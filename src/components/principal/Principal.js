@@ -1,6 +1,10 @@
 import React from 'react';
 import './Principal.css';
 import logo from '../../recursos/images/logo.svg';
+import casa from './lol.png';
+import casa2 from './casa2.png';
+import casa3 from './casa3.png';
+
 class Principal extends React.Component {
 
     constructor(props) {
@@ -36,8 +40,8 @@ class Principal extends React.Component {
 
                 <div className="container">
                     <div className="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
-                        <h1 className="display-4">Pricing</h1>
-                        <p className="lead">Quickly build an effective pricing table for your potential customers with this Bootstrap example. It’s built with default Bootstrap components and utilities with little customization.</p>
+                        <h1 className="display-4">Empresa Inmobiliaria Jesley sac</h1>
+                        <p className="lead">Ruc 71137690</p>
                     </div>
                 </div>
 
@@ -47,15 +51,19 @@ class Principal extends React.Component {
                             <div className="card-header">
                                 <h4 className="my-0 font-weight-normal">Free</h4>
                             </div>
+
                             <div className="card-body">
+                            <div className="form-group">
+                                    <img src={casa3} className="mx-auto d-block " width="100%" height="350px" />
+                                </div>
+                                <button type="button" className="btn btn-lg btn-block btn-outline-primary text-info"><i className="bi bi-arrow-right-circle-fill"></i> Ingresar</button>
+
                                 <h1 className="card-title pricing-card-title">$0 <small className="text-muted">/ mo</small></h1>
                                 <ul className="list-unstyled mt-3 mb-4">
                                     <li>10 users included</li>
-                                    <li>2 GB of storage</li>
-                                    <li>Email support</li>
-                                    <li>Help center access</li>
+
                                 </ul>
-                                <button type="button" className="btn btn-lg btn-block btn-outline-primary">Sign up for free</button>
+
                             </div>
                         </div>
                         <div className="card mb-4 shadow-sm">
@@ -63,14 +71,18 @@ class Principal extends React.Component {
                                 <h4 className="my-0 font-weight-normal">Pro</h4>
                             </div>
                             <div className="card-body">
-                                <h1 className="card-title pricing-card-title">$15 <small className="text-muted">/ mo</small></h1>
+                            <div className="form-group">
+                                    <img src={casa2} className="mx-auto d-block " width="100%" height="350px" />
+                                </div>
+                                <button type="button" className="bi bi-arrow-right-circle-fill" className="btn btn-lg btn-block btn-outline-primary text-info"><i className="bi bi-arrow-right-circle-fill"></i>  Ingresar</button>
+                                <h1 className="card-title pricing-card-title">$30000 <small className="text-muted">/ mo</small></h1>
                                 <ul className="list-unstyled mt-3 mb-4">
                                     <li>20 users included</li>
                                     <li>10 GB of storage</li>
                                     <li>Priority email support</li>
                                     <li>Help center access</li>
                                 </ul>
-                                <button type="button" className="btn btn-lg btn-block btn-primary">Get started</button>
+
                             </div>
                         </div>
                         <div className="card mb-4 shadow-sm">
@@ -78,14 +90,22 @@ class Principal extends React.Component {
                                 <h4 className="my-0 font-weight-normal">Enterprise</h4>
                             </div>
                             <div className="card-body">
-                                <h1 className="card-title pricing-card-title">$29 <small className="text-muted">/ mo</small></h1>
-                                <ul className="list-unstyled mt-3 mb-4">
-                                    <li>30 users included</li>
-                                    <li>15 GB of storage</li>
-                                    <li>Phone and email support</li>
-                                    <li>Help center access</li>
-                                </ul>
-                                <button type="button" className="btn btn-lg btn-block btn-primary">Contact us</button>
+                                <div className="form-group">
+                                    <img src={casa} className="mx-auto d-block " width="100%" height="350px" />
+                                </div>
+
+                                <li>SANTA ANITA-LOS NOGALES</li>
+                                <div className="form-group mt-3">
+                                    <button type="button" className="btn btn-lg btn-block btn-outline-primary text-info"><i className="bi bi-arrow-right-circle-fill"></i>  Ingresar</button>
+                                </div>
+                                <div className="form-group mt-3">
+                                    <h1 className="card-title pricing-card-title">$29 <small className="text-muted">/ mo</small></h1>
+                                    <ul className="list-unstyled mt-3 mb-4">
+                                        <li>30 users included</li>
+                                        
+
+                                    </ul>
+                                </div>
                             </div>
                         </div>
                     </div>
