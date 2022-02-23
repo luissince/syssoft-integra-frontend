@@ -55,11 +55,7 @@ class Login extends React.Component {
                             type="email"
                             id="inputEmail"
                             className="form-control"
-<<<<<<< HEAD
                             placeholder="Correo o usuario"
-=======
-                            placeholder="Email addrese"
->>>>>>> ddd18063a88d7a745b53d18ffeda83f515697306
                             required=""
                             autoFocus="" />
 
