@@ -4,6 +4,7 @@ import Login from './components/login/Login';
 import Principal from './components/principal/Principal';
 import Dashboard from './components/dashboard/Dashboard';
 import NotFound from './components/error/NotFound';
+import './styles/App.scss';
 
 import {
     BrowserRouter,
