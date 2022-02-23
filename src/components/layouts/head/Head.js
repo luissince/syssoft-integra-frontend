@@ -19,6 +19,10 @@ class Menu extends React.Component {
         this.setState({ visibility: value });
     }
 
+    eventChange = (event) => {
+        console.log(event);
+    }
+
     render() {
         return (
             <>
@@ -27,34 +31,39 @@ class Menu extends React.Component {
                         <div className="col-lg-12" navbar-scroll="true">
                             <div className='row'>
                                 <div className='col-lg-2 col-md-2 col-sm-2 col-xs-12'>
-                                    {/* <ol className="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
+                                    <div className='form-group'>
+                                        {/* <ol className="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
                                         <li className="breadcrumb-item text-sm"><a className="opacity-5 text-dark">Pages</a></li>
                                         <li className="breadcrumb-item text-sm text-dark active" aria-current="page">Dashboard</li>
                                     </ol> 
                                     <h6 className="font-weight-bolder mb-0">Dashboard</h6>*/}
-                                    <div className="block d-block d-sm-none d-none d-sm-block d-md-none " onClick={this.props.setOpen}  style={{fontSize: '25px'}}>
-                                        <i className="bi bi-list"></i>
+                                        <div className="block d-block d-sm-none d-none d-sm-block d-md-none ">
+                                            <button className="btn btn-dark" onClick={this.props.setOpen} >
+                                                <i className="bi bi-list"></i>
+                                            </button>
+                                        </div>
+                                        <div className="block d-none d-lg-block d-xl-none d-xl-block d-md-block d-lg-none">
+                                            <button className="btn btn-dark" onClick={this.props.setMinimun}>
+                                                <i className="bi bi-list"></i>
+                                            </button>
+                                        </div>
                                     </div>
-                                    <div className="block d-none d-lg-block d-xl-none d-xl-block d-md-block d-lg-none" onClick={this.props.setMinimun}  style={{fontSize: '25px'}}>
-                                        <i className="bi bi-list"></i>
-                                    </div>
-
                                 </div>
                                 <div className='col-lg-10 col-md-10 col-sm-10 col-xs-12'>
                                     <form className="form-inline float-lg-right float-md-left float-sm-left float-xs-left" >
                                         <div className="row">
-                                        <div className='col-lg-6 col-md-6 col-sm-6 col-xs-12'>
-                                            <input className="form-control  bg-transparent" type="search" placeholder="Search" aria-label="Search" />
+                                            <div className='col-lg-6 col-md-6 col-sm-6 col-xs-12'>
+                                                <input className="form-control  bg-transparent" type="search" placeholder="Search" aria-label="Search" />
+                                            </div>
+                                            <div className='col-lg-3 col-md-3 col-sm-3 col-xs-12'>
+                                                <button className="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+                                            </div>
+                                            <div className='col-lg-3 col-md-3 col-sm-3 col-xs-12' role="button">
+                                                <i className="bi bi-person-fill"></i>
+                                                <span className="d-sm-inline"> Sign In</span>
+                                            </div>
                                         </div>
-                                        <div className='col-lg-3 col-md-3 col-sm-3 col-xs-12'>
-                                            <button className="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
-                                        </div>
-                                        <div className='col-lg-3 col-md-3 col-sm-3 col-xs-12' role="button">
-                                            <i className="bi bi-person-fill"></i>
-                                            <span className="d-sm-inline"> Sign In</span>
-                                        </div>
-                                        </div>
-                                        
+
                                     </form>
                                 </div>
                             </div>
