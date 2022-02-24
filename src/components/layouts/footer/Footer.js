@@ -11,12 +11,12 @@ const Menu = () => {
             <footer>
                 <small>
                     © {new Date().getFullYear()} Desarrollado por - {' '}
-                    <a target="_blank" rel="noopener noreferrer" href="">
+                    <a target="_blank" rel="noopener noreferrer">
                         SysSoftIntegra
                     </a>
                 </small>
                 <br />
-                <div className="social-bagdes">
+                {/* <div className="social-bagdes">
                     <a href="" target="_blank" rel="noopener noreferrer">
                         <img
                             alt="GitHub followers"
@@ -29,7 +29,7 @@ const Menu = () => {
                             src="https://img.shields.io/twitter/follow/azouaoui_med?label=twitter&style=social"
                         />
                     </a>
-                </div>
+                </div> */}
             </footer>
         </>
     );

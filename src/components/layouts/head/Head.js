@@ -26,17 +26,12 @@ class Menu extends React.Component {
     render() {
         return (
             <>
-                <header >
-                    <div className='row pb-3'>
+                <header style={{marginBottom:'10px'}}>
+                    <div className='row'>
                         <div className="col-lg-12" navbar-scroll="true">
                             <div className='row'>
                                 <div className='col-lg-2 col-md-2 col-sm-2 col-xs-12'>
                                     <div className='form-group'>
-                                        {/* <ol className="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
-                                        <li className="breadcrumb-item text-sm"><a className="opacity-5 text-dark">Pages</a></li>
-                                        <li className="breadcrumb-item text-sm text-dark active" aria-current="page">Dashboard</li>
-                                    </ol> 
-                                    <h6 className="font-weight-bolder mb-0">Dashboard</h6>*/}
                                         <div className="block d-block d-sm-none d-none d-sm-block d-md-none ">
                                             <button className="btn btn-dark" onClick={this.props.setOpen} >
                                                 <i className="bi bi-list"></i>
