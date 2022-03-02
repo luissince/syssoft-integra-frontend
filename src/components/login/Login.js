@@ -97,7 +97,7 @@ class Login extends React.Component {
                             </label>
                         </div>
                         <button onClick={this.onEventForm} type="button" className="btn btn-lg btn-primary btn-block">Ingresar</button>
-                        <button onClick={this.onEventForm} type="button" className="btn btn-lg btn-outline-primary btn-block">Recuperar</button>
+                        <button type="button" className="btn btn-lg btn-outline-primary btn-block">Recuperar</button>
                         <p className="mt-5 mb-3 text-muted">© 2022</p>
                     </form>
                 </div>
