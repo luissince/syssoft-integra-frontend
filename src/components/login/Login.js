@@ -1,5 +1,7 @@
 import React from 'react';
-import { Link } from "react-router-dom";
+import { Redirect } from 'react-router-dom';
+import { connect } from 'react-redux';
+import { signIn } from '../../redux/actions';
 import './Login.css';
 
 class Login extends React.Component {
@@ -12,22 +14,37 @@ class Login extends React.Component {
             password: ''
         }
 
-        this.handleChangeEmail = this.handleChangeEmail.bind(this);
-        this.handleChangePassword = this.handleChangePassword.bind(this);
+        console.log("login constructor")
+
     }
 
-    onEventForm = () => {
-        if (this.state.email == "") {
+    componentDidMount() {
+        console.log("login componentDidMount")
+    }
+
+    onEventForm = async () => {
+        if (this.state.email === "") {
             this.emailInput.focus();
             return;
         }
 
-        if (this.state.password == "") {
+        if (this.state.password === "") {
             this.passwordInput.focus();
             return;
         }
 
-        window.location.href = "./principal";
+        try {
+            let user = JSON.stringify({
+                "id": Math.floor(Math.random() * 562000),
+                "email": this.state.email,
+                "password": this.state.password
+            });
+            await localStorage.setItem('login', user);
+            this.props.restore(user);
+            this.props.history.push("principal");
+        } catch (error) {
+            console.log(error)
+        }
     }
 
     handleChangeEmail = (event) => {
@@ -39,6 +56,10 @@ class Login extends React.Component {
     }
 
     render() {
+        console.log("render login")
+        if (this.props.token.userToken != null) {
+            return <Redirect to="/principal" />
+        }
         return (
             <>
                 <style>{'html,body,#root{height:100%;}'}</style>
@@ -82,8 +103,18 @@ class Login extends React.Component {
             </>
         );
     }
-
 }
 
+const mapStateToProps = (state) => {
+    return {
+        token: state.reducer
+    }
+}
 
-export default Login;
+const mapDispatchToProps = (dispatch) => {
+    return {
+        restore: (user) => dispatch(signIn(user))
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Login);

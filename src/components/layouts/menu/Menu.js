@@ -8,7 +8,7 @@ import {
     SidebarFooter,
     SidebarContent,
 } from 'react-pro-sidebar';
-import {Redirect,Link, } from 'react-router-dom';
+import { Redirect, Link, } from 'react-router-dom';
 
 import "react-pro-sidebar/dist/css/styles.css";
 import logoEmpresa from '../../../recursos/images/inmobiliarianav.png';
@@ -26,7 +26,6 @@ class Menu extends React.Component {
             collapsed: false,
             toggled: false
         }
-        
     }
 
     handleToggleSidebar = (value) => {
@@ -35,10 +34,6 @@ class Menu extends React.Component {
 
     handleCollapsedSidebar = (value) => {
         this.setState({ collapsed: value });
-    }
-
-    setActive = (id) => {
-
     }
 
     render() {
@@ -60,7 +55,7 @@ class Menu extends React.Component {
                     <SidebarContent>
                         <Main >
                             <MenuItem icon={<i className="bi bi-apple"></i>} id='dashboard'>
-                                <Link to='/dashboard' style={{ fontWeight: 'bold' }}>Dashboard</Link>
+                                <Link to={`${this.props.url}/dashboard`} style={{ fontWeight: 'bold' }}>Dashboard</Link>
                             </MenuItem>
 
                             <SubMenu
@@ -78,12 +73,12 @@ class Menu extends React.Component {
                                 icon={<i className="bi bi-file-earmark-bar-graph-fill"></i>}
                                 id='facturacion'
                             >
-                                <MenuItem id='clientes'>
-                                    <Link to='/clientes' style={{ fontWeight: 'bold' }}>Clientes</Link>
+                                <MenuItem>
+                                    <Link to={`${this.props.url}/clientes`} style={{ fontWeight: 'bold' }}>Clientes</Link>
                                 </MenuItem>
                                 <MenuItem>Ventas</MenuItem>
                                 <MenuItem>Créditos</MenuItem>
-                                <MenuItem> <Link to='/cobros' style={{ fontWeight: 'bold' }}>Cobros</Link></MenuItem>
+                                <MenuItem> <Link to={`${this.props.url}/cobros`} style={{ fontWeight: 'bold' }}>Cobros</Link></MenuItem>
                                 <MenuItem>Cotizaciones</MenuItem>
                                 <MenuItem>Reservas</MenuItem>
                             </SubMenu>
@@ -128,7 +123,7 @@ class Menu extends React.Component {
                                 <MenuItem>R. Lotes</MenuItem>
                                 <MenuItem>R. Clientes</MenuItem>
                             </SubMenu>
-                         
+
                         </Main>
                     </SidebarContent>
                 </ProSidebar>

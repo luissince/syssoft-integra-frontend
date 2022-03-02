@@ -1,32 +1,37 @@
-import React, { useState } from "react";
+import React from "react";
 import "react-pro-sidebar/dist/css/styles.css";
+import { connect } from 'react-redux';
+import { signOut } from '../../../redux/actions';
 import logoEmpresa from '../../../recursos/images/inmobiliarianav.png';
 import logoEmpresa2 from '../../../recursos/images/inmobiliarianav2.png';
 import sidebarBg from '../../../recursos/images/bg2.jpg';
-
-import { Menu as Main } from '../../layouts/menu/Menu';
 
 class Menu extends React.Component {
 
     constructor(props) {
         super(props);
         this.state = {
-            visibility: true
+
         }
     }
 
-    visibilityChange = (value) => {
-        this.setState({ visibility: value });
+    componentDidMount() {
+        console.log(this.props)
     }
 
-    eventChange = (event) => {
-        console.log(event);
+    onEventSignIn = async (event) => {
+        try {
+            await localStorage.removeItem('login');
+            this.props.restore();
+        } catch (e) {
+            this.props.restore();
+        }
     }
 
     render() {
         return (
             <>
-                <header style={{marginBottom:'10px'}}>
+                <header style={{ marginBottom: '10px' }}>
                     <div className='row'>
                         <div className="col-lg-12" navbar-scroll="true">
                             <div className='row'>
@@ -51,11 +56,14 @@ class Menu extends React.Component {
                                                 <input className="form-control  bg-transparent" type="search" placeholder="Search" aria-label="Search" />
                                             </div>
                                             <div className='col-lg-3 col-md-3 col-sm-3 col-xs-12'>
-                                                <button className="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+                                                <button className="btn btn-outline-success my-2 my-sm-0" type="button">
+                                                    Search
+                                                </button>
                                             </div>
-                                            <div className='col-lg-3 col-md-3 col-sm-3 col-xs-12' role="button">
-                                                <i className="bi bi-person-fill"></i>
-                                                <span className="d-sm-inline"> Sign In</span>
+                                            <div className='col-lg-3 col-md-3 col-sm-3 col-xs-12' >
+                                                <button onClick={this.onEventSignIn} className="btn btn-outline-danger my-2 my-sm-0" type="button">
+                                                    Sign In
+                                                </button>
                                             </div>
                                         </div>
 
@@ -68,7 +76,19 @@ class Menu extends React.Component {
             </>
         );
     }
-
-
 }
-export default Menu;
+
+const mapStateToProps = (state) => {
+    return {
+        token: state.reducer
+    }
+}
+
+const mapDispatchToProps = (dispatch) => {
+    return {
+        restore: () => dispatch(signOut())
+    }
+}
+
+
+export default connect(mapStateToProps, mapDispatchToProps)(Menu);
