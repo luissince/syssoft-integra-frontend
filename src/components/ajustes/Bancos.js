@@ -1,6 +1,6 @@
 import React from 'react';
 
-class Cotizaciones extends React.Component {
+class Bancos extends React.Component {
     constructor(props) {
         super(props);
     }
@@ -13,7 +13,7 @@ class Cotizaciones extends React.Component {
                     <div className="modal-dialog">
                         <div className="modal-content">
                             <div className="modal-header">
-                                <h5 className="modal-title" id="exampleModalLabel"><i className="bi bi-file-earmark-plus-fill"></i> Registrar Cotización</h5>
+                                <h5 className="modal-title" id="exampleModalLabel"><i className="bi bi-bank"></i> Registrar Banco</h5>
                                 <button type="button" className="close" data-dismiss="modal" aria-label="Close">
                                     <span aria-hidden="true">&times;</span>
                                 </button>
@@ -79,22 +79,22 @@ class Cotizaciones extends React.Component {
                 <div className='row pb-3'>
                     <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
                         <section className="content-header">
-                            <h5 className="no-margin"> Cotizaciones <small style={{ color: 'gray' }}> Lista </small> </h5>
+                            <h5 className="no-margin"> Bancos <small style={{ color: 'gray' }}> Lista </small> </h5>
                         </section>
                     </div>
                 </div>
 
                 <div className='row'>
                     <div className="col-lg-3 col-md-3 col-sm-12 col-xs-12">
-                        <label>Nueva Cotización</label>
+                        <label>Nuevo Banco</label>
                         <div className="form-group">
                             <button type="button" className="btn btn-success" data-toggle="modal" data-target="#exampleModal">
-                            <i className="bi bi-plus-lg"></i> Agregar Cotización
+                            <i className="bi bi-plus-lg"></i> Agregar Banco
                             </button>
                         </div>
                     </div>
 
-                    <div className="col-lg-6 col-md-3 col-sm-12 col-xs-12">
+                    <div className="col-lg-3 col-md-3 col-sm-12 col-xs-12">
                         <label>Opción.</label>
                         <div className="form-group">
                             <button className="btn btn-light">
@@ -104,7 +104,7 @@ class Cotizaciones extends React.Component {
                     </div>
 
                     <div className="col-lg-6 col-md-6 col-sm-12 col-xs-12">
-                        <label>Filtrar por cliente, ruc, comprobante</label>
+                        <label>Filtrar por banco</label>
                         <div className="form-group">
                             <div className="input-group mb-3">
                                 <input type="text" className="form-control" placeholder="Ingrese para buscar" aria-label="Recipient's username" aria-describedby="basic-addon2" />
@@ -123,16 +123,12 @@ class Cotizaciones extends React.Component {
                                 <thead>
                                     <tr>
                                         <th width="5%" className="text-center">#</th>
-                                        <th width="17%" className="text-center">Cliente</th>
-                                        <th width="10%" className="text-center">DNI/RUC</th>
-                                        <th width="10%" className="text-center">Fecha</th>                                        
-                                        <th width="10%" className="text-center">Cuotas</th>
-                                        <th width="10%" className="text-center">Inicial</th>
-                                        <th width="7%" className="text-center">Saldo</th>
-                                        <th width="6%" className="text-center">Interes</th>
-                                        <th width="7%" className="text-center">Total</th>
-                                        <th width="5%" className="text-center">Imprimir</th>
-                                        <th width="5%" colSpan='2' className="text-center">Opciones</th>
+                                        <th width="17%">Banco</th>
+                                        <th width="15%">Tipo Cuenta</th>
+                                        <th width="10%">Moneda</th>
+                                        <th width="20%">Número Cuenta</th>
+                                        <th width="15%">Representante</th>
+                                        <th width="15%" colSpan="2">Opciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -166,4 +162,4 @@ class Cotizaciones extends React.Component {
     }
 }
 
-export default Cotizaciones;
+export default Bancos;

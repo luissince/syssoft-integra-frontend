@@ -76,11 +76,21 @@ class Menu extends React.Component {
                                 <MenuItem>
                                     <Link to={`${this.props.url}/clientes`} style={{ fontWeight: 'bold' }}>Clientes</Link>
                                 </MenuItem>
-                                <MenuItem>Ventas</MenuItem>
-                                <MenuItem>Créditos</MenuItem>
-                                <MenuItem> <Link to={`${this.props.url}/cobros`} style={{ fontWeight: 'bold' }}>Cobros</Link></MenuItem>
-                                <MenuItem>Cotizaciones</MenuItem>
-                                <MenuItem>Reservas</MenuItem>
+                                <MenuItem>
+                                    <Link to={`${this.props.url}/ventas`} style={{ fontWeight: 'bold' }}>Ventas</Link>
+                                </MenuItem>
+                                <MenuItem>
+                                    <Link to={`${this.props.url}/creditos`} style={{ fontWeight: 'bold' }}>Créditos</Link>
+                                </MenuItem>
+                                <MenuItem>
+                                    <Link to={`${this.props.url}/cobros`} style={{ fontWeight: 'bold' }}>Cobros</Link>
+                                </MenuItem>
+                                <MenuItem>
+                                    <Link to={`${this.props.url}/cotizaciones`} style={{ fontWeight: 'bold' }}>Cotizaciones</Link>
+                                </MenuItem>
+                                <MenuItem>
+                                    <Link to={`${this.props.url}/reservas`} style={{ fontWeight: 'bold' }}>Reservas</Link>
+                                </MenuItem>
                             </SubMenu>
 
                             <SubMenu
@@ -108,9 +118,15 @@ class Menu extends React.Component {
                                 title={'Ajustes'}
                                 icon={<i className="bi bi-gear-fill"></i>}
                             >
-                                <MenuItem>submenu 1</MenuItem>
-                                <MenuItem>submenu 2</MenuItem>
-                                <MenuItem>submenu 3</MenuItem>
+                                <MenuItem>
+                                    <Link to={`${this.props.url}/comprobantes`} style={{ fontWeight: 'bold' }}>Comprobantes</Link>
+                                </MenuItem>
+                                <MenuItem>
+                                    <Link to={`${this.props.url}/monedas`} style={{ fontWeight: 'bold' }}>Monedas</Link>
+                                </MenuItem>
+                                <MenuItem>
+                                    <Link to={`${this.props.url}/bancos`} style={{ fontWeight: 'bold' }}>Bancos</Link>
+                                </MenuItem>
                             </SubMenu>
 
                             <SubMenu
