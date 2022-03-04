@@ -3,9 +3,9 @@ import ReactDOM from 'react-dom';
 import App from './App';
 import { Provider } from 'react-redux';
 import store from './redux/store';
-import '../node_modules/bootstrap/dist/css/bootstrap.min.css';
-import '../node_modules/bootstrap/dist/js/bootstrap.min.js';
+import './recursos/css/bootstrap.css';
 import '../node_modules/bootstrap-icons/font/bootstrap-icons.css';
+import './styles/App.scss';
 
 ReactDOM.render(
     <Provider store={store}>

@@ -94,7 +94,7 @@ class Principal extends React.Component {
                     <div className="card-deck mb-3">
                         <div className="card mb-4 shadow-sm">
                             <div className="card-header p-0">
-                                <img src={casa3} className="mx-auto d-block " width="100%" />
+                                <img src={casa3} alt="" className="mx-auto d-block " width="100%" />
                             </div>
                             <div className="card-body m-2">
                                 <h6 className='text-info font-weight-bold'>RESIDENCIAL VILLA SAN JUAN</h6>
@@ -126,7 +126,7 @@ class Principal extends React.Component {
                         </div>
                         <div className="card mb-4 shadow-sm">
                             <div className="card-header p-0">
-                                <img src={casa2} className="mx-auto d-block " width="100%" />
+                                <img src={casa2} alt="" className="mx-auto d-block " width="100%" />
                             </div>
                             <div className="card-body m-2">
                                 <h6 className='text-info font-weight-bold'>HABILITACION URBANA LAS LOMAS</h6>
@@ -156,7 +156,7 @@ class Principal extends React.Component {
                         </div>
                         <div className="card mb-4 shadow-sm">
                             <div className="card-header p-0">
-                                <img src={casa} className="mx-auto d-block " width="100%" />
+                                <img src={casa} alt="" className="mx-auto d-block " width="100%" />
                             </div>
                             <div className="card-body m-2">
                                 <h6 className='text-info font-weight-bold'>LOTIZACION LOS CEDROS</h6>

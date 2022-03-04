@@ -1,8 +1,8 @@
-import React, { useState } from "react";
-import "react-pro-sidebar/dist/css/styles.css";
-import logoEmpresa from '../../../recursos/images/inmobiliarianav.png';
-import logoEmpresa2 from '../../../recursos/images/inmobiliarianav2.png';
-import sidebarBg from '../../../recursos/images/bg2.jpg';
+import React from "react";
+import { Link } from "react-router-dom";
+// import logoEmpresa from '../../../recursos/images/inmobiliarianav.png';
+// import logoEmpresa2 from '../../../recursos/images/inmobiliarianav2.png';
+// import sidebarBg from '../../../recursos/images/bg2.jpg';
 
 const Menu = () => {
 
@@ -11,9 +11,9 @@ const Menu = () => {
             <footer>
                 <small>
                     © {new Date().getFullYear()} Desarrollado por - {' '}
-                    <a target="_blank" rel="noopener noreferrer">
+                    <Link to="#" target="_blank" rel="noopener noreferrer">
                         SysSoftIntegra
-                    </a>
+                    </Link>
                 </small>
                 <br />
                 {/* <div className="social-bagdes">

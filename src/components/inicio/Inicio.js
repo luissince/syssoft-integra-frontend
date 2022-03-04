@@ -8,6 +8,8 @@ import Dashboard from '../dashboard/Dashboard';
 import Clientes from '../facturacion/Clientes';
 import Cobros from '../facturacion/Cobros';
 
+import Comprobante from '../ajustes/Comprobante';
+
 class Inicio extends React.Component {
 
     constructor(props) {
@@ -15,8 +17,6 @@ class Inicio extends React.Component {
         this.state = {
             isModal: false
         }
-        console.log("Inicio constructor")
-        console.log(this.props)
         this.menuRef = React.createRef();
     }
 
@@ -34,14 +34,13 @@ class Inicio extends React.Component {
 
 
     render() {
-        console.log("render inicio")
         if (this.props.token.userToken == null) {
             return <Redirect to="/login" />
         }
 
         const { path, url } = this.props.match;
         return (
-            <div className='app toggled'>
+            <div className='app'>
                 <Menu ref={this.menuRef} url={url} />
                 <main>
                     <Head setOpen={this.setOpen} setMinimun={this.setMinimun} />
@@ -63,6 +62,10 @@ class Inicio extends React.Component {
                         <Route
                             path={`${path}/cobros`}
                             render={(props) => <Cobros {...props} />}
+                        />
+                        <Route
+                            path={`${path}/comprobante`}
+                            render={(props) => <Comprobante {...props} />}
                         />
                         {/* <Route component={<div>chucha</div>} /> */}
                     </Switch>

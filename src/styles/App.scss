@@ -1,19 +1,20 @@
-@import url('https://fonts.googleapis.com/css?family=Roboto&display=swap');
-
-$sidebar-bg-color: #0c1e35;
-$submenu-bg-color: rgba(255, 255, 255, 0.05);
+$sidebar-bg-color: linear-gradient(
+  90deg,
+  rgba(64, 73, 82, 1) 0%,
+  rgba(52, 58, 64, 1) 100%
+);
 $submenu-bg-color-collapsed: rgba(#0c1e35, 0.95);
-$sidebar-color: #b3b8d4;
+$sidebar-color: #ffffff;
 $highlight-color: #dee2ec;
 $icon-bg-color: rgba(255, 255, 255, 0.05);
 $icon-size: 35px;
 
-@import '~react-pro-sidebar/dist/scss/styles.scss';
+@import "~react-pro-sidebar/dist/scss/styles.scss";
 body {
   margin: 0;
   height: 100vh;
-  color: #353535;
-  font-family: 'Roboto', sans-serif;
+  // font-size: 14px;
+  // color: #353535;
 }
 
 #root {

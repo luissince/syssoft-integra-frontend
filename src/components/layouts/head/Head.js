@@ -1,10 +1,6 @@
 import React from "react";
-import "react-pro-sidebar/dist/css/styles.css";
 import { connect } from 'react-redux';
 import { signOut } from '../../../redux/actions';
-import logoEmpresa from '../../../recursos/images/inmobiliarianav.png';
-import logoEmpresa2 from '../../../recursos/images/inmobiliarianav2.png';
-import sidebarBg from '../../../recursos/images/bg2.jpg';
 
 class Menu extends React.Component {
 
@@ -31,7 +27,7 @@ class Menu extends React.Component {
     render() {
         return (
             <>
-                <header style={{ marginBottom: '10px' }}>
+                <header className="mb-1">
                     <div className='row'>
                         <div className="col-lg-12" navbar-scroll="true">
                             <div className='row'>
@@ -50,24 +46,24 @@ class Menu extends React.Component {
                                     </div>
                                 </div>
                                 <div className='col-lg-10 col-md-10 col-sm-10 col-xs-12'>
-                                    <form className="form-inline float-lg-right float-md-left float-sm-left float-xs-left" >
-                                        <div className="row">
-                                            <div className='col-lg-6 col-md-6 col-sm-6 col-xs-12'>
-                                                <input className="form-control  bg-transparent" type="search" placeholder="Search" aria-label="Search" />
-                                            </div>
-                                            <div className='col-lg-3 col-md-3 col-sm-3 col-xs-12'>
-                                                <button className="btn btn-outline-success my-2 my-sm-0" type="button">
-                                                    Search
-                                                </button>
-                                            </div>
-                                            <div className='col-lg-3 col-md-3 col-sm-3 col-xs-12' >
-                                                <button onClick={this.onEventSignIn} className="btn btn-outline-danger my-2 my-sm-0" type="button">
-                                                    Sign In
-                                                </button>
+                                    <div className="form-inline float-lg-right float-md-right float-sm-right float-xs-left" >
+                                        <div className="form-group">
+                                            <div className="input-group">
+                                                <input className="form-control  bg-transparent" type="search" placeholder="Buscar modulos" aria-label="Search" />
+                                                <div className="input-group-append">
+                                                    <button className="btn btn-outline-success" type="button">
+                                                        <i className="bi bi-search"></i>
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
 
-                                    </form>
+                                        <div className="form-group ml-xl-2 ml-lg-2 ml-md-2 ml-sm-2 ml-0">
+                                            <button onClick={this.onEventSignIn} className="btn btn-outline-danger" type="button">
+                                                Regresar
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

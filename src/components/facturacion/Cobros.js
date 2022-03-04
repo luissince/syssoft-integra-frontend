@@ -1,9 +1,9 @@
 import React from 'react';
 
 class Cobros extends React.Component {
-    constructor(props) {
-        super(props);
-    }
+    // constructor(props) {
+    //     super(props);
+    // }
 
     render() {
         return (
@@ -11,7 +11,7 @@ class Cobros extends React.Component {
                 <div className='row pb-3'>
                     <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
                         <section className="content-header">
-                        <h5 className="no-margin"> Cobros <small style={{ color: 'gray'}}> Lista </small> </h5>
+                            <h5 className="no-margin"> Cobros <small style={{ color: 'gray' }}> Lista </small> </h5>
                         </section>
                     </div>
                 </div>

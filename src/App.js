@@ -1,6 +1,4 @@
 import React from 'react';
-import './index.css';
-import './styles/App.scss';
 import Login from './components/login/Login';
 import Inicio from './components/inicio/Inicio';
 import Principal from './components/principal/Principal';
@@ -10,9 +8,7 @@ import { restoreToken } from './redux/actions';
 import { BrowserRouter, Switch, Route, Redirect } from 'react-router-dom';
 
 const Loader = () => {
-    console.log("loader...")
     return <div>Cargando....</div>
-
 }
 
 class App extends React.Component {
@@ -20,20 +16,15 @@ class App extends React.Component {
     constructor(props) {
         super(props);
         this.menuRef = React.createRef();
-        console.log("app constructor")
-        console.log(this.props)
     }
 
     async componentDidMount() {
-        console.log("app componentDidMount")
         try {
             let userToken = await localStorage.getItem('login');
             this.props.restore(userToken);
-            console.log(userToken)
         } catch (e) {
             this.props.restore(null);
         }
-        console.log("----------------------------------------------------")
     }
 
     componentDidUpdate() {
@@ -53,7 +44,6 @@ class App extends React.Component {
     }
 
     render() {
-        console.log("render app")
         return (
             <BrowserRouter>
                 {
