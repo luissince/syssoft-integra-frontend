@@ -4,11 +4,8 @@
   * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
   */
 (function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('jquery'), require('popper.js')) :
-        typeof define === 'function' && define.amd ? define(['exports', 'jquery', 'popper.js'], factory) :
-            (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.bootstrap = {}, global.jQuery, global.Popper));
+    module.exports = factory(exports, require('jquery'), require('popper.js'));
 })(this, (function (exports, $, Popper) {
-    'use strict';
 
     function _interopDefaultLegacy(e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
@@ -2716,7 +2713,7 @@
                 return "continue";
             }
 
-            var attributeList = [].slice.call(el.attributes); // eslint-disable-next-line unicorn/prefer-spread
+            var attributeList = [].slice.call(el.attributes);
 
             var whitelistedAttributes = [].concat(whiteList['*'] || [], whiteList[elName] || []);
             attributeList.forEach(function (attr) {

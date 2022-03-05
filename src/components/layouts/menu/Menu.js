@@ -63,6 +63,7 @@ class Menu extends React.Component {
                             <MenuItem>Accesos</MenuItem>
                         </SubMenu>
 
+<<<<<<< HEAD
                         <SubMenu
                             prefix={<span className="badge gray">3</span>}
                             title={'Facturacion'}
@@ -78,6 +79,33 @@ class Menu extends React.Component {
                             <MenuItem>Cotizaciones</MenuItem>
                             <MenuItem>Reservas</MenuItem>
                         </SubMenu>
+=======
+                            <SubMenu
+                                prefix={<span className="badge gray">3</span>}
+                                title={'Facturacion'}
+                                icon={<i className="bi bi-file-earmark-bar-graph-fill"></i>}
+                                id='facturacion'
+                            >
+                                <MenuItem>
+                                    <Link to={`${this.props.url}/clientes`} style={{ fontWeight: 'bold' }}>Clientes</Link>
+                                </MenuItem>
+                                <MenuItem>
+                                    <Link to={`${this.props.url}/ventas`} style={{ fontWeight: 'bold' }}>Ventas</Link>
+                                </MenuItem>
+                                <MenuItem>
+                                    <Link to={`${this.props.url}/creditos`} style={{ fontWeight: 'bold' }}>Créditos</Link>
+                                </MenuItem>
+                                <MenuItem>
+                                    <Link to={`${this.props.url}/cobros`} style={{ fontWeight: 'bold' }}>Cobros</Link>
+                                </MenuItem>
+                                <MenuItem>
+                                    <Link to={`${this.props.url}/cotizaciones`} style={{ fontWeight: 'bold' }}>Cotizaciones</Link>
+                                </MenuItem>
+                                <MenuItem>
+                                    <Link to={`${this.props.url}/reservas`} style={{ fontWeight: 'bold' }}>Reservas</Link>
+                                </MenuItem>
+                            </SubMenu>
+>>>>>>> c88dcc36221160571994bcfa136ede10e5628900
 
                         <SubMenu
                             prefix={<span className="badge gray">3</span>}
@@ -99,6 +127,7 @@ class Menu extends React.Component {
                             <MenuItem>submenu 3</MenuItem>
                         </SubMenu>
 
+<<<<<<< HEAD
                         <SubMenu
                             prefix={<span className="badge gray">3</span>}
                             title={'Ajustes'}
@@ -120,6 +149,23 @@ class Menu extends React.Component {
                                 <Link to={`${this.props.url}/proyecto`}>Proyectos</Link>
                             </MenuItem>
                         </SubMenu>
+=======
+                            <SubMenu
+                                prefix={<span className="badge gray">3</span>}
+                                title={'Ajustes'}
+                                icon={<i className="bi bi-gear-fill"></i>}
+                            >
+                                <MenuItem>
+                                    <Link to={`${this.props.url}/comprobantes`} style={{ fontWeight: 'bold' }}>Comprobantes</Link>
+                                </MenuItem>
+                                <MenuItem>
+                                    <Link to={`${this.props.url}/monedas`} style={{ fontWeight: 'bold' }}>Monedas</Link>
+                                </MenuItem>
+                                <MenuItem>
+                                    <Link to={`${this.props.url}/bancos`} style={{ fontWeight: 'bold' }}>Bancos</Link>
+                                </MenuItem>
+                            </SubMenu>
+>>>>>>> c88dcc36221160571994bcfa136ede10e5628900
 
                         <SubMenu
                             prefix={<span className="badge gray">3</span>}
