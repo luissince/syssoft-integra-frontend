@@ -16,11 +16,14 @@ function PaginacionElement(props) {
                     <span className="page-link">{number}</span>
                 </li>
             );
-
         } else if ((number < props.upperPageBound + 1) && number > props.lowerPageBound) {
             return (
-                <li key={index} className="page-item">
-                    <button className="page-link">{number}</button>
+                <li key={index} className={`page-item ${number === props.paginacion ? "active" : ""}`}>
+                    {
+                        number === props.paginacion
+                            ? <span id={number} className="page-link">{number}</span>
+                            : <button id={number} className="page-link" onClick={props.handleClick}>{number}</button>
+                    }
                 </li>
             );
         }
@@ -76,18 +79,24 @@ class Comprobantes extends React.Component {
             lista: [],
             upperPageBound: 3,
             lowerPageBound: 0,
+            isPrevBtnActive: 'disabled',
+            isNextBtnActive: '',
+            pageBound: 3,
             paginacion: 0,
             totalPaginacion: 0,
-            filasPorPagina: 10,
+            filasPorPagina: 5,
             mostrarPaginacion: null,
             messagePaginacion: 'Mostranto 0 de 0 Páginas'
         }
         this.refNombre = React.createRef();
         this.refSerie = React.createRef();
         this.refNumeracion = React.createRef();
+    }
 
-        console.log("Comprobante constructor");
-        console.log(props);
+    handleClick = async (event) => {
+        console.log(event.target.id)
+        let listid = parseInt(event.target.id);
+        this.fillTableComprobante(listid);
     }
 
     setStateAsync(state) {
@@ -97,10 +106,12 @@ class Comprobantes extends React.Component {
     }
 
     async componentDidMount() {
-        console.log("Comprobante componentDidMount");
+        this.fillTableComprobante(1);
+    }
 
+    fillTableComprobante = async (paginacion) => {
         try {
-            await this.setStateAsync({ paginacion: 1 });
+            await this.setStateAsync({ paginacion: paginacion });
 
             const result = await axios.get('/api/comprobante', {
                 params: {
@@ -112,19 +123,16 @@ class Comprobantes extends React.Component {
             let totalPaginacion = parseInt(Math.ceil((parseFloat(result.data.total) / this.state.filasPorPagina)));
             let messagePaginacion = `Mostrando ${result.data.result.length} de ${totalPaginacion} Páginas`;
 
-
-
             this.setState({
                 lista: result.data.result,
                 totalPaginacion: totalPaginacion,
                 messagePaginacion: messagePaginacion
             });
-            console.log(result);
+            // console.log(result);
         } catch (err) {
             console.log(err.response.data.message)
             console.log(err.response.status)
         }
-
     }
 
     onEventGuardar = async () => {
@@ -152,7 +160,6 @@ class Comprobantes extends React.Component {
     }
 
     render() {
-        console.log("render...")
         return (
             <>
                 <div className="modal fade" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -279,14 +286,14 @@ class Comprobantes extends React.Component {
                             <table className="table table-striped table-bordered rounded">
                                 <thead>
                                     <tr>
-                                        <th scope="col">#</th>
-                                        <th scope="col">Nombre</th>
-                                        <th scope="col">Serie</th>
-                                        <th scope="col">Numeración</th>
-                                        <th scope="col">Creación</th>
-                                        <th scope="col">Estado</th>
-                                        <th scope="col">Edición</th>
-                                        <th scope="col">Anular</th>
+                                        <th width={50} scope="col">#</th>
+                                        <th width={140} scope="col">Nombre</th>
+                                        <th width={100} scope="col">Serie</th>
+                                        <th width={100} scope="col">Numeración</th>
+                                        <th width={100} scope="col">Creación</th>
+                                        <th width={100} scope="col">Estado</th>
+                                        <th width={120} scope="col">Edición</th>
+                                        <th width={120} scope="col">Anular</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -299,7 +306,7 @@ class Comprobantes extends React.Component {
                                             this.state.lista.map(function (item, index) {
                                                 return (
                                                     <tr key={index}>
-                                                        <td>{(index + 1)}</td>
+                                                        <td>{item.id}</td>
                                                         <td>{item.nombre}</td>
                                                         <td>{item.serie}</td>
                                                         <td>{item.numeracion}</td>
@@ -325,7 +332,17 @@ class Comprobantes extends React.Component {
                         <div className="dataTables_paginate paging_simple_numbers">
                             <nav aria-label="Page navigation example">
                                 <ul className="pagination justify-content-end">
-                                    <PaginacionElement totalPaginacion={this.state.totalPaginacion} paginacion={this.state.paginacion} upperPageBound={this.state.upperPageBound} lowerPageBound={this.state.lowerPageBound} />
+                                    <PaginacionElement
+                                        totalPaginacion={this.state.totalPaginacion}
+                                        paginacion={this.state.paginacion}
+                                        upperPageBound={this.state.upperPageBound}
+                                        lowerPageBound={this.state.lowerPageBound}
+                                        isPrevBtnActive={this.state.isPrevBtnActive}
+                                        isNextBtnActive={this.state.isNextBtnActive}
+                                        pageBound={this.state.pageBound}
+
+                                        handleClick={this.handleClick}
+                                    />
                                     {/* <li className="page-item disabled">
                                         <button className="page-link"><i className="bi bi-arrow-left"></i></button>
                                     </li>

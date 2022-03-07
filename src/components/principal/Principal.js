@@ -16,13 +16,13 @@ class Principal extends React.Component {
         this.state = {
 
         }
-        console.log("principal constructor")
-        console.log(this.props)
+        // console.log("principal constructor")
+        // console.log(this.props)
     }
 
     componentDidMount() {
-        console.log("principal componentDidMount")
-        console.log(this.props)
+        // console.log("principal componentDidMount")
+        // console.log(this.props)
     }
 
     onEventSignIn = async (event) => {
@@ -41,7 +41,7 @@ class Principal extends React.Component {
     }
 
     render() {
-        console.log("render principal")
+        // console.log("render principal")
         if (this.props.token.userToken == null) {
             return <Redirect to="/login" />
         }

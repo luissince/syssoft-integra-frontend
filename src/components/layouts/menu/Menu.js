@@ -7,7 +7,6 @@ import {
     SidebarHeader,
     SidebarContent,
 } from 'react-pro-sidebar';
-
 import { Link } from 'react-router-dom';
 import logoEmpresa from '../../../recursos/images/inmobiliarianav.png';
 import sidebarBg from '../../../recursos/images/bg2.jpg';
@@ -105,19 +104,19 @@ class Menu extends React.Component {
                             icon={<i className="bi bi-gear-fill"></i>}
                         >
                             <MenuItem>
-                                <Link to={`${this.props.url}/comprobante`}>Comprobante</Link>
+                                <Link to={`${this.props.url}/comprobantes`}>Comprobantes</Link>
                             </MenuItem>
                             <MenuItem>
-                                <Link to={`${this.props.url}/moneda`}>Moneda</Link>
+                                <Link to={`${this.props.url}/monedas`}>Monedas</Link>
                             </MenuItem>
                             <MenuItem>
-                                <Link to={`${this.props.url}/banco`}>Bancos</Link>
+                                <Link to={`${this.props.url}/bancos`}>Bancos</Link>
                             </MenuItem>
                             <MenuItem>
-                                <Link to={`${this.props.url}/sede`}>Sedes</Link>
+                                <Link to={`${this.props.url}/sedes`}>Sedes</Link>
                             </MenuItem>
                             <MenuItem>
-                                <Link to={`${this.props.url}/proyecto`}>Proyectos</Link>
+                                <Link to={`${this.props.url}/proyectos`}>Proyectos</Link>
                             </MenuItem>
                         </SubMenu>
 

@@ -40,7 +40,6 @@ class Inicio extends React.Component {
         });
     }
 
-
     render() {
         if (this.props.token.userToken == null) {
             return <Redirect to="/login" />
