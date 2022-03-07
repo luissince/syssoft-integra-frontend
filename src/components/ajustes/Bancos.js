@@ -1,8 +1,46 @@
 import React from 'react';
+import axios from 'axios';
 
 class Bancos extends React.Component {
     constructor(props) {
         super(props);
+        this.state = {
+            nombre: '',
+            tipo: '',
+            moneda: '',
+            representante: '',
+            estado: true
+        }
+        this.nombreRef = React.createRef();
+        this.tipoRef = React.createRef();
+        this.monedaRef = React.createRef();
+        this.representanteRef = React.createRef();
+    }
+
+    onEventGuardar = async () => {
+        if (this.state.nombre === '') {
+            this.nombreRef.current.focus();
+        } else if (this.state.tipo === '') {
+            this.tipoRef.current.focus();
+        } else if (this.state.moneda === '') {
+            this.monedaRef.current.focus();
+        } else if (this.state.representante === '') {
+            this.representanteRef.current.focus();
+        } else {
+            try {
+                let result = await axios.post("/api/banco", {
+                    "idBanco": "",
+                    "nombre": this.state.nombre,
+                    "tipo": this.state.tipo,
+                    "moneda": this.state.moneda,
+                    "representante": this.state.representante,
+                    "estado": this.state.estado,
+                });
+                console.log(result);
+            } catch (error) {
+                console.log(error.response)
+            }
+        }
     }
 
     render() {
@@ -24,7 +62,14 @@ class Bancos extends React.Component {
                                         <label>Nombre Banco: </label>
                                     </div>
                                     <div className='col-lg-8 col-md-8 col-sm-12 col-xs-12'>
-                                        <input type="" className="form-control" placeholder='Ingrese nombre banco' />
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            placeholder='Ingrese nombre banco'
+                                            ref={this.nombreRef}
+                                            value={this.state.nombre}
+                                            onChange={(event) => this.setState({ nombre: event.target.value })}
+                                        />
                                     </div>
                                 </div>
                                 <div className='row py-1'>
@@ -32,7 +77,10 @@ class Bancos extends React.Component {
                                         <label>Tipo de Cuenta: </label>
                                     </div>
                                     <div className='col-lg-8 col-md-8 col-sm-12 col-xs-12'>
-                                        <input type="" className="form-control" placeholder='corriente, recaudadora, etc' />
+                                        <input type="" className="form-control" placeholder='corriente, recaudadora, etc'
+                                            ref={this.tipoRef}
+                                            value={this.state.tipo}
+                                            onChange={(event) => this.setState({ tipo: event.target.value })} />
                                     </div>
                                 </div>
                                 <div className='row py-1'>
@@ -40,7 +88,10 @@ class Bancos extends React.Component {
                                         <label>Moneda: </label>
                                     </div>
                                     <div className='col-lg-8 col-md-8 col-sm-12 col-xs-12'>
-                                        <input type="" className="form-control" placeholder='Soles, Dolares, etc' />
+                                        <input type="" className="form-control" placeholder='Soles, Dolares, etc'
+                                            ref={this.monedaRef}
+                                            value={this.state.moneda}
+                                            onChange={(event) => this.setState({ moneda: event.target.value })} />
                                     </div>
                                 </div>
                                 <div className='row py-1'>
@@ -48,7 +99,10 @@ class Bancos extends React.Component {
                                         <label>Representante: </label>
                                     </div>
                                     <div className='col-lg-8 col-md-8 col-sm-12 col-xs-12'>
-                                        <input type="" className="form-control" placeholder='inmobiliaria' />
+                                        <input type="" className="form-control" placeholder='inmobiliaria'
+                                            ref={this.representanteRef}
+                                            value={this.state.representante}
+                                            onChange={(event) => this.setState({ representante: event.target.value })} />
                                     </div>
                                 </div>
                                 <div className='row py-1'>
@@ -59,8 +113,10 @@ class Bancos extends React.Component {
                                         <div className="form-check form-switch">
                                             <form>
                                                 <div className="custom-control custom-switch">
-                                                    <input type="checkbox" className="custom-control-input" id="switch1"/>
-                                                        <label className="custom-control-label" for="switch1">Active o desactive</label>
+                                                    <input type="checkbox" className="custom-control-input" id="switch1"
+                                                        checked={this.state.estado}
+                                                        onChange={(event) => this.setState({ estado: event.target.checked })} />
+                                                    <label className="custom-control-label" htmlFor="switch1">Active o desactive</label>
                                                 </div>
                                             </form>
                                         </div>
@@ -68,8 +124,8 @@ class Bancos extends React.Component {
                                 </div>
                             </div>
                             <div className="modal-footer">
-                                <button type="button" className="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-                                <button type="button" className="btn btn-primary">Aceptar</button>
+                                <button type="button" className="btn btn-primary" onClick={this.onEventGuardar}>Guardar</button>
+                                <button type="button" className="btn btn-danger" data-dismiss="modal">Cerrar</button>
                             </div>
                         </div>
                     </div>
@@ -89,7 +145,7 @@ class Bancos extends React.Component {
                         <label>Nuevo Banco</label>
                         <div className="form-group">
                             <button type="button" className="btn btn-success" data-toggle="modal" data-target="#exampleModal">
-                            <i className="bi bi-plus-lg"></i> Agregar Banco
+                                <i className="bi bi-plus-lg"></i> Agregar Banco
                             </button>
                         </div>
                     </div>
@@ -97,7 +153,7 @@ class Bancos extends React.Component {
                     <div className="col-lg-3 col-md-3 col-sm-12 col-xs-12">
                         <label>Opción.</label>
                         <div className="form-group">
-                            <button className="btn btn-light">
+                            <button className="btn btn-secondary">
                                 <i className="bi bi-arrow-repeat"></i> Recargar
                             </button>
                         </div>
@@ -141,15 +197,15 @@ class Bancos extends React.Component {
                             <nav aria-label="...">
                                 <ul className="pagination justify-content-end">
                                     <li className="page-item disabled">
-                                        <a className="page-link">Previous</a>
+                                        <button className="page-link">Previous</button>
                                     </li>
-                                    <li className="page-item"><a className="page-link" href="#">1</a></li>
+                                    <li className="page-item"><button className="page-link">1</button></li>
                                     <li className="page-item active" aria-current="page">
-                                        <a className="page-link" href="#">2</a>
+                                        <button className="page-link" href="#">2</button>
                                     </li>
-                                    <li className="page-item"><a className="page-link" href="#">3</a></li>
+                                    <li className="page-item"><button className="page-link" >3</button></li>
                                     <li className="page-item">
-                                        <a className="page-link" href="#">Next</a>
+                                        <button className="page-link">Next</button>
                                     </li>
                                 </ul>
                             </nav>

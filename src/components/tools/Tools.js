@@ -16,3 +16,11 @@ export function keyNumberFloat(event) {
         event.preventDefault();
     }
 }
+
+export function timeForma24(value) {
+    var hourEnd = value.indexOf(":");
+    var H = +value.substr(0, hourEnd);
+    var h = H % 12 || 12;
+    var ampm = (H < 12 || H === 24) ? "AM" : "PM";
+    return h + value.substr(hourEnd, 3) + ":" + value.substr(6, 2) + " " + ampm;
+};

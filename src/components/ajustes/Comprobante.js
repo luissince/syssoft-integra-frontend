@@ -1,7 +1,65 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { keyNumberInteger } from '../tools/Tools';
-const axios = require('axios').default;
+import axios from 'axios';
+import { keyNumberInteger, timeForma24 } from '../tools/Tools';
+
+function PaginacionElement(props) {
+    const pageNumbers = [];
+    for (let i = 1; i <= props.totalPaginacion; i++) {
+        pageNumbers.push(i);
+    }
+
+    const renderPageNumbers = pageNumbers.map((number, index) => {
+        if (number === 1 && props.paginacion === 1) {
+            return (
+                <li key={index} className="page-item active" aria-current="page">
+                    <span className="page-link">{number}</span>
+                </li>
+            );
+
+        } else if ((number < props.upperPageBound + 1) && number > props.lowerPageBound) {
+            return (
+                <li key={index} className="page-item">
+                    <button className="page-link">{number}</button>
+                </li>
+            );
+        }
+    });
+
+    let pageIncrementBtn = null;
+    if (pageNumbers.length > props.upperPageBound) {
+        pageIncrementBtn = <li className="page-item"><button className="page-link"> &hellip; </button></li>;
+    }
+
+    let pageDecrementBtn = null;
+    if (props.lowerPageBound >= 1) {
+        pageDecrementBtn = <li className="page-item"><button> &hellip; </button></li>;
+    }
+
+    let renderPrevBtn = null;
+    if (props.isPrevBtnActive === 'disabled') {
+        renderPrevBtn = <li className="page-item disabled"><button className="page-link"> Ante. </button></li>;
+    } else {
+        renderPrevBtn = <li className="page-item"><button className="page-link"> Ante.  </button></li>;
+    }
+
+    let renderNextBtn = null;
+    if (props.isNextBtnActive === 'disabled') {
+        renderNextBtn = <li className="page-item disabled"><button className="page-link"> Sigui. </button></li>;
+    } else {
+        renderNextBtn = <li className="page-item"><button className="page-link"> Sigui. </button></li>;
+    }
+
+    return (
+        <>
+            {renderPrevBtn}
+            {pageDecrementBtn}
+            {renderPageNumbers}
+            {pageIncrementBtn}
+            {renderNextBtn}
+        </>
+    );
+}
 
 class Comprobante extends React.Component {
 
@@ -11,10 +69,18 @@ class Comprobante extends React.Component {
             idComprobante: '',
             nombre: '',
             serie: '',
-            numeracion: 0,
+            numeracion: '',
             impresion: '',
             estado: true,
             idUsuario: '',
+            lista: [],
+            upperPageBound: 3,
+            lowerPageBound: 0,
+            paginacion: 0,
+            totalPaginacion: 0,
+            filasPorPagina: 10,
+            mostrarPaginacion: null,
+            messagePaginacion: 'Mostranto 0 de 0 Páginas'
         }
         this.refNombre = React.createRef();
         this.refSerie = React.createRef();
@@ -24,22 +90,40 @@ class Comprobante extends React.Component {
         console.log(props);
     }
 
+    setStateAsync(state) {
+        return new Promise((resolve) => {
+            this.setState(state, resolve)
+        });
+    }
+
     async componentDidMount() {
         console.log("Comprobante componentDidMount");
 
+        try {
+            await this.setStateAsync({ paginacion: 1 });
 
-        // try {
-        //     const result = await axios.get('/api/comprobante', {
-        //         params: {
-        //             name: 'Sherlock',
-        //             apellido: 'Jackson'
-        //         }
-        //     });
-        //     console.log(result);
-        // } catch (err) {
-        //     console.log(err)
-        // }
+            const result = await axios.get('/api/comprobante', {
+                params: {
+                    "posicionPagina": ((this.state.paginacion - 1) * this.state.filasPorPagina),
+                    "filasPorPagina": this.state.filasPorPagina
+                }
+            });
 
+            let totalPaginacion = parseInt(Math.ceil((parseFloat(result.data.total) / this.state.filasPorPagina)));
+            let messagePaginacion = `Mostrando ${result.data.result.length} de ${totalPaginacion} Páginas`;
+
+
+
+            this.setState({
+                lista: result.data.result,
+                totalPaginacion: totalPaginacion,
+                messagePaginacion: messagePaginacion
+            });
+            console.log(result);
+        } catch (err) {
+            console.log(err.response.data.message)
+            console.log(err.response.status)
+        }
 
     }
 
@@ -53,12 +137,12 @@ class Comprobante extends React.Component {
         } else {
             try {
                 const result = await axios.post('/api/comprobante', {
-                    nombre: this.state.nombre.trim(),
-                    serie: this.state.serie.trim(),
-                    numeracion: this.state.numeracion,
-                    impresion: this.state.impresion.trim(),
-                    estado: this.state.estado,
-                    idUsuario: this.state.idUsuario,
+                    "nombre": this.state.nombre.trim(),
+                    "serie": this.state.serie.trim(),
+                    "numeracion": this.state.numeracion,
+                    "impresion": this.state.impresion.trim(),
+                    "estado": this.state.estado,
+                    "idUsuario": this.state.idUsuario
                 });
                 console.log(result);
             } catch (err) {
@@ -68,6 +152,7 @@ class Comprobante extends React.Component {
     }
 
     render() {
+        console.log("render...")
         return (
             <>
                 <div className="modal fade" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -126,7 +211,16 @@ class Comprobante extends React.Component {
                                 </div>
 
                                 <div className="form-group">
-                                    <div className="form-check">
+                                    <div className="custom-control custom-switch">
+                                        <input
+                                            type="checkbox"
+                                            className="custom-control-input"
+                                            id="switch1"
+                                            checked={this.state.estado}
+                                            onChange={(value) => this.setState({ estado: value.target.checked })} />
+                                        <label className="custom-control-label" htmlFor="switch1">Activo o Inactivo</label>
+                                    </div>
+                                    {/* <div className="form-check">
                                         <input
                                             className="form-check-input"
                                             type="checkbox"
@@ -134,9 +228,9 @@ class Comprobante extends React.Component {
                                             checked={this.state.estado}
                                             onChange={(value) => this.setState({ estado: value.target.checked })} />
                                         <label className="form-check-label" htmlFor="estado">
-                                            Habilitado
+                                            {this.state.estado ? "ACTIVO" : "INACTIVO"}
                                         </label>
-                                    </div>
+                                    </div> */}
                                 </div>
                             </div>
                             <div className="modal-footer">
@@ -150,7 +244,7 @@ class Comprobante extends React.Component {
                 <div className="row">
                     <div className="col-md-12">
                         <div className="form-group">
-                            <h5>Comprobantes de pago <small>LISTA</small></h5>
+                            <h5>Comprobantes <small className="text-secondary">LISTA</small></h5>
                         </div>
                     </div>
                 </div>
@@ -196,16 +290,27 @@ class Comprobante extends React.Component {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td>1</td>
-                                        <td>Mark</td>
-                                        <td>Otto</td>
-                                        <td>@mdo</td>
-                                        <td>@mdo</td>
-                                        <td>@mdo</td>
-                                        <td>@mdo</td>
-                                        <td>@mdo</td>
-                                    </tr>
+                                    {
+                                        this.state.lista.length === 0 ? (
+                                            <tr>
+                                                <td colSpan="8">¡No hay comprobantes registrados!</td>
+                                            </tr>
+                                        ) :
+                                            this.state.lista.map(function (item, index) {
+                                                return (
+                                                    <tr key={index}>
+                                                        <td>{(index + 1)}</td>
+                                                        <td>{item.nombre}</td>
+                                                        <td>{item.serie}</td>
+                                                        <td>{item.numeracion}</td>
+                                                        <td>{<span>{item.fechaRegistro}</span>}{<br></br>}{<span>{timeForma24(item.horaRegistro)}</span>}</td>
+                                                        <td className="text-center"><div className={`badge ${item.estado === 1 ? "badge-info" : "badge-danger"}`}>{item.estado === 1 ? "ACTIVO" : "INACTIVO"}</div></td>
+                                                        <td><button className="btn btn-outline-dark btn-sm"><i className="bi bi-pencil"></i> Editar</button></td>
+                                                        <td><button className="btn btn-outline-danger btn-sm"><i className="bi bi-trash"></i> Anular</button></td>
+                                                    </tr>
+                                                )
+                                            })
+                                    }
                                 </tbody>
                             </table>
                         </div>
@@ -214,13 +319,14 @@ class Comprobante extends React.Component {
 
                 <div className="row">
                     <div className="col-sm-12 col-md-5">
-                        <div className="dataTables_info mt-2" role="status" aria-live="polite">Showing 51 to 57 of 57 entries</div>
+                        <div className="dataTables_info mt-2" role="status" aria-live="polite">{this.state.messagePaginacion}</div>
                     </div>
                     <div className="col-sm-12 col-md-7">
                         <div className="dataTables_paginate paging_simple_numbers">
                             <nav aria-label="Page navigation example">
                                 <ul className="pagination justify-content-end">
-                                    <li className="page-item disabled">
+                                    <PaginacionElement totalPaginacion={this.state.totalPaginacion} paginacion={this.state.paginacion} upperPageBound={this.state.upperPageBound} lowerPageBound={this.state.lowerPageBound} />
+                                    {/* <li className="page-item disabled">
                                         <button className="page-link"><i className="bi bi-arrow-left"></i></button>
                                     </li>
                                     <li className="page-item"><button className="page-link" >1</button></li>
@@ -230,7 +336,7 @@ class Comprobante extends React.Component {
                                     <li className="page-item"><button className="page-link">3</button></li>
                                     <li className="page-item">
                                         <button className="page-link"><i className="bi bi-arrow-right"></i></button>
-                                    </li>
+                                    </li> */}
                                 </ul>
                             </nav>
                         </div>

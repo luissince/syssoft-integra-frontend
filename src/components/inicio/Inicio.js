@@ -8,11 +8,11 @@ import Dashboard from '../dashboard/Dashboard';
 import Clientes from '../facturacion/Clientes';
 import Ventas from '../facturacion/Ventas';
 import Cobros from '../facturacion/Cobros';
-import Creditos from '../facturacion/Creditos';
-import Cotizaciones from '../facturacion/Cotizaciones';
-import Reservas from '../facturacion/Reservas';
-import Comprobantes from '../ajustes/Comprobantes';
-import Monedas from '../ajustes/Monedas';
+// import Creditos from '../facturacion/Creditos';
+// import Cotizaciones from '../facturacion/Cotizaciones';
+// import Reservas from '../facturacion/Reservas';
+// import Comprobantes from '../ajustes/Comprobantes';
+// import Monedas from '../ajustes/Monedas';
 import Bancos from '../ajustes/Bancos';
 
 import Comprobante from '../ajustes/Comprobante';
@@ -66,7 +66,6 @@ class Inicio extends React.Component {
                             path={`${path}/clientes`}
                             render={(props) => <Clientes {...props} />}
                         />
-                        />
                         <Route
                             path={`${path}/ventas`}
                             render={(props) => <Ventas {...props} />}
@@ -76,33 +75,12 @@ class Inicio extends React.Component {
                             render={(props) => <Cobros {...props} />}
                         />
                         <Route
-<<<<<<< HEAD
                             path={`${path}/comprobante`}
                             render={(props) => <Comprobante {...props} />}
-=======
-                            path={`${path}/comprobantes`}
-                            render={(props) => <Comprobantes {...props} />}
                         />
                         <Route
-                            path={`${path}/creditos`}
-                            render={(props) => <Creditos {...props} />}
-                        />
-                        <Route
-                            path={`${path}/cotizaciones`}
-                            render={(props) => <Cotizaciones {...props} />}
-                        />
-                        <Route
-                            path={`${path}/reservas`}
-                            render={(props) => <Reservas {...props} />}
-                        />
-                        <Route
-                            path={`${path}/monedas`}
-                            render={(props) => <Monedas {...props} />}
-                        />
-                        <Route
-                            path={`${path}/bancos`}
+                            path={`${path}/banco`}
                             render={(props) => <Bancos {...props} />}
->>>>>>> c88dcc36221160571994bcfa136ede10e5628900
                         />
                         {/* <Route component={<div>chucha</div>} /> */}
                     </Switch>
