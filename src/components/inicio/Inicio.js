@@ -5,6 +5,7 @@ import Menu from '../layouts/menu/Menu';
 import Head from '../layouts/head/Head';
 import Footer from '../layouts/footer/Footer';
 import Dashboard from '../dashboard/Dashboard';
+import Comprobantes from '../ajustes/Comprobantes';
 import Clientes from '../facturacion/Clientes';
 import Ventas from '../facturacion/Ventas';
 import Cobros from '../facturacion/Cobros';
@@ -15,7 +16,7 @@ import Cobros from '../facturacion/Cobros';
 // import Monedas from '../ajustes/Monedas';
 import Bancos from '../ajustes/Bancos';
 
-import Comprobante from '../ajustes/Comprobante';
+
 
 class Inicio extends React.Component {
 
@@ -75,11 +76,11 @@ class Inicio extends React.Component {
                             render={(props) => <Cobros {...props} />}
                         />
                         <Route
-                            path={`${path}/comprobante`}
-                            render={(props) => <Comprobante {...props} />}
+                            path={`${path}/comprobantes`}
+                            render={(props) => <Comprobantes {...props} />}
                         />
                         <Route
-                            path={`${path}/banco`}
+                            path={`${path}/bancos`}
                             render={(props) => <Bancos {...props} />}
                         />
                         {/* <Route component={<div>chucha</div>} /> */}

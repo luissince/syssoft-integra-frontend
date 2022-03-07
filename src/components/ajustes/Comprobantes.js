@@ -61,7 +61,7 @@ function PaginacionElement(props) {
     );
 }
 
-class Comprobante extends React.Component {
+class Comprobantes extends React.Component {
 
     constructor(props) {
         super(props);
@@ -355,4 +355,4 @@ const mapStateToProps = (state) => {
 }
 
 
-export default connect(mapStateToProps, null)(Comprobante);
+export default connect(mapStateToProps, null)(Comprobantes);
