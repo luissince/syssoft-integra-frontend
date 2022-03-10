@@ -60,7 +60,7 @@ class Monedas extends React.Component {
                                             <form>
                                                 <div className="custom-control custom-switch">
                                                     <input type="checkbox" className="custom-control-input" id="switch1"/>
-                                                        <label className="custom-control-label" for="switch1">Active o desactive</label>
+                                                        <label className="custom-control-label" htmlFor="switch1">Active o desactive</label>
                                                 </div>
                                             </form>
                                         </div>

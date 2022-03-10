@@ -1,81 +1,20 @@
 import React from 'react';
+import { Redirect } from 'react-router-dom';
+import { connect } from 'react-redux';
+import { signOut } from '../../redux/actions';
 
 class Ventas extends React.Component {
     constructor(props) {
         super(props);
     }
 
+    onEventNuevaVenta = () => {
+        this.props.history.push("venta")
+    }
+
     render() {
         return (
             <>
-                {/* Inicio modal nuevo cliente*/}
-                <div className="modal fade" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                    <div className="modal-dialog">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h5 className="modal-title" id="exampleModalLabel"><i className="bi bi-bank"></i> Registrar Banco</h5>
-                                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-                            <div className="modal-body">
-                                <div className='row py-1'>
-                                    <div className='col-lg-4 col-md-4 col-sm-12 col-xs-12'>
-                                        <label>Nombre Banco: </label>
-                                    </div>
-                                    <div className='col-lg-8 col-md-8 col-sm-12 col-xs-12'>
-                                        <input type="" className="form-control" placeholder='Ingrese nombre banco' />
-                                    </div>
-                                </div>
-                                <div className='row py-1'>
-                                    <div className='col-lg-4 col-md-4 col-sm-12 col-xs-12'>
-                                        <label>Tipo de Cuenta: </label>
-                                    </div>
-                                    <div className='col-lg-8 col-md-8 col-sm-12 col-xs-12'>
-                                        <input type="" className="form-control" placeholder='corriente, recaudadora, etc' />
-                                    </div>
-                                </div>
-                                <div className='row py-1'>
-                                    <div className='col-lg-4 col-md-4 col-sm-12 col-xs-12'>
-                                        <label>Moneda: </label>
-                                    </div>
-                                    <div className='col-lg-8 col-md-8 col-sm-12 col-xs-12'>
-                                        <input type="" className="form-control" placeholder='Soles, Dolares, etc' />
-                                    </div>
-                                </div>
-                                <div className='row py-1'>
-                                    <div className='col-lg-4 col-md-4 col-sm-12 col-xs-12'>
-                                        <label>Representante: </label>
-                                    </div>
-                                    <div className='col-lg-8 col-md-8 col-sm-12 col-xs-12'>
-                                        <input type="" className="form-control" placeholder='inmobiliaria' />
-                                    </div>
-                                </div>
-                                <div className='row py-1'>
-                                    <div className='col-lg-4 col-md-4 col-sm-12 col-xs-12'>
-                                        <label>Estado: </label>
-                                    </div>
-                                    <div className='col-lg-8 col-md-8 col-sm-12 col-xs-12'>
-                                        <div className="form-check form-switch">
-                                            <form>
-                                                <div className="custom-control custom-switch">
-                                                    <input type="checkbox" className="custom-control-input" id="switch1"/>
-                                                        <label className="custom-control-label" for="switch1">Active o desactive</label>
-                                                </div>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="modal-footer">
-                                <button type="button" className="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-                                <button type="button" className="btn btn-primary">Aceptar</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {/* fin modal nuevo cliente*/}
-
                 <div className='row pb-3'>
                     <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
                         <section className="content-header">
@@ -88,7 +27,7 @@ class Ventas extends React.Component {
                     <div className="col-lg-3 col-md-3 col-sm-12 col-xs-12">
                         <label>Nuevo Ventas</label>
                         <div className="form-group">
-                            <button type="button" className="btn btn-success" data-toggle="modal" data-target="#exampleModal">
+                            <button type="button" className="btn btn-success" onClick={this.onEventNuevaVenta}>
                             <i className="bi bi-plus-lg"></i> Agregar Venta
                             </button>
                         </div>

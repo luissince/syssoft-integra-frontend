@@ -5,18 +5,19 @@ import Menu from '../layouts/menu/Menu';
 import Head from '../layouts/head/Head';
 import Footer from '../layouts/footer/Footer';
 import Dashboard from '../dashboard/Dashboard';
-import Comprobantes from '../ajustes/Comprobantes';
 import Clientes from '../facturacion/Clientes';
 import Ventas from '../facturacion/Ventas';
 import Cobros from '../facturacion/Cobros';
-// import Creditos from '../facturacion/Creditos';
-// import Cotizaciones from '../facturacion/Cotizaciones';
-// import Reservas from '../facturacion/Reservas';
-// import Comprobantes from '../ajustes/Comprobantes';
-// import Monedas from '../ajustes/Monedas';
+import Creditos from '../facturacion/Creditos';
+import Cotizaciones from '../facturacion/Cotizaciones';
+import Reservas from '../facturacion/Reservas';
+import Monedas from '../ajustes/Monedas';
+import Comprobantes from '../ajustes/Comprobantes';
 import Bancos from '../ajustes/Bancos';
-
-
+import Manzanas from '../logistica/Manzanas';
+import Lotes from '../logistica/Lotes';
+import NuevaVenta from '../facturacion/registros/Venta';
+import NuevoCliente from '../facturacion/registros/Cliente'
 
 class Inicio extends React.Component {
 
@@ -71,8 +72,32 @@ class Inicio extends React.Component {
                             render={(props) => <Ventas {...props} />}
                         />
                         <Route
+                            path={`${path}/venta`}
+                            render={(props) => <NuevaVenta {...props} />}
+                        />
+                        <Route
+                            path={`${path}/cliente`}
+                            render={(props) => <NuevoCliente {...props} />}
+                        />
+                        <Route
                             path={`${path}/cobros`}
                             render={(props) => <Cobros {...props} />}
+                        />
+                        <Route
+                            path={`${path}/creditos`}
+                            render={(props) => <Creditos {...props} />}
+                        />
+                        <Route
+                            path={`${path}/cotizaciones`}
+                            render={(props) => <Cotizaciones {...props} />}
+                        />
+                        <Route
+                            path={`${path}/reservas`}
+                            render={(props) => <Reservas {...props} />}
+                        />
+                        <Route
+                            path={`${path}/monedas`}
+                            render={(props) => <Monedas {...props} />}
                         />
                         <Route
                             path={`${path}/comprobantes`}
@@ -81,6 +106,14 @@ class Inicio extends React.Component {
                         <Route
                             path={`${path}/bancos`}
                             render={(props) => <Bancos {...props} />}
+                        />
+                        <Route
+                            path={`${path}/manzanas`}
+                            render={(props) => <Manzanas {...props} />}
+                        />
+                        <Route
+                            path={`${path}/lotes`}
+                            render={(props) => <Lotes {...props} />}
                         />
                         {/* <Route component={<div>chucha</div>} /> */}
                     </Switch>

@@ -1,9 +1,10 @@
 import React from 'react';
 
-class Creditos extends React.Component {
-    constructor(props) {
-        super(props);
-    }
+class Lotes extends React.Component {
+    // constructor(props) {
+    //     super(props);
+
+    // }
 
     render() {
         return (
@@ -13,7 +14,7 @@ class Creditos extends React.Component {
                     <div className="modal-dialog">
                         <div className="modal-content">
                             <div className="modal-header">
-                                <h5 className="modal-title" id="exampleModalLabel"><i className="bi bi-bank"></i> Registrar Banco</h5>
+                                <h5 className="modal-title" id="exampleModalLabel"><i className="bi bi-person-plus-fill"></i> Registrar Cliente</h5>
                                 <button type="button" className="close" data-dismiss="modal" aria-label="Close">
                                     <span aria-hidden="true">&times;</span>
                                 </button>
@@ -21,49 +22,42 @@ class Creditos extends React.Component {
                             <div className="modal-body">
                                 <div className='row py-1'>
                                     <div className='col-lg-4 col-md-4 col-sm-12 col-xs-12'>
-                                        <label>Nombre Banco: </label>
+                                        <label>Nombre(s): </label>
                                     </div>
                                     <div className='col-lg-8 col-md-8 col-sm-12 col-xs-12'>
-                                        <input type="" className="form-control" placeholder='Ingrese nombre banco' />
+                                        <input type="" className="form-control" placeholder='Ingrese nombres' />
                                     </div>
                                 </div>
                                 <div className='row py-1'>
                                     <div className='col-lg-4 col-md-4 col-sm-12 col-xs-12'>
-                                        <label>Tipo de Cuenta: </label>
+                                        <label>Apellidos: </label>
                                     </div>
                                     <div className='col-lg-8 col-md-8 col-sm-12 col-xs-12'>
-                                        <input type="" className="form-control" placeholder='corriente, recaudadora, etc' />
+                                        <input type="" className="form-control" placeholder='Ingrese apellidos' />
                                     </div>
                                 </div>
                                 <div className='row py-1'>
                                     <div className='col-lg-4 col-md-4 col-sm-12 col-xs-12'>
-                                        <label>Moneda: </label>
+                                        <label>DNI/RUC: </label>
                                     </div>
                                     <div className='col-lg-8 col-md-8 col-sm-12 col-xs-12'>
-                                        <input type="" className="form-control" placeholder='Soles, Dolares, etc' />
+                                        <input type="number" className="form-control" placeholder='Ingrese documento' />
                                     </div>
                                 </div>
                                 <div className='row py-1'>
                                     <div className='col-lg-4 col-md-4 col-sm-12 col-xs-12'>
-                                        <label>Representante: </label>
+                                        <label>Telf./Celular: </label>
                                     </div>
                                     <div className='col-lg-8 col-md-8 col-sm-12 col-xs-12'>
-                                        <input type="" className="form-control" placeholder='inmobiliaria' />
+                                        <input type="number" className="form-control" placeholder='Ingrese Telefono' />
                                     </div>
                                 </div>
                                 <div className='row py-1'>
                                     <div className='col-lg-4 col-md-4 col-sm-12 col-xs-12'>
-                                        <label>Estado: </label>
+                                        <label>Observacion: </label>
                                     </div>
                                     <div className='col-lg-8 col-md-8 col-sm-12 col-xs-12'>
-                                        <div className="form-check form-switch">
-                                            <form>
-                                                <div className="custom-control custom-switch">
-                                                    <input type="checkbox" className="custom-control-input" id="switch1"/>
-                                                        <label className="custom-control-label" htmlFor="switch1">Active o desactive</label>
-                                                </div>
-                                            </form>
-                                        </div>
+                                        <input type="" className="form-control" placeholder='' />
                                     </div>
                                 </div>
                             </div>
@@ -79,22 +73,22 @@ class Creditos extends React.Component {
                 <div className='row pb-3'>
                     <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
                         <section className="content-header">
-                            <h5 className="no-margin"> Creditos <small style={{ color: 'gray' }}> Lista </small> </h5>
+                            <h5 className="no-margin"> Lotes <small style={{ color: 'gray' }}> Lista </small> </h5>
                         </section>
                     </div>
                 </div>
 
                 <div className='row'>
-                    {/* <div className="col-lg-3 col-md-3 col-sm-12 col-xs-12">
-                        <label>Nuevo Ventas</label>
+                    <div className="col-lg-3 col-md-3 col-sm-12 col-xs-12">
+                        <label>Nuevo Cliente/Socio</label>
                         <div className="form-group">
                             <button type="button" className="btn btn-success" data-toggle="modal" data-target="#exampleModal">
-                            <i className="bi bi-plus-lg"></i> Agregar Venta
+                                <i className="bi bi-plus-lg"></i> Agregar Cliente
                             </button>
                         </div>
-                    </div> */}
+                    </div>
 
-                    <div className="col-lg-6 col-md-3 col-sm-12 col-xs-12">
+                    <div className="col-lg-3 col-md-3 col-sm-12 col-xs-12">
                         <label>Opción.</label>
                         <div className="form-group">
                             <button className="btn btn-light">
@@ -104,7 +98,7 @@ class Creditos extends React.Component {
                     </div>
 
                     <div className="col-lg-6 col-md-6 col-sm-12 col-xs-12">
-                        <label>Filtrar por cliente, ruc, comprobante</label>
+                        <label>Filtrar por dni, apellidos y nombres.</label>
                         <div className="form-group">
                             <div className="input-group mb-3">
                                 <input type="text" className="form-control" placeholder="Ingrese para buscar" aria-label="Recipient's username" aria-describedby="basic-addon2" />
@@ -123,16 +117,12 @@ class Creditos extends React.Component {
                                 <thead>
                                     <tr>
                                         <th width="5%" className="text-center">#</th>
-                                        <th width="17%" className="text-center">Cliente</th>
-                                        <th width="10%" className="text-center">Comprobante</th>
-                                        <th width="10%" className="text-center">Sigu. Pago</th>                                        
-                                        <th width="10%" className="text-center">Cuota</th>
-                                        <th width="10%" className="text-center">Restante</th>
-                                        <th width="7%" className="text-center">Total</th>
-                                        <th width="6%" className="text-center">Cronograma</th>
-                                        <th width="8%" className="text-center">Letra</th>
-                                        <th width="7%" className="text-center">Cobro</th>
-                                        <th width="7%" className="text-center">Anular</th>
+                                        <th width="20%">Nombre</th>
+                                        <th width="20%">Apellido</th>
+                                        <th width="15%">Dni / Ruc</th>
+                                        <th width="10%">Telefono</th>
+                                        <th width="12%">Observacion</th>
+                                        <th width="15%" colSpan="2">Opciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -166,4 +156,4 @@ class Creditos extends React.Component {
     }
 }
 
-export default Creditos;
+export default Lotes;
