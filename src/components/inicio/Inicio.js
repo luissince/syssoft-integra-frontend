@@ -18,6 +18,9 @@ import Manzanas from '../logistica/Manzanas';
 import Lotes from '../logistica/Lotes';
 import NuevaVenta from '../facturacion/registros/Venta';
 import NuevoCliente from '../facturacion/registros/Cliente'
+import Perfiles from '../seguridad/Perfiles'
+import Usuarios from '../seguridad/Usuarios'
+import Accesos from '../seguridad/Accesos'
 
 class Inicio extends React.Component {
 
@@ -62,6 +65,18 @@ class Inicio extends React.Component {
                         <Route
                             path={`${path}/dashboard`}
                             render={(props) => <Dashboard {...props} />}
+                        />
+                        <Route
+                            path={`${path}/perfiles`}
+                            render={(props) => <Perfiles {...props} />}
+                        />
+                        <Route
+                            path={`${path}/usuarios`}
+                            render={(props) => <Usuarios {...props} />}
+                        />
+                        <Route
+                            path={`${path}/accesos`}
+                            render={(props) => <Accesos {...props} />}
                         />
                         <Route
                             path={`${path}/clientes`}
