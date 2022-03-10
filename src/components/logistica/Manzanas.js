@@ -10,11 +10,11 @@ class Manzanas extends React.Component {
         return (
             <>
                 {/* Inicio modal nuevo cliente*/}
-                <div className="modal fade" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div className="modal fade" id="modalManzana" tabIndex="-1" aria-labelledby="modalManzanaLabel" aria-hidden="true">
                     <div className="modal-dialog">
                         <div className="modal-content">
                             <div className="modal-header">
-                                <h5 className="modal-title" id="exampleModalLabel"><i className="bi bi-person-plus-fill"></i> Registrar Cliente</h5>
+                                <h5 className="modal-title" id="modalManzanaLabel"><i className="bi bi-house-door"></i> Registrar Manzana</h5>
                                 <button type="button" className="close" data-dismiss="modal" aria-label="Close">
                                     <span aria-hidden="true">&times;</span>
                                 </button>
@@ -22,42 +22,10 @@ class Manzanas extends React.Component {
                             <div className="modal-body">
                                 <div className='row py-1'>
                                     <div className='col-lg-4 col-md-4 col-sm-12 col-xs-12'>
-                                        <label>Nombre(s): </label>
+                                        <label>Nombre Manzana: </label>
                                     </div>
                                     <div className='col-lg-8 col-md-8 col-sm-12 col-xs-12'>
-                                        <input type="" className="form-control" placeholder='Ingrese nombres' />
-                                    </div>
-                                </div>
-                                <div className='row py-1'>
-                                    <div className='col-lg-4 col-md-4 col-sm-12 col-xs-12'>
-                                        <label>Apellidos: </label>
-                                    </div>
-                                    <div className='col-lg-8 col-md-8 col-sm-12 col-xs-12'>
-                                        <input type="" className="form-control" placeholder='Ingrese apellidos' />
-                                    </div>
-                                </div>
-                                <div className='row py-1'>
-                                    <div className='col-lg-4 col-md-4 col-sm-12 col-xs-12'>
-                                        <label>DNI/RUC: </label>
-                                    </div>
-                                    <div className='col-lg-8 col-md-8 col-sm-12 col-xs-12'>
-                                        <input type="number" className="form-control" placeholder='Ingrese documento' />
-                                    </div>
-                                </div>
-                                <div className='row py-1'>
-                                    <div className='col-lg-4 col-md-4 col-sm-12 col-xs-12'>
-                                        <label>Telf./Celular: </label>
-                                    </div>
-                                    <div className='col-lg-8 col-md-8 col-sm-12 col-xs-12'>
-                                        <input type="number" className="form-control" placeholder='Ingrese Telefono' />
-                                    </div>
-                                </div>
-                                <div className='row py-1'>
-                                    <div className='col-lg-4 col-md-4 col-sm-12 col-xs-12'>
-                                        <label>Observacion: </label>
-                                    </div>
-                                    <div className='col-lg-8 col-md-8 col-sm-12 col-xs-12'>
-                                        <input type="" className="form-control" placeholder='' />
+                                        <input type="" className="form-control" placeholder='Ingrese el nombre de la manzana' />
                                     </div>
                                 </div>
                             </div>
@@ -80,10 +48,10 @@ class Manzanas extends React.Component {
 
                 <div className='row'>
                     <div className="col-lg-3 col-md-3 col-sm-12 col-xs-12">
-                        <label>Nuevo Cliente/Socio</label>
+                        <label>Nuevo Registro</label>
                         <div className="form-group">
-                            <button type="button" className="btn btn-success" data-toggle="modal" data-target="#exampleModal">
-                                <i className="bi bi-plus-lg"></i> Agregar Cliente
+                            <button type="button" className="btn btn-success" data-toggle="modal" data-target="#modalManzana">
+                                <i className="bi bi-plus-lg"></i> Agregar Manzana
                             </button>
                         </div>
                     </div>
@@ -98,7 +66,7 @@ class Manzanas extends React.Component {
                     </div>
 
                     <div className="col-lg-6 col-md-6 col-sm-12 col-xs-12">
-                        <label>Filtrar por dni, apellidos y nombres.</label>
+                        <label>Filtrar por manzana o nombre del proyecto.</label>
                         <div className="form-group">
                             <div className="input-group mb-3">
                                 <input type="text" className="form-control" placeholder="Ingrese para buscar" aria-label="Recipient's username" aria-describedby="basic-addon2" />
@@ -117,11 +85,8 @@ class Manzanas extends React.Component {
                                 <thead>
                                     <tr>
                                         <th width="5%" className="text-center">#</th>
-                                        <th width="20%">Nombre</th>
-                                        <th width="20%">Apellido</th>
-                                        <th width="15%">Dni / Ruc</th>
-                                        <th width="10%">Telefono</th>
-                                        <th width="12%">Observacion</th>
+                                        <th width="35%">Manzana</th>
+                                        <th width="45%">Nombre del Proyecto</th>
                                         <th width="15%" colSpan="2">Opciones</th>
                                     </tr>
                                 </thead>
