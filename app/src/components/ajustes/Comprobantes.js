@@ -31,26 +31,26 @@ function PaginacionElement(props) {
 
     let pageIncrementBtn = null;
     if (pageNumbers.length > props.upperPageBound) {
-        pageIncrementBtn = <li className="page-item"><button className="page-link"> &hellip; </button></li>;
+        pageIncrementBtn = <li className="page-item"><button className="page-link" onClick={props.btnIncrementClick}> &hellip; </button></li>;
     }
 
     let pageDecrementBtn = null;
     if (props.lowerPageBound >= 1) {
-        pageDecrementBtn = <li className="page-item"><button> &hellip; </button></li>;
+        pageDecrementBtn = <li className="page-item"><button className="page-link" onClick={props.btnDecrementClick}> &hellip; </button></li>;
     }
 
     let renderPrevBtn = null;
     if (props.isPrevBtnActive === 'disabled') {
-        renderPrevBtn = <li className="page-item disabled"><button className="page-link"> Ante. </button></li>;
+        renderPrevBtn = <li className="page-item disabled"><span className="page-link"> Ante. </span></li>;
     } else {
-        renderPrevBtn = <li className="page-item"><button className="page-link"> Ante.  </button></li>;
+        renderPrevBtn = <li className="page-item"><button className="page-link" onClick={props.btnPrevClick}> Ante.  </button></li>;
     }
 
     let renderNextBtn = null;
     if (props.isNextBtnActive === 'disabled') {
-        renderNextBtn = <li className="page-item disabled"><button className="page-link"> Sigui. </button></li>;
+        renderNextBtn = <li className="page-item disabled"><span className="page-link"> Sigui. </span></li>;
     } else {
-        renderNextBtn = <li className="page-item"><button className="page-link"> Sigui. </button></li>;
+        renderNextBtn = <li className="page-item"><button className="page-link" onClick={props.btnNextClick}> Sigui. </button></li>;
     }
 
     return (
@@ -96,6 +96,60 @@ class Comprobantes extends React.Component {
     handleClick = async (event) => {
         console.log(event.target.id)
         let listid = parseInt(event.target.id);
+        this.setPrevAndNextBtnClass(listid);
+    }
+
+    btnIncrementClick = async () => {
+        await this.setStateAsync({
+            upperPageBound: this.state.upperPageBound + this.state.pageBound,
+            lowerPageBound: this.state.lowerPageBound + this.state.pageBound
+        });
+        let listid = this.state.lowerPageBound + 1;
+        this.setPrevAndNextBtnClass(listid);
+    }
+
+    btnDecrementClick = async () => {
+        await this.setStateAsync({
+            upperPageBound: this.state.upperPageBound - this.state.pageBound,
+            lowerPageBound: this.state.lowerPageBound - this.state.pageBound
+        });
+        let listid = this.state.upperPageBound;
+        this.setPrevAndNextBtnClass(listid);
+    }
+
+    btnPrevClick = async () => {
+        if ((this.state.paginacion - 1) % this.state.pageBound === 0) {
+            await this.setStateAsync({
+                upperPageBound: this.state.upperPageBound - this.state.pageBound,
+                lowerPageBound: this.state.lowerPageBound - this.state.pageBound
+            });
+        }
+        let listid = this.state.paginacion - 1;
+        this.setPrevAndNextBtnClass(listid);
+    }
+
+    btnNextClick = async () => {
+        if ((this.state.paginacion + 1) > this.state.upperPageBound) {
+            await this.setStateAsync({
+                upperPageBound: this.state.upperPageBound + this.state.pageBound,
+                lowerPageBound: this.state.lowerPageBound + this.state.pageBound
+            });
+        }
+        let listid = this.state.paginacion + 1;
+        this.setPrevAndNextBtnClass(listid);
+    }
+
+    setPrevAndNextBtnClass = async (listid) => {
+        await this.setStateAsync({ isNextBtnActive: 'disabled', isPrevBtnActive: 'disabled' });
+
+        if (this.state.totalPaginacion === listid && this.state.totalPaginacion > 1) {
+            await this.setStateAsync({ isPrevBtnActive: '' });
+        } else if (listid === 1 && this.state.totalPaginacion > 1) {
+            await this.setStateAsync({ isNextBtnActive: '' });
+        } else if (this.state.totalPaginacion > 1) {
+            await this.setStateAsync({ isNextBtnActive: '', isPrevBtnActive: '' });
+        }
+
         this.fillTableComprobante(listid);
     }
 
@@ -342,18 +396,11 @@ class Comprobantes extends React.Component {
                                         pageBound={this.state.pageBound}
 
                                         handleClick={this.handleClick}
+                                        btnIncrementClick={this.btnIncrementClick}
+                                        btnDecrementClick={this.btnDecrementClick}
+                                        btnPrevClick={this.btnPrevClick}
+                                        btnNextClick={this.btnNextClick}
                                     />
-                                    {/* <li className="page-item disabled">
-                                        <button className="page-link"><i className="bi bi-arrow-left"></i></button>
-                                    </li>
-                                    <li className="page-item"><button className="page-link" >1</button></li>
-                                    <li className="page-item active" aria-current="page">
-                                        <span className="page-link">2</span>
-                                    </li>
-                                    <li className="page-item"><button className="page-link">3</button></li>
-                                    <li className="page-item">
-                                        <button className="page-link"><i className="bi bi-arrow-right"></i></button>
-                                    </li> */}
                                 </ul>
                             </nav>
                         </div>
