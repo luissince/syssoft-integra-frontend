@@ -25,6 +25,7 @@ app.get("/", function (req, res) {
 //api rest
 // app.use('/api/usuario', require('./router/Usuario'));
 // app.use('/api/facultad', require('./router/Facultad'));
+app.use('/api/comprobante', require('./src/router/Comprobante'));
 
 app.use((req, res, next) => {
     res.sendFile(path.join(__dirname, "..", "app/build", "index.html"));

@@ -83,4 +83,4 @@ class Conexion {
 
 }
 
-module.export = Conexion;
+module.exports = Conexion;
