@@ -6,7 +6,7 @@ import store from './redux/store';
 import './recursos/css/bootstrap.css';
 import './recursos/js/bootstrap.js';
 // import '../node_modules/bootstrap/dist/js/bootstrap';
-import '../node_modules/bootstrap-icons/font/bootstrap-icons.css';
+import '../../node_modules/bootstrap-icons/font/bootstrap-icons.css';
 import './styles/App.scss';
 
 
