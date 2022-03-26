@@ -22,7 +22,7 @@ class Conexion {
                     return resolve(result);
                 });
             });
-        });
+        }); 
     }
 
     beginTransaction() {

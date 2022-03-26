@@ -1,176 +1,304 @@
 import React from 'react';
 import axios from 'axios';
+import loading from '../../recursos/images/loading.gif'
+import { showModal, hideModal } from '../tools/Tools'
 
 class Bancos extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            nombre: '',
-            tipo: '',
-            moneda: '',
-            representante: '',
-            estado: true
+            idBanco: '',
+            txtNombre: '',
+            CbxTipoCuenta: 'CUENTA CORRIENTE',
+            txtMoneda: '',
+            txtNumCuenta: '',
+            txtCci: '',
+            txtRepresentante: '',
+            loading: true,
+            lista: [],
+            paginacion: 0,
+            totalPaginacion: 0,
+            filasPorPagina: 10,
+            messagePaginacion: ''
+
         }
-        this.nombreRef = React.createRef();
-        this.tipoRef = React.createRef();
-        this.monedaRef = React.createRef();
-        this.representanteRef = React.createRef();
+
+        this.refTxtNombre = React.createRef();
+        this.CbxTipoCuenta = React.createRef();
+        this.refTxtMoneda = React.createRef();
+        this.refTxtNumCuenta = React.createRef();
+        this.refTxtCci = React.createRef();
+        this.refTxtRepresentante = React.createRef();
     }
 
-    onEventGuardar = async () => {
-        if (this.state.nombre === '') {
-            this.nombreRef.current.focus();
-        } else if (this.state.tipo === '') {
-            this.tipoRef.current.focus();
-        } else if (this.state.moneda === '') {
-            this.monedaRef.current.focus();
-        } else if (this.state.representante === '') {
-            this.representanteRef.current.focus();
+    async componentDidMount() {
+        this.fillTable(0, 1, "");
+    }
+
+    setStateAsync(state) {
+        return new Promise((resolve) => {
+            this.setState(state, resolve)
+        });
+    }
+
+    fillTable = async (option, paginacion, buscar) => {
+        // console.log(buscar.trim().toUpperCase())
+        try {
+            await this.setStateAsync({ loading: true, paginacion: paginacion, lista: [] });
+            const result = await axios.get('/api/banco/list', {
+                params: {
+                    "option": option,
+                    "buscar": buscar.trim().toUpperCase(),
+                    "posicionPagina": ((this.state.paginacion - 1) * this.state.filasPorPagina),
+                    "filasPorPagina": this.state.filasPorPagina
+                }
+            });
+
+            let totalPaginacion = parseInt(Math.ceil((parseFloat(result.data.total) / this.state.filasPorPagina)));
+            let messagePaginacion = `Mostrando ${result.data.result.length} de ${totalPaginacion} Páginas`;
+
+            this.setState({
+                loading: false,
+                lista: result.data.result,
+                totalPaginacion: totalPaginacion,
+                messagePaginacion: messagePaginacion
+            });
+            // console.log(result);
+        } catch (err) {
+            console.log(err.response.data.message)
+            console.log(err.response.status)
+        }
+    }
+
+    loadDataId = async (id) => {
+        try {
+            const result = await axios.get("/api/banco/id", {
+                params: {
+                    idbanco: id
+                }
+            });
+            // console.log(result)
+            this.setState({
+                txtNombre: result.data.nombre,
+                CbxTipoCuenta: result.data.tipocuenta,
+                txtMoneda: result.data.moneda,
+                txtNumCuenta: result.data.numcuenta,
+                txtCci: result.data.cci,
+                txtRepresentante: result.data.representante,
+                idBanco: result.data.idbanco
+            });
+
+        } catch (error) {
+            console.log(error.response)
+        }
+    }
+
+    async save() {
+        if (this.state.txtNombre === "") {
+            this.refTxtNombre.current.focus();
+        } else if (this.state.txtMoneda === "") {
+            this.refTxtMoneda.current.focus();
+        } else if (this.state.txtNumCuenta === "") {
+            this.refTxtNumCuenta.current.focus();
+        } else if (this.state.txtRepresentante === "") {
+            this.refTxtRepresentante.current.focus();
         } else {
             try {
-                let result = await axios.post("/api/banco", {
-                    "idBanco": "",
-                    "nombre": this.state.nombre,
-                    "tipo": this.state.tipo,
-                    "moneda": this.state.moneda,
-                    "representante": this.state.representante,
-                    "estado": this.state.estado,
-                });
-                console.log(result);
+
+                let result = null
+                if (this.state.idBanco !== '') {
+                    result = await axios.post('/api/banco/update', {
+                        "nombre": this.state.txtNombre.trim().toUpperCase(),
+                        "tipocuenta": this.state.CbxTipoCuenta,
+                        "moneda": this.state.txtMoneda.trim().toUpperCase(),
+                        "numcuenta": this.state.txtNumCuenta.trim().toUpperCase(),
+                        "cci": this.state.txtCci.trim().toUpperCase(),
+                        "representante": this.state.txtRepresentante.trim().toUpperCase(),
+                        "idbanco": this.state.idBanco
+                    })
+                    // console.log(result);
+
+                } else {
+                    result = await axios.post('/api/banco/add', {
+                        "nombre": this.state.txtNombre.trim().toUpperCase(),
+                        "tipocuenta": this.state.CbxTipoCuenta,
+                        "moneda": this.state.txtMoneda.trim().toUpperCase(),
+                        "numcuenta": this.state.txtNumCuenta.trim().toUpperCase(),
+                        "cci": this.state.txtCci.trim().toUpperCase(),
+                        "representante": this.state.txtRepresentante.trim().toUpperCase(),
+                    });
+                    // console.log(result);
+                }
+
+                // console.log(result);
+                this.closeModal()
+
             } catch (error) {
+                console.log(error)
                 console.log(error.response)
             }
         }
     }
 
+
+    openModal(id) {
+        if (id === '') {
+            showModal('modalBanco')
+            this.refTxtNombre.current.focus();
+            // console.log('nuevo')
+        }
+        else {
+            this.setState({ idBanco: id });
+            showModal('modalBanco')
+            this.loadDataId(id)
+            // console.log('editar')
+        }
+    }
+
+    closeModal() {
+        hideModal('modalBanco')
+        this.setState({
+            txtNombre: '',
+            CbxTipoCuenta: 'CUENTA CORRIENTE',
+            txtMoneda: '',
+            txtNumCuenta: '',
+            txtCci: '',
+            txtRepresentante: '',
+            idBanco: '',
+        })
+    }
+
     render() {
         return (
             <>
-                {/* Inicio modal nuevo cliente*/}
-                <div className="modal fade" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                    <div className="modal-dialog">
+                {/* Inicio modal */}
+                <div className="modal fade" id="modalBanco" data-backdrop="static">
+                    <div className="modal-dialog modal-lg">
                         <div className="modal-content">
                             <div className="modal-header">
-                                <h5 className="modal-title" id="exampleModalLabel"><i className="bi bi-bank"></i> Registrar Banco</h5>
-                                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                                <h5 className="modal-title"><i className="bi bi-currency-exchange"></i>{this.state.idBanco === '' ? " Registrar Banco" : " Editar Banco"}</h5>
+                                <button type="button" className="close" data-dismiss="modal" onClick={() => this.closeModal()}>
                                     <span aria-hidden="true">&times;</span>
                                 </button>
                             </div>
                             <div className="modal-body">
-                                <div className='row py-1'>
-                                    <div className='col-lg-4 col-md-4 col-sm-12 col-xs-12'>
-                                        <label>Nombre Banco: </label>
-                                    </div>
-                                    <div className='col-lg-8 col-md-8 col-sm-12 col-xs-12'>
+
+                                <div className="form-row">
+                                    <div className="form-group col-md-6">
+                                        <label>Nombre Banco:</label>
                                         <input
                                             type="text"
                                             className="form-control"
-                                            placeholder='Ingrese nombre banco'
-                                            ref={this.nombreRef}
-                                            value={this.state.nombre}
-                                            onChange={(event) => this.setState({ nombre: event.target.value })}
-                                        />
+                                            ref={this.refTxtNombre}
+                                            value={this.state.txtNombre}
+                                            onChange={(event) => this.setState({ txtNombre: event.target.value })}
+                                            placeholder="BCP, BBVA, etc" />
                                     </div>
-                                </div>
-                                <div className='row py-1'>
-                                    <div className='col-lg-4 col-md-4 col-sm-12 col-xs-12'>
-                                        <label>Tipo de Cuenta: </label>
-                                    </div>
-                                    <div className='col-lg-8 col-md-8 col-sm-12 col-xs-12'>
-                                        <input type="" className="form-control" placeholder='corriente, recaudadora, etc'
-                                            ref={this.tipoRef}
-                                            value={this.state.tipo}
-                                            onChange={(event) => this.setState({ tipo: event.target.value })} />
-                                    </div>
-                                </div>
-                                <div className='row py-1'>
-                                    <div className='col-lg-4 col-md-4 col-sm-12 col-xs-12'>
-                                        <label>Moneda: </label>
-                                    </div>
-                                    <div className='col-lg-8 col-md-8 col-sm-12 col-xs-12'>
-                                        <input type="" className="form-control" placeholder='Soles, Dolares, etc'
-                                            ref={this.monedaRef}
-                                            value={this.state.moneda}
-                                            onChange={(event) => this.setState({ moneda: event.target.value })} />
-                                    </div>
-                                </div>
-                                <div className='row py-1'>
-                                    <div className='col-lg-4 col-md-4 col-sm-12 col-xs-12'>
-                                        <label>Representante: </label>
-                                    </div>
-                                    <div className='col-lg-8 col-md-8 col-sm-12 col-xs-12'>
-                                        <input type="" className="form-control" placeholder='inmobiliaria'
-                                            ref={this.representanteRef}
-                                            value={this.state.representante}
-                                            onChange={(event) => this.setState({ representante: event.target.value })} />
-                                    </div>
-                                </div>
-                                <div className='row py-1'>
-                                    <div className='col-lg-4 col-md-4 col-sm-12 col-xs-12'>
-                                        <label>Estado: </label>
-                                    </div>
-                                    <div className='col-lg-8 col-md-8 col-sm-12 col-xs-12'>
-                                        <div className="form-check form-switch">
-                                            <form>
-                                                <div className="custom-control custom-switch">
-                                                    <input type="checkbox" className="custom-control-input" id="switch1"
-                                                        checked={this.state.estado}
-                                                        onChange={(event) => this.setState({ estado: event.target.checked })} />
-                                                    <label className="custom-control-label" htmlFor="switch1">Active o desactive</label>
-                                                </div>
-                                            </form>
+                                    <div className="form-group col-md-6">
+                                        <label>Tipo de Cuenta:</label>
+                                        <div className="input-group">
+                                            <select
+                                                className="form-control"
+                                                ref={this.refCbxTipoCuenta}
+                                                value={this.state.CbxTipoCuenta}
+                                                onChange={(event) => this.setState({ CbxTipoCuenta: event.target.value })} >
+                                                <option value="CUENTA CORRIENTE">Cuenta Corriente</option>
+                                                <option value="CUENTA RECAUDADORA">Cuenta Recaudadora</option>
+                                                <option value="CUENTA DE AHORROS">Cuenta de Ahorros</option>
+                                            </select>
                                         </div>
                                     </div>
                                 </div>
+
+                                <div className="form-row">
+                                    <div className="form-group col-md-6">
+                                        <label>Moneda:</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            ref={this.refTxtMoneda}
+                                            value={this.state.txtMoneda}
+                                            onChange={(event) => this.setState({ txtMoneda: event.target.value })}
+                                            placeholder="Soles, Dolares, etc" />
+                                    </div>
+                                    <div className="form-group col-md-6">
+                                        <label>Número de cuenta:</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            ref={this.refTxtNumCuenta}
+                                            value={this.state.txtNumCuenta}
+                                            onChange={(event) => this.setState({ txtNumCuenta: event.target.value })}
+                                            placeholder="##############" />
+                                    </div>
+                                </div>
+
+                                <div className="form-row">
+                                    <div className="form-group col-md-6">
+                                        <label>CCI:</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            ref={this.refTxtCci}
+                                            value={this.state.txtCci}
+                                            onChange={(event) => this.setState({ txtCci: event.target.value })}
+                                            placeholder="####################" />
+                                    </div>
+                                    <div className="form-group col-md-6">
+                                        <label>Representante:</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            ref={this.refTxtRepresentante}
+                                            value={this.state.txtRepresentante}
+                                            onChange={(event) => this.setState({ txtRepresentante: event.target.value })}
+                                            placeholder="Datos del representante" />
+                                    </div>
+                                </div>
+
                             </div>
                             <div className="modal-footer">
-                                <button type="button" className="btn btn-primary" onClick={this.onEventGuardar}>Guardar</button>
-                                <button type="button" className="btn btn-danger" data-dismiss="modal">Cerrar</button>
+                                <button type="button" className="btn btn-primary" onClick={() => this.save()}>Guardar</button>
+                                <button type="button" className="btn btn-secondary" data-dismiss="modal" onClick={() => this.closeModal()}>Cerrar</button>
                             </div>
                         </div>
                     </div>
                 </div>
-                {/* fin modal nuevo cliente*/}
+                {/* fin modal */}
 
-                <div className='row pb-3'>
-                    <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
-                        <section className="content-header">
-                            <h5 className="no-margin"> Bancos <small style={{ color: 'gray' }}> Lista </small> </h5>
-                        </section>
-                    </div>
-                </div>
 
                 <div className='row'>
-                    <div className="col-lg-3 col-md-3 col-sm-12 col-xs-12">
-                        <label>Nuevo Banco</label>
+                    <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
                         <div className="form-group">
-                            <button type="button" className="btn btn-success" data-toggle="modal" data-target="#exampleModal">
-                                <i className="bi bi-plus-lg"></i> Agregar Banco
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className="col-lg-3 col-md-3 col-sm-12 col-xs-12">
-                        <label>Opción.</label>
-                        <div className="form-group">
-                            <button className="btn btn-secondary">
-                                <i className="bi bi-arrow-repeat"></i> Recargar
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className="col-lg-6 col-md-6 col-sm-12 col-xs-12">
-                        <label>Filtrar por banco</label>
-                        <div className="form-group">
-                            <div className="input-group mb-3">
-                                <input type="text" className="form-control" placeholder="Ingrese para buscar" aria-label="Recipient's username" aria-describedby="basic-addon2" />
-                                <div className="input-group-append">
-                                    <button className="btn btn-outline-secondary" type="button">Button</button>
-                                </div>
-                            </div>
+                            <h5>Bancos <small className="text-secondary">LISTA</small></h5>
                         </div>
                     </div>
                 </div>
+
+                <div className="row">
+                    <div className="col-md-6 col-sm-12">
+                        <div className="form-group">
+                            <div className="input-group mb-2">
+                                <div className="input-group-prepend">
+                                    <div className="input-group-text"><i className="bi bi-search"></i></div>
+                                </div>
+                                <input type="search" className="form-control" placeholder="Buscar..." onKeyUp={(event) => console.log(event.target.value)} />
+                            </div>
+                        </div>
+                    </div>
+                    <div className="col-md-6 col-sm-12">
+                        <div className="form-group">
+                            <button className="btn btn-outline-info" onClick={() => this.openModal(this.state.idBanco)}>
+                                <i className="bi bi-file-plus"></i> Nuevo Registro
+                            </button>
+                            {" "}
+                            <button className="btn btn-outline-secondary" onClick={() => this.fillTable(0, 1, "")}>
+                                <i className="bi bi-arrow-clockwise"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
 
                 <div className="row">
                     <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
@@ -178,22 +306,56 @@ class Bancos extends React.Component {
                             <table className="table table-striped" style={{ borderWidth: '1px', borderStyle: 'inset', borderColor: '#CFA7C9' }}>
                                 <thead>
                                     <tr>
-                                        <th width="5%" className="text-center">#</th>
-                                        <th width="17%">Banco</th>
+                                        <th width="5%">#</th>
+                                        <th width="10%">Banco</th>
                                         <th width="15%">Tipo Cuenta</th>
                                         <th width="10%">Moneda</th>
                                         <th width="20%">Número Cuenta</th>
                                         <th width="15%">Representante</th>
-                                        <th width="15%" colSpan="2">Opciones</th>
+                                        <th width="15%">Opciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-
+                                    {
+                                        this.state.loading ? (
+                                            <tr>
+                                                <td className="text-center" colSpan="7">
+                                                    <img
+                                                        src={loading}
+                                                        id="imgLoad"
+                                                        width="34"
+                                                        height="34"
+                                                    />
+                                                    <p>Cargando información...</p>
+                                                </td>
+                                            </tr>
+                                        ) : this.state.lista.length === 0 ? (
+                                            <tr className="text-center">
+                                                <td colSpan="7">¡No hay datos registrados!</td>
+                                            </tr>
+                                        ) : (
+                                            this.state.lista.map((item, index) => {
+                                                return (
+                                                    <tr key={index}>
+                                                        <td>{item.id}</td>
+                                                        <td>{item.nombre}</td>
+                                                        <td>{item.tipocuenta}</td>
+                                                        <td>{item.moneda}</td>
+                                                        <td>{item.numcuenta}</td>
+                                                        <td>{item.representante}</td>
+                                                        <td>
+                                                            <button className="btn btn-outline-dark btn-sm" title="Editar" onClick={ () => this.openModal(item.idbanco) }><i className="bi bi-pencil"></i></button>
+                                                        </td>
+                                                    </tr>
+                                                )
+                                            })
+                                        )
+                                    }
                                 </tbody>
 
                             </table>
                         </div>
-                        <div className="col-md-12" style={{ textAlign: 'center' }}>
+                        <div className="col-md-12 text-center">
                             <nav aria-label="...">
                                 <ul className="pagination justify-content-end">
                                     <li className="page-item disabled">
