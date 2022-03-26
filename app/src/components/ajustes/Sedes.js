@@ -3,17 +3,22 @@ import axios from 'axios';
 import loading from '../../recursos/images/loading.gif'
 import { showModal, hideModal } from '../tools/Tools'
 
-class Bancos extends React.Component {
+class Sedes extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            idBanco: '',
-            txtNombre: '',
-            CbxTipoCuenta: 'CUENTA CORRIENTE',
-            txtMoneda: '',
-            txtNumCuenta: '',
-            txtCci: '',
-            txtRepresentante: '',
+            idSede: '',
+            txtNombreEmpresa: '',
+            txtNombreSede: '',
+            txtTelefono: '',
+            txtCelular: '',
+            txtEmail: '',
+            txtWeb: '',
+            txtDireccion: '',
+            txtPais: '',
+            txtRegion: '',
+            txtProvincia: '',
+            txtDistrito: '',
             loading: true,
             lista: [],
             paginacion: 0,
@@ -23,160 +28,47 @@ class Bancos extends React.Component {
 
         }
 
-        this.refTxtNombre = React.createRef();
-        this.refCbxTipoCuenta = React.createRef();
-        this.refTxtMoneda = React.createRef();
-        this.refTxtNumCuenta = React.createRef();
-        this.refTxtCci = React.createRef();
-        this.refTxtRepresentante = React.createRef();
+        this.refTxtNombreEmpresa = React.createRef();
+        this.refTxtNombreSede = React.createRef();
+        this.refTxtTelefono = React.createRef();
+        this.refTxtCelular = React.createRef();
+        this.refTxtEmail = React.createRef();
+        this.refTxtDireccion = React.createRef();
+        this.refTxtPais = React.createRef();
+        this.refTxtRegion = React.createRef();
+        this.refTxtProvincia = React.createRef();
+        this.refTxtDistrito = React.createRef();
+
+        // this.refTxtMoneda = React.createRef();
+        // this.refTxtNumCuenta = React.createRef();
+        // this.refTxtCci = React.createRef();
+        // this.refTxtRepresentante = React.createRef();
     }
-
-    async componentDidMount() {
-        this.fillTable(0, 1, "");
-    }
-
-    setStateAsync(state) {
-        return new Promise((resolve) => {
-            this.setState(state, resolve)
-        });
-    }
-
-    fillTable = async (option, paginacion, buscar) => {
-        // console.log(buscar.trim().toUpperCase())
-        try {
-            await this.setStateAsync({ loading: true, paginacion: paginacion, lista: [] });
-            const result = await axios.get('/api/banco/list', {
-                params: {
-                    "option": option,
-                    "buscar": buscar.trim().toUpperCase(),
-                    "posicionPagina": ((this.state.paginacion - 1) * this.state.filasPorPagina),
-                    "filasPorPagina": this.state.filasPorPagina
-                }
-            });
-
-            let totalPaginacion = parseInt(Math.ceil((parseFloat(result.data.total) / this.state.filasPorPagina)));
-            let messagePaginacion = `Mostrando ${result.data.result.length} de ${totalPaginacion} Páginas`;
-
-            this.setState({
-                loading: false,
-                lista: result.data.result,
-                totalPaginacion: totalPaginacion,
-                messagePaginacion: messagePaginacion
-            });
-            // console.log(result);
-        } catch (err) {
-            console.log(err.response.data.message)
-            console.log(err.response.status)
-        }
-    }
-
-    loadDataId = async (id) => {
-        try {
-            const result = await axios.get("/api/banco/id", {
-                params: {
-                    idbanco: id
-                }
-            });
-            // console.log(result)
-            this.setState({
-                txtNombre: result.data.nombre,
-                CbxTipoCuenta: result.data.tipocuenta,
-                txtMoneda: result.data.moneda,
-                txtNumCuenta: result.data.numcuenta,
-                txtCci: result.data.cci,
-                txtRepresentante: result.data.representante,
-                idBanco: result.data.idbanco
-            });
-
-        } catch (error) {
-            console.log(error.response)
-        }
-    }
-
-    async save() {
-        if (this.state.txtNombre === "") {
-            this.refTxtNombre.current.focus();
-        } else if (this.state.txtMoneda === "") {
-            this.refTxtMoneda.current.focus();
-        } else if (this.state.txtNumCuenta === "") {
-            this.refTxtNumCuenta.current.focus();
-        } else if (this.state.txtRepresentante === "") {
-            this.refTxtRepresentante.current.focus();
-        } else {
-            try {
-
-                let result = null
-                if (this.state.idBanco !== '') {
-                    result = await axios.post('/api/banco/update', {
-                        "nombre": this.state.txtNombre.trim().toUpperCase(),
-                        "tipocuenta": this.state.CbxTipoCuenta,
-                        "moneda": this.state.txtMoneda.trim().toUpperCase(),
-                        "numcuenta": this.state.txtNumCuenta.trim().toUpperCase(),
-                        "cci": this.state.txtCci.trim().toUpperCase(),
-                        "representante": this.state.txtRepresentante.trim().toUpperCase(),
-                        "idbanco": this.state.idBanco
-                    })
-                    // console.log(result);
-
-                } else {
-                    result = await axios.post('/api/banco/add', {
-                        "nombre": this.state.txtNombre.trim().toUpperCase(),
-                        "tipocuenta": this.state.CbxTipoCuenta,
-                        "moneda": this.state.txtMoneda.trim().toUpperCase(),
-                        "numcuenta": this.state.txtNumCuenta.trim().toUpperCase(),
-                        "cci": this.state.txtCci.trim().toUpperCase(),
-                        "representante": this.state.txtRepresentante.trim().toUpperCase(),
-                    });
-                    // console.log(result);
-                }
-
-                // console.log(result);
-                this.closeModal()
-
-            } catch (error) {
-                console.log(error)
-                console.log(error.response)
-            }
-        }
-    }
-
 
     openModal(id) {
         if (id === '') {
-            showModal('modalBanco')
+            showModal('modalSede')
             this.refTxtNombre.current.focus();
             // console.log('nuevo')
         }
         else {
-            this.setState({ idBanco: id });
-            showModal('modalBanco')
+            this.setState({ idSede: id });
+            showModal('modalSede')
             this.loadDataId(id)
             // console.log('editar')
         }
     }
 
-    closeModal() {
-        hideModal('modalBanco')
-        this.setState({
-            txtNombre: '',
-            CbxTipoCuenta: 'CUENTA CORRIENTE',
-            txtMoneda: '',
-            txtNumCuenta: '',
-            txtCci: '',
-            txtRepresentante: '',
-            idBanco: '',
-        })
-    }
-
-    render() {
+    render(){
         return (
             <>
+
                 {/* Inicio modal */}
-                <div className="modal fade" id="modalBanco" data-backdrop="static">
+                <div className="modal fade" id="modalSede" data-backdrop="static">
                     <div className="modal-dialog modal-lg">
                         <div className="modal-content">
                             <div className="modal-header">
-                                <h5 className="modal-title"><i className="bi bi-currency-exchange"></i>{this.state.idBanco === '' ? " Registrar Banco" : " Editar Banco"}</h5>
+                                <h5 className="modal-title"><i className="bi bi-currency-exchange"></i>{this.state.idSede === '' ? " Registrar Sede" : " Editar Sede"}</h5>
                                 <button type="button" className="close" data-dismiss="modal" onClick={() => this.closeModal()}>
                                     <span aria-hidden="true">&times;</span>
                                 </button>
@@ -266,11 +158,10 @@ class Bancos extends React.Component {
                 </div>
                 {/* fin modal */}
 
-
                 <div className='row'>
                     <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
                         <div className="form-group">
-                            <h5>Bancos <small className="text-secondary">LISTA</small></h5>
+                            <h5>Sedes <small className="text-secondary">LISTA</small></h5>
                         </div>
                     </div>
                 </div>
@@ -288,17 +179,16 @@ class Bancos extends React.Component {
                     </div>
                     <div className="col-md-6 col-sm-12">
                         <div className="form-group">
-                            <button className="btn btn-outline-info" onClick={() => this.openModal(this.state.idBanco)}>
+                            {/* <button className="btn btn-outline-info" onClick={() => this.openModal(this.state.idSede)}>
                                 <i className="bi bi-file-plus"></i> Nuevo Registro
                             </button>
-                            {" "}
+                            {" "} */}
                             <button className="btn btn-outline-secondary" onClick={() => this.fillTable(0, 1, "")}>
                                 <i className="bi bi-arrow-clockwise"></i>
                             </button>
                         </div>
                     </div>
                 </div>
-
 
                 <div className="row">
                     <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
@@ -317,39 +207,39 @@ class Bancos extends React.Component {
                                 </thead>
                                 <tbody>
                                     {
-                                        this.state.loading ? (
-                                            <tr>
-                                                <td className="text-center" colSpan="7">
-                                                    <img
-                                                        src={loading}
-                                                        id="imgLoad"
-                                                        width="34"
-                                                        height="34"
-                                                    />
-                                                    <p>Cargando información...</p>
-                                                </td>
-                                            </tr>
-                                        ) : this.state.lista.length === 0 ? (
-                                            <tr className="text-center">
-                                                <td colSpan="7">¡No hay datos registrados!</td>
-                                            </tr>
-                                        ) : (
-                                            this.state.lista.map((item, index) => {
-                                                return (
-                                                    <tr key={index}>
-                                                        <td>{item.id}</td>
-                                                        <td>{item.nombre}</td>
-                                                        <td>{item.tipocuenta}</td>
-                                                        <td>{item.moneda}</td>
-                                                        <td>{item.numcuenta}</td>
-                                                        <td>{item.representante}</td>
-                                                        <td>
-                                                            <button className="btn btn-outline-dark btn-sm" title="Editar" onClick={ () => this.openModal(item.idbanco) }><i className="bi bi-pencil"></i></button>
-                                                        </td>
-                                                    </tr>
-                                                )
-                                            })
-                                        )
+                                        // this.state.loading ? (
+                                        //     <tr>
+                                        //         <td className="text-center" colSpan="7">
+                                        //             <img
+                                        //                 src={loading}
+                                        //                 id="imgLoad"
+                                        //                 width="34"
+                                        //                 height="34"
+                                        //             />
+                                        //             <p>Cargando información...</p>
+                                        //         </td>
+                                        //     </tr>
+                                        // ) : this.state.lista.length === 0 ? (
+                                        //     <tr className="text-center">
+                                        //         <td colSpan="7">¡No hay datos registrados!</td>
+                                        //     </tr>
+                                        // ) : (
+                                        //     this.state.lista.map((item, index) => {
+                                        //         return (
+                                        //             <tr key={index}>
+                                        //                 <td>{item.id}</td>
+                                        //                 <td>{item.nombre}</td>
+                                        //                 <td>{item.tipocuenta}</td>
+                                        //                 <td>{item.moneda}</td>
+                                        //                 <td>{item.numcuenta}</td>
+                                        //                 <td>{item.representante}</td>
+                                        //                 <td>
+                                        //                     <button className="btn btn-outline-dark btn-sm" title="Editar" onClick={ () => this.openModal(item.idbanco) }><i className="bi bi-pencil"></i></button>
+                                        //                 </td>
+                                        //             </tr>
+                                        //         )
+                                        //     })
+                                        // )
                                     }
                                 </tbody>
 
@@ -376,8 +266,9 @@ class Bancos extends React.Component {
                     </div>
                 </div>
             </>
-        );
+        )
     }
+
 }
 
-export default Bancos;
+export default Sedes

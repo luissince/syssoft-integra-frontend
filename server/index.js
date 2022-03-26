@@ -28,6 +28,7 @@ app.use(express.static(path.join(__dirname, "..", "app/build")));
 app.use('/api/comprobante', require('./src/router/Comprobante'));
 app.use('/api/moneda', require('./src/router/Moneda'));
 app.use('/api/banco', require('./src/router/Banco'));
+app.use('api/sede', require('./src/router/Sede'));
 
 app.use((req, res, next) => {
     res.sendFile(path.join(__dirname, "..", "app/build", "index.html"));
