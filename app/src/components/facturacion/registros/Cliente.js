@@ -18,19 +18,19 @@ class Cliente extends React.Component {
 
                 <ul className="nav nav-tabs" id="myTab" role="tablist">
                     <li className="nav-item" role="presentation">
-                        <a className="nav-link active" id="representante-tab" data-toggle="tab" href="#representante" role="tab" aria-controls="representante" aria-selected="true"><i className="bi bi-person-circle"></i> Representante</a>
+                        <a className="nav-link active" id="representante-tab" data-bs-toggle="tab" href="#representante" role="tab" aria-controls="representante" aria-selected="true"><i className="bi bi-person-circle"></i> Representante</a>
                     </li>
                     <li className="nav-item" role="presentation">
-                        <a className="nav-link" id="ubicacion-tab" data-toggle="tab" href="#ubicacion" role="tab" aria-controls="ubicacion" aria-selected="false"><i className="bi bi-geo-alt-fill"></i> Ubicación</a>
+                        <a className="nav-link" id="ubicacion-tab" data-bs-toggle="tab" href="#ubicacion" role="tab" aria-controls="ubicacion" aria-selected="false"><i className="bi bi-geo-alt-fill"></i> Ubicación</a>
                     </li>
                     <li className="nav-item" role="presentation">
-                        <a className="nav-link" id="conyuge-tab" data-toggle="tab" href="#conyuge" role="tab" aria-controls="conyuge" aria-selected="false"><i className="bi bi-people-fill"></i> Conyuge</a>
+                        <a className="nav-link" id="conyuge-tab" data-bs-toggle="tab" href="#conyuge" role="tab" aria-controls="conyuge" aria-selected="false"><i className="bi bi-people-fill"></i> Conyuge</a>
                     </li>
                     <li className="nav-item" role="presentation">
-                        <a className="nav-link" id="otrosDatos-tab" data-toggle="tab" href="#otrosDatos" role="tab" aria-controls="otrosDatos" aria-selected="false"><i className="bi bi-person-badge"></i> Otros Datos</a>
+                        <a className="nav-link" id="otrosDatos-tab" data-bs-toggle="tab" href="#otrosDatos" role="tab" aria-controls="otrosDatos" aria-selected="false"><i className="bi bi-person-badge"></i> Otros Datos</a>
                     </li>
                     <li className="nav-item" role="presentation">
-                        <a className="nav-link" id="beneficiario-tab" data-toggle="tab" href="#beneficiario" role="tab" aria-controls="beneficiario" aria-selected="false"><i className="bi bi-person-heart"></i> Beneficiario</a>
+                        <a className="nav-link" id="beneficiario-tab" data-bs-toggle="tab" href="#beneficiario" role="tab" aria-controls="beneficiario" aria-selected="false"><i className="bi bi-person-heart"></i> Beneficiario</a>
                     </li>
                 </ul>
                 <div className="tab-content pt-2" id="myTabContent">
