@@ -6,3 +6,4 @@ PASSWORD=
 DATABASE=
 PORTHOST=3306
 
+TZ="America/Lima"
