@@ -32,73 +32,13 @@ router.get('/', async function (req, res) {
         });
 
         let total = await conec.query('SELECT COUNT(*) AS Total FROM comprobante');
-
+        console.log(resultLista)
         res.status(200).send({ "result": resultLista, "total": total[0].Total });
     } catch (error) {
+        console.log("error")
         console.log(error)
         res.status(500).send("Error interno de conexión, intente nuevamente.");
     }
-    // var pool = mysql.createPool({
-    //     host: 'localhost',
-    //     user: 'root',
-    //     password: '',
-    //     database: 'inmobiliaria'
-    // });
-
-    // const promise = new Promise(function (resolve, reject) {
-    //     pool.getConnection(function (err, connection) {
-    //         if (err) {
-    //             return reject(err.sqlMessage);
-
-    //         };
-    //         connection.query(`SELECT 
-    //         idComprobante,
-    //         nombre,
-    //         serie,
-    //         numeracion,
-    //         impresion,
-    //         estado, 
-    //         DATE_FORMAT(fechaRegistro,'%d/%m/%Y') as fechaRegistro,
-    //         horaRegistro
-    //         FROM comprobante LIMIT ?,?`, [
-    //             parseInt(req.query.posicionPagina),
-    //             parseInt(req.query.filasPorPagina)
-    //         ], function (err, result) {
-    //             if (err) return reject(err.sqlMessage);
-
-    //             let lista = [];
-    //             let count = 0;
-    //             for (let value of result) {
-    //                 count++;
-    //                 lista.push({
-    //                     "id": count + parseInt(req.query.posicionPagina),
-    //                     "nombre": value.nombre,
-    //                     "serie": value.serie,
-    //                     "numeracion": value.numeracion,
-    //                     "impresion": value.impresion,
-    //                     "estado": value.estado,
-    //                     "fechaRegistro": value.fechaRegistro,
-    //                     "horaRegistro": value.horaRegistro
-    //                 });
-    //             }
-
-    //             connection.query(`SELECT COUNT(*) AS Total
-    //             FROM comprobante`, function (err, result) {
-    //                 if (err) return reject(err.sqlMessage);
-
-    //                 connection.release();
-    //                 return resolve({ "result": lista, "total": result[0].Total });
-    //             });
-    //         });
-    //     });
-    // });
-
-    // try {
-    //     let result = await promise;
-    //     res.status(200).send(result);
-    // } catch (error) {
-    //     res.status(500).send({ "message": error });
-    // }
 });
 
 router.post('/', async function (req, res) {

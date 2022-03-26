@@ -17,10 +17,10 @@ app.set('port', process.env.PORT || 5000);
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-// app.use(express.static(path.join(__dirname, "..", "app/build")));
-app.get("/", function (req, res) {
-    res.send("server running inmobiliaria...");
-})
+app.use(express.static(path.join(__dirname, "..", "app/build")));
+// app.get("/", function (req, res) {
+//     res.send("server running inmobiliaria...");
+// })
 
 //api rest
 // app.use('/api/usuario', require('./router/Usuario'));
