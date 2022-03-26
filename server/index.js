@@ -30,6 +30,13 @@ app.use('/api/moneda', require('./src/router/Moneda'));
 app.use('/api/banco', require('./src/router/Banco'));
 app.use('/api/sede', require('./src/router/Sede'));
 
+app.use('/api/proyecto', require('./src/router/Proyecto'));
+app.use('/api/manzana', require('./src/router/Manzana'));
+app.use('/api/lote', require('./src/router/Lote'));
+
+app.use('/api/cliente', require('./src/router/Cliente'));
+
+
 app.use((req, res, next) => {
     res.sendFile(path.join(__dirname, "..", "app/build", "index.html"));
 });
