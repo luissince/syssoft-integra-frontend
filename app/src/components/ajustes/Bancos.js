@@ -140,7 +140,6 @@ class Bancos extends React.Component {
         }
     }
 
-
     openModal(id) {
         if (id === '') {
             showModal('modalBanco')
