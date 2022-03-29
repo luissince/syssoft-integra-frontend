@@ -135,7 +135,7 @@ class Menu extends React.Component {
                                 <Link to={`${this.props.url}/sedes`}>Sedes</Link>
                             </MenuItem>
                             <MenuItem>
-                                <Link to={`${this.props.url}/proyectos`}>Proyectos</Link>
+                                <Link to={`${this.props.url}/proyecto`}>Proyectos</Link>
                             </MenuItem>
                         </SubMenu>
 

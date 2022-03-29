@@ -49,10 +49,40 @@ router.get('/list', async function(req, res){
     }
 });
 
+router.post('/add', async function (req, res){
+    const conec =  new Conexion()
+    let connection = null;
+    try{
+        connection = await conec.beginTransaction();
+        await conec.execute(connection, 'INSERT INTO sede (nombrempresa, nombresede, telefono, celular, email, web, direccion, pais, region, provincia, distrito) values (?,?,?,?,?,?,?,?,?,?,?)', [
+            req.body.nombrempresa,
+            req.body.nombresede	,
+            req.body.telefono,
+            req.body.celular,
+            req.body.email,
+            req.body.web,
+            req.body.direccion,
+            req.body.pais,
+            req.body.region,
+            req.body.provincia,
+            req.body.distrito,
+        ])
+
+        await conec.commit(connection);
+        res.status(200).send('Datos insertados correctamente')
+        
+    } catch (err) {
+        if(connection != null){
+            conec.rollback(connection);
+        }
+        res.status(500).send(connection);
+    }
+});
+
 router.get('/id', async function(req, res) {
     const conec = new Conexion(); 
     try{
-        console.log(req.body.idsede);
+        // console.log(req.body.idsede);
         let result = await conec.query('SELECT * FROM sede WHERE idsede = ?',[
             req.query.idsede,
         ]);

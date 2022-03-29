@@ -15,6 +15,8 @@ import Monedas from '../ajustes/Monedas';
 import Comprobantes from '../ajustes/Comprobantes';
 import Bancos from '../ajustes/Bancos';
 import Sedes from '../ajustes/Sedes';
+import Proyectos from '../ajustes/Proyectos';
+import ProcesoProyecto from '../ajustes/proyecto/ProcesoProyecto';
 import Manzanas from '../logistica/Manzanas';
 import Lotes from '../logistica/Lotes';
 import NuevaVenta from '../facturacion/registros/Venta';
@@ -51,6 +53,7 @@ class Inicio extends React.Component {
         }
 
         const { path, url } = this.props.match;
+        console.log(path)
         return (
             <div className='app'>
                 <Menu ref={this.menuRef} url={url} />
@@ -126,6 +129,16 @@ class Inicio extends React.Component {
                         <Route
                             path={`${path}/sedes`}
                             render={(props) => <Sedes {...props} />}
+                        />
+                        <Route
+                            path={`${path}/proyecto`}
+                            exact={true}
+                            render={(props) => <Proyectos {...props} />}
+                        />
+                        <Route
+                            path={`${path}/proyecto/proceso`}
+                            exact={true}
+                            render={(props) => <ProcesoProyecto {...props} />}
                         />
                         <Route
                             path={`${path}/manzanas`}
