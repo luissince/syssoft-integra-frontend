@@ -20,7 +20,7 @@ class App extends React.Component {
 
     async componentDidMount() {
         try {
-            let userToken = await localStorage.getItem('login');
+            let userToken = localStorage.getItem('login');
             this.props.restore(userToken);
         } catch (e) {
             this.props.restore(null);
