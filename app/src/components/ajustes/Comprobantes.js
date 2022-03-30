@@ -1,7 +1,8 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import axios from 'axios';
-import { keyNumberInteger, timeForma24 } from '../tools/Tools';
+import loading from "../../recursos/images/loading.gif";
+import { keyNumberInteger, timeForma24, showModal, hideModal } from '../tools/Tools';
 import Paginacion from '../tools/Paginacion';
 
 class Comprobantes extends React.Component {
@@ -16,16 +17,13 @@ class Comprobantes extends React.Component {
             impresion: '',
             estado: true,
             idUsuario: '',
+
+            loading: true,
             lista: [],
-            upperPageBound: 3,
-            lowerPageBound: 0,
-            isPrevBtnActive: 'disabled',
-            isNextBtnActive: '',
-            pageBound: 3,
+
             paginacion: 0,
             totalPaginacion: 0,
             filasPorPagina: 5,
-            mostrarPaginacion: null,
             messagePaginacion: 'Mostranto 0 de 0 Páginas'
         }
         this.refNombre = React.createRef();
@@ -33,65 +31,6 @@ class Comprobantes extends React.Component {
         this.refNumeracion = React.createRef();
     }
 
-    handleClick = async (event) => {
-        console.log(event.target.id)
-        let listid = parseInt(event.target.id);
-        this.setPrevAndNextBtnClass(listid);
-    }
-
-    btnIncrementClick = async () => {
-        await this.setStateAsync({
-            upperPageBound: this.state.upperPageBound + this.state.pageBound,
-            lowerPageBound: this.state.lowerPageBound + this.state.pageBound
-        });
-        let listid = this.state.lowerPageBound + 1;
-        this.setPrevAndNextBtnClass(listid);
-    }
-
-    btnDecrementClick = async () => {
-        await this.setStateAsync({
-            upperPageBound: this.state.upperPageBound - this.state.pageBound,
-            lowerPageBound: this.state.lowerPageBound - this.state.pageBound
-        });
-        let listid = this.state.upperPageBound;
-        this.setPrevAndNextBtnClass(listid);
-    }
-
-    btnPrevClick = async () => {
-        if ((this.state.paginacion - 1) % this.state.pageBound === 0) {
-            await this.setStateAsync({
-                upperPageBound: this.state.upperPageBound - this.state.pageBound,
-                lowerPageBound: this.state.lowerPageBound - this.state.pageBound
-            });
-        }
-        let listid = this.state.paginacion - 1;
-        this.setPrevAndNextBtnClass(listid);
-    }
-
-    btnNextClick = async () => {
-        if ((this.state.paginacion + 1) > this.state.upperPageBound) {
-            await this.setStateAsync({
-                upperPageBound: this.state.upperPageBound + this.state.pageBound,
-                lowerPageBound: this.state.lowerPageBound + this.state.pageBound
-            });
-        }
-        let listid = this.state.paginacion + 1;
-        this.setPrevAndNextBtnClass(listid);
-    }
-
-    setPrevAndNextBtnClass = async (listid) => {
-        await this.setStateAsync({ isNextBtnActive: 'disabled', isPrevBtnActive: 'disabled' });
-
-        if (this.state.totalPaginacion === listid && this.state.totalPaginacion > 1) {
-            await this.setStateAsync({ isPrevBtnActive: '' });
-        } else if (listid === 1 && this.state.totalPaginacion > 1) {
-            await this.setStateAsync({ isNextBtnActive: '' });
-        } else if (this.state.totalPaginacion > 1) {
-            await this.setStateAsync({ isNextBtnActive: '', isPrevBtnActive: '' });
-        }
-
-        this.fillTableComprobante(listid);
-    }
 
     setStateAsync(state) {
         return new Promise((resolve) => {
@@ -105,9 +44,9 @@ class Comprobantes extends React.Component {
 
     fillTableComprobante = async (paginacion) => {
         try {
-            await this.setStateAsync({ paginacion: paginacion });
+            await this.setStateAsync({ loading: true, lista: [], messagePaginacion: "Mostranto 0 de 0 Páginas", paginacion: paginacion });
 
-            const result = await axios.get('/api/comprobante', {
+            const result = await axios.get('/api/comprobante/list', {
                 params: {
                     "posicionPagina": ((this.state.paginacion - 1) * this.state.filasPorPagina),
                     "filasPorPagina": this.state.filasPorPagina
@@ -118,15 +57,23 @@ class Comprobantes extends React.Component {
             let messagePaginacion = `Mostrando ${result.data.result.length} de ${totalPaginacion} Páginas`;
 
             this.setState({
+                loading: false,
                 lista: result.data.result,
                 totalPaginacion: totalPaginacion,
                 messagePaginacion: messagePaginacion
             });
-            // console.log(result);
         } catch (err) {
-            console.log(err.response.data.message)
-            console.log(err.response.status)
+            this.setState({
+                loading: false,
+                lista: [],
+                totalPaginacion: 0,
+                messagePaginacion: "Se produjo un error de conexión, intente nuevamente por favor.",
+            });
         }
+    }
+
+    openModal = () => {
+        showModal('modalComprobante')
     }
 
     onEventGuardar = async () => {
@@ -156,12 +103,13 @@ class Comprobantes extends React.Component {
     render() {
         return (
             <>
-                <div className="modal fade" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                {/* inicio modal */}
+                <div className="modal fade" id="modalComprobante" data-bs-keyboard="false" data-bs-backdrop="static">
                     <div className="modal-dialog">
                         <div className="modal-content">
                             <div className="modal-header">
                                 <h5 className="modal-title">Nuevo Comprobante</h5>
-                                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                                <button type="button" className="close" data-bs-dismiss="modal" aria-label="Close">
                                     <span aria-hidden="true">&times;</span>
                                 </button>
                             </div>
@@ -236,11 +184,12 @@ class Comprobantes extends React.Component {
                             </div>
                             <div className="modal-footer">
                                 <button type="button" className="btn btn-primary" onClick={this.onEventGuardar}>Guardar</button>
-                                <button type="button" className="btn btn-danger" data-dismiss="modal">Cerrar</button>
+                                <button type="button" className="btn btn-danger" data-bs-dismiss="modal">Cerrar</button>
                             </div>
                         </div>
                     </div>
                 </div>
+                {/* fin modal */}
 
                 <div className="row">
                     <div className="col-md-12">
@@ -263,7 +212,7 @@ class Comprobantes extends React.Component {
                     </div>
                     <div className="col-md-6 col-sm-12">
                         <div className="form-group">
-                            <button className="btn btn-outline-info" data-toggle="modal" data-target="#exampleModal">
+                            <button className="btn btn-outline-info" onClick={() => this.openModal()}>
                                 <i className="bi bi-file-plus"></i> Nuevo Registro
                             </button>
                             {" "}
@@ -280,21 +229,33 @@ class Comprobantes extends React.Component {
                             <table className="table table-striped table-bordered rounded">
                                 <thead>
                                     <tr>
-                                        <th width={50} scope="col">#</th>
-                                        <th width={140} scope="col">Nombre</th>
-                                        <th width={100} scope="col">Serie</th>
-                                        <th width={100} scope="col">Numeración</th>
-                                        <th width={100} scope="col">Creación</th>
-                                        <th width={100} scope="col">Estado</th>
-                                        <th width={120} scope="col">Edición</th>
-                                        <th width={120} scope="col">Anular</th>
+                                        <th width="5%" scope="col">#</th>
+                                        <th width="20%" scope="col">Nombre</th>
+                                        <th width="15%" scope="col">Serie</th>
+                                        <th width="15%" scope="col">Numeración</th>
+                                        <th width="15%" scope="col">Creación</th>
+                                        <th width="10%" scope="col">Estado</th>
+                                        <th width="5%" scope="col">Edición</th>
+                                        <th width="5%" scope="col">Anular</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {
-                                        this.state.lista.length === 0 ? (
+                                        this.state.loading ? (
                                             <tr>
-                                                <td colSpan="8">¡No hay comprobantes registrados!</td>
+                                                <td className="text-center" colSpan="8">
+                                                    <img
+                                                        src={loading}
+                                                        width="34"
+                                                        height="34"
+                                                        alt="Loading..."
+                                                    />
+                                                    <p>Cargando información...</p>
+                                                </td>
+                                            </tr>
+                                        ) : this.state.lista.length === 0 ? (
+                                            <tr>
+                                                <td className="text-center" colSpan="8">¡No hay comprobantes registrados!</td>
                                             </tr>
                                         ) :
                                             this.state.lista.map(function (item, index) {
@@ -304,7 +265,7 @@ class Comprobantes extends React.Component {
                                                         <td>{item.nombre}</td>
                                                         <td>{item.serie}</td>
                                                         <td>{item.numeracion}</td>
-                                                        <td>{<span>{item.fechaRegistro}</span>}{<br></br>}{<span>{timeForma24(item.horaRegistro)}</span>}</td>
+                                                        <td>{<span>{item.fecha}</span>}{<br></br>}{<span>{timeForma24(item.hora)}</span>}</td>
                                                         <td className="text-center"><div className={`badge ${item.estado === 1 ? "badge-info" : "badge-danger"}`}>{item.estado === 1 ? "ACTIVO" : "INACTIVO"}</div></td>
                                                         <td><button className="btn btn-outline-dark btn-sm"><i className="bi bi-pencil"></i> Editar</button></td>
                                                         <td><button className="btn btn-outline-danger btn-sm"><i className="bi bi-trash"></i> Anular</button></td>
@@ -329,17 +290,7 @@ class Comprobantes extends React.Component {
                                     <Paginacion
                                         totalPaginacion={this.state.totalPaginacion}
                                         paginacion={this.state.paginacion}
-                                        upperPageBound={this.state.upperPageBound}
-                                        lowerPageBound={this.state.lowerPageBound}
-                                        isPrevBtnActive={this.state.isPrevBtnActive}
-                                        isNextBtnActive={this.state.isNextBtnActive}
-                                        pageBound={this.state.pageBound}
-
-                                        handleClick={this.handleClick}
-                                        btnIncrementClick={this.btnIncrementClick}
-                                        btnDecrementClick={this.btnDecrementClick}
-                                        btnPrevClick={this.btnPrevClick}
-                                        btnNextClick={this.btnNextClick}
+                                        fillTable={this.fillTableComprobante}
                                     />
                                 </ul>
                             </nav>

@@ -52,6 +52,32 @@ export function clearModal(id, callback = function () {}) {
   myModalEl.addEventListener("hidden.bs.modal", callback);
 }
 
+export function readDataURL(files) {
+  return new Promise((resolve, reject) => {
+    let file = files[0];
+    let blob = file.slice();
+    var reader = new FileReader();
+    reader.onload = () => {
+      resolve(reader.result);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+export function imageSizeData(data) {
+  return new Promise((resolve, reject) => {
+    let image = new Image();
+    image.src = data;
+    image.onload = function () {
+      var height = this.height;
+      var width = this.width;
+      resolve({ width, height });
+    };
+    image.onerror = reject;
+  });
+}
+
 export function ModalAlertClear() {
   Swal({
     type: "info",

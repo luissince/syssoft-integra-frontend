@@ -1,7 +1,7 @@
 import React from 'react';
 import axios from 'axios';
-import loading from '../../recursos/images/loading.gif'
-import { showModal, hideModal } from '../tools/Tools'
+import loading from '../../recursos/images/loading.gif';
+import { showModal, hideModal } from '../tools/Tools';
 
 class Bancos extends React.Component {
     constructor(props) {
@@ -321,7 +321,7 @@ class Bancos extends React.Component {
                                                 <td className="text-center" colSpan="7">
                                                     <img
                                                         src={loading}
-                                                        id="imgLoad"
+                                                        alt="Loading..."
                                                         width="34"
                                                         height="34"
                                                     />
@@ -343,7 +343,7 @@ class Bancos extends React.Component {
                                                         <td>{item.numcuenta}</td>
                                                         <td>{item.representante}</td>
                                                         <td>
-                                                            <button className="btn btn-outline-dark btn-sm" title="Editar" onClick={ () => this.openModal(item.idbanco) }><i className="bi bi-pencil"></i></button>
+                                                            <button className="btn btn-outline-dark btn-sm" title="Editar" onClick={() => this.openModal(item.idbanco)}><i className="bi bi-pencil"></i></button>
                                                         </td>
                                                     </tr>
                                                 )

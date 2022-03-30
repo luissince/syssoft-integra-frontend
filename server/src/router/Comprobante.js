@@ -5,7 +5,7 @@ const tools = require('../tools/Tools');
 const Conexion = require('../database/Conexion');
 
 
-router.get('/', async function (req, res) {
+router.get('/list', async function (req, res) {
     const conec = new Conexion();
     try {
 
@@ -16,8 +16,8 @@ router.get('/', async function (req, res) {
                 numeracion,
                 impresion,
                 estado, 
-                DATE_FORMAT(fechaRegistro,'%d/%m/%Y') as fechaRegistro,
-                horaRegistro
+                DATE_FORMAT(fecha,'%d/%m/%Y') as fecha,
+                hora
                 FROM comprobante LIMIT ?,?`, [
             parseInt(req.query.posicionPagina),
             parseInt(req.query.filasPorPagina)
@@ -32,11 +32,9 @@ router.get('/', async function (req, res) {
         });
 
         let total = await conec.query('SELECT COUNT(*) AS Total FROM comprobante');
-        console.log(resultLista)
+
         res.status(200).send({ "result": resultLista, "total": total[0].Total });
     } catch (error) {
-        console.log("error")
-        console.log(error)
         res.status(500).send("Error interno de conexión, intente nuevamente.");
     }
 });

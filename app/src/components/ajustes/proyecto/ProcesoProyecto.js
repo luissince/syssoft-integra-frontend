@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
-import { getExtension, ModalAlertClear, ModalAlertInfo, ModalAlertSuccess, ModalAlertWarning } from '../../tools/Tools';
-// import loading from '../../../recursos/images/loading.gif'
+import { getExtension, ModalAlertClear, ModalAlertInfo, ModalAlertSuccess, ModalAlertWarning, readDataURL, imageSizeData } from '../../tools/Tools';
 import noImage from '../../../recursos/images/noimage.jpg'
 
 export default function ProcesoProyecto(props) {
@@ -36,7 +35,6 @@ export default function ProcesoProyecto(props) {
     const [imageBase64, setImageBase64] = useState(null);
     const [extenBase64, setExtenBase64] = useState(null);
 
-
     const refTxtNombre = useRef()
     const refTxtSede = useRef()
     const refTxtArea = useRef()
@@ -49,10 +47,7 @@ export default function ProcesoProyecto(props) {
     const refTxtTea = useRef()
     const refFileImagen = useRef()
 
-    // const 
-
     useEffect(() => {
-
         const url = props.location.search;
         const idResult = new URLSearchParams(url).get("idproyecto");
         if (idResult !== null) setIdProyecto(idResult)
@@ -136,79 +131,68 @@ export default function ProcesoProyecto(props) {
     }, [idProyecto, props.history]);
 
     const saveProyect = async () => {
-        ModalAlertInfo("Proyecto", "Procesando informacion...");
-        let files = refFileImagen.current.files;
-        if (files.length !== 0) {
-            let file = files[0];
-            let blob = file.slice();
-            let reader = new FileReader();
-            reader.onloadend = async function (evt) {
-                console.log("loadend" + evt.target)
-                if (evt.target.readyState === FileReader.DONE) {
-                    let image = new Image();
-                    image.src = evt.target.result;
-                    image.onload = function () {
-                        var height = this.height;
-                        var width = this.width;
-
-                        console.log("Height and Width must not exceed: " + height + "-" + width);
-
-                    };
-
-                    let base64String = evt.target.result.replace(/^data:.+;base64,/, '');
-                    let ext = getExtension(file.name);
-
-                    await editSaveProject(base64String, ext);
-                }
-            };
-            reader.readAsDataURL(blob);
-        } else {
-            await editSaveProject("", "");
-        }
-    }
-
-    const editSaveProject = async (image, extension) => {
         try {
-            let result = await axios.post('/api/proyecto/update', {
-                "idproyecto": idProyecto,
-                //datos
-                "nombre": txtNombre.trim().toUpperCase(),
-                "sede": txtSede.trim().toUpperCase(),
-                "numpartidaelectronica": txtNumPartidaElectronica.trim().toUpperCase(),
-                "area": txtArea.toString().trim().toUpperCase(),
-                "estado": CbxEstado,
-                //ubicacion
-                "ubicacion": txtUbicacion.trim().toUpperCase(),
-                "pais": txtPais.trim().toUpperCase(),
-                "region": txtRegion.trim().toUpperCase(),
-                "provincia": txtProvincia.trim().toUpperCase(),
-                "distrito": txtDistrito.trim().toUpperCase(),
-                //limite
-                "lnorte": txtLnorte.trim().toUpperCase(),
-                "leste": txtLeste.trim().toUpperCase(),
-                "lsur": txtLsur.trim().toUpperCase(),
-                "loeste": txtLoeste.trim().toUpperCase(),
-                //ajustes
-                "moneda": txtMoneda.trim().toUpperCase(),
-                "tea": txtTea.toString().trim().toUpperCase(),
-                "preciometro": txtPrecioMetro.toString().trim().toUpperCase(),
-                "costoxlote": txtCostoXlote.toString().trim().toUpperCase(),
-                "numcontratocorrelativo": txtNumContratoCorrelativo.trim().toUpperCase(),
-                "numrecibocorrelativo": txtNumReciboCorrelativo.trim().toUpperCase(),
-                "inflacionanual": txtInflacionAnual.toString().trim().toUpperCase(),
-                //imagen
-                "imagen": image === "" ? imageBase64 == null ? "" : imageBase64 : image,
-                "extension": extension === "" ? extenBase64 == null ? "" : extenBase64 : extension,
-            });
-
-            ModalAlertSuccess("Proyecto", result.data, function () {
-                props.history.goBack();
-            });
+            ModalAlertInfo("Proyecto", "Procesando información...");
+            let files = refFileImagen.current.files;
+            if (files.length !== 0) {
+                let read = await readDataURL(files);
+                let base64String = read.replace(/^data:.+;base64,/, '');
+                let ext = getExtension(files[0].name);
+                let { width, height } = await imageSizeData(read);
+                if (width === 1024 && height === 629) {
+                    let result = await editSaveProject(base64String, ext);
+                    ModalAlertSuccess("Proyecto", result.data, function () {
+                        props.history.goBack();
+                    });
+                } else {
+                    ModalAlertWarning("Proyecto", "La imagen subida no tiene el tamaño establecido.");
+                }
+            } else {
+                let result = await editSaveProject("", "");
+                ModalAlertSuccess("Proyecto", result.data, function () {
+                    props.history.goBack();
+                });
+            }
         } catch (error) {
             ModalAlertWarning("Proyecto", "Se produjo un error interno, comuníquese con su proveedor del sistema.", function () {
                 props.history.goBack();
             });
         }
+    }
+
+    const editSaveProject = async (image, extension) => {
+
+        return await axios.post('/api/proyecto/update', {
+            "idproyecto": idProyecto,
+            //datos
+            "nombre": txtNombre.trim().toUpperCase(),
+            "sede": txtSede.trim().toUpperCase(),
+            "numpartidaelectronica": txtNumPartidaElectronica.trim().toUpperCase(),
+            "area": txtArea.toString().trim().toUpperCase(),
+            "estado": CbxEstado,
+            //ubicacion
+            "ubicacion": txtUbicacion.trim().toUpperCase(),
+            "pais": txtPais.trim().toUpperCase(),
+            "region": txtRegion.trim().toUpperCase(),
+            "provincia": txtProvincia.trim().toUpperCase(),
+            "distrito": txtDistrito.trim().toUpperCase(),
+            //limite
+            "lnorte": txtLnorte.trim().toUpperCase(),
+            "leste": txtLeste.trim().toUpperCase(),
+            "lsur": txtLsur.trim().toUpperCase(),
+            "loeste": txtLoeste.trim().toUpperCase(),
+            //ajustes
+            "moneda": txtMoneda.trim().toUpperCase(),
+            "tea": txtTea.toString().trim().toUpperCase(),
+            "preciometro": txtPrecioMetro.toString().trim().toUpperCase(),
+            "costoxlote": txtCostoXlote.toString().trim().toUpperCase(),
+            "numcontratocorrelativo": txtNumContratoCorrelativo.trim().toUpperCase(),
+            "numrecibocorrelativo": txtNumReciboCorrelativo.trim().toUpperCase(),
+            "inflacionanual": txtInflacionAnual.toString().trim().toUpperCase(),
+            //imagen
+            "imagen": image === "" ? imageBase64 == null ? "" : imageBase64 : image,
+            "extension": extension === "" ? extenBase64 == null ? "" : extenBase64 : extension,
+        });
     }
 
     const clearImage = () => {
@@ -506,17 +490,25 @@ export default function ProcesoProyecto(props) {
                         </div>
 
                         <div className="tab-pane fade" id="imagen" role="tabpanel" aria-labelledby="imagen-tab">
-                            <div className="form-row">
 
-                                <div className="form-group col-md-12">
-                                    <div className="text-center">
-                                        {/* <label>Imagen de portada:</label> */}
-                                        <p>Imagen de portada:</p>
-                                        <img src={txtImagen} style={{ objectFit: "cover" }} width="260" height="260" alt="Imagen del Proyecto" />
+
+                            <div className="row">
+                                <div className="col-md-12">
+                                    <div className="form-group">
+                                        <div className="row">
+                                            <div className="col-lg-8 col-md-10 col-sm-12 col-xs-12">
+                                                <img src={txtImagen} alt="" className="card-img-top" />
+                                                <p>Imagen de portada 1024 x 629 pixeles </p>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                                <div className="form-group col-md-12">
-                                    <div className="text-center">
+                            </div>
+
+                            <div className="row">
+                                <div className="col-md-12">
+                                    <div className="form-group text-center">
+
                                         <input type="file" id="fileImage" accept="image/png, image/jpeg, image/gif, image/svg" style={{ display: "none" }} ref={refFileImagen} />
                                         <label htmlFor="fileImage" className="btn btn-outline-secondary m-0">
                                             <div className="content-button">
@@ -528,10 +520,12 @@ export default function ProcesoProyecto(props) {
                                         <button className="btn btn-outline-secondary" onClick={clearImage}>
                                             <i className="bi bi-trash"></i>
                                         </button>
+
                                     </div>
                                 </div>
-
                             </div>
+
+
                         </div>
 
 
