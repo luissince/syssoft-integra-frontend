@@ -1,9 +1,10 @@
-import React,{useEffect,useState, useRef} from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
+import { getExtension, ModalAlertClear, ModalAlertInfo, ModalAlertSuccess, ModalAlertWarning } from '../../tools/Tools';
 // import loading from '../../../recursos/images/loading.gif'
 import noImage from '../../../recursos/images/noimage.jpg'
 
- export default function ProcesoProyecto(props) {
+export default function ProcesoProyecto(props) {
 
     const [idProyecto, setIdProyecto] = useState('')
     //datos
@@ -27,14 +28,13 @@ import noImage from '../../../recursos/images/noimage.jpg'
     const [txtMoneda, setTxtMoneda] = useState('')
     const [txtTea, setTxtTea] = useState('')
     const [txtPrecioMetro, setTxtPrecioMetro] = useState('')
-    const [txtCostoXlote, setTxtCostoXLote] = useState('' )
+    const [txtCostoXlote, setTxtCostoXLote] = useState('')
     const [txtNumContratoCorrelativo, setTxtNumContratoCorrelativo] = useState('')
     const [txtNumReciboCorrelativo, setTxtNumReciboCorrelativo] = useState('')
     const [txtInflacionAnual, setTxtInflacionAnual] = useState('')
     const [txtImagen, setTxtImagen] = useState(noImage)
-
-    const [inputImg, setInputImg] = useState(null)
-
+    const [imageBase64, setImageBase64] = useState(null);
+    const [extenBase64, setExtenBase64] = useState(null);
 
 
     const refTxtNombre = useRef()
@@ -49,35 +49,171 @@ import noImage from '../../../recursos/images/noimage.jpg'
     const refTxtTea = useRef()
     const refFileImagen = useRef()
 
-    let img = null
+    // const 
 
-    useEffect(()=>{
+    useEffect(() => {
 
-       console.log(refFileImagen)
-       refFileImagen.current.addEventListener("change", (event)=>{
-            if(event.target.files.length != 0){
-                setTxtImagen( URL.createObjectURL(event.target.files[0]))
-                img = event.target.files[0]
-            } else{
+        const url = props.location.search;
+        const idResult = new URLSearchParams(url).get("idproyecto");
+        if (idResult !== null) setIdProyecto(idResult)
+
+        refFileImagen.current.addEventListener("change", (event) => {
+            if (event.target.files.length !== 0) {
+                setTxtImagen(URL.createObjectURL(event.target.files[0]))
+                console.log(event.target.files)
+            } else {
                 setTxtImagen(noImage)
-                img = null
+                refFileImagen.current.value = "";
             }
-            
-       })
+        });
+    }, [props.location.search]);
 
-        return ()=>{
-            refFileImagen.current.removeEventListener("change", ()=>{ 
-            })
+    useEffect(() => {
+        const abortController = new AbortController();
+        const signal = abortController.signal;
+        const loadDataId = async (id) => {
+            try {
+                const result = await axios.get("/api/proyecto/id", {
+                    signal: signal,
+                    params: {
+                        idproyecto: id
+                    }
+                });
+
+                const data = result.data;
+
+                setTxtNombre(data.nombre);
+                setTxtSede(data.sede);
+                setTxtNumPartidaElectronica(data.numpartidaelectronica);
+                setTxtArea(data.area);
+                setCbxEstado(data.estado);
+                //
+                setTxtUbicacion(data.ubicacion);
+                setTxtPais(data.pais);
+                setTxtRegion(data.region);
+                setTxtProvincia(data.provincia);
+                setTxtDistrito(data.distrito);
+                //
+                setTxtLnorte(data.lnorte);
+                setTxtLeste(data.leste);
+                setTxtLsur(data.lsur);
+                setTxtLoeste(data.loeste);
+                //
+                setTxtMoneda(data.moneda);
+                setTxtTea(data.tea);
+                setTxtPrecioMetro(data.preciometro);
+                setTxtCostoXLote(data.costoxlote);
+                setTxtNumContratoCorrelativo(data.numcontratocorrelativo);
+                setTxtNumReciboCorrelativo(data.numrecibocorrelativo);
+                setTxtInflacionAnual(data.inflacionanual);
+                //
+                if (data.imagen !== "") {
+                    setTxtImagen(`data:image/${data.extensionimagen};base64,${data.imagen}`);
+                    setImageBase64(data.imagen);
+                    setExtenBase64(data.extensionimagen);
+                }
+                ModalAlertClear()
+            } catch (error) {
+                if (error.message === "canceled") return;
+
+                ModalAlertWarning("Proyecto", "Se produjo un error un interno, intente nuevamente.", function () {
+                    props.history.goBack();
+                });
+            }
         }
-    }, []);
 
-    const save = ()=>{
-        // console.log(refFileImagen.current.files)
-        console.log(typeof txtImagen === "string")
+        if (idProyecto !== "" && idProyecto !== null) {
+            ModalAlertInfo("Proyecto", "Cargando información...");
+            loadDataId(idProyecto)
+        }
+
+        return () => {
+            if (idProyecto !== "" && idProyecto !== null) {
+                ModalAlertClear()
+                abortController.abort();
+            }
+        }
+    }, [idProyecto, props.history]);
+
+    const saveProyect = async () => {
+        ModalAlertInfo("Proyecto", "Procesando informacion...");
+        let files = refFileImagen.current.files;
+        if (files.length !== 0) {
+            let file = files[0];
+            let blob = file.slice();
+            let reader = new FileReader();
+            reader.onloadend = async function (evt) {
+                console.log("loadend" + evt.target)
+                if (evt.target.readyState === FileReader.DONE) {
+                    let image = new Image();
+                    image.src = evt.target.result;
+                    image.onload = function () {
+                        var height = this.height;
+                        var width = this.width;
+
+                        console.log("Height and Width must not exceed: " + height + "-" + width);
+
+                    };
+
+                    let base64String = evt.target.result.replace(/^data:.+;base64,/, '');
+                    let ext = getExtension(file.name);
+
+                    await editSaveProject(base64String, ext);
+                }
+            };
+            reader.readAsDataURL(blob);
+        } else {
+            await editSaveProject("", "");
+        }
     }
 
-    const cambio = ()=>{
+    const editSaveProject = async (image, extension) => {
+        try {
+            let result = await axios.post('/api/proyecto/update', {
+                "idproyecto": idProyecto,
+                //datos
+                "nombre": txtNombre.trim().toUpperCase(),
+                "sede": txtSede.trim().toUpperCase(),
+                "numpartidaelectronica": txtNumPartidaElectronica.trim().toUpperCase(),
+                "area": txtArea.toString().trim().toUpperCase(),
+                "estado": CbxEstado,
+                //ubicacion
+                "ubicacion": txtUbicacion.trim().toUpperCase(),
+                "pais": txtPais.trim().toUpperCase(),
+                "region": txtRegion.trim().toUpperCase(),
+                "provincia": txtProvincia.trim().toUpperCase(),
+                "distrito": txtDistrito.trim().toUpperCase(),
+                //limite
+                "lnorte": txtLnorte.trim().toUpperCase(),
+                "leste": txtLeste.trim().toUpperCase(),
+                "lsur": txtLsur.trim().toUpperCase(),
+                "loeste": txtLoeste.trim().toUpperCase(),
+                //ajustes
+                "moneda": txtMoneda.trim().toUpperCase(),
+                "tea": txtTea.toString().trim().toUpperCase(),
+                "preciometro": txtPrecioMetro.toString().trim().toUpperCase(),
+                "costoxlote": txtCostoXlote.toString().trim().toUpperCase(),
+                "numcontratocorrelativo": txtNumContratoCorrelativo.trim().toUpperCase(),
+                "numrecibocorrelativo": txtNumReciboCorrelativo.trim().toUpperCase(),
+                "inflacionanual": txtInflacionAnual.toString().trim().toUpperCase(),
+                //imagen
+                "imagen": image === "" ? imageBase64 == null ? "" : imageBase64 : image,
+                "extension": extension === "" ? extenBase64 == null ? "" : extenBase64 : extension,
+            });
 
+            ModalAlertSuccess("Proyecto", result.data, function () {
+                props.history.goBack();
+            });
+        } catch (error) {
+            ModalAlertWarning("Proyecto", "Se produjo un error interno, comuníquese con su proveedor del sistema.", function () {
+                props.history.goBack();
+            });
+        }
+    }
+
+    const clearImage = () => {
+        setTxtImagen(noImage)
+        refFileImagen.current.value = "";
     }
 
     // useEffect(()=>{
@@ -89,7 +225,6 @@ import noImage from '../../../recursos/images/noimage.jpg'
     // },[txtNombre]);
 
     return (
-
         <>
             <div className='row'>
                 <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
@@ -173,8 +308,8 @@ import noImage from '../../../recursos/images/noimage.jpg'
                                         <select
                                             className="form-control"
                                             value={CbxEstado}
-                                            onChange={(event) => setCbxEstado(event.target.value)} 
-                                            >
+                                            onChange={(event) => setCbxEstado(event.target.value)}
+                                        >
                                             <option value="VENTA">Venta</option>
                                             <option value="LITIGIO">Litigio</option>
                                             <option value="COMPLETADA">Completada</option>
@@ -194,7 +329,7 @@ import noImage from '../../../recursos/images/noimage.jpg'
                                         className="form-control"
                                         ref={refTxtUbicacion}
                                         value={txtUbicacion}
-                                        onChange={(event) => setTxtUbicacion( event.target.value)}
+                                        onChange={(event) => setTxtUbicacion(event.target.value)}
                                         placeholder="Dijite ..." />
                                 </div>
                             </div>
@@ -377,12 +512,12 @@ import noImage from '../../../recursos/images/noimage.jpg'
                                     <div className="text-center">
                                         {/* <label>Imagen de portada:</label> */}
                                         <p>Imagen de portada:</p>
-                                        <img src={txtImagen} style={{ objectFit: "cover" }} width="160" height="160"/>
+                                        <img src={txtImagen} style={{ objectFit: "cover" }} width="260" height="260" alt="Imagen del Proyecto" />
                                     </div>
                                 </div>
                                 <div className="form-group col-md-12">
                                     <div className="text-center">
-                                        <input type="file" id="fileImage" accept="image/png, image/jpeg, image/gif, image/svg" style={{ display: "none" }} ref={refFileImagen}/>
+                                        <input type="file" id="fileImage" accept="image/png, image/jpeg, image/gif, image/svg" style={{ display: "none" }} ref={refFileImagen} />
                                         <label htmlFor="fileImage" className="btn btn-outline-secondary m-0">
                                             <div className="content-button">
                                                 <i className="bi bi-image"></i>
@@ -390,7 +525,7 @@ import noImage from '../../../recursos/images/noimage.jpg'
                                             </div>
                                         </label>
                                         {" "}
-                                        <button className="btn btn-outline-secondary" onClick={ () => setTxtImagen(noImage) }>
+                                        <button className="btn btn-outline-secondary" onClick={clearImage}>
                                             <i className="bi bi-trash"></i>
                                         </button>
                                     </div>
@@ -406,8 +541,8 @@ import noImage from '../../../recursos/images/noimage.jpg'
             </div>
 
             <div className='row'>
-                <button type="button" className="btn btn-primary" onClick={ save }>Guardar</button>
-                <button type="button" className="btn btn-secondary ml-2" onClick={() => console.log('C')}>Cerrar</button>
+                <button type="button" className="btn btn-primary" onClick={saveProyect}>Guardar</button>
+                <button type="button" className="btn btn-secondary ml-2" onClick={() => props.history.goBack()}>Cerrar</button>
             </div>
 
         </>

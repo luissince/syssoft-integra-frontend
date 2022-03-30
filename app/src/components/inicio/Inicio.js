@@ -25,6 +25,21 @@ import Perfiles from '../seguridad/Perfiles'
 import Usuarios from '../seguridad/Usuarios'
 import Accesos from '../seguridad/Accesos'
 
+function Page404(props) {
+    return (
+        <div className="px-4 py-5 my-5 text-center">
+            <img className="d-block mx-auto mb-4" src="https://getbootstrap.com/docs/5.0/assets/brand/bootstrap-logo.svg" alt="" width="72" height="57" />
+            <h1 className="display-5 fw-bold">Error 404 página no encontrada</h1>
+            <div className="col-lg-6 mx-auto">
+                <p className="lead mb-4">No se encuentra la página que ha solicitado.</p>
+                <div className="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                    <button type="button" onClick={() => props.history.goBack()} className="btn btn-outline-secondary btn-lg px-4"><i className="bi bi-arrow-left"></i> Regresar</button>
+                </div>
+            </div>
+        </div>
+    )
+}
+
 class Inicio extends React.Component {
 
     constructor(props) {
@@ -53,7 +68,6 @@ class Inicio extends React.Component {
         }
 
         const { path, url } = this.props.match;
-        console.log(path)
         return (
             <div className='app'>
                 <Menu ref={this.menuRef} url={url} />
@@ -148,7 +162,7 @@ class Inicio extends React.Component {
                             path={`${path}/lotes`}
                             render={(props) => <Lotes {...props} />}
                         />
-                        {/* <Route component={<div>chucha</div>} /> */}
+                        <Route component={Page404} />
                     </Switch>
 
                     <Footer />

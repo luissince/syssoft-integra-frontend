@@ -1,5 +1,5 @@
 const express = require('express');
-const bodyParser = require('body-parser');
+// const bodyParser = require('body-parser');
 const path = require('path');
 const app = express();
 const cors = require('cors');
@@ -14,8 +14,8 @@ app.use(cors());
 
 app.set('port', process.env.PORT || 5000);
 
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 app.use(express.static(path.join(__dirname, "..", "app/build")));
 // app.get("/", function (req, res) {

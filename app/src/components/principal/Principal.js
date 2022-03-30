@@ -1,12 +1,12 @@
 import React from 'react';
 import './Principal.css';
+import axios from 'axios';
 import { Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { signOut } from '../../redux/actions';
-// import logo from '../../recursos/images/logo.svg';
-import casa from './lol.png';
-import casa2 from './casa2.png';
-import casa3 from './casa3.png';
+import { ModalAlertInfo, ModalAlertClear } from '../tools/Tools';
+
+import noImage from '../../recursos/images/noimage.jpg'
 import logoInmobiliaria from './INMOBILIARIA.png';
 
 class Principal extends React.Component {
@@ -14,13 +14,27 @@ class Principal extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-
+            data: []
         }
         // console.log("principal constructor")
         // console.log(this.props)
     }
 
-    componentDidMount() {
+    async componentDidMount() {
+
+        try {
+            ModalAlertInfo("Proyecto", "Cargando proyectos...");
+            let result = await axios.get("/api/proyecto/inicio", {
+                params: {
+
+                }
+            });
+            this.setState({ data: result.data });
+            console.log(result)
+            ModalAlertClear();
+        } catch (error) {
+            console.log(error)
+        }
         // console.log("principal componentDidMount")
         // console.log(this.props)
     }
@@ -92,7 +106,43 @@ class Principal extends React.Component {
                     </div>
 
                     <div className="card-deck mb-3">
-                        <div className="card mb-4 shadow-sm">
+                        {
+                            this.state.data.map((item, index) => (
+                                <div key={index} className="card mb-4 shadow-sm">
+                                    <div className="card-header p-0">
+                                        <img src={item.imagen === "" ? noImage : `data:image/${item.extensionimagen};base64,${item.imagen}`} alt="" className="mx-auto d-block" width="260" height="260" />
+                                    </div>
+                                    <div className="card-body m-2">
+                                        <h6 className='text-info font-weight-bold'>{item.nombre}</h6>
+                                        <h6 className='text-secondary'>{item.ubicacion}</h6>
+                                        <button onClick={this.onEventIngresar} type="button" className="btn btn-lg btn-block btn-outline-primary text-info" >
+                                            <i className="bi bi-arrow-right-circle-fill"></i> Ingresar
+                                        </button>
+                                    </div>
+                                    <hr className="m-0" />
+                                    <div className="card-body m-2">
+                                        <ul className="list-group text-left pt-0">
+                                            <li className="list-group-item border-0 px-0 pt-0"><i className="bi bi-geo-fill"></i> Moneda SOLES(S/)</li>
+                                            <li className="list-group-item border-0 px-0"><i className="bi bi-geo-fill"></i> Total de lotes 26</li>
+                                            <li className="list-group-item border-0 px-0"><i className="bi bi-geo-fill"></i> Lotes disponibles 19</li>
+                                        </ul>
+                                        <div className='row'>
+                                            <div className='col-2 text-left'><i className="bi bi-grid-1x2-fill"></i></div>
+                                            <div className='col-6 bg-warning' style={{ borderRadius: '7px' }}>Estado en venta</div>
+                                        </div>
+                                        <div className="row pt-3">
+                                            <div className="col-12">
+                                                <div className="progress" style={{ height: '15px' }}>
+                                                    <div className="progress-bar bg-info w-50" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="40">50.00%</div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            ))
+                        }
+                        {/* <div className="card mb-4 shadow-sm">
                             <div className="card-header p-0">
                                 <img src={casa3} alt="" className="mx-auto d-block " width="100%" />
                             </div>
@@ -123,8 +173,9 @@ class Principal extends React.Component {
 
                                 </div>
                             </div>
-                        </div>
-                        <div className="card mb-4 shadow-sm">
+                        </div> */}
+
+                        {/* <div className="card mb-4 shadow-sm">
                             <div className="card-header p-0">
                                 <img src={casa2} alt="" className="mx-auto d-block " width="100%" />
                             </div>
@@ -153,8 +204,9 @@ class Principal extends React.Component {
 
                                 </div>
                             </div>
-                        </div>
-                        <div className="card mb-4 shadow-sm">
+                        </div> */}
+
+                        {/* <div className="card mb-4 shadow-sm">
                             <div className="card-header p-0">
                                 <img src={casa} alt="" className="mx-auto d-block " width="100%" />
                             </div>
@@ -183,7 +235,7 @@ class Principal extends React.Component {
 
                                 </div>
                             </div>
-                        </div>
+                        </div> */}
                     </div>
                 </div>
             </>

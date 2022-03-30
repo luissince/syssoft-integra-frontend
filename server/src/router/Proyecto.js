@@ -3,9 +3,9 @@ const router = express.Router();
 const tools = require('../tools/Tools');
 const Conexion = require('../database/Conexion');
 
-router.get('/list', async function(req, res){
+router.get('/list', async function (req, res) {
     const conec = new Conexion()
-    try{
+    try {
 
         let lista = await conec.query(`SELECT * FROM proyecto 
          WHERE 
@@ -21,13 +21,13 @@ router.get('/list', async function(req, res){
             parseInt(req.query.posicionPagina),
             parseInt(req.query.filasPorPagina)
         ])
-     
+
         let resultLista = lista.map(function (item, index) {
             return {
                 ...item,
-                id: (index+1) + parseInt(req.query.posicionPagina)
+                id: (index + 1) + parseInt(req.query.posicionPagina)
             }
-        }); 
+        });
 
         let total = await conec.query(`SELECT COUNT(*) AS Total FROM proyecto
          where  
@@ -38,21 +38,21 @@ router.get('/list', async function(req, res){
 
             parseInt(req.query.option),
             req.query.buscar,
-            
-        ]);
-       
-        res.status(200).send({"result": resultLista, "total": total[0].Total })
 
-    }catch(error){
+        ]);
+
+        res.status(200).send({ "result": resultLista, "total": total[0].Total })
+
+    } catch (error) {
         console.log(error)
         res.status(500).send("Error interno de conexión, intente nuevamente.")
     }
 });
 
-router.post('/add', async function (req, res){
-    const conec =  new Conexion()
+router.post('/add', async function (req, res) {
+    const conec = new Conexion()
     let connection = null;
-    try{
+    try {
         connection = await conec.beginTransaction();
         await conec.execute(connection, `INSERT INTO proyecto (
             nombre, sede, numpartidaelectronica, area, estado, 
@@ -90,47 +90,67 @@ router.post('/add', async function (req, res){
 
         await conec.commit(connection);
         res.status(200).send('Datos insertados correctamente')
-        
+
     } catch (err) {
-        if(connection != null){
+        if (connection != null) {
             conec.rollback(connection);
         }
         res.status(500).send(connection);
     }
 });
 
-router.get('/id', async function(req, res) {
-    const conec = new Conexion(); 
-    try{
+router.get('/id', async function (req, res) {
+    const conec = new Conexion();
+    try {
         // console.log(req.body.idsede);
-        let result = await conec.query('SELECT * FROM proyecto WHERE idproyecto = ?',[
+        let result = await conec.query('SELECT * FROM proyecto WHERE idproyecto = ?', [
             req.query.idproyecto,
         ]);
 
-        if(result.length > 0){
+        if (result.length > 0) {
             res.status(200).send(result[0]);
-        }else{
-            res.status(400).send( "Datos no encontrados" );
-        } 
+        } else {
+            res.status(400).send("Datos no encontrados");
+        }
 
-    } catch(error){
+    } catch (error) {
         console.log(error)
         res.status(500).send("Error interno de conexión, intente nuevamente.");
     }
-    
+
 });
 
-router.post('/update', async function(req, res) {
+router.post('/update', async function (req, res) {
     const conec = new Conexion();
     let connection = null;
-    try{
+    try {
 
         connection = await conec.beginTransaction();
-        await conec.execute(connection, `UPDATE proyecto SET
-            nombre=?, sede=?, numpartidaelectronica=?, area=?, estado=?, 
-            ubicacion=?, pais=?, region=?, provincia=?, distrito=?, 
-            lnorte=?, leste=?, lsur=?, loeste=?, 
-            moneda=?, tea=?, preciometro=?, costoxlote=?, numcontratocorrelativo=?, numrecibocorrelativo=?, inflacionanual=?, imagen=? WHERE idproyecto=?`, [
+        await conec.execute(connection, `UPDATE  proyecto SET
+            nombre=?, 
+            sede=?,
+            numpartidaelectronica=?,
+            area=?,
+            estado=?, 
+            ubicacion=?,
+            pais=?, 
+            region=?,
+            provincia=?,
+            distrito=?, 
+            lnorte=?, 
+            leste=?,
+            lsur=?,
+            loeste=?, 
+            moneda=?,
+            tea=?, 
+            preciometro=?,
+            costoxlote=?, 
+            numcontratocorrelativo=?, 
+            numrecibocorrelativo=?,
+            inflacionanual=?, 
+            imagen=?,
+            extension=? 
+            WHERE idproyecto=?`, [
             //datos
             req.body.nombre,
             req.body.sede,
@@ -158,20 +178,31 @@ router.post('/update', async function(req, res) {
             req.body.inflacionanual,
             //imagen
             req.body.imagen,
+            req.body.extension,
             req.body.idproyecto
         ])
 
         await conec.commit(connection)
-        res.status(200).send('Datos actulizados correctamente')
-        // console.log(req.body)
-
-    }catch (error) {
+        res.status(200).send('Los datos se actualizaron correctamente.')
+    } catch (error) {
         if (connection != null) {
             conec.rollback(connection);
         }
-        res.status(500).send(error);
-        // console.log(error)
+        res.status(500).send("Se produjo un error de servidor, intente nuevamente.");
     }
-})
+});
+
+router.get('/inicio', async function (req, res) {
+    const conec = new Conexion();
+    try {
+        let result = await conec.query('SELECT idproyecto ,nombre,ubicacion,imagen,extension FROM proyecto');
+        res.status(200).send(result);
+    } catch (error) {
+        console.log(error)
+        res.status(500).send("Error interno de conexión, intente nuevamente.");
+    }
+});
+
+
 
 module.exports = router;

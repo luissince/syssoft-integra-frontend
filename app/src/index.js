@@ -4,9 +4,12 @@ import App from './App';
 import { Provider } from 'react-redux';
 import store from './redux/store';
 import './recursos/css/bootstrap.css';
+import './recursos/css/sweetalert.css';
+
 import './recursos/js/bootstrap.js';
-// import '../node_modules/bootstrap/dist/js/bootstrap';
 import '../../node_modules/bootstrap-icons/font/bootstrap-icons.css';
+import './recursos/js/bootstrap.js';
+import './recursos/js/sweetalert.js';
 import './styles/App.scss';
 
 
