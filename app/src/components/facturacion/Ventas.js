@@ -1,15 +1,17 @@
 import React from 'react';
-import { Redirect } from 'react-router-dom';
-import { connect } from 'react-redux';
-import { signOut } from '../../redux/actions';
+// import { Redirect } from 'react-router-dom';
+// import { connect } from 'react-redux';
+// import { signOut } from '../../redux/actions';
 
 class Ventas extends React.Component {
     constructor(props) {
         super(props);
+        this.state = {}
     }
 
     onEventNuevaVenta = () => {
-        this.props.history.push("venta")
+        // console.log(this.props.location.pathname)
+        this.props.history.push(`${this.props.location.pathname}/proceso`)
     }
 
     render() {
@@ -28,7 +30,7 @@ class Ventas extends React.Component {
                         <label>Nuevo Ventas</label>
                         <div className="form-group">
                             <button type="button" className="btn btn-success" onClick={this.onEventNuevaVenta}>
-                            <i className="bi bi-plus-lg"></i> Agregar Venta
+                                <i className="bi bi-plus-lg"></i> Agregar Venta
                             </button>
                         </div>
                     </div>
@@ -79,7 +81,7 @@ class Ventas extends React.Component {
 
                             </table>
                         </div>
-                        <div className="col-md-12" style={{ textAlign: 'center' }}>
+                        {/* <div className="col-md-12" style={{ textAlign: 'center' }}>
                             <nav aria-label="...">
                                 <ul className="pagination justify-content-end">
                                     <li className="page-item disabled">
@@ -95,7 +97,7 @@ class Ventas extends React.Component {
                                     </li>
                                 </ul>
                             </nav>
-                        </div>
+                        </div> */}
 
                     </div>
                 </div>

@@ -1,8 +1,16 @@
 import React from 'react';
 
-class Cliente extends React.Component {
+class ClienteProceso extends React.Component {
     constructor(props) {
         super(props);
+        this.state = {
+            numeroDocumento: '',
+            informacion: '',
+            genero: '',
+            numeroTelefono: '',
+            email: '',
+            fechaNacimiento: '',
+        }
     }
 
     render() {
@@ -205,7 +213,7 @@ class Cliente extends React.Component {
                                 </div>
                                 <div className="form-group">
                                     <label htmlFor="FechaNacimientoBeneficiario">Fecha de Nacimiento</label>
-                                    <input type="date" className="form-control" id="FechaNacimientoBeneficiario"/>
+                                    <input type="date" className="form-control" id="FechaNacimientoBeneficiario" />
                                 </div>
                             </form>
                         </div>
@@ -218,4 +226,4 @@ class Cliente extends React.Component {
     }
 }
 
-export default Cliente;
+export default ClienteProceso;

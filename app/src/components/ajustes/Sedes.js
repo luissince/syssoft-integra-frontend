@@ -88,13 +88,13 @@ class Sedes extends React.Component {
         try {
             const result = await axios.get("/api/sede/id", {
                 params: {
-                    idsede: id
+                    idSede: id
                 }
             });
             // console.log(result)
             this.setState({
-                txtNombreEmpresa: result.data.nombrempresa,
-                txtNombreSede: result.data.nombresede,
+                txtNombreEmpresa: result.data.nombreEmpresa,
+                txtNombreSede: result.data.nombreSede,
                 txtTelefono: result.data.telefono,
                 txtCelular: result.data.celular,
                 txtEmail: result.data.email,
@@ -104,7 +104,7 @@ class Sedes extends React.Component {
                 txtRegion: result.data.region,
                 txtProvincia: result.data.provincia,
                 txtDistrito: result.data.distrito,
-                idSede: result.data.idsede
+                idSede: result.data.idSede
             });
 
         } catch (error) {
@@ -126,14 +126,14 @@ class Sedes extends React.Component {
         } else if (this.state.txtDireccion === "") {
             this.refTxtDireccion.current.focus();
         }
-         else {
+        else {
             try {
 
                 let result = null
                 if (this.state.idSede !== '') {
                     result = await axios.post('/api/sede/update', {
-                        "nombrempresa": this.state.txtNombreEmpresa.trim().toUpperCase(),
-                        "nombresede": this.state.txtNombreSede.trim().toUpperCase(),
+                        "nombreEmpresa": this.state.txtNombreEmpresa.trim().toUpperCase(),
+                        "nombreSede": this.state.txtNombreSede.trim().toUpperCase(),
                         "telefono": this.state.txtTelefono.trim().toUpperCase(),
                         "celular": this.state.txtCelular.trim().toUpperCase(),
                         "email": this.state.txtEmail.trim().toUpperCase(),
@@ -143,14 +143,14 @@ class Sedes extends React.Component {
                         "region": this.state.txtRegion.trim().toUpperCase(),
                         "provincia": this.state.txtProvincia.trim().toUpperCase(),
                         "distrito": this.state.txtDistrito.trim().toUpperCase(),
-                        "idsede": this.state.idSede
+                        "idSede": this.state.idSede
                     })
                     // console.log(result);
 
                 } else {
                     result = await axios.post('/api/sede/add', {
-                        "nombrempresa": this.state.txtNombreEmpresa.trim().toUpperCase(),
-                        "nombresede": this.state.txtNombreSede.trim().toUpperCase(),
+                        "nombreEmpresa": this.state.txtNombreEmpresa.trim().toUpperCase(),
+                        "nombreSede": this.state.txtNombreSede.trim().toUpperCase(),
                         "telefono": this.state.txtTelefono.trim().toUpperCase(),
                         "celular": this.state.txtCelular.trim().toUpperCase(),
                         "email": this.state.txtEmail.trim().toUpperCase(),
@@ -207,7 +207,7 @@ class Sedes extends React.Component {
         })
     }
 
-    render(){
+    render() {
         return (
             <>
 
@@ -410,7 +410,7 @@ class Sedes extends React.Component {
                                                 <td className="text-center" colSpan="7">
                                                     <img
                                                         src={loading}
-                                                        id="imgLoad"
+                                                        alt="Loading..."
                                                         width="34"
                                                         height="34"
                                                     />
@@ -426,13 +426,13 @@ class Sedes extends React.Component {
                                                 return (
                                                     <tr key={index}>
                                                         <td>{item.id}</td>
-                                                        <td>{item.nombresede}</td>
-                                                        <td>{item.nombrempresa}</td>
+                                                        <td>{item.nombreSede}</td>
+                                                        <td>{item.nombreEmpresa}</td>
                                                         <td>{item.direccion}</td>
                                                         <td>{item.telefono}</td>
                                                         <td>{item.celular}</td>
                                                         <td>
-                                                            <button className="btn btn-outline-dark btn-sm" title="Editar" onClick={ () => this.openModal(item.idsede) }><i className="bi bi-pencil"></i></button>
+                                                            <button className="btn btn-outline-dark btn-sm" title="Editar" onClick={() => this.openModal(item.idSede)}><i className="bi bi-pencil"></i></button>
                                                         </td>
                                                     </tr>
                                                 )

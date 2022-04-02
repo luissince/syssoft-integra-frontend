@@ -1,5 +1,5 @@
 import React from 'react';
-import { Switch, Route, Redirect } from 'react-router-dom';
+import { Switch, Route, Redirect, } from 'react-router-dom';
 import { connect } from 'react-redux';
 import Menu from '../layouts/menu/Menu';
 import Head from '../layouts/head/Head';
@@ -19,8 +19,8 @@ import Proyectos from '../ajustes/Proyectos';
 import ProcesoProyecto from '../ajustes/proyecto/ProcesoProyecto';
 import Manzanas from '../logistica/Manzanas';
 import Lotes from '../logistica/Lotes';
-import NuevaVenta from '../facturacion/registros/Venta';
-import NuevoCliente from '../facturacion/registros/Cliente'
+import VentaProceso from '../facturacion/registros/VentaProceso';
+import ClienteProceso from '../facturacion/registros/ClienteProceso'
 import Perfiles from '../seguridad/Perfiles'
 import Usuarios from '../seguridad/Usuarios'
 import Accesos from '../seguridad/Accesos'
@@ -98,19 +98,23 @@ class Inicio extends React.Component {
                         />
                         <Route
                             path={`${path}/clientes`}
+                            exact={true}
                             render={(props) => <Clientes {...props} />}
                         />
                         <Route
+                            path={`${path}/clientes/proceso`}
+                            exact={true}
+                            render={(props) => <ClienteProceso {...props} />}
+                        />
+                        <Route
                             path={`${path}/ventas`}
+                            exact={true}
                             render={(props) => <Ventas {...props} />}
                         />
                         <Route
-                            path={`${path}/venta`}
-                            render={(props) => <NuevaVenta {...props} />}
-                        />
-                        <Route
-                            path={`${path}/cliente`}
-                            render={(props) => <NuevoCliente {...props} />}
+                            path={`${path}/ventas/proceso`}
+                            exact={true}
+                            render={(props) => <VentaProceso {...props} />}
                         />
                         <Route
                             path={`${path}/cobros`}

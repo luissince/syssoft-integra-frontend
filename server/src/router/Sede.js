@@ -2,16 +2,17 @@ const express = require('express');
 const router = express.Router();
 const tools = require('../tools/Tools');
 const Conexion = require('../database/Conexion');
+const conec = new Conexion()
 
-router.get('/list', async function(req, res){
-    const conec = new Conexion()
-    try{
+router.get('/list', async function (req, res) {
+
+    try {
 
         let lista = await conec.query(`SELECT * FROM sede 
          WHERE 
          ? = 0
          OR
-         ? = 1 and nombresede like concat(?,'%')
+         ? = 1 and nombreSede like concat(?,'%')
          LIMIT ?,?`, [
             parseInt(req.query.option),
 
@@ -21,42 +22,42 @@ router.get('/list', async function(req, res){
             parseInt(req.query.posicionPagina),
             parseInt(req.query.filasPorPagina)
         ])
-     
+
         let resultLista = lista.map(function (item, index) {
             return {
                 ...item,
-                id: (index+1) + parseInt(req.query.posicionPagina)
+                id: (index + 1) + parseInt(req.query.posicionPagina)
             }
-        }); 
+        });
 
         let total = await conec.query(`SELECT COUNT(*) AS Total FROM sede
          where  
         ? = 0
         OR
-        ? = 1 and nombresede like concat(?,'%')`, [
+        ? = 1 and nombreSede like concat(?,'%')`, [
             parseInt(req.query.option),
 
             parseInt(req.query.option),
             req.query.buscar,
-            
-        ]);
-       
-        res.status(200).send({"result": resultLista, "total": total[0].Total })
 
-    }catch(error){
+        ]);
+
+        res.status(200).send({ "result": resultLista, "total": total[0].Total })
+
+    } catch (error) {
         console.log(error)
         res.status(500).send("Error interno de conexión, intente nuevamente.")
     }
 });
 
-router.post('/add', async function (req, res){
-    const conec =  new Conexion()
+router.post('/add', async function (req, res) {
+
     let connection = null;
-    try{
+    try {
         connection = await conec.beginTransaction();
-        await conec.execute(connection, 'INSERT INTO sede (nombrempresa, nombresede, telefono, celular, email, web, direccion, pais, region, provincia, distrito) values (?,?,?,?,?,?,?,?,?,?,?)', [
-            req.body.nombrempresa,
-            req.body.nombresede	,
+        await conec.execute(connection, 'INSERT INTO sede (nombreEmpresa, nombreSede, telefono, celular, email, web, direccion, pais, region, provincia, distrito) values (?,?,?,?,?,?,?,?,?,?,?)', [
+            req.body.nombreEmpresa,
+            req.body.nombreSede,
             req.body.telefono,
             req.body.celular,
             req.body.email,
@@ -70,45 +71,45 @@ router.post('/add', async function (req, res){
 
         await conec.commit(connection);
         res.status(200).send('Datos insertados correctamente')
-        
+
     } catch (err) {
-        if(connection != null){
+        if (connection != null) {
             conec.rollback(connection);
         }
         res.status(500).send(connection);
     }
 });
 
-router.get('/id', async function(req, res) {
-    const conec = new Conexion(); 
-    try{
+router.get('/id', async function (req, res) {
+
+    try {
         // console.log(req.body.idsede);
-        let result = await conec.query('SELECT * FROM sede WHERE idsede = ?',[
-            req.query.idsede,
+        let result = await conec.query('SELECT * FROM sede WHERE idSede  = ?', [
+            req.query.idSede,
         ]);
 
-        if(result.length > 0){
+        if (result.length > 0) {
             res.status(200).send(result[0]);
-        }else{
-            res.status(400).send( "Datos no encontrados" );
-        } 
+        } else {
+            res.status(400).send("Datos no encontrados");
+        }
 
-    } catch(error){
+    } catch (error) {
         console.log(error)
         res.status(500).send("Error interno de conexión, intente nuevamente.");
     }
-    
+
 });
 
-router.post('/update', async function(req, res) {
-    const conec = new Conexion();
+router.post('/update', async function (req, res) {
+
     let connection = null;
-    try{
+    try {
 
         connection = await conec.beginTransaction();
-        await conec.execute(connection, 'UPDATE sede SET nombrempresa=?, nombresede=?, telefono=?, celular=?, email=?, web=?, direccion=?, pais=?, region=?, provincia=?, distrito=? where idsede=?', [
-            req.body.nombrempresa,
-            req.body.nombresede	,
+        await conec.execute(connection, 'UPDATE sede SET nombreEmpresa=?, nombreSede=?, telefono=?, celular=?, email=?, web=?, direccion=?, pais=?, region=?, provincia=?, distrito=? where idSede =?', [
+            req.body.nombreEmpresa,
+            req.body.nombreSede,
             req.body.telefono,
             req.body.celular,
             req.body.email,
@@ -118,14 +119,14 @@ router.post('/update', async function(req, res) {
             req.body.region,
             req.body.provincia,
             req.body.distrito,
-            req.body.idsede
+            req.body.idSede
         ])
 
         await conec.commit(connection)
         res.status(200).send('Datos actulizados correctamente')
         // console.log(req.body)
 
-    }catch (error) {
+    } catch (error) {
         if (connection != null) {
             conec.rollback(connection);
         }

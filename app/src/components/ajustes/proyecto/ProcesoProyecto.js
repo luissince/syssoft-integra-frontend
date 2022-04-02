@@ -49,7 +49,7 @@ export default function ProcesoProyecto(props) {
 
     useEffect(() => {
         const url = props.location.search;
-        const idResult = new URLSearchParams(url).get("idproyecto");
+        const idResult = new URLSearchParams(url).get("idProyecto");
         if (idResult !== null) setIdProyecto(idResult)
 
         refFileImagen.current.addEventListener("change", (event) => {
@@ -71,7 +71,7 @@ export default function ProcesoProyecto(props) {
                 const result = await axios.get("/api/proyecto/id", {
                     signal: signal,
                     params: {
-                        idproyecto: id
+                        idProyecto: id
                     }
                 });
 
@@ -79,7 +79,7 @@ export default function ProcesoProyecto(props) {
 
                 setTxtNombre(data.nombre);
                 setTxtSede(data.sede);
-                setTxtNumPartidaElectronica(data.numpartidaelectronica);
+                setTxtNumPartidaElectronica(data.numPartidaElectronica);
                 setTxtArea(data.area);
                 setCbxEstado(data.estado);
                 //
@@ -98,9 +98,9 @@ export default function ProcesoProyecto(props) {
                 setTxtTea(data.tea);
                 setTxtPrecioMetro(data.preciometro);
                 setTxtCostoXLote(data.costoxlote);
-                setTxtNumContratoCorrelativo(data.numcontratocorrelativo);
-                setTxtNumReciboCorrelativo(data.numrecibocorrelativo);
-                setTxtInflacionAnual(data.inflacionanual);
+                setTxtNumContratoCorrelativo(data.numContratoCorrelativo);
+                setTxtNumReciboCorrelativo(data.numRecibocCorrelativo);
+                setTxtInflacionAnual(data.inflacionAnual);
                 //
                 if (data.imagen !== "") {
                     setTxtImagen(`data:image/${data.extensionimagen};base64,${data.imagen}`);
@@ -140,7 +140,7 @@ export default function ProcesoProyecto(props) {
                 let ext = getExtension(files[0].name);
                 let { width, height } = await imageSizeData(read);
                 if (width === 1024 && height === 629) {
-                    let result = await editSaveProject(base64String, ext);
+                    let result = await saveProject(base64String, ext);
                     ModalAlertSuccess("Proyecto", result.data, function () {
                         props.history.goBack();
                     });
@@ -148,51 +148,90 @@ export default function ProcesoProyecto(props) {
                     ModalAlertWarning("Proyecto", "La imagen subida no tiene el tamaño establecido.");
                 }
             } else {
-                let result = await editSaveProject("", "");
+                let result = await saveProject("", "");
                 ModalAlertSuccess("Proyecto", result.data, function () {
                     props.history.goBack();
                 });
             }
         } catch (error) {
-            ModalAlertWarning("Proyecto", "Se produjo un error interno, comuníquese con su proveedor del sistema.", function () {
-                props.history.goBack();
-            });
+            console.log(error)
+            if (error.response != null) {
+                ModalAlertWarning("Proyecto", error.response.data, function () {
+                    props.history.goBack();
+                });
+            } else {
+                ModalAlertWarning("Proyecto", "Se produjo un error un interno, intente nuevamente.", function () {
+                    props.history.goBack();
+                });
+            }
         }
     }
 
-    const editSaveProject = async (image, extension) => {
-
-        return await axios.post('/api/proyecto/update', {
-            "idproyecto": idProyecto,
-            //datos
-            "nombre": txtNombre.trim().toUpperCase(),
-            "sede": txtSede.trim().toUpperCase(),
-            "numpartidaelectronica": txtNumPartidaElectronica.trim().toUpperCase(),
-            "area": txtArea.toString().trim().toUpperCase(),
-            "estado": CbxEstado,
-            //ubicacion
-            "ubicacion": txtUbicacion.trim().toUpperCase(),
-            "pais": txtPais.trim().toUpperCase(),
-            "region": txtRegion.trim().toUpperCase(),
-            "provincia": txtProvincia.trim().toUpperCase(),
-            "distrito": txtDistrito.trim().toUpperCase(),
-            //limite
-            "lnorte": txtLnorte.trim().toUpperCase(),
-            "leste": txtLeste.trim().toUpperCase(),
-            "lsur": txtLsur.trim().toUpperCase(),
-            "loeste": txtLoeste.trim().toUpperCase(),
-            //ajustes
-            "moneda": txtMoneda.trim().toUpperCase(),
-            "tea": txtTea.toString().trim().toUpperCase(),
-            "preciometro": txtPrecioMetro.toString().trim().toUpperCase(),
-            "costoxlote": txtCostoXlote.toString().trim().toUpperCase(),
-            "numcontratocorrelativo": txtNumContratoCorrelativo.trim().toUpperCase(),
-            "numrecibocorrelativo": txtNumReciboCorrelativo.trim().toUpperCase(),
-            "inflacionanual": txtInflacionAnual.toString().trim().toUpperCase(),
-            //imagen
-            "imagen": image === "" ? imageBase64 == null ? "" : imageBase64 : image,
-            "extension": extension === "" ? extenBase64 == null ? "" : extenBase64 : extension,
-        });
+    const saveProject = async (image, extension) => {
+        if (idProyecto === "") {
+            return await axios.post('/api/proyecto/add', {
+                //datos
+                "nombre": txtNombre.trim().toUpperCase(),
+                "sede": txtSede.trim().toUpperCase(),
+                "numPartidaElectronica": txtNumPartidaElectronica.trim().toUpperCase(),
+                "area": txtArea.toString().trim().toUpperCase(),
+                "estado": CbxEstado,
+                //ubicacion
+                "ubicacion": txtUbicacion.trim().toUpperCase(),
+                "pais": txtPais.trim().toUpperCase(),
+                "region": txtRegion.trim().toUpperCase(),
+                "provincia": txtProvincia.trim().toUpperCase(),
+                "distrito": txtDistrito.trim().toUpperCase(),
+                //limite
+                "lnorte": txtLnorte.trim().toUpperCase(),
+                "leste": txtLeste.trim().toUpperCase(),
+                "lsur": txtLsur.trim().toUpperCase(),
+                "loeste": txtLoeste.trim().toUpperCase(),
+                //ajustes
+                "moneda": txtMoneda.trim().toUpperCase(),
+                "tea": txtTea.toString().trim().toUpperCase(),
+                "preciometro": txtPrecioMetro.toString().trim().toUpperCase(),
+                "costoxlote": txtCostoXlote.toString().trim().toUpperCase(),
+                "numContratoCorrelativo": txtNumContratoCorrelativo.trim().toUpperCase(),
+                "numRecibocCorrelativo": txtNumReciboCorrelativo.trim().toUpperCase(),
+                "inflacionAnual": txtInflacionAnual.toString().trim().toUpperCase(),
+                //imagen
+                "imagen": image === "" ? imageBase64 == null ? "" : imageBase64 : image,
+                "extension": extension === "" ? extenBase64 == null ? "" : extenBase64 : extension,
+            });
+        } else {
+            return await axios.post('/api/proyecto/update', {
+                "idProyecto ": idProyecto,
+                //datos
+                "nombre": txtNombre.trim().toUpperCase(),
+                "sede": txtSede.trim().toUpperCase(),
+                "numPartidaElectronica": txtNumPartidaElectronica.trim().toUpperCase(),
+                "area": txtArea.toString().trim().toUpperCase(),
+                "estado": CbxEstado,
+                //ubicacion
+                "ubicacion": txtUbicacion.trim().toUpperCase(),
+                "pais": txtPais.trim().toUpperCase(),
+                "region": txtRegion.trim().toUpperCase(),
+                "provincia": txtProvincia.trim().toUpperCase(),
+                "distrito": txtDistrito.trim().toUpperCase(),
+                //limite
+                "lnorte": txtLnorte.trim().toUpperCase(),
+                "leste": txtLeste.trim().toUpperCase(),
+                "lsur": txtLsur.trim().toUpperCase(),
+                "loeste": txtLoeste.trim().toUpperCase(),
+                //ajustes
+                "moneda": txtMoneda.trim().toUpperCase(),
+                "tea": txtTea.toString().trim().toUpperCase(),
+                "preciometro": txtPrecioMetro.toString().trim().toUpperCase(),
+                "costoxlote": txtCostoXlote.toString().trim().toUpperCase(),
+                "numContratoCorrelativo": txtNumContratoCorrelativo.trim().toUpperCase(),
+                "numRecibocCorrelativo": txtNumReciboCorrelativo.trim().toUpperCase(),
+                "inflacionAnual": txtInflacionAnual.toString().trim().toUpperCase(),
+                //imagen
+                "imagen": image === "" ? imageBase64 == null ? "" : imageBase64 : image,
+                "extension": extension === "" ? extenBase64 == null ? "" : extenBase64 : extension,
+            });
+        }
     }
 
     const clearImage = () => {
@@ -490,8 +529,6 @@ export default function ProcesoProyecto(props) {
                         </div>
 
                         <div className="tab-pane fade" id="imagen" role="tabpanel" aria-labelledby="imagen-tab">
-
-
                             <div className="row">
                                 <div className="col-md-12">
                                     <div className="form-group">
@@ -525,12 +562,8 @@ export default function ProcesoProyecto(props) {
                                 </div>
                             </div>
 
-
                         </div>
-
-
                     </div>
-
                 </div>
             </div>
 

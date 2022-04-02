@@ -7,7 +7,7 @@ class Clientes extends React.Component {
     // }
 
     onEventNuevoCliente = () => {
-        this.props.history.push("cliente")
+        this.props.history.push(`${this.props.location.pathname}/proceso`)
     }
 
     render() {

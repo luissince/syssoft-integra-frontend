@@ -2,7 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import axios from 'axios';
 import loading from "../../recursos/images/loading.gif";
-import { keyNumberInteger, timeForma24, showModal, hideModal } from '../tools/Tools';
+import { keyNumberInteger, timeForma24, showModal, hideModal, clearModal } from '../tools/Tools';
 import Paginacion from '../tools/Paginacion';
 
 class Comprobantes extends React.Component {
@@ -16,11 +16,12 @@ class Comprobantes extends React.Component {
             numeracion: '',
             impresion: '',
             estado: true,
-            idUsuario: '',
+            idUsuario: 0,
 
-            loading: true,
+            loading: false,
             lista: [],
 
+            opcion: 0,
             paginacion: 0,
             totalPaginacion: 0,
             filasPorPagina: 5,
@@ -39,12 +40,38 @@ class Comprobantes extends React.Component {
     }
 
     async componentDidMount() {
-        this.fillTableComprobante(1);
+        this.loadInitComprobantes();
+
+        clearModal("modalComprobante", async () => {
+            await this.setStateAsync({
+                idComprobante: '',
+                nombre: '',
+                serie: '',
+                numeracion: '',
+                impresion: '',
+                estado: true,
+                idUsuario: '',
+            });
+        });
+
     }
 
-    fillTableComprobante = async (paginacion) => {
+    loadInitComprobantes = async () => {
+        if (!this.state.loading) {
+            await this.setStateAsync({ paginacion: 1 });
+            this.fillTableComprobante();
+            await this.setStateAsync({ opcion: 0 });
+        }
+    }
+
+    paginacionContext = async (listid) => {
+        await this.setStateAsync({ paginacion: listid });
+        this.fillTableComprobante();
+    }
+
+    fillTableComprobante = async () => {
         try {
-            await this.setStateAsync({ loading: true, lista: [], messagePaginacion: "Mostranto 0 de 0 Páginas", paginacion: paginacion });
+            await this.setStateAsync({ loading: true, lista: [], messagePaginacion: "Mostranto 0 de 0 Páginas" });
 
             const result = await axios.get('/api/comprobante/list', {
                 params: {
@@ -55,7 +82,6 @@ class Comprobantes extends React.Component {
 
             let totalPaginacion = parseInt(Math.ceil((parseFloat(result.data.total) / this.state.filasPorPagina)));
             let messagePaginacion = `Mostrando ${result.data.result.length} de ${totalPaginacion} Páginas`;
-
             this.setState({
                 loading: false,
                 lista: result.data.result,
@@ -67,16 +93,50 @@ class Comprobantes extends React.Component {
                 loading: false,
                 lista: [],
                 totalPaginacion: 0,
-                messagePaginacion: "Se produjo un error de conexión, intente nuevamente por favor.",
+                messagePaginacion: "Mostranto 0 de 0 Páginas",
             });
         }
     }
 
-    openModal = () => {
-        showModal('modalComprobante')
+    onEventPaginacion = async (listid) => {
+        switch (this.state.opcion) {
+
+        }
     }
 
-    onEventGuardar = async () => {
+    openModal = (id) => {
+        if (id === '') {
+            showModal('modalComprobante')
+        } else {
+            showModal('modalComprobante')
+            this.loadDataId(id);
+        }
+    }
+
+    loadDataId = async (id) => {
+        try {
+            const result = await axios.get("/api/comprobante/id", {
+                params: {
+                    idComprobante: id
+                }
+            });
+
+            this.setState({
+                idComprobante: result.data.idComprobante,
+                nombre: result.data.nombre,
+                serie: result.data.serie,
+                numeracion: result.data.numeracion,
+                impresion: result.data.impresion,
+                estado: result.data.estado === 1 ? true : false
+            });
+
+        } catch (error) {
+            console.log(error.response)
+        }
+    }
+
+
+    async onEventGuardar() {
         if (this.state.nombre === "") {
             this.refNombre.current.focus()
         } else if (this.state.serie === "") {
@@ -84,19 +144,37 @@ class Comprobantes extends React.Component {
         } else if (this.state.numeracion === "") {
             this.refNumeracion.current.focus()
         } else {
-            try {
-                const result = await axios.post('/api/comprobante', {
-                    "nombre": this.state.nombre.trim(),
-                    "serie": this.state.serie.trim(),
-                    "numeracion": this.state.numeracion,
-                    "impresion": this.state.impresion.trim(),
-                    "estado": this.state.estado,
-                    "idUsuario": this.state.idUsuario
-                });
-                console.log(result);
-            } catch (err) {
-                console.log(err.response)
+            if (this.state.idComprobante !== "") {
+                try {
+                    const result = await axios.post('/api/comprobante/edit', {
+                        "idComprobante": this.state.idComprobante,
+                        "nombre": this.state.nombre.trim().toUpperCase(),
+                        "serie": this.state.serie.trim().toUpperCase(),
+                        "numeracion": this.state.numeracion,
+                        "impresion": this.state.impresion.trim(),
+                        "estado": this.state.estado,
+                        "idUsuario": this.state.idUsuario
+                    });
+                    console.log(result);
+                } catch (err) {
+                    console.log(err.response)
+                }
+            } else {
+                try {
+                    const result = await axios.post('/api/comprobante/add', {
+                        "nombre": this.state.nombre.trim().toUpperCase(),
+                        "serie": this.state.serie.trim().toUpperCase(),
+                        "numeracion": this.state.numeracion,
+                        "impresion": this.state.impresion.trim(),
+                        "estado": this.state.estado,
+                        "idUsuario": this.state.idUsuario
+                    });
+                    console.log(result);
+                } catch (err) {
+                    console.log(err.response)
+                }
             }
+
         }
     }
 
@@ -155,8 +233,9 @@ class Comprobantes extends React.Component {
                                         type="text"
                                         className="form-control"
                                         id="impresion"
-                                        alue={this.state.impresion}
-                                        onChange={(event) => this.setState({ impresion: event.target.value })} />
+                                        value={this.state.impresion}
+                                        onChange={(event) => this.setState({ impresion: event.target.value })}
+                                    />
                                 </div>
 
                                 <div className="form-group">
@@ -169,21 +248,10 @@ class Comprobantes extends React.Component {
                                             onChange={(value) => this.setState({ estado: value.target.checked })} />
                                         <label className="custom-control-label" htmlFor="switch1">Activo o Inactivo</label>
                                     </div>
-                                    {/* <div className="form-check">
-                                        <input
-                                            className="form-check-input"
-                                            type="checkbox"
-                                            id="estado"
-                                            checked={this.state.estado}
-                                            onChange={(value) => this.setState({ estado: value.target.checked })} />
-                                        <label className="form-check-label" htmlFor="estado">
-                                            {this.state.estado ? "ACTIVO" : "INACTIVO"}
-                                        </label>
-                                    </div> */}
                                 </div>
                             </div>
                             <div className="modal-footer">
-                                <button type="button" className="btn btn-primary" onClick={this.onEventGuardar}>Guardar</button>
+                                <button type="button" className="btn btn-primary" onClick={() => this.onEventGuardar()}>Guardar</button>
                                 <button type="button" className="btn btn-danger" data-bs-dismiss="modal">Cerrar</button>
                             </div>
                         </div>
@@ -212,11 +280,11 @@ class Comprobantes extends React.Component {
                     </div>
                     <div className="col-md-6 col-sm-12">
                         <div className="form-group">
-                            <button className="btn btn-outline-info" onClick={() => this.openModal()}>
+                            <button className="btn btn-outline-info" onClick={() => this.openModal('')}>
                                 <i className="bi bi-file-plus"></i> Nuevo Registro
                             </button>
                             {" "}
-                            <button className="btn btn-outline-secondary">
+                            <button className="btn btn-outline-secondary" onClick={() => this.loadInitComprobantes()}>
                                 <i className="bi bi-arrow-clockwise"></i>
                             </button>
                         </div>
@@ -258,7 +326,7 @@ class Comprobantes extends React.Component {
                                                 <td className="text-center" colSpan="8">¡No hay comprobantes registrados!</td>
                                             </tr>
                                         ) :
-                                            this.state.lista.map(function (item, index) {
+                                            this.state.lista.map((item, index) => {
                                                 return (
                                                     <tr key={index}>
                                                         <td>{item.id}</td>
@@ -267,7 +335,7 @@ class Comprobantes extends React.Component {
                                                         <td>{item.numeracion}</td>
                                                         <td>{<span>{item.fecha}</span>}{<br></br>}{<span>{timeForma24(item.hora)}</span>}</td>
                                                         <td className="text-center"><div className={`badge ${item.estado === 1 ? "badge-info" : "badge-danger"}`}>{item.estado === 1 ? "ACTIVO" : "INACTIVO"}</div></td>
-                                                        <td><button className="btn btn-outline-dark btn-sm"><i className="bi bi-pencil"></i> Editar</button></td>
+                                                        <td><button className="btn btn-outline-dark btn-sm" onClick={() => this.openModal(item.idComprobante)}><i className="bi bi-pencil"></i> Editar</button></td>
                                                         <td><button className="btn btn-outline-danger btn-sm"><i className="bi bi-trash"></i> Anular</button></td>
                                                     </tr>
                                                 )
@@ -290,7 +358,7 @@ class Comprobantes extends React.Component {
                                     <Paginacion
                                         totalPaginacion={this.state.totalPaginacion}
                                         paginacion={this.state.paginacion}
-                                        fillTable={this.fillTableComprobante}
+                                        fillTable={this.paginacionContext}
                                     />
                                 </ul>
                             </nav>
