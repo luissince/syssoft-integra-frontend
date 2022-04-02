@@ -41,7 +41,7 @@ class Monedas extends React.Component {
 
     fillTableMoneda = async (option, paginacion, buscar) => {
         // console.log(buscar.trim().toUpperCase())
-        
+
         try {
 
             await this.setStateAsync({ loading: true, paginacion: paginacion, lista: [] });
@@ -75,7 +75,7 @@ class Monedas extends React.Component {
         try {
             const result = await axios.get("/api/moneda/id", {
                 params: {
-                    idmoneda: id
+                    idMoneda: id
                 }
             });
 
@@ -86,7 +86,7 @@ class Monedas extends React.Component {
                 txtCodIso: result.data.codiso,
                 txtSimbolo: result.data.simbolo,
                 ckEstado: result.data.estado,
-                idMoneda: result.data.idmoneda
+                idMoneda: result.data.idMoneda
             });
 
         } catch (error) {
@@ -112,7 +112,7 @@ class Monedas extends React.Component {
                         "codiso": this.state.txtCodIso.trim().toUpperCase(),
                         "simbolo": this.state.txtSimbolo.trim().toUpperCase(),
                         "estado": this.state.ckEstado,
-                        "idmoneda": this.state.idMoneda
+                        "idMoneda": this.state.idMoneda
                     })
                     // console.log('actualizar');
 
@@ -253,7 +253,7 @@ class Monedas extends React.Component {
                                 <div className="input-group-prepend">
                                     <div className="input-group-text"><i className="bi bi-search"></i></div>
                                 </div>
-                                <input type="search" className="form-control" placeholder="Buscar..." ref={this.refTxtSearch} onKeyUp={(event) => this.searchText(event.target.value) } />
+                                <input type="search" className="form-control" placeholder="Buscar..." ref={this.refTxtSearch} onKeyUp={(event) => this.searchText(event.target.value)} />
                             </div>
                         </div>
                     </div>
@@ -292,7 +292,7 @@ class Monedas extends React.Component {
                                                 <td className="text-center" colSpan="6">
                                                     <img
                                                         src={loading}
-                                                        id="imgLoad"
+                                                        alt="Loading..."
                                                         width="34"
                                                         height="34"
                                                     />
@@ -313,7 +313,7 @@ class Monedas extends React.Component {
                                                         <td>{item.simbolo}</td>
                                                         <td><div className={`badge ${item.estado === 1 ? "badge-info" : "badge-danger"}`}>{item.estado === 1 ? "ACTIVO" : "INACTIVO"}</div></td>
                                                         <td>
-                                                            <button className="btn btn-outline-dark btn-sm" title="Editar" onClick={() => this.openModalMoneda(item.idmoneda)}><i className="bi bi-pencil"></i></button>
+                                                            <button className="btn btn-outline-dark btn-sm" title="Editar" onClick={() => this.openModalMoneda(item.idMoneda)}><i className="bi bi-pencil"></i></button>
                                                             {" "}
                                                             <button className="btn btn-outline-danger btn-sm" title="Eliminar"><i className="bi bi-trash"></i></button>
                                                         </td>

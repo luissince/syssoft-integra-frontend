@@ -15,7 +15,7 @@ app.use(cors());
 app.set('port', process.env.PORT || 5000);
 
 app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb', extended: true }));
+app.use(express.urlencoded({ limit: '50mb', extended: false }));
 
 app.use(express.static(path.join(__dirname, "..", "app/build")));
 // app.get("/", function (req, res) {
@@ -35,6 +35,7 @@ app.use('/api/manzana', require('./src/router/Manzana'));
 app.use('/api/lote', require('./src/router/Lote'));
 
 app.use('/api/cliente', require('./src/router/Cliente'));
+app.use('/api/factura', require('./src/router/Factura'));
 
 
 app.use((req, res, next) => {

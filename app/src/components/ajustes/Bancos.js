@@ -74,7 +74,7 @@ class Bancos extends React.Component {
         try {
             const result = await axios.get("/api/banco/id", {
                 params: {
-                    idbanco: id
+                    idBanco: id
                 }
             });
             // console.log(result)
@@ -85,7 +85,7 @@ class Bancos extends React.Component {
                 txtNumCuenta: result.data.numcuenta,
                 txtCci: result.data.cci,
                 txtRepresentante: result.data.representante,
-                idBanco: result.data.idbanco
+                idBanco: result.data.idBanco
             });
 
         } catch (error) {
@@ -114,7 +114,7 @@ class Bancos extends React.Component {
                         "numcuenta": this.state.txtNumCuenta.trim().toUpperCase(),
                         "cci": this.state.txtCci.trim().toUpperCase(),
                         "representante": this.state.txtRepresentante.trim().toUpperCase(),
-                        "idbanco": this.state.idBanco
+                        "idBanco": this.state.idBanco
                     })
                     // console.log(result);
 
@@ -144,13 +144,10 @@ class Bancos extends React.Component {
         if (id === '') {
             showModal('modalBanco')
             this.refTxtNombre.current.focus();
-            // console.log('nuevo')
         }
         else {
-            this.setState({ idBanco: id });
             showModal('modalBanco')
             this.loadDataId(id)
-            // console.log('editar')
         }
     }
 
@@ -343,7 +340,7 @@ class Bancos extends React.Component {
                                                         <td>{item.numcuenta}</td>
                                                         <td>{item.representante}</td>
                                                         <td>
-                                                            <button className="btn btn-outline-dark btn-sm" title="Editar" onClick={() => this.openModal(item.idbanco)}><i className="bi bi-pencil"></i></button>
+                                                            <button className="btn btn-outline-dark btn-sm" title="Editar" onClick={() => this.openModal(item.idBanco)}><i className="bi bi-pencil"></i></button>
                                                         </td>
                                                     </tr>
                                                 )

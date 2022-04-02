@@ -1,6 +1,63 @@
 import bootstrap from "../../recursos/js/bootstrap";
 import Swal from "../../recursos/js/sweetalert";
 
+export function validateDate(date) {
+  var regex = new RegExp(
+    "([0-9]{4}[-](0[1-9]|1[0-2])[-]([0-2]{1}[0-9]{1}|3[0-1]{1})|([0-2]{1}[0-9]{1}|3[0-1]{1})[-](0[1-9]|1[0-2])[-][0-9]{4})"
+  );
+  return regex.test(date);
+}
+
+export function validateComboBox(comboBox) {
+  if (comboBox.children("option").length === 0) {
+    return true;
+  }
+  if (comboBox.children("option").length > 0 && comboBox.val() === "") {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+export function validateEmail(value) {
+  var validRegex =
+    /^(([^<>()\\[\]\\.,;:\s@"]+(\.[^<>()\\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  if (value.match(validRegex)) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+export function isNumeric(value) {
+  try {
+    if (value.trim().length === 0 || value === "undefined") return false;
+
+    if (isNaN(value.trim())) {
+      return false;
+    }
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+export function isText(value) {
+  try {
+    if (
+      value.trim() === "" ||
+      value.trim().length === 0 ||
+      value === "undefined" ||
+      value === null
+    ) {
+      return false;
+    }
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
 export function keyNumberInteger(event) {
   var key = window.Event ? event.which : event.keyCode;
   var c = String.fromCharCode(key);

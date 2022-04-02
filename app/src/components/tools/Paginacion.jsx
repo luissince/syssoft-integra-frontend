@@ -123,6 +123,8 @@ class Paginacion extends React.Component {
             )}
           </li>
         );
+      } else {
+        return null;
       }
     });
 

@@ -2,11 +2,10 @@ const express = require('express');
 const router = express.Router();
 const tools = require('../tools/Tools');
 const Conexion = require('../database/Conexion');
+const conec = new Conexion()
 
 router.get('/list', async function (req, res) {
-    const conec = new Conexion()
     try {
-
         let lista = await conec.query(`SELECT * FROM proyecto 
          WHERE 
          ? = 0
@@ -50,19 +49,67 @@ router.get('/list', async function (req, res) {
 });
 
 router.post('/add', async function (req, res) {
-    const conec = new Conexion()
     let connection = null;
     try {
         connection = await conec.beginTransaction();
+
+        let result = await conec.execute(connection, 'SELECT idProyecto FROM proyecto');
+        let idProyecto = "";
+        if (result.length != 0) {
+
+            let quitarValor = result.map(function (item) {
+                return parseInt(item.idProyecto.replace("PR", ''));
+            });
+
+            let valorActual = Math.max(...quitarValor);
+            let incremental = valorActual + 1;
+            let codigoGenerado = "";
+            if (incremental <= 9) {
+                codigoGenerado = 'PR000' + incremental;
+            } else if (incremental >= 10 && incremental <= 99) {
+                codigoGenerado = 'PR00' + incremental;
+            } else if (incremental >= 100 && incremental <= 999) {
+                codigoGenerado = 'PR0' + incremental;
+            } else {
+                codigoGenerado = 'PR' + incremental;
+            }
+
+            idProyecto = codigoGenerado;
+        } else {
+            idProyecto = "PR0001";
+        }
+
         await conec.execute(connection, `INSERT INTO proyecto (
-            nombre, sede, numpartidaelectronica, area, estado, 
-            ubicacion, pais, region, provincia, distrito, 
-            lnorte, leste, lsur, loeste, 
-            moneda, tea, preciometro, costoxlote, numcontratocorrelativo, numrecibocorrelativo, inflacionanual, imagen) values (?,?,?,?,?, ?,?,?,?,?, ?,?,?,?, ?,?,?,?,?,?,?,?)`, [
+            idProyecto,
+            nombre, 
+            sede, 
+            numPartidaElectronica,
+            area,
+            estado, 
+            ubicacion,
+            pais, 
+            region,
+            provincia,
+            distrito, 
+            lnorte,
+            leste, 
+            lsur, 
+            loeste, 
+            moneda,
+            tea, 
+            preciometro, 
+            costoxlote,
+            numContratoCorrelativo, 
+            numRecibocCorrelativo, 
+            inflacionAnual, 
+            imagen,
+            extension) 
+            values (?,?,?,?,?,?, ?,?,?,?,?, ?,?,?,?, ?,?,?,?,?,?,?,?,?)`, [
+            idProyecto,
             //datos
             req.body.nombre,
             req.body.sede,
-            req.body.numpartidaelectronica,
+            req.body.numPartidaElectronica,
             req.body.area,
             req.body.estado,
             //ubicacion
@@ -81,11 +128,12 @@ router.post('/add', async function (req, res) {
             req.body.tea,
             req.body.preciometro,
             req.body.costoxlote,
-            req.body.numcontratocorrelativo,
-            req.body.numrecibocorrelativo,
-            req.body.inflacionanual,
+            req.body.numContratoCorrelativo,
+            req.body.numRecibocCorrelativo,
+            req.body.inflacionAnual,
             //imagen
-            req.body.imagen
+            req.body.imagen,
+            req.body.extension,
         ])
 
         await conec.commit(connection);
@@ -100,11 +148,10 @@ router.post('/add', async function (req, res) {
 });
 
 router.get('/id', async function (req, res) {
-    const conec = new Conexion();
     try {
         // console.log(req.body.idsede);
-        let result = await conec.query('SELECT * FROM proyecto WHERE idproyecto = ?', [
-            req.query.idproyecto,
+        let result = await conec.query('SELECT * FROM proyecto WHERE idProyecto  = ?', [
+            req.query.idProyecto,
         ]);
 
         if (result.length > 0) {
@@ -121,7 +168,6 @@ router.get('/id', async function (req, res) {
 });
 
 router.post('/update', async function (req, res) {
-    const conec = new Conexion();
     let connection = null;
     try {
 
@@ -129,7 +175,7 @@ router.post('/update', async function (req, res) {
         await conec.execute(connection, `UPDATE  proyecto SET
             nombre=?, 
             sede=?,
-            numpartidaelectronica=?,
+            numPartidaElectronica=?,
             area=?,
             estado=?, 
             ubicacion=?,
@@ -145,16 +191,16 @@ router.post('/update', async function (req, res) {
             tea=?, 
             preciometro=?,
             costoxlote=?, 
-            numcontratocorrelativo=?, 
-            numrecibocorrelativo=?,
-            inflacionanual=?, 
+            numContratoCorrelativo=?, 
+            numRecibocCorrelativo=?,
+            inflacionAnual=?, 
             imagen=?,
             extension=? 
             WHERE idproyecto=?`, [
             //datos
             req.body.nombre,
             req.body.sede,
-            req.body.numpartidaelectronica,
+            req.body.numPartidaElectronica,
             req.body.area,
             req.body.estado,
             //ubicacion
@@ -173,13 +219,13 @@ router.post('/update', async function (req, res) {
             req.body.tea,
             req.body.preciometro,
             req.body.costoxlote,
-            req.body.numcontratocorrelativo,
-            req.body.numrecibocorrelativo,
-            req.body.inflacionanual,
+            req.body.numContratoCorrelativo,
+            req.body.numRecibocCorrelativo,
+            req.body.inflacionAnual,
             //imagen
             req.body.imagen,
             req.body.extension,
-            req.body.idproyecto
+            req.body.idProyecto
         ])
 
         await conec.commit(connection)
@@ -193,9 +239,8 @@ router.post('/update', async function (req, res) {
 });
 
 router.get('/inicio', async function (req, res) {
-    const conec = new Conexion();
     try {
-        let result = await conec.query('SELECT idproyecto ,nombre,ubicacion,imagen,extension FROM proyecto');
+        let result = await conec.query('SELECT idProyecto ,nombre,ubicacion,imagen,extension FROM proyecto');
         res.status(200).send(result);
     } catch (error) {
         console.log(error)

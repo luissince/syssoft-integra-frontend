@@ -1,12 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const mysql = require('mysql');
-const tools = require('../tools/Tools');
+const { currentDate, currentTime } = require('../tools/Tools');
 const Conexion = require('../database/Conexion');
-
+const conec = new Conexion()
 
 router.get('/list', async function (req, res) {
-    const conec = new Conexion();
+
     try {
 
         let lista = await conec.query(`SELECT 
@@ -39,92 +38,105 @@ router.get('/list', async function (req, res) {
     }
 });
 
-router.post('/', async function (req, res) {
-    var pool = mysql.createPool({
-        host: 'localhost',
-        user: 'root',
-        password: '',
-        database: 'inmobiliaria'
-    });
+router.get('/id', async function (req, res) {
+    try {
+        let result = await conec.query(`SELECT * FROM comprobante WHERE idComprobante = ?`, [
+            req.query.idComprobante
+        ]);
+        if (result.length > 0) {
+            res.status(200).send(result[0]);
+        } else {
+            res.status(400).send("Datos no encontrados");
+        }
+    } catch (error) {
+        res.status(500).send("Error interno de conexión, intente nuevamente.");
+    }
+});
 
-    const promise = new Promise(function (resolve, reject) {
-        pool.getConnection(function (err, connection) {
-            if (err) {
-                return reject(err.sqlMessage);
+router.post('/add', async function (req, res) {
+    let connection = null;
+    try {
+        connection = await conec.beginTransaction();
+
+        let result = await conec.execute(connection, 'SELECT idComprobante FROM comprobante');
+        let idComprobante = "";
+        if (result.length != 0) {
+
+            let quitarValor = result.map(function (item) {
+                return parseInt(item.idComprobante.replace("CB", ''));
+            });
+
+            let valorActual = Math.max(...quitarValor);
+            let incremental = valorActual + 1;
+            let codigoGenerado = "";
+            if (incremental <= 9) {
+                codigoGenerado = 'CB000' + incremental;
+            } else if (incremental >= 10 && incremental <= 99) {
+                codigoGenerado = 'CB00' + incremental;
+            } else if (incremental >= 100 && incremental <= 999) {
+                codigoGenerado = 'CB0' + incremental;
+            } else {
+                codigoGenerado = 'CB' + incremental;
             }
 
-            connection.beginTransaction(function (err) {
-                if (err) {
-                    return reject(err.sqlMessage);
-                }
-            });
+            idComprobante = codigoGenerado;
+        } else {
+            idComprobante = "CB0001";
+        }
 
-            connection.query("SELECT * FROM comprobante", function (err, result) {
-                if (err) return reject(err.sqlMessage);
+        await conec.execute(connection, `INSERT INTO comprobante 
+        (idComprobante,nombre,serie,numeracion,impresion,estado,fecha,hora,idUsuario) 
+        VALUES(?,?,?,?,?,?,?,?,?)`, [
+            idComprobante,
+            req.body.nombre,
+            req.body.serie,
+            req.body.numeracion,
+            req.body.impresion,
+            req.body.estado,
+            currentDate(),
+            currentTime(),
+            req.body.idUsuario,
+        ])
 
-                let idComprobante = "";
-                if (result.length != 0) {
+        await conec.commit(connection);
+        res.status(200).send('Se registró el comprobante.')
 
-                    let quitarValor = result.map(function (item) {
-                        return parseInt(item.idComprobante.replace("CB", ''));
-                    });
+    } catch (err) {
+        if (connection != null) {
+            await conec.rollback(connection);
+        }
+        res.status(500).send(connection);
+    }
+});
 
-                    let valorActual = Math.max(...quitarValor);
-                    let incremental = valorActual + 1;
-                    let codigoGenerado = "";
-                    if (incremental <= 9) {
-                        codigoGenerado = 'CB000' + incremental;
-                    } else if (incremental >= 10 && incremental <= 99) {
-                        codigoGenerado = 'CB00' + incremental;
-                    } else if (incremental >= 100 && incremental <= 999) {
-                        codigoGenerado = 'CB0' + incremental;
-                    } else {
-                        codigoGenerado = 'CB' + incremental;
-                    }
-
-                    idComprobante = codigoGenerado;
-                } else {
-                    idComprobante = "CB0001";
-                }
-
-                connection.query("INSERT INTO comprobante (idComprobante,nombre,serie,numeracion,impresion,estado,fechaRegistro,horaRegistro,idUsuario) VALUES(?,?,?,?,?,?,?,?,?)", [
-                    idComprobante,
-                    req.body.nombre,
-                    req.body.serie,
-                    req.body.numeracion,
-                    req.body.impresion,
-                    req.body.estado,
-                    tools.currentDate(),
-                    tools.currentTime(),
-                    req.body.idUsuario,
-                ], function (err, results) {
-                    if (err) {
-                        return connection.rollback(function () {
-                            reject(err.sqlMessage);
-                        });
-                    }
-
-                    connection.commit(function (err) {
-                        if (err) {
-                            return connection.rollback(function () {
-                                reject(err.sqlMessage);
-                            });
-                        }
-
-                        connection.release();
-                        return resolve("bien!!");
-                    });
-                });
-            });
-        });
-    });
-
+router.post('/edit', async function (req, res) {
+    let connection = null;
     try {
-        let result = await promise;
-        res.status(201).send({ "message": result });
-    } catch (error) {
-        console.error(error)
-        res.status(500).send({ "message": error });
+        connection = await conec.beginTransaction();
+
+        await conec.execute(connection, `UPDATE comprobante SET 
+        nombre = ?,
+        serie = ?,
+        numeracion = ?,
+        impresion = ?,
+        estado = ?
+        WHERE idComprobante = ?`, [
+            req.body.nombre,
+            req.body.serie,
+            req.body.numeracion,
+            req.body.impresion,
+            req.body.estado,
+            req.body.idComprobante,
+        ])
+
+        await conec.commit(connection);
+        res.status(200).send('Se actualizó el comprobante.')
+
+    } catch (err) {
+        if (connection != null) {
+            await conec.rollback(connection);
+        }
+        res.status(500).send(connection);
     }
 });
 
