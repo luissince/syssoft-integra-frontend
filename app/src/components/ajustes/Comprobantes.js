@@ -32,7 +32,6 @@ class Comprobantes extends React.Component {
         this.refNumeracion = React.createRef();
     }
 
-
     setStateAsync(state) {
         return new Promise((resolve) => {
             this.setState(state, resolve)
@@ -41,7 +40,6 @@ class Comprobantes extends React.Component {
 
     async componentDidMount() {
         this.loadInitComprobantes();
-
         clearModal("modalComprobante", async () => {
             await this.setStateAsync({
                 idComprobante: '',
@@ -53,7 +51,6 @@ class Comprobantes extends React.Component {
                 idUsuario: '',
             });
         });
-
     }
 
     loadInitComprobantes = async () => {

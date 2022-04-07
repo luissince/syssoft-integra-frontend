@@ -2,19 +2,27 @@ const express = require('express');
 const router = express.Router();
 const tools = require('../tools/Tools');
 const Conexion = require('../database/Conexion');
-const conec = new Conexion()
+const conec = new Conexion();
 
 router.get('/list', async function (req, res) {
 
     try {
-        let lista = await conec.query(`SELECT idBanco, nombre, tipocuenta, moneda, numcuenta, cci, representante FROM banco 
-         WHERE 
-         ? = 0
-         OR
-         ? = 1 and nombre like concat(?,'%')
-         OR
-         ? = 1 and representante like concat(?,'%')
-         LIMIT ?,?`, [
+        let lista = await conec.query(`SELECT 
+        idBanco, 
+        nombre, 
+        tipocuenta,
+        moneda,
+        numcuenta,
+        cci, 
+        representante 
+        FROM banco 
+        WHERE 
+        ? = 0
+        OR
+        ? = 1 and nombre like concat(?,'%')
+        OR
+        ? = 1 and representante like concat(?,'%')
+        LIMIT ?,?`, [
             parseInt(req.query.option),
 
             parseInt(req.query.option),
@@ -45,11 +53,9 @@ router.get('/list', async function (req, res) {
 });
 
 router.post('/add', async function (req, res) {
-
     let connection = null;
     try {
         connection = await conec.beginTransaction();
-
 
         let result = await conec.execute(connection, 'SELECT idBanco FROM banco');
         let idBanco = "";
@@ -94,7 +100,7 @@ router.post('/add', async function (req, res) {
         if (connection != null) {
             conec.rollback(connection);
         }
-        res.status(500).send(connection);
+        res.status(500).send(error);
     }
 });
 
