@@ -21,7 +21,7 @@ class App extends React.Component {
     async componentDidMount() {
         try {
             let userToken = localStorage.getItem('login');
-            this.props.restore(userToken);
+            this.props.restore(JSON.parse(userToken));
         } catch (e) {
             this.props.restore(null);
         }
@@ -31,28 +31,15 @@ class App extends React.Component {
 
     }
 
-    setOpen = () => {
-        this.setState({ isModal: !this.state.isModal }, () => {
-            this.menuRef.current.handleToggleSidebar(this.state.isModal);
-        });
-    }
-
-    setMinimun = () => {
-        this.setState({ isModal: !this.state.isModal }, () => {
-            this.menuRef.current.handleCollapsedSidebar(this.state.isModal);
-        });
-    }
-
     render() {
+        console.log("render app")
         return (
-            <BrowserRouter>
+            <>
                 {
-                    this.props.token.isLoading ?
-                        (
-                            <Loader />
-                        )
-                        :
-                        (
+                    this.props.token.isLoading ? (
+                        <Loader />
+                    ) : (
+                        <BrowserRouter>
                             <Switch>
                                 <Route
                                     path="/"
@@ -75,9 +62,11 @@ class App extends React.Component {
                                 />
                                 <Route component={NotFound} />
                             </Switch>
-                        )
+
+                        </BrowserRouter>
+                    )
                 }
-            </BrowserRouter>
+            </>
         );
     }
 }

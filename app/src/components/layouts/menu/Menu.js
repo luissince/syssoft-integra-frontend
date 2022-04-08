@@ -86,12 +86,12 @@ class Menu extends React.Component {
                             <MenuItem>
                                 <Link to={`${this.props.url}/cobros`} style={{ fontWeight: 'bold' }}>Cobros</Link>
                             </MenuItem>
-                            <MenuItem>
+                            {/* <MenuItem>
                                 <Link to={`${this.props.url}/cotizaciones`} style={{ fontWeight: 'bold' }}>Cotizaciones</Link>
-                            </MenuItem>
-                            <MenuItem>
+                            </MenuItem> */}
+                            {/* <MenuItem>
                                 <Link to={`${this.props.url}/reservas`} style={{ fontWeight: 'bold' }}>Reservas</Link>
-                            </MenuItem>
+                            </MenuItem> */}
                         </SubMenu>
 
                         <SubMenu
