@@ -12,7 +12,10 @@
     "build": "npm run build --workspace=app",
     "start": "npm run start --workspace=server",
     "dev:app": "npm start --workspace=app",
-    "dev:server": "npm run dev --workspace=server"
+    "dev:server": "npm run dev --workspace=server",
+    "save": "git add . && git commit -m 'act'",
+    "push": "git push origin master",
+    "pull": "git pull origin master"
   },
   "keywords": [],
   "author": "",

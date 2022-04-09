@@ -5,13 +5,14 @@ import { Provider } from 'react-redux';
 import store from './redux/store';
 import './recursos/css/bootstrap.css';
 import './recursos/css/sweetalert.css';
+import './recursos/css/tree.css';
 
 import './recursos/js/bootstrap.js';
 import '../../node_modules/bootstrap-icons/font/bootstrap-icons.css';
 import './recursos/js/bootstrap.js';
 import './recursos/js/sweetalert.js';
+import './recursos/js/tree.js';
 import './styles/App.scss';
-
 
 ReactDOM.render(
     <Provider store={store}>
