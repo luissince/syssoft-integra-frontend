@@ -146,7 +146,15 @@ class Proyectos extends React.Component {
                                                         <td>{item.moneda}</td>
                                                         <td>{item.tea}</td>
                                                         <td>
-                                                            <button className="btn btn-outline-dark btn-sm" title="Editar" onClick={() => this.props.history.push({ pathname: `${this.props.location.pathname}/proceso`, search: "?idProyecto=" + item.idProyecto })}><i className="bi bi-pencil"></i></button>
+                                                            <button
+                                                                className="btn btn-outline-dark btn-sm"
+                                                                title="Editar"
+                                                                onClick={() => {
+                                                                    this.props.history.push({ pathname: `${this.props.location.pathname}/proceso`, search: "?idProyecto=" + item.idProyecto })
+                                                                }}
+                                                            >
+                                                                <i className="bi bi-pencil"></i>
+                                                            </button>
                                                         </td>
                                                     </tr>
                                                 )

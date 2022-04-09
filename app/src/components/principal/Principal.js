@@ -16,12 +16,10 @@ class Principal extends React.Component {
         this.state = {
             data: []
         }
-        // console.log("principal constructor")
-        // console.log(this.props)
+        console.log(this.props.token)
     }
 
     async componentDidMount() {
-
         try {
             ModalAlertInfo("Proyecto", "Cargando proyectos...");
             let result = await axios.get("/api/proyecto/inicio", {
@@ -30,18 +28,15 @@ class Principal extends React.Component {
                 }
             });
             this.setState({ data: result.data });
-            console.log(result)
             ModalAlertClear();
         } catch (error) {
             console.log(error)
         }
-        // console.log("principal componentDidMount")
-        // console.log(this.props)
     }
 
     onEventSignIn = async (event) => {
         try {
-            await localStorage.removeItem('login');
+            localStorage.removeItem('login');
             this.props.restore();
             this.props.history.push("login");
         } catch (e) {
@@ -55,7 +50,6 @@ class Principal extends React.Component {
     }
 
     render() {
-        // console.log("render principal")
         if (this.props.token.userToken == null) {
             return <Redirect to="/login" />
         }
@@ -108,9 +102,9 @@ class Principal extends React.Component {
                     <div className="row">
                         {
                             this.state.data.map((item, index) => (
-                                <div className="col-lg-4 col-md-4 col-sm-12 col-xs-12">
-                                    <div key={index} className="card">
-                                        <img src={item.imagen === "" ? noImage : `data:image/${item.extensionimagen};base64,${item.imagen}`} alt="" class="card-img-top" />
+                                <div key={index} className="col-lg-4 col-md-4 col-sm-12 col-xs-12">
+                                    <div className="card">
+                                        <img src={item.imagen === "" ? noImage : `data:image/${item.extensionimagen};base64,${item.imagen}`} alt="" className="card-img-top" />
                                         <div className="card-body m-2">
                                             <h6 className='text-info font-weight-bold'>{item.nombre}</h6>
                                             <h6 className='text-secondary'>{item.ubicacion}</h6>

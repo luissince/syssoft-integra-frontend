@@ -1,4 +1,6 @@
 import React from 'react';
+import axios from 'axios';
+import { getCookie } from '../tools/Tools';
 import { Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { signIn } from '../../redux/actions';
@@ -11,52 +13,94 @@ class Login extends React.Component {
 
         this.state = {
             email: '',
-            password: ''
+            password: '',
+            message: '',
         }
 
-        console.log("login constructor")
+        this.emailInput = React.createRef();
+        this.passwordInput = React.createRef();
 
     }
 
+
+    setStateAsync(state) {
+        return new Promise((resolve) => {
+            this.setState(state, resolve)
+        });
+    }
+
     componentDidMount() {
-        console.log("login componentDidMount")
+
     }
 
     onEventForm = async () => {
         if (this.state.email === "") {
-            this.emailInput.focus();
+            this.emailInput.current.focus();
+            this.setStateAsync({ message: "Ingrese su usuario para iniciar sesión." });
             return;
         }
 
         if (this.state.password === "") {
-            this.passwordInput.focus();
+            this.passwordInput.current.focus();
+            this.setStateAsync({ message: "Ingrese su contraseña para iniciar sesión." });
             return;
         }
 
         try {
-            let user = JSON.stringify({
-                "id": Math.floor(Math.random() * 562000),
-                "email": this.state.email,
-                "password": this.state.password
+            let user = await axios.get('/api/login', {
+                params: {
+                    "id": Math.floor(Math.random() * 562000),
+                    "email": this.state.email,
+                    "password": this.state.password
+                }
             });
-            await localStorage.setItem('login', user);
-            this.props.restore(user);
+
+
+            localStorage.setItem('login', JSON.stringify(user.data));
+            this.props.restore(JSON.parse(localStorage.getItem('login')));
             this.props.history.push("principal");
+            // document.cookie = `token=${user.data.token}; max-age=${10}; path=/; samesite=strict`;
+
         } catch (error) {
             console.log(error)
         }
     }
 
+    onEventRecuperar = () => {
+        console.log(getCookie("token"))
+        window.open("/api/login/report", "_blank");
+    }
+
     handleChangeEmail = (event) => {
-        this.setState({ email: event.target.value });
+        if (event.target.value.length > 0) {
+            this.setState({
+                email: event.target.value,
+                message: ""
+            });
+        } else {
+            this.setState({
+                email: event.target.value,
+                message: "Ingrese su usuario para iniciar sesión."
+            });
+        }
     }
 
     handleChangePassword = (event) => {
-        this.setState({ password: event.target.value });
+        if (event.target.value.length > 0) {
+            this.setState({
+                password: event.target.value,
+                message: ""
+            });
+        } else {
+            this.setState({
+                password: event.target.value,
+                message: "Ingrese su contraseña para iniciar sesión."
+            });
+        }
     }
 
     render() {
-        console.log("render login")
+        const { email, password, message } = this.state;
         if (this.props.token.userToken != null) {
             return <Redirect to="/principal" />
         }
@@ -67,12 +111,21 @@ class Login extends React.Component {
                     <form className="form-signin">
                         <img className="mb-4" src="https://getbootstrap.com/docs/4.6/assets/brand/bootstrap-solid.svg" alt="" width="72" height="72" />
                         <h1 className="h3 mb-3 font-weight-normal">Ingrese los datos</h1>
+                        {
+                            message !== "" ?
+                                <div className="alert alert-warning d-flex align-items-center" role="alert">
+                                    <i className="bi bi-exclamation-diamond-fill m-1"></i>
+                                    <div className=" m-1">
+                                        {message}
+                                    </div>
+                                </div> : null
+                        }
 
                         <label htmlFor="inputEmail" className="sr-only">usuario o correo</label>
                         <input
-                            ref={(input) => { this.emailInput = input; }}
+                            ref={this.emailInput}
                             onChange={this.handleChangeEmail}
-                            value={this.state.email}
+                            value={email}
                             type="email"
                             id="inputEmail"
                             className="form-control"
@@ -82,9 +135,9 @@ class Login extends React.Component {
 
                         <label htmlFor="inputPassword" className="sr-only">Password</label>
                         <input
-                            ref={(input) => { this.passwordInput = input; }}
+                            ref={this.passwordInput}
                             onChange={this.handleChangePassword}
-                            value={this.state.password}
+                            value={password}
                             type="password"
                             id="inputPassword"
                             className="form-control"
@@ -97,7 +150,7 @@ class Login extends React.Component {
                             </label>
                         </div>
                         <button onClick={this.onEventForm} type="button" className="btn btn-lg btn-primary btn-block">Ingresar</button>
-                        <button type="button" className="btn btn-lg btn-outline-primary btn-block">Recuperar</button>
+                        <button onClick={this.onEventRecuperar} type="button" className="btn btn-lg btn-outline-primary btn-block">Recuperar</button>
                         <p className="mt-5 mb-3 text-muted">© 2022</p>
                     </form>
                 </div>

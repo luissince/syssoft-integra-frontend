@@ -1,7 +1,7 @@
 import React from 'react';
 import axios from 'axios';
-import loading from '../../recursos/images/loading.gif'
-import { showModal, hideModal } from '../tools/Tools'
+import loading from '../../recursos/images/loading.gif';
+import { showModal, hideModal } from '../tools/Tools';
 
 class Monedas extends React.Component {
     constructor(props) {
@@ -12,6 +12,7 @@ class Monedas extends React.Component {
             txtCodIso: '',
             txtSimbolo: '',
             ckEstado: true,
+
             loading: true,
             lista: [],
             paginacion: 0,
@@ -40,12 +41,8 @@ class Monedas extends React.Component {
     }
 
     fillTableMoneda = async (option, paginacion, buscar) => {
-        // console.log(buscar.trim().toUpperCase())
-
         try {
-
             await this.setStateAsync({ loading: true, paginacion: paginacion, lista: [] });
-
             const result = await axios.get('/api/moneda/list', {
                 params: {
                     "option": option,
