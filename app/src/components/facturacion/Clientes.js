@@ -1,54 +1,106 @@
 import React from 'react';
+import axios from 'axios';
+import loading from '../../recursos/images/loading.gif';
 
 class Clientes extends React.Component {
-    // constructor(props) {
-    //     super(props);
+    constructor(props) {
+        super(props);
+        this.state = {
+            idCliente: '',
 
-    // }
+            loading: true,
+            lista: [],
+            paginacion: 0,
+            totalPaginacion: 0,
+            filasPorPagina: 10,
+            messagePaginacion: ''
+        }
 
-    onEventNuevoCliente = () => {
-        this.props.history.push(`${this.props.location.pathname}/proceso`)
+    }
+
+    controller = new AbortController();
+
+    async componentDidMount() {
+        this.fillTable(0, 1, "");
+    }
+
+    componentWillUnmount() {
+        this.controller.abort();
+    }
+
+    setStateAsync(state) {
+        return new Promise((resolve) => {
+            this.setState(state, resolve)
+        });
+    }
+
+    fillTable = async (option, paginacion, buscar) => {
+        try {
+            await this.setStateAsync({ loading: true, paginacion: paginacion, lista: [] });
+            const result = await axios.get('/api/cliente/list', {
+                signal: this.controller.signal,
+                params: {
+                    "option": option,
+                    "buscar": buscar.trim().toUpperCase(),
+                    "posicionPagina": ((this.state.paginacion - 1) * this.state.filasPorPagina),
+                    "filasPorPagina": this.state.filasPorPagina
+                }
+            });
+
+            let totalPaginacion = parseInt(Math.ceil((parseFloat(result.data.total) / this.state.filasPorPagina)));
+            let messagePaginacion = `Mostrando ${result.data.result.length} de ${totalPaginacion} Páginas`;
+
+            this.setState({
+                loading: false,
+                lista: result.data.result,
+                totalPaginacion: totalPaginacion,
+                messagePaginacion: messagePaginacion
+            });
+            // console.log(result);
+        } catch (err) {
+            console.log("error")
+            console.log(err.response)
+            console.log(err)
+        }
     }
 
     render() {
         return (
             <>
-                <div className='row pb-3'>
+                <div className='row'>
                     <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
-                        <section className="content-header">
-                            <h5 className="no-margin"> Clientes <small style={{ color: 'gray' }}> Lista </small> </h5>
-                        </section>
+                        <div className="form-group">
+                            <h5>Clientes <small className="text-secondary">LISTA</small></h5>
+                        </div>
                     </div>
                 </div>
 
-                <div className='row'>
-                    <div className="col-lg-3 col-md-3 col-sm-12 col-xs-12">
-                        <label>Nuevo Cliente/Socio</label>
+                <div className="row">
+                    <div className="col-md-6 col-sm-12">
                         <div className="form-group">
-                            <button type="button" className="btn btn-success" onClick={this.onEventNuevoCliente}>
-                                <i className="bi bi-plus-lg"></i> Agregar Cliente
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className="col-lg-3 col-md-3 col-sm-12 col-xs-12">
-                        <label>Opción.</label>
-                        <div className="form-group">
-                            <button className="btn btn-light">
-                                <i className="bi bi-arrow-repeat"></i> Recargar
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className="col-lg-6 col-md-6 col-sm-12 col-xs-12">
-                        <label>Filtrar por dni, apellidos y nombres.</label>
-                        <div className="form-group">
-                            <div className="input-group mb-3">
-                                <input type="text" className="form-control" placeholder="Ingrese para buscar" aria-label="Recipient's username" aria-describedby="basic-addon2" />
-                                <div className="input-group-append">
-                                    <button className="btn btn-outline-secondary" type="button">Button</button>
+                            <div className="input-group mb-2">
+                                <div className="input-group-prepend">
+                                    <div className="input-group-text"><i className="bi bi-search"></i></div>
                                 </div>
+                                <input type="search" className="form-control" placeholder="Buscar..." onKeyUp={(event) => console.log(event.target.value)} />
                             </div>
+                        </div>
+                    </div>
+                    <div className="col-md-6 col-sm-12">
+                        <div className="form-group">
+                            
+                            <button className="btn btn-outline-info" onClick={ () => this.props.history.push( {
+                                    pathname: `${this.props.location.pathname}/proceso`, 
+                                    search: `?idCliente=${this.state.idCliente}`
+                                }) 
+                            }> 
+                                <i className="bi bi-file-plus"></i> Nuevo Registro
+                            </button>
+                            {" "}
+                            <button className="btn btn-outline-secondary" onClick={() => this.fillTable(0, 1, "")}>
+                                <i className="bi bi-arrow-clockwise"></i>
+                            </button>
+
                         </div>
                     </div>
                 </div>
@@ -59,17 +111,52 @@ class Clientes extends React.Component {
                             <table className="table table-striped" style={{ borderWidth: '1px', borderStyle: 'inset', borderColor: '#CFA7C9' }}>
                                 <thead>
                                     <tr>
-                                        <th width="5%" className="text-center">#</th>
-                                        <th width="20%">Nombre</th>
-                                        <th width="20%">Apellido</th>
-                                        <th width="15%">Dni / Ruc</th>
-                                        <th width="10%">Telefono</th>
+                                        <th width="5%">#</th>
+                                        <th width="20%">Cliente</th>
+                                        <th width="20%">DNI / RUC</th>
+                                        <th width="15%">Telefono</th>
+                                        <th width="10%">Dirección</th>
                                         <th width="12%">Observacion</th>
-                                        <th width="15%" colSpan="2">Opciones</th>
+                                        <th width="15%">Opciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-
+                                    {
+                                        this.state.loading ? (
+                                            <tr>
+                                                <td className="text-center" colSpan="7">
+                                                    <img
+                                                        src={loading}
+                                                        id="imgLoad"
+                                                        width="34"
+                                                        height="34"
+                                                        alt="Loader"
+                                                    />
+                                                    <p>Cargando información...</p>
+                                                </td>
+                                            </tr>
+                                        ) : this.state.lista.length === 0 ? (
+                                            <tr className="text-center">
+                                                <td colSpan="7">¡No hay datos registrados!</td>
+                                            </tr>
+                                        ) : (
+                                            this.state.lista.map((item, index) => {
+                                                return (
+                                                    <tr key={index}>
+                                                        <td>{item.id}</td>
+                                                        <td>{item.infoCliente}</td>
+                                                        <td>{item.numDocumento}</td>
+                                                        <td>{item.telefono}</td>
+                                                        <td>{item.direccion}</td>
+                                                        <td>{item.observacion}</td>
+                                                        <td>
+                                                            <button className="btn btn-outline-dark btn-sm" title="Editar" onClick={() => this.props.history.push({ pathname: `${this.props.location.pathname}/proceso`, search: "?idCliente=" + item.idCliente })}><i className="bi bi-pencil"></i></button>
+                                                        </td>
+                                                    </tr>
+                                                )
+                                            })
+                                        )
+                                    }
                                 </tbody>
 
                             </table>

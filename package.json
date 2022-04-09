@@ -12,7 +12,8 @@
     "build": "npm run build --workspace=app",
     "start": "npm run start --workspace=server",
     "dev:app": "npm start --workspace=app",
-    "dev:server": "npm run dev --workspace=server"
+    "dev:server": "npm run dev --workspace=server",
+    "gitsave": "git add . && git commit -m 'act'"
   },
   "keywords": [],
   "author": "",

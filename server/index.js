@@ -37,6 +37,9 @@ app.use('/api/lote', require('./src/router/Lote'));
 app.use('/api/cliente', require('./src/router/Cliente'));
 app.use('/api/factura', require('./src/router/Factura'));
 
+app.use('/api/perfil', require('./src/router/Perfil'));
+app.use('/api/usuario', require('./src/router/Usuario'))
+
 
 app.use((req, res, next) => {
     res.sendFile(path.join(__dirname, "..", "app/build", "index.html"));
