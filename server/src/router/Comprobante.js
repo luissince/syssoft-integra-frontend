@@ -17,7 +17,27 @@ router.get('/list', async function (req, res) {
                 estado, 
                 DATE_FORMAT(fecha,'%d/%m/%Y') as fecha,
                 hora
-                FROM comprobante LIMIT ?,?`, [
+                FROM comprobante
+                WHERE 
+                ? = 0
+                OR
+                ? = 1 AND nombre LIKE CONCAT(?,'%')
+                OR
+                ? = 1 AND serie LIKE CONCAT(?,'%')
+                OR
+                ? = 1 AND numeracion LIKE CONCAT(?,'%')
+                LIMIT ?,?`, [
+            parseInt(req.query.opcion),
+
+            parseInt(req.query.opcion),
+            req.query.buscar,
+
+            parseInt(req.query.opcion),
+            req.query.buscar,
+
+            parseInt(req.query.opcion),
+            req.query.buscar,
+
             parseInt(req.query.posicionPagina),
             parseInt(req.query.filasPorPagina)
         ]);
@@ -30,7 +50,26 @@ router.get('/list', async function (req, res) {
             };
         });
 
-        let total = await conec.query('SELECT COUNT(*) AS Total FROM comprobante');
+        let total = await conec.query(`SELECT COUNT(*) AS Total FROM comprobante
+        WHERE 
+                ? = 0
+                OR
+                ? = 1 AND nombre LIKE CONCAT(?,'%')
+                OR
+                ? = 1 AND serie LIKE CONCAT(?,'%')
+                OR
+                ? = 1 AND numeracion LIKE CONCAT(?,'%')`, [
+            parseInt(req.query.opcion),
+
+            parseInt(req.query.opcion),
+            req.query.buscar,
+
+            parseInt(req.query.opcion),
+            req.query.buscar,
+
+            parseInt(req.query.opcion),
+            req.query.buscar,
+        ]);
 
         res.status(200).send({ "result": resultLista, "total": total[0].Total });
     } catch (error) {

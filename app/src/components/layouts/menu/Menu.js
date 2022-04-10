@@ -42,8 +42,8 @@ class Menu extends React.Component {
                 breakPoint="md"
                 onToggle={this.handleToggleSidebar} >
                 <SidebarHeader>
-                    <div style={{ padding: '24px 24px 24px 12px', textTransform: 'uppercase', fontWeight: 'bold', fontSize: 14, letterSpacing: '1px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} >
-                        <img src={logoEmpresa} alt="logo" width="50" height="50" className='mr-3' />
+                    <div className="pt-4 pb-4 pl-2 pr-2 font-weight-bold text-truncate  ">
+                        <img src={logoEmpresa} alt="logo" width="70" className='mr-3' />
                         INMOBILIARIA GMYC
                     </div>
                 </SidebarHeader>

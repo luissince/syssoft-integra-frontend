@@ -14,9 +14,9 @@ router.get('/list', async function (req, res) {
          OR
          ? = 1 and nombreSede like concat(?,'%')
          LIMIT ?,?`, [
-            parseInt(req.query.option),
+            parseInt(req.query.opcion),
 
-            parseInt(req.query.option),
+            parseInt(req.query.opcion),
             req.query.buscar,
 
             parseInt(req.query.posicionPagina),
@@ -31,13 +31,13 @@ router.get('/list', async function (req, res) {
         });
 
         let total = await conec.query(`SELECT COUNT(*) AS Total FROM sede
-         where  
+        where  
         ? = 0
         OR
         ? = 1 and nombreSede like concat(?,'%')`, [
-            parseInt(req.query.option),
+            parseInt(req.query.opcion),
 
-            parseInt(req.query.option),
+            parseInt(req.query.opcion),
             req.query.buscar,
 
         ]);
@@ -55,7 +55,35 @@ router.post('/add', async function (req, res) {
     let connection = null;
     try {
         connection = await conec.beginTransaction();
-        await conec.execute(connection, 'INSERT INTO sede (nombreEmpresa, nombreSede, telefono, celular, email, web, direccion, pais, region, provincia, distrito) values (?,?,?,?,?,?,?,?,?,?,?)', [
+
+        let result = await conec.execute(connection, 'SELECT idBanco FROM sede');
+        let idSede = "";
+        if (result.length != 0) {
+
+            let quitarValor = result.map(function (item) {
+                return parseInt(item.idSede.replace("SD", ''));
+            });
+
+            let valorActual = Math.max(...quitarValor);
+            let incremental = valorActual + 1;
+            let codigoGenerado = "";
+            if (incremental <= 9) {
+                codigoGenerado = 'SD000' + incremental;
+            } else if (incremental >= 10 && incremental <= 99) {
+                codigoGenerado = 'SD00' + incremental;
+            } else if (incremental >= 100 && incremental <= 999) {
+                codigoGenerado = 'SD0' + incremental;
+            } else {
+                codigoGenerado = 'SD' + incremental;
+            }
+
+            idSede = codigoGenerado;
+        } else {
+            idSede = "SD0001";
+        }
+
+        await conec.execute(connection, 'INSERT INTO sede (idSede ,nombreEmpresa, nombreSede, telefono, celular, email, web, direccion, pais, region, provincia, distrito) values (?,?,?,?,?,?,?,?,?,?,?,?)', [
+            idSede,
             req.body.nombreEmpresa,
             req.body.nombreSede,
             req.body.telefono,

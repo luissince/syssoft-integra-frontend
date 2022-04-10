@@ -1,7 +1,16 @@
 import React from 'react';
 import axios from 'axios';
-import loading from '../../recursos/images/loading.gif'
-import { showModal, hideModal } from '../tools/Tools'
+import {
+    showModal,
+    hideModal,
+    viewModal,
+    clearModal,
+    ModalAlertInfo,
+    ModalAlertSuccess,
+    ModalAlertWarning,
+    spinnerLoading
+} from '../tools/Tools';
+import Paginacion from '../tools/Paginacion';
 
 class Sedes extends React.Component {
     constructor(props) {
@@ -19,13 +28,20 @@ class Sedes extends React.Component {
             txtRegion: '',
             txtProvincia: '',
             txtDistrito: '',
-            loading: true,
+
+            loadModal: false,
+            nameModal: 'Nuevo Comprobante',
+            msgModal: 'Cargando datos...',
+
+            loading: false,
             lista: [],
+
+            opcion: 0,
             paginacion: 0,
             totalPaginacion: 0,
             filasPorPagina: 10,
-            messagePaginacion: ''
-
+            messageTable: 'Cargando información...',
+            messagePaginacion: 'Mostranto 0 de 0 Páginas'
         }
 
         this.refTxtNombreEmpresa = React.createRef();
@@ -39,14 +55,14 @@ class Sedes extends React.Component {
         this.refTxtProvincia = React.createRef();
         this.refTxtDistrito = React.createRef();
 
+        this.refTxtSearch = React.createRef();
+
         // this.refTxtMoneda = React.createRef();
         // this.refTxtNumCuenta = React.createRef();
         // this.refTxtCci = React.createRef();
         // this.refTxtRepresentante = React.createRef();
-    }
-
-    async componentDidMount() {
-        this.fillTable(0, 1, "");
+        this.idCodigo = "";
+        this.abortControllerTable = new AbortController();
     }
 
     setStateAsync(state) {
@@ -55,14 +71,86 @@ class Sedes extends React.Component {
         });
     }
 
-    fillTable = async (option, paginacion, buscar) => {
-        // console.log(buscar.trim().toUpperCase())
+    async componentDidMount() {
+        this.loadInit();
+
+        viewModal("modalSede", () => {
+            this.abortControllerModal = new AbortController();
+
+            if (this.idCodigo !== "") this.loadDataId(this.idCodigo);
+        });
+
+        clearModal("modalSede", async () => {
+            this.abortControllerModal.abort();
+            await this.setStateAsync({
+                txtNombreEmpresa: '',
+                txtNombreSede: '',
+                txtTelefono: '',
+                txtCelular: '',
+                txtEmail: '',
+                txtWeb: '',
+                txtDireccion: '',
+                txtPais: '',
+                txtRegion: '',
+                txtProvincia: '',
+                txtDistrito: '',
+                idSede: '',
+
+                loadModal: false,
+                nameModal: 'Nuevo Comprobante',
+                msgModal: 'Cargando datos...',
+            });
+            this.idCodigo = "";
+        });
+    }
+
+    componentWillUnmount() {
+        this.abortControllerTable.abort();
+    }
+
+    loadInit = async () => {
+        if (this.state.loading) return;
+
+        await this.setStateAsync({ paginacion: 1 });
+        this.fillTable(0, "");
+        await this.setStateAsync({ opcion: 0 });
+    }
+
+    async searchText(text) {
+        if (this.state.loading) return;
+
+        if (text.trim().length === 0) return;
+
+        await this.setStateAsync({ paginacion: 1 });
+        this.fillTable(1, text.trim());
+        await this.setStateAsync({ opcion: 1 });
+    }
+
+    paginacionContext = async (listid) => {
+        await this.setStateAsync({ paginacion: listid });
+        this.onEventPaginacion();
+    }
+
+    onEventPaginacion = () => {
+        switch (this.state.opcion) {
+            case 0:
+                this.fillTable(0, "");
+                break;
+            case 1:
+                this.fillTable(1, this.refTxtSearch.current.value);
+                break;
+        }
+    }
+
+    fillTable = async (opcion, buscar) => {
         try {
-            await this.setStateAsync({ loading: true, paginacion: paginacion, lista: [] });
+            await this.setStateAsync({ loading: true, lista: [], messageTable: "Cargando información...", messagePaginacion: "Mostranto 0 de 0 Páginas" });
+
             const result = await axios.get('/api/sede/list', {
+                signal: this.abortControllerTable.signal,
                 params: {
-                    "option": option,
-                    "buscar": buscar.trim().toUpperCase(),
+                    "opcion": opcion,
+                    "buscar": buscar,
                     "posicionPagina": ((this.state.paginacion - 1) * this.state.filasPorPagina),
                     "filasPorPagina": this.state.filasPorPagina
                 }
@@ -71,28 +159,48 @@ class Sedes extends React.Component {
             let totalPaginacion = parseInt(Math.ceil((parseFloat(result.data.total) / this.state.filasPorPagina)));
             let messagePaginacion = `Mostrando ${result.data.result.length} de ${totalPaginacion} Páginas`;
 
-            this.setState({
+            await this.setStateAsync({
                 loading: false,
                 lista: result.data.result,
                 totalPaginacion: totalPaginacion,
                 messagePaginacion: messagePaginacion
             });
-            // console.log(result);
-        } catch (err) {
-            console.log(err.response)
-            console.log(err)
+
+        } catch (error) {
+            if (error.message !== "canceled") {
+                await this.setStateAsync({
+                    loading: false,
+                    lista: [],
+                    totalPaginacion: 0,
+                    messageTable: "Se produjo un error interno, intente nuevamente por favor.",
+                    messagePaginacion: "Mostranto 0 de 0 Páginas",
+                });
+            }
+        }
+    }
+
+    async openModal(id) {
+        if (id === '') {
+            showModal('modalSede')
+            await this.setStateAsync({ nameModal: "Nueva Sede" });
+        }
+        else {
+            showModal('modalSede')
+            this.idCodigo = id;
+            await this.setStateAsync({ idComprobante: id, nameModal: "Editar Sede", loadModal: true });
         }
     }
 
     loadDataId = async (id) => {
         try {
             const result = await axios.get("/api/sede/id", {
+                signal: this.abortControllerModal.signal,
                 params: {
                     idSede: id
                 }
             });
-            // console.log(result)
-            this.setState({
+
+            await this.setStateAsync({
                 txtNombreEmpresa: result.data.nombreEmpresa,
                 txtNombreSede: result.data.nombreSede,
                 txtTelefono: result.data.telefono,
@@ -104,15 +212,21 @@ class Sedes extends React.Component {
                 txtRegion: result.data.region,
                 txtProvincia: result.data.provincia,
                 txtDistrito: result.data.distrito,
-                idSede: result.data.idSede
+                idSede: result.data.idSede,
+
+                loadModal: false
             });
 
         } catch (error) {
-            console.log(error.response)
+            if (error.message !== "canceled") {
+                await this.setStateAsync({
+                    msgModal: "Se produjo un error interno, intente nuevamente"
+                });
+            }
         }
     }
 
-    async save() {
+    async onEventGuardar() {
         if (this.state.txtNombreEmpresa === "") {
             this.refTxtNombreEmpresa.current.focus();
         } else if (this.state.txtNombreSede === "") {
@@ -129,9 +243,10 @@ class Sedes extends React.Component {
         else {
             try {
 
-                let result = null
+                ModalAlertInfo("Sede", "Procesando información...");
+                hideModal("modalSede");
                 if (this.state.idSede !== '') {
-                    result = await axios.post('/api/sede/update', {
+                    let result = await axios.post('/api/sede/update', {
                         "nombreEmpresa": this.state.txtNombreEmpresa.trim().toUpperCase(),
                         "nombreSede": this.state.txtNombreSede.trim().toUpperCase(),
                         "telefono": this.state.txtTelefono.trim().toUpperCase(),
@@ -145,10 +260,12 @@ class Sedes extends React.Component {
                         "distrito": this.state.txtDistrito.trim().toUpperCase(),
                         "idSede": this.state.idSede
                     })
-                    // console.log(result);
 
+                    ModalAlertSuccess("Sede", result.data, () => {
+                        this.onEventPaginacion();
+                    });
                 } else {
-                    result = await axios.post('/api/sede/add', {
+                    let result = await axios.post('/api/sede/add', {
                         "nombreEmpresa": this.state.txtNombreEmpresa.trim().toUpperCase(),
                         "nombreSede": this.state.txtNombreSede.trim().toUpperCase(),
                         "telefono": this.state.txtTelefono.trim().toUpperCase(),
@@ -161,67 +278,37 @@ class Sedes extends React.Component {
                         "provincia": this.state.txtProvincia.trim().toUpperCase(),
                         "distrito": this.state.txtDistrito.trim().toUpperCase(),
                     });
-                    // console.log(result);
+
+                    ModalAlertSuccess("Sede", result.data, () => {
+                        this.onEventPaginacion();
+                    });
                 }
-
-                // console.log(result);
-                this.closeModal()
-
             } catch (error) {
-                console.log(error)
-                console.log(error.response)
+                ModalAlertWarning("Sede", "Se produjo un error un interno, intente nuevamente.");
             }
         }
     }
 
-    openModal(id) {
-        if (id === '') {
-            showModal('modalSede')
-            this.refTxtNombre.current.focus();
-            // console.log('nuevo')
-        }
-        else {
-            this.setState({ idSede: id });
-            showModal('modalSede')
-            this.loadDataId(id)
-            // console.log('editar')
-        }
-    }
-
-    closeModal() {
-        hideModal('modalSede')
-        this.setState({
-            txtNombreEmpresa: '',
-            txtNombreSede: '',
-            txtTelefono: '',
-            txtCelular: '',
-            txtEmail: '',
-            txtWeb: '',
-            txtDireccion: '',
-            txtPais: '',
-            txtRegion: '',
-            txtProvincia: '',
-            txtDistrito: '',
-
-            idSede: '',
-        })
-    }
 
     render() {
         return (
             <>
-
                 {/* Inicio modal */}
                 <div className="modal fade" id="modalSede" data-backdrop="static">
                     <div className="modal-dialog modal-lg">
                         <div className="modal-content">
                             <div className="modal-header">
-                                <h5 className="modal-title"><i className="bi bi-currency-exchange"></i>{this.state.idSede === '' ? " Registrar Sede" : " Editar Sede"}</h5>
-                                <button type="button" className="close" data-dismiss="modal" onClick={() => this.closeModal()}>
+                                <h5 className="modal-title">{this.state.nameModal}</h5>
+                                <button type="button" className="close" data-bs-dismiss="modal" aria-label="Close">
                                     <span aria-hidden="true">&times;</span>
                                 </button>
                             </div>
                             <div className="modal-body">
+                                {this.state.loadModal ?
+                                    <div className="clearfix absolute-all bg-white">
+                                        {spinnerLoading(this.state.msgModal)}
+                                    </div>
+                                    : null}
 
                                 <div className="form-row">
                                     <div className="form-group col-md-6">
@@ -348,8 +435,8 @@ class Sedes extends React.Component {
 
                             </div>
                             <div className="modal-footer">
-                                <button type="button" className="btn btn-primary" onClick={() => this.save()}>Guardar</button>
-                                <button type="button" className="btn btn-secondary" data-dismiss="modal" onClick={() => this.closeModal()}>Cerrar</button>
+                                <button type="button" className="btn btn-primary" onClick={() => this.onEventGuardar()}>Guardar</button>
+                                <button type="button" className="btn btn-danger" data-bs-dismiss="modal">Cerrar</button>
                             </div>
                         </div>
                     </div>
@@ -371,7 +458,12 @@ class Sedes extends React.Component {
                                 <div className="input-group-prepend">
                                     <div className="input-group-text"><i className="bi bi-search"></i></div>
                                 </div>
-                                <input type="search" className="form-control" placeholder="Buscar..." onKeyUp={(event) => console.log(event.target.value)} />
+                                <input
+                                    type="search"
+                                    className="form-control"
+                                    placeholder="Buscar..."
+                                    ref={this.refTxtSearch}
+                                    onKeyUp={(event) => this.searchText(event.target.value)} />
                             </div>
                         </div>
                     </div>
@@ -408,13 +500,7 @@ class Sedes extends React.Component {
                                         this.state.loading ? (
                                             <tr>
                                                 <td className="text-center" colSpan="7">
-                                                    <img
-                                                        src={loading}
-                                                        alt="Loading..."
-                                                        width="34"
-                                                        height="34"
-                                                    />
-                                                    <p>Cargando información...</p>
+                                                    {spinnerLoading()}
                                                 </td>
                                             </tr>
                                         ) : this.state.lista.length === 0 ? (
@@ -443,24 +529,27 @@ class Sedes extends React.Component {
 
                             </table>
                         </div>
-                        <div className="col-md-12 text-center">
-                            <nav aria-label="...">
+                    </div>
+                </div>
+
+
+                <div className="row">
+                    <div className="col-sm-12 col-md-5">
+                        <div className="dataTables_info mt-2" role="status" aria-live="polite">{this.state.messagePaginacion}</div>
+                    </div>
+                    <div className="col-sm-12 col-md-7">
+                        <div className="dataTables_paginate paging_simple_numbers">
+                            <nav aria-label="Page navigation example">
                                 <ul className="pagination justify-content-end">
-                                    <li className="page-item disabled">
-                                        <button className="page-link">Previous</button>
-                                    </li>
-                                    <li className="page-item"><button className="page-link">1</button></li>
-                                    <li className="page-item active" aria-current="page">
-                                        <button className="page-link" href="#">2</button>
-                                    </li>
-                                    <li className="page-item"><button className="page-link" >3</button></li>
-                                    <li className="page-item">
-                                        <button className="page-link">Next</button>
-                                    </li>
+                                    <Paginacion
+                                        loading={this.state.loading}
+                                        totalPaginacion={this.state.totalPaginacion}
+                                        paginacion={this.state.paginacion}
+                                        fillTable={this.paginacionContext}
+                                    />
                                 </ul>
                             </nav>
                         </div>
-
                     </div>
                 </div>
             </>
