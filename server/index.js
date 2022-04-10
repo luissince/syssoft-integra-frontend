@@ -43,6 +43,7 @@ app.use('/api/usuario', require('./src/router/Usuario'))
 
 app.use('/api/concepto', require('./src/router/Concepto'))
 app.use('/api/gasto', require('./src/router/Gasto'))
+app.use('/api/cobro', require('./src/router/Cobro'))
 
 
 app.use((req, res, next) => {

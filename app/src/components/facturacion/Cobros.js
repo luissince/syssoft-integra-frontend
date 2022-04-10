@@ -12,7 +12,7 @@ class Cobros extends React.Component {
             depositoBanco: '',
             metodoPago: '',
             cuotaMensual: '',
-            fechaPago: '',
+            fecha: '',
             concepto: '',
             monto: '',
 
@@ -29,14 +29,14 @@ class Cobros extends React.Component {
         this.refDepositoBanco = React.createRef()
         this.refMetodoPago = React.createRef()
         this.refCuotaMensual = React.createRef()
-        this.refFechaPago = React.createRef()
+        this.refFecha = React.createRef()
         this.refConcepto = React.createRef()
         this.refMonto = React.createRef()
 
     }
 
     async componentDidMount() {
-        // this.fillTable(0, 1, "");
+        this.fillTable(0, 1, "");
 
         clearModal("modalCobro", () => {
             this.setState({
@@ -44,7 +44,7 @@ class Cobros extends React.Component {
                 depositoBanco: '',
                 metodoPago: '',
                 cuotaMensual: '',
-                fechaPago: '',
+                fecha: '',
                 concepto: '',
                 monto: '',
 
@@ -102,9 +102,9 @@ class Cobros extends React.Component {
                 depositoBanco: result.data.depositoBanco,
                 metodoPago: result.data.metodoPago,
                 cuotaMensual: result.data.cuotaMensual,
-                fechaPago: result.data.fechaPago,
-                // concepto: '',
-                // monto: '',
+                fecha: result.data.fecha,
+                concepto: result.data.concepto,
+                monto: result.data.monto,
 
                 idCobro: result.data.idCobro
             });
@@ -118,31 +118,25 @@ class Cobros extends React.Component {
 
         if (this.state.cliente === "") {
             this.setState({ messageWarning: "Seleccione el cliente" });
-            this.onFocusTab("concepto-tab", "concepto");
+            this.onFocusTab("cuota-tab", "cuota");
             this.refCliente.current.focus();
         } else if (this.state.depositoBanco === "") {
             this.setState({ messageWarning: "Seleccione el banco a depositar" })
-            this.onFocusTab("concepto-tab", "concepto");
+            this.onFocusTab("cuota-tab", "cuota");
             this.refDepositoBanco.current.focus();
         } else if (this.state.metodoPago === "") {
             this.setState({ messageWarning: "Seleccione la metodo de pago" })
-            this.onFocusTab("concepto-tab", "concepto");
+            this.onFocusTab("cuota-tab", "cuota");
             this.refMetodoPago.current.focus();
         } else if (this.state.cuotaMensual === "") {
             this.setState({ messageWarning: "Ingrese el monto de la cuota" });
-            this.onFocusTab("concepto-tab", "concepto");
+            this.onFocusTab("cuota-tab", "cuota");
             this.refCuotaMensual.current.focus();
-        } else if (this.state.fechaPago === "") {
+        } else if (this.state.fecha === "") {
             this.setState({ messageWarning: "Seleccione la fecha" });
-            this.onFocusTab("concepto-tab", "concepto");
-            this.refFechaPago.current.focus();
+            this.onFocusTab("cuota-tab", "cuota");
+            this.refFecha.current.focus();
         }
-
-        //    else if (this.state.estado === "") {
-        //         this.setState({ messageWarning: "Seleccione el estado" });
-        //         this.onFocusTab("login-tab", "login");
-        //         this.refEstado.current.focus();
-        //     }  
 
         else {
 
@@ -156,12 +150,14 @@ class Cobros extends React.Component {
                         "depositoBanco": this.state.depositoBanco,
                         "metodoPago": this.state.metodoPago,
                         "cuotaMensual": this.state.cuotaMensual.toString().trim(),
-                        "fechaPago": this.state.fechaPago,
+                        "fecha": this.state.fecha,
+
+                        "concepto": '',
+                        "monto": '',
 
                         //id
                         "idCobro": this.state.idCobro
                     })
-                    // console.log(result);
 
                 } else {
                     result = await axios.post('/api/cobro/add', {
@@ -170,9 +166,11 @@ class Cobros extends React.Component {
                         "depositoBanco": this.state.depositoBanco,
                         "metodoPago": this.state.metodoPago,
                         "cuotaMensual": this.state.cuotaMensual.toString().trim(),
-                        "fechaPago": this.state.fechaPago
+                        "fecha": this.state.fecha,
+
+                        "concepto": '',
+                        "monto": ''
                     });
-                    // console.log(result);
                 }
 
                 this.closeModal()
@@ -205,7 +203,7 @@ class Cobros extends React.Component {
             depositoBanco: '',
             metodoPago: '',
             cuotaMensual: '',
-            fechaPago: '',
+            fecha: '',
             concepto: '',
             monto: '',
 
@@ -227,6 +225,11 @@ class Cobros extends React.Component {
         }
     }
 
+    
+
+
+    
+
     render() {
         return (
             <>
@@ -235,7 +238,7 @@ class Cobros extends React.Component {
                     <div className="modal-dialog modal-lg">
                         <div className="modal-content">
                             <div className="modal-header">
-                                <h5 className="modal-title"><i className="bi bi-currency-exchange"></i>{this.state.idCobro === '' ? " Registrar Cobro" : " Editar Cobro"}</h5>
+                                <h5 className="modal-title">{this.state.idCobro === '' ? " Registrar Cobro" : " Editar Cobro"}</h5>
                                 <button type="button" className="close" data-dismiss="modal" onClick={() => this.closeModal()}>
                                     <span aria-hidden="true">&times;</span>
                                 </button>
@@ -251,8 +254,15 @@ class Cobros extends React.Component {
                                         </a>
                                     </div>
                                 </nav>
-                                <br />
-                                <div className="tab-content" id="myTabContent">
+
+                                {
+                                    this.state.messageWarning === '' ? null :
+                                        <div className="alert alert-warning" role="alert">
+                                            <i className="bi bi-exclamation-diamond-fill"></i> {this.state.messageWarning}
+                                        </div>
+                                }
+                                
+                                <div className="tab-content mt-2" id="myTabContent">
                                     <div className="tab-pane fade show active" id="cuota" role="tabpanel" aria-labelledby="cuota-tab">
 
                                         <div className="form-row">
@@ -425,17 +435,17 @@ class Cobros extends React.Component {
                                                 <input
                                                     type="date"
                                                     className="form-control"
-                                                    value={this.state.fechaPago}
-                                                    ref={this.refFechaPago}
+                                                    value={this.state.fecha}
+                                                    ref={this.refFecha}
                                                     onChange={(event) => {
                                                         if (event.target.value.length > 0) {
                                                             this.setState({
-                                                                fechaPago: event.target.value,
+                                                                fecha: event.target.value,
                                                                 messageWarning: '',
                                                             });
                                                         } else {
                                                             this.setState({
-                                                                fechaPago: event.target.value,
+                                                                fecha: event.target.value,
                                                                 messageWarning: 'Seleccione la fecha',
                                                             });
                                                         }
@@ -527,8 +537,8 @@ class Cobros extends React.Component {
 
                             </div>
                             <div className="modal-footer">
-                                <button type="button" className="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-                                <button type="button" className="btn btn-primary">Aceptar</button>
+                                <button type="button" className="btn btn-primary" onClick={() => this.save()}>Guardar</button>
+                                <button type="button" className="btn btn-secondary" data-dismiss="modal" onClick={() => this.closeModal()}>Cerrar</button>
                             </div>
                         </div>
                     </div>
@@ -586,10 +596,10 @@ class Cobros extends React.Component {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {/* {
+                                    {
                                         this.state.loading ? (
                                             <tr>
-                                                <td className="text-center" colSpan="8">
+                                                <td className="text-center" colSpan="9">
                                                     <img
                                                         src={loading}
                                                         id="imgLoad"
@@ -602,7 +612,7 @@ class Cobros extends React.Component {
                                             </tr>
                                         ) : this.state.lista.length === 0 ? (
                                             <tr className="text-center">
-                                                <td colSpan="8">¡No hay datos registrados!</td>
+                                                <td colSpan="9">¡No hay datos registrados!</td>
                                             </tr>
                                         ) : (
                                             this.state.lista.map((item, index) => {
@@ -616,13 +626,13 @@ class Cobros extends React.Component {
                                                         <td>{item.empresa}</td>
                                                         <td className="text-center"><div className={`badge ${item.estado === 1 ? "badge-info" : "badge-danger"}`}>{item.estado === 1 ? "ACTIVO" : "INACTIVO"}</div></td>
                                                         <td>
-                                                            <button className="btn btn-outline-dark btn-sm" title="Editar" onClick={() => this.openModal(item.idUsuario)}><i className="bi bi-pencil"></i></button>
+                                                            <button className="btn btn-outline-dark btn-sm" title="Editar" onClick={() => this.openModal(item.idCobro)}><i className="bi bi-pencil"></i></button>
                                                         </td>
                                                     </tr>
                                                 )
                                             })
                                         )
-                                    } */}
+                                    }
                                 </tbody>
 
                             </table>
