@@ -86,7 +86,7 @@ class Perfiles extends React.Component {
             // console.log(result)
             this.setState({
                 descripcion: result.data.descripcion,
-                empresa: result.data.empresa,
+                empresa: result.data.idSede,
                 idPerfil: result.data.idPerfil
             });
 
@@ -105,24 +105,24 @@ class Perfiles extends React.Component {
         } else {
             try {
 
-                let result = null
+
                 if (this.state.idPerfil !== '') {
-                    result = await axios.post('/api/perfil/update', {
+                    let result = await axios.post('/api/perfil/update', {
                         "descripcion": this.state.descripcion.trim().toUpperCase(),
-                        "empresa": this.state.empresa.trim().toUpperCase(),
+                        "idSede": this.state.empresa.trim().toUpperCase(),
                         "idPerfil": this.state.idPerfil
                     })
-                    // console.log(result);
+                    console.log(result);
 
                 } else {
-                    result = await axios.post('/api/perfil/add', {
+                    let result = await axios.post('/api/perfil/add', {
                         "descripcion": this.state.descripcion.trim().toUpperCase(),
-                        "empresa": this.state.empresa.trim().toUpperCase(),
+                        "idSede": this.state.empresa.trim().toUpperCase(),
                     });
-                    // console.log(result);
+                    console.log(result);
                 }
 
-                // console.log(result);
+
                 this.closeModal()
 
             } catch (error) {
@@ -185,11 +185,6 @@ class Perfiles extends React.Component {
                                             ref={this.refEmpresa}
                                             onChange={(event) => this.setState({ empresa: event.target.value })}
                                             placeholder='Ingrese la empresa' />
-                                        {/* <select className="form-control" id="empresas">
-                                            <option>-- seleccione --</option>
-                                            <option>seleccion primera</option>
-                                            <option>seleccion segunda</option>
-                                        </select> */}
                                     </div>
                                 </div>
                                 <div className='row py-1'>

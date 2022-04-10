@@ -39,15 +39,18 @@ class NavTree {
           const icon_container = document.createElement('span')
           icon_container.classList.add('mx-1')
 
-          const a = li.querySelector(':scope > a')
-          a.classList.add('nav-link', 'flex-grow-1', 'text-break')
+          const a = li.querySelector(':scope > button') || li.querySelector(':scope > div')
+        
+          // a.classList.add('nav-link', 'flex-grow-1', 'text-break')
+          a.classList.add('nav-link', 'text-break')
 
           li.replaceChild(li_container, a)
-          li_container.append(a)
+          li_container.append(a)        
 
-          const icon_link = a.cloneNode()
-          icon_link.classList.add('px-0')
+          // const icon_link = a.cloneNode()
+          // icon_link.classList.add('px-0')
           const icon = document.createElement('i')
+          icon.classList.add('px-3');
 
           const ul = li.querySelector('ul')
           if (ul){
@@ -63,7 +66,7 @@ class NavTree {
               collapsable.setAttribute('id', 'ntc-' + li_id)
 
               li.replaceChild(collapsable, ul)
-              ul.classList.add('ms-4')
+              ul.classList.add('ml-4')
               collapsable.appendChild(ul)
 
               new bootstrap.Collapse(collapsable, {
@@ -97,13 +100,13 @@ class NavTree {
               })
           }
 
-          icon_link.appendChild(icon)
-          icon_container.appendChild(icon_link)
-          prefix_container.appendChild(icon_container)
+          // icon_link.appendChild(icon)
+          // icon_container.appendChild(icon_link)
+          prefix_container.appendChild(icon)
 
           var prevs = []
           var prev = li_container
-          while(prev = prev.previousSibling){
+          while(prev === prev.previousSibling){
             if (prev.nodeName.toUpperCase() === 'SPAN'){
               prevs.push(prev)
             }
@@ -124,7 +127,7 @@ class NavTree {
           
           var nexts = []
           var next = li_container
-          while(next = next.nextSibling){
+          while(next === next.nextSibling){
             if (next.nodeName.toUpperCase() === 'SPAN'){
               nexts.push(next)
             }
@@ -196,7 +199,7 @@ class NavTree {
       var new_node = this.element.querySelector("#" + i.getAttribute('id'));
       if (new_node){
         for (let attr of i.attributes) {
-          if (attr.name == 'class')
+          if (attr.name === 'class')
             attr.value.split(' ').forEach((cls) => new_node.classList.add(cls))
           else
             new_node.setAttribute(attr.name, attr.value)

@@ -115,14 +115,30 @@ export function hideModal(id) {
   myModal.hide();
 }
 
-export function viewModal(id, callback = function () {}) {
+export function viewModal(id, callback = function () { }) {
   let myModalEl = document.getElementById(id);
   myModalEl.addEventListener("shown.bs.modal", callback);
 }
 
-export function clearModal(id, callback = function () {}) {
+export function clearModal(id, callback = function () { }) {
   let myModalEl = document.getElementById(id);
   myModalEl.addEventListener("hidden.bs.modal", callback);
+}
+
+export function spinnerLoading(message = "Cargando datos..") {
+  return (<div className="d-flex flex-column justify-content-center align-items-center h-100">
+    <div>
+      <div className="spinner-grow text-danger" role="status">
+      </div>
+      <div className="spinner-grow text-warning" role="status">
+      </div>
+      <div className="spinner-grow text-info" role="status">
+      </div>
+    </div>
+    <div>
+      <strong>{message}</strong>
+    </div>
+  </div>);
 }
 
 export function readDataURL(files) {
@@ -172,7 +188,7 @@ export function ModalAlertInfo(title, message) {
   });
 }
 
-export function ModalAlertSuccess(title, message, callback = function () {}) {
+export function ModalAlertSuccess(title, message, callback = function () { }) {
   Swal({
     title: title,
     text: message,
@@ -184,7 +200,7 @@ export function ModalAlertSuccess(title, message, callback = function () {}) {
   });
 }
 
-export function ModalAlertWarning(title, message, callback = function () {}) {
+export function ModalAlertWarning(title, message, callback = function () { }) {
   Swal({
     title: title,
     text: message,

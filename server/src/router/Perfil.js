@@ -7,12 +7,18 @@ const conec = new Conexion()
 
 router.get('/list', async function (req, res) {
     try {
-        let lista = await conec.query(`SELECT * FROM perfil 
-            WHERE 
-            ? = 0
-            OR
-            ? = 1 and empresa like concat(?,'%')
-            LIMIT ?,?`, [
+        let lista = await conec.query(`SELECT 
+        idPerfil ,
+        idSede,
+        descripcion,
+        fecha,
+        hora
+        FROM perfil 
+        WHERE 
+        ? = 0
+        OR
+        ? = 1 and descripcion like concat(?,'%')
+        LIMIT ?,?`, [
             parseInt(req.query.option),
 
             parseInt(req.query.option),
@@ -33,7 +39,7 @@ router.get('/list', async function (req, res) {
             WHERE 
             ? = 0
             OR
-            ? = 1 and empresa like concat(?,'%')`, [
+            ? = 1 and descripcion like concat(?,'%')`, [
             
             parseInt(req.query.option),
 
@@ -80,7 +86,7 @@ router.post('/add', async function (req, res) {
             idPerfil = "PF0001";
         }
 
-        await conec.execute(connection, `INSERT INTO perfil(idPerfil, empresa, descripcion, fechaRegistro) VALUES(?,?,?,NOW())`, [
+        await conec.execute(connection, `INSERT INTO perfil(idPerfil, idSede, descripcion, fechaRegistro) VALUES(?,?,?,NOW())`, [
             idPerfil, req.body.empresa, req.body.descripcion
         ])
 
@@ -120,8 +126,8 @@ router.post('/update', async function (req, res) {
     try {
 
         connection = await conec.beginTransaction();
-        await conec.execute(connection, `UPDATE perfil SET empresa=?, descripcion=? WHERE idPerfil=?`, [
-            req.body.empresa, req.body.descripcion, req.body.idPerfil
+        await conec.execute(connection, `UPDATE perfil SET idSede=?, descripcion=? WHERE idPerfil=?`, [
+            req.body.idSede, req.body.descripcion, req.body.idPerfil
         ])
 
         await conec.commit(connection)

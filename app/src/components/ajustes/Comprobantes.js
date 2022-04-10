@@ -1,8 +1,18 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import axios from 'axios';
-import loading from "../../recursos/images/loading.gif";
-import { keyNumberInteger, timeForma24, showModal, hideModal, clearModal } from '../tools/Tools';
+import {
+    keyNumberInteger,
+    timeForma24,
+    showModal,
+    hideModal,
+    viewModal,
+    clearModal,
+    ModalAlertInfo,
+    ModalAlertSuccess,
+    ModalAlertWarning,
+    spinnerLoading
+} from '../tools/Tools';
 import Paginacion from '../tools/Paginacion';
 
 class Comprobantes extends React.Component {
@@ -18,6 +28,10 @@ class Comprobantes extends React.Component {
             estado: true,
             idUsuario: 0,
 
+            loadModal: false,
+            nameModal: 'Nuevo Comprobante',
+            msgModal: 'Cargando datos...',
+
             loading: false,
             lista: [],
 
@@ -25,11 +39,18 @@ class Comprobantes extends React.Component {
             paginacion: 0,
             totalPaginacion: 0,
             filasPorPagina: 5,
+            messageTable: 'Cargando información...',
             messagePaginacion: 'Mostranto 0 de 0 Páginas'
         }
         this.refNombre = React.createRef();
         this.refSerie = React.createRef();
         this.refNumeracion = React.createRef();
+
+        this.refTxtSearch = React.createRef();
+
+        this.idCodigo = "";
+        this.abortControllerTable = new AbortController();
+
     }
 
     setStateAsync(state) {
@@ -39,8 +60,16 @@ class Comprobantes extends React.Component {
     }
 
     async componentDidMount() {
-        this.loadInitComprobantes();
+        this.loadInit();
+
+        viewModal("modalComprobante", () => {
+            this.abortControllerModal = new AbortController();
+
+            if (this.idCodigo !== "") this.loadDataId(this.idCodigo);
+        });
+
         clearModal("modalComprobante", async () => {
+            this.abortControllerModal.abort();
             await this.setStateAsync({
                 idComprobante: '',
                 nombre: '',
@@ -49,29 +78,62 @@ class Comprobantes extends React.Component {
                 impresion: '',
                 estado: true,
                 idUsuario: '',
+                loadModal: false,
+                nameModal: 'Nuevo Comprobante',
+                msgModal: 'Cargando datos...',
             });
+            this.idCodigo = "";
         });
     }
 
-    loadInitComprobantes = async () => {
-        if (!this.state.loading) {
-            await this.setStateAsync({ paginacion: 1 });
-            this.fillTableComprobante();
-            await this.setStateAsync({ opcion: 0 });
-        }
+    componentWillUnmount() {
+        this.abortControllerTable.abort();
+    }
+
+    loadInit = async () => {
+        if (this.state.loading) return;
+
+        await this.setStateAsync({ paginacion: 1 });
+        this.fillTable(0, "");
+        await this.setStateAsync({ opcion: 0 });
+
+    }
+
+    async searchText(text) {
+        if (this.state.loading) return;
+
+        if (text.trim().length === 0) return;
+
+        await this.setStateAsync({ paginacion: 1 });
+        this.fillTable(1, text.trim());
+        await this.setStateAsync({ opcion: 1 });
     }
 
     paginacionContext = async (listid) => {
         await this.setStateAsync({ paginacion: listid });
-        this.fillTableComprobante();
+        this.onEventPaginacion();
     }
 
-    fillTableComprobante = async () => {
+    onEventPaginacion = () => {
+        switch (this.state.opcion) {
+            case 0:
+                this.fillTable(0, "");
+                break;
+            case 1:
+                this.fillTable(1, this.refTxtSearch.current.value);
+                break;
+        }
+    }
+
+    fillTable = async (opcion, buscar) => {
         try {
-            await this.setStateAsync({ loading: true, lista: [], messagePaginacion: "Mostranto 0 de 0 Páginas" });
+            await this.setStateAsync({ loading: true, lista: [], messageTable: "Cargando información...", messagePaginacion: "Mostranto 0 de 0 Páginas" });
 
             const result = await axios.get('/api/comprobante/list', {
+                signal: this.abortControllerTable.signal,
                 params: {
+                    "opcion": opcion,
+                    "buscar": buscar,
                     "posicionPagina": ((this.state.paginacion - 1) * this.state.filasPorPagina),
                     "filasPorPagina": this.state.filasPorPagina
                 }
@@ -79,59 +141,63 @@ class Comprobantes extends React.Component {
 
             let totalPaginacion = parseInt(Math.ceil((parseFloat(result.data.total) / this.state.filasPorPagina)));
             let messagePaginacion = `Mostrando ${result.data.result.length} de ${totalPaginacion} Páginas`;
-            this.setState({
+            await this.setStateAsync({
                 loading: false,
                 lista: result.data.result,
                 totalPaginacion: totalPaginacion,
                 messagePaginacion: messagePaginacion
             });
-        } catch (err) {
-            this.setState({
-                loading: false,
-                lista: [],
-                totalPaginacion: 0,
-                messagePaginacion: "Mostranto 0 de 0 Páginas",
-            });
+        } catch (error) {
+            if (error.message !== "canceled") {
+                await this.setStateAsync({
+                    loading: false,
+                    lista: [],
+                    totalPaginacion: 0,
+                    messageTable: "Se produjo un error interno, intente nuevamente por favor.",
+                    messagePaginacion: "Mostranto 0 de 0 Páginas",
+                });
+            }
         }
     }
 
-    onEventPaginacion = async (listid) => {
-        switch (this.state.opcion) {
-
-        }
-    }
-
-    openModal = (id) => {
+    async openModal(id) {
         if (id === '') {
             showModal('modalComprobante')
+            await this.setStateAsync({ nameModal: "Nuevo Comprobante" });
         } else {
             showModal('modalComprobante')
-            this.loadDataId(id);
+            this.idCodigo = id;
+            await this.setStateAsync({ idComprobante: id, nameModal: "Editar Comprobante", loadModal: true });
         }
     }
 
     loadDataId = async (id) => {
         try {
             const result = await axios.get("/api/comprobante/id", {
+                signal: this.abortControllerModal.signal,
                 params: {
                     idComprobante: id
                 }
             });
 
-            this.setState({
+            await this.setStateAsync({
                 idComprobante: result.data.idComprobante,
                 nombre: result.data.nombre,
                 serie: result.data.serie,
                 numeracion: result.data.numeracion,
                 impresion: result.data.impresion,
-                estado: result.data.estado === 1 ? true : false
+                estado: result.data.estado === 1 ? true : false,
+                loadModal: false
             });
 
         } catch (error) {
-            console.log(error.response)
+            if (error.message !== "canceled") {
+                await this.setStateAsync({
+                    msgModal: "Se produjo un error interno, intente nuevamente"
+                });
+            }
         }
     }
-
 
     async onEventGuardar() {
         if (this.state.nombre === "") {
@@ -141,8 +207,10 @@ class Comprobantes extends React.Component {
         } else if (this.state.numeracion === "") {
             this.refNumeracion.current.focus()
         } else {
-            if (this.state.idComprobante !== "") {
-                try {
+            try {
+                ModalAlertInfo("Comprobante", "Procesando información...");
+                hideModal("modalComprobante");
+                if (this.state.idComprobante !== "") {
                     const result = await axios.post('/api/comprobante/edit', {
                         "idComprobante": this.state.idComprobante,
                         "nombre": this.state.nombre.trim().toUpperCase(),
@@ -152,12 +220,11 @@ class Comprobantes extends React.Component {
                         "estado": this.state.estado,
                         "idUsuario": this.state.idUsuario
                     });
-                    console.log(result);
-                } catch (err) {
-                    console.log(err.response)
-                }
-            } else {
-                try {
+
+                    ModalAlertSuccess("Comprobante", result.data, () => {
+                        this.onEventPaginacion();
+                    });
+                } else {
                     const result = await axios.post('/api/comprobante/add', {
                         "nombre": this.state.nombre.trim().toUpperCase(),
                         "serie": this.state.serie.trim().toUpperCase(),
@@ -166,12 +233,14 @@ class Comprobantes extends React.Component {
                         "estado": this.state.estado,
                         "idUsuario": this.state.idUsuario
                     });
-                    console.log(result);
-                } catch (err) {
-                    console.log(err.response)
-                }
-            }
 
+                    ModalAlertSuccess("Comprobante", result.data, () => {
+                        this.onEventPaginacion();
+                    });
+                }
+            } catch (err) {
+                ModalAlertWarning("Comprobante", "Se produjo un error un interno, intente nuevamente.");
+            }
         }
     }
 
@@ -183,12 +252,18 @@ class Comprobantes extends React.Component {
                     <div className="modal-dialog">
                         <div className="modal-content">
                             <div className="modal-header">
-                                <h5 className="modal-title">Nuevo Comprobante</h5>
+                                <h5 className="modal-title">{this.state.nameModal}</h5>
                                 <button type="button" className="close" data-bs-dismiss="modal" aria-label="Close">
                                     <span aria-hidden="true">&times;</span>
                                 </button>
                             </div>
                             <div className="modal-body">
+                                {this.state.loadModal ?
+                                    <div className="clearfix absolute-all bg-white">
+                                        {spinnerLoading(this.state.msgModal)}
+                                    </div>
+                                    : null}
+
                                 <div className="form-group">
                                     <label htmlFor="nombre" className="col-form-label">Nombre:</label>
                                     <input
@@ -271,7 +346,12 @@ class Comprobantes extends React.Component {
                                 <div className="input-group-prepend">
                                     <div className="input-group-text"><i className="bi bi-search"></i></div>
                                 </div>
-                                <input type="text" className="form-control" placeholder="Buscar..." />
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    placeholder="Buscar..."
+                                    ref={this.refTxtSearch}
+                                    onKeyUp={(event) => this.searchText(event.target.value)} />
                             </div>
                         </div>
                     </div>
@@ -281,7 +361,7 @@ class Comprobantes extends React.Component {
                                 <i className="bi bi-file-plus"></i> Nuevo Registro
                             </button>
                             {" "}
-                            <button className="btn btn-outline-secondary" onClick={() => this.loadInitComprobantes()}>
+                            <button className="btn btn-outline-secondary" onClick={() => this.loadInit()}>
                                 <i className="bi bi-arrow-clockwise"></i>
                             </button>
                         </div>
@@ -309,13 +389,7 @@ class Comprobantes extends React.Component {
                                         this.state.loading ? (
                                             <tr>
                                                 <td className="text-center" colSpan="8">
-                                                    <img
-                                                        src={loading}
-                                                        width="34"
-                                                        height="34"
-                                                        alt="Loading..."
-                                                    />
-                                                    <p>Cargando información...</p>
+                                                    {spinnerLoading()}
                                                 </td>
                                             </tr>
                                         ) : this.state.lista.length === 0 ? (
@@ -332,8 +406,8 @@ class Comprobantes extends React.Component {
                                                         <td>{item.numeracion}</td>
                                                         <td>{<span>{item.fecha}</span>}{<br></br>}{<span>{timeForma24(item.hora)}</span>}</td>
                                                         <td className="text-center"><div className={`badge ${item.estado === 1 ? "badge-info" : "badge-danger"}`}>{item.estado === 1 ? "ACTIVO" : "INACTIVO"}</div></td>
-                                                        <td><button className="btn btn-outline-dark btn-sm" onClick={() => this.openModal(item.idComprobante)}><i className="bi bi-pencil"></i> Editar</button></td>
-                                                        <td><button className="btn btn-outline-danger btn-sm"><i className="bi bi-trash"></i> Anular</button></td>
+                                                        <td><button className="btn btn-outline-dark btn-sm" title="Editar" onClick={() => this.openModal(item.idComprobante)}><i className="bi bi-pencil"></i> </button></td>
+                                                        <td><button className="btn btn-outline-danger btn-sm" title="Anular"><i className="bi bi-trash"></i></button></td>
                                                     </tr>
                                                 )
                                             })
@@ -353,6 +427,7 @@ class Comprobantes extends React.Component {
                             <nav aria-label="Page navigation example">
                                 <ul className="pagination justify-content-end">
                                     <Paginacion
+                                        loading={this.state.loading}
                                         totalPaginacion={this.state.totalPaginacion}
                                         paginacion={this.state.paginacion}
                                         fillTable={this.paginacionContext}
