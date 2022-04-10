@@ -8,6 +8,13 @@ class Cobros extends React.Component {
         super(props);
         this.state = {
             idCobro: '',
+            cliente: '',
+            depositoBanco: '',
+            metodoPago: '',
+            cuotaMensual: '',
+            fechaPago: '',
+            concepto: '',
+            monto: '',
 
             loading: true,
             lista: [],
@@ -15,9 +22,17 @@ class Cobros extends React.Component {
             totalPaginacion: 0,
             filasPorPagina: 10,
             messagePaginacion: '',
-
             messageWarning: ''
         }
+
+        this.refCliente = React.createRef()
+        this.refDepositoBanco = React.createRef()
+        this.refMetodoPago = React.createRef()
+        this.refCuotaMensual = React.createRef()
+        this.refFechaPago = React.createRef()
+        this.refConcepto = React.createRef()
+        this.refMonto = React.createRef()
+
     }
 
     async componentDidMount() {
@@ -25,7 +40,13 @@ class Cobros extends React.Component {
 
         clearModal("modalCobro", () => {
             this.setState({
-
+                cliente: '',
+                depositoBanco: '',
+                metodoPago: '',
+                cuotaMensual: '',
+                fechaPago: '',
+                concepto: '',
+                monto: '',
 
                 idCobro: '',
                 messageWarning: ''
@@ -77,7 +98,13 @@ class Cobros extends React.Component {
             });
             // console.log(result)
             this.setState({
-
+                cliente: result.data.cliente,
+                depositoBanco: result.data.depositoBanco,
+                metodoPago: result.data.metodoPago,
+                cuotaMensual: result.data.cuotaMensual,
+                fechaPago: result.data.fechaPago,
+                // concepto: '',
+                // monto: '',
 
                 idCobro: result.data.idCobro
             });
@@ -87,52 +114,28 @@ class Cobros extends React.Component {
         }
     }
 
-    async onSaveProceso() {
+    async save() {
 
-
-
-        if (this.state.nombres === "") {
-            this.setState({ messageWarning: "Ingrese los nombres" });
-            this.onFocusTab("datos-tab", "datos");
-            this.refNombres.current.focus();
-        } else if (this.state.apellidos === "") {
-            this.setState({ messageWarning: "Ingrese los apellidos" })
-            this.onFocusTab("datos-tab", "datos");
-            this.refApellidos.current.focus();
-        } else if (this.state.dni === "") {
-            this.setState({ messageWarning: "Ingrese el numero de DNI" })
-            this.onFocusTab("datos-tab", "datos");
-            this.refDni.current.focus();
-        } else if (this.state.genero === "") {
-            this.setState({ messageWarning: "Seleccione el genero" });
-            this.onFocusTab("datos-tab", "datos");
-            this.refGenero.current.focus();
-        } else if (this.state.direccion === "") {
-            this.setState({ messageWarning: "Ingrese la dirección" });
-            this.onFocusTab("datos-tab", "datos");
-            this.refDireccion.current.focus();
-        } else if (this.state.telefono === "") {
-            this.setState({ messageWarning: "Ingrese el N° de telefono" });
-            this.onFocusTab("datos-tab", "datos");
-            this.refTelefono.current.focus();
-        } else if (this.state.email === "") {
-            this.setState({ messageWarning: "Ingrese el email" });
-            this.onFocusTab("datos-tab", "datos");
-            this.refEmail.current.focus();
-        }
-
-        else if (this.state.empresa === "") {
-            this.setState({ messageWarning: "Ingrese el nombre de la empresa" });
-            this.onFocusTab("login-tab", "login");
-            this.refempresa.current.focus();
-        } else if (this.state.perfil === "") {
-            this.setState({ messageWarning: "Ingrese el nombre del perfil" });
-            this.onFocusTab("login-tab", "login");
-            this.refPerfil.current.focus();
-        } else if (this.state.representante === "") {
-            this.setState({ messageWarning: "Seleccione si es representante" });
-            this.onFocusTab("login-tab", "login");
-            this.refRepresentante.current.focus();
+        if (this.state.cliente === "") {
+            this.setState({ messageWarning: "Seleccione el cliente" });
+            this.onFocusTab("concepto-tab", "concepto");
+            this.refCliente.current.focus();
+        } else if (this.state.depositoBanco === "") {
+            this.setState({ messageWarning: "Seleccione el banco a depositar" })
+            this.onFocusTab("concepto-tab", "concepto");
+            this.refDepositoBanco.current.focus();
+        } else if (this.state.metodoPago === "") {
+            this.setState({ messageWarning: "Seleccione la metodo de pago" })
+            this.onFocusTab("concepto-tab", "concepto");
+            this.refMetodoPago.current.focus();
+        } else if (this.state.cuotaMensual === "") {
+            this.setState({ messageWarning: "Ingrese el monto de la cuota" });
+            this.onFocusTab("concepto-tab", "concepto");
+            this.refCuotaMensual.current.focus();
+        } else if (this.state.fechaPago === "") {
+            this.setState({ messageWarning: "Seleccione la fecha" });
+            this.onFocusTab("concepto-tab", "concepto");
+            this.refFechaPago.current.focus();
         }
 
         //    else if (this.state.estado === "") {
@@ -141,75 +144,35 @@ class Cobros extends React.Component {
         //         this.refEstado.current.focus();
         //     }  
 
-        else if (this.state.usuario === "") {
-            this.setState({ messageWarning: "Ingrese el usuario" });
-            this.onFocusTab("login-tab", "login");
-            this.refUsuario.current.focus();
-        } else if (this.state.clave === "") {
-            this.setState({ messageWarning: "Ingrese la contraseña" });
-            this.onFocusTab("login-tab", "login");
-            this.refClave.current.focus();
-        } else if (this.state.configClave === "") {
-            this.setState({ messageWarning: "Ingrese contraseña nuevamente" });
-            this.onFocusTab("login-tab", "login");
-            this.refConfigClave.current.focus();
-        }
-
         else {
 
             try {
 
-                if (this.state.clave === this.state.configClave) {
-                    let result = null
-                    if (this.state.idUsuario !== '') {
-                        result = await axios.post('/api/usuario/update', {
-                            //datos
-                            "nombres": this.state.nombres.trim().toUpperCase(),
-                            "apellidos": this.state.apellidos.trim().toUpperCase(),
-                            "dni": this.state.dni.toString().trim().toUpperCase(),
-                            "genero": this.state.genero,
-                            "direccion": this.state.direccion.trim().toUpperCase(),
-                            "telefono": this.state.telefono.toString().trim().toUpperCase(),
-                            "email": this.state.email.trim().toUpperCase(),
-                            //login
-                            "empresa": this.state.empresa.trim().toUpperCase(),
-                            "perfil": this.state.perfil.trim().toUpperCase(),
-                            "representante": this.state.representante,
-                            "estado": this.state.estado,
-                            "usuario": this.state.usuario.trim().toUpperCase(),
-                            "clave": this.state.clave.trim().toUpperCase(),
-                            // "configClave": this.state.configClave.trim().toUpperCase(),
+                let result = null
+                if (this.state.idCobro !== '') {
+                    result = await axios.post('/api/cobro/update', {
+                        //concepto
+                        "cliente": this.state.cliente,
+                        "depositoBanco": this.state.depositoBanco,
+                        "metodoPago": this.state.metodoPago,
+                        "cuotaMensual": this.state.cuotaMensual.toString().trim(),
+                        "fechaPago": this.state.fechaPago,
 
-                            //idUsuario
-                            "idUsuario": this.state.idUsuario
-                        })
-                        // console.log(result);
+                        //id
+                        "idCobro": this.state.idCobro
+                    })
+                    // console.log(result);
 
-                    } else {
-                        result = await axios.post('/api/usuario/add', {
-                            //datos
-                            "nombres": this.state.nombres.trim().toUpperCase(),
-                            "apellidos": this.state.apellidos.trim().toUpperCase(),
-                            "dni": this.state.dni.toString().trim().toUpperCase(),
-                            "genero": this.state.genero,
-                            "direccion": this.state.direccion.trim().toUpperCase(),
-                            "telefono": this.state.telefono.toString().trim().toUpperCase(),
-                            "email": this.state.email.trim().toUpperCase(),
-                            //login
-                            "empresa": this.state.empresa.trim().toUpperCase(),
-                            "perfil": this.state.perfil.trim().toUpperCase(),
-                            "representante": this.state.representante,
-                            "estado": this.state.estado,
-                            "usuario": this.state.usuario.trim().toUpperCase(),
-                            "clave": this.state.clave.trim().toUpperCase(),
-                            // "configClave": this.state.configClave.trim().toUpperCase(),
-                        });
-                        // console.log(result);
-                    }
                 } else {
-                    this.setState({ messageWarning: "Las contraseñas no coinciden" });
-                    this.onFocusTab("login-tab", "login");
-                    this.refConfigClave.current.focus();
+                    result = await axios.post('/api/cobro/add', {
+                        //concepto
+                        "cliente": this.state.cliente,
+                        "depositoBanco": this.state.depositoBanco,
+                        "metodoPago": this.state.metodoPago,
+                        "cuotaMensual": this.state.cuotaMensual.toString().trim(),
+                        "fechaPago": this.state.fechaPago
+                    });
+                    // console.log(result);
                 }
 
                 this.closeModal()
@@ -226,7 +189,7 @@ class Cobros extends React.Component {
         if (id === '') {
             showModal('modalCobro')
             this.onFocusTab("cuota-tab", "cuota");
-            // this.ref.current.focus();
+            this.refCliente.current.focus();
         }
         else {
             showModal('modalCobro')
@@ -238,6 +201,13 @@ class Cobros extends React.Component {
     closeModal() {
         hideModal('modalCobro')
         this.setState({
+            cliente: '',
+            depositoBanco: '',
+            metodoPago: '',
+            cuotaMensual: '',
+            fechaPago: '',
+            concepto: '',
+            monto: '',
 
             idCobro: '',
             messageWarning: ''
@@ -286,75 +256,36 @@ class Cobros extends React.Component {
                                     <div className="tab-pane fade show active" id="cuota" role="tabpanel" aria-labelledby="cuota-tab">
 
                                         <div className="form-row">
-                                            <div className="form-group col-md-6">
+                                            <div className="form-group col-md-12">
                                                 <label>Cliente</label>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    value={this.state.cliente}
-                                                    ref={this.refCliente}
-                                                    onChange={(event) => {
-                                                        if (event.target.value.trim().length > 0) {
-                                                            this.setState({
-                                                                cliente: event.target.value,
-                                                                messageWarning: '',
-                                                            });
-                                                        } else {
-                                                            this.setState({
-                                                                cliente: event.target.value,
-                                                                messageWarning: 'Ingrese el cliente',
-                                                            });
-                                                        }
-                                                    }}
-                                                    placeholder="Ingrese el cliente" />
-                                            </div>
-                                            <div className="form-group col-md-6">
-                                                <label>DNI/RUC</label>
-                                                <input
-                                                    type="number"
-                                                    className="form-control"
-                                                    value={this.state.dni}
-                                                    ref={this.refDni}
-                                                    onChange={(event) => {
-                                                        if (event.target.value.trim().length > 0) {
-                                                            this.setState({
-                                                                dni: event.target.value,
-                                                                messageWarning: '',
-                                                            });
-                                                        } else {
-                                                            this.setState({
-                                                                dni: event.target.value,
-                                                                messageWarning: 'Ingrese el número de DNI',
-                                                            });
-                                                        }
-                                                    }}
-                                                    placeholder="Ingrese el número de DNI" />
+                                                <div className="input-group">
+                                                    <select
+                                                        className="form-control"
+                                                        value={this.state.cliente}
+                                                        ref={this.refCliente}
+                                                        onChange={(event) => {
+                                                            if (event.target.value.length > 0) {
+                                                                this.setState({
+                                                                    cliente: event.target.value,
+                                                                    messageWarning: '',
+                                                                });
+                                                            } else {
+                                                                this.setState({
+                                                                    cliente: event.target.value,
+                                                                    messageWarning: 'Seleccione el cliente',
+                                                                });
+                                                            }
+                                                        }}>
+                                                        <option value="">-- seleccione --</option>
+                                                        <option value="1">cliente 1 - 12345678</option>
+                                                        <option value="2">cliente 2 - 12345678</option>
+                                                        <option value="3">cliente 3 - 12345678</option>
+                                                    </select>
+                                                </div>
                                             </div>
                                         </div>
 
-                                        <div className="form-row">
-                                            <div className="form-group col-md-6">
-                                                <label>Banco a depositar</label>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    value={this.state.banco}
-                                                    ref={this.refBanco}
-                                                    onChange={(event) => {
-                                                        if (event.target.value.trim().length > 0) {
-                                                            this.setState({
-                                                                banco: event.target.value,
-                                                                messageWarning: '',
-                                                            });
-                                                        } else {
-                                                            this.setState({
-                                                                banco: event.target.value,
-                                                                messageWarning: 'Ingrese el banco',
-                                                            });
-                                                        }
-                                                    }}
-                                                    placeholder="Ingrese el banco" />
-                                            </div>
+                                        {/* <div className="form-row">
                                             <div className="form-group col-md-6">
                                                 <label>Comprobante</label>
                                                 <div className="input-group">
@@ -382,9 +313,6 @@ class Cobros extends React.Component {
                                                     </select>
                                                 </div>
                                             </div>
-                                        </div>
-                                        
-                                        <div className="form-row">
                                             <div className="form-group col-md-6">
                                                 <label>N° de Comprobante</label>
                                                 <input
@@ -407,30 +335,63 @@ class Cobros extends React.Component {
                                                     }}
                                                     placeholder="Ingrese el número del comprobante" />
                                             </div>
+                                        </div> */}
+
+                                        <div className="form-row">
                                             <div className="form-group col-md-6">
-                                                <label>Forma de Pago</label>
+                                                <label>Banco a depositar</label>
                                                 <div className="input-group">
                                                     <select
                                                         className="form-control"
-                                                        value={this.state.formaPago}
-                                                        ref={this.refFormaPago}
+                                                        value={this.state.depositoBanco}
+                                                        ref={this.refDepositoBanco}
                                                         onChange={(event) => {
-                                                            if (event.target.value.trim().length > 0) {
+                                                            if (event.target.value.length > 0) {
                                                                 this.setState({
-                                                                    formaPago: event.target.value,
+                                                                    depositoBanco: event.target.value,
                                                                     messageWarning: '',
                                                                 });
                                                             } else {
                                                                 this.setState({
-                                                                    formaPago: event.target.value,
-                                                                    messageWarning: 'Seleccione la forma de pago',
+                                                                    depositoBanco: event.target.value,
+                                                                    messageWarning: 'Seleccione el banco a depositar',
                                                                 });
                                                             }
                                                         }}>
                                                         <option value="">-- seleccione --</option>
-                                                        <option value="1">Recibo</option>
-                                                        <option value="2">Boleta</option>
-                                                        <option value="3">Factura</option>
+                                                        <option value="1">BBVA - Cuenta de ahorros</option>
+                                                        <option value="2">BCP - Cuenta de ahorros</option>
+                                                        <option value="3">Pichincha - Cuenta de ahorros</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div className="form-group col-md-6">
+                                                <label>Metodo de Pago</label>
+                                                <div className="input-group">
+                                                    <select
+                                                        className="form-control"
+                                                        value={this.state.metodoPago}
+                                                        ref={this.refMetodoPago}
+                                                        onChange={(event) => {
+                                                            if (event.target.value.length > 0) {
+                                                                this.setState({
+                                                                    metodoPago: event.target.value,
+                                                                    messageWarning: '',
+                                                                });
+                                                            } else {
+                                                                this.setState({
+                                                                    metodoPago: event.target.value,
+                                                                    messageWarning: 'Seleccione la metodo de pago',
+                                                                });
+                                                            }
+                                                        }}>
+                                                        <option value="">-- seleccione --</option>
+                                                        <option value="1">Efectivo</option>
+                                                        <option value="2">Consignación</option>
+                                                        <option value="3">Transferencia</option>
+                                                        <option value="4">Cheque</option>
+                                                        <option value="5">Tarjeta crédito</option>
+                                                        <option value="6">Tarjeta débito</option>
                                                     </select>
                                                 </div>
                                             </div>
@@ -442,100 +403,125 @@ class Cobros extends React.Component {
                                                 <input
                                                     type="number"
                                                     className="form-control"
-                                                    value={this.state.cuotamensual}
-                                                    ref={this.refNumComprobante}
+                                                    value={this.state.cuotaMensual}
+                                                    ref={this.refCuotaMensual}
                                                     onChange={(event) => {
                                                         if (event.target.value.trim().length > 0) {
                                                             this.setState({
-                                                                numComprobante: event.target.value,
+                                                                cuotaMensual: event.target.value,
                                                                 messageWarning: '',
                                                             });
                                                         } else {
                                                             this.setState({
-                                                                numComprobante: event.target.value,
-                                                                messageWarning: 'Ingrese el número del comprobante',
+                                                                cuotaMensual: event.target.value,
+                                                                messageWarning: 'Ingrese el monto de la cuota',
                                                             });
                                                         }
                                                     }}
-                                                    placeholder="Ingrese el número del comprobante" />
+                                                    placeholder="Ingrese el monto de la cuota" />
                                             </div>
                                             <div className="form-group col-md-6">
-                                                <label>Forma de Pago</label>
-                                                <div className="input-group">
-                                                    <select
-                                                        className="form-control"
-                                                        value={this.state.formaPago}
-                                                        ref={this.refFormaPago}
-                                                        onChange={(event) => {
-                                                            if (event.target.value.trim().length > 0) {
-                                                                this.setState({
-                                                                    formaPago: event.target.value,
-                                                                    messageWarning: '',
-                                                                });
-                                                            } else {
-                                                                this.setState({
-                                                                    formaPago: event.target.value,
-                                                                    messageWarning: 'Seleccione la forma de pago',
-                                                                });
-                                                            }
-                                                        }}>
-                                                        <option value="">-- seleccione --</option>
-                                                        <option value="1">Recibo</option>
-                                                        <option value="2">Boleta</option>
-                                                        <option value="3">Factura</option>
-                                                    </select>
-                                                </div>
+                                                <label>Fecha de Pago</label>
+                                                <input
+                                                    type="date"
+                                                    className="form-control"
+                                                    value={this.state.fechaPago}
+                                                    ref={this.refFechaPago}
+                                                    onChange={(event) => {
+                                                        if (event.target.value.length > 0) {
+                                                            this.setState({
+                                                                fechaPago: event.target.value,
+                                                                messageWarning: '',
+                                                            });
+                                                        } else {
+                                                            this.setState({
+                                                                fechaPago: event.target.value,
+                                                                messageWarning: 'Seleccione la fecha',
+                                                            });
+                                                        }
+                                                    }} />
                                             </div>
                                         </div>
 
                                     </div>
                                     <div className="tab-pane fade" id="concepto" role="tabpanel" aria-labelledby="concepto-tab">
-                                        <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
-                                            <div>
-                                                dfsdf
+
+                                        <div className="form-row">
+                                            <div className="form-group col-md-6">
+                                                <label>Concepto</label>
+                                                <div className="input-group">
+                                                    <select
+                                                        className="form-control"
+                                                        value={this.state.concepto}
+                                                        ref={this.refConcepto}
+                                                        onChange={(event) => {
+                                                            if (event.target.value.trim().length > 0) {
+                                                                this.setState({
+                                                                    concepto: event.target.value,
+                                                                    messageWarning: '',
+                                                                });
+                                                            } else {
+                                                                this.setState({
+                                                                    concepto: event.target.value,
+                                                                    messageWarning: 'Seleccione el concepto',
+                                                                });
+                                                            }
+                                                        }}>
+                                                        <option value="">-- seleccione --</option>
+                                                        <option value="1">Mora por retraso de pago</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div className="form-group col-md-6">
+                                                <label>Monto</label>
+                                                <div className="input-group">
+                                                    <input
+                                                        type="number"
+                                                        className="form-control"
+                                                        value={this.state.monto}
+                                                        ref={this.refMonto}
+                                                        onChange={(event) => {
+                                                            if (event.target.value.trim().length > 0) {
+                                                                this.setState({
+                                                                    monto: event.target.value,
+                                                                    messageWarning: '',
+                                                                });
+                                                            } else {
+                                                                this.setState({
+                                                                    monto: event.target.value,
+                                                                    messageWarning: 'Ingrese el monto',
+                                                                });
+                                                            }
+                                                        }}
+                                                        placeholder="Ingrese el monto" />
+                                                    <button className="btn btn-outline-secondary ml-1" type="button"><i className="bi bi-plus-circle"></i> Agregar</button>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </div>
 
-                                <div className='row py-1'>
-                                    <div className='col-lg-4 col-md-4 col-sm-12 col-xs-12'>
-                                        <label>Nombre(s): </label>
-                                    </div>
-                                    <div className='col-lg-8 col-md-8 col-sm-12 col-xs-12'>
-                                        <input type="" className="form-control" placeholder='Ingrese nombres' />
-                                    </div>
-                                </div>
-                                <div className='row py-1'>
-                                    <div className='col-lg-4 col-md-4 col-sm-12 col-xs-12'>
-                                        <label>Apellidos: </label>
-                                    </div>
-                                    <div className='col-lg-8 col-md-8 col-sm-12 col-xs-12'>
-                                        <input type="" className="form-control" placeholder='Ingrese apellidos' />
-                                    </div>
-                                </div>
-                                <div className='row py-1'>
-                                    <div className='col-lg-4 col-md-4 col-sm-12 col-xs-12'>
-                                        <label>DNI/RUC: </label>
-                                    </div>
-                                    <div className='col-lg-8 col-md-8 col-sm-12 col-xs-12'>
-                                        <input type="number" className="form-control" placeholder='Ingrese documento' />
-                                    </div>
-                                </div>
-                                <div className='row py-1'>
-                                    <div className='col-lg-4 col-md-4 col-sm-12 col-xs-12'>
-                                        <label>Telf./Celular: </label>
-                                    </div>
-                                    <div className='col-lg-8 col-md-8 col-sm-12 col-xs-12'>
-                                        <input type="number" className="form-control" placeholder='Ingrese Telefono' />
-                                    </div>
-                                </div>
-                                <div className='row py-1'>
-                                    <div className='col-lg-4 col-md-4 col-sm-12 col-xs-12'>
-                                        <label>Observacion: </label>
-                                    </div>
-                                    <div className='col-lg-8 col-md-8 col-sm-12 col-xs-12'>
-                                        <input type="" className="form-control" placeholder='' />
+                                        <div className="row">
+                                            <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                <div className="table-responsive">
+                                                    <table className="table table-striped" style={{ borderWidth: '1px', borderStyle: 'inset', borderColor: '#CFA7C9' }}>
+                                                        <thead>
+                                                            <tr>
+                                                                <th width="10%">#</th>
+                                                                <th width="50%">Concepto</th>
+                                                                <th width="20%">Monto</th>
+                                                                <th width="20%">Quitar</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+
+                                                        </tbody>
+
+                                                    </table>
+                                                </div>
+
+
+                                            </div>
+                                        </div>
+
                                     </div>
                                 </div>
 

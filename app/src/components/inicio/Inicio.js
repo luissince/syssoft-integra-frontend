@@ -24,6 +24,8 @@ import ClienteProceso from '../facturacion/registros/ClienteProceso'
 import Perfiles from '../seguridad/Perfiles'
 import Usuarios from '../seguridad/Usuarios'
 import Accesos from '../seguridad/Accesos'
+import Conceptos from '../tesoreria/Conceptos'
+import Gastos from '../tesoreria/Gastos'
 
 function Page404(props) {
     return (
@@ -165,6 +167,14 @@ class Inicio extends React.Component {
                         <Route
                             path={`${path}/lotes`}
                             render={(props) => <Lotes {...props} />}
+                        />
+                        <Route
+                            path={`${path}/conceptos`}
+                            render={(props) => <Conceptos {...props} />}
+                        />
+                        <Route
+                            path={`${path}/gastos`}
+                            render={(props) => <Gastos {...props} />}
                         />
                         <Route component={Page404} />
                     </Switch>

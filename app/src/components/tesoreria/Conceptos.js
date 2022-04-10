@@ -1,38 +1,40 @@
 import React from 'react';
 import axios from 'axios';
 import loading from '../../recursos/images/loading.gif';
-import { showModal, hideModal } from '../tools/Tools';
+import { showModal, hideModal, clearModal } from '../tools/Tools';
 
-class Bancos extends React.Component {
+class Conceptos extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            idBanco: '',
-            txtNombre: '',
-            CbxTipoCuenta: 'CUENTA CORRIENTE',
-            txtMoneda: '',
-            txtNumCuenta: '',
-            txtCci: '',
-            txtRepresentante: '',
+            idConcepto: '',
+            nombre: '',
+            tipoConcepto: '',
+
             loading: true,
             lista: [],
             paginacion: 0,
             totalPaginacion: 0,
             filasPorPagina: 10,
-            messagePaginacion: ''
-
+            messagePaginacion: '',
+            messageWarning: ''
         }
 
-        this.refTxtNombre = React.createRef();
-        this.refCbxTipoCuenta = React.createRef();
-        this.refTxtMoneda = React.createRef();
-        this.refTxtNumCuenta = React.createRef();
-        this.refTxtCci = React.createRef();
-        this.refTxtRepresentante = React.createRef();
+        this.refNombre = React.createRef();
+        this.refTipoConcepto = React.createRef();
     }
 
     async componentDidMount() {
         this.fillTable(0, 1, "");
+
+        clearModal("modalConcepto", () => {
+            this.setState({
+                nombre: '',
+                tipoConcepto: '',
+                idCobro: '',
+                messageWarning: ''
+            })
+        })
     }
 
     setStateAsync(state) {
@@ -45,7 +47,7 @@ class Bancos extends React.Component {
         // console.log(buscar.trim().toUpperCase())
         try {
             await this.setStateAsync({ loading: true, paginacion: paginacion, lista: [] });
-            const result = await axios.get('/api/banco/list', {
+            const result = await axios.get('/api/concepto/list', {
                 params: {
                     "option": option,
                     "buscar": buscar.trim().toUpperCase(),
@@ -72,20 +74,16 @@ class Bancos extends React.Component {
 
     loadDataId = async (id) => {
         try {
-            const result = await axios.get("/api/banco/id", {
+            const result = await axios.get("/api/concepto/id", {
                 params: {
-                    idBanco: id
+                    idConcepto: id
                 }
             });
             // console.log(result)
             this.setState({
-                txtNombre: result.data.nombre,
-                CbxTipoCuenta: result.data.tipocuenta,
-                txtMoneda: result.data.moneda,
-                txtNumCuenta: result.data.numcuenta,
-                txtCci: result.data.cci,
-                txtRepresentante: result.data.representante,
-                idBanco: result.data.idBanco
+                nombre: result.data.nombre,
+                tipoConcepto: result.data.tipoConcepto,
+                idConcepto: result.data.idConcepto
             });
 
         } catch (error) {
@@ -94,43 +92,37 @@ class Bancos extends React.Component {
     }
 
     async save() {
-        if (this.state.txtNombre === "") {
-            this.refTxtNombre.current.focus();
-        } else if (this.state.txtMoneda === "") {
-            this.refTxtMoneda.current.focus();
-        } else if (this.state.txtNumCuenta === "") {
-            this.refTxtNumCuenta.current.focus();
-        } else if (this.state.txtRepresentante === "") {
-            this.refTxtRepresentante.current.focus();
+
+        if (this.state.nombre === "") {
+            this.setState({ messageWarning: "Ingrese el nombre del concepto" });
+            this.refNombre.current.focus();
+        } else if (this.state.tipoConcepto === "") {
+            this.setState({ messageWarning: "Seleccione el concepto" })
+            this.refTipoConcepto.current.focus();
         } else {
+
             try {
 
                 let result = null
-                if (this.state.idBanco !== '') {
-                    result = await axios.post('/api/banco/update', {
-                        "nombre": this.state.txtNombre.trim().toUpperCase(),
-                        "tipocuenta": this.state.CbxTipoCuenta,
-                        "moneda": this.state.txtMoneda.trim().toUpperCase(),
-                        "numcuenta": this.state.txtNumCuenta.trim().toUpperCase(),
-                        "cci": this.state.txtCci.trim().toUpperCase(),
-                        "representante": this.state.txtRepresentante.trim().toUpperCase(),
-                        "idBanco": this.state.idBanco
+
+                if (this.state.idConcepto !== '') {
+                    result = await axios.post('/api/concepto/update', {
+
+                        "nombre": this.state.nombre.trim().toUpperCase(),
+                        "tipoConcepto": this.state.tipoConcepto,
+                        "idConcepto": this.state.idConcepto
                     })
                     // console.log(result);
 
                 } else {
-                    result = await axios.post('/api/banco/add', {
-                        "nombre": this.state.txtNombre.trim().toUpperCase(),
-                        "tipocuenta": this.state.CbxTipoCuenta,
-                        "moneda": this.state.txtMoneda.trim().toUpperCase(),
-                        "numcuenta": this.state.txtNumCuenta.trim().toUpperCase(),
-                        "cci": this.state.txtCci.trim().toUpperCase(),
-                        "representante": this.state.txtRepresentante.trim().toUpperCase(),
+                    result = await axios.post('/api/concepto/add', {
+
+                        "nombre": this.state.nombre.trim().toUpperCase(),
+                        "tipoConcepto": this.state.tipoConcepto,
                     });
                     // console.log(result);
                 }
 
-                // console.log(result);
                 this.closeModal()
 
             } catch (error) {
@@ -138,29 +130,28 @@ class Bancos extends React.Component {
                 console.log(error.response)
             }
         }
+
     }
 
     openModal(id) {
         if (id === '') {
-            showModal('modalBanco')
-            this.refTxtNombre.current.focus();
+            showModal('modalConcepto')
+            this.refNombre.current.focus();
         }
         else {
-            showModal('modalBanco')
+            showModal('modalConcepto')
             this.loadDataId(id)
         }
     }
 
     closeModal() {
-        hideModal('modalBanco')
+        hideModal('modalConcepto')
         this.setState({
-            txtNombre: '',
-            CbxTipoCuenta: 'CUENTA CORRIENTE',
-            txtMoneda: '',
-            txtNumCuenta: '',
-            txtCci: '',
-            txtRepresentante: '',
-            idBanco: '',
+            nombre: '',
+            tipoConcepto: '',
+
+            idConcepto: '',
+            messageWarning: ''
         })
     }
 
@@ -168,87 +159,72 @@ class Bancos extends React.Component {
         return (
             <>
                 {/* Inicio modal */}
-                <div className="modal fade" id="modalBanco" data-backdrop="static">
-                    <div className="modal-dialog modal-lg">
+                <div className="modal fade" id="modalConcepto" data-backdrop="static">
+                    <div className="modal-dialog">
                         <div className="modal-content">
                             <div className="modal-header">
-                                <h5 className="modal-title"><i className="bi bi-currency-exchange"></i>{this.state.idBanco === '' ? " Registrar Banco" : " Editar Banco"}</h5>
+                                <h5 className="modal-title"><i className="bi bi-currency-exchange"></i>{this.state.idConcepto === '' ? " Registrar Concepto" : " Editar Concepto"}</h5>
                                 <button type="button" className="close" data-dismiss="modal" onClick={() => this.closeModal()}>
                                     <span aria-hidden="true">&times;</span>
                                 </button>
                             </div>
                             <div className="modal-body">
 
+                                {
+                                    this.state.messageWarning === '' ? null :
+                                        <div className="alert alert-warning" role="alert">
+                                            <i className="bi bi-exclamation-diamond-fill"></i> {this.state.messageWarning}
+                                        </div>
+                                }
+
                                 <div className="form-row">
-                                    <div className="form-group col-md-6">
-                                        <label>Nombre Banco:</label>
+                                    <div className="form-group col-md-12">
+                                        <label>Concepto</label>
                                         <input
                                             type="text"
                                             className="form-control"
-                                            ref={this.refTxtNombre}
-                                            value={this.state.txtNombre}
-                                            onChange={(event) => this.setState({ txtNombre: event.target.value })}
-                                            placeholder="BCP, BBVA, etc" />
+                                            value={this.state.nombre}
+                                            ref={this.refNombre}
+                                            onChange={(event) => {
+                                                if (event.target.value.trim().length > 0) {
+                                                    this.setState({
+                                                        nombre: event.target.value,
+                                                        messageWarning: '',
+                                                    });
+                                                } else {
+                                                    this.setState({
+                                                        nombre: event.target.value,
+                                                        messageWarning: 'Ingrese el nombre del concepto',
+                                                    });
+                                                }
+                                            }}
+                                            placeholder="Ingrese el nombre del concepto" />
                                     </div>
-                                    <div className="form-group col-md-6">
-                                        <label>Tipo de Cuenta:</label>
+                                    <div className="form-group col-md-12">
+                                        <label>Tipo de Concepto:</label>
                                         <div className="input-group">
                                             <select
                                                 className="form-control"
-                                                ref={this.refCbxTipoCuenta}
-                                                value={this.state.CbxTipoCuenta}
-                                                onChange={(event) => this.setState({ CbxTipoCuenta: event.target.value })} >
-                                                <option value="CUENTA CORRIENTE">Cuenta Corriente</option>
-                                                <option value="CUENTA RECAUDADORA">Cuenta Recaudadora</option>
-                                                <option value="CUENTA DE AHORROS">Cuenta de Ahorros</option>
+                                                value={this.state.tipoConcepto}
+                                                ref={this.refTipoConcepto}
+                                                onChange={(event) => {
+                                                    if (event.target.value.trim().length > 0) {
+                                                        this.setState({
+                                                            tipoConcepto: event.target.value,
+                                                            messageWarning: '',
+                                                        });
+                                                    } else {
+                                                        this.setState({
+                                                            tipoConcepto: event.target.value,
+                                                            messageWarning: 'Seleccione el concepto',
+                                                        });
+                                                    }
+                                                }}>
+                                                <option value="">-- Seleccione --</option>
+                                                <option value="1">CONCEPTO DE GASTO</option>
+                                                <option value="2">CONCEPTO DE COBRO</option>
                                             </select>
                                         </div>
-                                    </div>
-                                </div>
-
-                                <div className="form-row">
-                                    <div className="form-group col-md-6">
-                                        <label>Moneda:</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            ref={this.refTxtMoneda}
-                                            value={this.state.txtMoneda}
-                                            onChange={(event) => this.setState({ txtMoneda: event.target.value })}
-                                            placeholder="Soles, Dolares, etc" />
-                                    </div>
-                                    <div className="form-group col-md-6">
-                                        <label>Número de cuenta:</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            ref={this.refTxtNumCuenta}
-                                            value={this.state.txtNumCuenta}
-                                            onChange={(event) => this.setState({ txtNumCuenta: event.target.value })}
-                                            placeholder="##############" />
-                                    </div>
-                                </div>
-
-                                <div className="form-row">
-                                    <div className="form-group col-md-6">
-                                        <label>CCI:</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            ref={this.refTxtCci}
-                                            value={this.state.txtCci}
-                                            onChange={(event) => this.setState({ txtCci: event.target.value })}
-                                            placeholder="####################" />
-                                    </div>
-                                    <div className="form-group col-md-6">
-                                        <label>Representante:</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            ref={this.refTxtRepresentante}
-                                            value={this.state.txtRepresentante}
-                                            onChange={(event) => this.setState({ txtRepresentante: event.target.value })}
-                                            placeholder="Datos del representante" />
                                     </div>
                                 </div>
 
@@ -262,11 +238,10 @@ class Bancos extends React.Component {
                 </div>
                 {/* fin modal */}
 
-
                 <div className='row'>
                     <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
                         <div className="form-group">
-                            <h5>Bancos <small className="text-secondary">LISTA</small></h5>
+                            <h5>Conceptos <small className="text-secondary">LISTA</small></h5>
                         </div>
                     </div>
                 </div>
@@ -284,7 +259,7 @@ class Bancos extends React.Component {
                     </div>
                     <div className="col-md-6 col-sm-12">
                         <div className="form-group">
-                            <button className="btn btn-outline-info" onClick={() => this.openModal(this.state.idBanco)}>
+                            <button className="btn btn-outline-info" onClick={() => this.openModal(this.state.idConcepto)}>
                                 <i className="bi bi-file-plus"></i> Nuevo Registro
                             </button>
                             {" "}
@@ -302,11 +277,9 @@ class Bancos extends React.Component {
                                 <thead>
                                     <tr>
                                         <th width="5%">#</th>
-                                        <th width="10%">Banco</th>
-                                        <th width="15%">Tipo Cuenta</th>
-                                        <th width="10%">Moneda</th>
-                                        <th width="20%">Número Cuenta</th>
-                                        <th width="15%">Representante</th>
+                                        <th width="10%">Concepto</th>
+                                        <th width="15%">Tipo Concepto</th>
+                                        <th width="10%">Creacion</th>
                                         <th width="15%">Opciones</th>
                                     </tr>
                                 </thead>
@@ -314,7 +287,7 @@ class Bancos extends React.Component {
                                     {
                                         this.state.loading ? (
                                             <tr>
-                                                <td className="text-center" colSpan="7">
+                                                <td className="text-center" colSpan="5">
                                                     <img
                                                         src={loading}
                                                         alt="Loading..."
@@ -326,7 +299,7 @@ class Bancos extends React.Component {
                                             </tr>
                                         ) : this.state.lista.length === 0 ? (
                                             <tr className="text-center">
-                                                <td colSpan="7">¡No hay datos registrados!</td>
+                                                <td colSpan="5">¡No hay datos registrados!</td>
                                             </tr>
                                         ) : (
                                             this.state.lista.map((item, index) => {
@@ -334,12 +307,10 @@ class Bancos extends React.Component {
                                                     <tr key={index}>
                                                         <td>{item.id}</td>
                                                         <td>{item.nombre}</td>
-                                                        <td>{item.tipocuenta}</td>
-                                                        <td>{item.moneda}</td>
-                                                        <td>{item.numcuenta}</td>
-                                                        <td>{item.representante}</td>
+                                                        <td>{item.tipoConcepto == 1 ? 'CONCEPTO DE GASTO' : 'CONCEPTO DE COBRO'}</td>
+                                                        <td>{item.fecha + ' ' + item.hora}</td>
                                                         <td>
-                                                            <button className="btn btn-outline-dark btn-sm" title="Editar" onClick={() => this.openModal(item.idBanco)}><i className="bi bi-pencil"></i></button>
+                                                            <button className="btn btn-outline-dark btn-sm" title="Editar" onClick={() => this.openModal(item.idConcepto)}><i className="bi bi-pencil"></i></button>
                                                         </td>
                                                     </tr>
                                                 )
@@ -370,9 +341,10 @@ class Bancos extends React.Component {
 
                     </div>
                 </div>
+
             </>
-        );
+        )
     }
 }
 
-export default Bancos;
+export default Conceptos

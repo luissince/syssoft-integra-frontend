@@ -61,6 +61,7 @@ class ClienteProceso extends React.Component {
         let idResult = new URLSearchParams(url).get("idCliente");
         this.setState({ idCliente: idResult}, () => {
                 if (this.state.idCliente === '') {
+                    this.onFocusTab("representante-tab", "representante");
                     this.refNumDocumento.current.focus();
                     console.log('new')
                 } else {
@@ -271,7 +272,7 @@ class ClienteProceso extends React.Component {
                 <div className='row pb-3'>
                     <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
                         <section className="content-header">
-                            <h5 className="no-margin"> Registrar Cliente <small style={{ color: 'gray' }}> nuevo </small> </h5>
+                            <h5 className="no-margin"> {this.state.idCliente === ''? 'Registrar Cliente':'Editar Cliente' } </h5>
                         </section>
                     </div>
                 </div>
