@@ -109,9 +109,7 @@ router.post('/add', async function (req, res) {
 });
 
 router.get('/id', async function (req, res) {
-
     try {
-        // console.log(req.body.idsede);
         let result = await conec.query('SELECT * FROM sede WHERE idSede  = ?', [
             req.query.idSede,
         ]);
@@ -127,6 +125,15 @@ router.get('/id', async function (req, res) {
         res.status(500).send("Error interno de conexión, intente nuevamente.");
     }
 
+});
+
+router.get('/listcombo', async function (req, res) {
+    try {
+        let result = await conec.query('SELECT idSede,nombreSede FROM sede');
+        res.status(200).send(result);
+    } catch (error) {
+        res.status(500).send("Error interno de conexión, intente nuevamente.");
+    } 
 });
 
 router.post('/update', async function (req, res) {

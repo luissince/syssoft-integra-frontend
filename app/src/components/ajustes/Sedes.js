@@ -280,7 +280,7 @@ class Sedes extends React.Component {
                     });
 
                     ModalAlertSuccess("Sede", result.data, () => {
-                        this.onEventPaginacion();
+                        this.loadInit();
                     });
                 }
             } catch (error) {
@@ -294,7 +294,7 @@ class Sedes extends React.Component {
         return (
             <>
                 {/* Inicio modal */}
-                <div className="modal fade" id="modalSede" data-backdrop="static">
+                <div className="modal fade" id="modalSede" data-bs-keyboard="false" data-bs-backdrop="static">
                     <div className="modal-dialog modal-lg">
                         <div className="modal-content">
                             <div className="modal-header">
@@ -483,7 +483,7 @@ class Sedes extends React.Component {
                 <div className="row">
                     <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                         <div className="table-responsive">
-                            <table className="table table-striped" style={{ borderWidth: '1px', borderStyle: 'inset', borderColor: '#CFA7C9' }}>
+                            <table className="table table-striped table-bordered rounded">
                                 <thead>
                                     <tr>
                                         <th width="5%">#</th>

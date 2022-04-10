@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const tools = require('../tools/Tools');
+const { currentDate, currentTime } = require('../tools/Tools');
 const Conexion = require('../database/Conexion');
 
 const conec = new Conexion()
@@ -8,20 +8,21 @@ const conec = new Conexion()
 router.get('/list', async function (req, res) {
     try {
         let lista = await conec.query(`SELECT 
-        idPerfil ,
-        idSede,
-        descripcion,
-        fecha,
-        hora
-        FROM perfil 
+        p.idPerfil,
+        s.nombreSede as empresa,
+        p.descripcion,
+        DATE_FORMAT(p.fecha,'%d/%m/%Y') as fecha,
+        p.hora
+        FROM perfil AS p 
+        INNER JOIN sede AS s ON s.idSede = p.idSede 
         WHERE 
         ? = 0
         OR
-        ? = 1 and descripcion like concat(?,'%')
+        ? = 1 and p.descripcion like concat(?,'%')
         LIMIT ?,?`, [
-            parseInt(req.query.option),
+            parseInt(req.query.opcion),
 
-            parseInt(req.query.option),
+            parseInt(req.query.opcion),
             req.query.buscar,
 
             parseInt(req.query.posicionPagina),
@@ -35,15 +36,17 @@ router.get('/list', async function (req, res) {
             }
         });
 
-        let total = await conec.query(`SELECT COUNT(*) AS Total FROM perfil
-            WHERE 
-            ? = 0
-            OR
-            ? = 1 and descripcion like concat(?,'%')`, [
-            
-            parseInt(req.query.option),
+        let total = await conec.query(`SELECT COUNT(*) AS Total 
+        FROM perfil AS p 
+        INNER JOIN sede AS s ON s.idSede = p.idSede 
+        WHERE 
+        ? = 0
+        OR
+        ? = 1 and p.descripcion like concat(?,'%')`, [
 
-            parseInt(req.query.option),
+            parseInt(req.query.opcion),
+
+            parseInt(req.query.opcion),
             req.query.buscar
         ]);
 
@@ -86,8 +89,12 @@ router.post('/add', async function (req, res) {
             idPerfil = "PF0001";
         }
 
-        await conec.execute(connection, `INSERT INTO perfil(idPerfil, idSede, descripcion, fechaRegistro) VALUES(?,?,?,NOW())`, [
-            idPerfil, req.body.empresa, req.body.descripcion
+        await conec.execute(connection, `INSERT INTO perfil(idPerfil, idSede, descripcion, fecha, hora) VALUES(?,?,?,?,?)`, [
+            idPerfil,
+            req.body.idSede,
+            req.body.descripcion,
+            currentDate(),
+            currentTime()
         ])
 
         await conec.commit(connection);
@@ -113,12 +120,10 @@ router.get('/id', async function (req, res) {
         } else {
             res.status(400).send("Datos no encontrados");
         }
-
     } catch (error) {
         console.log(error)
         res.status(500).send("Error interno de conexión, intente nuevamente.");
     }
-
 });
 
 router.post('/update', async function (req, res) {
@@ -127,7 +132,9 @@ router.post('/update', async function (req, res) {
 
         connection = await conec.beginTransaction();
         await conec.execute(connection, `UPDATE perfil SET idSede=?, descripcion=? WHERE idPerfil=?`, [
-            req.body.idSede, req.body.descripcion, req.body.idPerfil
+            req.body.idSede, 
+            req.body.descripcion, 
+            req.body.idPerfil
         ])
 
         await conec.commit(connection)
