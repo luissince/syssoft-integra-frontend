@@ -38,7 +38,7 @@ class Comprobantes extends React.Component {
             opcion: 0,
             paginacion: 0,
             totalPaginacion: 0,
-            filasPorPagina: 5,
+            filasPorPagina: 10,
             messageTable: 'Cargando información...',
             messagePaginacion: 'Mostranto 0 de 0 Páginas'
         }
@@ -235,7 +235,7 @@ class Comprobantes extends React.Component {
                     });
 
                     ModalAlertSuccess("Comprobante", result.data, () => {
-                        this.onEventPaginacion();
+                        this.loadInit();
                     });
                 }
             } catch (err) {

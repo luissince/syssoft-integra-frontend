@@ -1,10 +1,17 @@
 import React from 'react';
-// import { Redirect } from 'react-router-dom';
-// import { connect } from 'react-redux';
-// import { signOut } from '../../redux/actions';
 import axios from 'axios';
-import loading from '../../recursos/images/loading.gif';
-import { showModal, hideModal, clearModal } from '../tools/Tools';
+import {
+    timeForma24,
+    showModal,
+    hideModal,
+    viewModal,
+    clearModal,
+    ModalAlertInfo,
+    ModalAlertSuccess,
+    ModalAlertWarning,
+    spinnerLoading
+} from '../tools/Tools';
+import Paginacion from '../tools/Paginacion';
 
 class Perfiles extends React.Component {
     constructor(props) {
@@ -12,33 +19,31 @@ class Perfiles extends React.Component {
         this.state = {
             idPerfil: '',
             descripcion: '',
-            empresa: '',
+            idSede: '',
+            sedes: [],
 
-            loading: true,
+            loadModal: false,
+            nameModal: 'Nuevo Comprobante',
+            msgModal: 'Cargando datos...',
+
+            loading: false,
             lista: [],
+
+            opcion: 0,
             paginacion: 0,
             totalPaginacion: 0,
             filasPorPagina: 10,
-            messagePaginacion: '',
-
-            messageWarning: ''
+            messageTable: 'Cargando información...',
+            messagePaginacion: 'Mostranto 0 de 0 Páginas'
         }
 
         this.refDescripcion = React.createRef();
         this.refEmpresa = React.createRef();
-    }
 
-    async componentDidMount() {
-        this.fillTable(0, 1, "");
+        this.refTxtSearch = React.createRef();
 
-        clearModal("modalPerfil", () => {
-            this.setState({
-                empresa: '',
-                descripcion: '',
-                idPerfil: '',
-                messageWarning: ''
-            })
-        })
+        this.idCodigo = "";
+        this.abortControllerTable = new AbortController();
     }
 
     setStateAsync(state) {
@@ -46,14 +51,83 @@ class Perfiles extends React.Component {
             this.setState(state, resolve)
         });
     }
+    
+    componentDidMount() {
+        this.loadInit();
 
-    fillTable = async (option, paginacion, buscar) => {
-        // console.log(buscar.trim().toUpperCase())
+        viewModal("modalPerfil", () => {
+            this.abortControllerModal = new AbortController();
+
+            if (this.idCodigo !== "") {
+                this.loadDataId(this.idCodigo);
+            } else {
+                this.loadData();
+            }
+        });
+
+        clearModal("modalPerfil", async () => {
+            this.abortControllerModal.abort();
+            await this.setStateAsync({
+                idSede: '',
+                descripcion: '',
+                idPerfil: '',
+                loadModal: false,
+                sedes: [],
+                nameModal: 'Nuevo Comprobante',
+                msgModal: 'Cargando datos...',
+            });
+            this.idCodigo = "";
+        });
+
+    }
+
+    componentWillUnmount() {
+        this.abortControllerTable.abort();
+    }
+
+    loadInit = async () => {
+        if (this.state.loading) return;
+
+        await this.setStateAsync({ paginacion: 1 });
+        this.fillTable(0, "");
+        await this.setStateAsync({ opcion: 0 });
+
+    }
+
+    async searchText(text) {
+        if (this.state.loading) return;
+
+        if (text.trim().length === 0) return;
+
+        await this.setStateAsync({ paginacion: 1 });
+        this.fillTable(1, text.trim());
+        await this.setStateAsync({ opcion: 1 });
+    }
+
+    paginacionContext = async (listid) => {
+        await this.setStateAsync({ paginacion: listid });
+        this.onEventPaginacion();
+    }
+
+    onEventPaginacion = () => {
+        switch (this.state.opcion) {
+            case 0:
+                this.fillTable(0, "");
+                break;
+            case 1:
+                this.fillTable(1, this.refTxtSearch.current.value);
+                break;
+        }
+    }
+
+    fillTable = async (opcion, buscar) => {
         try {
-            await this.setStateAsync({ loading: true, paginacion: paginacion, lista: [] });
+            await this.setStateAsync({ loading: true, lista: [], messageTable: "Cargando información...", messagePaginacion: "Mostranto 0 de 0 Páginas" });
+
             const result = await axios.get('/api/perfil/list', {
+                signal: this.abortControllerTable.signal,
                 params: {
-                    "option": option,
+                    "opcion": opcion,
                     "buscar": buscar.trim().toUpperCase(),
                     "posicionPagina": ((this.state.paginacion - 1) * this.state.filasPorPagina),
                     "filasPorPagina": this.state.filasPorPagina
@@ -63,40 +137,92 @@ class Perfiles extends React.Component {
             let totalPaginacion = parseInt(Math.ceil((parseFloat(result.data.total) / this.state.filasPorPagina)));
             let messagePaginacion = `Mostrando ${result.data.result.length} de ${totalPaginacion} Páginas`;
 
-            this.setState({
+            await this.setStateAsync({
                 loading: false,
                 lista: result.data.result,
                 totalPaginacion: totalPaginacion,
                 messagePaginacion: messagePaginacion
             });
-            // console.log(result);
-        } catch (err) {
-            console.log(err.response.data.message)
-            console.log(err.response.status)
+        } catch (error) {
+            if (error.message !== "canceled") {
+                await this.setStateAsync({
+                    loading: false,
+                    lista: [],
+                    totalPaginacion: 0,
+                    messageTable: "Se produjo un error interno, intente nuevamente por favor.",
+                    messagePaginacion: "Mostranto 0 de 0 Páginas",
+                });
+            }
+        }
+    }
+
+    async openModal(id) {
+        if (id === '') {
+            showModal('modalPerfil')
+            await this.setStateAsync({ nameModal: "Nuevo Perfil", loadModal: true });
+        }
+        else {
+            showModal('modalPerfil')
+            this.idCodigo = id;
+            await this.setStateAsync({ idComprobante: id, nameModal: "Editar Perfil", loadModal: true });
+        }
+    }
+
+    loadData = async () => {
+        try {
+            const sede = await axios.get("/api/sede/listcombo", {
+                signal: this.abortControllerModal.signal,
+            });
+
+            let idSede = sede.data.length === 1 ? sede.data[0].idSede : "";
+
+            await this.setStateAsync({
+                sedes: sede.data,
+                idSede: idSede,
+                loadModal: false
+            });
+
+        } catch (error) {
+            if (error.message !== "canceled") {
+                await this.setStateAsync({
+                    msgModal: "Se produjo un error interno, intente nuevamente"
+                });
+            }
         }
     }
 
     loadDataId = async (id) => {
         try {
-            const result = await axios.get("/api/perfil/id", {
+            const sede = await axios.get("/api/sede/listcombo", {
+                signal: this.abortControllerModal.signal,
+            });
+
+            const perfil = await axios.get("/api/perfil/id", {
+                signal: this.abortControllerModal.signal,
                 params: {
                     idPerfil: id
                 }
             });
-            // console.log(result)
-            this.setState({
-                descripcion: result.data.descripcion,
-                empresa: result.data.idSede,
-                idPerfil: result.data.idPerfil
+
+            await this.setStateAsync({
+                sedes: sede.data,
+                descripcion: perfil.data.descripcion,
+                idSede: perfil.data.idSede,
+                idPerfil: perfil.data.idPerfil,
+                loadModal: false
             });
 
         } catch (error) {
-            console.log(error.response)
+            if (error.message !== "canceled") {
+                await this.setStateAsync({
+                    msgModal: "Se produjo un error interno, intente nuevamente"
+                });
+            }
         }
     }
 
-    async save() {
-        if (this.state.empresa === "") {
+    async onEventGuardar() {
+        if (this.state.idSede === "") {
             this.setState({ messageWarning: "Ingrese el nombre de la empresa" });
             this.refEmpresa.current.focus();
         } else if (this.state.descripcion === "") {
@@ -105,86 +231,75 @@ class Perfiles extends React.Component {
         } else {
             try {
 
-
+                ModalAlertInfo("Perfil", "Procesando información...");
+                hideModal("modalPerfil");
                 if (this.state.idPerfil !== '') {
                     let result = await axios.post('/api/perfil/update', {
                         "descripcion": this.state.descripcion.trim().toUpperCase(),
-                        "idSede": this.state.empresa.trim().toUpperCase(),
+                        "idSede": this.state.idSede.trim().toUpperCase(),
                         "idPerfil": this.state.idPerfil
-                    })
-                    console.log(result);
+                    });
+
+                    ModalAlertSuccess("Perfil", result.data, () => {
+                        this.onEventPaginacion();
+                    });
 
                 } else {
                     let result = await axios.post('/api/perfil/add', {
                         "descripcion": this.state.descripcion.trim().toUpperCase(),
-                        "idSede": this.state.empresa.trim().toUpperCase(),
+                        "idSede": this.state.idSede.trim().toUpperCase(),
                     });
-                    console.log(result);
+
+
+                    ModalAlertSuccess("Comprobante", result.data, () => {
+                        this.loadInit();
+                    });
                 }
-
-
-                this.closeModal()
-
             } catch (error) {
-                console.log(error)
-                console.log(error.response)
+                ModalAlertWarning("Comprobante", "Se produjo un error un interno, intente nuevamente.");
             }
         }
     }
 
-    openModal(id) {
-        if (id === '') {
-            showModal('modalPerfil')
-            this.refEmpresa.current.focus();
-        }
-        else {
-            showModal('modalPerfil')
-            this.loadDataId(id)
-        }
-    }
-
-    closeModal() {
-        hideModal('modalPerfil')
-        this.setState({
-            empresa: '',
-            descripcion: '',
-            idPerfil: '',
-            messageWarning: ''
-        })
-    }
 
     render() {
         return (
             <>
                 {/* Inicio modal */}
-                <div className="modal fade" id="modalPerfil" tabIndex="-1" aria-labelledby="modalPerfilLabel" aria-hidden="true">
+                <div className="modal fade" id="modalPerfil" data-bs-keyboard="false" data-bs-backdrop="static">
                     <div className="modal-dialog">
                         <div className="modal-content">
                             <div className="modal-header">
-                                <h5 className="modal-title"><i className="bi bi-currency-exchange"></i>{this.state.idPerfil === '' ? " Registrar Perfil" : " Editar Perfil"}</h5>
-                                <button type="button" className="close" data-dismiss="modal" onClick={() => this.closeModal()}>
+                                <h5 className="modal-title">{this.state.nameModal}</h5>
+                                <button type="button" className="close" data-bs-dismiss="modal" aria-label="Close">
                                     <span aria-hidden="true">&times;</span>
                                 </button>
                             </div>
                             <div className="modal-body">
-                                {
-                                    this.state.messageWarning === '' ? null :
-                                        <div className="alert alert-warning" role="alert">
-                                            <i className="bi bi-exclamation-diamond-fill"></i> {this.state.messageWarning}
-                                        </div>
-                                }
+                                {this.state.loadModal ?
+                                    <div className="clearfix absolute-all bg-white">
+                                        {spinnerLoading(this.state.msgModal)}
+                                    </div>
+                                    : null}
+
                                 <div className='row py-1'>
                                     <div className='col-lg-4 col-md-4 col-sm-12 col-xs-12'>
                                         <label>Empresa: </label>
                                     </div>
                                     <div className='col-lg-8 col-md-8 col-sm-12 col-xs-12'>
-                                        <input
-                                            type="text"
+                                        <select
                                             className="form-control"
-                                            value={this.state.empresa}
                                             ref={this.refEmpresa}
-                                            onChange={(event) => this.setState({ empresa: event.target.value })}
-                                            placeholder='Ingrese la empresa' />
+                                            value={this.state.idSede}
+                                            onChange={(event) => this.setState({ idSede: event.target.value })}
+                                        >
+                                            <option value="">- Seleccione -</option>
+                                            {
+                                                this.state.sedes.map((item, index) => (
+                                                    <option key={index} value={item.idSede}>{item.nombreSede}</option>
+                                                ))
+                                            }
+                                        </select>
                                     </div>
                                 </div>
                                 <div className='row py-1'>
@@ -203,8 +318,8 @@ class Perfiles extends React.Component {
                                 </div>
                             </div>
                             <div className="modal-footer">
-                                <button type="button" className="btn btn-primary" onClick={() => this.save()}>Aceptar</button>
-                                <button type="button" className="btn btn-secondary" data-dismiss="modal" onClick={() => this.closeModal()}>Cerrar</button>
+                                <button type="button" className="btn btn-primary" onClick={() => this.onEventGuardar()}>Aceptar</button>
+                                <button type="button" className="btn btn-danger" data-bs-dismiss="modal">Cerrar</button>
                             </div>
                         </div>
                     </div>
@@ -226,20 +341,24 @@ class Perfiles extends React.Component {
                                 <div className="input-group-prepend">
                                     <div className="input-group-text"><i className="bi bi-search"></i></div>
                                 </div>
-                                <input type="search" className="form-control" placeholder="Buscar..." onKeyUp={(event) => console.log(event.target.value)} />
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    placeholder="Buscar..."
+                                    ref={this.refTxtSearch}
+                                    onKeyUp={(event) => this.searchText(event.target.value)} />
                             </div>
                         </div>
                     </div>
                     <div className="col-md-6 col-sm-12">
                         <div className="form-group">
-                            <button className="btn btn-outline-info" onClick={() => this.openModal(this.state.idPerfil)}>
+                            <button className="btn btn-outline-info" onClick={() => this.openModal('')}>
                                 <i className="bi bi-file-plus"></i> Nuevo Registro
                             </button>
                             {" "}
-                            <button className="btn btn-outline-secondary" onClick={() => this.fillTable(0, 1, "")}>
+                            <button className="btn btn-outline-secondary" onClick={() => this.loadInit()}>
                                 <i className="bi bi-arrow-clockwise"></i>
                             </button>
-
                         </div>
                     </div>
                 </div>
@@ -247,7 +366,7 @@ class Perfiles extends React.Component {
                 <div className="row">
                     <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                         <div className="table-responsive">
-                            <table className="table table-striped" style={{ borderWidth: '1px', borderStyle: 'inset', borderColor: '#CFA7C9' }}>
+                            <table className="table table-striped table-bordered rounded">
                                 <thead>
                                     <tr>
                                         <th width="5%">#</th>
@@ -261,15 +380,8 @@ class Perfiles extends React.Component {
                                     {
                                         this.state.loading ? (
                                             <tr>
-                                                <td className="text-center" colSpan="5">
-                                                    <img
-                                                        src={loading}
-                                                        id="imgLoad"
-                                                        width="34"
-                                                        height="34"
-                                                        alt="Loader"
-                                                    />
-                                                    <p>Cargando información...</p>
+                                                <td className="text-center" colSpan="8">
+                                                    {spinnerLoading()}
                                                 </td>
                                             </tr>
                                         ) : this.state.lista.length === 0 ? (
@@ -283,7 +395,7 @@ class Perfiles extends React.Component {
                                                         <td>{item.id}</td>
                                                         <td>{item.descripcion}</td>
                                                         <td>{item.empresa}</td>
-                                                        <td><small>{item.fechaRegistro}</small></td>
+                                                        <td>{<span>{item.fecha}</span>}{<br></br>}{<span>{timeForma24(item.hora)}</span>}</td>
                                                         <td>
                                                             <button className="btn btn-outline-dark btn-sm" title="Editar" onClick={() => this.openModal(item.idPerfil)}><i className="bi bi-pencil"></i></button>
                                                         </td>
@@ -296,24 +408,26 @@ class Perfiles extends React.Component {
 
                             </table>
                         </div>
-                        <div className="col-md-12" style={{ textAlign: 'center' }}>
-                            <nav aria-label="...">
+                    </div>
+                </div>
+
+                <div className="row">
+                    <div className="col-sm-12 col-md-5">
+                        <div className="dataTables_info mt-2" role="status" aria-live="polite">{this.state.messagePaginacion}</div>
+                    </div>
+                    <div className="col-sm-12 col-md-7">
+                        <div className="dataTables_paginate paging_simple_numbers">
+                            <nav aria-label="Page navigation example">
                                 <ul className="pagination justify-content-end">
-                                    <li className="page-item disabled">
-                                        <a className="page-link">Previous</a>
-                                    </li>
-                                    <li className="page-item"><a className="page-link" href="#">1</a></li>
-                                    <li className="page-item active" aria-current="page">
-                                        <a className="page-link" href="#">2</a>
-                                    </li>
-                                    <li className="page-item"><a className="page-link" href="#">3</a></li>
-                                    <li className="page-item">
-                                        <a className="page-link" href="#">Next</a>
-                                    </li>
+                                    <Paginacion
+                                        loading={this.state.loading}
+                                        totalPaginacion={this.state.totalPaginacion}
+                                        paginacion={this.state.paginacion}
+                                        fillTable={this.paginacionContext}
+                                    />
                                 </ul>
                             </nav>
                         </div>
-
                     </div>
                 </div>
             </>

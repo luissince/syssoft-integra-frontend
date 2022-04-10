@@ -108,7 +108,7 @@ class Proyectos extends React.Component {
                                 <thead>
                                     <tr>
                                         <th width="5%">#</th>
-                                        <th width="20%"><small><strong>Nombre del Proyecto</strong></small></th>
+                                        <th width="20%">Nombre del Proyecto</th>
                                         <th width="20%">Área Total(Has)</th>
                                         <th width="20%">N° Partida Electrónica</th>
                                         <th width="15%">Moneda</th>
