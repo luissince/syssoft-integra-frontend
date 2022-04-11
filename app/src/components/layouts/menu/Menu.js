@@ -112,9 +112,12 @@ class Menu extends React.Component {
                             title={'Tesoreria'}
                             icon={<i className="bi bi-chat-quote-fill"></i>}
                         >
-                            <MenuItem>submenu 1</MenuItem>
-                            <MenuItem>submenu 2</MenuItem>
-                            <MenuItem>submenu 3</MenuItem>
+                            <MenuItem>
+                                <Link to={`${this.props.url}/conceptos`} style={{ fontWeight: 'bold' }}>Conceptos</Link>
+                            </MenuItem>
+                            <MenuItem>
+                                <Link to={`${this.props.url}/gastos`} style={{ fontWeight: 'bold' }}>Gastos</Link>
+                            </MenuItem>
                         </SubMenu>
 
                         <SubMenu

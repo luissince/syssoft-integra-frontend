@@ -1,13 +1,27 @@
 import React from 'react';
 import axios from 'axios';
 import loading from '../../recursos/images/loading.gif';
-import { showModal, hideModal, clearModal } from '../tools/Tools';
+import { showModal, hideModal, clearModal, isNumeric } from '../tools/Tools';
 
 class Cobros extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             idCobro: '',
+            cliente: '',
+            depositoBanco: '',
+            metodoPago: '',
+            cuotaMensual: '',
+            fecha: '',
+            concepto: '',
+            monto: '',
+
+            conceptos: [
+                { "value": 1, "name": "Mora por retraso de pago" },
+                { "value": 2, "name": "Cuota Mensual" }
+            ],
+
+            detalleConcepto: [],
 
             loading: true,
             lista: [],
@@ -15,17 +29,29 @@ class Cobros extends React.Component {
             totalPaginacion: 0,
             filasPorPagina: 10,
             messagePaginacion: '',
-
             messageWarning: ''
         }
+
+        this.refCliente = React.createRef()
+        this.refDepositoBanco = React.createRef()
+        this.refMetodoPago = React.createRef()
+        this.refConcepto = React.createRef()
+        this.refMonto = React.createRef()
+
     }
 
     async componentDidMount() {
-        // this.fillTable(0, 1, "");
+        this.fillTable(0, 1, "");
 
         clearModal("modalCobro", () => {
             this.setState({
-
+                cliente: '',
+                depositoBanco: '',
+                metodoPago: '',
+                cuotaMensual: '',
+                fecha: '',
+                concepto: '',
+                monto: '',
 
                 idCobro: '',
                 messageWarning: ''
@@ -77,7 +103,13 @@ class Cobros extends React.Component {
             });
             // console.log(result)
             this.setState({
-
+                cliente: result.data.cliente,
+                depositoBanco: result.data.depositoBanco,
+                metodoPago: result.data.metodoPago,
+                cuotaMensual: result.data.cuotaMensual,
+                fecha: result.data.fecha,
+                concepto: result.data.concepto,
+                monto: result.data.monto,
 
                 idCobro: result.data.idCobro
             });
@@ -87,129 +119,55 @@ class Cobros extends React.Component {
         }
     }
 
-    async onSaveProceso() {
+    async save() {
 
-
-
-        if (this.state.nombres === "") {
-            this.setState({ messageWarning: "Ingrese los nombres" });
-            this.onFocusTab("datos-tab", "datos");
-            this.refNombres.current.focus();
-        } else if (this.state.apellidos === "") {
-            this.setState({ messageWarning: "Ingrese los apellidos" })
-            this.onFocusTab("datos-tab", "datos");
-            this.refApellidos.current.focus();
-        } else if (this.state.dni === "") {
-            this.setState({ messageWarning: "Ingrese el numero de DNI" })
-            this.onFocusTab("datos-tab", "datos");
-            this.refDni.current.focus();
-        } else if (this.state.genero === "") {
-            this.setState({ messageWarning: "Seleccione el genero" });
-            this.onFocusTab("datos-tab", "datos");
-            this.refGenero.current.focus();
-        } else if (this.state.direccion === "") {
-            this.setState({ messageWarning: "Ingrese la dirección" });
-            this.onFocusTab("datos-tab", "datos");
-            this.refDireccion.current.focus();
-        } else if (this.state.telefono === "") {
-            this.setState({ messageWarning: "Ingrese el N° de telefono" });
-            this.onFocusTab("datos-tab", "datos");
-            this.refTelefono.current.focus();
-        } else if (this.state.email === "") {
-            this.setState({ messageWarning: "Ingrese el email" });
-            this.onFocusTab("datos-tab", "datos");
-            this.refEmail.current.focus();
-        }
-
-        else if (this.state.empresa === "") {
-            this.setState({ messageWarning: "Ingrese el nombre de la empresa" });
-            this.onFocusTab("login-tab", "login");
-            this.refempresa.current.focus();
-        } else if (this.state.perfil === "") {
-            this.setState({ messageWarning: "Ingrese el nombre del perfil" });
-            this.onFocusTab("login-tab", "login");
-            this.refPerfil.current.focus();
-        } else if (this.state.representante === "") {
-            this.setState({ messageWarning: "Seleccione si es representante" });
-            this.onFocusTab("login-tab", "login");
-            this.refRepresentante.current.focus();
-        }
-
-        //    else if (this.state.estado === "") {
-        //         this.setState({ messageWarning: "Seleccione el estado" });
-        //         this.onFocusTab("login-tab", "login");
-        //         this.refEstado.current.focus();
-        //     }  
-
-        else if (this.state.usuario === "") {
-            this.setState({ messageWarning: "Ingrese el usuario" });
-            this.onFocusTab("login-tab", "login");
-            this.refUsuario.current.focus();
-        } else if (this.state.clave === "") {
-            this.setState({ messageWarning: "Ingrese la contraseña" });
-            this.onFocusTab("login-tab", "login");
-            this.refClave.current.focus();
-        } else if (this.state.configClave === "") {
-            this.setState({ messageWarning: "Ingrese contraseña nuevamente" });
-            this.onFocusTab("login-tab", "login");
-            this.refConfigClave.current.focus();
+        if (this.state.cliente === "") {
+            this.setState({ messageWarning: "Seleccione el cliente" });
+            this.onFocusTab("cuota-tab", "cuota");
+            this.refCliente.current.focus();
+        } else if (this.state.depositoBanco === "") {
+            this.setState({ messageWarning: "Seleccione el banco a depositar" })
+            this.onFocusTab("cuota-tab", "cuota");
+            this.refDepositoBanco.current.focus();
+        } else if (this.state.metodoPago === "") {
+            this.setState({ messageWarning: "Seleccione la metodo de pago" })
+            this.onFocusTab("cuota-tab", "cuota");
+            this.refMetodoPago.current.focus();
         }
 
         else {
 
             try {
 
-                if (this.state.clave === this.state.configClave) {
-                    let result = null
-                    if (this.state.idUsuario !== '') {
-                        result = await axios.post('/api/usuario/update', {
-                            //datos
-                            "nombres": this.state.nombres.trim().toUpperCase(),
-                            "apellidos": this.state.apellidos.trim().toUpperCase(),
-                            "dni": this.state.dni.toString().trim().toUpperCase(),
-                            "genero": this.state.genero,
-                            "direccion": this.state.direccion.trim().toUpperCase(),
-                            "telefono": this.state.telefono.toString().trim().toUpperCase(),
-                            "email": this.state.email.trim().toUpperCase(),
-                            //login
-                            "empresa": this.state.empresa.trim().toUpperCase(),
-                            "perfil": this.state.perfil.trim().toUpperCase(),
-                            "representante": this.state.representante,
-                            "estado": this.state.estado,
-                            "usuario": this.state.usuario.trim().toUpperCase(),
-                            "clave": this.state.clave.trim().toUpperCase(),
-                            // "configClave": this.state.configClave.trim().toUpperCase(),
+                let result = null
+                if (this.state.idCobro !== '') {
+                    result = await axios.post('/api/cobro/update', {
+                        //concepto
+                        "cliente": this.state.cliente,
+                        "depositoBanco": this.state.depositoBanco,
+                        "metodoPago": this.state.metodoPago,
+                        "cuotaMensual": this.state.cuotaMensual.toString().trim(),
+                        "fecha": this.state.fecha,
 
-                            //idUsuario
-                            "idUsuario": this.state.idUsuario
-                        })
-                        // console.log(result);
+                        "concepto": '',
+                        "monto": '',
 
-                    } else {
-                        result = await axios.post('/api/usuario/add', {
-                            //datos
-                            "nombres": this.state.nombres.trim().toUpperCase(),
-                            "apellidos": this.state.apellidos.trim().toUpperCase(),
-                            "dni": this.state.dni.toString().trim().toUpperCase(),
-                            "genero": this.state.genero,
-                            "direccion": this.state.direccion.trim().toUpperCase(),
-                            "telefono": this.state.telefono.toString().trim().toUpperCase(),
-                            "email": this.state.email.trim().toUpperCase(),
-                            //login
-                            "empresa": this.state.empresa.trim().toUpperCase(),
-                            "perfil": this.state.perfil.trim().toUpperCase(),
-                            "representante": this.state.representante,
-                            "estado": this.state.estado,
-                            "usuario": this.state.usuario.trim().toUpperCase(),
-                            "clave": this.state.clave.trim().toUpperCase(),
-                            // "configClave": this.state.configClave.trim().toUpperCase(),
-                        });
-                        // console.log(result);
-                    }
+                        //id
+                        "idCobro": this.state.idCobro
+                    })
+
                 } else {
-                    this.setState({ messageWarning: "Las contraseñas no coinciden" });
-                    this.onFocusTab("login-tab", "login");
-                    this.refConfigClave.current.focus();
+                    result = await axios.post('/api/cobro/add', {
+                        //concepto
+                        "cliente": this.state.cliente,
+                        "depositoBanco": this.state.depositoBanco,
+                        "metodoPago": this.state.metodoPago,
+                        "cuotaMensual": this.state.cuotaMensual.toString().trim(),
+                        "fecha": this.state.fecha,
+
+                        "concepto": '',
+                        "monto": ''
+                    });
                 }
 
                 this.closeModal()
@@ -226,7 +184,7 @@ class Cobros extends React.Component {
         if (id === '') {
             showModal('modalCobro')
             this.onFocusTab("cuota-tab", "cuota");
-            // this.ref.current.focus();
+            this.refCliente.current.focus();
         }
         else {
             showModal('modalCobro')
@@ -238,6 +196,13 @@ class Cobros extends React.Component {
     closeModal() {
         hideModal('modalCobro')
         this.setState({
+            cliente: '',
+            depositoBanco: '',
+            metodoPago: '',
+            cuotaMensual: '',
+            fecha: '',
+            concepto: '',
+            monto: '',
 
             idCobro: '',
             messageWarning: ''
@@ -257,6 +222,56 @@ class Cobros extends React.Component {
         }
     }
 
+    addConcepto() {
+        // console.log('entro')
+        // console.log(this.refConcepto.current.value)
+        if (this.refConcepto.current.value === '') {
+            this.refConcepto.current.focus();
+            return;
+        }
+        if (!isNumeric(this.state.monto)) {
+            this.refMonto.current.focus();
+            return;
+        }
+
+        if (this.state.monto <= 0) {
+            this.refMonto.current.focus();
+            return;
+        }
+
+        let nombre = "";
+        for (let item of this.state.conceptos) {
+            if (this.refConcepto.current.value == item.value) {
+                nombre = item.name;
+                break;
+            }
+        }
+        // console.log(nombre)
+        let obj = {
+            "id": this.refConcepto.current.value,
+            "concepto": nombre,
+            "monto": this.state.monto
+        }
+
+        let newArr = [...this.state.detalleConcepto, obj]
+        this.setState({ detalleConcepto: newArr });
+    }
+
+    removerConcepto(id) {
+
+        for (let i = 0; i < this.state.detalleConcepto.length; i++) {
+            console.log(this.state.detalleConcepto[i].id)
+            if (id === this.state.detalleConcepto[i].id) {
+                this.state.detalleConcepto.splice(i, 1)
+                i--;
+                break;
+            }
+        }
+
+        this.setState({ detalleConcepto: this.state.detalleConcepto })
+
+    }
+
     render() {
         return (
             <>
@@ -265,13 +280,13 @@ class Cobros extends React.Component {
                     <div className="modal-dialog modal-lg">
                         <div className="modal-content">
                             <div className="modal-header">
-                                <h5 className="modal-title"><i className="bi bi-currency-exchange"></i>{this.state.idCobro === '' ? " Registrar Cobro" : " Editar Cobro"}</h5>
+                                <h5 className="modal-title">{this.state.idCobro === '' ? " Registrar Cobro" : " Editar Cobro"}</h5>
                                 <button type="button" className="close" data-dismiss="modal" onClick={() => this.closeModal()}>
                                     <span aria-hidden="true">&times;</span>
                                 </button>
                             </div>
                             <div className="modal-body">
-                                <nav>
+                                {/* <nav>
                                     <div className="nav nav-tabs" id="myTab" role="tablist">
                                         <a className="nav-link active" id="cuota-tab" data-bs-toggle="tab" href="#cuota" role="tab" aria-controls="cuota" aria-selected="true">
                                             <i className="bi bi-info-circle"></i> Cuota Mensual
@@ -280,209 +295,116 @@ class Cobros extends React.Component {
                                             <i className="bi bi-person-workspace"></i> Añadir Conceptos
                                         </a>
                                     </div>
-                                </nav>
-                                <br />
-                                <div className="tab-content" id="myTabContent">
+                                </nav> */}
+
+                                <ul className="nav nav-tabs" id="myTab" role="tablist">
+                                    <li className="nav-item" role="presentation">
+                                        <a className="nav-link active" id="cuota-tab" data-bs-toggle="tab" href="#cuota" role="tab" aria-controls="cuota" aria-selected="true">
+                                            <i className="bi bi-info-circle"></i> Cuota
+                                        </a>
+                                    </li>
+                                    <li className="nav-item" role="presentation">
+                                        <a className="nav-link" id="concepto-tab" data-bs-toggle="tab" href="#concepto" role="tab" aria-controls="concepto" aria-selected="false">
+                                            <i className="bi bi-person-workspace"></i> Conceptos
+                                        </a>
+                                    </li>
+                                </ul>
+
+                                {
+                                    this.state.messageWarning === '' ? null :
+                                        <div className="alert alert-warning" role="alert">
+                                            <i className="bi bi-exclamation-diamond-fill"></i> {this.state.messageWarning}
+                                        </div>
+                                }
+
+                                <div className="tab-content mt-2" id="myTabContent">
                                     <div className="tab-pane fade show active" id="cuota" role="tabpanel" aria-labelledby="cuota-tab">
 
                                         <div className="form-row">
-                                            <div className="form-group col-md-6">
+                                            <div className="form-group col-md-12">
                                                 <label>Cliente</label>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    value={this.state.cliente}
-                                                    ref={this.refCliente}
-                                                    onChange={(event) => {
-                                                        if (event.target.value.trim().length > 0) {
-                                                            this.setState({
-                                                                cliente: event.target.value,
-                                                                messageWarning: '',
-                                                            });
-                                                        } else {
-                                                            this.setState({
-                                                                cliente: event.target.value,
-                                                                messageWarning: 'Ingrese el cliente',
-                                                            });
-                                                        }
-                                                    }}
-                                                    placeholder="Ingrese el cliente" />
-                                            </div>
-                                            <div className="form-group col-md-6">
-                                                <label>DNI/RUC</label>
-                                                <input
-                                                    type="number"
-                                                    className="form-control"
-                                                    value={this.state.dni}
-                                                    ref={this.refDni}
-                                                    onChange={(event) => {
-                                                        if (event.target.value.trim().length > 0) {
-                                                            this.setState({
-                                                                dni: event.target.value,
-                                                                messageWarning: '',
-                                                            });
-                                                        } else {
-                                                            this.setState({
-                                                                dni: event.target.value,
-                                                                messageWarning: 'Ingrese el número de DNI',
-                                                            });
-                                                        }
-                                                    }}
-                                                    placeholder="Ingrese el número de DNI" />
+                                                <div className="input-group">
+                                                    <select
+                                                        className="form-control"
+                                                        value={this.state.cliente}
+                                                        ref={this.refCliente}
+                                                        onChange={(event) => {
+                                                            if (event.target.value.length > 0) {
+                                                                this.setState({
+                                                                    cliente: event.target.value,
+                                                                    messageWarning: '',
+                                                                });
+                                                            } else {
+                                                                this.setState({
+                                                                    cliente: event.target.value,
+                                                                    messageWarning: 'Seleccione el cliente',
+                                                                });
+                                                            }
+                                                        }}>
+                                                        <option value="">-- seleccione --</option>
+                                                        <option value="1">cliente 1 - 12345678</option>
+                                                        <option value="2">cliente 2 - 12345678</option>
+                                                        <option value="3">cliente 3 - 12345678</option>
+                                                    </select>
+                                                </div>
                                             </div>
                                         </div>
 
                                         <div className="form-row">
                                             <div className="form-group col-md-6">
                                                 <label>Banco a depositar</label>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    value={this.state.banco}
-                                                    ref={this.refBanco}
-                                                    onChange={(event) => {
-                                                        if (event.target.value.trim().length > 0) {
-                                                            this.setState({
-                                                                banco: event.target.value,
-                                                                messageWarning: '',
-                                                            });
-                                                        } else {
-                                                            this.setState({
-                                                                banco: event.target.value,
-                                                                messageWarning: 'Ingrese el banco',
-                                                            });
-                                                        }
-                                                    }}
-                                                    placeholder="Ingrese el banco" />
-                                            </div>
-                                            <div className="form-group col-md-6">
-                                                <label>Comprobante</label>
                                                 <div className="input-group">
                                                     <select
                                                         className="form-control"
-                                                        value={this.state.comprobante}
-                                                        ref={this.refComprobante}
+                                                        value={this.state.depositoBanco}
+                                                        ref={this.refDepositoBanco}
                                                         onChange={(event) => {
-                                                            if (event.target.value.trim().length > 0) {
+                                                            if (event.target.value.length > 0) {
                                                                 this.setState({
-                                                                    comprobante: event.target.value,
+                                                                    depositoBanco: event.target.value,
                                                                     messageWarning: '',
                                                                 });
                                                             } else {
                                                                 this.setState({
-                                                                    comprobante: event.target.value,
-                                                                    messageWarning: 'Seleccione el comprobante',
+                                                                    depositoBanco: event.target.value,
+                                                                    messageWarning: 'Seleccione el banco a depositar',
                                                                 });
                                                             }
                                                         }}>
                                                         <option value="">-- seleccione --</option>
-                                                        <option value="1">Recibo</option>
-                                                        <option value="2">Boleta</option>
-                                                        <option value="3">Factura</option>
+                                                        <option value="1">BBVA - Cuenta de ahorros</option>
+                                                        <option value="2">BCP - Cuenta de ahorros</option>
+                                                        <option value="3">Pichincha - Cuenta de ahorros</option>
                                                     </select>
                                                 </div>
                                             </div>
-                                        </div>
-                                        
-                                        <div className="form-row">
                                             <div className="form-group col-md-6">
-                                                <label>N° de Comprobante</label>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    value={this.state.numComprobante}
-                                                    ref={this.refNumComprobante}
-                                                    onChange={(event) => {
-                                                        if (event.target.value.trim().length > 0) {
-                                                            this.setState({
-                                                                numComprobante: event.target.value,
-                                                                messageWarning: '',
-                                                            });
-                                                        } else {
-                                                            this.setState({
-                                                                numComprobante: event.target.value,
-                                                                messageWarning: 'Ingrese el número del comprobante',
-                                                            });
-                                                        }
-                                                    }}
-                                                    placeholder="Ingrese el número del comprobante" />
-                                            </div>
-                                            <div className="form-group col-md-6">
-                                                <label>Forma de Pago</label>
+                                                <label>Metodo de Pago</label>
                                                 <div className="input-group">
                                                     <select
                                                         className="form-control"
-                                                        value={this.state.formaPago}
-                                                        ref={this.refFormaPago}
+                                                        value={this.state.metodoPago}
+                                                        ref={this.refMetodoPago}
                                                         onChange={(event) => {
-                                                            if (event.target.value.trim().length > 0) {
+                                                            if (event.target.value.length > 0) {
                                                                 this.setState({
-                                                                    formaPago: event.target.value,
+                                                                    metodoPago: event.target.value,
                                                                     messageWarning: '',
                                                                 });
                                                             } else {
                                                                 this.setState({
-                                                                    formaPago: event.target.value,
-                                                                    messageWarning: 'Seleccione la forma de pago',
+                                                                    metodoPago: event.target.value,
+                                                                    messageWarning: 'Seleccione la metodo de pago',
                                                                 });
                                                             }
                                                         }}>
                                                         <option value="">-- seleccione --</option>
-                                                        <option value="1">Recibo</option>
-                                                        <option value="2">Boleta</option>
-                                                        <option value="3">Factura</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div className="form-row">
-                                            <div className="form-group col-md-6">
-                                                <label>Cuota Mensual</label>
-                                                <input
-                                                    type="number"
-                                                    className="form-control"
-                                                    value={this.state.cuotamensual}
-                                                    ref={this.refNumComprobante}
-                                                    onChange={(event) => {
-                                                        if (event.target.value.trim().length > 0) {
-                                                            this.setState({
-                                                                numComprobante: event.target.value,
-                                                                messageWarning: '',
-                                                            });
-                                                        } else {
-                                                            this.setState({
-                                                                numComprobante: event.target.value,
-                                                                messageWarning: 'Ingrese el número del comprobante',
-                                                            });
-                                                        }
-                                                    }}
-                                                    placeholder="Ingrese el número del comprobante" />
-                                            </div>
-                                            <div className="form-group col-md-6">
-                                                <label>Forma de Pago</label>
-                                                <div className="input-group">
-                                                    <select
-                                                        className="form-control"
-                                                        value={this.state.formaPago}
-                                                        ref={this.refFormaPago}
-                                                        onChange={(event) => {
-                                                            if (event.target.value.trim().length > 0) {
-                                                                this.setState({
-                                                                    formaPago: event.target.value,
-                                                                    messageWarning: '',
-                                                                });
-                                                            } else {
-                                                                this.setState({
-                                                                    formaPago: event.target.value,
-                                                                    messageWarning: 'Seleccione la forma de pago',
-                                                                });
-                                                            }
-                                                        }}>
-                                                        <option value="">-- seleccione --</option>
-                                                        <option value="1">Recibo</option>
-                                                        <option value="2">Boleta</option>
-                                                        <option value="3">Factura</option>
+                                                        <option value="1">Efectivo</option>
+                                                        <option value="2">Consignación</option>
+                                                        <option value="3">Transferencia</option>
+                                                        <option value="4">Cheque</option>
+                                                        <option value="5">Tarjeta crédito</option>
+                                                        <option value="6">Tarjeta débito</option>
                                                     </select>
                                                 </div>
                                             </div>
@@ -490,59 +412,106 @@ class Cobros extends React.Component {
 
                                     </div>
                                     <div className="tab-pane fade" id="concepto" role="tabpanel" aria-labelledby="concepto-tab">
-                                        <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
-                                            <div>
-                                                dfsdf
+
+                                        <div className="form-row">
+                                            <div className="form-group col-md-6">
+                                                <label>Concepto</label>
+                                                <div className="input-group">
+                                                    <select
+                                                        className="form-control"
+                                                        // value={this.state.concepto}
+                                                        ref={this.refConcepto}
+                                                    // onChange={(event) => {
+                                                    //     if (event.target.value.length > 0) {
+                                                    //         this.setState({
+                                                    //             concepto: event.target.value,
+                                                    //             messageWarning: '',
+                                                    //         });
+                                                    //     } else {
+                                                    //         this.setState({
+                                                    //             concepto: event.target.value,
+                                                    //             messageWarning: 'Seleccione el concepto',
+                                                    //         });
+                                                    //     }
+                                                    // }}
+                                                    >
+                                                        <option value="">-- seleccione --</option>
+                                                        {
+                                                            this.state.conceptos.map((item, index) => (
+                                                                <option key={index} value={item.value}>{item.name}</option>
+                                                            ))
+                                                        }
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div className="form-group col-md-6">
+                                                <label>Monto</label>
+                                                <div className="input-group">
+                                                    <input
+                                                        type="number"
+                                                        className="form-control"
+                                                        value={this.state.monto}
+                                                        ref={this.refMonto}
+                                                        onChange={(event) => {
+                                                            if (event.target.value.trim().length > 0) {
+                                                                this.setState({
+                                                                    monto: event.target.value,
+                                                                    messageWarning: '',
+                                                                });
+                                                            } else {
+                                                                this.setState({
+                                                                    monto: event.target.value,
+                                                                    messageWarning: 'Ingrese el monto',
+                                                                });
+                                                            }
+                                                        }}
+                                                        placeholder="Ingrese el monto" />
+                                                    <button className="btn btn-outline-secondary ml-1" type="button" onClick={() => this.addConcepto()}><i className="bi bi-plus-circle"></i> Agregar</button>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </div>
 
-                                <div className='row py-1'>
-                                    <div className='col-lg-4 col-md-4 col-sm-12 col-xs-12'>
-                                        <label>Nombre(s): </label>
-                                    </div>
-                                    <div className='col-lg-8 col-md-8 col-sm-12 col-xs-12'>
-                                        <input type="" className="form-control" placeholder='Ingrese nombres' />
-                                    </div>
-                                </div>
-                                <div className='row py-1'>
-                                    <div className='col-lg-4 col-md-4 col-sm-12 col-xs-12'>
-                                        <label>Apellidos: </label>
-                                    </div>
-                                    <div className='col-lg-8 col-md-8 col-sm-12 col-xs-12'>
-                                        <input type="" className="form-control" placeholder='Ingrese apellidos' />
-                                    </div>
-                                </div>
-                                <div className='row py-1'>
-                                    <div className='col-lg-4 col-md-4 col-sm-12 col-xs-12'>
-                                        <label>DNI/RUC: </label>
-                                    </div>
-                                    <div className='col-lg-8 col-md-8 col-sm-12 col-xs-12'>
-                                        <input type="number" className="form-control" placeholder='Ingrese documento' />
-                                    </div>
-                                </div>
-                                <div className='row py-1'>
-                                    <div className='col-lg-4 col-md-4 col-sm-12 col-xs-12'>
-                                        <label>Telf./Celular: </label>
-                                    </div>
-                                    <div className='col-lg-8 col-md-8 col-sm-12 col-xs-12'>
-                                        <input type="number" className="form-control" placeholder='Ingrese Telefono' />
-                                    </div>
-                                </div>
-                                <div className='row py-1'>
-                                    <div className='col-lg-4 col-md-4 col-sm-12 col-xs-12'>
-                                        <label>Observacion: </label>
-                                    </div>
-                                    <div className='col-lg-8 col-md-8 col-sm-12 col-xs-12'>
-                                        <input type="" className="form-control" placeholder='' />
+                                        <div className="row">
+                                            <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                <div className="table-responsive">
+                                                    <table className="table table-striped" style={{ borderWidth: '1px', borderStyle: 'inset', borderColor: '#CFA7C9' }}>
+                                                        <thead>
+                                                            <tr>
+                                                                <th width="10%">#</th>
+                                                                <th width="50%">Concepto</th>
+                                                                <th width="20%">Monto</th>
+                                                                <th width="20%">Quitar</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {
+                                                                this.state.detalleConcepto.map((item, index) => (
+                                                                    <tr key={index}>
+                                                                        <td>1</td>
+                                                                        <td>{item.concepto}</td>
+                                                                        <td>{item.monto}</td>
+                                                                        <td>
+                                                                            <button className="btn btn-outline-dark btn-sm" title="Eliminar" onClick={() => this.removerConcepto(item.id)}><i className="bi bi-trash"></i></button>
+                                                                        </td>
+                                                                    </tr>
+                                                                ))
+                                                            }
+                                                        </tbody>
+
+                                                    </table>
+                                                </div>
+
+
+                                            </div>
+                                        </div>
+
                                     </div>
                                 </div>
 
                             </div>
                             <div className="modal-footer">
-                                <button type="button" className="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-                                <button type="button" className="btn btn-primary">Aceptar</button>
+                                <button type="button" className="btn btn-primary" onClick={() => this.save()}>Guardar</button>
+                                <button type="button" className="btn btn-secondary" data-dismiss="modal" onClick={() => this.closeModal()}>Cerrar</button>
                             </div>
                         </div>
                     </div>
@@ -600,10 +569,10 @@ class Cobros extends React.Component {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {/* {
+                                    {
                                         this.state.loading ? (
                                             <tr>
-                                                <td className="text-center" colSpan="8">
+                                                <td className="text-center" colSpan="9">
                                                     <img
                                                         src={loading}
                                                         id="imgLoad"
@@ -616,7 +585,7 @@ class Cobros extends React.Component {
                                             </tr>
                                         ) : this.state.lista.length === 0 ? (
                                             <tr className="text-center">
-                                                <td colSpan="8">¡No hay datos registrados!</td>
+                                                <td colSpan="9">¡No hay datos registrados!</td>
                                             </tr>
                                         ) : (
                                             this.state.lista.map((item, index) => {
@@ -630,13 +599,13 @@ class Cobros extends React.Component {
                                                         <td>{item.empresa}</td>
                                                         <td className="text-center"><div className={`badge ${item.estado === 1 ? "badge-info" : "badge-danger"}`}>{item.estado === 1 ? "ACTIVO" : "INACTIVO"}</div></td>
                                                         <td>
-                                                            <button className="btn btn-outline-dark btn-sm" title="Editar" onClick={() => this.openModal(item.idUsuario)}><i className="bi bi-pencil"></i></button>
+                                                            <button className="btn btn-outline-dark btn-sm" title="Editar" onClick={() => this.openModal(item.idCobro)}><i className="bi bi-pencil"></i></button>
                                                         </td>
                                                     </tr>
                                                 )
                                             })
                                         )
-                                    } */}
+                                    }
                                 </tbody>
 
                             </table>
