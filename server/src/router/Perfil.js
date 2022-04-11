@@ -126,14 +126,23 @@ router.get('/id', async function (req, res) {
     }
 });
 
+router.get('/listcombo', async function (req, res) {
+    try {
+        let result = await conec.query('SELECT idPerfil,descripcion FROM perfil');
+        res.status(200).send(result);
+    } catch (error) {
+        res.status(500).send("Error interno de conexión, intente nuevamente.");
+    }
+});
+
 router.post('/update', async function (req, res) {
     let connection = null;
     try {
 
         connection = await conec.beginTransaction();
         await conec.execute(connection, `UPDATE perfil SET idSede=?, descripcion=? WHERE idPerfil=?`, [
-            req.body.idSede, 
-            req.body.descripcion, 
+            req.body.idSede,
+            req.body.descripcion,
             req.body.idPerfil
         ])
 

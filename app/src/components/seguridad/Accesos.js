@@ -2,17 +2,28 @@ import React from 'react';
 // import { Redirect } from 'react-router-dom';
 // import { connect } from 'react-redux';
 // import { signOut } from '../../redux/actions';
-// import axios from 'axios';
+import axios from 'axios';
 import NavTree from '../../recursos/js/tree.js';
 // import loading from '../../recursos/images/loading.gif';
-// import { showModal, hideModal, clearModal } from '../tools/Tools';
+import { showModal, hideModal, clearModal, spinnerLoading } from '../tools/Tools';
 
 class Accesos extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-
+      idSede: "",
+      idPerfil: "",
+      perfiles: [],
+      loading: true,
     }
+
+    this.abortControllerView = new AbortController();
+  }
+
+  setStateAsync(state) {
+    return new Promise((resolve) => {
+      this.setState(state, resolve)
+    });
   }
 
   componentDidMount() {
@@ -31,11 +42,40 @@ class Accesos extends React.Component {
 
       searchPlaceholderText: "Search",
     });
+
+    this.loadData();
+  }
+
+  componentWillUnmount() {
+    this.abortControllerView.abort();
+  }
+
+  loadData = async () => {
+    try {
+      const perfil = await axios.get("/api/perfil/listcombo", {
+        signal: this.abortControllerView.signal,
+      });
+
+      console.log(perfil)
+      await this.setStateAsync({
+        perfiles: perfil.data,
+        loading: false,
+      });
+    } catch (error) {
+      console.log(error)
+    }
   }
 
   render() {
     return (
       <>
+        {
+          this.state.loading ?
+            <div className="clearfix absolute-all bg-white">
+              {spinnerLoading()}
+            </div> : null
+        }
+
         <div className='row'>
           <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
             <div className="form-group">
@@ -60,10 +100,18 @@ class Accesos extends React.Component {
           <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
             <label>Perfil: </label>
             <div className='form-group'>
-              <input
-                type="text"
+              <select
                 className="form-control"
-                placeholder='Ingrese el perfil' />
+                value={this.state.idPerfil}
+                onChange={(event) => this.setState({ idPerfil: event.target.value })}
+              >
+                <option value="">- Seleccione -</option>
+                {
+                  this.state.perfiles.map((item, index) => (
+                    <option key={index} value={item.idPerfil}>{item.descripcion}</option>
+                  ))
+                }
+              </select>
             </div>
           </div>
         </div>
@@ -178,7 +226,7 @@ class Accesos extends React.Component {
 
               <li id="li14" data-value="li14">
                 <button type="button" className="btn">
-                  Logistica
+                  Tesorería
                 </button>
                 <ul>
                   <li id="li15" data-value="li15">
@@ -250,7 +298,7 @@ class Accesos extends React.Component {
 
               <li id="li23" data-value="li23">
                 <button type="button" className="btn">
-                  Logistica
+                  Reporte
                 </button>
                 <ul>
                   <li id="li24" data-value="li24">
