@@ -1,7 +1,7 @@
 import React from 'react';
 import axios from 'axios';
 import loading from '../../recursos/images/loading.gif';
-import { showModal, hideModal, clearModal } from '../tools/Tools';
+import { showModal, hideModal, clearModal, isNumeric } from '../tools/Tools';
 
 class Cobros extends React.Component {
     constructor(props) {
@@ -16,6 +16,13 @@ class Cobros extends React.Component {
             concepto: '',
             monto: '',
 
+            conceptos: [
+                { "value": 1, "name": "Mora por retraso de pago" },
+                { "value": 2, "name": "Cuota Mensual" }
+            ],
+
+            detalleConcepto: [],
+
             loading: true,
             lista: [],
             paginacion: 0,
@@ -28,8 +35,6 @@ class Cobros extends React.Component {
         this.refCliente = React.createRef()
         this.refDepositoBanco = React.createRef()
         this.refMetodoPago = React.createRef()
-        this.refCuotaMensual = React.createRef()
-        this.refFecha = React.createRef()
         this.refConcepto = React.createRef()
         this.refMonto = React.createRef()
 
@@ -128,14 +133,6 @@ class Cobros extends React.Component {
             this.setState({ messageWarning: "Seleccione la metodo de pago" })
             this.onFocusTab("cuota-tab", "cuota");
             this.refMetodoPago.current.focus();
-        } else if (this.state.cuotaMensual === "") {
-            this.setState({ messageWarning: "Ingrese el monto de la cuota" });
-            this.onFocusTab("cuota-tab", "cuota");
-            this.refCuotaMensual.current.focus();
-        } else if (this.state.fecha === "") {
-            this.setState({ messageWarning: "Seleccione la fecha" });
-            this.onFocusTab("cuota-tab", "cuota");
-            this.refFecha.current.focus();
         }
 
         else {
@@ -225,10 +222,55 @@ class Cobros extends React.Component {
         }
     }
 
-    
+    addConcepto() {
+        // console.log('entro')
+        // console.log(this.refConcepto.current.value)
+        if (this.refConcepto.current.value === '') {
+            this.refConcepto.current.focus();
+            return;
+        }
+        if (!isNumeric(this.state.monto)) {
+            this.refMonto.current.focus();
+            return;
+        }
 
+        if (this.state.monto <= 0) {
+            this.refMonto.current.focus();
+            return;
+        }
 
-    
+        let nombre = "";
+        for (let item of this.state.conceptos) {
+            if (this.refConcepto.current.value == item.value) {
+                nombre = item.name;
+                break;
+            }
+        }
+        // console.log(nombre)
+        let obj = {
+            "id": this.refConcepto.current.value,
+            "concepto": nombre,
+            "monto": this.state.monto
+        }
+
+        let newArr = [...this.state.detalleConcepto, obj]
+        this.setState({ detalleConcepto: newArr });
+    }
+
+    removerConcepto(id) {
+
+        for (let i = 0; i < this.state.detalleConcepto.length; i++) {
+            console.log(this.state.detalleConcepto[i].id)
+            if (id === this.state.detalleConcepto[i].id) {
+                this.state.detalleConcepto.splice(i, 1)
+                i--;
+                break;
+            }
+        }
+
+        this.setState({ detalleConcepto: this.state.detalleConcepto })
+
+    }
 
     render() {
         return (
@@ -244,7 +286,7 @@ class Cobros extends React.Component {
                                 </button>
                             </div>
                             <div className="modal-body">
-                                <nav>
+                                {/* <nav>
                                     <div className="nav nav-tabs" id="myTab" role="tablist">
                                         <a className="nav-link active" id="cuota-tab" data-bs-toggle="tab" href="#cuota" role="tab" aria-controls="cuota" aria-selected="true">
                                             <i className="bi bi-info-circle"></i> Cuota Mensual
@@ -253,7 +295,20 @@ class Cobros extends React.Component {
                                             <i className="bi bi-person-workspace"></i> Añadir Conceptos
                                         </a>
                                     </div>
-                                </nav>
+                                </nav> */}
+
+                                <ul className="nav nav-tabs" id="myTab" role="tablist">
+                                    <li className="nav-item" role="presentation">
+                                        <a className="nav-link active" id="cuota-tab" data-bs-toggle="tab" href="#cuota" role="tab" aria-controls="cuota" aria-selected="true">
+                                            <i className="bi bi-info-circle"></i> Cuota
+                                        </a>
+                                    </li>
+                                    <li className="nav-item" role="presentation">
+                                        <a className="nav-link" id="concepto-tab" data-bs-toggle="tab" href="#concepto" role="tab" aria-controls="concepto" aria-selected="false">
+                                            <i className="bi bi-person-workspace"></i> Conceptos
+                                        </a>
+                                    </li>
+                                </ul>
 
                                 {
                                     this.state.messageWarning === '' ? null :
@@ -261,7 +316,7 @@ class Cobros extends React.Component {
                                             <i className="bi bi-exclamation-diamond-fill"></i> {this.state.messageWarning}
                                         </div>
                                 }
-                                
+
                                 <div className="tab-content mt-2" id="myTabContent">
                                     <div className="tab-pane fade show active" id="cuota" role="tabpanel" aria-labelledby="cuota-tab">
 
@@ -294,58 +349,6 @@ class Cobros extends React.Component {
                                                 </div>
                                             </div>
                                         </div>
-
-                                        {/* <div className="form-row">
-                                            <div className="form-group col-md-6">
-                                                <label>Comprobante</label>
-                                                <div className="input-group">
-                                                    <select
-                                                        className="form-control"
-                                                        value={this.state.comprobante}
-                                                        ref={this.refComprobante}
-                                                        onChange={(event) => {
-                                                            if (event.target.value.trim().length > 0) {
-                                                                this.setState({
-                                                                    comprobante: event.target.value,
-                                                                    messageWarning: '',
-                                                                });
-                                                            } else {
-                                                                this.setState({
-                                                                    comprobante: event.target.value,
-                                                                    messageWarning: 'Seleccione el comprobante',
-                                                                });
-                                                            }
-                                                        }}>
-                                                        <option value="">-- seleccione --</option>
-                                                        <option value="1">Recibo</option>
-                                                        <option value="2">Boleta</option>
-                                                        <option value="3">Factura</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div className="form-group col-md-6">
-                                                <label>N° de Comprobante</label>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    value={this.state.numComprobante}
-                                                    ref={this.refNumComprobante}
-                                                    onChange={(event) => {
-                                                        if (event.target.value.trim().length > 0) {
-                                                            this.setState({
-                                                                numComprobante: event.target.value,
-                                                                messageWarning: '',
-                                                            });
-                                                        } else {
-                                                            this.setState({
-                                                                numComprobante: event.target.value,
-                                                                messageWarning: 'Ingrese el número del comprobante',
-                                                            });
-                                                        }
-                                                    }}
-                                                    placeholder="Ingrese el número del comprobante" />
-                                            </div>
-                                        </div> */}
 
                                         <div className="form-row">
                                             <div className="form-group col-md-6">
@@ -407,52 +410,6 @@ class Cobros extends React.Component {
                                             </div>
                                         </div>
 
-                                        <div className="form-row">
-                                            <div className="form-group col-md-6">
-                                                <label>Cuota Mensual</label>
-                                                <input
-                                                    type="number"
-                                                    className="form-control"
-                                                    value={this.state.cuotaMensual}
-                                                    ref={this.refCuotaMensual}
-                                                    onChange={(event) => {
-                                                        if (event.target.value.trim().length > 0) {
-                                                            this.setState({
-                                                                cuotaMensual: event.target.value,
-                                                                messageWarning: '',
-                                                            });
-                                                        } else {
-                                                            this.setState({
-                                                                cuotaMensual: event.target.value,
-                                                                messageWarning: 'Ingrese el monto de la cuota',
-                                                            });
-                                                        }
-                                                    }}
-                                                    placeholder="Ingrese el monto de la cuota" />
-                                            </div>
-                                            <div className="form-group col-md-6">
-                                                <label>Fecha de Pago</label>
-                                                <input
-                                                    type="date"
-                                                    className="form-control"
-                                                    value={this.state.fecha}
-                                                    ref={this.refFecha}
-                                                    onChange={(event) => {
-                                                        if (event.target.value.length > 0) {
-                                                            this.setState({
-                                                                fecha: event.target.value,
-                                                                messageWarning: '',
-                                                            });
-                                                        } else {
-                                                            this.setState({
-                                                                fecha: event.target.value,
-                                                                messageWarning: 'Seleccione la fecha',
-                                                            });
-                                                        }
-                                                    }} />
-                                            </div>
-                                        </div>
-
                                     </div>
                                     <div className="tab-pane fade" id="concepto" role="tabpanel" aria-labelledby="concepto-tab">
 
@@ -462,23 +419,28 @@ class Cobros extends React.Component {
                                                 <div className="input-group">
                                                     <select
                                                         className="form-control"
-                                                        value={this.state.concepto}
+                                                        // value={this.state.concepto}
                                                         ref={this.refConcepto}
-                                                        onChange={(event) => {
-                                                            if (event.target.value.trim().length > 0) {
-                                                                this.setState({
-                                                                    concepto: event.target.value,
-                                                                    messageWarning: '',
-                                                                });
-                                                            } else {
-                                                                this.setState({
-                                                                    concepto: event.target.value,
-                                                                    messageWarning: 'Seleccione el concepto',
-                                                                });
-                                                            }
-                                                        }}>
+                                                    // onChange={(event) => {
+                                                    //     if (event.target.value.length > 0) {
+                                                    //         this.setState({
+                                                    //             concepto: event.target.value,
+                                                    //             messageWarning: '',
+                                                    //         });
+                                                    //     } else {
+                                                    //         this.setState({
+                                                    //             concepto: event.target.value,
+                                                    //             messageWarning: 'Seleccione el concepto',
+                                                    //         });
+                                                    //     }
+                                                    // }}
+                                                    >
                                                         <option value="">-- seleccione --</option>
-                                                        <option value="1">Mora por retraso de pago</option>
+                                                        {
+                                                            this.state.conceptos.map((item, index) => (
+                                                                <option key={index} value={item.value}>{item.name}</option>
+                                                            ))
+                                                        }
                                                     </select>
                                                 </div>
                                             </div>
@@ -504,7 +466,7 @@ class Cobros extends React.Component {
                                                             }
                                                         }}
                                                         placeholder="Ingrese el monto" />
-                                                    <button className="btn btn-outline-secondary ml-1" type="button"><i className="bi bi-plus-circle"></i> Agregar</button>
+                                                    <button className="btn btn-outline-secondary ml-1" type="button" onClick={() => this.addConcepto()}><i className="bi bi-plus-circle"></i> Agregar</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -522,7 +484,18 @@ class Cobros extends React.Component {
                                                             </tr>
                                                         </thead>
                                                         <tbody>
-
+                                                            {
+                                                                this.state.detalleConcepto.map((item, index) => (
+                                                                    <tr key={index}>
+                                                                        <td>1</td>
+                                                                        <td>{item.concepto}</td>
+                                                                        <td>{item.monto}</td>
+                                                                        <td>
+                                                                            <button className="btn btn-outline-dark btn-sm" title="Eliminar" onClick={() => this.removerConcepto(item.id)}><i className="bi bi-trash"></i></button>
+                                                                        </td>
+                                                                    </tr>
+                                                                ))
+                                                            }
                                                         </tbody>
 
                                                     </table>
