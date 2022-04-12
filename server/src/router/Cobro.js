@@ -7,9 +7,10 @@ const conec = new Conexion()
 
 router.get('/list', async function (req, res) {
     try {
+
         // console.log(req.query)
         let lista = await conec.query(`SELECT 
-            idCobro, cliente, depositoBanco, metodoPago, cuotaMensual, DATE_FORMAT(fecha,'%d/%m/%Y') as fecha, hora, concepto, monto  
+            idCobro, cliente, usuario, moneda, cuentaBancaria, metodoPago, estado, observacion, DATE_FORMAT(fecha,'%d/%m/%Y') as fecha, hora  
             FROM cobro
             WHERE 
             ? = 0
@@ -84,14 +85,26 @@ router.post('/add', async function (req, res) {
 
         await conec.execute(connection, `INSERT INTO cobro(
             idCobro, 
-            cliente, depositoBanco, metodoPago, cuotaMensual, fecha, hora, concepto, monto) 
-            VALUES(?,?,?,?,?,?,?,?,?)`, [
+            cliente, usuario, moneda, cuentaBancaria, metodoPago, estado, observacion, fecha, hora) 
+            VALUES(?, ?,?,?,?,?,?,?,?,?)`, [
             idCobro, 
-            req.body.cliente, req.body.depositoBanco, req.body.metodoPago, req.body.cuotaMensual, req.body.fecha, currentTime(), req.body.concepto, req.body.monto
+            req.body.cliente, req.body.usuario, req.body.moneda, req.body.cuentaBancaria, req.body.metodoPago, req.body.estado, req.body.observacion, currentDate(), currentTime()
         ])
+
+        // console.log(req.body.cobroDetalle)
+
+        for(let item of req.body.cobroDetalle) {
+
+            await conec.execute(connection, `INSERT INTO cobroDetalle(
+                idCobro, idConcepto, precio, cantidad, impuesto)
+                VALUES(?,?,?,?,?)`, [
+                    idCobro, item.id, parseFloat(item.monto), 1, 0
+            ])
+        }
 
         await conec.commit(connection);
         res.status(200).send('Datos insertados correctamente')
+        
     } catch (error) {
         if (connection != null) {
             conec.rollback(connection);
@@ -127,9 +140,9 @@ router.post('/update', async function (req, res) {
 
         connection = await conec.beginTransaction();
         await conec.execute(connection, `UPDATE cobro SET 
-            cliente=?, depositoBanco=?, metodoPago=?, cuotaMensual=?, fecha=?, hora=?, concepto=?, monto=?
+            cliente=?, usuario=?, moneda=?, cuentaBancaria=?, metodoPago=?, estado=?, observacion=?, fecha=?, hora=?
             WHERE idCobro=?`, [ 
-            req.body.cliente, req.body.depositoBanco, req.body.metodoPago, req.body.cuotaMensual, req.body.fecha, currentTime(), req.body.concepto, req.body.monto,  
+            req.body.cliente, req.body.usuario, req.body.moneda, req.body.cuentaBancaria, req.body.metodoPago, req.body.estado, req.body.observacion, currentDate(), currentTime(),   
             req.body.idCobro, 
         ])
 
@@ -141,6 +154,6 @@ router.post('/update', async function (req, res) {
         }
         res.status(500).send("Se produjo un error de servidor, intente nuevamente.");
     }
-});
+})
 
 module.exports = router;

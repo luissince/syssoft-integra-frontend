@@ -21,6 +21,7 @@ import Manzanas from '../logistica/Manzanas';
 import Lotes from '../logistica/Lotes';
 import VentaProceso from '../facturacion/registros/VentaProceso';
 import ClienteProceso from '../facturacion/registros/ClienteProceso'
+import CobroProceso from '../facturacion/registros/CobroProceso';
 import Perfiles from '../seguridad/Perfiles'
 import Usuarios from '../seguridad/Usuarios'
 import Accesos from '../seguridad/Accesos'
@@ -120,7 +121,13 @@ class Inicio extends React.Component {
                         />
                         <Route
                             path={`${path}/cobros`}
+                            exact={true}
                             render={(props) => <Cobros {...props} />}
+                        />
+                        <Route
+                            path={`${path}/cobros/proceso`}
+                            exact={true}
+                            render={(props) => <CobroProceso {...props} />}
                         />
                         <Route
                             path={`${path}/creditos`}
