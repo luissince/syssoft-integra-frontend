@@ -39,11 +39,12 @@ app.use('/api/factura', require('./src/router/Factura'));
 app.use('/api/login', require('./src/router/Login'));
 
 app.use('/api/perfil', require('./src/router/Perfil'));
-app.use('/api/usuario', require('./src/router/Usuario'))
+app.use('/api/usuario', require('./src/router/Usuario'));
 
-app.use('/api/concepto', require('./src/router/Concepto'))
-app.use('/api/gasto', require('./src/router/Gasto'))
-app.use('/api/cobro', require('./src/router/Cobro'))
+app.use('/api/concepto', require('./src/router/Concepto'));
+app.use('/api/gasto', require('./src/router/Gasto'));
+app.use('/api/cobro', require('./src/router/Cobro'));
+app.use('/api/acceso', require('./src/router/Acceso'));
 
 
 app.use((req, res, next) => {

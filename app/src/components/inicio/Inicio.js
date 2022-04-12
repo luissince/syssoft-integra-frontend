@@ -74,7 +74,7 @@ class Inicio extends React.Component {
         return (
             <div className='app'>
                 <Menu ref={this.menuRef} url={url} />
-                <main>
+                <main className='position-relative'>
                     <Head setOpen={this.setOpen} setMinimun={this.setMinimun} />
 
                     <Switch>
