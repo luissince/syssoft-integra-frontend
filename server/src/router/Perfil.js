@@ -97,6 +97,28 @@ router.post('/add', async function (req, res) {
             currentTime()
         ])
 
+        let menus = await conec.execute(connection, `SELECT idMenu,nombre FROM menu`);
+        for(let menu of menus) {
+            await conec.execute(connection, `INSERT INTO permisomenu(idPerfil ,idMenu ,estado)values(?,?,?)`,[
+                idPerfil,
+                menu.idMenu,
+                0
+            ]);
+
+            let submenus = await conec.execute(connection, `SELECT idSubMenu  FROM submenu WHERE idMenu = ?`,[
+                menu.idMenu
+            ]);
+
+            for(let submenu of submenus) {
+                await conec.execute(connection, `INSERT INTO permisosubmenu(idPerfil ,idMenu , idSubMenu ,estado)values(?,?,?,?)`,[
+                    idPerfil,
+                    menu.idMenu,
+                    submenu.idSubMenu,
+                    0
+                ]);
+            }
+        }
+
         await conec.commit(connection);
         res.status(200).send('Datos insertados correctamente')
     } catch (error) {

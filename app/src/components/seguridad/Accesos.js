@@ -5,7 +5,7 @@ import React from 'react';
 import axios from 'axios';
 import NavTree from '../../recursos/js/tree.js';
 // import loading from '../../recursos/images/loading.gif';
-import { showModal, hideModal, clearModal, spinnerLoading } from '../tools/Tools';
+import { ModalAlertInfo,ModalAlertSuccess,ModalAlertWarning,spinnerLoading } from '../tools/Tools';
 
 class Accesos extends React.Component {
   constructor(props) {
@@ -14,7 +14,9 @@ class Accesos extends React.Component {
       idSede: "",
       idPerfil: "",
       perfiles: [],
+      menu: [],
       loading: true,
+      msgLoading: 'Cargando datos...'
     }
 
     this.abortControllerView = new AbortController();
@@ -27,22 +29,6 @@ class Accesos extends React.Component {
   }
 
   componentDidMount() {
-    NavTree.createBySelector("#nav-tree", {
-      searchable: false,
-      showEmptyGroups: true,
-
-      groupOpenIconClass: "fas",
-      groupOpenIcon: "fa-folder-open",
-
-      groupCloseIconClass: "fas",
-      groupCloseIcon: "fa-folder",
-
-      linkIconClass: "fas",
-      linkIcon: "fa-th",
-
-      searchPlaceholderText: "Search",
-    });
-
     this.loadData();
   }
 
@@ -56,13 +42,123 @@ class Accesos extends React.Component {
         signal: this.abortControllerView.signal,
       });
 
-      console.log(perfil)
       await this.setStateAsync({
         perfiles: perfil.data,
         loading: false,
       });
+
+    } catch (error) {
+      await this.setStateAsync({
+        msgLoading: "Se produjo un error interno, intente nuevamente."
+      });
+    }
+  }
+
+  loadDataAcceso = async (id) => {
+    try {
+      await this.setStateAsync({
+        menu: [],
+        loading: true,
+        msgLoading: 'Cargando accesos...'
+      });
+
+      const accesos = await axios.get("/api/acceso/accesos", {
+        // signal: this.abortControllerView.signal,
+        params: {
+          idPerfil: id
+        }
+      });
+
+      let menus = accesos.data.menu.map((item, index) => {
+
+        let submenu = [];
+
+        for (let value of accesos.data.submenu) {
+          if (item.idMenu == value.idMenu) {
+            submenu.push(value);
+          }
+        }
+
+        return {
+          ...item,
+          submenu
+        }
+      });
+
+      await this.setStateAsync({
+        menu: menus,
+        loading: false,
+      });
+
+      NavTree.createBySelector("#nav-tree", {
+        searchable: false,
+        showEmptyGroups: true,
+
+        groupOpenIconClass: "fas",
+        groupOpenIcon: "fa-folder-open",
+
+        groupCloseIconClass: "fas",
+        groupCloseIcon: "fa-folder",
+
+        linkIconClass: "fas",
+        linkIcon: "fa-th",
+
+        searchPlaceholderText: "Search",
+      });
     } catch (error) {
       console.log(error)
+    }
+  }
+
+  async onChangePerfil(event) {
+    await this.setStateAsync({ idPerfil: event.target.value })
+    if (event.target.value !== "") {
+      this.loadDataAcceso(event.target.value);
+    } else {
+      await this.setStateAsync({
+        menu: [],
+      });
+    }
+  }
+
+  handleCheck = async (event) => {
+    let updatedList = [...this.state.menu];
+    for (let menu of updatedList) {
+      if (menu.idMenu === event.target.value) {
+        menu.estado = event.target.checked ? 1 : 0;
+        break;
+      } else {
+        if (menu.submenu.length !== 0) {
+          for (let submenu of menu.submenu) {
+            if ((submenu.idSubMenu + menu.idMenu) === event.target.value) {
+              submenu.estado = event.target.checked ? 1 : 0;
+              break;
+            }
+          }
+        }
+      }
+    }
+    await this.setStateAsync({ menu: updatedList })
+  }
+
+  async onEventGuardar(){
+    try{
+
+      ModalAlertInfo("Acceso", "Procesando información...");
+
+      let result = await axios.post('/api/acceso/save',{
+        "idPerfil":this.state.idPerfil,
+        "menu":this.state.menu
+      });
+
+      ModalAlertSuccess("Acceso", result.data, () => {
+        this.onEventPaginacion();
+    });
+
+      console.log(result)
+    }catch(error){ 
+      ModalAlertWarning("Acceso", 
+      "Se produjo un error un interno, intente nuevamente.");
     }
   }
 
@@ -72,7 +168,7 @@ class Accesos extends React.Component {
         {
           this.state.loading ?
             <div className="clearfix absolute-all bg-white">
-              {spinnerLoading()}
+              {spinnerLoading(this.state.msgLoading)}
             </div> : null
         }
 
@@ -103,7 +199,7 @@ class Accesos extends React.Component {
               <select
                 className="form-control"
                 value={this.state.idPerfil}
-                onChange={(event) => this.setState({ idPerfil: event.target.value })}
+                onChange={(event) => this.onChangePerfil(event)}
               >
                 <option value="">- Seleccione -</option>
                 {
@@ -119,6 +215,52 @@ class Accesos extends React.Component {
         <div className="row">
           <div className="col-xl-12 col-lg-12 col-md-12 col-sm-4 col-12">
             <ul id="nav-tree">
+              {
+                this.state.menu.map((item, index) => (
+                  item.submenu.length == 0 ?
+                    <li key={index} data-value={`li${index + 1}`}>
+                      <div className="form-check">
+                        <input
+                          className="form-check-input"
+                          type="checkbox"
+                          id={`id${item.nombre}`}
+                          value={item.idMenu}
+                          checked={item.estado == 1 ? true : false}
+                          onChange={this.handleCheck} />
+                        <label className="form-check-label" htmlFor={`id${item.nombre}`}>
+                          {item.nombre}
+                        </label>
+                      </div>
+                    </li>
+                    :
+                    <li key={index} id={`li${index + 1}`} data-value={`li${index + 1}`}>
+                      <button type="button" className="btn">
+                        {item.nombre}
+                      </button>
+                      <ul>
+                        {
+                          item.submenu.map((submenu, index) => (
+                            <li key={index} id={`li${index + 1}`} data-value={`li${index + 1}`} >
+                              <div className="form-check">
+                                <input
+                                  className="form-check-input"
+                                  type="checkbox"
+                                  id={`id${submenu.nombre}`}
+                                  value={submenu.idSubMenu + item.idMenu}
+                                  checked={submenu.estado == 1 ? true : false}
+                                  onChange={this.handleCheck} />
+                                <label className="form-check-label" htmlFor={`id${submenu.nombre}`}>
+                                  {submenu.nombre}
+                                </label>
+                              </div>
+                            </li>
+                          ))
+                        }
+                      </ul>
+                    </li>
+                ))
+              }
+              {/*
               <li data-value="li1">
                 <div className="form-check">
                   <input className="form-check-input" type="checkbox" value="" id="idDashboard" />
@@ -334,12 +476,25 @@ class Accesos extends React.Component {
                     </div>
                   </li>
                 </ul>
-              </li>
+              </li> */}
             </ul>
           </div>
         </div>
 
-
+        <div className="row">
+          <div className="col-xl-12 col-lg-12 col-md-12 col-sm-4 col-12">
+              <button
+              type="button" 
+              className="btn btn-outline-primary"
+              onClick={() =>this.onEventGuardar()}>
+                <i className="fa fa-save"></i> Guardar
+              </button>
+              {" "}
+              <button type="button" className="btn btn-outline-danger">
+                <i className="fa fa-backspace"></i> Cancelar
+              </button>
+          </div>
+        </div>
       </>
     )
   }
