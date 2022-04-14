@@ -61,10 +61,10 @@ class Menu extends React.Component {
                                 <Link to={`${this.props.url}/perfiles`} style={{ fontWeight: 'bold' }}>Perfiles</Link>
                             </MenuItem>
                             <MenuItem>
-                                <Link to={`${this.props.url}/usuarios`} style={{ fontWeight: 'bold' }}>Usuarios</Link>
+                                <Link to={`${this.props.url}/accesos`} style={{ fontWeight: 'bold' }}>Accesos</Link>
                             </MenuItem>
                             <MenuItem>
-                                <Link to={`${this.props.url}/accesos`} style={{ fontWeight: 'bold' }}>Accesos</Link>
+                                <Link to={`${this.props.url}/usuarios`} style={{ fontWeight: 'bold' }}>Usuarios</Link>
                             </MenuItem>
                         </SubMenu>
 

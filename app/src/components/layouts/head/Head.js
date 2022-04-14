@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { signOut } from '../../../redux/actions';
 
@@ -8,19 +9,6 @@ class Menu extends React.Component {
         super(props);
         this.state = {
 
-        }
-    }
-
-    componentDidMount() {
-        // console.log(this.props)
-    }
-
-    onEventSignIn = async (event) => {
-        try {
-            await localStorage.removeItem('login');
-            this.props.restore();
-        } catch (e) {
-            this.props.restore();
         }
     }
 
@@ -59,9 +47,7 @@ class Menu extends React.Component {
                                         </div>
 
                                         <div className="form-group ml-xl-2 ml-lg-2 ml-md-2 ml-sm-2 ml-0">
-                                            <button onClick={this.onEventSignIn} className="btn btn-outline-danger" type="button">
-                                                Regresar
-                                            </button>
+                                            <Link to={"/principal"} className="btn btn-outline-danger" >Regresar</Link>
                                         </div>
                                     </div>
                                 </div>

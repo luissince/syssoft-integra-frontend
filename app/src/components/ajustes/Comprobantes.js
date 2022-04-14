@@ -141,6 +141,7 @@ class Comprobantes extends React.Component {
 
             let totalPaginacion = parseInt(Math.ceil((parseFloat(result.data.total) / this.state.filasPorPagina)));
             let messagePaginacion = `Mostrando ${result.data.result.length} de ${totalPaginacion} Páginas`;
+            
             await this.setStateAsync({
                 loading: false,
                 lista: result.data.result,
@@ -450,4 +451,4 @@ const mapStateToProps = (state) => {
 }
 
 
-export default connect(mapStateToProps, null)(Comprobantes);
+export default connect(mapStateToProps,null)(Comprobantes);

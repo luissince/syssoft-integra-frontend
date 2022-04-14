@@ -12,16 +12,15 @@ class Login extends React.Component {
         super(props);
 
         this.state = {
-            email: '',
+            usuario: '',
             password: '',
             message: '',
+            loading: false
         }
 
-        this.emailInput = React.createRef();
+        this.usuarioInput = React.createRef();
         this.passwordInput = React.createRef();
-
     }
-
 
     setStateAsync(state) {
         return new Promise((resolve) => {
@@ -34,35 +33,66 @@ class Login extends React.Component {
     }
 
     onEventForm = async () => {
-        if (this.state.email === "") {
-            this.emailInput.current.focus();
-            this.setStateAsync({ message: "Ingrese su usuario para iniciar sesión." });
+        if (this.state.loading) return;
+
+        if (this.state.usuario === "") {
+            this.usuarioInput.current.focus();
+            await this.setStateAsync({ message: "Ingrese su usuario para iniciar sesión." });
             return;
         }
 
         if (this.state.password === "") {
             this.passwordInput.current.focus();
-            this.setStateAsync({ message: "Ingrese su contraseña para iniciar sesión." });
+            await this.setStateAsync({ message: "Ingrese su contraseña para iniciar sesión." });
             return;
         }
 
         try {
-            let user = await axios.get('/api/login', {
+
+            await this.setStateAsync({ loading: true });
+
+            let result = await axios.get('/api/login/createsession', {
                 params: {
-                    "id": Math.floor(Math.random() * 562000),
-                    "email": this.state.email,
+                    "usuario": this.state.usuario,
                     "password": this.state.password
                 }
             });
 
+            let menus = result.data.menu.map((item, index) => {
+                let submenu = [];
+                for (let value of result.data.submenu) {
+                    if (item.idMenu == value.idMenu) {
+                        submenu.push(value);
+                    }
+                }
 
-            localStorage.setItem('login', JSON.stringify(user.data));
+                return {
+                    ...item,
+                    submenu
+                }
+            });
+
+            let user = {
+               "apellidos": result.data.apellidos,
+               "estado": result.data.estado,
+               "idUsuario": result.data.idUsuario,
+               "nombres": result.data.nombres,
+               "token": result.data.token,
+               menus
+            }
+
+            localStorage.setItem('login', JSON.stringify(user));
             this.props.restore(JSON.parse(localStorage.getItem('login')));
             this.props.history.push("principal");
             // document.cookie = `token=${user.data.token}; max-age=${10}; path=/; samesite=strict`;
 
         } catch (error) {
-            console.log(error)
+            if (error.response !== undefined) {
+                await this.setStateAsync({ loading: false, message: error.response.data });
+                console.log(error.response)
+            } else {
+                await this.setStateAsync({ loading: false, message: "Se genero un error de cliente, intente nuevamente." });
+            }
         }
     }
 
@@ -71,15 +101,15 @@ class Login extends React.Component {
         window.open("/api/login/report", "_blank");
     }
 
-    handleChangeEmail = (event) => {
+    handleChangeUsuario = (event) => {
         if (event.target.value.length > 0) {
             this.setState({
-                email: event.target.value,
+                usuario: event.target.value,
                 message: ""
             });
         } else {
             this.setState({
-                email: event.target.value,
+                usuario: event.target.value,
                 message: "Ingrese su usuario para iniciar sesión."
             });
         }
@@ -100,13 +130,14 @@ class Login extends React.Component {
     }
 
     render() {
-        const { email, password, message } = this.state;
+        const { usuario, password, message } = this.state;
         if (this.props.token.userToken != null) {
             return <Redirect to="/principal" />
         }
         return (
             <>
                 <style>{'html,body,#root{height:100%;}'}</style>
+
                 <div className="form-content text-center bg-white">
                     <form className="form-signin">
                         <img className="mb-4" src="https://getbootstrap.com/docs/4.6/assets/brand/bootstrap-solid.svg" alt="" width="72" height="72" />
@@ -121,17 +152,32 @@ class Login extends React.Component {
                                 </div> : null
                         }
 
-                        <label htmlFor="inputEmail" className="sr-only">usuario o correo</label>
+                        {
+                            this.state.loading ?
+                                <div className="m-3">
+                                    <div className="spinner-border text-success" role="status">
+                                    </div>
+                                </div>
+                                : null
+                        }
+
+                        <label htmlFor="inputUsuario" className="sr-only">Usuario</label>
                         <input
-                            ref={this.emailInput}
-                            onChange={this.handleChangeEmail}
-                            value={email}
-                            type="email"
-                            id="inputEmail"
+                            ref={this.usuarioInput}
+                            onChange={this.handleChangeUsuario}
+                            value={usuario}
+                            type="text"
+                            id="inputUsuario"
                             className="form-control"
-                            placeholder="Correo o usuario"
+                            placeholder="Ingrese su suario"
                             required=""
-                            autoFocus="" />
+                            autoFocus=""
+                            onKeyUp={(event) => {
+                                if (event.keyCode === 13 || event.which === 13) {
+                                    this.onEventForm();
+                                    event.preventDefault();
+                                }
+                            }} />
 
                         <label htmlFor="inputPassword" className="sr-only">Password</label>
                         <input
@@ -142,7 +188,13 @@ class Login extends React.Component {
                             id="inputPassword"
                             className="form-control"
                             placeholder="Contraseña"
-                            required="" />
+                            required=""
+                            onKeyUp={(event) => {
+                                if (event.keyCode === 13 || event.which === 13) {
+                                    this.onEventForm();
+                                    event.preventDefault();
+                                }
+                            }} />
 
                         <div className="checkbox mb-3">
                             <label>

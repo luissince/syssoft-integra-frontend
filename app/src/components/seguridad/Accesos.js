@@ -5,7 +5,7 @@ import React from 'react';
 import axios from 'axios';
 import NavTree from '../../recursos/js/tree.js';
 // import loading from '../../recursos/images/loading.gif';
-import { ModalAlertInfo,ModalAlertSuccess,ModalAlertWarning,spinnerLoading } from '../tools/Tools';
+import { ModalAlertInfo, ModalAlertSuccess, ModalAlertWarning, spinnerLoading } from '../tools/Tools';
 
 class Accesos extends React.Component {
   constructor(props) {
@@ -141,24 +141,27 @@ class Accesos extends React.Component {
     await this.setStateAsync({ menu: updatedList })
   }
 
-  async onEventGuardar(){
-    try{
+  async onEventGuardar() {
+    try {
 
       ModalAlertInfo("Acceso", "Procesando información...");
 
-      let result = await axios.post('/api/acceso/save',{
-        "idPerfil":this.state.idPerfil,
-        "menu":this.state.menu
+      let result = await axios.post('/api/acceso/save', {
+        "idPerfil": this.state.idPerfil,
+        "menu": this.state.menu
       });
 
-      ModalAlertSuccess("Acceso", result.data, () => {
-        this.onEventPaginacion();
-    });
+      ModalAlertSuccess("Acceso", result.data,async () => {
+        await this.setStateAsync({
+          idPerfil:"",
+          menu: [],
+        });
+      });
 
       console.log(result)
-    }catch(error){ 
-      ModalAlertWarning("Acceso", 
-      "Se produjo un error un interno, intente nuevamente.");
+    } catch (error) {
+      ModalAlertWarning("Acceso",
+        "Se produjo un error un interno, intente nuevamente.");
     }
   }
 
@@ -483,16 +486,16 @@ class Accesos extends React.Component {
 
         <div className="row">
           <div className="col-xl-12 col-lg-12 col-md-12 col-sm-4 col-12">
-              <button
-              type="button" 
+            <button
+              type="button"
               className="btn btn-outline-primary"
-              onClick={() =>this.onEventGuardar()}>
-                <i className="fa fa-save"></i> Guardar
-              </button>
-              {" "}
-              <button type="button" className="btn btn-outline-danger">
-                <i className="fa fa-backspace"></i> Cancelar
-              </button>
+              onClick={() => this.onEventGuardar()}>
+              <i className="fa fa-save"></i> Guardar
+            </button>
+            {" "}
+            <button type="button" className="btn btn-outline-danger">
+              <i className="fa fa-backspace"></i> Cancelar
+            </button>
           </div>
         </div>
       </>

@@ -1,7 +1,7 @@
 const express = require('express');
-const jwt = require('jsonwebtoken');
 const router = express.Router();
-const tools = require('../tools/Tools');
+const bcrypt = require('bcrypt');
+const { createToken, verifyToken, token } = require('../services/Jwt');
 const Conexion = require('../database/Conexion');
 const conec = new Conexion();
 
@@ -10,48 +10,94 @@ router.get('/report/:version/:number', async function (req, res) {
     res.send("ddata")
 });
 
-router.get('/', async function (req, res) {
-    const user = {
-        id: req.query.id,
-        email: req.query.email,
-        password: req.query.password,
-    }
-
-
+router.get('/createsession', async function (req, res) {
     try {
-        const token = await new Promise((resolve, reject) => {
-            jwt.sign(user, 'secretkey', { expiresIn: '30s' }, (error, token) => {
-                if (error) {
-                    reject("error");
-                } else {
-                    resolve(token);
+
+        let validate = await conec.query(`SELECT idUsuario ,clave FROM usuario 
+        WHERE usuario = ?`, [
+            req.query.usuario,
+        ]);
+
+        if (validate.length > 0) {
+
+            let hash = bcrypt.compareSync(req.query.password, validate[0].clave);
+
+            if (hash) {
+
+                let usuario = await conec.query(`SELECT 
+                idUsuario, 
+                nombres,
+                apellidos,
+                idPerfil,
+                estado
+                FROM usuario
+                WHERE idUsuario = ?`, [
+                    validate[0].idUsuario
+                ]);
+
+                let user = {
+                    idUsuario: usuario[0].idUsuario,
+                    nombres: usuario[0].nombres,
+                    apellidos: usuario[0].apellidos,
+                    estado: usuario[0].estado
                 }
-            });
-        });
 
-        user.token = token;
 
-        res.status(200).send(user)
+                let menu = await conec.query(`
+                SELECT 
+                m.idMenu,
+                m.nombre,
+                pm.estado 
+                FROM permisomenu as pm 
+                INNER JOIN perfil as p on pm.idPerfil = p.idPerfil
+                INNER JOIN menu as m on pm.idMenu = m.idMenu
+                WHERE p.idPerfil = ?
+                `, [
+                    usuario[0].idPerfil,
+                ]);
+
+                let submenu = await conec.query(`
+                SELECT 
+                sm.idMenu,
+                sm.idSubMenu,
+                sm.nombre,
+                psm.estado
+                FROM permisosubmenu as psm
+                INNER JOIN perfil AS p ON psm.idPerfil = p.idPerfil
+                INNER JOIN submenu AS sm on sm.idMenu = psm.idMenu and sm.idSubMenu = psm.idSubMenu
+                WHERE psm.idPerfil = ?
+                `, [
+                    usuario[0].idPerfil,
+                ]);
+
+                const token = await createToken(user, 'userkeylogin');
+
+                res.status(200).send({ ...user, token, menu, submenu })
+            } else {
+                res.status(400).send("Datos incorrectos, intente nuevamente.")
+            }
+        } else {
+            res.status(400).send("Datos incorrectos, intente nuevamente.")
+        }
     } catch (error) {
-        // console.log(error)
         res.status(500).send("Error interno de conexión, intente nuevamente.")
     }
 });
 
-router.post("/list", verifyToken, async (req, res) => {
+router.get('/closesession', async function (req, res) {
     try {
-        let result = await new Promise((resolve, reject) => {
-            jwt.verify(req.token, 'secretkey', (error, authorization) => {
-                if (error) {
-                    reject("expired");
-                } else {
-                    resolve(authorization);
-                }
-            });
-        });
 
-        res.status(200).send({ "data": { "ok": "data list" }, "authorization": result });
+    } catch (error) {
 
+    }
+});
+
+router.get('/validtoken', token, async function (req, res) {
+    try {
+
+        await verifyToken(req.token, 'userkeylogin');
+
+        res.status(200).send("Ok");
     } catch (error) {
         if (error == "expired") {
             res.status(403).send("Sesión expirada")
@@ -61,16 +107,28 @@ router.post("/list", verifyToken, async (req, res) => {
     }
 });
 
-function verifyToken(req, res, next) {
-    const bearerToken = req.headers['authorization'];
+// router.post("/list", verifyToken, async (req, res) => {
+//     try {
+//         let result = await new Promise((resolve, reject) => {
+//             jwt.verify(req.token, 'secretkey', (error, authorization) => {
+//                 if (error) {
+//                     reject("expired");
+//                 } else {
+//                     resolve(authorization);
+//                 }
+//             });
+//         });
 
-    if (typeof bearerToken !== 'undefined') {
-        const token = bearerToken.split(" ")[1];
-        req.token = token;
-        next();
-    } else {
-        res.sendStatus(403);
-    }
-}
+//         res.status(200).send({ "data": { "ok": "data list" }, "authorization": result });
+
+//     } catch (error) {
+//         if (error == "expired") {
+//             res.status(403).send("Sesión expirada")
+//         } else {
+//             res.status(500).send("Error del servidor, intente nuevamente.")
+//         }
+//     }
+// });
+
 
 module.exports = router;

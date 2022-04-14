@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
 const tools = require('../tools/Tools');
 const Conexion = require('../database/Conexion');
 
@@ -7,23 +9,35 @@ const conec = new Conexion()
 
 router.get('/list', async function (req, res) {
     try {
-        let lista = await conec.query(`SELECT * FROM usuario
-            WHERE 
-            ? = 0
-            OR
-            ? = 1 and nombres like concat(?,'%')
-            OR
-            ? = 1 and apellidos like concat(?,'%')
-            OR
-            ? = 1 and dni like concat(?,'%')
-            LIMIT ?,?`, [
-            parseInt(req.query.option),
 
-            parseInt(req.query.option),
+        let lista = await conec.query(`SELECT 
+        u.idUsuario,
+        u.dni,
+        u.nombres,
+        u.apellidos,
+        u.representante,
+        p.descripcion AS perfil,
+        u.estado
+        FROM usuario AS u INNER JOIN perfil AS p
+        ON u.idPerfil  = p.idPerfil
+        WHERE 
+        ? = 0
+        OR
+        ? = 1 and u.nombres like concat(?,'%')
+        OR
+        ? = 1 and u.apellidos like concat(?,'%')
+        OR
+        ? = 1 and u.dni like concat(?,'%')
+        LIMIT ?,?`, [
+            parseInt(req.query.opcion),
+
+            parseInt(req.query.opcion),
             req.query.buscar,
-            parseInt(req.query.option),
+
+            parseInt(req.query.opcion),
             req.query.buscar,
-            parseInt(req.query.option),
+
+            parseInt(req.query.opcion),
             req.query.buscar,
 
             parseInt(req.query.posicionPagina),
@@ -37,23 +51,26 @@ router.get('/list', async function (req, res) {
             }
         });
 
-        let total = await conec.query(`SELECT COUNT(*) AS Total FROM usuario
-            WHERE 
-            ? = 0
-            OR
-            ? = 1 and nombres like concat(?,'%')
-            OR
-            ? = 1 and apellidos like concat(?,'%')
-            OR
-            ? = 1 and dni like concat(?,'%')`, [
-            
-            parseInt(req.query.option),
+        let total = await conec.query(`SELECT COUNT(*) AS Total 
+        FROM usuario AS u INNER JOIN perfil AS p
+        ON u.idPerfil  = p.idPerfil
+        WHERE 
+        ? = 0
+        OR
+        ? = 1 and u.nombres like concat(?,'%')
+        OR
+        ? = 1 and u.apellidos like concat(?,'%')
+        OR
+        ? = 1 and u.dni like concat(?,'%')`, [
+            parseInt(req.query.opcion),
 
-            parseInt(req.query.option),
+            parseInt(req.query.opcion),
             req.query.buscar,
-            parseInt(req.query.option),
+
+            parseInt(req.query.opcion),
             req.query.buscar,
-            parseInt(req.query.option),
+
+            parseInt(req.query.opcion),
             req.query.buscar,
         ]);
 
@@ -96,14 +113,50 @@ router.post('/add', async function (req, res) {
             idUsuario = "US0001";
         }
 
+        const salt = bcrypt.genSaltSync(saltRounds);
+        const hash = bcrypt.hashSync(req.body.clave, salt);
+
+        let usuario = await conec.execute(connection, `SELECT * FROM usuario
+        WHERE usuario = ?`, [
+            req.body.usuario,
+        ]);
+
+        if (usuario.length > 0) {
+            conec.rollback(connection);
+            res.status(400).send("Hay un usuario con el mismo valor.");
+            return;
+        }
+
         await conec.execute(connection, `INSERT INTO usuario(
             idUsuario, 
-            nombres, apellidos, dni, genero, direccion, telefono, email,
-            empresa, perfil, representante, estado, usuario, clave) 
+            nombres, 
+            apellidos, 
+            dni, 
+            genero, 
+            direccion, 
+            telefono, 
+            email,
+            empresa, 
+            idPerfil, 
+            representante, 
+            estado, 
+            usuario, 
+            clave) 
             VALUES(?, ?,?,?,?,?,?,?, ?,?,?,?,?,?)`, [
-            idUsuario, 
-            req.body.nombres, req.body.apellidos, req.body.dni, req.body.genero, req.body.direccion, req.body.telefono, req.body.email, 
-            req.body.empresa, req.body.perfil, req.body.representante, req.body.estado, req.body.usuario, req.body.clave
+            idUsuario,
+            req.body.nombres,
+            req.body.apellidos,
+            req.body.dni,
+            req.body.genero,
+            req.body.direccion,
+            req.body.telefono,
+            req.body.email,
+            req.body.empresa,
+            req.body.idPerfil,
+            req.body.representante,
+            req.body.estado,
+            req.body.usuario,
+            hash
         ])
 
         await conec.commit(connection);
@@ -114,6 +167,88 @@ router.post('/add', async function (req, res) {
         }
         res.status(500).send("Error de servidor");
         console.log(error)
+    }
+});
+
+router.post('/update', async function (req, res) {
+    let connection = null;
+    try {
+
+        connection = await conec.beginTransaction();
+
+        let usuario = await conec.execute(connection, `SELECT * FROM usuario
+        WHERE usuario = ? AND idUsuario <> ?`, [
+            req.body.usuario,
+            req.body.idUsuario
+        ]);
+
+        if (usuario.length > 0) {
+            conec.rollback(connection);
+            res.status(400).send("Hay un usuario con el mismo valor.");
+            return;
+        }
+
+        await conec.execute(connection, `UPDATE usuario SET 
+            nombres=?, 
+            apellidos=?, 
+            dni=?, 
+            genero=?, 
+            direccion=?, 
+            telefono=?, 
+            email=?, 
+            empresa=?, 
+            idPerfil=?, 
+            representante=?, 
+            estado=?, 
+            usuario=?
+            WHERE idUsuario=?`, [
+            req.body.nombres,
+            req.body.apellidos,
+            req.body.dni,
+            req.body.genero,
+            req.body.direccion,
+            req.body.telefono,
+            req.body.email,
+            req.body.empresa,
+            req.body.idPerfil,
+            req.body.representante,
+            req.body.estado,
+            req.body.usuario,
+            req.body.idUsuario
+        ])
+
+        await conec.commit(connection)
+        res.status(200).send('Los datos se actualizaron correctamente.')
+    } catch (error) {
+        if (connection != null) {
+            conec.rollback(connection);
+        }
+        res.status(500).send("Se produjo un error de servidor, intente nuevamente.");
+    }
+});
+
+router.post('/reset', async function (req, res) {
+    let connection = null;
+    try {
+        connection = await conec.beginTransaction();
+
+        const salt = bcrypt.genSaltSync(saltRounds);
+        const hash = bcrypt.hashSync(req.body.clave, salt);
+
+        await conec.execute(connection, `UPDATE usuario SET
+        clave = ?
+        WHERE idUsuario=?`, [
+            hash,
+            req.body.idUsuario
+        ]);
+
+        await conec.commit(connection)
+        res.status(200).send('Se actualizó la contraseña correctamente.')
+    } catch (error) {
+        if (connection != null) {
+            conec.rollback(connection);
+        }
+        res.status(500).send("Se produjo un error de servidor, intente nuevamente.");
     }
 });
 
@@ -137,29 +272,5 @@ router.get('/id', async function (req, res) {
 
 });
 
-router.post('/update', async function (req, res) {
-    let connection = null;
-    try {
-
-        connection = await conec.beginTransaction();
-        await conec.execute(connection, `UPDATE usuario SET 
-            nombres=?, apellidos=?, dni=?, genero=?, direccion=?, telefono=?, email=?, 
-            empresa=?, perfil=?, representante=?, estado=?, usuario=?, clave=?
-            WHERE idUsuario=?`, [ 
-            req.body.nombres, req.body.apellidos, req.body.dni, req.body.genero, req.body.direccion, req.body.telefono, req.body.email, 
-            req.body.empresa, req.body.perfil, req.body.representante, req.body.estado, req.body.usuario, req.body.clave, 
-            req.body.idUsuario, 
-            
-        ])
-
-        await conec.commit(connection)
-        res.status(200).send('Los datos se actualizaron correctamente.')
-    } catch (error) {
-        if (connection != null) {
-            conec.rollback(connection);
-        }
-        res.status(500).send("Se produjo un error de servidor, intente nuevamente.");
-    }
-});
 
 module.exports = router;

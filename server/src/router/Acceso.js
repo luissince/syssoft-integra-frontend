@@ -66,7 +66,6 @@ router.post('/save', async function (req, res) {
                 ]);
             }
         }
-        // console.log(menu.idMenu)
 
         await conec.commit(connection);
         res.status(200).send('Datos insertados correctamente')

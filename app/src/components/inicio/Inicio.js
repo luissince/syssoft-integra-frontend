@@ -72,9 +72,9 @@ class Inicio extends React.Component {
         const { path, url } = this.props.match;
         return (
             <div className='app'>
-                <Menu ref={this.menuRef} url={url} />
+                <Menu  {...this.props.token} ref={this.menuRef} url={url} />
                 <main className='position-relative'>
-                    <Head setOpen={this.setOpen} setMinimun={this.setMinimun} />
+                    <Head {...this.props} setOpen={this.setOpen} setMinimun={this.setMinimun} />
 
                     <Switch>
                         <Route

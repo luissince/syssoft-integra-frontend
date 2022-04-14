@@ -4,7 +4,7 @@ import axios from 'axios';
 import { Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { signOut } from '../../redux/actions';
-import { ModalAlertInfo, ModalAlertClear } from '../tools/Tools';
+import { spinnerLoading } from '../tools/Tools';
 
 import noImage from '../../recursos/images/noimage.jpg'
 import logoInmobiliaria from './INMOBILIARIA.png';
@@ -14,24 +14,47 @@ class Principal extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            data: []
+            data: [],
+            loadModal: true,
+            msgModal: "Cargando proyectos...",
         }
         console.log(this.props.token)
+
+        this.abortControllerTable = new AbortController();
+    }
+
+    setStateAsync(state) {
+        return new Promise((resolve) => {
+            this.setState(state, resolve)
+        });
     }
 
     async componentDidMount() {
         try {
-            ModalAlertInfo("Proyecto", "Cargando proyectos...");
+
             let result = await axios.get("/api/proyecto/inicio", {
+                signal: this.abortControllerTable.signal,
                 params: {
 
                 }
             });
-            this.setState({ data: result.data });
-            ModalAlertClear();
+
+            await this.setStateAsync({
+                data: result.data,
+                loadModal: false
+            });
+
         } catch (error) {
-            console.log(error)
+            if (error.message !== "canceled") {
+                await this.setStateAsync({
+                    msgModal: "Se produjo un error interno, intente nuevamente."
+                });
+            }
         }
+    }
+
+    componentWillUnmount() {
+        this.abortControllerTable.abort();
     }
 
     onEventSignIn = async (event) => {
@@ -56,6 +79,13 @@ class Principal extends React.Component {
         return (
             <>
                 <div className='container'>
+
+                    {this.state.loadModal ?
+                        <div className="clearfix absolute-all bg-white">
+                            {spinnerLoading(this.state.msgModal)}
+                        </div>
+                        : null
+                    }
 
                     <div className='row'>
                         <div className='col-md-3 col-12' >
