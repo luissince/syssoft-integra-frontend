@@ -27,6 +27,7 @@ import Usuarios from '../seguridad/Usuarios'
 import Accesos from '../seguridad/Accesos'
 import Conceptos from '../tesoreria/Conceptos'
 import Gastos from '../tesoreria/Gastos'
+import RepVentas from '../reporte/RepVentas';
 
 function Page404(props) {
     return (
@@ -182,6 +183,10 @@ class Inicio extends React.Component {
                         <Route
                             path={`${path}/gastos`}
                             render={(props) => <Gastos {...props} />}
+                        />
+                        <Route
+                            path={`${path}/repventas`}
+                            render={(props) => <RepVentas {...props} />}
                         />
                         <Route component={Page404} />
                     </Switch>

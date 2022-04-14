@@ -17,42 +17,37 @@ class Ventas extends React.Component {
     render() {
         return (
             <>
-                <div className='row pb-3'>
+
+                <div className='row'>
                     <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
-                        <section className="content-header">
-                            <h5 className="no-margin"> Ventas <small style={{ color: 'gray' }}> Lista </small> </h5>
-                        </section>
+                        <div className="form-group">
+                            <h5>Ventas <small className="text-secondary">LISTA</small></h5>
+                        </div>
                     </div>
                 </div>
 
-                <div className='row'>
-                    <div className="col-lg-3 col-md-3 col-sm-12 col-xs-12">
-                        <label>Nuevo Ventas</label>
+                <div className="row">
+                    <div className="col-md-6 col-sm-12">
                         <div className="form-group">
-                            <button type="button" className="btn btn-success" onClick={this.onEventNuevaVenta}>
-                                <i className="bi bi-plus-lg"></i> Agregar Venta
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className="col-lg-3 col-md-3 col-sm-12 col-xs-12">
-                        <label>Opción.</label>
-                        <div className="form-group">
-                            <button className="btn btn-light">
-                                <i className="bi bi-arrow-repeat"></i> Recargar
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className="col-lg-6 col-md-6 col-sm-12 col-xs-12">
-                        <label>Filtrar por cliente, ruc, comprobante</label>
-                        <div className="form-group">
-                            <div className="input-group mb-3">
-                                <input type="text" className="form-control" placeholder="Ingrese para buscar" aria-label="Recipient's username" aria-describedby="basic-addon2" />
-                                <div className="input-group-append">
-                                    <button className="btn btn-outline-secondary" type="button">Button</button>
+                            <div className="input-group mb-2">
+                                <div className="input-group-prepend">
+                                    <div className="input-group-text"><i className="bi bi-search"></i></div>
                                 </div>
+                                <input type="search" className="form-control" placeholder="Buscar..." onKeyUp={(event) => console.log(event.target.value)} />
                             </div>
+                        </div>
+                    </div>
+                    <div className="col-md-6 col-sm-12">
+                        <div className="form-group">
+
+                            <button className="btn btn-outline-info" onClick={this.onEventNuevaVenta}>
+                                <i className="bi bi-file-plus"></i> Nuevo Registro
+                            </button>
+                            {" "}
+                            <button className="btn btn-outline-secondary" onClick={() => this.fillTable(0, 1, "")}>
+                                <i className="bi bi-arrow-clockwise"></i>
+                            </button>
+
                         </div>
                     </div>
                 </div>

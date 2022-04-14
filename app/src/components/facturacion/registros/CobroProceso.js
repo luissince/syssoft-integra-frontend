@@ -1,26 +1,24 @@
 import React from 'react';
 import axios from 'axios';
-import { showModal, hideModal, clearModal, isNumeric } from '../../tools/Tools';
-
+import { isNumeric, spinnerLoading } from '../../tools/Tools';
 
 class CobroProceso extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             idCobro: '',
-            conceptos: [
-                { "value": 1, "name": "Mora por retraso de pago" },
-                { "value": 2, "name": "Cuota Mensual" },
-                { "value": 3, "name": "Tarifa de agua mensual" }
-            ],
+
+            conceptos: [],
             monto: '',
-            cliente: '',
-            cuentaBancaria: '',
+            clientes: [],
+            cuentasBancarias: [],
             metodoPago: '',
             observacion: '',
             detalleConcepto: [],
 
-            messageWarning: ''
+            loading: true,
+            messageWarning: '',
+            msgLoading: 'Cargando datos...'
         }
 
         this.refConcepto = React.createRef()
@@ -30,16 +28,62 @@ class CobroProceso extends React.Component {
         this.refCuentaBancaria = React.createRef()
         this.refMetodoPago = React.createRef()
         this.refObservacion = React.createRef()
+
+        this.abortControllerView = new AbortController();
     }
 
-    async componentDidMount() { }
+    setStateAsync(state) {
+        return new Promise((resolve) => {
+            this.setState(state, resolve)
+        });
+    }
+
+    async componentDidMount() {
+        this.loadData()
+
+    }
+
+    componentWillUnmount() {
+        this.abortControllerView.abort();
+    }
+
+    loadData = async () => {
+        try {
+            const concepto = await axios.get("/api/concepto/listcombo", {
+                signal: this.abortControllerView.signal,
+            });
+
+            const cliente = await axios.get("/api/cliente/listcombo", {
+                signal: this.abortControllerView.signal,
+            });
+
+            const cuentaBancaria = await axios.get("/api/banco/listcombo", {
+                signal: this.abortControllerView.signal,
+            });
+
+            await this.setStateAsync({
+                conceptos: concepto.data,
+                clientes: cliente.data,
+                cuentasBancarias: cuentaBancaria.data,
+                loading: false,
+            });
+
+            // console.log(this.state.conceptos)
+
+        } catch (error) {
+            await this.setStateAsync({
+                msgLoading: "Se produjo un error interno, intente nuevamente."
+            });
+        }
+    }
 
     async save() {
 
-        if (this.state.cliente === "") {
+
+        if (this.refCliente.current.value === "") {
             this.setState({ messageWarning: "Seleccione el cliente" });
             this.refCliente.current.focus();
-        } else if (this.state.cuentaBancaria === "") {
+        } else if (this.refCuentaBancaria.current.value === "") {
             this.setState({ messageWarning: "Seleccione el banco a depositar" })
             this.refCuentaBancaria.current.focus();
         } else if (this.state.metodoPago === "") {
@@ -55,10 +99,10 @@ class CobroProceso extends React.Component {
 
                 result = await axios.post('/api/cobro/add', {
                     //concepto
-                    "cliente": this.state.cliente,
+                    "cliente": this.refCliente.current.value,
                     "usuario": 'US0001',
                     'moneda': 'MN001',
-                    "cuentaBancaria": this.state.cuentaBancaria,
+                    "cuentaBancaria": this.refCuentaBancaria.current.value,
                     "metodoPago": this.state.metodoPago,
                     "estado": 1,
                     "observacion": this.state.observacion.trim().toUpperCase(),
@@ -99,8 +143,8 @@ class CobroProceso extends React.Component {
 
         let nombre = "";
         for (let item of this.state.conceptos) {
-            if (this.refConcepto.current.value == item.value) {
-                nombre = item.name;
+            if (this.refConcepto.current.value == item.idConcepto) {
+                nombre = item.nombre;
                 break;
             }
         }
@@ -117,7 +161,17 @@ class CobroProceso extends React.Component {
         }
 
         let newArr = [...this.state.detalleConcepto, obj]
-        this.setState({ detalleConcepto: newArr, messageWarning: '' });
+
+        let montoTotal = 0
+
+        for(let item of newArr){
+            montoTotal = parseFloat(montoTotal) + parseFloat(item.monto)
+        }
+
+        console.log(montoTotal)
+
+        this.setState({ detalleConcepto: newArr, messageWarning: '',  monto: '' });
+        this.refConcepto.current.value = ''
 
     }
 
@@ -148,12 +202,11 @@ class CobroProceso extends React.Component {
 
     }
 
-    clearObjetos(){
+    clearObjetos() {
         this.setState({
-            
+
             monto: '',
-            cliente: '',
-            cuentaBancaria: '',
+ 
             metodoPago: '',
             observacion: '',
             detalleConcepto: [],
@@ -165,6 +218,12 @@ class CobroProceso extends React.Component {
     render() {
         return (
             <>
+                {
+                    this.state.loading ?
+                        <div className="clearfix absolute-all bg-white">
+                            {spinnerLoading(this.state.msgLoading)}
+                        </div> : null
+                }
                 <div className='row'>
                     <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
                         <div className="form-group">
@@ -192,7 +251,7 @@ class CobroProceso extends React.Component {
                                         <option value="">-- seleccione --</option>
                                         {
                                             this.state.conceptos.map((item, index) => (
-                                                <option key={index} value={item.value}>{item.name}</option>
+                                                <option key={index} value={item.idConcepto}>{item.nombre}</option>
                                             ))
                                         }
                                     </select>
@@ -263,27 +322,15 @@ class CobroProceso extends React.Component {
                                         <div className="input-group-text"><i className="bi bi-person-fill"></i></div>
                                     </div>
                                     <select
-                                        title="Clientes"
+                                        title="Lista de clientes"
                                         className="form-control"
-                                        value={this.state.cliente}
-                                        ref={this.refCliente}
-                                        onChange={(event) => {
-                                            if (event.target.value.length > 0) {
-                                                this.setState({
-                                                    cliente: event.target.value,
-                                                    messageWarning: '',
-                                                });
-                                            } else {
-                                                this.setState({
-                                                    cliente: event.target.value,
-                                                    messageWarning: 'Seleccione el cliente',
-                                                });
-                                            }
-                                        }}>
+                                        ref={this.refCliente}>
                                         <option value="">-- seleccione --</option>
-                                        <option value="1">cliente 1 - 12345678</option>
-                                        <option value="2">cliente 2 - 12345678</option>
-                                        <option value="3">cliente 3 - 12345678</option>
+                                        {
+                                            this.state.clientes.map((item, index) => (
+                                                <option key={index} value={item.idCliente}>{item.infoCliente + " - " + item.numDocumento}</option>
+                                            ))
+                                        }
                                     </select>
                                 </div>
                             </div>
@@ -295,29 +342,16 @@ class CobroProceso extends React.Component {
                                         <div className="input-group-text"><i className="bi bi-bank"></i></div>
                                     </div>
                                     <select
-                                        title="Caja o banco a depositar"
+                                        title="Lista de caja o banco a depositar"
                                         className="form-control"
-                                        value={this.state.cuentaBancaria}
-                                        ref={this.refCuentaBancaria}
-                                        onChange={(event) => {
-                                            if (event.target.value.length > 0) {
-                                                this.setState({
-                                                    cuentaBancaria: event.target.value,
-                                                    messageWarning: '',
-                                                });
-                                            } else {
-                                                this.setState({
-                                                    cuentaBancaria: event.target.value,
-                                                    messageWarning: 'Seleccione el banco a depositar',
-                                                });
-                                            }
-                                        }}>
+                                        ref={this.refCuentaBancaria}>
                                         <option value="">-- seleccione --</option>
-                                        <option value="1">BBVA - Cuenta de ahorros</option>
-                                        <option value="2">BCP - Cuenta de ahorros</option>
-                                        <option value="3">Pichincha - Cuenta de ahorros</option>
+                                        {
+                                            this.state.cuentasBancarias.map((item, index) => (
+                                                <option key={index} value={item.idBanco}>{item.nombre + " - " + item.tipoCuenta}</option>
+                                            ))
+                                        }
                                     </select>
-
                                 </div>
                             </div>
                         </div>
@@ -328,7 +362,7 @@ class CobroProceso extends React.Component {
                                         <div className="input-group-text"><i className="bi bi-credit-card-2-back"></i></div>
                                     </div>
                                     <select
-                                        title="Metodo de pago"
+                                        title="Lista metodo de pago"
                                         className="form-control"
                                         value={this.state.metodoPago}
                                         ref={this.refMetodoPago}
