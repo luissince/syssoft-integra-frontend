@@ -129,4 +129,15 @@ router.get('/id', async function (req, res) {
     }
 });
 
+router.get('/listcombo', async function (req, res) {
+    try {
+        let result = await conec.query(`SELECT l.idLote, l.descripcion AS nombreLote, l.precio, m.nombre AS nombreManzana 
+            FROM lote AS l INNER JOIN manzana AS m 
+            ON l.idManzana = m.idManzana`);
+        res.status(200).send(result);
+    } catch (error) {
+        res.status(500).send("Error interno de conexión, intente nuevamente.");
+    }
+});
+
 module.exports = router;
