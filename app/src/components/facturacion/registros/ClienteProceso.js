@@ -1,5 +1,7 @@
 import React from 'react';
 import axios from 'axios';
+import { keyNumberFloat, isNumeric, spinnerLoading, currentDate } from '../../tools/Tools'
+
 
 class ClienteProceso extends React.Component {
     constructor(props) {
@@ -59,18 +61,18 @@ class ClienteProceso extends React.Component {
 
         let url = this.props.location.search;
         let idResult = new URLSearchParams(url).get("idCliente");
-        this.setState({ idCliente: idResult}, () => {
-                if (this.state.idCliente === '') {
-                    this.onFocusTab("representante-tab", "representante");
-                    this.refNumDocumento.current.focus();
-                    console.log('new')
-                } else {
-                    this.loadDataId(this.state.idCliente)
-                    console.log('edit')
-                }
+        this.setState({ idCliente: idResult }, () => {
+            if (this.state.idCliente === '') {
+                this.onFocusTab("representante-tab", "representante");
+                this.refNumDocumento.current.focus();
+                console.log('new')
+            } else {
+                this.loadDataId(this.state.idCliente)
+                console.log('edit')
             }
+        }
         )
-        
+
     }
 
     loadDataId = async (id) => {
@@ -272,10 +274,13 @@ class ClienteProceso extends React.Component {
                 <div className='row pb-3'>
                     <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
                         <section className="content-header">
-                            <h5 className="no-margin"> {this.state.idCliente === ''? 'Registrar Cliente':'Editar Cliente' } </h5>
+                            <h5>
+                                <span role="button" onClick={() => this.props.history.goBack()}><i className="bi bi-arrow-left-short"></i></span> {this.state.idCliente === '' ? 'Registrar Cliente' : 'Editar Cliente'}
+                            </h5>
                         </section>
                     </div>
                 </div>
+
                 {
                     this.state.messageWarning === '' ? null :
                         <div className="alert alert-warning" role="alert">
@@ -302,125 +307,156 @@ class ClienteProceso extends React.Component {
                 </ul>
                 <div className="tab-content pt-2" id="myTabContent">
                     <div className="tab-pane fade show active" id="representante" role="tabpanel" aria-labelledby="representante-tab">
-                        <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
-                            <div>
-                                <div className="form-group">
-                                    <label htmlFor="numDocumento">DNI/RUC</label>
-                                    <input
-                                        type="number"
-                                        className="form-control"
-                                        id="numDocumento"
-                                        ref={this.refNumDocumento}
-                                        value={this.state.numDocumento}
-                                        onChange={(event) => {
-                                            if (event.target.value.trim().length > 0) {
-                                                this.setState({
-                                                    numDocumento: event.target.value,
-                                                    messageWarning: '',
-                                                });
-                                            } else {
-                                                this.setState({
-                                                    numDocumento: event.target.value,
-                                                    messageWarning: 'Ingrese N° dni o ruc',
-                                                });
-                                            }
-                                        }}
-                                        placeholder='ingrese N° dni o ruc' />
+
+                        <div class="card card-default">
+                            <div class="card-header">
+                                <span class="card-title">Representante</span>
+                            </div>
+                            <div class="card-body">
+
+                                <div className="row">
+                                    <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
+                                        <div className="form-group">
+                                            <label>N° de documento</label>
+                                            <div className="input-group">
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    ref={this.refNumDocumento}
+                                                    value={this.state.numDocumento}
+                                                    onChange={(event) => {
+                                                        if (event.target.value.trim().length > 0) {
+                                                            this.setState({
+                                                                numDocumento: event.target.value,
+                                                                messageWarning: '',
+                                                            });
+                                                        } else {
+                                                            this.setState({
+                                                                numDocumento: event.target.value,
+                                                                messageWarning: 'Ingrese # dni o ruc del cliente',
+                                                            });
+                                                        }
+                                                    }}
+                                                    onKeyPress={keyNumberFloat}
+                                                    placeholder='00000000' />
+                                                <div class="input-group-append">
+                                                    <button className="btn btn-outline-secondary" type="button" title="Reniec" onClick={() => console.log()}><i className="bi bi-person-fill"></i></button>
+                                                </div>
+                                                <div class="input-group-append">
+
+                                                    <button className="btn btn-outline-secondary" type="button" title="Sunat" onClick={() => console.log()}><i className="bi bi-people-fill"></i></button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
+                                        <div className="form-group">
+                                            <label>Cliente (Nombre y Apellidos)</label>
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                ref={this.refInfoCliente}
+                                                value={this.state.infoCliente}
+                                                onChange={(event) => {
+                                                    if (event.target.value.trim().length > 0) {
+                                                        this.setState({
+                                                            infoCliente: event.target.value,
+                                                            messageWarning: '',
+                                                        });
+                                                    } else {
+                                                        this.setState({
+                                                            infoCliente: event.target.value,
+                                                            messageWarning: 'Ingrese apellidos y nombre',
+                                                        });
+                                                    }
+                                                }}
+                                                placeholder='Ingrese apellidos y nombre' />
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="form-group">
-                                    <label htmlFor="cliente">Cliente (Nombre y Apellidos)</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        id="cliente"
-                                        ref={this.refInfoCliente}
-                                        value={this.state.infoCliente}
-                                        onChange={(event) => {
-                                            if (event.target.value.trim().length > 0) {
-                                                this.setState({
-                                                    infoCliente: event.target.value,
-                                                    messageWarning: '',
-                                                });
-                                            } else {
-                                                this.setState({
-                                                    infoCliente: event.target.value,
-                                                    messageWarning: 'Ingrese N° dni o ruc',
-                                                });
-                                            }
-                                        }}
-                                        placeholder='ingrese nombre y apellidos' />
+
+                                <div className="row">
+                                    <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
+                                        <div className="form-group">
+                                            <label>Genero</label>
+                                            <select
+                                                className="form-control"
+                                                value={this.state.genero}
+                                                ref={this.refGenero}
+                                                onChange={(event) => {
+                                                    if (event.target.value.trim().length > 0) {
+                                                        this.setState({
+                                                            genero: event.target.value,
+                                                            messageWarning: '',
+                                                        });
+                                                    } else {
+                                                        this.setState({
+                                                            genero: event.target.value,
+                                                            messageWarning: 'seleccione el genero.',
+                                                        });
+                                                    }
+                                                }}>
+                                                <option value="">-- Seleccione --</option>
+                                                <option value="1">Masculino</option>
+                                                <option value="2">Femenino</option>
+                                                <option value="3">Otros</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
+                                        <div className="form-group">
+                                            <label>N° de Telefono</label>
+                                            <input
+                                                type="number"
+                                                className="form-control"
+                                                value={this.state.telefono}
+                                                ref={this.refTelefono}
+                                                onChange={(event) => {
+                                                    if (event.target.value.trim().length > 0) {
+                                                        this.setState({
+                                                            telefono: event.target.value,
+                                                            messageWarning: '',
+                                                        });
+                                                    } else {
+                                                        this.setState({
+                                                            telefono: event.target.value,
+                                                            messageWarning: 'Ingrese N° dni o ruc',
+                                                        });
+                                                    }
+                                                }}
+                                                placeholder='ingrese numero de tlefono' />
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="form-group">
-                                    <label htmlFor="genero">Genero</label>
-                                    <select
-                                        className="form-control"
-                                        id="genero"
-                                        value={this.state.genero} 
-                                        ref={this.refGenero}
-                                        onChange={(event) => {
-                                            if (event.target.value.trim().length > 0) {
-                                                this.setState({
-                                                    genero: event.target.value,
-                                                    messageWarning: '',
-                                                });
-                                            } else {
-                                                this.setState({
-                                                    genero: event.target.value,
-                                                    messageWarning: 'seleccione el genero.',
-                                                });
-                                            }
-                                        }}>
-                                        <option value="">-- Seleccione --</option>
-                                        <option value="1">Masculino</option>
-                                        <option value="2">Femenino</option>
-                                        <option value="3">Otros</option>
-                                    </select>
+
+                                <div className="row">
+                                    <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
+                                        <div className="form-group">
+                                            <label>E-Mail</label>
+                                            <input
+                                                type="email"
+                                                className="form-control"
+                                                value={this.state.email}
+                                                onChange={(event) => this.setState({ email: event.target.value })}
+                                                placeholder='ej: email@server.com' />
+                                        </div>
+                                    </div>
+                                    <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
+                                        <div className="form-group">
+                                            <label>Fecha de Nacimiento</label>
+                                            <input
+                                                type="date"
+                                                className="form-control"
+                                                value={this.state.fechaNacimiento}
+                                                onChange={(event) => this.setState({ fechaNacimiento: event.target.value })}
+                                                placeholder='ej: 04 / 04 / 2024' />
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="form-group">
-                                    <label htmlFor="telefono">N° de Telefono</label>
-                                    <input
-                                        type="number"
-                                        className="form-control"
-                                        id="telefono"
-                                        value={this.state.telefono}
-                                        ref={this.refTelefono}
-                                        onChange={(event) => {
-                                            if (event.target.value.trim().length > 0) {
-                                                this.setState({
-                                                    telefono: event.target.value,
-                                                    messageWarning: '',
-                                                });
-                                            } else {
-                                                this.setState({
-                                                    telefono: event.target.value,
-                                                    messageWarning: 'Ingrese N° dni o ruc',
-                                                });
-                                            }
-                                        }}
-                                        placeholder='ingrese numero de tlefono' />
-                                </div>
-                                <div className="form-group">
-                                    <label htmlFor="email">E-Mail</label>
-                                    <input
-                                        type="email"
-                                        className="form-control"
-                                        id="email"
-                                        value={this.state.email}
-                                        onChange={(event) => this.setState({ email: event.target.value })}
-                                        placeholder='ej: email@server.com' />
-                                </div>
-                                <div className="form-group">
-                                    <label htmlFor="fechaNacimiento">Fecha de Nacimiento</label>
-                                    <input
-                                        type="date"
-                                        className="form-control"
-                                        id="fechaNacimiento"
-                                        value={this.state.fechaNacimiento}
-                                        onChange={(event) => this.setState({ fechaNacimiento: event.target.value })}
-                                        placeholder='ej: 04 / 04 / 2024' />
-                                </div>
+
                             </div>
                         </div>
+
                     </div>
                     <div className="tab-pane fade" id="ubicacion" role="tabpanel" aria-labelledby="ubicacion-tab">
                         <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
@@ -591,7 +627,7 @@ class ClienteProceso extends React.Component {
                                     <select
                                         className="form-control"
                                         id="generoConyuge"
-                                        value={this.state.generoConyuge} 
+                                        value={this.state.generoConyuge}
                                         onChange={(event) => this.setState({ generoConyuge: event.target.value })}>
                                         <option value="">-- Seleccione --</option>
                                         <option value="1">Masculino</option>

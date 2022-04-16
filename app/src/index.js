@@ -5,7 +5,7 @@ import { Provider } from 'react-redux';
 import store from './redux/store';
 import './recursos/css/bootstrap.css';
 import './recursos/css/sweetalert.css';
-import './recursos/css/fontawesome/all.css';
+import './recursos/css/all.css';
 import './recursos/css/tree.css'; 
 
 import './recursos/js/bootstrap.js';

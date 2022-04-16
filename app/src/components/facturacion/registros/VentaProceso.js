@@ -1,6 +1,6 @@
 import React from 'react';
 import axios from 'axios';
-import { keyNumberFloat, keyNumberInteger, validateDate, isNumeric, readDataURL, getExtension, imageSizeData, spinnerLoading } from '../../tools/Tools'
+import { keyNumberFloat, keyNumberInteger, validateDate, isNumeric, readDataURL, getExtension, imageSizeData, spinnerLoading, showModal, clearModal, hideModal, currentDate } from '../../tools/Tools'
 import noImage from '../../../recursos/images/noimage.jpg'
 
 class VentaProceso extends React.Component {
@@ -8,57 +8,44 @@ class VentaProceso extends React.Component {
         super(props);
         this.state = {
 
-            //datos
-            clientes: [],
-            fechaVenta: '',
-            tipoVenta: '',
-            inicial: '',
-            numeroCuotas: '',
-
-            //detalle
             lotes: [],
             precioContado: '',
 
-            //convenio
-            idVendedor: '',
-            idBanco: '',
-            fechaPrimeraCuota: '',
-            numeroContato: '1',
-
-            //comprobante
-            comprobantes: [
-                { "idComprobante": 1, "nombre": "NOTA DE VENTA" },
-                { "idComprobante": 2, "nombre": "BOLETA" },
-                { "idComprobante": 3, "nombre": "FACTURA" }
-            ],
-            idComprobante: '',
-            idFormaPago: '',
-            codigoOperacion: '',
+            detalleLote: [],
+            // comprobantes: [
+            //     { "idComprobante": "CP0001", "nombre": "NOTA DE VENTA" },
+            //     { "idComprobante": "CP0002", "nombre": "BOLETA" },
+            //     { "idComprobante": "CP0003", "nombre": "FACTURA" }
+            // ],
+            comprobantes: [],
+            clientes: [],
+            isContado: true,
+            inicial: '',
+            numeroCuotas: '',
+            cuentasBancarias: [],
             imagen: noImage,
             extension: '',
 
-            detalleLote: [],
+            importeTotal: 0.00,
+            letraMensual: 0.00,
             loading: true,
             messageWarning: '',
-            msgLoading: 'Cargando datos...'
+            msgLoading: 'Cargando datos...',
+
+            classBtnContado: 'btn-primary',
+            classBtnLetra: 'btn-secondary',
+            classBoxContado: 'd-block',
+            classBoxLetra: 'd-none'
+
         }
-
-        this.refCliente = React.createRef();
-
-        this.refFechaVenta = React.createRef();
-        this.refTipoVenta = React.createRef();
-        this.refInicial = React.createRef();
-        this.refNumeroCuotas = React.createRef();
 
         this.refLote = React.createRef();
         this.refPrecioContado = React.createRef();
-
-        this.refVendedor = React.createRef();
-        this.refBanco = React.createRef();
-        this.refFechaPrimeraCuota = React.createRef();
-
         this.refComprobante = React.createRef();
-        this.refFormaPago = React.createRef();
+        this.refCliente = React.createRef();
+        this.refInicial = React.createRef();
+        this.refNumeroCuotas = React.createRef();
+        this.refBanco = React.createRef();
         this.refFile = React.createRef();
 
         this.abortControllerView = new AbortController();
@@ -81,6 +68,21 @@ class VentaProceso extends React.Component {
         });
 
         this.loadData()
+
+        clearModal("modalVentaProceso", async () => {
+            await this.setStateAsync({
+                classBtnContado: 'btn-primary',
+                classBtnLetra: 'btn-secondary',
+                classBoxContado: 'd-block',
+                classBoxLetra: 'd-none',
+                inicial: '',
+                numeroCuotas: '',
+                letraMensual: 0.00,
+                isContado: true
+            });
+            this.refBanco.current.value = ''
+
+        });
     }
 
     componentWillUnmount() {
@@ -90,6 +92,10 @@ class VentaProceso extends React.Component {
     loadData = async () => {
         try {
 
+            const comprobante = await axios.get("/api/comprobante/listcombo", {
+                signal: this.abortControllerView.signal,
+            });
+
             const cliente = await axios.get("/api/cliente/listcombo", {
                 signal: this.abortControllerView.signal,
             });
@@ -98,15 +104,15 @@ class VentaProceso extends React.Component {
                 signal: this.abortControllerView.signal,
             });
 
-
-            // const cuentaBancaria = await axios.get("/api/banco/listcombo", {
-            //     signal: this.abortControllerView.signal,
-            // });
+            const cuentaBancaria = await axios.get("/api/banco/listcombo", {
+                signal: this.abortControllerView.signal,
+            });
 
             await this.setStateAsync({
+                comprobantes : comprobante.data,
                 clientes: cliente.data,
                 lotes: lote.data,
-                // cuentasBancarias: cuentaBancaria.data,
+                cuentasBancarias: cuentaBancaria.data,
                 loading: false,
             });
 
@@ -119,101 +125,66 @@ class VentaProceso extends React.Component {
     }
 
     async onSaveProceso() {
-        if (this.refCliente.current.value === "") {
-            this.setState({ messageWarning: "Seleccione al cliente." })
-            this.onFocusTab("datos-tab", "datos");
-            this.refCliente.current.focus();
-        } else if (!validateDate(this.state.fechaVenta)) {
-            this.setState({ messageWarning: "Ingrese la fecha de venta." });
-            this.onFocusTab("datos-tab", "datos");
-            this.refFechaVenta.current.focus();
-        } else if (this.state.tipoVenta === "") {
-            this.setState({ messageWarning: "Seleccione el tipo de venta." });
-            this.onFocusTab("datos-tab", "datos");
-            this.refTipoVenta.current.focus();
-        } else if (this.state.tipoVenta === "2" && !isNumeric(this.state.inicial)) {
-            this.setState({ messageWarning: "Ingrese la cuota inicial." });
-            this.onFocusTab("datos-tab", "datos");
-            this.refInicial.current.focus();
-        } else if (this.state.tipoVenta === "2" && !isNumeric(this.state.numeroCuotas)) {
-            this.setState({ messageWarning: "Ingrese el n° de cuotas." });
-            this.onFocusTab("datos-tab", "datos");
-            this.refNumeroCuotas.current.focus();
-        }
 
-        else if (this.refLote.current.value === "") {
-            this.setState({ messageWarning: "Seleccione el lote." });
-            this.onFocusTab("detalle-tab", "detalle");
-            this.refLote.current.focus();
-        } else if (!isNumeric(this.state.precioContado)) {
-            this.setState({ messageWarning: "Ingrese el precio de venta a contado." });
-            this.onFocusTab("detalle-tab", "detalle");
-            this.refPrecioContado.current.focus();
-        } else if (this.state.idVendedor === "") {
-            this.setState({ messageWarning: "Seleccione al vendedor." });
-            this.onFocusTab("convenio-tab", "convenio");
-            this.refVendedor.current.focus();
-        } else if (this.state.idBanco === "") {
-            this.setState({ messageWarning: "Seleccione de pago de la primera cuota." });
-            this.onFocusTab("convenio-tab", "convenio");
-            this.refBanco.current.focus();
-        } else if (!validateDate(this.state.fechaPrimeraCuota)) {
-            this.setState({ messageWarning: "Ingrese la fecha de la primera cuota." });
-            this.onFocusTab("convenio-tab", "convenio");
-            this.refFechaPrimeraCuota.current.focus();
-        } else if (this.state.idComprobante === "") {
-            this.setState({ messageWarning: "Seleccione un comprobante." });
-            this.onFocusTab("comprobante-tab", "comprobante");
-            this.refComprobante.current.focus();
-        } else if (this.state.idFormaPago === "") {
-            this.setState({ messageWarning: "Seleccione la forma de pago." });
-            this.onFocusTab("comprobante-tab", "comprobante");
-            this.refFormaPago.current.focus();
+        if (this.state.isContado) {
+            if (this.refBanco.current.value === '') {
+                this.refBanco.current.focus();
+            } else {
+                await this.save()
+                await this.closeModal()
+            }
         } else {
-            try {
-                let files = this.refFile.current.files;
-                if (files.length !== 0) {
-                    let read = await readDataURL(files);
-                    let base64String = read.replace(/^data:.+;base64,/, '');
-                    let ext = getExtension(files[0].name);
-                    let result = await this.saveProject(base64String, ext);
-                    console.log(result);
-                } else {
-                    let result = await this.saveProject("", "");
-                    console.log(result);
-                }
-            } catch (error) {
-                console.log(error)
+            if (!isNumeric(this.state.inicial) && this.state.inicial === '') {
+                this.refInicial.current.focus()
+            } else if (!isNumeric(this.state.numeroCuotas) && this.state.numeroCuotas === '') {
+                this.refNumeroCuotas.current.focus()
+            } else if (this.refBanco.current.value === '') {
+                this.refBanco.current.focus();
+            } else {
+                await this.save()
+                await this.closeModal()
             }
         }
     }
 
-    saveProject(image, extension) {
-        return axios.post('/api/factura/add', {
-            "idVenta": "",
-            "idCliente": this.refCliente.current.value,
-            "tipoVenta": this.state.tipoVenta,
-            "inicial": this.state.tipoVenta === "1" ? 0 : this.state.inicial,
-            "numeroCuotas": this.state.tipoVenta === "1" ? 0 : this.state.numeroCuotas,
+    async cargarImg() {
+        let files = this.refFile.current.files;
+        if (files.length !== 0) {
+            let read = await readDataURL(files);
+            let base64String = read.replace(/^data:.+;base64,/, '');
+            let ext = getExtension(files[0].name);
+            await this.setStateAsync({ image: base64String, extension: ext })
+        } else {
+            await this.setStateAsync({ image: "", extension: "" })
+        }
+    }
 
-            "idLote": this.refLote.current.value,
-            "precioContado": this.state.precioContado,
+    async save() {
+        try {
+            // console.log(this.state.detalleLote)
+            await this.cargarImg()
 
-            "idVendedor": this.state.idVendedor,
-            "idBanco": this.state.idBanco,
-            "fechaPrimeraCuota": this.state.fechaPrimeraCuota,
-            "numeroContrato": this.state.numeroContato,
-
-            "idComprobante": this.state.idComprobante,
-            "idFormaPago": this.state.idFormaPago,
-            "codigoOperacion": this.state.codigoOperacion,
-
-            "imagen": image,
-            "extension": extension,
-
-            "fecha": this.state.fechaVenta,
-            "hora": "",
-        });
+            return axios.post('/api/factura/add', {
+                "idCliente": this.refCliente.current.value,
+                "idUsuario": 'US0001',
+                "idBanco": this.refBanco.current.value,
+                "idComprobante": this.refComprobante.current.value,
+                "idFormaPago": '',
+                "tipoVenta": this.state.isContado ? 1 : 2,
+                "inicial": this.state.isContado ? 0 : parseFloat(this.state.inicial),
+                "numeroCuotas": this.state.isContado ? 0 : parseInt(this.state.numeroCuotas),
+                "fechaCuotaInicial": this.state.isContado ? 0 : 1,
+                "numeroContrato": 0,
+                "codigoOperacion": '',
+                "estado": this.state.isContado ? 1 : 2,
+                "imagen": this.state.imagen,
+                "extension": this.state.extension,
+                "listaLotes": this.state.detalleLote,
+            });
+        }
+        catch (error) {
+            console.log(error)
+        }
     }
 
     addObjectTable() {
@@ -240,7 +211,7 @@ class VentaProceso extends React.Component {
             if (this.refLote.current.value == item.idLote) {
                 nombreLote = item.nombreLote;
                 nombreManzana = item.nombreManzana;
-                precioContado = item.precioContado;
+                precioContado = item.precio;
                 break;
             }
         }
@@ -258,8 +229,12 @@ class VentaProceso extends React.Component {
         }
 
         let newArr = [...this.state.detalleLote, obj]
+        let importeTotal = 0
+        for (let item of newArr) {
+            importeTotal = parseFloat(importeTotal) + parseFloat(item.precioContado)
+        }
 
-        this.setState({ detalleLote: newArr, messageWarning: '', precioContado: '' });
+        this.setState({ detalleLote: newArr, messageWarning: '', precioContado: '', importeTotal: importeTotal });
         this.refLote.current.value = ''
 
     }
@@ -286,19 +261,6 @@ class VentaProceso extends React.Component {
         this.setState({ detalleLote: this.state.detalleLote })
     }
 
-    onFocusTab(idTab, idContent) {
-        if (!document.getElementById(idTab).classList.contains('active')) {
-            for (let child of document.getElementById('myTab').childNodes) {
-                child.childNodes[0].classList.remove('active')
-            }
-            for (let child of document.getElementById('myTabContent').childNodes) {
-                child.classList.remove('show', 'active')
-            }
-            document.getElementById(idTab).classList.add('active');
-            document.getElementById(idContent).classList.add('show', 'active');
-        }
-    }
-
     async changeLote(event) {
         let precio = 0
         for (let i of this.state.lotes) {
@@ -312,15 +274,261 @@ class VentaProceso extends React.Component {
         })
     }
 
+    async openModal() {
+        if (this.state.detalleLote.length <= 0) {
+            this.setState({ messageWarning: "Agregar datos a la tabla" })
+            this.refLote.current.focus()
+        } else if (this.refComprobante.current.value === '') {
+            this.setState({ messageWarning: "Seleccione el comprobante" })
+            this.refComprobante.current.focus();
+        } else if (this.refCliente.current.value === "") {
+            this.setState({ messageWarning: "Seleccione el cliente" });
+            this.refCliente.current.focus();
+        } else {
+            showModal('modalVentaProceso')
+        }
+
+    }
+
+    async selectedContado() {
+
+        await this.setStateAsync({
+            classBtnContado: 'btn-primary', 
+            classBtnLetra: 'btn-secondary', 
+            classBoxContado: 'd-block', 
+            classBoxLetra: 'd-none', 
+            isContado: true,
+            inicial: '',
+            numeroCuotas: '',
+            letraMensual: 0.00,
+        })
+
+    }
+
+    async selectedLetra() {
+        await this.setStateAsync({
+            classBtnContado: 'btn-secondary', 
+            classBtnLetra: 'btn-primary', 
+            classBoxContado: 'd-none', 
+            classBoxLetra: 'd-flex', 
+            isContado: false,
+        })
+    }
+
+    calcularLetraMensual() {
+        if (this.state.inicial === '') {
+            return;
+        }
+        if (this.state.numeroCuotas === '') {
+            return;
+        }
+
+        let saldo = this.state.importeTotal - this.state.inicial
+        let letra = saldo / this.state.numeroCuotas
+
+        this.setState({ letraMensual: letra })
+    }
+
+    async closeModal() {
+        hideModal('modalVentaProceso')
+        await this.setStateAsync({
+            detalleLote: [],
+            precioContado: '',
+            inicial: '',
+            numeroCuotas: '',
+            letraMensual: 0.00,
+            importeTotal: 0.00,
+            classBtnContado: 'btn-primary',
+            classBtnLetra: 'btn-secondary',
+            classBoxContado: 'd-block',
+            classBoxLetra: 'd-none',
+            isContado: true,
+        })
+
+        this.refLote.current.value = ''
+        this.refComprobante.current.value = ''
+        this.refCliente.current.value = ''
+        this.refBanco.current.value = ''
+    }
+
     render() {
         return (
             <>
+
+                {/* Inicio modal */}
+                <div className="modal fade" id="modalVentaProceso" data-bs-keyboard="false" data-bs-backdrop="static">
+                    <div className="modal-dialog modal-md">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">Comletar venta</h5>
+                                <button type="button" className="close" data-bs-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div className="modal-body">
+
+                                <div className="row">
+                                    <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                                        <div className="text-center">
+                                            <h3>TOTAL A PAGAR: <span>S/ {this.state.importeTotal}</span></h3>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="row">
+                                    <div className="col-md-4 col-sm-4">
+                                        <hr />
+                                    </div>
+                                    <div className="col-md-4 col-sm-4 d-flex align-items-center justify-content-center">
+                                        <h6 className="mb-0">Tipos de pagos</h6>
+                                    </div>
+                                    <div className="col-md-4 col-sm-4">
+                                        <hr />
+                                    </div>
+                                </div>
+
+                                <div className="row">
+                                    <div className="col-md-6 col-sm-6">
+                                        <button className={`btn ${this.state.classBtnContado} btn-block`} type="button" title="Pago al contado" onClick={() => this.selectedContado()}>
+                                            <div className="row">
+                                                <div className="col-md-12">
+                                                    <i className="bi bi-cash-coin fa-2x"></i>
+                                                </div>
+                                            </div>
+                                            <div className="text-center">
+                                                <label>Contado</label>
+                                            </div>
+                                        </button>
+                                    </div>
+                                    <div className="col-md-6 col-sm-6">
+                                        <button className={`btn ${this.state.classBtnLetra} btn-block`} type="button" title="Pago al credito" onClick={() => this.selectedLetra()}>
+                                            <div className="row">
+                                                <div className="col-md-12">
+                                                    <i className="bi bi-boxes fa-2x"></i>
+                                                </div>
+                                            </div>
+                                            <div className="text-center">
+                                                <label>Crédito</label>
+                                            </div>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <br />
+
+                                <div className={`row ${this.state.classBoxContado}`}>
+                                    <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                                        <div className="justify-content-center">
+                                            <div className="text-center">
+                                                {/* Eligio pago al contado. */}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className={`row ${this.state.classBoxLetra}`}>
+                                    <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+
+                                        <div className="form-group">
+                                            <div className="input-group">
+                                                <div className="input-group-prepend">
+                                                    <div className="input-group-text"><i className="bi bi-tag-fill"></i></div>
+                                                </div>
+                                                <input
+                                                    title="Monto inicial"
+                                                    type="text"
+                                                    className="form-control"
+                                                    placeholder='Monto inicial'
+                                                    ref={this.refInicial}
+                                                    value={this.state.inicial}
+                                                    onChange={(event) => this.setState({ inicial: event.target.value }, () => {
+                                                        this.calcularLetraMensual()
+                                                    })}
+                                                    onKeyPress={keyNumberFloat} />
+                                            </div>
+                                        </div>
+
+                                        <div className="form-group">
+                                            <div className="input-group">
+                                                <div className="input-group-prepend">
+                                                    <div className="input-group-text"><i className="bi bi-hourglass-split"></i></div>
+                                                </div>
+                                                <input
+                                                    title="Número de letras"
+                                                    type="text"
+                                                    className="form-control"
+                                                    placeholder='Número de letras'
+                                                    ref={this.refNumeroCuotas}
+                                                    value={this.state.numeroCuotas}
+                                                    onChange={(event) => this.setState({ numeroCuotas: event.target.value }, () => {
+                                                        this.calcularLetraMensual()
+                                                    })}
+                                                    onKeyPress={keyNumberFloat} />
+                                            </div>
+                                        </div>
+
+                                        <div className="form-group">
+                                            <div className="input-group">
+                                                <div className="input-group-prepend">
+                                                    <div className="input-group-text"><i className="bi bi-coin"></i></div>
+                                                </div>
+                                                <input
+                                                    title="Letra mensual"
+                                                    type="text"
+                                                    className="form-control"
+                                                    placeholder='0.00'
+                                                    disabled={true}
+                                                    value={this.state.letraMensual}
+                                                    onChange={(event) => this.setState({ letraMensual: event.target.value })}
+                                                    onKeyPress={keyNumberFloat} />
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                <div className="row">
+                                    <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                                        <div className="form-row">
+                                            <div className="form-group col-md-12">
+                                                <div className="input-group">
+                                                    <div className="input-group-prepend">
+                                                        <div className="input-group-text"><i className="bi bi-bank"></i></div>
+                                                    </div>
+                                                    <select
+                                                        title="Lista de caja o banco a depositar"
+                                                        className="form-control"
+                                                        ref={this.refBanco}>
+                                                        <option value="">-- seleccione --</option>
+                                                        {
+                                                            this.state.cuentasBancarias.map((item, index) => (
+                                                                <option key={index} value={item.idBanco}>{item.nombre + " - " + item.tipoCuenta}</option>
+                                                            ))
+                                                        }
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-primary" onClick={() => this.onSaveProceso()}>Completar venta</button>
+                                <button type="button" className="btn btn-danger" data-bs-dismiss="modal">Cerrar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {/* fin modal */}
+
                 {
                     this.state.loading ?
                         <div className="clearfix absolute-all bg-white">
                             {spinnerLoading(this.state.msgLoading)}
                         </div> : null
                 }
+
                 <div className='row pb-3'>
                     <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
                         <section className="content-header">
@@ -358,7 +566,7 @@ class VentaProceso extends React.Component {
                             <div className="form-group col-md-6">
                                 <div className="input-group">
                                     <div className="input-group-prepend">
-                                        <div className="input-group-text"><i className="bi bi-cash-coin"></i></div>
+                                        <div className="input-group-text"><i className="bi bi-tag-fill"></i></div>
                                     </div>
                                     <input
                                         title="Precio de venta"
@@ -368,7 +576,7 @@ class VentaProceso extends React.Component {
                                         ref={this.refPrecioContado}
                                         value={this.state.precioContado}
                                         onChange={(event) => {
-                                            console.log(event.target.value)
+
                                             if (event.target.value.trim().length > 0) {
                                                 this.setState({
                                                     precioContado: event.target.value,
@@ -420,6 +628,22 @@ class VentaProceso extends React.Component {
                         </div>
                     </div>
                     <div className="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12">
+
+                        <div className="form-row">
+                            <div className="form-group col-md-12">
+                                <button className="btn btn-success btn-block" onClick={() => this.openModal()}>
+                                    <div className="row justify-content-center align-items-center p-2">
+                                        <div className="col-md-6 col-sm-6 col-6 text-left">
+                                            <span className="text-white h6">COBRAR (F1)</span>
+                                        </div>
+                                        <div className="col-md-6 col-sm-6 col-6 text-right">
+                                            <span className="text-white h5">S/ {this.state.importeTotal}</span>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+
                         <div className="form-row">
                             <div className="form-group col-md-12">
                                 <div className="input-group">
@@ -427,7 +651,7 @@ class VentaProceso extends React.Component {
                                         <div className="input-group-text"><i className="bi bi-receipt"></i></div>
                                     </div>
                                     <select
-                                        title="Comprobante de venta"
+                                        title="Comprobantes de venta"
                                         className="form-control"
                                         ref={this.refComprobante}>
                                         <option value="">-- seleccione --</option>
@@ -463,8 +687,6 @@ class VentaProceso extends React.Component {
 
                         <div className="form-row">
                             <div className="form-group col-md-12">
-                                <button type="button" className="btn btn-primary" onClick={() => this.save()}>Guardar</button>
-                                {" "}
                                 <button type="button" className="btn btn-secondary" onClick={() => this.props.history.goBack()}>Cerrar</button>
                             </div>
                         </div>
@@ -476,333 +698,21 @@ class VentaProceso extends React.Component {
                         }
 
                     </div>
-                </div>
-
-                {""}
-
-                <ul className="nav nav-tabs" id="myTab" role="tablist">
-                    <li className="nav-item" role="presentation">
-                        <a className="nav-link active" id="datos-tab" data-bs-toggle="tab" href="#datos" role="tab" aria-controls="datos" aria-selected="true"><i className="bi bi-info-circle"></i> Datos</a>
-                    </li>
-                    <li className="nav-item" role="presentation">
-                        <a className="nav-link" id="detalle-tab" data-bs-toggle="tab" href="#detalle" role="tab" aria-controls="detalle" aria-selected="false"><i className="bi bi-ticket-detailed-fill"></i> Detalle</a>
-                    </li>
-                    <li className="nav-item" role="presentation">
-                        <a className="nav-link" id="convenio-tab" data-bs-toggle="tab" href="#convenio" role="tab" aria-controls="convenio" aria-selected="false"><i className="bi bi-file-earmark-person-fill"></i> Convenio</a>
-                    </li>
-                    <li className="nav-item" role="presentation">
-                        <a className="nav-link" id="comprobante-tab" data-bs-toggle="tab" href="#comprobante" role="tab" aria-controls="comprobante" aria-selected="false"><i className="bi bi-file-text-fill"></i> Comprobante</a>
-                    </li>
-                </ul>
-
-                <div className="tab-content pt-2" id="myTabContent">
-                    <div className="tab-pane fade show active" id="datos" role="tabpanel" aria-labelledby="datos-tab">
-                        <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
-                            <div className="form-group">
-                                <label>Cliente</label>
-                                <select
-                                    className="form-control"
-                                    ref={this.refCliente}>
-                                    <option value="">-- seleccione --</option>
-                                    {
-                                        this.state.clientes.map((item, index) => (
-                                            <option key={index} value={item.idCliente}>{item.infoCliente + " - " + item.numDocumento}</option>
-                                        ))
-                                    }
-                                </select>
-                            </div>
-                            <div className="form-group">
-                                <label htmlFor="fechaVenta">Fecha Venta</label>
-                                <input
-                                    type="date"
-                                    className="form-control"
-                                    id="fechaVenta"
-                                    ref={this.refFechaVenta}
-                                    value={this.state.fechaVenta}
-                                    onChange={(event) => {
-                                        if (event.target.value.trim().length > 0) {
-                                            this.setState({
-                                                fechaVenta: event.target.value,
-                                                messageWarning: '',
-                                            });
-                                        } else {
-                                            this.setState({
-                                                fechaVenta: event.target.value,
-                                                messageWarning: 'Ingrese la fecha de venta',
-                                            });
-                                        }
-                                    }}
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label htmlFor="tipoVenta">Tipo de Venta</label>
-                                <select
-                                    className="form-control"
-                                    id="tipoVenta"
-                                    ref={this.refTipoVenta}
-                                    value={this.state.tipoVenta}
-                                    onChange={(event) => {
-                                        if (event.target.value.trim().length > 0) {
-                                            this.setState({
-                                                tipoVenta: event.target.value,
-                                                messageWarning: '',
-                                            });
-                                        } else {
-                                            this.setState({
-                                                tipoVenta: event.target.value,
-                                                messageWarning: 'Seleccione el tipo de venta.',
-                                            });
-                                        }
-                                    }
-
-                                    }>
-                                    <option value="">- Seleccione -</option>
-                                    <option value="1">Contado</option>
-                                    <option value="2">Credito</option>
-                                </select>
-                            </div>
-                            <div className="form-group">
-                                <label htmlFor="inicial">Inicial (S/)</label>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    id="inicial"
-                                    ref={this.refInicial}
-                                    placeholder='####.##'
-                                    value={this.state.inicial}
-                                    onChange={(event) => {
-                                        if (event.target.value.trim().length > 0) {
-                                            this.setState({
-                                                inicial: event.target.value,
-                                                messageWarning: '',
-                                            });
-                                        } else {
-                                            this.setState({
-                                                inicial: event.target.value,
-                                                messageWarning: 'Ingrese el monto inicial',
-                                            });
-                                        }
-                                    }}
-                                    disabled={this.state.tipoVenta === "1" ? true : false}
-                                    onKeyPress={keyNumberFloat} />
-                            </div>
-                            <div className="form-group">
-                                <label htmlFor="cuotas">N° de Cuotas</label>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    id="cuotas"
-                                    placeholder='0'
-                                    ref={this.refNumeroCuotas}
-                                    value={this.state.numeroCuotas}
-                                    onChange={(event) => {
-                                        if (event.target.value.trim().length > 0) {
-                                            this.setState({
-                                                numeroCuotas: event.target.value,
-                                                messageWarning: '',
-                                            });
-                                        } else {
-                                            this.setState({
-                                                numeroCuotas: event.target.value,
-                                                messageWarning: 'Ingrese el n° de cuotas',
-                                            });
-                                        }
-                                    }}
-                                    disabled={this.state.tipoVenta === "1" ? true : false}
-                                    onKeyPress={keyNumberInteger} />
-                            </div>
-                        </div>
-                    </div>
-                    <div className="tab-pane fade" id="detalle" role="tabpanel" aria-labelledby="detalle-tab">
+                    <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
                         <div className="form-row">
-                            <div className="form-group col-md-6">
-                                <label>Lote</label>
-
-                            </div>
-                            <div className="form-group col-md-6">
-                                <label>Precio Venta Contado</label>
-                                <div className="d-flex">
-
-                                    <button className="btn btn-outline-secondary ml-1" type="button" title="Agregar" onClick={() => this.addObjectTable()}><i className="bi bi-plus-circle"></i></button>
+                            <div className='col-lg-8 col-md-8 col-sm-12 col-xs-12'>
+                                <div className="form-group">
+                                    <label>Voucher Imagen</label>
+                                    <input type="file" className="form-control-file" accept="image/png, image/jpeg, image/gif, image/svg" ref={this.refFile}></input>
                                 </div>
                             </div>
-                        </div>
-                        <div className='form-row'>
-                            <div className='form-group col-md-12'>
-                                <div className="table-responsive">
-                                    <table className="table table-striped" style={{ borderWidth: '1px', borderStyle: 'outset', borderColor: '#CFA7C9' }}>
-                                        <thead>
-                                            <tr>
-                                                <th width="10%">#</th>
-                                                <th width="50%">Descripción (Lote - Manzana) </th>
-                                                <th width="30%">Precio </th>
-                                                <th width="10%">Quitar</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {
-                                                this.state.detalleLote.length === 0 ? (
-                                                    <tr className="text-center">
-                                                        <td colSpan="4"> Agregar datos a la tabla </td>
-                                                    </tr>
-                                                ) : (
-                                                    this.state.detalleLote.map((item, index) => (
-                                                        <tr key={index}>
-                                                            <td>{++index}</td>
-                                                            <td>{`${item.nombreLote} / ${item.nombreManzana}`}</td>
-                                                            <td>{item.precioContado}</td>
-                                                            <td>
-                                                                <button className="btn btn-outline-dark btn-sm" title="Eliminar" onClick={() => this.removeObjectTable(item.id)}><i className="bi bi-trash"></i></button>
-                                                            </td>
-                                                        </tr>
-                                                    ))
-                                                )
-                                            }
-                                        </tbody>
-                                    </table>
-                                </div>
+                            <div className='col-lg-4 col-md-4 col-sm-12 col-xs-12 bg-light'>
+                                <img src={this.state.imagen} alt="" className="card-img-top" />
                             </div>
                         </div>
                     </div>
-                    <div className="tab-pane fade" id="convenio" role="tabpanel" aria-labelledby="convenio-tab">
-                        <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
-                            <div className="form-group">
-                                <label htmlFor="cliente">Vendedor</label>
-                                <select
-                                    className="form-control"
-                                    id="cliente"
-                                    ref={this.refVendedor}
-                                    value={this.state.idVendedor}
-                                    onChange={(event) => {
-                                        if (event.target.value.trim().length > 0) {
-                                            this.setState({
-                                                idVendedor: event.target.value,
-                                                messageWarning: '',
-                                            });
-                                        } else {
-                                            this.setState({
-                                                idVendedor: event.target.value,
-                                                messageWarning: 'Seleccione al vendedor.',
-                                            });
-                                        }
-                                    }}
-                                >
-                                    <option value="">- Seleccione -</option>
-                                    <option value="VD0001">VENDEDOR POR DEFECTO</option>
-                                </select>
-                            </div>
-                            <div className="form-group">
-                                <label htmlFor="fechaVenta">Deposito en Banco</label>
-                                <select
-                                    className="form-control"
-                                    id="depositoBanco"
-                                    value={this.state.idBanco}
-                                    ref={this.refBanco}
-                                    onChange={(event) => {
-                                        if (event.target.value.trim().length > 0) {
-                                            this.setState({
-                                                idBanco: event.target.value,
-                                                messageWarning: '',
-                                            });
-                                        } else {
-                                            this.setState({
-                                                idBanco: event.target.value,
-                                                messageWarning: 'Seleccione de pago de la primera cuota.',
-                                            });
-                                        }
-                                    }}
-                                >
-                                    <option value="">-- seleccione --</option>
-                                    <option value="BC0001">BANCO SELECCIONADO</option>
-                                </select>
-                            </div>
-                            <div className="form-group">
-                                <label htmlFor="tipoVenta">Fecha Pago Primera Cuota</label>
-                                <input
-                                    type="date"
-                                    className="form-control"
-                                    id="fechaPagoPrimeraCuota"
-                                    ref={this.refFechaPrimeraCuota}
-                                    value={this.state.fechaPrimeraCuota}
-                                    onChange={(event) => {
-                                        if (event.target.value.trim().length > 0) {
-                                            this.setState({
-                                                fechaPrimeraCuota: event.target.value,
-                                                messageWarning: '',
-                                            });
-                                        } else {
-                                            this.setState({
-                                                fechaPrimeraCuota: event.target.value,
-                                                messageWarning: 'Ingrese la fecha de la primera cuota.',
-                                            });
-                                        }
-                                    }}
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label htmlFor="inicial">N° Contrato</label>
-                                <input type="number" className="form-control" id="inicial" placeholder='Por Generar..' readOnly />
-                            </div>
-                        </div>
-                    </div>
-                    <div className="tab-pane fade" id="comprobante" role="tabpanel" aria-labelledby="comprobante-tab">
-                        <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
-                            <div className='row'>
-                                <div className='col-lg-8 col-md-8 col-sm-12 col-xs-12'>
-                                    <div className="form-group">
-                                        <label htmlFor="cliente">Comprobante</label>
-
-                                    </div>
-                                    <div className="form-group">
-                                        <label htmlFor="tipoVenta">Forma de Pago</label>
-                                        <select
-                                            className="form-control"
-                                            id="formaPago"
-                                            ref={this.refFormaPago}
-                                            value={this.state.idFormaPago}
-                                            onChange={(event) => {
-                                                if (event.target.value.trim().length > 0) {
-                                                    this.setState({
-                                                        idFormaPago: event.target.value,
-                                                        messageWarning: '',
-                                                    });
-                                                } else {
-                                                    this.setState({
-                                                        idFormaPago: event.target.value,
-                                                        messageWarning: 'Seleccione la forma de pago.',
-                                                    });
-                                                }
-                                            }}
-                                        >
-                                            <option value=""> -- seleccione -- </option>
-                                            <option value="FP0001">FORMA DE PAGO POR DEFECTO</option>
-                                        </select>
-                                    </div>
-                                    <div className="form-group">
-                                        <label htmlFor="inicial">Código de Operación</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            id="inicial"
-                                            placeholder='ej: 12345 - 09/03-2022'
-                                            value={this.state.codigoOperacion}
-                                            onChange={(event) => this.setState({ codigoOperacion: event.target.value })}
-                                        />
-                                    </div>
-                                    <div className="form-group">
-                                        <label htmlFor="inicial">Voucher Imagen</label>
-                                        <input type="file" className="form-control-file" accept="image/png, image/jpeg, image/gif, image/svg" ref={this.refFile}></input>
-                                    </div>
-                                </div>
-                                <div className='col-lg-4 col-md-4 col-sm-12 col-xs-12 bg-light'>
-                                    <img src={this.state.imagen} alt="" className="card-img-top" />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <button type="button" className="btn btn-primary mr-2" onClick={() => this.onSaveProceso()}>Guardar</button>
-                    <button type="button" className="btn btn-secondary" onClick={() => this.props.history.goBack()}>Cancelar</button>
                 </div>
+
             </>
         );
     }

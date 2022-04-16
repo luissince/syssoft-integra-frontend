@@ -279,7 +279,7 @@ class Comprobantes extends React.Component {
                                     <div className="form-group col-md-6">
                                         <label htmlFor="serie">Serie:</label>
                                         <input
-                                            type="email"
+                                            type="text"
                                             className="form-control"
                                             id="serie"
                                             ref={this.refSerie}

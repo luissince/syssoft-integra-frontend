@@ -79,7 +79,6 @@ class CobroProceso extends React.Component {
 
     async save() {
 
-
         if (this.refCliente.current.value === "") {
             this.setState({ messageWarning: "Seleccione el cliente" });
             this.refCliente.current.focus();

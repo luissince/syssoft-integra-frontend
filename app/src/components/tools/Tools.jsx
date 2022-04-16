@@ -1,6 +1,19 @@
 import bootstrap from "../../recursos/js/bootstrap";
 import Swal from "../../recursos/js/sweetalert";
 
+export function currentDate() {
+  let date = new Date();
+  let formatted_date = date.getFullYear() + "-" + ((date.getMonth() + 1) > 9 ? (date.getMonth() + 1) : '0' + (
+      date.getMonth() + 1)) + "-" + (date.getDate() > 9 ? date.getDate() : '0' + date.getDate());
+  return formatted_date;
+}
+
+export function currentTime() {
+  let time = new Date();
+  let formatted_time = (time.getHours() > 9 ? time.getHours() : '0' + time.getHours()) + ":" + (time.getMinutes() > 9 ? time.getMinutes() : '0' + time.getMinutes()) + ":" + (time.getSeconds() > 9 ? time.getSeconds() : '0' + time.getSeconds());
+  return formatted_time;
+}
+
 export function validateDate(date) {
   var regex = new RegExp(
     "([0-9]{4}[-](0[1-9]|1[0-2])[-]([0-2]{1}[0-9]{1}|3[0-1]{1})|([0-2]{1}[0-9]{1}|3[0-1]{1})[-](0[1-9]|1[0-2])[-][0-9]{4})"
@@ -220,4 +233,5 @@ export function ModalAlertError(title, message) {
     showConfirmButton: true,
     allowOutsideClick: false,
   });
+
 }
