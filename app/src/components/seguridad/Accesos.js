@@ -1,11 +1,7 @@
 import React from 'react';
-// import { Redirect } from 'react-router-dom';
-// import { connect } from 'react-redux';
-// import { signOut } from '../../redux/actions';
 import axios from 'axios';
 import NavTree from '../../recursos/js/tree.js';
-// import loading from '../../recursos/images/loading.gif';
-import { ModalAlertInfo,ModalAlertSuccess,ModalAlertWarning,spinnerLoading } from '../tools/Tools';
+import { ModalAlertInfo, ModalAlertSuccess, ModalAlertWarning, spinnerLoading } from '../tools/Tools';
 
 class Accesos extends React.Component {
   constructor(props) {
@@ -16,7 +12,9 @@ class Accesos extends React.Component {
       perfiles: [],
       menu: [],
       loading: true,
-      msgLoading: 'Cargando datos...'
+      msgLoading: 'Cargando datos...',
+
+      messageWarning: ""
     }
 
     this.abortControllerView = new AbortController();
@@ -74,7 +72,7 @@ class Accesos extends React.Component {
         let submenu = [];
 
         for (let value of accesos.data.submenu) {
-          if (item.idMenu == value.idMenu) {
+          if (item.idMenu === value.idMenu) {
             submenu.push(value);
           }
         }
@@ -111,12 +109,16 @@ class Accesos extends React.Component {
   }
 
   async onChangePerfil(event) {
-    await this.setStateAsync({ idPerfil: event.target.value })
-    if (event.target.value !== "") {
+    if (event.target.value.length > 0) {
+      await this.setStateAsync({ 
+        idPerfil: event.target.value, 
+        messageWarning: "" })
       this.loadDataAcceso(event.target.value);
     } else {
       await this.setStateAsync({
+        idPerfil: event.target.value, 
         menu: [],
+        messageWarning: "Seleccione el perfil."
       });
     }
   }
@@ -141,24 +143,30 @@ class Accesos extends React.Component {
     await this.setStateAsync({ menu: updatedList })
   }
 
-  async onEventGuardar(){
-    try{
+  async onEventGuardar() {
+    if (this.state.idPerfil == "") {
+      await this.setStateAsync({ messageWarning: "Seleccione el perfil." })
+      return;
+    }
+    try {
 
       ModalAlertInfo("Acceso", "Procesando información...");
 
-      let result = await axios.post('/api/acceso/save',{
-        "idPerfil":this.state.idPerfil,
-        "menu":this.state.menu
+      let result = await axios.post('/api/acceso/save', {
+        "idPerfil": this.state.idPerfil,
+        "menu": this.state.menu
       });
 
-      ModalAlertSuccess("Acceso", result.data, () => {
-        this.onEventPaginacion();
-    });
+      ModalAlertSuccess("Acceso", result.data, async () => {
+        await this.setStateAsync({
+          idPerfil: "",
+          menu: [],
+        });
+      });
 
-      console.log(result)
-    }catch(error){ 
-      ModalAlertWarning("Acceso", 
-      "Se produjo un error un interno, intente nuevamente.");
+    } catch (error) {
+      ModalAlertWarning("Acceso",
+        "Se produjo un error un interno, intente nuevamente.");
     }
   }
 
@@ -179,6 +187,15 @@ class Accesos extends React.Component {
             </div>
           </div>
         </div>
+
+        {
+          this.state.messageWarning !== "" ?
+            <div className="alert alert-warning" role="alert">
+              <i className="bi bi-exclamation-diamond-fill"></i> {this.state.messageWarning}
+            </div> :
+            null
+        }
+
 
         <div className='row'>
           <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
@@ -217,7 +234,7 @@ class Accesos extends React.Component {
             <ul id="nav-tree">
               {
                 this.state.menu.map((item, index) => (
-                  item.submenu.length == 0 ?
+                  item.submenu.length === 0 ?
                     <li key={index} data-value={`li${index + 1}`}>
                       <div className="form-check">
                         <input
@@ -225,7 +242,7 @@ class Accesos extends React.Component {
                           type="checkbox"
                           id={`id${item.nombre}`}
                           value={item.idMenu}
-                          checked={item.estado == 1 ? true : false}
+                          checked={item.estado === 1 ? true : false}
                           onChange={this.handleCheck} />
                         <label className="form-check-label" htmlFor={`id${item.nombre}`}>
                           {item.nombre}
@@ -247,7 +264,7 @@ class Accesos extends React.Component {
                                   type="checkbox"
                                   id={`id${submenu.nombre}`}
                                   value={submenu.idSubMenu + item.idMenu}
-                                  checked={submenu.estado == 1 ? true : false}
+                                  checked={submenu.estado === 1 ? true : false}
                                   onChange={this.handleCheck} />
                                 <label className="form-check-label" htmlFor={`id${submenu.nombre}`}>
                                   {submenu.nombre}
@@ -483,16 +500,16 @@ class Accesos extends React.Component {
 
         <div className="row">
           <div className="col-xl-12 col-lg-12 col-md-12 col-sm-4 col-12">
-              <button
-              type="button" 
+            <button
+              type="button"
               className="btn btn-outline-primary"
-              onClick={() =>this.onEventGuardar()}>
-                <i className="fa fa-save"></i> Guardar
-              </button>
-              {" "}
-              <button type="button" className="btn btn-outline-danger">
-                <i className="fa fa-backspace"></i> Cancelar
-              </button>
+              onClick={() => this.onEventGuardar()}>
+              <i className="fa fa-save"></i> Guardar
+            </button>
+            {" "}
+            <button type="button" className="btn btn-outline-danger">
+              <i className="fa fa-backspace"></i> Cancelar
+            </button>
           </div>
         </div>
       </>

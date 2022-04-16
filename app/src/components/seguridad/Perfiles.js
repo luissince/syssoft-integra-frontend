@@ -22,6 +22,7 @@ class Perfiles extends React.Component {
             idSede: '',
             sedes: [],
 
+            idComprobante:'',
             loadModal: false,
             nameModal: 'Nuevo Comprobante',
             msgModal: 'Cargando datos...',
@@ -73,6 +74,7 @@ class Perfiles extends React.Component {
                 idPerfil: '',
                 loadModal: false,
                 sedes: [],
+                idComprobante:'',
                 nameModal: 'Nuevo Comprobante',
                 msgModal: 'Cargando datos...',
             });
@@ -164,12 +166,13 @@ class Perfiles extends React.Component {
         else {
             showModal('modalPerfil')
             this.idCodigo = id;
-            await this.setStateAsync({ idComprobante: id, nameModal: "Editar Perfil", loadModal: true });
+            await this.setStateAsync({ idPerfil: id, nameModal: "Editar Perfil", loadModal: true });
         }
     }
 
     loadData = async () => {
         try {
+            
             const sede = await axios.get("/api/sede/listcombo", {
                 signal: this.abortControllerModal.signal,
             });

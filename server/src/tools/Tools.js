@@ -13,4 +13,5 @@ function currentTime() {
     return formatted_time;
 }
 
+
 module.exports = { currentDate, currentTime };

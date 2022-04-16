@@ -1,6 +1,6 @@
 import React from "react";
 import { connect } from 'react-redux';
-import { signOut } from '../../../redux/actions';
+import { closeProject } from '../../../redux/actions';
 
 class Menu extends React.Component {
 
@@ -11,17 +11,9 @@ class Menu extends React.Component {
         }
     }
 
-    componentDidMount() {
-        // console.log(this.props)
-    }
-
-    onEventSignIn = async (event) => {
-        try {
-            await localStorage.removeItem('login');
-            this.props.restore();
-        } catch (e) {
-            this.props.restore();
-        }
+    onEventCloseProject(){
+        window.localStorage.removeItem('project');
+        this.props.restore();
     }
 
     render() {
@@ -59,9 +51,7 @@ class Menu extends React.Component {
                                         </div>
 
                                         <div className="form-group ml-xl-2 ml-lg-2 ml-md-2 ml-sm-2 ml-0">
-                                            <button onClick={this.onEventSignIn} className="btn btn-outline-danger" type="button">
-                                                Regresar
-                                            </button>
+                                            <button type="button" onClick={()=>this.onEventCloseProject()} className="btn btn-outline-danger" >Regresar</button>
                                         </div>
                                     </div>
                                 </div>
@@ -82,7 +72,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        restore: () => dispatch(signOut())
+        restore: () => dispatch(closeProject())
     }
 }
 

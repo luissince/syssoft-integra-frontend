@@ -78,6 +78,7 @@ class Comprobantes extends React.Component {
                 impresion: '',
                 estado: true,
                 idUsuario: '',
+
                 loadModal: false,
                 nameModal: 'Nuevo Comprobante',
                 msgModal: 'Cargando datos...',
@@ -141,6 +142,7 @@ class Comprobantes extends React.Component {
 
             let totalPaginacion = parseInt(Math.ceil((parseFloat(result.data.total) / this.state.filasPorPagina)));
             let messagePaginacion = `Mostrando ${result.data.result.length} de ${totalPaginacion} Páginas`;
+            
             await this.setStateAsync({
                 loading: false,
                 lista: result.data.result,
@@ -406,7 +408,7 @@ class Comprobantes extends React.Component {
                                                         <td>{item.numeracion}</td>
                                                         <td>{<span>{item.fecha}</span>}{<br></br>}{<span>{timeForma24(item.hora)}</span>}</td>
                                                         <td className="text-center"><div className={`badge ${item.estado === 1 ? "badge-info" : "badge-danger"}`}>{item.estado === 1 ? "ACTIVO" : "INACTIVO"}</div></td>
-                                                        <td><button className="btn btn-outline-dark btn-sm" title="Editar" onClick={() => this.openModal(item.idComprobante)}><i className="bi bi-pencil"></i> </button></td>
+                                                        <td><button className="btn btn-outline-warning btn-sm" title="Editar" onClick={() => this.openModal(item.idComprobante)}><i className="bi bi-pencil"></i> </button></td>
                                                         <td><button className="btn btn-outline-danger btn-sm" title="Anular"><i className="bi bi-trash"></i></button></td>
                                                     </tr>
                                                 )
@@ -450,4 +452,4 @@ const mapStateToProps = (state) => {
 }
 
 
-export default connect(mapStateToProps, null)(Comprobantes);
+export default connect(mapStateToProps,null)(Comprobantes);

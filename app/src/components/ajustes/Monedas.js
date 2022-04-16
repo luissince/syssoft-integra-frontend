@@ -1,7 +1,17 @@
 import React from 'react';
 import axios from 'axios';
-import loading from '../../recursos/images/loading.gif';
-import { showModal, hideModal } from '../tools/Tools';
+import {
+    showModal,
+    hideModal,
+    viewModal,
+    clearModal,
+    ModalAlertInfo,
+    ModalAlertSuccess,
+    ModalAlertWarning,
+    spinnerLoading
+} from '../tools/Tools';
+import Paginacion from '../tools/Paginacion';
+
 
 class Monedas extends React.Component {
     constructor(props) {
@@ -13,25 +23,31 @@ class Monedas extends React.Component {
             txtSimbolo: '',
             ckEstado: true,
 
-            loading: true,
+            loadModal: false,
+            nameModal: 'Nuevo Comprobante',
+            msgModal: 'Cargando datos...',
+
+            loading: false,
             lista: [],
+
+            opcion: 0,
             paginacion: 0,
             totalPaginacion: 0,
             filasPorPagina: 10,
-            messagePaginacion: ''
-
+            messageTable: 'Cargando información...',
+            messagePaginacion: 'Mostranto 0 de 0 Páginas'
         }
 
-        this.refTxtNombre = React.createRef()
-        this.refTxtCodIso = React.createRef()
-        this.refTxtSimbolo = React.createRef()
-        this.refCkEstado = React.createRef()
+        this.refTxtNombre = React.createRef();
+        this.refTxtCodIso = React.createRef();
+        this.refTxtSimbolo = React.createRef();
+        this.refCkEstado = React.createRef();
 
-        this.refTxtSearch = React.createRef()
-    }
 
-    async componentDidMount() {
-        this.fillTableMoneda(0, 1, "");
+        this.refTxtSearch = React.createRef();
+
+        this.idCodigo = "";
+        this.abortControllerTable = new AbortController();
     }
 
     setStateAsync(state) {
@@ -40,12 +56,79 @@ class Monedas extends React.Component {
         });
     }
 
-    fillTableMoneda = async (option, paginacion, buscar) => {
+    async componentDidMount() {
+        this.loadInit();
+
+        viewModal("modalMoneda", () => {
+            this.abortControllerModal = new AbortController();
+
+            if (this.idCodigo !== "") this.loadDataId(this.idCodigo);
+        });
+
+        clearModal("modalMoneda", async () => {
+            this.abortControllerModal.abort();
+            await this.setStateAsync({
+                idMoneda: '',
+                txtNombre: '',
+                txtCodIso: '',
+                txtSimbolo: '',
+                ckEstado: true,
+
+                loadModal: false,
+                nameModal: 'Nuevo Comprobante',
+                msgModal: 'Cargando datos...',
+            });
+            this.idCodigo = "";
+        });
+    }
+
+    componentWillUnmount() {
+        this.abortControllerTable.abort();
+    }
+
+    loadInit = async () => {
+        if (this.state.loading) return;
+
+        await this.setStateAsync({ paginacion: 1 });
+        this.fillTable(0, "");
+        await this.setStateAsync({ opcion: 0 });
+
+    }
+
+    async searchText(text) {
+        if (this.state.loading) return;
+
+        if (text.trim().length === 0) return;
+
+        await this.setStateAsync({ paginacion: 1 });
+        this.fillTable(1, text.trim());
+        await this.setStateAsync({ opcion: 1 });
+    }
+
+    paginacionContext = async (listid) => {
+        await this.setStateAsync({ paginacion: listid });
+        this.onEventPaginacion();
+    }
+
+    onEventPaginacion = () => {
+        switch (this.state.opcion) {
+            case 0:
+                this.fillTable(0, "");
+                break;
+            case 1:
+                this.fillTable(1, this.refTxtSearch.current.value);
+                break;
+        }
+    }
+
+    fillTable = async (opcion, buscar) => {
         try {
-            await this.setStateAsync({ loading: true, paginacion: paginacion, lista: [] });
+            await this.setStateAsync({ loading: true, lista: [], messageTable: "Cargando información...", messagePaginacion: "Mostranto 0 de 0 Páginas" });
+
             const result = await axios.get('/api/moneda/list', {
+                signal: this.abortControllerTable.signal,
                 params: {
-                    "option": option,
+                    "opcion": opcion,
                     "buscar": buscar.trim().toUpperCase(),
                     "posicionPagina": ((this.state.paginacion - 1) * this.state.filasPorPagina),
                     "filasPorPagina": this.state.filasPorPagina
@@ -55,43 +138,65 @@ class Monedas extends React.Component {
             let totalPaginacion = parseInt(Math.ceil((parseFloat(result.data.total) / this.state.filasPorPagina)));
             let messagePaginacion = `Mostrando ${result.data.result.length} de ${totalPaginacion} Páginas`;
 
-            this.setState({
+            await this.setStateAsync({
                 loading: false,
                 lista: result.data.result,
                 totalPaginacion: totalPaginacion,
                 messagePaginacion: messagePaginacion
             });
-            // console.log(result);
-        } catch (err) {
-            console.log(err.response.data.message)
-            console.log(err.response.status)
+        } catch (error) {
+            if (error.message !== "canceled") {
+                await this.setStateAsync({
+                    loading: false,
+                    lista: [],
+                    totalPaginacion: 0,
+                    messageTable: "Se produjo un error interno, intente nuevamente por favor.",
+                    messagePaginacion: "Mostranto 0 de 0 Páginas",
+                });
+            }
         }
     }
 
-    loadDataMoneda = async (id) => {
+    async openModal(id) {
+        if (id === '') {
+            showModal('modalMoneda')
+            await this.setStateAsync({ nameModal: "Nueva Moneda" });
+        }
+        else {
+            showModal('modalMoneda')
+            this.idCodigo = id;
+            await this.setStateAsync({ idMoneda: id, nameModal: "Editar Moneda", loadModal: true });
+        }
+    }
+
+    loadDataId = async (id) => {
         try {
             const result = await axios.get("/api/moneda/id", {
+                signal: this.abortControllerModal.signal,
                 params: {
                     idMoneda: id
                 }
             });
 
-            // console.log(result)
-
-            this.setState({
+            await this.setStateAsync({
                 txtNombre: result.data.nombre,
                 txtCodIso: result.data.codiso,
                 txtSimbolo: result.data.simbolo,
                 ckEstado: result.data.estado,
-                idMoneda: result.data.idMoneda
+                idMoneda: result.data.idMoneda,
+                loadModal: false
             });
 
         } catch (error) {
-            console.log(error.response)
+            if (error.message !== "canceled") {
+                await this.setStateAsync({
+                    msgModal: "Se produjo un error interno, intente nuevamente"
+                });
+            }
         }
     }
 
-    async saveMoneda() {
+    async onEventGuardar() {
         if (this.state.txtNombre === "") {
             this.refTxtNombre.current.focus();
         } else if (this.state.txtCodIso === "") {
@@ -101,65 +206,36 @@ class Monedas extends React.Component {
         } else {
             try {
 
-                let result = null
+                ModalAlertInfo("Moneda", "Procesando información...");
+                hideModal("modalMoneda");
 
                 if (this.state.idMoneda !== '') {
-                    result = await axios.post('/api/moneda/update', {
+                    const result = await axios.post('/api/moneda/update', {
                         "nombre": this.state.txtNombre.trim().toUpperCase(),
                         "codiso": this.state.txtCodIso.trim().toUpperCase(),
                         "simbolo": this.state.txtSimbolo.trim().toUpperCase(),
                         "estado": this.state.ckEstado,
                         "idMoneda": this.state.idMoneda
                     })
-                    // console.log('actualizar');
+                    ModalAlertSuccess("Moneda", result.data, () => {
+                        this.onEventPaginacion();
+                    });
 
                 } else {
-                    result = await axios.post('/api/moneda/add', {
+                    const result = await axios.post('/api/moneda/add', {
                         "nombre": this.state.txtNombre.trim().toUpperCase(),
                         "codiso": this.state.txtCodIso.trim().toUpperCase(),
                         "simbolo": this.state.txtSimbolo.trim().toUpperCase(),
                         "estado": this.state.ckEstado,
                     });
-                    // console.log('nuevo');
+                    ModalAlertSuccess("Moneda", result.data, () => {
+                        this.loadInit();
+                    });
                 }
-
-                // console.log(result);
-                this.closeModal()
-
             } catch (error) {
-                console.log(error)
-                console.log(error.response)
+                ModalAlertWarning("Moneda", "Se produjo un error un interno, intente nuevamente.");
             }
         }
-    }
-
-    openModalMoneda(id) {
-        if (id === '') {
-            showModal('modalMoneda')
-            this.refTxtNombre.current.focus();
-            // console.log('nuevo')
-        }
-        else {
-            this.setState({ idMoneda: id });
-            showModal('modalMoneda')
-            this.loadDataMoneda(id)
-            // console.log('editar')
-        }
-    }
-
-    closeModal() {
-        hideModal('modalMoneda')
-        this.setState({
-            txtNombre: '',
-            txtCodIso: '',
-            txtSimbolo: '',
-            ckEstado: true,
-            idMoneda: '',
-        })
-    }
-
-    searchText(text) {
-        this.fillTableMoneda(0, 1, text);
     }
 
     render() {
@@ -170,12 +246,17 @@ class Monedas extends React.Component {
                     <div className="modal-dialog modal-lg">
                         <div className="modal-content">
                             <div className="modal-header">
-                                <h5 className="modal-title"><i className="bi bi-currency-exchange"></i>{this.state.idMoneda === '' ? " Registrar Moneda" : " Editar Moneda"}</h5>
-                                <button type="button" className="close" data-dismiss="modal" onClick={() => this.closeModal()}>
+                                <h5 className="modal-title">{this.state.nameModal}</h5>
+                                <button type="button" className="close" data-bs-dismiss="modal" aria-label="Close">
                                     <span aria-hidden="true">&times;</span>
                                 </button>
                             </div>
                             <div className="modal-body">
+                                {this.state.loadModal ?
+                                    <div className="clearfix absolute-all bg-white">
+                                        {spinnerLoading(this.state.msgModal)}
+                                    </div>
+                                    : null}
 
                                 <div className="form-row">
                                     <div className="form-group col-md-6">
@@ -227,8 +308,8 @@ class Monedas extends React.Component {
 
                             </div>
                             <div className="modal-footer">
-                                <button type="button" className="btn btn-primary" onClick={() => this.saveMoneda()}>Guardar</button>
-                                <button type="button" className="btn btn-secondary" data-dismiss="modal" onClick={() => this.closeModal()}>Cerrar</button>
+                                <button type="button" className="btn btn-primary" onClick={() => this.onEventGuardar()}>Guardar</button>
+                                <button type="button" className="btn btn-danger" data-bs-dismiss="modal">Cerrar</button>
                             </div>
                         </div>
                     </div>
@@ -250,17 +331,22 @@ class Monedas extends React.Component {
                                 <div className="input-group-prepend">
                                     <div className="input-group-text"><i className="bi bi-search"></i></div>
                                 </div>
-                                <input type="search" className="form-control" placeholder="Buscar..." ref={this.refTxtSearch} onKeyUp={(event) => this.searchText(event.target.value)} />
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    placeholder="Buscar..."
+                                    ref={this.refTxtSearch}
+                                    onKeyUp={(event) => this.searchText(event.target.value)} />
                             </div>
                         </div>
                     </div>
                     <div className="col-md-6 col-sm-12">
                         <div className="form-group">
-                            <button className="btn btn-outline-info" onClick={() => this.openModalMoneda(this.state.idMoneda)}>
+                            <button className="btn btn-outline-info" onClick={() => this.openModal('')}>
                                 <i className="bi bi-file-plus"></i> Nuevo Registro
                             </button>
                             {" "}
-                            <button className="btn btn-outline-secondary" onClick={() => this.fillTableMoneda(0, 1, "")}>
+                            <button className="btn btn-outline-secondary" onClick={() => this.loadInit()}>
                                 <i className="bi bi-arrow-clockwise"></i>
                             </button>
                         </div>
@@ -279,26 +365,21 @@ class Monedas extends React.Component {
                                         <th width="15%">Codigo ISO</th>
                                         <th width="15%">Símbolo</th>
                                         <th width="15%">Estado</th>
-                                        <th width="15%" colSpan="2">Opciones</th>
+                                        <th width="5%">Editar</th>
+                                        <th width="5%">Eliminar</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {
                                         this.state.loading ? (
                                             <tr>
-                                                <td className="text-center" colSpan="6">
-                                                    <img
-                                                        src={loading}
-                                                        alt="Loading..."
-                                                        width="34"
-                                                        height="34"
-                                                    />
-                                                    <p>Cargando información...</p>
+                                                <td className="text-center" colSpan="7">
+                                                    {spinnerLoading()}
                                                 </td>
                                             </tr>
                                         ) : this.state.lista.length === 0 ? (
                                             <tr className="text-center">
-                                                <td colSpan="6">¡No hay datos registrados!</td>
+                                                <td colSpan="7">¡No hay datos registrados!</td>
                                             </tr>
                                         ) : (
                                             this.state.lista.map((item, index) => {
@@ -310,8 +391,9 @@ class Monedas extends React.Component {
                                                         <td>{item.simbolo}</td>
                                                         <td><div className={`badge ${item.estado === 1 ? "badge-info" : "badge-danger"}`}>{item.estado === 1 ? "ACTIVO" : "INACTIVO"}</div></td>
                                                         <td>
-                                                            <button className="btn btn-outline-dark btn-sm" title="Editar" onClick={() => this.openModalMoneda(item.idMoneda)}><i className="bi bi-pencil"></i></button>
-                                                            {" "}
+                                                            <button className="btn btn-outline-warning btn-sm" title="Editar" onClick={() => this.openModal(item.idMoneda)}><i className="bi bi-pencil"></i></button>
+                                                        </td>
+                                                        <td>
                                                             <button className="btn btn-outline-danger btn-sm" title="Eliminar"><i className="bi bi-trash"></i></button>
                                                         </td>
                                                     </tr>
@@ -323,22 +405,27 @@ class Monedas extends React.Component {
 
                             </table>
                         </div>
-                        <div className="col-md-12 " style={{ textAlign: 'center' }}>
-                            <nav aria-label="...">
+
+                    </div>
+                </div>
+
+                <div className="row">
+                    <div className="col-sm-12 col-md-5">
+                        <div className="dataTables_info mt-2" role="status" aria-live="polite">{this.state.messagePaginacion}</div>
+                    </div>
+                    <div className="col-sm-12 col-md-7">
+                        <div className="dataTables_paginate paging_simple_numbers">
+                            <nav aria-label="Page navigation example">
                                 <ul className="pagination justify-content-end">
-                                    <li className="page-item disabled">
-                                        <a className="page-link">Previous</a>
-                                    </li>
-                                    <li className="page-item"><a className="page-link" href="#">1</a></li>
-                                    <li className="page-item active" aria-current="page"><a className="page-link" href="#">2</a></li>
-                                    <li className="page-item"><a className="page-link" href="#">3</a></li>
-                                    <li className="page-item">
-                                        <a className="page-link" href="#">Next</a>
-                                    </li>
+                                    <Paginacion
+                                        loading={this.state.loading}
+                                        totalPaginacion={this.state.totalPaginacion}
+                                        paginacion={this.state.paginacion}
+                                        fillTable={this.paginacionContext}
+                                    />
                                 </ul>
                             </nav>
                         </div>
-
                     </div>
                 </div>
             </>

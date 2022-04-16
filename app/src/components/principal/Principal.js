@@ -3,8 +3,8 @@ import './Principal.css';
 import axios from 'axios';
 import { Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { signOut } from '../../redux/actions';
-import { ModalAlertInfo, ModalAlertClear } from '../tools/Tools';
+import { signOut, selectProject } from '../../redux/actions';
+import { spinnerLoading } from '../tools/Tools';
 
 import noImage from '../../recursos/images/noimage.jpg'
 import logoInmobiliaria from './INMOBILIARIA.png';
@@ -14,29 +14,52 @@ class Principal extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            data: []
+            data: [],
+            loadModal: true,
+            msgModal: "Cargando proyectos...",
         }
-        console.log(this.props.token)
+
+        this.abortControllerTable = new AbortController();
+    }
+
+    setStateAsync(state) {
+        return new Promise((resolve) => {
+            this.setState(state, resolve)
+        });
     }
 
     async componentDidMount() {
         try {
-            ModalAlertInfo("Proyecto", "Cargando proyectos...");
+
             let result = await axios.get("/api/proyecto/inicio", {
+                signal: this.abortControllerTable.signal,
                 params: {
 
                 }
             });
-            this.setState({ data: result.data });
-            ModalAlertClear();
+
+            await this.setStateAsync({
+                data: result.data,
+                loadModal: false
+            });
+
         } catch (error) {
-            console.log(error)
+            if (error.message !== "canceled") {
+                await this.setStateAsync({
+                    msgModal: "Se produjo un error interno, intente nuevamente."
+                });
+            }
         }
+    }
+
+    componentWillUnmount() {
+        this.abortControllerTable.abort();
     }
 
     onEventSignIn = async (event) => {
         try {
-            localStorage.removeItem('login');
+            window.localStorage.removeItem('login');
+            window.localStorage.removeItem('project');
             this.props.restore();
             this.props.history.push("login");
         } catch (e) {
@@ -45,17 +68,35 @@ class Principal extends React.Component {
         }
     }
 
-    onEventIngresar = () => {
-        this.props.history.push("inicio");
+    onEventIngresar(item) {
+        const proyect = {
+            "idProyecto": item.idProyecto,
+            "nombre": item.nombre,
+            "ubicacion": item.ubicacion
+        }
+        window.localStorage.setItem("project",JSON.stringify(proyect));
+        this.props.project(JSON.parse(window.localStorage.getItem('project')));
     }
 
     render() {
         if (this.props.token.userToken == null) {
             return <Redirect to="/login" />
         }
+
+        if (this.props.token.project !== null) {
+            return <Redirect to="/inicio" />
+        }
+
         return (
             <>
                 <div className='container'>
+
+                    {this.state.loadModal ?
+                        <div className="clearfix absolute-all bg-white">
+                            {spinnerLoading(this.state.msgModal)}
+                        </div>
+                        : null
+                    }
 
                     <div className='row'>
                         <div className='col-md-3 col-12' >
@@ -108,7 +149,7 @@ class Principal extends React.Component {
                                         <div className="card-body m-2">
                                             <h6 className='text-info font-weight-bold'>{item.nombre}</h6>
                                             <h6 className='text-secondary'>{item.ubicacion}</h6>
-                                            <button onClick={this.onEventIngresar} type="button" className="btn btn-block btn-outline-primary text-info" >
+                                            <button onClick={() => this.onEventIngresar(item)} type="button" className="btn btn-block btn-outline-primary text-info" >
                                                 <i className="bi bi-arrow-right-circle-fill"></i> Ingresar
                                             </button>
                                         </div>
@@ -152,7 +193,8 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        restore: () => dispatch(signOut())
+        restore: () => dispatch(signOut()),
+        project: (idProyecto) => dispatch(selectProject(idProyecto))
     }
 }
 

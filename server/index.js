@@ -46,6 +46,8 @@ app.use('/api/gasto', require('./src/router/Gasto'));
 app.use('/api/cobro', require('./src/router/Cobro'));
 app.use('/api/acceso', require('./src/router/Acceso'));
 
+app.use('/api/ubigeo', require('./src/router/Ubigeo'));
+
 
 app.use((req, res, next) => {
     res.sendFile(path.join(__dirname, "..", "app/build", "index.html"));

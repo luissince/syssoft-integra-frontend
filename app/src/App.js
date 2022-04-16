@@ -1,4 +1,5 @@
 import React from 'react';
+import axios from 'axios';
 import Login from './components/login/Login';
 import Inicio from './components/inicio/Inicio';
 import Principal from './components/principal/Principal';
@@ -18,17 +19,27 @@ class App extends React.Component {
         this.menuRef = React.createRef();
     }
 
-    async componentDidMount() {
+    async componentDidMount() {  
         try {
-            let userToken = localStorage.getItem('login');
-            this.props.restore(JSON.parse(userToken));
-        } catch (e) {
+            let userToken = window.localStorage.getItem('login');
+            let user = JSON.parse(userToken);
+            await axios.get("/api/login/validtoken", {
+                headers: {
+                    Authorization: "Bearer " + user.token
+                }
+            });
+
+            let project = JSON.parse(window.localStorage.getItem('project'));
+
+            user = {
+                ...user,
+                project: project
+            }
+
+            this.props.restore(user);
+        } catch (error) {
             this.props.restore(null);
         }
-    }
-
-    componentDidUpdate() {
-
     }
 
     render() {
@@ -82,5 +93,4 @@ const mapDispatchToProps = (dispatch) => {
     }
 }
 
-// export default App;
 export default connect(mapStateToProps, mapDispatchToProps)(App);

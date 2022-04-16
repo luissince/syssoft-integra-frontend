@@ -1,7 +1,16 @@
 import React from 'react';
 import axios from 'axios';
-import loading from '../../recursos/images/loading.gif';
-import { showModal, hideModal, viewModal, clearModal } from '../tools/Tools';
+import {
+    showModal,
+    hideModal,
+    viewModal,
+    clearModal,
+    ModalAlertInfo,
+    ModalAlertSuccess,
+    ModalAlertWarning,
+    spinnerLoading
+} from '../tools/Tools';
+import Paginacion from '../tools/Paginacion';
 
 class Manzanas extends React.Component {
 
@@ -12,16 +21,27 @@ class Manzanas extends React.Component {
             nombre: '',
             idProyecto: 'PR0001',
 
-            loading: true,
+            loadModal: false,
+            nameModal: 'Nuevo Comprobante',
+            msgModal: 'Cargando datos...',
+
+            loading: false,
             lista: [],
+
+            opcion: 0,
             paginacion: 0,
             totalPaginacion: 0,
             filasPorPagina: 10,
-            messagePaginacion: ''
+            messageTable: 'Cargando información...',
+            messagePaginacion: 'Mostranto 0 de 0 Páginas'
         };
 
         this.refNombre = React.createRef();
-        console.log("ingreso")
+
+        this.refTxtSearch = React.createRef();
+
+        this.idCodigo = "";
+        this.abortControllerTable = new AbortController();
     }
 
     setStateAsync(state) {
@@ -31,102 +51,165 @@ class Manzanas extends React.Component {
     }
 
     async componentDidMount() {
-        this.fillTableManzana(1);
+        this.loadInit();
 
-        viewModal("modalManzana", () => {
-            this.refNombre.current.focus();
+        viewModal("modalManzana", () => {         
+            this.abortControllerModal = new AbortController();
+
+            if (this.idCodigo !== "") this.loadDataId(this.idCodigo);
         });
 
-        clearModal("modalManzana", () => {
-            this.closeModal();
+        clearModal("modalManzana", async () => {
+            this.abortControllerModal.abort();
+            await this.setStateAsync({
+                idManzana: '',
+                nombre: '',
+
+                loadModal: false,
+                nameModal: 'Nuevo Comprobante',
+                msgModal: 'Cargando datos...',
+            });
+            this.idCodigo = "";
         });
     }
 
-    fillTableManzana = async (paginacion) => {
+    componentWillUnmount() {
+        this.abortControllerTable.abort();
+    }
+
+    loadInit = async () => {
+        if (this.state.loading) return;
+
+        await this.setStateAsync({ paginacion: 1 });
+        this.fillTable(0, "");
+        await this.setStateAsync({ opcion: 0 });
+    }
+
+    async searchText(text) {
+        if (this.state.loading) return;
+
+        if (text.trim().length === 0) return;
+
+        await this.setStateAsync({ paginacion: 1 });
+        this.fillTable(1, text.trim());
+        await this.setStateAsync({ opcion: 1 });
+    }
+
+    paginacionContext = async (listid) => {
+        await this.setStateAsync({ paginacion: listid });
+        this.onEventPaginacion();
+    }
+
+    onEventPaginacion = () => {
+        switch (this.state.opcion) {
+            case 0:
+                this.fillTable(0, "");
+                break;
+            case 1:
+                this.fillTable(1, this.refTxtSearch.current.value);
+                break;
+        }
+    }
+
+    fillTable = async (opcion, buscar) => {
         try {
-            await this.setStateAsync({ loading: true, paginacion: paginacion, lista: [] });
+            await this.setStateAsync({ loading: true, lista: [], messageTable: "Cargando información...", messagePaginacion: "Mostranto 0 de 0 Páginas" });
+
             const result = await axios.get('/api/manzana/list', {
+                signal: this.abortControllerTable.signal,
                 params: {
+                    "opcion": opcion,
+                    "buscar": buscar.trim().toUpperCase(),
                     "posicionPagina": ((this.state.paginacion - 1) * this.state.filasPorPagina),
                     "filasPorPagina": this.state.filasPorPagina
                 }
             });
-
             let totalPaginacion = parseInt(Math.ceil((parseFloat(result.data.total) / this.state.filasPorPagina)));
             let messagePaginacion = `Mostrando ${result.data.result.length} de ${totalPaginacion} Páginas`;
 
-            this.setState({
+            await this.setStateAsync({
                 loading: false,
                 lista: result.data.result,
                 totalPaginacion: totalPaginacion,
                 messagePaginacion: messagePaginacion
             });
-        } catch (err) {
-            console.log(err.response.data.message)
-            console.log(err.response.status)
+        } catch (error) {
+            if (error.message !== "canceled") {
+                await this.setStateAsync({
+                    loading: false,
+                    lista: [],
+                    totalPaginacion: 0,
+                    messageTable: "Se produjo un error interno, intente nuevamente por favor.",
+                    messagePaginacion: "Mostranto 0 de 0 Páginas",
+                });
+            }
         }
     }
 
-    openModalManzana(id) {
-        if (id === undefined) {
+    async openModal(id) {
+        if (id === "") {
             showModal('modalManzana');
+            await this.setStateAsync({ nameModal: "Nueva Manzana" });
         } else {
             showModal('modalManzana');
-            this.loadDataId(id);
+            this.idCodigo = id;
+            await this.setStateAsync({ idManzana: id, nameModal: "Editar Manzana", loadModal: true });
         }
     }
 
     async loadDataId(id) {
         try {
             let result = await axios.get('/api/manzana/id', {
+                signal: this.abortControllerModal.signal,
                 params: {
                     "idManzana": id
                 }
             });
-            this.setStateAsync({
+            await this.setStateAsync({
                 idManzana: result.data.idManzana,
-                nombre: result.data.nombre
+                nombre: result.data.nombre,
+                loadModal: false
             });
-            console.log(result)
         } catch (error) {
-            console.log(error)
-        }
-    }
-
-    async saveManzana() {
-        if (this.state.nombre === "") {
-            this.refNombre.current.focus();
-        } else {
-            try {
-
-                if (this.state.idManzana === "") {
-                    let result = await axios.post("/api/manzana/add", {
-                        "nombre": this.state.nombre,
-                        "idProyecto": this.state.idProyecto
-                    });
-                    hideModal("modalManzana");
-                    console.log(result)
-                } else {
-                    let result = await axios.post("/api/manzana/edit", {
-                        "idManzana": this.state.idManzana,
-                        "nombre": this.state.nombre,
-                        "idProyecto": this.state.idProyecto
-                    });
-                    hideModal("modalManzana");
-                    console.log(result)
-                }
-            } catch (error) {
-                console.log(error.response)
+            if (error.message !== "canceled") {
+                await this.setStateAsync({
+                    msgModal: "Se produjo un error interno, intente nuevamente"
+                });
             }
         }
     }
 
-    async closeModal() {
-        hideModal("modalManzana");
-        await this.setStateAsync({
-            idManzana: '',
-            nombre: '',
-        });
+    async onEventGuardar() {
+        if (this.state.nombre === "") {
+            this.refNombre.current.focus();
+        } else {
+            try {
+                ModalAlertInfo("Banco", "Procesando información...");
+                hideModal("modalManzana");
+                if (this.state.idManzana === "") {
+                    const result = await axios.post("/api/manzana/add", {
+                        "nombre": this.state.nombre,
+                        "idProyecto": this.state.idProyecto
+                    });
+
+                    ModalAlertSuccess("Comprobante", result.data, () => {
+                        this.loadInit();
+                    });
+                } else {
+                    const result = await axios.post("/api/manzana/edit", {
+                        "idManzana": this.state.idManzana,
+                        "nombre": this.state.nombre,
+                        "idProyecto": this.state.idProyecto
+                    });
+
+                    ModalAlertSuccess("Banco", result.data, () => {
+                        this.onEventPaginacion();
+                    });
+                }
+            } catch (error) {
+                ModalAlertWarning("Comprobante", "Se produjo un error un interno, intente nuevamente.");
+            }
+        }
     }
 
     render() {
@@ -138,12 +221,18 @@ class Manzanas extends React.Component {
                     <div className="modal-dialog">
                         <div className="modal-content">
                             <div className="modal-header">
-                                <h5 className="modal-title"><i className="bi bi-house-door"></i> Registrar Manzana</h5>
+                                <h5 className="modal-title">{this.state.nameModal}</h5>
                                 <button type="button" className="close" data-bs-dismiss="modal" aria-label="Close">
                                     <span aria-hidden="true">&times;</span>
                                 </button>
                             </div>
                             <div className="modal-body">
+                                {this.state.loadModal ?
+                                    <div className="clearfix absolute-all bg-white">
+                                        {spinnerLoading(this.state.msgModal)}
+                                    </div>
+                                    : null}
+
                                 <div className='row py-1'>
                                     <div className='col-lg-4 col-md-4 col-sm-12 col-xs-12'>
                                         <label>Nombre Manzana: </label>
@@ -161,8 +250,8 @@ class Manzanas extends React.Component {
                                 </div>
                             </div>
                             <div className="modal-footer">
-                                <button type="button" className="btn btn-primary" onClick={() => this.saveManzana()}>Aceptar</button>
-                                <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                                <button type="button" className="btn btn-primary" onClick={() => this.onEventGuardar()}>Aceptar</button>
+                                <button type="button" className="btn btn-danger" data-bs-dismiss="modal">Cerrar</button>
                             </div>
                         </div>
                     </div>
@@ -184,17 +273,22 @@ class Manzanas extends React.Component {
                                 <div className="input-group-prepend">
                                     <div className="input-group-text"><i className="bi bi-search"></i></div>
                                 </div>
-                                <input type="search" className="form-control" placeholder="Buscar..." />
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    placeholder="Buscar..."
+                                    ref={this.refTxtSearch}
+                                    onKeyUp={(event) => this.searchText(event.target.value)} />
                             </div>
                         </div>
                     </div>
                     <div className="col-md-6 col-sm-12">
                         <div className="form-group">
-                            <button className="btn btn-outline-info" onClick={() => this.openModalManzana()}>
+                            <button className="btn btn-outline-info" onClick={() => this.openModal('')}>
                                 <i className="bi bi-file-plus"></i> Nuevo Registro
                             </button>
                             {" "}
-                            <button className="btn btn-outline-secondary" >
+                            <button className="btn btn-outline-secondary" onClick={() => this.loadInit()}>
                                 <i className="bi bi-arrow-clockwise"></i>
                             </button>
                         </div>
@@ -211,25 +305,20 @@ class Manzanas extends React.Component {
                                         <th width="15%">Manzana</th>
                                         <th width="25%">Nombre de Proyecto</th>
                                         <th width="5%">Editar</th>
+                                        <th width="5%">Eliminar</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {
                                         this.state.loading ? (
                                             <tr>
-                                                <td className="text-center" colSpan="4">
-                                                    <img
-                                                        src={loading}
-                                                        alt="Loading..."
-                                                        width="34"
-                                                        height="34"
-                                                    />
-                                                    <p>Cargando información...</p>
+                                                <td className="text-center" colSpan="5">
+                                                    {spinnerLoading()}
                                                 </td>
                                             </tr>
                                         ) : this.state.lista.length === 0 ? (
                                             <tr className="text-center">
-                                                <td colSpan="4">¡No hay datos registrados!</td>
+                                                <td colSpan="5">¡No hay datos registrados!</td>
                                             </tr>
                                         ) : (
                                             this.state.lista.map((item, index) => {
@@ -239,8 +328,9 @@ class Manzanas extends React.Component {
                                                         <td>{item.nombre}</td>
                                                         <td>{item.idProyecto}</td>
                                                         <td>
-                                                            <button className="btn btn-outline-dark btn-sm" title="Editar" onClick={() => this.openModalManzana(item.idManzana)}><i className="bi bi-pencil"></i></button>
+                                                            <button className="btn btn-outline-warning btn-sm" title="Editar" onClick={() => this.openModal(item.idManzana)}><i className="bi bi-pencil"></i></button>
                                                         </td>
+                                                        <td><button className="btn btn-outline-danger btn-sm" title="Anular"><i className="bi bi-trash"></i></button></td>
                                                     </tr>
                                                 )
                                             })
@@ -249,18 +339,23 @@ class Manzanas extends React.Component {
                                 </tbody>
                             </table>
                         </div>
-                        <div className="col-md-12 " style={{ textAlign: 'center' }}>
-                            <nav aria-label="...">
+                    </div>
+                </div>
+
+                <div className="row">
+                    <div className="col-sm-12 col-md-5">
+                        <div className="dataTables_info mt-2" role="status" aria-live="polite">{this.state.messagePaginacion}</div>
+                    </div>
+                    <div className="col-sm-12 col-md-7">
+                        <div className="dataTables_paginate paging_simple_numbers">
+                            <nav aria-label="Page navigation example">
                                 <ul className="pagination justify-content-end">
-                                    <li className="page-item disabled">
-                                        <a className="page-link">Previous</a>
-                                    </li>
-                                    <li className="page-item"><a className="page-link" href="#">1</a></li>
-                                    <li className="page-item active" aria-current="page"><a className="page-link" href="#">2</a></li>
-                                    <li className="page-item"><a className="page-link" href="#">3</a></li>
-                                    <li className="page-item">
-                                        <a className="page-link" href="#">Next</a>
-                                    </li>
+                                    <Paginacion
+                                        loading={this.state.loading}
+                                        totalPaginacion={this.state.totalPaginacion}
+                                        paginacion={this.state.paginacion}
+                                        fillTable={this.paginacionContext}
+                                    />
                                 </ul>
                             </nav>
                         </div>

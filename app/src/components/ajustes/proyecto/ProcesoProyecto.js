@@ -1,577 +1,686 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React from 'react';
 import axios from 'axios';
-import { getExtension, ModalAlertClear, ModalAlertInfo, ModalAlertSuccess, ModalAlertWarning, readDataURL, imageSizeData } from '../../tools/Tools';
-import noImage from '../../../recursos/images/noimage.jpg'
+import {
+    getExtension,
+    ModalAlertInfo,
+    ModalAlertSuccess,
+    ModalAlertWarning,
+    readDataURL,
+    imageSizeData,
+    spinnerLoading
+} from '../../tools/Tools';
+import noImage from '../../../recursos/images/noimage.jpg';
+import SearchBar from "../../tools/SearchBar";
 
-export default function ProcesoProyecto(props) {
+class ProcesoProyecto extends React.Component {
 
-    const [idProyecto, setIdProyecto] = useState('')
-    //datos
-    const [txtNombre, setTxtNombre] = useState('')
-    const [txtSede, setTxtSede] = useState('')
-    const [txtNumPartidaElectronica, setTxtNumPartidaElectronica] = useState('')
-    const [txtArea, setTxtArea] = useState('')
-    const [CbxEstado, setCbxEstado] = useState('VENTA')
-    //ubicacion
-    const [txtUbicacion, setTxtUbicacion] = useState('')
-    const [txtPais, setTxtPais] = useState('')
-    const [txtRegion, setTxtRegion] = useState('')
-    const [txtProvincia, setTxtProvincia] = useState('')
-    const [txtDistrito, setTxtDistrito] = useState('')
-    //limite
-    const [txtLnorte, setTxtLnorte] = useState('')
-    const [txtLeste, setTxtLeste] = useState('')
-    const [txtLsur, setTxtLsur] = useState('')
-    const [txtLoeste, setTxtLoeste] = useState('')
-    //ajustes
-    const [txtMoneda, setTxtMoneda] = useState('')
-    const [txtTea, setTxtTea] = useState('')
-    const [txtPrecioMetro, setTxtPrecioMetro] = useState('')
-    const [txtCostoXlote, setTxtCostoXLote] = useState('')
-    const [txtNumContratoCorrelativo, setTxtNumContratoCorrelativo] = useState('')
-    const [txtNumReciboCorrelativo, setTxtNumReciboCorrelativo] = useState('')
-    const [txtInflacionAnual, setTxtInflacionAnual] = useState('')
-    const [txtImagen, setTxtImagen] = useState(noImage)
-    const [imageBase64, setImageBase64] = useState(null);
-    const [extenBase64, setExtenBase64] = useState(null);
+    constructor(props) {
+        super(props);
+        this.state = {
+            idProyecto: '',
+            nombre: '',
+            idSede: '',
+            sedes: [],
+            numPartidaElectronica: '',
+            area: '',
+            estado: 'VENTA',
 
-    const refTxtNombre = useRef()
-    const refTxtSede = useRef()
-    const refTxtArea = useRef()
-    const refTxtUbicacion = useRef()
-    const refTxtPais = useRef()
-    const refTxtRegion = useRef()
-    const refTxtProvincia = useRef()
-    const refTxtDistrito = useRef()
-    const refTxtMoneda = useRef()
-    const refTxtTea = useRef()
-    const refFileImagen = useRef()
+            ubicacion: '',
+            pais: '',
+            region: '',
+            provincia: '',
+            distrito: '',
 
-    useEffect(() => {
-        const url = props.location.search;
-        const idResult = new URLSearchParams(url).get("idProyecto");
-        if (idResult !== null) setIdProyecto(idResult)
+            lnorte: '',
+            leste: '',
+            lsur: '',
+            loeste: '',
 
-        refFileImagen.current.addEventListener("change", (event) => {
-            if (event.target.files.length !== 0) {
-                setTxtImagen(URL.createObjectURL(event.target.files[0]))
-                console.log(event.target.files)
-            } else {
-                setTxtImagen(noImage)
-                refFileImagen.current.value = "";
-            }
+            moneda: '',
+            tea: '',
+            preciometro: '',
+            costoxlote: '',
+            numContratoCorrelativo: '',
+            numRecibocCorrelativo: '',
+            inflacionAnual: '',
+
+            imagen: noImage,
+            imageBase64: null,
+            extenBase64: null,
+            loading: false,
+            msgLoading: 'Cargando datos...',
+
+            messageWarning: ''
+        }
+
+        this.refTxtNombre = React.createRef();
+        this.refTxtSede = React.createRef();
+        this.refTxtArea = React.createRef();
+        this.refTxtUbicacion = React.createRef();
+        this.refTxtPais = React.createRef();
+        this.refTxtRegion = React.createRef();
+        this.refTxtProvincia = React.createRef();
+        this.refTxtDistrito = React.createRef();
+        this.refTxtMoneda = React.createRef();
+        this.refTxtTea = React.createRef();
+        this.refFileImagen = React.createRef();
+
+        this.abortController = new AbortController();
+    }
+
+    setStateAsync(state) {
+        return new Promise((resolve) => {
+            this.setState(state, resolve)
         });
-    }, [props.location.search]);
+    }
 
-    useEffect(() => {
-        const abortController = new AbortController();
-        const signal = abortController.signal;
-        const loadDataId = async (id) => {
-            try {
-                const result = await axios.get("/api/proyecto/id", {
-                    signal: signal,
-                    params: {
-                        idProyecto: id
-                    }
-                });
+    componentDidMount() {
+        this.refFileImagen.current.addEventListener("change", this.onEventFileImage);
 
-                const data = result.data;
+        const url = this.props.location.search;
+        const idResult = new URLSearchParams(url).get("idProyecto");
+        if (idResult !== null) {
+            this.loadDataId(idResult)
+        }
+    }
 
-                setTxtNombre(data.nombre);
-                setTxtSede(data.sede);
-                setTxtNumPartidaElectronica(data.numPartidaElectronica);
-                setTxtArea(data.area);
-                setCbxEstado(data.estado);
-                //
-                setTxtUbicacion(data.ubicacion);
-                setTxtPais(data.pais);
-                setTxtRegion(data.region);
-                setTxtProvincia(data.provincia);
-                setTxtDistrito(data.distrito);
-                //
-                setTxtLnorte(data.lnorte);
-                setTxtLeste(data.leste);
-                setTxtLsur(data.lsur);
-                setTxtLoeste(data.loeste);
-                //
-                setTxtMoneda(data.moneda);
-                setTxtTea(data.tea);
-                setTxtPrecioMetro(data.preciometro);
-                setTxtCostoXLote(data.costoxlote);
-                setTxtNumContratoCorrelativo(data.numContratoCorrelativo);
-                setTxtNumReciboCorrelativo(data.numRecibocCorrelativo);
-                setTxtInflacionAnual(data.inflacionAnual);
-                //
-                if (data.imagen !== "") {
-                    setTxtImagen(`data:image/${data.extensionimagen};base64,${data.imagen}`);
-                    setImageBase64(data.imagen);
-                    setExtenBase64(data.extensionimagen);
+    componentWillUnmount() {
+        this.refFileImagen.current.removeEventListener("change", this.onEventFileImage);
+        this.abortController.abort();
+    }
+
+    onEventFileImage = async (event) => {
+        if (event.target.files.length !== 0) {
+            await this.setStateAsync({
+                imagen: URL.createObjectURL(event.target.files[0])
+            });
+        } else {
+            await this.setStateAsync({
+                imagen: noImage
+            });
+            this.refFileImagen.current.value = "";
+        }
+    }
+
+    async loadDataId(id) {
+        try {
+            await this.setStateAsync({ loading: true });
+
+            const sede = await axios.get("/api/sede/listcombo", {
+                signal: this.abortController.signal,
+            });
+
+            const result = await axios.get("/api/proyecto/id", {
+                signal: this.abortController.signal,
+                params: {
+                    idProyecto: id
                 }
-                ModalAlertClear()
-            } catch (error) {
-                if (error.message === "canceled") return;
+            });
 
-                ModalAlertWarning("Proyecto", "Se produjo un error un interno, intente nuevamente.", function () {
-                    props.history.goBack();
+            console.log(sede.data)
+
+            const data = result.data;
+
+            await this.setStateAsync({
+                idProyecto: id,
+                nombre: data.nombre,
+                idSede: data.sede,
+                numPartidaElectronica: data.numPartidaElectronica,
+                area: data.area,
+                estado: data.estado,
+
+                ubicacion: data.ubicacion,
+                pais: data.pais,
+                region: data.region,
+                provincia: data.provincia,
+                distrito: data.distrito,
+
+                lnorte: data.lnorte,
+                leste: data.leste,
+                lsur: data.lsur,
+                loeste: data.loeste,
+
+                moneda: data.moneda,
+                tea: data.tea,
+                preciometro: data.preciometro,
+                costoxlote: data.costoxlote,
+                numContratoCorrelativo: data.numContratoCorrelativo,
+                numRecibocCorrelativo: data.numRecibocCorrelativo,
+                inflacionAnual: data.inflacionAnual,
+
+                imagen: data.imagen !== "" ? `data:image/${data.extensionimagen};base64,${data.imagen}` : noImage,
+                imageBase64: data.imagen,
+                extenBase64: data.extensionimagen,
+
+                sedes: sede.data,
+
+                loading: false,
+            });
+        } catch (error) {
+            console.log(error)
+            if (error.message !== "canceled") {
+                await this.setStateAsync({
+                    msgLoading: "Se produjo un error un interno, intente nuevamente."
                 });
             }
         }
+    }
 
-        if (idProyecto !== "" && idProyecto !== null) {
-            ModalAlertInfo("Proyecto", "Cargando información...");
-            loadDataId(idProyecto)
+    async onEventGuardar() {
+        if (this.state.nombre === "") {
+            await this.setStateAsync({ messageWarning: "Ingrese el nombre del proyecto." })
+            this.onFocusTab("datos-tab", "datos");
+            this.refTxtNombre.current.focus();
+            return;
         }
 
-        return () => {
-            if (idProyecto !== "" && idProyecto !== null) {
-                ModalAlertClear()
-                abortController.abort();
-            }
+        if (this.state.idSede === "") {
+            await this.setStateAsync({
+                messageWarning: "Ingrese el nombre del proyecto."
+            })
+            return;
         }
-    }, [idProyecto, props.history]);
 
-    const saveProyect = async () => {
+        if (this.state.area === "") {
+            await this.setStateAsync({
+                messageWarning: "Ingrese el nombre del proyecto."
+            })
+            return;
+        }
+
+        if (this.state.ubicacion === "") {
+            await this.setStateAsync({
+                messageWarning: "Ingrese el nombre del proyecto."
+            })
+            return;
+        }
+
         try {
             ModalAlertInfo("Proyecto", "Procesando información...");
-            let files = refFileImagen.current.files;
+            let files = this.refFileImagen.current.files;
             if (files.length !== 0) {
                 let read = await readDataURL(files);
                 let base64String = read.replace(/^data:.+;base64,/, '');
                 let ext = getExtension(files[0].name);
                 let { width, height } = await imageSizeData(read);
                 if (width === 1024 && height === 629) {
-                    let result = await saveProject(base64String, ext);
-                    ModalAlertSuccess("Proyecto", result.data, function () {
-                        props.history.goBack();
+                    let result = await this.saveProject(base64String, ext);
+                    ModalAlertSuccess("Proyecto", result.data, () => {
+                        this.props.history.goBack();
                     });
                 } else {
                     ModalAlertWarning("Proyecto", "La imagen subida no tiene el tamaño establecido.");
                 }
             } else {
-                let result = await saveProject("", "");
-                ModalAlertSuccess("Proyecto", result.data, function () {
-                    props.history.goBack();
+                let result = await this.saveProject("", "");
+                ModalAlertSuccess("Proyecto", result.data, () => {
+                    this.props.history.goBack();
                 });
             }
         } catch (error) {
-            console.log(error)
             if (error.response != null) {
-                ModalAlertWarning("Proyecto", error.response.data, function () {
-                    props.history.goBack();
+                ModalAlertWarning("Proyecto", error.response.data, () => {
+                    this.props.history.goBack();
                 });
             } else {
-                ModalAlertWarning("Proyecto", "Se produjo un error un interno, intente nuevamente.", function () {
-                    props.history.goBack();
+                ModalAlertWarning("Proyecto", "Se produjo un error un interno, intente nuevamente.", () => {
+                    this.props.history.goBack();
                 });
             }
         }
     }
 
-    const saveProject = async (image, extension) => {
-        if (idProyecto === "") {
+    async saveProject(image, extension) {
+        if (this.state.idProyecto === "") {
             return await axios.post('/api/proyecto/add', {
                 //datos
-                "nombre": txtNombre.trim().toUpperCase(),
-                "sede": txtSede.trim().toUpperCase(),
-                "numPartidaElectronica": txtNumPartidaElectronica.trim().toUpperCase(),
-                "area": txtArea.toString().trim().toUpperCase(),
-                "estado": CbxEstado,
+                "nombre": this.state.nombre.trim().toUpperCase(),
+                "idSede": this.state.idSede.trim().toUpperCase(),
+                "numPartidaElectronica": this.state.numPartidaElectronica.trim().toUpperCase(),
+                "area": this.state.area.toString().trim().toUpperCase(),
+                "estado": this.state.estado,
                 //ubicacion
-                "ubicacion": txtUbicacion.trim().toUpperCase(),
-                "pais": txtPais.trim().toUpperCase(),
-                "region": txtRegion.trim().toUpperCase(),
-                "provincia": txtProvincia.trim().toUpperCase(),
-                "distrito": txtDistrito.trim().toUpperCase(),
+                "ubicacion": this.state.ubicacion.trim().toUpperCase(),
+                "pais": this.state.pais.trim().toUpperCase(),
+                "region": this.state.region.trim().toUpperCase(),
+                "provincia": this.state.provincia.trim().toUpperCase(),
+                "distrito": this.state.distrito.trim().toUpperCase(),
                 //limite
-                "lnorte": txtLnorte.trim().toUpperCase(),
-                "leste": txtLeste.trim().toUpperCase(),
-                "lsur": txtLsur.trim().toUpperCase(),
-                "loeste": txtLoeste.trim().toUpperCase(),
+                "lnorte": this.state.lnorte.trim().toUpperCase(),
+                "leste": this.state.leste.trim().toUpperCase(),
+                "lsur": this.state.lsur.trim().toUpperCase(),
+                "loeste": this.state.loeste.trim().toUpperCase(),
                 //ajustes
-                "moneda": txtMoneda.trim().toUpperCase(),
-                "tea": txtTea.toString().trim().toUpperCase(),
-                "preciometro": txtPrecioMetro.toString().trim().toUpperCase(),
-                "costoxlote": txtCostoXlote.toString().trim().toUpperCase(),
-                "numContratoCorrelativo": txtNumContratoCorrelativo.trim().toUpperCase(),
-                "numRecibocCorrelativo": txtNumReciboCorrelativo.trim().toUpperCase(),
-                "inflacionAnual": txtInflacionAnual.toString().trim().toUpperCase(),
+                "moneda": this.state.moneda.trim().toUpperCase(),
+                "tea": this.state.tea.toString().trim().toUpperCase(),
+                "preciometro": this.state.preciometro.toString().trim().toUpperCase(),
+                "costoxlote": this.state.costoxlote.toString().trim().toUpperCase(),
+                "numContratoCorrelativo": this.state.numContratoCorrelativo.trim().toUpperCase(),
+                "numRecibocCorrelativo": this.state.numRecibocCorrelativo.trim().toUpperCase(),
+                "inflacionAnual": this.state.inflacionAnual.toString().trim().toUpperCase(),
                 //imagen
-                "imagen": image === "" ? imageBase64 == null ? "" : imageBase64 : image,
-                "extension": extension === "" ? extenBase64 == null ? "" : extenBase64 : extension,
+                "imagen": image === "" ? this.state.imageBase64 == null ? "" : this.state.imageBase64 : image,
+                "extension": extension === "" ? this.state.extenBase64 == null ? "" : this.state.extenBase64 : extension,
             });
         } else {
             return await axios.post('/api/proyecto/update', {
-                "idProyecto ": idProyecto,
+                "idProyecto ": this.state.idProyecto,
                 //datos
-                "nombre": txtNombre.trim().toUpperCase(),
-                "sede": txtSede.trim().toUpperCase(),
-                "numPartidaElectronica": txtNumPartidaElectronica.trim().toUpperCase(),
-                "area": txtArea.toString().trim().toUpperCase(),
-                "estado": CbxEstado,
+                "nombre": this.state.nombre.trim().toUpperCase(),
+                "idSede": this.state.idSede.trim().toUpperCase(),
+                "numPartidaElectronica": this.state.numPartidaElectronica.trim().toUpperCase(),
+                "area": this.state.area.toString().trim().toUpperCase(),
+                "estado": this.state.estado,
                 //ubicacion
-                "ubicacion": txtUbicacion.trim().toUpperCase(),
-                "pais": txtPais.trim().toUpperCase(),
-                "region": txtRegion.trim().toUpperCase(),
-                "provincia": txtProvincia.trim().toUpperCase(),
-                "distrito": txtDistrito.trim().toUpperCase(),
+                "ubicacion": this.state.ubicacion.trim().toUpperCase(),
+                "pais": this.state.pais.trim().toUpperCase(),
+                "region": this.state.region.trim().toUpperCase(),
+                "provincia": this.state.provincia.trim().toUpperCase(),
+                "distrito": this.state.distrito.trim().toUpperCase(),
                 //limite
-                "lnorte": txtLnorte.trim().toUpperCase(),
-                "leste": txtLeste.trim().toUpperCase(),
-                "lsur": txtLsur.trim().toUpperCase(),
-                "loeste": txtLoeste.trim().toUpperCase(),
+                "lnorte": this.state.lnorte.trim().toUpperCase(),
+                "leste": this.state.leste.trim().toUpperCase(),
+                "lsur": this.state.lsur.trim().toUpperCase(),
+                "loeste": this.state.loeste.trim().toUpperCase(),
                 //ajustes
-                "moneda": txtMoneda.trim().toUpperCase(),
-                "tea": txtTea.toString().trim().toUpperCase(),
-                "preciometro": txtPrecioMetro.toString().trim().toUpperCase(),
-                "costoxlote": txtCostoXlote.toString().trim().toUpperCase(),
-                "numContratoCorrelativo": txtNumContratoCorrelativo.trim().toUpperCase(),
-                "numRecibocCorrelativo": txtNumReciboCorrelativo.trim().toUpperCase(),
-                "inflacionAnual": txtInflacionAnual.toString().trim().toUpperCase(),
+                "moneda": this.state.moneda.trim().toUpperCase(),
+                "tea": this.state.tea.toString().trim().toUpperCase(),
+                "preciometro": this.state.preciometro.toString().trim().toUpperCase(),
+                "costoxlote": this.state.costoxlote.toString().trim().toUpperCase(),
+                "numContratoCorrelativo": this.state.numContratoCorrelativo.trim().toUpperCase(),
+                "numRecibocCorrelativo": this.state.numRecibocCorrelativo.trim().toUpperCase(),
+                "inflacionAnual": this.state.inflacionAnual.toString().trim().toUpperCase(),
                 //imagen
-                "imagen": image === "" ? imageBase64 == null ? "" : imageBase64 : image,
-                "extension": extension === "" ? extenBase64 == null ? "" : extenBase64 : extension,
+                "imagen": image === "" ? this.state.imageBase64 == null ? "" : this.state.imageBase64 : image,
+                "extension": extension === "" ? this.state.extenBase64 == null ? "" : this.state.extenBase64 : extension,
             });
         }
     }
 
-    const clearImage = () => {
-        setTxtImagen(noImage)
-        refFileImagen.current.value = "";
+    async clearImage() {
+        await this.setStateAsync({
+            imagen: noImage
+        })
+        this.refFileImagen.current.value = "";
     }
 
-    // useEffect(()=>{
-    //     console.log("render")
-    // });
+    onChangeIdUsuario = async (idUsuario) => {
+        console.log(idUsuario)
+        // await this.setStateAsync({ idUsuario: idUsuario });
+    };
 
-    // useEffect(()=>{
-    //     console.log("nombre")
-    // },[txtNombre]);
+    onFocusTab(idTab, idContent) {
+        if (!document.getElementById(idTab).classList.contains('active')) {
+            for (let child of document.getElementById('myTab').childNodes) {
+                child.childNodes[0].classList.remove('active')
+            }
+            for (let child of document.getElementById('myTabContent').childNodes) {
+                child.classList.remove('show', 'active')
+            }
+            document.getElementById(idTab).classList.add('active');
+            document.getElementById(idContent).classList.add('show', 'active');
+        }
+    }
 
-    return (
-        <>
-            <div className='row'>
-                <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
-                    <div className="form-group">
-                        <h5>Proyectos <small className="text-secondary">LISTA</small></h5>
+
+    render() {
+        return (
+            <>
+                {
+                    this.state.loading ?
+                        <div className="clearfix absolute-all bg-white">
+                            {spinnerLoading(this.state.msgLoading)}
+                        </div> : null
+                }
+
+                <div className='row'>
+                    <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
+                        <div className="form-group">
+                            <h5>Proyectos <small className="text-secondary">LISTA</small></h5>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div className='row'>
-                <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
-                    <ul className="nav nav-tabs" id="myTab" role="tablist">
-                        <li className="nav-item" role="presentation">
-                            <a className="nav-link active" id="datos-tab" data-bs-toggle="tab" href="#datos" role="tab" aria-controls="datos" aria-selected="true"><i className="bi bi-info-circle"></i> Datos</a>
-                        </li>
-                        <li className="nav-item" role="presentation">
-                            <a className="nav-link" id="ubicacion-tab" data-bs-toggle="tab" href="#ubicacion" role="tab" aria-controls="ubicacion" aria-selected="false"><i className="bi bi-geo-alt-fill"></i> Ubicación</a>
-                        </li>
-                        <li className="nav-item" role="presentation">
-                            <a className="nav-link" id="limite-tab" data-bs-toggle="tab" href="#limite" role="tab" aria-controls="limite" aria-selected="false"><i className="bi bi-border-all"></i> Limite</a>
-                        </li>
-                        <li className="nav-item" role="presentation">
-                            <a className="nav-link" id="ajustes-tab" data-bs-toggle="tab" href="#ajustes" role="tab" aria-controls="ajustes" aria-selected="false"><i className="bi bi-gear"></i> Ajustes</a>
-                        </li>
-                        <li className="nav-item" role="presentation">
-                            <a className="nav-link" id="imagen-tab" data-bs-toggle="tab" href="#imagen" role="tab" aria-controls="imagen" aria-selected="false"><i className="bi bi-image"></i> Imagen</a>
-                        </li>
-                    </ul>
-                    <div className="tab-content pt-2" id="myTabContent">
+                {
+                    this.state.messageWarning === '' ? null :
+                        <div className="alert alert-warning" role="alert">
+                            <i className="bi bi-exclamation-diamond-fill"></i> {this.state.messageWarning}
+                        </div>
+                }
 
-                        <div className="tab-pane fade show active" id="datos" role="tabpanel" aria-labelledby="datos-tab">
-                            <div className="form-row">
-                                <div className="form-group col-md-6">
-                                    <label>Nombre de Proyecto:</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        ref={refTxtNombre}
-                                        value={txtNombre}
-                                        onChange={(event) => setTxtNombre(event.target.value)}
-                                        placeholder="Dijite ..." />
-                                </div>
-                                <div className="form-group col-md-6">
-                                    <label>Sede:</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        ref={refTxtSede}
-                                        value={txtSede}
-                                        onChange={(event) => setTxtSede(event.target.value)}
-                                        placeholder="Dijite ..." />
+                <div className='row'>
+                    <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
+                        <ul className="nav nav-tabs" id="myTab" role="tablist">
+                            <li className="nav-item" role="presentation">
+                                <a className="nav-link active" id="datos-tab" data-bs-toggle="tab" href="#datos" role="tab" aria-controls="datos" aria-selected="true"><i className="bi bi-info-circle"></i> Datos</a>
+                            </li>
+                            <li className="nav-item" role="presentation">
+                                <a className="nav-link" id="ubicacion-tab" data-bs-toggle="tab" href="#ubicacion" role="tab" aria-controls="ubicacion" aria-selected="false"><i className="bi bi-geo-alt-fill"></i> Ubicación</a>
+                            </li>
+                            <li className="nav-item" role="presentation">
+                                <a className="nav-link" id="limite-tab" data-bs-toggle="tab" href="#limite" role="tab" aria-controls="limite" aria-selected="false"><i className="bi bi-border-all"></i> Limite</a>
+                            </li>
+                            <li className="nav-item" role="presentation">
+                                <a className="nav-link" id="ajustes-tab" data-bs-toggle="tab" href="#ajustes" role="tab" aria-controls="ajustes" aria-selected="false"><i className="bi bi-gear"></i> Ajustes</a>
+                            </li>
+                            <li className="nav-item" role="presentation">
+                                <a className="nav-link" id="imagen-tab" data-bs-toggle="tab" href="#imagen" role="tab" aria-controls="imagen" aria-selected="false"><i className="bi bi-image"></i> Imagen</a>
+                            </li>
+                        </ul>
+                        <div className="tab-content pt-2" id="myTabContent">
 
-                                </div>
-                            </div>
-                            <div className="form-row">
-                                <div className="form-group col-md-6">
-                                    <label>N° Partida Electrónica:</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        value={txtNumPartidaElectronica}
-                                        onChange={(event) => setTxtNumPartidaElectronica(event.target.value)}
-                                        placeholder="Dijite ..." />
-                                </div>
-                                <div className="form-group col-md-6">
-                                    <label>Area Total(Has):</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        ref={refTxtArea}
-                                        value={txtArea}
-                                        onChange={(event) => setTxtArea(event.target.value)}
-                                        placeholder="Dijite ..." />
-
-                                </div>
-                            </div>
-                            <div className="form-row">
-                                <div className="form-group col-md-12">
-                                    <label>Estado:</label>
-                                    <div className="input-group">
+                            <div className="tab-pane fade show active" id="datos" role="tabpanel" aria-labelledby="datos-tab">
+                                <div className="form-row">
+                                    <div className="form-group col-md-6">
+                                        <label>Nombre de Proyecto: <i className="fa fa-asterisk text-danger small"></i></label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            ref={this.refTxtNombre}
+                                            value={this.state.nombre}
+                                            onChange={(event) => this.setState({ nombre: event.target.value })}
+                                            placeholder="Dijite ..." />
+                                    </div>
+                                    <div className="form-group col-md-6">
+                                        <label>Sede: <i className="fa fa-asterisk text-danger small"></i></label>
                                         <select
                                             className="form-control"
-                                            value={CbxEstado}
-                                            onChange={(event) => setCbxEstado(event.target.value)}
+                                            ref={this.refTxtSede}
+                                            value={this.state.idSede}
+                                            onChange={(event) => this.setState({ idSede: event.target.value })}
                                         >
-                                            <option value="VENTA">Venta</option>
-                                            <option value="LITIGIO">Litigio</option>
-                                            <option value="COMPLETADA">Completada</option>
+                                            <option value="">- Seleccione -</option>
+                                            {
+                                                this.state.sedes.map((item, index) => (
+                                                    <option key={index} value={item.idSede}>{item.nombreSede}</option>
+                                                ))
+                                            }
                                         </select>
+                                    </div>
+                                </div>
+                                <div className="form-row">
+                                    <div className="form-group col-md-6">
+                                        <label>N° Partida Electrónica:</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            value={this.state.numPartidaElectronica}
+                                            onChange={(event) => this.setState({ numPartidaElectronica: event.target.value })}
+                                            placeholder="Dijite ..." />
+                                    </div>
+                                    <div className="form-group col-md-6">
+                                        <label>Area Total(Has): <i className="fa fa-asterisk text-danger small"></i></label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            ref={this.refTxtArea}
+                                            value={this.state.area}
+                                            onChange={(event) => this.setState({ area: event.target.value })}
+                                            placeholder="Dijite ..." />
+
+                                    </div>
+                                </div>
+                                <div className="form-row">
+                                    <div className="form-group col-md-12">
+                                        <label>Estado: <i className="fa fa-asterisk text-danger small"></i></label>
+                                        <div className="input-group">
+                                            <select
+                                                className="form-control"
+                                                value={this.state.estado}
+                                                onChange={(event) => this.setState({ estado: event.target.value })}
+                                            >
+                                                <option value="VENTA">Venta</option>
+                                                <option value="LITIGIO">Litigio</option>
+                                                <option value="COMPLETADA">Completada</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div className="tab-pane fade" id="ubicacion" role="tabpanel" aria-labelledby="ubicacion-tab">
+                                <div className="form-row">
+                                    <div className="form-group col-md-12">
+                                        <label>Ubicacion del Proyecto: <i className="fa fa-asterisk text-danger small"></i></label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            ref={this.refTxtUbicacion}
+                                            value={this.state.ubicacion}
+                                            onChange={(event) => this.setState({ ubicacion: event.target.value })}
+                                            placeholder="Dijite ..." />
+                                    </div>
+                                </div>
+
+                                <div className="form-row">
+                                    <div className="form-group col-md-12">
+                                        <label>Usuario:</label>
+                                        <SearchBar
+                                            placeholder="Escribe para iniciar a filtrar..."
+                                            onChangeIdUsuario={this.onChangeIdUsuario}
+                                        />
+                                    </div>
+                                </div>
+                                {/* <div className="form-row">
+                                    <div className="form-group col-md-6">
+                                        <label>Pais: <i className="fa fa-asterisk text-danger small"></i></label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            ref={this.refTxtPais}
+                                            value={this.state.pais}
+                                            onChange={(event) => this.setState({ pais: event.target.value })}
+                                            placeholder="Dijite ..." />
+                                    </div>
+                                    <div className="form-group col-md-6">
+                                        <label>Region: <i className="fa fa-asterisk text-danger small"></i></label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            ref={this.refTxtRegion}
+                                            value={this.state.region}
+                                            onChange={(event) => this.setState({ region: event.target.value })}
+                                            placeholder="Dijite ..." />
+
+                                    </div>
+                                </div>
+                                <div className="form-row">
+                                    <div className="form-group col-md-6">
+                                        <label>Provincia: <i className="fa fa-asterisk text-danger small"></i></label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            ref={this.refTxtProvincia}
+                                            value={this.state.provincia}
+                                            onChange={(event) => this.setState({ provincia: event.target.value })}
+                                            placeholder="Dijite ..." />
+                                    </div>
+                                    <div className="form-group col-md-6">
+                                        <label>Distrito: <i className="fa fa-asterisk text-danger small"></i></label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            ref={this.refTxtDistrito}
+                                            value={this.state.distrito}
+                                            onChange={(event) => this.setState({ distrito: event.target.value })}
+                                            placeholder="Dijite ..." />
+
+                                    </div>
+                                </div> */}
+                            </div>
+
+                            <div className="tab-pane fade" id="limite" role="tabpanel" aria-labelledby="limite-tab">
+                                <div className="form-row">
+                                    <div className="form-group col-md-6">
+                                        <label>Limite, Norte/Noreste:</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            value={this.state.lnorte}
+                                            onChange={(event) => this.setState({ lnorte: event.target.value })}
+                                            placeholder="Dijite ..." />
+                                    </div>
+                                    <div className="form-group col-md-6">
+                                        <label>Limite, Este/Sureste:</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            value={this.state.leste}
+                                            onChange={(event) => this.setState({ leste: event.target.value })}
+                                            placeholder="Dijite ..." />
+                                    </div>
+                                </div>
+                                <div className="form-row">
+                                    <div className="form-group col-md-6">
+                                        <label>Limite, Sur/Suroeste:</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            value={this.state.lsur}
+                                            onChange={(event) => this.setState({ lsur: event.target.value })}
+                                            placeholder="Dijite ..." />
+                                    </div>
+                                    <div className="form-group col-md-6">
+                                        <label>Limite, Oeste/Noroeste:</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            value={this.state.loeste}
+                                            onChange={(event) => this.setState({ loeste: event.target.value })}
+                                            placeholder="Dijite ..." />
                                     </div>
                                 </div>
                             </div>
 
-                        </div>
+                            <div className="tab-pane fade" id="ajustes" role="tabpanel" aria-labelledby="ajustes-tab">
 
-                        <div className="tab-pane fade" id="ubicacion" role="tabpanel" aria-labelledby="ubicacion-tab">
-                            <div className="form-row">
-                                <div className="form-group col-md-12">
-                                    <label>Ubicacion del Proyecto:</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        ref={refTxtUbicacion}
-                                        value={txtUbicacion}
-                                        onChange={(event) => setTxtUbicacion(event.target.value)}
-                                        placeholder="Dijite ..." />
+                                <div className="form-row">
+                                    <div className="form-group col-md-6">
+                                        <label>Moneda: <i className="fa fa-asterisk text-danger small"></i></label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            ref={this.refTxtMoneda}
+                                            value={this.state.moneda}
+                                            onChange={(event) => this.setState({ moneda: event.target.value })}
+                                            placeholder="Dijite ..." />
+                                    </div>
+                                    <div className="form-group col-md-6">
+                                        <label>TEA %: <i className="fa fa-asterisk text-danger small"></i></label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            ref={this.refTxtTea}
+                                            value={this.state.tea}
+                                            onChange={(event) => this.setState({ tea: event.target.value })}
+                                            placeholder="Dijite ..." />
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="form-row">
-                                <div className="form-group col-md-6">
-                                    <label>Pais:</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        ref={refTxtPais}
-                                        value={txtPais}
-                                        onChange={(event) => setTxtPais(event.target.value)}
-                                        placeholder="Dijite ..." />
-                                </div>
-                                <div className="form-group col-md-6">
-                                    <label>Region:</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        ref={refTxtRegion}
-                                        value={txtRegion}
-                                        onChange={(event) => setTxtRegion(event.target.value)}
-                                        placeholder="Dijite ..." />
 
+                                <div className="form-row">
+                                    <div className="form-group col-md-6">
+                                        <label>Precio Metro Cuadrado:</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            value={this.state.preciometro}
+                                            onChange={(event) => this.setState({ preciometro: event.target.value })}
+                                            placeholder="Dijite ..." />
+                                    </div>
+                                    <div className="form-group col-md-6">
+                                        <label>Coste Aproximado x Lote:</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            value={this.state.costoxlote}
+                                            onChange={(event) => this.setState({ costoxlote: event.target.value })}
+                                            placeholder="Dijite ..." />
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="form-row">
-                                <div className="form-group col-md-6">
-                                    <label>Provincia:</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        ref={refTxtProvincia}
-                                        value={txtProvincia}
-                                        onChange={(event) => setTxtProvincia(event.target.value)}
-                                        placeholder="Dijite ..." />
-                                </div>
-                                <div className="form-group col-md-6">
-                                    <label>Distrito:</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        ref={refTxtDistrito}
-                                        value={txtDistrito}
-                                        onChange={(event) => setTxtDistrito(event.target.value)}
-                                        placeholder="Dijite ..." />
 
+                                <div className="form-row">
+                                    <div className="form-group col-md-6">
+                                        <label>Número Contrato Correlativo:</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            value={this.state.numContratoCorrelativo}
+                                            onChange={(event) => this.setState({ numContratoCorrelativo: event.target.value })}
+                                            placeholder="Dijite ..." />
+                                    </div>
+                                    <div className="form-group col-md-6">
+                                        <label>Número Recibo Correlativo:</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            value={this.state.numRecibocCorrelativo}
+                                            onChange={(event) => this.setState({ numRecibocCorrelativo: event.target.value })}
+                                            placeholder="Dijite ..." />
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
 
-                        <div className="tab-pane fade" id="limite" role="tabpanel" aria-labelledby="limite-tab">
-                            <div className="form-row">
-                                <div className="form-group col-md-6">
-                                    <label>Limite, Norte/Noreste:</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        value={txtLnorte}
-                                        onChange={(event) => setTxtLnorte(event.target.value)}
-                                        placeholder="Dijite ..." />
+                                <div className="form-row">
+                                    <div className="form-group col-md-12">
+                                        <label>Inflacion Anual:</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            value={this.state.inflacionAnual}
+                                            onChange={(event) => this.setState({ inflacionAnual: event.target.value })}
+                                            placeholder="Dijite ..." />
+                                    </div>
                                 </div>
-                                <div className="form-group col-md-6">
-                                    <label>Limite, Este/Sureste:</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        value={txtLeste}
-                                        onChange={(event) => setTxtLeste(event.target.value)}
-                                        placeholder="Dijite ..." />
-                                </div>
-                            </div>
-                            <div className="form-row">
-                                <div className="form-group col-md-6">
-                                    <label>Limite, Sur/Suroeste:</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        value={txtLsur}
-                                        onChange={(event) => setTxtLsur(event.target.value)}
-                                        placeholder="Dijite ..." />
-                                </div>
-                                <div className="form-group col-md-6">
-                                    <label>Limite, Oeste/Noroeste:</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        value={txtLoeste}
-                                        onChange={(event) => setTxtLoeste(event.target.value)}
-                                        placeholder="Dijite ..." />
-                                </div>
-                            </div>
-                        </div>
 
-                        <div className="tab-pane fade" id="ajustes" role="tabpanel" aria-labelledby="ajustes-tab">
-
-                            <div className="form-row">
-                                <div className="form-group col-md-6">
-                                    <label>Moneda:</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        ref={refTxtMoneda}
-                                        value={txtMoneda}
-                                        onChange={(event) => setTxtMoneda(event.target.value)}
-                                        placeholder="Dijite ..." />
-                                </div>
-                                <div className="form-group col-md-6">
-                                    <label>TEA %:</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        ref={refTxtTea}
-                                        value={txtTea}
-                                        onChange={(event) => setTxtTea(event.target.value)}
-                                        placeholder="Dijite ..." />
-                                </div>
                             </div>
 
-                            <div className="form-row">
-                                <div className="form-group col-md-6">
-                                    <label>Precio Metro Cuadrado:</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        value={txtPrecioMetro}
-                                        onChange={(event) => setTxtPrecioMetro(event.target.value)}
-                                        placeholder="Dijite ..." />
-                                </div>
-                                <div className="form-group col-md-6">
-                                    <label>Coste Aproximado x Lote:</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        value={txtCostoXlote}
-                                        onChange={(event) => setTxtCostoXLote(event.target.value)}
-                                        placeholder="Dijite ..." />
-                                </div>
-                            </div>
-
-                            <div className="form-row">
-                                <div className="form-group col-md-6">
-                                    <label>Número Contrato Correlativo:</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        value={txtNumContratoCorrelativo}
-                                        onChange={(event) => setTxtNumContratoCorrelativo(event.target.value)}
-                                        placeholder="Dijite ..." />
-                                </div>
-                                <div className="form-group col-md-6">
-                                    <label>Número Recibo Correlativo:</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        value={txtNumReciboCorrelativo}
-                                        onChange={(event) => setTxtNumReciboCorrelativo(event.target.value)}
-                                        placeholder="Dijite ..." />
-                                </div>
-                            </div>
-
-                            <div className="form-row">
-                                <div className="form-group col-md-12">
-                                    <label>Inflacion Anual:</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        value={txtInflacionAnual}
-                                        onChange={(event) => setTxtInflacionAnual(event.target.value)}
-                                        placeholder="Dijite ..." />
-                                </div>
-                            </div>
-
-                        </div>
-
-                        <div className="tab-pane fade" id="imagen" role="tabpanel" aria-labelledby="imagen-tab">
-                            <div className="row">
-                                <div className="col-md-12">
-                                    <div className="form-group">
-                                        <div className="row">
-                                            <div className="col-lg-8 col-md-10 col-sm-12 col-xs-12">
-                                                <img src={txtImagen} alt="" className="card-img-top" />
-                                                <p>Imagen de portada 1024 x 629 pixeles </p>
+                            <div className="tab-pane fade" id="imagen" role="tabpanel" aria-labelledby="imagen-tab">
+                                <div className="row">
+                                    <div className="col-md-12">
+                                        <div className="form-group">
+                                            <div className="row">
+                                                <div className="col-lg-8 col-md-10 col-sm-12 col-xs-12">
+                                                    <img src={this.state.imagen} alt="" className="card-img-top" />
+                                                    <p>Imagen de portada 1024 x 629 pixeles </p>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <div className="row">
-                                <div className="col-md-12">
-                                    <div className="form-group text-center">
+                                <div className="row">
+                                    <div className="col-md-12">
+                                        <div className="form-group text-center">
 
-                                        <input type="file" id="fileImage" accept="image/png, image/jpeg, image/gif, image/svg" style={{ display: "none" }} ref={refFileImagen} />
-                                        <label htmlFor="fileImage" className="btn btn-outline-secondary m-0">
-                                            <div className="content-button">
-                                                <i className="bi bi-image"></i>
-                                                <span></span>
-                                            </div>
-                                        </label>
-                                        {" "}
-                                        <button className="btn btn-outline-secondary" onClick={clearImage}>
-                                            <i className="bi bi-trash"></i>
-                                        </button>
+                                            <input type="file" id="fileImage" accept="image/png, image/jpeg, image/gif, image/svg" style={{ display: "none" }} ref={this.refFileImagen} />
+                                            <label htmlFor="fileImage" className="btn btn-outline-secondary m-0">
+                                                <div className="content-button">
+                                                    <i className="bi bi-image"></i>
+                                                    <span></span>
+                                                </div>
+                                            </label>
+                                            {" "}
+                                            <button className="btn btn-outline-secondary" onClick={() => this.clearImage()}>
+                                                <i className="bi bi-trash"></i>
+                                            </button>
 
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
 
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div className='row'>
-                <button type="button" className="btn btn-primary" onClick={saveProyect}>Guardar</button>
-                <button type="button" className="btn btn-secondary ml-2" onClick={() => props.history.goBack()}>Cerrar</button>
-            </div>
+                <div className='row'>
+                    <button type="button" className="btn btn-primary" onClick={() => this.onEventGuardar()}>Guardar</button>
+                    <button type="button" className="btn btn-secondary ml-2" onClick={() => this.props.history.goBack()}>Cerrar</button>
+                </div>
 
-        </>
-    )
+            </>
+        )
+    }
 }
+
+export default ProcesoProyecto;
