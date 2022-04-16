@@ -1,7 +1,6 @@
 import React from "react";
-import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { signOut } from '../../../redux/actions';
+import { closeProject } from '../../../redux/actions';
 
 class Menu extends React.Component {
 
@@ -10,6 +9,11 @@ class Menu extends React.Component {
         this.state = {
 
         }
+    }
+
+    onEventCloseProject(){
+        window.localStorage.removeItem('project');
+        this.props.restore();
     }
 
     render() {
@@ -47,7 +51,7 @@ class Menu extends React.Component {
                                         </div>
 
                                         <div className="form-group ml-xl-2 ml-lg-2 ml-md-2 ml-sm-2 ml-0">
-                                            <Link to={"/principal"} className="btn btn-outline-danger" >Regresar</Link>
+                                            <button type="button" onClick={()=>this.onEventCloseProject()} className="btn btn-outline-danger" >Regresar</button>
                                         </div>
                                     </div>
                                 </div>
@@ -68,7 +72,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        restore: () => dispatch(signOut())
+        restore: () => dispatch(closeProject())
     }
 }
 

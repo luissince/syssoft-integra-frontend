@@ -19,17 +19,23 @@ class App extends React.Component {
         this.menuRef = React.createRef();
     }
 
-    async componentDidMount() {
+    async componentDidMount() {  
         try {
-            let userToken = localStorage.getItem('login');
+            let userToken = window.localStorage.getItem('login');
             let user = JSON.parse(userToken);
-           
-            await axios.get("/api/login/validtoken",{
+            await axios.get("/api/login/validtoken", {
                 headers: {
                     Authorization: "Bearer " + user.token
-                 }
+                }
             });
-            
+
+            let project = JSON.parse(window.localStorage.getItem('project'));
+
+            user = {
+                ...user,
+                project: project
+            }
+
             this.props.restore(user);
         } catch (error) {
             this.props.restore(null);

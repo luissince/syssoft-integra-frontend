@@ -13,7 +13,16 @@ router.get("/list", async function (req, res) {
         DATE_FORMAT(fecha,'%d/%m/%Y') as fecha,
         hora
         FROM manzana
+        WHERE
+        ? = 0
+        OR
+        ? = 1 AND nombre LIKE CONCAT(?,'%')
         LIMIT ?,?`, [
+            parseInt(req.query.opcion),
+
+            parseInt(req.query.opcion),
+            req.query.buscar,
+
             parseInt(req.query.posicionPagina),
             parseInt(req.query.filasPorPagina)
         ]);
@@ -25,12 +34,20 @@ router.get("/list", async function (req, res) {
             }
         });
 
-        let total = await conec.query(`SELECT COUNT(*) AS Total FROM manzana`, []);
+        let total = await conec.query(`SELECT COUNT(*) AS Total FROM manzana
+        WHERE
+        ? = 0
+        OR
+        ? = 1 AND nombre LIKE CONCAT(?,'%')`, [
+            parseInt(req.query.opcion),
+
+            parseInt(req.query.opcion),
+            req.query.buscar,
+        ]);
 
         res.status(200).send({ "result": resultLista, "total": total[0].Total })
 
     } catch (error) {
-        console.log(error)
         res.status(500).send("Error interno de conexión, intente nuevamente.")
     }
 });

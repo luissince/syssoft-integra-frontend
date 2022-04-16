@@ -81,8 +81,8 @@ class Login extends React.Component {
                menus
             }
 
-            localStorage.setItem('login', JSON.stringify(user));
-            this.props.restore(JSON.parse(localStorage.getItem('login')));
+            window.localStorage.setItem('login', JSON.stringify(user));
+            this.props.restore(JSON.parse(window.localStorage.getItem('login')));
             this.props.history.push("principal");
             // document.cookie = `token=${user.data.token}; max-age=${10}; path=/; samesite=strict`;
 

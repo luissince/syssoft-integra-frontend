@@ -12,9 +12,9 @@ router.get('/list', async function (req, res) {
          OR
          ? = 1 and nombre like concat(?,'%')
          LIMIT ?,?`, [
-            parseInt(req.query.option),
+            parseInt(req.query.opcion),
 
-            parseInt(req.query.option),
+            parseInt(req.query.opcion),
             req.query.buscar,
 
             parseInt(req.query.posicionPagina),
@@ -33,9 +33,9 @@ router.get('/list', async function (req, res) {
         ? = 0
         OR
         ? = 1 and nombre like concat(?,'%')`, [
-            parseInt(req.query.option),
+            parseInt(req.query.opcion),
 
-            parseInt(req.query.option),
+            parseInt(req.query.opcion),
             req.query.buscar,
 
         ]);
@@ -82,7 +82,7 @@ router.post('/add', async function (req, res) {
         await conec.execute(connection, `INSERT INTO proyecto (
             idProyecto,
             nombre, 
-            sede, 
+            idSede, 
             numPartidaElectronica,
             area,
             estado, 
@@ -108,7 +108,7 @@ router.post('/add', async function (req, res) {
             idProyecto,
             //datos
             req.body.nombre,
-            req.body.sede,
+            req.body.idSede,
             req.body.numPartidaElectronica,
             req.body.area,
             req.body.estado,
@@ -174,7 +174,7 @@ router.post('/update', async function (req, res) {
         connection = await conec.beginTransaction();
         await conec.execute(connection, `UPDATE  proyecto SET
             nombre=?, 
-            sede=?,
+            idSede=?,
             numPartidaElectronica=?,
             area=?,
             estado=?, 
@@ -199,7 +199,7 @@ router.post('/update', async function (req, res) {
             WHERE idproyecto=?`, [
             //datos
             req.body.nombre,
-            req.body.sede,
+            req.body.idSede,
             req.body.numPartidaElectronica,
             req.body.area,
             req.body.estado,
@@ -240,7 +240,7 @@ router.post('/update', async function (req, res) {
 
 router.get('/inicio', async function (req, res) {
     try {
-        let result = await conec.query('SELECT idProyecto ,nombre,ubicacion,imagen,extension FROM proyecto');
+        let result = await conec.query(`SELECT idProyecto ,nombre,ubicacion,'' as imagen,extension FROM proyecto`);
         res.status(200).send(result);
     } catch (error) {
         console.log(error)

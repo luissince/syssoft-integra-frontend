@@ -14,12 +14,12 @@ router.get('/list', async function (req, res) {
          OR
          ? = 1 and codiso like concat(?,'%')
          LIMIT ?,?`, [
-            parseInt(req.query.option),
+            parseInt(req.query.opcion),
 
-            parseInt(req.query.option),
+            parseInt(req.query.opcion),
             req.query.buscar,
 
-            parseInt(req.query.option),
+            parseInt(req.query.opcion),
             req.query.buscar,
 
             parseInt(req.query.posicionPagina),
@@ -33,12 +33,26 @@ router.get('/list', async function (req, res) {
             }
         });
 
-        let total = await conec.query(`SELECT COUNT(*) AS Total FROM moneda`);
+        let total = await conec.query(`SELECT COUNT(*) AS Total 
+        FROM moneda  
+        WHERE 
+        ? = 0
+        OR
+        ? = 1 and nombre like concat(?,'%')
+        OR
+        ? = 1 and codiso like concat(?,'%')`, [
+            parseInt(req.query.opcion),
+
+            parseInt(req.query.opcion),
+            req.query.buscar,
+
+            parseInt(req.query.opcion),
+            req.query.buscar,
+        ]);
 
         res.status(200).send({ "result": resultLista, "total": total[0].Total })
 
     } catch (error) {
-        console.log(error + ' es indefinido')
         res.status(500).send("Error interno de conexión, intente nuevamente.")
     }
 });
@@ -119,7 +133,7 @@ router.post('/update', async function (req, res) {
         res.status(500).send(error);
         // console.log(error)
     }
-})
+});
 
 router.get('/id', async function (req, res) {
     try {
@@ -133,6 +147,15 @@ router.get('/id', async function (req, res) {
             res.status(400).send("Datos no encontrados");
         }
 
+    } catch (error) {
+        res.status(500).send("Error interno de conexión, intente nuevamente.");
+    }
+});
+
+router.get('/listcombo', async function (req, res) {
+    try {
+        let result = await conec.query('SELECT idMoneda,nombre FROM moneda');
+        res.status(200).send(result);
     } catch (error) {
         res.status(500).send("Error interno de conexión, intente nuevamente.");
     }

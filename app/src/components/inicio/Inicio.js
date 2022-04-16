@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import Menu from '../layouts/menu/Menu';
 import Head from '../layouts/head/Head';
 import Footer from '../layouts/footer/Footer';
+import Main from './Main';
 import Dashboard from '../dashboard/Dashboard';
 import Clientes from '../facturacion/Clientes';
 import Ventas from '../facturacion/Ventas';
@@ -29,7 +30,7 @@ import Conceptos from '../tesoreria/Conceptos'
 import Gastos from '../tesoreria/Gastos'
 import RepVentas from '../reporte/RepVentas';
 
-function Page404(props) {
+const Page404 = (props) => {
     return (
         <div className="px-4 py-5 my-5 text-center">
             <img className="d-block mx-auto mb-4" src="https://getbootstrap.com/docs/5.0/assets/brand/bootstrap-logo.svg" alt="" width="72" height="57" />
@@ -44,6 +45,10 @@ function Page404(props) {
     )
 }
 
+const Loader = () => {
+    return <div>Cargando....</div>
+}
+
 class Inicio extends React.Component {
 
     constructor(props) {
@@ -52,6 +57,10 @@ class Inicio extends React.Component {
             isModal: false
         }
         this.menuRef = React.createRef();
+    }
+
+    async componentDidMount() {
+        
     }
 
     setOpen = () => {
@@ -71,10 +80,14 @@ class Inicio extends React.Component {
             return <Redirect to="/login" />
         }
 
+        if (this.props.token.project === null) {
+            return <Redirect to="/principal" />
+        }
+
         const { path, url } = this.props.match;
         return (
             <div className='app'>
-                <Menu  {...this.props.token} ref={this.menuRef} url={url} />
+                <Menu  {...this.props} ref={this.menuRef} url={url} />
                 <main className='position-relative'>
                     <Head {...this.props} setOpen={this.setOpen} setMinimun={this.setMinimun} />
 
@@ -82,8 +95,12 @@ class Inicio extends React.Component {
                         <Route
                             path="/inicio"
                             exact={true}>
-                            <Redirect to={`${path}/dashboard`} />
+                            <Redirect to={`${path}/main`} />
                         </Route>
+                        <Route
+                            path={`${path}/main`}
+                            render={(props) => <Main {...props} />}
+                        />
                         <Route
                             path={`${path}/dashboard`}
                             render={(props) => <Dashboard {...props} />}
@@ -159,12 +176,12 @@ class Inicio extends React.Component {
                             render={(props) => <Sedes {...props} />}
                         />
                         <Route
-                            path={`${path}/proyecto`}
+                            path={`${path}/proyectos`}
                             exact={true}
                             render={(props) => <Proyectos {...props} />}
                         />
                         <Route
-                            path={`${path}/proyecto/proceso`}
+                            path={`${path}/proyectos/proceso`}
                             exact={true}
                             render={(props) => <ProcesoProyecto {...props} />}
                         />
@@ -195,9 +212,8 @@ class Inicio extends React.Component {
 
                 </main>
             </div>
-        );
+        )
     }
-
 }
 
 const mapStateToProps = (state) => {

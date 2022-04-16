@@ -1,10 +1,11 @@
-import { RESTORE_TOKEN, SIGN_IN, SIGN_OUT } from './types';
+import { RESTORE_TOKEN, SIGN_IN, SIGN_OUT, PROJECT_ACTIVE, PROJECT_CLOSE } from './types';
 
 const initialState = {
     isLoading: true,
     isSignout: false,
     isVisible: false,
     userToken: null,
+    project: null,
 }
 
 const reducer = (state = initialState, action) => {
@@ -13,6 +14,7 @@ const reducer = (state = initialState, action) => {
             return {
                 ...state,
                 userToken: action.token,
+                project: action.token === null ? null : action.token.project,
                 isLoading: false,
                 isVisible: true,
             };
@@ -29,6 +31,17 @@ const reducer = (state = initialState, action) => {
                 isSignout: true,
                 isVisible: false,
                 userToken: null,
+                project: null
+            };
+        case PROJECT_ACTIVE:
+            return {
+                ...state,
+                project: action.project
+            };
+        case PROJECT_CLOSE:
+            return {
+                ...state,
+                project: null
             };
         default: return state;
     }

@@ -35,6 +35,11 @@ router.get('/createsession', async function (req, res) {
                     validate[0].idUsuario
                 ]);
 
+                if(usuario[0].estado === 0){
+                    res.status(400).send("Su cuenta se encuentra inactiva.")
+                    return;
+                }
+
                 let user = {
                     idUsuario: usuario[0].idUsuario,
                     nombres: usuario[0].nombres,
@@ -42,12 +47,12 @@ router.get('/createsession', async function (req, res) {
                     estado: usuario[0].estado
                 }
 
-
                 let menu = await conec.query(`
                 SELECT 
                 m.idMenu,
                 m.nombre,
-                pm.estado 
+                pm.estado,
+                m.icon 
                 FROM permisomenu as pm 
                 INNER JOIN perfil as p on pm.idPerfil = p.idPerfil
                 INNER JOIN menu as m on pm.idMenu = m.idMenu
