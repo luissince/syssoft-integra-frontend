@@ -235,3 +235,25 @@ export function ModalAlertError(title, message) {
   });
 
 }
+
+
+export function ModalAlertDialog  (title, mensaje, callback) {
+  Swal({
+      title: title,
+      text: mensaje,
+      type: 'question',
+      showCancelButton: true,
+      confirmButtonText: "Si",
+      cancelButtonText: "No",
+      allowOutsideClick: false
+  }).then((isConfirm) => {
+      if (isConfirm.value == undefined) {
+          return false;
+      }
+      if (isConfirm.value) {
+          callback(true)
+      } else {
+          callback(false)
+      }
+  });
+}
