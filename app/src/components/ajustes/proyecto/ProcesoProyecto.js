@@ -33,7 +33,8 @@ class ProcesoProyecto extends React.Component {
             lsur: '',
             loeste: '',
 
-            moneda: '',
+            idMoneda: '',
+            monedas:[],
             tea: '',
             preciometro: '',
             costoxlote: '',
@@ -113,6 +114,10 @@ class ProcesoProyecto extends React.Component {
                 signal: this.abortController.signal,
             });
 
+            const moneda = await axios.get("/api/moneda/listcombo", {
+                signal: this.abortController.signal,
+            });
+
             const result = await axios.get("/api/proyecto/id", {
                 signal: this.abortController.signal,
                 params: {
@@ -121,8 +126,6 @@ class ProcesoProyecto extends React.Component {
             });
 
             const data = result.data;
-
-            // console.log(data)
 
             await this.setStateAsync({
                 idProyecto: id,
@@ -141,7 +144,7 @@ class ProcesoProyecto extends React.Component {
                 lsur: data.lsur,
                 loeste: data.loeste,
 
-                moneda: data.moneda,
+                idMoneda: data.idMoneda,
                 tea: data.tea,
                 preciometro: data.preciometro,
                 costoxlote: data.costoxlote,
@@ -154,10 +157,10 @@ class ProcesoProyecto extends React.Component {
                 extenBase64: data.extension,
 
                 sedes: sede.data,
+                monedas: moneda.data,
 
                 loading: false,
             });
-            console.log(this.state)
             this.selectItem = true;
         } catch (error) {
             if (error.message !== "canceled") {
@@ -258,7 +261,7 @@ class ProcesoProyecto extends React.Component {
                 "lsur": this.state.lsur.trim().toUpperCase(),
                 "loeste": this.state.loeste.trim().toUpperCase(),
                 //ajustes
-                "moneda": this.state.moneda.trim().toUpperCase(),
+                "idMoneda": this.state.idMoneda.trim().toUpperCase(),
                 "tea": this.state.tea.toString().trim().toUpperCase(),
                 "preciometro": this.state.preciometro.toString().trim().toUpperCase(),
                 "costoxlote": this.state.costoxlote.toString().trim().toUpperCase(),
@@ -287,7 +290,7 @@ class ProcesoProyecto extends React.Component {
                 "lsur": this.state.lsur.trim().toUpperCase(),
                 "loeste": this.state.loeste.trim().toUpperCase(),
                 //ajustes
-                "moneda": this.state.moneda.trim().toUpperCase(),
+                "idMoneda": this.state.idMoneda.trim().toUpperCase(),
                 "tea": this.state.tea.toString().trim().toUpperCase(),
                 "preciometro": this.state.preciometro.toString().trim().toUpperCase(),
                 "costoxlote": this.state.costoxlote.toString().trim().toUpperCase(),
@@ -554,13 +557,26 @@ class ProcesoProyecto extends React.Component {
                                 <div className="form-row">
                                     <div className="form-group col-md-6">
                                         <label>Moneda: <i className="fa fa-asterisk text-danger small"></i></label>
-                                        <input
+                                            <select
+                                             className="form-control"
+                                             ref={this.refTxtMoneda}
+                                             value={this.state.idMoneda}
+                                             onChange={(event) => this.setState({ idMoneda: event.target.value })}
+                                                >
+                                                <option value="">- Seleccione -</option>
+                                                {
+                                                    this.state.monedas.map((item,index)=>(
+                                                        <option value={item.idMoneda}>{item.nombre}</option>
+                                                    ))
+                                                }
+                                            </select>
+                                        {/* <input
                                             type="text"
                                             className="form-control"
                                             ref={this.refTxtMoneda}
                                             value={this.state.moneda}
                                             onChange={(event) => this.setState({ moneda: event.target.value })}
-                                            placeholder="Dijite ..." />
+                                            placeholder="Dijite ..." /> */}
                                     </div>
                                     <div className="form-group col-md-6">
                                         <label>TEA %: <i className="fa fa-asterisk text-danger small"></i></label>

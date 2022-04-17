@@ -11,7 +11,7 @@ router.get('/list', async function (req, res) {
         nombre,
         numPartidaElectronica,
         area,
-        moneda,
+        idMoneda,
         tea
         FROM proyecto 
         WHERE 
@@ -99,7 +99,7 @@ router.post('/', async function (req, res) {
             leste, 
             lsur, 
             loeste, 
-            moneda,
+            idMoneda,
             tea, 
             preciometro, 
             costoxlote,
@@ -125,7 +125,7 @@ router.post('/', async function (req, res) {
             req.body.lsur,
             req.body.loeste,
             //ajustes
-            req.body.moneda,
+            req.body.idMoneda,
             req.body.tea,
             req.body.preciometro,
             req.body.costoxlote,
@@ -165,7 +165,7 @@ router.put('/', async function (req, res) {
             leste=?,
             lsur=?,
             loeste=?, 
-            moneda=?,
+            idMoneda=?,
             tea=?, 
             preciometro=?,
             costoxlote=?, 
@@ -190,7 +190,7 @@ router.put('/', async function (req, res) {
             req.body.lsur,
             req.body.loeste,
             //ajustes
-            req.body.moneda,
+            req.body.idMoneda,
             req.body.tea,
             req.body.preciometro,
             req.body.costoxlote,
@@ -234,7 +234,7 @@ router.get('/id', async function (req, res) {
         p.leste,
         p.lsur,
         p.loeste,
-        p.moneda,
+        p.idMoneda,
         p.tea,
         p.preciometro,
         p.costoxlote,
