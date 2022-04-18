@@ -1,6 +1,6 @@
 import React from 'react';
 import axios from 'axios';
-import loading from '../../recursos/images/loading.gif';
+import { keyNumberFloat, isNumeric, spinnerLoading } from '../tools/Tools'
 
 class Clientes extends React.Component {
     constructor(props) {
@@ -88,12 +88,12 @@ class Clientes extends React.Component {
                     </div>
                     <div className="col-md-6 col-sm-12">
                         <div className="form-group">
-                            
-                            <button className="btn btn-outline-info" onClick={ () => this.props.history.push( {
-                                    pathname: `${this.props.location.pathname}/proceso`, 
-                                    search: `?idCliente=${this.state.idCliente}`
-                                }) 
-                            }> 
+
+                            <button className="btn btn-outline-info" onClick={() => this.props.history.push({
+                                pathname: `${this.props.location.pathname}/proceso`,
+                                search: `?idCliente=${this.state.idCliente}`
+                            })
+                            }>
                                 <i className="bi bi-file-plus"></i> Nuevo Registro
                             </button>
                             {" "}
@@ -114,25 +114,19 @@ class Clientes extends React.Component {
                                         <th width="5%">#</th>
                                         <th width="20%">Cliente</th>
                                         <th width="20%">DNI / RUC</th>
-                                        <th width="15%">Telefono</th>
+                                        <th width="15%">Cel. / Tel.</th>
                                         <th width="10%">Dirección</th>
-                                        <th width="12%">Observacion</th>
+                                        <th width="12%">Estado</th>
                                         <th width="15%">Opciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {
                                         this.state.loading ? (
+
                                             <tr>
-                                                <td className="text-center" colSpan="7">
-                                                    <img
-                                                        src={loading}
-                                                        id="imgLoad"
-                                                        width="34"
-                                                        height="34"
-                                                        alt="Loader"
-                                                    />
-                                                    <p>Cargando información...</p>
+                                                <td className="text-center" colSpan="9">
+                                                    {spinnerLoading()}
                                                 </td>
                                             </tr>
                                         ) : this.state.lista.length === 0 ? (
@@ -148,7 +142,11 @@ class Clientes extends React.Component {
                                                         <td>{item.numDocumento}</td>
                                                         <td>{item.telefono}</td>
                                                         <td>{item.direccion}</td>
-                                                        <td>{item.observacion}</td>
+                                                        <td className="text-center">
+                                                            <div className={`badge ${item.estado == 1 ? "badge-info" : "badge-danger"}`}>
+                                                                {item.estado == 1 ? "ACTIVO" : "INACTIVO"}
+                                                            </div>
+                                                        </td>
                                                         <td>
                                                             <button className="btn btn-outline-dark btn-sm" title="Editar" onClick={() => this.props.history.push({ pathname: `${this.props.location.pathname}/proceso`, search: "?idCliente=" + item.idCliente })}><i className="bi bi-pencil"></i></button>
                                                         </td>

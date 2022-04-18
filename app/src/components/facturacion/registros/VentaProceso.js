@@ -12,11 +12,6 @@ class VentaProceso extends React.Component {
             precioContado: '',
 
             detalleLote: [],
-            // comprobantes: [
-            //     { "idComprobante": "CP0001", "nombre": "NOTA DE VENTA" },
-            //     { "idComprobante": "CP0002", "nombre": "BOLETA" },
-            //     { "idComprobante": "CP0003", "nombre": "FACTURA" }
-            // ],
             comprobantes: [],
             clientes: [],
             isContado: true,

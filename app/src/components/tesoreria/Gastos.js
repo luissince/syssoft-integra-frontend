@@ -1,7 +1,6 @@
 import React from 'react';
 import axios from 'axios';
-import loading from '../../recursos/images/loading.gif';
-import { showModal, hideModal, clearModal } from '../tools/Tools';
+import { showModal, hideModal, clearModal, spinnerLoading } from '../tools/Tools';
 
 class Gastos extends React.Component {
     constructor(props) {
@@ -358,14 +357,8 @@ class Gastos extends React.Component {
                                     {
                                         this.state.loading ? (
                                             <tr>
-                                                <td className="text-center" colSpan="6">
-                                                    <img
-                                                        src={loading}
-                                                        alt="Loading..."
-                                                        width="34"
-                                                        height="34"
-                                                    />
-                                                    <p>Cargando información...</p>
+                                                <td className="text-center" colSpan="9">
+                                                    {spinnerLoading()}
                                                 </td>
                                             </tr>
                                         ) : this.state.lista.length === 0 ? (
