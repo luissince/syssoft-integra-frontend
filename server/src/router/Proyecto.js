@@ -6,12 +6,19 @@ const conec = new Conexion()
 
 router.get('/list', async function (req, res) {
     try {
-        let lista = await conec.query(`SELECT * FROM proyecto 
-         WHERE 
-         ? = 0
-         OR
-         ? = 1 and nombre like concat(?,'%')
-         LIMIT ?,?`, [
+        let lista = await conec.query(`SELECT  
+        idProyecto,
+        nombre,
+        numPartidaElectronica,
+        area,
+        idMoneda,
+        tea
+        FROM proyecto 
+        WHERE 
+        ? = 0
+        OR
+        ? = 1 AND nombre LIKE concat(?,'%')
+        LIMIT ?,?`, [
             parseInt(req.query.opcion),
 
             parseInt(req.query.opcion),
@@ -29,10 +36,10 @@ router.get('/list', async function (req, res) {
         });
 
         let total = await conec.query(`SELECT COUNT(*) AS Total FROM proyecto
-         where  
+        WHERE
         ? = 0
         OR
-        ? = 1 and nombre like concat(?,'%')`, [
+        ? = 1 AND nombre LIKE concat(?,'%')`, [
             parseInt(req.query.opcion),
 
             parseInt(req.query.opcion),
@@ -48,7 +55,7 @@ router.get('/list', async function (req, res) {
     }
 });
 
-router.post('/add', async function (req, res) {
+router.post('/', async function (req, res) {
     let connection = null;
     try {
         connection = await conec.beginTransaction();
@@ -87,15 +94,12 @@ router.post('/add', async function (req, res) {
             area,
             estado, 
             ubicacion,
-            pais, 
-            region,
-            provincia,
-            distrito, 
+            idUbigeo, 
             lnorte,
             leste, 
             lsur, 
             loeste, 
-            moneda,
+            idMoneda,
             tea, 
             preciometro, 
             costoxlote,
@@ -104,7 +108,7 @@ router.post('/add', async function (req, res) {
             inflacionAnual, 
             imagen,
             extension) 
-            values (?,?,?,?,?,?, ?,?,?,?,?, ?,?,?,?, ?,?,?,?,?,?,?,?,?)`, [
+            values (?, ?,?,?,?,?, ?,?, ?,?,?,?, ?,?,?,?,?,?,?,?,?)`, [
             idProyecto,
             //datos
             req.body.nombre,
@@ -114,17 +118,14 @@ router.post('/add', async function (req, res) {
             req.body.estado,
             //ubicacion
             req.body.ubicacion,
-            req.body.pais,
-            req.body.region,
-            req.body.provincia,
-            req.body.distrito,
+            req.body.idUbigeo,
             //limite
             req.body.lnorte,
             req.body.leste,
             req.body.lsur,
             req.body.loeste,
             //ajustes
-            req.body.moneda,
+            req.body.idMoneda,
             req.body.tea,
             req.body.preciometro,
             req.body.costoxlote,
@@ -147,10 +148,104 @@ router.post('/add', async function (req, res) {
     }
 });
 
+router.put('/', async function (req, res) {
+    let connection = null;
+    try {
+       
+        connection = await conec.beginTransaction();
+        await conec.execute(connection, `UPDATE proyecto SET
+            nombre=?, 
+            idSede=?,
+            numPartidaElectronica=?,
+            area=?,
+            estado=?, 
+            ubicacion=?,
+            idUbigeo=?, 
+            lnorte=?, 
+            leste=?,
+            lsur=?,
+            loeste=?, 
+            idMoneda=?,
+            tea=?, 
+            preciometro=?,
+            costoxlote=?, 
+            numContratoCorrelativo=?, 
+            numRecibocCorrelativo=?,
+            inflacionAnual=?, 
+            imagen=?,
+            extension=? 
+            WHERE idProyecto=?`, [
+            //datos
+            req.body.nombre,
+            req.body.idSede,
+            req.body.numPartidaElectronica,
+            req.body.area,
+            req.body.estado,
+            //ubicacion
+            req.body.ubicacion,
+            req.body.idUbigeo,
+            //limite
+            req.body.lnorte,
+            req.body.leste,
+            req.body.lsur,
+            req.body.loeste,
+            //ajustes
+            req.body.idMoneda,
+            req.body.tea,
+            req.body.preciometro,
+            req.body.costoxlote,
+            req.body.numContratoCorrelativo,
+            req.body.numRecibocCorrelativo,
+            req.body.inflacionAnual,
+            //imagen
+            req.body.imagen,
+            req.body.extension,
+            req.body.idProyecto
+        ])
+
+        await conec.commit(connection)
+        res.status(200).send('Los datos se actualizarón correctamente.')
+    } catch (error) {
+        if (connection != null) {
+            conec.rollback(connection);
+        }
+        res.status(500).send("Se produjo un error de servidor, intente nuevamente.");
+    }
+});
+
 router.get('/id', async function (req, res) {
     try {
-        // console.log(req.body.idsede);
-        let result = await conec.query('SELECT * FROM proyecto WHERE idProyecto  = ?', [
+        let result = await conec.query(`SELECT 
+        p.idProyecto,
+        p.nombre,
+        p.idSede,
+        p.numPartidaElectronica,
+        p.area,
+        p.estado,
+        p.ubicacion,
+
+        p.idUbigeo,
+        u.ubigeo,
+        u.departamento,
+        u.provincia,
+        u.distrito,
+
+        p.lnorte,
+        p.leste,
+        p.lsur,
+        p.loeste,
+        p.idMoneda,
+        p.tea,
+        p.preciometro,
+        p.costoxlote,
+        p.numContratoCorrelativo,
+        p.numRecibocCorrelativo,
+        p.inflacionAnual,
+        p.imagen,
+        p.extension
+        FROM proyecto AS p
+        INNER JOIN ubigeo AS u ON u.idUbigeo = p.idUbigeo
+        WHERE p.idProyecto = ?`, [
             req.query.idProyecto,
         ]);
 
@@ -167,76 +262,26 @@ router.get('/id', async function (req, res) {
 
 });
 
-router.post('/update', async function (req, res) {
-    let connection = null;
+router.delete('/', async function (req, res) {
+    let connection = null; 
     try {
-
+      
         connection = await conec.beginTransaction();
-        await conec.execute(connection, `UPDATE  proyecto SET
-            nombre=?, 
-            idSede=?,
-            numPartidaElectronica=?,
-            area=?,
-            estado=?, 
-            ubicacion=?,
-            pais=?, 
-            region=?,
-            provincia=?,
-            distrito=?, 
-            lnorte=?, 
-            leste=?,
-            lsur=?,
-            loeste=?, 
-            moneda=?,
-            tea=?, 
-            preciometro=?,
-            costoxlote=?, 
-            numContratoCorrelativo=?, 
-            numRecibocCorrelativo=?,
-            inflacionAnual=?, 
-            imagen=?,
-            extension=? 
-            WHERE idproyecto=?`, [
-            //datos
-            req.body.nombre,
-            req.body.idSede,
-            req.body.numPartidaElectronica,
-            req.body.area,
-            req.body.estado,
-            //ubicacion
-            req.body.ubicacion,
-            req.body.pais,
-            req.body.region,
-            req.body.provincia,
-            req.body.distrito,
-            //limite
-            req.body.lnorte,
-            req.body.leste,
-            req.body.lsur,
-            req.body.loeste,
-            //ajustes
-            req.body.moneda,
-            req.body.tea,
-            req.body.preciometro,
-            req.body.costoxlote,
-            req.body.numContratoCorrelativo,
-            req.body.numRecibocCorrelativo,
-            req.body.inflacionAnual,
-            //imagen
-            req.body.imagen,
-            req.body.extension,
-            req.body.idProyecto
-        ])
+
+        await conec.execute(connection,`DELETE FROM proyecto WHERE idProyecto = ?`,[
+            req.query.idProyecto
+        ]);
 
         await conec.commit(connection)
-        res.status(200).send('Los datos se actualizaron correctamente.')
+        res.status(200).send('Se eliminó correctamente el proyecto.')
     } catch (error) {
         if (connection != null) {
             conec.rollback(connection);
         }
-        res.status(500).send("Se produjo un error de servidor, intente nuevamente.");
+        res.status(500).send("Error interno de conexión, intente nuevamente.");
     }
 });
+
 
 router.get('/inicio', async function (req, res) {
     try {
@@ -247,7 +292,5 @@ router.get('/inicio', async function (req, res) {
         res.status(500).send("Error interno de conexión, intente nuevamente.");
     }
 });
-
-
 
 module.exports = router;

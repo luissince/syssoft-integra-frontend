@@ -1,7 +1,11 @@
 import React from 'react';
 import axios from 'axios';
 import {
-    spinnerLoading
+    spinnerLoading,
+    ModalAlertInfo,
+    ModalAlertSuccess,
+    ModalAlertWarning,
+    ModalAlertDialog,
 } from '../tools/Tools';
 import Paginacion from '../tools/Paginacion';
 
@@ -47,9 +51,7 @@ class Proyectos extends React.Component {
         await this.setStateAsync({ paginacion: 1 });
         this.fillTable(0, "");
         await this.setStateAsync({ opcion: 0 });
-
     }
-
 
     async searchText(text) {
         if (this.state.loading) return;
@@ -113,6 +115,23 @@ class Proyectos extends React.Component {
         }
     }
 
+    onEventDelete(idProyecto) {
+        ModalAlertDialog("Proyecto", "¿Estás seguro de eliminar el proyecto?", async (event) => {
+            if (event) {
+                try {
+                    ModalAlertInfo("Proyecto", "Procesando información...")
+                    let result = await axios.delete('/api/proyecto', {
+                        params: { "idProyecto": idProyecto }
+                    })
+                    ModalAlertSuccess("Proyecto", result.data, () => {
+                        this.loadInit();
+                    })
+                } catch (error) {
+                    ModalAlertWarning("Proyecto", "Se genero un error interno, intente nuevamente.")
+                }
+            }
+        })
+    }
 
     render() {
         return (
@@ -204,7 +223,11 @@ class Proyectos extends React.Component {
                                                             </button>
                                                         </td>
                                                         <td>
-                                                            <button className="btn btn-outline-danger btn-sm" title="Eliminar"><i className="bi bi-trash"></i></button>
+                                                            <button
+                                                                className="btn btn-outline-danger btn-sm"
+                                                                title="Eliminar"
+                                                                onClick={() => this.onEventDelete(item.idProyecto)}
+                                                            ><i className="bi bi-trash"></i></button>
                                                         </td>
                                                     </tr>
                                                 )
@@ -214,7 +237,7 @@ class Proyectos extends React.Component {
                                 </tbody>
 
                             </table>
-                        </div>                   
+                        </div>
                     </div>
                 </div>
 

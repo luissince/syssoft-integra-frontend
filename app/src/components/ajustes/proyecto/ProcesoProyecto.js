@@ -26,17 +26,15 @@ class ProcesoProyecto extends React.Component {
             estado: 'VENTA',
 
             ubicacion: '',
-            pais: '',
-            region: '',
-            provincia: '',
-            distrito: '',
+            idUbigeo: '',
 
             lnorte: '',
             leste: '',
             lsur: '',
             loeste: '',
 
-            moneda: '',
+            idMoneda: '',
+            monedas:[],
             tea: '',
             preciometro: '',
             costoxlote: '',
@@ -50,7 +48,11 @@ class ProcesoProyecto extends React.Component {
             loading: false,
             msgLoading: 'Cargando datos...',
 
-            messageWarning: ''
+            messageWarning: '',
+
+            filter: false,
+            ubigeo: '',
+            filteredData: [],
         }
 
         this.refTxtNombre = React.createRef();
@@ -66,6 +68,8 @@ class ProcesoProyecto extends React.Component {
         this.refFileImagen = React.createRef();
 
         this.abortController = new AbortController();
+
+        this.selectItem = false;
     }
 
     setStateAsync(state) {
@@ -110,6 +114,10 @@ class ProcesoProyecto extends React.Component {
                 signal: this.abortController.signal,
             });
 
+            const moneda = await axios.get("/api/moneda/listcombo", {
+                signal: this.abortController.signal,
+            });
+
             const result = await axios.get("/api/proyecto/id", {
                 signal: this.abortController.signal,
                 params: {
@@ -117,30 +125,26 @@ class ProcesoProyecto extends React.Component {
                 }
             });
 
-            console.log(sede.data)
-
             const data = result.data;
 
             await this.setStateAsync({
                 idProyecto: id,
                 nombre: data.nombre,
-                idSede: data.sede,
+                idSede: data.idSede,
                 numPartidaElectronica: data.numPartidaElectronica,
                 area: data.area,
                 estado: data.estado,
 
                 ubicacion: data.ubicacion,
-                pais: data.pais,
-                region: data.region,
-                provincia: data.provincia,
-                distrito: data.distrito,
+                idUbigeo: data.idUbigeo.toString(),
+                ubigeo: data.departamento + "-" + data.provincia + "-" + data.distrito + " (" + data.ubigeo + ")",
 
                 lnorte: data.lnorte,
                 leste: data.leste,
                 lsur: data.lsur,
                 loeste: data.loeste,
 
-                moneda: data.moneda,
+                idMoneda: data.idMoneda,
                 tea: data.tea,
                 preciometro: data.preciometro,
                 costoxlote: data.costoxlote,
@@ -150,14 +154,15 @@ class ProcesoProyecto extends React.Component {
 
                 imagen: data.imagen !== "" ? `data:image/${data.extensionimagen};base64,${data.imagen}` : noImage,
                 imageBase64: data.imagen,
-                extenBase64: data.extensionimagen,
+                extenBase64: data.extension,
 
                 sedes: sede.data,
+                monedas: moneda.data,
 
                 loading: false,
             });
+            this.selectItem = true;
         } catch (error) {
-            console.log(error)
             if (error.message !== "canceled") {
                 await this.setStateAsync({
                     msgLoading: "Se produjo un error un interno, intente nuevamente."
@@ -167,6 +172,7 @@ class ProcesoProyecto extends React.Component {
     }
 
     async onEventGuardar() {
+
         if (this.state.nombre === "") {
             await this.setStateAsync({ messageWarning: "Ingrese el nombre del proyecto." })
             this.onFocusTab("datos-tab", "datos");
@@ -189,6 +195,13 @@ class ProcesoProyecto extends React.Component {
         }
 
         if (this.state.ubicacion === "") {
+            await this.setStateAsync({
+                messageWarning: "Ingrese el nombre del proyecto."
+            })
+            return;
+        }
+
+        if (this.state.idUbigeo === "") {
             await this.setStateAsync({
                 messageWarning: "Ingrese el nombre del proyecto."
             })
@@ -232,7 +245,7 @@ class ProcesoProyecto extends React.Component {
 
     async saveProject(image, extension) {
         if (this.state.idProyecto === "") {
-            return await axios.post('/api/proyecto/add', {
+            return await axios.post('/api/proyecto', {
                 //datos
                 "nombre": this.state.nombre.trim().toUpperCase(),
                 "idSede": this.state.idSede.trim().toUpperCase(),
@@ -241,17 +254,14 @@ class ProcesoProyecto extends React.Component {
                 "estado": this.state.estado,
                 //ubicacion
                 "ubicacion": this.state.ubicacion.trim().toUpperCase(),
-                "pais": this.state.pais.trim().toUpperCase(),
-                "region": this.state.region.trim().toUpperCase(),
-                "provincia": this.state.provincia.trim().toUpperCase(),
-                "distrito": this.state.distrito.trim().toUpperCase(),
+                "idUbigeo": this.state.idUbigeo,
                 //limite
                 "lnorte": this.state.lnorte.trim().toUpperCase(),
                 "leste": this.state.leste.trim().toUpperCase(),
                 "lsur": this.state.lsur.trim().toUpperCase(),
                 "loeste": this.state.loeste.trim().toUpperCase(),
                 //ajustes
-                "moneda": this.state.moneda.trim().toUpperCase(),
+                "idMoneda": this.state.idMoneda.trim().toUpperCase(),
                 "tea": this.state.tea.toString().trim().toUpperCase(),
                 "preciometro": this.state.preciometro.toString().trim().toUpperCase(),
                 "costoxlote": this.state.costoxlote.toString().trim().toUpperCase(),
@@ -263,8 +273,8 @@ class ProcesoProyecto extends React.Component {
                 "extension": extension === "" ? this.state.extenBase64 == null ? "" : this.state.extenBase64 : extension,
             });
         } else {
-            return await axios.post('/api/proyecto/update', {
-                "idProyecto ": this.state.idProyecto,
+            return await axios.put('/api/proyecto', {
+                "idProyecto": this.state.idProyecto,
                 //datos
                 "nombre": this.state.nombre.trim().toUpperCase(),
                 "idSede": this.state.idSede.trim().toUpperCase(),
@@ -273,17 +283,14 @@ class ProcesoProyecto extends React.Component {
                 "estado": this.state.estado,
                 //ubicacion
                 "ubicacion": this.state.ubicacion.trim().toUpperCase(),
-                "pais": this.state.pais.trim().toUpperCase(),
-                "region": this.state.region.trim().toUpperCase(),
-                "provincia": this.state.provincia.trim().toUpperCase(),
-                "distrito": this.state.distrito.trim().toUpperCase(),
+                "idUbigeo": this.state.idUbigeo,
                 //limite
                 "lnorte": this.state.lnorte.trim().toUpperCase(),
                 "leste": this.state.leste.trim().toUpperCase(),
                 "lsur": this.state.lsur.trim().toUpperCase(),
                 "loeste": this.state.loeste.trim().toUpperCase(),
                 //ajustes
-                "moneda": this.state.moneda.trim().toUpperCase(),
+                "idMoneda": this.state.idMoneda.trim().toUpperCase(),
                 "tea": this.state.tea.toString().trim().toUpperCase(),
                 "preciometro": this.state.preciometro.toString().trim().toUpperCase(),
                 "costoxlote": this.state.costoxlote.toString().trim().toUpperCase(),
@@ -304,10 +311,44 @@ class ProcesoProyecto extends React.Component {
         this.refFileImagen.current.value = "";
     }
 
-    onChangeIdUsuario = async (idUsuario) => {
-        console.log(idUsuario)
-        // await this.setStateAsync({ idUsuario: idUsuario });
-    };
+    handleFilter = async (event) => {
+
+        const searchWord = this.selectItem ? "" : event.target.value;
+        await this.setStateAsync({ idUbigeo: '', ubigeo: searchWord });
+        this.selectItem = false;
+        if (searchWord.length == 0) {
+            await this.setStateAsync({ filteredData: [] });
+            return;
+        }
+
+        if (this.state.filter) return;
+
+        try {
+            await this.setStateAsync({ filter: true });
+            let result = await axios.get("/api/ubigeo/", {
+                params: {
+                    filtrar: searchWord,
+                },
+            });
+            await this.setStateAsync({ filter: false, filteredData: result.data });
+        } catch (error) {
+            await this.setStateAsync({ filter: false, filteredData: [] });
+        }
+    }
+
+    onEventSelectItem = async (value) => {
+        await this.setStateAsync({
+            ubigeo: value.departamento + "-" + value.provincia + "-" + value.distrito + " (" + value.ubigeo + ")",
+            filteredData: [],
+            idUbigeo: value.idUbigeo
+        });
+        this.selectItem = true;
+    }
+
+    onEventClearInput = async () => {
+        await this.setStateAsync({ filteredData: [], idUbigeo: '', ubigeo: "" });
+        this.selectItem = false;
+    }
 
     onFocusTab(idTab, idContent) {
         if (!document.getElementById(idTab).classList.contains('active')) {
@@ -455,59 +496,17 @@ class ProcesoProyecto extends React.Component {
 
                                 <div className="form-row">
                                     <div className="form-group col-md-12">
-                                        <label>Usuario:</label>
+                                        <label>Ubigeo: <i className="fa fa-asterisk text-danger small"></i></label>
                                         <SearchBar
                                             placeholder="Escribe para iniciar a filtrar..."
-                                            onChangeIdUsuario={this.onChangeIdUsuario}
+                                            ubigeo={this.state.ubigeo}
+                                            filteredData={this.state.filteredData}
+                                            onEventClearInput={this.onEventClearInput}
+                                            handleFilter={this.handleFilter}
+                                            onEventSelectItem={this.onEventSelectItem}
                                         />
                                     </div>
                                 </div>
-                                {/* <div className="form-row">
-                                    <div className="form-group col-md-6">
-                                        <label>Pais: <i className="fa fa-asterisk text-danger small"></i></label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            ref={this.refTxtPais}
-                                            value={this.state.pais}
-                                            onChange={(event) => this.setState({ pais: event.target.value })}
-                                            placeholder="Dijite ..." />
-                                    </div>
-                                    <div className="form-group col-md-6">
-                                        <label>Region: <i className="fa fa-asterisk text-danger small"></i></label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            ref={this.refTxtRegion}
-                                            value={this.state.region}
-                                            onChange={(event) => this.setState({ region: event.target.value })}
-                                            placeholder="Dijite ..." />
-
-                                    </div>
-                                </div>
-                                <div className="form-row">
-                                    <div className="form-group col-md-6">
-                                        <label>Provincia: <i className="fa fa-asterisk text-danger small"></i></label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            ref={this.refTxtProvincia}
-                                            value={this.state.provincia}
-                                            onChange={(event) => this.setState({ provincia: event.target.value })}
-                                            placeholder="Dijite ..." />
-                                    </div>
-                                    <div className="form-group col-md-6">
-                                        <label>Distrito: <i className="fa fa-asterisk text-danger small"></i></label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            ref={this.refTxtDistrito}
-                                            value={this.state.distrito}
-                                            onChange={(event) => this.setState({ distrito: event.target.value })}
-                                            placeholder="Dijite ..." />
-
-                                    </div>
-                                </div> */}
                             </div>
 
                             <div className="tab-pane fade" id="limite" role="tabpanel" aria-labelledby="limite-tab">
@@ -558,13 +557,26 @@ class ProcesoProyecto extends React.Component {
                                 <div className="form-row">
                                     <div className="form-group col-md-6">
                                         <label>Moneda: <i className="fa fa-asterisk text-danger small"></i></label>
-                                        <input
+                                            <select
+                                             className="form-control"
+                                             ref={this.refTxtMoneda}
+                                             value={this.state.idMoneda}
+                                             onChange={(event) => this.setState({ idMoneda: event.target.value })}
+                                                >
+                                                <option value="">- Seleccione -</option>
+                                                {
+                                                    this.state.monedas.map((item,index)=>(
+                                                        <option value={item.idMoneda}>{item.nombre}</option>
+                                                    ))
+                                                }
+                                            </select>
+                                        {/* <input
                                             type="text"
                                             className="form-control"
                                             ref={this.refTxtMoneda}
                                             value={this.state.moneda}
                                             onChange={(event) => this.setState({ moneda: event.target.value })}
-                                            placeholder="Dijite ..." />
+                                            placeholder="Dijite ..." /> */}
                                     </div>
                                     <div className="form-group col-md-6">
                                         <label>TEA %: <i className="fa fa-asterisk text-danger small"></i></label>

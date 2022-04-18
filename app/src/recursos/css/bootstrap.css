@@ -11520,7 +11520,7 @@ a.text-dark:focus {
   }
 
   abbr[title]::after {
-    content: " ("attr(title) ")";
+    content: " (" attr(href) " )";
   }
 
   pre {
