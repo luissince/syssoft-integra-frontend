@@ -41,7 +41,7 @@ router.get('/list', async function (req, res) {
             ? = 1 and numDocumento like concat(?,'%')
             OR
             ? = 1 and infoCliente like concat(?,'%')`, [
-            
+
             parseInt(req.query.option),
 
             parseInt(req.query.option),
@@ -92,29 +92,13 @@ router.post('/add', async function (req, res) {
 
         await conec.execute(connection, `INSERT INTO cliente(
             idCliente, 
-            numDocumento, infoCliente, genero, telefono, email, fechaNacimiento, 
-            pais, region, provincia, distrito, direccion, 
-            numDocConyuge, infoConyuge, generoConyuge, telConyuge, emailConyuge, fechaNacConyuge,
-            estadoCivil, tipoMonedaBanco, numCuentaBanco, observacion,
-            numDocBeneficiario, infoBeneficiario, generoBeneficiario, telBeneficiario, fechaNacBeneficiario)
-            VALUES(?, ?,?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?,?, ?,?,?,?, ?,?,?,?,?)`, [
-            idCliente, 
-            req.body.numDocumento, req.body.infoCliente, req.body.genero, req.body.telefono, req.body.email, req.body.fechaNacimiento, 
-            req.body.pais, req.body.region, req.body.provincia, req.body.distrito, req.body.direccion, 
-            req.body.numDocConyuge, req.body.infoConyuge, req.body.generoConyuge, req.body.telConyuge, req.body.emailConyuge, req.body.fechaNacConyuge, 
-            req.body.estadoCivil, req.body.tipoMonedaBanco, req.body.numCuentaBanco, req.body.observacion, 
-            req.body.numDocBeneficiario, req.body.infoBeneficiario, req.body.generoBeneficiario, req.body.telBeneficiario, req.body.fechaNacBeneficiario
+            idDocumentoIdentidad, numDocumento, infoCliente, telefono, fechaNacimiento, email, genero, 
+            direccion, ubigeo, estadoCivil, estado, observacion)
+            VALUES(?, ?,?,?,?,?,?,?, ?,?,?,?,?)`, [
+            idCliente,
+            req.body.tipoDocumento, req.body.numDocumento, req.body.infoCliente, req.body.telefono, req.body.fechaNacimiento, req.body.email, req.body.genero,
+            req.body.direccion, req.body.ubigeo, req.body.estadoCivil, req.body.estado, req.body.observacion
         ])
-
-        // await conec.execute(connection, `INSERT INTO cliente(
-        //     idCliente, 
-        //     numDocumento, infoCliente, genero, telefono, email, fechaNacimiento, 
-        //     pais, region, provincia, distrito, direccion)
-        //     VALUES(?, ?,?,?,?,?,?, ?,?,?,?,?)`, [
-        //     idCliente, 
-        //     req.body.numDocumento, req.body.infoCliente, req.body.genero, req.body.telefono, req.body.email, req.body.fechaNacimiento,
-        //     req.body.pais, req.body.region, req.body.provincia, req.body.distrito, req.body.direccion, 
-        // ])
 
         await conec.commit(connection);
         res.status(200).send('Datos insertados correctamente')
@@ -122,7 +106,7 @@ router.post('/add', async function (req, res) {
         if (connection != null) {
             conec.rollback(connection);
         }
-        res.status(500).send("Error de servidor");
+        res.status(500).send("Se produjo un error de servidor, intente nuevamente.");
         console.log(error)
     }
 });
@@ -130,7 +114,9 @@ router.post('/add', async function (req, res) {
 router.get('/id', async function (req, res) {
     try {
 
-        let result = await conec.query('SELECT * FROM cliente WHERE idCliente  = ?', [
+        let result = await conec.query(`SELECT idCliente, idDocumentoIdentidad AS tipoDocumento, numDocumento, infoCliente, telefono, fechaNacimiento, email, genero,  
+            direccion, ubigeo, estadoCivil, estado, observacion
+            FROM cliente WHERE idCliente  = ?`, [
             req.query.idCliente,
         ]);
 
@@ -153,17 +139,11 @@ router.post('/update', async function (req, res) {
 
         connection = await conec.beginTransaction();
         await conec.execute(connection, `UPDATE cliente SET
-            numDocumento=?, infoCliente=?, genero=?, telefono=?, email=?, fechaNacimiento=?, 
-            pais=?, region=?, provincia=?, distrito=?, direccion=?, 
-            numDocConyuge=?, infoConyuge=?, generoConyuge=?, telConyuge=?, emailConyuge=?, fechaNacConyuge=?,
-            estadoCivil=?, tipoMonedaBanco=?, numCuentaBanco=?, observacion=?,
-            numDocBeneficiario=?, infoBeneficiario=?, generoBeneficiario=?, telBeneficiario=?, fechaNacBeneficiario=?
+            idDocumentoIdentidad=?, numDocumento=?, infoCliente=?, telefono=?, fechaNacimiento=?, email=?, genero=?, 
+            direccion=?, ubigeo=?, estadoCivil=?, estado=?, observacion=?
             WHERE idCliente=?`, [
-            req.body.numDocumento, req.body.infoCliente, req.body.genero, req.body.telefono, req.body.email, req.body.fechaNacimiento, 
-            req.body.pais, req.body.region, req.body.provincia, req.body.distrito, req.body.direccion, 
-            req.body.numDocConyuge, req.body.infoConyuge, req.body.generoConyuge, req.body.telConyuge, req.body.emailConyuge, req.body.fechaNacConyuge, 
-            req.body.estadoCivil, req.body.tipoMonedaBanco, req.body.numCuentaBanco, req.body.observacion, 
-            req.body.numDocBeneficiario, req.body.infoBeneficiario, req.body.generoBeneficiario, req.body.telBeneficiario, req.body.fechaNacBeneficiario, 
+            req.body.tipoDocumento, req.body.numDocumento, req.body.infoCliente, req.body.telefono, req.body.fechaNacimiento, req.body.email, req.body.genero,
+            req.body.direccion, req.body.ubigeo, req.body.estadoCivil, req.body.estado, req.body.observacion,
             req.body.idCliente
         ])
 
@@ -174,6 +154,7 @@ router.post('/update', async function (req, res) {
             conec.rollback(connection);
         }
         res.status(500).send("Se produjo un error de servidor, intente nuevamente.");
+        console.log(error)
     }
 });
 

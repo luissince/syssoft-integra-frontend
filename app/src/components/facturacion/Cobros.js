@@ -17,7 +17,6 @@ class Cobros extends React.Component {
             messagePaginacion: '',
         }
 
-   
 
     }
 
@@ -67,7 +66,7 @@ class Cobros extends React.Component {
                 <div className='row'>
                     <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
                         <div className="form-group">
-                            <h5>Cobros <small className="text-secondary">LISTA</small></h5>
+                            <h5>Cobros o Ingresos <small className="text-secondary">LISTA</small></h5>
                         </div>
                     </div>
                 </div>

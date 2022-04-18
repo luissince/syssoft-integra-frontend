@@ -41,9 +41,6 @@ class Monedas extends React.Component {
         this.refTxtNombre = React.createRef();
         this.refTxtCodIso = React.createRef();
         this.refTxtSimbolo = React.createRef();
-        this.refCkEstado = React.createRef();
-
-
         this.refTxtSearch = React.createRef();
 
         this.idCodigo = "";
