@@ -1,15 +1,34 @@
 const express = require('express');
 const router = express.Router();
-const tools = require('../tools/Tools');
 const Conexion = require('../database/Conexion');
 const conec = new Conexion();
 
 router.get('/list', async function (req, res) {
     try {
         let lista = await conec.query(`SELECT 
-        *
-        FROM lote         
+        l.idLote,
+        l.descripcion,
+        l.precio,
+        l.estado,
+        l.medidaFrontal,
+        l.costadoDerecho,
+        l.costadoIzquierdo,
+        l.medidaFondo,
+        l.areaLote
+        FROM lote AS l INNER JOIN manzana AS m 
+        ON l.idManzana = m.idManzana 
+        WHERE
+        ? = 0 AND m.idProyecto = ?
+        OR
+        ? = 1 AND m.idProyecto = ? AND l.descripcion LIKE CONCAT(?,'%')    
         LIMIT ?,?`, [
+            parseInt(req.query.opcion),
+            req.query.idProyecto,
+
+            parseInt(req.query.opcion),
+            req.query.idProyecto,
+            req.query.buscar,
+
             parseInt(req.query.posicionPagina),
             parseInt(req.query.filasPorPagina)
         ])
@@ -21,7 +40,20 @@ router.get('/list', async function (req, res) {
             }
         });
 
-        let total = await conec.query(`SELECT COUNT(*) AS Total FROM lote`);
+        let total = await conec.query(`SELECT COUNT(*) AS Total 
+        FROM lote AS l INNER JOIN manzana AS m 
+        ON l.idManzana = m.idManzana 
+        WHERE
+        ? = 0 AND m.idProyecto = ?
+        OR
+        ? = 1 AND m.idProyecto = ? AND l.descripcion LIKE CONCAT(?,'%')`, [
+            parseInt(req.query.opcion),
+            req.query.idProyecto,
+
+            parseInt(req.query.opcion),
+            req.query.idProyecto,
+            req.query.buscar,
+        ]);
 
         res.status(200).send({ "result": resultLista, "total": total[0].Total })
 
@@ -31,7 +63,7 @@ router.get('/list', async function (req, res) {
     }
 })
 
-router.post('/add', async function (req, res) {
+router.post('/', async function (req, res) {
     let connection = null;
     try {
         connection = await conec.beginTransaction();
@@ -111,6 +143,61 @@ router.post('/add', async function (req, res) {
         res.status(500).send(error);
     }
 });
+
+router.put('/', async function (req, res) {
+    let connection = null;
+    try {
+        connection = await conec.beginTransaction();
+
+        await conec.execute(connection, `UPDATE lote SET        
+        idManzana = ?,
+        descripcion = ?,
+        costo = ?,
+        precio = ?,
+        estado = ?,
+        medidaFrontal =?,
+        costadoDerecho = ?,
+        costadoIzquierdo = ?,
+        medidaFondo = ?,
+        areaLote = ?,
+        numeroPartida = ?,
+        limiteFrontal = ?,
+        limiteDerecho = ?,
+        limiteIzquierdo = ?,
+        limitePosterior = ?,
+        ubicacionLote = ?
+        WHERE idLote = ?
+        `, [
+            req.body.idManzana,
+            req.body.descripcion,
+            req.body.costo,
+            req.body.precio,
+            req.body.estado,
+            req.body.medidaFrontal,
+            req.body.costadoDerecho,
+            req.body.costadoIzquierdo,
+            req.body.medidaFondo,
+            req.body.areaLote,
+            req.body.numeroPartida,
+            req.body.limiteFrontal,
+            req.body.limiteDerecho,
+            req.body.limiteIzquierdo,
+            req.body.limitePosterior,
+            req.body.ubicacionLote,
+            req.body.idLote,
+        ])
+
+        await conec.commit(connection);
+        res.status(200).send('Datos actualizados correctamente')
+
+    } catch (error) {
+        if (connection != null) {
+            conec.rollback(connection);
+        }
+        res.status(500).send(error);
+    }
+});
+
 
 router.get('/id', async function (req, res) {
     try {

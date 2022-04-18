@@ -7,20 +7,23 @@ const conec = new Conexion();
 router.get("/list", async function (req, res) {
     try {
         let lista = await conec.query(`SELECT 
-        idManzana,
-        nombre,
-        idProyecto,
-        DATE_FORMAT(fecha,'%d/%m/%Y') as fecha,
-        hora
-        FROM manzana
+        m.idManzana,
+        m.nombre,
+        p.nombre as proyecto,
+        DATE_FORMAT(m.fecha,'%d/%m/%Y') as fecha,
+        m.hora
+        FROM manzana AS m INNER JOIN proyecto AS p
+        ON m.idProyecto = p.idProyecto
         WHERE
-        ? = 0
+        ? = 0 AND p.idProyecto = ?
         OR
-        ? = 1 AND nombre LIKE CONCAT(?,'%')
+        ? = 1 AND p.idProyecto = ? AND m.nombre LIKE CONCAT(?,'%')
         LIMIT ?,?`, [
             parseInt(req.query.opcion),
+            req.query.idProyecto,
 
             parseInt(req.query.opcion),
+            req.query.idProyecto,
             req.query.buscar,
 
             parseInt(req.query.posicionPagina),
@@ -34,14 +37,18 @@ router.get("/list", async function (req, res) {
             }
         });
 
-        let total = await conec.query(`SELECT COUNT(*) AS Total FROM manzana
+        let total = await conec.query(`SELECT COUNT(*) AS Total     
+        FROM manzana AS m INNER JOIN proyecto AS p
+        ON m.idProyecto = p.idProyecto
         WHERE
-        ? = 0
+        ? = 0 AND p.idProyecto = ?
         OR
-        ? = 1 AND nombre LIKE CONCAT(?,'%')`, [
+        ? = 1 AND p.idProyecto = ? AND m.nombre LIKE CONCAT(?,'%')`, [
             parseInt(req.query.opcion),
+            req.query.idProyecto,
 
             parseInt(req.query.opcion),
+            req.query.idProyecto,
             req.query.buscar,
         ]);
 
@@ -51,7 +58,6 @@ router.get("/list", async function (req, res) {
         res.status(500).send("Error interno de conexión, intente nuevamente.")
     }
 });
-
 
 router.get('/id', async function (req, res) {
     try {
@@ -71,7 +77,7 @@ router.get('/id', async function (req, res) {
 
 })
 
-router.post("/add", async function (req, res) {
+router.post("/", async function (req, res) {
     let connection = null;
     try {
         connection = await conec.beginTransaction();
@@ -102,7 +108,7 @@ router.post("/add", async function (req, res) {
             idManzana = "MZ0001";
         }
 
-        await conec.execute(connection, 'INSERT INTO manzana (idManzana ,nombre,idProyecto,fecha,hora) values (?,?,?,?,?)', [
+        await conec.execute(connection, 'INSERT INTO manzana (idManzana,nombre,idProyecto,fecha,hora) values (?,?,?,?,?)', [
             idManzana,
             req.body.nombre,
             req.body.idProyecto,
@@ -120,7 +126,7 @@ router.post("/add", async function (req, res) {
     }
 });
 
-router.post("/edit", async function (req, res) {
+router.put("/", async function (req, res) {
     let connection = null;
     try {
         connection = await conec.beginTransaction();
@@ -141,6 +147,34 @@ router.post("/edit", async function (req, res) {
             conec.rollback(connection);
         }
         res.status(500).send(error);
+    }
+});
+
+router.delete('/', async function (req, res) {
+    let connection = null;
+    try {
+        connection = await conec.beginTransaction();
+
+        await conec.execute(connection, `DELETE FROM manzana WHERE idManzana  = ?`, [
+            req.query.idManzana
+        ]);
+
+        await conec.commit(connection)
+        res.status(200).send('Se eliminó correctamente la manzana.')
+    } catch (error) {
+        if (connection != null) {
+            conec.rollback(connection);
+        }
+        res.status(500).send("Error interno de conexión, intente nuevamente.");
+    }
+});
+
+router.get('/listcombo', async function (req, res) {
+    try {
+        let result = await conec.query('SELECT idManzana ,nombre FROM manzana');
+        res.status(200).send(result);
+    } catch (error) {
+        res.status(500).send("Error interno de conexión, intente nuevamente.");
     }
 });
 

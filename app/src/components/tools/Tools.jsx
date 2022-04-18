@@ -3,14 +3,25 @@ import Swal from "../../recursos/js/sweetalert";
 
 export function currentDate() {
   let date = new Date();
-  let formatted_date = date.getFullYear() + "-" + ((date.getMonth() + 1) > 9 ? (date.getMonth() + 1) : '0' + (
-      date.getMonth() + 1)) + "-" + (date.getDate() > 9 ? date.getDate() : '0' + date.getDate());
+  let formatted_date =
+    date.getFullYear() +
+    "-" +
+    (date.getMonth() + 1 > 9
+      ? date.getMonth() + 1
+      : "0" + (date.getMonth() + 1)) +
+    "-" +
+    (date.getDate() > 9 ? date.getDate() : "0" + date.getDate());
   return formatted_date;
 }
 
 export function currentTime() {
   let time = new Date();
-  let formatted_time = (time.getHours() > 9 ? time.getHours() : '0' + time.getHours()) + ":" + (time.getMinutes() > 9 ? time.getMinutes() : '0' + time.getMinutes()) + ":" + (time.getSeconds() > 9 ? time.getSeconds() : '0' + time.getSeconds());
+  let formatted_time =
+    (time.getHours() > 9 ? time.getHours() : "0" + time.getHours()) +
+    ":" +
+    (time.getMinutes() > 9 ? time.getMinutes() : "0" + time.getMinutes()) +
+    ":" +
+    (time.getSeconds() > 9 ? time.getSeconds() : "0" + time.getSeconds());
   return formatted_time;
 }
 
@@ -128,30 +139,29 @@ export function hideModal(id) {
   myModal.hide();
 }
 
-export function viewModal(id, callback = function () { }) {
+export function viewModal(id, callback = function () {}) {
   let myModalEl = document.getElementById(id);
   myModalEl.addEventListener("shown.bs.modal", callback);
 }
 
-export function clearModal(id, callback = function () { }) {
+export function clearModal(id, callback = function () {}) {
   let myModalEl = document.getElementById(id);
   myModalEl.addEventListener("hidden.bs.modal", callback);
 }
 
 export function spinnerLoading(message = "Cargando datos..") {
-  return (<div className="d-flex flex-column justify-content-center align-items-center h-100">
-    <div>
-      <div className="spinner-grow text-danger" role="status">
+  return (
+    <div className="d-flex flex-column justify-content-center align-items-center h-100">
+      <div>
+        <div className="spinner-grow text-danger" role="status"></div>
+        <div className="spinner-grow text-warning" role="status"></div>
+        <div className="spinner-grow text-info" role="status"></div>
       </div>
-      <div className="spinner-grow text-warning" role="status">
-      </div>
-      <div className="spinner-grow text-info" role="status">
+      <div>
+        <strong>{message}</strong>
       </div>
     </div>
-    <div>
-      <strong>{message}</strong>
-    </div>
-  </div>);
+  );
 }
 
 export function readDataURL(files) {
@@ -201,7 +211,7 @@ export function ModalAlertInfo(title, message) {
   });
 }
 
-export function ModalAlertSuccess(title, message, callback = function () { }) {
+export function ModalAlertSuccess(title, message, callback = function () {}) {
   Swal({
     title: title,
     text: message,
@@ -213,7 +223,7 @@ export function ModalAlertSuccess(title, message, callback = function () { }) {
   });
 }
 
-export function ModalAlertWarning(title, message, callback = function () { }) {
+export function ModalAlertWarning(title, message, callback = function () {}) {
   Swal({
     title: title,
     text: message,
@@ -233,27 +243,25 @@ export function ModalAlertError(title, message) {
     showConfirmButton: true,
     allowOutsideClick: false,
   });
-
 }
 
-
-export function ModalAlertDialog  (title, mensaje, callback) {
+export function ModalAlertDialog(title, mensaje, callback) {
   Swal({
-      title: title,
-      text: mensaje,
-      type: 'question',
-      showCancelButton: true,
-      confirmButtonText: "Si",
-      cancelButtonText: "No",
-      allowOutsideClick: false
+    title: title,
+    text: mensaje,
+    type: "question",
+    showCancelButton: true,
+    confirmButtonText: "Si",
+    cancelButtonText: "No",
+    allowOutsideClick: false,
   }).then((isConfirm) => {
-      if (isConfirm.value == undefined) {
-          return false;
-      }
-      if (isConfirm.value) {
-          callback(true)
-      } else {
-          callback(false)
-      }
+    if (isConfirm.value === undefined) {
+      return false;
+    }
+    if (isConfirm.value) {
+      callback(true);
+    } else {
+      callback(false);
+    }
   });
 }

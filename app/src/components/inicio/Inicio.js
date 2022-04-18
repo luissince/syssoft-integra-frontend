@@ -45,9 +45,6 @@ const Page404 = (props) => {
     )
 }
 
-const Loader = () => {
-    return <div>Cargando....</div>
-}
 
 class Inicio extends React.Component {
 
@@ -60,7 +57,7 @@ class Inicio extends React.Component {
     }
 
     async componentDidMount() {
-        
+
     }
 
     setOpen = () => {

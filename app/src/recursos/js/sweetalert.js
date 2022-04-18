@@ -229,7 +229,7 @@ const Swal = () => {
      */
     var setParameters = function setParameters(params) {
         // If a custom element is set, determine if it is valid
-        if (typeof params.target === 'string' && !document.querySelector(params.target) || typeof params.target !== 'string' && !params.target.appendChild) {
+        if ((typeof params.target === 'string' && !document.querySelector(params.target)) || (typeof params.target !== 'string' && !params.target.appendChild)) {
             warn('Target parameter is not valid, defaulting to "body"');
             params.target = 'body';
         }
@@ -338,7 +338,7 @@ const Swal = () => {
             show(progressStepsContainer);
             empty(progressStepsContainer);
             if (currentProgressStep >= params.progressSteps.length) {
-                warn('Invalid currentProgressStep parameter, it should be less than progressSteps.length ' + '(currentProgressStep like JS arrays starts from 0)');
+                warn('Invalid currentProgressStep parameter, it should be less than progressSteps.length (currentProgressStep like JS arrays starts from 0)');
             }
             params.progressSteps.forEach(function (step, index) {
                 var circle = document.createElement('li');
@@ -484,7 +484,7 @@ const Swal = () => {
 
         // showLoaderOnConfirm && preConfirm
         if (params.showLoaderOnConfirm && !params.preConfirm) {
-            warn('showLoaderOnConfirm is set to true, but preConfirm is not defined.\n' + 'showLoaderOnConfirm should be used together with preConfirm, see usage example:\n' + 'https://limonte.github.io/sweetalert2/#ajax-request');
+            warn('showLoaderOnConfirm is set to true, but preConfirm is not defined.\n showLoaderOnConfirm should be used together with preConfirm, see usage example:\n https://limonte.github.io/sweetalert2/#ajax-request');
         }
     };
 

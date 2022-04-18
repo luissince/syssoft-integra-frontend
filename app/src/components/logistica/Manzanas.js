@@ -10,6 +10,7 @@ import {
     ModalAlertWarning,
     spinnerLoading
 } from '../tools/Tools';
+import { connect } from 'react-redux';
 import Paginacion from '../tools/Paginacion';
 
 class Manzanas extends React.Component {
@@ -19,7 +20,7 @@ class Manzanas extends React.Component {
         this.state = {
             idManzana: '',
             nombre: '',
-            idProyecto: 'PR0001',
+            idProyecto: this.props.token.project.idProyecto,
 
             loadModal: false,
             nameModal: 'Nuevo Comprobante',
@@ -53,7 +54,7 @@ class Manzanas extends React.Component {
     async componentDidMount() {
         this.loadInit();
 
-        viewModal("modalManzana", () => {         
+        viewModal("modalManzana", () => {
             this.abortControllerModal = new AbortController();
 
             if (this.idCodigo !== "") this.loadDataId(this.idCodigo);
@@ -118,6 +119,7 @@ class Manzanas extends React.Component {
             const result = await axios.get('/api/manzana/list', {
                 signal: this.abortControllerTable.signal,
                 params: {
+                    "idProyecto": this.state.idProyecto,
                     "opcion": opcion,
                     "buscar": buscar.trim().toUpperCase(),
                     "posicionPagina": ((this.state.paginacion - 1) * this.state.filasPorPagina),
@@ -187,7 +189,7 @@ class Manzanas extends React.Component {
                 ModalAlertInfo("Banco", "Procesando información...");
                 hideModal("modalManzana");
                 if (this.state.idManzana === "") {
-                    const result = await axios.post("/api/manzana/add", {
+                    const result = await axios.post("/api/manzana/", {
                         "nombre": this.state.nombre,
                         "idProyecto": this.state.idProyecto
                     });
@@ -196,7 +198,7 @@ class Manzanas extends React.Component {
                         this.loadInit();
                     });
                 } else {
-                    const result = await axios.post("/api/manzana/edit", {
+                    const result = await axios.put("/api/manzana", {
                         "idManzana": this.state.idManzana,
                         "nombre": this.state.nombre,
                         "idProyecto": this.state.idProyecto
@@ -298,12 +300,12 @@ class Manzanas extends React.Component {
                 <div className="row">
                     <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                         <div className="table-responsive">
-                            <table className="table table-striped" style={{ borderWidth: '1px', borderStyle: 'inset', borderColor: '#CFA7C9' }}>
+                            <table className="table table-striped table-bordered rounded">
                                 <thead>
                                     <tr>
                                         <th width="5%">#</th>
                                         <th width="15%">Manzana</th>
-                                        <th width="25%">Nombre de Proyecto</th>
+                                        <th width="25%">Proyecto</th>
                                         <th width="5%">Editar</th>
                                         <th width="5%">Eliminar</th>
                                     </tr>
@@ -326,7 +328,7 @@ class Manzanas extends React.Component {
                                                     <tr key={index}>
                                                         <td>{item.id}</td>
                                                         <td>{item.nombre}</td>
-                                                        <td>{item.idProyecto}</td>
+                                                        <td>{item.proyecto}</td>
                                                         <td>
                                                             <button className="btn btn-outline-warning btn-sm" title="Editar" onClick={() => this.openModal(item.idManzana)}><i className="bi bi-pencil"></i></button>
                                                         </td>
@@ -366,4 +368,10 @@ class Manzanas extends React.Component {
     }
 }
 
-export default Manzanas;
+const mapStateToProps = (state) => {
+    return {
+        token: state.reducer
+    }
+}
+
+export default connect(mapStateToProps, null)(Manzanas);

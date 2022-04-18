@@ -32,8 +32,8 @@ class Menu extends React.Component {
         this.setState({ collapsed: value });
     }
 
-    render() {     
-        const { project,userToken } = this.props.token;
+    render() {
+        const { project, userToken } = this.props.token;
         return (
             <ProSidebar
                 image={this.state.image ? sidebarBg : false}
@@ -53,7 +53,7 @@ class Menu extends React.Component {
                     <Main >
                         {
                             userToken.menus.map((menu, index) => (
-                                menu.submenu.length == 0 &&  menu.estado === 1?
+                                menu.submenu.length === 0 && menu.estado === 1 ?
                                     <MenuItem key={index} icon={<i className="bi bi-apple"></i>} id={`${menu.nombre.toLowerCase()}`}>
                                         <Link to={`${this.props.url}/${menu.nombre.toLowerCase()}`} >{menu.nombre}</Link>
                                     </MenuItem>
@@ -89,7 +89,7 @@ class Menu extends React.Component {
                             padding: '20px 24px',
                         }}>
                         <span className="sidebar-btn">
-                            {userToken.nombres+" "+userToken.apellidos}
+                            {userToken.nombres + " " + userToken.apellidos}
                         </span>
                     </div>
                 </SidebarFooter>
