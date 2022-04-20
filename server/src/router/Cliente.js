@@ -11,9 +11,9 @@ router.get('/list', async function (req, res) {
             WHERE 
             ? = 0
             OR
-            ? = 1 and numDocumento like concat(?,'%')
+            ? = 1 and documento like concat(?,'%')
             OR
-            ? = 1 and infoCliente like concat(?,'%')
+            ? = 1 and informacion like concat(?,'%')
             LIMIT ?,?`, [
             parseInt(req.query.option),
 
@@ -35,12 +35,12 @@ router.get('/list', async function (req, res) {
         });
 
         let total = await conec.query(`SELECT COUNT(*) AS Total FROM cliente
-            WHERE 
-            ? = 0
-            OR
-            ? = 1 and numDocumento like concat(?,'%')
-            OR
-            ? = 1 and infoCliente like concat(?,'%')`, [
+        WHERE 
+        ? = 0
+        OR
+        ? = 1 and documento like concat(?,'%')
+        OR
+        ? = 1 and informacion like concat(?,'%')`, [
 
             parseInt(req.query.option),
 
@@ -92,12 +92,32 @@ router.post('/add', async function (req, res) {
 
         await conec.execute(connection, `INSERT INTO cliente(
             idCliente, 
-            idDocumentoIdentidad, numDocumento, infoCliente, telefono, fechaNacimiento, email, genero, 
-            direccion, ubigeo, estadoCivil, estado, observacion)
+            idTipoDocumento,
+            documento,
+            informacion,
+            telefono,
+            fechaNacimiento,
+            email, 
+            genero, 
+            direccion,
+            ubigeo, 
+            estadoCivil,
+            estado, 
+            observacion)
             VALUES(?, ?,?,?,?,?,?,?, ?,?,?,?,?)`, [
             idCliente,
-            req.body.tipoDocumento, req.body.numDocumento, req.body.infoCliente, req.body.telefono, req.body.fechaNacimiento, req.body.email, req.body.genero,
-            req.body.direccion, req.body.ubigeo, req.body.estadoCivil, req.body.estado, req.body.observacion
+            req.body.idTipoDocumento,
+            req.body.documento,
+            req.body.informacion,
+            req.body.telefono,
+            req.body.fechaNacimiento,
+            req.body.email,
+            req.body.genero,
+            req.body.direccion,
+            req.body.ubigeo,
+            req.body.estadoCivil,
+            req.body.estado,
+            req.body.observacion
         ])
 
         await conec.commit(connection);
@@ -114,9 +134,21 @@ router.post('/add', async function (req, res) {
 router.get('/id', async function (req, res) {
     try {
 
-        let result = await conec.query(`SELECT idCliente, idDocumentoIdentidad AS tipoDocumento, numDocumento, infoCliente, telefono, fechaNacimiento, email, genero,  
-            direccion, ubigeo, estadoCivil, estado, observacion
-            FROM cliente WHERE idCliente  = ?`, [
+        let result = await conec.query(`SELECT 
+        idCliente,
+        idTipoDocumento,
+        documento,
+        informacion,
+        telefono, 
+        fechaNacimiento,
+        email, 
+        genero,  
+        direccion,
+        ubigeo,
+        estadoCivil,
+        estado, 
+        observacion
+        FROM cliente WHERE idCliente  = ?`, [
             req.query.idCliente,
         ]);
 
@@ -139,11 +171,31 @@ router.post('/update', async function (req, res) {
 
         connection = await conec.beginTransaction();
         await conec.execute(connection, `UPDATE cliente SET
-            idDocumentoIdentidad=?, numDocumento=?, infoCliente=?, telefono=?, fechaNacimiento=?, email=?, genero=?, 
-            direccion=?, ubigeo=?, estadoCivil=?, estado=?, observacion=?
-            WHERE idCliente=?`, [
-            req.body.tipoDocumento, req.body.numDocumento, req.body.infoCliente, req.body.telefono, req.body.fechaNacimiento, req.body.email, req.body.genero,
-            req.body.direccion, req.body.ubigeo, req.body.estadoCivil, req.body.estado, req.body.observacion,
+        idTipoDocumento=?, 
+        documento=?,
+        informacion=?, 
+        telefono=?,
+        fechaNacimiento=?,
+        email=?,
+        genero=?, 
+        direccion=?, 
+        ubigeo=?,
+        estadoCivil=?, 
+        estado=?,
+        observacion=?
+        WHERE idCliente=?`, [
+            req.body.idTipoDocumento,
+            req.body.documento,
+            req.body.informacion,
+            req.body.telefono,
+            req.body.fechaNacimiento,
+            req.body.email,
+            req.body.genero,
+            req.body.direccion,
+            req.body.ubigeo,
+            req.body.estadoCivil,
+            req.body.estado,
+            req.body.observacion,
             req.body.idCliente
         ])
 
@@ -160,7 +212,7 @@ router.post('/update', async function (req, res) {
 
 router.get('/listcombo', async function (req, res) {
     try {
-        let result = await conec.query('SELECT idCliente, numDocumento, infoCliente FROM cliente');
+        let result = await conec.query('SELECT idCliente, documento, informacion FROM cliente');
         res.status(200).send(result);
     } catch (error) {
         res.status(500).send("Error interno de conexión, intente nuevamente.");

@@ -736,7 +736,14 @@ class Lotes extends React.Component {
                                                         <td>{item.medidaFondo}</td>
                                                         <td>{item.medidaFrontal}</td>
                                                         <td>{item.areaLote}</td>
-                                                        <td><span className="badge badge-info">{item.estado}</span></td>
+                                                        <td>
+                                                            {
+                                                                item.estado === 1 ? <span className="badge badge-warning">Disponible</span>
+                                                                    : item.estado === 2 ? <span className="badge badge-info">Reservado</span>
+                                                                        : item.estado === 3 ? <span className="badge badge-success">Vendido</span>
+                                                                            : <span className="badge badge-warnin">Inactivo</span>
+                                                            }
+                                                        </td>
                                                         <td>
                                                             <button className="btn btn-outline-warning btn-sm" title="Editar" onClick={() => this.openModal(item.idLote)}><i className="bi bi-pencil"></i></button>
                                                         </td>

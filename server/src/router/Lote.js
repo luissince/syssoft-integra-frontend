@@ -149,47 +149,83 @@ router.put('/', async function (req, res) {
     try {
         connection = await conec.beginTransaction();
 
-        await conec.execute(connection, `UPDATE lote SET        
-        idManzana = ?,
-        descripcion = ?,
-        costo = ?,
-        precio = ?,
-        estado = ?,
-        medidaFrontal =?,
-        costadoDerecho = ?,
-        costadoIzquierdo = ?,
-        medidaFondo = ?,
-        areaLote = ?,
-        numeroPartida = ?,
-        limiteFrontal = ?,
-        limiteDerecho = ?,
-        limiteIzquierdo = ?,
-        limitePosterior = ?,
-        ubicacionLote = ?
-        WHERE idLote = ?
-        `, [
-            req.body.idManzana,
-            req.body.descripcion,
-            req.body.costo,
-            req.body.precio,
-            req.body.estado,
-            req.body.medidaFrontal,
-            req.body.costadoDerecho,
-            req.body.costadoIzquierdo,
-            req.body.medidaFondo,
-            req.body.areaLote,
-            req.body.numeroPartida,
-            req.body.limiteFrontal,
-            req.body.limiteDerecho,
-            req.body.limiteIzquierdo,
-            req.body.limitePosterior,
-            req.body.ubicacionLote,
-            req.body.idLote,
-        ])
+        if (req.body.estado === 3) {
+            await conec.execute(connection, `UPDATE lote SET        
+            idManzana = ?,
+            descripcion = ?,
+            medidaFrontal =?,
+            costadoDerecho = ?,
+            costadoIzquierdo = ?,
+            medidaFondo = ?,
+            areaLote = ?,
+            numeroPartida = ?,
+            limiteFrontal = ?,
+            limiteDerecho = ?,
+            limiteIzquierdo = ?,
+            limitePosterior = ?,
+            ubicacionLote = ?
+            WHERE idLote = ?
+            `, [
+                req.body.idManzana,
+                req.body.descripcion,
+                req.body.medidaFrontal,
+                req.body.costadoDerecho,
+                req.body.costadoIzquierdo,
+                req.body.medidaFondo,
+                req.body.areaLote,
+                req.body.numeroPartida,
+                req.body.limiteFrontal,
+                req.body.limiteDerecho,
+                req.body.limiteIzquierdo,
+                req.body.limitePosterior,
+                req.body.ubicacionLote,
+                req.body.idLote,
+            ])
 
-        await conec.commit(connection);
-        res.status(200).send('Datos actualizados correctamente')
+            await conec.commit(connection);
+            res.status(200).send('Datos actualizados correctamente');
+        } else {
+            await conec.execute(connection, `UPDATE lote SET        
+            idManzana = ?,
+            descripcion = ?,
+            costo = ?,
+            precio = ?,
+            estado = ?,
+            medidaFrontal =?,
+            costadoDerecho = ?,
+            costadoIzquierdo = ?,
+            medidaFondo = ?,
+            areaLote = ?,
+            numeroPartida = ?,
+            limiteFrontal = ?,
+            limiteDerecho = ?,
+            limiteIzquierdo = ?,
+            limitePosterior = ?,
+            ubicacionLote = ?
+            WHERE idLote = ?
+            `, [
+                req.body.idManzana,
+                req.body.descripcion,
+                req.body.costo,
+                req.body.precio,
+                req.body.estado,
+                req.body.medidaFrontal,
+                req.body.costadoDerecho,
+                req.body.costadoIzquierdo,
+                req.body.medidaFondo,
+                req.body.areaLote,
+                req.body.numeroPartida,
+                req.body.limiteFrontal,
+                req.body.limiteDerecho,
+                req.body.limiteIzquierdo,
+                req.body.limitePosterior,
+                req.body.ubicacionLote,
+                req.body.idLote,
+            ])
 
+            await conec.commit(connection);
+            res.status(200).send('Datos actualizados correctamente');
+        }
     } catch (error) {
         if (connection != null) {
             conec.rollback(connection);
@@ -218,9 +254,16 @@ router.get('/id', async function (req, res) {
 
 router.get('/listcombo', async function (req, res) {
     try {
-        let result = await conec.query(`SELECT l.idLote, l.descripcion AS nombreLote, l.precio, m.nombre AS nombreManzana 
-            FROM lote AS l INNER JOIN manzana AS m 
-            ON l.idManzana = m.idManzana`);
+        let result = await conec.query(`SELECT 
+        l.idLote, 
+        l.descripcion AS nombreLote, 
+        l.precio,
+        m.nombre AS nombreManzana 
+        FROM lote AS l INNER JOIN manzana AS m 
+        ON l.idManzana = m.idManzana
+        WHERE m.idProyecto = ? AND l.estado = 1`, [
+            req.query.idProyecto
+        ]);
         res.status(200).send(result);
     } catch (error) {
         res.status(500).send("Error interno de conexión, intente nuevamente.");

@@ -1,6 +1,9 @@
 import React from 'react';
 import axios from 'axios';
 import {
+    isNumeric,
+    keyNumberInteger,
+    timeForma24,
     showModal,
     hideModal,
     viewModal,
@@ -10,23 +13,24 @@ import {
     ModalAlertWarning,
     spinnerLoading
 } from '../tools/Tools';
+import { connect } from 'react-redux';
 import Paginacion from '../tools/Paginacion';
 
-class Bancos extends React.Component {
+class Impuestos extends React.Component {
+
     constructor(props) {
         super(props);
         this.state = {
-            idBanco: '',
+            idImpuesto: '',
             nombre: '',
-            tipoCuenta: 'CUENTA CORRIENTE',
-            idMoneda: '',
-            monedas: [],
-            numCuenta: '',
-            cci: '',
-            representante: '',
+            porcentaje: '',
+            codigo: '',
+            estado: true,
+            idUsuario: this.props.token.userToken.idUsuario,
 
             loadModal: false,
-            nameModal: 'Nuevo Comprobante',
+            nameModal: 'Nuevo Impuesto',
+            messageWarning: '',
             msgModal: 'Cargando datos...',
 
             loading: false,
@@ -38,16 +42,10 @@ class Bancos extends React.Component {
             filasPorPagina: 10,
             messageTable: 'Cargando información...',
             messagePaginacion: 'Mostranto 0 de 0 Páginas'
-
         }
-
-        this.refTxtNombre = React.createRef();
-        this.refCbxTipoCuenta = React.createRef();
-        this.refTxtMoneda = React.createRef();
-        this.refTxtNumCuenta = React.createRef();
-        this.refTxtCci = React.createRef();
-        this.refTxtRepresentante = React.createRef();
-
+        this.refNombre = React.createRef();
+        this.refPorcentaje = React.createRef();
+        this.refCodigo = React.createRef();
 
         this.refTxtSearch = React.createRef();
 
@@ -64,30 +62,23 @@ class Bancos extends React.Component {
     async componentDidMount() {
         this.loadInit();
 
-        viewModal("modalBanco", () => {
+        viewModal("modalImpuesto", () => {
             this.abortControllerModal = new AbortController();
 
-            if (this.idCodigo !== "") {
-                this.loadDataId(this.idCodigo);
-            } else {
-                this.loadData();
-            }
+            if (this.idCodigo !== "") this.loadDataId(this.idCodigo);
         });
 
-        clearModal("modalBanco", async () => {
+        clearModal("modalImpuesto", async () => {
             this.abortControllerModal.abort();
             await this.setStateAsync({
+                idImpuesto: '',
                 nombre: '',
-                tipoCuenta: 'CUENTA CORRIENTE',
-                idMoneda: '',
-                monedas: [],
-                numCuenta: '',
-                cci: '',
-                representante: '',
-                idBanco: '',
+                porcentaje: '',
+                codigo: '',
+                estado: true,
 
                 loadModal: false,
-                nameModal: 'Nuevo Comprobante',
+                nameModal: 'Nuevo Impuesto',
                 msgModal: 'Cargando datos...',
             });
             this.idCodigo = "";
@@ -104,6 +95,7 @@ class Bancos extends React.Component {
         await this.setStateAsync({ paginacion: 1 });
         this.fillTable(0, "");
         await this.setStateAsync({ opcion: 0 });
+
     }
 
     async searchText(text) {
@@ -137,11 +129,11 @@ class Bancos extends React.Component {
         try {
             await this.setStateAsync({ loading: true, lista: [], messageTable: "Cargando información...", messagePaginacion: "Mostranto 0 de 0 Páginas" });
 
-            const result = await axios.get('/api/banco/list', {
+            const result = await axios.get('/api/impuesto/list', {
                 signal: this.abortControllerTable.signal,
                 params: {
                     "opcion": opcion,
-                    "buscar": buscar.trim().toUpperCase(),
+                    "buscar": buscar,
                     "posicionPagina": ((this.state.paginacion - 1) * this.state.filasPorPagina),
                     "filasPorPagina": this.state.filasPorPagina
                 }
@@ -171,59 +163,33 @@ class Bancos extends React.Component {
 
     async openModal(id) {
         if (id === '') {
-            showModal('modalBanco')
-            await this.setStateAsync({ nameModal: "Nuevo Banco", loadModal: true });
+            showModal('modalImpuesto')
+            await this.setStateAsync({ nameModal: "Nuevo Impuesto" });
         } else {
-            showModal('modalBanco')
+            showModal('modalImpuesto')
             this.idCodigo = id;
-            await this.setStateAsync({ idBanco: id, nameModal: "Editar Banco", loadModal: true });
-        }
-    }
-
-    loadData = async () => {
-        try {
-            const moneda = await axios.get("/api/moneda/listcombo", {
-                signal: this.abortControllerModal.signal,
-            });
-
-            await this.setStateAsync({
-                monedas: moneda.data,
-                loadModal: false
-            });
-        } catch (error) {
-            if (error.message !== "canceled") {
-                await this.setStateAsync({
-                    msgModal: "Se produjo un error interno, intente nuevamente"
-                });
-            }
+            await this.setStateAsync({ idImpuesto: id, nameModal: "Editar Impuesto", loadModal: true });
         }
     }
 
     loadDataId = async (id) => {
         try {
-
-            const moneda = await axios.get("/api/moneda/listcombo", {
-                signal: this.abortControllerModal.signal,
-            });
-
-            const banco = await axios.get("/api/banco/id", {
+            const result = await axios.get("/api/impuesto/id", {
                 signal: this.abortControllerModal.signal,
                 params: {
-                    idBanco: id
+                    idImpuesto: id
                 }
             });
 
             await this.setStateAsync({
-                nombre: banco.data.nombre,
-                tipoCuenta: banco.data.tipoCuenta,
-                idMoneda: banco.data.idMoneda,
-                numCuenta: banco.data.numCuenta,
-                cci: banco.data.cci,
-                representante: banco.data.representante,
-                idBanco: banco.data.idBanco,
-                monedas: moneda.data,
+                idImpuesto: result.data.idImpuesto,
+                nombre: result.data.nombre,
+                porcentaje: result.data.porcentaje.toString(),
+                codigo: result.data.codigo,
+                estado: result.data.estado === 1 ? true : false,
                 loadModal: false
             });
+
         } catch (error) {
             if (error.message !== "canceled") {
                 await this.setStateAsync({
@@ -235,48 +201,43 @@ class Bancos extends React.Component {
 
     async onEventGuardar() {
         if (this.state.nombre === "") {
-            this.refTxtNombre.current.focus();
-        } else if (this.state.idMoneda === "") {
-            this.refTxtMoneda.current.focus();
-        } else if (this.state.numCuenta === "") {
-            this.refTxtNumCuenta.current.focus();
-        } else if (this.state.representante === "") {
-            this.refTxtRepresentante.current.focus();
+            await this.setStateAsync({ messageWarning: "Ingrese el nombre." });
+            this.refNombre.current.focus();
+        } else if (!isNumeric(this.state.porcentaje)) {
+            await this.setStateAsync({ messageWarning: "Ingrese el porcentaje." });
+            this.refPorcentaje.current.focus();
         } else {
             try {
-                ModalAlertInfo("Banco", "Procesando información...");
-                hideModal("modalBanco");
-                if (this.state.idBanco !== '') {
-                    const result = await axios.post('/api/banco/update', {
-                        "nombre": this.state.nombre.trim().toUpperCase(),
-                        "tipoCuenta": this.state.tipoCuenta,
-                        "idMoneda": this.state.idMoneda.trim().toUpperCase(),
-                        "numCuenta": this.state.numCuenta.trim().toUpperCase(),
-                        "cci": this.state.cci.trim().toUpperCase(),
-                        "representante": this.state.representante.trim().toUpperCase(),
-                        "idBanco": this.state.idBanco
-                    })
+                ModalAlertInfo("Impuesto", "Procesando información...");
+                hideModal("modalImpuesto");
+                if (this.state.idImpuesto !== "") {
+                    const result = await axios.post('/api/impuesto/edit', {
+                        "idImpuesto": this.state.idImpuesto,
+                        "nombre": this.state.nombre,
+                        "porcentaje": this.state.porcentaje,
+                        "codigo": this.state.codigo,
+                        "estado": this.state.estado,
+                        "idUsuario": this.state.idUsuario,
+                    });
 
-                    ModalAlertSuccess("Banco", result.data, () => {
+                    ModalAlertSuccess("Impuesto", result.data, () => {
                         this.onEventPaginacion();
                     });
                 } else {
-                    const result = await axios.post('/api/banco/add', {
-                        "nombre": this.state.nombre.trim().toUpperCase(),
-                        "tipoCuenta": this.state.tipoCuenta,
-                        "idMoneda": this.state.idMoneda.trim().toUpperCase(),
-                        "numCuenta": this.state.numCuenta.trim().toUpperCase(),
-                        "cci": this.state.cci.trim().toUpperCase(),
-                        "representante": this.state.representante.trim().toUpperCase(),
+                    const result = await axios.post('/api/impuesto/add', {
+                        "nombre": this.state.nombre,
+                        "porcentaje": this.state.porcentaje,
+                        "codigo": this.state.codigo,
+                        "estado": this.state.estado,
+                        "idUsuario": this.state.idUsuario,
                     });
 
-
-                    ModalAlertSuccess("Comprobante", result.data, () => {
+                    ModalAlertSuccess("Impuesto", result.data, () => {
                         this.loadInit();
                     });
                 }
-            } catch (error) {
-                ModalAlertWarning("Comprobante", "Se produjo un error un interno, intente nuevamente.");
+            } catch (err) {
+                ModalAlertWarning("Impuesto", "Se produjo un error un interno, intente nuevamente.");
             }
         }
     }
@@ -284,9 +245,9 @@ class Bancos extends React.Component {
     render() {
         return (
             <>
-                {/* Inicio modal */}
-                <div className="modal fade" id="modalBanco" data-backdrop="static">
-                    <div className="modal-dialog modal-lg">
+                {/* inicio modal */}
+                <div className="modal fade" id="modalImpuesto" data-bs-keyboard="false" data-bs-backdrop="static">
+                    <div className="modal-dialog">
                         <div className="modal-content">
                             <div className="modal-header">
                                 <h5 className="modal-title">{this.state.nameModal}</h5>
@@ -301,85 +262,63 @@ class Bancos extends React.Component {
                                     </div>
                                     : null}
 
-                                <div className="form-row">
-                                    <div className="form-group col-md-6">
-                                        <label>Nombre Banco:</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            ref={this.refTxtNombre}
-                                            value={this.state.nombre}
-                                            onChange={(event) => this.setState({ nombre: event.target.value })}
-                                            placeholder="BCP, BBVA, etc" />
-                                    </div>
-                                    <div className="form-group col-md-6">
-                                        <label>Tipo de Cuenta:</label>
-                                        <div className="input-group">
-                                            <select
-                                                className="form-control"
-                                                ref={this.tipoCuenta}
-                                                value={this.state.tipoCuenta}
-                                                onChange={(event) => this.setState({ tipoCuenta: event.target.value })} >
-                                                <option value="CUENTA CORRIENTE">Cuenta Corriente</option>
-                                                <option value="CUENTA RECAUDADORA">Cuenta Recaudadora</option>
-                                                <option value="CUENTA DE AHORROS">Cuenta de Ahorros</option>
-                                            </select>
+                                {
+                                    this.state.messageWarning === '' ? null :
+                                        <div className="alert alert-warning" role="alert">
+                                            <i className="bi bi-exclamation-diamond-fill"></i> {this.state.messageWarning}
                                         </div>
-                                    </div>
+                                }
+
+                                <div className="form-group">
+                                    <label htmlFor="nombre" className="col-form-label">Nombre: <i className="fa fa-asterisk text-danger small"></i></label>
+                                    <input
+                                        type="text"
+                                        placeholder="Digite..."
+                                        className="form-control"
+                                        id="nombre"
+                                        ref={this.refNombre}
+                                        value={this.state.nombre}
+                                        onChange={(event) => this.setState({ nombre: event.target.value })} />
                                 </div>
 
                                 <div className="form-row">
                                     <div className="form-group col-md-6">
-                                        <label>Moneda:</label>
-                                        <select
-                                            className="form-control"
-                                            ref={this.refTxtMoneda}
-                                            value={this.state.idMoneda}
-                                            onChange={(event) => this.setState({ idMoneda: event.target.value })}
-                                        >
-                                            <option value="">- Seleccione -</option>
-                                            {
-                                                this.state.monedas.map((item, index) => (
-                                                    <option key={index} value={item.idMoneda}>{item.nombre}</option>
-                                                ))
-                                            }
-                                        </select>
-                                    </div>
-                                    <div className="form-group col-md-6">
-                                        <label>Número de cuenta:</label>
+                                        <label htmlFor="serie">Porcentaje: <i className="fa fa-asterisk text-danger small"></i></label>
                                         <input
                                             type="text"
+                                            placeholder="Digite..."
                                             className="form-control"
-                                            ref={this.refTxtNumCuenta}
-                                            value={this.state.numCuenta}
-                                            onChange={(event) => this.setState({ numCuenta: event.target.value })}
-                                            placeholder="##############" />
+                                            id="serie"
+                                            ref={this.refPorcentaje}
+                                            value={this.state.porcentaje}
+                                            onChange={(event) => this.setState({ porcentaje: event.target.value })}
+                                            onKeyPress={keyNumberInteger} />
+                                    </div>
+                                    <div className="form-group col-md-6">
+                                        <label htmlFor="numeracion">Código:</label>
+                                        <input
+                                            type="text"
+                                            placeholder="Digite..."
+                                            className="form-control"
+                                            id="numeracion"
+                                            ref={this.refCodigo}
+                                            value={this.state.codigo}
+                                            onChange={(event) => this.setState({ codigo: event.target.value })}
+                                        />
                                     </div>
                                 </div>
 
-                                <div className="form-row">
-                                    <div className="form-group col-md-6">
-                                        <label>CCI:</label>
+                                <div className="form-group">
+                                    <div className="custom-control custom-switch">
                                         <input
-                                            type="text"
-                                            className="form-control"
-                                            ref={this.refTxtCci}
-                                            value={this.state.cci}
-                                            onChange={(event) => this.setState({ cci: event.target.value })}
-                                            placeholder="####################" />
-                                    </div>
-                                    <div className="form-group col-md-6">
-                                        <label>Representante:</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            ref={this.refTxtRepresentante}
-                                            value={this.state.representante}
-                                            onChange={(event) => this.setState({ representante: event.target.value })}
-                                            placeholder="Datos del representante" />
+                                            type="checkbox"
+                                            className="custom-control-input"
+                                            id="switch1"
+                                            checked={this.state.estado}
+                                            onChange={(value) => this.setState({ estado: value.target.checked })} />
+                                        <label className="custom-control-label" htmlFor="switch1">Activo o Inactivo</label>
                                     </div>
                                 </div>
-
                             </div>
                             <div className="modal-footer">
                                 <button type="button" className="btn btn-primary" onClick={() => this.onEventGuardar()}>Guardar</button>
@@ -390,11 +329,10 @@ class Bancos extends React.Component {
                 </div>
                 {/* fin modal */}
 
-
-                <div className='row'>
-                    <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
+                <div className="row">
+                    <div className="col-md-12">
                         <div className="form-group">
-                            <h5>Bancos <small className="text-secondary">LISTA</small></h5>
+                            <h5>Impuestos <small className="text-secondary">LISTA</small></h5>
                         </div>
                     </div>
                 </div>
@@ -429,19 +367,19 @@ class Bancos extends React.Component {
                 </div>
 
                 <div className="row">
-                    <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                    <div className="col-md-12 col-sm-12">
                         <div className="table-responsive">
                             <table className="table table-striped table-bordered rounded">
                                 <thead>
                                     <tr>
-                                        <th width="5%">#</th>
-                                        <th width="10%">Banco</th>
-                                        <th width="15%">Tipo Cuenta</th>
-                                        <th width="10%">Moneda</th>
-                                        <th width="20%">Número Cuenta</th>
-                                        <th width="15%">Representante</th>
-                                        <th width="5%">Editar</th>
-                                        <th width="5%">Eliminar</th>
+                                        <th width="5%" scope="col">#</th>
+                                        <th width="20%" scope="col">Fecha</th>
+                                        <th width="20%" scope="col">Nombre</th>
+                                        <th width="15%" scope="col">Porcentaje</th>
+                                        <th width="15%" scope="col">Código</th>
+                                        <th width="15%" scope="col">Estado</th>
+                                        <th width="5%" scope="col">Editar</th>
+                                        <th width="5%" scope="col">Anular</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -453,30 +391,26 @@ class Bancos extends React.Component {
                                                 </td>
                                             </tr>
                                         ) : this.state.lista.length === 0 ? (
-                                            <tr className="text-center">
-                                                <td colSpan="8">¡No hay datos registrados!</td>
+                                            <tr>
+                                                <td className="text-center" colSpan="8">¡No hay comprobantes registrados!</td>
                                             </tr>
-                                        ) : (
+                                        ) :
                                             this.state.lista.map((item, index) => {
                                                 return (
                                                     <tr key={index}>
                                                         <td>{item.id}</td>
+                                                        <td>{<span>{item.fecha}</span>}{<br></br>}{<span>{timeForma24(item.hora)}</span>}</td>
                                                         <td>{item.nombre}</td>
-                                                        <td>{item.tipoCuenta}</td>
-                                                        <td>{item.moneda}</td>
-                                                        <td>{item.numCuenta}</td>
-                                                        <td>{item.representante}</td>
-                                                        <td>
-                                                            <button className="btn btn-outline-warning btn-sm" title="Editar" onClick={() => this.openModal(item.idBanco)}><i className="bi bi-pencil"></i></button>
-                                                        </td>
+                                                        <td>{item.porcentaje + "%"}</td>
+                                                        <td>{item.codigo}</td>
+                                                        <td className="text-center"><div className={`badge ${item.estado === 1 ? "badge-info" : "badge-danger"}`}>{item.estado === 1 ? "ACTIVO" : "INACTIVO"}</div></td>
+                                                        <td><button className="btn btn-outline-warning btn-sm" title="Editar" onClick={() => this.openModal(item.idImpuesto)}><i className="bi bi-pencil"></i> </button></td>
                                                         <td><button className="btn btn-outline-danger btn-sm" title="Anular"><i className="bi bi-trash"></i></button></td>
                                                     </tr>
                                                 )
                                             })
-                                        )
                                     }
                                 </tbody>
-
                             </table>
                         </div>
                     </div>
@@ -504,6 +438,13 @@ class Bancos extends React.Component {
             </>
         );
     }
+
 }
 
-export default Bancos;
+const mapStateToProps = (state) => {
+    return {
+        token: state.reducer
+    }
+}
+
+export default connect(mapStateToProps, null)(Impuestos);

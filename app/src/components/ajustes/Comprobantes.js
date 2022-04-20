@@ -123,6 +123,7 @@ class Comprobantes extends React.Component {
             case 1:
                 this.fillTable(1, this.refTxtSearch.current.value);
                 break;
+            default: this.fillTable(0, "");
         }
     }
 
@@ -142,7 +143,7 @@ class Comprobantes extends React.Component {
 
             let totalPaginacion = parseInt(Math.ceil((parseFloat(result.data.total) / this.state.filasPorPagina)));
             let messagePaginacion = `Mostrando ${result.data.result.length} de ${totalPaginacion} Páginas`;
-            
+
             await this.setStateAsync({
                 loading: false,
                 lista: result.data.result,
@@ -452,4 +453,4 @@ const mapStateToProps = (state) => {
 }
 
 
-export default connect(mapStateToProps,null)(Comprobantes);
+export default connect(mapStateToProps, null)(Comprobantes);

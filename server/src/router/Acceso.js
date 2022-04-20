@@ -9,7 +9,7 @@ router.get('/accesos', async function (req, res) {
         let menu = await conec.query(`
         SELECT 
         m.idMenu,
-        m.nombre,
+        m.nombre, 
         pm.estado 
         FROM permisomenu as pm 
         INNER JOIN perfil as p on pm.idPerfil = p.idPerfil
@@ -52,13 +52,13 @@ router.post('/save', async function (req, res) {
                 req.body.idPerfil,
                 menu.idMenu
             ]);
-          
-            for(let submenu of menu.submenu){
-                await conec.execute(connection,`
+
+            for (let submenu of menu.submenu) {
+                await conec.execute(connection, `
                     UPDATE permisosubmenu 
                     SET estado = ?
                     WHERE idPerfil = ? AND idMenu = ? AND idSubMenu = ?
-                `,[
+                `, [
                     submenu.estado,
                     req.body.idPerfil,
                     menu.idMenu,
