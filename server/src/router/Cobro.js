@@ -1,30 +1,46 @@
 const express = require('express');
 const router = express.Router();
-const {currentDate, currentTime} = require('../tools/Tools');
+const { currentDate, currentTime } = require('../tools/Tools');
 const Conexion = require('../database/Conexion');
-
 const conec = new Conexion()
 
 router.get('/list', async function (req, res) {
     try {
 
-        // console.log(req.query)
         let lista = await conec.query(`SELECT 
-            idCobro, cliente, usuario, moneda, cuentaBancaria, metodoPago, estado, observacion, DATE_FORMAT(fecha,'%d/%m/%Y') as fecha, hora  
-            FROM cobro
-            WHERE 
-            ? = 0
-            OR
-            ? = 1 and cliente like concat(?,'%')
-            LIMIT ?,?`, [
-            parseInt(req.query.option),
+        c.idCobro, 
+        cl.documento,
+        cl.informacion,  
+        CASE 
+        WHEN cn.idConcepto IS NOT NULL THEN cn.nombre
+        ELSE '' END AS detalle,
+        m.simbolo,
+        b.nombre as banco, 
+        c.estado, 
+        c.observacion, 
+        DATE_FORMAT(c.fecha,'%d/%m/%Y') as fecha, 
+        c.hora,
+        IFNULL(SUM(cd.precio*cd.cantidad),0) AS monto
+        FROM cobro AS c
+        INNER JOIN cliente AS cl ON c.idCliente = cl.idCliente
+        INNER JOIN banco AS b ON c.idBanco = b.idBanco
+        INNER JOIN moneda AS m ON c.idMoneda = m.idMoneda 
+        LEFT JOIN cobroDetalle AS cd ON c.idCobro = cd.idCobro
+        LEFT JOIN concepto AS cn ON cd.idConcepto = cn.idConcepto 
+        WHERE 
+        ? = 0
+        OR
+        ? = 1 AND cl.informacion LIKE CONCAT(?,'%')
+        GROUP BY c.idCobro
+        LIMIT ?,?`, [
+            parseInt(req.query.opcion),
 
-            parseInt(req.query.option),
+            parseInt(req.query.opcion),
             req.query.buscar,
 
             parseInt(req.query.posicionPagina),
             parseInt(req.query.filasPorPagina)
-        ])
+        ]);
 
         let resultLista = lista.map(function (item, index) {
             return {
@@ -33,14 +49,18 @@ router.get('/list', async function (req, res) {
             }
         });
 
-        let total = await conec.query(`SELECT COUNT(*) AS Total FROM cobro
-            WHERE 
-            ? = 0
-            OR
-            ? = 1 and cliente like concat(?,'%')`, [
-            parseInt(req.query.option),
+        let total = await conec.query(`SELECT COUNT(*) AS Total        
+        FROM cobro AS c
+        INNER JOIN cliente AS cl ON c.idCliente = cl.idCliente
+        INNER JOIN banco AS b ON c.idBanco = b.idBanco
+        INNER JOIN moneda AS m ON c.idMoneda = m.idMoneda 
+        WHERE 
+        ? = 0
+        OR
+        ? = 1 AND cl.informacion LIKE CONCAT(?,'%')`, [
+            parseInt(req.query.opcion),
 
-            parseInt(req.query.option),
+            parseInt(req.query.opcion),
             req.query.buscar
         ]);
 
@@ -85,26 +105,118 @@ router.post('/add', async function (req, res) {
 
         await conec.execute(connection, `INSERT INTO cobro(
             idCobro, 
-            cliente, usuario, moneda, cuentaBancaria, metodoPago, estado, observacion, fecha, hora) 
-            VALUES(?, ?,?,?,?,?,?,?,?,?)`, [
-            idCobro, 
-            req.body.cliente, req.body.usuario, req.body.moneda, req.body.cuentaBancaria, req.body.metodoPago, req.body.estado, req.body.observacion, currentDate(), currentTime()
+            idCliente, 
+            idUsuario, 
+            idMoneda, 
+            idBanco, 
+            idProcedencia,
+            metodoPago, 
+            estado, 
+            observacion, 
+            fecha, 
+            hora) 
+            VALUES(?,?,?,?,?,?,?,?,?,?,?)`, [
+            idCobro,
+            req.body.idCliente,
+            req.body.idUsuario,
+            req.body.idMoneda,
+            req.body.idBanco,
+            '',
+            req.body.metodoPago,
+            req.body.estado,
+            req.body.observacion,
+            currentDate(),
+            currentTime()
         ])
 
-        // console.log(req.body.cobroDetalle)
-
-        for(let item of req.body.cobroDetalle) {
-
+        for (let item of req.body.cobroDetalle) {
             await conec.execute(connection, `INSERT INTO cobroDetalle(
-                idCobro, idConcepto, precio, cantidad, impuesto)
+                idCobro, 
+                idConcepto, 
+                precio, 
+                cantidad, 
+                idImpuesto)
                 VALUES(?,?,?,?,?)`, [
-                    idCobro, item.id, parseFloat(item.monto), 1, 0
+                idCobro,
+                item.idConcepto,
+                item.monto,
+                item.cantidad,
+                item.idImpuesto
             ])
         }
 
         await conec.commit(connection);
         res.status(200).send('Datos insertados correctamente')
-        
+
+    } catch (error) {
+        if (connection != null) {
+            conec.rollback(connection);
+        }
+        res.status(500).send("Error de servidor");
+        console.log(error)
+    }
+});
+
+router.post('/cobro', async function (req, res) {
+    let connection = null;
+    try {
+        connection = await conec.beginTransaction();
+
+        let result = await conec.execute(connection, 'SELECT idCobro FROM cobro');
+        let idCobro = "";
+        if (result.length != 0) {
+
+            let quitarValor = result.map(function (item) {
+                return parseInt(item.idCobro.replace("CB", ''));
+            });
+
+            let valorActual = Math.max(...quitarValor);
+            let incremental = valorActual + 1;
+            let codigoGenerado = "";
+            if (incremental <= 9) {
+                codigoGenerado = 'CB000' + incremental;
+            } else if (incremental >= 10 && incremental <= 99) {
+                codigoGenerado = 'CB00' + incremental;
+            } else if (incremental >= 100 && incremental <= 999) {
+                codigoGenerado = 'CB0' + incremental;
+            } else {
+                codigoGenerado = 'CB' + incremental;
+            }
+
+            idCobro = codigoGenerado;
+        } else {
+            idCobro = "CB0001";
+        }
+
+        await conec.execute(connection, `INSERT INTO cobro(
+            idCobro, 
+            idCliente, 
+            idUsuario, 
+            idMoneda, 
+            idBanco, 
+            idProcedencia,
+            metodoPago, 
+            estado, 
+            observacion, 
+            fecha, 
+            hora) 
+            VALUES(?,?,?,?,?,?,?,?,?,?,?)`, [
+            idCobro,
+            req.body.idCliente,
+            req.body.idUsuario,
+            req.body.idMoneda,
+            req.body.idBanco,
+            req.body.idVenta,
+            req.body.metodoPago,
+            req.body.estado,
+            req.body.observacion,
+            currentDate(),
+            currentTime()
+        ])
+
+        await conec.commit(connection);
+        res.status(200).send('Datos insertados correctamente')
+
     } catch (error) {
         if (connection != null) {
             conec.rollback(connection);
@@ -116,13 +228,53 @@ router.post('/add', async function (req, res) {
 
 router.get('/id', async function (req, res) {
     try {
+        let result = await conec.query(`SELECT
+        c.idCobro,
+        c.metodoPago,
+        c.estado,
+        c.observacion,
+        DATE_FORMAT(c.fecha,'%d/%m/%Y') as fecha,
+        c.hora,
 
-        let result = await conec.query('SELECT * FROM cobro WHERE idCobro  = ?', [
+        cl.documento,
+        cl.informacion,
+
+        b.nombre as banco,
+
+        m.simbolo,
+
+        IFNULL(SUM(cb.precio*cb.cantidad),0) AS monto
+
+        FROM cobro AS c
+        INNER JOIN cliente AS cl ON c.idCliente = cl.idCliente
+        INNER JOIN banco AS b ON c.idBanco = b.idBanco
+        INNER JOIN moneda AS m ON c.idMoneda = m.idMoneda
+        LEFT JOIN cobroDetalle AS cb ON c.idCobro = cb.idCobro
+        WHERE c.idCobro = ?
+        GROUP BY  c.idCobro`, [
             req.query.idCobro
         ]);
 
         if (result.length > 0) {
-            res.status(200).send(result[0]);
+
+            let detalle = await conec.query(`SELECT 
+            co.nombre as concepto,
+            cd.precio,
+            cd.cantidad,
+            imp.nombre as impuesto,
+            imp.porcentaje
+            FROM cobroDetalle AS cd 
+            INNER JOIN concepto AS co ON cd.idConcepto = co.idConcepto
+            INNER JOIN impuesto AS imp ON cd.idImpuesto  = imp.idImpuesto 
+            WHERE cd.idCobro = ?
+            `, [
+                req.query.idCobro
+            ]);
+
+            res.status(200).send({
+                "cabecera": result[0],
+                "detalle": detalle
+            });
         } else {
             res.status(400).send("Datos no encontrados");
         }
@@ -140,10 +292,26 @@ router.post('/update', async function (req, res) {
 
         connection = await conec.beginTransaction();
         await conec.execute(connection, `UPDATE cobro SET 
-            cliente=?, usuario=?, moneda=?, cuentaBancaria=?, metodoPago=?, estado=?, observacion=?, fecha=?, hora=?
-            WHERE idCobro=?`, [ 
-            req.body.cliente, req.body.usuario, req.body.moneda, req.body.cuentaBancaria, req.body.metodoPago, req.body.estado, req.body.observacion, currentDate(), currentTime(),   
-            req.body.idCobro, 
+        idCliente=?, 
+        idUsuario=?, 
+        idMoneda=?, 
+        idBanco=?, 
+        metodoPago=?, 
+        estado=?,
+        observacion=?, 
+        fecha=?,
+        hora=?
+        WHERE idCobro=?`, [
+            req.body.idCliente,
+            req.body.idUsuario,
+            req.body.idMoneda,
+            req.body.idBanco,
+            req.body.metodoPago,
+            req.body.estado,
+            req.body.observacion,
+            currentDate(),
+            currentTime(),
+            req.body.idCobro,
         ])
 
         await conec.commit(connection)

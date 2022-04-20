@@ -30,12 +30,8 @@ class Principal extends React.Component {
 
     async componentDidMount() {
         try {
-
             let result = await axios.get("/api/proyecto/inicio", {
-                signal: this.abortControllerTable.signal,
-                params: {
-
-                }
+                signal: this.abortControllerTable.signal
             });
 
             await this.setStateAsync({
@@ -74,7 +70,7 @@ class Principal extends React.Component {
             "nombre": item.nombre,
             "ubicacion": item.ubicacion
         }
-        window.localStorage.setItem("project",JSON.stringify(proyect));
+        window.localStorage.setItem("project", JSON.stringify(proyect));
         this.props.project(JSON.parse(window.localStorage.getItem('project')));
     }
 
@@ -144,33 +140,34 @@ class Principal extends React.Component {
                         {
                             this.state.data.map((item, index) => (
                                 <div key={index} className="col-lg-4 col-md-4 col-sm-12 col-xs-12">
-                                    <div className="card">
-                                        <img src={item.imagen === "" ? noImage : `data:image/${item.extensionimagen};base64,${item.imagen}`} alt="" className="card-img-top" />
-                                        <div className="card-body m-2">
-                                            <h6 className='text-info font-weight-bold'>{item.nombre}</h6>
-                                            <h6 className='text-secondary'>{item.ubicacion}</h6>
-                                            <button onClick={() => this.onEventIngresar(item)} type="button" className="btn btn-block btn-outline-primary text-info" >
-                                                <i className="bi bi-arrow-right-circle-fill"></i> Ingresar
-                                            </button>
-                                        </div>
-                                        <hr className="m-0" />
-                                        <div className="card-body m-2">
-                                            <ul className="list-group text-left pt-0">
-                                                <li className="list-group-item border-0 px-0 pt-0"><i className="bi bi-geo-fill"></i> Moneda SOLES(S/)</li>
-                                                <li className="list-group-item border-0 px-0"><i className="bi bi-geo-fill"></i> Total de lotes 26</li>
-                                                <li className="list-group-item border-0 px-0"><i className="bi bi-geo-fill"></i> Lotes disponibles 19</li>
-                                            </ul>
-                                            <div className='row'>
-                                                <div className='col-2 text-left'><i className="bi bi-grid-1x2-fill"></i></div>
-                                                <div className='col-6 bg-warning' style={{ borderRadius: '7px' }}>Estado en venta</div>
+                                    <div className="form-group">
+                                        <div className="card">
+                                            <img src={item.imagen === "" ? noImage : `data:image/${item.extensionimagen};base64,${item.imagen}`} alt="" className="card-img-top" />
+                                            <div className="card-body m-2">
+                                                <h6 className='text-info font-weight-bold'>{item.nombre}</h6>
+                                                <h6 className='text-secondary'>{item.ubicacion}</h6>
+                                                <button onClick={() => this.onEventIngresar(item)} type="button" className="btn btn-block btn-outline-primary text-info" >
+                                                    <i className="bi bi-arrow-right-circle-fill"></i> Ingresar
+                                                </button>
                                             </div>
-                                            <div className="row pt-3">
-                                                <div className="col-12">
-                                                    <div className="progress" style={{ height: '15px' }}>
-                                                        <div className="progress-bar bg-info w-50" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="40">50.00%</div>
+                                            <hr className="m-0" />
+                                            <div className="card-body m-2">
+                                                <ul className="list-group text-left pt-0">
+                                                    <li className="list-group-item border-0 px-0 pt-0"><i className="bi bi-geo-fill"></i> Moneda {item.moneda}({item.simbolo})</li>
+                                                    <li className="list-group-item border-0 px-0"><i className="bi bi-geo-fill"></i> Total de lotes {item.lotes.length}</li>
+                                                    <li className="list-group-item border-0 px-0"><i className="bi bi-geo-fill"></i> Lotes disponibles {item.lotes.filter(lote => lote.estado === 1).length}</li>
+                                                    <li className="list-group-item border-0 px-0"><i className="bi bi-grid-1x2-fill"></i>
+                                                        {
+                                                            item.estado === 1 ? <span className='text-success'> Estado en Venta</span> : <span className='text-danger'> Estado en Litigio</span>
+                                                        }</li>
+                                                </ul>
+                                                {/* <div className="row pt-3">
+                                                    <div className="col-12">
+                                                        <div className="progress">
+                                                            <div className="progress-bar bg-info w-10" role="progressbar" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100">50%</div>
+                                                        </div>
                                                     </div>
-                                                </div>
-
+                                                </div> */}
                                             </div>
                                         </div>
                                     </div>

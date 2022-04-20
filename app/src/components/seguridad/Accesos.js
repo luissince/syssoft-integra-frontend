@@ -92,13 +92,13 @@ class Accesos extends React.Component {
         searchable: false,
         showEmptyGroups: true,
 
-        groupOpenIconClass: "fas",
+        groupOpenIconClass: "fa",
         groupOpenIcon: "fa-folder-open",
 
-        groupCloseIconClass: "fas",
+        groupCloseIconClass: "fa",
         groupCloseIcon: "fa-folder",
 
-        linkIconClass: "fas",
+        linkIconClass: "fa",
         linkIcon: "fa-th",
 
         searchPlaceholderText: "Search",
@@ -110,13 +110,14 @@ class Accesos extends React.Component {
 
   async onChangePerfil(event) {
     if (event.target.value.length > 0) {
-      await this.setStateAsync({ 
-        idPerfil: event.target.value, 
-        messageWarning: "" })
+      await this.setStateAsync({
+        idPerfil: event.target.value,
+        messageWarning: ""
+      })
       this.loadDataAcceso(event.target.value);
     } else {
       await this.setStateAsync({
-        idPerfil: event.target.value, 
+        idPerfil: event.target.value,
         menu: [],
         messageWarning: "Seleccione el perfil."
       });
@@ -144,7 +145,7 @@ class Accesos extends React.Component {
   }
 
   async onEventGuardar() {
-    if (this.state.idPerfil == "") {
+    if (this.state.idPerfil === "") {
       await this.setStateAsync({ messageWarning: "Seleccione el perfil." })
       return;
     }
@@ -502,13 +503,13 @@ class Accesos extends React.Component {
           <div className="col-xl-12 col-lg-12 col-md-12 col-sm-4 col-12">
             <button
               type="button"
-              className="btn btn-outline-primary"
+              className="btn btn-primary"
               onClick={() => this.onEventGuardar()}>
               <i className="fa fa-save"></i> Guardar
             </button>
             {" "}
             <button type="button" className="btn btn-outline-danger">
-              <i className="fa fa-backspace"></i> Cancelar
+              <i className="fa fa-close"></i> Cancelar
             </button>
           </div>
         </div>

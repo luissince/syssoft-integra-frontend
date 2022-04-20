@@ -14,6 +14,7 @@ import Cotizaciones from '../facturacion/Cotizaciones';
 import Reservas from '../facturacion/Reservas';
 import Monedas from '../ajustes/Monedas';
 import Comprobantes from '../ajustes/Comprobantes';
+import Impuestos from '../ajustes/Impuestos';
 import Bancos from '../ajustes/Bancos';
 import Sedes from '../ajustes/Sedes';
 import Proyectos from '../ajustes/Proyectos';
@@ -21,8 +22,10 @@ import ProcesoProyecto from '../ajustes/proyecto/ProcesoProyecto';
 import Manzanas from '../logistica/Manzanas';
 import Lotes from '../logistica/Lotes';
 import VentaProceso from '../facturacion/registros/VentaProceso';
+import VentaDetalle from '../facturacion/registros/VentaDetalle';
 import ClienteProceso from '../facturacion/registros/ClienteProceso'
 import CobroProceso from '../facturacion/registros/CobroProceso';
+import CobroDetalle from '../facturacion/registros/CobroDetalle';
 import Perfiles from '../seguridad/Perfiles'
 import Usuarios from '../seguridad/Usuarios'
 import Accesos from '../seguridad/Accesos'
@@ -45,9 +48,6 @@ const Page404 = (props) => {
     )
 }
 
-const Loader = () => {
-    return <div>Cargando....</div>
-}
 
 class Inicio extends React.Component {
 
@@ -60,7 +60,7 @@ class Inicio extends React.Component {
     }
 
     async componentDidMount() {
-        
+
     }
 
     setOpen = () => {
@@ -138,6 +138,11 @@ class Inicio extends React.Component {
                             render={(props) => <VentaProceso {...props} />}
                         />
                         <Route
+                            path={`${path}/ventas/detalle`}
+                            exact={true}
+                            render={(props) => <VentaDetalle {...props} />}
+                        />
+                        <Route
                             path={`${path}/cobros`}
                             exact={true}
                             render={(props) => <Cobros {...props} />}
@@ -146,6 +151,11 @@ class Inicio extends React.Component {
                             path={`${path}/cobros/proceso`}
                             exact={true}
                             render={(props) => <CobroProceso {...props} />}
+                        />
+                        <Route
+                            path={`${path}/cobros/detalle`}
+                            exact={true}
+                            render={(props) => <CobroDetalle {...props} />}
                         />
                         <Route
                             path={`${path}/creditos`}
@@ -184,6 +194,10 @@ class Inicio extends React.Component {
                             path={`${path}/proyectos/proceso`}
                             exact={true}
                             render={(props) => <ProcesoProyecto {...props} />}
+                        />
+                        <Route
+                            path={`${path}/impuestos`}
+                            render={(props) => <Impuestos {...props} />}
                         />
                         <Route
                             path={`${path}/manzanas`}

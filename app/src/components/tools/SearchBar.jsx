@@ -4,15 +4,7 @@ import "./SearchBar.css";
 class SearchBar extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      filter: false,
-      filteredData: [],
-      wordEntered: "",
-    };
-
-    this.selectItem = false;
-
-    this.searchRef = React.createRef();
+    this.index = -1;
   }
 
   componentDidMount() {
@@ -34,13 +26,56 @@ class SearchBar extends React.Component {
     } else {
       if (parent != null) {
         this.props.onEventClearInput();
+        this.index = -1;
+      }
+    }
+  };
+
+  onEventKeyUp(event) {
+    if (event.keyCode === 40 || event.which === 40) {
+      if (this.props.filteredData.length === 0) return;
+
+      const dataResult = document.getElementById("idDataResult");
+      dataResult.focus();
+      let children = dataResult.children;
+      if (children.length > 0) {
+        this.index = 0;
+        children[this.index].focus();
+      }
+    } else if (event.keyCode === 13) {
+      if (this.props.filteredData.length === 0) return;
+
+      const dataResult = document.getElementById("idDataResult");
+      dataResult.focus();
+      let children = dataResult.children;
+      if (children.length > 0) {
+        this.index = 0;
+        children[this.index].focus();
       }
     }
   }
 
+  onEventKeyDown(event) {
+    if (event.keyCode === 38) {
+      let children = document.getElementById("idDataResult").children;
+
+      if (this.index !== 0) {
+        if (this.index > 0) {
+          this.index--;
+          children[this.index].focus();
+        }
+      }
+    } else if (event.keyCode === 40) {
+      let children = document.getElementById("idDataResult").children;
+
+      if (this.index < children.length - 1) {
+        this.index++;
+        children[this.index].focus();
+      }
+    }
+  }
 
   render() {
-
     return (
       <div className="search">
         <div className="form-group position-relative mb-0">
@@ -49,9 +84,10 @@ class SearchBar extends React.Component {
               type="text"
               className="form-control"
               placeholder={this.props.placeholder}
-              ref={this.searchRef}
+              ref={this.props.refTxtUbigeo}
               value={this.props.ubigeo}
               onChange={this.props.handleFilter}
+              onKeyUp={(event) => this.onEventKeyUp(event)}
             />
             <div className="input-group-append">
               <button
@@ -59,7 +95,8 @@ class SearchBar extends React.Component {
                 type="button"
                 onClick={() => {
                   this.props.onEventClearInput();
-                  this.searchRef.current.focus();
+                  this.props.refTxtUbigeo.current.focus();
+                  this.index = -1;
                 }}
               >
                 <i className="fa fa-close"></i>
@@ -67,20 +104,32 @@ class SearchBar extends React.Component {
             </div>
           </div>
 
-          {this.props.filteredData.length != 0 && (
-            <div className="dataResult" id="idDataResult">
+          {this.props.filteredData.length !== 0 && (
+            <div
+              className="dataResult"
+              id="idDataResult"
+              tabIndex="-1"
+              onKeyDown={(event) => this.onEventKeyDown(event)}
+            >
               {this.props.filteredData.map((value, index) => (
                 <button
                   key={index}
                   className="list-group-item list-group-item-action"
                   onClick={() => {
                     this.props.onEventSelectItem(value);
-                    this.searchRef.current.focus();
+                    this.props.refTxtUbigeo.current.focus();
+                    this.index = -1;
                   }}
                 >
-                  {value.departamento + "-" + value.provincia + "-" + value.distrito + " (" + value.ubigeo + ")"}
+                  {value.departamento +
+                    "-" +
+                    value.provincia +
+                    "-" +
+                    value.distrito +
+                    " (" +
+                    value.ubigeo +
+                    ")"}
                 </button>
-
               ))}
             </div>
           )}

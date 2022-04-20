@@ -396,12 +396,12 @@ class Usuarios extends React.Component {
                     }
                 }
             } catch (error) {
-                if(error.response !== undefined) {
+                if (error.response !== undefined) {
                     ModalAlertWarning("Usuario", error.response.data);
-                }else{
+                } else {
                     ModalAlertWarning("Usuario", "Se produjo un error un interno, intente nuevamente.");
                 }
-                
+
             }
         }
     }
@@ -529,6 +529,7 @@ class Usuarios extends React.Component {
                                                     }}
                                                     placeholder='Ingrese los nombres' />
                                             </div>
+
                                             <div className="form-group col-md-6">
                                                 <label htmlFor="apellidos">Apellidos</label>
                                                 <input
@@ -553,7 +554,6 @@ class Usuarios extends React.Component {
                                                     placeholder='ingrese apellidos del usuario' />
                                             </div>
                                         </div>
-
 
                                         <div className="form-group">
                                             <label htmlFor="genero">Genero</label>
@@ -657,7 +657,6 @@ class Usuarios extends React.Component {
                                     </div>
                                     <div className="tab-pane fade" id="login" role="tabpanel" aria-labelledby="login-tab">
 
-
                                         <div className="form-group">
                                             <label htmlFor="empresa">Empresa</label>
                                             <input
@@ -680,11 +679,6 @@ class Usuarios extends React.Component {
                                                     }
                                                 }}
                                                 placeholder='Ingrese el nombre de la empresa' />
-                                            {/* <select className="form-control" id="empresa">
-                                                        <option>-- seleccione --</option>
-                                                        <option>Empresa 1</option>
-                                                        <option>Empresa 2</option>
-                                                    </select> */}
                                         </div>
                                         <div className="form-group">
                                             <label htmlFor="perfil">Perfil</label>
@@ -830,7 +824,7 @@ class Usuarios extends React.Component {
                 </div>
                 {/* fin usuario*/}
 
-                {/* Inicio perfil */}
+                {/* Inicio resetear */}
                 <div className="modal fade" id="modalClave" data-bs-keyboard="false" data-bs-backdrop="static">
                     <div className="modal-dialog">
                         <div className="modal-content">
@@ -863,7 +857,7 @@ class Usuarios extends React.Component {
                         </div>
                     </div>
                 </div>
-                {/* fin perfil */}
+                {/* fin resetear */}
 
                 <div className='row'>
                     <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
@@ -905,7 +899,7 @@ class Usuarios extends React.Component {
                 <div className="row">
                     <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                         <div className="table-responsive">
-                            <table className="table table-striped" style={{ borderWidth: '1px', borderStyle: 'inset', borderColor: '#CFA7C9' }}>
+                            <table className="table table-striped table-bordered rounded">
                                 <thead>
                                     <tr>
                                         <th width="5%">#</th>

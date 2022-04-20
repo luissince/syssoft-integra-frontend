@@ -2,7 +2,7 @@ const express = require('express');
 // const bodyParser = require('body-parser');
 const path = require('path');
 const app = express();
-const cors = require('cors'); 
+const cors = require('cors');
 
 //cors para peticiones fuera del servidor
 /**
@@ -29,6 +29,7 @@ app.use('/api/comprobante', require('./src/router/Comprobante'));
 app.use('/api/moneda', require('./src/router/Moneda'));
 app.use('/api/banco', require('./src/router/Banco'));
 app.use('/api/sede', require('./src/router/Sede'));
+app.use('/api/impuesto', require('./src/router/Impuesto'));
 
 app.use('/api/proyecto', require('./src/router/Proyecto'));
 app.use('/api/manzana', require('./src/router/Manzana'));

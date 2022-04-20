@@ -76,6 +76,7 @@ class Proyectos extends React.Component {
             case 1:
                 this.fillTable(1, this.refTxtSearch.current.value);
                 break;
+            default: this.fillTable(0, "");
         }
     }
 
@@ -176,15 +177,15 @@ class Proyectos extends React.Component {
                 <div className="row">
                     <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                         <div className="table-responsive">
-                            <table className="table table-striped" style={{ borderWidth: '1px', borderStyle: 'inset', borderColor: '#CFA7C9' }}>
+                            <table className="table table-striped table-bordered rounded">
                                 <thead>
                                     <tr>
                                         <th width="5%">#</th>
-                                        <th width="20%">Nombre del Proyecto</th>
-                                        <th width="20%">Área Total(Has)</th>
-                                        <th width="20%">N° Partida Electrónica</th>
-                                        <th width="15%">Moneda</th>
-                                        <th width="10%">TEA</th>
+                                        <th width="20%">Proyecto</th>
+                                        <th width="10%">Área Total(Has)</th>
+                                        <th width="30%">Ubicación</th>
+                                        <th width="10%">Precio X m2</th>
+                                        <th width="10%">Estado</th>
                                         <th width="5%">Editar</th>
                                         <th width="5%">Eliminar</th>
                                     </tr>
@@ -208,9 +209,9 @@ class Proyectos extends React.Component {
                                                         <td>{item.id}</td>
                                                         <td>{item.nombre}</td>
                                                         <td>{item.area}</td>
-                                                        <td>{item.numpartidaelectronica}</td>
-                                                        <td>{item.moneda}</td>
-                                                        <td>{item.tea}</td>
+                                                        <td>{item.ubicacion}</td>
+                                                        <td>{item.simbolo}{" "}{item.preciometro}</td>
+                                                        <td>{item.estado === 1 ? <span className="badge badge-success">VENTA</span> : <span className="badge badge-danger">LITIGIO</span>}</td>
                                                         <td>
                                                             <button
                                                                 className="btn btn-outline-warning btn-sm"

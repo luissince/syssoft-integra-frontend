@@ -605,7 +605,7 @@ body.swal2-no-backdrop > .swal2-shown.swal2-bottom-right {
 }
 
 .swal2-popup .swal2-title {
-  color: #212529;
+  color: #020203;
   font-size: 22px;
   text-align: center;
   font-weight: 600;
@@ -743,7 +743,7 @@ body.swal2-no-backdrop > .swal2-shown.swal2-bottom-right {
   margin: 0;
   padding: 0;
   line-height: normal;
-  color: #212529;
+  color: #020203;
   word-wrap: break-word;
 }
 
