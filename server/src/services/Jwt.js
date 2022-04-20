@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 
 function createToken(user, key, expiresIn = '10h') {
-    return  new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
         jwt.sign(user, key, { expiresIn: expiresIn }, (error, token) => {
             if (error) {
                 reject("error");
@@ -37,4 +37,3 @@ function token(req, res, next) {
 }
 
 module.exports = { createToken, verifyToken, token }
-
