@@ -1,12 +1,17 @@
 import React from 'react';
 import axios from 'axios';
 import {
+    isNumeric,
     spinnerLoading,
     timeForma24,
     formatMoney,
     showModal,
+    hideModal,
     viewModal,
-    clearModal
+    clearModal,
+    ModalAlertInfo,
+    ModalAlertSuccess,
+    ModalAlertWarning,
 } from '../tools/Tools';
 import { connect } from 'react-redux';
 import Paginacion from '../tools/Paginacion';
@@ -24,6 +29,10 @@ class Ventas extends React.Component {
             moneda: '',
             metodoPago: '',
             observacion: '',
+            total: '0.00',
+            cobrado: '0.00',
+            porCobrar: '0.00',
+            valorRecibido: '',
             bancos: [],
 
             loadModal: false,
@@ -43,6 +52,7 @@ class Ventas extends React.Component {
         }
         this.refBanco = React.createRef();
         this.refMetodoPago = React.createRef();
+        this.refValorRecibido = React.createRef();
 
         this.refTxtSearch = React.createRef();
 
@@ -75,6 +85,10 @@ class Ventas extends React.Component {
                 moneda: '',
                 metodoPago: '',
                 observacion: '',
+                total: '0.00',
+                cobrado: '0.00',
+                porCobrar: '0.00',
+                valorRecibido: '',
                 bancos: [],
 
                 loadModal: false,
@@ -183,8 +197,18 @@ class Ventas extends React.Component {
                 signal: this.abortControllerModal.signal,
             });
 
+            const cobro = await axios.get("/api/cobro/cobroventa", {
+                signal: this.abortControllerModal.signal,
+                params: {
+                    idVenta: this.state.idVenta,
+                }
+            });
+
             await this.setStateAsync({
                 bancos: banco.data,
+                total: formatMoney(cobro.data.venta),
+                cobrado: formatMoney(cobro.data.cobrado),
+                porCobrar: formatMoney(cobro.data.venta - cobro.data.cobrado),
                 loadModal: false
             });
         } catch (error) {
@@ -209,8 +233,16 @@ class Ventas extends React.Component {
             return;
         }
 
+
+        if (!isNumeric(this.state.valorRecibido)) {
+            await this.setStateAsync({ messageWarning: "Ingrese el valor recibido." });
+            this.refValorRecibido.current.focus();
+            return;
+        }
+
         try {
-            console.log(this.state)
+            ModalAlertInfo("Cobro", "Procesando información...")
+            hideModal("modalCobro");
             let result = await axios.post("/api/cobro/cobro", {
                 "idCliente": this.state.idCliente,
                 "idUsuario": this.state.idUsuario,
@@ -220,11 +252,13 @@ class Ventas extends React.Component {
                 "metodoPago": this.state.metodoPago,
                 "estado": 1,
                 "observacion": this.state.observacion.trim().toUpperCase(),
+                "valorRecibido": this.state.valorRecibido
             })
-
-            console.log(result)
+            ModalAlertSuccess("Cobro", result.data, () => {
+                this.onEventPaginacion();
+            });
         } catch (error) {
-            console.log(error)
+            ModalAlertWarning("Cobro", "Se produjo un error un interno, intente nuevamente.")
         }
     }
 
@@ -237,7 +271,7 @@ class Ventas extends React.Component {
                     <div className="modal-dialog modal-md">
                         <div className="modal-content">
                             <div className="modal-header">
-                                <h5 className="modal-title">{this.state.nameModal}</h5>
+                                <h6 className="modal-title">{this.state.nameModal}</h6>
                                 <button type="button" className="close" data-bs-dismiss="modal" aria-label="Close">
                                     <span aria-hidden="true">&times;</span>
                                 </button>
@@ -351,16 +385,48 @@ class Ventas extends React.Component {
                                 </div>
 
                                 <div className="form-row">
-                                    <div className="row g-3">
-                                        <div className="col-auto">
-                                            <input type="text" readOnly className="form-control-plaintext" id="staticEmail2" value="email@example.com" />
-                                        </div>
-                                        <div className="col-auto">
-                                            <input type="password" className="form-control" id="inputPassword2" placeholder="Password" />
-                                        </div>
-                                        <div className="col-auto">
-                                            <button type="submit" className="btn btn-primary mb-3">Confirm identity</button>
-                                        </div>
+                                    <div className="form-group col-md-3">
+                                        <label>Total:</label>
+                                        <span
+                                            readOnly
+                                            className="form-control"
+                                        >{this.state.total}</span>
+                                    </div>
+                                    <div className="form-group col-md-3">
+                                        <label>Cobrado:</label>
+                                        <span
+                                            readOnly
+                                            className="form-control text-success"
+                                        >{this.state.cobrado}</span>
+                                    </div>
+                                    <div className="form-group col-md-3">
+                                        <label>Por cobrar:</label>
+                                        <span
+                                            readOnly
+                                            className="form-control text-danger"
+                                        >{this.state.porCobrar}</span>
+                                    </div>
+                                    <div className="form-group col-md-3">
+                                        <label>Valor recibido:</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            placeholder="0.00"
+                                            ref={this.refValorRecibido}
+                                            value={this.state.valorRecibido}
+                                            onChange={(event) => {
+                                                if (event.target.value.length > 0) {
+                                                    this.setState({
+                                                        valorRecibido: event.target.value,
+                                                        messageWarning: ""
+                                                    })
+                                                } else {
+                                                    this.setState({
+                                                        valorRecibido: event.target.value,
+                                                        messageWarning: "Ingrese el valor recibido."
+                                                    })
+                                                }
+                                            }} />
                                     </div>
                                 </div>
 
@@ -469,15 +535,15 @@ class Ventas extends React.Component {
                                                             }}><i className="fa fa-eye"></i></button>
                                                         </td>
                                                         <td className="text-center">
-                                                            <button className="btn btn-outline-success btn-sm" title="Agregar pago" onClick={() => {
+                                                            <button className="btn btn-outline-success btn-sm" disabled={item.estado === 1 ? true : false} title="Agregar pago" onClick={() => {
                                                                 this.openModalCobro(item)
                                                             }}><i className="fa fa-money"></i></button>
                                                         </td>
                                                         <td className="text-center">
-                                                            <button className="btn btn-outline-warning btn-sm" title="Editar" onClick={() => { }}><i className="fa fa-edit"></i></button>
+                                                            <button className="btn btn-outline-warning btn-sm" disabled={item.estado === 1 ? true : false} title="Editar" onClick={() => { }}><i className="fa fa-edit"></i></button>
                                                         </td>
                                                         <td className="text-center">
-                                                            <button className="btn btn-outline-danger btn-sm" title="Anular" onClick={() => { }}><i className="fa fa-remove"></i></button>
+                                                            <button className="btn btn-outline-danger btn-sm" disabled={item.estado === 1 ? true : false} title="Anular" onClick={() => { }}><i className="fa fa-remove"></i></button>
                                                         </td>
                                                     </tr>
                                                 )

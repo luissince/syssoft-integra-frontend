@@ -4,6 +4,11 @@ import {
     formatMoney,
     timeForma24,
     spinnerLoading,
+    ModalAlertDialog,
+    ModalAlertInfo,
+    ModalAlertSuccess,
+    ModalAlertWarning,
+    ModalAlertError
 } from '../tools/Tools';
 import Paginacion from '../tools/Paginacion';
 
@@ -34,7 +39,6 @@ class Cobros extends React.Component {
             this.setState(state, resolve)
         });
     }
-
 
     componentDidMount() {
         this.loadInit();
@@ -120,6 +124,30 @@ class Cobros extends React.Component {
         })
     }
 
+    onEventAnularCobro(idCobro) {
+        ModalAlertDialog("Cobro", "¿Está seguro de que desea eliminar la transacción? Esta operación no se puede deshacer.", async (value) => {
+            if (value) {
+                try {
+                    ModalAlertInfo("Cobro", "Procesando información...");
+                    let result = await axios.delete('/api/cobro/anular', {
+                        params: {
+                            "idCobro": idCobro,
+                        }
+                    })
+                    ModalAlertSuccess("Cobro", result.data, () => {
+                        this.loadInit();
+                    })
+                } catch (error) {
+                    if (error.response !== undefined) {
+                        ModalAlertWarning("Cobro", error.response.data)
+                    } else {
+                        ModalAlertError("Cobro", "Se genero un error interno, intente nuevamente.")
+                    }
+                }
+            }
+        })
+    }
+
     render() {
         return (
             <>
@@ -156,7 +184,6 @@ class Cobros extends React.Component {
                             <button className="btn btn-outline-secondary" onClick={() => this.loadInit()}>
                                 <i className="bi bi-arrow-clockwise"></i>
                             </button>
-
                         </div>
                     </div>
                 </div>
@@ -164,7 +191,7 @@ class Cobros extends React.Component {
                 <div className="row">
                     <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                         <div className="table-responsive">
-                            <table className="table table-striped" style={{ borderWidth: '1px', borderStyle: 'inset', borderColor: '#CFA7C9' }}>
+                            <table className="table table-striped table-bordered rounded">
                                 <thead>
                                     <tr>
                                         <th width="5%">#</th>
@@ -215,7 +242,7 @@ class Cobros extends React.Component {
                                                             </button>
                                                         </td>
                                                         <td>
-                                                            <button className="btn btn-outline-danger btn-sm" title="Eliminar" onClick={() => console.log('perro')}>
+                                                            <button className="btn btn-outline-danger btn-sm" title="Eliminar" onClick={() => this.onEventAnularCobro(item.idCobro)}>
                                                                 <i className="fa fa-remove"></i>
                                                             </button>
                                                         </td>

@@ -1,18 +1,27 @@
 import React from 'react';
 import axios from 'axios';
-import { keyNumberFloat, isNumeric, spinnerLoading } from '../../tools/Tools'
-
+import {
+    keyNumberFloat,
+    spinnerLoading,
+    ModalAlertInfo,
+    ModalAlertSuccess,
+    ModalAlertWarning,
+} from '../../tools/Tools';
+import { connect } from 'react-redux';
+import reniec from '../../../recursos/images/reniec.png';
+import sunat from '../../../recursos/images/sunat.png';
 
 class ClienteProceso extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             idCliente: '',
-
-            tipoDocumento: '',
-            numDocumento: '',
-            infoCliente: '',
+            idTipoDocumento: '',
+            tiposDocumentos: [],
+            documento: '',
+            informacion: '',
             telefono: '',
+            celular: '',
             fechaNacimiento: '',
             email: '',
             genero: '',
@@ -21,20 +30,21 @@ class ClienteProceso extends React.Component {
             estadoCivil: '',
             estado: true,
             observacion: '',
+            idUsuario: this.props.token.userToken.idUsuario,
 
             loading: true,
             messageWarning: '',
             msgLoading: 'Cargando datos...',
-
         }
 
         this.refTipoDocumento = React.createRef();
-        this.refNumDocumento = React.createRef();
-        this.refInfoCliente = React.createRef();
-        this.refTelefono = React.createRef();
+        this.refDocumento = React.createRef();
+        this.refInformacion = React.createRef();
+        this.refCelular = React.createRef();
 
         this.refDireccion = React.createRef();
 
+        this.abortController = new AbortController();
     }
 
     setStateAsync(state) {
@@ -44,127 +54,194 @@ class ClienteProceso extends React.Component {
     }
 
     async componentDidMount() {
-
-        let url = this.props.location.search;
-        let idResult = new URLSearchParams(url).get("idCliente");
-
-        await this.setStateAsync({
-            idCliente: idResult
-        })
-
-        if (this.state.idCliente === '') {
-            await this.setStateAsync({loading: false})
-            this.refTipoDocumento.current.focus();
-            
+        const url = this.props.location.search;
+        const idcliente = new URLSearchParams(url).get("idCliente");
+        if (idcliente !== null) {
+            this.loadDataId(idcliente)
         } else {
-            await this.setStateAsync({loading: true})
-            this.loadDataId(this.state.idCliente)
-            
+            this.loadData();
         }
+    }
 
+    componentWillUnmount() {
+        this.abortController.abort();
+    }
+
+    loadData = async () => {
+        try {
+            const documento = await axios.get("/api/tipodcumento/listcombo", {
+                signal: this.abortController.signal,
+            });
+
+            await this.setStateAsync({
+                tiposDocumentos: documento.data,
+
+                loading: false
+            })
+        } catch (error) {
+            if (error.message !== "canceled") {
+                await this.setStateAsync({
+                    msgLoading: "Se produjo un error un interno, intente nuevamente."
+                });
+            }
+        }
     }
 
     loadDataId = async (id) => {
         try {
+            const documento = await axios.get("/api/tipodcumento/listcombo", {
+                signal: this.abortController.signal
+            });
 
-            const result = await axios.get("/api/cliente/id", {
+            const cliente = await axios.get("/api/cliente/id", {
+                signal: this.abortController.signal,
                 params: {
                     idCliente: id
                 }
             });
 
             await this.setStateAsync({
-                tipoDocumento: result.data.tipoDocumento,
-                numDocumento: result.data.numDocumento,
-                infoCliente: result.data.infoCliente,
-                telefono: result.data.telefono,
-                fechaNacimiento: result.data.fechaNacimiento,
-                email: result.data.email,
-                genero: result.data.genero,
-                direccion: result.data.direccion,
-                ubigeo: result.data.ubigeo,
-                estadoCivil: result.data.estadoCivil,
-                estado: result.data.estado,
-                observacion: result.data.observacion,
-                idCliente: result.data.idCliente,
+                idTipoDocumento: cliente.data.idTipoDocumento,
+                documento: cliente.data.documento,
+                informacion: cliente.data.informacion,
+                telefono: cliente.data.telefono,
+                celular: cliente.data.celular,
+                fechaNacimiento: cliente.data.fechaNacimiento,
+                email: cliente.data.email,
+                genero: cliente.data.genero,
+                direccion: cliente.data.direccion,
+                ubigeo: cliente.data.ubigeo,
+                estadoCivil: cliente.data.estadoCivil,
+                estado: cliente.data.estado,
+                observacion: cliente.data.observacion,
+                idCliente: cliente.data.idCliente,
+
+                tiposDocumentos: documento.data,
+
                 loading: false
-                
             })
-
-
         } catch (error) {
-            await this.setStateAsync({
-                msgLoading: "Se produjo un error interno, intente nuevamente."
-              });
-            console.log(error)
+            if (error.message !== "canceled") {
+                await this.setStateAsync({
+                    msgLoading: "Se produjo un error un interno, intente nuevamente."
+                });
+            }
         }
     }
 
-    async onSaveProceso() {
-        // console.log(this.state)
-
-        if (this.state.tipoDocumento === "") {
-            this.setState({ messageWarning: "seleccione el tipo de documento" });
+    async onEventGuardar() {
+        if (this.state.idTipoDocumento === "") {
+            this.setState({ messageWarning: "Seleccione el tipo de documento." });
             this.refTipoDocumento.current.focus();
-        } else if (this.state.numDocumento === "") {
-            this.setState({ messageWarning: "Ingrese el número de documento" });
-            this.refNumDocumento.current.focus();
-        } else if (this.state.infoCliente === "") {
-            this.setState({ messageWarning: "Ingrese los apellidos y nombres" })
-            this.refInfoCliente.current.focus();
-        } else if (this.state.telefono === "") {
-            this.setState({ messageWarning: "Ingrese el número de celular o telefono" });
-            this.refTelefono.current.focus();
-        } else if (this.state.direccion === "") {
-            this.setState({ messageWarning: "Ingrese la dirección" });
-            this.refDireccion.current.focus();
-        } else {
-
-            try {
-
-                let result = null
-                if (this.state.idCliente !== '') {
-                    result = await axios.post('/api/cliente/update', {
-                        "tipoDocumento": this.refTipoDocumento.current.value,
-                        "numDocumento": this.state.numDocumento.toString().trim().toUpperCase(),
-                        "infoCliente": this.state.infoCliente.trim().toUpperCase(),
-                        "telefono": this.state.telefono.toString().trim().toUpperCase(),
-                        "fechaNacimiento": this.state.fechaNacimiento,
-                        "email": this.state.email.trim().toUpperCase(),
-                        "genero": this.state.genero,
-                        "direccion": this.state.direccion.trim().toUpperCase(),
-                        "ubigeo": this.state.ubigeo.trim().toUpperCase(),
-                        "estadoCivil": this.state.estadoCivil,
-                        "estado": this.state.estado,
-                        "observacion": this.state.observacion.trim().toUpperCase(),
-
-                        //idCliente
-                        "idCliente": this.state.idCliente
-                    })
-
-                } else {
-                    result = await axios.post('/api/cliente/add', {
-                        "tipoDocumento": this.refTipoDocumento.current.value,
-                        "numDocumento": this.state.numDocumento.toString().trim().toUpperCase(),
-                        "infoCliente": this.state.infoCliente.trim().toUpperCase(),
-                        "telefono": this.state.telefono.toString().trim().toUpperCase(),
-                        "fechaNacimiento": this.state.fechaNacimiento,
-                        "email": this.state.email.trim().toUpperCase(),
-                        "genero": this.state.genero,
-                        "direccion": this.state.direccion.trim().toUpperCase(),
-                        "ubigeo": this.state.ubigeo.trim().toUpperCase(),
-                        "estadoCivil": this.state.estadoCivil,
-                        "estado": this.state.estado,
-                        "observacion": this.state.observacion.trim().toUpperCase()
-                    });
-                }
-                // console.log(result);
-            } catch (error) {
-                console.log(error)
-                console.log(error.response)
-            }
+            return;
         }
 
+        if (this.state.documento === "") {
+            this.setState({ messageWarning: "Ingrese el número de documento." });
+            this.refDocumento.current.focus();
+            return;
+        }
+
+        if (this.state.informacion === "") {
+            this.setState({ messageWarning: "Ingrese los apellidos y nombres." })
+            this.refInformacion.current.focus();
+            return;
+        }
+
+        if (this.state.celular === "") {
+            this.setState({ messageWarning: "Ingrese el número de celular." });
+            this.refCelular.current.focus();
+            return;
+        }
+        if (this.state.direccion === "") {
+            this.setState({ messageWarning: "Ingrese la dirección." });
+            this.refDireccion.current.focus();
+            return;
+        }
+
+        try {
+            ModalAlertInfo("Cliente", "Procesando información...");
+            if (this.state.idCliente !== '') {
+                const cliente = await axios.post('/api/cliente/update', {
+                    "idTipoDocumento": this.state.idTipoDocumento,
+                    "documento": this.state.documento.toString().trim().toUpperCase(),
+                    "informacion": this.state.informacion.trim().toUpperCase(),
+                    "telefono": this.state.telefono.toString().trim().toUpperCase(),
+                    "celular": this.state.celular.toString().trim().toUpperCase(),
+                    "fechaNacimiento": this.state.fechaNacimiento,
+                    "email": this.state.email.trim().toUpperCase(),
+                    "genero": this.state.genero,
+                    "direccion": this.state.direccion.trim().toUpperCase(),
+                    "ubigeo": this.state.ubigeo.trim().toUpperCase(),
+                    "estadoCivil": this.state.estadoCivil,
+                    "estado": this.state.estado,
+                    "observacion": this.state.observacion.trim().toUpperCase(),
+
+                    //idCliente
+                    "idCliente": this.state.idCliente
+                })
+                ModalAlertSuccess("Cliente", cliente.data, () => {
+                    this.props.history.goBack();
+                });
+            } else {
+                const cliente = await axios.post('/api/cliente/add', {
+                    "idTipoDocumento": this.state.idTipoDocumento,
+                    "documento": this.state.documento.toString().trim().toUpperCase(),
+                    "informacion": this.state.informacion.trim().toUpperCase(),
+                    "telefono": this.state.telefono.toString().trim().toUpperCase(),
+                    "celular": this.state.celular.toString().trim().toUpperCase(),
+                    "fechaNacimiento": this.state.fechaNacimiento,
+                    "email": this.state.email.trim().toUpperCase(),
+                    "genero": this.state.genero,
+                    "direccion": this.state.direccion.trim().toUpperCase(),
+                    "ubigeo": this.state.ubigeo.trim().toUpperCase(),
+                    "estadoCivil": this.state.estadoCivil,
+                    "estado": this.state.estado,
+                    "observacion": this.state.observacion.trim().toUpperCase()
+                });
+                ModalAlertSuccess("Cliente", cliente.data, () => {
+                    this.props.history.goBack();
+                });
+            }
+        } catch (error) {
+            if (error.response != null) {
+                ModalAlertWarning("Proyecto", error.response.data);
+            } else {
+                ModalAlertWarning("Proyecto", "Se produjo un error un interno, intente nuevamente.");
+            }
+        }
+    }
+
+    async onEventGetApiReniec() {
+        if (this.state.documento.length !== 8) {
+            this.setState({ messageWarning: "Para iniciar la busqueda en número dni debe tener 8 caracteres." });
+            return;
+        }
+        try {
+            let result = await axios.get("https://dniruc.apisperu.com/api/v1/dni/" + this.state.documento + "?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6ImFsZXhhbmRlcl9keF8xMEBob3RtYWlsLmNvbSJ9.6TLycBwcRyW1d-f_hhCoWK1yOWG_HJvXo8b-EoS5MhE", {
+
+            });
+
+            console.log(result);
+        } catch (error) {
+
+        }
+    }
+
+    async onEventGetApiSunat() {
+        if (this.state.documento.length !== 11) {
+            this.setState({ messageWarning: "Para iniciar la busqueda en número ruc debe tener 11 caracteres." });
+            return;
+        }
+        try {
+            let result = await axios.get("https://dniruc.apisperu.com/api/v1/ruc/" + this.state.documento + "?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6ImFsZXhhbmRlcl9keF8xMEBob3RtYWlsLmNvbSJ9.6TLycBwcRyW1d-f_hhCoWK1yOWG_HJvXo8b-EoS5MhE", {
+
+            });
+
+            console.log(result);
+        } catch (error) {
+
+        }
     }
 
     render() {
@@ -189,7 +266,7 @@ class ClienteProceso extends React.Component {
 
                 <div className="row pb-3">
                     <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
-                        <button type="button" className="btn btn-primary mr-2" onClick={() => this.onSaveProceso()}>Guardar</button>
+                        <button type="button" className="btn btn-primary mr-2" onClick={() => this.onEventGuardar()}>Guardar</button>
                         <button type="button" className="btn btn-danger" onClick={() => this.props.history.goBack()}>Cancelar</button>
                     </div>
                 </div>
@@ -201,264 +278,272 @@ class ClienteProceso extends React.Component {
                         </div>
                 }
 
-                <div className="card card-default">
-                    {/* <div className="card-header"><span className="card-title">Representante</span></div> */}
-                    <div className="card-body">
+                <div className="row">
+                    <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
+                        <div className="form-group">
+                            <label>Tipo Documento <i className="fa fa-asterisk text-danger small"></i></label>
+                            <select
+                                className="form-control"
+                                value={this.state.idTipoDocumento}
+                                ref={this.refTipoDocumento}
+                                onChange={(event) => {
+                                    if (event.target.value.trim().length > 0) {
+                                        this.setState({
+                                            idTipoDocumento: event.target.value,
+                                            messageWarning: '',
+                                        });
+                                    } else {
+                                        this.setState({
+                                            idTipoDocumento: event.target.value,
+                                            messageWarning: 'Seleccione el tipo de documento',
+                                        });
+                                    }
+                                }}>
+                                <option value="">-- Seleccione --</option>
+                                {
+                                    this.state.tiposDocumentos.map((item, index) => (
+                                        <option key={index} value={item.idTipoDocumento}>{item.nombre}</option>
+                                    ))
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
+                        <div className="form-group">
+                            <label>N° de documento</label>
+                            <div className="input-group">
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    ref={this.refDocumento}
+                                    value={this.state.documento}
+                                    onChange={(event) => {
+                                        if (event.target.value.trim().length > 0) {
+                                            this.setState({
+                                                documento: event.target.value,
+                                                messageWarning: '',
+                                            });
+                                        } else {
+                                            this.setState({
+                                                documento: event.target.value,
+                                                messageWarning: 'Ingrese el número de documento',
+                                            });
+                                        }
+                                    }}
+                                    onKeyPress={keyNumberFloat}
+                                    placeholder='00000000' />
+                                <div className="input-group-append">
+                                    <button
+                                        className="btn btn-outline-secondary"
+                                        type="button"
+                                        title="Reniec"
+                                        onClick={() => this.onEventGetApiReniec()}>
+                                        <img src={reniec} alt="Reniec" width="12" />
+                                    </button>
+                                </div>
+                                <div className="input-group-append">
+                                    <button
+                                        className="btn btn-outline-secondary"
+                                        type="button"
+                                        title="Sunat"
+                                        onClick={() => this.onEventGetApiSunat()}>
+                                        <img src={sunat} alt="Sunat" width="12" />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-                        <div className="row">
-                            <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
-                                <div className="form-group">
-                                    <label>Tipo Documento</label>
-                                    <select
-                                        className="form-control"
-                                        value={this.state.tipoDocumento}
-                                        ref={this.refTipoDocumento}
-                                        onChange={(event) => {
-                                            if (event.target.value.trim().length > 0) {
-                                                this.setState({
-                                                    tipoDocumento: event.target.value,
-                                                    messageWarning: '',
-                                                });
-                                            } else {
-                                                this.setState({
-                                                    tipoDocumento: event.target.value,
-                                                    messageWarning: 'seleccione el tipo de documento',
-                                                });
-                                            }
-                                        }}>
-                                        <option value="">-- Seleccione --</option>
-                                        <option value="1">SIN DOCUMENTO</option>
-                                        <option value="2">DNI</option>
-                                        <option value="3">RUC</option>
-                                        <option value="4">CARNET DE EXTRANJERIA</option>
-                                        <option value="5">PASAPORTE</option>
-                                        <option value="6">PART. DE NACIMIENTO-IDENTIDAD</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
-                                <div className="form-group">
-                                    <label>N° de documento</label>
-                                    <div className="input-group">
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            ref={this.refNumDocumento}
-                                            value={this.state.numDocumento}
-                                            onChange={(event) => {
-                                                if (event.target.value.trim().length > 0) {
-                                                    this.setState({
-                                                        numDocumento: event.target.value,
-                                                        messageWarning: '',
-                                                    });
-                                                } else {
-                                                    this.setState({
-                                                        numDocumento: event.target.value,
-                                                        messageWarning: 'Ingrese el número de documento',
-                                                    });
-                                                }
-                                            }}
-                                            onKeyPress={keyNumberFloat}
-                                            placeholder='00000000' />
-                                        <div className="input-group-append">
-                                            <button className="btn btn-outline-secondary" type="button" title="Reniec" onClick={() => console.log("Reniec")}><i className="bi bi-person-fill"></i></button>
-                                        </div>
-                                        <div className="input-group-append">
-                                            <button className="btn btn-outline-secondary" type="button" title="Sunat" onClick={() => console.log("Sunat")}><i className="bi bi-people-fill"></i></button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                <div className="row">
+                    <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
+                        <div className="form-group">
+                            <label>Razón Social/Apellidos y nombres</label>
+                            <input
+                                type="text"
+                                className="form-control"
+                                ref={this.refInformacion}
+                                value={this.state.informacion}
+                                onChange={(event) => {
+                                    if (event.target.value.trim().length > 0) {
+                                        this.setState({
+                                            informacion: event.target.value,
+                                            messageWarning: '',
+                                        });
+                                    } else {
+                                        this.setState({
+                                            informacion: event.target.value,
+                                            messageWarning: 'Ingrese la razón social o apellidos y nombres',
+                                        });
+                                    }
+                                }}
+                                placeholder='Ingrese la razón social o apellidos y nombres' />
                         </div>
-                        <div className="row">
-                            <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
-                                <div className="form-group">
-                                    <label>Apellidos y nombres</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        ref={this.refInfoCliente}
-                                        value={this.state.infoCliente}
-                                        onChange={(event) => {
-                                            if (event.target.value.trim().length > 0) {
-                                                this.setState({
-                                                    infoCliente: event.target.value,
-                                                    messageWarning: '',
-                                                });
-                                            } else {
-                                                this.setState({
-                                                    infoCliente: event.target.value,
-                                                    messageWarning: 'Ingrese los apellidos y nombres',
-                                                });
-                                            }
-                                        }}
-                                        placeholder='Ingrese los apellidos y nombres' />
-                                </div>
-                            </div>
-                            <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
-                                <div className="form-group">
-                                    <label>N° de Celular/Telefono</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        value={this.state.telefono}
-                                        ref={this.refTelefono}
-                                        onChange={(event) => {
-                                            if (event.target.value.trim().length > 0) {
-                                                this.setState({
-                                                    telefono: event.target.value,
-                                                    messageWarning: '',
-                                                });
-                                            } else {
-                                                this.setState({
-                                                    telefono: event.target.value,
-                                                    messageWarning: 'Ingrese el número de celular o telefono',
-                                                });
-                                            }
-                                        }}
-                                        onKeyPress={keyNumberFloat}
-                                        placeholder='Ingrese el número de celular o telefono' />
-                                </div>
-                            </div>
+                    </div>
+                    <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
+                        <div className="form-group">
+                            <label>N° de Celular/Telefono</label>
+                            <input
+                                type="text"
+                                className="form-control"
+                                value={this.state.telefono}
+                                ref={this.refTelefono}
+                                onChange={(event) => {
+                                    if (event.target.value.trim().length > 0) {
+                                        this.setState({
+                                            telefono: event.target.value,
+                                            messageWarning: '',
+                                        });
+                                    } else {
+                                        this.setState({
+                                            telefono: event.target.value,
+                                            messageWarning: 'Ingrese el número de celular o telefono',
+                                        });
+                                    }
+                                }}
+                                onKeyPress={keyNumberFloat}
+                                placeholder='Ingrese el número de celular o telefono' />
                         </div>
-                        <div className="row">
-                            <div className="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12">
-                                <div className="form-group">
-                                    <label>Fecha de Nacimiento</label>
-                                    <input
-                                        type="date"
-                                        className="form-control"
-                                        value={this.state.fechaNacimiento}
-                                        onChange={(event) => this.setState({ fechaNacimiento: event.target.value })}
-                                    />
-                                </div>
-                            </div>
-                            <div className="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12">
-                                <div className="form-group">
-                                    <label>E-Mail</label>
-                                    <input
-                                        type="email"
-                                        className="form-control"
-                                        value={this.state.email}
-                                        onChange={(event) => this.setState({ email: event.target.value })}
-                                        placeholder='Ingrese el email' />
-                                </div>
-                            </div>
-                            <div className="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12">
-                                <div className="form-group">
-                                    <label>Genero</label>
-                                    <select
-                                        className="form-control"
-                                        value={this.state.genero}
-                                        onChange={(event) => {
-                                            if (event.target.value.trim().length > 0) {
-                                                this.setState({
-                                                    genero: event.target.value,
-                                                    messageWarning: '',
-                                                });
-                                            } else {
-                                                this.setState({
-                                                    genero: event.target.value,
-                                                    messageWarning: 'Seleccione el genero',
-                                                });
-                                            }
-                                        }}>
-                                        <option value="">-- Seleccione --</option>
-                                        <option value="1">Masculino</option>
-                                        <option value="2">Femenino</option>
-                                        <option value="3">Otros</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="row">
-                            <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
-                                <div className="form-group">
-                                    <label>Dirección</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        value={this.state.direccion}
-                                        ref={this.refDireccion}
-                                        onChange={(event) => {
-                                            if (event.target.value.trim().length > 0) {
-                                                this.setState({
-                                                    direccion: event.target.value,
-                                                    messageWarning: '',
-                                                });
-                                            } else {
-                                                this.setState({
-                                                    direccion: event.target.value,
-                                                    messageWarning: 'Ingrese la dirección',
-                                                });
-                                            }
-                                        }}
-                                        placeholder='Ingrese la dirección' />
-                                </div>
-                            </div>
-                            <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
-                                <div className="form-group">
-                                    <label>Ubigeo</label>
-                                    <div className="input-group">
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            ref={this.refUbigeo}
-                                            value={this.state.ubigeo}
-                                            onChange={(event) => this.setState({ ubigeo: event.target.value })}
-                                            placeholder="Ingrese el ubigeo" />
-                                        <div className="input-group-append">
-                                            <button className="btn btn-outline-secondary" type="button" title="Ubigeo" onClick={() => console.log("ubigeo")}><i className="bi bi-building"></i></button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="row">
-                            <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
-                                <div className="form-group">
-                                    <label>Estado Civil</label>
-                                    <select
-                                        className="form-control"
-                                        value={this.state.estadoCivil}
-                                        onChange={(event) => this.setState({ estadoCivil: event.target.value })}>
-                                        <option value="">-- seleccione --</option>
-                                        <option value="1">Soltero(a)</option>
-                                        <option value="2">Casado(a)</option>
-                                        <option value="3">Viudo(a)</option>
-                                        <option value="4">Divorciado(a)</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
-                                <div className="form-group">
-                                    <label>Estado:</label>
-                                    <div className="custom-control custom-switch">
-                                        <input
-                                            type="checkbox"
-                                            className="custom-control-input"
-                                            id="switch1"
-                                            checked={this.state.estado}
-                                            onChange={(value) => this.setState({ estado: value.target.checked })} />
-                                        <label className="custom-control-label" htmlFor="switch1">{this.state.estado == true ? "Activo" : "Inactivo"}</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="row">
-                            <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
-                                <div className="form-group">
-                                    <label>Observación</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        value={this.state.observacion}
-                                        onChange={(event) => this.setState({ observacion: event.target.value })}
-                                        placeholder='Ingrese alguna observación' />
-                                </div>
-                            </div>
-                        </div>
+                    </div>
+                </div>
 
+                <div className="row">
+                    <div className="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12">
+                        <div className="form-group">
+                            <label>Fecha de Nacimiento</label>
+                            <input
+                                type="date"
+                                className="form-control"
+                                value={this.state.fechaNacimiento}
+                                onChange={(event) => this.setState({ fechaNacimiento: event.target.value })}
+                            />
+                        </div>
+                    </div>
+                    <div className="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12">
+                        <div className="form-group">
+                            <label>E-Mail</label>
+                            <input
+                                type="email"
+                                className="form-control"
+                                value={this.state.email}
+                                onChange={(event) => this.setState({ email: event.target.value })}
+                                placeholder='Ingrese el email' />
+                        </div>
+                    </div>
+                    <div className="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12">
+                        <div className="form-group">
+                            <label>Genero</label>
+                            <select
+                                className="form-control"
+                                value={this.state.genero}
+                                onChange={(event) => {
+                                    if (event.target.value.trim().length > 0) {
+                                        this.setState({
+                                            genero: event.target.value,
+                                            messageWarning: '',
+                                        });
+                                    } else {
+                                        this.setState({
+                                            genero: event.target.value,
+                                            messageWarning: 'Seleccione el genero',
+                                        });
+                                    }
+                                }}>
+                                <option value="">-- Seleccione --</option>
+                                <option value="1">Masculino</option>
+                                <option value="2">Femenino</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="row">
+                    <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
+                        <div className="form-group">
+                            <label>Dirección</label>
+                            <input
+                                type="text"
+                                className="form-control"
+                                value={this.state.direccion}
+                                ref={this.refDireccion}
+                                onChange={(event) => {
+                                    if (event.target.value.trim().length > 0) {
+                                        this.setState({
+                                            direccion: event.target.value,
+                                            messageWarning: '',
+                                        });
+                                    } else {
+                                        this.setState({
+                                            direccion: event.target.value,
+                                            messageWarning: 'Ingrese la dirección',
+                                        });
+                                    }
+                                }}
+                                placeholder='Ingrese la dirección' />
+                        </div>
+                    </div>
+                    <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
+                        <div className="form-group">
+                            <label>Ubigeo</label>
+                            <div className="input-group">
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    ref={this.refUbigeo}
+                                    value={this.state.ubigeo}
+                                    onChange={(event) => this.setState({ ubigeo: event.target.value })}
+                                    placeholder="Ingrese el ubigeo" />
+                                <div className="input-group-append">
+                                    <button className="btn btn-outline-secondary" type="button" title="Ubigeo" onClick={() => console.log("ubigeo")}><i className="bi bi-building"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="row">
+                    <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
+                        <div className="form-group">
+                            <label>Estado Civil</label>
+                            <select
+                                className="form-control"
+                                value={this.state.estadoCivil}
+                                onChange={(event) => this.setState({ estadoCivil: event.target.value })}>
+                                <option value="">-- seleccione --</option>
+                                <option value="1">Soltero(a)</option>
+                                <option value="2">Casado(a)</option>
+                                <option value="3">Viudo(a)</option>
+                                <option value="4">Divorciado(a)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
+                        <div className="form-group">
+                            <label>Estado:</label>
+                            <div className="custom-control custom-switch">
+                                <input
+                                    type="checkbox"
+                                    className="custom-control-input"
+                                    id="switch1"
+                                    checked={this.state.estado}
+                                    onChange={(value) => this.setState({ estado: value.target.checked })} />
+                                <label className="custom-control-label" htmlFor="switch1">{this.state.estado == true ? "Activo" : "Inactivo"}</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="row">
+                    <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                        <div className="form-group">
+                            <label>Observación</label>
+                            <input
+                                type="text"
+                                className="form-control"
+                                value={this.state.observacion}
+                                onChange={(event) => this.setState({ observacion: event.target.value })}
+                                placeholder='Ingrese alguna observación' />
+                        </div>
                     </div>
                 </div>
             </>
@@ -466,4 +551,10 @@ class ClienteProceso extends React.Component {
     }
 }
 
-export default ClienteProceso;
+const mapStateToProps = (state) => {
+    return {
+        token: state.reducer
+    }
+}
+
+export default connect(mapStateToProps, null)(ClienteProceso);

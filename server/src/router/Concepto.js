@@ -7,18 +7,21 @@ const conec = new Conexion()
 
 router.get('/list', async function (req, res) {
     try {
-        // console.log(req.query)
         let lista = await conec.query(`SELECT 
-            idConcepto, nombre, tipoConcepto, DATE_FORMAT(fecha,'%d/%m/%Y') as fecha, hora 
+            idConcepto,
+            nombre,
+            tipoConcepto,
+            DATE_FORMAT(fecha,'%d/%m/%Y') as fecha,
+            hora 
             FROM concepto
             WHERE 
             ? = 0
             OR
             ? = 1 and nombre like concat(?,'%')
             LIMIT ?,?`, [
-            parseInt(req.query.option),
+            parseInt(req.query.opcion),
 
-            parseInt(req.query.option),
+            parseInt(req.query.opcion),
             req.query.buscar,
 
             parseInt(req.query.posicionPagina),
@@ -37,9 +40,9 @@ router.get('/list', async function (req, res) {
             ? = 0
             OR
             ? = 1 and nombre like concat(?,'%')`, [
-            parseInt(req.query.option),
+            parseInt(req.query.opcion),
 
-            parseInt(req.query.option),
+            parseInt(req.query.opcion),
             req.query.buscar
         ]);
 
