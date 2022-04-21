@@ -1,117 +1,101 @@
 import React from 'react';
+import axios from 'axios';
+import Paginacion from '../tools/Paginacion';
 
 class Creditos extends React.Component {
     constructor(props) {
         super(props);
+        this.state = {
+            //idCobro: '',
+
+            loading: false,
+            lista: [],
+
+            opcion: 0,
+            paginacion: 0,
+            totalPaginacion: 0,
+            filasPorPagina: 10,
+            messageTable: 'Cargando información...',
+            messagePaginacion: 'Mostranto 0 de 0 Páginas'
+        }
+        this.refTxtSearch = React.createRef();
+
+        this.idCodigo = "";
+        this.abortControllerTable = new AbortController();
+    }
+
+    fillTable = async (opcion, buscar) => {
+        try {
+            await this.setStateAsync({ loading: true, lista: [], messageTable: "Cargando información...", messagePaginacion: "Mostranto 0 de 0 Páginas" });
+
+            const result = await axios.get('/api/cobro/list', {
+                params: {
+                    "opcion": opcion,
+                    "buscar": buscar,
+                    "posicionPagina": ((this.state.paginacion - 1) * this.state.filasPorPagina),
+                    "filasPorPagina": this.state.filasPorPagina
+                }
+            });
+
+            let totalPaginacion = parseInt(Math.ceil((parseFloat(result.data.total) / this.state.filasPorPagina)));
+            let messagePaginacion = `Mostrando ${result.data.result.length} de ${totalPaginacion} Páginas`;
+
+            await this.setStateAsync({
+                loading: false,
+                lista: result.data.result,
+                totalPaginacion: totalPaginacion,
+                messagePaginacion: messagePaginacion
+            });
+        } catch (error) {
+            if (error.message !== "canceled") {
+                await this.setStateAsync({
+                    loading: false,
+                    lista: [],
+                    totalPaginacion: 0,
+                    messageTable: "Se produjo un error interno, intente nuevamente por favor.",
+                    messagePaginacion: "Mostranto 0 de 0 Páginas",
+                });
+            }
+        }
     }
 
     render() {
         return (
-            <>
-                {/* Inicio modal nuevo cliente*/}
-                <div className="modal fade" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                    <div className="modal-dialog">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h5 className="modal-title" id="exampleModalLabel"><i className="bi bi-bank"></i> Registrar Banco</h5>
-                                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-                            <div className="modal-body">
-                                <div className='row py-1'>
-                                    <div className='col-lg-4 col-md-4 col-sm-12 col-xs-12'>
-                                        <label>Nombre Banco: </label>
-                                    </div>
-                                    <div className='col-lg-8 col-md-8 col-sm-12 col-xs-12'>
-                                        <input type="" className="form-control" placeholder='Ingrese nombre banco' />
-                                    </div>
-                                </div>
-                                <div className='row py-1'>
-                                    <div className='col-lg-4 col-md-4 col-sm-12 col-xs-12'>
-                                        <label>Tipo de Cuenta: </label>
-                                    </div>
-                                    <div className='col-lg-8 col-md-8 col-sm-12 col-xs-12'>
-                                        <input type="" className="form-control" placeholder='corriente, recaudadora, etc' />
-                                    </div>
-                                </div>
-                                <div className='row py-1'>
-                                    <div className='col-lg-4 col-md-4 col-sm-12 col-xs-12'>
-                                        <label>Moneda: </label>
-                                    </div>
-                                    <div className='col-lg-8 col-md-8 col-sm-12 col-xs-12'>
-                                        <input type="" className="form-control" placeholder='Soles, Dolares, etc' />
-                                    </div>
-                                </div>
-                                <div className='row py-1'>
-                                    <div className='col-lg-4 col-md-4 col-sm-12 col-xs-12'>
-                                        <label>Representante: </label>
-                                    </div>
-                                    <div className='col-lg-8 col-md-8 col-sm-12 col-xs-12'>
-                                        <input type="" className="form-control" placeholder='inmobiliaria' />
-                                    </div>
-                                </div>
-                                <div className='row py-1'>
-                                    <div className='col-lg-4 col-md-4 col-sm-12 col-xs-12'>
-                                        <label>Estado: </label>
-                                    </div>
-                                    <div className='col-lg-8 col-md-8 col-sm-12 col-xs-12'>
-                                        <div className="form-check form-switch">
-                                            <form>
-                                                <div className="custom-control custom-switch">
-                                                    <input type="checkbox" className="custom-control-input" id="switch1"/>
-                                                        <label className="custom-control-label" htmlFor="switch1">Active o desactive</label>
-                                                </div>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="modal-footer">
-                                <button type="button" className="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-                                <button type="button" className="btn btn-primary">Aceptar</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {/* fin modal nuevo cliente*/}
-
-                <div className='row pb-3'>
-                    <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
-                        <section className="content-header">
-                            <h5 className="no-margin"> Creditos <small style={{ color: 'gray' }}> Lista </small> </h5>
-                        </section>
-                    </div>
-                </div>
-
+            <>                
                 <div className='row'>
-                    {/* <div className="col-lg-3 col-md-3 col-sm-12 col-xs-12">
-                        <label>Nuevo Ventas</label>
+                    <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
                         <div className="form-group">
-                            <button type="button" className="btn btn-success" data-toggle="modal" data-target="#exampleModal">
-                            <i className="bi bi-plus-lg"></i> Agregar Venta
-                            </button>
-                        </div>
-                    </div> */}
-
-                    <div className="col-lg-6 col-md-3 col-sm-12 col-xs-12">
-                        <label>Opción.</label>
-                        <div className="form-group">
-                            <button className="btn btn-light">
-                                <i className="bi bi-arrow-repeat"></i> Recargar
-                            </button>
+                            <h5>Lista de Créditos <small className="text-secondary">LISTA</small></h5>
                         </div>
                     </div>
+                </div>
 
-                    <div className="col-lg-6 col-md-6 col-sm-12 col-xs-12">
-                        <label>Filtrar por cliente, ruc, comprobante</label>
+                <div className="row">
+                    <div className="col-md-6 col-sm-12">
                         <div className="form-group">
-                            <div className="input-group mb-3">
-                                <input type="text" className="form-control" placeholder="Ingrese para buscar" aria-label="Recipient's username" aria-describedby="basic-addon2" />
-                                <div className="input-group-append">
-                                    <button className="btn btn-outline-secondary" type="button">Button</button>
+                            <div className="input-group mb-2">
+                                <div className="input-group-prepend">
+                                    <div className="input-group-text"><i className="bi bi-search"></i></div>
                                 </div>
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    placeholder="Buscar..."
+                                    ref={this.refTxtSearch}
+                                    onKeyUp={(event) => this.searchText(event.target.value)} />
                             </div>
+                        </div>
+                    </div>
+                    <div className="col-md-6 col-sm-12">
+                        <div className="form-group">
+                            <button className="btn btn-outline-info" onClick={() => this.onEventNuevoCobro()}>
+                                <i className="bi bi-file-plus"></i> Nuevo Registro
+                            </button>
+                            {" "}
+                            <button className="btn btn-outline-secondary" onClick={() => this.loadInit()}>
+                                <i className="bi bi-arrow-clockwise"></i>
+                            </button>
+
                         </div>
                     </div>
                 </div>
@@ -122,43 +106,41 @@ class Creditos extends React.Component {
                             <table className="table table-striped" style={{ borderWidth: '1px', borderStyle: 'inset', borderColor: '#CFA7C9' }}>
                                 <thead>
                                     <tr>
-                                        <th width="5%" className="text-center">#</th>
-                                        <th width="17%" className="text-center">Cliente</th>
-                                        <th width="10%" className="text-center">Comprobante</th>
-                                        <th width="10%" className="text-center">Sigu. Pago</th>                                        
-                                        <th width="10%" className="text-center">Cuota</th>
-                                        <th width="10%" className="text-center">Restante</th>
-                                        <th width="7%" className="text-center">Total</th>
-                                        <th width="6%" className="text-center">Cronograma</th>
-                                        <th width="8%" className="text-center">Letra</th>
-                                        <th width="7%" className="text-center">Cobro</th>
-                                        <th width="7%" className="text-center">Anular</th>
+                                        <th width="5%">#</th>
+                                        <th width="15%">Cliente</th>
+                                        <th width="10%">Cmp</th>
+                                        <th width="15%">Sig. Pago</th>
+                                        <th width="10%">Cuota</th>
+                                        <th width="10%">Restante</th>
+                                        <th width="10%">Total Venta</th>
+                                        <th width="5%">Cronograma</th>
+                                        <th width="5%">Letra</th>
+                                        <th width="5%">Cobros</th>
+                                        <th width="5%">C</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-
-                                </tbody>
-
                             </table>
                         </div>
-                        <div className="col-md-12" style={{ textAlign: 'center' }}>
-                            <nav aria-label="...">
+                    </div>
+                </div>
+
+                <div className="row">
+                    <div className="col-sm-12 col-md-5">
+                        <div className="dataTables_info mt-2" role="status" aria-live="polite">{this.state.messagePaginacion}</div>
+                    </div>
+                    <div className="col-sm-12 col-md-7">
+                        <div className="dataTables_paginate paging_simple_numbers">
+                            <nav aria-label="Page navigation example">
                                 <ul className="pagination justify-content-end">
-                                    <li className="page-item disabled">
-                                        <a className="page-link">Previous</a>
-                                    </li>
-                                    <li className="page-item"><a className="page-link" href="#">1</a></li>
-                                    <li className="page-item active" aria-current="page">
-                                        <a className="page-link" href="#">2</a>
-                                    </li>
-                                    <li className="page-item"><a className="page-link" href="#">3</a></li>
-                                    <li className="page-item">
-                                        <a className="page-link" href="#">Next</a>
-                                    </li>
+                                    <Paginacion
+                                        loading={this.state.loading}
+                                        totalPaginacion={this.state.totalPaginacion}
+                                        paginacion={this.state.paginacion}
+                                        fillTable={this.paginacionContext}
+                                    />
                                 </ul>
                             </nav>
                         </div>
-
                     </div>
                 </div>
             </>
