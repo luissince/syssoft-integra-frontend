@@ -35,6 +35,7 @@ router.get("/list", async function (req, res) {
             OR
             ? = 1 and c.documento like concat(?,'%')
             GROUP BY v.idVenta
+            ORDER BY v.fecha DESC, v.hora DESC
             LIMIT ?,?`, [
             parseInt(req.query.opcion),
 

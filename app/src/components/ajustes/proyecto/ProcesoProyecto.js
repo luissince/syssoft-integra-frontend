@@ -273,13 +273,9 @@ class ProcesoProyecto extends React.Component {
             }
         } catch (error) {
             if (error.response != null) {
-                ModalAlertWarning("Proyecto", error.response.data, () => {
-                    this.props.history.goBack();
-                });
+                ModalAlertWarning("Proyecto", error.response.data);
             } else {
-                ModalAlertWarning("Proyecto", "Se produjo un error un interno, intente nuevamente.", () => {
-                    this.props.history.goBack();
-                });
+                ModalAlertWarning("Proyecto", "Se produjo un error un interno, intente nuevamente.");
             }
         }
     }

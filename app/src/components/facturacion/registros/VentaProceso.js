@@ -239,7 +239,6 @@ class VentaProceso extends React.Component {
         let total = 0;
 
         for (let item of this.state.detalleVenta) {
-            console.log(item)
             let cantidad = item.cantidad;
             let valor = parseFloat(item.precioContado);
             let filter = item.impuestos.filter(imp =>
@@ -300,7 +299,7 @@ class VentaProceso extends React.Component {
                     "idMoneda": this.state.idMoneda,
                     "tipo": this.state.tipo,
                     "numCuota": this.state.numCuota === "" ? 0 : this.state.numCuota,
-                    "estado": 1,
+                    "estado": 2,
                     "detalleVenta": this.state.detalleVenta,
                 });
 

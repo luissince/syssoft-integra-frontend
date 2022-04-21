@@ -15,12 +15,12 @@ router.get('/list', async function (req, res) {
             OR
             ? = 1 and informacion like concat(?,'%')
             LIMIT ?,?`, [
-            parseInt(req.query.option),
+            parseInt(req.query.opcion),
 
-            parseInt(req.query.option),
+            parseInt(req.query.opcion),
             req.query.buscar,
 
-            parseInt(req.query.option),
+            parseInt(req.query.opcion),
             req.query.buscar,
 
             parseInt(req.query.posicionPagina),
@@ -34,7 +34,8 @@ router.get('/list', async function (req, res) {
             }
         });
 
-        let total = await conec.query(`SELECT COUNT(*) AS Total FROM cliente
+        let total = await conec.query(`SELECT COUNT(*) AS Total 
+        FROM cliente
         WHERE 
         ? = 0
         OR
@@ -42,12 +43,12 @@ router.get('/list', async function (req, res) {
         OR
         ? = 1 and informacion like concat(?,'%')`, [
 
-            parseInt(req.query.option),
+            parseInt(req.query.opcion),
 
-            parseInt(req.query.option),
+            parseInt(req.query.opcion),
             req.query.buscar,
 
-            parseInt(req.query.option),
+            parseInt(req.query.opcion),
             req.query.buscar
         ]);
 

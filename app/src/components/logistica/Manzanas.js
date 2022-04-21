@@ -23,7 +23,7 @@ class Manzanas extends React.Component {
             idProyecto: this.props.token.project.idProyecto,
 
             loadModal: false,
-            nameModal: 'Nuevo Comprobante',
+            nameModal: 'Nuevo Manzana',
             msgModal: 'Cargando datos...',
 
             loading: false,
@@ -67,7 +67,7 @@ class Manzanas extends React.Component {
                 nombre: '',
 
                 loadModal: false,
-                nameModal: 'Nuevo Comprobante',
+                nameModal: 'Nueva Manzana',
                 msgModal: 'Cargando datos...',
             });
             this.idCodigo = "";
@@ -109,6 +109,7 @@ class Manzanas extends React.Component {
             case 1:
                 this.fillTable(1, this.refTxtSearch.current.value);
                 break;
+            default: this.fillTable(0, "");
         }
     }
 
@@ -186,7 +187,7 @@ class Manzanas extends React.Component {
             this.refNombre.current.focus();
         } else {
             try {
-                ModalAlertInfo("Banco", "Procesando información...");
+                ModalAlertInfo("Manzana", "Procesando información...");
                 hideModal("modalManzana");
                 if (this.state.idManzana === "") {
                     const result = await axios.post("/api/manzana/", {
@@ -194,7 +195,7 @@ class Manzanas extends React.Component {
                         "idProyecto": this.state.idProyecto
                     });
 
-                    ModalAlertSuccess("Comprobante", result.data, () => {
+                    ModalAlertSuccess("Manzana", result.data, () => {
                         this.loadInit();
                     });
                 } else {
@@ -204,12 +205,12 @@ class Manzanas extends React.Component {
                         "idProyecto": this.state.idProyecto
                     });
 
-                    ModalAlertSuccess("Banco", result.data, () => {
+                    ModalAlertSuccess("Manzana", result.data, () => {
                         this.onEventPaginacion();
                     });
                 }
             } catch (error) {
-                ModalAlertWarning("Comprobante", "Se produjo un error un interno, intente nuevamente.");
+                ModalAlertWarning("Manzana", "Se produjo un error un interno, intente nuevamente.");
             }
         }
     }
