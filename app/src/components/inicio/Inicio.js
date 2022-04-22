@@ -26,6 +26,8 @@ import VentaDetalle from '../facturacion/registros/VentaDetalle';
 import ClienteProceso from '../facturacion/registros/ClienteProceso'
 import CobroProceso from '../facturacion/registros/CobroProceso';
 import CobroDetalle from '../facturacion/registros/CobroDetalle';
+import GastoProceso from '../tesoreria/registros/GastoProceso';
+import GastoDetalle from '../tesoreria/registros/GastoDetalle';
 import Perfiles from '../seguridad/Perfiles'
 import Usuarios from '../seguridad/Usuarios'
 import Accesos from '../seguridad/Accesos'
@@ -213,7 +215,18 @@ class Inicio extends React.Component {
                         />
                         <Route
                             path={`${path}/gastos`}
+                            exact={true}
                             render={(props) => <Gastos {...props} />}
+                        />
+                        <Route 
+                            path={`${path}/gastos/proceso`}
+                            exact={true}
+                            render={(props) => <GastoProceso {...props} />}
+                        />
+                        <Route 
+                            path={`${path}/gastos/detalle`}
+                            exact={true}
+                            render={(props) => <GastoDetalle {...props} />}
                         />
                         <Route
                             path={`${path}/repventas`}

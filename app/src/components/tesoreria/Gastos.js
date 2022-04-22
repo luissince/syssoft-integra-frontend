@@ -6,11 +6,6 @@ class Gastos extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            idGasto: '',
-            conceptoGasto: '',
-            fecha: '',
-            monto: '',
-            observacion: '',
 
             loading: true,
             lista: [],
@@ -30,17 +25,6 @@ class Gastos extends React.Component {
 
     async componentDidMount() {
         this.fillTable(0, 1, "");
-
-        clearModal("modalGasto", () => {
-            this.setState({
-                conceptoGasto: '',
-                fecha: '',
-                monto: '',
-                observacion: '',
-                idGasto: '',
-                messageWarning: ''
-            })
-        })
     }
 
     setStateAsync(state) {
@@ -78,235 +62,16 @@ class Gastos extends React.Component {
         }
     }
 
-    loadDataId = async (id) => {
-        try {
-            const result = await axios.get("/api/gasto/id", {
-                params: {
-                    idGasto: id
-                }
-            });
-            // console.log(result)
-            this.setState({
-                conceptoGasto: result.data.conceptoGasto,
-                fecha: result.data.fecha,
-                monto: result.data.monto,
-                observacion: result.data.observacion,
-                idGasto: result.data.idGasto,
-            });
-
-        } catch (error) {
-            console.log(error.response)
-        }
-    }
-
-    async save() {
-
-        if (this.state.conceptoGasto === "") {
-            this.setState({ messageWarning: "Seleccione el concepto del gasto" });
-            this.refConceptoGasto.current.focus();
-        } else if (this.state.fecha === "") {
-            this.setState({ messageWarning: "Seleccione la fecha" })
-            this.refFecha.current.focus();
-        } else if (this.state.monto === "") {
-            this.setState({ messageWarning: "Ingrese el monto" })
-            this.refMonto.current.focus();
-        } else if (this.state.observacion === "") {
-            this.setState({ messageWarning: "Ingrese una observación" })
-            this.refObservacion.current.focus();
-        }
-        else {
-
-            try {
-
-                let result = null
-
-                if (this.state.idGasto !== '') {
-                    result = await axios.post('/api/gasto/update', {
-                        "conceptoGasto": this.state.conceptoGasto,
-                        "fecha": this.state.fecha,
-                        "monto": this.state.monto.toString().trim().toUpperCase(),
-                        "observacion": this.state.observacion.trim().toUpperCase(),
-                        "idGasto": this.state.idGasto,
-                    })
-                    // console.log(result);
-
-                } else {
-                    result = await axios.post('/api/gasto/add', {
-                        "conceptoGasto": this.state.conceptoGasto,
-                        "fecha": this.state.fecha,
-                        "monto": this.state.monto.toString().trim().toUpperCase(),
-                        "observacion": this.state.observacion.trim().toUpperCase(),
-                    });
-                    // console.log(result);
-                }
-
-                // console.log(this.state)
-
-                this.closeModal()
-
-            } catch (error) {
-                console.log(error)
-                console.log(error.response)
-            }
-        }
-
-    }
-
-    openModal(id) {
-        if (id === '') {
-            showModal('modalGasto')
-            this.refConceptoGasto.current.focus();
-        }
-        else {
-            showModal('modalGasto')
-            this.loadDataId(id)
-        }
-    }
-
-    closeModal() {
-        hideModal('modalGasto')
-        this.setState({
-            conceptoGasto: '',
-            fecha: '',
-            monto: '',
-            observacion: '',
-
-            idGasto: '',
-            messageWarning: ''
-
+    onEventNuevoGasto() {
+        this.props.history.push({
+            pathname: `${this.props.location.pathname}/proceso`,
         })
     }
 
     render() {
         return (
-            <>
-                {/* Inicio modal */}
-                <div className="modal fade" id="modalGasto" data-backdrop="static">
-                    <div className="modal-dialog">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h5 className="modal-title"><i className="bi bi-currency-exchange"></i>{this.state.idGasto === '' ? " Registrar Gasto" : " Editar Gasto"}</h5>
-                                <button type="button" className="close" data-dismiss="modal" onClick={() => this.closeModal()}>
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-                            <div className="modal-body">
-
-                                {
-                                    this.state.messageWarning === '' ? null :
-                                        <div className="alert alert-warning" role="alert">
-                                            <i className="bi bi-exclamation-diamond-fill"></i> {this.state.messageWarning}
-                                        </div>
-                                }
-
-                                <div className="form-row">
-                                    <div className="form-group col-md-12">
-                                        <label>Concepto del Gasto</label>
-                                        <div className="input-group">
-                                            <select
-                                                className="form-control"
-                                                value={this.state.conceptoGasto}
-                                                ref={this.refConceptoGasto}
-                                                onChange={(event) => {
-                                                    if (event.target.value.length > 0) {
-                                                        this.setState({
-                                                            conceptoGasto: event.target.value,
-                                                            messageWarning: '',
-                                                        });
-                                                    } else {
-                                                        this.setState({
-                                                            conceptoGasto: event.target.value,
-                                                            messageWarning: 'Seleccione el concepto del gasto',
-                                                        });
-                                                    }
-                                                }}>
-                                                <option value="">-- Seleccione --</option>
-                                                <option value="1">PAGO DE OFICINA</option>
-                                                <option value="2">PAGO DE LUZ</option>
-                                                <option value="3">TRASPORTE</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div className="form-group col-md-12">
-                                        <label>Fecha del Gasto</label>
-                                        <input
-                                            type="date"
-                                            className="form-control"
-                                            value={this.state.fecha}
-                                            ref={this.refFecha}
-                                            onChange={(event) => {
-                                                if (event.target.value.length > 0) {
-                                                    this.setState({
-                                                        fecha: event.target.value,
-                                                        messageWarning: '',
-                                                    });
-                                                } else {
-                                                    this.setState({
-                                                        fecha: event.target.value,
-                                                        messageWarning: 'Seleccione la fecha',
-                                                    });
-                                                }
-                                            }} />
-                                    </div>
-                                </div>
-
-                                <div className="form-row">
-                                    <div className="form-group col-md-12">
-                                        <label>Monto</label>
-                                        <input
-                                            type="number"
-                                            className="form-control"
-                                            value={this.state.monto}
-                                            ref={this.refMonto}
-                                            onChange={(event) => {
-                                                if (event.target.value.length > 0) {
-                                                    this.setState({
-                                                        monto: event.target.value,
-                                                        messageWarning: '',
-                                                    });
-                                                } else {
-                                                    this.setState({
-                                                        monto: event.target.value,
-                                                        messageWarning: 'Ingrese el monto',
-                                                    });
-                                                }
-                                            }}
-                                            placeholder="Ingrese el monto" />
-                                    </div>
-                                    <div className="form-group col-md-12">
-                                        <label>Observación</label>
-                                        <textarea
-                                            className="form-control"
-                                            value={this.state.observacion}
-                                            ref={this.refObservacion}
-                                            onChange={(event) => {
-                                                if (event.target.value.trim().length > 0) {
-                                                    this.setState({
-                                                        observacion: event.target.value,
-                                                        messageWarning: '',
-                                                    });
-                                                } else {
-                                                    this.setState({
-                                                        observacion: event.target.value,
-                                                        messageWarning: 'Ingrese una observación',
-                                                    });
-                                                }
-                                            }}
-                                            placeholder="Ingrese una observación">
-                                        </textarea>
-                                    </div>
-                                </div>
-
-                            </div>
-                            <div className="modal-footer">
-                                <button type="button" className="btn btn-primary" onClick={() => this.save()}>Guardar</button>
-                                <button type="button" className="btn btn-secondary" data-dismiss="modal" onClick={() => this.closeModal()}>Cerrar</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {/* fin modal */}
-
+  
+<>
                 <div className='row'>
                     <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
                         <div className="form-group">
@@ -328,7 +93,7 @@ class Gastos extends React.Component {
                     </div>
                     <div className="col-md-6 col-sm-12">
                         <div className="form-group">
-                            <button className="btn btn-outline-info" onClick={() => this.openModal(this.state.idGasto)}>
+                            <button className="btn btn-outline-info" onClick={() =>this.onEventNuevoGasto()}>
                                 <i className="bi bi-file-plus"></i> Nuevo Registro
                             </button>
                             {" "}
