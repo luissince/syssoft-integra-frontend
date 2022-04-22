@@ -278,6 +278,34 @@ router.get("/id", async function (req, res) {
         console.log(error);
         res.status(500).send("Error interno de conexión, intente nuevamente.")
     }
+});
+
+router.get("/credito", async function (req, res) {
+    try {
+        let credito = await conec.query(`SELECT 
+        v.idVenta, 
+        cl.documento, 
+        cl.informacion, 
+        cm.nombre, 
+        v.serie, 
+        v.numeracion, 
+        v.numCuota, 
+        v.fecha, 
+        v.hora, 
+        IFNULL(SUM(vd.precio*vd.cantidad),0) AS total,
+        (SELECT IFNULL(SUM(cv.precio),0) FROM cobro AS c LEFT JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro WHERE c.idProcedencia = v.idVenta ) AS cobrado 
+        FROM venta AS v 
+        INNER JOIN comprobante AS cm ON v.idComprobante = cm.idComprobante 
+        INNER JOIN cliente AS cl ON v.idCliente = cl.idCliente 
+        LEFT JOIN ventaDetalle AS vd ON vd.idVenta = v.idVenta 
+        WHERE v.estado = 2 
+        v.fecha DESC, v.hora DESC
+        GROUP BY v.idVenta;`);
+
+        res.status(200).send(credito)
+    } catch (error) {
+        res.status(500).send("Error interno de conexión, intente nuevamente.")
+    }
 })
 
 module.exports = router;

@@ -134,6 +134,20 @@ export function keyNumberFloat(event) {
   }
 }
 
+export function keyNumberPhone(event) {
+  var key = window.Event ? event.which : event.keyCode;
+  var c = String.fromCharCode(key);
+  if ((c < "0" || c > "9") && c !== "\b" && c !== "." && c !== "+") {
+    event.preventDefault();
+  }
+  if (c === "." && event.target.value.includes(".")) {
+    event.preventDefault();
+  }
+  if (c === "+" && event.target.value.includes("+")) {
+    event.preventDefault();
+  }
+}
+
 export function timeForma24(value) {
   var hourEnd = value.indexOf(":");
   var H = +value.substr(0, hourEnd);
@@ -144,6 +158,11 @@ export function timeForma24(value) {
 
 export function getExtension(filename) {
   return filename.split("?")[0].split("#")[0].split(".").pop();
+}
+
+export function convertNullText(value) {
+  let text = value === undefined ? null : value;
+  return text === null ? "" : text;
 }
 
 export function getCookie(cname) {
