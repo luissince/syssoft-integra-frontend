@@ -26,36 +26,9 @@ class Creditos extends React.Component {
 
     fillTable = async (opcion, buscar) => {
         try {
-            await this.setStateAsync({ loading: true, lista: [], messageTable: "Cargando información...", messagePaginacion: "Mostranto 0 de 0 Páginas" });
-
-            const result = await axios.get('/api/cobro/list', {
-                params: {
-                    "opcion": opcion,
-                    "buscar": buscar,
-                    "posicionPagina": ((this.state.paginacion - 1) * this.state.filasPorPagina),
-                    "filasPorPagina": this.state.filasPorPagina
-                }
-            });
-
-            let totalPaginacion = parseInt(Math.ceil((parseFloat(result.data.total) / this.state.filasPorPagina)));
-            let messagePaginacion = `Mostrando ${result.data.result.length} de ${totalPaginacion} Páginas`;
-
-            await this.setStateAsync({
-                loading: false,
-                lista: result.data.result,
-                totalPaginacion: totalPaginacion,
-                messagePaginacion: messagePaginacion
-            });
+            
         } catch (error) {
-            if (error.message !== "canceled") {
-                await this.setStateAsync({
-                    loading: false,
-                    lista: [],
-                    totalPaginacion: 0,
-                    messageTable: "Se produjo un error interno, intente nuevamente por favor.",
-                    messagePaginacion: "Mostranto 0 de 0 Páginas",
-                });
-            }
+            
         }
     }
 

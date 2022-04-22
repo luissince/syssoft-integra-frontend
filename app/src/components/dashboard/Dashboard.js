@@ -37,7 +37,7 @@ class Dashboard extends React.Component {
                                             <i className="bi bi-calendar-week-fill"></i>
                                         </div>
                                         <div className="text-right pt-1">
-                                            <p className="text-sm mb-0 text-capitalize">Today's Money</p>
+                                            <p className="text-sm mb-0 text-capitalize">Dinero actual</p>
                                             <h4 className="mb-0">$53k</h4>
                                         </div>
                                     </div>
@@ -54,7 +54,7 @@ class Dashboard extends React.Component {
                                             <i className="bi bi-person-fill"></i>
                                         </div>
                                         <div className="text-right pt-1">
-                                            <p className="text-sm mb-0 text-capitalize">Today's User</p>
+                                            <p className="text-sm mb-0 text-capitalize">Total de Usuarios</p>
                                             <h4 className="mb-0">2,300</h4>
                                         </div>
                                     </div>
@@ -71,7 +71,7 @@ class Dashboard extends React.Component {
                                             <i className="bi bi-person-fill" style={{ margin: 'auto' }}></i>
                                         </div>
                                         <div className="text-right pt-1">
-                                            <p className="text-sm mb-0 text-capitalize">New Clients</p>
+                                            <p className="text-sm mb-0 text-capitalize">Total de Lotes</p>
                                             <h4 className="mb-0">3,462</h4>
                                         </div>
                                     </div>
@@ -88,7 +88,7 @@ class Dashboard extends React.Component {
                                             <i className="bi bi-clipboard-data-fill"></i>
                                         </div>
                                         <div className="text-right pt-1">
-                                            <p className="text-sm mb-0 text-capitalize">Sales</p>
+                                            <p className="text-sm mb-0 text-capitalize">Ventas</p>
                                             <h4 className="mb-0">$103,430</h4>
                                         </div>
                                     </div>
