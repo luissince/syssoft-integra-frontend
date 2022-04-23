@@ -54,8 +54,8 @@ class Menu extends React.Component {
                         {
                             userToken.menus.map((menu, index) => (
                                 menu.submenu.length === 0 && menu.estado === 1 ?
-                                    <MenuItem key={index} icon={<i className="bi bi-apple"></i>} id={`${menu.nombre.toLowerCase()}`}>
-                                        <Link to={`${this.props.url}/${menu.nombre.toLowerCase()}`} >{menu.nombre}</Link>
+                                    <MenuItem key={index} icon={<i className="bi bi-apple"></i>} id={`${menu.ruta}`}>
+                                        <Link to={`${this.props.url}/${menu.ruta}`} >{menu.nombre}</Link>
                                     </MenuItem>
                                     :
 
@@ -69,7 +69,7 @@ class Menu extends React.Component {
                                                 menu.submenu.map((submenu, indexm) => (
                                                     submenu.estado === 1 ?
                                                         <MenuItem key={indexm}>
-                                                            <Link to={`${this.props.url}/${submenu.nombre.toLowerCase()}`}>{submenu.nombre}</Link>
+                                                            <Link to={`${this.props.url}/${submenu.ruta}`}>{submenu.nombre}</Link>
                                                         </MenuItem>
                                                         :
                                                         null
