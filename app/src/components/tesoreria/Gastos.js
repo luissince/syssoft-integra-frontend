@@ -1,6 +1,6 @@
 import React from 'react';
 import axios from 'axios';
-import { showModal, hideModal, clearModal, spinnerLoading } from '../tools/Tools';
+import { showModal, hideModal, clearModal, spinnerLoading, formatMoney, timeForma24 } from '../tools/Tools';
 
 class Gastos extends React.Component {
     constructor(props) {
@@ -70,8 +70,8 @@ class Gastos extends React.Component {
 
     render() {
         return (
-  
-<>
+
+            <>
                 <div className='row'>
                     <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
                         <div className="form-group">
@@ -93,7 +93,7 @@ class Gastos extends React.Component {
                     </div>
                     <div className="col-md-6 col-sm-12">
                         <div className="form-group">
-                            <button className="btn btn-outline-info" onClick={() =>this.onEventNuevoGasto()}>
+                            <button className="btn btn-outline-info" onClick={() => this.onEventNuevoGasto()}>
                                 <i className="bi bi-file-plus"></i> Nuevo Registro
                             </button>
                             {" "}
@@ -111,7 +111,7 @@ class Gastos extends React.Component {
                                 <thead>
                                     <tr>
                                         <th width="5%">#</th>
-                                        <th width="10%">Concepto</th>
+                                        <th width="10%">Usuario</th>
                                         <th width="15%">Monto</th>
                                         <th width="10%">Fecha</th>
                                         <th width="10%">Observación</th>
@@ -122,7 +122,7 @@ class Gastos extends React.Component {
                                     {
                                         this.state.loading ? (
                                             <tr>
-                                                <td className="text-center" colSpan="9">
+                                                <td className="text-center" colSpan="6">
                                                     {spinnerLoading()}
                                                 </td>
                                             </tr>
@@ -135,12 +135,16 @@ class Gastos extends React.Component {
                                                 return (
                                                     <tr key={index}>
                                                         <td>{item.id}</td>
-                                                        <td>{item.conceptoGasto}</td>
-                                                        <td>{item.monto}</td>
-                                                        <td>{item.fecha + ' ' + item.hora}</td>
+                                                        <td>{item.nombreUse + ' ' + item.apellidoUse}</td>
+                                                        <td>{item.simbolo + ' ' + formatMoney(item.monto)}</td>
+                                                        <td>{item.fecha + ' ' + timeForma24(item.hora)}</td>
                                                         <td>{item.observacion}</td>
                                                         <td>
-                                                            <button className="btn btn-outline-dark btn-sm" title="Editar" onClick={() => this.openModal(item.idGasto)}><i className="bi bi-pencil"></i></button>
+                                                            <button className="btn btn-outline-info btn-sm" title="Detalle" onClick={() => {
+                                                                this.props.history.push({ pathname: `${this.props.location.pathname}/detalle`, search: "?idCobro=" + item.idGasto })
+                                                            }}>
+                                                                <i className="fa fa-eye"></i>
+                                                            </button>
                                                         </td>
                                                     </tr>
                                                 )

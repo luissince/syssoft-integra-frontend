@@ -153,7 +153,7 @@ router.get('/id', async function (req, res) {
 
 router.get('/listcombo', async function (req, res) {
     try {
-        let result = await conec.query('SELECT idMoneda,nombre FROM moneda');
+        let result = await conec.query('SELECT idMoneda,nombre, simbolo FROM moneda');
         res.status(200).send(result);
     } catch (error) {
         res.status(500).send("Error interno de conexión, intente nuevamente.");

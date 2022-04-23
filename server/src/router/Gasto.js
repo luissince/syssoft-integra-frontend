@@ -9,12 +9,29 @@ router.get('/list', async function (req, res) {
     try {
         // console.log(req.query)
         let lista = await conec.query(`SELECT 
-            idGasto, conceptoGasto, DATE_FORMAT(fecha,'%d/%m/%Y') as fecha, hora, monto, observacion 
-            FROM gasto
+            g.idGasto, 
+            u.nombres AS nombreUse, 
+            u.apellidos AS apellidoUse, 
+            m.simbolo, 
+            b.nombre AS nombreBanco, 
+            b.tipoCuenta, 
+            g.metodoPago, 
+            g.estado, 
+            g.observacion, 
+            DATE_FORMAT(g.fecha,'%d/%m/%Y') AS fecha, 
+            g.hora, 
+            IFNULL(SUM(gd.precio*gd.cantidad), 0) AS monto
+            FROM gasto AS g
+            INNER JOIN usuario AS u ON g.idUsuario = u.idUsuario
+            INNER JOIN moneda AS m ON g.idMoneda = m.idMoneda
+            INNER JOIN banco AS b ON g.idBanco = b.idBanco
+            LEFT JOIN gastoDetalle AS gd ON g.idGasto = gd.idGasto
             WHERE 
             ? = 0
             OR
-            ? = 1 and conceptoGasto like concat(?,'%')
+            ? = 1 AND u.nombres LIKE CONCAT(?,'%')
+            GROUP BY g.idGasto
+            ORDER BY g.fecha DESC, g.hora DESC
             LIMIT ?,?`, [
             parseInt(req.query.option),
 
@@ -32,11 +49,15 @@ router.get('/list', async function (req, res) {
             }
         });
 
-        let total = await conec.query(`SELECT COUNT(*) AS Total FROM gasto
+        let total = await conec.query(`SELECT COUNT(*) AS Total 
+            FROM gasto AS g
+            INNER JOIN usuario AS u ON g.idUsuario = u.idUsuario
+            INNER JOIN moneda AS m ON g.idMoneda = m.idMoneda
+            INNER JOIN banco AS b ON g.idBanco = b.idBanco
             WHERE 
             ? = 0
             OR
-            ? = 1 and conceptoGasto like concat(?,'%')`, [
+            ? = 1 AND u.nombres LIKE CONCAT(?,'%')`, [
             parseInt(req.query.option),
 
             parseInt(req.query.option),
@@ -54,6 +75,8 @@ router.get('/list', async function (req, res) {
 router.post('/add', async function (req, res) {
     let connection = null;
     try {
+
+        console.log(req.body)
         connection = await conec.beginTransaction();
 
         let result = await conec.execute(connection, 'SELECT idGasto FROM gasto');
@@ -84,11 +107,19 @@ router.post('/add', async function (req, res) {
 
         await conec.execute(connection, `INSERT INTO gasto(
             idGasto, 
-            conceptoGasto, fecha, hora, monto, observacion) 
-            VALUES(?,?,?,?,?,?)`, [
+            idUsuario, idMoneda, idBanco, metodoPago, estado, observacion, fecha, hora) 
+            VALUES(?,?,?,?,?,?,?,?,?)`, [
             idGasto, 
-            req.body.conceptoGasto, req.body.fecha, currentTime(), req.body.monto, req.body.observacion
+            req.body.idUsuario, req.body.idMoneda, req.body.idBanco, req.body.metodoPago, req.body.estado, req.body.observacion, currentDate(), currentTime()
         ])
+
+        for (let item of req.body.gastoDetalle) {
+            await conec.execute(connection, `INSERT INTO gastoDetalle(
+                idGasto, idConcepto, precio, cantidad, idImpuesto)
+                VALUES(?,?,?,?,?)`, [
+                idGasto, item.idConcepto, item.monto, item.cantidad, item.idImpuesto
+            ])
+        }
 
         await conec.commit(connection);
         res.status(200).send('Datos insertados correctamente')
@@ -121,27 +152,27 @@ router.get('/id', async function (req, res) {
 
 });
 
-router.post('/update', async function (req, res) {
-    let connection = null;
-    try {
+// router.post('/update', async function (req, res) {
+//     let connection = null;
+//     try {
 
-        connection = await conec.beginTransaction();
-        await conec.execute(connection, `UPDATE gasto SET 
-            conceptoGasto=?, fecha=?, hora=?, monto=?, observacion=?,
-            WHERE idGasto=?`, [ 
-            req.body.conceptoGasto, req.body.fecha, currentTime(), req.body.monto, req.body.observacion, 
-            req.body.idGasto, 
+//         connection = await conec.beginTransaction();
+//         await conec.execute(connection, `UPDATE gasto SET 
+//             conceptoGasto=?, fecha=?, hora=?, monto=?, observacion=?,
+//             WHERE idGasto=?`, [ 
+//             req.body.conceptoGasto, req.body.fecha, currentTime(), req.body.monto, req.body.observacion, 
+//             req.body.idGasto, 
             
-        ])
+//         ])
 
-        await conec.commit(connection)
-        res.status(200).send('Los datos se actualizaron correctamente.')
-    } catch (error) {
-        if (connection != null) {
-            conec.rollback(connection);
-        }
-        res.status(500).send("Se produjo un error de servidor, intente nuevamente.");
-    }
-});
+//         await conec.commit(connection)
+//         res.status(200).send('Los datos se actualizaron correctamente.')
+//     } catch (error) {
+//         if (connection != null) {
+//             conec.rollback(connection);
+//         }
+//         res.status(500).send("Se produjo un error de servidor, intente nuevamente.");
+//     }
+// });
 
 module.exports = router;
