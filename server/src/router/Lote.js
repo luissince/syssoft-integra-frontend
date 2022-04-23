@@ -258,19 +258,30 @@ router.get('/detalle', async function (req, res) {
         l.idLote,
         m.nombre as manzana,
         l.descripcion as lote,
+        l.costo,
+        l.precio,
+        l.estado,
         c.nombre as comprobante,
+        cl.informacion as cliente,
         v.idVenta,
         v.serie,
         v.numeracion,
+        DATE_FORMAT(v.fecha,'%d/%m/%Y') as fecha, 
+        v.hora,
+        v.tipo,
+        v.estado as vestado,
         cl.documento,
-        cl.informacion
+        cl.informacion,
+        IFNULL(SUM(vdv.precio*vdv.cantidad),0) AS monto
         FROM lote AS l
         INNER JOIN manzana AS m  ON l.idManzana = m.idManzana
         INNER JOIN ventaDetalle AS vd ON l.idLote = vd.idLote
         INNER JOIN venta AS v ON v.idVenta = vd.idVenta
         INNER JOIN comprobante AS c ON c.idComprobante = v.idComprobante
         INNER JOIN cliente AS cl ON cl.idCliente = v.idCliente
-        WHERE l.idLote = ?`, [
+        LEFT JOIN ventaDetalle AS vdv ON vdv.idVenta = v.idVenta
+        WHERE l.idLote = ?
+        GROUP BY v.idVenta`, [
             req.query.idLote,
         ]);
 
@@ -298,13 +309,14 @@ router.get('/detalle', async function (req, res) {
             ]);
 
             res.status(200).send({
-                cabecera: cabecera,
+                cabecera: cabecera[0],
                 detalle: detalle
             });
         } else {
             res.status(400).send("No se pudo cargar la información requerida.");
         }
     } catch (error) {
+        console.log(error)
         res.status(500).send("Error interno de conexión, intente nuevamente.");
     }
 });

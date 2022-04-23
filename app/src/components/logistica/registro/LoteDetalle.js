@@ -5,21 +5,32 @@ class LoteDetalle extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            order: '',
-            weight: '',
-            abilities: [],
-            id:'',
-            name: '',
-            is_default: '',
-            height: ''
+            detalle: [],
+            fecha: '',
+            manzana: '',
+            serie: '',
+            lote: '',
+            cliente: '',
+            costo: '',
+            precio: '',
+            estado: '',
+            vestado: ''
         }
     }
 
     /*SE EJECUTA CUANDO EL COMPONENTE SE MONTO O SE TERMINA DE CARGAR LA GUI*/
     async componentDidMount() {
         try{
-            let result = await axios.get("/api/lote/detalle");
+            let result = await axios.get("/api/lote/detalle",{
+                params: {
+                    idLote:"LT0001"
+                }
+            });
+
             console.log(result.data)
+
+            const { estado } = result.data.cabecera;
+            console.log(estado)
             //console.log(result.data.abilities)
             //console.log(result.data.moves)
 
@@ -32,6 +43,19 @@ class LoteDetalle extends React.Component {
             //     is_default: result.data.is_default,
             //     height: result.data.height
             // });
+
+            this.setState({
+                detalle: result.data.detalle,
+                manzana: result.data.cabecera.manzana,
+                fecha: result.data.cabecera.fecha,
+                serie: result.data.cabecera.serie,
+                lote: result.data.cabecera.lote,
+                cliente: result.data.cabecera.cliente,
+                costo: result.data.cabecera.costo,
+                precio: result.data.cabecera.precio,
+                estado: result.data.cabecera.estado,
+                vestado: result.data.cabecera.vestado
+            });
         }catch(error){
             console.log(error)
         }
@@ -69,18 +93,20 @@ class LoteDetalle extends React.Component {
                     <div className="col-5">
                         <div className="form-group">
                             --Descripcion-- <br></br>
-                            Manzana: { this.state.order }<br></br>
-                            Descripción de Lote: { this.state.weight }<br></br>
-                            Costo Aproximado (S/.): {this.state.id } <br></br>
-                            Precio de Venta Contado (S/.): { this.state.name } <br></br>
-                            Estado: { this.state.is_default === false ? "false" : "true" } <br></br> <br></br>
+                            Manzana: { this.state.manzana }<br></br>
+                            Descripción de Lote: { this.state.lote } <br></br>
+                            Costo Aproximado (S/.): { this.state.costo } <br></br>
+                            Precio de Venta Contado (S/.): { this.state.precio } <br></br>
+                            Estado: { this.state.estado }  <br></br> <br></br>
+
                             --Medidas-- <br></br>
-                            Medida Frontal (ML): { this.state.height } <br></br>
+                            Medida Frontal (ML):<br></br>
                             Costado Derecho (ML):  <br></br>
                             Costado Izquierdo (ML): <br></br>
                             Medida Fondo (ML): <br></br>
                             Area Lote (ML): <br></br>
                             N° Partida: <br></br> <br></br>
+
                             --Límite-- <br></br>
                             Limite, Frontal / Norte / Noroeste: <br></br>
                             Límite, Derecho / Este / Sureste: <br></br>
@@ -90,12 +116,12 @@ class LoteDetalle extends React.Component {
                         </div>
                     </div>
                     <div className="col-7">
-                        Comprobante: <br></br>
-                        Cliente: <br></br>
-                        Fecha: <br></br>
+                        Comprobante: { this.state.serie } <br></br>
+                        Cliente: { this.state.cliente } <br></br>
+                        Fecha: { this.state.fecha } <br></br>
                         Notas: <br></br>
                         Forma de venta: <br></br>
-                        Estado: <br></br>
+                        Estado: { this.state.vestado } <br></br>
                         Total: <br></br>
                         Archivos adjuntos: <br></br>
                     </div>
@@ -116,13 +142,13 @@ class LoteDetalle extends React.Component {
                                 </thead>
                                 <tbody>
                                     {
-                                        this.state.abilities.map((item, index) =>{
+                                        this.state.detalle.map((item, index) =>{
                                             return(
                                                 <tr key={index}>
-                                                    <td>{item.ability.name}</td>
-                                                    <td>{item.ability.url}</td>
-                                                    <td>{item.slot}</td>
-                                                    <td>{item.is_hidden === true ? "true" : "false"}</td>
+                                                    <td>{ item.concepto }</td>
+                                                    <td>{ item.monto }</td>
+                                                    <td>{ item.metodo }</td>
+                                                    <td>{ item.banco } </td>
                                                 </tr>
                                             )
                                         })
