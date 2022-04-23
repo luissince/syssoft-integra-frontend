@@ -282,8 +282,9 @@ router.get("/id", async function (req, res) {
 
 router.get("/credito", async function (req, res) {
     try {
-        let credito = await conec.query(`SELECT 
+        let lista = await conec.query(`SELECT 
         v.idVenta, 
+        cl.idCliente,
         cl.documento, 
         cl.informacion, 
         cm.nombre, 
@@ -292,17 +293,65 @@ router.get("/credito", async function (req, res) {
         v.numCuota, 
         v.fecha, 
         v.hora, 
+        v.estado,
+        m.idMoneda,
+        m.simbolo,
         IFNULL(SUM(vd.precio*vd.cantidad),0) AS total,
         (SELECT IFNULL(SUM(cv.precio),0) FROM cobro AS c LEFT JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro WHERE c.idProcedencia = v.idVenta ) AS cobrado 
         FROM venta AS v 
+        INNER JOIN moneda AS m ON m.idMoneda = v.idMoneda
         INNER JOIN comprobante AS cm ON v.idComprobante = cm.idComprobante 
         INNER JOIN cliente AS cl ON v.idCliente = cl.idCliente 
         LEFT JOIN ventaDetalle AS vd ON vd.idVenta = v.idVenta 
-        WHERE v.estado = 2 
-        v.fecha DESC, v.hora DESC
-        GROUP BY v.idVenta;`);
+        WHERE  
+        ? = 0 AND v.estado = 2 
+        OR
+        ? = 1 and cl.informacion like concat(?,'%') AND v.estado = 2 
+        OR
+        ? = 1 and cl.documento like concat(?,'%') AND v.estado = 2 
+        GROUP BY v.idVenta
+        ORDER BY v.fecha DESC, v.hora DESC
+        LIMIT ?,?`, [
+            parseInt(req.query.opcion),
 
-        res.status(200).send(credito)
+            parseInt(req.query.opcion),
+            req.query.buscar,
+
+            parseInt(req.query.opcion),
+            req.query.buscar,
+
+            parseInt(req.query.posicionPagina),
+            parseInt(req.query.filasPorPagina)
+        ]);
+
+        let resultLista = lista.map(function (item, index) {
+            return {
+                ...item,
+                id: (index + 1) + parseInt(req.query.posicionPagina)
+            }
+        });
+
+        let total = await conec.query(`SELECT COUNT(*) AS Total 
+        FROM venta AS v 
+        INNER JOIN moneda AS m ON m.idMoneda = v.idMoneda
+        INNER JOIN comprobante AS cm ON v.idComprobante = cm.idComprobante 
+        INNER JOIN cliente AS cl ON v.idCliente = cl.idCliente  
+        WHERE  
+        ? = 0 AND v.estado = 2 
+        OR
+        ? = 1 and cl.informacion like concat(?,'%') AND v.estado = 2 
+        OR
+        ? = 1 and cl.documento like concat(?,'%') AND v.estado = 2 `, [
+            parseInt(req.query.opcion),
+
+            parseInt(req.query.opcion),
+            req.query.buscar,
+
+            parseInt(req.query.opcion),
+            req.query.buscar
+        ]);
+
+        res.status(200).send({ "result": resultLista, "total": total[0].Total })
     } catch (error) {
         res.status(500).send("Error interno de conexión, intente nuevamente.")
     }
