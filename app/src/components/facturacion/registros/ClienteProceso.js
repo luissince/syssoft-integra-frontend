@@ -1,8 +1,10 @@
 import React from 'react';
 import axios from 'axios';
 import {
-    keyNumberFloat,
+    keyNumberPhone,
+    keyNumberInteger,
     spinnerLoading,
+    convertNullText,
     ModalAlertInfo,
     ModalAlertSuccess,
     ModalAlertWarning,
@@ -44,7 +46,7 @@ class ClienteProceso extends React.Component {
 
         this.refDireccion = React.createRef();
 
-        this.abortController = new AbortController();
+        this.abortControllerTable = new AbortController();
     }
 
     setStateAsync(state) {
@@ -64,13 +66,13 @@ class ClienteProceso extends React.Component {
     }
 
     componentWillUnmount() {
-        this.abortController.abort();
+        this.abortControllerTable.abort();
     }
 
     loadData = async () => {
         try {
             const documento = await axios.get("/api/tipodcumento/listcombo", {
-                signal: this.abortController.signal,
+                signal: this.abortControllerTable.signal,
             });
 
             await this.setStateAsync({
@@ -90,11 +92,11 @@ class ClienteProceso extends React.Component {
     loadDataId = async (id) => {
         try {
             const documento = await axios.get("/api/tipodcumento/listcombo", {
-                signal: this.abortController.signal
+                signal: this.abortControllerTable.signal
             });
 
             const cliente = await axios.get("/api/cliente/id", {
-                signal: this.abortController.signal,
+                signal: this.abortControllerTable.signal,
                 params: {
                     idCliente: id
                 }
@@ -153,11 +155,6 @@ class ClienteProceso extends React.Component {
             this.refCelular.current.focus();
             return;
         }
-        if (this.state.direccion === "") {
-            this.setState({ messageWarning: "Ingrese la dirección." });
-            this.refDireccion.current.focus();
-            return;
-        }
 
         try {
             ModalAlertInfo("Cliente", "Procesando información...");
@@ -176,7 +173,7 @@ class ClienteProceso extends React.Component {
                     "estadoCivil": this.state.estadoCivil,
                     "estado": this.state.estado,
                     "observacion": this.state.observacion.trim().toUpperCase(),
-
+                    "idUsuario": this.state.idUsuario,
                     //idCliente
                     "idCliente": this.state.idCliente
                 })
@@ -197,7 +194,8 @@ class ClienteProceso extends React.Component {
                     "ubigeo": this.state.ubigeo.trim().toUpperCase(),
                     "estadoCivil": this.state.estadoCivil,
                     "estado": this.state.estado,
-                    "observacion": this.state.observacion.trim().toUpperCase()
+                    "observacion": this.state.observacion.trim().toUpperCase(),
+                    "idUsuario": this.state.idUsuario
                 });
                 ModalAlertSuccess("Cliente", cliente.data, () => {
                     this.props.history.goBack();
@@ -218,11 +216,20 @@ class ClienteProceso extends React.Component {
             return;
         }
         try {
-            let result = await axios.get("https://dniruc.apisperu.com/api/v1/dni/" + this.state.documento + "?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6ImFsZXhhbmRlcl9keF8xMEBob3RtYWlsLmNvbSJ9.6TLycBwcRyW1d-f_hhCoWK1yOWG_HJvXo8b-EoS5MhE", {
-
+            await this.setStateAsync({
+                loading: true,
+                msgLoading: 'Consultando número de DNI...',
             });
 
-            console.log(result);
+            let result = await axios.get("https://dniruc.apisperu.com/api/v1/dni/" + this.state.documento + "?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6ImFsZXhhbmRlcl9keF8xMEBob3RtYWlsLmNvbSJ9.6TLycBwcRyW1d-f_hhCoWK1yOWG_HJvXo8b-EoS5MhE", {
+                timeout: 5000,
+            });
+
+            await this.setStateAsync({
+                documento: convertNullText(result.data.dni),
+                informacion: convertNullText(result.data.apellidoMaterno) + " " + convertNullText(result.data.apellidoPaterno) + " " + convertNullText(result.data.nombres),
+                loading: false,
+            });
         } catch (error) {
 
         }
@@ -234,11 +241,20 @@ class ClienteProceso extends React.Component {
             return;
         }
         try {
-            let result = await axios.get("https://dniruc.apisperu.com/api/v1/ruc/" + this.state.documento + "?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6ImFsZXhhbmRlcl9keF8xMEBob3RtYWlsLmNvbSJ9.6TLycBwcRyW1d-f_hhCoWK1yOWG_HJvXo8b-EoS5MhE", {
-
+            await this.setStateAsync({
+                loading: true,
+                msgLoading: 'Consultando número de RUC...',
             });
 
-            console.log(result);
+            let result = await axios.get("https://dniruc.apisperu.com/api/v1/ruc/" + this.state.documento + "?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6ImFsZXhhbmRlcl9keF8xMEBob3RtYWlsLmNvbSJ9.6TLycBwcRyW1d-f_hhCoWK1yOWG_HJvXo8b-EoS5MhE", {
+                timeout: 5000,
+            });
+            await this.setStateAsync({
+                documento: convertNullText(result.data.ruc),
+                informacion: convertNullText(result.data.razonSocial),
+                direccion: convertNullText(result.data.direccion),
+                loading: false,
+            });
         } catch (error) {
 
         }
@@ -254,20 +270,13 @@ class ClienteProceso extends React.Component {
                         </div> : null
                 }
 
-                <div className='row pb-2'>
+                <div className='row'>
                     <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
                         <section className="content-header">
                             <h5>
                                 <span role="button" onClick={() => this.props.history.goBack()}><i className="bi bi-arrow-left-short"></i></span> {this.state.idCliente === '' ? 'Registrar Cliente' : 'Editar Cliente'}
                             </h5>
                         </section>
-                    </div>
-                </div>
-
-                <div className="row pb-3">
-                    <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
-                        <button type="button" className="btn btn-primary mr-2" onClick={() => this.onEventGuardar()}>Guardar</button>
-                        <button type="button" className="btn btn-danger" onClick={() => this.props.history.goBack()}>Cancelar</button>
                     </div>
                 </div>
 
@@ -310,7 +319,7 @@ class ClienteProceso extends React.Component {
                     </div>
                     <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
                         <div className="form-group">
-                            <label>N° de documento</label>
+                            <label>N° de documento <i className="fa fa-asterisk text-danger small"></i></label>
                             <div className="input-group">
                                 <input
                                     type="text"
@@ -330,7 +339,7 @@ class ClienteProceso extends React.Component {
                                             });
                                         }
                                     }}
-                                    onKeyPress={keyNumberFloat}
+                                    onKeyPress={keyNumberInteger}
                                     placeholder='00000000' />
                                 <div className="input-group-append">
                                     <button
@@ -356,13 +365,12 @@ class ClienteProceso extends React.Component {
                 </div>
 
                 <div className="row">
-                    <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
+                    <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
                         <div className="form-group">
-                            <label>Razón Social/Apellidos y nombres</label>
+                            <label>Razón Social/Apellidos y Nombres <i className="fa fa-asterisk text-danger small"></i></label>
                             <input
                                 type="text"
                                 className="form-control"
-                                ref={this.refInformacion}
                                 value={this.state.informacion}
                                 onChange={(event) => {
                                     if (event.target.value.trim().length > 0) {
@@ -380,29 +388,45 @@ class ClienteProceso extends React.Component {
                                 placeholder='Ingrese la razón social o apellidos y nombres' />
                         </div>
                     </div>
+                </div>
+
+                <div className="row">
                     <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
                         <div className="form-group">
-                            <label>N° de Celular/Telefono</label>
+                            <label>N° de Celular <i className="fa fa-asterisk text-danger small"></i></label>
+                            <input
+                                type="text"
+                                className="form-control"
+                                value={this.state.celular}
+                                ref={this.refCelular}
+                                onChange={(event) => {
+                                    if (event.target.value.trim().length > 0) {
+                                        this.setState({
+                                            celular: event.target.value,
+                                            messageWarning: '',
+                                        });
+                                    } else {
+                                        this.setState({
+                                            celular: event.target.value,
+                                            messageWarning: 'Ingrese el número de celular.',
+                                        });
+                                    }
+                                }}
+                                onKeyPress={keyNumberPhone}
+                                placeholder='Ingrese el número de celular.' />
+                        </div>
+                    </div>
+                    <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
+                        <div className="form-group">
+                            <label>N° de Telefono</label>
                             <input
                                 type="text"
                                 className="form-control"
                                 value={this.state.telefono}
                                 ref={this.refTelefono}
-                                onChange={(event) => {
-                                    if (event.target.value.trim().length > 0) {
-                                        this.setState({
-                                            telefono: event.target.value,
-                                            messageWarning: '',
-                                        });
-                                    } else {
-                                        this.setState({
-                                            telefono: event.target.value,
-                                            messageWarning: 'Ingrese el número de celular o telefono',
-                                        });
-                                    }
-                                }}
-                                onKeyPress={keyNumberFloat}
-                                placeholder='Ingrese el número de celular o telefono' />
+                                onChange={(event) => this.setState({ telefono: event.target.value, })}
+                                onKeyPress={keyNumberPhone}
+                                placeholder='Ingrese el número de telefono.' />
                         </div>
                     </div>
                 </div>
@@ -436,19 +460,7 @@ class ClienteProceso extends React.Component {
                             <select
                                 className="form-control"
                                 value={this.state.genero}
-                                onChange={(event) => {
-                                    if (event.target.value.trim().length > 0) {
-                                        this.setState({
-                                            genero: event.target.value,
-                                            messageWarning: '',
-                                        });
-                                    } else {
-                                        this.setState({
-                                            genero: event.target.value,
-                                            messageWarning: 'Seleccione el genero',
-                                        });
-                                    }
-                                }}>
+                                onChange={(event) => this.setState({ genero: event.target.value })}>
                                 <option value="">-- Seleccione --</option>
                                 <option value="1">Masculino</option>
                                 <option value="2">Femenino</option>
@@ -466,19 +478,7 @@ class ClienteProceso extends React.Component {
                                 className="form-control"
                                 value={this.state.direccion}
                                 ref={this.refDireccion}
-                                onChange={(event) => {
-                                    if (event.target.value.trim().length > 0) {
-                                        this.setState({
-                                            direccion: event.target.value,
-                                            messageWarning: '',
-                                        });
-                                    } else {
-                                        this.setState({
-                                            direccion: event.target.value,
-                                            messageWarning: 'Ingrese la dirección',
-                                        });
-                                    }
-                                }}
+                                onChange={(event) => this.setState({ direccion: event.target.value })}
                                 placeholder='Ingrese la dirección' />
                         </div>
                     </div>
@@ -527,7 +527,7 @@ class ClienteProceso extends React.Component {
                                     id="switch1"
                                     checked={this.state.estado}
                                     onChange={(value) => this.setState({ estado: value.target.checked })} />
-                                <label className="custom-control-label" htmlFor="switch1">{this.state.estado == true ? "Activo" : "Inactivo"}</label>
+                                <label className="custom-control-label" htmlFor="switch1">{this.state.estado === true ? "Activo" : "Inactivo"}</label>
                             </div>
                         </div>
                     </div>
@@ -544,6 +544,13 @@ class ClienteProceso extends React.Component {
                                 onChange={(event) => this.setState({ observacion: event.target.value })}
                                 placeholder='Ingrese alguna observación' />
                         </div>
+                    </div>
+                </div>
+
+                <div className="row">
+                    <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
+                        <button type="button" className="btn btn-primary mr-2" onClick={() => this.onEventGuardar()}>Guardar</button>
+                        <button type="button" className="btn btn-danger" onClick={() => this.props.history.goBack()}>Cancelar</button>
                     </div>
                 </div>
             </>

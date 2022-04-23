@@ -19,6 +19,7 @@ class CobroDetalle extends React.Component {
             metodoPago: '',
             total: '',
 
+            cobro: true,
             detalle: [],
 
             loading: true,
@@ -73,11 +74,11 @@ class CobroDetalle extends React.Component {
                                     : "Tarjeta débito",
                 total: cabecera.simbolo + " " + formatMoney(cabecera.monto),
 
-                detalle: result.data.detalle,
+                cobro: result.data.detalle.length !== 0 ? true : false,
+                detalle: result.data.detalle.length !== 0 ? result.data.detalle : result.data.venta,
 
                 loading: false
             });
-
         } catch (error) {
             if (error.message !== "canceled") {
                 this.props.history.goBack();
@@ -87,38 +88,45 @@ class CobroDetalle extends React.Component {
 
 
     renderTotal() {
-        let subTotal = 0;
-        let impuestoTotal = 0;
-        let total = 0;
+        if (this.state.cobro) {
+            let subTotal = 0;
+            let impuestoTotal = 0;
+            let total = 0;
 
-        for (let item of this.state.detalle) {
-            let cantidad = item.cantidad;
-            let valor = item.precio;
-            let impuesto = item.porcentaje;
+            for (let item of this.state.detalle) {
+                let cantidad = item.cantidad;
+                let valor = item.precio;
+                let impuesto = item.porcentaje;
 
-            subTotal += cantidad * valor;
-            impuestoTotal += (cantidad * valor) * (impuesto / 100);
-            total += (cantidad * valor) + ((cantidad * valor) * (impuesto / 100));
+                subTotal += cantidad * valor;
+                impuestoTotal += (cantidad * valor) * (impuesto / 100);
+                total += (cantidad * valor) + ((cantidad * valor) * (impuesto / 100));
+            }
+
+            return (
+                <>
+                    <tr>
+                        <th className="text-right">Sub Total:</th>
+                        <th className="text-right">{formatMoney(subTotal)}</th>
+                    </tr>
+                    <tr>
+                        <th className="text-right">Impuesto:</th>
+                        <th className="text-right">{formatMoney(impuestoTotal)}</th>
+                    </tr>
+                    <tr className="border-bottom">
+                    </tr>
+                    <tr>
+                        <th className="text-right h5">Total:</th>
+                        <th className="text-right h5">{formatMoney(total)}</th>
+                    </tr>
+                </>
+            )
+        } else {
+            return (
+                <>
+                </>
+            )
         }
-
-        return (
-            <>
-                <tr>
-                    <th className="text-right">Sub Total:</th>
-                    <th className="text-right">{formatMoney(subTotal)}</th>
-                </tr>
-                <tr>
-                    <th className="text-right">Impuesto:</th>
-                    <th className="text-right">{formatMoney(impuestoTotal)}</th>
-                </tr>
-                <tr className="border-bottom">
-                </tr>
-                <tr>
-                    <th className="text-right h5">Total:</th>
-                    <th className="text-right h5">{formatMoney(total)}</th>
-                </tr>
-            </>
-        )
     }
 
     render() {
@@ -211,29 +219,53 @@ class CobroDetalle extends React.Component {
                             <div className="table-responsive">
                                 <table className="table table-light table-striped">
                                     <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>Concepto</th>
-                                            <th>Cantidad</th>
-                                            <th>Impuesto</th>
-                                            <th>Valor</th>
-                                            <th>Monto</th>
-                                        </tr>
+                                        {
+                                            this.state.cobro ?
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Concepto</th>
+                                                    <th>Cantidad</th>
+                                                    <th>Impuesto</th>
+                                                    <th>Valor</th>
+                                                    <th>Monto</th>
+                                                </tr>
+                                                :
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Concepto</th>
+                                                    <th>Total</th>
+                                                    <th>Cobrado</th>
+                                                    <th>Por Cobrar</th>
+                                                    <th>Monto</th>
+                                                </tr>
+                                        }
+
                                     </thead>
                                     <tbody>
                                         {
-                                            this.state.detalle.map((item, index) => (
-                                                <tr key={index}>
-                                                    <td>{++index}</td>
-                                                    <td>{item.concepto}</td>
-                                                    <td className="text-right">{formatMoney(item.cantidad)}</td>
-                                                    <td className="text-right">{item.impuesto}</td>
-                                                    <td className="text-right">{formatMoney(item.precio)}</td>
-                                                    <td className="text-right">{formatMoney(item.cantidad * item.precio)}</td>
-                                                </tr>
-                                            ))
+                                            this.state.cobro ?
+                                                this.state.detalle.map((item, index) => (
+                                                    <tr key={index}>
+                                                        <td>{++index}</td>
+                                                        <td>{item.concepto}</td>
+                                                        <td className="text-right">{formatMoney(item.cantidad)}</td>
+                                                        <td className="text-right">{item.impuesto}</td>
+                                                        <td className="text-right">{formatMoney(item.precio)}</td>
+                                                        <td className="text-right">{formatMoney(item.cantidad * item.precio)}</td>
+                                                    </tr>
+                                                ))
+                                                :
+                                                this.state.detalle.map((item, index) => (
+                                                    <tr key={index}>
+                                                        <td>{++index}</td>
+                                                        <td>{item.comprobante + ": " + item.serie + "-" + item.numeracion}</td>
+                                                        <td className="text-right">{formatMoney(item.total)}</td>
+                                                        <td className="text-right">{formatMoney(item.cobrado)}</td>
+                                                        <td className="text-right">{formatMoney(item.total - item.cobrado)}</td>
+                                                        <td className="text-right">{formatMoney(item.precio)}</td>
+                                                    </tr>
+                                                ))
                                         }
-
                                     </tbody>
                                 </table>
                             </div>

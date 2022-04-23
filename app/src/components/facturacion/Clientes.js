@@ -1,14 +1,8 @@
 import React from 'react';
 import axios from 'axios';
 import {
-    formatMoney,
-    timeForma24,
     spinnerLoading,
-    ModalAlertDialog,
-    ModalAlertInfo,
-    ModalAlertSuccess,
-    ModalAlertWarning,
-    ModalAlertError
+    ModalAlertDialog
 } from '../tools/Tools';
 import Paginacion from '../tools/Paginacion';
 
@@ -16,8 +10,6 @@ class Clientes extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            idCliente: '',
-
             loading: false,
             lista: [],
 
@@ -189,10 +181,10 @@ class Clientes extends React.Component {
                                 <thead>
                                     <tr>
                                         <th width="5%">#</th>
-                                        <th width="20%">DNI / RUC</th>
+                                        <th width="10%">DNI / RUC</th>
                                         <th width="20%">Cliente</th>
                                         <th width="15%">Cel. / Tel.</th>
-                                        <th width="10%">Dirección</th>
+                                        <th width="20%">Dirección</th>
                                         <th width="12%">Estado</th>
                                         <th width="5%">Editar</th>
                                         <th width="5%">Eliminar</th>
@@ -216,9 +208,9 @@ class Clientes extends React.Component {
                                                 return (
                                                     <tr key={index}>
                                                         <td>{item.id}</td>
-                                                        <td>{item.documento}</td>
+                                                        <td>{item.tipodocumento}{<br />}{item.documento}</td>
                                                         <td>{item.informacion}</td>
-                                                        <td>{item.telefono}</td>
+                                                        <td>{item.celular}{<br />}{item.telefono}</td>
                                                         <td>{item.direccion}</td>
                                                         <td className="text-center">
                                                             <div className={`badge ${item.estado === 1 ? "badge-info" : "badge-danger"}`}>

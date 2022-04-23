@@ -1,20 +1,30 @@
 const express = require('express');
 const router = express.Router();
-const tools = require('../tools/Tools');
+const { currentDate, currentTime } = require('../tools/Tools');
 const Conexion = require('../database/Conexion');
-
 const conec = new Conexion()
 
 router.get('/list', async function (req, res) {
     try {
-        let lista = await conec.query(`SELECT * FROM cliente 
-            WHERE 
-            ? = 0
-            OR
-            ? = 1 and documento like concat(?,'%')
-            OR
-            ? = 1 and informacion like concat(?,'%')
-            LIMIT ?,?`, [
+        let lista = await conec.query(`SELECT 
+        c.idCliente ,
+        td.nombre as tipodocumento,
+        c.documento,
+        c.informacion,
+        c.celular,
+        c.telefono,
+        c.direccion,
+        c.estado
+        FROM cliente AS c
+        INNER JOIN tipoDocumento AS td ON td.idTipoDocumento = c.idTipoDocumento
+        WHERE 
+        ? = 0
+        OR
+        ? = 1 and c.documento like concat(?,'%')
+        OR
+        ? = 1 and c.informacion like concat(?,'%')
+        ORDER BY c.fecha DESC, c.hora DESC
+        LIMIT ?,?`, [
             parseInt(req.query.opcion),
 
             parseInt(req.query.opcion),
@@ -35,13 +45,14 @@ router.get('/list', async function (req, res) {
         });
 
         let total = await conec.query(`SELECT COUNT(*) AS Total 
-        FROM cliente
+        FROM cliente AS c
+        INNER JOIN tipoDocumento AS td ON td.idTipoDocumento = c.idTipoDocumento
         WHERE 
         ? = 0
         OR
-        ? = 1 and documento like concat(?,'%')
+        ? = 1 and c.documento like concat(?,'%')
         OR
-        ? = 1 and informacion like concat(?,'%')`, [
+        ? = 1 and c.informacion like concat(?,'%')`, [
 
             parseInt(req.query.opcion),
 
@@ -96,6 +107,7 @@ router.post('/add', async function (req, res) {
             idTipoDocumento,
             documento,
             informacion,
+            celular,
             telefono,
             fechaNacimiento,
             email, 
@@ -104,12 +116,16 @@ router.post('/add', async function (req, res) {
             ubigeo, 
             estadoCivil,
             estado, 
-            observacion)
-            VALUES(?, ?,?,?,?,?,?,?, ?,?,?,?,?)`, [
+            observacion,
+            fecha,
+            hora,
+            idUsuario)
+            VALUES(?, ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, [
             idCliente,
             req.body.idTipoDocumento,
             req.body.documento,
             req.body.informacion,
+            req.body.celular,
             req.body.telefono,
             req.body.fechaNacimiento,
             req.body.email,
@@ -118,7 +134,10 @@ router.post('/add', async function (req, res) {
             req.body.ubigeo,
             req.body.estadoCivil,
             req.body.estado,
-            req.body.observacion
+            req.body.observacion,
+            currentDate(),
+            currentTime(),
+            req.body.idUsuario,
         ])
 
         await conec.commit(connection);
@@ -140,6 +159,7 @@ router.get('/id', async function (req, res) {
         idTipoDocumento,
         documento,
         informacion,
+        celular,
         telefono, 
         fechaNacimiento,
         email, 
@@ -175,6 +195,7 @@ router.post('/update', async function (req, res) {
         idTipoDocumento=?, 
         documento=?,
         informacion=?, 
+        celular=?,
         telefono=?,
         fechaNacimiento=?,
         email=?,
@@ -183,11 +204,13 @@ router.post('/update', async function (req, res) {
         ubigeo=?,
         estadoCivil=?, 
         estado=?,
-        observacion=?
+        observacion=?,
+        idUsuario=?
         WHERE idCliente=?`, [
             req.body.idTipoDocumento,
             req.body.documento,
             req.body.informacion,
+            req.body.celular,
             req.body.telefono,
             req.body.fechaNacimiento,
             req.body.email,
@@ -197,6 +220,7 @@ router.post('/update', async function (req, res) {
             req.body.estadoCivil,
             req.body.estado,
             req.body.observacion,
+            req.body.idUsuario,
             req.body.idCliente
         ])
 

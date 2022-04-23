@@ -280,13 +280,14 @@ router.get('/id', async function (req, res) {
 
         m.simbolo,
 
-        IFNULL(SUM(cb.precio*cb.cantidad),0) AS monto
+        IFNULL(SUM(cb.precio*cb.cantidad),SUM(cv.precio)) AS monto
 
         FROM cobro AS c
         INNER JOIN cliente AS cl ON c.idCliente = cl.idCliente
         INNER JOIN banco AS b ON c.idBanco = b.idBanco
         INNER JOIN moneda AS m ON c.idMoneda = m.idMoneda
         LEFT JOIN cobroDetalle AS cb ON c.idCobro = cb.idCobro
+        LEFT JOIN cobroVenta AS cv ON c.idCobro  = cv.idCobro 
         WHERE c.idCobro = ?
         GROUP BY  c.idCobro`, [
             req.query.idCobro
@@ -308,9 +309,24 @@ router.get('/id', async function (req, res) {
                 req.query.idCobro
             ]);
 
+            let venta = await conec.query(`SELECT  
+            cp.nombre AS comprobante,
+            v.serie,
+            v.numeracion,
+            (SELECT IFNULL(SUM(vd.precio*vd.cantidad),0) FROM ventaDetalle AS vd WHERE vd.idVenta = v.idVenta ) AS total,
+            (SELECT IFNULL(SUM(cv.precio),0) FROM cobroVenta AS cv WHERE cv.idVenta = v.idVenta ) AS cobrado,
+            cv.precio
+            FROM cobroVenta AS cv
+            INNER JOIN venta AS v ON cv.idVenta = v.idVenta 
+            INNER JOIN comprobante AS cp ON v.idComprobante = cp.idComprobante
+            WHERE cv.idCobro = ?`, [
+                req.query.idCobro
+            ]);
+
             res.status(200).send({
                 "cabecera": result[0],
-                "detalle": detalle
+                "detalle": detalle,
+                "venta": venta
             });
         } else {
             res.status(400).send("Datos no encontrados");
