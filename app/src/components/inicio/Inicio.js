@@ -21,6 +21,7 @@ import Proyectos from '../ajustes/Proyectos';
 import ProcesoProyecto from '../ajustes/proyecto/ProcesoProyecto';
 import Manzanas from '../logistica/Manzanas';
 import Lotes from '../logistica/Lotes';
+import LoteDetalle from '../logistica/registro/LoteDetalle';
 import VentaProceso from '../facturacion/registros/VentaProceso';
 import VentaDetalle from '../facturacion/registros/VentaDetalle';
 import ClienteProceso from '../facturacion/registros/ClienteProceso'
@@ -207,7 +208,13 @@ class Inicio extends React.Component {
                         />
                         <Route
                             path={`${path}/lotes`}
+                            exact={true}
                             render={(props) => <Lotes {...props} />}
+                        />
+                        <Route 
+                            path={`${path}/lotes/detalle`}
+                            exact={true}
+                            render={(props) => <LoteDetalle {...props} />}
                         />
                         <Route
                             path={`${path}/conceptos`}
