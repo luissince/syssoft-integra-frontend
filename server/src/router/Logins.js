@@ -12,131 +12,121 @@ router.get('/report/:version/:number', async function (req, res) {
     // Create a document
     const doc = new PDFDocument({
         margins: {
-            top: 40,
-            bottom: 40,
-            left: 40,
-            right: 40
+            top: 72,
+            bottom: 72,
+            left: 72,
+            right: 72
         }
     });
 
-    console.log(doc.page.width)
-
     doc.pipe(res);
+
+
+    // Embed a font, set the font size, and render some text
+    doc
+        .font('Courier')
+        .fontSize(20)
+        .text('Courier');
+
+    doc
+        .font('Courier-Bold')
+        .fontSize(20)
+        .text('Courier-Bold', doc.options.margins.left, doc.y);
+
+    doc
+        .font('Courier-Oblique')
+        .fontSize(20)
+        .text('Courier-Oblique', doc.options.margins.left, doc.y + 20);
+    doc
+        .font('Courier-BoldOblique')
+        .fontSize(20)
+        .text('Courier-BoldOblique');
+    doc
+        .font('Helvetica')
+        .fontSize(20)
+        .text('Helvetica');
+
+
+
+    // // Add an image, constrain it to a given size, and center it vertically and horizontally
+    doc.image(path.join(__dirname, "..", "path/to/ehil.png"), doc.options.margins.left, doc.y, { width: 100, });
+    doc.image(path.join(__dirname, "..", "path/to/ehil.png"), 200, doc.y, { width: 100, });
+    // doc.image(path.join(__dirname, "..", "path/to/ehil.png"), 200, doc.y, { width: 100, });
+    // doc.image(path.join(__dirname, "..", "path/to/ehil.png"), 200, doc.y, { width: 100, });
+
+    let ypost = doc.y;
+
+    doc
+        .font('Helvetica', 0, ypost)
+        .fontSize(20)
+        .text('Helvetica');
+
+    // requires 
+    const table = {
+        title: "Title",
+        subtitle: "Subtitle",
+        headers: ["Country", "Conversion rate", "Trend"],
+        rows: [
+            ["Switzerland", "12%", "+1.12%"],
+            ["France", "67%", "-0.98%"],
+            ["England", "33%", "+4.44%"],
+        ],
+    };
+    doc.table(table, {
+        // A4 595.28 x 841.89 (portrait) (about width sizes)
+        width: doc.page.width,
+        //columnsSize: [ 200, 100, 100 ],
+    });
+
 
     let colTop = doc.y;
 
-    doc.image(path.join(__dirname, "..", "path/to/ehil.png"), doc.options.margins.left, colTop, { width: 50, });
-
-    let ypostimage = doc.y;
-
-    doc.fontSize(12).text(
-        "APPLE GYM PERÚ ",
-        doc.options.margins.left + 170,
-        colTop
-    );
-
-    doc.moveDown();
-    doc.fontSize(10).text(
-        "AV. LAS CALLES DEL MAR NRO 100",
-        doc.options.margins.left + 140,
-        colTop + 15
-    );
-
-    doc.moveDown();
-    doc.fontSize(10).text(
-        "064 1231546546 213154654",
-        doc.options.margins.left + 162,
-        colTop + 30
-    );
-
-    doc.fontSize(10).text(
-        `RUC: 456789123120\nBOLETA\nB0001-895653`,
-        doc.page.width - 140 - doc.options.margins.right,
-        colTop+10
-        , {
-            width: 140,
-            align: "center",
+    doc.fontSize(16).text(
+        "test col 1 test col 1 test col 1 test col 1",
+        doc.options.margins.left,
+        colTop,
+        {
+            width: 200
         });
 
+    doc.fontSize(16).text(
+        "test col 2 test col 2 test col 2 test col 2 test col 2 test col 2 test col 2 test col 2 test col 2 test col 2 test col 2 test col 2",
+        doc.options.margins.left + 200,
+        colTop,
+        {
+            width: 200
+        });
 
-    // doc.rect(
-    //     doc.options.margins.left + 350,
-    //     doc.options.margins.top-10,
-    //     140,
-    //     50).stroke();
-
-        doc.rect(
-            doc.page.width - 140 - doc.options.margins.right,
-            doc.options.margins.top,
-            140,
-            50).stroke();
-
-    // doc.rect(xleft3-30, doc.options.margins.top-10, 140, 60).stroke();
-
-    doc.x = 0;
-
-    doc.moveDown();
-
-    const table = {
-        title: "Detalle",
-        subtitle: "Subtitle",
-        headers: ["#", "CONCEPTO", "CANTIDAD", "PRECIO", "UNITARIO", "DESCUENTO", "IMPORTE"],
-        rows: [
-            ["1", "PLAN REGULAR - 3 MESES", "1.00", "210.00", "0.00", "210.00"],
-            ["2", "INSCRIPCIÓN", "10.00", "10.00", "0.00", "10.00"]
-        ],
-    };
-
-    console.log(doc.page.width)
-
-    doc.table(table, {
-        x: 0,
-        y: ypostimage + 20,
-        width: doc.page.width - doc.options.margins.left - doc.options.margins.right
-    });
-
-    doc.fontSize(12).text(
-        "IMPORTE BRUTO: ",
-        doc.x,
-        doc.y + 10
-    );
-
-    doc.fontSize(12).text(
-        "DESCUENTO: ",
-        doc.options.margins.left + 300,
-        doc.y
-    );
-
-    doc.fontSize(12).text(
-        "IMPORTE NETO: ",
-        doc.options.margins.left + 300,
-        doc.y
-    );
-
-    const table1 = {
-        title: "PAGOS ASOCIADOS",
-        subtitle: "Subtitle",
-        headers: ["#", "TRANSACCIÓN", "CONCEPTO", "FECHA PAGO", "IMPORTE"],
-        rows: [
-            ["1", "N° 2736 VENTAS", "INGRESO DEL COMPROBANTE B001-4102", "23/04/2022 08:09:47", "220.00"]
-        ],
-    };
-
-    doc.table(table1, {
-        width: doc.page.width
-    });
-
-    doc.fontSize(14).text(
-        "TERMINOS Y CONDICIONES",
+    doc.fontSize(16).text(
+        "test col 2 test col 2 test col 2 test col 2 test col 2 test col 2 test col 2 test col 2 test col 2 test col 2 test col 2 test col 2",
         doc.options.margins.left,
-        doc.y
-    );
+        doc.y);
 
-    doc.fontSize(14).text(
-        "NO HAY NINGÚN TIPO DE REEMBOLSO POR POLÍTICAS DE LA EMPRESA.",
+    doc.fontSize(16).text(
+        "test col 2 test col 2 test col 2 test col 2 test col 2 test col 2 test col 2 test col 2 test col 2 test col 2 test col 2 test col 2",
         doc.options.margins.left,
-        doc.y
-    );
+        doc.y);
+
+    doc.fontSize(16).text(
+        "test col 2 test col 2 test col 2 test col 2 test col 2 test col 2 test col 2 test col 2 test col 2 test col 2 test col 2 test col 2",
+        doc.options.margins.left,
+        doc.y);
+
+    doc.fontSize(16).text(
+        "test col 2 test col 2 test col 2 test col 2 test col 2 test col 2 test col 2 test col 2 test col 2 test col 2 test col 2 test col 2",
+        doc.options.margins.left,
+        doc.y);
+
+    doc.fontSize(16).text(
+        "test col 2 test col 2 test col 2 test col 2 test col 2 test col 2 test col 2 test col 2 test col 2 test col 2 test col 2 test col 2",
+        doc.options.margins.left,
+        doc.y);
+
+    doc.fontSize(16).text(
+        "test col 3 test col 2 test col 2 test col 2 test col 2 test col 2 test col 2 test col 2 test col 2 test col 2 test col 2 test col 2",
+        doc.options.margins.left,
+        doc.y);
+
 
     doc.end();
 
