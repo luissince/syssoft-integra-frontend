@@ -3,6 +3,7 @@ import axios from 'axios';
 import {
     isNumeric,
     spinnerLoading,
+    dateFormat,
     timeForma24,
     formatMoney,
     showModal,
@@ -58,7 +59,6 @@ class Creditos extends React.Component {
 
         this.abortControllerTable = new AbortController();
     }
-
 
     setStateAsync(state) {
         return new Promise((resolve) => {
@@ -503,11 +503,11 @@ class Creditos extends React.Component {
                                             this.state.lista.map((item, index) => {
                                                 return (
                                                     <tr key={index}>
-                                                        <td className="text-center">{index++}</td>
+                                                        <td className="text-center">{item.id}</td>
                                                         <td>{item.documento}{<br />}{item.informacion}</td>
                                                         <td>{item.nombre}{<br />}{item.serie + "-" + item.numeracion}</td>
                                                         <td>{item.numCuota === 1 ? item.numCuota + " Cuota" : item.numCuota + " Cuotas"}</td>
-                                                        <td></td>
+                                                        <td>{item.fechaPago === "" ? "-" : dateFormat(item.fechaPago)}</td>
                                                         <td className="text-right">{item.simbolo + " " + formatMoney(item.total)}</td>
                                                         <td className="text-right text-success">{item.simbolo + " " + formatMoney(item.cobrado)}</td>
                                                         <td className="text-right text-danger">{item.simbolo + " " + formatMoney(item.total - item.cobrado)}</td>

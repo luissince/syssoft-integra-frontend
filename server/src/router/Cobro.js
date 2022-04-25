@@ -76,6 +76,59 @@ router.get('/list', async function (req, res) {
     }
 });
 
+router.get('/cronograma', async function (req, res) {
+    try {
+        let result = await conec.query(`SELECT 
+        numCuota,
+        DATE_FORMAT(fecha,'%d-%m-%Y') as fecha
+        FROM venta WHERE idVenta = 'VT0001'`);
+
+        let total = await conec.query(`SELECT 
+        IFNULL(SUM(vd.precio*vd.cantidad),0) AS total
+        FROM venta AS v 
+        LEFT JOIN ventaDetalle AS vd ON vd.idVenta = v.idVenta 
+        WHERE v.idVenta = 'VT0001'`);
+
+        let now = new Date();
+        console.log("ahora: " + now.getFullYear(), (now.getMonth() + 1), now.getDate());
+
+        const parts = result[0].fecha.split('-');
+        let mydate = new Date(parts[2], parts[1] - 1, parts[0]);
+        console.log("inicio: " + mydate.getFullYear() + "-" + (mydate.getMonth() + 1) + "-" + mydate.getDate())
+
+        let inicioDate = new Date(mydate);
+        // inicioDate.setMonth(inicioDate.getMonth() + 1)
+        // console.log("inicio: " + inicioDate.getFullYear(), (inicioDate.getMonth() + 1), inicioDate.getDate());
+
+        // var myNow = new Date();
+        // console.log(myNow.getFullYear(), (myNow.getMonth() + 1), myNow.getDate());
+        var ultimoDate = new Date(inicioDate)
+        ultimoDate.setMonth(ultimoDate.getMonth() + result[0].numCuota)
+        // console.log("fin: " + ultimoDate.getFullYear() + "-" + (ultimoDate.getMonth() + 1) + "-" + ultimoDate.getDate())
+        let i = 0;
+        let arrayCuotas = [];
+        let cuotaMes = total[0].total / result[0].numCuota;
+        while (inicioDate < ultimoDate) {
+            i++;
+            inicioDate.setMonth(inicioDate.getMonth() + 1)
+            arrayCuotas.push("cuota-" + (i < 10 ? "0" + i : i) + ": " + inicioDate.getFullYear() + "-" + ((inicioDate.getMonth() + 1) < 10 ? "0" + (inicioDate.getMonth() + 1) : (inicioDate.getMonth() + 1)) + "-" + inicioDate.getDate() + " MONTO:" + cuotaMes)
+            // console.log();
+        }
+
+
+
+        // let mydate = new Date(result[0].fecha);
+        // console.log(mydate.getDay());
+        // console.log(mydate.getMonth());
+        // console.log(mydate.getFullYear());
+
+        res.status(200).send({ result, total, arrayCuotas });
+    } catch (error) {
+        console.log(error)
+        res.status(500).send("Error interno de conexión, intente nuevamente.")
+    }
+});
+
 router.post('/add', async function (req, res) {
     let connection = null;
     try {
