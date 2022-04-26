@@ -356,6 +356,10 @@ class Lotes extends React.Component {
         }
     }
 
+    onEventMostrar(){
+        this.props.history.push(`${this.props.location.pathname}/detalle`);
+    }
+
     render() {
         return (
             <>
@@ -710,6 +714,7 @@ class Lotes extends React.Component {
                                         <th width="20%">M.C.D(ML)</th>
                                         <th width="20%">Area(M2)</th>
                                         <th width="10%">Estado</th>
+                                        <th width="5%">Mostar</th>
                                         <th width="5%">Editar</th>
                                         <th width="5%">Eliminar</th>
                                     </tr>
@@ -718,13 +723,13 @@ class Lotes extends React.Component {
                                     {
                                         this.state.loading ? (
                                             <tr>
-                                                <td className="text-center" colSpan="9">
+                                                <td className="text-center" colSpan="10">
                                                     {spinnerLoading()}
                                                 </td>
                                             </tr>
                                         ) : this.state.lista.length === 0 ? (
                                             <tr className="text-center">
-                                                <td colSpan="9">¡No hay datos registrados!</td>
+                                                <td colSpan="10">¡No hay datos registrados!</td>
                                             </tr>
                                         ) : (
                                             this.state.lista.map((item, index) => {
@@ -743,6 +748,9 @@ class Lotes extends React.Component {
                                                                         : item.estado === 3 ? <span className="badge badge-success">Vendido</span>
                                                                             : <span className="badge badge-warnin">Inactivo</span>
                                                             }
+                                                        </td>
+                                                        <td>
+                                                            <button className="btn btn-outline-info btn-sm" title="Detalle" onClick={() => this.onEventMostrar() }><i className="bi bi-eye"></i></button>
                                                         </td>
                                                         <td>
                                                             <button className="btn btn-outline-warning btn-sm" title="Editar" onClick={() => this.openModal(item.idLote)}><i className="bi bi-pencil"></i></button>
