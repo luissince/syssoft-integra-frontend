@@ -1,73 +1,98 @@
 import React from 'react';
 import axios from 'axios';
+import {
+    formatMoney,
+    spinnerLoading,
+    timeForma24
+} from '../../tools/Tools';
 
 class LoteDetalle extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            lote: {},
             detalle: [],
-            fecha: '',
-            manzana: '',
-            serie: '',
-            lote: '',
-            cliente: '',
-            costo: '',
-            precio: '',
-            estado: '',
-            vestado: ''
+
+
+            loading: true,
+            messageWarning: '',
+            msgLoading: 'Cargando datos...',
         }
+
+        this.abortControllerTable = new AbortController();
     }
 
-    /*SE EJECUTA CUANDO EL COMPONENTE SE MONTO O SE TERMINA DE CARGAR LA GUI*/
+    setStateAsync(state) {
+        return new Promise((resolve) => {
+            this.setState(state, resolve)
+        });
+    }
+
     async componentDidMount() {
-        try{
-            let result = await axios.get("/api/lote/detalle",{
-                params: {
-                    idLote:"LT0001"
-                }
-            });
-
-            console.log(result.data)
-
-            const { estado } = result.data.cabecera;
-            console.log(estado)
-            //console.log(result.data.abilities)
-            //console.log(result.data.moves)
-
-            // this.setState({
-            //     order: result.data.order,
-            //     weight: result.data.weight,
-            //     abilities: result.data.abilities,
-            //     id: result.data.id,
-            //     name: result.data.name, 
-            //     is_default: result.data.is_default,
-            //     height: result.data.height
-            // });
-
-            this.setState({
-                detalle: result.data.detalle,
-                manzana: result.data.cabecera.manzana,
-                fecha: result.data.cabecera.fecha,
-                serie: result.data.cabecera.serie,
-                lote: result.data.cabecera.lote,
-                cliente: result.data.cabecera.cliente,
-                costo: result.data.cabecera.costo,
-                precio: result.data.cabecera.precio,
-                estado: result.data.cabecera.estado,
-                vestado: result.data.cabecera.vestado
-            });
-        }catch(error){
-            console.log(error)
+        const url = this.props.location.search;
+        const idLote = new URLSearchParams(url).get("idLote");
+        if (idLote !== null) {
+            this.loadDataId(idLote)
+        } else {
+            this.props.history.goBack();
         }
     }
 
     componentWillUnmount() {
+        this.abortControllerTable.abort();
+    }
+
+    async loadDataId(id) {
+        try {
+            let result = await axios.get("/api/lote/detalle", {
+                signal: this.abortControllerTable.signal,
+                params: {
+                    "idLote": id
+                }
+            });
+
+            console.log(result);
+
+            await this.setStateAsync({
+                lote: result.data.cabecera,
+                detalle: result.data.detalle,
+
+                loading: false,
+            });
+        } catch (error) {
+            if (error.message !== "canceled") {
+                this.props.history.goBack();
+            }
+        }
     }
 
     render() {
-        console.log("render")
+        const { manzana,
+            lote,
+            costo,
+            precio,
+            lotestado,
+            comprobante,
+            serie,
+            numeracion,
+            documento,
+            informacion,
+            fecha,
+            hora,
+            tipo,
+            estado,
+            simbolo,
+            monto
+        } = this.state.lote;
         return (
             <>
+                {
+                    this.state.loading ?
+                        <div className="clearfix absolute-all bg-white">
+                            {spinnerLoading(this.state.msgLoading)}
+                        </div> : null
+                }
+
                 <div className='row'>
                     <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
                         <div className="form-group">
@@ -93,44 +118,44 @@ class LoteDetalle extends React.Component {
                     <div className="col-5">
                         <div className="form-group">
                             --Descripcion-- <br></br>
-                            Manzana: { this.state.manzana }<br></br>
-                            Descripción de Lote: { this.state.lote } <br></br>
-                            Costo Aproximado (S/.): { this.state.costo } <br></br>
-                            Precio de Venta Contado (S/.): { this.state.precio } <br></br>
-                            Estado: { this.state.estado }  <br></br> <br></br>
+                            Manzana: <strong>{manzana}</strong><br></br>
+                            Descripción de Lote: <strong>{lote}</strong> <br></br>
+                            Costo Aproximado (S/.): <strong>{formatMoney(costo)} </strong><br></br>
+                            Precio de Venta Contado (S/.): <strong>{formatMoney(precio)} </strong><br></br>
+                            Estado:<strong> {lotestado} </strong> <br></br> <br></br>
 
                             --Medidas-- <br></br>
-                            Medida Frontal (ML):<br></br>
-                            Costado Derecho (ML):  <br></br>
-                            Costado Izquierdo (ML): <br></br>
-                            Medida Fondo (ML): <br></br>
-                            Area Lote (ML): <br></br>
-                            N° Partida: <br></br> <br></br>
+                            Medida Frontal (ML):<strong> </strong> <br></br>
+                            Costado Derecho (ML): <strong> </strong>  <br></br>
+                            Costado Izquierdo (ML): <strong> </strong> <br></br>
+                            Medida Fondo (ML): <strong> </strong> <br></br>
+                            Area Lote (ML): <strong> </strong> <br></br>
+                            N° Partida: <strong> </strong> <br></br> <br></br>
 
                             --Límite-- <br></br>
-                            Limite, Frontal / Norte / Noroeste: <br></br>
-                            Límite, Derecho / Este / Sureste: <br></br>
-                            Límite, Iquierdo / Sur / Sureste: <br></br>
-                            Límite, Posterior / Oeste / Noroeste: <br></br>
+                            Limite, Frontal / Norte / Noroeste: <strong> </strong> <br></br>
+                            Límite, Derecho / Este / Sureste: <strong> </strong> <br></br>
+                            Límite, Iquierdo / Sur / Sureste: <strong> </strong> <br></br>
+                            Límite, Posterior / Oeste / Noroeste:<strong> </strong>  <br></br>
                             Ubicación del Lote: <br></br>
                         </div>
                     </div>
                     <div className="col-7">
-                        Comprobante: { this.state.serie } <br></br>
-                        Cliente: { this.state.cliente } <br></br>
-                        Fecha: { this.state.fecha } <br></br>
-                        Notas: <br></br>
-                        Forma de venta: <br></br>
-                        Estado: { this.state.vestado } <br></br>
-                        Total: <br></br>
-                        Archivos adjuntos: <br></br>
+                        Comprobante: <strong>{comprobante + " " + serie + "-" + numeracion} </strong> <br></br>
+                        Cliente: <strong>{documento + " " + informacion} </strong> <br></br>
+                        Fecha: <strong>{fecha + " " + hora} </strong> <br></br>
+                        Notas: <strong> </strong> <br></br>
+                        Forma de venta: <strong>{tipo === 1 ? "CONTADO" : "CRÉDITO"} </strong> <br></br>
+                        Estado: <strong>{estado === 1 ? "COBRADO" : "POR COBRAR"} </strong> <br></br>
+                        Total: <strong>{simbolo + " " + formatMoney(monto)} </strong> <br></br>
+                        Archivos adjuntos: <strong> </strong> <br></br>
                     </div>
                 </div>
 
                 <div className="row">
                     <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                         <div className="table-responsive">
-                            <table className="table table-striped table-bordered rounded">
+                            <table className="table table-light table-striped">
                                 <thead>
                                     <tr>
                                         <th width="20%">Concepto</th>
@@ -142,13 +167,14 @@ class LoteDetalle extends React.Component {
                                 </thead>
                                 <tbody>
                                     {
-                                        this.state.detalle.map((item, index) =>{
-                                            return(
+                                        this.state.detalle.map((item, index) => {
+                                            return (
                                                 <tr key={index}>
-                                                    <td>{ item.concepto }</td>
-                                                    <td>{ item.monto }</td>
-                                                    <td>{ item.metodo }</td>
-                                                    <td>{ item.banco } </td>
+                                                    <td>{item.concepto === "" ? "CUOTA" : item.concepto}</td>
+                                                    <td>{item.simbolo + " " + formatMoney(item.monto)}</td>
+                                                    <td>{item.metodo}</td>
+                                                    <td>{item.banco} </td>
+                                                    <td>{item.fecha}{<br />}{timeForma24(item.hora)} </td>
                                                 </tr>
                                             )
                                         })

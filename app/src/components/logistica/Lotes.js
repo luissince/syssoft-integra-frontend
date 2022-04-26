@@ -158,6 +158,7 @@ class Lotes extends React.Component {
             case 1:
                 this.fillTable(1, this.refTxtSearch.current.value);
                 break;
+            default: this.fillTable(0, "");
         }
     }
 
@@ -214,7 +215,6 @@ class Lotes extends React.Component {
             });
 
             await this.setStateAsync({
-
                 manzanas: manzana.data,
 
                 loadModal: false
@@ -244,8 +244,8 @@ class Lotes extends React.Component {
                 idLote: result.data.idLote,
                 idManzana: result.data.idManzana,
                 descripcion: result.data.descripcion,
-                costo: result.data.costo,
-                precio: result.data.precio,
+                costo: result.data.costo.toString(),
+                precio: result.data.precio.toString(),
                 estado: result.data.estado,
                 medidaFrontal: result.data.medidaFrontal,
                 costadoDerecho: result.data.costadoDerecho,
@@ -356,8 +356,11 @@ class Lotes extends React.Component {
         }
     }
 
-    onEventMostrar(){
-        this.props.history.push(`${this.props.location.pathname}/detalle`);
+    onEventMostrar(idLote) {
+        this.props.history.push({
+            pathname: `${this.props.location.pathname}/detalle`,
+            search: "?idLote=" + idLote
+        })
     }
 
     render() {
@@ -750,7 +753,7 @@ class Lotes extends React.Component {
                                                             }
                                                         </td>
                                                         <td>
-                                                            <button className="btn btn-outline-info btn-sm" title="Detalle" onClick={() => this.onEventMostrar() }><i className="bi bi-eye"></i></button>
+                                                            <button className="btn btn-outline-info btn-sm" title="Detalle" onClick={() => this.onEventMostrar(item.idLote)}><i className="bi bi-eye"></i></button>
                                                         </td>
                                                         <td>
                                                             <button className="btn btn-outline-warning btn-sm" title="Editar" onClick={() => this.openModal(item.idLote)}><i className="bi bi-pencil"></i></button>

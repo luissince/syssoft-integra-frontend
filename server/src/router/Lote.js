@@ -56,9 +56,7 @@ router.get('/list', async function (req, res) {
         ]);
 
         res.status(200).send({ "result": resultLista, "total": total[0].Total })
-
     } catch (error) {
-        console.log(error)
         res.status(500).send("Error interno de conexión, intente nuevamente.")
     }
 })
@@ -138,7 +136,7 @@ router.post('/', async function (req, res) {
 
     } catch (error) {
         if (connection != null) {
-            conec.rollback(connection);
+            await conec.rollback(connection);
         }
         res.status(500).send(error);
     }
@@ -228,12 +226,11 @@ router.put('/', async function (req, res) {
         }
     } catch (error) {
         if (connection != null) {
-            conec.rollback(connection);
+            await conec.rollback(connection);
         }
         res.status(500).send(error);
     }
 });
-
 
 router.get('/id', async function (req, res) {
     try {
@@ -260,23 +257,33 @@ router.get('/detalle', async function (req, res) {
         l.descripcion as lote,
         l.costo,
         l.precio,
-        l.estado,
+        CASE 
+        WHEN l.estado = 1 THEN 'Disponible' 
+        WHEN l.estado = 2 THEN 'Reservado' 
+        WHEN l.estado = 3 THEN 'Vendido' 
+        ELSE 'Inactivo' END AS lotestado,
+
         c.nombre as comprobante,
         cl.informacion as cliente,
+
         v.idVenta,
         v.serie,
         v.numeracion,
         DATE_FORMAT(v.fecha,'%d/%m/%Y') as fecha, 
         v.hora,
         v.tipo,
-        v.estado as vestado,
+        v.estado,
+        mo.simbolo,
+
         cl.documento,
         cl.informacion,
         IFNULL(SUM(vdv.precio*vdv.cantidad),0) AS monto
+
         FROM lote AS l
         INNER JOIN manzana AS m  ON l.idManzana = m.idManzana
         INNER JOIN ventaDetalle AS vd ON l.idLote = vd.idLote
         INNER JOIN venta AS v ON v.idVenta = vd.idVenta
+        INNER JOIN moneda AS mo ON v.idMoneda = mo.idMoneda
         INNER JOIN comprobante AS c ON c.idComprobante = v.idComprobante
         INNER JOIN cliente AS cl ON cl.idCliente = v.idCliente
         LEFT JOIN ventaDetalle AS vdv ON vdv.idVenta = v.idVenta
@@ -288,8 +295,9 @@ router.get('/detalle', async function (req, res) {
         if (cabecera.length > 0) {
             let detalle = await conec.query(`SELECT 
             c.idCobro,
-            'ABONO' AS concepto,
-            IFNULL(SUM(cv.precio),0) AS monto,
+            m.simbolo,
+            IFNULL(co.nombre,c.observacion) AS concepto,
+            IFNULL(SUM(cv.precio),(cd.precio*cd.cantidad)) AS monto,
             CASE 
             WHEN c.metodoPago = 1 THEN 'Efectivo'
             WHEN c.metodoPago = 2 THEN 'Consignación'
@@ -301,9 +309,12 @@ router.get('/detalle', async function (req, res) {
             DATE_FORMAT(c.fecha,'%d/%m/%Y') as fecha, 
             c.hora
             FROM cobro AS c
+            INNER JOIN moneda AS m ON c.idMoneda = m.idMoneda
             INNER JOIN banco AS b ON b.idBanco = c.idBanco
-            LEFT JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro
-            where c.idProcedencia = 'VT0001'
+            LEFT JOIN cobroDetalle AS cd ON cd.idCobro = c.idCobro 
+            LEFT JOIN concepto AS co ON co.idConcepto = cd.idConcepto 
+            LEFT JOIN cobroVenta AS cv ON cv.idCobro = c.idCobro
+            WHERE c.idProcedencia = ?
             GROUP by c.idCobro`, [
                 cabecera[0].idVenta
             ]);

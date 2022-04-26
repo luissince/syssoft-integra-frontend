@@ -88,9 +88,7 @@ class VentaProceso extends React.Component {
 
         clearModal("modalVentaProceso", async () => {
             await this.setStateAsync({
-                importeTotal: 0,
                 selectTipoPago: true,
-                bancos: [],
                 idBancoContado: '',
                 metodoPagoContado: '',
                 montoInicialCheck: false,
@@ -242,15 +240,33 @@ class VentaProceso extends React.Component {
         return value
     }
 
-    removeObjectTable(id) {
-        for (let i = 0; i < this.state.detalleVenta.length; i++) {
-            if (id === this.state.detalleVenta[i].idDetalle) {
-                this.state.detalleVenta.splice(i, 1)
+    async removeObjectTable(id) {
+        let newArr = [...this.state.detalleVenta];
+
+        for (let i = 0; i < newArr.length; i++) {
+            if (id === newArr[i].idDetalle) {
+                newArr.splice(i, 1)
                 i--;
                 break;
             }
         }
-        this.setState({ detalleVenta: this.state.detalleVenta })
+
+        let total = 0;
+        for (let item of newArr) {
+            let cantidad = item.cantidad;
+            let valor = parseFloat(item.precioContado);
+            let filter = item.impuestos.filter(imp =>
+                imp.idImpuesto === item.idImpuesto
+            )
+            let impuesto = filter.length > 0 ? filter[0].porcentaje : 0;
+
+            total += (cantidad * valor) + ((cantidad * valor) * (impuesto / 100));
+        }
+
+        await this.setStateAsync({
+            detalleVenta: newArr,
+            importeTotal: total
+        })
     }
 
     async changeLote(event) {

@@ -12,7 +12,7 @@ router.get("/list", async function (req, res) {
             c.idCliente,
             c.documento, 
             c.informacion,             
-            v.idComprobante, 
+            v.idComprobante,  
             co.nombre as comprobante,
             v.serie,
             v.numeracion,
@@ -84,7 +84,6 @@ router.get("/list", async function (req, res) {
     }
 });
 
-
 router.post("/add", async function (req, res) {
     let connection = null;
     try {
@@ -135,8 +134,11 @@ router.post("/add", async function (req, res) {
             idVenta = "VT0001";
         }
 
-        let comprobante = await conec.execute(connection, `
-        SELECT serie,numeracion FROM comprobante WHERE idComprobante  = ?
+        let comprobante = await conec.execute(connection, `SELECT 
+        serie,
+        numeracion 
+        FROM comprobante 
+        WHERE idComprobante  = ?
         `, [
             req.body.idComprobante
         ]);
@@ -275,6 +277,7 @@ router.post("/add", async function (req, res) {
                 idVenta,
                 montoTotal
             ]);
+
         } else {
             if (req.body.montoInicialCheck) {
                 let cobro = await conec.execute(connection, 'SELECT idCobro FROM cobro');
@@ -332,10 +335,12 @@ router.post("/add", async function (req, res) {
                 await conec.execute(connection, `INSERT INTO cobroVenta(
                     idCobro,
                     idVenta,
+                    idPlazo,
                     precio) 
-                    VALUES (?,?,?)`, [
+                    VALUES (?,?,?,?)`, [
                     idCobro,
                     idVenta,
+                    0,
                     req.body.inicial
                 ]);
             }
@@ -361,7 +366,7 @@ router.post("/add", async function (req, res) {
             ultimoDate.setMonth(ultimoDate.getMonth() + parseInt(req.body.numCuota));
 
             let i = 0;
-            let cuotaMes = montoTotal / req.body.numCuota;
+            let cuotaMes = (montoTotal - req.body.inicial) / req.body.numCuota;
             while (inicioDate < ultimoDate) {
                 i++;
                 inicioDate.setMonth(inicioDate.getMonth() + 1);
@@ -381,17 +386,34 @@ router.post("/add", async function (req, res) {
                     cuotaMes,
                     0
                 ]);
-
                 idPlazo++;
             }
 
         }
 
         await conec.commit(connection);
-        // await conec.rollback(connection);
         res.status(200).send('Datos insertados correctamente')
     } catch (error) {
-        // console.log(error)
+        console.log(error)
+        if (connection != null) {
+            await conec.rollback(connection);
+        }
+        res.status(500).send("Error interno de conexión, intente nuevamente.");
+    }
+});
+
+router.delete("/anular", async function (req, res) {
+    let connection = null;
+    try {
+        connection = await conec.beginTransaction();
+
+        await
+
+
+            await conec.commit(connection);
+        res.status(200).send('Se anulo la venta correctamente.')
+    } catch (error) {
+        console.log(error)
         if (connection != null) {
             await conec.rollback(connection);
         }
@@ -535,6 +557,62 @@ router.get("/credito", async function (req, res) {
     } catch (error) {
         res.status(500).send("Error interno de conexión, intente nuevamente.")
     }
-})
+});
+
+router.get("/credito/detalle", async function (req, res) {
+    try {
+        let venta = await conec.query(`
+        SELECT 
+        v.idVenta, 
+        cl.idCliente,
+        cl.documento, 
+        cl.informacion, 
+        cl.celular,
+        cl.telefono,
+        cl.email,
+        cl.direccion,        
+        cm.nombre, 
+        v.serie, 
+        v.numeracion, 
+        v.numCuota, 
+        (SELECT IFNULL(MIN(fecha),'') FROM plazo WHERE estado = 0) AS fechaPago,
+        DATE_FORMAT(v.fecha,'%d/%m/%Y') as fecha, 
+        v.hora, 
+        v.estado,
+        m.idMoneda,
+        m.simbolo,
+        IFNULL(SUM(vd.precio*vd.cantidad),0) AS total,
+        (SELECT IFNULL(SUM(cv.precio),0) FROM cobro AS c LEFT JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro WHERE c.idProcedencia = v.idVenta ) AS cobrado 
+        FROM venta AS v 
+        INNER JOIN moneda AS m ON m.idMoneda = v.idMoneda
+        INNER JOIN comprobante AS cm ON v.idComprobante = cm.idComprobante 
+        INNER JOIN cliente AS cl ON v.idCliente = cl.idCliente 
+        LEFT JOIN ventaDetalle AS vd ON vd.idVenta = v.idVenta 
+        WHERE  
+        v.idVenta = ?
+        GROUP BY v.idVenta
+        `, [
+            req.query.idVenta
+        ]);
+
+        let plazos = await conec.query(`SELECT 
+        idPlazo,        
+        DATE_FORMAT(fecha,'%d/%m/%Y') as fecha,
+        monto,
+        estado
+        FROM plazo WHERE idVenta = ?
+        `, [
+            req.query.idVenta
+        ]);
+
+        res.status(200).send({
+            "venta": venta[0],
+            "plazos": plazos
+        })
+    } catch (error) {
+        res.status(500).send("Error interno de conexión, intente nuevamente.")
+
+    }
+});
 
 module.exports = router;

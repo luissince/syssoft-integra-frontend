@@ -202,7 +202,6 @@ class Cobros extends React.Component {
                                         <th width="10%">Estado</th>
                                         <th width="10%">Monto</th>
                                         <th width="5%">Detalle</th>
-                                        <th width="5%">Editar</th>
                                         <th width="5%">Eliminar</th>
                                     </tr>
                                 </thead>
@@ -210,13 +209,13 @@ class Cobros extends React.Component {
                                     {
                                         this.state.loading ? (
                                             <tr>
-                                                <td className="text-center" colSpan="10">
+                                                <td className="text-center" colSpan="9">
                                                     {spinnerLoading()}
                                                 </td>
                                             </tr>
                                         ) : this.state.lista.length === 0 ? (
                                             <tr className="text-center">
-                                                <td colSpan="10">¡No hay datos registrados!</td>
+                                                <td colSpan="9">¡No hay datos registrados!</td>
                                             </tr>
                                         ) : (
                                             this.state.lista.map((item, index) => {
@@ -237,12 +236,10 @@ class Cobros extends React.Component {
                                                             </button>
                                                         </td>
                                                         <td>
-                                                            <button className="btn btn-outline-warning btn-sm" title="Editar" onClick={() => console.log('perro')}>
-                                                                <i className="fa fa-edit"></i>
-                                                            </button>
-                                                        </td>
-                                                        <td>
-                                                            <button className="btn btn-outline-danger btn-sm" title="Eliminar" onClick={() => this.onEventAnularCobro(item.idCobro)}>
+                                                            <button
+                                                                className="btn btn-outline-danger btn-sm"
+                                                                title="Eliminar"
+                                                                onClick={() => this.onEventAnularCobro(item.idCobro)}>
                                                                 <i className="fa fa-remove"></i>
                                                             </button>
                                                         </td>
