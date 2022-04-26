@@ -1,6 +1,13 @@
 import React from 'react';
 import axios from 'axios';
-import { showModal, hideModal, clearModal, spinnerLoading, formatMoney, timeForma24 } from '../tools/Tools';
+import { spinnerLoading, 
+    formatMoney, 
+    timeForma24,
+    ModalAlertDialog,
+    ModalAlertInfo,
+    ModalAlertSuccess,
+    ModalAlertWarning,
+    ModalAlertError } from '../tools/Tools';
 
 class Gastos extends React.Component {
     constructor(props) {
@@ -65,6 +72,30 @@ class Gastos extends React.Component {
     onEventNuevoGasto() {
         this.props.history.push({
             pathname: `${this.props.location.pathname}/proceso`,
+        })
+    }
+
+    onEventAnularGasto(idGasto) {
+        ModalAlertDialog("Gasto", "¿Está seguro de que desea eliminar la transacción? Esta operación no se puede deshacer.", async (value) => {
+            if (value) {
+                try {
+                    ModalAlertInfo("Gasto", "Procesando información...");
+                    let result = await axios.delete('/api/gasto/anular', {
+                        params: {
+                            "idGasto": idGasto,
+                        }
+                    })
+                    ModalAlertSuccess("Gasto", result.data, () => {
+                        this.fillTable(0, 1, "");
+                    })
+                } catch (error) {
+                    if (error.response !== undefined) {
+                        ModalAlertWarning("Gasto", error.response.data)
+                    } else {
+                        ModalAlertError("Gasto", "Se genero un error interno, intente nuevamente.")
+                    }
+                }
+            }
         })
     }
 
@@ -141,9 +172,13 @@ class Gastos extends React.Component {
                                                         <td>{item.observacion}</td>
                                                         <td>
                                                             <button className="btn btn-outline-info btn-sm" title="Detalle" onClick={() => {
-                                                                this.props.history.push({ pathname: `${this.props.location.pathname}/detalle`, search: "?idCobro=" + item.idGasto })
+                                                                this.props.history.push({ pathname: `${this.props.location.pathname}/detalle`, search: "?idGasto=" + item.idGasto })
                                                             }}>
                                                                 <i className="fa fa-eye"></i>
+                                                            </button>
+                                                            {" "}
+                                                            <button className="btn btn-outline-danger btn-sm" title="Eliminar" onClick={() => this.onEventAnularGasto(item.idGasto)}>
+                                                                <i className="fa fa-remove"></i>
                                                             </button>
                                                         </td>
                                                     </tr>
@@ -178,7 +213,6 @@ class Gastos extends React.Component {
             </>
         )
     }
-
 
 }
 

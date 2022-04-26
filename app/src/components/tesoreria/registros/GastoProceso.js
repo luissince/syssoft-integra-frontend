@@ -17,8 +17,6 @@ class GastoProceso extends React.Component {
         this.state = {
             idConcepto: '',
             conceptos: [],
-            // idCliente: '',
-            // clientes: [],
             idBanco: '',
             cuentasBancarias: [],
             idMoneda: '',
@@ -40,7 +38,6 @@ class GastoProceso extends React.Component {
         this.refConcepto = React.createRef()
         this.refMonto = React.createRef()
 
-        // this.refCliente = React.createRef()
         this.refCuentaBancaria = React.createRef()
         this.refMoneda = React.createRef()
 
@@ -241,10 +238,6 @@ class GastoProceso extends React.Component {
     }
 
     async onEventGuardar() {
-        // if (this.refCliente.current.value === "") {
-        //     this.setState({ messageWarning: "Seleccione el cliente." });
-        //     this.refCliente.current.focus();
-        // } else 
         
         if (this.state.idBanco === "") {
             this.setState({ messageWarning: "Seleccione el banco a desembolsar." })
@@ -263,8 +256,7 @@ class GastoProceso extends React.Component {
                 ModalAlertInfo("Gasto", "Procesando información...");
 
                 let result = await axios.post('/api/gasto/add', {
-                    //concepto
-                    // "idCliente": this.state.idCliente,
+                   
                     "idUsuario": this.state.idUsuario,
                     'idMoneda': this.state.idMoneda,
                     "idBanco": this.state.idBanco,
@@ -290,9 +282,6 @@ class GastoProceso extends React.Component {
 
     async onEventLimpiar() {
         await this.setStateAsync({
-            
-            // idCliente: '',
-            // clientes: [],
             idMoneda: '',
             monedas: [],
             idConcepto: '',
@@ -476,40 +465,6 @@ class GastoProceso extends React.Component {
                     </div>
 
                     <div className="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12">
-
-                        {/* <div className="form-group">
-                            <div className="input-group">
-                                <div className="input-group-prepend">
-                                    <div className="input-group-text"><i className="bi bi-person-fill"></i></div>
-                                </div>
-                                <select
-                                    title="Lista de clientes"
-                                    className="form-control"
-                                    ref={this.refCliente}
-                                    value={this.state.idCliente}
-                                    onChange={(event) => {
-                                        if (event.target.value.trim().length > 0) {
-                                            this.setState({
-                                                idCliente: event.target.value,
-                                                messageWarning: '',
-                                            });
-                                        } else {
-                                            this.setState({
-                                                idCliente: event.target.value,
-                                                messageWarning: "Seleccione el cliente.",
-                                            });
-                                        }
-                                    }}
-                                >
-                                    <option value="">-- Cliente --</option>
-                                    {
-                                        this.state.clientes.map((item, index) => (
-                                            <option key={index} value={item.idCliente}>{item.informacion + ' - ' + item.documento}</option>
-                                        ))
-                                    }
-                                </select>
-                            </div>
-                        </div> */}
 
                         <div className="form-group">
                             <div className="input-group">
