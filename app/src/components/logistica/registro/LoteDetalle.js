@@ -13,7 +13,6 @@ class LoteDetalle extends React.Component {
             lote: {},
             detalle: [],
 
-
             loading: true,
             messageWarning: '',
             msgLoading: 'Cargando datos...',

@@ -178,7 +178,7 @@ router.post('/add', async function (req, res) {
             req.body.idUsuario,
             req.body.idMoneda,
             req.body.idBanco,
-            '',
+            req.body.idProcedencia,
             req.body.metodoPago,
             req.body.estado,
             req.body.observacion,
