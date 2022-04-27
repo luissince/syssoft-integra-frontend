@@ -233,7 +233,9 @@ class Ventas extends React.Component {
                                                             {
                                                                 item.estado === 1
                                                                     ? <span className="text-success">Cobrado</span>
-                                                                    : <span className="text-danger">Por Cobrar</span>
+                                                                    : item.estado === 2 ?
+                                                                        <span className="text-warning">Por Cobrar</span>
+                                                                        : <span className="text-danger">Anulado</span>
                                                             }
                                                         </td>
                                                         <td className="text-center">

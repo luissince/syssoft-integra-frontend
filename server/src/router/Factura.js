@@ -406,7 +406,7 @@ router.delete("/anular", async function (req, res) {
     let connection = null;
     try {
         connection = await conec.beginTransaction();
-        console.log(req.query.idVenta)
+
         let vanta = await conec.execute(connection, `SELECT idVenta FROM venta 
         WHERE idVenta = ? AND estado = 3`, [
             req.query.idVenta
@@ -434,20 +434,52 @@ router.delete("/anular", async function (req, res) {
                 return;
             }
 
-            await conec.execute(connection, `UPDATE venta SET estado = ? 
+            await conec.execute(connection, `UPDATE venta SET estado = 3 
             WHERE idVenta = ?`, [
                 req.query.idVenta
             ]);
 
-            await conec.execute(connection, `DELETE FROM cobro WHERE idProcedencia = ?`, [
+            console.log(req.query.idVenta)
+
+            let cobro = await conec.execute(connection, `SELECT idCobro FROM cobro WHERE idProcedencia = ?`, [
+                req.query.idVenta
+            ])
+
+            if (cobro.length > 0) {
+                await conec.execute(connection, `DELETE FROM cobro WHERE idCobro = ?`, [
+                    cobro[0].idCobro
+                ]);
+
+                await conec.execute(connection, `DELETE FROM cobroDetalle WHERE idCobro = ?`, [
+                    cobro[0].idCobro
+                ]);
+
+                await conec.execute(connection, `DELETE FROM cobroVenta WHERE idCobro = ?`, [
+                    cobro[0].idCobro
+                ]);
+            }
+
+            let lote = await conec.execute(connection, `SELECT vd.idLote FROM
+            venta AS v 
+            INNER JOIN ventaDetalle AS vd ON v.idVenta = vd.idVenta
+            WHERE v.idVenta  = ?`, [
                 req.query.idVenta
             ]);
 
-            console.log(validate)
+            for (let item of lote) {
+                await conec.execute(connection, `UPDATE lote SET estado = 1 
+                WHERE idLote = ?`, [
+                    item.idLote
+                ]);
+            }
 
-            await conec.rollback(connection);
-            // await conec.commit(connection);
-            res.status(200).send('Se anulo la venta correctamente.');
+            await conec.execute(connection, `DELETE FROM plazo WHERE idVenta = ?`, [
+                req.query.idVenta
+            ]);
+
+            // await conec.rollback(connection);
+            await conec.commit(connection);
+            res.status(200).send('Se anulo correctamente la venta.');
         }
     } catch (error) {
         console.log(error)

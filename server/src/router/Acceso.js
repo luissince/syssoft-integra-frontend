@@ -3,7 +3,7 @@ const router = express.Router();
 const tools = require('../tools/Tools');
 const Conexion = require('../database/Conexion');
 const conec = new Conexion();
- 
+
 router.get('/accesos', async function (req, res) {
     try {
         let menu = await conec.query(`

@@ -112,6 +112,26 @@ class Creditos extends React.Component {
         }
     }
 
+    onEventCronograma = async (item) => {
+        console.log(item)
+        window.open("/api/login/report/cuotas", "_blank");
+
+        // try {
+        //     let result = await axios.get("/api/login/report/cuotas/", {
+        //         responseType: "blob",
+        //         params: {
+
+        //         },
+        //     });
+
+        //     const file = new Blob([result.data], { type: "application/pdf" });
+        //     const fileURL = URL.createObjectURL(file);
+        //     window.open(fileURL, "_blank");
+
+        // } catch (error) {
+        //     console.log(error)
+        // }
+    }
 
     onEventCobros = (item) => {
         this.props.history.push({
@@ -199,7 +219,10 @@ class Creditos extends React.Component {
                                                         <td className="text-right text-success">{item.simbolo + " " + formatMoney(item.cobrado)}</td>
                                                         <td className="text-right text-danger">{item.simbolo + " " + formatMoney(item.total - item.cobrado)}</td>
                                                         <td className="text-center">
-                                                            <button className="btn btn-outline-info btn-sm"><i className="fa fa-calendar"></i></button>
+                                                            <button
+                                                                className="btn btn-outline-info btn-sm"
+                                                                onClick={() => this.onEventCronograma(item)}>
+                                                                <i className="fa fa-calendar"></i></button>
                                                         </td>
                                                         <td className="text-center">
                                                             <button className="btn btn-outline-info btn-sm"

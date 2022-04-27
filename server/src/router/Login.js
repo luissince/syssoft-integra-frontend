@@ -279,7 +279,7 @@ router.get('/report/cuotas', async function (req, res) {
     );
 
     let titX = doc.x;
-   
+
     doc.fontSize(h3).text(
         "RUC: 20151615314\nJR. LIMA 1465 - PUNTA HERMOSA\nTeléfono: 54574355",
         doc.x,
@@ -320,7 +320,7 @@ router.get('/report/cuotas', async function (req, res) {
             width: 250,
             align: "center",
         }
-    ); 
+    );
 
     const table1 = {
         //title: "CRONOGRAMA DE PAGOS MENSUALES VENTA AL CRÉDITO",
@@ -334,13 +334,13 @@ router.get('/report/cuotas', async function (req, res) {
     doc.table(table1, {
         width: doc.page.width - doc.options.margins.left - doc.options.margins.right,
         x: orgX,
-        y: doc.y + 10, 
+        y: doc.y + 10,
     });
 
     doc.end();
 });
 
-router.get('/report/lote', async function (req, res){
+router.get('/report/lote', async function (req, res) {
     const doc = new PDFDocument({
         margins: {
             top: 40,
@@ -375,7 +375,7 @@ router.get('/report/lote', async function (req, res){
     );
 
     let titX = doc.x;
-   
+
     doc.fontSize(h3).text(
         "RUC: 20151615314\nJR. LIMA 1465 - PUNTA HERMOSA\nTeléfono: 54574355",
         doc.x,
@@ -456,7 +456,7 @@ router.get('/report/lote', async function (req, res){
             width: 250,
             align: "center",
         }
-    ); 
+    );
 
     const table1 = {
         //title: "CRONOGRAMA DE PAGOS MENSUALES VENTA AL CRÉDITO",
@@ -470,7 +470,7 @@ router.get('/report/lote', async function (req, res){
     doc.table(table1, {
         width: doc.page.width - doc.options.margins.left - doc.options.margins.right,
         x: orgX,
-        y: doc.y + 10, 
+        y: doc.y + 10,
     });
 
 

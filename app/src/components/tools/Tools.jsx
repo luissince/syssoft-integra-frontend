@@ -195,6 +195,15 @@ export function getCookie(cname) {
   return "";
 }
 
+export function calculateTaxBruto(impuesto, monto) {
+  return monto / ((impuesto + 100) * 0.01);
+}
+
+export function calculateTax(porcentaje, valor) {
+  let igv = parseFloat(porcentaje) / 100.0;
+  return valor * igv;
+}
+
 export function showModal(id) {
   let myModal = new bootstrap.Modal(document.getElementById(id));
   myModal.show();

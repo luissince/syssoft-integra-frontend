@@ -87,12 +87,13 @@ router.post('/add', async function (req, res) {
             idMoneda = "MN0001";
         }
 
-        await conec.execute(connection, 'INSERT INTO moneda (idMoneda ,nombre, codiso, simbolo, estado) values (?,?,?,?,?)', [
+        await conec.execute(connection, 'INSERT INTO moneda (idMoneda ,nombre, codiso, simbolo, estado, predeterminado) values (?,?,?,?,?,?)', [
             idMoneda,
             req.body.nombre,
             req.body.codiso,
             req.body.simbolo,
-            req.body.estado
+            req.body.estado,
+            0
         ])
 
         await conec.commit(connection);
@@ -153,7 +154,7 @@ router.get('/id', async function (req, res) {
 
 router.get('/listcombo', async function (req, res) {
     try {
-        let result = await conec.query('SELECT idMoneda,nombre, simbolo FROM moneda');
+        let result = await conec.query('SELECT idMoneda,nombre, simbolo, predeterminado FROM moneda');
         res.status(200).send(result);
     } catch (error) {
         res.status(500).send("Error interno de conexión, intente nuevamente.");
