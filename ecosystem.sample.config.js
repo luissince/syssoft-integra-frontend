@@ -10,11 +10,11 @@ module.exports = {
             },
             env_production: {
                 "PORT": 8000,
-                "HOST_DB": "127.0.0.1",
-                "USER_DB": "root",
-                "PASSWORD_DB": "",
-                "DATABASE_DB": "",
-                "PORT_DB": 3306,
+                "HOST": "127.0.0.1",
+                "USER": "root",
+                "PASSWORD": "",
+                "DATABASE": "",
+                "PORTHOST": 3306,
                 "TZ": "America/Lima",
                 "NODE_ENV": "production",
             }
