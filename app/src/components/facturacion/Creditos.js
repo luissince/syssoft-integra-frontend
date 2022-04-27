@@ -114,23 +114,23 @@ class Creditos extends React.Component {
 
     onEventCronograma = async (item) => {
         console.log(item)
-        window.open("/api/login/report/cuotas", "_blank");
+        // window.open("/api/login/report/cuotas", "_blank");
 
-        // try {
-        //     let result = await axios.get("/api/login/report/cuotas/", {
-        //         responseType: "blob",
-        //         params: {
+        try {
+            let result = await axios.get("/api/login/report/cuotas/", {
+                responseType: "blob",
+                params: {
 
-        //         },
-        //     });
+                },
+            });
 
-        //     const file = new Blob([result.data], { type: "application/pdf" });
-        //     const fileURL = URL.createObjectURL(file);
-        //     window.open(fileURL, "_blank");
+            const file = new Blob([result.data], { type: "application/pdf" });
+            const fileURL = URL.createObjectURL(file);
+            window.open(fileURL, "_blank");
 
-        // } catch (error) {
-        //     console.log(error)
-        // }
+        } catch (error) {
+            console.log(error)
+        }
     }
 
     onEventCobros = (item) => {
