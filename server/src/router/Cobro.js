@@ -486,28 +486,6 @@ router.delete('/anular', async function (req, res) {
             ]);
 
             if (venta.length > 0) {
-                // let total = await conec.execute(connection, `SELECT 
-                // IFNULL(SUM(vd.precio*vd.cantidad),0) AS total 
-                // FROM venta AS v
-                // LEFT JOIN ventaDetalle AS vd ON v.idVenta  = vd.idVenta
-                // WHERE v.idVenta  = ?`, [
-                //     venta[0].idVenta
-                // ]);
-
-                // let cobrado = await conec.execute(connection, `SELECT 
-                // IFNULL(SUM(cv.precio),0) AS total
-                // FROM cobro AS c 
-                // LEFT JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro
-                // WHERE c.idProcedencia = ?`, [
-                //     venta[0].idVenta
-                // ]);
-
-                // let remover = await conec.execute(connection, `SELECT 
-                // precio
-                // FROM cobroVenta WHERE idCobro = ?`, [
-                //     req.query.idCobro
-                // ]);
-
                 let plazos = await conec.execute(connection, `SELECT idPlazo,estado FROM plazo 
                 WHERE idVenta = ? AND estado = 1`, [
                     venta[0].idVenta
@@ -529,9 +507,6 @@ router.delete('/anular', async function (req, res) {
                 });
 
                 let maxCobroVenta = Math.max(...arrCobroVenta);
-
-                console.log(maxPlazo);
-                console.log(maxCobroVenta);
 
                 if (maxPlazo == maxCobroVenta) {
                     for (let item of cobroVenta) {

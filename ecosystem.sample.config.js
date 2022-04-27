@@ -9,7 +9,7 @@ module.exports = {
                 "NODE_ENV": "development"
             },
             env_production: {
-                "PORT": 6000,
+                "PORT": 8000,
                 "HOST_DB": "127.0.0.1",
                 "USER_DB": "root",
                 "PASSWORD_DB": "",

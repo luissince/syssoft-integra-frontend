@@ -122,23 +122,23 @@ class Ventas extends React.Component {
     }
 
     onEventAnularVenta(idVenta) {
-        ModalAlertDialog("Cobro", "¿Está seguro de que desea eliminar la venta? Esta operación no se puede deshacer.", async (value) => {
+        ModalAlertDialog("Venta", "¿Está seguro de que desea eliminar la venta? Esta operación no se puede deshacer.", async (value) => {
             if (value) {
                 try {
-                    ModalAlertInfo("Cobro", "Procesando información...");
+                    ModalAlertInfo("Venta", "Procesando información...");
                     let result = await axios.delete('/api/factura/anular', {
                         params: {
                             "idVenta": idVenta,
                         }
                     })
-                    ModalAlertSuccess("Cobro", result.data, () => {
+                    ModalAlertSuccess("Venta", result.data, () => {
                         this.loadInit();
                     })
                 } catch (error) {
                     if (error.response !== undefined) {
-                        ModalAlertWarning("Cobro", error.response.data)
+                        ModalAlertWarning("Venta", error.response.data)
                     } else {
-                        ModalAlertError("Cobro", "Se genero un error interno, intente nuevamente.")
+                        ModalAlertError("Venta", "Se genero un error interno, intente nuevamente.")
                     }
                 }
             }

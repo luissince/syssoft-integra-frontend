@@ -406,12 +406,49 @@ router.delete("/anular", async function (req, res) {
     let connection = null;
     try {
         connection = await conec.beginTransaction();
+        console.log(req.query.idVenta)
+        let vanta = await conec.execute(connection, `SELECT idVenta FROM venta 
+        WHERE idVenta = ? AND estado = 3`, [
+            req.query.idVenta
+        ]);
+        if (vanta.length !== 0) {
+            await conec.rollback(connection);
+            res.status(400).send('La venta ya se encuentra anulada.');
+        } else {
+            let plazos = await conec.execute(connection, `SELECT * FROM
+            cobroVenta WHERE idVenta = ?`, [
+                req.query.idVenta
+            ]);
 
-        await
+            let validate = 0;
 
+            for (let item of plazos) {
+                if (item.idPlazo !== 0) {
+                    validate++;
+                }
+            }
 
-            await conec.commit(connection);
-        res.status(200).send('Se anulo la venta correctamente.')
+            if (validate > 0) {
+                await conec.rollback(connection);
+                res.status(400).send('No se puede eliminar la venta porque tiene cuotas asociadas.');
+                return;
+            }
+
+            await conec.execute(connection, `UPDATE venta SET estado = ? 
+            WHERE idVenta = ?`, [
+                req.query.idVenta
+            ]);
+
+            await conec.execute(connection, `DELETE FROM cobro WHERE idProcedencia = ?`, [
+                req.query.idVenta
+            ]);
+
+            console.log(validate)
+
+            await conec.rollback(connection);
+            // await conec.commit(connection);
+            res.status(200).send('Se anulo la venta correctamente.');
+        }
     } catch (error) {
         console.log(error)
         if (connection != null) {
