@@ -24,7 +24,7 @@ class RepLote {
             let h3 = 10;
             let h4 = 8;
 
-            doc.image(path.join(__dirname, "..", "path/to/ehil.png"), doc.x, doc.y, { width: 50, });
+            doc.image(path.join(__dirname, "..", "path/to/logo.png"), doc.x, doc.y, { width: 75, });
 
             let postImgY = doc.y;
 

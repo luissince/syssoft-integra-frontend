@@ -73,9 +73,10 @@ router.get('/lotecliente', async function (req, res) {
 
 router.get('/replotedetalle', async function (req, res) {
     const result = await lote.detalle(req)
+    
     if (typeof result === 'object') {
-        // console.log(result)
         let data = await repLote.repDetalle(res, result)
+        
         if (typeof data === 'string') {
             res.status(500).send(data)
         } else {
