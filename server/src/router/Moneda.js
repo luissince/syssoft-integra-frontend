@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { currentDate, currentTime } = require('../tools/Tools');
 const Conexion = require('../database/Conexion');
 const conec = new Conexion()
 
@@ -87,13 +88,26 @@ router.post('/add', async function (req, res) {
             idMoneda = "MN0001";
         }
 
-        await conec.execute(connection, 'INSERT INTO moneda (idMoneda ,nombre, codiso, simbolo, estado, predeterminado) values (?,?,?,?,?,?)', [
+        await conec.execute(connection, `INSERT INTO moneda(
+            idMoneda,
+            nombre, 
+            codiso, 
+            simbolo,
+            estado,
+            predeterminado,
+            fecha, 
+            hora, 
+            idUsuario) 
+            values (?,?,?,?,?,?,?,?,?)`, [
             idMoneda,
             req.body.nombre,
             req.body.codiso,
             req.body.simbolo,
             req.body.estado,
-            0
+            0,
+            currentDate(),
+            currentTime(),
+            req.body.idUsuario,
         ])
 
         await conec.commit(connection);
@@ -112,26 +126,32 @@ router.post('/update', async function (req, res) {
     try {
 
         connection = await conec.beginTransaction();
-        await conec.execute(connection, 'UPDATE moneda SET nombre=?, codiso=?, simbolo=?, estado=? where idMoneda=?', [
+        await conec.execute(connection, `UPDATE moneda SET 
+        nombre=?, 
+        codiso=?,
+        simbolo=?, 
+        estado=?,
+        fecha=?,
+        hora=?,
+        idUsuario=? 
+        where idMoneda=?`, [
             req.body.nombre,
             req.body.codiso,
             req.body.simbolo,
             req.body.estado,
-            req.body.idMoneda
+            currentDate(),
+            currentTime(),
+            req.body.idUsuario,
+            req.body.idMoneda,
         ])
 
-        await conec.commit(connection)
-
-        res.status(200).send('Datos actulizados correctamente')
-        // console.log(req.body)
-
+        await conec.commit(connection);
+        res.status(200).send('Se actualizó correctamente los datos.');
     } catch (error) {
         if (connection != null) {
-            conec.rollback(connection);
-
+            await conec.rollback(connection);
         }
-        res.status(500).send(error);
-        // console.log(error)
+        res.status(500).send("Error interno de conexión, intente nuevamente.");
     }
 });
 

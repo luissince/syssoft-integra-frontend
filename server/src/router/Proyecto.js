@@ -260,12 +260,22 @@ router.delete('/', async function (req, res) {
     try {
         connection = await conec.beginTransaction();
 
+        let manzana = await conec.execute(connection, `SELECT * FROM manzana WHERE idProyecto = ?`, [
+            req.query.idProyecto
+        ]);
+
+        if (manzana.length > 0) {
+            await conec.rollback(connection);
+            res.status(400).send('No se puede eliminar el proyecto ya que esta ligada a una manzana.');
+            return;
+        }
+
         await conec.execute(connection, `DELETE FROM proyecto WHERE idProyecto = ?`, [
             req.query.idProyecto
         ]);
 
-        await conec.commit(connection)
-        res.status(200).send('Se eliminó correctamente el proyecto.')
+        await conec.commit(connection);
+        res.status(200).send('Se eliminó correctamente el proyecto.');
     } catch (error) {
         if (connection != null) {
             await conec.rollback(connection);

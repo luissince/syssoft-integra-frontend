@@ -170,6 +170,55 @@ router.post('/edit', async function (req, res) {
     }
 });
 
+router.delete('/', async function (req, res) {
+    let connection = null;
+    try {
+        connection = await conec.beginTransaction();
+
+        let cobroDetalle = await conec.execute(connection, `SELECT * FROM cobroDetalle WHERE idImpuesto = ?`, [
+            req.query.idImpuesto
+        ]);
+
+        if (cobroDetalle.length > 0) {
+            await conec.rollback(connection);
+            res.status(400).send('No se puede eliminar el impuesto ya que esta ligada a un detalle de cobro.')
+            return;
+        }
+
+        let gastoDetalle = await conec.execute(connection, `SELECT * FROM gastoDetalle WHERE idImpuesto = ?`, [
+            req.query.idImpuesto
+        ]);
+
+        if (gastoDetalle.length > 0) {
+            await conec.rollback(connection);
+            res.status(400).send('No se puede eliminar el impuesto ya que esta ligada a un detalle de gasto.')
+            return;
+        }
+
+        let ventaDetalle = await conec.execute(connection, `SELECT * FROM ventaDetalle WHERE idImpuesto = ?`, [
+            req.query.idImpuesto
+        ]);
+
+        if (ventaDetalle.length > 0) {
+            await conec.rollback(connection);
+            res.status(400).send('No se puede eliminar el impuesto ya que esta ligada a un detalle de venta.')
+            return;
+        }
+
+        await conec.execute(connection, `DELETE FROM impuesto WHERE idImpuesto   = ?`, [
+            req.query.idImpuesto
+        ]);
+
+        await conec.commit(connection)
+        res.status(200).send('Se eliminó correctamente el impuesto.')
+    } catch (error) {
+        if (connection != null) {
+            await conec.rollback(connection);
+        }
+        res.status(500).send("Error interno de conexión, intente nuevamente.");
+    }
+});
+
 router.get('/listcombo', async function (req, res) {
     try {
         let result = await conec.query('SELECT idImpuesto,nombre,porcentaje	 FROM impuesto');

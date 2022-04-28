@@ -1,37 +1,35 @@
 import React from 'react';
 import axios from 'axios';
-import { spinnerLoading, 
-    formatMoney, 
+import {
+    spinnerLoading,
+    formatMoney,
     timeForma24,
     ModalAlertDialog,
     ModalAlertInfo,
     ModalAlertSuccess,
     ModalAlertWarning,
-    ModalAlertError } from '../tools/Tools';
+    ModalAlertError
+} from '../tools/Tools';
+import Paginacion from '../tools/Paginacion';
 
 class Gastos extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-
-            loading: true,
+            loading: false,
             lista: [],
+
+            opcion: 0,
             paginacion: 0,
             totalPaginacion: 0,
             filasPorPagina: 10,
-            messagePaginacion: '',
-            messageWarning: ''
-
+            messageTable: 'Cargando información...',
+            messagePaginacion: 'Mostranto 0 de 0 Páginas'
         }
+        this.refTxtSearch = React.createRef();
 
-        this.refConceptoGasto = React.createRef();
-        this.refFecha = React.createRef();
-        this.refMonto = React.createRef();
-        this.refObservacion = React.createRef();
-    }
-
-    async componentDidMount() {
-        this.fillTable(0, 1, "");
+        this.idCodigo = "";
+        this.abortControllerTable = new AbortController();
     }
 
     setStateAsync(state) {
@@ -40,14 +38,57 @@ class Gastos extends React.Component {
         });
     }
 
-    fillTable = async (option, paginacion, buscar) => {
-        // console.log(buscar.trim().toUpperCase())
+    componentDidMount() {
+        this.loadInit();
+    }
+
+    componentWillUnmount() {
+        this.abortControllerTable.abort();
+    }
+
+    loadInit = async () => {
+        if (this.state.loading) return;
+
+        await this.setStateAsync({ paginacion: 1 });
+        this.fillTable(0, "");
+        await this.setStateAsync({ opcion: 0 });
+    }
+
+    async searchText(text) {
+        if (this.state.loading) return;
+
+        if (text.trim().length === 0) return;
+
+        await this.setStateAsync({ paginacion: 1 });
+        this.fillTable(1, text.trim());
+        await this.setStateAsync({ opcion: 1 });
+    }
+
+    paginacionContext = async (listid) => {
+        await this.setStateAsync({ paginacion: listid });
+        this.onEventPaginacion();
+    }
+
+    onEventPaginacion = () => {
+        switch (this.state.opcion) {
+            case 0:
+                this.fillTable(0, "");
+                break;
+            case 1:
+                this.fillTable(1, this.refTxtSearch.current.value);
+                break;
+            default: this.fillTable(0, "");
+        }
+    }
+
+    fillTable = async (opcion, buscar) => {
         try {
-            await this.setStateAsync({ loading: true, paginacion: paginacion, lista: [] });
+            await this.setStateAsync({ loading: true, lista: [], messageTable: "Cargando información...", messagePaginacion: "Mostranto 0 de 0 Páginas" });
+
             const result = await axios.get('/api/gasto/list', {
                 params: {
-                    "option": option,
-                    "buscar": buscar.trim().toUpperCase(),
+                    "opcion": opcion,
+                    "buscar": buscar,
                     "posicionPagina": ((this.state.paginacion - 1) * this.state.filasPorPagina),
                     "filasPorPagina": this.state.filasPorPagina
                 }
@@ -56,16 +97,22 @@ class Gastos extends React.Component {
             let totalPaginacion = parseInt(Math.ceil((parseFloat(result.data.total) / this.state.filasPorPagina)));
             let messagePaginacion = `Mostrando ${result.data.result.length} de ${totalPaginacion} Páginas`;
 
-            this.setState({
+            await this.setStateAsync({
                 loading: false,
                 lista: result.data.result,
                 totalPaginacion: totalPaginacion,
                 messagePaginacion: messagePaginacion
             });
-            // console.log(result);
-        } catch (err) {
-            console.log(err.response.data.message)
-            console.log(err.response.status)
+        } catch (error) {
+            if (error.message !== "canceled") {
+                await this.setStateAsync({
+                    loading: false,
+                    lista: [],
+                    totalPaginacion: 0,
+                    messageTable: "Se produjo un error interno, intente nuevamente por favor.",
+                    messagePaginacion: "Mostranto 0 de 0 Páginas",
+                });
+            }
         }
     }
 
@@ -118,7 +165,12 @@ class Gastos extends React.Component {
                                 <div className="input-group-prepend">
                                     <div className="input-group-text"><i className="bi bi-search"></i></div>
                                 </div>
-                                <input type="search" className="form-control" placeholder="Buscar..." onKeyUp={(event) => console.log(event.target.value)} />
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    placeholder="Buscar..."
+                                    ref={this.refTxtSearch}
+                                    onKeyUp={(event) => this.searchText(event.target.value)} />
                             </div>
                         </div>
                     </div>
@@ -128,7 +180,7 @@ class Gastos extends React.Component {
                                 <i className="bi bi-file-plus"></i> Nuevo Registro
                             </button>
                             {" "}
-                            <button className="btn btn-outline-secondary" onClick={() => this.fillTable(0, 1, "")}>
+                            <button className="btn btn-outline-secondary" onClick={() => this.loadInit()}>
                                 <i className="bi bi-arrow-clockwise"></i>
                             </button>
                         </div>
@@ -138,7 +190,7 @@ class Gastos extends React.Component {
                 <div className="row">
                     <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                         <div className="table-responsive">
-                            <table className="table table-striped" style={{ borderWidth: '1px', borderStyle: 'inset', borderColor: '#CFA7C9' }}>
+                            <table className="table table-striped table-bordered rounded">
                                 <thead>
                                     <tr>
                                         <th width="5%">#</th>
@@ -146,20 +198,21 @@ class Gastos extends React.Component {
                                         <th width="15%">Monto</th>
                                         <th width="10%">Fecha</th>
                                         <th width="10%">Observación</th>
-                                        <th width="15%">Opción</th>
+                                        <th width="5%">Detalle</th>
+                                        <th width="5%">Eliminar</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {
                                         this.state.loading ? (
                                             <tr>
-                                                <td className="text-center" colSpan="6">
+                                                <td className="text-center" colSpan="7">
                                                     {spinnerLoading()}
                                                 </td>
                                             </tr>
                                         ) : this.state.lista.length === 0 ? (
                                             <tr className="text-center">
-                                                <td colSpan="6">¡No hay datos registrados!</td>
+                                                <td colSpan="7">¡No hay datos registrados!</td>
                                             </tr>
                                         ) : (
                                             this.state.lista.map((item, index) => {
@@ -171,13 +224,20 @@ class Gastos extends React.Component {
                                                         <td>{item.fecha + ' ' + timeForma24(item.hora)}</td>
                                                         <td>{item.observacion}</td>
                                                         <td>
-                                                            <button className="btn btn-outline-info btn-sm" title="Detalle" onClick={() => {
-                                                                this.props.history.push({ pathname: `${this.props.location.pathname}/detalle`, search: "?idGasto=" + item.idGasto })
-                                                            }}>
+                                                            <button
+                                                                className="btn btn-outline-info btn-sm"
+                                                                title="Detalle"
+                                                                onClick={() => {
+                                                                    this.props.history.push({ pathname: `${this.props.location.pathname}/detalle`, search: "?idGasto=" + item.idGasto })
+                                                                }}>
                                                                 <i className="fa fa-eye"></i>
                                                             </button>
-                                                            {" "}
-                                                            <button className="btn btn-outline-danger btn-sm" title="Eliminar" onClick={() => this.onEventAnularGasto(item.idGasto)}>
+                                                        </td>
+                                                        <td>
+                                                            <button
+                                                                className="btn btn-outline-danger btn-sm"
+                                                                title="Eliminar"
+                                                                onClick={() => this.onEventAnularGasto(item.idGasto)}>
                                                                 <i className="fa fa-remove"></i>
                                                             </button>
                                                         </td>
@@ -190,24 +250,26 @@ class Gastos extends React.Component {
 
                             </table>
                         </div>
-                        <div className="col-md-12 text-center">
-                            <nav aria-label="...">
+                    </div>
+                </div>
+
+                <div className="row">
+                    <div className="col-sm-12 col-md-5">
+                        <div className="dataTables_info mt-2" role="status" aria-live="polite">{this.state.messagePaginacion}</div>
+                    </div>
+                    <div className="col-sm-12 col-md-7">
+                        <div className="dataTables_paginate paging_simple_numbers">
+                            <nav aria-label="Page navigation example">
                                 <ul className="pagination justify-content-end">
-                                    <li className="page-item disabled">
-                                        <button className="page-link">Previous</button>
-                                    </li>
-                                    <li className="page-item"><button className="page-link">1</button></li>
-                                    <li className="page-item active" aria-current="page">
-                                        <button className="page-link" href="#">2</button>
-                                    </li>
-                                    <li className="page-item"><button className="page-link" >3</button></li>
-                                    <li className="page-item">
-                                        <button className="page-link">Next</button>
-                                    </li>
+                                    <Paginacion
+                                        loading={this.state.loading}
+                                        totalPaginacion={this.state.totalPaginacion}
+                                        paginacion={this.state.paginacion}
+                                        fillTable={this.paginacionContext}
+                                    />
                                 </ul>
                             </nav>
                         </div>
-
                     </div>
                 </div>
             </>

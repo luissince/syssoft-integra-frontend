@@ -5,6 +5,7 @@ import {
     hideModal,
     viewModal,
     clearModal,
+    ModalAlertDialog,
     ModalAlertInfo,
     ModalAlertSuccess,
     ModalAlertWarning,
@@ -281,12 +282,36 @@ class Bancos extends React.Component {
         }
     }
 
+    onEventDelete(idBanco) {
+        ModalAlertDialog("Banco", "¿Estás seguro de eliminar el banco?", async (event) => {
+            if (event) {
+                try {
+                    ModalAlertInfo("Moneda", "Procesando información...")
+                    let result = await axios.delete('/api/banco', {
+                        params: {
+                            "idBanco": idBanco
+                        }
+                    })
+                    ModalAlertSuccess("Banco", result.data, () => {
+                        this.loadInit();
+                    })
+                } catch (error) {
+                    if (error.response !== undefined) {
+                        ModalAlertWarning("Banco", error.response.data)
+                    } else {
+                        ModalAlertWarning("Banco", "Se genero un error interno, intente nuevamente.")
+                    }
+                }
+            }
+        })
+    }
+
     render() {
         return (
             <>
                 {/* Inicio modal */}
                 <div className="modal fade" id="modalBanco" data-backdrop="static">
-                    <div className="modal-dialog modal-lg">
+                    <div className="modal-dialog modal-md">
                         <div className="modal-content">
                             <div className="modal-header">
                                 <h5 className="modal-title">{this.state.nameModal}</h5>
@@ -467,9 +492,20 @@ class Bancos extends React.Component {
                                                         <td>{item.numCuenta}</td>
                                                         <td>{item.representante}</td>
                                                         <td>
-                                                            <button className="btn btn-outline-warning btn-sm" title="Editar" onClick={() => this.openModal(item.idBanco)}><i className="bi bi-pencil"></i></button>
+                                                            <button
+                                                                className="btn btn-outline-warning btn-sm"
+                                                                title="Editar"
+                                                                onClick={() => this.openModal(item.idBanco)}>
+                                                                <i className="bi bi-pencil"></i>
+                                                            </button>
                                                         </td>
-                                                        <td><button className="btn btn-outline-danger btn-sm" title="Anular"><i className="bi bi-trash"></i></button></td>
+                                                        <td><button
+                                                            className="btn btn-outline-danger btn-sm"
+                                                            title="Anular"
+                                                            onClick={() => this.onEventDelete(item.idBanco)}>
+                                                            <i className="bi bi-trash"></i>
+                                                        </button>
+                                                        </td>
                                                     </tr>
                                                 )
                                             })

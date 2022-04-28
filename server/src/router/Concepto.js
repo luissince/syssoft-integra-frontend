@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const { currentDate, currentTime } = require('../tools/Tools');
 const Conexion = require('../database/Conexion');
-
 const conec = new Conexion()
 
 router.get('/list', async function (req, res) {
@@ -49,7 +48,6 @@ router.get('/list', async function (req, res) {
         res.status(200).send({ "result": resultLista, "total": total[0].Total })
 
     } catch (error) {
-        console.log(error)
         res.status(500).send("Error interno de conexión, intente nuevamente.")
     }
 });
@@ -97,16 +95,14 @@ router.post('/add', async function (req, res) {
         res.status(200).send('Datos insertados correctamente')
     } catch (error) {
         if (connection != null) {
-            conec.rollback(connection);
+            await conec.rollback(connection);
         }
         res.status(500).send("Error de servidor");
-        console.log(error)
     }
 });
 
 router.get('/id', async function (req, res) {
     try {
-
         let result = await conec.query('SELECT * FROM concepto WHERE idConcepto  = ?', [
             req.query.idConcepto
         ]);
@@ -116,22 +112,20 @@ router.get('/id', async function (req, res) {
         } else {
             res.status(400).send("Datos no encontrados");
         }
-
     } catch (error) {
-        console.log(error)
         res.status(500).send("Error interno de conexión, intente nuevamente.");
     }
-
 });
 
 router.post('/update', async function (req, res) {
     let connection = null;
     try {
-
         connection = await conec.beginTransaction();
+
         await conec.execute(connection, `UPDATE concepto SET 
-            nombre=?, tipoConcepto=?
-            WHERE idConcepto=?`, [
+        nombre=?, 
+        tipoConcepto=?
+        WHERE idConcepto=?`, [
             req.body.nombre, req.body.tipoConcepto,
             req.body.idConcepto,
 
@@ -141,7 +135,56 @@ router.post('/update', async function (req, res) {
         res.status(200).send('Los datos se actualizarón correctamente.')
     } catch (error) {
         if (connection != null) {
-            conec.rollback(connection);
+            await conec.rollback(connection);
+        }
+        res.status(500).send("Se produjo un error de servidor, intente nuevamente.");
+    }
+});
+
+router.delete('/', async function (req, res) {
+    let connection = null;
+    try {
+        connection = await conec.beginTransaction();
+
+        let cobroDetalle = await conec.execute(connection, `SELECT * FROM cobroDetalle WHERE idConcepto = ?`, [
+            req.query.idConcepto
+        ]);
+
+        if (cobroDetalle.length > 0) {
+            await conec.rollback(connection);
+            res.status(400).send('No se puede eliminar el concepto ya que esta ligada a un detalle de cobro.')
+            return;
+        }
+
+        let gastoDetalle = await conec.execute(connection, `SELECT * FROM gastoDetalle WHERE idConcepto = ?`, [
+            req.query.idConcepto
+        ]);
+
+        if (gastoDetalle.length > 0) {
+            await conec.rollback(connection);
+            res.status(400).send('No se puede eliminar el concepto ya que esta ligada a un detalle de gasto.')
+            return;
+        }
+
+        let lote = await conec.execute(connection, `SELECT * FROM lote WHERE idConcepto = ?`, [
+            req.query.idConcepto
+        ]);
+
+        if (lote.length > 0) {
+            await conec.rollback(connection);
+            res.status(400).send('No se puede eliminar el concepto ya que esta ligada a un lote.')
+            return;
+        }
+
+        await conec.execute(connection, `DELETE FROM concepto WHERE idConcepto = ?`, [
+            req.query.idConcepto
+        ]);
+
+        await conec.commit(connection)
+        res.status(200).send('Se eliminó correctamente el concepto..')
+    } catch (error) {
+        if (connection != null) {
+            await conec.rollback(connection);
         }
         res.status(500).send("Se produjo un error de servidor, intente nuevamente.");
     }
