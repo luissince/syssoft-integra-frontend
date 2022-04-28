@@ -13,5 +13,9 @@ function currentTime() {
     return formatted_time;
 }
 
+function formatMoney(valor){
+   return new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(valor)
+}
 
-module.exports = { currentDate, currentTime };
+
+module.exports = { currentDate, currentTime,formatMoney };

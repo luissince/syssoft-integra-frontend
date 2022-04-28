@@ -10,6 +10,7 @@ import {
     ModalAlertWarning,
     spinnerLoading
 } from '../tools/Tools';
+import noImage from '../../recursos/images/noimage.jpg';
 import Paginacion from '../tools/Paginacion';
 
 class Sedes extends React.Component {
@@ -28,6 +29,10 @@ class Sedes extends React.Component {
             txtRegion: '',
             txtProvincia: '',
             txtDistrito: '',
+
+            imagen: noImage,
+            imageBase64: null,
+            extenBase64: null,
 
             loadModal: false,
             nameModal: 'Nuevo Comprobante',
@@ -57,10 +62,7 @@ class Sedes extends React.Component {
 
         this.refTxtSearch = React.createRef();
 
-        // this.refTxtMoneda = React.createRef();
-        // this.refTxtNumCuenta = React.createRef();
-        // this.refTxtCci = React.createRef();
-        // this.refTxtRepresentante = React.createRef();
+        this.refFileImagen = React.createRef();
         this.idCodigo = "";
         this.abortControllerTable = new AbortController();
     }
@@ -73,6 +75,7 @@ class Sedes extends React.Component {
 
     async componentDidMount() {
         this.loadInit();
+        this.refFileImagen.current.addEventListener("change", this.onEventFileImage);
 
         viewModal("modalSede", () => {
             this.abortControllerModal = new AbortController();
@@ -97,7 +100,7 @@ class Sedes extends React.Component {
                 idSede: '',
 
                 loadModal: false,
-                nameModal: 'Nuevo Comprobante',
+                nameModal: 'Nueva Sede',
                 msgModal: 'Cargando datos...',
             });
             this.idCodigo = "";
@@ -105,7 +108,28 @@ class Sedes extends React.Component {
     }
 
     componentWillUnmount() {
+        this.refFileImagen.current.removeEventListener("change", this.onEventFileImage);
         this.abortControllerTable.abort();
+    }
+
+    onEventFileImage = async (event) => {
+        if (event.target.files.length !== 0) {
+            await this.setStateAsync({
+                imagen: URL.createObjectURL(event.target.files[0])
+            });
+        } else {
+            await this.setStateAsync({
+                imagen: noImage
+            });
+            this.refFileImagen.current.value = "";
+        }
+    }
+
+    async clearImage() {
+        await this.setStateAsync({
+            imagen: noImage
+        })
+        this.refFileImagen.current.value = "";
     }
 
     loadInit = async () => {
@@ -305,25 +329,69 @@ class Sedes extends React.Component {
                                 </button>
                             </div>
                             <div className="modal-body">
-                                {this.state.loadModal ?
-                                    <div className="clearfix absolute-all bg-white">
-                                        {spinnerLoading(this.state.msgModal)}
-                                    </div>
-                                    : null}
+                                {
+                                    this.state.loadModal ?
+                                        <div className="clearfix absolute-all bg-white">
+                                            {spinnerLoading(this.state.msgModal)}
+                                        </div>
+                                        : null
+                                }
 
                                 <div className="form-row">
                                     <div className="form-group col-md-6">
-                                        <label>Nombre de Empresa:</label>
+                                        <label>RUC: <i className="fa fa-asterisk text-danger small"></i></label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            ref={this.refRuc}
+                                            value={this.state.ruc}
+                                            onChange={(event) => this.setState({ ruc: event.target.value })}
+                                            placeholder="Ingrese el número del ruc" />
+                                    </div>
+                                    <div className="form-group col-md-6">
+                                        <label>Razon Social: <i className="fa fa-asterisk text-danger small"></i></label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            ref={this.refRazonSocial}
+                                            value={this.state.razonSocial}
+                                            onChange={(event) => this.setState({ razonSocial: event.target.value })}
+                                            placeholder="Ingrese la razon social" />
+                                    </div>
+
+                                    <div className="form-group col-md-6 text-center">
+                                        <div className="row pb-2">
+                                            <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                <img src={this.state.imagen} alt="" className="card-img-top" height={200} width={200} />
+                                            </div>
+                                        </div>
+                                        <input type="file" id="fileImage" accept="image/png, image/jpeg, image/gif, image/svg" style={{ display: "none" }} ref={this.refFileImagen} />
+                                        <label htmlFor="fileImage" className="btn btn-outline-secondary m-0">
+                                            <div className="content-button">
+                                                <i className="bi bi-image"></i>
+                                                <span></span>
+                                            </div>
+                                        </label>
+                                        {" "}
+                                        <button className="btn btn-outline-secondary" onClick={() => this.clearImage()}>
+                                            <i className="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="form-row">
+                                    <div className="form-group col-md-6">
+                                        <label>Nombre de Empresa: <i className="fa fa-asterisk text-danger small"></i></label>
                                         <input
                                             type="text"
                                             className="form-control"
                                             ref={this.refTxtNombreEmpresa}
                                             value={this.state.txtNombreEmpresa}
                                             onChange={(event) => this.setState({ txtNombreEmpresa: event.target.value })}
-                                            placeholder="Dijite ..." />
+                                            placeholder="Ingrese el nombre comercial de la empresa" />
                                     </div>
                                     <div className="form-group col-md-6">
-                                        <label>Nombre de Sede:</label>
+                                        <label>Nombre de Sede: <i className="fa fa-asterisk text-danger small"></i></label>
                                         <input
                                             type="text"
                                             className="form-control"
@@ -331,13 +399,36 @@ class Sedes extends React.Component {
                                             value={this.state.txtNombreSede}
                                             onChange={(event) => this.setState({ txtNombreSede: event.target.value })}
                                             placeholder="Dijite ..." />
+                                    </div>
+                                </div>
 
+                                <div className="form-row">
+                                    <div className="form-group col-md-6">
+                                    <label>Dirección: <i className="fa fa-asterisk text-danger small"></i></label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            ref={this.refTxtDireccion}
+                                            value={this.state.txtDireccion}
+                                            onChange={(event) => this.setState({ txtDireccion: event.target.value })}
+                                            placeholder="Dijite ..." />
+                                        
+                                    </div>
+                                    <div className="form-group col-md-6">
+                                        <label>Nombre de Sede: <i className="fa fa-asterisk text-danger small"></i></label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            ref={this.refTxtNombreSede}
+                                            value={this.state.txtNombreSede}
+                                            onChange={(event) => this.setState({ txtNombreSede: event.target.value })}
+                                            placeholder="Dijite ..." />
                                     </div>
                                 </div>
 
                                 <div className="form-row">
                                     <div className="form-group col-md-4">
-                                        <label>Telefono:</label>
+                                        <label>Telefono: <i className="fa fa-asterisk text-danger small"></i></label>
                                         <input
                                             type="text"
                                             className="form-control"
@@ -347,7 +438,7 @@ class Sedes extends React.Component {
                                             placeholder="Dijite ..." />
                                     </div>
                                     <div className="form-group col-md-4">
-                                        <label>celular:</label>
+                                        <label>celular: <i className="fa fa-asterisk text-danger small"></i></label>
                                         <input
                                             type="text"
                                             className="form-control"
@@ -380,14 +471,7 @@ class Sedes extends React.Component {
                                             placeholder="Dijite ..." />
                                     </div>
                                     <div className="form-group col-md-6">
-                                        <label>Dirección:</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            ref={this.refTxtDireccion}
-                                            value={this.state.txtDireccion}
-                                            onChange={(event) => this.setState({ txtDireccion: event.target.value })}
-                                            placeholder="Dijite ..." />
+                                        
                                     </div>
                                 </div>
 

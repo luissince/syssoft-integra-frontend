@@ -477,6 +477,514 @@ router.get('/report/lote', async function (req, res) {
     doc.end();
 });
 
+router.get('/report/ventas', async function (req, res) {
+    const doc = new PDFDocument({
+        margins: {
+            top: 40,
+            bottom: 40,
+            left: 40,
+            right: 40
+        }
+    });
+
+    doc.pipe(res);
+
+    let orgX = doc.x;
+    let orgY = doc.y;
+    let cabeceraY = orgY + 70;
+    let bodY = cabeceraY + 100;
+    let footerY = bodY + 75;
+    let medioX = (doc.page.width - doc.options.margins.left - doc.options.margins.right) / 2;
+    let tercioX = (doc.page.width - doc.options.margins.left - doc.options.margins.right) / 3;
+
+    doc.image(path.join(__dirname, "..", "path/to/ehil.png"), doc.x, doc.y, { width: 50, });
+
+    doc.fontSize(12).text(
+        "REPORTE DE VENTAS",
+        (doc.page.width - orgX - orgY) / 2,
+        orgY + 15,
+        {
+            width: 200,
+            align: "left",
+        }
+    );
+
+    doc.fontSize(11).text(
+        "PERIODO: 01-01-2022 al 01-31-2022",
+        orgX,
+        cabeceraY,
+        {
+            width: 300,
+            align: "left",
+        }
+    );
+
+    doc.rect(
+        orgX, // EJE X
+        cabeceraY + 25, // EJE Y
+        doc.page.width - doc.options.margins.left - doc.options.margins.right, // ANCHO
+        60).stroke(); // ALTO
+
+    // left
+    doc.fontSize(11).text(
+        `Documentos: TODOS`,
+        orgX + 5,
+        cabeceraY + 30
+    );
+    doc.fontSize(11).text(
+        `Cliente: TODOS`,
+        orgX + 5,
+        cabeceraY + 50
+    );
+    doc.fontSize(11).text(
+        `Vendedor: TODOS`,
+        orgX + 5,
+        cabeceraY + 70
+    );
+
+    // right
+    doc.fontSize(11).text(
+        `Tipos: TODOS`,
+        medioX + 15,
+        cabeceraY + 30
+    );
+    doc.fontSize(11).text(
+        `Metodo: TODOS`,
+        medioX + 15,
+        cabeceraY + 50
+    );
+
+    const table = {
+        title: "Detalle",
+        // subtitle: "Subtitle",
+        headers: ["Fecha", "Cliente", "Comprobante", "Tipo de Venta", "Metodo Cobro", "Estado", "Total"],
+        rows: [
+            ["11-01-2022", "PUBLICO GENERAL", "N001-1", "Contado", "Efectivo", "Cobrado", "S/ 10.00"]
+        ],
+    };
+
+    // doc.x = doc.options.margins.left,
+
+    doc.table(table, {
+        x: orgX,
+        y: bodY,
+        width: doc.page.width - doc.options.margins.left - doc.options.margins.right
+    });
+
+    doc.rect(
+        orgX + (tercioX * 2), // EJE X
+        footerY, // EJE Y
+        tercioX, // ANCHO
+        30).stroke(); // ALTO
+
+    // 1
+    doc.fontSize(10).text(
+        `Contado: S/ 10.00`,
+        orgX,
+        footerY + 10
+    );
+
+    // 2
+    doc.fontSize(10).text(
+        `Credito: S/ 10.00`,
+        orgX + tercioX,
+        footerY + 10
+    );
+
+    // 3
+    doc.fontSize(11).fillColor('#2d6be7').text(
+        `TOTAL: S/ 20.00`,
+        orgX + (tercioX * 2),
+        footerY + 10,
+        {
+            align: "center"
+        }
+    );
+
+    doc.end();
+});
+
+router.get('/report/gastos', async function (req, res) {
+    const doc = new PDFDocument({
+        margins: {
+            top: 40,
+            bottom: 40,
+            left: 40,
+            right: 40
+        }
+    });
+
+    doc.pipe(res);
+
+    let orgX = doc.x;
+    let orgY = doc.y;
+    let cabeceraY = orgY + 70;
+    let bodY = cabeceraY + 80;
+    let footerY = bodY + 65;
+    let medioX = (doc.page.width - doc.options.margins.left - doc.options.margins.right) / 2;
+    let tercioX = (doc.page.width - doc.options.margins.left - doc.options.margins.right) / 3;
+
+    doc.image(path.join(__dirname, "..", "path/to/ehil.png"), doc.x, doc.y, { width: 50, });
+
+    doc.fontSize(12).text(
+        "REPORTE DE GASTOS",
+        (doc.page.width - orgX - orgY) / 2,
+        orgY + 15,
+        {
+            width: 200,
+            align: "left",
+        }
+    );
+
+    doc.fontSize(11).text(
+        "PERIODO: 01-01-2022 al 01-31-2022",
+        orgX,
+        cabeceraY,
+        {
+            width: 300,
+            align: "left",
+        }
+    );
+
+    doc.rect(
+        orgX, // EJE X
+        cabeceraY + 25, // EJE Y
+        doc.page.width - doc.options.margins.left - doc.options.margins.right, // ANCHO
+        40).stroke(); // ALTO
+
+    // left
+    doc.fontSize(11).text(
+        `Usuario: TODOS`,
+        orgX + 5,
+        cabeceraY + 30
+    );
+    doc.fontSize(11).text(
+        `Metodo de Pago: TODOS`,
+        orgX + 5,
+        cabeceraY + 50
+    );
+
+    // right
+    doc.fontSize(11).text(
+        `Cuenta Bancaria: TODOS`,
+        medioX + 15,
+        cabeceraY + 30
+    );
+
+    const table = {
+        title: "Detalle",
+        // subtitle: "Subtitle",
+        headers: ["Fecha", "Usurio", "Cuenta Bancaria", "Metodo Pago", "Observación", "Importe"],
+        rows: [
+            ["11-01-2022", "admin admin", "Caja 1", "Efectivo", "Ninguna", "S/ 10.00"]
+        ],
+    };
+
+    doc.table(table, {
+        x: orgX,
+        y: bodY,
+        width: doc.page.width - doc.options.margins.left - doc.options.margins.right
+    });
+
+    let grad = doc.linearGradient(50, 0, 150, 100);
+    grad.stop(0, 'green')
+        .stop(1, '#eeeeee');
+
+    doc.rect(
+        orgX + (tercioX*2), 
+        footerY, 
+        tercioX, 
+        28);
+    doc.fill(grad);
+
+    // doc.rect(
+    //     orgX + (tercioX*2), // EJE X
+    //     footerY, // EJE Y
+    //     tercioX, // ANCHO
+    //     30).stroke(); // ALTO
+
+
+
+
+    doc.fontSize(11).fillColor('#0b5394').text(
+        `TOTAL: S/ 20.00`,
+        orgX + (tercioX * 2),
+        footerY + 10,
+        {
+            align: "center"
+        }
+    );
+
+    doc.end();
+});
+
+router.get('/report/cobros', async function (req, res) {
+    const doc = new PDFDocument({
+        margins: {
+            top: 40,
+            bottom: 40,
+            left: 40,
+            right: 40
+        }
+    });
+
+    doc.pipe(res);
+
+    let orgX = doc.x;
+    let orgY = doc.y;
+    let cabeceraY = orgY + 70;
+    let bodY = cabeceraY + 80;
+    let footerY = bodY + 65;
+    let medioX = (doc.page.width - doc.options.margins.left - doc.options.margins.right) / 2;
+    let tercioX = (doc.page.width - doc.options.margins.left - doc.options.margins.right) / 3;
+
+    doc.image(path.join(__dirname, "..", "path/to/ehil.png"), doc.x, doc.y, { width: 50, });
+
+    doc.fontSize(12).text(
+        "REPORTE DE COBROS",
+        (doc.page.width - orgX - orgY) / 2,
+        orgY + 15,
+        {
+            width: 200,
+            align: "left",
+        }
+    );
+
+    doc.fontSize(11).text(
+        "PERIODO: 01-01-2022 al 01-31-2022",
+        orgX,
+        cabeceraY,
+        {
+            width: 300,
+            align: "left",
+        }
+    );
+
+    doc.rect(
+        orgX, // EJE X
+        cabeceraY + 25, // EJE Y
+        doc.page.width - doc.options.margins.left - doc.options.margins.right, // ANCHO
+        40).stroke(); // ALTO
+
+    // left
+    doc.fontSize(11).text(
+        `Clientes: TODOS`,
+        orgX + 5,
+        cabeceraY + 30
+    );
+    doc.fontSize(11).text(
+        `Metodo de Pago: TODOS`,
+        orgX + 5,
+        cabeceraY + 50
+    );
+
+    // right
+    doc.fontSize(11).text(
+        `Usuario: TODOS`,
+        medioX + 15,
+        cabeceraY + 30
+    );
+    doc.fontSize(11).text(
+        `Cuenta Bancaria: TODOS`,
+        medioX + 15,
+        cabeceraY + 50
+    );
+
+    const table = {
+        title: "Detalle",
+        // subtitle: "Subtitle",
+        headers: ["Fecha", "Cliente", "Usuario", "Metodo Pago", "Observación", "Importe"],
+        rows: [
+            ["11-01-2022", "cliente Cliente", "admin admin", "Efectivo", "Ninguna", "S/ 10.00"]
+        ],
+    };
+
+    doc.table(table, {
+        x: orgX,
+        y: bodY,
+        width: doc.page.width - doc.options.margins.left - doc.options.margins.right
+    });
+
+    let grad = doc.linearGradient(50, 0, 150, 100);
+    grad.stop(0, 'green')
+        .stop(1, '#eeeeee');
+
+    doc.rect(
+        orgX + (tercioX*2), 
+        footerY, 
+        tercioX, 
+        28);
+    doc.fill(grad);
+
+    // doc.rect(
+    //     orgX + (tercioX*2), // EJE X
+    //     footerY, // EJE Y
+    //     tercioX, // ANCHO
+    //     30).stroke(); // ALTO
+
+    doc.fontSize(11).fillColor('#0b5394').text(
+        `TOTAL: S/ 20.00`,
+        orgX + (tercioX * 2),
+        footerY + 10,
+        {
+            align: "center"
+        }
+    );
+
+    doc.end();
+});
+
+router.get('/report/conceptos', async function (req, res) {
+
+    try {
+
+        let result = await conec.query(`SELECT
+        
+        c.idCobro
+
+        FROM cobro AS c
+        INNER JOIN usuario AS u ON c.idUsuario = u.idUsuario
+        INNER JOIN gasto AS g ON u.idUsuario = g.idUsuario
+        LEFT JOIN cobroDetalle AS cd ON c.idCobro = cb.idCobro
+        LEFT JOIN cobroVenta AS cv ON c.idCobro  = cv.idCobro 
+
+        WHERE 
+        ? = 0
+        OR
+        (? = 1 AND u.idUsuario = ?)
+        OR
+        (? = 1 AND (co.idConcepto=? AND co.tipoConcepto = ?) AND (co.idConcepto=? AND co.tipoConcepto = ?) )
+        OR
+        (? = 2 AND u.idUsuario = ? AND (co.idConcepto=? AND co.tipoConcepto = ?) AND (co.idConcepto=? AND co.tipoConcepto = ?) )
+
+        GROUP BY  u.idUsuario`, [
+            req.query.option,
+            req.query.option, req.query.idUsuario,
+            req.query.option, req.query.idConcepto, req.body.conceptoCobro, req.query.idConcepto, req.body.conceptoGasto,
+            req.body.option, req.query.idUsuario, req.query.idConcepto, req.body.conceptoCobro, req.query.idConcepto, req.body.conceptoGasto
+        ]);
+
+    }catch (err) {
+        res.status(500).send("Error interno de conexión, intente nuevamente.")
+    }
+
+    const doc = new PDFDocument({
+        margins: {
+            top: 40,
+            bottom: 40,
+            left: 40,
+            right: 40
+        }
+    });
+
+    doc.pipe(res);
+
+    let orgX = doc.x;
+    let orgY = doc.y;
+    let cabeceraY = orgY + 70;
+    let bodY = cabeceraY + 80;
+    let footerY = bodY + 80;
+    let medioX = (doc.page.width - doc.options.margins.left - doc.options.margins.right) / 2;
+    let tercioX = (doc.page.width - doc.options.margins.left - doc.options.margins.right) / 3;
+
+    doc.image(path.join(__dirname, "..", "path/to/ehil.png"), doc.x, doc.y, { width: 50, });
+
+    doc.fontSize(12).text(
+        "REPORTE DE CONCEPTOS",
+        (doc.page.width - orgX - orgY - 50) / 2,
+        orgY + 15,
+        {
+            width: 300,
+            align: "left",
+        }
+    );
+
+    doc.fontSize(10).text(
+        "COBROS Y GASTOS",
+        (doc.page.width - orgX - orgY) / 2,
+        orgY + 30,
+        {
+            width: 300,
+            align: "left",
+        }
+    );
+
+    doc.fontSize(11).text(
+        "PERIODO: 01-01-2022 al 01-31-2022",
+        orgX,
+        cabeceraY,
+        {
+            width: 300,
+            align: "left",
+        }
+    );
+
+    doc.rect(
+        orgX, // EJE X
+        cabeceraY + 25, // EJE Y
+        doc.page.width - doc.options.margins.left - doc.options.margins.right, // ANCHO
+        40).stroke(); // ALTO
+
+    // left
+    doc.fontSize(11).text(
+        `Cobro: TODOS`,
+        orgX + 5,
+        cabeceraY + 30
+    );
+
+    doc.fontSize(11).text(
+        `Usuario: TODOS`,
+        orgX + 5,
+        cabeceraY + 50
+    );
+
+    // right
+    doc.fontSize(11).text(
+        `Gasto: TODOS`,
+        medioX + 15,
+        cabeceraY + 30
+    );
+
+
+    const table = {
+        title: "Detalle",
+        // subtitle: "Subtitle",
+        headers: ["N°", "Concepto", "fecha", "Importe"],
+        rows: [
+            ["1", "Pago vigilancia", "11-01-2022", "S/ - 10.00"],
+            ["2", "Cobro Alquiler de maquinaria ", "11-01-2022", "S/ 10.00"]
+        ],
+    };
+
+    doc.table(table, {
+        x: orgX,
+        y: bodY,
+        width: doc.page.width - doc.options.margins.left - doc.options.margins.right
+    });
+
+    let grad = doc.linearGradient(50, 0, 150, 100);
+    grad.stop(0, 'green')
+        .stop(1, '#eeeeee');
+
+    doc.rect(
+        orgX + (tercioX*2), 
+        footerY, 
+        tercioX, 
+        28);
+    doc.fill(grad);
+
+    doc.fontSize(11).fillColor('#0b5394').text(
+        `TOTAL: S/ 00.00`,
+        orgX + (tercioX * 2),
+        footerY + 10,
+        {
+            align: "center"
+        }
+    );
+
+    doc.end();
+});
+
 router.get('/createsession', async function (req, res) {
     try {
 

@@ -10,9 +10,9 @@ class LoteDetalle extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            idLote: '',
             lote: {},
             detalle: [],
-
 
             loading: true,
             messageWarning: '',
@@ -56,13 +56,37 @@ class LoteDetalle extends React.Component {
             await this.setStateAsync({
                 lote: result.data.cabecera,
                 detalle: result.data.detalle,
-
+                idLote: id,
                 loading: false,
             });
         } catch (error) {
             if (error.message !== "canceled") {
                 this.props.history.goBack();
             }
+        }
+    }
+
+    async onEventImprimir(){
+
+        //Despliegue 
+        // window.open("/api/lote/replotedetalle?idLote="+this.state.idLote, "_blank");
+
+        //Desarrollo
+        try {
+            
+            let result = await axios.get("/api/lote/replotedetalle", {
+                responseType: "blob",
+                params: {
+                    "idLote": this.state.idLote
+                }
+            });
+
+            const file = new Blob([result.data], { type: "application/pdf" });
+            const fileURL = URL.createObjectURL(file);
+            window.open(fileURL, "_blank");
+
+        } catch (error) {
+            console.log(error)
         }
     }
 
@@ -76,7 +100,7 @@ class LoteDetalle extends React.Component {
             serie,
             numeracion,
             documento,
-            informacion,
+            cliente,
             fecha,
             hora,
             tipo,
@@ -107,7 +131,7 @@ class LoteDetalle extends React.Component {
                 <div className="row">
                     <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                         <div className="form-group">
-                            <button type="button" className="btn btn-light" onClick={() => { }}><i className="fa fa-print"></i> Imprimir</button>
+                            <button type="button" className="btn btn-light" onClick={() => this.onEventImprimir()}><i className="fa fa-print"></i> Imprimir</button>
                             {" "}
                             <button type="button" className="btn btn-light"><i className="fa fa-file-archive-o"></i> Adjuntar</button>
                         </div>
@@ -142,7 +166,7 @@ class LoteDetalle extends React.Component {
                     </div>
                     <div className="col-7">
                         Comprobante: <strong>{comprobante + " " + serie + "-" + numeracion} </strong> <br></br>
-                        Cliente: <strong>{documento + " " + informacion} </strong> <br></br>
+                        Cliente: <strong>{documento + " " + cliente} </strong> <br></br>
                         Fecha: <strong>{fecha + " " + hora} </strong> <br></br>
                         Notas: <strong> </strong> <br></br>
                         Forma de venta: <strong>{tipo === 1 ? "CONTADO" : "CRÉDITO"} </strong> <br></br>
