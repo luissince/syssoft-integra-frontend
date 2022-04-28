@@ -152,6 +152,65 @@ router.get('/id', async function (req, res) {
     }
 });
 
+router.delete('/', async function (req, res) {
+    let connection = null;
+    try {
+        connection = await conec.beginTransaction();
+
+        let banco = await conec.execute(connection, `SELECT * FROM banco WHERE idMoneda = ?`, [
+            req.query.idMoneda
+        ]);
+
+        if (banco.length > 0) {
+            await conec.rollback(connection);
+            res.status(400).send('No se puede eliminar la moneda ya que esta ligada a un banco.')
+            return;
+        }
+
+        let cobro = await conec.execute(connection, `SELECT * FROM  cobro WHERE idMoneda = ?`, [
+            req.query.idMoneda
+        ]);
+
+        if (cobro.length > 0) {
+            await conec.rollback(connection);
+            res.status(400).send('No se puede eliminar la moneda ya que esta ligada a un cobro.')
+            return;
+        }
+
+        let gasto = await conec.execute(connection, `SELECT * FROM  gasto WHERE idMoneda = ?`, [
+            req.query.idMoneda
+        ]);
+
+        if (gasto.length > 0) {
+            await conec.rollback(connection);
+            res.status(400).send('No se puede eliminar la moneda ya que esta ligada a un gasto.')
+            return;
+        }
+
+        let venta = await conec.execute(connection, `SELECT * FROM venta WHERE idMoneda = ?`, [
+            req.query.idMoneda
+        ]);
+
+        if (venta.length > 0) {
+            await conec.rollback(connection);
+            res.status(400).send('No se puede eliminar la moneda ya que esta ligada a un venta.')
+            return;
+        }
+
+        await conec.execute(connection, `DELETE FROM moneda WHERE idMoneda  = ?`, [
+            req.query.idMoneda
+        ]);
+
+        await conec.commit(connection)
+        res.status(200).send('Se eliminó correctamente la moneda.')
+    } catch (error) {
+        if (connection != null) {
+            await conec.rollback(connection);
+        }
+        res.status(500).send("Error interno de conexión, intente nuevamente.");
+    }
+});
+
 router.get('/listcombo', async function (req, res) {
     try {
         let result = await conec.query('SELECT idMoneda,nombre, simbolo, predeterminado FROM moneda');
