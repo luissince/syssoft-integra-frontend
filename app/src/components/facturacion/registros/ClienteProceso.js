@@ -202,10 +202,10 @@ class ClienteProceso extends React.Component {
                 });
             }
         } catch (error) {
-            if (error.response != null) {
-                ModalAlertWarning("Proyecto", error.response.data);
+            if (error.response !== undefined) {
+                ModalAlertWarning("Venta", error.response.data)
             } else {
-                ModalAlertWarning("Proyecto", "Se produjo un error un interno, intente nuevamente.");
+                ModalAlertWarning("Venta", "Se genero un error interno, intente nuevamente.")
             }
         }
     }

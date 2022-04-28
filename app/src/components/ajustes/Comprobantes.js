@@ -8,6 +8,7 @@ import {
     hideModal,
     viewModal,
     clearModal,
+    ModalAlertDialog,
     ModalAlertInfo,
     ModalAlertSuccess,
     ModalAlertWarning,
@@ -21,6 +22,7 @@ class Comprobantes extends React.Component {
         super(props);
         this.state = {
             idComprobante: '',
+            tipo: '',
             nombre: '',
             serie: '',
             numeracion: '',
@@ -42,6 +44,7 @@ class Comprobantes extends React.Component {
             messageTable: 'Cargando información...',
             messagePaginacion: 'Mostranto 0 de 0 Páginas'
         }
+        this.refTipo = React.createRef();
         this.refNombre = React.createRef();
         this.refSerie = React.createRef();
         this.refNumeracion = React.createRef();
@@ -247,6 +250,30 @@ class Comprobantes extends React.Component {
         }
     }
 
+    onEventDelete(idComprobante) {
+        ModalAlertDialog("Comprobante", "¿Estás seguro de eliminar el comprobante?", async (event) => {
+            if (event) {
+                try {
+                    ModalAlertInfo("Moneda", "Procesando información...")
+                    let result = await axios.delete('/api/comprobante', {
+                        params: {
+                            "idComprobante": idComprobante
+                        }
+                    })
+                    ModalAlertSuccess("Comprobante", result.data, () => {
+                        this.loadInit();
+                    })
+                } catch (error) {
+                    if (error.response !== undefined) {
+                        ModalAlertWarning("Comprobante", error.response.data)
+                    } else {
+                        ModalAlertWarning("Comprobante", "Se genero un error interno, intente nuevamente.")
+                    }
+                }
+            }
+        })
+    }
+
     render() {
         return (
             <>
@@ -266,6 +293,28 @@ class Comprobantes extends React.Component {
                                         {spinnerLoading(this.state.msgModal)}
                                     </div>
                                     : null}
+
+                                <div className="form-group">
+                                    <label htmlFor="estado">Estado</label>
+                                    <select
+                                        className="form-control"
+                                        id="estado"
+                                        ref={this.refTipo}
+                                        value={this.state.tipo}
+                                        onChange={(event) => {
+                                            this.setState({ tipo: event.target.value })
+                                        }}
+                                    >
+                                        <option value="">- Seleccione -</option>
+                                        <option value="1">Facturar</option>
+                                        <option value="2">Nota de Crédito</option>
+                                        <option value="3">Nota de Debito</option>
+                                        <option value="4">Recibo de Caja</option>
+                                        <option value="5">Comprobante de Ingreso</option>
+                                        <option value="6">Comprobante de Egreso</option>
+                                        <option value="7">Cotización</option>
+                                    </select>
+                                </div>
 
                                 <div className="form-group">
                                     <label htmlFor="nombre" className="col-form-label">Nombre:</label>
@@ -409,8 +458,22 @@ class Comprobantes extends React.Component {
                                                         <td>{item.numeracion}</td>
                                                         <td>{<span>{item.fecha}</span>}{<br></br>}{<span>{timeForma24(item.hora)}</span>}</td>
                                                         <td className="text-center"><div className={`badge ${item.estado === 1 ? "badge-info" : "badge-danger"}`}>{item.estado === 1 ? "ACTIVO" : "INACTIVO"}</div></td>
-                                                        <td><button className="btn btn-outline-warning btn-sm" title="Editar" onClick={() => this.openModal(item.idComprobante)}><i className="bi bi-pencil"></i> </button></td>
-                                                        <td><button className="btn btn-outline-danger btn-sm" title="Anular"><i className="bi bi-trash"></i></button></td>
+                                                        <td>
+                                                            <button
+                                                                className="btn btn-outline-warning btn-sm"
+                                                                title="Editar"
+                                                                onClick={() => this.openModal(item.idComprobante)}>
+                                                                <i className="bi bi-pencil"></i>
+                                                            </button>
+                                                        </td>
+                                                        <td>
+                                                            <button
+                                                                className="btn btn-outline-danger btn-sm"
+                                                                title="Anular"
+                                                                onClick={() => this.onEventDelete(item.idComprobante)}>
+                                                                <i className="bi bi-trash"></i>
+                                                            </button>
+                                                        </td>
                                                     </tr>
                                                 )
                                             })

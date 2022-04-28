@@ -55,7 +55,6 @@ router.get('/list', async function (req, res) {
         res.status(200).send({ "result": resultLista, "total": total[0].Total })
 
     } catch (error) {
-        console.log(error)
         res.status(500).send("Error interno de conexión, intente nuevamente.")
     }
 });
@@ -143,7 +142,7 @@ router.post('/', async function (req, res) {
 
     } catch (err) {
         if (connection != null) {
-            conec.rollback(connection);
+            await conec.rollback(connection);
         }
         res.status(500).send(connection);
     }
@@ -204,7 +203,7 @@ router.put('/', async function (req, res) {
         res.status(200).send('Los datos se actualizarón correctamente.')
     } catch (error) {
         if (connection != null) {
-            conec.rollback(connection);
+            await conec.rollback(connection);
         }
         res.status(500).send("Se produjo un error de servidor, intente nuevamente.");
     }
@@ -259,7 +258,6 @@ router.get('/id', async function (req, res) {
 router.delete('/', async function (req, res) {
     let connection = null;
     try {
-
         connection = await conec.beginTransaction();
 
         await conec.execute(connection, `DELETE FROM proyecto WHERE idProyecto = ?`, [
@@ -270,7 +268,7 @@ router.delete('/', async function (req, res) {
         res.status(200).send('Se eliminó correctamente el proyecto.')
     } catch (error) {
         if (connection != null) {
-            conec.rollback(connection);
+            await conec.rollback(connection);
         }
         res.status(500).send("Error interno de conexión, intente nuevamente.");
     }

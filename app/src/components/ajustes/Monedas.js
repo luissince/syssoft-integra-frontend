@@ -1,14 +1,16 @@
 import React from 'react';
 import axios from 'axios';
 import {
+    spinnerLoading,
     showModal,
     hideModal,
     viewModal,
     clearModal,
+    ModalAlertDialog,
     ModalAlertInfo,
     ModalAlertSuccess,
     ModalAlertWarning,
-    spinnerLoading
+
 } from '../tools/Tools';
 import Paginacion from '../tools/Paginacion';
 
@@ -236,6 +238,30 @@ class Monedas extends React.Component {
         }
     }
 
+    onEventDelete(idMoneda) {
+        ModalAlertDialog("Moneda", "¿Estás seguro de eliminar la moneda?", async (event) => {
+            if (event) {
+                try {
+                    ModalAlertInfo("Moneda", "Procesando información...")
+                    let result = await axios.delete('/api/moneda', {
+                        params: {
+                            "idMoneda": idMoneda
+                        }
+                    })
+                    ModalAlertSuccess("Moneda", result.data, () => {
+                        this.loadInit();
+                    })
+                } catch (error) {
+                    if (error.response !== undefined) {
+                        ModalAlertWarning("Moneda", error.response.data)
+                    } else {
+                        ModalAlertWarning("Moneda", "Se genero un error interno, intente nuevamente.")
+                    }
+                }
+            }
+        })
+    }
+
     render() {
         return (
             <>
@@ -389,10 +415,18 @@ class Monedas extends React.Component {
                                                         <td>{item.simbolo}</td>
                                                         <td><div className={`badge ${item.estado === 1 ? "badge-info" : "badge-danger"}`}>{item.estado === 1 ? "ACTIVO" : "INACTIVO"}</div></td>
                                                         <td>
-                                                            <button className="btn btn-outline-warning btn-sm" title="Editar" onClick={() => this.openModal(item.idMoneda)}><i className="bi bi-pencil"></i></button>
+                                                            <button
+                                                                className="btn btn-outline-warning btn-sm"
+                                                                title="Editar"
+                                                                onClick={() => this.openModal(item.idMoneda)}>
+                                                                <i className="bi bi-pencil"></i></button>
                                                         </td>
                                                         <td>
-                                                            <button className="btn btn-outline-danger btn-sm" title="Eliminar"><i className="bi bi-trash"></i></button>
+                                                            <button
+                                                                className="btn btn-outline-danger btn-sm"
+                                                                title="Eliminar"
+                                                                onClick={() => this.onEventDelete(item.idMoneda)}>
+                                                                <i className="bi bi-trash"></i></button>
                                                         </td>
                                                     </tr>
                                                 )
