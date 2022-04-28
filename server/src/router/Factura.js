@@ -407,11 +407,80 @@ router.delete("/anular", async function (req, res) {
     try {
         connection = await conec.beginTransaction();
 
-        await
+        let vanta = await conec.execute(connection, `SELECT idVenta FROM venta 
+        WHERE idVenta = ? AND estado = 3`, [
+            req.query.idVenta
+        ]);
+        if (vanta.length !== 0) {
+            await conec.rollback(connection);
+            res.status(400).send('La venta ya se encuentra anulada.');
+        } else {
+            let plazos = await conec.execute(connection, `SELECT * FROM
+            cobroVenta WHERE idVenta = ?`, [
+                req.query.idVenta
+            ]);
 
+            let validate = 0;
 
+            for (let item of plazos) {
+                if (item.idPlazo !== 0) {
+                    validate++;
+                }
+            }
+
+            if (validate > 0) {
+                await conec.rollback(connection);
+                res.status(400).send('No se puede eliminar la venta porque tiene cuotas asociadas.');
+                return;
+            }
+
+            await conec.execute(connection, `UPDATE venta SET estado = 3 
+            WHERE idVenta = ?`, [
+                req.query.idVenta
+            ]);
+
+            console.log(req.query.idVenta)
+
+            let cobro = await conec.execute(connection, `SELECT idCobro FROM cobro WHERE idProcedencia = ?`, [
+                req.query.idVenta
+            ])
+
+            if (cobro.length > 0) {
+                await conec.execute(connection, `DELETE FROM cobro WHERE idCobro = ?`, [
+                    cobro[0].idCobro
+                ]);
+
+                await conec.execute(connection, `DELETE FROM cobroDetalle WHERE idCobro = ?`, [
+                    cobro[0].idCobro
+                ]);
+
+                await conec.execute(connection, `DELETE FROM cobroVenta WHERE idCobro = ?`, [
+                    cobro[0].idCobro
+                ]);
+            }
+
+            let lote = await conec.execute(connection, `SELECT vd.idLote FROM
+            venta AS v 
+            INNER JOIN ventaDetalle AS vd ON v.idVenta = vd.idVenta
+            WHERE v.idVenta  = ?`, [
+                req.query.idVenta
+            ]);
+
+            for (let item of lote) {
+                await conec.execute(connection, `UPDATE lote SET estado = 1 
+                WHERE idLote = ?`, [
+                    item.idLote
+                ]);
+            }
+
+            await conec.execute(connection, `DELETE FROM plazo WHERE idVenta = ?`, [
+                req.query.idVenta
+            ]);
+
+            // await conec.rollback(connection);
             await conec.commit(connection);
-        res.status(200).send('Se anulo la venta correctamente.')
+            res.status(200).send('Se anulo correctamente la venta.');
+        }
     } catch (error) {
         console.log(error)
         if (connection != null) {

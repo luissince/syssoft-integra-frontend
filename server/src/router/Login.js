@@ -7,7 +7,6 @@ const conec = new Conexion();
 const fs = require('fs');
 const path = require('path');
 const PDFDocument = require("pdfkit-table");
-const { x } = require('pdfkit');
 
 router.get('/report/:version/:number', async function (req, res) {
     // Create a document

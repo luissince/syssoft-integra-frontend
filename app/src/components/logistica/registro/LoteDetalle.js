@@ -75,7 +75,7 @@ class LoteDetalle extends React.Component {
             serie,
             numeracion,
             documento,
-            informacion,
+            cliente,
             fecha,
             hora,
             tipo,
@@ -141,7 +141,7 @@ class LoteDetalle extends React.Component {
                     </div>
                     <div className="col-7">
                         Comprobante: <strong>{comprobante + " " + serie + "-" + numeracion} </strong> <br></br>
-                        Cliente: <strong>{documento + " " + informacion} </strong> <br></br>
+                        Cliente: <strong>{documento + " " + cliente} </strong> <br></br>
                         Fecha: <strong>{fecha + " " + hora} </strong> <br></br>
                         Notas: <strong> </strong> <br></br>
                         Forma de venta: <strong>{tipo === 1 ? "CONTADO" : "CRÉDITO"} </strong> <br></br>

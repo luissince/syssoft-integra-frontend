@@ -277,9 +277,7 @@ class Lote {
             v.tipo,
             v.estado,
             mo.simbolo,
-    
             cl.documento,
-            cl.informacion,
             IFNULL(SUM(vdv.precio*vdv.cantidad),0) AS monto
     
             FROM lote AS l

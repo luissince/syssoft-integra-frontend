@@ -2,6 +2,8 @@ import React from 'react';
 import axios from 'axios';
 import {
     formatMoney,
+    calculateTaxBruto,
+    calculateTax,
     keyNumberInteger,
     keyNumberFloat,
     isNumeric,
@@ -135,12 +137,15 @@ class VentaProceso extends React.Component {
                 signal: this.abortControllerView.signal,
             });
 
+            const monedaFilter = moneda.data.filter(item => item.predeterminado === 1);
+
             await this.setStateAsync({
                 comprobantes: comprobante.data,
                 clientes: cliente.data,
                 lotes: lote.data,
                 monedas: moneda.data,
                 impuestos: impuesto.data,
+                idMoneda: monedaFilter.length > 0 ? monedaFilter[0].idMoneda : '',
                 bancos: banco.data,
                 loading: false,
             });
@@ -251,17 +256,7 @@ class VentaProceso extends React.Component {
             }
         }
 
-        let total = 0;
-        for (let item of newArr) {
-            let cantidad = item.cantidad;
-            let valor = parseFloat(item.precioContado);
-            let filter = item.impuestos.filter(imp =>
-                imp.idImpuesto === item.idImpuesto
-            )
-            let impuesto = filter.length > 0 ? filter[0].porcentaje : 0;
-
-            total += (cantidad * valor) + ((cantidad * valor) * (impuesto / 100));
-        }
+        const { total } = this.calcularTotales();
 
         await this.setStateAsync({
             detalleVenta: newArr,
@@ -331,7 +326,7 @@ class VentaProceso extends React.Component {
         this.loadData();
     }
 
-    renderTotal() {
+    calcularTotales() {
         let subTotal = 0;
         let impuestoTotal = 0;
         let total = 0;
@@ -344,11 +339,20 @@ class VentaProceso extends React.Component {
             )
             let impuesto = filter.length > 0 ? filter[0].porcentaje : 0;
 
-            subTotal += cantidad * valor;
-            impuestoTotal += (cantidad * valor) * (impuesto / 100);
-            total += (cantidad * valor) + ((cantidad * valor) * (impuesto / 100));
-        }
+            let valorActual = cantidad * valor;
+            let valorSubNeto = calculateTaxBruto(impuesto, valorActual);
+            let valorImpuesto = calculateTax(impuesto, valorSubNeto);
+            let valorNeto = valorSubNeto + valorImpuesto;
 
+            subTotal += valorSubNeto;
+            impuestoTotal += valorImpuesto;
+            total += valorNeto;
+        }
+        return { subTotal, impuestoTotal, total }
+    }
+
+    renderTotal() {
+        const { subTotal, impuestoTotal, total } = this.calcularTotales();
         return (
             <>
                 <tr>
@@ -373,68 +377,118 @@ class VentaProceso extends React.Component {
         if (this.state.detalleVenta.length <= 0) {
             await this.setStateAsync({ messageWarning: "Agregar datos a la tabla." })
             this.refLote.current.focus()
-        } else if (this.state.idComprobante === '') {
+            return;
+        }
+
+        if (this.state.idComprobante === '') {
             await this.setStateAsync({ messageWarning: "Seleccione el comprobante." })
             this.refComprobante.current.focus();
-        } else if (this.state.idCliente === "") {
+            return;
+        }
+
+        if (this.state.idCliente === "") {
             await this.setStateAsync({ messageWarning: "Seleccione el cliente." });
             this.refCliente.current.focus();
-        } else if (this.state.idMoneda === "") {
+            return;
+        }
+        if (this.state.idMoneda === "") {
             await this.setStateAsync({ messageWarning: "Seleccione la moneda." });
             this.refMoneda.current.focus();
+            return;
         }
-        else {
-            showModal("modalVentaProceso")
+
+        let validate = this.state.detalleVenta.reduce((acumulador, item) =>
+            item.idImpuesto === "" ? acumulador + 1 : acumulador + 0
+            , 0);
+
+        if (validate > 0) {
+            await this.setStateAsync({ messageWarning: "Hay detalles en la tabla sin impuesto seleccionado." });
+            let count = 0;
+            for (let item of this.state.detalleVenta) {
+                count++;
+                if (item.idImpuesto === "") {
+                    document.getElementById(count + "imv").focus()
+                }
+            }
+            return;
         }
+
+        console.log(validate)
+
+        showModal("modalVentaProceso")
+
     }
 
     async onEventGuardar() {
         if (this.state.selectTipoPago && this.state.idBancoContado === "") {
             this.refBancoContado.current.focus();
-        } else if (this.state.selectTipoPago && this.state.metodoPagoContado === "") {
-            this.refMetodoContado.current.focus();
-        } else if (!this.state.selectTipoPago && this.state.montoInicialCheck && !isNumeric(this.state.inicial)) {
-            this.refMontoInicial.current.focus();
-        } else if (parseFloat(this.state.inicial) <= 0) {
-            this.refMontoInicial.current.focus();
-        } else if (!this.state.selectTipoPago && this.state.montoInicialCheck && this.state.idBancoCredito === "") {
-            this.refBancoCredito.current.focus();
-        } else if (!this.state.selectTipoPago && this.state.montoInicialCheck && this.state.metodoPagoCredito === "") {
-            this.refMetodoCredito.current.focus();
-        } else if (!this.state.selectTipoPago && !isNumeric(this.state.numCuota)) {
-            this.refNumCutoas.current.focus();
-        } else if (parseInt(this.state.numCuota) <= 0) {
-            this.refNumCutoas.current.focus();
-        } else {
-            try {
-                ModalAlertInfo("Venta", "Procesando información...");
-                hideModal("modalVentaProceso")
-                let result = await axios.post('/api/factura/add', {
-                    "idCliente": this.state.idCliente,
-                    "idUsuario": this.state.idUsuario,
-                    "idComprobante": this.state.idComprobante,
-                    "idMoneda": this.state.idMoneda,
-                    "tipo": this.state.selectTipoPago ? 1 : 2,
-                    "selectTipoPago": this.state.selectTipoPago,
-                    "montoInicialCheck": this.state.montoInicialCheck,
-                    "idBanco": this.state.selectTipoPago ? this.state.idBancoContado : this.state.montoInicialCheck ? this.state.idBancoCredito : "",
-                    "metodoPago": this.state.selectTipoPago ? this.state.metodoPagoContado : this.state.montoInicialCheck ? this.state.metodoPagoCredito : "",
-                    "inicial": this.state.selectTipoPago ? 0 : this.state.montoInicialCheck ? parseFloat(this.state.inicial) : 0,
-                    "numCuota": this.state.selectTipoPago ? 0 : parseInt(this.state.numCuota),
-                    "estado": this.state.selectTipoPago ? 1 : 2,
-                    "detalleVenta": this.state.detalleVenta,
-                });
+            return;
+        }
 
-                ModalAlertSuccess("Venta", result.data, () => {
-                    this.onEventLimpiar()
-                });
-            }
-            catch (error) {
-                if (error.response !== undefined) {
-                    ModalAlertWarning("Venta", error.response.data)
-                } else {
-                    ModalAlertWarning("Venta", "Se genero un error interno, intente nuevamente.")
-                }
+        if (this.state.selectTipoPago && this.state.metodoPagoContado === "") {
+            this.refMetodoContado.current.focus();
+            return;
+        }
+
+        if (!this.state.selectTipoPago && this.state.montoInicialCheck && !isNumeric(this.state.inicial)) {
+            this.refMontoInicial.current.focus();
+            return;
+        }
+
+        if (parseFloat(this.state.inicial) <= 0) {
+            this.refMontoInicial.current.focus();
+            return;
+        }
+
+        if (!this.state.selectTipoPago && this.state.montoInicialCheck && this.state.idBancoCredito === "") {
+            this.refBancoCredito.current.focus();
+            return;
+        }
+
+        if (!this.state.selectTipoPago && this.state.montoInicialCheck && this.state.metodoPagoCredito === "") {
+            this.refMetodoCredito.current.focus();
+            return;
+        }
+
+        if (!this.state.selectTipoPago && !isNumeric(this.state.numCuota)) {
+            this.refNumCutoas.current.focus();
+            return;
+        }
+
+        if (parseInt(this.state.numCuota) <= 0) {
+            this.refNumCutoas.current.focus();
+            return;
+        }
+
+        try {
+            ModalAlertInfo("Venta", "Procesando información...");
+            hideModal("modalVentaProceso")
+            let result = await axios.post('/api/factura/add', {
+                "idCliente": this.state.idCliente,
+                "idUsuario": this.state.idUsuario,
+                "idComprobante": this.state.idComprobante,
+                "idMoneda": this.state.idMoneda,
+                "tipo": this.state.selectTipoPago ? 1 : 2,
+                "selectTipoPago": this.state.selectTipoPago,
+                "montoInicialCheck": this.state.montoInicialCheck,
+                "idBanco": this.state.selectTipoPago ? this.state.idBancoContado : this.state.montoInicialCheck ? this.state.idBancoCredito : "",
+                "metodoPago": this.state.selectTipoPago ? this.state.metodoPagoContado : this.state.montoInicialCheck ? this.state.metodoPagoCredito : "",
+                "inicial": this.state.selectTipoPago ? 0 : this.state.montoInicialCheck ? parseFloat(this.state.inicial) : 0,
+                "numCuota": this.state.selectTipoPago ? 0 : parseInt(this.state.numCuota),
+                "estado": this.state.selectTipoPago ? 1 : 2,
+                "idProyecto": this.state.idProyecto,
+                "detalleVenta": this.state.detalleVenta,
+            });
+
+            ModalAlertSuccess("Venta", result.data, () => {
+                this.onEventLimpiar()
+            });
+        }
+        catch (error) {
+            if (error.response !== undefined) {
+                ModalAlertWarning("Venta", error.response.data)
+            } else {
+                ModalAlertWarning("Venta", "Se genero un error interno, intente nuevamente.")
             }
         }
     }
@@ -829,6 +883,7 @@ class VentaProceso extends React.Component {
                                                         <td>{item.cantidad}</td>
                                                         <td>
                                                             <select className="form-control"
+                                                                id={index + "imv"}
                                                                 value={item.idImpuesto}
                                                                 onChange={(event) => this.handleSelect(event, item.idDetalle)}>
                                                                 <option value="">- Seleccione -</option>
