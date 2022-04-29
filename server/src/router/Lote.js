@@ -1,8 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const Lote = require('../services/Lote');
+const Sede = require('../services/Sede');
 const RepLote = require('../report/RepLote');
 const lote = new Lote();
+const sede = new Sede();
+
 const repLote = new RepLote();
 
 router.get('/list', async function (req, res) {
@@ -44,7 +47,7 @@ router.put('/', async function (req, res) {
 });
 
 router.get('/detalle', async function (req, res) {
-    const result = await lote.detalle(req)
+    const result = await lote.detalleLote(req)
     if (typeof result === 'object') {
         res.status(200).send(result)
     } else {
@@ -72,19 +75,31 @@ router.get('/lotecliente', async function (req, res) {
 })
 
 router.get('/replotedetalle', async function (req, res) {
-    const result = await lote.detalle(req)
-    
-    if (typeof result === 'object') {
-        let data = await repLote.repDetalle(res, result)
+
+    const sedeInfo = await sede.infoSedeReporte(req)
+
+    if(typeof sedeInfo !== 'object'){
+        res.status(500).send(sedeInfo)
+        return;
+    }
+    // console.log(sedeInfo)
+
+    const detalle = await lote.detalleLote(req)
+
+    if (typeof detalle === 'object') {
+
+        let data = await repLote.repDetalleLote(sedeInfo, detalle)
         
         if (typeof data === 'string') {
             res.status(500).send(data)
+            console.log(data)
         } else {
             res.contentType("application/pdf");
             res.send(data);
         }
     } else {
-        res.status(500).send(result)
+        res.status(500).send(detalle)
+        cosnsole.log(detalle)
     }
 })
 

@@ -252,7 +252,7 @@ class Lote {
         }
     }
 
-    async detalle(req) {
+    async detalleLote(req) {
         try {
             let cabecera = await conec.query(`SELECT 
             l.idLote,
@@ -265,6 +265,19 @@ class Lote {
             WHEN l.estado = 2 THEN 'Reservado' 
             WHEN l.estado = 3 THEN 'Vendido' 
             ELSE 'Inactivo' END AS lotestado,
+
+            l.medidaFrontal,
+            l.costadoDerecho,
+            l.costadoIzquierdo,
+            l.medidaFondo,
+            l.areaLote,
+            l.numeroPartida,
+
+            l.limiteFrontal,
+            l.limiteDerecho,
+            l.limiteIzquierdo,
+            l.limitePosterior,
+            l.ubicacionLote,
     
             c.nombre as comprobante,
             cl.informacion as cliente,
