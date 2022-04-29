@@ -189,6 +189,14 @@ router.delete('/', async function (req, res) {
             req.query.idPerfil
         ]);
 
+        await conec.execute(connection, `DELETE FROM permisomenu WHERE idPerfil  = ?`, [
+            req.query.idPerfil
+        ]);
+
+        await conec.execute(connection, `DELETE FROM permisosubmenu WHERE idPerfil  = ?`, [
+            req.query.idPerfil
+        ]);
+
         await conec.commit(connection);
         res.status(200).send('Se eliminó correctamente el perfil.');
     } catch (error) {
