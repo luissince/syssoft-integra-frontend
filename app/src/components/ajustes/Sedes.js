@@ -8,8 +8,14 @@ import {
     ModalAlertInfo,
     ModalAlertSuccess,
     ModalAlertWarning,
-    spinnerLoading
+    spinnerLoading,
+    keyNumberInteger,
+    getExtension,
+    readDataURL,
+    imageSizeData,
 } from '../tools/Tools';
+import noImage from '../../recursos/images/noimage.jpg';
+import SearchBar from "../tools/SearchBar";
 import Paginacion from '../tools/Paginacion';
 
 class Sedes extends React.Component {
@@ -17,17 +23,32 @@ class Sedes extends React.Component {
         super(props);
         this.state = {
             idSede: '',
-            txtNombreEmpresa: '',
-            txtNombreSede: '',
-            txtTelefono: '',
-            txtCelular: '',
-            txtEmail: '',
-            txtWeb: '',
-            txtDireccion: '',
-            txtPais: '',
-            txtRegion: '',
-            txtProvincia: '',
-            txtDistrito: '',
+
+            ruc: '',
+            razonSocial: '',
+            nombreEmpresa: '',
+            nombreSede: '',
+            direccion: '',
+
+            idUbigeo: '',
+            ubigeo: '',
+
+            celular: '',
+            telefono: '',
+            email: '',
+            web: '',
+            descripcion: '',
+            useSol: '',
+            claveSol: '',
+            certificado: '',
+            claveCert: '',
+
+            filter: false,
+            filteredData: [],
+
+            imagen: noImage,
+            imageBase64: null,
+            extenBase64: null,
 
             loadModal: false,
             nameModal: 'Nuevo Comprobante',
@@ -44,24 +65,21 @@ class Sedes extends React.Component {
             messagePaginacion: 'Mostranto 0 de 0 Páginas'
         }
 
-        this.refTxtNombreEmpresa = React.createRef();
-        this.refTxtNombreSede = React.createRef();
-        this.refTxtTelefono = React.createRef();
-        this.refTxtCelular = React.createRef();
-        this.refTxtEmail = React.createRef();
-        this.refTxtDireccion = React.createRef();
-        this.refTxtPais = React.createRef();
-        this.refTxtRegion = React.createRef();
-        this.refTxtProvincia = React.createRef();
-        this.refTxtDistrito = React.createRef();
+        this.refRuc = React.createRef();
+        this.refRazonSocial = React.createRef();
+        this.refNombreEmpresa = React.createRef();
+        this.refNombreSede = React.createRef();
+        this.refCelular = React.createRef();
+
+        this.refDireccion = React.createRef();
+        this.refUbigeo = React.createRef();
+
 
         this.refTxtSearch = React.createRef();
+        this.refFileImagen = React.createRef();
 
-        // this.refTxtMoneda = React.createRef();
-        // this.refTxtNumCuenta = React.createRef();
-        // this.refTxtCci = React.createRef();
-        // this.refTxtRepresentante = React.createRef();
         this.idCodigo = "";
+        this.selectItem = false;
         this.abortControllerTable = new AbortController();
     }
 
@@ -73,6 +91,7 @@ class Sedes extends React.Component {
 
     async componentDidMount() {
         this.loadInit();
+        this.refFileImagen.current.addEventListener("change", this.onEventFileImage);
 
         viewModal("modalSede", () => {
             this.abortControllerModal = new AbortController();
@@ -83,18 +102,32 @@ class Sedes extends React.Component {
         clearModal("modalSede", async () => {
             this.abortControllerModal.abort();
             await this.setStateAsync({
-                txtNombreEmpresa: '',
-                txtNombreSede: '',
-                txtTelefono: '',
-                txtCelular: '',
-                txtEmail: '',
-                txtWeb: '',
-                txtDireccion: '',
-                txtPais: '',
-                txtRegion: '',
-                txtProvincia: '',
-                txtDistrito: '',
                 idSede: '',
+                ruc: '',
+                razonSocial: '',
+                nombreEmpresa: '',
+                nombreSede: '',
+                direccion: '',
+
+                idUbigeo: '',
+                ubigeo: '',
+
+                celular: '',
+                telefono: '',
+                email: '',
+                web: '',
+                descripcion: '',
+                useSol: '',
+                claveSol: '',
+                certificado: '',
+                claveCert: '',
+
+                filter: false,
+                filteredData: [],
+
+                imagen: noImage,
+                imageBase64: null,
+                extenBase64: null,
 
                 loadModal: false,
                 nameModal: 'Nuevo Comprobante',
@@ -105,7 +138,28 @@ class Sedes extends React.Component {
     }
 
     componentWillUnmount() {
+        this.refFileImagen.current.removeEventListener("change", this.onEventFileImage);
         this.abortControllerTable.abort();
+    }
+
+    onEventFileImage = async (event) => {
+        if (event.target.files.length !== 0) {
+            await this.setStateAsync({
+                imagen: URL.createObjectURL(event.target.files[0])
+            });
+        } else {
+            await this.setStateAsync({
+                imagen: noImage
+            });
+            this.refFileImagen.current.value = "";
+        }
+    }
+
+    async clearImage() {
+        await this.setStateAsync({
+            imagen: noImage
+        })
+        this.refFileImagen.current.value = "";
     }
 
     loadInit = async () => {
@@ -166,6 +220,7 @@ class Sedes extends React.Component {
                 totalPaginacion: totalPaginacion,
                 messagePaginacion: messagePaginacion
             });
+            this.selectItem = true;
 
         } catch (error) {
             if (error.message !== "canceled") {
@@ -188,7 +243,7 @@ class Sedes extends React.Component {
         else {
             showModal('modalSede')
             this.idCodigo = id;
-            await this.setStateAsync({ idComprobante: id, nameModal: "Editar Sede", loadModal: true });
+            await this.setStateAsync({ idSede: id, nameModal: "Editar Sede", loadModal: true });
         }
     }
 
@@ -197,23 +252,38 @@ class Sedes extends React.Component {
             const result = await axios.get("/api/sede/id", {
                 signal: this.abortControllerModal.signal,
                 params: {
-                    idSede: id
+                    "idSede": id
                 }
             });
 
+            const data = result.data;
+
+            // console.log(data)
+
             await this.setStateAsync({
-                txtNombreEmpresa: result.data.nombreEmpresa,
-                txtNombreSede: result.data.nombreSede,
-                txtTelefono: result.data.telefono,
-                txtCelular: result.data.celular,
-                txtEmail: result.data.email,
-                txtWeb: result.data.web,
-                txtDireccion: result.data.direccion,
-                txtPais: result.data.pais,
-                txtRegion: result.data.region,
-                txtProvincia: result.data.provincia,
-                txtDistrito: result.data.distrito,
-                idSede: result.data.idSede,
+                idSede: data.idSede,
+                ruc: data.ruc,
+                razonSocial: data.razonSocial,
+                nombreEmpresa: data.nombreEmpresa,
+                nombreSede: data.nombreSede,
+                direccion: data.direccion,
+
+                idUbigeo: data.idUbigeo.toString(),
+                ubigeo: data.departamento + "-" + data.provincia + "-" + data.distrito + " (" + data.ubigeo + ")",
+
+                celular: data.celular,
+                telefono: data.telefono,
+                email: data.email,
+                web: data.web,
+                descripcion: data.descripcion,
+                useSol: data.useSol,
+                claveSol: data.claveSol,
+                certificado: data.certificado,
+                claveCert: data.claveCert,
+
+                imagen: data.imagen !== "" ? `data:image/${data.extensionimagen};base64,${data.imagen}` : noImage,
+                imageBase64: data.imagen,
+                extenBase64: data.extension,
 
                 loadModal: false
             });
@@ -228,66 +298,150 @@ class Sedes extends React.Component {
     }
 
     async onEventGuardar() {
-        if (this.state.txtNombreEmpresa === "") {
-            this.refTxtNombreEmpresa.current.focus();
-        } else if (this.state.txtNombreSede === "") {
-            this.refTxtNombreSede.current.focus();
-        } else if (this.state.txtTelefono === "") {
-            this.refTxtTelefono.current.focus();
-        } else if (this.state.txtCelular === "") {
-            this.refTxtCelular.current.focus();
-        } else if (this.state.txtEmail === "") {
-            this.refTxtEmail.current.focus();
-        } else if (this.state.txtDireccion === "") {
-            this.refTxtDireccion.current.focus();
-        }
-        else {
+
+        if (this.state.ruc === "") {
+            this.refRuc.current.focus();
+        } else if (this.state.razonSocial === "") {
+            this.refRazonSocial.current.focus();
+        } else if (this.state.nombreEmpresa === "") {
+            this.refNombreEmpresa.current.focus();
+        } else if (this.state.nombreSede === "") {
+            this.refNombreSede.current.focus();
+        } else if (this.state.direccion === "") {
+            this.refDireccion.current.focus();
+        } else if (this.state.idUbigeo === "") {
+            this.refUbigeo.current.focus();
+        } else if (this.state.celular === "") {
+            this.refCelular.current.focus();
+        } else {
             try {
 
                 ModalAlertInfo("Sede", "Procesando información...");
-                hideModal("modalSede");
-                if (this.state.idSede !== '') {
-                    let result = await axios.post('/api/sede/update', {
-                        "nombreEmpresa": this.state.txtNombreEmpresa.trim().toUpperCase(),
-                        "nombreSede": this.state.txtNombreSede.trim().toUpperCase(),
-                        "telefono": this.state.txtTelefono.trim().toUpperCase(),
-                        "celular": this.state.txtCelular.trim().toUpperCase(),
-                        "email": this.state.txtEmail.trim().toUpperCase(),
-                        "web": this.state.txtWeb.trim().toUpperCase(),
-                        "direccion": this.state.txtDireccion.trim().toUpperCase(),
-                        "pais": this.state.txtPais.trim().toUpperCase(),
-                        "region": this.state.txtRegion.trim().toUpperCase(),
-                        "provincia": this.state.txtProvincia.trim().toUpperCase(),
-                        "distrito": this.state.txtDistrito.trim().toUpperCase(),
-                        "idSede": this.state.idSede
-                    })
-
-                    ModalAlertSuccess("Sede", result.data, () => {
-                        this.onEventPaginacion();
-                    });
+                let files = this.refFileImagen.current.files;
+                if (files.length !== 0) {
+                    let read = await readDataURL(files);
+                    let base64String = read.replace(/^data:.+;base64,/, '');
+                    let ext = getExtension(files[0].name);
+                    let { width, height } = await imageSizeData(read);
+                    if (width <= 1024 && height <= 629) {
+                        this.save(base64String, ext);
+                    } else {
+                        ModalAlertWarning("Proyecto", "La imagen subida no tiene el tamaño establecido.");
+                    }
                 } else {
-                    let result = await axios.post('/api/sede/add', {
-                        "nombreEmpresa": this.state.txtNombreEmpresa.trim().toUpperCase(),
-                        "nombreSede": this.state.txtNombreSede.trim().toUpperCase(),
-                        "telefono": this.state.txtTelefono.trim().toUpperCase(),
-                        "celular": this.state.txtCelular.trim().toUpperCase(),
-                        "email": this.state.txtEmail.trim().toUpperCase(),
-                        "web": this.state.txtWeb.trim().toUpperCase(),
-                        "direccion": this.state.txtDireccion.trim().toUpperCase(),
-                        "pais": this.state.txtPais.trim().toUpperCase(),
-                        "region": this.state.txtRegion.trim().toUpperCase(),
-                        "provincia": this.state.txtProvincia.trim().toUpperCase(),
-                        "distrito": this.state.txtDistrito.trim().toUpperCase(),
-                    });
-
-                    ModalAlertSuccess("Sede", result.data, () => {
-                        this.loadInit();
-                    });
+                    this.save("", "");
                 }
+                hideModal("modalSede");
+
             } catch (error) {
-                ModalAlertWarning("Sede", "Se produjo un error un interno, intente nuevamente.");
+                if (error.response != null) {
+                    ModalAlertWarning("Sede", error.response.data);
+                } else {
+                    ModalAlertWarning("Sede", "Se produjo un error un interno, intente nuevamente.");
+                }
+
             }
         }
+    }
+
+    async save(image, extension) {
+        if (this.state.idSede !== '') {
+            let result = await axios.post('/api/sede/update', {
+                "ruc": this.state.ruc,
+                "razonSocial": this.state.razonSocial.trim().toUpperCase(),
+                "nombreEmpresa": this.state.nombreEmpresa.trim().toUpperCase(),
+                "nombreSede": this.state.nombreSede.trim().toUpperCase(),
+                "direccion": this.state.direccion.trim().toUpperCase(),
+
+                "idUbigeo": this.state.idUbigeo,
+
+                "celular": this.state.celular.trim(),
+                "telefono": this.state.telefono.trim(),
+                "email": this.state.email.trim().toUpperCase(),
+                "web": this.state.web.trim().toUpperCase(),
+                "descripcion": this.state.descripcion.trim().toUpperCase(),
+                "useSol": this.state.useSol.trim(),
+                "claveSol": this.state.claveSol.trim(),
+                "certificado": '',
+                "claveCert": this.state.claveCert.trim(),
+
+                "imagen": image === "" ? this.state.imageBase64 == null ? "" : this.state.imageBase64 : image,
+                "extension": extension === "" ? this.state.extenBase64 == null ? "" : this.state.extenBase64 : extension,
+
+                "idSede": this.state.idSede
+            })
+
+            ModalAlertSuccess("Sede", result.data, () => {
+                this.onEventPaginacion();
+            });
+        } else {
+            let result = await axios.post('/api/sede/add', {
+                "ruc": this.state.ruc,
+                "razonSocial": this.state.razonSocial.trim().toUpperCase(),
+                "nombreEmpresa": this.state.nombreEmpresa.trim().toUpperCase(),
+                "nombreSede": this.state.nombreSede.trim().toUpperCase(),
+                "direccion": this.state.direccion.trim().toUpperCase(),
+
+                "idUbigeo": this.state.idUbigeo,
+
+                "celular": this.state.celular.trim(),
+                "telefono": this.state.telefono.trim(),
+                "email": this.state.email.trim().toUpperCase(),
+                "web": this.state.web.trim().toUpperCase(),
+                "descripcion": this.state.descripcion.trim().toUpperCase(),
+                "useSol": this.state.useSol.trim(),
+                "claveSol": this.state.claveSol.trim(),
+                "certificado": '',
+                "claveCert": this.state.claveCert.trim(),
+
+                "imagen": image === "" ? this.state.imageBase64 == null ? "" : this.state.imageBase64 : image,
+                "extension": extension === "" ? this.state.extenBase64 == null ? "" : this.state.extenBase64 : extension,
+
+            });
+
+            ModalAlertSuccess("Sede", result.data, () => {
+                this.loadInit();
+            });
+        }
+    }
+
+    handleFilter = async (event) => {
+
+        const searchWord = this.selectItem ? "" : event.target.value;
+        await this.setStateAsync({ idUbigeo: '', ubigeo: searchWord });
+        this.selectItem = false;
+        if (searchWord.length === 0) {
+            await this.setStateAsync({ filteredData: [] });
+            return;
+        }
+
+        if (this.state.filter) return;
+
+        try {
+            await this.setStateAsync({ filter: true });
+            let result = await axios.get("/api/ubigeo/", {
+                params: {
+                    filtrar: searchWord,
+                },
+            });
+            await this.setStateAsync({ filter: false, filteredData: result.data });
+        } catch (error) {
+            await this.setStateAsync({ filter: false, filteredData: [] });
+        }
+    }
+
+    onEventSelectItem = async (value) => {
+        await this.setStateAsync({
+            ubigeo: value.departamento + "-" + value.provincia + "-" + value.distrito + " (" + value.ubigeo + ")",
+            filteredData: [],
+            idUbigeo: value.idUbigeo
+        });
+        this.selectItem = true;
+    }
+
+    onEventClearInput = async () => {
+        await this.setStateAsync({ filteredData: [], idUbigeo: '', ubigeo: "" });
+        this.selectItem = false;
     }
 
 
@@ -305,66 +459,116 @@ class Sedes extends React.Component {
                                 </button>
                             </div>
                             <div className="modal-body">
-                                {this.state.loadModal ?
-                                    <div className="clearfix absolute-all bg-white">
-                                        {spinnerLoading(this.state.msgModal)}
-                                    </div>
-                                    : null}
+                                {
+                                    this.state.loadModal ?
+                                        <div className="clearfix absolute-all bg-white">
+                                            {spinnerLoading(this.state.msgModal)}
+                                        </div>
+                                        : null
+                                }
 
                                 <div className="form-row">
                                     <div className="form-group col-md-6">
-                                        <label>Nombre de Empresa:</label>
+                                        <label>RUC: <i className="fa fa-asterisk text-danger small"></i></label>
                                         <input
                                             type="text"
                                             className="form-control"
-                                            ref={this.refTxtNombreEmpresa}
-                                            value={this.state.txtNombreEmpresa}
-                                            onChange={(event) => this.setState({ txtNombreEmpresa: event.target.value })}
-                                            placeholder="Dijite ..." />
+                                            ref={this.refRuc}
+                                            value={this.state.ruc}
+                                            onChange={(event) => this.setState({ ruc: event.target.value })}
+                                            onKeyPress={keyNumberInteger}
+                                            placeholder="Ingrese el número del ruc" />
                                     </div>
                                     <div className="form-group col-md-6">
-                                        <label>Nombre de Sede:</label>
+                                        <label>Razon Social: <i className="fa fa-asterisk text-danger small"></i></label>
                                         <input
                                             type="text"
                                             className="form-control"
-                                            ref={this.refTxtNombreSede}
-                                            value={this.state.txtNombreSede}
-                                            onChange={(event) => this.setState({ txtNombreSede: event.target.value })}
-                                            placeholder="Dijite ..." />
+                                            ref={this.refRazonSocial}
+                                            value={this.state.razonSocial}
+                                            onChange={(event) => this.setState({ razonSocial: event.target.value })}
+                                            placeholder="Ingrese la razon social" />
+                                    </div>
+                                </div>
 
+                                <div className="form-row">
+                                    <div className="form-group col-md-6">
+                                        <label>Nombre de Empresa: <i className="fa fa-asterisk text-danger small"></i></label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            ref={this.refNombreEmpresa}
+                                            value={this.state.nombreEmpresa}
+                                            onChange={(event) => this.setState({ nombreEmpresa: event.target.value })}
+                                            placeholder="Ingrese el nombre comercial de la empresa" />
+                                    </div>
+                                    <div className="form-group col-md-6">
+                                        <label>Nombre de Sede: <i className="fa fa-asterisk text-danger small"></i></label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            ref={this.refNombreSede}
+                                            value={this.state.nombreSede}
+                                            onChange={(event) => this.setState({ nombreSede: event.target.value })}
+                                            placeholder="Ingrese el nombre de la sede" />
+                                    </div>
+                                </div>
+
+                                <div className="form-row">
+                                    <div className="form-group col-md-6">
+                                        <label>Dirección: <i className="fa fa-asterisk text-danger small"></i></label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            ref={this.refDireccion}
+                                            value={this.state.direccion}
+                                            onChange={(event) => this.setState({ direccion: event.target.value })}
+                                            placeholder="Ingrese el la dirección" />
+                                    </div>
+                                    <div className="form-group col-md-6">
+                                        <label>Ubigeo: <i className="fa fa-asterisk text-danger small"></i></label>
+                                        <SearchBar
+                                            placeholder="Escribe para iniciar a filtrar..."
+                                            refTxtUbigeo={this.refUbigeo}
+                                            ubigeo={this.state.ubigeo}
+                                            filteredData={this.state.filteredData}
+                                            onEventClearInput={this.onEventClearInput}
+                                            handleFilter={this.handleFilter}
+                                            onEventSelectItem={this.onEventSelectItem}
+                                        />
                                     </div>
                                 </div>
 
                                 <div className="form-row">
                                     <div className="form-group col-md-4">
-                                        <label>Telefono:</label>
+                                        <label>celular: <i className="fa fa-asterisk text-danger small"></i></label>
                                         <input
                                             type="text"
                                             className="form-control"
-                                            ref={this.refTxtTelefono}
-                                            value={this.state.txtTelefono}
-                                            onChange={(event) => this.setState({ txtTelefono: event.target.value })}
-                                            placeholder="Dijite ..." />
+                                            ref={this.refCelular}
+                                            value={this.state.celular}
+                                            onChange={(event) => this.setState({ celular: event.target.value })}
+                                            onKeyPress={keyNumberInteger}
+                                            placeholder="Ingrese el número de celular" />
                                     </div>
                                     <div className="form-group col-md-4">
-                                        <label>celular:</label>
+                                        <label>Telefono: </label>
                                         <input
                                             type="text"
                                             className="form-control"
-                                            ref={this.refTxtCelular}
-                                            value={this.state.txtCelular}
-                                            onChange={(event) => this.setState({ txtCelular: event.target.value })}
-                                            placeholder="Dijite ..." />
+                                            value={this.state.telefono}
+                                            onChange={(event) => this.setState({ telefono: event.target.value })}
+                                            onKeyPress={keyNumberInteger}
+                                            placeholder="Ingrese el número de telefono" />
                                     </div>
                                     <div className="form-group col-md-4">
                                         <label>Email:</label>
                                         <input
                                             type="text"
                                             className="form-control"
-                                            ref={this.refTxtEmail}
-                                            value={this.state.txtEmail}
-                                            onChange={(event) => this.setState({ txtEmail: event.target.value })}
-                                            placeholder="Dijite ..." />
+                                            value={this.state.email}
+                                            onChange={(event) => this.setState({ email: event.target.value })}
+                                            placeholder="Ingrese el email" />
                                     </div>
                                 </div>
 
@@ -374,63 +578,85 @@ class Sedes extends React.Component {
                                         <input
                                             type="text"
                                             className="form-control"
-                                            ref={this.refTxWebSite}
-                                            value={this.state.txtWeb}
-                                            onChange={(event) => this.setState({ txtWeb: event.target.value })}
-                                            placeholder="Dijite ..." />
+                                            value={this.state.web}
+                                            onChange={(event) => this.setState({ web: event.target.value })}
+                                            placeholder="Ingrese la url" />
                                     </div>
                                     <div className="form-group col-md-6">
-                                        <label>Dirección:</label>
+                                        <label>Descripción:</label>
                                         <input
                                             type="text"
                                             className="form-control"
-                                            ref={this.refTxtDireccion}
-                                            value={this.state.txtDireccion}
-                                            onChange={(event) => this.setState({ txtDireccion: event.target.value })}
-                                            placeholder="Dijite ..." />
+
+                                            value={this.state.descripcion}
+                                            onChange={(event) => this.setState({ descripcion: event.target.value })}
+                                            placeholder="Ingrese una descripción" />
                                     </div>
                                 </div>
 
                                 <div className="form-row">
-                                    <div className="form-group col-md-3">
-                                        <label>Pais:</label>
+                                    <div className="form-group col-md-6">
+                                        <label>Usuario sol: </label>
                                         <input
                                             type="text"
                                             className="form-control"
-                                            ref={this.refTxtPais}
-                                            value={this.state.txtPais}
-                                            onChange={(event) => this.setState({ txtPais: event.target.value })}
-                                            placeholder="Dijite ..." />
+                                            value={this.state.useSol}
+                                            onChange={(event) => this.setState({ useSol: event.target.value })}
+                                            placeholder="Ingrese el usuario sol" />
                                     </div>
-                                    <div className="form-group col-md-3">
-                                        <label>Región:</label>
+                                    <div className="form-group col-md-6">
+                                        <label>Contraseña sol: </label>
                                         <input
-                                            type="text"
+                                            type="password"
                                             className="form-control"
-                                            ref={this.refTxtRegion}
-                                            value={this.state.txtRegion}
-                                            onChange={(event) => this.setState({ txtRegion: event.target.value })}
-                                            placeholder="Dijite ..." />
+                                            value={this.state.claveSol}
+                                            onChange={(event) => this.setState({ claveSol: event.target.value })}
+                                            placeholder="Ingrese la contraseña sol" />
                                     </div>
-                                    <div className="form-group col-md-3">
-                                        <label>Provincia:</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            ref={this.refTxtProvincia}
-                                            value={this.state.txtProvincia}
-                                            onChange={(event) => this.setState({ txtProvincia: event.target.value })}
-                                            placeholder="Dijite ..." />
+                                </div>
+
+                                <div className="form-row">
+                                    <div className="col-md-6">
+                                        <label className="form-text" >Certificado:</label>
+                                        <div className="form-group d-flex">
+                                            <input type="file" className="form-control d-none" id="fileCertificado" />
+                                            <div className="input-group">
+                                                <label className="form-control" htmlFor="fileCertificado" id="lblNameCertificado">{'...'}</label>
+                                                <div className="input-group-append">
+                                                    <label htmlFor="fileCertificado" className="form-control ml-1" type="button" id="btnReloadCliente"><i className="bi bi-file-earmark-fill"></i></label>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div className="form-group col-md-3">
-                                        <label>Distrito:</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            ref={this.refTxtDistrito}
-                                            value={this.state.txtDistrito}
-                                            onChange={(event) => this.setState({ txtDistrito: event.target.value })}
-                                            placeholder="Dijite ..." />
+                                    <div className="col-md-6">
+                                        <label className="form-text">Contraseña certificado: </label>
+                                        <div className="form-group">
+                                            <input
+                                                type="password"
+                                                className="form-control"
+                                                ref={this.refClaveSol}
+                                                onChange={(event) => this.setState({ claveCert: event.target.value })}
+                                                placeholder="Ingrese la contraseña del certificado" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="form-row">
+                                    <div className="form-group col-md-12 text-center">
+                                        <div className="text-center mb-2 ">
+                                            <img src={this.state.imagen} alt="" className="img-fluid border border-primary rounded" width={250} />
+                                        </div>
+                                        <input type="file" id="fileImage" accept="image/png, image/jpeg, image/gif, image/svg" style={{ display: "none" }} ref={this.refFileImagen} />
+                                        <label htmlFor="fileImage" className="btn btn-outline-secondary m-0">
+                                            <div className="content-button">
+                                                <i className="bi bi-image"></i>
+                                                <span></span>
+                                            </div>
+                                        </label>
+                                        {" "}
+                                        <button className="btn btn-outline-secondary" onClick={() => this.clearImage()}>
+                                            <i className="bi bi-trash"></i>
+                                        </button>
                                     </div>
                                 </div>
 
@@ -519,7 +745,7 @@ class Sedes extends React.Component {
                                                         <td>{item.telefono}</td>
                                                         <td>{item.celular}</td>
                                                         <td>
-                                                            <button className="btn btn-outline-dark btn-sm" title="Editar" onClick={() => this.openModal(item.idSede)}><i className="bi bi-pencil"></i></button>
+                                                            <button className="btn btn-outline-warning btn-sm" title="Editar" onClick={() => this.openModal(item.idSede)}><i className="bi bi-pencil"></i></button>
                                                         </td>
                                                     </tr>
                                                 )

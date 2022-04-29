@@ -6,6 +6,7 @@ import {
     hideModal,
     viewModal,
     clearModal,
+    ModalAlertDialog,
     ModalAlertInfo,
     ModalAlertSuccess,
     ModalAlertWarning,
@@ -222,6 +223,30 @@ class Conceptos extends React.Component {
         }
     }
 
+    onEventDelete(idConcepto) {
+        ModalAlertDialog("Concepto", "¿Estás seguro de eliminar el concepto?", async (event) => {
+            if (event) {
+                try {
+                    ModalAlertInfo("Moneda", "Procesando información...")
+                    let result = await axios.delete('/api/concepto', {
+                        params: {
+                            "idConcepto": idConcepto
+                        }
+                    })
+                    ModalAlertSuccess("Concepto", result.data, () => {
+                        this.loadInit();
+                    })
+                } catch (error) {
+                    if (error.response !== undefined) {
+                        ModalAlertWarning("Concepto", error.response.data)
+                    } else {
+                        ModalAlertWarning("Concepto", "Se genero un error interno, intente nuevamente.")
+                    }
+                }
+            }
+        })
+    }
+
     render() {
         return (
             <>
@@ -236,11 +261,13 @@ class Conceptos extends React.Component {
                                 </button>
                             </div>
                             <div className="modal-body">
-                                {this.state.loadModal ?
-                                    <div className="clearfix absolute-all bg-white">
-                                        {spinnerLoading(this.state.msgModal)}
-                                    </div>
-                                    : null}
+                                {
+                                    this.state.loadModal ?
+                                        <div className="clearfix absolute-all bg-white">
+                                            {spinnerLoading(this.state.msgModal)}
+                                        </div>
+                                        : null
+                                }
 
                                 {
                                     this.state.messageWarning === '' ? null :
@@ -382,10 +409,20 @@ class Conceptos extends React.Component {
                                                         <td>{item.tipoConcepto === 1 ? 'CONCEPTO DE GASTO' : 'CONCEPTO DE COBRO'}</td>
                                                         <td>{item.fecha}{<br />}{timeForma24(item.hora)}</td>
                                                         <td className="text-center">
-                                                            <button className="btn btn-outline-warning btn-sm" title="Editar" onClick={() => this.openModal(item.idConcepto)}><i className="bi bi-pencil"></i></button>
+                                                            <button
+                                                                className="btn btn-outline-warning btn-sm"
+                                                                title="Editar"
+                                                                onClick={() => this.openModal(item.idConcepto)}>
+                                                                <i className="bi bi-pencil"></i>
+                                                            </button>
                                                         </td>
                                                         <td className="text-center">
-                                                            <button className="btn btn-outline-danger btn-sm" title="Editar" onClick={() => { }}><i className="bi bi-trash"></i></button>
+                                                            <button
+                                                                className="btn btn-outline-danger btn-sm"
+                                                                title="Anular"
+                                                                onClick={() => this.onEventDelete(item.idConcepto)}>
+                                                                <i className="bi bi-trash"></i>
+                                                            </button>
                                                         </td>
                                                     </tr>
                                                 )

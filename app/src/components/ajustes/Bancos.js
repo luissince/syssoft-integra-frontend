@@ -5,11 +5,13 @@ import {
     hideModal,
     viewModal,
     clearModal,
+    ModalAlertDialog,
     ModalAlertInfo,
     ModalAlertSuccess,
     ModalAlertWarning,
     spinnerLoading
 } from '../tools/Tools';
+import { connect } from 'react-redux';
 import Paginacion from '../tools/Paginacion';
 
 class Bancos extends React.Component {
@@ -18,12 +20,12 @@ class Bancos extends React.Component {
         this.state = {
             idBanco: '',
             nombre: '',
-            tipoCuenta: 'CUENTA CORRIENTE',
+            tipoCuenta: '',
             idMoneda: '',
             monedas: [],
             numCuenta: '',
             cci: '',
-            representante: '',
+            idUsuario: this.props.token.userToken.idUsuario,
 
             loadModal: false,
             nameModal: 'Nuevo Comprobante',
@@ -42,12 +44,10 @@ class Bancos extends React.Component {
         }
 
         this.refTxtNombre = React.createRef();
-        this.refCbxTipoCuenta = React.createRef();
+        this.refTipoCuenta = React.createRef();
         this.refTxtMoneda = React.createRef();
         this.refTxtNumCuenta = React.createRef();
         this.refTxtCci = React.createRef();
-        this.refTxtRepresentante = React.createRef();
-
 
         this.refTxtSearch = React.createRef();
 
@@ -78,12 +78,11 @@ class Bancos extends React.Component {
             this.abortControllerModal.abort();
             await this.setStateAsync({
                 nombre: '',
-                tipoCuenta: 'CUENTA CORRIENTE',
+                tipoCuenta: '',
                 idMoneda: '',
                 monedas: [],
                 numCuenta: '',
                 cci: '',
-                representante: '',
                 idBanco: '',
 
                 loadModal: false,
@@ -219,7 +218,6 @@ class Bancos extends React.Component {
                 idMoneda: banco.data.idMoneda,
                 numCuenta: banco.data.numCuenta,
                 cci: banco.data.cci,
-                representante: banco.data.representante,
                 idBanco: banco.data.idBanco,
                 monedas: moneda.data,
                 loadModal: false
@@ -236,12 +234,10 @@ class Bancos extends React.Component {
     async onEventGuardar() {
         if (this.state.nombre === "") {
             this.refTxtNombre.current.focus();
+        } else if (this.state.tipoCuenta === "") {
+            this.tipoCuenta.current.focus();
         } else if (this.state.idMoneda === "") {
             this.refTxtMoneda.current.focus();
-        } else if (this.state.numCuenta === "") {
-            this.refTxtNumCuenta.current.focus();
-        } else if (this.state.representante === "") {
-            this.refTxtRepresentante.current.focus();
         } else {
             try {
                 ModalAlertInfo("Banco", "Procesando información...");
@@ -253,7 +249,7 @@ class Bancos extends React.Component {
                         "idMoneda": this.state.idMoneda.trim().toUpperCase(),
                         "numCuenta": this.state.numCuenta.trim().toUpperCase(),
                         "cci": this.state.cci.trim().toUpperCase(),
-                        "representante": this.state.representante.trim().toUpperCase(),
+                        "idUsuario": this.state.idUsuario,
                         "idBanco": this.state.idBanco
                     })
 
@@ -267,18 +263,45 @@ class Bancos extends React.Component {
                         "idMoneda": this.state.idMoneda.trim().toUpperCase(),
                         "numCuenta": this.state.numCuenta.trim().toUpperCase(),
                         "cci": this.state.cci.trim().toUpperCase(),
-                        "representante": this.state.representante.trim().toUpperCase(),
+                        "idUsuario": this.state.idUsuario,
                     });
 
-
-                    ModalAlertSuccess("Comprobante", result.data, () => {
+                    ModalAlertSuccess("Banco", result.data, () => {
                         this.loadInit();
                     });
                 }
             } catch (error) {
-                ModalAlertWarning("Comprobante", "Se produjo un error un interno, intente nuevamente.");
+                if (error.response !== undefined) {
+                    ModalAlertWarning("Banco", error.response.data)
+                } else {
+                    ModalAlertWarning("Banco", "Se genero un error interno, intente nuevamente.")
+                }
             }
         }
+    }
+
+    onEventDelete(idBanco) {
+        ModalAlertDialog("Banco", "¿Estás seguro de eliminar el banco?", async (event) => {
+            if (event) {
+                try {
+                    ModalAlertInfo("Moneda", "Procesando información...")
+                    let result = await axios.delete('/api/banco', {
+                        params: {
+                            "idBanco": idBanco
+                        }
+                    })
+                    ModalAlertSuccess("Banco", result.data, () => {
+                        this.loadInit();
+                    })
+                } catch (error) {
+                    if (error.response !== undefined) {
+                        ModalAlertWarning("Banco", error.response.data)
+                    } else {
+                        ModalAlertWarning("Banco", "Se genero un error interno, intente nuevamente.")
+                    }
+                }
+            }
+        })
     }
 
     render() {
@@ -286,7 +309,7 @@ class Bancos extends React.Component {
             <>
                 {/* Inicio modal */}
                 <div className="modal fade" id="modalBanco" data-backdrop="static">
-                    <div className="modal-dialog modal-lg">
+                    <div className="modal-dialog modal-md">
                         <div className="modal-content">
                             <div className="modal-header">
                                 <h5 className="modal-title">{this.state.nameModal}</h5>
@@ -303,7 +326,7 @@ class Bancos extends React.Component {
 
                                 <div className="form-row">
                                     <div className="form-group col-md-6">
-                                        <label>Nombre Banco:</label>
+                                        <label>Nombre Banco <i className="fa fa-asterisk text-danger small"></i></label>
                                         <input
                                             type="text"
                                             className="form-control"
@@ -313,16 +336,17 @@ class Bancos extends React.Component {
                                             placeholder="BCP, BBVA, etc" />
                                     </div>
                                     <div className="form-group col-md-6">
-                                        <label>Tipo de Cuenta:</label>
+                                        <label>Tipo de Cuenta <i className="fa fa-asterisk text-danger small"></i></label>
                                         <div className="input-group">
                                             <select
                                                 className="form-control"
-                                                ref={this.tipoCuenta}
+                                                ref={this.refTipoCuenta}
                                                 value={this.state.tipoCuenta}
                                                 onChange={(event) => this.setState({ tipoCuenta: event.target.value })} >
-                                                <option value="CUENTA CORRIENTE">Cuenta Corriente</option>
-                                                <option value="CUENTA RECAUDADORA">Cuenta Recaudadora</option>
-                                                <option value="CUENTA DE AHORROS">Cuenta de Ahorros</option>
+                                                <option value="">- Seleccione -</option>
+                                                <option value="1">Banco</option>
+                                                <option value="2">Tarjeta</option>
+                                                <option value="3">Efectivo</option>
                                             </select>
                                         </div>
                                     </div>
@@ -330,7 +354,7 @@ class Bancos extends React.Component {
 
                                 <div className="form-row">
                                     <div className="form-group col-md-6">
-                                        <label>Moneda:</label>
+                                        <label>Moneda <i className="fa fa-asterisk text-danger small"></i></label>
                                         <select
                                             className="form-control"
                                             ref={this.refTxtMoneda}
@@ -346,7 +370,7 @@ class Bancos extends React.Component {
                                         </select>
                                     </div>
                                     <div className="form-group col-md-6">
-                                        <label>Número de cuenta:</label>
+                                        <label>Número de cuenta </label>
                                         <input
                                             type="text"
                                             className="form-control"
@@ -359,7 +383,7 @@ class Bancos extends React.Component {
 
                                 <div className="form-row">
                                     <div className="form-group col-md-6">
-                                        <label>CCI:</label>
+                                        <label>CCI </label>
                                         <input
                                             type="text"
                                             className="form-control"
@@ -367,16 +391,6 @@ class Bancos extends React.Component {
                                             value={this.state.cci}
                                             onChange={(event) => this.setState({ cci: event.target.value })}
                                             placeholder="####################" />
-                                    </div>
-                                    <div className="form-group col-md-6">
-                                        <label>Representante:</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            ref={this.refTxtRepresentante}
-                                            value={this.state.representante}
-                                            onChange={(event) => this.setState({ representante: event.target.value })}
-                                            placeholder="Datos del representante" />
                                     </div>
                                 </div>
 
@@ -434,27 +448,28 @@ class Bancos extends React.Component {
                             <table className="table table-striped table-bordered rounded">
                                 <thead>
                                     <tr>
-                                        <th width="5%">#</th>
-                                        <th width="10%">Banco</th>
+                                        <th width="5%" className="text-center">#</th>
+                                        <th width="10%">Nombre</th>
                                         <th width="15%">Tipo Cuenta</th>
                                         <th width="10%">Moneda</th>
                                         <th width="20%">Número Cuenta</th>
-                                        <th width="15%">Representante</th>
-                                        <th width="5%">Editar</th>
-                                        <th width="5%">Eliminar</th>
+                                        <th width="10%">Saldo</th>
+                                        <th width="5%" className="text-center">Mostrar</th>
+                                        <th width="5%" className="text-center">Editar</th>
+                                        <th width="5%" className="text-center">Eliminar</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {
                                         this.state.loading ? (
                                             <tr>
-                                                <td className="text-center" colSpan="8">
+                                                <td className="text-center" colSpan="9">
                                                     {spinnerLoading()}
                                                 </td>
                                             </tr>
                                         ) : this.state.lista.length === 0 ? (
                                             <tr className="text-center">
-                                                <td colSpan="8">¡No hay datos registrados!</td>
+                                                <td colSpan="9">¡No hay datos registrados!</td>
                                             </tr>
                                         ) : (
                                             this.state.lista.map((item, index) => {
@@ -462,14 +477,34 @@ class Bancos extends React.Component {
                                                     <tr key={index}>
                                                         <td>{item.id}</td>
                                                         <td>{item.nombre}</td>
-                                                        <td>{item.tipoCuenta}</td>
+                                                        <td>{item.tipoCuenta.toUpperCase()}</td>
                                                         <td>{item.moneda}</td>
                                                         <td>{item.numCuenta}</td>
-                                                        <td>{item.representante}</td>
-                                                        <td>
-                                                            <button className="btn btn-outline-warning btn-sm" title="Editar" onClick={() => this.openModal(item.idBanco)}><i className="bi bi-pencil"></i></button>
+                                                        <td>{0}</td>
+                                                        <td className="text-center">
+                                                            <button
+                                                                className="btn btn-outline-info btn-sm"
+                                                                title="Editar"
+                                                                onClick={() => { }}>
+                                                                <i className="bi bi-eye"></i>
+                                                            </button>
                                                         </td>
-                                                        <td><button className="btn btn-outline-danger btn-sm" title="Anular"><i className="bi bi-trash"></i></button></td>
+                                                        <td className="text-center">
+                                                            <button
+                                                                className="btn btn-outline-warning btn-sm"
+                                                                title="Editar"
+                                                                onClick={() => this.openModal(item.idBanco)}>
+                                                                <i className="bi bi-pencil"></i>
+                                                            </button>
+                                                        </td>
+                                                        <td className="text-center">
+                                                            <button
+                                                                className="btn btn-outline-danger btn-sm"
+                                                                title="Anular"
+                                                                onClick={() => this.onEventDelete(item.idBanco)}>
+                                                                <i className="bi bi-trash"></i>
+                                                            </button>
+                                                        </td>
                                                     </tr>
                                                 )
                                             })
@@ -506,4 +541,10 @@ class Bancos extends React.Component {
     }
 }
 
-export default Bancos;
+const mapStateToProps = (state) => {
+    return {
+        token: state.reducer
+    }
+}
+
+export default connect(mapStateToProps, null)(Bancos);

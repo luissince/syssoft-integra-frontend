@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const tools = require('../tools/Tools');
+const { currentDate, currentTime } = require('../tools/Tools');
 const Conexion = require('../database/Conexion');
 const conec = new Conexion()
 
@@ -55,7 +55,6 @@ router.get('/list', async function (req, res) {
         res.status(200).send({ "result": resultLista, "total": total[0].Total })
 
     } catch (error) {
-        console.log(error)
         res.status(500).send("Error interno de conexión, intente nuevamente.")
     }
 });
@@ -110,8 +109,11 @@ router.post('/', async function (req, res) {
             numContratoCorrelativo, 
             numRecibocCorrelativo, 
             imagen,
-            extension) 
-            values (?, ?,?,?,?, ?,?, ?,?,?,?, ?,?,?,?,?,?,?,?)`, [
+            extension,
+            fecha,
+            hora,
+            idUsuario) 
+            values (?, ?,?,?,?, ?,?, ?,?,?,?, ?,?,?,?,?,?,?,?,?,?,?)`, [
             idProyecto,
             //datos
             req.body.nombre,
@@ -136,14 +138,16 @@ router.post('/', async function (req, res) {
             //imagen
             req.body.imagen,
             req.body.extension,
+            currentDate(),
+            currentTime(),
+            req.body.idUsuario,
         ])
 
         await conec.commit(connection);
-        res.status(200).send('Datos insertados correctamente')
-
+        res.status(200).send('Datos insertados correctamente');
     } catch (err) {
         if (connection != null) {
-            conec.rollback(connection);
+            await conec.rollback(connection);
         }
         res.status(500).send(connection);
     }
@@ -172,7 +176,10 @@ router.put('/', async function (req, res) {
             numContratoCorrelativo=?, 
             numRecibocCorrelativo=?,
             imagen=?,
-            extension=? 
+            extension=?,
+            fecha=?,
+            hora=?,
+            idUsuario=?
             WHERE idProyecto=?`, [
             //datos
             req.body.nombre,
@@ -197,6 +204,9 @@ router.put('/', async function (req, res) {
             //imagen
             req.body.imagen,
             req.body.extension,
+            currentDate(),
+            currentTime(),
+            req.body.idUsuario,
             req.body.idProyecto
         ])
 
@@ -204,7 +214,7 @@ router.put('/', async function (req, res) {
         res.status(200).send('Los datos se actualizarón correctamente.')
     } catch (error) {
         if (connection != null) {
-            conec.rollback(connection);
+            await conec.rollback(connection);
         }
         res.status(500).send("Se produjo un error de servidor, intente nuevamente.");
     }
@@ -259,18 +269,27 @@ router.get('/id', async function (req, res) {
 router.delete('/', async function (req, res) {
     let connection = null;
     try {
-
         connection = await conec.beginTransaction();
+
+        let manzana = await conec.execute(connection, `SELECT * FROM manzana WHERE idProyecto = ?`, [
+            req.query.idProyecto
+        ]);
+
+        if (manzana.length > 0) {
+            await conec.rollback(connection);
+            res.status(400).send('No se puede eliminar el proyecto ya que esta ligada a una manzana.');
+            return;
+        }
 
         await conec.execute(connection, `DELETE FROM proyecto WHERE idProyecto = ?`, [
             req.query.idProyecto
         ]);
 
-        await conec.commit(connection)
-        res.status(200).send('Se eliminó correctamente el proyecto.')
+        await conec.commit(connection);
+        res.status(200).send('Se eliminó correctamente el proyecto.');
     } catch (error) {
         if (connection != null) {
-            conec.rollback(connection);
+            await conec.rollback(connection);
         }
         res.status(500).send("Error interno de conexión, intente nuevamente.");
     }

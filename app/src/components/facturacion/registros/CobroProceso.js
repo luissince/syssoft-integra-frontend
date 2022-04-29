@@ -1,10 +1,14 @@
 import React from 'react';
 import axios from 'axios';
 import {
+    calculateTax,
+    calculateTaxBruto,
     formatMoney,
+    numberFormat,
     keyNumberFloat,
     isNumeric,
     spinnerLoading,
+    ModalAlertDialog,
     ModalAlertInfo,
     ModalAlertSuccess,
     ModalAlertWarning,
@@ -32,6 +36,9 @@ class CobroProceso extends React.Component {
 
             impuestos: [],
 
+            idLote: '',
+            lotes: [],
+
             loading: true,
             messageWarning: '',
             msgLoading: 'Cargando datos...'
@@ -45,6 +52,7 @@ class CobroProceso extends React.Component {
         this.refMoneda = React.createRef()
         this.refMetodoPago = React.createRef()
         this.refObservacion = React.createRef()
+        this.refLote = React.createRef()
 
         this.abortControllerView = new AbortController();
     }
@@ -86,13 +94,17 @@ class CobroProceso extends React.Component {
                 signal: this.abortControllerView.signal,
             });
 
+            const monedaFilter = moneda.data.filter(item => item.predeterminado === 1);
+
             await this.setStateAsync({
                 conceptos: concepto.data,
                 clientes: cliente.data,
                 cuentasBancarias: cuentaBancaria.data,
                 monedas: moneda.data,
+                idMoneda: monedaFilter.length > 0 ? monedaFilter[0].idMoneda : '',
                 impuestos: impuesto.data,
                 loading: false,
+
             });
 
         } catch (error) {
@@ -189,50 +201,73 @@ class CobroProceso extends React.Component {
 
     async onEventGuardar() {
         if (this.refCliente.current.value === "") {
-            this.setState({ messageWarning: "Seleccione el cliente." });
+            await this.setStateAsync({ messageWarning: "Seleccione el cliente." });
             this.refCliente.current.focus();
         } else if (this.state.idBanco === "") {
-            this.setState({ messageWarning: "Seleccione el banco a depositar." })
+            await this.setStateAsync({ messageWarning: "Seleccione el banco a depositar." })
             this.refCuentaBancaria.current.focus();
         } else if (this.state.metodoPago === "") {
-            this.setState({ messageWarning: "Seleccione el metodo de pago." })
+            await this.setStateAsync({ messageWarning: "Seleccione el metodo de pago." })
             this.refMetodoPago.current.focus();
-        } else if (this.state.idMoneda === '') {
-            this.setState({ messageWarning: "Seleccione un moneda." })
+        } else if (this.state.idMoneda === "") {
+            await this.setStateAsync({ messageWarning: "Seleccione un moneda." })
             this.refMoneda.current.focus();
         } else if (this.state.detalleConcepto.length <= 0) {
-            this.setState({ messageWarning: "Agregar datos a la tabla." })
+            await this.setStateAsync({ messageWarning: "Agregar datos a la tabla." })
             this.refConcepto.current.focus()
         } else {
-            try {
-                ModalAlertInfo("Cobro", "Procesando información...");
 
-                let result = await axios.post('/api/cobro/add', {
-                    //concepto
-                    "idCliente": this.state.idCliente,
-                    "idUsuario": this.state.idUsuario,
-                    'idMoneda': this.state.idMoneda,
-                    "idBanco": this.state.idBanco,
-                    "metodoPago": this.state.metodoPago,
-                    "estado": 1,
-                    "observacion": this.state.observacion.trim().toUpperCase(),
-                    "cobroDetalle": this.state.detalleConcepto
-                });
+            let validate = this.state.detalleConcepto.reduce((acumulador, item) =>
+                item.idImpuesto === "" ? acumulador + 1 : acumulador + 0
+                , 0);
 
-                ModalAlertSuccess("Cobro", result.data, () => {
-                    this.onEventLimpiar()
-                });
-
-            } catch (error) {
-                if (error.response !== undefined) {
-                    ModalAlertWarning("Cobro", error.response.data)
-                } else {
-                    ModalAlertWarning("Cobro", "Se genero un error interno, intente nuevamente.")
+            if (validate > 0) {
+                await this.setStateAsync({ messageWarning: "Hay detalles en la tabla sin impuesto seleccionado." });
+                let count = 0;
+                for (let item of this.state.detalleConcepto) {
+                    count++;
+                    if (item.idImpuesto === "") {
+                        document.getElementById(count + "imc").focus()
+                    }
                 }
+                return;
+            } else {
+                await this.setStateAsync({ messageWarning: "" });
             }
+
+            ModalAlertDialog("Cobro", "¿Estás seguro de continuar?", async (event) => {
+                if (event) {
+                    try {
+                        ModalAlertInfo("Cobro", "Procesando información...");
+
+                        let result = await axios.post('/api/cobro/add', {
+                            //concepto
+                            "idCliente": this.state.idCliente,
+                            "idUsuario": this.state.idUsuario,
+                            'idMoneda': this.state.idMoneda,
+                            "idBanco": this.state.idBanco,
+                            "idProcedencia": this.state.idLote,
+                            "metodoPago": this.state.metodoPago,
+                            "estado": 1,
+                            "observacion": this.state.observacion.trim().toUpperCase(),
+                            "cobroDetalle": this.state.detalleConcepto
+                        });
+
+                        ModalAlertSuccess("Cobro", result.data, () => {
+                            this.onEventLimpiar()
+                        });
+
+                    } catch (error) {
+                        if (error.response !== undefined) {
+                            ModalAlertWarning("Cobro", error.response.data)
+                        } else {
+                            ModalAlertWarning("Cobro", "Se genero un error interno, intente nuevamente.")
+                        }
+                    }
+                }
+            });
         }
     }
-
 
     async onEventLimpiar() {
         await this.setStateAsync({
@@ -253,14 +288,17 @@ class CobroProceso extends React.Component {
 
             impuestos: [],
 
+            idLote: '',
+            lotes: [],
+
             loading: true,
+
         });
 
         this.loadData();
     }
 
-    renderTotal() {
-
+    calcularTotales() {
         let subTotal = 0;
         let impuestoTotal = 0;
         let total = 0;
@@ -273,26 +311,38 @@ class CobroProceso extends React.Component {
             )
             let impuesto = filter.length > 0 ? filter[0].porcentaje : 0;
 
-            subTotal += cantidad * valor;
-            impuestoTotal += (cantidad * valor) * (impuesto / 100);
-            total += (cantidad * valor) + ((cantidad * valor) * (impuesto / 100));
+            let valorActual = cantidad * valor;
+            let valorSubNeto = calculateTaxBruto(impuesto, valorActual);
+            let valorImpuesto = calculateTax(impuesto, valorSubNeto);
+            let valorNeto = valorSubNeto + valorImpuesto;
+
+            subTotal += valorSubNeto;
+            impuestoTotal += valorImpuesto;
+            total += valorNeto;
         }
+        return { subTotal, impuestoTotal, total }
+    }
+
+    renderTotal() {
+        const { subTotal, impuestoTotal, total } = this.calcularTotales();
+        let moneda = this.state.monedas.filter(item => item.idMoneda === this.state.idMoneda);
+        let codigo = moneda.length > 0 ? moneda[0].codiso : "PEN";
 
         return (
             <>
                 <tr>
                     <td className="text-left">Sub Total:</td>
-                    <td className="text-right">{formatMoney(subTotal)}</td>
+                    <td className="text-right">{numberFormat(subTotal, codigo)}</td>
                 </tr>
                 <tr>
                     <td className="text-left">Impuesto:</td>
-                    <td className="text-right">{formatMoney(impuestoTotal)}</td>
+                    <td className="text-right">{numberFormat(impuestoTotal, codigo)}</td>
                 </tr>
                 <tr className="border-bottom">
                 </tr>
                 <tr>
                     <td className="text-left h4">Total:</td>
-                    <td className="text-right h4">{formatMoney(total)}</td>
+                    <td className="text-right h4">{numberFormat(total, codigo)}</td>
                 </tr>
             </>
         )
@@ -308,6 +358,31 @@ class CobroProceso extends React.Component {
         }
 
         await this.setStateAsync({ detalleConcepto: updatedList })
+    }
+
+    loadLoteCliente = async (id) => {
+        try {
+            await this.setStateAsync({ loading: true, lotes: [], idLote: '' })
+
+            const lote = await axios.get("/api/lote/lotecliente", {
+                signal: this.abortControllerView.signal,
+                params: {
+                    "idCliente": id
+                }
+            });
+
+            await this.setStateAsync({
+                lotes: lote.data,
+                loading: false
+            });
+        } catch (error) {
+            if (error.message !== "canceled") {
+                await this.setStateAsync({
+                    msgLoading: "Se produjo un error interno, intente nuevamente.",
+                    loading: false
+                });
+            }
+        }
     }
 
     render() {
@@ -374,7 +449,7 @@ class CobroProceso extends React.Component {
                                         <div className="input-group-text"><i className="bi bi-cash-coin"></i></div>
                                     </div>
                                     <input
-                                        title="Monto a cobrar"
+                                        title="Valor a cobrar"
                                         type="text"
                                         className="form-control"
                                         ref={this.refMonto}
@@ -416,31 +491,40 @@ class CobroProceso extends React.Component {
                                     </thead>
                                     <tbody>
                                         {
-                                            this.state.detalleConcepto.map((item, index) => (
-                                                <tr key={index}>
-                                                    <td>{++index}</td>
-                                                    <td>{item.concepto}</td>
-                                                    <td>{formatMoney(item.cantidad)}</td>
-                                                    <td>
-                                                        <select className="form-control"
-                                                            value={item.idImpuesto}
-                                                            onChange={(event) => this.handleSelect(event, item.idConcepto)}>
-                                                            <option value="">- Seleccione -</option>
-                                                            {
-                                                                item.impuestos.map((imp, iimp) => (
-                                                                    <option key={iimp} value={imp.idImpuesto}
-                                                                    >{imp.nombre}</option>
-                                                                ))
-                                                            }
-                                                        </select>
-                                                    </td>
-                                                    <td>{formatMoney(item.monto)}</td>
-                                                    <td>{formatMoney(item.cantidad * item.monto)}</td>
-                                                    <td>
-                                                        <button className="btn btn-outline-danger btn-sm" title="Eliminar" onClick={() => this.removerConcepto(item.id)}><i className="bi bi-trash"></i></button>
-                                                    </td>
+                                            this.state.detalleConcepto.length === 0 ? (
+                                                <tr className="text-center">
+                                                    <td colSpan="7"> Agregar datos a la tabla </td>
                                                 </tr>
-                                            ))
+
+                                            ) : (
+
+                                                this.state.detalleConcepto.map((item, index) => (
+                                                    <tr key={index}>
+                                                        <td>{++index}</td>
+                                                        <td>{item.concepto}</td>
+                                                        <td>{formatMoney(item.cantidad)}</td>
+                                                        <td>
+                                                            <select className="form-control"
+                                                                id={index + "imc"}
+                                                                value={item.idImpuesto}
+                                                                onChange={(event) => this.handleSelect(event, item.idConcepto)}>
+                                                                <option value="">- Seleccione -</option>
+                                                                {
+                                                                    item.impuestos.map((imp, iimp) => (
+                                                                        <option key={iimp} value={imp.idImpuesto}
+                                                                        >{imp.nombre}</option>
+                                                                    ))
+                                                                }
+                                                            </select>
+                                                        </td>
+                                                        <td>{formatMoney(item.monto)}</td>
+                                                        <td>{formatMoney(item.cantidad * item.monto)}</td>
+                                                        <td>
+                                                            <button className="btn btn-outline-danger btn-sm" title="Eliminar" onClick={() => this.removerConcepto(item.id)}><i className="bi bi-trash"></i></button>
+                                                        </td>
+                                                    </tr>
+                                                ))
+                                            )
                                         }
                                     </tbody>
 
@@ -450,7 +534,7 @@ class CobroProceso extends React.Component {
 
                         <div className="form-row">
                             <div className="form-group">
-                                <button type="button" className="btn btn-primary" onClick={() => this.onEventGuardar()}>
+                                <button type="button" className="btn btn-success" onClick={() => this.onEventGuardar()}>
                                     <i className="fa fa-save"></i> Guardar
                                 </button>
                                 {" "}
@@ -477,12 +561,13 @@ class CobroProceso extends React.Component {
                                     className="form-control"
                                     ref={this.refCliente}
                                     value={this.state.idCliente}
-                                    onChange={(event) => {
+                                    onChange={async (event) => {
                                         if (event.target.value.trim().length > 0) {
-                                            this.setState({
+                                            await this.setStateAsync({
                                                 idCliente: event.target.value,
                                                 messageWarning: '',
                                             });
+                                            this.loadLoteCliente(this.state.idCliente)
                                         } else {
                                             this.setState({
                                                 idCliente: event.target.value,
@@ -526,7 +611,7 @@ class CobroProceso extends React.Component {
                                     <option value="">-- Cuenta bancaria --</option>
                                     {
                                         this.state.cuentasBancarias.map((item, index) => (
-                                            <option key={index} value={item.idBanco}>{item.nombre + " - " + item.tipoCuenta}</option>
+                                            <option key={index} value={item.idBanco}>{item.nombre}</option>
                                         ))
                                     }
                                 </select>
@@ -596,6 +681,41 @@ class CobroProceso extends React.Component {
                                             <option key={index} value={item.idMoneda}>{item.nombre}</option>
                                         ))
                                     }
+                                </select>
+                            </div>
+                        </div>
+
+                        <div className="form-group">
+                            <div className="input-group">
+                                <div className="input-group-prepend">
+                                    <div className="input-group-text"><i className="bi bi-box"></i></div>
+                                </div>
+                                <select
+                                    title="Lista de lotes del cliente"
+                                    className="form-control"
+                                    ref={this.refLote}
+                                    value={this.state.idLote}
+                                    onChange={async (event) => {
+                                        if (event.target.value.trim().length > 0) {
+                                            await this.setStateAsync({
+                                                idLote: event.target.value,
+                                                messageWarning: '',
+                                            });
+                                        } else {
+                                            this.setState({
+                                                idLote: event.target.value,
+                                                messageWarning: "Seleccione un lote del cliente.",
+                                            });
+                                        }
+                                    }}>
+                                    <option value="">-- Lotes del cliente --</option>
+
+                                    {
+                                        this.state.lotes.map((item, index) => (
+                                            <option key={index} value={item.idLote}>{item.lote + " - " + item.manzana}</option>
+                                        ))
+                                    }
+
                                 </select>
                             </div>
                         </div>

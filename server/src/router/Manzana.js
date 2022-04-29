@@ -70,11 +70,9 @@ router.get('/id', async function (req, res) {
         } else {
             res.status(400).send("Datos no encontrados");
         }
-
     } catch (error) {
         res.status(500).send("Error interno de conexión, intente nuevamente.");
     }
-
 })
 
 router.post("/", async function (req, res) {
@@ -120,7 +118,7 @@ router.post("/", async function (req, res) {
         res.status(200).send('Datos insertados correctamente')
     } catch (error) {
         if (connection != null) {
-            conec.rollback(connection);
+            await conec.rollback(connection);
         }
         res.status(500).send(error);
     }
@@ -144,7 +142,7 @@ router.put("/", async function (req, res) {
         res.status(200).send('Datos actualizados correctamente')
     } catch (error) {
         if (connection != null) {
-            conec.rollback(connection);
+            await conec.rollback(connection);
         }
         res.status(500).send(error);
     }
@@ -155,6 +153,16 @@ router.delete('/', async function (req, res) {
     try {
         connection = await conec.beginTransaction();
 
+        let lote = await conec.execute(connection, `SELECT * FROM lote WHERE idManzana = ?`, [
+            req.query.idManzana
+        ]);
+
+        if (lote.length > 0) {
+            await conec.rollback(connection);
+            res.status(400).send('No se puede eliminar la manzana ya que esta ligada a un lote.')
+            return;
+        }
+
         await conec.execute(connection, `DELETE FROM manzana WHERE idManzana  = ?`, [
             req.query.idManzana
         ]);
@@ -163,7 +171,7 @@ router.delete('/', async function (req, res) {
         res.status(200).send('Se eliminó correctamente la manzana.')
     } catch (error) {
         if (connection != null) {
-            conec.rollback(connection);
+            await conec.rollback(connection);
         }
         res.status(500).send("Error interno de conexión, intente nuevamente.");
     }

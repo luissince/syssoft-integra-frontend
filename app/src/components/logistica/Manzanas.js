@@ -5,6 +5,7 @@ import {
     hideModal,
     viewModal,
     clearModal,
+    ModalAlertDialog,
     ModalAlertInfo,
     ModalAlertSuccess,
     ModalAlertWarning,
@@ -215,6 +216,30 @@ class Manzanas extends React.Component {
         }
     }
 
+    onEventDelete(idManzana) {
+        ModalAlertDialog("Manzana", "¿Estás seguro de eliminar la Manzana?", async (event) => {
+            if (event) {
+                try {
+                    ModalAlertInfo("Moneda", "Procesando información...")
+                    let result = await axios.delete('/api/manzana', {
+                        params: {
+                            "idManzana": idManzana
+                        }
+                    })
+                    ModalAlertSuccess("Manzana", result.data, () => {
+                        this.loadInit();
+                    })
+                } catch (error) {
+                    if (error.response !== undefined) {
+                        ModalAlertWarning("Manzana", error.response.data)
+                    } else {
+                        ModalAlertWarning("Manzana", "Se genero un error interno, intente nuevamente.")
+                    }
+                }
+            }
+        })
+    }
+
     render() {
 
         return (
@@ -236,22 +261,19 @@ class Manzanas extends React.Component {
                                     </div>
                                     : null}
 
-                                <div className='row py-1'>
-                                    <div className='col-lg-4 col-md-4 col-sm-12 col-xs-12'>
-                                        <label>Nombre Manzana: </label>
-                                    </div>
-                                    <div className='col-lg-8 col-md-8 col-sm-12 col-xs-12'>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            placeholder='Ingrese el nombre de la manzana'
-                                            ref={this.refNombre}
-                                            value={this.state.nombre}
-                                            onChange={(event) => this.setState({ nombre: event.target.value })}
-                                        />
-                                    </div>
+                                <div className="form-group">
+                                    <label htmlFor="manzana">Nombre Manzana <i className="fa fa-asterisk text-danger small"></i></label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        placeholder='Ingrese el nombre de la manzana'
+                                        ref={this.refNombre}
+                                        value={this.state.nombre}
+                                        onChange={(event) => this.setState({ nombre: event.target.value })}
+                                    />
                                 </div>
                             </div>
+
                             <div className="modal-footer">
                                 <button type="button" className="btn btn-primary" onClick={() => this.onEventGuardar()}>Aceptar</button>
                                 <button type="button" className="btn btn-danger" data-bs-dismiss="modal">Cerrar</button>
@@ -304,11 +326,11 @@ class Manzanas extends React.Component {
                             <table className="table table-striped table-bordered rounded">
                                 <thead>
                                     <tr>
-                                        <th width="5%">#</th>
+                                        <th width="5%" className="text-center">#</th>
                                         <th width="15%">Manzana</th>
                                         <th width="25%">Proyecto</th>
-                                        <th width="5%">Editar</th>
-                                        <th width="5%">Eliminar</th>
+                                        <th width="5%" className="text-center">Editar</th>
+                                        <th width="5%" className="text-center">Eliminar</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -327,13 +349,25 @@ class Manzanas extends React.Component {
                                             this.state.lista.map((item, index) => {
                                                 return (
                                                     <tr key={index}>
-                                                        <td>{item.id}</td>
+                                                        <td className="text-center">{item.id}</td>
                                                         <td>{item.nombre}</td>
                                                         <td>{item.proyecto}</td>
-                                                        <td>
-                                                            <button className="btn btn-outline-warning btn-sm" title="Editar" onClick={() => this.openModal(item.idManzana)}><i className="bi bi-pencil"></i></button>
+                                                        <td className="text-center">
+                                                            <button
+                                                                className="btn btn-outline-warning btn-sm"
+                                                                title="Editar"
+                                                                onClick={() => this.openModal(item.idManzana)}>
+                                                                <i className="bi bi-pencil"></i>
+                                                            </button>
                                                         </td>
-                                                        <td><button className="btn btn-outline-danger btn-sm" title="Anular"><i className="bi bi-trash"></i></button></td>
+                                                        <td className="text-center">
+                                                            <button
+                                                                className="btn btn-outline-danger btn-sm"
+                                                                title="Anular"
+                                                                onClick={() => this.onEventDelete(item.idManzana)}>
+                                                                <i className="bi bi-trash"></i>
+                                                            </button>
+                                                        </td>
                                                     </tr>
                                                 )
                                             })

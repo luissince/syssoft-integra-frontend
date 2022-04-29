@@ -76,6 +76,59 @@ router.get('/list', async function (req, res) {
     }
 });
 
+router.get('/cronograma', async function (req, res) {
+    try {
+        let result = await conec.query(`SELECT 
+        numCuota,
+        DATE_FORMAT(fecha,'%d-%m-%Y') as fecha
+        FROM venta WHERE idVenta = 'VT0001'`);
+
+        let total = await conec.query(`SELECT 
+        IFNULL(SUM(vd.precio*vd.cantidad),0) AS total
+        FROM venta AS v 
+        LEFT JOIN ventaDetalle AS vd ON vd.idVenta = v.idVenta 
+        WHERE v.idVenta = 'VT0001'`);
+
+        let now = new Date();
+        console.log("ahora: " + now.getFullYear(), (now.getMonth() + 1), now.getDate());
+
+        const parts = result[0].fecha.split('-');
+        let mydate = new Date(parts[2], parts[1] - 1, parts[0]);
+        console.log("inicio: " + mydate.getFullYear() + "-" + (mydate.getMonth() + 1) + "-" + mydate.getDate())
+
+        let inicioDate = new Date(mydate);
+        // inicioDate.setMonth(inicioDate.getMonth() + 1)
+        // console.log("inicio: " + inicioDate.getFullYear(), (inicioDate.getMonth() + 1), inicioDate.getDate());
+
+        // var myNow = new Date();
+        // console.log(myNow.getFullYear(), (myNow.getMonth() + 1), myNow.getDate());
+        var ultimoDate = new Date(inicioDate)
+        ultimoDate.setMonth(ultimoDate.getMonth() + result[0].numCuota)
+        // console.log("fin: " + ultimoDate.getFullYear() + "-" + (ultimoDate.getMonth() + 1) + "-" + ultimoDate.getDate())
+        let i = 0;
+        let arrayCuotas = [];
+        let cuotaMes = total[0].total / result[0].numCuota;
+        while (inicioDate < ultimoDate) {
+            i++;
+            inicioDate.setMonth(inicioDate.getMonth() + 1)
+            arrayCuotas.push("cuota-" + (i < 10 ? "0" + i : i) + ": " + inicioDate.getFullYear() + "-" + ((inicioDate.getMonth() + 1) < 10 ? "0" + (inicioDate.getMonth() + 1) : (inicioDate.getMonth() + 1)) + "-" + inicioDate.getDate() + " MONTO:" + cuotaMes)
+            // console.log();
+        }
+
+
+
+        // let mydate = new Date(result[0].fecha);
+        // console.log(mydate.getDay());
+        // console.log(mydate.getMonth());
+        // console.log(mydate.getFullYear());
+
+        res.status(200).send({ result, total, arrayCuotas });
+    } catch (error) {
+        console.log(error)
+        res.status(500).send("Error interno de conexión, intente nuevamente.")
+    }
+});
+
 router.post('/add', async function (req, res) {
     let connection = null;
     try {
@@ -125,7 +178,7 @@ router.post('/add', async function (req, res) {
             req.body.idUsuario,
             req.body.idMoneda,
             req.body.idBanco,
-            '',
+            req.body.idProcedencia,
             req.body.metodoPago,
             req.body.estado,
             req.body.observacion,
@@ -166,11 +219,11 @@ router.post('/cobro', async function (req, res) {
     try {
         connection = await conec.beginTransaction();
 
-        let result = await conec.execute(connection, 'SELECT idCobro FROM cobro');
+        let cobro = await conec.execute(connection, 'SELECT idCobro FROM cobro');
         let idCobro = "";
-        if (result.length != 0) {
+        if (cobro.length != 0) {
 
-            let quitarValor = result.map(function (item) {
+            let quitarValor = cobro.map(function (item) {
                 return parseInt(item.idCobro.replace("CB", ''));
             });
 
@@ -191,6 +244,23 @@ router.post('/cobro', async function (req, res) {
         } else {
             idCobro = "CB0001";
         }
+
+        let total = await conec.execute(connection, `SELECT 
+        IFNULL(SUM(vd.precio*vd.cantidad),0) AS total 
+        FROM venta AS v
+        LEFT JOIN ventaDetalle AS vd ON v.idVenta  = vd.idVenta
+        WHERE v.idVenta  = ?`, [
+            req.body.idVenta,
+        ]);
+
+
+        let cobrado = await conec.execute(connection, `SELECT 
+        IFNULL(SUM(cv.precio),0) AS total
+        FROM cobro AS c 
+        LEFT JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro
+        WHERE c.idProcedencia = ?`, [
+            req.body.idVenta,
+        ]);
 
         await conec.execute(connection, `INSERT INTO cobro(
             idCobro, 
@@ -218,32 +288,6 @@ router.post('/cobro', async function (req, res) {
             currentTime()
         ]);
 
-        await conec.execute(connection, `INSERT INTO cobroVenta(
-        idCobro,
-        idVenta,
-        precio) 
-        VALUES (?,?,?)`, [
-            idCobro,
-            req.body.idVenta,
-            parseFloat(req.body.valorRecibido)
-        ]);
-
-        let total = await conec.execute(connection, `SELECT 
-        IFNULL(SUM(vd.precio*vd.cantidad),0) AS total 
-        FROM venta AS v
-        LEFT JOIN ventaDetalle AS vd ON v.idVenta  = vd.idVenta
-        WHERE v.idVenta  = ?`, [
-            req.body.idVenta,
-        ]);
-
-        let cobrado = await conec.execute(connection, `SELECT 
-        IFNULL(SUM(cv.precio),0) AS total
-        FROM cobro AS c 
-        LEFT JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro
-        WHERE c.idProcedencia = ?`, [
-            req.body.idVenta,
-        ]);
-
         let montoCobrado = cobrado[0].total + parseFloat(req.body.valorRecibido);
         if (montoCobrado >= total[0].total) {
             await conec.execute(connection, `UPDATE venta SET estado = 1 WHERE idVenta = ?`, [
@@ -251,12 +295,34 @@ router.post('/cobro', async function (req, res) {
             ]);
         }
 
-        await conec.commit(connection);
-        res.status(201).send('Datos insertados correctamente')
+        for (let item of req.body.plazos) {
+            if (item.selected) {
+                await conec.execute(connection, `INSERT INTO cobroVenta(
+                    idCobro,
+                    idVenta,
+                    idPlazo,
+                    precio) 
+                    VALUES (?,?,?,?)`, [
+                    idCobro,
+                    req.body.idVenta,
+                    item.idPlazo,
+                    parseFloat(item.monto)
+                ]);
 
+                await conec.execute(connection, `UPDATE plazo 
+                SET estado = 1
+                WHERE idPlazo  = ?
+                `, [
+                    item.idPlazo
+                ]);
+            }
+        }
+
+        await conec.commit(connection);
+        res.status(201).send('Datos insertados correctamente');
     } catch (error) {
         if (connection != null) {
-            conec.rollback(connection);
+            await conec.rollback(connection);
         }
         res.status(500).send("Error de servidor");
         console.log(error)
@@ -278,6 +344,7 @@ router.get('/id', async function (req, res) {
 
         b.nombre as banco,
 
+        m.codiso,
         m.simbolo,
 
         IFNULL(SUM(cb.precio*cb.cantidad),SUM(cv.precio)) AS monto
@@ -420,36 +487,42 @@ router.delete('/anular', async function (req, res) {
             ]);
 
             if (venta.length > 0) {
-                let total = await conec.execute(connection, `SELECT 
-                IFNULL(SUM(vd.precio*vd.cantidad),0) AS total 
-                FROM venta AS v
-                LEFT JOIN ventaDetalle AS vd ON v.idVenta  = vd.idVenta
-                WHERE v.idVenta  = ?`, [
+                let plazos = await conec.execute(connection, `SELECT idPlazo,estado FROM plazo 
+                WHERE idVenta = ? AND estado = 1`, [
                     venta[0].idVenta
                 ]);
 
-                let cobrado = await conec.execute(connection, `SELECT 
-                IFNULL(SUM(cv.precio),0) AS total
-                FROM cobro AS c 
-                LEFT JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro
-                WHERE c.idProcedencia = ?`, [
-                    venta[0].idVenta
-                ]);
+                let arrPlazos = plazos.map(function (item) {
+                    return item.idPlazo;
+                });
 
-                let remover = await conec.execute(connection, `SELECT 
-                precio
-                FROM cobroVenta WHERE idCobro = ?`, [
+                let maxPlazo = Math.max(...arrPlazos);
+
+                let cobroVenta = await conec.execute(connection, `SELECT idPlazo FROM cobroVenta 
+                WHERE idCobro = ?`, [
                     req.query.idCobro
                 ]);
 
-                let montoTotal = total[0].total;
-                let montoCobrado = cobrado[0].total;
-                let quitarMonto = remover.reduce((acumulador, item) => acumulador + item.precio, 0);
+                let arrCobroVenta = cobroVenta.map(function (item) {
+                    return item.idPlazo;
+                });
 
-                if ((montoCobrado - quitarMonto) < montoTotal) {
-                    await conec.execute(connection, `UPDATE venta SET estado = 2 WHERE idVenta = ?`, [
+                let maxCobroVenta = Math.max(...arrCobroVenta);
+
+                if (maxPlazo == maxCobroVenta) {
+                    for (let item of cobroVenta) {
+                        await conec.execute(connection, `UPDATE plazo SET estado = 0 WHERE idPlazo = ?`, [
+                            item.idPlazo
+                        ]);
+                    }
+
+                    await conec.execute(connection, `UPDATE venta SET estado = 2
+                    WHERE idVenta = ?`, [
                         venta[0].idVenta
                     ]);
+                } else {
+                    res.status(400).send("No se puede eliminar el cobro ya tiene plazos ligados que son inferiores.");
+                    return;
                 }
             }
         }
@@ -466,12 +539,13 @@ router.delete('/anular', async function (req, res) {
             req.query.idCobro
         ]);
 
+        // await conec.rollback(connection);
         await conec.commit(connection);
-        res.status(201).send("Se elimino la transacción correctamente.");
+        res.status(201).send("Se eliminó la transacción correctamente.");
     } catch (error) {
         console.log(error)
         if (connection != null) {
-            conec.rollback(connection);
+            await conec.rollback(connection);
         }
         res.status(500).send("Error interno de conexión, intente nuevamente.");
     }

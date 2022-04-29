@@ -2,10 +2,18 @@ import React from 'react';
 import axios from 'axios';
 import {
     formatMoney,
+    numberFormat,
+    calculateTaxBruto,
+    calculateTax,
     keyNumberInteger,
     keyNumberFloat,
     isNumeric,
+    showModal,
+    hideModal,
+    viewModal,
+    clearModal,
     spinnerLoading,
+    ModalAlertDialog,
     ModalAlertInfo,
     ModalAlertSuccess,
     ModalAlertWarning,
@@ -20,7 +28,6 @@ class VentaProceso extends React.Component {
             idCliente: '',
             idComprobante: '',
             idUsuario: this.props.token.userToken.idUsuario,
-            tipo: '',
             numCuota: '',
             estado: 1,
             idMoneda: '',
@@ -40,15 +47,32 @@ class VentaProceso extends React.Component {
             loading: true,
             messageWarning: '',
             msgLoading: 'Cargando datos...',
+
+            importeTotal: 0,
+            selectTipoPago: true,
+            bancos: [],
+            idBancoContado: '',
+            metodoPagoContado: '',
+            montoInicialCheck: false,
+            inicial: '',
+            idBancoCredito: '',
+            metodoPagoCredito: '',
+            letraMensual: '',
         }
 
         this.refLote = React.createRef();
         this.refPrecioContado = React.createRef();
         this.refComprobante = React.createRef();
         this.refCliente = React.createRef();
-        this.refTipo = React.createRef();
         this.refMoneda = React.createRef();
-        this.refCuotas = React.createRef();
+
+        this.refBancoContado = React.createRef();
+        this.refMetodoContado = React.createRef();
+
+        this.refMontoInicial = React.createRef();
+        this.refBancoCredito = React.createRef();
+        this.refMetodoCredito = React.createRef();
+        this.refNumCutoas = React.createRef();
 
         this.abortControllerView = new AbortController();
     }
@@ -60,7 +84,24 @@ class VentaProceso extends React.Component {
     }
 
     async componentDidMount() {
-        this.loadData()
+        this.loadData();
+
+        viewModal("modalVentaProceso", () => {
+            this.refBancoContado.current.focus();
+        });
+
+        clearModal("modalVentaProceso", async () => {
+            await this.setStateAsync({
+                selectTipoPago: true,
+                idBancoContado: '',
+                metodoPagoContado: '',
+                montoInicialCheck: false,
+                inicial: '',
+                idBancoCredito: '',
+                metodoPagoCredito: '',
+                letraMensual: '',
+            });
+        })
     }
 
     componentWillUnmount() {
@@ -94,12 +135,20 @@ class VentaProceso extends React.Component {
                 signal: this.abortControllerView.signal,
             });
 
+            const banco = await axios.get("/api/banco/listcombo", {
+                signal: this.abortControllerView.signal,
+            });
+
+            const monedaFilter = moneda.data.filter(item => item.predeterminado === 1);
+
             await this.setStateAsync({
                 comprobantes: comprobante.data,
                 clientes: cliente.data,
                 lotes: lote.data,
                 monedas: moneda.data,
                 impuestos: impuesto.data,
+                idMoneda: monedaFilter.length > 0 ? monedaFilter[0].idMoneda : '',
+                bancos: banco.data,
                 loading: false,
             });
 
@@ -113,7 +162,7 @@ class VentaProceso extends React.Component {
         }
     }
 
-    addObjectTable() {
+    async addObjectTable() {
         if (this.refLote.current.value === '') {
             this.setState({ messageWarning: "Seleccione un lote" })
             this.refLote.current.focus();
@@ -164,9 +213,21 @@ class VentaProceso extends React.Component {
             }
         }
 
-        let newArr = [...this.state.detalleVenta]
+        let newArr = [...this.state.detalleVenta];
 
-        this.setState({ detalleVenta: newArr, messageWarning: '', precioContado: '' });
+
+        await this.setStateAsync({
+            detalleVenta: newArr,
+            messageWarning: '',
+            precioContado: '',
+        });
+
+        const { total } = this.calcularTotales();
+
+        await this.setStateAsync({
+            importeTotal: total
+        });
+
         this.refLote.current.value = '';
     }
 
@@ -181,15 +242,26 @@ class VentaProceso extends React.Component {
         return value
     }
 
-    removeObjectTable(id) {
-        for (let i = 0; i < this.state.detalleVenta.length; i++) {
-            if (id === this.state.detalleVenta[i].idDetalle) {
-                this.state.detalleVenta.splice(i, 1)
+    async removeObjectTable(id) {
+        let newArr = [...this.state.detalleVenta];
+
+        for (let i = 0; i < newArr.length; i++) {
+            if (id === newArr[i].idDetalle) {
+                newArr.splice(i, 1)
                 i--;
                 break;
             }
         }
-        this.setState({ detalleVenta: this.state.detalleVenta })
+
+        await this.setStateAsync({
+            detalleVenta: newArr,
+        })
+
+        const { total } = this.calcularTotales();
+
+        await this.setStateAsync({
+            importeTotal: total
+        })
     }
 
     async changeLote(event) {
@@ -207,11 +279,21 @@ class VentaProceso extends React.Component {
         this.refPrecioContado.current.focus();
     }
 
+    async calcularLetraMensual() {
+        if (this.state.numCuota === '') {
+            return;
+        }
+
+        let saldo = this.state.importeTotal - (this.state.montoInicialCheck ? this.state.inicial : 0)
+        let letra = saldo / this.state.numCuota
+
+        await this.setStateAsync({ letraMensual: letra })
+    }
+
     async onEventLimpiar() {
         await this.setStateAsync({
             idCliente: '',
             idComprobante: '',
-            tipo: '',
             numCuota: '',
             estado: 1,
             idMoneda: '',
@@ -220,20 +302,31 @@ class VentaProceso extends React.Component {
             lotes: [],
             precioContado: '',
 
-            impuestos: [],
-
             detalleVenta: [],
             comprobantes: [],
             clientes: [],
 
+            impuestos: [],
+
             loading: true,
+            messageWarning: '',
+
+            importeTotal: 0,
+            selectTipoPago: true,
+            bancos: [],
+            idBancoContado: '',
+            metodoPagoContado: '',
+            montoInicialCheck: false,
+            inicial: '',
+            idBancoCredito: '',
+            metodoPagoCredito: '',
+            letraMensual: '',
         });
 
         this.loadData();
     }
 
-    renderTotal() {
-
+    calcularTotales() {
         let subTotal = 0;
         let impuestoTotal = 0;
         let total = 0;
@@ -246,76 +339,165 @@ class VentaProceso extends React.Component {
             )
             let impuesto = filter.length > 0 ? filter[0].porcentaje : 0;
 
-            subTotal += cantidad * valor;
-            impuestoTotal += (cantidad * valor) * (impuesto / 100);
-            total += (cantidad * valor) + ((cantidad * valor) * (impuesto / 100));
-        }
+            let valorActual = cantidad * valor;
+            let valorSubNeto = calculateTaxBruto(impuesto, valorActual);
+            let valorImpuesto = calculateTax(impuesto, valorSubNeto);
+            let valorNeto = valorSubNeto + valorImpuesto;
 
+            subTotal += valorSubNeto;
+            impuestoTotal += valorImpuesto;
+            total += valorNeto;
+        }
+        return { subTotal, impuestoTotal, total }
+    }
+
+    renderTotal() {
+        const { subTotal, impuestoTotal, total } = this.calcularTotales();
+        let moneda = this.state.monedas.filter(item => item.idMoneda === this.state.idMoneda);
+        let codigo = moneda.length > 0 ? moneda[0].codiso : "PEN";
         return (
             <>
                 <tr>
                     <td className="text-left">Sub Total:</td>
-                    <td className="text-right">{formatMoney(subTotal)}</td>
+                    <td className="text-right">{numberFormat(subTotal, codigo)}</td>
                 </tr>
                 <tr>
                     <td className="text-left">Impuesto:</td>
-                    <td className="text-right">{formatMoney(impuestoTotal)}</td>
+                    <td className="text-right">{numberFormat(impuestoTotal, codigo)}</td>
                 </tr>
                 <tr className="border-bottom">
                 </tr>
                 <tr>
                     <td className="text-left h4">Total:</td>
-                    <td className="text-right h4">{formatMoney(total)}</td>
+                    <td className="text-right h4">{numberFormat(total, codigo)}</td>
                 </tr>
             </>
         )
     }
 
-    async onEventGuardar() {
+    async onEventOpenModal() {
         if (this.state.detalleVenta.length <= 0) {
-            this.setState({ messageWarning: "Agregar datos a la tabla." })
+            await this.setStateAsync({ messageWarning: "Agregar datos a la tabla." })
             this.refLote.current.focus()
-        } else if (this.state.idComprobante === '') {
-            this.setState({ messageWarning: "Seleccione el comprobante." })
+            return;
+        }
+
+        if (this.state.idComprobante === '') {
+            await this.setStateAsync({ messageWarning: "Seleccione el comprobante." })
             this.refComprobante.current.focus();
-        } else if (this.state.idCliente === "") {
-            this.setState({ messageWarning: "Seleccione el cliente." });
+            return;
+        }
+
+        if (this.state.idCliente === "") {
+            await this.setStateAsync({ messageWarning: "Seleccione el cliente." });
             this.refCliente.current.focus();
-        } else if (this.state.tipo === "") {
-            this.setState({ messageWarning: "Seleccione el tipo de venta." });
-            this.refTipo.current.focus();
+            return;
         }
-        else if (this.state.tipo === "2" && this.state.numCuota === "") {
-            this.setState({ messageWarning: "Ingrese el n° de cuotas." });
-            this.refCuotas.current.focus();
+        if (this.state.idMoneda === "") {
+            await this.setStateAsync({ messageWarning: "Seleccione la moneda." });
+            this.refMoneda.current.focus();
+            return;
         }
-        else {
-            try {
-                ModalAlertInfo("Venta", "Procesando información...");
-                let result = await axios.post('/api/factura/add', {
-                    "idCliente": this.state.idCliente,
-                    "idUsuario": this.state.idUsuario,
-                    "idComprobante": this.state.idComprobante,
-                    "idMoneda": this.state.idMoneda,
-                    "tipo": this.state.tipo,
-                    "numCuota": this.state.numCuota === "" ? 0 : this.state.numCuota,
-                    "estado": 2,
-                    "detalleVenta": this.state.detalleVenta,
-                });
 
-                ModalAlertSuccess("Venta", result.data, () => {
-                    this.onEventLimpiar()
-                });
-            }
-            catch (error) {
-                if (error.response !== undefined) {
-                    ModalAlertWarning("Venta", error.response.data)
-                } else {
-                    ModalAlertWarning("Venta", "Se genero un error interno, intente nuevamente.")
+        let validate = this.state.detalleVenta.reduce((acumulador, item) =>
+            item.idImpuesto === "" ? acumulador + 1 : acumulador + 0
+            , 0);
+
+        if (validate > 0) {
+            await this.setStateAsync({ messageWarning: "Hay detalles en la tabla sin impuesto seleccionado." });
+            let count = 0;
+            for (let item of this.state.detalleVenta) {
+                count++;
+                if (item.idImpuesto === "") {
+                    document.getElementById(count + "imv").focus()
                 }
-
             }
+            return;
+        } else {
+            await this.setStateAsync({ messageWarning: "" });
         }
+
+        showModal("modalVentaProceso")
+
+    }
+
+    async onEventGuardar() {
+        if (this.state.selectTipoPago && this.state.idBancoContado === "") {
+            this.refBancoContado.current.focus();
+            return;
+        }
+
+        if (this.state.selectTipoPago && this.state.metodoPagoContado === "") {
+            this.refMetodoContado.current.focus();
+            return;
+        }
+
+        if (!this.state.selectTipoPago && this.state.montoInicialCheck && !isNumeric(this.state.inicial)) {
+            this.refMontoInicial.current.focus();
+            return;
+        }
+
+        if (parseFloat(this.state.inicial) <= 0) {
+            this.refMontoInicial.current.focus();
+            return;
+        }
+
+        if (!this.state.selectTipoPago && this.state.montoInicialCheck && this.state.idBancoCredito === "") {
+            this.refBancoCredito.current.focus();
+            return;
+        }
+
+        if (!this.state.selectTipoPago && this.state.montoInicialCheck && this.state.metodoPagoCredito === "") {
+            this.refMetodoCredito.current.focus();
+            return;
+        }
+
+        if (!this.state.selectTipoPago && !isNumeric(this.state.numCuota)) {
+            this.refNumCutoas.current.focus();
+            return;
+        }
+
+        if (parseInt(this.state.numCuota) <= 0) {
+            this.refNumCutoas.current.focus();
+            return;
+        }
+
+
+        ModalAlertDialog("Venta", "¿Estás seguro de continuar?", async (event) => {
+            if (event) {
+                try {
+                    ModalAlertInfo("Venta", "Procesando información...");
+                    hideModal("modalVentaProceso")
+                    let result = await axios.post('/api/factura/add', {
+                        "idCliente": this.state.idCliente,
+                        "idUsuario": this.state.idUsuario,
+                        "idComprobante": this.state.idComprobante,
+                        "idMoneda": this.state.idMoneda,
+                        "tipo": this.state.selectTipoPago ? 1 : 2,
+                        "selectTipoPago": this.state.selectTipoPago,
+                        "montoInicialCheck": this.state.montoInicialCheck,
+                        "idBanco": this.state.selectTipoPago ? this.state.idBancoContado : this.state.montoInicialCheck ? this.state.idBancoCredito : "",
+                        "metodoPago": this.state.selectTipoPago ? this.state.metodoPagoContado : this.state.montoInicialCheck ? this.state.metodoPagoCredito : "",
+                        "inicial": this.state.selectTipoPago ? 0 : this.state.montoInicialCheck ? parseFloat(this.state.inicial) : 0,
+                        "numCuota": this.state.selectTipoPago ? 0 : parseInt(this.state.numCuota),
+                        "estado": this.state.selectTipoPago ? 1 : 2,
+                        "idProyecto": this.state.idProyecto,
+                        "detalleVenta": this.state.detalleVenta,
+                    });
+
+                    ModalAlertSuccess("Venta", result.data, () => {
+                        this.onEventLimpiar()
+                    });
+                }
+                catch (error) {
+                    if (error.response !== undefined) {
+                        ModalAlertWarning("Venta", error.response.data)
+                    } else {
+                        ModalAlertWarning("Venta", "Se genero un error interno, intente nuevamente.")
+                    }
+                }
+            }
+        });
     }
 
     handleSelect = async (event, idDetalle) => {
@@ -331,9 +513,274 @@ class VentaProceso extends React.Component {
     }
 
     render() {
-
         return (
             <>
+                {/* Inicio modal */}
+                <div className="modal fade" id="modalVentaProceso" data-bs-keyboard="false" data-bs-backdrop="static">
+                    <div className="modal-dialog modal-md">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h6 className="modal-title">Completar Venta</h6>
+                                <button type="button" className="close" data-bs-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div className="modal-body">
+
+                                <div className="row">
+                                    <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                                        <div className="text-center">
+                                            <h5>TOTAL A PAGAR: <span>{formatMoney(this.state.importeTotal)}</span></h5>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="row">
+                                    <div className="col-md-4 col-sm-4">
+                                        <hr />
+                                    </div>
+                                    <div className="col-md-4 col-sm-4 d-flex align-items-center justify-content-center">
+                                        <h6 className="mb-0">Tipos de pagos</h6>
+                                    </div>
+                                    <div className="col-md-4 col-sm-4">
+                                        <hr />
+                                    </div>
+                                </div>
+
+                                <div className="row">
+                                    <div className="col-md-6 col-sm-6">
+                                        <button className={`btn ${this.state.selectTipoPago ? "btn-primary" : "btn-light"} btn-block`}
+                                            type="button"
+                                            title="Pago al contado"
+                                            onClick={() => this.setState({ selectTipoPago: !this.state.selectTipoPago })}>
+                                            <div className="row">
+                                                <div className="col-md-12">
+                                                    <i className="bi bi-cash-coin fa-2x"></i>
+                                                </div>
+                                            </div>
+                                            <div className="text-center">
+                                                <label>Contado</label>
+                                            </div>
+                                        </button>
+                                    </div>
+
+                                    <div className="col-md-6 col-sm-6">
+                                        <button className={`btn ${!this.state.selectTipoPago ? "btn-primary" : "btn-light"} btn-block`}
+                                            type="button"
+                                            title="Pago al credito"
+                                            onClick={() => this.setState({ selectTipoPago: !this.state.selectTipoPago })}>
+                                            <div className="row">
+                                                <div className="col-md-12">
+                                                    <i className="bi bi-boxes fa-2x"></i>
+                                                </div>
+                                            </div>
+                                            <div className="text-center">
+                                                <label>Crédito</label>
+                                            </div>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <br />
+                                {/* contado detalle */}
+                                {
+                                    this.state.selectTipoPago ?
+                                        <div className="row">
+                                            <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                                                <div className="form-row">
+                                                    <div className="form-group col-md-12">
+                                                        <div className="input-group">
+                                                            <div className="input-group-prepend">
+                                                                <div className="input-group-text"><i className="bi bi-bank"></i></div>
+                                                            </div>
+                                                            <select
+                                                                title="Lista de caja o banco a depositar"
+                                                                className="form-control"
+                                                                ref={this.refBancoContado}
+                                                                value={this.state.idBancoContado}
+                                                                onChange={(event) => this.setState({ idBancoContado: event.target.value })}>
+                                                                <option value="">-- Cuenta bancaria --</option>
+                                                                {
+                                                                    this.state.bancos.map((item, index) => (
+                                                                        <option key={index} value={item.idBanco}>{item.nombre}</option>
+                                                                    ))
+                                                                }
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div className="form-row">
+                                                    <div className="form-group col-md-12">
+                                                        <div className="input-group">
+                                                            <div className="input-group-prepend">
+                                                                <div className="input-group-text"><i className="bi bi-credit-card-2-back"></i></div>
+                                                            </div>
+                                                            <select
+                                                                title="Lista metodo de pago"
+                                                                className="form-control"
+                                                                ref={this.refMetodoContado}
+                                                                value={this.state.metodoPagoContado}
+                                                                onChange={(event) => this.setState({ metodoPagoContado: event.target.value })}>
+                                                                <option value="">-- Metodo de pago --</option>
+                                                                <option value="1">Efectivo</option>
+                                                                <option value="2">Consignación</option>
+                                                                <option value="3">Transferencia</option>
+                                                                <option value="4">Cheque</option>
+                                                                <option value="5">Tarjeta crédito</option>
+                                                                <option value="6">Tarjeta débito</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        :
+                                        null
+                                }
+                                {/* crédito detalle */}
+                                {
+                                    !this.state.selectTipoPago ?
+                                        <div className={`row`}>
+                                            <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+
+                                                <div className="form-group">
+                                                    <div className="input-group">
+                                                        <div className="input-group-prepend">
+                                                            <div className="input-group-text"><i className="bi bi-tag-fill"></i></div>
+                                                        </div>
+                                                        <input
+                                                            title="Monto inicial"
+                                                            type="text"
+                                                            className="form-control"
+                                                            ref={this.refMontoInicial}
+                                                            disabled={!this.state.montoInicialCheck}
+                                                            placeholder='Monto inicial'
+                                                            value={this.state.inicial}
+                                                            onChange={async (event) => {
+                                                                await this.setStateAsync({ inicial: event.target.value })
+                                                                this.calcularLetraMensual()
+                                                            }}
+                                                            onKeyPress={keyNumberFloat} />
+                                                        <div className="input-group-append">
+                                                            <div className="input-group-text">
+                                                                <div className="form-check form-check-inline m-0">
+                                                                    <input
+                                                                        className="form-check-input"
+                                                                        type="checkbox"
+                                                                        value={this.state.montoInicialCheck}
+                                                                        onChange={async (event) => {
+                                                                            await this.setStateAsync({ montoInicialCheck: event.target.checked })
+                                                                            this.refMontoInicial.current.focus();
+                                                                        }}
+                                                                    />
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {
+                                                    this.state.montoInicialCheck ?
+                                                        <div className="form-group">
+                                                            <div className="input-group">
+                                                                <div className="input-group-prepend">
+                                                                    <div className="input-group-text"><i className="bi bi-bank"></i></div>
+                                                                </div>
+                                                                <select
+                                                                    title="Lista de caja o banco a depositar"
+                                                                    className="form-control"
+                                                                    ref={this.refBancoCredito}
+                                                                    value={this.state.idBancoCredito}
+                                                                    onChange={(event) => this.setState({ idBancoCredito: event.target.value })}>
+                                                                    <option value="">-- Cuenta bancaria --</option>
+                                                                    {
+                                                                        this.state.bancos.map((item, index) => (
+                                                                            <option key={index} value={item.idBanco}>{item.nombre}</option>
+                                                                        ))
+                                                                    }
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        : null
+                                                }
+
+                                                {
+                                                    this.state.montoInicialCheck ?
+                                                        <div className="form-group">
+                                                            <div className="input-group">
+                                                                <div className="input-group-prepend">
+                                                                    <div className="input-group-text"><i className="bi bi-credit-card-2-back"></i></div>
+                                                                </div>
+                                                                <select
+                                                                    title="Lista metodo de pago"
+                                                                    className="form-control"
+                                                                    ref={this.refMetodoCredito}
+                                                                    value={this.state.metodoPagoCredito}
+                                                                    onChange={(event) => this.setState({ metodoPagoCredito: event.target.value })}>
+                                                                    <option value="">-- Metodo de pago --</option>
+                                                                    <option value="1">Efectivo</option>
+                                                                    <option value="2">Consignación</option>
+                                                                    <option value="3">Transferencia</option>
+                                                                    <option value="4">Cheque</option>
+                                                                    <option value="5">Tarjeta crédito</option>
+                                                                    <option value="6">Tarjeta débito</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        : null
+                                                }
+
+                                                <div className="form-group">
+                                                    <div className="input-group">
+                                                        <div className="input-group-prepend">
+                                                            <div className="input-group-text"><i className="bi bi-hourglass-split"></i></div>
+                                                        </div>
+                                                        <input
+                                                            title="Número de cuotas"
+                                                            type="text"
+                                                            className="form-control"
+                                                            placeholder='Número de cuotas'
+                                                            ref={this.refNumCutoas}
+                                                            value={this.state.numCuota}
+                                                            onChange={async (event) => {
+                                                                await this.setStateAsync({ numCuota: event.target.value })
+                                                                this.calcularLetraMensual()
+                                                            }}
+                                                            onKeyPress={keyNumberInteger} />
+                                                    </div>
+                                                </div>
+
+                                                <div className="form-group">
+                                                    <div className="input-group">
+                                                        <div className="input-group-prepend">
+                                                            <div className="input-group-text"><i className="bi bi-coin"></i></div>
+                                                        </div>
+                                                        <input
+                                                            title="Letra mensual"
+                                                            type="text"
+                                                            className="form-control"
+                                                            placeholder='0.00'
+                                                            value={this.state.letraMensual}
+                                                            disabled={true} />
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                        : null
+                                }
+                            </div>
+
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-primary" onClick={() => this.onEventGuardar()}>Completar venta</button>
+                                <button type="button" className="btn btn-danger" data-bs-dismiss="modal">Cerrar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {/* fin modal */}
+
                 {
                     this.state.loading ?
                         <div className="clearfix absolute-all bg-white">
@@ -443,6 +890,7 @@ class VentaProceso extends React.Component {
                                                         <td>{item.cantidad}</td>
                                                         <td>
                                                             <select className="form-control"
+                                                                id={index + "imv"}
                                                                 value={item.idImpuesto}
                                                                 onChange={(event) => this.handleSelect(event, item.idDetalle)}>
                                                                 <option value="">- Seleccione -</option>
@@ -457,7 +905,7 @@ class VentaProceso extends React.Component {
                                                         <td>{item.precioContado}</td>
                                                         <td>{item.precioContado * item.cantidad}</td>
                                                         <td>
-                                                            <button className="btn btn-outline-danger btn-sm" title="Eliminar" onClick={() => this.removeObjectTable(item.id)}><i className="bi bi-trash"></i></button>
+                                                            <button className="btn btn-outline-danger btn-sm" title="Eliminar" onClick={() => this.removeObjectTable(item.idDetalle)}><i className="bi bi-trash"></i></button>
                                                         </td>
                                                     </tr>
                                                 ))
@@ -547,45 +995,6 @@ class VentaProceso extends React.Component {
                         </div>
 
                         <div className="form-group">
-                            <div className="input-group">
-                                <div className="input-group-prepend">
-                                    <div className="input-group-text"><i className="bi bi-front"></i></div>
-                                </div>
-                                <select
-                                    title="Comprobantes de venta"
-                                    className="form-control"
-                                    ref={this.refTipo}
-                                    value={this.state.tipo}
-                                    onChange={(event) => this.setState({ tipo: event.target.value })}>
-                                    <option value="">-- Tipo de Venta --</option>
-                                    <option value="1">Contado</option>
-                                    <option value="2">Crédito</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        {
-                            this.state.tipo === "2" ?
-                                <div className="form-group">
-                                    <div className="input-group">
-                                        <div className="input-group-prepend">
-                                            <div className="input-group-text"><i className="bi bi-calendar-event"></i></div>
-                                        </div>
-                                        <input
-                                            placeholder="N° de Cuotas"
-                                            type="text"
-                                            className="form-control"
-                                            ref={this.refCuotas}
-                                            value={this.state.numCuota}
-                                            onChange={(event) => this.setState({ numCuota: event.target.value })}
-                                            onKeyPress={keyNumberInteger}
-                                        />
-                                    </div>
-                                </div>
-                                : null
-                        }
-
-                        <div className="form-group">
                             <table width="100%">
                                 <tbody>
                                     {this.renderTotal()}
@@ -600,7 +1009,7 @@ class VentaProceso extends React.Component {
                     <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
                         <div className="form-row">
                             <div className="form-group col-md-12">
-                                <button type="button" className="btn btn-success" onClick={() => this.onEventGuardar()}>
+                                <button type="button" className="btn btn-success" onClick={() => this.onEventOpenModal()}>
                                     <i className="fa fa-save"></i> Guardar
                                 </button>
                                 {" "}

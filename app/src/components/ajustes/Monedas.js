@@ -1,15 +1,17 @@
 import React from 'react';
 import axios from 'axios';
 import {
+    spinnerLoading,
     showModal,
     hideModal,
     viewModal,
     clearModal,
+    ModalAlertDialog,
     ModalAlertInfo,
     ModalAlertSuccess,
     ModalAlertWarning,
-    spinnerLoading
 } from '../tools/Tools';
+import { connect } from 'react-redux';
 import Paginacion from '../tools/Paginacion';
 
 
@@ -18,10 +20,11 @@ class Monedas extends React.Component {
         super(props);
         this.state = {
             idMoneda: '',
-            txtNombre: '',
-            txtCodIso: '',
-            txtSimbolo: '',
-            ckEstado: true,
+            nombre: '',
+            codIso: '',
+            simbolo: '',
+            estado: true,
+            idUsuario: this.props.token.userToken.idUsuario,
 
             loadModal: false,
             nameModal: 'Nuevo Comprobante',
@@ -66,9 +69,10 @@ class Monedas extends React.Component {
             this.abortControllerModal.abort();
             await this.setStateAsync({
                 idMoneda: '',
-                txtNombre: '',
-                txtCodIso: '',
-                txtSimbolo: '',
+                nombre: '',
+                codIso: '',
+                simbolo: '',
+                estado: '',
                 ckEstado: true,
 
                 loadModal: false,
@@ -177,10 +181,10 @@ class Monedas extends React.Component {
             });
 
             await this.setStateAsync({
-                txtNombre: result.data.nombre,
-                txtCodIso: result.data.codiso,
-                txtSimbolo: result.data.simbolo,
-                ckEstado: result.data.estado,
+                nombre: result.data.nombre,
+                codIso: result.data.codiso,
+                simbolo: result.data.simbolo,
+                estado: result.data.estado,
                 idMoneda: result.data.idMoneda,
                 loadModal: false
             });
@@ -195,24 +199,24 @@ class Monedas extends React.Component {
     }
 
     async onEventGuardar() {
-        if (this.state.txtNombre === "") {
+        if (this.state.nombre === "") {
             this.refTxtNombre.current.focus();
-        } else if (this.state.txtCodIso === "") {
+        } else if (this.state.codIso === "") {
             this.refTxtCodIso.current.focus();
-        } else if (this.state.txtSimbolo === "") {
-            this.refTxtSimbolo.current.focus();
+        } else if (this.state.estado === "") {
+            this.estado.current.focus();
         } else {
             try {
-
                 ModalAlertInfo("Moneda", "Procesando información...");
                 hideModal("modalMoneda");
 
                 if (this.state.idMoneda !== '') {
                     const result = await axios.post('/api/moneda/update', {
-                        "nombre": this.state.txtNombre.trim().toUpperCase(),
-                        "codiso": this.state.txtCodIso.trim().toUpperCase(),
-                        "simbolo": this.state.txtSimbolo.trim().toUpperCase(),
-                        "estado": this.state.ckEstado,
+                        "nombre": this.state.nombre.trim().toUpperCase(),
+                        "codiso": this.state.codIso.trim().toUpperCase(),
+                        "simbolo": this.state.simbolo.trim().toUpperCase(),
+                        "estado": this.state.estado,
+                        "idUsuario": this.state.idUsuario,
                         "idMoneda": this.state.idMoneda
                     })
                     ModalAlertSuccess("Moneda", result.data, () => {
@@ -221,19 +225,48 @@ class Monedas extends React.Component {
 
                 } else {
                     const result = await axios.post('/api/moneda/add', {
-                        "nombre": this.state.txtNombre.trim().toUpperCase(),
-                        "codiso": this.state.txtCodIso.trim().toUpperCase(),
-                        "simbolo": this.state.txtSimbolo.trim().toUpperCase(),
-                        "estado": this.state.ckEstado,
+                        "nombre": this.state.nombre.trim().toUpperCase(),
+                        "codiso": this.state.codIso.trim().toUpperCase(),
+                        "simbolo": this.state.simbolo.trim().toUpperCase(),
+                        "estado": this.state.estado,
+                        "idUsuario": this.state.idUsuario
                     });
                     ModalAlertSuccess("Moneda", result.data, () => {
                         this.loadInit();
                     });
                 }
             } catch (error) {
-                ModalAlertWarning("Moneda", "Se produjo un error un interno, intente nuevamente.");
+                if (error.response !== undefined) {
+                    ModalAlertWarning("Moneda", error.response.data)
+                } else {
+                    ModalAlertWarning("Moneda", "Se genero un error interno, intente nuevamente.")
+                }
             }
         }
+    }
+
+    onEventDelete(idMoneda) {
+        ModalAlertDialog("Moneda", "¿Estás seguro de eliminar la moneda?", async (event) => {
+            if (event) {
+                try {
+                    ModalAlertInfo("Moneda", "Procesando información...")
+                    let result = await axios.delete('/api/moneda', {
+                        params: {
+                            "idMoneda": idMoneda
+                        }
+                    })
+                    ModalAlertSuccess("Moneda", result.data, () => {
+                        this.loadInit();
+                    })
+                } catch (error) {
+                    if (error.response !== undefined) {
+                        ModalAlertWarning("Moneda", error.response.data)
+                    } else {
+                        ModalAlertWarning("Moneda", "Se genero un error interno, intente nuevamente.")
+                    }
+                }
+            }
+        })
     }
 
     render() {
@@ -241,7 +274,7 @@ class Monedas extends React.Component {
             <>
                 {/* Inicio modal nuevo cliente*/}
                 <div className="modal fade" id="modalMoneda" data-backdrop="static">
-                    <div className="modal-dialog modal-lg">
+                    <div className="modal-dialog modal-md">
                         <div className="modal-content">
                             <div className="modal-header">
                                 <h5 className="modal-title">{this.state.nameModal}</h5>
@@ -263,8 +296,8 @@ class Monedas extends React.Component {
                                             type="text"
                                             className="form-control"
                                             ref={this.refTxtNombre}
-                                            value={this.state.txtNombre}
-                                            onChange={(event) => this.setState({ txtNombre: event.target.value })}
+                                            value={this.state.nombre}
+                                            onChange={(event) => this.setState({ nombre: event.target.value })}
                                             placeholder="Soles, dolares, etc" />
                                     </div>
                                     <div className="form-group col-md-6">
@@ -273,8 +306,8 @@ class Monedas extends React.Component {
                                             type="text"
                                             className="form-control"
                                             ref={this.refTxtCodIso}
-                                            value={this.state.txtCodIso}
-                                            onChange={(event) => this.setState({ txtCodIso: event.target.value })}
+                                            value={this.state.codIso}
+                                            onChange={(event) => this.setState({ codIso: event.target.value })}
                                             placeholder="PEN, USD, etc" />
                                     </div>
                                 </div>
@@ -286,10 +319,11 @@ class Monedas extends React.Component {
                                             type="text"
                                             className="form-control"
                                             ref={this.refTxtSimbolo}
-                                            value={this.state.txtSimbolo}
-                                            onChange={(event) => this.setState({ txtSimbolo: event.target.value })}
+                                            value={this.state.simbolo}
+                                            onChange={(event) => this.setState({ simbolo: event.target.value })}
                                             placeholder="S/, $, etc" />
                                     </div>
+
                                     <div className="form-group col-md-6">
                                         <label>Estado:</label>
                                         <div className="custom-control custom-switch">
@@ -297,8 +331,8 @@ class Monedas extends React.Component {
                                                 type="checkbox"
                                                 className="custom-control-input"
                                                 id="switch1"
-                                                checked={this.state.ckEstado}
-                                                onChange={(value) => this.setState({ ckEstado: value.target.checked })} />
+                                                checked={this.state.estado}
+                                                onChange={(value) => this.setState({ estado: value.target.checked })} />
                                             <label className="custom-control-label" htmlFor="switch1">Activo o Inactivo</label>
                                         </div>
                                     </div>
@@ -389,10 +423,18 @@ class Monedas extends React.Component {
                                                         <td>{item.simbolo}</td>
                                                         <td><div className={`badge ${item.estado === 1 ? "badge-info" : "badge-danger"}`}>{item.estado === 1 ? "ACTIVO" : "INACTIVO"}</div></td>
                                                         <td>
-                                                            <button className="btn btn-outline-warning btn-sm" title="Editar" onClick={() => this.openModal(item.idMoneda)}><i className="bi bi-pencil"></i></button>
+                                                            <button
+                                                                className="btn btn-outline-warning btn-sm"
+                                                                title="Editar"
+                                                                onClick={() => this.openModal(item.idMoneda)}>
+                                                                <i className="bi bi-pencil"></i></button>
                                                         </td>
                                                         <td>
-                                                            <button className="btn btn-outline-danger btn-sm" title="Eliminar"><i className="bi bi-trash"></i></button>
+                                                            <button
+                                                                className="btn btn-outline-danger btn-sm"
+                                                                title="Eliminar"
+                                                                onClick={() => this.onEventDelete(item.idMoneda)}>
+                                                                <i className="bi bi-trash"></i></button>
                                                         </td>
                                                     </tr>
                                                 )
@@ -431,4 +473,10 @@ class Monedas extends React.Component {
     }
 }
 
-export default Monedas;
+const mapStateToProps = (state) => {
+    return {
+        token: state.reducer
+    }
+}
+
+export default connect(mapStateToProps, null)(Monedas);

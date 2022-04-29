@@ -130,7 +130,7 @@ class Inicio extends React.Component {
                         <Route
                             path={`${path}/clientes/proceso`}
                             exact={true}
-                            render={(props) => <CreditoProceso {...props} />}
+                            render={(props) => <ClienteProceso {...props} />}
                         />
                         <Route
                             path={`${path}/ventas`}
@@ -167,8 +167,8 @@ class Inicio extends React.Component {
                             exact={true}
                             render={(props) => <Creditos {...props} />}
                         />
-                         <Route
-                            path={`${path}/creditos/abono`}
+                        <Route
+                            path={`${path}/creditos/proceso`}
                             exact={true}
                             render={(props) => <CreditoProceso {...props} />}
                         />
@@ -219,7 +219,7 @@ class Inicio extends React.Component {
                             exact={true}
                             render={(props) => <Lotes {...props} />}
                         />
-                        <Route 
+                        <Route
                             path={`${path}/lotes/detalle`}
                             exact={true}
                             render={(props) => <LoteDetalle {...props} />}
@@ -233,12 +233,12 @@ class Inicio extends React.Component {
                             exact={true}
                             render={(props) => <Gastos {...props} />}
                         />
-                        <Route 
+                        <Route
                             path={`${path}/gastos/proceso`}
                             exact={true}
                             render={(props) => <GastoProceso {...props} />}
                         />
-                        <Route 
+                        <Route
                             path={`${path}/gastos/detalle`}
                             exact={true}
                             render={(props) => <GastoDetalle {...props} />}

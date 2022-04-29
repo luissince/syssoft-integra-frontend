@@ -6,11 +6,13 @@ import {
     hideModal,
     viewModal,
     clearModal,
+    ModalAlertDialog,
     ModalAlertInfo,
     ModalAlertSuccess,
     ModalAlertWarning,
     spinnerLoading
 } from '../tools/Tools';
+import { connect } from 'react-redux';
 import Paginacion from '../tools/Paginacion';
 
 class Perfiles extends React.Component {
@@ -21,8 +23,9 @@ class Perfiles extends React.Component {
             descripcion: '',
             idSede: '',
             sedes: [],
+            idUsuario: this.props.token.userToken.idUsuario,
 
-            idComprobante:'',
+            idComprobante: '',
             loadModal: false,
             nameModal: 'Nuevo Comprobante',
             msgModal: 'Cargando datos...',
@@ -52,7 +55,7 @@ class Perfiles extends React.Component {
             this.setState(state, resolve)
         });
     }
-    
+
     componentDidMount() {
         this.loadInit();
 
@@ -74,7 +77,7 @@ class Perfiles extends React.Component {
                 idPerfil: '',
                 loadModal: false,
                 sedes: [],
-                idComprobante:'',
+                idComprobante: '',
                 nameModal: 'Nuevo Comprobante',
                 msgModal: 'Cargando datos...',
             });
@@ -119,6 +122,7 @@ class Perfiles extends React.Component {
             case 1:
                 this.fillTable(1, this.refTxtSearch.current.value);
                 break;
+            default: this.fillTable(0, "");
         }
     }
 
@@ -172,7 +176,6 @@ class Perfiles extends React.Component {
 
     loadData = async () => {
         try {
-            
             const sede = await axios.get("/api/sede/listcombo", {
                 signal: this.abortControllerModal.signal,
             });
@@ -184,7 +187,6 @@ class Perfiles extends React.Component {
                 idSede: idSede,
                 loadModal: false
             });
-
         } catch (error) {
             if (error.message !== "canceled") {
                 await this.setStateAsync({
@@ -214,7 +216,6 @@ class Perfiles extends React.Component {
                 idPerfil: perfil.data.idPerfil,
                 loadModal: false
             });
-
         } catch (error) {
             if (error.message !== "canceled") {
                 await this.setStateAsync({
@@ -240,6 +241,7 @@ class Perfiles extends React.Component {
                     let result = await axios.post('/api/perfil/update', {
                         "descripcion": this.state.descripcion.trim().toUpperCase(),
                         "idSede": this.state.idSede.trim().toUpperCase(),
+                        "idUsuario": this.state.idUsuario,
                         "idPerfil": this.state.idPerfil
                     });
 
@@ -251,6 +253,7 @@ class Perfiles extends React.Component {
                     let result = await axios.post('/api/perfil/add', {
                         "descripcion": this.state.descripcion.trim().toUpperCase(),
                         "idSede": this.state.idSede.trim().toUpperCase(),
+                        "idUsuario": this.state.idUsuario,
                     });
 
 
@@ -262,6 +265,30 @@ class Perfiles extends React.Component {
                 ModalAlertWarning("Comprobante", "Se produjo un error un interno, intente nuevamente.");
             }
         }
+    }
+
+    onEventDelete(idPerfil) {
+        ModalAlertDialog("Perfil", "¿Estás seguro de eliminar el perfil?", async (event) => {
+            if (event) {
+                try {
+                    ModalAlertInfo("Perfil", "Procesando información...")
+                    let result = await axios.delete('/api/perfil', {
+                        params: {
+                            "idPerfil": idPerfil
+                        }
+                    })
+                    ModalAlertSuccess("Perfil", result.data, () => {
+                        this.loadInit();
+                    })
+                } catch (error) {
+                    if (error.response !== undefined) {
+                        ModalAlertWarning("Perfil", error.response.data)
+                    } else {
+                        ModalAlertWarning("Perfil", "Se genero un error interno, intente nuevamente.")
+                    }
+                }
+            }
+        })
     }
 
 
@@ -372,11 +399,12 @@ class Perfiles extends React.Component {
                             <table className="table table-striped table-bordered rounded">
                                 <thead>
                                     <tr>
-                                        <th width="5%">#</th>
+                                        <th width="5%" className="text-center">#</th>
                                         <th width="30%">Descripción</th>
                                         <th width="30%">Empresa</th>
                                         <th width="20%">Creación</th>
-                                        <th width="15%">Opciones</th>
+                                        <th width="5%" className="text-center">Editar</th>
+                                        <th width="5%" className="text-center">Eliminar</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -395,12 +423,25 @@ class Perfiles extends React.Component {
                                             this.state.lista.map((item, index) => {
                                                 return (
                                                     <tr key={index}>
-                                                        <td>{item.id}</td>
+                                                        <td className="text-center">{item.id}</td>
                                                         <td>{item.descripcion}</td>
                                                         <td>{item.empresa}</td>
                                                         <td>{<span>{item.fecha}</span>}{<br></br>}{<span>{timeForma24(item.hora)}</span>}</td>
-                                                        <td>
-                                                            <button className="btn btn-outline-dark btn-sm" title="Editar" onClick={() => this.openModal(item.idPerfil)}><i className="bi bi-pencil"></i></button>
+                                                        <td className="text-center">
+                                                            <button
+                                                                className="btn btn-outline-warning btn-sm"
+                                                                title="Editar"
+                                                                onClick={() => this.openModal(item.idPerfil)}>
+                                                                <i className="bi bi-pencil"></i>
+                                                            </button>
+                                                        </td>
+                                                        <td className="text-center">
+                                                            <button
+                                                                className="btn btn-outline-danger btn-sm"
+                                                                title="Anular"
+                                                                onClick={() => this.onEventDelete(item.idPerfil)}>
+                                                                <i className="bi bi-trash"></i>
+                                                            </button>
                                                         </td>
                                                     </tr>
                                                 )
@@ -438,4 +479,11 @@ class Perfiles extends React.Component {
     }
 }
 
-export default Perfiles;
+const mapStateToProps = (state) => {
+    return {
+        token: state.reducer
+    }
+}
+
+
+export default connect(mapStateToProps, null)(Perfiles);

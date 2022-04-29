@@ -122,13 +122,19 @@ class Proyectos extends React.Component {
                 try {
                     ModalAlertInfo("Proyecto", "Procesando información...")
                     let result = await axios.delete('/api/proyecto', {
-                        params: { "idProyecto": idProyecto }
+                        params: {
+                            "idProyecto": idProyecto
+                        }
                     })
                     ModalAlertSuccess("Proyecto", result.data, () => {
                         this.loadInit();
                     })
                 } catch (error) {
-                    ModalAlertWarning("Proyecto", "Se genero un error interno, intente nuevamente.")
+                    if (error.response !== undefined) {
+                        ModalAlertWarning("Proyecto", error.response.data)
+                    } else {
+                        ModalAlertWarning("Proyecto", "Se genero un error interno, intente nuevamente.")
+                    }
                 }
             }
         })

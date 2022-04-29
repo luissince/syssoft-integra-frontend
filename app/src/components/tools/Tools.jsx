@@ -34,6 +34,46 @@ export function formatMoney(
   }
 }
 
+export const numberFormat = (value, currency = "PEN") => {
+  let formats = [
+    {
+      locales: "es-PE",
+      options: {
+        style: "currency",
+        currency: "PEN",
+        minimumFractionDigits: 2,
+      },
+    },
+    {
+      locales: "en-US",
+      options: {
+        style: "currency",
+        currency: "USD",
+        minimumFractionDigits: 2,
+      },
+    },
+    {
+      locales: "de-DE",
+      options: {
+        style: "currency",
+        currency: "EUR",
+        minimumFractionDigits: 2,
+      },
+    },
+  ];
+
+  let newFormat = formats.filter((item) => currency === item.options.currency);
+  if (newFormat.length > 0) {
+    var formatter = new Intl.NumberFormat(newFormat[0].locales, {
+      style: newFormat[0].options.style,
+      currency: newFormat[0].options.currency,
+    });
+    return formatter.format(value);
+  } else {
+    return 0;
+  }
+};
+
 export function currentDate() {
   let date = new Date();
   let formatted_date =
@@ -148,6 +188,20 @@ export function keyNumberPhone(event) {
   }
 }
 
+export function dateFormat(value) {
+  var parts = value.split("-");
+  let today = new Date(parts[0], parts[1] - 1, parts[2]);
+  return (
+    (today.getDate() > 9 ? today.getDate() : "0" + today.getDate()) +
+    "/" +
+    (today.getMonth() + 1 > 9
+      ? today.getMonth() + 1
+      : "0" + (today.getMonth() + 1)) +
+    "/" +
+    today.getFullYear()
+  );
+}
+
 export function timeForma24(value) {
   var hourEnd = value.indexOf(":");
   var H = +value.substr(0, hourEnd);
@@ -179,6 +233,15 @@ export function getCookie(cname) {
     }
   }
   return "";
+}
+
+export function calculateTaxBruto(impuesto, monto) {
+  return monto / ((impuesto + 100) * 0.01);
+}
+
+export function calculateTax(porcentaje, valor) {
+  let igv = parseFloat(porcentaje) / 100.0;
+  return valor * igv;
 }
 
 export function showModal(id) {

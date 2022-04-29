@@ -5,28 +5,35 @@ const Conexion = require('../database/Conexion');
 const conec = new Conexion()
 
 router.get('/list', async function (req, res) {
-
     try {
 
         let lista = await conec.query(`SELECT 
-                idComprobante,
-                nombre,
-                serie,
-                numeracion,
-                impresion,
-                estado, 
-                DATE_FORMAT(fecha,'%d/%m/%Y') as fecha,
-                hora
-                FROM comprobante
-                WHERE 
-                ? = 0
-                OR
-                ? = 1 AND nombre LIKE CONCAT(?,'%')
-                OR
-                ? = 1 AND serie LIKE CONCAT(?,'%')
-                OR
-                ? = 1 AND numeracion LIKE CONCAT(?,'%')
-                LIMIT ?,?`, [
+            idComprobante,
+            CASE
+            WHEN 1 THEN 'Facturación'
+            WHEN 2 THEN 'Nota de Crédito'
+            WHEN 3 THEN 'Nota de Debito'
+            WHEN 4 THEN 'Recibo de Caja'
+            WHEN 5 THEN 'Comprobante de Ingreso'
+            WHEN 6 THEN 'Comprobante de Egreso'
+            ELSE 'Cotización' END AS 'tipo',
+            nombre,
+            serie, 
+            numeracion,
+            impresion,
+            estado, 
+            DATE_FORMAT(fecha,'%d/%m/%Y') as fecha,
+            hora
+            FROM comprobante
+            WHERE 
+            ? = 0
+            OR
+            ? = 1 AND nombre LIKE CONCAT(?,'%')
+            OR
+            ? = 1 AND serie LIKE CONCAT(?,'%')
+            OR
+            ? = 1 AND numeracion LIKE CONCAT(?,'%')
+            LIMIT ?,?`, [
             parseInt(req.query.opcion),
 
             parseInt(req.query.opcion),
@@ -52,13 +59,13 @@ router.get('/list', async function (req, res) {
 
         let total = await conec.query(`SELECT COUNT(*) AS Total FROM comprobante
         WHERE 
-                ? = 0
-                OR
-                ? = 1 AND nombre LIKE CONCAT(?,'%')
-                OR
-                ? = 1 AND serie LIKE CONCAT(?,'%')
-                OR
-                ? = 1 AND numeracion LIKE CONCAT(?,'%')`, [
+        ? = 0
+        OR
+        ? = 1 AND nombre LIKE CONCAT(?,'%')
+        OR
+        ? = 1 AND serie LIKE CONCAT(?,'%')
+        OR
+        ? = 1 AND numeracion LIKE CONCAT(?,'%')`, [
             parseInt(req.query.opcion),
 
             parseInt(req.query.opcion),
@@ -123,10 +130,20 @@ router.post('/add', async function (req, res) {
             idComprobante = "CB0001";
         }
 
-        await conec.execute(connection, `INSERT INTO comprobante 
-        (idComprobante,nombre,serie,numeracion,impresion,estado,fecha,hora,idUsuario) 
-        VALUES(?,?,?,?,?,?,?,?,?)`, [
+        await conec.execute(connection, `INSERT INTO comprobante(
+        idComprobante,
+        tipo,
+        nombre,
+        serie,
+        numeracion,
+        impresion,
+        estado,
+        fecha,
+        hora,
+        idUsuario) 
+        VALUES(?,=,?,?,?,?,?,?,?,?)`, [
             idComprobante,
+            req.body.tipo,
             req.body.nombre,
             req.body.serie,
             req.body.numeracion,
@@ -153,23 +170,59 @@ router.post('/edit', async function (req, res) {
     try {
         connection = await conec.beginTransaction();
 
-        await conec.execute(connection, `UPDATE comprobante SET 
-        nombre = ?,
-        serie = ?,
-        numeracion = ?,
-        impresion = ?,
-        estado = ?
-        WHERE idComprobante = ?`, [
-            req.body.nombre,
-            req.body.serie,
-            req.body.numeracion,
-            req.body.impresion,
-            req.body.estado,
-            req.body.idComprobante,
-        ])
+        let venta = await conec.execute(connection, `SELECT  * FROM venta WHERE idComprobante = ?`, [
+            req.body.idComprobante
+        ]);
 
-        await conec.commit(connection);
-        res.status(200).send('Se actualizó el comprobante.')
+        if (venta.length > 0) {
+            await conec.execute(connection, `UPDATE comprobante SET 
+            tipo = ?,
+            nombre = ?,
+            impresion = ?,
+            estado = ?,
+            fecha = ?,
+            hora = ?,
+            idUsuario = ?
+            WHERE idComprobante = ?`, [
+                req.body.tipo,
+                req.body.nombre,
+                req.body.impresion,
+                req.body.estado,
+                currentDate(),
+                currentTime(),
+                req.body.idUsuario,
+                req.body.idComprobante
+            ]);
+
+            await conec.commit(connection);
+            res.status(200).send('Se actualizó correctamente el comprobante. !Hay campos que no se van editar ya que el comprobante esta ligado a un venta¡');
+        } else {
+            await conec.execute(connection, `UPDATE comprobante SET 
+            tipo = ?,
+            nombre = ?,
+            serie = ?,
+            numeracion = ?,
+            impresion = ?,
+            estado = ?,
+            fecha = ?,
+            hora = ?,
+            idUsuario = ?
+            WHERE idComprobante = ?`, [
+                req.body.tipo,
+                req.body.nombre,
+                req.body.serie,
+                req.body.numeracion,
+                req.body.impresion,
+                req.body.estado,
+                currentDate(),
+                currentTime(),
+                req.body.idUsuario,
+                req.body.idComprobante
+            ]);
+
+            await conec.commit(connection);
+            res.status(200).send('Se actualizó correctamente el comprobante.');
+        }
 
     } catch (err) {
         if (connection != null) {
@@ -178,6 +231,35 @@ router.post('/edit', async function (req, res) {
         res.status(500).send(connection);
     }
 });
+
+router.delete('/', async function (req, res) {
+    let connection = null;
+    try {
+        connection = await conec.beginTransaction();
+
+        let venta = await conec.execute(connection, `SELECT * FROM venta WHERE idComprobante = ?`, [
+            req.query.idComprobante
+        ]);
+
+        if (venta.length > 0) {
+            await conec.rollback(connection);
+            res.status(400).send('No se puede eliminar el comprobante ya que esta ligada a un venta.')
+            return;
+        }
+
+        await conec.execute(connection, `DELETE FROM comprobante WHERE idComprobante = ?`, [
+            req.query.idComprobante
+        ]);
+
+        await conec.commit(connection)
+        res.status(200).send('Se eliminó correctamente el comprobante.')
+    } catch (error) {
+        if (connection != null) {
+            await conec.rollback(connection);
+        }
+        res.status(500).send("Error interno de conexión, intente nuevamente.");
+    }
+})
 
 router.get('/listcombo', async function (req, res) {
     try {

@@ -119,6 +119,7 @@ class Lotes extends React.Component {
                 nameModal: 'Nuevo Comprobante',
                 msgModal: 'Cargando datos...',
             });
+            this.onFocusTab("info-tab", "info");
             this.idCodigo = "";
         });
     }
@@ -158,6 +159,7 @@ class Lotes extends React.Component {
             case 1:
                 this.fillTable(1, this.refTxtSearch.current.value);
                 break;
+            default: this.fillTable(0, "");
         }
     }
 
@@ -214,7 +216,6 @@ class Lotes extends React.Component {
             });
 
             await this.setStateAsync({
-
                 manzanas: manzana.data,
 
                 loadModal: false
@@ -244,8 +245,8 @@ class Lotes extends React.Component {
                 idLote: result.data.idLote,
                 idManzana: result.data.idManzana,
                 descripcion: result.data.descripcion,
-                costo: result.data.costo,
-                precio: result.data.precio,
+                costo: result.data.costo.toString(),
+                precio: result.data.precio.toString(),
                 estado: result.data.estado,
                 medidaFrontal: result.data.medidaFrontal,
                 costadoDerecho: result.data.costadoDerecho,
@@ -274,18 +275,22 @@ class Lotes extends React.Component {
 
     async onEventGuardar() {
         if (this.state.idManzana === "") {
+            this.onFocusTab("info-tab", "info");
             this.refManzana.current.focus();
         } else if (this.state.descripcion === "") {
+            this.onFocusTab("info-tab", "info");
             this.refDescripcion.current.focus();
         } else if (!isNumeric(this.state.costo)) {
+            this.onFocusTab("info-tab", "info");
             this.refCosto.current.focus();
         } else if (!isNumeric(this.state.precio)) {
+            this.onFocusTab("info-tab", "info");
             this.refPrecio.current.focus();
         } else if (this.state.estado === "") {
+            this.onFocusTab("info-tab", "info");
             this.refEstado.current.focus();
         }
         else {
-            console.log(this.state)
             try {
                 ModalAlertInfo("Lote", "Procesando información...");
                 hideModal("modalLote");
@@ -293,7 +298,7 @@ class Lotes extends React.Component {
                     let result = await axios.put("/api/lote", {
                         "idLote": this.state.idLote,
                         "idManzana": this.state.idManzana,
-                        "descripcion": this.state.descripcion,
+                        "descripcion": this.state.descripcion.trim().toUpperCase(),
                         "costo": this.state.costo,
                         "precio": this.state.precio,
                         "estado": this.state.estado,
@@ -316,7 +321,7 @@ class Lotes extends React.Component {
                 } else {
                     let result = await axios.post("/api/lote", {
                         "idManzana": this.state.idManzana,
-                        "descripcion": this.state.descripcion,
+                        "descripcion": this.state.descripcion.trim().toUpperCase(),
                         "costo": this.state.costo,
                         "precio": this.state.precio,
                         "estado": this.state.estado,
@@ -356,8 +361,11 @@ class Lotes extends React.Component {
         }
     }
 
-    onEventMostrar(){
-        this.props.history.push(`${this.props.location.pathname}/detalle`);
+    onEventMostrar(idLote) {
+        this.props.history.push({
+            pathname: `${this.props.location.pathname}/detalle`,
+            search: "?idLote=" + idLote
+        })
     }
 
     render() {
@@ -408,7 +416,7 @@ class Lotes extends React.Component {
                                     <div className="tab-pane fade show active" id="info" role="tabpanel" aria-labelledby="info-tab">
                                         <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
                                             <div className="form-group">
-                                                <label htmlFor="manzana">Manzana</label>
+                                                <label htmlFor="manzana">Manzana <i className="fa fa-asterisk text-danger small"></i></label>
                                                 <select
                                                     className="form-control"
                                                     id="manzana"
@@ -426,8 +434,9 @@ class Lotes extends React.Component {
                                                     }
                                                 </select>
                                             </div>
+
                                             <div className="form-group">
-                                                <label htmlFor="descripción">Descripción del Lote</label>
+                                                <label htmlFor="descripción">Descripción del Lote <i className="fa fa-asterisk text-danger small"></i></label>
                                                 <input
                                                     type="text"
                                                     className="form-control"
@@ -440,38 +449,43 @@ class Lotes extends React.Component {
                                                     }}
                                                 />
                                             </div>
-                                            <div className="form-group">
-                                                <label htmlFor="cAproximado">Costo Aproximado (S/)</label>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    id="cAproximado"
-                                                    placeholder='0.00'
-                                                    ref={this.refCosto}
-                                                    value={this.state.costo}
-                                                    onChange={(event) => {
-                                                        this.setState({ costo: event.target.value })
-                                                    }}
-                                                    onKeyPress={keyNumberFloat}
-                                                />
+
+                                            <div className="form-row">
+                                                <div className="form-group col-md-6">
+                                                    <label htmlFor="cAproximado">Costo Aproximado <i className="fa fa-asterisk text-danger small"></i></label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        id="cAproximado"
+                                                        placeholder='0.00'
+                                                        ref={this.refCosto}
+                                                        value={this.state.costo}
+                                                        onChange={(event) => {
+                                                            this.setState({ costo: event.target.value })
+                                                        }}
+                                                        onKeyPress={keyNumberFloat}
+                                                    />
+                                                </div>
+
+                                                <div className="form-group col-md-6">
+                                                    <label htmlFor="pvContado">Precio Venta Contado <i className="fa fa-asterisk text-danger small"></i></label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        id="pvContado"
+                                                        placeholder='0.00'
+                                                        ref={this.refPrecio}
+                                                        value={this.state.precio}
+                                                        onChange={(event) => {
+                                                            this.setState({ precio: event.target.value })
+                                                        }}
+                                                        onKeyPress={keyNumberFloat}
+                                                    />
+                                                </div>
                                             </div>
+
                                             <div className="form-group">
-                                                <label htmlFor="pvContado">Precio Venta Contado (S/)</label>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    id="pvContado"
-                                                    placeholder='0.00'
-                                                    ref={this.refPrecio}
-                                                    value={this.state.precio}
-                                                    onChange={(event) => {
-                                                        this.setState({ precio: event.target.value })
-                                                    }}
-                                                    onKeyPress={keyNumberFloat}
-                                                />
-                                            </div>
-                                            <div className="form-group">
-                                                <label htmlFor="estado">Estado</label>
+                                                <label htmlFor="estado">Estado <i className="fa fa-asterisk text-danger small"></i></label>
                                                 <select
                                                     className="form-control"
                                                     id="estado"
@@ -490,6 +504,7 @@ class Lotes extends React.Component {
                                             </div>
                                         </div>
                                     </div>
+
                                     <div className="tab-pane fade" id="medida" role="tabpanel" aria-labelledby="medida-tab">
                                         <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
                                             <div className="form-group">
@@ -507,66 +522,75 @@ class Lotes extends React.Component {
                                                     onKeyPress={keyNumberFloat}
                                                 />
                                             </div>
-                                            <div className="form-group">
-                                                <label htmlFor="coDerecho">Costado Derecho (ML)</label>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    id="coDerecho"
-                                                    placeholder='0'
-                                                    ref={this.refCostadoDerecho}
-                                                    value={this.state.costadoDerecho}
-                                                    onChange={(event) => {
-                                                        this.setState({ costadoDerecho: event.target.value })
-                                                    }}
-                                                    onKeyPress={keyNumberFloat}
-                                                />
+
+                                            <div className="form-row">
+                                                <div className="form-group col-md-6">
+                                                    <label htmlFor="coDerecho">Costado Derecho (ML)</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        id="coDerecho"
+                                                        placeholder='0'
+                                                        ref={this.refCostadoDerecho}
+                                                        value={this.state.costadoDerecho}
+                                                        onChange={(event) => {
+                                                            this.setState({ costadoDerecho: event.target.value })
+                                                        }}
+                                                        onKeyPress={keyNumberFloat}
+                                                    />
+                                                </div>
+
+                                                <div className="form-group col-md-6">
+                                                    <label htmlFor="coIzquierdo">Costado Izquierdo (ML)</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        id="coIzquierdo"
+                                                        placeholder='0'
+                                                        ref={this.refCostadoIzquiero}
+                                                        value={this.state.costadoIzquierdo}
+                                                        onChange={(event) => {
+                                                            this.setState({ costadoIzquierdo: event.target.value })
+                                                        }}
+                                                        onKeyPress={keyNumberFloat}
+                                                    />
+                                                </div>
                                             </div>
-                                            <div className="form-group">
-                                                <label htmlFor="coIzquierdo">Costado Izquierdo (ML)</label>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    id="coIzquierdo"
-                                                    placeholder='0'
-                                                    ref={this.refCostadoIzquiero}
-                                                    value={this.state.costadoIzquierdo}
-                                                    onChange={(event) => {
-                                                        this.setState({ costadoIzquierdo: event.target.value })
-                                                    }}
-                                                    onKeyPress={keyNumberFloat}
-                                                />
+
+                                            <div className="form-row">
+                                                <div className="form-group col-md-6">
+                                                    <label htmlFor="mFondo">Medida Fondo (ML)</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        id="mFondo"
+                                                        placeholder='0'
+                                                        ref={this.refMedidaFondo}
+                                                        value={this.state.medidaFondo}
+                                                        onChange={(event) => {
+                                                            this.setState({ medidaFondo: event.target.value })
+                                                        }}
+                                                        onKeyPress={keyNumberFloat}
+                                                    />
+                                                </div>
+
+                                                <div className="form-group col-md-6">
+                                                    <label htmlFor="aLote">Area Lote (M2)</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        id="aLote"
+                                                        placeholder='0'
+                                                        ref={this.refAreaLote}
+                                                        value={this.state.areaLote}
+                                                        onChange={(event) => {
+                                                            this.setState({ areaLote: event.target.value })
+                                                        }}
+                                                        onKeyPress={keyNumberFloat}
+                                                    />
+                                                </div>
                                             </div>
-                                            <div className="form-group">
-                                                <label htmlFor="mFondo">Medida Fondo (ML)</label>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    id="mFondo"
-                                                    placeholder='0'
-                                                    ref={this.refMedidaFondo}
-                                                    value={this.state.medidaFondo}
-                                                    onChange={(event) => {
-                                                        this.setState({ medidaFondo: event.target.value })
-                                                    }}
-                                                    onKeyPress={keyNumberFloat}
-                                                />
-                                            </div>
-                                            <div className="form-group">
-                                                <label htmlFor="aLote">Area Lote (M2)</label>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    id="aLote"
-                                                    placeholder='0'
-                                                    ref={this.refAreaLote}
-                                                    value={this.state.areaLote}
-                                                    onChange={(event) => {
-                                                        this.setState({ areaLote: event.target.value })
-                                                    }}
-                                                    onKeyPress={keyNumberFloat}
-                                                />
-                                            </div>
+
                                             <div className="form-group">
                                                 <label htmlFor="nPartida">N° Partida</label>
                                                 <input
@@ -584,6 +608,7 @@ class Lotes extends React.Component {
                                             </div>
                                         </div>
                                     </div>
+
                                     <div className="tab-pane fade" id="limite" role="tabpanel" aria-labelledby="limite-tab">
                                         <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
                                             <div className="form-group">
@@ -707,7 +732,7 @@ class Lotes extends React.Component {
                             <table className="table table-striped table-bordered rounded">
                                 <thead>
                                     <tr>
-                                        <th width="5%">#</th>
+                                        <th width="5%" className="text-center">#</th>
                                         <th width="15%">Descripción</th>
                                         <th width="25%">P. Venta</th>
                                         <th width="20%">M.F(ML)</th>
@@ -715,8 +740,8 @@ class Lotes extends React.Component {
                                         <th width="20%">Area(M2)</th>
                                         <th width="10%">Estado</th>
                                         <th width="5%">Mostar</th>
-                                        <th width="5%">Editar</th>
-                                        <th width="5%">Eliminar</th>
+                                        <th width="5%" className="text-center">Editar</th>
+                                        <th width="5%" className="text-center">Eliminar</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -735,7 +760,7 @@ class Lotes extends React.Component {
                                             this.state.lista.map((item, index) => {
                                                 return (
                                                     <tr key={index}>
-                                                        <td>{item.id}</td>
+                                                        <td className="text-center">{item.id}</td>
                                                         <td>{item.descripcion}</td>
                                                         <td>{item.precio}</td>
                                                         <td>{item.medidaFondo}</td>
@@ -749,13 +774,13 @@ class Lotes extends React.Component {
                                                                             : <span className="badge badge-warnin">Inactivo</span>
                                                             }
                                                         </td>
-                                                        <td>
-                                                            <button className="btn btn-outline-info btn-sm" title="Detalle" onClick={() => this.onEventMostrar() }><i className="bi bi-eye"></i></button>
+                                                        <td className="text-center">
+                                                            <button className="btn btn-outline-info btn-sm" title="Detalle" onClick={() => this.onEventMostrar(item.idLote)}><i className="bi bi-eye"></i></button>
                                                         </td>
-                                                        <td>
+                                                        <td className="text-center">
                                                             <button className="btn btn-outline-warning btn-sm" title="Editar" onClick={() => this.openModal(item.idLote)}><i className="bi bi-pencil"></i></button>
                                                         </td>
-                                                        <td>
+                                                        <td className="text-center">
                                                             <button className="btn btn-outline-danger btn-sm" title="Anular"><i className="bi bi-trash"></i></button>
                                                         </td>
                                                     </tr>

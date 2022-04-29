@@ -194,29 +194,27 @@ class Cobros extends React.Component {
                             <table className="table table-striped table-bordered rounded">
                                 <thead>
                                     <tr>
-                                        <th width="5%">#</th>
+                                        <th width="5%" className="text-center">#</th>
                                         <th width="15%">Cliente</th>
                                         <th width="10%">Detalle</th>
                                         <th width="15%">Creación</th>
                                         <th width="10%">Cuenta</th>
-                                        <th width="10%">Estado</th>
                                         <th width="10%">Monto</th>
-                                        <th width="5%">Detalle</th>
-                                        <th width="5%">Editar</th>
-                                        <th width="5%">Eliminar</th>
+                                        <th width="5%" className="text-center">Detalle</th>
+                                        <th width="5%" className="text-center">Eliminar</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {
                                         this.state.loading ? (
                                             <tr>
-                                                <td className="text-center" colSpan="10">
+                                                <td className="text-center" colSpan="8">
                                                     {spinnerLoading()}
                                                 </td>
                                             </tr>
                                         ) : this.state.lista.length === 0 ? (
                                             <tr className="text-center">
-                                                <td colSpan="10">¡No hay datos registrados!</td>
+                                                <td colSpan="8">¡No hay datos registrados!</td>
                                             </tr>
                                         ) : (
                                             this.state.lista.map((item, index) => {
@@ -227,22 +225,19 @@ class Cobros extends React.Component {
                                                         <td>{item.detalle}</td>
                                                         <td>{item.fecha}{<br />}{timeForma24(item.hora)}</td>
                                                         <td>{item.banco}</td>
-                                                        <td>{""}</td>
                                                         <td>{item.simbolo + " " + formatMoney(item.monto)}</td>
-                                                        <td>
+                                                        <td className="text-center">
                                                             <button className="btn btn-outline-info btn-sm" title="Detalle" onClick={() => {
                                                                 this.props.history.push({ pathname: `${this.props.location.pathname}/detalle`, search: "?idCobro=" + item.idCobro })
                                                             }}>
                                                                 <i className="fa fa-eye"></i>
                                                             </button>
                                                         </td>
-                                                        <td>
-                                                            <button className="btn btn-outline-warning btn-sm" title="Editar" onClick={() => console.log('perro')}>
-                                                                <i className="fa fa-edit"></i>
-                                                            </button>
-                                                        </td>
-                                                        <td>
-                                                            <button className="btn btn-outline-danger btn-sm" title="Eliminar" onClick={() => this.onEventAnularCobro(item.idCobro)}>
+                                                        <td className="text-center">
+                                                            <button
+                                                                className="btn btn-outline-danger btn-sm"
+                                                                title="Eliminar"
+                                                                onClick={() => this.onEventAnularCobro(item.idCobro)}>
                                                                 <i className="fa fa-remove"></i>
                                                             </button>
                                                         </td>
