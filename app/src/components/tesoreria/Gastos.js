@@ -89,6 +89,7 @@ class Gastos extends React.Component {
             await this.setStateAsync({ loading: true, lista: [], messageTable: "Cargando información...", messagePaginacion: "Mostranto 0 de 0 Páginas" });
 
             const result = await axios.get('/api/gasto/list', {
+                signal: this.abortControllerTable.signal,
                 params: {
                     "opcion": opcion,
                     "buscar": buscar,
@@ -153,7 +154,6 @@ class Gastos extends React.Component {
 
     render() {
         return (
-
             <>
                 <div className='row'>
                     <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>

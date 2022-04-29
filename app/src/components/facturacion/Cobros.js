@@ -91,6 +91,7 @@ class Cobros extends React.Component {
             await this.setStateAsync({ loading: true, lista: [], messageTable: "Cargando información...", messagePaginacion: "Mostranto 0 de 0 Páginas" });
 
             const result = await axios.get('/api/cobro/list', {
+                signal: this.abortControllerTable.signal,
                 params: {
                     "opcion": opcion,
                     "buscar": buscar,

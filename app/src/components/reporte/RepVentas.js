@@ -14,17 +14,17 @@ class RepVentas extends React.Component {
         return (
             <>
                 <div className="card">
-                    <h6 class="card-header">Filtros Generales</h6>
+                    <h6 className="card-header">Filtros Generales</h6>
                     <div className="card-body">
-                        <div class="custom-control custom-switch">
-                            <input type="checkbox" class="custom-control-input" id="customSwitch1"></input>
-                            <label class="custom-control-label" for="customSwitch1">Filtro por fechas</label>
+                        <div className="custom-control custom-switch">
+                            <input type="checkbox" className="custom-control-input" id="customSwitch1"></input>
+                            <label className="custom-control-label" htmlFor="customSwitch1">Filtro por fechas</label>
                         </div>
                     </div>
                 </div>
 
                 <div className="card">
-                    <h6 class="card-header">Reporte de Ventas <small className="text-secondary">RESIDENCIAL VILLA SAN JUAN</small></h6>
+                    <h6 className="card-header">Reporte de Ventas <small className="text-secondary">RESIDENCIAL VILLA SAN JUAN</small></h6>
                     <div className="card-body">
                         <div className="row">
                             <div className="col">
