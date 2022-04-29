@@ -1,13 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const {currentDate, currentTime} = require('../tools/Tools');
+const { currentDate, currentTime } = require('../tools/Tools');
 const Conexion = require('../database/Conexion');
-
 const conec = new Conexion()
 
 router.get('/list', async function (req, res) {
     try {
-        // console.log(req.query)
         let lista = await conec.query(`SELECT 
             g.idGasto, 
             u.nombres AS nombreUse, 
@@ -33,9 +31,9 @@ router.get('/list', async function (req, res) {
             GROUP BY g.idGasto
             ORDER BY g.fecha DESC, g.hora DESC
             LIMIT ?,?`, [
-            parseInt(req.query.option),
+            parseInt(req.query.opcion),
 
-            parseInt(req.query.option),
+            parseInt(req.query.opcion),
             req.query.buscar,
 
             parseInt(req.query.posicionPagina),
@@ -58,16 +56,14 @@ router.get('/list', async function (req, res) {
             ? = 0
             OR
             ? = 1 AND u.nombres LIKE CONCAT(?,'%')`, [
-            parseInt(req.query.option),
+            parseInt(req.query.opcion),
 
-            parseInt(req.query.option),
+            parseInt(req.query.opcion),
             req.query.buscar
         ]);
 
-        res.status(200).send({ "result": resultLista, "total": total[0].Total })
-
+        res.status(200).send({ "result": resultLista, "total": total[0].Total });
     } catch (error) {
-        console.log(error)
         res.status(500).send("Error interno de conexión, intente nuevamente.")
     }
 });
@@ -75,8 +71,6 @@ router.get('/list', async function (req, res) {
 router.post('/add', async function (req, res) {
     let connection = null;
     try {
-
-        console.log(req.body)
         connection = await conec.beginTransaction();
 
         let result = await conec.execute(connection, 'SELECT idGasto FROM gasto');
@@ -109,7 +103,7 @@ router.post('/add', async function (req, res) {
             idGasto, 
             idUsuario, idMoneda, idBanco, metodoPago, estado, observacion, fecha, hora) 
             VALUES(?,?,?,?,?,?,?,?,?)`, [
-            idGasto, 
+            idGasto,
             req.body.idUsuario, req.body.idMoneda, req.body.idBanco, req.body.metodoPago, req.body.estado, req.body.observacion, currentDate(), currentTime()
         ])
 
@@ -125,14 +119,12 @@ router.post('/add', async function (req, res) {
         res.status(200).send('Datos insertados correctamente')
     } catch (error) {
         if (connection != null) {
-            conec.rollback(connection);
+            await conec.rollback(connection);
         }
         res.status(500).send("Error de servidor");
         console.log(error)
     }
 });
-
-
 
 router.get('/id', async function (req, res) {
     try {
@@ -141,6 +133,7 @@ router.get('/id', async function (req, res) {
         g.idGasto,
         u.nombres AS nombreUse,
         u.apellidos AS apellidoUse,
+        m.codiso,
         m.simbolo,
         b.nombre AS nombreBanco,
         b.tipoCuenta,
@@ -179,23 +172,17 @@ router.get('/id', async function (req, res) {
                 req.query.idGasto
             ]);
 
-            // console.log(detalle)
-
             res.status(200).send({
                 "cabecera": result[0],
                 "detalle": detalle
-              
             });
         } else {
             res.status(400).send("Datos no encontrados");
         }
-
     } catch (error) {
         res.status(500).send("Error interno de conexión, intente nuevamente.");
     }
-
-})
-
+});
 
 router.delete('/anular', async function (req, res) {
     let connection = null;
@@ -213,9 +200,8 @@ router.delete('/anular', async function (req, res) {
         await conec.commit(connection);
         res.status(201).send("Se elimino la transacción correctamente.");
     } catch (error) {
-        console.log(error)
         if (connection != null) {
-            conec.rollback(connection);
+            await conec.rollback(connection);
         }
         res.status(500).send("Error interno de conexión, intente nuevamente.");
     }
@@ -231,7 +217,7 @@ router.delete('/anular', async function (req, res) {
 //             WHERE idGasto=?`, [ 
 //             req.body.conceptoGasto, req.body.fecha, currentTime(), req.body.monto, req.body.observacion, 
 //             req.body.idGasto, 
-            
+
 //         ])
 
 //         await conec.commit(connection)

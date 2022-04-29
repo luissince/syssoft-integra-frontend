@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const tools = require('../tools/Tools');
+const { currentDate, currentTime } = require('../tools/Tools');
 const Conexion = require('../database/Conexion');
 const conec = new Conexion()
 
@@ -109,8 +109,11 @@ router.post('/', async function (req, res) {
             numContratoCorrelativo, 
             numRecibocCorrelativo, 
             imagen,
-            extension) 
-            values (?, ?,?,?,?, ?,?, ?,?,?,?, ?,?,?,?,?,?,?,?)`, [
+            extension,
+            fecha,
+            hora,
+            idUsuario) 
+            values (?, ?,?,?,?, ?,?, ?,?,?,?, ?,?,?,?,?,?,?,?,?,?,?)`, [
             idProyecto,
             //datos
             req.body.nombre,
@@ -135,11 +138,13 @@ router.post('/', async function (req, res) {
             //imagen
             req.body.imagen,
             req.body.extension,
+            currentDate(),
+            currentTime(),
+            req.body.idUsuario,
         ])
 
         await conec.commit(connection);
-        res.status(200).send('Datos insertados correctamente')
-
+        res.status(200).send('Datos insertados correctamente');
     } catch (err) {
         if (connection != null) {
             await conec.rollback(connection);
@@ -171,7 +176,10 @@ router.put('/', async function (req, res) {
             numContratoCorrelativo=?, 
             numRecibocCorrelativo=?,
             imagen=?,
-            extension=? 
+            extension=?,
+            fecha=?,
+            hora=?,
+            idUsuario=?
             WHERE idProyecto=?`, [
             //datos
             req.body.nombre,
@@ -196,6 +204,9 @@ router.put('/', async function (req, res) {
             //imagen
             req.body.imagen,
             req.body.extension,
+            currentDate(),
+            currentTime(),
+            req.body.idUsuario,
             req.body.idProyecto
         ])
 
@@ -260,12 +271,22 @@ router.delete('/', async function (req, res) {
     try {
         connection = await conec.beginTransaction();
 
+        let manzana = await conec.execute(connection, `SELECT * FROM manzana WHERE idProyecto = ?`, [
+            req.query.idProyecto
+        ]);
+
+        if (manzana.length > 0) {
+            await conec.rollback(connection);
+            res.status(400).send('No se puede eliminar el proyecto ya que esta ligada a una manzana.');
+            return;
+        }
+
         await conec.execute(connection, `DELETE FROM proyecto WHERE idProyecto = ?`, [
             req.query.idProyecto
         ]);
 
-        await conec.commit(connection)
-        res.status(200).send('Se eliminó correctamente el proyecto.')
+        await conec.commit(connection);
+        res.status(200).send('Se eliminó correctamente el proyecto.');
     } catch (error) {
         if (connection != null) {
             await conec.rollback(connection);

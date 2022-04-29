@@ -1,5 +1,4 @@
 import React from 'react';
-import { connect } from 'react-redux';
 import axios from 'axios';
 import {
     keyNumberInteger,
@@ -14,6 +13,7 @@ import {
     ModalAlertWarning,
     spinnerLoading
 } from '../tools/Tools';
+import { connect } from 'react-redux';
 import Paginacion from '../tools/Paginacion';
 
 class Comprobantes extends React.Component {
@@ -28,7 +28,7 @@ class Comprobantes extends React.Component {
             numeracion: '',
             impresion: '',
             estado: true,
-            idUsuario: 0,
+            idUsuario: this.props.token.userToken.idUsuario,
 
             loadModal: false,
             nameModal: 'Nuevo Comprobante',
@@ -75,12 +75,12 @@ class Comprobantes extends React.Component {
             this.abortControllerModal.abort();
             await this.setStateAsync({
                 idComprobante: '',
+                tipo: '',
                 nombre: '',
                 serie: '',
                 numeracion: '',
                 impresion: '',
                 estado: true,
-                idUsuario: '',
 
                 loadModal: false,
                 nameModal: 'Nuevo Comprobante',
@@ -188,6 +188,7 @@ class Comprobantes extends React.Component {
 
             await this.setStateAsync({
                 idComprobante: result.data.idComprobante,
+                tipo: result.data.tipo,
                 nombre: result.data.nombre,
                 serie: result.data.serie,
                 numeracion: result.data.numeracion,
@@ -206,25 +207,28 @@ class Comprobantes extends React.Component {
     }
 
     async onEventGuardar() {
-        if (this.state.nombre === "") {
-            this.refNombre.current.focus()
+        if (this.state.tipo === "") {
+            this.refTipo.current.focus();
+        } else if (this.state.nombre === "") {
+            this.refNombre.current.focus();
         } else if (this.state.serie === "") {
-            this.refSerie.current.focus()
+            this.refSerie.current.focus();
         } else if (this.state.numeracion === "") {
-            this.refNumeracion.current.focus()
+            this.refNumeracion.current.focus();
         } else {
             try {
                 ModalAlertInfo("Comprobante", "Procesando información...");
                 hideModal("modalComprobante");
                 if (this.state.idComprobante !== "") {
                     const result = await axios.post('/api/comprobante/edit', {
-                        "idComprobante": this.state.idComprobante,
+                        "tipo": this.state.tipo,
                         "nombre": this.state.nombre.trim().toUpperCase(),
                         "serie": this.state.serie.trim().toUpperCase(),
                         "numeracion": this.state.numeracion,
                         "impresion": this.state.impresion.trim(),
                         "estado": this.state.estado,
-                        "idUsuario": this.state.idUsuario
+                        "idUsuario": this.state.idUsuario,
+                        "idComprobante": this.state.idComprobante,
                     });
 
                     ModalAlertSuccess("Comprobante", result.data, () => {
@@ -232,6 +236,7 @@ class Comprobantes extends React.Component {
                     });
                 } else {
                     const result = await axios.post('/api/comprobante/add', {
+                        "tipo": this.state.tipo,
                         "nombre": this.state.nombre.trim().toUpperCase(),
                         "serie": this.state.serie.trim().toUpperCase(),
                         "numeracion": this.state.numeracion,
@@ -244,8 +249,12 @@ class Comprobantes extends React.Component {
                         this.loadInit();
                     });
                 }
-            } catch (err) {
-                ModalAlertWarning("Comprobante", "Se produjo un error un interno, intente nuevamente.");
+            } catch (error) {
+                if (error.response !== undefined) {
+                    ModalAlertWarning("Comprobante", error.response.data)
+                } else {
+                    ModalAlertWarning("Comprobante", "Se genero un error interno, intente nuevamente.")
+                }
             }
         }
     }
@@ -254,7 +263,7 @@ class Comprobantes extends React.Component {
         ModalAlertDialog("Comprobante", "¿Estás seguro de eliminar el comprobante?", async (event) => {
             if (event) {
                 try {
-                    ModalAlertInfo("Moneda", "Procesando información...")
+                    ModalAlertInfo("Comprobante", "Procesando información...")
                     let result = await axios.delete('/api/comprobante', {
                         params: {
                             "idComprobante": idComprobante
@@ -295,7 +304,7 @@ class Comprobantes extends React.Component {
                                     : null}
 
                                 <div className="form-group">
-                                    <label htmlFor="estado">Estado</label>
+                                    <label htmlFor="estado">Tipo de Comprobante <i className="fa fa-asterisk text-danger small"></i></label>
                                     <select
                                         className="form-control"
                                         id="estado"
@@ -306,7 +315,7 @@ class Comprobantes extends React.Component {
                                         }}
                                     >
                                         <option value="">- Seleccione -</option>
-                                        <option value="1">Facturar</option>
+                                        <option value="1">Facturación</option>
                                         <option value="2">Nota de Crédito</option>
                                         <option value="3">Nota de Debito</option>
                                         <option value="4">Recibo de Caja</option>
@@ -317,10 +326,11 @@ class Comprobantes extends React.Component {
                                 </div>
 
                                 <div className="form-group">
-                                    <label htmlFor="nombre" className="col-form-label">Nombre:</label>
+                                    <label htmlFor="nombre" className="col-form-label">Nombre <i className="fa fa-asterisk text-danger small"></i></label>
                                     <input
                                         type="text"
                                         className="form-control"
+                                        placeholder="Ingresar el nombre del comprobante"
                                         id="nombre"
                                         ref={this.refNombre}
                                         value={this.state.nombre}
@@ -329,21 +339,23 @@ class Comprobantes extends React.Component {
 
                                 <div className="form-row">
                                     <div className="form-group col-md-6">
-                                        <label htmlFor="serie">Serie:</label>
+                                        <label htmlFor="serie">Serie <i className="fa fa-asterisk text-danger small"></i></label>
                                         <input
                                             type="text"
                                             className="form-control"
                                             id="serie"
+                                            placeholder={"B001, F001"}
                                             ref={this.refSerie}
                                             value={this.state.serie}
                                             onChange={(event) => this.setState({ serie: event.target.value })} />
                                     </div>
                                     <div className="form-group col-md-6">
-                                        <label htmlFor="numeracion">Numeración:</label>
+                                        <label htmlFor="numeracion">Numeración <i className="fa fa-asterisk text-danger small"></i></label>
                                         <input
                                             type="text"
                                             className="form-control"
                                             id="numeracion"
+                                            placeholder={"1, 2, 3"}
                                             ref={this.refNumeracion}
                                             value={this.state.numeracion}
                                             onChange={(event) => this.setState({ numeracion: event.target.value })}
@@ -427,6 +439,7 @@ class Comprobantes extends React.Component {
                                 <thead>
                                     <tr>
                                         <th width="5%" scope="col">#</th>
+                                        <th width="10%" scope="col">Tipo Comprobante</th>
                                         <th width="20%" scope="col">Nombre</th>
                                         <th width="15%" scope="col">Serie</th>
                                         <th width="15%" scope="col">Numeración</th>
@@ -440,19 +453,20 @@ class Comprobantes extends React.Component {
                                     {
                                         this.state.loading ? (
                                             <tr>
-                                                <td className="text-center" colSpan="8">
+                                                <td className="text-center" colSpan="9">
                                                     {spinnerLoading()}
                                                 </td>
                                             </tr>
                                         ) : this.state.lista.length === 0 ? (
                                             <tr>
-                                                <td className="text-center" colSpan="8">¡No hay comprobantes registrados!</td>
+                                                <td className="text-center" colSpan="9">¡No hay comprobantes registrados!</td>
                                             </tr>
                                         ) :
                                             this.state.lista.map((item, index) => {
                                                 return (
                                                     <tr key={index}>
                                                         <td>{item.id}</td>
+                                                        <td>{item.tipo.toUpperCase()}</td>
                                                         <td>{item.nombre}</td>
                                                         <td>{item.serie}</td>
                                                         <td>{item.numeracion}</td>
@@ -514,6 +528,5 @@ const mapStateToProps = (state) => {
         token: state.reducer
     }
 }
-
 
 export default connect(mapStateToProps, null)(Comprobantes);

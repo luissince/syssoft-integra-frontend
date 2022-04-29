@@ -1,10 +1,14 @@
 import React from 'react';
 import axios from 'axios';
 import {
+    calculateTax,
+    calculateTaxBruto,
     formatMoney,
+    numberFormat,
     keyNumberFloat,
     isNumeric,
     spinnerLoading,
+    ModalAlertDialog,
     ModalAlertInfo,
     ModalAlertSuccess,
     ModalAlertWarning,
@@ -90,11 +94,14 @@ class CobroProceso extends React.Component {
                 signal: this.abortControllerView.signal,
             });
 
+            const monedaFilter = moneda.data.filter(item => item.predeterminado === 1);
+
             await this.setStateAsync({
                 conceptos: concepto.data,
                 clientes: cliente.data,
                 cuentasBancarias: cuentaBancaria.data,
                 monedas: moneda.data,
+                idMoneda: monedaFilter.length > 0 ? monedaFilter[0].idMoneda : '',
                 impuestos: impuesto.data,
                 loading: false,
 
@@ -194,54 +201,73 @@ class CobroProceso extends React.Component {
 
     async onEventGuardar() {
         if (this.refCliente.current.value === "") {
-            this.setState({ messageWarning: "Seleccione el cliente." });
+            await this.setStateAsync({ messageWarning: "Seleccione el cliente." });
             this.refCliente.current.focus();
         } else if (this.state.idBanco === "") {
-            this.setState({ messageWarning: "Seleccione el banco a depositar." })
+            await this.setStateAsync({ messageWarning: "Seleccione el banco a depositar." })
             this.refCuentaBancaria.current.focus();
         } else if (this.state.metodoPago === "") {
-            this.setState({ messageWarning: "Seleccione el metodo de pago." })
+            await this.setStateAsync({ messageWarning: "Seleccione el metodo de pago." })
             this.refMetodoPago.current.focus();
         } else if (this.state.idMoneda === "") {
-            this.setState({ messageWarning: "Seleccione un moneda." })
+            await this.setStateAsync({ messageWarning: "Seleccione un moneda." })
             this.refMoneda.current.focus();
-        } else if (this.state.idLote === "") {
-            this.setState({ messageWarning: "Seleccione un lote del cliente." })
-            this.refLote.current.focus()
         } else if (this.state.detalleConcepto.length <= 0) {
-            this.setState({ messageWarning: "Agregar datos a la tabla." })
+            await this.setStateAsync({ messageWarning: "Agregar datos a la tabla." })
             this.refConcepto.current.focus()
         } else {
-            try {
-                ModalAlertInfo("Cobro", "Procesando información...");
 
-                let result = await axios.post('/api/cobro/add', {
-                    //concepto
-                    "idCliente": this.state.idCliente,
-                    "idUsuario": this.state.idUsuario,
-                    'idMoneda': this.state.idMoneda,
-                    "idBanco": this.state.idBanco,
-                    "idProcedencia": this.state.idLote,
-                    "metodoPago": this.state.metodoPago,
-                    "estado": 1,
-                    "observacion": this.state.observacion.trim().toUpperCase(),
-                    "cobroDetalle": this.state.detalleConcepto
-                });
+            let validate = this.state.detalleConcepto.reduce((acumulador, item) =>
+                item.idImpuesto === "" ? acumulador + 1 : acumulador + 0
+                , 0);
 
-                ModalAlertSuccess("Cobro", result.data, () => {
-                    this.onEventLimpiar()
-                });
-
-            } catch (error) {
-                if (error.response !== undefined) {
-                    ModalAlertWarning("Cobro", error.response.data)
-                } else {
-                    ModalAlertWarning("Cobro", "Se genero un error interno, intente nuevamente.")
+            if (validate > 0) {
+                await this.setStateAsync({ messageWarning: "Hay detalles en la tabla sin impuesto seleccionado." });
+                let count = 0;
+                for (let item of this.state.detalleConcepto) {
+                    count++;
+                    if (item.idImpuesto === "") {
+                        document.getElementById(count + "imc").focus()
+                    }
                 }
+                return;
+            } else {
+                await this.setStateAsync({ messageWarning: "" });
             }
+
+            ModalAlertDialog("Cobro", "¿Estás seguro de continuar?", async (event) => {
+                if (event) {
+                    try {
+                        ModalAlertInfo("Cobro", "Procesando información...");
+
+                        let result = await axios.post('/api/cobro/add', {
+                            //concepto
+                            "idCliente": this.state.idCliente,
+                            "idUsuario": this.state.idUsuario,
+                            'idMoneda': this.state.idMoneda,
+                            "idBanco": this.state.idBanco,
+                            "idProcedencia": this.state.idLote,
+                            "metodoPago": this.state.metodoPago,
+                            "estado": 1,
+                            "observacion": this.state.observacion.trim().toUpperCase(),
+                            "cobroDetalle": this.state.detalleConcepto
+                        });
+
+                        ModalAlertSuccess("Cobro", result.data, () => {
+                            this.onEventLimpiar()
+                        });
+
+                    } catch (error) {
+                        if (error.response !== undefined) {
+                            ModalAlertWarning("Cobro", error.response.data)
+                        } else {
+                            ModalAlertWarning("Cobro", "Se genero un error interno, intente nuevamente.")
+                        }
+                    }
+                }
+            });
         }
     }
-
 
     async onEventLimpiar() {
         await this.setStateAsync({
@@ -272,8 +298,7 @@ class CobroProceso extends React.Component {
         this.loadData();
     }
 
-    renderTotal() {
-
+    calcularTotales() {
         let subTotal = 0;
         let impuestoTotal = 0;
         let total = 0;
@@ -286,26 +311,38 @@ class CobroProceso extends React.Component {
             )
             let impuesto = filter.length > 0 ? filter[0].porcentaje : 0;
 
-            subTotal += cantidad * valor;
-            impuestoTotal += (cantidad * valor) * (impuesto / 100);
-            total += (cantidad * valor) + ((cantidad * valor) * (impuesto / 100));
+            let valorActual = cantidad * valor;
+            let valorSubNeto = calculateTaxBruto(impuesto, valorActual);
+            let valorImpuesto = calculateTax(impuesto, valorSubNeto);
+            let valorNeto = valorSubNeto + valorImpuesto;
+
+            subTotal += valorSubNeto;
+            impuestoTotal += valorImpuesto;
+            total += valorNeto;
         }
+        return { subTotal, impuestoTotal, total }
+    }
+
+    renderTotal() {
+        const { subTotal, impuestoTotal, total } = this.calcularTotales();
+        let moneda = this.state.monedas.filter(item => item.idMoneda === this.state.idMoneda);
+        let codigo = moneda.length > 0 ? moneda[0].codiso : "PEN";
 
         return (
             <>
                 <tr>
                     <td className="text-left">Sub Total:</td>
-                    <td className="text-right">{formatMoney(subTotal)}</td>
+                    <td className="text-right">{numberFormat(subTotal, codigo)}</td>
                 </tr>
                 <tr>
                     <td className="text-left">Impuesto:</td>
-                    <td className="text-right">{formatMoney(impuestoTotal)}</td>
+                    <td className="text-right">{numberFormat(impuestoTotal, codigo)}</td>
                 </tr>
                 <tr className="border-bottom">
                 </tr>
                 <tr>
                     <td className="text-left h4">Total:</td>
-                    <td className="text-right h4">{formatMoney(total)}</td>
+                    <td className="text-right h4">{numberFormat(total, codigo)}</td>
                 </tr>
             </>
         )
@@ -323,9 +360,7 @@ class CobroProceso extends React.Component {
         await this.setStateAsync({ detalleConcepto: updatedList })
     }
 
-
     loadLoteCliente = async (id) => {
-        // console.log(this.state.idLote)
         try {
             await this.setStateAsync({ loading: true, lotes: [], idLote: '' })
 
@@ -340,11 +375,7 @@ class CobroProceso extends React.Component {
                 lotes: lote.data,
                 loading: false
             });
-
-            // console.log(this.state.lotes)
-
         } catch (error) {
-            console.log(error)
             if (error.message !== "canceled") {
                 await this.setStateAsync({
                     msgLoading: "Se produjo un error interno, intente nuevamente.",
@@ -352,8 +383,6 @@ class CobroProceso extends React.Component {
                 });
             }
         }
-
-
     }
 
     render() {
@@ -476,6 +505,7 @@ class CobroProceso extends React.Component {
                                                         <td>{formatMoney(item.cantidad)}</td>
                                                         <td>
                                                             <select className="form-control"
+                                                                id={index + "imc"}
                                                                 value={item.idImpuesto}
                                                                 onChange={(event) => this.handleSelect(event, item.idConcepto)}>
                                                                 <option value="">- Seleccione -</option>
@@ -581,7 +611,7 @@ class CobroProceso extends React.Component {
                                     <option value="">-- Cuenta bancaria --</option>
                                     {
                                         this.state.cuentasBancarias.map((item, index) => (
-                                            <option key={index} value={item.idBanco}>{item.nombre + " - " + item.tipoCuenta}</option>
+                                            <option key={index} value={item.idBanco}>{item.nombre}</option>
                                         ))
                                     }
                                 </select>

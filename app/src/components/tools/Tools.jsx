@@ -34,6 +34,46 @@ export function formatMoney(
   }
 }
 
+export const numberFormat = (value, currency = "PEN") => {
+  let formats = [
+    {
+      locales: "es-PE",
+      options: {
+        style: "currency",
+        currency: "PEN",
+        minimumFractionDigits: 2,
+      },
+    },
+    {
+      locales: "en-US",
+      options: {
+        style: "currency",
+        currency: "USD",
+        minimumFractionDigits: 2,
+      },
+    },
+    {
+      locales: "de-DE",
+      options: {
+        style: "currency",
+        currency: "EUR",
+        minimumFractionDigits: 2,
+      },
+    },
+  ];
+
+  let newFormat = formats.filter((item) => currency === item.options.currency);
+  if (newFormat.length > 0) {
+    var formatter = new Intl.NumberFormat(newFormat[0].locales, {
+      style: newFormat[0].options.style,
+      currency: newFormat[0].options.currency,
+    });
+    return formatter.format(value);
+  } else {
+    return 0;
+  }
+};
+
 export function currentDate() {
   let date = new Date();
   let formatted_date =

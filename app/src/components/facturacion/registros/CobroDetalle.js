@@ -2,6 +2,9 @@ import React from 'react';
 import axios from 'axios';
 import {
     formatMoney,
+    numberFormat,
+    calculateTaxBruto,
+    calculateTax,
     timeForma24,
     spinnerLoading,
 } from '../../tools/Tools';
@@ -18,6 +21,8 @@ class CobroDetalle extends React.Component {
             notas: '',
             metodoPago: '',
             total: '',
+            codiso: '',
+            simbolo: '',
 
             cobro: true,
             detalle: [],
@@ -72,7 +77,9 @@ class CobroDetalle extends React.Component {
                             : cabecera.metodoPago === 4 ? "Cheque"
                                 : cabecera.metodoPago === 5 ? "arjeta crédito"
                                     : "Tarjeta débito",
-                total: cabecera.simbolo + " " + formatMoney(cabecera.monto),
+                total: cabecera.monto,
+                simbolo: cabecera.simbolo,
+                codiso: cabecera.codiso,
 
                 cobro: result.data.detalle.length !== 0 ? true : false,
                 detalle: result.data.detalle.length !== 0 ? result.data.detalle : result.data.venta,
@@ -88,45 +95,44 @@ class CobroDetalle extends React.Component {
 
 
     renderTotal() {
-        if (this.state.cobro) {
-            let subTotal = 0;
-            let impuestoTotal = 0;
-            let total = 0;
+        let subTotal = 0;
+        let impuestoTotal = 0;
+        let total = 0;
 
-            for (let item of this.state.detalle) {
-                let cantidad = item.cantidad;
-                let valor = item.precio;
-                let impuesto = item.porcentaje;
+        for (let item of this.state.detalle) {
+            let cantidad = item.cantidad;
+            let valor = item.precio;
 
-                subTotal += cantidad * valor;
-                impuestoTotal += (cantidad * valor) * (impuesto / 100);
-                total += (cantidad * valor) + ((cantidad * valor) * (impuesto / 100));
-            }
+            let impuesto = item.porcentaje;
 
-            return (
-                <>
-                    <tr>
-                        <th className="text-right">Sub Total:</th>
-                        <th className="text-right">{formatMoney(subTotal)}</th>
-                    </tr>
-                    <tr>
-                        <th className="text-right">Impuesto:</th>
-                        <th className="text-right">{formatMoney(impuestoTotal)}</th>
-                    </tr>
-                    <tr className="border-bottom">
-                    </tr>
-                    <tr>
-                        <th className="text-right h5">Total:</th>
-                        <th className="text-right h5">{formatMoney(total)}</th>
-                    </tr>
-                </>
-            )
-        } else {
-            return (
-                <>
-                </>
-            )
+            let valorActual = cantidad * valor;
+            let valorSubNeto = calculateTaxBruto(impuesto, valorActual);
+            let valorImpuesto = calculateTax(impuesto, valorSubNeto);
+            let valorNeto = valorSubNeto + valorImpuesto;
+
+            subTotal += valorSubNeto;
+            impuestoTotal += valorImpuesto;
+            total += valorNeto;
         }
+
+        return (
+            <>
+                <tr>
+                    <th className="text-right">Sub Total:</th>
+                    <th className="text-right">{numberFormat(subTotal, this.state.codiso)}</th>
+                </tr>
+                <tr>
+                    <th className="text-right">Impuesto:</th>
+                    <th className="text-right">{numberFormat(impuestoTotal, this.state.codiso)}</th>
+                </tr>
+                <tr className="border-bottom">
+                </tr>
+                <tr>
+                    <th className="text-right h5">Total:</th>
+                    <th className="text-right h5">{numberFormat(total, this.state.codiso)}</th>
+                </tr>
+            </>
+        )
     }
 
     render() {
@@ -174,10 +180,10 @@ class CobroDetalle extends React.Component {
                                             <th className="table-secondary w-25 p-1 font-weight-normal "><span>Recibo de caja</span></th>
                                             <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal"></th>
                                         </tr>
-                                        <tr>
+                                        {/* <tr>
                                             <th className="table-secondary w-25 p-1 font-weight-normal ">Estado</th>
                                             <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal"></th>
-                                        </tr>
+                                        </tr> */}
                                         <tr>
                                             <th className="table-secondary w-25 p-1 font-weight-normal ">Cliente</th>
                                             <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">{this.state.cliente}</th>
@@ -200,7 +206,7 @@ class CobroDetalle extends React.Component {
                                         </tr>
                                         <tr>
                                             <th className="table-secondary w-25 p-1 font-weight-normal ">Total</th>
-                                            <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">{this.state.total}</th>
+                                            <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">{numberFormat(this.state.total, this.state.codiso)}</th>
                                         </tr>
                                         <tr>
                                             <th className="table-secondary w-25 p-1 font-weight-normal ">Archivos adjuntos</th>
@@ -250,8 +256,8 @@ class CobroDetalle extends React.Component {
                                                         <td>{item.concepto}</td>
                                                         <td className="text-right">{formatMoney(item.cantidad)}</td>
                                                         <td className="text-right">{item.impuesto}</td>
-                                                        <td className="text-right">{formatMoney(item.precio)}</td>
-                                                        <td className="text-right">{formatMoney(item.cantidad * item.precio)}</td>
+                                                        <td className="text-right">{numberFormat(item.precio, this.state.codiso)}</td>
+                                                        <td className="text-right">{numberFormat(item.cantidad * item.precio, this.state.codiso)}</td>
                                                     </tr>
                                                 ))
                                                 :
@@ -259,10 +265,10 @@ class CobroDetalle extends React.Component {
                                                     <tr key={index}>
                                                         <td>{++index}</td>
                                                         <td>{item.comprobante + ": " + item.serie + "-" + item.numeracion}</td>
-                                                        <td className="text-right">{formatMoney(item.total)}</td>
-                                                        <td className="text-right">{formatMoney(item.cobrado)}</td>
-                                                        <td className="text-right">{formatMoney(item.total - item.cobrado)}</td>
-                                                        <td className="text-right">{formatMoney(item.precio)}</td>
+                                                        <td className="text-right">{numberFormat(item.total, this.state.codiso)}</td>
+                                                        <td className="text-right">{numberFormat(item.cobrado, this.state.codiso)}</td>
+                                                        <td className="text-right">{numberFormat(item.total - item.cobrado, this.state.codiso)}</td>
+                                                        <td className="text-right">{numberFormat(item.precio, this.state.codiso)}</td>
                                                     </tr>
                                                 ))
                                         }

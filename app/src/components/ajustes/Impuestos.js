@@ -8,6 +8,7 @@ import {
     hideModal,
     viewModal,
     clearModal,
+    ModalAlertDialog,
     ModalAlertInfo,
     ModalAlertSuccess,
     ModalAlertWarning,
@@ -242,6 +243,30 @@ class Impuestos extends React.Component {
         }
     }
 
+    onEventDelete(idImpuesto) {
+        ModalAlertDialog("Impuesto", "¿Estás seguro de eliminar la moneda?", async (event) => {
+            if (event) {
+                try {
+                    ModalAlertInfo("Impuesto", "Procesando información...")
+                    let result = await axios.delete('/api/impuesto', {
+                        params: {
+                            "idImpuesto": idImpuesto
+                        }
+                    })
+                    ModalAlertSuccess("Impuesto", result.data, () => {
+                        this.loadInit();
+                    })
+                } catch (error) {
+                    if (error.response !== undefined) {
+                        ModalAlertWarning("Impuesto", error.response.data)
+                    } else {
+                        ModalAlertWarning("Impuesto", "Se genero un error interno, intente nuevamente.")
+                    }
+                }
+            }
+        })
+    }
+
     render() {
         return (
             <>
@@ -404,8 +429,22 @@ class Impuestos extends React.Component {
                                                         <td>{item.porcentaje + "%"}</td>
                                                         <td>{item.codigo}</td>
                                                         <td className="text-center"><div className={`badge ${item.estado === 1 ? "badge-info" : "badge-danger"}`}>{item.estado === 1 ? "ACTIVO" : "INACTIVO"}</div></td>
-                                                        <td><button className="btn btn-outline-warning btn-sm" title="Editar" onClick={() => this.openModal(item.idImpuesto)}><i className="bi bi-pencil"></i> </button></td>
-                                                        <td><button className="btn btn-outline-danger btn-sm" title="Anular"><i className="bi bi-trash"></i></button></td>
+                                                        <td>
+                                                            <button
+                                                                className="btn btn-outline-warning btn-sm"
+                                                                title="Editar"
+                                                                onClick={() => this.openModal(item.idImpuesto)}>
+                                                                <i className="bi bi-pencil"></i>
+                                                            </button>
+                                                        </td>
+                                                        <td>
+                                                            <button
+                                                                className="btn btn-outline-danger btn-sm"
+                                                                title="Anular"
+                                                                onClick={() => this.onEventDelete(item.idImpuesto)}>
+                                                                <i className="bi bi-trash"></i>
+                                                            </button>
+                                                        </td>
                                                     </tr>
                                                 )
                                             })
