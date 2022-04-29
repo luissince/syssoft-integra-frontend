@@ -36,6 +36,7 @@ import Accesos from '../seguridad/Accesos'
 import Conceptos from '../tesoreria/Conceptos'
 import Gastos from '../tesoreria/Gastos'
 import RepVentas from '../reporte/RepVentas';
+import RepFinanciero from '../reporte/RepFinanciero';
 
 const Page404 = (props) => {
     return (
@@ -245,6 +246,10 @@ class Inicio extends React.Component {
                         <Route
                             path={`${path}/repventas`}
                             render={(props) => <RepVentas {...props} />}
+                        />
+                        <Route
+                            path={`${path}/repfinanciero`}
+                            render={(props) => <RepFinanciero {...props} />}
                         />
                         <Route component={Page404} />
                     </Switch>
