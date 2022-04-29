@@ -325,13 +325,17 @@ router.get('/report/cuotas', async function (req, res) {
     const table1 = {
         //title: "CRONOGRAMA DE PAGOS MENSUALES VENTA AL CRÉDITO",
         //subtitle: "",
-        headers: ["#", "TRANSACCIÓN", "CONCEPTO", "FECHA PAGO", "IMPORTE"],
+        headers: ["#", "FECHA DE PAGO", "MONTO RESTANTE", "CUOTA MENSUAL"],
         rows: [
-            ["1", "N° 2736 VENTAS", "INGRESO DEL COMPROBANTE B001-4102", "23/04/2022 08:09:47", "220.00"]
+            ["1", "28-04-2022 08:09:47", "S/ 15000", "S/ 500"]
         ],
     };
 
     doc.table(table1, {
+        prepareHeader: () => doc.font("Helvetica-Bold").fontSize(11),
+        prepareRow: () => {
+            doc.font("Helvetica").fontSize(10);
+        },
         width: doc.page.width - doc.options.margins.left - doc.options.margins.right,
         x: orgX,
         y: doc.y + 10,
@@ -691,9 +695,9 @@ router.get('/report/gastos', async function (req, res) {
         .stop(1, '#eeeeee');
 
     doc.rect(
-        orgX + (tercioX*2), 
-        footerY, 
-        tercioX, 
+        orgX + (tercioX * 2),
+        footerY,
+        tercioX,
         28);
     doc.fill(grad);
 
@@ -810,9 +814,9 @@ router.get('/report/cobros', async function (req, res) {
         .stop(1, '#eeeeee');
 
     doc.rect(
-        orgX + (tercioX*2), 
-        footerY, 
-        tercioX, 
+        orgX + (tercioX * 2),
+        footerY,
+        tercioX,
         28);
     doc.fill(grad);
 
@@ -864,7 +868,7 @@ router.get('/report/conceptos', async function (req, res) {
             req.body.option, req.query.idUsuario, req.query.idConcepto, req.body.conceptoCobro, req.query.idConcepto, req.body.conceptoGasto
         ]);
 
-    }catch (err) {
+    } catch (err) {
         res.status(500).send("Error interno de conexión, intente nuevamente.")
     }
 
@@ -967,9 +971,9 @@ router.get('/report/conceptos', async function (req, res) {
         .stop(1, '#eeeeee');
 
     doc.rect(
-        orgX + (tercioX*2), 
-        footerY, 
-        tercioX, 
+        orgX + (tercioX * 2),
+        footerY,
+        tercioX,
         28);
     doc.fill(grad);
 
