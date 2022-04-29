@@ -210,6 +210,32 @@ class CreditoProceso extends React.Component {
         })
     }
 
+    async onEventImprimir(){
+
+        //Despliegue 
+        window.open("/api/factura/repcreditolote?idSede=SD0001&idVenta="+this.state.venta.idVenta+"&proyecto="+this.props.token.project.nombre, "_blank");
+
+        //Desarrollo
+        // try {
+            
+        //     let result = await axios.get("/api/factura/repcreditolote", {
+        //         responseType: "blob",
+        //         params: {
+        //             "idSede": 'SD0001',
+        //             "idVenta": idVenta,
+        //              "proyecto": this.props.token.project.nombre,
+        //         }
+        //     });
+
+        //     const file = new Blob([result.data], { type: "application/pdf" });
+        //     const fileURL = URL.createObjectURL(file);
+        //     window.open(fileURL, "_blank");
+
+        // } catch (error) {
+        //     console.log(error)
+        // }
+    }
+
     render() {
         const {
             documento,
@@ -351,7 +377,7 @@ class CreditoProceso extends React.Component {
                         <div className="form-group">
                             <button type="button" className="btn btn-success" onClick={() => this.onEventOpenModal()}><i className="fa fa-save"></i> Cobrar</button>
                             {" "}
-                            <button type="button" className="btn btn-light" onClick={() => { }}><i className="fa fa-print"></i> Imprimir</button>
+                            <button type="button" className="btn btn-light" onClick={() => this.onEventImprimir()}><i className="fa fa-print"></i> Imprimir</button>
                             {" "}
                             <button type="button" className="btn btn-light"><i className="fa fa-file-archive-o"></i> Adjuntar</button>
                         </div>
@@ -374,7 +400,7 @@ class CreditoProceso extends React.Component {
                             <div className="pt-1 pb-1">N° de Cuotas: <strong>{numCuota === 1 ? numCuota + " Cuota" : numCuota + " Cuotas"}</strong></div>
                             <div className="pt-1 pb-1">Monto Total: <strong>{simbolo + " " + formatMoney(total)}</strong></div>
                             <div className="pt-1 pb-1">Monto Cobrado: <span className="text-success">{simbolo + " " + formatMoney(cobrado)}</span></div>
-                            <div className="pt-1 pb-1">Monto Diferencia: <span className="text-danger">{simbolo + " " + formatMoney(total - cobrado)}</span></div>
+                            <div className="pt-1 pb-1">Monto Restante: <span className="text-danger">{simbolo + " " + formatMoney(total - cobrado)}</span></div>
                         </div>
                     </div>
                 </div>

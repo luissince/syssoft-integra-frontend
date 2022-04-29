@@ -258,19 +258,20 @@ router.get('/report/cuotas', async function (req, res) {
 
     let orgX = doc.x;
     let orgY = doc.y;
+    let cabeceraY = orgY + 80;
+    let bodY = cabeceraY + 100;
+    let titleX = orgX + 150;
+    let medioX = (doc.page.width - doc.options.margins.left - doc.options.margins.right) / 2;
 
     let h1 = 14;
     let h2 = 12;
     let h3 = 10;
-    let h4 = 8;
 
-    doc.image(path.join(__dirname, "..", "path/to/ehil.png"), doc.x, doc.y, { width: 50, });
-
-    let postImgY = doc.y;
+    doc.image(path.join(__dirname, "..", "path/to/logo.png"), orgX, orgY, { width: 75, });
 
     doc.fontSize(h1).text(
         "EMPRESA INMOBILIARIA DEMO SAC",
-        orgX + 150,
+        titleX,
         orgY,
         {
             width: 250,
@@ -278,44 +279,51 @@ router.get('/report/cuotas', async function (req, res) {
         }
     );
 
-    let titX = doc.x;
-
     doc.fontSize(h3).text(
         "RUC: 20151615314\nJR. LIMA 1465 - PUNTA HERMOSA\nTeléfono: 54574355",
-        doc.x,
-        doc.y,
+        titleX,
+        orgY + 15,
         {
             width: 250,
             align: "center",
         }
     );
 
-    doc.fontSize(h2).text(
+    doc.fontSize(11).text(
         "RESIDENCIAL VILLA SAN JUAN",
-        titX,
-        postImgY + 10,
+        orgX,
+        cabeceraY,
         {
             width: 250,
-            align: "center",
+            align: "left",
         }
     );
 
-    /* doc.fontSize(h2).text(
-        "Cliente:",
-        doc.x,
-        doc.y
-    ); */
+    doc.rect(
+        orgX, // EJE X
+        cabeceraY + 20, // EJE Y
+        doc.page.width - doc.options.margins.left - doc.options.margins.right, // ANCHO
+        60).fillAndStroke('#F2F4F4', '#3498DB'); // ALTO
+
+    // reset 
+    doc.fill('#000').stroke('#000');
 
     doc.fontSize(h2).text(
-        "Cliente:\nLote:\nCrédito:\nN° Cuotas:",
-        orgX,
-        doc.y + 5
+        `Cliente: -\nLote: -\nCrédito: -\nN° Cuotas: -`,
+        orgX + 5,
+        cabeceraY + 25
     );
 
     doc.fontSize(h2).text(
+        `DNI/RUC: -\nArea: -\nInicial: -\nTotal venta: -`,
+        medioX + 5,
+        cabeceraY + 25
+    );
+
+    doc.fontSize(11).text(
         "CRONOGRAMA DE PAGOS MENSUALES VENTA AL CRÉDITO",
-        titX,
-        doc.y + 5,
+        titleX,
+        bodY,
         {
             width: 250,
             align: "center",
@@ -323,8 +331,8 @@ router.get('/report/cuotas', async function (req, res) {
     );
 
     const table1 = {
-        //title: "CRONOGRAMA DE PAGOS MENSUALES VENTA AL CRÉDITO",
-        //subtitle: "",
+        // title: "CRONOGRAMA DE PAGOS MENSUALES VENTA AL CRÉDITO",
+        // subtitle: "CRONOGRAMA DE PAGOS MENSUALES VENTA AL CRÉDITO",
         headers: ["#", "FECHA DE PAGO", "MONTO RESTANTE", "CUOTA MENSUAL"],
         rows: [
             ["1", "28-04-2022 08:09:47", "S/ 15000", "S/ 500"]
@@ -334,11 +342,11 @@ router.get('/report/cuotas', async function (req, res) {
     doc.table(table1, {
         prepareHeader: () => doc.font("Helvetica-Bold").fontSize(11),
         prepareRow: () => {
-            doc.font("Helvetica").fontSize(10);
+            doc.font("Helvetica").fontSize(h3);
         },
         width: doc.page.width - doc.options.margins.left - doc.options.margins.right,
         x: orgX,
-        y: doc.y + 10,
+        y: bodY + 40,
     });
 
     doc.end();
@@ -706,9 +714,6 @@ router.get('/report/gastos', async function (req, res) {
     //     footerY, // EJE Y
     //     tercioX, // ANCHO
     //     30).stroke(); // ALTO
-
-
-
 
     doc.fontSize(11).fillColor('#0b5394').text(
         `TOTAL: S/ 20.00`,
