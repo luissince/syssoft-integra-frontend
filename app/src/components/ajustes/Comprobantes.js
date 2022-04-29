@@ -249,8 +249,12 @@ class Comprobantes extends React.Component {
                         this.loadInit();
                     });
                 }
-            } catch (err) {
-                ModalAlertWarning("Comprobante", "Se produjo un error un interno, intente nuevamente.");
+            } catch (error) {
+                if (error.response !== undefined) {
+                    ModalAlertWarning("Comprobante", error.response.data)
+                } else {
+                    ModalAlertWarning("Comprobante", "Se genero un error interno, intente nuevamente.")
+                }
             }
         }
     }
@@ -259,7 +263,7 @@ class Comprobantes extends React.Component {
         ModalAlertDialog("Comprobante", "¿Estás seguro de eliminar el comprobante?", async (event) => {
             if (event) {
                 try {
-                    ModalAlertInfo("Moneda", "Procesando información...")
+                    ModalAlertInfo("Comprobante", "Procesando información...")
                     let result = await axios.delete('/api/comprobante', {
                         params: {
                             "idComprobante": idComprobante

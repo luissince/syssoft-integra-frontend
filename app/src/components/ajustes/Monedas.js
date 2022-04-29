@@ -207,7 +207,6 @@ class Monedas extends React.Component {
             this.estado.current.focus();
         } else {
             try {
-
                 ModalAlertInfo("Moneda", "Procesando información...");
                 hideModal("modalMoneda");
 
@@ -237,7 +236,11 @@ class Monedas extends React.Component {
                     });
                 }
             } catch (error) {
-                ModalAlertWarning("Moneda", "Se produjo un error un interno, intente nuevamente.");
+                if (error.response !== undefined) {
+                    ModalAlertWarning("Moneda", error.response.data)
+                } else {
+                    ModalAlertWarning("Moneda", "Se genero un error interno, intente nuevamente.")
+                }
             }
         }
     }

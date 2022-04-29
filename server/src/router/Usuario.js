@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
-const tools = require('../tools/Tools');
+const { currentDate, currentTime } = require('../tools/Tools');
 const Conexion = require('../database/Conexion');
 
 const conec = new Conexion()
@@ -74,10 +74,8 @@ router.get('/list', async function (req, res) {
             req.query.buscar,
         ]);
 
-        res.status(200).send({ "result": resultLista, "total": total[0].Total })
-
+        res.status(200).send({ "result": resultLista, "total": total[0].Total });
     } catch (error) {
-        console.log(error)
         res.status(500).send("Error interno de conexión, intente nuevamente.")
     }
 });
@@ -122,7 +120,7 @@ router.post('/add', async function (req, res) {
         ]);
 
         if (usuario.length > 0) {
-            conec.rollback(connection);
+            await conec.rollback(connection);
             res.status(400).send("Hay un usuario con el mismo valor.");
             return;
         }
@@ -141,8 +139,10 @@ router.post('/add', async function (req, res) {
             representante, 
             estado, 
             usuario, 
-            clave) 
-            VALUES(?, ?,?,?,?,?,?,?, ?,?,?,?,?,?)`, [
+            clave,
+            fecha,
+            hora) 
+            VALUES(?, ?,?,?,?,?,?,?, ?,?,?,?,?,?,?,?)`, [
             idUsuario,
             req.body.nombres,
             req.body.apellidos,
@@ -156,17 +156,18 @@ router.post('/add', async function (req, res) {
             req.body.representante,
             req.body.estado,
             req.body.usuario,
-            hash
+            hash,
+            currentDate(),
+            currentTime(),
         ])
 
         await conec.commit(connection);
         res.status(200).send('Datos insertados correctamente')
     } catch (error) {
         if (connection != null) {
-            conec.rollback(connection);
+            await conec.rollback(connection);
         }
         res.status(500).send("Error de servidor");
-        console.log(error)
     }
 });
 
@@ -183,7 +184,7 @@ router.post('/update', async function (req, res) {
         ]);
 
         if (usuario.length > 0) {
-            conec.rollback(connection);
+            await conec.rollback(connection);
             res.status(400).send("Hay un usuario con el mismo valor.");
             return;
         }
@@ -200,7 +201,9 @@ router.post('/update', async function (req, res) {
             idPerfil=?, 
             representante=?, 
             estado=?, 
-            usuario=?
+            usuario=?,
+            fecha=?,
+            hora=?,
             WHERE idUsuario=?`, [
             req.body.nombres,
             req.body.apellidos,
@@ -214,6 +217,8 @@ router.post('/update', async function (req, res) {
             req.body.representante,
             req.body.estado,
             req.body.usuario,
+            currentDate(),
+            currentTime(),
             req.body.idUsuario
         ])
 
@@ -221,7 +226,7 @@ router.post('/update', async function (req, res) {
         res.status(200).send('Los datos se actualizaron correctamente.')
     } catch (error) {
         if (connection != null) {
-            conec.rollback(connection);
+            await conec.rollback(connection);
         }
         res.status(500).send("Se produjo un error de servidor, intente nuevamente.");
     }
@@ -246,7 +251,7 @@ router.post('/reset', async function (req, res) {
         res.status(200).send('Se actualizó la contraseña correctamente.')
     } catch (error) {
         if (connection != null) {
-            conec.rollback(connection);
+            await conec.rollback(connection);
         }
         res.status(500).send("Se produjo un error de servidor, intente nuevamente.");
     }
@@ -254,7 +259,6 @@ router.post('/reset', async function (req, res) {
 
 router.get('/id', async function (req, res) {
     try {
-
         let result = await conec.query('SELECT * FROM usuario WHERE idUsuario  = ?', [
             req.query.idUsuario
         ]);
@@ -266,10 +270,8 @@ router.get('/id', async function (req, res) {
         }
 
     } catch (error) {
-        console.log(error)
         res.status(500).send("Error interno de conexión, intente nuevamente.");
     }
-
 });
 
 

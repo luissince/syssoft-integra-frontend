@@ -2,6 +2,9 @@ import React from 'react';
 import axios from 'axios';
 import {
     formatMoney,
+    numberFormat,
+    calculateTaxBruto,
+    calculateTax,
     timeForma24,
     spinnerLoading,
 } from '../../tools/Tools';
@@ -17,6 +20,7 @@ class VentaDetalle extends React.Component {
             notas: '',
             formaVenta: '',
             estado: '',
+            codiso: '',
             simbolo: '',
             total: '',
 
@@ -68,6 +72,7 @@ class VentaDetalle extends React.Component {
                 formaVenta: cabecera.tipo === 1 ? "Contado" : "Crédito",
                 estado: cabecera.estado,
                 simbolo: cabecera.simbolo,
+                codiso: cabecera.codiso,
                 total: formatMoney(cabecera.monto),
                 detalle: result.data.detalle,
 
@@ -81,7 +86,6 @@ class VentaDetalle extends React.Component {
         }
     }
 
-
     renderTotal() {
         let subTotal = 0;
         let impuestoTotal = 0;
@@ -90,28 +94,34 @@ class VentaDetalle extends React.Component {
         for (let item of this.state.detalle) {
             let cantidad = item.cantidad;
             let valor = item.precio;
+
             let impuesto = item.porcentaje;
 
-            subTotal += cantidad * valor;
-            impuestoTotal += (cantidad * valor) * (impuesto / 100);
-            total += (cantidad * valor) + ((cantidad * valor) * (impuesto / 100));
+            let valorActual = cantidad * valor;
+            let valorSubNeto = calculateTaxBruto(impuesto, valorActual);
+            let valorImpuesto = calculateTax(impuesto, valorSubNeto);
+            let valorNeto = valorSubNeto + valorImpuesto;
+
+            subTotal += valorSubNeto;
+            impuestoTotal += valorImpuesto;
+            total += valorNeto;
         }
 
         return (
             <>
                 <tr>
                     <th className="text-right">Sub Total:</th>
-                    <th className="text-right">{this.state.simbolo + " " + formatMoney(subTotal)}</th>
+                    <th className="text-right">{numberFormat(subTotal, this.state.codiso)}</th>
                 </tr>
                 <tr>
                     <th className="text-right">Impuesto:</th>
-                    <th className="text-right">{this.state.simbolo + " " + formatMoney(impuestoTotal)}</th>
+                    <th className="text-right">{numberFormat(impuestoTotal, this.state.codiso)}</th>
                 </tr>
                 <tr className="border-bottom">
                 </tr>
                 <tr>
                     <th className="text-right h5">Total:</th>
-                    <th className="text-right h5">{this.state.simbolo + " " + formatMoney(total)}</th>
+                    <th className="text-right h5">{numberFormat(total, this.state.codiso)}</th>
                 </tr>
             </>
         )
@@ -184,7 +194,7 @@ class VentaDetalle extends React.Component {
                                         </tr>
                                         <tr>
                                             <th className="table-secondary w-25 p-1 font-weight-normal ">Total</th>
-                                            <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">{this.state.simbolo + " " + this.state.total}</th>
+                                            <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">{numberFormat(this.state.total, this.state.codiso)}</th>
                                         </tr>
                                         <tr>
                                             <th className="table-secondary w-25 p-1 font-weight-normal ">Archivos adjuntos</th>
@@ -220,8 +230,8 @@ class VentaDetalle extends React.Component {
                                                     <td>{item.lote}</td>
                                                     <td className="text-right">{formatMoney(item.cantidad)}</td>
                                                     <td className="text-right">{item.impuesto}</td>
-                                                    <td className="text-right">{this.state.simbolo + " " + formatMoney(item.precio)}</td>
-                                                    <td className="text-right">{this.state.simbolo + " " + formatMoney(item.cantidad * item.precio)}</td>
+                                                    <td className="text-right">{numberFormat(item.precio, this.state.codiso)}</td>
+                                                    <td className="text-right">{numberFormat(item.cantidad * item.precio, this.state.codiso)}</td>
                                                 </tr>
                                             ))
                                         }

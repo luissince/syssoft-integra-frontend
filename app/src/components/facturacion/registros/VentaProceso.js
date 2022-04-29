@@ -2,6 +2,7 @@ import React from 'react';
 import axios from 'axios';
 import {
     formatMoney,
+    numberFormat,
     calculateTaxBruto,
     calculateTax,
     keyNumberInteger,
@@ -12,6 +13,7 @@ import {
     viewModal,
     clearModal,
     spinnerLoading,
+    ModalAlertDialog,
     ModalAlertInfo,
     ModalAlertSuccess,
     ModalAlertWarning,
@@ -213,24 +215,19 @@ class VentaProceso extends React.Component {
 
         let newArr = [...this.state.detalleVenta];
 
-        let total = 0;
-        for (let item of newArr) {
-            let cantidad = item.cantidad;
-            let valor = parseFloat(item.precioContado);
-            let filter = item.impuestos.filter(imp =>
-                imp.idImpuesto === item.idImpuesto
-            )
-            let impuesto = filter.length > 0 ? filter[0].porcentaje : 0;
-
-            total += (cantidad * valor) + ((cantidad * valor) * (impuesto / 100));
-        }
 
         await this.setStateAsync({
             detalleVenta: newArr,
             messageWarning: '',
             precioContado: '',
+        });
+
+        const { total } = this.calcularTotales();
+
+        await this.setStateAsync({
             importeTotal: total
         });
+
         this.refLote.current.value = '';
     }
 
@@ -256,10 +253,13 @@ class VentaProceso extends React.Component {
             }
         }
 
+        await this.setStateAsync({
+            detalleVenta: newArr,
+        })
+
         const { total } = this.calcularTotales();
 
         await this.setStateAsync({
-            detalleVenta: newArr,
             importeTotal: total
         })
     }
@@ -353,21 +353,23 @@ class VentaProceso extends React.Component {
 
     renderTotal() {
         const { subTotal, impuestoTotal, total } = this.calcularTotales();
+        let moneda = this.state.monedas.filter(item => item.idMoneda === this.state.idMoneda);
+        let codigo = moneda.length > 0 ? moneda[0].codiso : "PEN";
         return (
             <>
                 <tr>
                     <td className="text-left">Sub Total:</td>
-                    <td className="text-right">{formatMoney(subTotal)}</td>
+                    <td className="text-right">{numberFormat(subTotal, codigo)}</td>
                 </tr>
                 <tr>
                     <td className="text-left">Impuesto:</td>
-                    <td className="text-right">{formatMoney(impuestoTotal)}</td>
+                    <td className="text-right">{numberFormat(impuestoTotal, codigo)}</td>
                 </tr>
                 <tr className="border-bottom">
                 </tr>
                 <tr>
                     <td className="text-left h4">Total:</td>
-                    <td className="text-right h4">{formatMoney(total)}</td>
+                    <td className="text-right h4">{numberFormat(total, codigo)}</td>
                 </tr>
             </>
         )
@@ -411,9 +413,9 @@ class VentaProceso extends React.Component {
                 }
             }
             return;
+        } else {
+            await this.setStateAsync({ messageWarning: "" });
         }
-
-        console.log(validate)
 
         showModal("modalVentaProceso")
 
@@ -460,37 +462,42 @@ class VentaProceso extends React.Component {
             return;
         }
 
-        try {
-            ModalAlertInfo("Venta", "Procesando información...");
-            hideModal("modalVentaProceso")
-            let result = await axios.post('/api/factura/add', {
-                "idCliente": this.state.idCliente,
-                "idUsuario": this.state.idUsuario,
-                "idComprobante": this.state.idComprobante,
-                "idMoneda": this.state.idMoneda,
-                "tipo": this.state.selectTipoPago ? 1 : 2,
-                "selectTipoPago": this.state.selectTipoPago,
-                "montoInicialCheck": this.state.montoInicialCheck,
-                "idBanco": this.state.selectTipoPago ? this.state.idBancoContado : this.state.montoInicialCheck ? this.state.idBancoCredito : "",
-                "metodoPago": this.state.selectTipoPago ? this.state.metodoPagoContado : this.state.montoInicialCheck ? this.state.metodoPagoCredito : "",
-                "inicial": this.state.selectTipoPago ? 0 : this.state.montoInicialCheck ? parseFloat(this.state.inicial) : 0,
-                "numCuota": this.state.selectTipoPago ? 0 : parseInt(this.state.numCuota),
-                "estado": this.state.selectTipoPago ? 1 : 2,
-                "idProyecto": this.state.idProyecto,
-                "detalleVenta": this.state.detalleVenta,
-            });
 
-            ModalAlertSuccess("Venta", result.data, () => {
-                this.onEventLimpiar()
-            });
-        }
-        catch (error) {
-            if (error.response !== undefined) {
-                ModalAlertWarning("Venta", error.response.data)
-            } else {
-                ModalAlertWarning("Venta", "Se genero un error interno, intente nuevamente.")
+        ModalAlertDialog("Venta", "¿Estás seguro de continuar?", async (event) => {
+            if (event) {
+                try {
+                    ModalAlertInfo("Venta", "Procesando información...");
+                    hideModal("modalVentaProceso")
+                    let result = await axios.post('/api/factura/add', {
+                        "idCliente": this.state.idCliente,
+                        "idUsuario": this.state.idUsuario,
+                        "idComprobante": this.state.idComprobante,
+                        "idMoneda": this.state.idMoneda,
+                        "tipo": this.state.selectTipoPago ? 1 : 2,
+                        "selectTipoPago": this.state.selectTipoPago,
+                        "montoInicialCheck": this.state.montoInicialCheck,
+                        "idBanco": this.state.selectTipoPago ? this.state.idBancoContado : this.state.montoInicialCheck ? this.state.idBancoCredito : "",
+                        "metodoPago": this.state.selectTipoPago ? this.state.metodoPagoContado : this.state.montoInicialCheck ? this.state.metodoPagoCredito : "",
+                        "inicial": this.state.selectTipoPago ? 0 : this.state.montoInicialCheck ? parseFloat(this.state.inicial) : 0,
+                        "numCuota": this.state.selectTipoPago ? 0 : parseInt(this.state.numCuota),
+                        "estado": this.state.selectTipoPago ? 1 : 2,
+                        "idProyecto": this.state.idProyecto,
+                        "detalleVenta": this.state.detalleVenta,
+                    });
+
+                    ModalAlertSuccess("Venta", result.data, () => {
+                        this.onEventLimpiar()
+                    });
+                }
+                catch (error) {
+                    if (error.response !== undefined) {
+                        ModalAlertWarning("Venta", error.response.data)
+                    } else {
+                        ModalAlertWarning("Venta", "Se genero un error interno, intente nuevamente.")
+                    }
+                }
             }
-        }
+        });
     }
 
     handleSelect = async (event, idDetalle) => {
@@ -595,7 +602,7 @@ class VentaProceso extends React.Component {
                                                                 <option value="">-- Cuenta bancaria --</option>
                                                                 {
                                                                     this.state.bancos.map((item, index) => (
-                                                                        <option key={index} value={item.idBanco}>{item.nombre + " - " + item.tipoCuenta}</option>
+                                                                        <option key={index} value={item.idBanco}>{item.nombre}</option>
                                                                     ))
                                                                 }
                                                             </select>
@@ -689,7 +696,7 @@ class VentaProceso extends React.Component {
                                                                     <option value="">-- Cuenta bancaria --</option>
                                                                     {
                                                                         this.state.bancos.map((item, index) => (
-                                                                            <option key={index} value={item.idBanco}>{item.nombre + " - " + item.tipoCuenta}</option>
+                                                                            <option key={index} value={item.idBanco}>{item.nombre}</option>
                                                                         ))
                                                                     }
                                                                 </select>

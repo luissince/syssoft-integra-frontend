@@ -344,6 +344,7 @@ router.get('/id', async function (req, res) {
 
         b.nombre as banco,
 
+        m.codiso,
         m.simbolo,
 
         IFNULL(SUM(cb.precio*cb.cantidad),SUM(cv.precio)) AS monto

@@ -91,9 +91,6 @@ class GastoProceso extends React.Component {
                 impuestos: impuesto.data,
                 loading: false,
             });
-
-            // console.log(this.state.conceptos)
-
         } catch (error) {
             if (error.message !== "canceled") {
                 await this.setStateAsync({
@@ -238,7 +235,7 @@ class GastoProceso extends React.Component {
     }
 
     async onEventGuardar() {
-        
+
         if (this.state.idBanco === "") {
             this.setState({ messageWarning: "Seleccione el banco a desembolsar." })
             this.refCuentaBancaria.current.focus();
@@ -256,7 +253,7 @@ class GastoProceso extends React.Component {
                 ModalAlertInfo("Gasto", "Procesando información...");
 
                 let result = await axios.post('/api/gasto/add', {
-                   
+
                     "idUsuario": this.state.idUsuario,
                     'idMoneda': this.state.idMoneda,
                     "idBanco": this.state.idBanco,

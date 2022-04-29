@@ -47,6 +47,8 @@ class ProcesoProyecto extends React.Component {
             imageBase64: null,
             extenBase64: null,
 
+            idUsuario: this.props.token.userToken.idUsuario,
+
             loading: true,
             msgLoading: 'Cargando datos...',
 
@@ -263,7 +265,7 @@ class ProcesoProyecto extends React.Component {
                         this.props.history.goBack();
                     });
                 } else {
-                    ModalAlertWarning("Proyecto", "La imagen subida no tiene el tamaño establecido.");
+                    ModalAlertWarning("Proyecto", "La imagen a subir no tiene el tamaño establecido.");
                 }
             } else {
                 let result = await this.saveProject("", "");
@@ -272,10 +274,10 @@ class ProcesoProyecto extends React.Component {
                 });
             }
         } catch (error) {
-            if (error.response != null) {
-                ModalAlertWarning("Proyecto", error.response.data);
+            if (error.response !== undefined) {
+                ModalAlertWarning("Proyecto", error.response.data)
             } else {
-                ModalAlertWarning("Proyecto", "Se produjo un error un interno, intente nuevamente.");
+                ModalAlertWarning("Proyecto", "Se genero un error interno, intente nuevamente.")
             }
         }
     }
@@ -306,10 +308,10 @@ class ProcesoProyecto extends React.Component {
                 //imagen
                 "imagen": image === "" ? this.state.imageBase64 == null ? "" : this.state.imageBase64 : image,
                 "extension": extension === "" ? this.state.extenBase64 == null ? "" : this.state.extenBase64 : extension,
+                "idUsuario": this.state.idUsuario,
             });
         } else {
             return await axios.put('/api/proyecto', {
-                "idProyecto": this.state.idProyecto,
                 //datos
                 "nombre": this.state.nombre.trim().toUpperCase(),
                 "idSede": this.state.idSede.trim().toUpperCase(),
@@ -333,6 +335,8 @@ class ProcesoProyecto extends React.Component {
                 //imagen
                 "imagen": image === "" ? this.state.imageBase64 == null ? "" : this.state.imageBase64 : image,
                 "extension": extension === "" ? this.state.extenBase64 == null ? "" : this.state.extenBase64 : extension,
+                "idUsuario": this.state.idUsuario,
+                "idProyecto": this.state.idProyecto,
             });
         }
     }

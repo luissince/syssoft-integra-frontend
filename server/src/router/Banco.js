@@ -1,33 +1,29 @@
 const express = require('express');
 const router = express.Router();
-const tools = require('../tools/Tools');
+const { currentDate, currentTime } = require('../tools/Tools');
 const Conexion = require('../database/Conexion');
 const conec = new Conexion();
 
 router.get('/list', async function (req, res) {
-
     try {
         let lista = await conec.query(`SELECT 
         b.idBanco, 
         b.nombre, 
-        b.tipoCuenta,
+        CASE 
+        WHEN b.tipoCuenta = 1 THEN 'Banco'
+        WHEN b.tipoCuenta = 2 THEN 'Tarjeta'
+        ELSE 'Efectivo' END AS 'tipoCuenta',
         m.nombre as moneda,
         b.numCuenta,
-        b.cci, 
-        representante 
+        b.cci
         FROM banco AS b INNER JOIN moneda AS m
         ON m.idMoneda = b.idMoneda 
         WHERE 
         ? = 0
         OR
         ? = 1 and b.nombre like concat(?,'%')
-        OR
-        ? = 1 and b.representante like concat(?,'%')
         LIMIT ?,?`, [
             parseInt(req.query.opcion),
-
-            parseInt(req.query.opcion),
-            req.query.buscar,
 
             parseInt(req.query.opcion),
             req.query.buscar,
@@ -49,22 +45,16 @@ router.get('/list', async function (req, res) {
         WHERE 
         ? = 0
         OR
-        ? = 1 and b.nombre like concat(?,'%')
-        OR
-        ? = 1 and b.representante like concat(?,'%')`, [
+        ? = 1 and b.nombre like concat(?,'%')`, [
             parseInt(req.query.opcion),
 
             parseInt(req.query.opcion),
-            req.query.buscar,
-
-            parseInt(req.query.opcion),
-            req.query.buscar,
+            req.query.buscar
         ]);
 
-        res.status(200).send({ "result": resultLista, "total": total[0].Total })
-
+        res.status(200).send({ "result": resultLista, "total": total[0].Total });
     } catch (error) {
-        res.status(500).send("Error interno de conexión, intente nuevamente.")
+        res.status(500).send("Error interno de conexión, intente nuevamente.");
     }
 });
 
@@ -99,59 +89,76 @@ router.post('/add', async function (req, res) {
             idBanco = "BC0001";
         }
 
-        await conec.execute(connection, 'INSERT INTO banco (idBanco ,nombre, tipoCuenta, idMoneda, numCuenta, cci, representante) values (?,?,?,?,?,?,?)', [
+        await conec.execute(connection, `INSERT INTO banco(
+        idBanco,
+        nombre,
+        tipoCuenta,
+        idMoneda,
+        numCuenta,
+        cci, 
+        fecha,
+        hora,
+        idUsuario) 
+        values (?,?,?,?,?,?,?,?,?)`, [
             idBanco,
             req.body.nombre,
             req.body.tipoCuenta,
             req.body.idMoneda,
             req.body.numCuenta,
             req.body.cci,
-            req.body.representante
-        ])
+            req.body.representante,
+            currentDate(),
+            currentTime(),
+            req.body.idUsuario
+        ]);
 
         await conec.commit(connection);
-        res.status(200).send('Datos insertados correctamente')
-
+        res.status(200).send('Datos insertados correctamente');
     } catch (err) {
         if (connection != null) {
-            conec.rollback(connection);
+            await conec.rollback(connection);
         }
         res.status(500).send(error);
     }
 });
 
 router.post('/update', async function (req, res) {
-
     let connection = null;
-
     try {
-
         connection = await conec.beginTransaction();
-        await conec.execute(connection, 'UPDATE banco SET nombre=?, tipoCuenta=?, idMoneda=?, numCuenta=?, cci=?, representante=? where idBanco=?', [
+
+        await conec.execute(connection, `UPDATE banco SET 
+        nombre=?, 
+        tipoCuenta=?, 
+        idMoneda=?, 
+        numCuenta=?, 
+        cci=?, 
+        fecha=?,
+        hora=?,
+        idUsuario=?
+        WHERE idBanco=?`, [
             req.body.nombre,
             req.body.tipoCuenta,
             req.body.idMoneda,
             req.body.numCuenta,
             req.body.cci,
-            req.body.representante,
+            currentDate(),
+            currentTime(),
+            req.body.idUsuario,
             req.body.idBanco
-        ])
+        ]);
 
-        await conec.commit(connection)
-        res.status(200).send('Datos actulizados correctamente')
-        // console.log(req.body)
-
+        await conec.commit(connection);
+        res.status(200).send('Datos actulizados correctamente');
     } catch (error) {
         if (connection != null) {
-            conec.rollback(connection);
+            await conec.rollback(connection);
         }
         res.status(500).send(error);
-        // console.log(error)
     }
-})
+});
 
 router.get('/id', async function (req, res) {
-
     try {
         let result = await conec.query('SELECT * FROM banco WHERE idBanco = ?', [
             req.query.idBanco,
@@ -162,11 +169,9 @@ router.get('/id', async function (req, res) {
         } else {
             res.status(400).send("Datos no encontrados");
         }
-
     } catch (error) {
         res.status(500).send("Error interno de conexión, intente nuevamente.");
     }
-
 });
 
 router.delete('/', async function (req, res) {

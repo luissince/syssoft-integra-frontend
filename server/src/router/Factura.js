@@ -507,6 +507,7 @@ router.get("/id", async function (req, res) {
         v.tipo, 
         v.estado, 
         m.simbolo,
+        m.codiso,
         IFNULL(SUM(vd.precio*vd.cantidad),0) AS monto
         FROM venta AS v 
         INNER JOIN cliente AS c ON v.idCliente = c.idCliente

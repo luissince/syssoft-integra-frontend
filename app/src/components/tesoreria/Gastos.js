@@ -153,7 +153,7 @@ class Gastos extends React.Component {
                 <div className='row'>
                     <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
                         <div className="form-group">
-                            <h5>Gastos <small className="text-secondary">LISTA</small></h5>
+                            <h5>Gastos o Salidas <small className="text-secondary">LISTA</small></h5>
                         </div>
                     </div>
                 </div>
@@ -193,13 +193,13 @@ class Gastos extends React.Component {
                             <table className="table table-striped table-bordered rounded">
                                 <thead>
                                     <tr>
-                                        <th width="5%">#</th>
+                                        <th width="5%" className="text-center">#</th>
                                         <th width="10%">Usuario</th>
                                         <th width="15%">Monto</th>
                                         <th width="10%">Fecha</th>
                                         <th width="10%">Observación</th>
-                                        <th width="5%">Detalle</th>
-                                        <th width="5%">Eliminar</th>
+                                        <th width="5%" className="text-center">Detalle</th>
+                                        <th width="5%" className="text-center">Eliminar</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -218,12 +218,12 @@ class Gastos extends React.Component {
                                             this.state.lista.map((item, index) => {
                                                 return (
                                                     <tr key={index}>
-                                                        <td>{item.id}</td>
+                                                        <td className="text-center">{item.id}</td>
                                                         <td>{item.nombreUse + ' ' + item.apellidoUse}</td>
                                                         <td>{item.simbolo + ' ' + formatMoney(item.monto)}</td>
                                                         <td>{item.fecha + ' ' + timeForma24(item.hora)}</td>
                                                         <td>{item.observacion}</td>
-                                                        <td>
+                                                        <td className="text-center">
                                                             <button
                                                                 className="btn btn-outline-info btn-sm"
                                                                 title="Detalle"
@@ -233,7 +233,7 @@ class Gastos extends React.Component {
                                                                 <i className="fa fa-eye"></i>
                                                             </button>
                                                         </td>
-                                                        <td>
+                                                        <td className="text-center">
                                                             <button
                                                                 className="btn btn-outline-danger btn-sm"
                                                                 title="Eliminar"

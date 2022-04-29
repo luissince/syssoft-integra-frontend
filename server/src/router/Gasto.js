@@ -133,6 +133,7 @@ router.get('/id', async function (req, res) {
         g.idGasto,
         u.nombres AS nombreUse,
         u.apellidos AS apellidoUse,
+        m.codiso,
         m.simbolo,
         b.nombre AS nombreBanco,
         b.tipoCuenta,
@@ -199,7 +200,6 @@ router.delete('/anular', async function (req, res) {
         await conec.commit(connection);
         res.status(201).send("Se elimino la transacción correctamente.");
     } catch (error) {
-        console.log(error)
         if (connection != null) {
             await conec.rollback(connection);
         }

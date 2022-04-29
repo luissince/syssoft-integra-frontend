@@ -18,7 +18,7 @@ router.get('/list', async function (req, res) {
             WHEN 6 THEN 'Comprobante de Egreso'
             ELSE 'Cotización' END AS 'tipo',
             nombre,
-            serie,
+            serie, 
             numeracion,
             impresion,
             estado, 
