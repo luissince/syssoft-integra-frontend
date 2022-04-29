@@ -69,25 +69,26 @@ class LoteDetalle extends React.Component {
     async onEventImprimir(){
 
         //Despliegue 
-        // window.open("/api/lote/replotedetalle?idLote="+this.state.idLote, "_blank");
+        window.open("/api/lote/replotedetalle?idLote="+this.state.idLote+"&idSede=SD0001", "_blank");
 
         //Desarrollo
-        try {
+        // try {
             
-            let result = await axios.get("/api/lote/replotedetalle", {
-                responseType: "blob",
-                params: {
-                    "idLote": this.state.idLote
-                }
-            });
+        //     let result = await axios.get("/api/lote/replotedetalle", {
+        //         responseType: "blob",
+        //         params: {
+        //             "idLote": this.state.idLote,
+        //             "idSede": 'SD0001'
+        //         }
+        //     });
 
-            const file = new Blob([result.data], { type: "application/pdf" });
-            const fileURL = URL.createObjectURL(file);
-            window.open(fileURL, "_blank");
+        //     const file = new Blob([result.data], { type: "application/pdf" });
+        //     const fileURL = URL.createObjectURL(file);
+        //     window.open(fileURL, "_blank");
 
-        } catch (error) {
-            console.log(error)
-        }
+        // } catch (error) {
+        //     console.log(error)
+        // }
     }
 
     render() {
