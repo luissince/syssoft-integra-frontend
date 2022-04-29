@@ -2,7 +2,7 @@ import React from 'react';
 import axios from 'axios';
 import { spinnerLoading } from '../tools/Tools';
 
-class RepVentas extends React.Component {
+class RepFinanciero extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -24,7 +24,7 @@ class RepVentas extends React.Component {
                 </div>
 
                 <div className="card">
-                    <h6 class="card-header">Reporte de Ventas <small className="text-secondary">RESIDENCIAL VILLA SAN JUAN</small></h6>
+                    <h6 class="card-header">Reporte de Ingresos <small className="text-secondary">RESIDENCIAL VILLA SAN JUAN</small></h6>
                     <div className="card-body">
                         <div className="row">
                             <div className="col">
@@ -37,19 +37,37 @@ class RepVentas extends React.Component {
                                             title="Lista de clientes"
                                             className="form-control"
                                         >
-                                            <option value="">-- Cliente --</option>
+                                            <option value="">Seleccione forma de pago</option>
                                         </select>
                                     </div>
                                 </div>
                             </div>
                             <div className="col">
-                                <button className="btn btn-outline-success btn-sm">Reporte de Ventas</button>
+                                <button className="btn btn-outline-success btn-sm">Reporte de Ingresos</button>
                             </div>
                             <div className="col">
-                                <button className="btn btn-outline-primary btn-sm">Detalle de Ventas</button>
+                                <button className="btn btn-outline-primary btn-sm">Recibos emitidos</button>
+                            </div>
+                        </div>
+
+                        <div className="row">
+                            <div className="col">
+                                <div className="form-group">
+                                    <div className="input-group">
+                                        <div className="input-group-prepend">
+                                            <div className="input-group-text"><i className="bi bi-person-fill"></i></div>
+                                        </div>
+                                        <select
+                                            title="Lista de clientes"
+                                            className="form-control"
+                                        >
+                                            <option value="">Seleccione tipo de cuota</option>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
                             <div className="col">
-                                <button className="btn btn-outline-secondary btn-sm">Ventas anuladas</button>
+                                <button className="btn btn-outline-success btn-sm">Reporte Cobro Cuotas</button>
                             </div>
                         </div>
 
@@ -65,56 +83,33 @@ class RepVentas extends React.Component {
                                             title="Lista de clientes"
                                             className="form-control"
                                         >
-                                            <option value="">Seleccione vendedor</option>
+                                            <option value="">Seleccione banco</option>
                                         </select>
                                     </div>
                                 </div>
                             </div>
                             <div className="col">
-                                <button className="btn btn-outline-success btn-sm">Ventas x Vendedor</button>
-                            </div>
-                            <div className="col">
-                                <button className="btn btn-outline-primary btn-sm">Cuotas x Cobrar</button>
-                            </div>
-                            <div className="col">
-                                <button className="btn btn-outline-primary btn-sm">Total Créditos por Cobrar</button>
+                                <button className="btn btn-outline-success btn-sm">Depósito por Banco</button>
                             </div>
                         </div>
+
                     </div>
                 </div>
 
                 <div className="card">
-                    <h6 className="card-header">Reporte de Ventas por Cliente</h6>
+                    <h6 class="card-header">Reporte de Gastos <small className="text-secondary">RESIDENCIAL VILLA SAN JUAN</small></h6>
                     <div className="card-body">
-                        <div className="row">
-                            <div className="col">
-                                <div className="form-group">
-                                    <div className="input-group">
-                                        <div className="input-group-prepend">
-                                            <div className="input-group-text"><i className="bi bi-person-fill"></i></div>
-                                        </div>
-                                        <select
-                                            title="Lista de clientes"
-                                            className="form-control"
-                                        >
-                                            <option value="">Buscar cliente</option>
-                                        </select>
-                                    </div>
+                        <div className="form-group">
+                            <div className="row">
+                                <div className="col">
+                                    <button className="btn btn-outline-secondary btn-sm">Reporte de Gastos</button>
                                 </div>
-                            </div>
-                            <div className="col">
-                                <button className="btn btn-outline-success btn-sm">Ventas x Cliente</button>
-                            </div>
-                            <div className="col">
-                                <button className="btn btn-outline-primary btn-sm">Recibos x Cliente</button>
+                                <div className="col">
+                                    <button className="btn btn-outline-success btn-sm">Estado Ingresos y Gastos</button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </div>
 
-                <div className="card">
-                    <h6 className="card-header">Reporte de Vouchers</h6>
-                    <div className="card-body">
                         <div className="row">
                             <div className="col">
                                 <div className="form-group">
@@ -122,17 +117,39 @@ class RepVentas extends React.Component {
                                         <div className="input-group-prepend">
                                             <div className="input-group-text"><i className="bi bi-person-fill"></i></div>
                                         </div>
+
                                         <select
                                             title="Lista de clientes"
                                             className="form-control"
                                         >
-                                            <option value="">Buscar Cliente con Venta al Crédito Exitosa</option>
+                                            <option value="">Seleccione concepto</option>
                                         </select>
                                     </div>
                                 </div>
                             </div>
                             <div className="col">
-                                <button className="btn btn-outline-success btn-sm">Vouchers x Venta</button>
+                                <button className="btn btn-outline-success btn-sm">Depósito por Banco</button>
+                            </div>
+                        </div>
+                        <div className="row">
+                            <div className="col">
+                                <div className="form-group">
+                                    <div className="input-group">
+                                        <div className="input-group-prepend">
+                                            <div className="input-group-text"><i className="bi bi-person-fill"></i></div>
+                                        </div>
+
+                                        <select
+                                            title="Lista de clientes"
+                                            className="form-control"
+                                        >
+                                            <option value="">Seleccione sede</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="col">
+                                <button className="btn btn-outline-success btn-sm">Gastos por Sede</button>
                             </div>
                         </div>
                     </div>
@@ -142,4 +159,4 @@ class RepVentas extends React.Component {
     }
 }
 
-export default RepVentas
+export default RepFinanciero;

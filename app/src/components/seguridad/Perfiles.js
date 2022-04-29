@@ -6,6 +6,7 @@ import {
     hideModal,
     viewModal,
     clearModal,
+    ModalAlertDialog,
     ModalAlertInfo,
     ModalAlertSuccess,
     ModalAlertWarning,
@@ -266,6 +267,30 @@ class Perfiles extends React.Component {
         }
     }
 
+    onEventDelete(idPerfil) {
+        ModalAlertDialog("Perfil", "¿Estás seguro de eliminar el perfil?", async (event) => {
+            if (event) {
+                try {
+                    ModalAlertInfo("Perfil", "Procesando información...")
+                    let result = await axios.delete('/api/perfil', {
+                        params: {
+                            "idPerfil": idPerfil
+                        }
+                    })
+                    ModalAlertSuccess("Perfil", result.data, () => {
+                        this.loadInit();
+                    })
+                } catch (error) {
+                    if (error.response !== undefined) {
+                        ModalAlertWarning("Perfil", error.response.data)
+                    } else {
+                        ModalAlertWarning("Perfil", "Se genero un error interno, intente nuevamente.")
+                    }
+                }
+            }
+        })
+    }
+
 
     render() {
         return (
@@ -414,7 +439,7 @@ class Perfiles extends React.Component {
                                                             <button
                                                                 className="btn btn-outline-danger btn-sm"
                                                                 title="Anular"
-                                                                onClick={() => { }}>
+                                                                onClick={() => this.onEventDelete(item.idPerfil)}>
                                                                 <i className="bi bi-trash"></i>
                                                             </button>
                                                         </td>

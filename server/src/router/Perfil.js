@@ -170,6 +170,43 @@ router.post('/update', async function (req, res) {
     }
 });
 
+router.delete('/', async function (req, res) {
+    let connection = null;
+    try {
+        connection = await conec.beginTransaction();
+
+        let usuario = await conec.execute(connection, `SELECT * FROM usuario WHERE idPerfil = ?`, [
+            req.query.idPerfil
+        ]);
+
+        if (usuario.length > 0) {
+            await conec.rollback(connection);
+            res.status(400).send('No se puede eliminar el perfil ya que esta ligada a un usuario.')
+            return;
+        }
+
+        await conec.execute(connection, `DELETE FROM perfil WHERE idPerfil  = ?`, [
+            req.query.idPerfil
+        ]);
+
+        await conec.execute(connection, `DELETE FROM permisomenu WHERE idPerfil  = ?`, [
+            req.query.idPerfil
+        ]);
+
+        await conec.execute(connection, `DELETE FROM permisosubmenu WHERE idPerfil  = ?`, [
+            req.query.idPerfil
+        ]);
+
+        await conec.commit(connection);
+        res.status(200).send('Se eliminó correctamente el perfil.');
+    } catch (error) {
+        if (connection != null) {
+            await conec.rollback(connection);
+        }
+        res.status(500).send("Error interno de conexión, intente nuevamente.");
+    }
+});
+
 router.get('/listcombo', async function (req, res) {
     try {
         let result = await conec.query('SELECT idPerfil,descripcion FROM perfil');
