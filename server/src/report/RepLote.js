@@ -5,7 +5,10 @@ const {formatMoney } = require('../tools/Tools');
 
 class RepLote {
 
-    async repDetalleLote(infoSede, data) {
+    async repDetalleLote(sedeInfo, data) {
+
+        const cabecera = data.cabecera
+
         try{
             const doc = new PDFDocument({
                 margins: {
@@ -28,7 +31,7 @@ class RepLote {
             let postImgY = doc.y;
 
             doc.fontSize(h1).text(
-                `${infoSede.nombreEmpresa}`,
+                `${sedeInfo.nombreEmpresa}`,
                 orgX + 150,
                 orgY,
                 {
@@ -40,7 +43,7 @@ class RepLote {
             let titX = doc.x;
 
             doc.fontSize(h3).text(
-                `RUC: ${infoSede.ruc}\n${infoSede.direccion}\nCelular: ${infoSede.celular}`,
+                `RUC: ${sedeInfo.ruc}\n${sedeInfo.direccion}\nCelular: ${sedeInfo.celular} / Telefono: ${sedeInfo.telefono}`,
                 doc.x,
                 doc.y,
                 {
@@ -66,7 +69,7 @@ class RepLote {
             )
 
             doc.fontSize(h3).text(
-                `Cliente: ${data.cabecera.cliente} ${data.cabecera.documento}\nFecha: ${data.cabecera.fecha} - ${data.cabecera.hora}\nNotas: ...\nForma de venta: ${data.cabecera.tipo === 1 ? "CONTADO" : "CRÉDITO"}\nEstado: ${data.cabecera.estado === 1 ? "COBRADO" : "POR COBRAR"}\nTotal: ${data.cabecera.simbolo} ${data.cabecera.monto}\nArchivos adjuntos: ...`,
+                `Cliente: ${cabecera.cliente} ${cabecera.documento}\nFecha: ${cabecera.fecha} - ${cabecera.hora}\nNotas: ...\nForma de venta: ${cabecera.tipo === 1 ? "CONTADO" : "CRÉDITO"}\nEstado: ${cabecera.estado === 1 ? "COBRADO" : "POR COBRAR"}\nTotal: ${cabecera.simbolo} ${cabecera.monto}\nArchivos adjuntos: ...`,
                 orgX,
                 doc.y + 5
             );
@@ -80,7 +83,7 @@ class RepLote {
             );
 
             doc.fontSize(h3).text(
-                `Manzana: ${data.cabecera.manzana}\nLote: ${data.cabecera.lote}\nDescripción: ...\nCosto: ${data.cabecera.costo}\nPrecio: ${data.cabecera.precio}\nEstado: ${data.cabecera.lotestado}`,
+                `Manzana: ${cabecera.manzana}\nLote: ${cabecera.lote}\nDescripción: ...\nCosto: ${cabecera.costo}\nPrecio: ${cabecera.precio}\nEstado: ${cabecera.lotestado}`,
                 orgX,
                 doc.y + 5
             );
@@ -94,7 +97,7 @@ class RepLote {
             );
 
             doc.fontSize(h3).text(
-                `Medida Frontal: ${data.cabecera.medidaFrontal}\nCoste Derecho: ${data.cabecera.costadoDerecho}\nCoste Izquierdo: ${data.cabecera.costadoIzquierdo}\nMedida Fondo: ${data.cabecera.medidaFondo}\nArea Lote: ${data.cabecera.areaLote}\nN° Partida: ${data.cabecera.numeroPartida}`,
+                `Medida Frontal: ${cabecera.medidaFrontal}\nCoste Derecho: ${cabecera.costadoDerecho}\nCoste Izquierdo: ${cabecera.costadoIzquierdo}\nMedida Fondo: ${cabecera.medidaFondo}\nArea Lote: ${cabecera.areaLote}\nN° Partida: ${cabecera.numeroPartida}`,
                 orgX + 170,
                 doc.y + 5
             );
@@ -106,7 +109,7 @@ class RepLote {
             );
 
             doc.fontSize(h3).text(
-                `Limite, Frontal / Norte / Noroeste: ${data.cabecera.limiteFrontal === '' ? '-' : data.cabecera.limiteFrontal}\nLímite, Derecho / Este / Sureste: ${data.cabecera.limiteDerecho === '' ? '-' : data.cabecera.limiteDerecho}\nLímite, Iquierdo / Sur / Sureste: ${data.cabecera.limiteIzquierdo === '' ? '-' : data.cabecera.limiteIzquierdo}\nLímite, Posterior / Oeste / Noroeste: ${data.cabecera.limitePosterior === '' ? '-' : data.cabecera.limitePosterior}\nUbicación del Lote: ${data.cabecera.ubicacionLote === '' ? '-' : data.cabecera.ubicacionLote}`,
+                `Limite, Frontal / Norte / Noroeste: ${cabecera.limiteFrontal === '' ? '-' : cabecera.limiteFrontal}\nLímite, Derecho / Este / Sureste: ${cabecera.limiteDerecho === '' ? '-' : cabecera.limiteDerecho}\nLímite, Iquierdo / Sur / Sureste: ${cabecera.limiteIzquierdo === '' ? '-' : cabecera.limiteIzquierdo}\nLímite, Posterior / Oeste / Noroeste: ${cabecera.limitePosterior === '' ? '-' : cabecera.limitePosterior}\nUbicación del Lote: ${cabecera.ubicacionLote === '' ? '-' : cabecera.ubicacionLote}`,
                 orgX + 340,
                 doc.y + 5
             );

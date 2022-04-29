@@ -1,6 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const { currentDate, currentTime } = require('../tools/Tools');
+const Factura = require('../services/Factura')
+const Sede = require('../services/Sede');
+const RepCuota = require('../report/RepCuota')
+
+const factura = new Factura();
+const sede = new Sede();
+const repCuota = new RepCuota();
+
 const Conexion = require('../database/Conexion');
 const conec = new Conexion();
 
@@ -630,59 +638,42 @@ router.get("/credito", async function (req, res) {
 });
 
 router.get("/credito/detalle", async function (req, res) {
-    try {
-        let venta = await conec.query(`
-        SELECT 
-        v.idVenta, 
-        cl.idCliente,
-        cl.documento, 
-        cl.informacion, 
-        cl.celular,
-        cl.telefono,
-        cl.email,
-        cl.direccion,        
-        cm.nombre, 
-        v.serie, 
-        v.numeracion, 
-        v.numCuota, 
-        (SELECT IFNULL(MIN(fecha),'') FROM plazo WHERE estado = 0) AS fechaPago,
-        DATE_FORMAT(v.fecha,'%d/%m/%Y') as fecha, 
-        v.hora, 
-        v.estado,
-        m.idMoneda,
-        m.simbolo,
-        IFNULL(SUM(vd.precio*vd.cantidad),0) AS total,
-        (SELECT IFNULL(SUM(cv.precio),0) FROM cobro AS c LEFT JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro WHERE c.idProcedencia = v.idVenta ) AS cobrado 
-        FROM venta AS v 
-        INNER JOIN moneda AS m ON m.idMoneda = v.idMoneda
-        INNER JOIN comprobante AS cm ON v.idComprobante = cm.idComprobante 
-        INNER JOIN cliente AS cl ON v.idCliente = cl.idCliente 
-        LEFT JOIN ventaDetalle AS vd ON vd.idVenta = v.idVenta 
-        WHERE  
-        v.idVenta = ?
-        GROUP BY v.idVenta
-        `, [
-            req.query.idVenta
-        ]);
-
-        let plazos = await conec.query(`SELECT 
-        idPlazo,        
-        DATE_FORMAT(fecha,'%d/%m/%Y') as fecha,
-        monto,
-        estado
-        FROM plazo WHERE idVenta = ?
-        `, [
-            req.query.idVenta
-        ]);
-
-        res.status(200).send({
-            "venta": venta[0],
-            "plazos": plazos
-        })
-    } catch (error) {
-        res.status(500).send("Error interno de conexión, intente nuevamente.")
-
+    const result = await factura.detalleCredito(req)
+    if (typeof result === 'object') {
+        res.status(200).send(result)
+    } else {
+        res.status(500).send(result)
     }
 });
+
+router.get("/repcreditolote", async function (req, res) {
+
+    const sedeInfo = await sede.infoSedeReporte(req)
+
+    if (typeof sedeInfo !== 'object') {
+        res.status(500).send(sedeInfo)
+        return;
+    }
+
+    const detalle = await factura.detalleCredito(req)
+
+    if (typeof detalle === 'object') {
+
+        let data = await repCuota.repDetalleCuota(req, sedeInfo, detalle)
+
+        if (typeof data === 'string') {
+            res.status(500).send(data)
+            console.log(data)
+        } else {
+            res.contentType("application/pdf");
+            res.send(data);
+        }
+    } else {
+        res.status(500).send(detalle)
+        cosnsole.log(detalle)
+    }
+
+
+})
 
 module.exports = router;
