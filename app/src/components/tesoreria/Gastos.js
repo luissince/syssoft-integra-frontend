@@ -10,6 +10,7 @@ import {
     ModalAlertWarning,
     ModalAlertError
 } from '../tools/Tools';
+import { connect } from 'react-redux';
 import Paginacion from '../tools/Paginacion';
 
 class Gastos extends React.Component {
@@ -18,6 +19,8 @@ class Gastos extends React.Component {
         this.state = {
             loading: false,
             lista: [],
+
+            idProyecto: this.props.token.project.idProyecto,
 
             opcion: 0,
             paginacion: 0,
@@ -89,6 +92,7 @@ class Gastos extends React.Component {
                 params: {
                     "opcion": opcion,
                     "buscar": buscar,
+                    "idProyecto": this.state.idProyecto,
                     "posicionPagina": ((this.state.paginacion - 1) * this.state.filasPorPagina),
                     "filasPorPagina": this.state.filasPorPagina
                 }
@@ -104,6 +108,7 @@ class Gastos extends React.Component {
                 messagePaginacion: messagePaginacion
             });
         } catch (error) {
+            console.log(error.response)
             if (error.message !== "canceled") {
                 await this.setStateAsync({
                     loading: false,
@@ -194,10 +199,11 @@ class Gastos extends React.Component {
                                 <thead>
                                     <tr>
                                         <th width="5%" className="text-center">#</th>
-                                        <th width="10%">Usuario</th>
-                                        <th width="15%">Monto</th>
-                                        <th width="10%">Fecha</th>
-                                        <th width="10%">Observación</th>
+                                        <th width="10%">Cliente</th>
+                                        <th width="15%">Detalle</th>
+                                        <th width="10%">Creación</th>
+                                        <th width="10%">Cuenta</th>
+                                        <th width="10%">Monto</th>
                                         <th width="5%" className="text-center">Detalle</th>
                                         <th width="5%" className="text-center">Eliminar</th>
                                     </tr>
@@ -206,23 +212,24 @@ class Gastos extends React.Component {
                                     {
                                         this.state.loading ? (
                                             <tr>
-                                                <td className="text-center" colSpan="7">
+                                                <td className="text-center" colSpan="8">
                                                     {spinnerLoading()}
                                                 </td>
                                             </tr>
                                         ) : this.state.lista.length === 0 ? (
                                             <tr className="text-center">
-                                                <td colSpan="7">¡No hay datos registrados!</td>
+                                                <td colSpan="8">¡No hay datos registrados!</td>
                                             </tr>
                                         ) : (
                                             this.state.lista.map((item, index) => {
                                                 return (
                                                     <tr key={index}>
                                                         <td className="text-center">{item.id}</td>
-                                                        <td>{item.nombreUse + ' ' + item.apellidoUse}</td>
-                                                        <td>{item.simbolo + ' ' + formatMoney(item.monto)}</td>
-                                                        <td>{item.fecha + ' ' + timeForma24(item.hora)}</td>
-                                                        <td>{item.observacion}</td>
+                                                        <td>{item.documento}{<br />}{item.informacion}</td>
+                                                        <td>{item.detalle}</td>
+                                                        <td>{item.fecha}{<br />}{timeForma24(item.hora)}</td>
+                                                        <td>{item.banco}</td>
+                                                        <td>{item.simbolo + " " + formatMoney(item.monto)}</td>
                                                         <td className="text-center">
                                                             <button
                                                                 className="btn btn-outline-info btn-sm"
@@ -278,4 +285,11 @@ class Gastos extends React.Component {
 
 }
 
-export default Gastos
+const mapStateToProps = (state) => {
+    return {
+        token: state.reducer
+    }
+}
+
+
+export default connect(mapStateToProps, null)(Gastos);

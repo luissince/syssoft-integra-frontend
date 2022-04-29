@@ -10,6 +10,7 @@ import {
     ModalAlertWarning,
     ModalAlertError
 } from '../tools/Tools';
+import { connect } from 'react-redux';
 import Paginacion from '../tools/Paginacion';
 
 class Cobros extends React.Component {
@@ -17,6 +18,8 @@ class Cobros extends React.Component {
         super(props);
         this.state = {
             idCobro: '',
+
+            idProyecto: this.props.token.project.idProyecto,
 
             loading: false,
             lista: [],
@@ -91,6 +94,7 @@ class Cobros extends React.Component {
                 params: {
                     "opcion": opcion,
                     "buscar": buscar,
+                    "idProyecto": this.state.idProyecto,
                     "posicionPagina": ((this.state.paginacion - 1) * this.state.filasPorPagina),
                     "filasPorPagina": this.state.filasPorPagina
                 }
@@ -195,9 +199,9 @@ class Cobros extends React.Component {
                                 <thead>
                                     <tr>
                                         <th width="5%" className="text-center">#</th>
-                                        <th width="15%">Cliente</th>
-                                        <th width="10%">Detalle</th>
-                                        <th width="15%">Creación</th>
+                                        <th width="10%">Cliente</th>
+                                        <th width="15%">Detalle</th>
+                                        <th width="10%">Creación</th>
                                         <th width="10%">Cuenta</th>
                                         <th width="10%">Monto</th>
                                         <th width="5%" className="text-center">Detalle</th>
@@ -220,7 +224,7 @@ class Cobros extends React.Component {
                                             this.state.lista.map((item, index) => {
                                                 return (
                                                     <tr key={index}>
-                                                        <td>{item.id}</td>
+                                                        <td className="text-center">{item.id}</td>
                                                         <td>{item.documento}{<br />}{item.informacion}</td>
                                                         <td>{item.detalle}</td>
                                                         <td>{item.fecha}{<br />}{timeForma24(item.hora)}</td>
@@ -276,4 +280,11 @@ class Cobros extends React.Component {
     }
 }
 
-export default Cobros;
+const mapStateToProps = (state) => {
+    return {
+        token: state.reducer
+    }
+}
+
+
+export default connect(mapStateToProps, null)(Cobros);

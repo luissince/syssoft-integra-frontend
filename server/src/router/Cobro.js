@@ -6,7 +6,6 @@ const conec = new Conexion()
 
 router.get('/list', async function (req, res) {
     try {
-
         let lista = await conec.query(`SELECT 
         c.idCobro, 
         cl.documento,
@@ -15,8 +14,7 @@ router.get('/list', async function (req, res) {
         WHEN cn.idConcepto IS NOT NULL THEN cn.nombre
         ELSE CONCAT(cp.nombre,': ',v.serie,'-',v.numeracion) END AS detalle,
         m.simbolo,
-        b.nombre as banco, 
-        c.estado, 
+        b.nombre as banco,  
         c.observacion, 
         DATE_FORMAT(c.fecha,'%d/%m/%Y') as fecha, 
         c.hora,
@@ -167,18 +165,20 @@ router.post('/add', async function (req, res) {
             idMoneda, 
             idBanco, 
             idProcedencia,
+            idProyecto,
             metodoPago, 
             estado, 
             observacion, 
             fecha, 
             hora) 
-            VALUES(?,?,?,?,?,?,?,?,?,?,?)`, [
+            VALUES(?,?,?,?,?,?,?,?,?,?,?,?)`, [
             idCobro,
             req.body.idCliente,
             req.body.idUsuario,
             req.body.idMoneda,
             req.body.idBanco,
             req.body.idProcedencia,
+            req.body.idProyecto,
             req.body.metodoPago,
             req.body.estado,
             req.body.observacion,
