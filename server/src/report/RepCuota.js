@@ -29,7 +29,6 @@ class RepCuota {
             let h1 = 14;
             let h2 = 12;
             let h3 = 10;
-            let h4 = 8;
 
             doc.image(path.join(__dirname, "..", "path/to/logo.png"), orgX, orgY, { width: 75, });
 
