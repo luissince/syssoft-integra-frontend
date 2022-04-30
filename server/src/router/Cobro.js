@@ -2,11 +2,10 @@ const express = require('express');
 const router = express.Router();
 const { currentDate, currentTime } = require('../tools/Tools');
 const Conexion = require('../database/Conexion');
-const conec = new Conexion()
+const conec = new Conexion();
 
 router.get('/list', async function (req, res) {
     try {
-
         let lista = await conec.query(`SELECT 
         c.idCobro, 
         cl.documento,
@@ -15,8 +14,7 @@ router.get('/list', async function (req, res) {
         WHEN cn.idConcepto IS NOT NULL THEN cn.nombre
         ELSE CONCAT(cp.nombre,': ',v.serie,'-',v.numeracion) END AS detalle,
         m.simbolo,
-        b.nombre as banco, 
-        c.estado, 
+        b.nombre as banco,  
         c.observacion, 
         DATE_FORMAT(c.fecha,'%d/%m/%Y') as fecha, 
         c.hora,
@@ -31,16 +29,18 @@ router.get('/list', async function (req, res) {
         LEFT JOIN venta AS v ON cv.idVenta = v.idVenta 
         LEFT JOIN comprobante AS cp ON v.idComprobante = cp.idComprobante
         WHERE 
-        ? = 0
+        ? = 0 AND c.idProyecto = ?
         OR
-        ? = 1 AND cl.informacion LIKE CONCAT(?,'%')
+        ? = 1 AND cl.informacion LIKE CONCAT(?,'%') AND c.idProyecto = ?
         GROUP BY c.idCobro
         ORDER BY c.fecha DESC,c.hora DESC
         LIMIT ?,?`, [
             parseInt(req.query.opcion),
+            req.query.idProyecto,
 
             parseInt(req.query.opcion),
             req.query.buscar,
+            req.query.idProyecto,
 
             parseInt(req.query.posicionPagina),
             parseInt(req.query.filasPorPagina)
@@ -59,20 +59,20 @@ router.get('/list', async function (req, res) {
         INNER JOIN banco AS b ON c.idBanco = b.idBanco
         INNER JOIN moneda AS m ON c.idMoneda = m.idMoneda 
         WHERE 
-        ? = 0
+        ? = 0 AND c.idProyecto = ?
         OR
-        ? = 1 AND cl.informacion LIKE CONCAT(?,'%')`, [
+        ? = 1 AND cl.informacion LIKE CONCAT(?,'%') AND c.idProyecto = ?`, [
             parseInt(req.query.opcion),
+            req.query.idProyecto,
 
             parseInt(req.query.opcion),
-            req.query.buscar
+            req.query.buscar,
+            req.query.idProyecto,
         ]);
 
-        res.status(200).send({ "result": resultLista, "total": total[0].Total })
-
+        res.status(200).send({ "result": resultLista, "total": total[0].Total });
     } catch (error) {
-        console.log(error)
-        res.status(500).send("Error interno de conexión, intente nuevamente.")
+        res.status(500).send("Se produjo un error de servidor, intente nuevamente.");
     }
 });
 
@@ -167,25 +167,28 @@ router.post('/add', async function (req, res) {
             idMoneda, 
             idBanco, 
             idProcedencia,
+            idProyecto,
             metodoPago, 
             estado, 
             observacion, 
             fecha, 
             hora) 
-            VALUES(?,?,?,?,?,?,?,?,?,?,?)`, [
+            VALUES(?,?,?,?,?,?,?,?,?,?,?,?)`, [
             idCobro,
             req.body.idCliente,
             req.body.idUsuario,
             req.body.idMoneda,
             req.body.idBanco,
             req.body.idProcedencia,
+            req.body.idProyecto,
             req.body.metodoPago,
             req.body.estado,
             req.body.observacion,
             currentDate(),
             currentTime()
-        ])
+        ]);
 
+        let monto = 0;
         for (let item of req.body.cobroDetalle) {
             await conec.execute(connection, `INSERT INTO cobroDetalle(
                 idCobro, 
@@ -200,17 +203,36 @@ router.post('/add', async function (req, res) {
                 item.cantidad,
                 item.idImpuesto
             ])
+            monto += item.cantidad * item.monto;
         }
+
+        await conec.execute(connection, `INSERT INTO bancoDetalle(
+            idBanco,
+            idProcedencia,
+            tipo,
+            monto,
+            fecha,
+            hora,
+            idUsuario
+        )
+        VALUES(?,?,?,?,?,?,?,?)`, [
+            req.body.idBanco,
+            idCobro,
+            1,
+            monto,
+            currentDate(),
+            currentTime(),
+            req.body.idUsuario,
+        ]);
 
         await conec.commit(connection);
         res.status(200).send('Datos insertados correctamente')
 
     } catch (error) {
         if (connection != null) {
-            conec.rollback(connection);
+            await conec.rollback(connection);
         }
-        res.status(500).send("Error de servidor");
-        console.log(error)
+        res.status(500).send("Se produjo un error de servidor, intente nuevamente.");
     }
 });
 
@@ -295,6 +317,8 @@ router.post('/cobro', async function (req, res) {
             ]);
         }
 
+        let monto = 0;
+
         for (let item of req.body.plazos) {
             if (item.selected) {
                 await conec.execute(connection, `INSERT INTO cobroVenta(
@@ -315,8 +339,29 @@ router.post('/cobro', async function (req, res) {
                 `, [
                     item.idPlazo
                 ]);
+
+                monto += parseFloat(item.monto)
             }
         }
+
+        await conec.execute(connection, `INSERT INTO bancoDetalle(
+            idBanco,
+            idProcedencia,
+            tipo,
+            monto,
+            fecha,
+            hora,
+            idUsuario
+        )
+        VALUES(?,?,?,?,?,?,?,?)`, [
+            req.body.idBanco,
+            idCobro,
+            1,
+            monto,
+            currentDate(),
+            currentTime(),
+            req.body.idUsuario,
+        ]);
 
         await conec.commit(connection);
         res.status(201).send('Datos insertados correctamente');
@@ -324,8 +369,7 @@ router.post('/cobro', async function (req, res) {
         if (connection != null) {
             await conec.rollback(connection);
         }
-        res.status(500).send("Error de servidor");
-        console.log(error)
+        res.status(500).send("Se produjo un error de servidor, intente nuevamente.");
     }
 });
 
@@ -400,75 +444,7 @@ router.get('/id', async function (req, res) {
         }
 
     } catch (error) {
-        res.status(500).send("Error interno de conexión, intente nuevamente.");
-    }
-
-});
-
-router.post('/update', async function (req, res) {
-    let connection = null;
-    try {
-
-        connection = await conec.beginTransaction();
-        await conec.execute(connection, `UPDATE cobro SET 
-        idCliente=?, 
-        idUsuario=?, 
-        idMoneda=?, 
-        idBanco=?, 
-        metodoPago=?, 
-        estado=?,
-        observacion=?, 
-        fecha=?,
-        hora=?
-        WHERE idCobro=?`, [
-            req.body.idCliente,
-            req.body.idUsuario,
-            req.body.idMoneda,
-            req.body.idBanco,
-            req.body.metodoPago,
-            req.body.estado,
-            req.body.observacion,
-            currentDate(),
-            currentTime(),
-            req.body.idCobro,
-        ])
-
-        await conec.commit(connection)
-        res.status(200).send('Los datos se actualizaron correctamente.')
-    } catch (error) {
-        if (connection != null) {
-            conec.rollback(connection);
-        }
         res.status(500).send("Se produjo un error de servidor, intente nuevamente.");
-    }
-});
-
-router.get('/cobroventa', async function (req, res) {
-    try {
-        let venta = await conec.query(`SELECT 
-        IFNULL(SUM(vd.precio*vd.cantidad),0) AS total 
-        FROM venta AS v
-        LEFT JOIN ventaDetalle AS vd ON v.idVenta  = vd.idVenta
-        WHERE v.idVenta  = ?`, [
-            req.query.idVenta
-        ]);
-
-        let cobrado = await conec.query(`SELECT 
-        IFNULL(SUM(cv.precio),0) AS total
-        FROM cobro AS c 
-        LEFT JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro
-        WHERE c.idProcedencia = ?`, [
-            req.query.idVenta
-        ]);
-
-        res.status(200).send({
-            venta: venta.length > 0 ? venta[0].total : 0,
-            cobrado: cobrado.length > 0 ? cobrado[0].total : 0
-        });
-    } catch (error) {
-        console.log(error)
-        res.status(500).send("Error interno de conexión, intente nuevamente.");
-
     }
 });
 
@@ -539,15 +515,17 @@ router.delete('/anular', async function (req, res) {
             req.query.idCobro
         ]);
 
-        // await conec.rollback(connection);
+        await conec.execute(connection, `DELETE FROM bancoDetalle WHERE idProcedencia  = ?`, [
+            req.query.idCobro
+        ]);
+
         await conec.commit(connection);
         res.status(201).send("Se eliminó la transacción correctamente.");
     } catch (error) {
-        console.log(error)
         if (connection != null) {
             await conec.rollback(connection);
         }
-        res.status(500).send("Error interno de conexión, intente nuevamente.");
+        res.status(500).send("Se produjo un error de servidor, intente nuevamente.");
     }
 });
 
