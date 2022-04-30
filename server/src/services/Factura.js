@@ -389,7 +389,7 @@ class Factura {
                 }
 
                 let plazo = await conec.execute(connection, 'SELECT idPlazo FROM plazo');
-                let idPlazo = "";
+                let idPlazo = 0;
                 if (plazo.length != 0) {
 
                     let quitarValor = plazo.map(function (item) {
@@ -408,10 +408,9 @@ class Factura {
                 let ultimoDate = new Date(inicioDate);
                 ultimoDate.setMonth(ultimoDate.getMonth() + parseInt(req.body.numCuota));
 
-                let i = 0;
+
                 let cuotaMes = (montoTotal - req.body.inicial) / req.body.numCuota;
                 while (inicioDate < ultimoDate) {
-                    i++;
                     inicioDate.setMonth(inicioDate.getMonth() + 1);
 
                     await conec.execute(connection, `INSERT INTO plazo(
