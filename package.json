@@ -21,10 +21,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "bcrypt": "^5.0.1",
-    "carbone": "^3.2.3",
-    "get-stream": "^6.0.1",
-    "pdfkit": "^0.13.0",
-    "pdfkit-table": "^0.1.86"
+    "crypto-js": "^4.1.1"
   }
 }

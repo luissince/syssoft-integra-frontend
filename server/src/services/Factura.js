@@ -6,7 +6,6 @@ class Factura {
 
     async listar(req) {
         try {
-
             let lista = await conec.query(`SELECT 
                 v.idVenta,
                 c.idCliente,
@@ -29,21 +28,24 @@ class Factura {
                 INNER JOIN moneda AS m ON v.idMoneda = m.idMoneda
                 LEFT JOIN ventaDetalle AS vd ON vd.idVenta = v.idVenta
                 WHERE 
-                ? = 0
+                ? = 0 AND v.idProyecto = ?
                 OR
-                ? = 1 and c.informacion like concat(?,'%')
+                ? = 1 and c.informacion like concat(?,'%') AND v.idProyecto = ?
                 OR
-                ? = 1 and c.documento like concat(?,'%')
+                ? = 1 and c.documento like concat(?,'%') AND v.idProyecto = ?
                 GROUP BY v.idVenta
                 ORDER BY v.fecha DESC, v.hora DESC
                 LIMIT ?,?`, [
                 parseInt(req.query.opcion),
+                req.query.idProyecto,
 
                 parseInt(req.query.opcion),
                 req.query.buscar,
+                req.query.idProyecto,
 
                 parseInt(req.query.opcion),
                 req.query.buscar,
+                req.query.idProyecto,
 
                 parseInt(req.query.posicionPagina),
                 parseInt(req.query.filasPorPagina)
@@ -62,18 +64,21 @@ class Factura {
                 INNER JOIN comprobante as co ON v.idComprobante = co.idComprobante
                 INNER JOIN moneda AS m ON v.idMoneda = m.idMoneda
                 WHERE 
-                ? = 0
+                ? = 0 AND v.idProyecto = ?
                 OR
-                ? = 1 and c.informacion like concat(?,'%')
+                ? = 1 and c.informacion like concat(?,'%') AND v.idProyecto = ?
                 OR
-                ? = 1 and c.documento like concat(?,'%')`, [
+                ? = 1 and c.documento like concat(?,'%') AND v.idProyecto = ?`, [
                 parseInt(req.query.opcion),
+                req.query.idProyecto,
 
                 parseInt(req.query.opcion),
                 req.query.buscar,
+                req.query.idProyecto,
 
                 parseInt(req.query.opcion),
-                req.query.buscar
+                req.query.buscar,
+                req.query.idProyecto,
             ]);
 
             return { "result": resultLista, "total": total[0].Total }
@@ -86,7 +91,6 @@ class Factura {
     async add(req) {
         let connection = null;
         try {
-
             connection = await conec.beginTransaction();
 
             let countLote = 0;
@@ -164,6 +168,7 @@ class Factura {
                 idCliente, 
                 idUsuario, 
                 idComprobante, 
+                idProyecto,
                 serie,
                 numeracion,
                 idMoneda,
@@ -172,12 +177,13 @@ class Factura {
                 estado, 
                 fecha, 
                 hora)
-                VALUES(?,?,?,?,?,?,?,?,?,?,?,?)
+                VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)
                 `, [
                 idVenta,
                 req.body.idCliente,
                 req.body.idUsuario,
                 req.body.idComprobante,
+                req.body.idProyecto,
                 comprobante[0].serie,
                 numeracion,
                 req.body.idMoneda,
@@ -212,7 +218,6 @@ class Factura {
                 montoTotal += parseFloat(item.precioContado) * item.cantidad;
             }
 
-
             if (req.body.selectTipoPago) {
                 let cobro = await conec.execute(connection, 'SELECT idCobro FROM cobro');
                 let idCobro = "";
@@ -241,24 +246,26 @@ class Factura {
                 }
 
                 await conec.execute(connection, `INSERT INTO cobro(
-                    idCobro, 
-                    idCliente, 
-                    idUsuario, 
-                    idMoneda, 
-                    idBanco, 
-                    idProcedencia,
-                    metodoPago, 
-                    estado, 
-                    observacion, 
-                    fecha, 
-                    hora) 
-                    VALUES(?,?,?,?,?,?,?,?,?,?,?)`, [
+                idCobro, 
+                idCliente, 
+                idUsuario, 
+                idMoneda, 
+                idBanco, 
+                idProcedencia,
+                idProyecto,
+                metodoPago, 
+                estado, 
+                observacion, 
+                fecha, 
+                hora) 
+                VALUES(?,?,?,?,?,?,?,?,?,?,?,?)`, [
                     idCobro,
                     req.body.idCliente,
                     req.body.idUsuario,
                     req.body.idMoneda,
                     req.body.idBanco,
                     idVenta,
+                    req.body.idProyecto,
                     req.body.metodoPago,
                     1,
                     'INGRESO DEL PAGO TOTAL',
@@ -267,13 +274,31 @@ class Factura {
                 ]);
 
                 await conec.execute(connection, `INSERT INTO cobroVenta(
-                    idCobro,
-                    idVenta,
-                    precio) 
-                    VALUES (?,?,?)`, [
+                idCobro,
+                idVenta,
+                precio) 
+                VALUES (?,?,?)`, [
                     idCobro,
                     idVenta,
                     montoTotal
+                ]);
+
+                await conec.execute(connection, `INSERT INTO bancoDetalle(
+                idBanco,
+                idProcedencia,
+                tipo,
+                monto,
+                fecha,
+                hora,
+                idUsuario)
+                VALUES(?,?,?,?,?,?,?)`, [
+                    req.body.idBanco,
+                    idCobro,
+                    1,
+                    montoTotal,
+                    currentDate(),
+                    currentTime(),
+                    req.body.idUsuario,
                 ]);
 
             } else {
@@ -311,18 +336,20 @@ class Factura {
                         idMoneda, 
                         idBanco, 
                         idProcedencia,
+                        idProyecto,
                         metodoPago, 
                         estado, 
                         observacion, 
                         fecha, 
                         hora) 
-                        VALUES(?,?,?,?,?,?,?,?,?,?,?)`, [
+                        VALUES(?,?,?,?,?,?,?,?,?,?,?,?)`, [
                         idCobro,
                         req.body.idCliente,
                         req.body.idUsuario,
                         req.body.idMoneda,
                         req.body.idBanco,
                         idVenta,
+                        req.body.idProyecto,
                         req.body.metodoPago,
                         1,
                         'INICIAL',
@@ -340,6 +367,24 @@ class Factura {
                         idVenta,
                         0,
                         req.body.inicial
+                    ]);
+
+                    await conec.execute(connection, `INSERT INTO bancoDetalle(
+                        idBanco,
+                        idProcedencia,
+                        tipo,
+                        monto,
+                        fecha,
+                        hora,
+                        idUsuario)
+                        VALUES(?,?,?,?,?,?,?)`, [
+                        req.body.idBanco,
+                        idCobro,
+                        1,
+                        req.body.inicial,
+                        currentDate(),
+                        currentTime(),
+                        req.body.idUsuario,
                     ]);
                 }
 
@@ -360,7 +405,7 @@ class Factura {
 
                 let inicioDate = new Date();
 
-                var ultimoDate = new Date(inicioDate);
+                let ultimoDate = new Date(inicioDate);
                 ultimoDate.setMonth(ultimoDate.getMonth() + parseInt(req.body.numCuota));
 
                 let i = 0;
@@ -386,12 +431,10 @@ class Factura {
                     ]);
                     idPlazo++;
                 }
-
             }
 
             await conec.commit(connection);
-            return "insert"
-
+            return "insert";
         } catch (error) {
             console.log(error)
             if (connection != null) {
@@ -437,8 +480,6 @@ class Factura {
                     req.query.idVenta
                 ]);
 
-                console.log(req.query.idVenta)
-
                 let cobro = await conec.execute(connection, `SELECT idCobro FROM cobro WHERE idProcedencia = ?`, [
                     req.query.idVenta
                 ])
@@ -453,6 +494,10 @@ class Factura {
                     ]);
 
                     await conec.execute(connection, `DELETE FROM cobroVenta WHERE idCobro = ?`, [
+                        cobro[0].idCobro
+                    ]);
+
+                    await conec.execute(connection, `DELETE FROM bancoDetalle WHERE idProcedencia  = ?`, [
                         cobro[0].idCobro
                     ]);
                 }
@@ -476,14 +521,13 @@ class Factura {
                 ]);
 
                 await conec.commit(connection);
-                return "anulado"
+                return "anulado";
             }
         } catch (error) {
-            console.log(error)
             if (connection != null) {
                 await conec.rollback(connection);
             }
-            return "Error interno de conexión, intente nuevamente."
+            return "Error interno de conexión, intente nuevamente.";
         }
     }
 
@@ -535,14 +579,12 @@ class Factura {
                     req.query.idVenta
                 ]);
 
-                return { "cabecera": result[0], "detalle": detalle }
-
+                return { "cabecera": result[0], "detalle": detalle };
             } else {
-                return "Datos no encontrados"
+                return "Datos no encontrados";
             }
         } catch (error) {
-            console.log(error);
-            return "Error interno de conexión, intente nuevamente."
+            return "Error interno de conexión, intente nuevamente.";
         }
     }
 
@@ -625,9 +667,7 @@ class Factura {
     }
 
     async detalleCredito(req) {
-
         try {
-
             let venta = await conec.query(`
             SELECT 
             v.idVenta, 

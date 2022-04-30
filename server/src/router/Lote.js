@@ -3,6 +3,8 @@ const router = express.Router();
 const Lote = require('../services/Lote');
 const Sede = require('../services/Sede');
 const RepLote = require('../report/RepLote');
+const { decrypt } = require('../tools/CryptoJS');
+
 const lote = new Lote();
 const sede = new Sede();
 
@@ -53,7 +55,6 @@ router.get('/detalle', async function (req, res) {
     } else {
         res.status(500).send(result)
     }
-
 });
 
 router.get('/listcombo', async function (req, res) {
@@ -75,31 +76,32 @@ router.get('/lotecliente', async function (req, res) {
 })
 
 router.get('/replotedetalle', async function (req, res) {
+    const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
+    req.query.idLote = decryptedData.idLote;
+    req.query.idSede = decryptedData.idSede;
 
     const sedeInfo = await sede.infoSedeReporte(req)
 
-    if(typeof sedeInfo !== 'object'){
+    if (typeof sedeInfo !== 'object') {
         res.status(500).send(sedeInfo)
         return;
     }
-    // console.log(sedeInfo)
 
     const detalle = await lote.detalleLote(req)
 
     if (typeof detalle === 'object') {
 
         let data = await repLote.repDetalleLote(sedeInfo, detalle)
-        
+
         if (typeof data === 'string') {
             res.status(500).send(data)
-            console.log(data)
         } else {
+            res.setHeader('Content-disposition', 'inline; filename=Detalle del Lote.pdf');
             res.contentType("application/pdf");
             res.send(data);
         }
     } else {
         res.status(500).send(detalle)
-        cosnsole.log(detalle)
     }
 })
 

@@ -151,18 +151,17 @@ router.post('/add', async function (req, res) {
         }
 
         await conec.execute(connection, `INSERT INTO bancoDetalle(
-            idBanco,
-            idProcedencia,
-            tipo,
-            monto,
-            fecha,
-            hora,
-            idUsuario
-        )
-        VALUES(?,?,?,?,?,?,?,?)`, [
+        idBanco,
+        idProcedencia,
+        tipo,
+        monto,
+        fecha,
+        hora,
+        idUsuario)
+        VALUES(?,?,?,?,?,?,?)`, [
             req.body.idBanco,
-            idCobro,
-            1,
+            idGasto,
+            0,
             monto,
             currentDate(),
             currentTime(),

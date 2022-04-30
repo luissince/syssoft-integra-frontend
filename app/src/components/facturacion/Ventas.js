@@ -20,6 +20,8 @@ class Ventas extends React.Component {
             loading: false,
             lista: [],
 
+            idProyecto: this.props.token.project.idProyecto,
+
             opcion: 0,
             paginacion: 0,
             totalPaginacion: 0,
@@ -90,6 +92,7 @@ class Ventas extends React.Component {
                 params: {
                     "opcion": opcion,
                     "buscar": buscar,
+                    "idProyecto": this.state.idProyecto,
                     "posicionPagina": ((this.state.paginacion - 1) * this.state.filasPorPagina),
                     "filasPorPagina": this.state.filasPorPagina
                 }
@@ -192,7 +195,7 @@ class Ventas extends React.Component {
                                 <thead>
                                     <tr>
                                         <th width="5%">#</th>
-                                        <th width="15%">Cliente</th>
+                                        <th width="10%">Cliente</th>
                                         <th width="10%">Comprobante</th>
                                         <th width="10%">Fecha</th>
                                         <th width="10%">Tipo</th>
@@ -223,7 +226,7 @@ class Ventas extends React.Component {
                                                         <td>{item.documento}{<br />}{item.informacion}</td>
                                                         <td>{item.comprobante}{<br />}{item.serie + "-" + item.numeracion}</td>
                                                         <td>{<span>{item.fecha}</span>}{<br></br>}{<span>{timeForma24(item.hora)}</span>}</td>
-                                                        <td className="text-center">
+                                                        <td>
                                                             {item.tipo === 1
                                                                 ? <span>Contado</span>
                                                                 : <span>Crédito</span>}
@@ -249,7 +252,7 @@ class Ventas extends React.Component {
                                                         <td className="text-center">
                                                             <button
                                                                 className="btn btn-outline-danger btn-sm"
-                                                                disabled={item.estado === 1 ? true : false}
+                                                                // disabled={item.estado === 1 ? true : false}
                                                                 title="Anular" onClick={() => this.onEventAnularVenta(item.idVenta)}>
                                                                 <i className="fa fa-remove"></i>
                                                             </button>

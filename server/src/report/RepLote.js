@@ -1,7 +1,7 @@
 const path = require('path');
 const PDFDocument = require("pdfkit-table");
 const getStream = require('get-stream');
-const {formatMoney } = require('../tools/Tools');
+const { formatMoney } = require('../tools/Tools');
 
 class RepLote {
 
@@ -9,8 +9,9 @@ class RepLote {
 
         const cabecera = data.cabecera
 
-        try{
+        try {
             const doc = new PDFDocument({
+                font: 'Helvetica',
                 margins: {
                     top: 40,
                     bottom: 40,
@@ -19,20 +20,24 @@ class RepLote {
                 }
             });
 
+            doc.info["Title"] = "Detalle del Lote.pdf"
+
             let orgX = doc.x;
             let orgY = doc.y;
+            let cabeceraY = orgY + 80;
+            let titleX = orgX + 150;
+            let medioX = (doc.page.width - doc.options.margins.left - doc.options.margins.right) / 2;
+            console.log(medioX)
 
-            let h1 = 14;
-            let h2 = 12;
-            let h3 = 10;
+            let h1 = 13;
+            let h2 = 11;
+            let h3 = 9;
 
             doc.image(path.join(__dirname, "..", "path/to/logo.png"), doc.x, doc.y, { width: 75, });
 
-            let postImgY = doc.y;
-
             doc.fontSize(h1).text(
                 `${sedeInfo.nombreEmpresa}`,
-                orgX + 150,
+                titleX,
                 orgY,
                 {
                     width: 250,
@@ -40,12 +45,10 @@ class RepLote {
                 }
             );
 
-            let titX = doc.x;
-
             doc.fontSize(h3).text(
                 `RUC: ${sedeInfo.ruc}\n${sedeInfo.direccion}\nCelular: ${sedeInfo.celular} / Telefono: ${sedeInfo.telefono}`,
-                doc.x,
-                doc.y,
+                titleX,
+                orgY + 17,
                 {
                     width: 250,
                     align: "center",
@@ -54,18 +57,19 @@ class RepLote {
 
             doc.fontSize(h2).text(
                 "RESUMEN DE LOTE",
-                titX,
-                postImgY + 10,
+                medioX,
+                cabeceraY,
                 {
                     width: 250,
-                    align: "center",
                 }
             );
+
+            doc.x = doc.options.margins.left;
 
             doc.fontSize(h3).text(
                 "COMPROBANTE",
                 orgX,
-                doc.y
+                doc.y + 14
             )
 
             doc.fontSize(h3).text(
@@ -87,8 +91,6 @@ class RepLote {
                 orgX,
                 doc.y + 5
             );
-
-            let afterInfoY = doc.y;
 
             doc.fontSize(h3).text(
                 "MEDIDAS",
@@ -114,43 +116,44 @@ class RepLote {
                 doc.y + 5
             );
 
-            doc.fontSize(h2).text(
-                "DETALLE DE PAGOS ASOCIADOS",
-                titX,
-                afterInfoY + 10,
-                {
-                    width: 250,
-                    align: "center",
-                }
-            );
+            doc.moveDown();
+
+            // doc.fontSize(h2).text(
+            //     "DETALLE DE PAGOS ASOCIADOS",
+            //     titX,
+            //     afterInfoY + 10,
+            //     {
+            //         width: 250,
+            //         align: "center",
+            //     }
+            // );
 
             let content = data.detalle.map((item, index) => {
-                return [item.concepto, formatMoney(item.monto) , item.metodo, item.banco, item.fecha]
+                return [item.concepto, formatMoney(item.monto), item.metodo, item.banco, item.fecha]
             })
 
             const table1 = {
                 //title: "CRONOGRAMA DE PAGOS MENSUALES VENTA AL CRÉDITO",
-                //subtitle: "",
+                subtitle: "DETALLE DE PAGOS ASOCIADOS",
                 headers: ["Concepto", "Monto", "Método", "Banco", "Fecha"],
                 rows: content
             };
 
             doc.table(table1, {
-                prepareHeader: () => doc.font("Helvetica-Bold").fontSize(11),
+                prepareHeader: () => doc.font("Helvetica-Bold").fontSize(h3),
                 prepareRow: () => {
-                    doc.font("Helvetica").fontSize(10);
+                    doc.font("Helvetica").fontSize(h3);
                 },
                 width: doc.page.width - doc.options.margins.left - doc.options.margins.right,
                 x: orgX,
                 y: doc.y + 10,
-
             });
 
 
             doc.end();
 
             return getStream.buffer(doc);
-        }catch (error) {
+        } catch (error) {
             // return error.message;
             return "Se genero un error al generar el reporte.";
         }

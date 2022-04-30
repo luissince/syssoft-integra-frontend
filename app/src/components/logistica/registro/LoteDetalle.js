@@ -1,5 +1,6 @@
 import React from 'react';
 import axios from 'axios';
+import CryptoJS from 'crypto-js';
 import {
     formatMoney,
     spinnerLoading,
@@ -51,8 +52,6 @@ class LoteDetalle extends React.Component {
                 }
             });
 
-            console.log(result);
-
             await this.setStateAsync({
                 lote: result.data.cabecera,
                 detalle: result.data.detalle,
@@ -66,14 +65,22 @@ class LoteDetalle extends React.Component {
         }
     }
 
-    async onEventImprimir(){
+    async onEventImprimir() {
+        const data = {
+            "idLote": this.state.idLote,
+            "idSede": "SD0001"
+        }
+
+        let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
+        let params = new URLSearchParams({ "params": ciphertext });
+        window.open("/api/lote/replotedetalle?" + params, "_blank");
 
         //Despliegue 
-        window.open("/api/lote/replotedetalle?idLote="+this.state.idLote+"&idSede=SD0001", "_blank");
+        // window.open("/api/lote/replotedetalle?idLote=" + this.state.idLote + "&idSede=SD0001", "_blank");
 
         //Desarrollo
         // try {
-            
+
         //     let result = await axios.get("/api/lote/replotedetalle", {
         //         responseType: "blob",
         //         params: {
@@ -115,100 +122,101 @@ class LoteDetalle extends React.Component {
                     this.state.loading ?
                         <div className="clearfix absolute-all bg-white">
                             {spinnerLoading(this.state.msgLoading)}
-                        </div> : null
-                }
+                        </div> :
+                        <>
+                            <div className='row'>
+                                <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
+                                    <div className="form-group">
+                                        <h5>
+                                            <span role="button" onClick={() => this.props.history.goBack()}><i className="bi bi-arrow-left-short"></i></span> Lote
+                                            <small className="text-secondary"> Detalle</small>
+                                        </h5>
+                                    </div>
+                                </div>
+                            </div>
 
-                <div className='row'>
-                    <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
-                        <div className="form-group">
-                            <h5>
-                                <span role="button" onClick={() => this.props.history.goBack()}><i className="bi bi-arrow-left-short"></i></span> Lotes
-                                <small className="text-secondary">Lista</small>
-                            </h5>
-                        </div>
-                    </div>
-                </div>
+                            <div className="row">
+                                <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                    <div className="form-group">
+                                        <button type="button" className="btn btn-light" onClick={() => this.onEventImprimir()}><i className="fa fa-print"></i> Imprimir</button>
+                                        {" "}
+                                        <button type="button" className="btn btn-light"><i className="fa fa-file-archive-o"></i> Adjuntar</button>
+                                    </div>
+                                </div>
+                            </div>
 
-                <div className="row">
-                    <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                        <div className="form-group">
-                            <button type="button" className="btn btn-light" onClick={() => this.onEventImprimir()}><i className="fa fa-print"></i> Imprimir</button>
-                            {" "}
-                            <button type="button" className="btn btn-light"><i className="fa fa-file-archive-o"></i> Adjuntar</button>
-                        </div>
-                    </div>
-                </div>
+                            <div className="row ">
+                                <div className="col-5">
+                                    <div className="form-group">
+                                        --Descripcion-- <br></br>
+                                        Manzana: <strong>{manzana}</strong><br></br>
+                                        Descripción de Lote: <strong>{lote}</strong> <br></br>
+                                        Costo Aproximado (S/.): <strong>{formatMoney(costo)} </strong><br></br>
+                                        Precio de Venta Contado (S/.): <strong>{formatMoney(precio)} </strong><br></br>
+                                        Estado:<strong> {lotestado} </strong> <br></br> <br></br>
 
-                <div className="row ">
-                    <div className="col-5">
-                        <div className="form-group">
-                            --Descripcion-- <br></br>
-                            Manzana: <strong>{manzana}</strong><br></br>
-                            Descripción de Lote: <strong>{lote}</strong> <br></br>
-                            Costo Aproximado (S/.): <strong>{formatMoney(costo)} </strong><br></br>
-                            Precio de Venta Contado (S/.): <strong>{formatMoney(precio)} </strong><br></br>
-                            Estado:<strong> {lotestado} </strong> <br></br> <br></br>
+                                        --Medidas-- <br></br>
+                                        Medida Frontal (ML):<strong> </strong> <br></br>
+                                        Costado Derecho (ML): <strong> </strong>  <br></br>
+                                        Costado Izquierdo (ML): <strong> </strong> <br></br>
+                                        Medida Fondo (ML): <strong> </strong> <br></br>
+                                        Area Lote (ML): <strong> </strong> <br></br>
+                                        N° Partida: <strong> </strong> <br></br> <br></br>
 
-                            --Medidas-- <br></br>
-                            Medida Frontal (ML):<strong> </strong> <br></br>
-                            Costado Derecho (ML): <strong> </strong>  <br></br>
-                            Costado Izquierdo (ML): <strong> </strong> <br></br>
-                            Medida Fondo (ML): <strong> </strong> <br></br>
-                            Area Lote (ML): <strong> </strong> <br></br>
-                            N° Partida: <strong> </strong> <br></br> <br></br>
+                                        --Límite-- <br></br>
+                                        Limite, Frontal / Norte / Noroeste: <strong> </strong> <br></br>
+                                        Límite, Derecho / Este / Sureste: <strong> </strong> <br></br>
+                                        Límite, Iquierdo / Sur / Sureste: <strong> </strong> <br></br>
+                                        Límite, Posterior / Oeste / Noroeste:<strong> </strong>  <br></br>
+                                        Ubicación del Lote: <br></br>
+                                    </div>
+                                </div>
+                                <div className="col-7">
+                                    Comprobante: <strong>{comprobante + " " + serie + "-" + numeracion} </strong> <br></br>
+                                    Cliente: <strong>{documento + " " + cliente} </strong> <br></br>
+                                    Fecha: <strong>{fecha + " " + hora} </strong> <br></br>
+                                    Notas: <strong> </strong> <br></br>
+                                    Forma de venta: <strong>{tipo === 1 ? "CONTADO" : "CRÉDITO"} </strong> <br></br>
+                                    Estado: <strong>{estado === 1 ? "COBRADO" : "POR COBRAR"} </strong> <br></br>
+                                    Total: <strong>{simbolo + " " + formatMoney(monto)} </strong> <br></br>
+                                    Archivos adjuntos: <strong> </strong> <br></br>
+                                </div>
+                            </div>
 
-                            --Límite-- <br></br>
-                            Limite, Frontal / Norte / Noroeste: <strong> </strong> <br></br>
-                            Límite, Derecho / Este / Sureste: <strong> </strong> <br></br>
-                            Límite, Iquierdo / Sur / Sureste: <strong> </strong> <br></br>
-                            Límite, Posterior / Oeste / Noroeste:<strong> </strong>  <br></br>
-                            Ubicación del Lote: <br></br>
-                        </div>
-                    </div>
-                    <div className="col-7">
-                        Comprobante: <strong>{comprobante + " " + serie + "-" + numeracion} </strong> <br></br>
-                        Cliente: <strong>{documento + " " + cliente} </strong> <br></br>
-                        Fecha: <strong>{fecha + " " + hora} </strong> <br></br>
-                        Notas: <strong> </strong> <br></br>
-                        Forma de venta: <strong>{tipo === 1 ? "CONTADO" : "CRÉDITO"} </strong> <br></br>
-                        Estado: <strong>{estado === 1 ? "COBRADO" : "POR COBRAR"} </strong> <br></br>
-                        Total: <strong>{simbolo + " " + formatMoney(monto)} </strong> <br></br>
-                        Archivos adjuntos: <strong> </strong> <br></br>
-                    </div>
-                </div>
-
-                <div className="row">
-                    <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                        <div className="table-responsive">
-                            <table className="table table-light table-striped">
-                                <thead>
-                                    <tr>
-                                        <th width="20%">Concepto</th>
-                                        <th width="20%">Monto</th>
-                                        <th width="20%">Método</th>
-                                        <th width="20%">Banco</th>
-                                        <th width="20%">Fecha</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {
-                                        this.state.detalle.map((item, index) => {
-                                            return (
-                                                <tr key={index}>
-                                                    <td>{item.concepto === "" ? "CUOTA" : item.concepto}</td>
-                                                    <td>{item.simbolo + " " + formatMoney(item.monto)}</td>
-                                                    <td>{item.metodo}</td>
-                                                    <td>{item.banco} </td>
-                                                    <td>{item.fecha}{<br />}{timeForma24(item.hora)} </td>
+                            <div className="row">
+                                <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                    <div className="table-responsive">
+                                        <table className="table table-light table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th width="20%">Concepto</th>
+                                                    <th width="20%">Monto</th>
+                                                    <th width="20%">Método</th>
+                                                    <th width="20%">Banco</th>
+                                                    <th width="20%">Fecha</th>
                                                 </tr>
-                                            )
-                                        })
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
+                                            </thead>
+                                            <tbody>
+                                                {
+                                                    this.state.detalle.map((item, index) => {
+                                                        return (
+                                                            <tr key={index}>
+                                                                <td>{item.concepto === "" ? "CUOTA" : item.concepto}</td>
+                                                                <td>{item.simbolo + " " + formatMoney(item.monto)}</td>
+                                                                <td>{item.metodo}</td>
+                                                                <td>{item.banco} </td>
+                                                                <td>{item.fecha}{<br />}{timeForma24(item.hora)} </td>
+                                                            </tr>
+                                                        )
+                                                    })
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </>
+                }
             </>
         );
     }

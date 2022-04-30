@@ -1,6 +1,7 @@
 import React from 'react';
 import axios from 'axios';
 import {
+    numberFormat,
     showModal,
     hideModal,
     viewModal,
@@ -480,7 +481,7 @@ class Bancos extends React.Component {
                                                         <td>{item.tipoCuenta.toUpperCase()}</td>
                                                         <td>{item.moneda}</td>
                                                         <td>{item.numCuenta}</td>
-                                                        <td>{0}</td>
+                                                        <td className={`text-right ${item.saldo >= 0 ? "text-success" : "text-danger"}`}>{numberFormat(item.saldo, item.codiso)}</td>
                                                         <td className="text-center">
                                                             <button
                                                                 className="btn btn-outline-info btn-sm"
