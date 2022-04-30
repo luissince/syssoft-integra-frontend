@@ -278,7 +278,7 @@ class Factura {
                 idVenta,
                 idPlazo,
                 precio) 
-                VALUES (?,?,?)`, [
+                VALUES (?,?,?,?)`, [
                     idCobro,
                     idVenta,
                     0,
