@@ -276,10 +276,12 @@ class Factura {
                 await conec.execute(connection, `INSERT INTO cobroVenta(
                 idCobro,
                 idVenta,
+                idPlazo,
                 precio) 
                 VALUES (?,?,?)`, [
                     idCobro,
                     idVenta,
+                    0,
                     montoTotal
                 ]);
 
@@ -407,7 +409,6 @@ class Factura {
 
                 let ultimoDate = new Date(inicioDate);
                 ultimoDate.setMonth(ultimoDate.getMonth() + parseInt(req.body.numCuota));
-
 
                 let cuotaMes = (montoTotal - req.body.inicial) / req.body.numCuota;
                 while (inicioDate < ultimoDate) {
