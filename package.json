@@ -12,7 +12,7 @@
     "build": "npm run build --workspace=app",
     "start": "npm run start --workspace=server",
     "stop": "pm2 stop $ID & pm2 delete $ID",
-    "deploy": "pm2 start ecosystem.config --env production",
+    "deploy": "pm2 start ecosystem.config.js --env production",
     "dev:app": "npm start --workspace=app",
     "dev:server": "npm run dev --workspace=server",
     "save": "git add . && git commit -m 'act'",
