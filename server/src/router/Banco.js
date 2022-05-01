@@ -147,7 +147,7 @@ router.post('/update', async function (req, res) {
             req.body.idUsuario,
             req.body.idBanco
         ]);
-
+        
         await conec.commit(connection);
         res.status(200).send('Datos actulizados correctamente');
     } catch (error) {
