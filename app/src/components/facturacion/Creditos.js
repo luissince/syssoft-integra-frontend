@@ -183,7 +183,7 @@ class Creditos extends React.Component {
                                 <thead>
                                     <tr>
                                         <th width="5%" className="text-center">#</th>
-                                        <th width="15%">Cliente</th>
+                                        <th width="10%">Cliente</th>
                                         <th width="10%">Comprobante</th>
                                         <th width="10%">N° Cuotas</th>
                                         <th width="10%">Sig. Pago</th>

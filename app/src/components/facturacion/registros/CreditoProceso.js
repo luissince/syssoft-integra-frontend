@@ -1,5 +1,6 @@
 import React from 'react';
 import axios from 'axios';
+import CryptoJS from 'crypto-js';
 import {
     formatMoney,
     spinnerLoading,
@@ -210,30 +211,16 @@ class CreditoProceso extends React.Component {
         })
     }
 
-    async onEventImprimir(){
+    async onEventImprimir() {
+        const data = {
+            "idSede": "SD0001",
+            "idVenta": this.state.venta.idVenta,
+            "proyecto": this.props.token.project.nombre,
+        }
 
-        //Despliegue 
-        window.open("/api/factura/repcreditolote?idSede=SD0001&idVenta="+this.state.venta.idVenta+"&proyecto="+this.props.token.project.nombre, "_blank");
-
-        //Desarrollo
-        // try {
-            
-        //     let result = await axios.get("/api/factura/repcreditolote", {
-        //         responseType: "blob",
-        //         params: {
-        //             "idSede": 'SD0001',
-        //             "idVenta": idVenta,
-        //              "proyecto": this.props.token.project.nombre,
-        //         }
-        //     });
-
-        //     const file = new Blob([result.data], { type: "application/pdf" });
-        //     const fileURL = URL.createObjectURL(file);
-        //     window.open(fileURL, "_blank");
-
-        // } catch (error) {
-        //     console.log(error)
-        // }
+        let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
+        let params = new URLSearchParams({ "params": ciphertext });
+        window.open("/api/factura/repcreditolote?" + params, "_blank");
     }
 
     render() {
@@ -269,7 +256,7 @@ class CreditoProceso extends React.Component {
 
                                 <div className="form-row">
                                     <div className="form-group col-md-6">
-                                        <label>Cuenta bancaria:</label>
+                                        <label>Cuenta bancaria <i className="fa fa-asterisk text-danger small"></i></label>
                                         <div className="input-group">
                                             <select
                                                 className="form-control"
@@ -283,7 +270,7 @@ class CreditoProceso extends React.Component {
                                                 <option value="">- Seleccione -</option>
                                                 {
                                                     this.state.bancos.map((item, index) => (
-                                                        <option key={index} value={item.idBanco}>{item.nombre + " - " + item.tipoCuenta}</option>
+                                                        <option key={index} value={item.idBanco}>{item.nombre}</option>
                                                     ))
                                                 }
                                             </select>
@@ -291,7 +278,7 @@ class CreditoProceso extends React.Component {
                                     </div>
 
                                     <div className="form-group col-md-6">
-                                        <label>Metodo de pago:</label>
+                                        <label>Metodo de pago <i className="fa fa-asterisk text-danger small"></i></label>
                                         <select
                                             className="form-control"
                                             ref={this.refMetodoPago}
@@ -313,7 +300,7 @@ class CreditoProceso extends React.Component {
 
                                 <div className="form-row">
                                     <div className="form-group col-md-12">
-                                        <label>Observación:</label>
+                                        <label>Observación</label>
                                         <input
                                             type="text"
                                             className="form-control"

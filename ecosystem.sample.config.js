@@ -2,7 +2,7 @@ module.exports = {
     apps: [
         {
             name: "inmobilaria",
-            script: "./index.js",
+            script: "./server/index.js",
             watch: true,
             env: {
                 "PORT": 5000,

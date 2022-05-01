@@ -14,14 +14,18 @@ router.get('/list', async function (req, res) {
         WHEN b.tipoCuenta = 2 THEN 'Tarjeta'
         ELSE 'Efectivo' END AS 'tipoCuenta',
         m.nombre as moneda,
+        m.codiso,
         b.numCuenta,
-        b.cci
-        FROM banco AS b INNER JOIN moneda AS m
-        ON m.idMoneda = b.idMoneda 
+        b.cci,
+        IFNULL(SUM(CASE WHEN bd.tipo = 1 THEN bd.monto ELSE -bd.monto END),0)AS saldo
+        FROM banco AS b 
+        INNER JOIN moneda AS m ON m.idMoneda = b.idMoneda 
+        LEFT JOIN bancoDetalle AS bd ON bd.idBanco = b.idBanco 
         WHERE 
         ? = 0
         OR
         ? = 1 and b.nombre like concat(?,'%')
+        GROUP BY b.idBanco
         LIMIT ?,?`, [
             parseInt(req.query.opcion),
 

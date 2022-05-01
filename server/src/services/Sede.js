@@ -5,7 +5,6 @@ class Sede {
 
     async listar(req) {
         try {
-
             let lista = await conec.query(`SELECT 
                 idSede, ruc, razonSocial, nombreEmpresa, nombreSede, direccion, celular, telefono, email, web
                 FROM sede 
@@ -21,7 +20,7 @@ class Sede {
 
                 parseInt(req.query.posicionPagina),
                 parseInt(req.query.filasPorPagina)
-            ])
+            ]);
 
             let resultLista = lista.map(function (item, index) {
                 return {
@@ -41,18 +40,13 @@ class Sede {
                 req.query.buscar,
             ]);
 
-            return {
-                "result": resultLista, "total": total[0].Total
-            }
-
+            return { "result": resultLista, "total": total[0].Total };
         } catch (error) {
-            console.log(error)
-            return "Error interno de conexión, intente nuevamente."
+            return "Error interno de conexión, intente nuevamente.";
         }
     }
 
     async add(req) {
-
         let connection = null;
         try {
             connection = await conec.beginTransaction();
@@ -124,17 +118,14 @@ class Sede {
 
                 req.body.imagen,
                 req.body.extension
-            ])
+            ]);
 
             await conec.commit(connection);
-            // res.status(200).send('Datos insertados correctamente')
             return "insert";
-
         } catch (err) {
             if (connection != null) {
-                conec.rollback(connection);
+                await conec.rollback(connection);
             }
-            // res.status(500).send(connection);
             return 'Error interno de conexión, intente nuevamente.';
         }
     }
@@ -175,17 +166,12 @@ class Sede {
             ]);
 
             if (result.length > 0) {
-                // res.status(200).send(result[0]);
-                return result[0]
+                return result[0];
             } else {
-                // res.status(400).send("Datos no encontrados");
-                return "Datos no encontrados"
+                return "Datos no encontrados";
             }
-
         } catch (error) {
-            // res.status(500).send("Error interno de conexión, intente nuevamente.");
-            console.log(error)
-            return "Error interno de conexión, intente nuevamente."
+            return "Error interno de conexión, intente nuevamente.";
         }
     }
 
@@ -235,27 +221,23 @@ class Sede {
                 req.body.imagen,
                 req.body.extension,
                 req.body.idSede
-            ])
+            ]);
 
-            await conec.commit(connection)
-            // res.status(200).send('Datos actulizados correctamente')
+            await conec.commit(connection);
             return "update";
         } catch (error) {
             if (connection != null) {
-                conec.rollback(connection);
+                await conec.rollback(connection);
             }
-            // res.status(500).send(error);
-            return "Error interno de conexión, intente nuevamente."
+            return "Error interno de conexión, intente nuevamente.";
         }
     }
 
     async listarCombo(req) {
         try {
             let result = await conec.query('SELECT idSede,nombreSede FROM sede');
-            // res.status(200).send(result);
             return result;
         } catch (error) {
-            // res.status(500).send("Error interno de conexión, intente nuevamente.");
             return "Error interno de conexión, intente nuevamente."
         }
     }
@@ -277,7 +259,6 @@ class Sede {
             return 'Error interno de conexión, intente nuevamente.';
         }
     }
-
 }
 
 module.exports = Sede

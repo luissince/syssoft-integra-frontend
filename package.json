@@ -11,6 +11,8 @@
   "scripts": {
     "build": "npm run build --workspace=app",
     "start": "npm run start --workspace=server",
+    "stop": "pm2 stop $ID & pm2 delete $ID",
+    "deploy": "pm2 start ecosystem.config.js --env production",
     "dev:app": "npm start --workspace=app",
     "dev:server": "npm run dev --workspace=server",
     "save": "git add . && git commit -m 'act'",
@@ -21,10 +23,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "bcrypt": "^5.0.1",
-    "carbone": "^3.2.3",
-    "get-stream": "^6.0.1",
-    "pdfkit": "^0.13.0",
-    "pdfkit-table": "^0.1.86"
+    "crypto-js": "^4.1.1"
   }
 }
