@@ -3,11 +3,14 @@ const router = express.Router();
 const Factura = require('../services/Factura');
 const Sede = require('../services/Sede');
 const RepCuota = require('../report/RepCuota');
+const RepFactura = require('../report/RepFactura');
 const { decrypt } = require('../tools/CryptoJS');
+const { route } = require('./Logins');
 
 const factura = new Factura();
 const sede = new Sede();
 const repCuota = new RepCuota();
+const repFactura = new RepFactura();
 
 router.get("/list", async function (req, res) {
     const result = await factura.listar(req)
@@ -62,6 +65,38 @@ router.get("/credito/detalle", async function (req, res) {
         res.status(500).send(result);
     }
 });
+
+router.get('/repcomprobante', async function (req, res) {
+    const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
+    console.log(decryptedData);
+    req.query.idSede = decryptedData.idSede;
+    req.query.idVenta = decryptedData.idVenta;
+    // req.query.proyecto = decryptedData.proyecto;
+
+    const sedeInfo = await sede.infoSedeReporte(req)
+
+    if (typeof sedeInfo !== 'object') {
+        res.status(500).send(sedeInfo)
+        return;
+    }
+
+    const detalle = await factura.dataId(req)
+
+    if (typeof detalle === 'object') {
+
+        let data = await repFactura.repComprobante(req, sedeInfo, detalle);
+
+        if (typeof data === 'string') {
+            res.status(500).send(data);
+        } else {
+            res.setHeader('Content-disposition', 'inline; filename=Boleta.pdf');
+            res.contentType("application/pdf");
+            res.send(data);
+        }
+    } else {
+        res.status(500).send(detalle);
+    }
+})
 
 router.get("/repcreditolote", async function (req, res) {
     const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');

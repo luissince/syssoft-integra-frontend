@@ -145,41 +145,134 @@ class LoteDetalle extends React.Component {
                                 </div>
                             </div>
 
-                            <div className="row ">
-                                <div className="col-5">
-                                    <div className="form-group">
-                                        --Descripcion-- <br></br>
-                                        Manzana: <strong>{manzana}</strong><br></br>
-                                        Descripción de Lote: <strong>{lote}</strong> <br></br>
-                                        Costo Aproximado (S/.): <strong>{formatMoney(costo)} </strong><br></br>
-                                        Precio de Venta Contado (S/.): <strong>{formatMoney(precio)} </strong><br></br>
-                                        Estado:<strong> {lotestado} </strong> <br></br> <br></br>
-
-                                        --Medidas-- <br></br>
-                                        Medida Frontal (ML):<strong> </strong> <br></br>
-                                        Costado Derecho (ML): <strong> </strong>  <br></br>
-                                        Costado Izquierdo (ML): <strong> </strong> <br></br>
-                                        Medida Fondo (ML): <strong> </strong> <br></br>
-                                        Area Lote (ML): <strong> </strong> <br></br>
-                                        N° Partida: <strong> </strong> <br></br> <br></br>
-
-                                        --Límite-- <br></br>
-                                        Limite, Frontal / Norte / Noroeste: <strong> </strong> <br></br>
-                                        Límite, Derecho / Este / Sureste: <strong> </strong> <br></br>
-                                        Límite, Iquierdo / Sur / Sureste: <strong> </strong> <br></br>
-                                        Límite, Posterior / Oeste / Noroeste:<strong> </strong>  <br></br>
-                                        Ubicación del Lote: <br></br>
+                            <div className="row">
+                                <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                    <p class="lead">Descripcion</p>
+                                    <div className="table-responsive">
+                                        <table className="table table-borderless">
+                                            <thead>
+                                                <tr>
+                                                    <th className="w-20  font-weight-normal p-0">Comprobante:</th>
+                                                    <th className="w-80 font-weight-bold p-0">{comprobante + " " + serie + "-" + numeracion}</th>
+                                                </tr>
+                                                <tr>
+                                                    <th className="w-20  font-weight-normal p-0">Cliente:</th>
+                                                    <th className="w-80 font-weight-bold p-0">{documento + " " + cliente}</th>
+                                                </tr>
+                                                <tr>
+                                                    <th className="w-20  font-weight-normal p-0">Fecha:</th>
+                                                    <th className="w-80 font-weight-bold p-0">{fecha + " " + hora}</th>
+                                                </tr>
+                                                <tr>
+                                                    <th className="w-20  font-weight-normal p-0">Notas:</th>
+                                                    <th className="w-80 font-weight-bold p-0">{ }</th>
+                                                </tr>
+                                                <tr>
+                                                    <th className="w-20  font-weight-normal p-0">Forma de venta:</th>
+                                                    <th className="w-80 font-weight-bold p-0"> {tipo === 1 ? "CONTADO" : "CRÉDITO"}</th>
+                                                </tr>
+                                                <tr>
+                                                    <th className="w-20  font-weight-normal p-0">Estado:</th>
+                                                    <th className="w-80 font-weight-bold p-0"> {estado === 1 ? "COBRADO" : "POR COBRAR"}</th>
+                                                </tr>
+                                                <tr>
+                                                    <th className="w-20  font-weight-normal p-0">Total:</th>
+                                                    <th className="w-80 font-weight-bold p-0"> {simbolo + " " + formatMoney(monto)}</th>
+                                                </tr>
+                                                <tr>
+                                                    <th className="w-20  font-weight-normal p-0">Archivos adjuntos:</th>
+                                                    <th className="w-80 font-weight-bold p-0"> { }</th>
+                                                </tr>
+                                            </thead>
+                                        </table>
                                     </div>
                                 </div>
-                                <div className="col-7">
-                                    Comprobante: <strong>{comprobante + " " + serie + "-" + numeracion} </strong> <br></br>
-                                    Cliente: <strong>{documento + " " + cliente} </strong> <br></br>
-                                    Fecha: <strong>{fecha + " " + hora} </strong> <br></br>
-                                    Notas: <strong> </strong> <br></br>
-                                    Forma de venta: <strong>{tipo === 1 ? "CONTADO" : "CRÉDITO"} </strong> <br></br>
-                                    Estado: <strong>{estado === 1 ? "COBRADO" : "POR COBRAR"} </strong> <br></br>
-                                    Total: <strong>{simbolo + " " + formatMoney(monto)} </strong> <br></br>
-                                    Archivos adjuntos: <strong> </strong> <br></br>
+                            </div>
+
+
+                            <div className="row">
+                                <div className="col-lg-4 col-md-4 col-sm-12 col-xs-12">
+                                    <p class="lead">Descripcion</p>
+                                    <div className="table-responsive">
+                                        <table className="table table-borderless">
+                                            <thead>
+                                                <tr>
+                                                    <th className="w-35 font-weight-normal p-0">Manzana:</th>
+                                                    <th className="w-65 font-weight-bold p-0">{manzana}</th>
+                                                </tr>
+                                                <tr>
+                                                    <th className="w-35 font-weight-normal p-0">Lote:</th>
+                                                    <th className="w-65 font-weight-bold p-0">{lote}</th>
+                                                </tr>
+                                                <tr>
+                                                    <th className="w-35 font-weight-normal p-0">Estado:</th>
+                                                    <th className="w-65 font-weight-bold p-0"> {lotestado}</th>
+                                                </tr>
+                                            </thead>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div className="col-lg-4 col-md-4 col-sm-12 col-xs-12">
+                                    <p class="lead">Medidas</p>
+                                    <div className="table-responsive">
+                                        <table className="table table-borderless">
+                                            <thead>
+                                                <tr>
+                                                    <th className="w-35 font-weight-normal p-0">Medida Frontal (ML)</th>
+                                                    <th className="w-65 font-weight-bold p-0">{ }</th>
+                                                </tr>
+                                                <tr>
+                                                    <th className="w-35 font-weight-normal p-0">Costado Derecho (ML)</th>
+                                                    <th className="w-65 font-weight-bold p-0">{ }</th>
+                                                </tr>
+                                                <tr>
+                                                    <th className="w-35 font-weight-normal p-0">Costado Izquierdo (ML)</th>
+                                                    <th className="w-65 font-weight-bold p-0">{ }</th>
+                                                </tr>
+                                                <tr>
+                                                    <th className="w-35 font-weight-normal p-0"> Medida Fondo (ML)</th>
+                                                    <th className="w-65 font-weight-bold p-0">{ }</th>
+                                                </tr>
+                                                <tr>
+                                                    <th className="w-35 font-weight-normal p-0"> Area Lote (ML)</th>
+                                                    <th className="w-65 font-weight-bold p-0"> { }</th>
+                                                </tr>
+                                                <tr>
+                                                    <th className="w-35 font-weight-normal p-0"> N° Partida</th>
+                                                    <th className="w-65 font-weight-bold p-0"> { }</th>
+                                                </tr>
+                                            </thead>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div className="col-lg-4 col-md-4 col-sm-12 col-xs-12">
+                                    <p class="lead">Límites</p>
+                                    <div className="table-responsive">
+                                        <table className="table table-borderless">
+                                            <thead>
+                                                <tr>
+                                                    <th className="w-35 font-weight-normal p-0">Limite, Frontal / Norte / Noroeste</th>
+                                                    <th className="w-65 font-weight-bold p-0">{ }</th>
+                                                </tr>
+                                                <tr>
+                                                    <th className="w-35 font-weight-normal p-0">Límite, Derecho / Este / Sureste</th>
+                                                    <th className="w-65 font-weight-bold p-0">{ }</th>
+                                                </tr>
+                                                <tr>
+                                                    <th className="w-35 font-weight-normal p-0">Límite, Iquierdo / Sur / Sureste</th>
+                                                    <th className="w-65 font-weight-bold p-0">{ }</th>
+                                                </tr>
+                                                <tr>
+                                                    <th className="w-35 font-weight-normal p-0">Límite, Posterior / Oeste / Noroeste</th>
+                                                    <th className="w-65 font-weight-bold p-0">{ }</th>
+                                                </tr>
+                                                <tr>
+                                                    <th className="w-35 font-weight-normal p-0">Ubicación del Lote</th>
+                                                    <th className="w-65 font-weight-bold p-0"> { }</th>
+                                                </tr>
+                                            </thead>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
 
@@ -198,17 +291,20 @@ class LoteDetalle extends React.Component {
                                             </thead>
                                             <tbody>
                                                 {
-                                                    this.state.detalle.map((item, index) => {
-                                                        return (
-                                                            <tr key={index}>
-                                                                <td>{item.concepto === "" ? "CUOTA" : item.concepto}</td>
-                                                                <td>{item.simbolo + " " + formatMoney(item.monto)}</td>
-                                                                <td>{item.metodo}</td>
-                                                                <td>{item.banco} </td>
-                                                                <td>{item.fecha}{<br />}{timeForma24(item.hora)} </td>
-                                                            </tr>
-                                                        )
-                                                    })
+                                                    this.state.detalle.length === 0 ?
+                                                        <tr><td colspan="5" className="text-center">No hay cobros asociados.</td></tr>
+                                                        :
+                                                        this.state.detalle.map((item, index) => {
+                                                            return (
+                                                                <tr key={index}>
+                                                                    <td>{item.concepto === "" ? "CUOTA" : item.concepto}</td>
+                                                                    <td>{item.simbolo + " " + formatMoney(item.monto)}</td>
+                                                                    <td>{item.metodo}</td>
+                                                                    <td>{item.banco} </td>
+                                                                    <td>{item.fecha}{<br />}{timeForma24(item.hora)} </td>
+                                                                </tr>
+                                                            )
+                                                        })
                                                 }
                                             </tbody>
                                         </table>

@@ -194,15 +194,15 @@ class Ventas extends React.Component {
                             <table className="table table-striped table-bordered rounded">
                                 <thead>
                                     <tr>
-                                        <th width="5%">#</th>
+                                        <th width="5%" className="text-center">#</th>
                                         <th width="10%">Cliente</th>
                                         <th width="10%">Comprobante</th>
                                         <th width="10%">Fecha</th>
                                         <th width="10%">Tipo</th>
                                         <th width="10%">Total</th>
-                                        <th width="10%">Estado</th>
+                                        <th width="10%" className="text-center">Estado</th>
                                         <th width="5%" className="text-center">Detalle</th>
-                                        <th width="5%" className="text-center">Editar</th>
+                                        {/* <th width="5%" className="text-center">Editar</th> */}
                                         <th width="5%" className="text-center">Anular</th>
                                     </tr>
                                 </thead>
@@ -222,7 +222,7 @@ class Ventas extends React.Component {
                                             this.state.lista.map((item, index) => {
                                                 return (
                                                     <tr key={index}>
-                                                        <td>{item.id}</td>
+                                                        <td className="text-center">{item.id}</td>
                                                         <td>{item.documento}{<br />}{item.informacion}</td>
                                                         <td>{item.comprobante}{<br />}{item.serie + "-" + item.numeracion}</td>
                                                         <td>{<span>{item.fecha}</span>}{<br></br>}{<span>{timeForma24(item.hora)}</span>}</td>
@@ -246,9 +246,9 @@ class Ventas extends React.Component {
                                                                 this.props.history.push({ pathname: `${this.props.location.pathname}/detalle`, search: "?idVenta=" + item.idVenta })
                                                             }}><i className="fa fa-eye"></i></button>
                                                         </td>
-                                                        <td className="text-center">
+                                                        {/* <td className="text-center">
                                                             <button className="btn btn-outline-warning btn-sm" disabled={item.estado === 1 ? true : false} title="Editar" onClick={() => { }}><i className="fa fa-edit"></i></button>
-                                                        </td>
+                                                        </td> */}
                                                         <td className="text-center">
                                                             <button
                                                                 className="btn btn-outline-danger btn-sm"

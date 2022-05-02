@@ -7,6 +7,7 @@ import {
     hideModal,
     viewModal,
     clearModal,
+    ModalAlertDialog,
     ModalAlertInfo,
     ModalAlertSuccess,
     ModalAlertWarning,
@@ -365,6 +366,30 @@ class Lotes extends React.Component {
         this.props.history.push({
             pathname: `${this.props.location.pathname}/detalle`,
             search: "?idLote=" + idLote
+        })
+    }
+
+    onEventDelete(idLote) {
+        ModalAlertDialog("Lote", "¿Estás seguro de eliminar el lote?", async (event) => {
+            if (event) {
+                try {
+                    ModalAlertInfo("Lote", "Procesando información...")
+                    let result = await axios.delete('/api/lote', {
+                        params: {
+                            "idLote": idLote
+                        }
+                    })
+                    ModalAlertSuccess("Lote", result.data, () => {
+                        this.loadInit();
+                    })
+                } catch (error) {
+                    if (error.response !== undefined) {
+                        ModalAlertWarning("Lote", error.response.data)
+                    } else {
+                        ModalAlertWarning("Lote", "Se genero un error interno, intente nuevamente.")
+                    }
+                }
+            }
         })
     }
 
@@ -775,13 +800,28 @@ class Lotes extends React.Component {
                                                             }
                                                         </td>
                                                         <td className="text-center">
-                                                            <button className="btn btn-outline-info btn-sm" title="Detalle" onClick={() => this.onEventMostrar(item.idLote)}><i className="bi bi-eye"></i></button>
+                                                            <button
+                                                                className="btn btn-outline-info btn-sm"
+                                                                title="Detalle"
+                                                                onClick={() => this.onEventMostrar(item.idLote)}>
+                                                                <i className="bi bi-eye"></i>
+                                                            </button>
                                                         </td>
                                                         <td className="text-center">
-                                                            <button className="btn btn-outline-warning btn-sm" title="Editar" onClick={() => this.openModal(item.idLote)}><i className="bi bi-pencil"></i></button>
+                                                            <button
+                                                                className="btn btn-outline-warning btn-sm"
+                                                                title="Editar"
+                                                                onClick={() => this.openModal(item.idLote)}>
+                                                                <i className="bi bi-pencil"></i>
+                                                            </button>
                                                         </td>
                                                         <td className="text-center">
-                                                            <button className="btn btn-outline-danger btn-sm" title="Anular"><i className="bi bi-trash"></i></button>
+                                                            <button
+                                                                className="btn btn-outline-danger btn-sm"
+                                                                title="Anular"
+                                                                onClick={() => this.onEventDelete(item.idLote)}>
+                                                                <i className="bi bi-trash"></i>
+                                                            </button>
                                                         </td>
                                                     </tr>
                                                 )

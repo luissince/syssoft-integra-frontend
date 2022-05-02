@@ -41,9 +41,20 @@ router.get('/id', async function (req, res) {
 router.put('/', async function (req, res) {
     const result = await lote.update(req)
     if (result === "update") {
-        res.status(200).send("Datos actualizados correctamente")
+        res.status(200).send("Los datos se actualizarón correctamente.");
+    } else if (result === "noid") {
+        res.status(400).send("Se genero un problema al tratar de obtener los datos.")
     } else {
         console.log(result)
+        res.status(500).send(result)
+    }
+});
+
+router.delete('/', async function (req, res) {
+    const result = await lote.delete(req);
+    if (result === "delete") {
+        res.status(200).send("Se eliminó correctamente el lote.");
+    } else {
         res.status(500).send(result)
     }
 });

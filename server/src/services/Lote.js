@@ -164,7 +164,17 @@ class Lote {
         try {
             connection = await conec.beginTransaction();
 
-            if (req.body.estado === 3) {
+            let lote = await conec.execute(connection, `SELECT estado FROM lote
+            WHERE idLote = ? `, [
+                req.body.idLote
+            ]);
+
+            if (lote.length === 0) {
+                await conec.rollback(connection);
+                return "noid";
+            }
+
+            if (lote[0].estado === 3) {
                 await conec.execute(connection, `UPDATE lote SET        
                     idManzana = ?,
                     descripcion = ?,
@@ -198,7 +208,6 @@ class Lote {
                 ])
 
                 await conec.commit(connection);
-                // res.status(200).send('Datos actualizados correctamente');
                 return "update";
             } else {
                 await conec.execute(connection, `UPDATE lote SET        
@@ -240,15 +249,41 @@ class Lote {
                 ])
 
                 await conec.commit(connection);
-                // res.status(200).send('Datos actualizados correctamente');
                 return "update";
             }
         } catch (error) {
             if (connection != null) {
                 await conec.rollback(connection);
             }
-            // res.status(500).send(error);
             return "Error interno de conexión, intente nuevamente."
+        }
+    }
+
+    async delete(req) {
+        let connection = null;
+        try {
+            connection = await conec.beginTransaction();
+
+            let lote = await conec.execute(connection, `SELECT * FROM ventaDetalle WHERE idLote  = ?`, [
+                req.query.idLote
+            ]);
+
+            if (lote.length > 0) {
+                await conec.rollback(connection);
+                return "No se puede eliminar el lote ya que esta ligado a una venta.";
+            }
+
+            await conec.execute(connection, `DELETE FROM lote WHERE idLote  = ?`, [
+                req.query.idLote
+            ]);
+
+            await conec.commit(connection)
+            return "delete";
+        } catch (error) {
+            if (connection != null) {
+                await conec.rollback(connection);
+            }
+            return "Error interno de conexión, intente nuevamente.";
         }
     }
 
@@ -366,7 +401,6 @@ class Lote {
                 return "No se pudo cargar la información requerida."
             }
         } catch (error) {
-            console.log(error)
             return "Error interno de conexión, intente nuevamente."
         }
     }
@@ -399,7 +433,7 @@ class Lote {
                 INNER JOIN ventaDetalle AS vd ON v.idVenta = vd.idVenta
                 INNER JOIN lote AS l ON l.idLote = vd.idLote
                 INNER JOIN manzana AS m ON m.idManzana = l.idManzana
-                WHERE c.idCliente = ?`, [
+                WHERE c.idCliente = ? AND v.estado <> 3`, [
                 req.query.idCliente
             ]);
             return result
@@ -441,4 +475,5 @@ class Lote {
     }
 
 }
-module.exports = Lote
+
+module.exports = Lote;

@@ -1,5 +1,6 @@
 import React from 'react';
 import axios from 'axios';
+import CryptoJS from 'crypto-js';
 import {
     formatMoney,
     numberFormat,
@@ -14,6 +15,7 @@ class VentaDetalle extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            idVenta: '',
             comprobante: '',
             cliente: '',
             fecha: '',
@@ -65,6 +67,7 @@ class VentaDetalle extends React.Component {
             let cabecera = result.data.cabecera;
 
             await this.setStateAsync({
+                idVenta: id,
                 comprobante: cabecera.comprobante + "  " + cabecera.serie + "-" + cabecera.numeracion,
                 cliente: cabecera.documento + " - " + cabecera.informacion,
                 fecha: cabecera.fecha + " " + timeForma24(cabecera.hora),
@@ -127,6 +130,17 @@ class VentaDetalle extends React.Component {
         )
     }
 
+    async onEventImprimir() {
+        const data = {
+            "idSede": "SD0001",
+            "idVenta": this.state.idVenta,
+        }
+
+        let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
+        let params = new URLSearchParams({ "params": ciphertext });
+        window.open("/api/factura/repcomprobante?" + params, "_blank");
+    }
+
     render() {
         return (
             <>
@@ -150,11 +164,11 @@ class VentaDetalle extends React.Component {
                             <div className="row">
                                 <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                                     <div className="form-group">
-                                        <button type="button" className="btn btn-light"><i className="fa fa-print"></i> Imprimir</button>
+                                        <button type="button" className="btn btn-light" onClick={() => this.onEventImprimir()}><i className="fa fa-print"></i> Imprimir</button>
                                         {" "}
-                                        <button type="button" className="btn btn-light"><i className="fa fa-edit"></i> Editar</button>
+                                        {/* <button type="button" className="btn btn-light"><i className="fa fa-edit"></i> Editar</button> */}
                                         {" "}
-                                        <button type="button" className="btn btn-light"><i className="fa fa-remove"></i> Eliminar</button>
+                                        {/* <button type="button" className="btn btn-light"><i className="fa fa-remove"></i> Eliminar</button> */}
                                         {" "}
                                         <button type="button" className="btn btn-light"><i className="fa fa-file-archive-o"></i> Adjuntar</button>
                                     </div>
