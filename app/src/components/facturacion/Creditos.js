@@ -16,6 +16,8 @@ class Creditos extends React.Component {
             loading: false,
             lista: [],
 
+            idProyecto: this.props.token.project.idProyecto,
+
             opcion: 0,
             paginacion: 0,
             totalPaginacion: 0,
@@ -86,6 +88,7 @@ class Creditos extends React.Component {
                 params: {
                     "opcion": opcion,
                     "buscar": buscar,
+                    "idProyecto": this.state.idProyecto,
                     "posicionPagina": ((this.state.paginacion - 1) * this.state.filasPorPagina),
                     "filasPorPagina": this.state.filasPorPagina
                 }

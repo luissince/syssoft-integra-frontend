@@ -539,9 +539,11 @@ class Factura {
             com.nombre AS comprobante,
             v.serie,
             v.numeracion,
-    
+            
+            td.nombre AS tipoDoc,
             c.documento,
             c.informacion,
+            c.direccion,
     
             DATE_FORMAT(v.fecha,'%d/%m/%Y') as fecha,
             v.hora, 
@@ -552,6 +554,7 @@ class Factura {
             IFNULL(SUM(vd.precio*vd.cantidad),0) AS monto
             FROM venta AS v 
             INNER JOIN cliente AS c ON v.idCliente = c.idCliente
+            INNER JOIN tipoDocumento AS td ON td.idTipoDocumento = c.idTipoDocumento 
             INNER JOIN comprobante AS com ON v.idComprobante = com.idComprobante
             INNER JOIN moneda AS m ON m.idMoneda = v.idMoneda
             LEFT JOIN ventaDetalle AS vd ON vd.idVenta = v.idVenta 
@@ -613,21 +616,24 @@ class Factura {
             INNER JOIN cliente AS cl ON v.idCliente = cl.idCliente 
             LEFT JOIN ventaDetalle AS vd ON vd.idVenta = v.idVenta 
             WHERE  
-            ? = 0 AND v.estado = 2 
+            ? = 0 AND v.estado = 2 AND v.idProyecto = ?
             OR
-            ? = 1 and cl.informacion like concat(?,'%') AND v.estado = 2 
+            ? = 1 and cl.informacion like concat(?,'%') AND v.estado = 2 AND v.idProyecto = ? 
             OR
-            ? = 1 and cl.documento like concat(?,'%') AND v.estado = 2 
+            ? = 1 and cl.documento like concat(?,'%') AND v.estado = 2 AND v.idProyecto = ?
             GROUP BY v.idVenta
             ORDER BY v.fecha DESC, v.hora DESC
             LIMIT ?,?`, [
                 parseInt(req.query.opcion),
+                req.query.idProyecto,
 
                 parseInt(req.query.opcion),
                 req.query.buscar,
+                req.query.idProyecto,
 
                 parseInt(req.query.opcion),
                 req.query.buscar,
+                req.query.idProyecto,
 
                 parseInt(req.query.posicionPagina),
                 parseInt(req.query.filasPorPagina)
@@ -646,18 +652,21 @@ class Factura {
             INNER JOIN comprobante AS cm ON v.idComprobante = cm.idComprobante 
             INNER JOIN cliente AS cl ON v.idCliente = cl.idCliente  
             WHERE  
-            ? = 0 AND v.estado = 2 
+            ? = 0 AND v.estado = 2 AND v.idProyecto = ?
             OR
-            ? = 1 and cl.informacion like concat(?,'%') AND v.estado = 2 
+            ? = 1 and cl.informacion like concat(?,'%') AND v.estado = 2 AND v.idProyecto = ?
             OR
-            ? = 1 and cl.documento like concat(?,'%') AND v.estado = 2 `, [
+            ? = 1 and cl.documento like concat(?,'%') AND v.estado = 2 AND v.idProyecto = ?`, [
                 parseInt(req.query.opcion),
+                req.query.idProyecto,
 
                 parseInt(req.query.opcion),
                 req.query.buscar,
+                req.query.idProyecto,
 
                 parseInt(req.query.opcion),
-                req.query.buscar
+                req.query.buscar,
+                req.query.idProyecto,
             ]);
 
             return { "result": resultLista, "total": total[0].Total }

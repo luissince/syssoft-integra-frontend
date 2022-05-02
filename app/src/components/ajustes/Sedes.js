@@ -716,10 +716,10 @@ class Sedes extends React.Component {
                                         <th width="5%">#</th>
                                         <th width="10%">Sede</th>
                                         <th width="15%">Empresa</th>
-                                        <th width="10%">Dirección</th>
-                                        <th width="20%">Telefono</th>
+                                        <th width="20%">Dirección</th>
+                                        <th width="10%">Telefono</th>
                                         <th width="15%">Celular</th>
-                                        <th width="15%">Opciones</th>
+                                        <th width="5%" className="text-center">Editar</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -744,7 +744,7 @@ class Sedes extends React.Component {
                                                         <td>{item.direccion}</td>
                                                         <td>{item.telefono}</td>
                                                         <td>{item.celular}</td>
-                                                        <td>
+                                                        <td className="text-center">
                                                             <button className="btn btn-outline-warning btn-sm" title="Editar" onClick={() => this.openModal(item.idSede)}><i className="bi bi-pencil"></i></button>
                                                         </td>
                                                     </tr>

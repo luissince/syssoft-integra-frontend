@@ -87,7 +87,7 @@ class RepLote {
             );
 
             doc.fontSize(h3).text(
-                `Manzana: ${cabecera.manzana}\nLote: ${cabecera.lote}\nDescripción: ...\nCosto: ${cabecera.costo}\nPrecio: ${cabecera.precio}\nEstado: ${cabecera.lotestado}`,
+                `Manzana: ${cabecera.manzana}\nLote: ${cabecera.lote}\nEstado: ${cabecera.lotestado}`,
                 orgX,
                 doc.y + 5
             );
@@ -136,7 +136,7 @@ class RepLote {
                 //title: "CRONOGRAMA DE PAGOS MENSUALES VENTA AL CRÉDITO",
                 subtitle: "DETALLE DE PAGOS ASOCIADOS",
                 headers: ["Concepto", "Monto", "Método", "Banco", "Fecha"],
-                rows: content
+                rows: content.length === 0 ? [["No hay pagos asociados."]] : content
             };
 
             doc.table(table1, {

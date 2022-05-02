@@ -4,6 +4,7 @@ import { getCookie } from '../tools/Tools';
 import { Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { signIn } from '../../redux/actions';
+import logoEmpresa from '../../recursos/images/INMOBILIARIA.png';
 import './Login.css';
 
 class Login extends React.Component {
@@ -29,7 +30,7 @@ class Login extends React.Component {
     }
 
     componentDidMount() {
-
+        this.usuarioInput.current.focus();
     }
 
     onEventForm = async () => {
@@ -73,12 +74,12 @@ class Login extends React.Component {
             });
 
             let user = {
-               "apellidos": result.data.apellidos,
-               "estado": result.data.estado,
-               "idUsuario": result.data.idUsuario,
-               "nombres": result.data.nombres,
-               "token": result.data.token,
-               menus
+                "apellidos": result.data.apellidos,
+                "estado": result.data.estado,
+                "idUsuario": result.data.idUsuario,
+                "nombres": result.data.nombres,
+                "token": result.data.token,
+                menus
             }
 
             window.localStorage.setItem('login', JSON.stringify(user));
@@ -140,7 +141,7 @@ class Login extends React.Component {
 
                 <div className="form-content text-center bg-white">
                     <form className="form-signin">
-                        <img className="mb-4" src="https://getbootstrap.com/docs/4.6/assets/brand/bootstrap-solid.svg" alt="" width="72" height="72" />
+                        <img className="mb-4" src={logoEmpresa} alt="Logo" width="150" />
                         <h1 className="h3 mb-3 font-weight-normal">Ingrese los datos</h1>
                         {
                             message !== "" ?
