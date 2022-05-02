@@ -49,7 +49,6 @@ class RepVentas extends React.Component {
         this.abortControllerView.abort();
     }
 
-
     loadData = async () => {
         try {
 
@@ -297,13 +296,12 @@ class RepVentas extends React.Component {
                                     </div>
 
                                     <div className="row">
-                                        {/* <div className="col"></div> */}
                                         <div className="col">
                                             <div className="form-group">
                                                 <label>Tipo de venta(s)</label>
                                                 <div className="input-group">
                                                     <select
-                                                        title="Lista de usuarios"
+                                                        title="Lista tipos de venta"
                                                         className="form-control"
                                                         value={this.state.tipoVenta}
                                                         disabled={this.state.tipoVentaCheck}
@@ -343,7 +341,7 @@ class RepVentas extends React.Component {
                                                 <label>Metodo de pago(s)</label>
                                                 <div className="input-group">
                                                     <select
-                                                        title="Lista de usuarios"
+                                                        title="Lista metodo de pagos"
                                                         className="form-control"
                                                         value={this.state.metodoPago}
                                                         disabled={this.state.metodoPagoCheck}
@@ -355,8 +353,13 @@ class RepVentas extends React.Component {
                                                         }}
                                                     >
                                                         <option value="">-- Todos --</option>
-                                                        <option value="1">AL CONTADO</option>
-                                                        <option value="1">AL CREDITO</option>
+                                                        {/* <option value="">-- Metodo de pago --</option> */}
+                                                        <option value="1">Efectivo</option>
+                                                        <option value="2">Consignación</option>
+                                                        <option value="3">Transferencia</option>
+                                                        <option value="4">Cheque</option>
+                                                        <option value="5">Tarjeta crédito</option>
+                                                        <option value="6">Tarjeta débito</option>
                                                     </select>
                                                     <div className="input-group-append">
                                                         <div className="input-group-text">

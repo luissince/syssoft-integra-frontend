@@ -1,7 +1,7 @@
 const path = require('path');
 const PDFDocument = require("pdfkit-table");
 const getStream = require('get-stream');
-const { formatMoney } = require('../tools/Tools');
+const { formatMoney, currentDate} = require('../tools/Tools');
 
 class RepLote {
 
@@ -155,6 +155,112 @@ class RepLote {
             return getStream.buffer(doc);
         } catch (error) {
             // return error.message;
+            return "Se genero un error al generar el reporte.";
+        }
+    }
+
+    async repTipoLote(req, sedeInfo, data) {
+
+        try {
+
+            const estadoLote = req.query.estadoLote == 0 ? 'TODOS LOS LOTES' 
+                            : req.query.estadoLote == 1 ? 'LOTES DISPONIBLES'
+                            : req.query.estadoLote == 2 ? 'LOTES RESERVADOS' 
+                            : req.query.estadoLote == 3 ? 'LOTES VENDIDOS' : 'LOTES INACTIVOS';
+
+            const doc = new PDFDocument({
+                font: 'Helvetica',
+                margins: {
+                    top: 40,
+                    bottom: 40,
+                    left: 40,
+                    right: 40
+                }
+            });
+
+            doc.info["Title"] = "Detalle del Lote.pdf"
+
+            let orgX = doc.x;
+            let orgY = doc.y;
+            let cabeceraY = orgY + 70;
+            let titleX = orgX + 150;
+            let medioX = (doc.page.width - doc.options.margins.left - doc.options.margins.right) / 2;
+
+            let h1 = 13;
+            let h2 = 11;
+            let h3 = 9;
+
+            doc.image(path.join(__dirname, "..", "path/to/logo.png"), doc.x, doc.y, { width: 75, });
+
+            doc.fontSize(h1).text(
+                `${sedeInfo.nombreEmpresa}`,
+                titleX,
+                orgY,
+                {
+                    width: 250,
+                    align: "center"
+                }
+            );
+
+            doc.fontSize(h3).text(
+                `RUC: ${sedeInfo.ruc}\n${sedeInfo.direccion}\nCelular: ${sedeInfo.celular} / Telefono: ${sedeInfo.telefono}`,
+                titleX,
+                orgY + 17,
+                {
+                    width: 250,
+                    align: "center",
+                }
+            );
+
+            doc.fontSize(h2).text(
+                "LISTA DE LOTES",
+                medioX,
+                cabeceraY,
+                {
+                    width: 250,
+                }
+            );
+
+            let totalCosto = 0;
+            let totalPrecio = 0;
+            let totalUtilidad = 0;
+
+            let content = data.map((item, index) => {
+                let estado = item.estado === 1 ? 'DISPONIBLE'
+                                : item.estado === 2 ? 'RESERVADO' 
+                                : item.estado === 3 ? 'VENDIDO' : 'INACTIVO';
+                
+                totalCosto = totalCosto + item.costo;
+                totalPrecio = totalPrecio + item.precio;
+                totalUtilidad = totalUtilidad + (item.precio + item.costo);
+
+                return [++index, item.lote+' '+item.manzana, item.areaLote, estado, item.costo, item.precio, item.precio - item.costo]
+            })
+
+            content.push(["", "", "", "TOTAL", totalCosto, totalPrecio, totalUtilidad])
+
+            const table1 = {
+                //title: `Resumen asociados al filtro: ${estadoLote} al ${currentDate()}`,
+                subtitle: `Resumen asociados al filtro: ${estadoLote} al ${currentDate()}`,
+                headers: ["N°", "Lotes", "Area m²", "Estado", "Costo", "Venta", "Utilidad"],
+                rows: content
+            };
+
+            doc.table(table1, {
+                prepareHeader: () => doc.font("Helvetica-Bold").fontSize(h3),
+                prepareRow: () => {
+                    doc.font("Helvetica").fontSize(h3);
+                },
+                width: doc.page.width - doc.options.margins.left - doc.options.margins.right,
+                x: orgX,
+                y: doc.y + 10,
+            });
+
+            doc.end();
+
+            return getStream.buffer(doc);
+
+        } catch (error) {
             return "Se genero un error al generar el reporte.";
         }
     }

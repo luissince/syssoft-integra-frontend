@@ -105,4 +105,35 @@ router.get('/replotedetalle', async function (req, res) {
     }
 })
 
+router.get('/reptipolotes', async function (req, res) {
+    const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
+    // req.query.idLote = decryptedData.idLote;
+    req.query.estadoLote = decryptedData.estadoLote,
+    req.query.idSede = decryptedData.idSede;
+
+    const sedeInfo = await sede.infoSedeReporte(req)
+
+    if (typeof sedeInfo !== 'object') {
+        res.status(500).send(sedeInfo)
+        return;
+    }
+
+    const detalle = await lote.listaEstadoLote(req)
+
+    if (Array.isArray(detalle)){
+
+        let data = await repLote.repTipoLote(req, sedeInfo, detalle)
+        
+        if (typeof data === 'string') {
+            res.status(500).send(data)
+        } else {
+            res.setHeader('Content-disposition', 'inline; filename=Reporte de lotes.pdf');
+            res.contentType("application/pdf");
+            res.send(data);
+        }
+    }else{
+        res.status(500).send(detalle)
+    }
+})
+
 module.exports = router;
