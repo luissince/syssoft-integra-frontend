@@ -241,7 +241,7 @@ class RepLote {
 
             const table1 = {
                 //title: `Resumen asociados al filtro: ${estadoLote} al ${currentDate()}`,
-                subtitle: `Resumen asociados al filtro: ${estadoLote} al ${currentDate()}`,
+                subtitle: `RESUMEN ASOCIADOS AL FILTRO: ${estadoLote} AL ${currentDate()}`,
                 headers: ["N°", "Lotes", "Area m²", "Estado", "Costo", "Venta", "Utilidad"],
                 rows: content
             };

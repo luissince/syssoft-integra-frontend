@@ -31,6 +31,9 @@ class RepFinanciero extends React.Component {
 
             idBancoDes: '',
 
+            idUsuario: '',
+            usuarios: [],
+
             loading: true,
             messageWarning: '',
         }
@@ -73,6 +76,10 @@ class RepFinanciero extends React.Component {
                 signal: this.abortControllerView.signal
             });
 
+            const usuario = await axios.get("/api/usuario/listcombo", {
+                signal: this.abortControllerView.signal
+            });
+
             await this.setStateAsync({
                 //cobro
                 cobros: cobro.data,
@@ -80,6 +87,7 @@ class RepFinanciero extends React.Component {
                 bancos: banco.data,
                 //gasto
                 gastos: gasto.data,
+                usuarios: usuario.data,
 
                 loading: false,
                 fechaIni: currentDate(),
@@ -96,16 +104,17 @@ class RepFinanciero extends React.Component {
     }
 
     async onEventImpGastos() {
-        if(this.state.fechaFin < this.state.fechaIni){
+        if (this.state.fechaFin < this.state.fechaIni) {
             this.setState({ messageWarning: "La Fecha inicial no puede ser mayor a la fecha final." })
             this.FechaIni.current.focus();
         }
-        else{
+        else {
             const data = {
                 // "idLote": this.state.idLote,
                 "idConcepto": this.state.idConpGasto === '' ? 0 : this.state.idConpGasto,
                 "metodoPago": this.state.metPagGasto === '' ? 0 : this.state.metPagGasto,
                 "idBanco": this.state.idBancoDes === '' ? 0 : this.state.idBancoDes,
+                "idUsuario": this.state.idUsuario === '' ? 0 : this.state.idUsuario,
                 "idSede": "SD0001",
                 "fechaIni": this.state.fechaIni,
                 "fechaIFin": this.state.fechaFin
@@ -113,8 +122,32 @@ class RepFinanciero extends React.Component {
 
             let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
             let params = new URLSearchParams({ "params": ciphertext });
-            // window.open("/api/lote/repgastos?" + params, "_blank");
-            console.log(data)
+            window.open("/api/gasto/repgeneralgastos?" + params, "_blank");
+            // console.log(data)
+        }
+    }
+
+    async onEventImpCobro() {
+        if (this.state.fechaFin < this.state.fechaIni) {
+            this.setState({ messageWarning: "La Fecha inicial no puede ser mayor a la fecha final." })
+            this.FechaIni.current.focus();
+        }
+        else {
+            const data = {
+                // "idLote": this.state.idLote,
+                "idConcepto": this.state.idConpCobro === '' ? 0 : this.state.idConpCobro,
+                "metodoPago": this.state.metodoPago === '' ? 0 : this.state.metodoPago,
+                "idBanco": this.state.idBanco === '' ? 0 : this.state.idBanco,
+                "idCliente": this.state.idCliente === '' ? 0 : this.state.idCliente,
+                "idSede": "SD0001",
+                "fechaIni": this.state.fechaIni,
+                "fechaIFin": this.state.fechaFin
+            }
+
+            let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
+            let params = new URLSearchParams({ "params": ciphertext });
+            window.open("/api/cobro/repgeneralcobros?" + params, "_blank");
+            // console.log(data)
         }
     }
 
@@ -150,6 +183,7 @@ class RepFinanciero extends React.Component {
                                             </div>
 
                                         </div>
+
                                         <div className="col">
                                             <div className="form-group">
                                                 <label>Fecha inicial <i className="fa fa-asterisk text-danger small"></i></label>
@@ -176,7 +210,7 @@ class RepFinanciero extends React.Component {
                                                                 });
                                                             }
                                                         }}
-                                                        />
+                                                    />
                                                 </div>
                                             </div>
                                         </div>
@@ -206,7 +240,7 @@ class RepFinanciero extends React.Component {
                             }
 
                             <div className="card my-1">
-                                <h6 className="card-header d-flex" data-bs-toggle="collapse" href="#ingresos" role="button" aria-controls="ingresos">Reporte de Ingresos
+                                <h6 className="card-header d-flex" data-bs-toggle="collapse" href="#ingresos" role="button" aria-controls="ingresos">Reporte de Cobros
                                     <div className="col text-right pr-0">
                                         <i className="bi bi-caret-down-fill"></i>
                                     </div>
@@ -238,29 +272,6 @@ class RepFinanciero extends React.Component {
                                         </div>
                                         <div className="col">
                                             <div className="form-group">
-                                                <label>Cliente(s)</label>
-                                                <div className="input-group">
-                                                    <select
-                                                        title="Lista de clientes"
-                                                        className="form-control"
-                                                        value={this.state.idCliente}
-                                                        onChange={async (event) => {
-                                                            await this.setStateAsync({ idCliente: event.target.value });
-                                                        }}
-                                                    >
-                                                        <option value="">-- Todos --</option>
-                                                        {
-                                                            this.state.clientes.map((item, index) => (
-                                                                <option key={index} value={item.idCliente}>{item.informacion}</option>
-                                                            ))
-                                                        }
-                                                    </select>
-
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="col">
-                                            <div className="form-group">
                                                 <label>Metodo de pago(s)</label>
                                                 <div className="input-group">
                                                     <select
@@ -282,10 +293,6 @@ class RepFinanciero extends React.Component {
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-
-                                    <div className="row">
-                                        
                                         <div className="col">
                                             <div className="form-group">
                                                 <label>Caja Banco(s) depositado</label>
@@ -308,14 +315,42 @@ class RepFinanciero extends React.Component {
                                                 </div>
                                             </div>
                                         </div>
+                                    </div>
+
+                                    <div className="row">
+
+                                        <div className="col">
+                                            <div className="form-group">
+                                                <label>Cliente(s)</label>
+                                                <div className="input-group">
+                                                    <select
+                                                        title="Lista de clientes"
+                                                        className="form-control"
+                                                        value={this.state.idCliente}
+                                                        onChange={async (event) => {
+                                                            await this.setStateAsync({ idCliente: event.target.value });
+                                                        }}
+                                                    >
+                                                        <option value="">-- Todos --</option>
+                                                        {
+                                                            this.state.clientes.map((item, index) => (
+                                                                <option key={index} value={item.idCliente}>{item.informacion}</option>
+                                                            ))
+                                                        }
+                                                    </select>
+
+                                                </div>
+                                            </div>
+                                        </div>
                                         <div className="col"></div>
                                         <div className="col"></div>
+
                                     </div>
 
                                     <div className="row mt-3">
                                         <div className="col"></div>
                                         <div className="col">
-                                            <button className="btn btn-outline-warning btn-sm"><i className="bi bi-file-earmark-pdf-fill"></i> Reporte Pdf</button>
+                                            <button className="btn btn-outline-warning btn-sm" onClick={ () => this.onEventImpCobro() }><i className="bi bi-file-earmark-pdf-fill"></i> Reporte Pdf</button>
                                         </div>
                                         <div className="col">
                                             <button className="btn btn-outline-success btn-sm"><i className="bi bi-file-earmark-excel-fill"></i> Reporte Excel</button>
@@ -343,7 +378,7 @@ class RepFinanciero extends React.Component {
                                                         title="Lista Concepto de gastos"
                                                         className="form-control"
                                                         value={this.state.idConpGasto}
-                                                
+
                                                         onChange={async (event) => {
                                                             await this.setStateAsync({ idConpGasto: event.target.value });
                                                         }}
@@ -355,7 +390,7 @@ class RepFinanciero extends React.Component {
                                                             ))
                                                         }
                                                     </select>
-                                                    
+
                                                 </div>
                                             </div>
                                         </div>
@@ -409,6 +444,33 @@ class RepFinanciero extends React.Component {
                                             </div>
                                         </div>
 
+                                    </div>
+
+                                    <div className="row">
+                                        <div className="col">
+                                            <div className="form-group">
+                                                <label>Usuario(s)</label>
+                                                <div className="input-group">
+                                                    <select
+                                                        title="Lista de usuarios"
+                                                        className="form-control"
+                                                        value={this.state.idUsuario}
+                                                        onChange={async (event) => {
+                                                            await this.setStateAsync({ idUsuario: event.target.value });
+                                                        }}
+                                                    >
+                                                        <option value="">-- Todos --</option>
+                                                        {
+                                                            this.state.usuarios.map((item, index) => (
+                                                                <option key={index} value={item.idUsuario}>{item.nombres + ' ' + item.apellidos}</option>
+                                                            ))
+                                                        }
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="col"></div>
+                                        <div className="col"></div>
                                     </div>
 
                                     <div className="row mt-3">

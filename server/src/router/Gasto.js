@@ -1,8 +1,16 @@
 const express = require('express');
 const router = express.Router();
 const { currentDate, currentTime } = require('../tools/Tools');
+const { decrypt } = require('../tools/CryptoJS');
+
 const Conexion = require('../database/Conexion');
 const conec = new Conexion();
+
+const Sede = require('../services/Sede');
+const RepFinanciero = require('../report/RepFinanciero')
+
+const sede = new Sede();
+const repFinanciero = new RepFinanciero();
 
 router.get('/list', async function (req, res) {
     try {
@@ -262,5 +270,33 @@ router.delete('/anular', async function (req, res) {
         res.status(500).send("Se produjo un error de servidor, intente nuevamente.");
     }
 });
+
+router.get('/repgeneralgastos', async function (req, res) {
+    const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
+    req.query.idConcepto = decryptedData.idConcepto;
+    req.query.metodoPago = decryptedData.metodoPago;
+    req.query.idBanco = decryptedData.idBanco;
+    req.query.idUsuario = decryptedData.idUsuario;
+    req.query.idSede = decryptedData.idSede;
+    req.query.fechaIni = decryptedData.fechaIni;
+    req.query.fechaIFin = decryptedData.fechaIFin;
+
+    const sedeInfo = await sede.infoSedeReporte(req)
+
+    if (typeof sedeInfo !== 'object') {
+        res.status(500).send(sedeInfo)
+        return;
+    }
+
+    let data = await repFinanciero.repFiltroGastos(req, sedeInfo)
+
+    if (typeof data === 'string') {
+        res.status(500).send(data)
+    } else {
+        res.setHeader('Content-disposition', 'inline; filename=Reporte de gastos.pdf');
+        res.contentType("application/pdf");
+        res.send(data);
+    }
+})
 
 module.exports = router;

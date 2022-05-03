@@ -119,7 +119,7 @@ router.get('/replotedetalle', async function (req, res) {
 router.get('/reptipolotes', async function (req, res) {
     const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
     // req.query.idLote = decryptedData.idLote;
-    req.query.estadoLote = decryptedData.estadoLote,
+    req.query.estadoLote = decryptedData.estadoLote;
     req.query.idSede = decryptedData.idSede;
 
     const sedeInfo = await sede.infoSedeReporte(req)
