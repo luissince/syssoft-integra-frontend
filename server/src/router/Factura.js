@@ -68,10 +68,8 @@ router.get("/credito/detalle", async function (req, res) {
 
 router.get('/repcomprobante', async function (req, res) {
     const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
-    console.log(decryptedData);
     req.query.idSede = decryptedData.idSede;
     req.query.idVenta = decryptedData.idVenta;
-    // req.query.proyecto = decryptedData.proyecto;
 
     const sedeInfo = await sede.infoSedeReporte(req)
 
@@ -89,7 +87,7 @@ router.get('/repcomprobante', async function (req, res) {
         if (typeof data === 'string') {
             res.status(500).send(data);
         } else {
-            res.setHeader('Content-disposition', 'inline; filename=Boleta.pdf');
+            res.setHeader('Content-disposition', `inline; filename=${detalle.cabecera.comprobante + " " + detalle.cabecera.serie + "-" + detalle.cabecera.numeracion}.pdf`);
             res.contentType("application/pdf");
             res.send(data);
         }
