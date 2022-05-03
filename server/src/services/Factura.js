@@ -537,10 +537,12 @@ class Factura {
             let result = await conec.query(`SELECT
             v.idVenta, 
             com.nombre AS comprobante,
+            com.codigo as codigoVenta,
             v.serie,
             v.numeracion,
             
-            td.nombre AS tipoDoc,
+            td.nombre AS tipoDoc,      
+            td.codigo AS codigoCliente,      
             c.documento,
             c.informacion,
             c.direccion,
@@ -551,6 +553,8 @@ class Factura {
             v.estado, 
             m.simbolo,
             m.codiso,
+            m.nombre as moneda,
+
             IFNULL(SUM(vd.precio*vd.cantidad),0) AS monto
             FROM venta AS v 
             INNER JOIN cliente AS c ON v.idCliente = c.idCliente

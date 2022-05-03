@@ -1,16 +1,17 @@
 const path = require('path');
 const PDFDocument = require("pdfkit-table");
 const getStream = require('get-stream');
-const { formatMoney } = require('../tools/Tools');
+const qr = require("qrcode");
+const NumberLleters = require('../tools/NumberLleters');
+const { formatMoney, numberFormat, calculateTaxBruto, calculateTax } = require('../tools/Tools');
+
+const numberLleters = new NumberLleters();
 
 class RepFactura {
 
     async repComprobante(req, sedeInfo, data) {
-        // const venta = data.venta;
         const cabecera = data.cabecera;
-        console.log(data)
         try {
-
             const doc = new PDFDocument({
                 font: 'Helvetica',
                 margins: {
@@ -56,7 +57,6 @@ class RepFactura {
                 }
             );
 
-
             doc.fontSize(h2).text(
                 `RUC: ${sedeInfo.ruc}\n${cabecera.comprobante}\n${cabecera.serie + "-" + cabecera.numeracion}`,
                 doc.page.width - 150 - doc.options.margins.right,
@@ -72,12 +72,6 @@ class RepFactura {
                 orgY,
                 150,
                 70).stroke();
-
-            // doc.fontSize(8).text(
-            //     "Fecha de emisión:",
-            //     doc.page.width - 150 - doc.options.margins.right,
-            //     doc.y + 10
-            // );
 
             doc.fontSize(h2).fill('#777').text(
                 "INFORMACIÓN",
@@ -96,31 +90,23 @@ class RepFactura {
             );
 
             doc.fontSize(h3).text(
-                `Fecha: ${cabecera.fecha} \nMoneda: ${cabecera.simbolo + " - " + cabecera.codiso} \nForma de Venta: ${cabecera.tipo == 1 ? "CONTADO" : "CRÉDITO"}`,
+                `Fecha: ${cabecera.fecha} \nMoneda: ${cabecera.moneda + " - " + cabecera.codiso} \nForma de Venta: ${cabecera.tipo == 1 ? "CONTADO" : "CRÉDITO"}`,
                 medioX,
                 topCebecera
             );
 
-            // doc.rect(
-            //     doc.options.margins.left,
-            //     boxTop,
-            //     doc.page.width - doc.options.margins.left - doc.options.margins.right,
-            //     boxBottom - boxTop).stroke();
-
             doc.x = doc.options.margins.left;
 
-            console.log(data)
             let detalle = data.detalle.map((item, index) => {
-                return [];
+                return [++index, "ZZ", item.cantidad, item.lote, numberFormat(item.precio, cabecera.codiso), numberFormat((item.precio * item.cantidad), cabecera.codiso)];
             });
 
             const table = {
                 subtitle: "DETALLE",
                 headers: ["Ítem", "Unidad de medida", "Cant.", "Descripción", "Valor Unitario", "Precio de Venta"],
-                rows: [
-                    ["1", "ZZ", "1", "CONCEPTO DE PAGO: COM.OP OTRA LINEA", "5.00", "5.00"]
-                ],
+                rows: detalle,
             };
+
 
             doc.table(table, {
                 prepareHeader: () => doc.font("Helvetica-Bold").fontSize(h3),
@@ -132,25 +118,99 @@ class RepFactura {
                 width: doc.page.width - doc.options.margins.left - doc.options.margins.right
             });
 
-            let boxTop = doc.y;
             doc.x = 0;
 
-            // doc.fontSize(8).text(
-            //     "Descuentos: \nValor de Venta Operaciones Gravadas: \nValor de Venta Operaciones Gratuitas: \nValor de Venta Operaciones Inafectas: \nValor de Venta Operaciones Exogeneradas: \nI.G.V 18%: \nI.S.C 10%: \nOtros Tributos: \nOtros Cargos: \nImporte Total:",
-            //     doc.x + 300,
-            //     doc.y
-            // );
+            let subTotal = 0;
+            let impuestoTotal = 0;
+            let total = 0;
+            let impuestos = [];
 
-            // let boxBottom = doc.y;
-            // doc.x = 0;
+            for (let item of data.detalle) {
+                let cantidad = item.cantidad;
+                let valor = item.precio;
 
-            // let widthRect = doc.x + 300;
+                let impuesto = item.porcentaje;
 
-            // doc.rect(
-            //     widthRect,
-            //     boxTop,
-            //     doc.page.width - doc.options.margins.left - doc.options.margins.right - widthRect,
-            //     boxBottom - boxTop).stroke();
+                let valorActual = cantidad * valor;
+                let valorSubNeto = calculateTaxBruto(impuesto, valorActual);
+                let valorImpuesto = calculateTax(impuesto, valorSubNeto);
+                let valorNeto = valorSubNeto + valorImpuesto;
+
+                impuestos.push({ "idImpuesto": item.idImpuesto, "nombre": item.impuesto, "valor": valorImpuesto });
+
+                subTotal += valorSubNeto;
+                impuestoTotal += valorImpuesto;
+                total += valorNeto;
+            }
+
+            let arrayImpuestos = [];
+            for (let item of impuestos) {
+                if (this.duplicateImpuestos(impuestos, item)) {
+                    arrayImpuestos.push(item)
+                } else {
+                    for (let newItem of arrayImpuestos) {
+                        if (newItem.idImpuesto === item.idImpuesto) {
+                            let currenteObject = newItem;
+                            currenteObject.valor += parseFloat(item.valor);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            doc.fontSize(h3).text(`IMPORTE BRUTO: ${numberFormat(subTotal, cabecera.codiso)}`,
+                doc.page.width - doc.options.margins.right - 200,
+                doc.y + 5, {
+                width: 200,
+                align: "right",
+            });
+
+            doc.fontSize(h3).text("DESCUENTO: 0.00",
+                doc.page.width - doc.options.margins.right - 200,
+                doc.y + 5, {
+                width: 200,
+                align: "right"
+            });
+
+            doc.fontSize(h3).text(`SUB IMPORTE: ${numberFormat(subTotal, cabecera.codiso)}`,
+                doc.page.width - doc.options.margins.right - 200,
+                doc.y + 5, {
+                width: 200,
+                align: "right"
+            });
+
+            for (let item of arrayImpuestos) {
+                doc.fontSize(h3).text(`${item.nombre}: ${numberFormat(item.valor, cabecera.codiso)}`,
+                    doc.page.width - doc.options.margins.right - 200,
+                    doc.y + 5, {
+                    width: 200,
+                    align: "right"
+                });
+            }
+
+            doc.fontSize(h3).text(`IMPORTE NETO: ${numberFormat(total, cabecera.codiso)}`,
+                doc.page.width - doc.options.margins.right - 200,
+                doc.y + 5, {
+                width: 200,
+                align: "right"
+            });
+
+            doc.fontSize(h3).text(`SON: ${numberLleters.getResult(formatMoney(total), cabecera.moneda)}`,
+                doc.options.margins.left,
+                doc.y + 5);
+
+            let qrResult = await this.qrGenerate(`|
+            ${sedeInfo.ruc}|
+            ${cabecera.codigoVenta}|
+            ${cabecera.serie}|
+            ${cabecera.numeracion}|
+            ${impuestoTotal}|
+            ${total}|
+            ${cabecera.fecha}|
+            ${cabecera.codigoCliente}|
+            ${cabecera.documento}|`);
+
+            doc.image(qrResult, doc.options.margins.left, doc.y, { width: 100, });
 
             doc.end();
             return getStream.buffer(doc);
@@ -158,6 +218,27 @@ class RepFactura {
         } catch (error) {
             return "Se genero un error al generar el reporte.";
         }
+    }
+
+    duplicateImpuestos(array, impuesto) {
+        let value = false
+        for (let item of array) {
+            if (item.idImpuesto === impuesto.idImpuesto) {
+                value = true
+                break;
+            }
+        }
+        return value
+    }
+
+    qrGenerate(data) {
+        return new Promise((resolve, reject) => {
+            qr.toDataURL(data, (err, src) => {
+                if (err) reject("Error occured");
+
+                resolve(src);
+            });
+        })
     }
 
 }
