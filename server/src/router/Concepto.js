@@ -221,7 +221,6 @@ router.get('/listcombo', async function (req, res) {
     }
 });
 
-
 router.get('/listcombogasto', async function (req, res) {
     try {
         let result = await conec.query('SELECT idConcepto, nombre FROM concepto WHERE tipo = 1');

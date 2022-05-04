@@ -636,7 +636,11 @@ router.get('/report/gastos', async function (req, res) {
     let medioX = (doc.page.width - doc.options.margins.left - doc.options.margins.right) / 2;
     let tercioX = (doc.page.width - doc.options.margins.left - doc.options.margins.right) / 3;
 
-    doc.image(path.join(__dirname, "..", "path/to/ehil.png"), doc.x, doc.y, { width: 50, });
+    let h1 = 14;
+    let h2 = 12;
+    let h3 = 10;
+
+    doc.image(path.join(__dirname, "..", "path/to/logo.png"), doc.x, doc.y, { width: 75 });
 
     doc.fontSize(12).text(
         "REPORTE DE GASTOS",
@@ -665,22 +669,27 @@ router.get('/report/gastos', async function (req, res) {
         40).stroke(); // ALTO
 
     // left
-    doc.fontSize(11).text(
-        `Usuario: TODOS`,
+    doc.fontSize(h3).text(
+        `Gasto(s): TODOS`,
         orgX + 5,
         cabeceraY + 30
     );
-    doc.fontSize(11).text(
-        `Metodo de Pago: TODOS`,
+    doc.fontSize(h3).text(
+        `Metodo de Pago(s): TODOS`,
         orgX + 5,
         cabeceraY + 50
     );
 
     // right
-    doc.fontSize(11).text(
-        `Cuenta Bancaria: TODOS`,
+    doc.fontSize(h3).text(
+        `Caja Banco(s): TODOS`,
         medioX + 15,
         cabeceraY + 30
+    );
+    doc.fontSize(h3).text(
+        `Usuario(s): TODOS`,
+        medioX + 15,
+        cabeceraY + 50
     );
 
     const table = {

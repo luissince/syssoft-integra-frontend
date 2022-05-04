@@ -16,6 +16,7 @@ import Monedas from '../ajustes/Monedas';
 import Comprobantes from '../ajustes/Comprobantes';
 import Impuestos from '../ajustes/Impuestos';
 import Bancos from '../ajustes/Bancos';
+import BancoDetalle from '../ajustes/registros/BancoDetalle';
 import Sedes from '../ajustes/Sedes';
 import Proyectos from '../ajustes/Proyectos';
 import ProcesoProyecto from '../ajustes/proyecto/ProcesoProyecto';
@@ -37,6 +38,7 @@ import Conceptos from '../tesoreria/Conceptos'
 import Gastos from '../tesoreria/Gastos'
 import RepVentas from '../reporte/RepVentas';
 import RepFinanciero from '../reporte/RepFinanciero';
+import RepLotes from '../reporte/RepLotes';
 
 const Page404 = (props) => {
     return (
@@ -190,7 +192,13 @@ class Inicio extends React.Component {
                         />
                         <Route
                             path={`${path}/bancos`}
+                            exact={true}
                             render={(props) => <Bancos {...props} />}
+                        />
+                        <Route
+                            path={`${path}/bancos/detalle`}
+                            exact={true}
+                            render={(props) => <BancoDetalle {...props} />}
                         />
                         <Route
                             path={`${path}/sedes`}
@@ -250,6 +258,10 @@ class Inicio extends React.Component {
                         <Route
                             path={`${path}/repfinanciero`}
                             render={(props) => <RepFinanciero {...props} />}
+                        />
+                        <Route
+                            path={`${path}/replotes`}
+                            render={(props) => <RepLotes {...props} />}
                         />
                         <Route component={Page404} />
                     </Switch>

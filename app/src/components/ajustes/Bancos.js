@@ -319,11 +319,13 @@ class Bancos extends React.Component {
                                 </button>
                             </div>
                             <div className="modal-body">
-                                {this.state.loadModal ?
-                                    <div className="clearfix absolute-all bg-white">
-                                        {spinnerLoading(this.state.msgModal)}
-                                    </div>
-                                    : null}
+                                {
+                                    this.state.loadModal ?
+                                        <div className="clearfix absolute-all bg-white">
+                                            {spinnerLoading(this.state.msgModal)}
+                                        </div>
+                                        : null
+                                }
 
                                 <div className="form-row">
                                     <div className="form-group col-md-6">
@@ -482,14 +484,15 @@ class Bancos extends React.Component {
                                                         <td>{item.moneda}</td>
                                                         <td>{item.numCuenta}</td>
                                                         <td className={`text-right ${item.saldo >= 0 ? "text-success" : "text-danger"}`}>{numberFormat(item.saldo, item.codiso)}</td>
+
                                                         <td className="text-center">
-                                                            <button
-                                                                className="btn btn-outline-info btn-sm"
-                                                                title="Editar"
-                                                                onClick={() => { }}>
-                                                                <i className="bi bi-eye"></i>
+                                                            <button className="btn btn-outline-info btn-sm" title="Detalle" onClick={() => {
+                                                                this.props.history.push({ pathname: `${this.props.location.pathname}/detalle`, search: "?idBanco=" + item.idBanco })
+                                                            }}>
+                                                                <i className="fa fa-eye"></i>
                                                             </button>
                                                         </td>
+
                                                         <td className="text-center">
                                                             <button
                                                                 className="btn btn-outline-warning btn-sm"

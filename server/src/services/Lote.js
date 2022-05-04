@@ -7,22 +7,22 @@ class Lote {
     async listar(req) {
         try {
             let lista = await conec.query(`SELECT 
-            l.idLote,
-            l.descripcion,
-            l.precio,
-            l.estado,
-            l.medidaFrontal,
-            l.costadoDerecho,
-            l.costadoIzquierdo,
-            l.medidaFondo,
-            l.areaLote
-            FROM lote AS l INNER JOIN manzana AS m 
-            ON l.idManzana = m.idManzana 
-            WHERE
-            ? = 0 AND m.idProyecto = ?
-            OR
-            ? = 1 AND m.idProyecto = ? AND l.descripcion LIKE CONCAT(?,'%')    
-            LIMIT ?,?`, [
+                l.idLote,
+                l.descripcion,
+                l.precio,
+                l.estado,
+                l.medidaFrontal,
+                l.costadoDerecho,
+                l.costadoIzquierdo,
+                l.medidaFondo,
+                l.areaLote
+                FROM lote AS l INNER JOIN manzana AS m 
+                ON l.idManzana = m.idManzana 
+                WHERE
+                ? = 0 AND m.idProyecto = ?
+                OR
+                ? = 1 AND m.idProyecto = ? AND l.descripcion LIKE CONCAT(?,'%')    
+                LIMIT ?,?`, [
                 parseInt(req.query.opcion),
                 req.query.idProyecto,
 
@@ -42,12 +42,12 @@ class Lote {
             });
 
             let total = await conec.query(`SELECT COUNT(*) AS Total 
-            FROM lote AS l INNER JOIN manzana AS m 
-            ON l.idManzana = m.idManzana 
-            WHERE
-            ? = 0 AND m.idProyecto = ?
-            OR
-            ? = 1 AND m.idProyecto = ? AND l.descripcion LIKE CONCAT(?,'%')`, [
+                FROM lote AS l INNER JOIN manzana AS m 
+                ON l.idManzana = m.idManzana 
+                WHERE
+                ? = 0 AND m.idProyecto = ?
+                OR
+                ? = 1 AND m.idProyecto = ? AND l.descripcion LIKE CONCAT(?,'%')`, [
                 parseInt(req.query.opcion),
                 req.query.idProyecto,
 
@@ -464,6 +464,41 @@ class Lote {
             return result
         } catch (error) {
             return "Error interno de conexión, intente nuevamente."
+        }
+    }
+
+    async listaEstadoLote(req) {
+        
+        try {
+
+            let lista = await conec.query(`SELECT 
+                l.idLote,
+                l.descripcion AS lote,
+                m.nombre AS manzana,
+                l.costo,
+                l.precio,
+                l.estado,
+                l.medidaFrontal,
+                l.costadoDerecho,
+                l.costadoIzquierdo,
+                l.medidaFondo,
+                l.areaLote
+                FROM lote AS l INNER JOIN manzana AS m 
+                ON l.idManzana = m.idManzana 
+                WHERE
+                ? = 0
+                OR
+                (? <> 0 AND l.estado = ? )`, [
+                req.query.estadoLote,
+                req.query.estadoLote,
+                req.query.estadoLote
+            ])
+
+            return lista;
+
+        } catch (error) {
+            // console.log(error)
+            return 'Error interno de conexión, intente nuevamente.'
         }
     }
 

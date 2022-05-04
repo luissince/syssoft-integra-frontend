@@ -274,5 +274,19 @@ router.get('/id', async function (req, res) {
     }
 });
 
+router.get('/listcombo', async function (req, res) {
+    try {
+        let result = await conec.query(`SELECT 
+            idUsuario, nombres, apellidos, dni, estado
+            FROM usuario`);
+        // return result
+        res.status(200).send(result);
+
+    } catch (error) {
+        // return "Error interno de conexión, intente nuevamente."
+        res.status(500).send("Error interno de conexión, intente nuevamente.");
+    }
+})
+
 
 module.exports = router;

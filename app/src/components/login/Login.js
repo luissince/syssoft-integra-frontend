@@ -30,7 +30,11 @@ class Login extends React.Component {
     }
 
     componentDidMount() {
-        this.usuarioInput.current.focus();
+
+        if(this.usuarioInput.current !== null){
+            this.usuarioInput.current.focus();
+        }
+        
     }
 
     onEventForm = async () => {
@@ -131,10 +135,12 @@ class Login extends React.Component {
     }
 
     render() {
+
         const { usuario, password, message } = this.state;
         if (this.props.token.userToken != null) {
             return <Redirect to="/principal" />
         }
+
         return (
             <>
                 <style>{'html,body,#root{height:100%;}'}</style>
