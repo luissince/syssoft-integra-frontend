@@ -16,6 +16,7 @@ import Monedas from '../ajustes/Monedas';
 import Comprobantes from '../ajustes/Comprobantes';
 import Impuestos from '../ajustes/Impuestos';
 import Bancos from '../ajustes/Bancos';
+import BancoDetalle from '../ajustes/registros/BancoDetalle';
 import Sedes from '../ajustes/Sedes';
 import Proyectos from '../ajustes/Proyectos';
 import ProcesoProyecto from '../ajustes/proyecto/ProcesoProyecto';
@@ -191,7 +192,13 @@ class Inicio extends React.Component {
                         />
                         <Route
                             path={`${path}/bancos`}
+                            exact={true}
                             render={(props) => <Bancos {...props} />}
+                        />
+                        <Route
+                            path={`${path}/bancos/detalle`}
+                            exact={true}
+                            render={(props) => <BancoDetalle {...props} />}
                         />
                         <Route
                             path={`${path}/sedes`}

@@ -1,5 +1,3 @@
-
-
 function currentDate() {
     let date = new Date();
     let formatted_date = date.getFullYear() + "-" + ((date.getMonth() + 1) > 9 ? (date.getMonth() + 1) : '0' + (

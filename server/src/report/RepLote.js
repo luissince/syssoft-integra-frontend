@@ -27,7 +27,6 @@ class RepLote {
             let cabeceraY = orgY + 80;
             let titleX = orgX + 150;
             let medioX = (doc.page.width - doc.options.margins.left - doc.options.margins.right) / 2;
-            console.log(medioX)
 
             let h1 = 13;
             let h2 = 11;
@@ -178,7 +177,7 @@ class RepLote {
                 }
             });
 
-            doc.info["Title"] = "Detalle del Lote.pdf"
+            doc.info["Title"] = `DETALLE DE LOTES AL ${currentDate()}.pdf`
 
             let orgX = doc.x;
             let orgY = doc.y;
@@ -186,9 +185,9 @@ class RepLote {
             let titleX = orgX + 150;
             let medioX = (doc.page.width - doc.options.margins.left - doc.options.margins.right) / 2;
 
-            let h1 = 13;
-            let h2 = 11;
-            let h3 = 9;
+            let h1 = 14;
+            let h2 = 12;
+            let h3 = 10;   
 
             doc.image(path.join(__dirname, "..", "path/to/logo.png"), doc.x, doc.y, { width: 75, });
 
@@ -213,13 +212,15 @@ class RepLote {
             );
 
             doc.fontSize(h2).text(
-                "LISTA DE LOTES",
+                "REPORTE DE LOTES",
                 medioX,
                 cabeceraY,
                 {
                     width: 250,
+                    align: "left"
                 }
             );
+
 
             let totalCosto = 0;
             let totalPrecio = 0;

@@ -1,7 +1,18 @@
 const express = require('express');
 const router = express.Router();
 const { currentDate, currentTime } = require('../tools/Tools');
+const { decrypt } = require('../tools/CryptoJS');
+
+const Banco = require('../services/Banco');
+const Sede = require('../services/Sede');
+const RepFinanciero = require('../report/RepFinanciero');
+
+const banco = new Banco();
+const sede = new Sede();
+const repFinanciero = new RepFinanciero();
+
 const Conexion = require('../database/Conexion');
+const { route } = require('./Logins');
 const conec = new Conexion();
 
 router.get('/list', async function (req, res) {
@@ -223,6 +234,48 @@ router.get('/listcombo', async function (req, res) {
         res.status(200).send(result);
     } catch (error) {
         res.status(500).send("Error interno de conexión, intente nuevamente.");
+    }
+});
+
+router.get('/detalle', async function (req, res) {
+    const result = await banco.detalleBanco(req)
+    if ( typeof result === 'object') {
+        res.status(200).send(result)
+    } else {
+        res.status(500).send(result)
+    }
+});
+
+router.get('/repdetallebanco', async function (req, res) {
+    const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
+
+    req.query.idBanco = decryptedData.idBanco;
+    req.query.idSede = decryptedData.idSede;
+
+    const sedeInfo = await sede.infoSedeReporte(req)
+
+    if (typeof sedeInfo !== 'object') {
+        res.status(500).send(sedeInfo)
+        return;
+    }
+
+    const detalle = await banco.detalleBanco(req)
+
+    if (typeof detalle === 'object') {
+
+        let data = await repFinanciero.repDetalleBanco(sedeInfo, detalle);
+
+        if (typeof data === 'string') {
+            res.status(500).send(data);
+        } else {
+            res.setHeader('Content-disposition', `inline; filename=REPORTE DE CAJA BANCO AL ${currentDate()}.pdf`);
+            res.contentType("application/pdf");
+            res.send(data);
+        }
+
+    } else {
+        res.status(500).send(detalle);
+
     }
 });
 

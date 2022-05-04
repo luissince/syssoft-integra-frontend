@@ -188,14 +188,12 @@ class RepFinanciero extends React.Component {
                                             <div className="form-group">
                                                 <label>Fecha inicial <i className="fa fa-asterisk text-danger small"></i></label>
                                                 <div className="input-group">
-
                                                     <input
                                                         type="date"
                                                         className="form-control"
                                                         disabled={!this.state.isFechaActive}
                                                         ref={this.FechaIni}
                                                         value={this.state.fechaIni}
-                                                        // onChange={(event) => this.setState({ fechaIni: event.target.value })}
                                                         onChange={(event) => {
 
                                                             if (event.target.value <= this.state.fechaFin) {

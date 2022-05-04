@@ -4,6 +4,7 @@ const Lote = require('../services/Lote');
 const Sede = require('../services/Sede');
 const RepLote = require('../report/RepLote');
 const { decrypt } = require('../tools/CryptoJS');
+const { currentDate } = require('../tools/Tools')
 
 const lote = new Lote();
 const sede = new Sede();
@@ -24,7 +25,6 @@ router.post('/', async function (req, res) {
     if (result === "insert") {
         res.status(200).send("Datos registrados correctamente")
     } else {
-        console.log(result)
         res.status(500).send(result)
     }
 });
@@ -45,7 +45,6 @@ router.put('/', async function (req, res) {
     } else if (result === "noid") {
         res.status(400).send("Se genero un problema al tratar de obtener los datos.")
     } else {
-        console.log(result)
         res.status(500).send(result)
     }
 });
@@ -138,12 +137,13 @@ router.get('/reptipolotes', async function (req, res) {
         if (typeof data === 'string') {
             res.status(500).send(data)
         } else {
-            res.setHeader('Content-disposition', 'inline; filename=Reporte de lotes.pdf');
+            res.setHeader('Content-disposition', `inline; filename=DETALLE DE LOTES AL ${currentDate()}.pdf`);
             res.contentType("application/pdf");
             res.send(data);
         }
     }else{
         res.status(500).send(detalle)
+        
     }
 })
 

@@ -1,5 +1,6 @@
 import React from 'react';
 import axios from 'axios';
+import CryptoJS from 'crypto-js';
 import { spinnerLoading, currentDate } from '../tools/Tools';
 
 class RepVentas extends React.Component {
@@ -29,8 +30,11 @@ class RepVentas extends React.Component {
             metodoPagoCheck: true,
 
             loading: true,
+            messageWarning: '',
 
         }
+
+        this.FechaIni = React.createRef();
 
         this.abortControllerView = new AbortController()
     }
@@ -83,6 +87,31 @@ class RepVentas extends React.Component {
         }
     }
 
+    async onEventImprimir() {
+        if (this.state.fechaFin < this.state.fechaIni) {
+            this.setState({ messageWarning: "La Fecha inicial no puede ser mayor a la fecha final." })
+            this.FechaIni.current.focus();
+        }
+        else {
+            const data = {
+                // "idLote": this.state.idLote,
+                "idComprobante": this.state.idComprobante === '' ? 0 : this.state.idComprobante,
+                "idCliente": this.state.idCliente === '' ? 0 : this.state.idCliente,
+                "idUsuario": this.state.idUsuario === '' ? 0 : this.state.idUsuario,
+                "tipoVenta": this.state.tipoVenta === '' ? 0 : this.state.tipoVenta,
+                "metodoPago": this.state.metodoPago === '' ? 0 : this.state.metodoPago,                
+                "idSede": "SD0001",
+                "fechaIni": this.state.fechaIni,
+                "fechaIFin": this.state.fechaFin
+            }
+
+            let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
+            let params = new URLSearchParams({ "params": ciphertext });
+            window.open("/api/factura/repgeneralventas?" + params, "_blank");
+            // console.log(data)
+        }
+    }
+
     render() {
 
         return (
@@ -108,7 +137,7 @@ class RepVentas extends React.Component {
                                                         id="customSwitch1"
                                                         checked={this.state.isFechaActive}
                                                         onChange={(event) => {
-                                                            this.setState({ isFechaActive: event.target.checked, fechaIni: currentDate(), fechaFin: currentDate() })
+                                                            this.setState({ isFechaActive: event.target.checked, fechaIni: currentDate(), fechaFin: currentDate(), messageWarning: '' })
                                                         }}
                                                     >
                                                     </input>
@@ -126,8 +155,22 @@ class RepVentas extends React.Component {
                                                         type="date"
                                                         className="form-control"
                                                         disabled={!this.state.isFechaActive}
+                                                        ref={this.FechaIni}
                                                         value={this.state.fechaIni}
-                                                        onChange={(event) => this.setState({ fechaIni: event.target.value })} />
+                                                        onChange={(event) => {
+
+                                                            if (event.target.value <= this.state.fechaFin) {
+                                                                this.setState({
+                                                                    fechaIni: event.target.value,
+                                                                    messageWarning: '',
+                                                                });
+                                                            } else {
+                                                                this.setState({
+                                                                    fechaIni: event.target.value,
+                                                                    messageWarning: 'La Fecha inicial no puede ser mayor a la fecha final.',
+                                                                });
+                                                            }
+                                                        }} />
                                                 </div>
                                             </div>
                                         </div>
@@ -148,6 +191,13 @@ class RepVentas extends React.Component {
 
                                 </div>
                             </div>
+
+                            {
+                                this.state.messageWarning === '' ? null :
+                                    <div className="alert alert-warning" role="alert">
+                                        <i className="bi bi-exclamation-diamond-fill"></i> {this.state.messageWarning}
+                                    </div>
+                            }
 
                             <div className="card my-1">
                                 <h6 className="card-header">Reporte de Ventas</h6>
@@ -387,7 +437,7 @@ class RepVentas extends React.Component {
                                     <div className="row">
                                         <div className="col"></div>
                                         <div className="col">
-                                            <button className="btn btn-outline-warning btn-sm"><i className="bi bi-file-earmark-pdf-fill"></i> Reporte Pdf</button>
+                                            <button className="btn btn-outline-warning btn-sm" onClick={ () => this.onEventImprimir() }><i className="bi bi-file-earmark-pdf-fill"></i> Reporte Pdf</button>
                                         </div>
                                         <div className="col">
                                             <button className="btn btn-outline-success btn-sm"><i className="bi bi-file-earmark-excel-fill"></i> Reporte Excel</button>

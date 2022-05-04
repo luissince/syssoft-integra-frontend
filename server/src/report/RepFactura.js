@@ -241,6 +241,135 @@ class RepFactura {
         })
     }
 
+    async repFiltroVentas(req, sedeInfo, data=''){
+        try{
+            const doc = new PDFDocument({
+                margins: {
+                    top: 40,
+                    bottom: 40,
+                    left: 40,
+                    right: 40
+                }
+            });
+
+            doc.info["Title"] = `REPORTE DE VENTAS DEL ${req.query.fechaIni} AL ${req.query.fechaIFin}`
+
+            let orgX = doc.x;
+            let orgY = doc.y;
+            let cabeceraY = orgY + 70;
+            let filtroY = cabeceraY + 40;
+            let bodY = filtroY + 65;
+            let titleX = orgX + 150;
+            let medioX = (doc.page.width - doc.options.margins.left - doc.options.margins.right) / 2;
+
+            let h1 = 14;
+            let h2 = 12;
+            let h3 = 10;
+
+            doc.image(path.join(__dirname, "..", "path/to/logo.png"), doc.x, doc.y, { width: 75 });
+
+            doc.fontSize(h1).text(
+                `${sedeInfo.nombreEmpresa}`,
+                titleX,
+                orgY,
+                {
+                    width: 250,
+                    align: "center"
+                }
+            );
+
+            doc.fontSize(h3).text(
+                `RUC: ${sedeInfo.ruc}\n${sedeInfo.direccion}\nCelular: ${sedeInfo.celular} / Telefono: ${sedeInfo.telefono}`,
+                titleX,
+                orgY + 17,
+                {
+                    width: 250,
+                    align: "center",
+                }
+            );
+
+            doc.fontSize(h2).text(
+                "REPORTE GENERAL DE VENTAS",
+                // (doc.page.width - orgX - orgY) / 2,
+                titleX,
+                cabeceraY,
+                {
+                    width: 200,
+                    align: "center",
+                }
+            );
+
+            doc.fontSize(11).text(
+                `PERIODO: ${req.query.fechaIni} al ${req.query.fechaIFin}`,
+                orgX,
+                cabeceraY + 26,
+                {
+                    width: 300,
+                    align: "left",
+                }
+            );
+
+            doc.rect(
+                orgX, // EJE X
+                filtroY, // EJE Y
+                doc.page.width - doc.options.margins.left - doc.options.margins.right, // ANCHO
+                50).stroke(); // ALTO
+        
+            // left
+            doc.fontSize(h3).text(
+                `Comprobante(s): TODOS`,
+                orgX + 5,
+                filtroY + 6
+            );
+            doc.fontSize(h3).text(
+                `Cliente(s): TODOS`,
+                orgX + 5,
+                filtroY + 20
+            );
+            doc.fontSize(h3).text(
+                `Vendedor(s): TODOS`,
+                orgX + 5,
+                filtroY + 34
+            );
+        
+            // right
+            doc.fontSize(h3).text(
+                `Tipo(s): TODOS`,
+                medioX + 15,
+                filtroY + 6
+            );
+            doc.fontSize(h3).text(
+                `Metodo de pago(s): TODOS`,
+                medioX + 15,
+                filtroY + 20
+            );
+
+            let content = [ ["11-01-2022", "PUBLICO GENERAL", "N001-1", "CONTADO", "EFECTIVO", "COBRADO", "S/ 10.00"] ];
+            content.push(["", "CONTADO", "S/ 10.00", "CREDITO", "S/ 10.00", "TOTAL", "S/ 20.00" ]);
+
+            //Tabla
+            const table = {
+                // title: "Detalle",
+                subtitle: "DETALLE",
+                headers: ["Fecha", "Cliente", "Comprobante", "Tipo", "Metodo", "Estado", "Importe"],
+                rows: content
+            };
+        
+            doc.table(table, {
+                x: orgX,
+                y: bodY,
+                width: doc.page.width - doc.options.margins.left - doc.options.margins.right
+            });
+
+            doc.end();
+
+            return getStream.buffer(doc);
+
+        } catch(error){
+            return "Se genero un error al generar el reporte.";
+        }
+    }
+
 }
 
 module.exports = RepFactura;
