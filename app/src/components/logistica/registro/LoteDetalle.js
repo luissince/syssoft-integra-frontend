@@ -147,7 +147,7 @@ class LoteDetalle extends React.Component {
 
                             <div className="row">
                                 <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                                    <p class="lead">Descripcion</p>
+                                    <p className="lead">Descripcion</p>
                                     <div className="table-responsive">
                                         <table className="table table-borderless">
                                             <thead>
@@ -192,7 +192,7 @@ class LoteDetalle extends React.Component {
 
                             <div className="row">
                                 <div className="col-lg-4 col-md-4 col-sm-12 col-xs-12">
-                                    <p class="lead">Descripcion</p>
+                                    <p className="lead">Descripcion</p>
                                     <div className="table-responsive">
                                         <table className="table table-borderless">
                                             <thead>
@@ -213,7 +213,7 @@ class LoteDetalle extends React.Component {
                                     </div>
                                 </div>
                                 <div className="col-lg-4 col-md-4 col-sm-12 col-xs-12">
-                                    <p class="lead">Medidas</p>
+                                    <p className="lead">Medidas</p>
                                     <div className="table-responsive">
                                         <table className="table table-borderless">
                                             <thead>
@@ -246,7 +246,7 @@ class LoteDetalle extends React.Component {
                                     </div>
                                 </div>
                                 <div className="col-lg-4 col-md-4 col-sm-12 col-xs-12">
-                                    <p class="lead">Límites</p>
+                                    <p className="lead">Límites</p>
                                     <div className="table-responsive">
                                         <table className="table table-borderless">
                                             <thead>
