@@ -21,7 +21,9 @@ class Conceptos extends React.Component {
         this.state = {
             idConcepto: '',
             nombre: '',
-            tipoConcepto: '',
+            tipo: '',
+            codigo: '',
+            idUsuario: this.props.token.userToken.idUsuario,
 
             loadModal: false,
             nameModal: 'Nuevo Comprobante',
@@ -38,6 +40,7 @@ class Conceptos extends React.Component {
             messageTable: 'Cargando información...',
             messagePaginacion: 'Mostranto 0 de 0 Páginas'
         }
+        this.refTipo = React.createRef();
 
         this.refTxtSearch = React.createRef();
 
@@ -64,7 +67,8 @@ class Conceptos extends React.Component {
             this.abortControllerModal.abort();
             await this.setStateAsync({
                 nombre: '',
-                tipoConcepto: '',
+                tipo: '',
+                codigo: '',
                 idConcepto: '',
 
                 loadModal: false,
@@ -173,7 +177,7 @@ class Conceptos extends React.Component {
 
             await this.setStateAsync({
                 nombre: result.data.nombre,
-                tipoConcepto: result.data.tipoConcepto,
+                tipo: result.data.tipo,
                 idConcepto: result.data.idConcepto,
                 loadModal: false
             });
@@ -190,9 +194,9 @@ class Conceptos extends React.Component {
         if (this.state.nombre === "") {
             this.setState({ messageWarning: "Ingrese el nombre del concepto" });
             this.refNombre.current.focus();
-        } else if (this.state.tipoConcepto === "") {
+        } else if (this.state.tipo === "") {
             this.setState({ messageWarning: "Seleccione el concepto" })
-            this.refTipoConcepto.current.focus();
+            this.tipo.current.focus();
         } else {
             try {
                 ModalAlertInfo("Concepto", "Procesando información...");
@@ -200,7 +204,8 @@ class Conceptos extends React.Component {
                 if (this.state.idConcepto !== '') {
                     const result = await axios.post('/api/concepto/update', {
                         "nombre": this.state.nombre.trim().toUpperCase(),
-                        "tipoConcepto": this.state.tipoConcepto,
+                        "tipo": this.state.tipo,
+                        "idUsuario": this.state.idUsuario,
                         "idConcepto": this.state.idConcepto
                     })
 
@@ -210,7 +215,8 @@ class Conceptos extends React.Component {
                 } else {
                     const result = await axios.post('/api/concepto/add', {
                         "nombre": this.state.nombre.trim().toUpperCase(),
-                        "tipoConcepto": this.state.tipoConcepto,
+                        "tipo": this.state.tipo,
+                        "idUsuario": this.state.idUsuario,
                     });
 
                     ModalAlertSuccess("Concepto", result.data, () => {
@@ -299,22 +305,23 @@ class Conceptos extends React.Component {
                                             }}
                                             placeholder="Ingrese el nombre del concepto" />
                                     </div>
+
                                     <div className="form-group col-md-12">
                                         <label>Tipo de Concepto:</label>
                                         <div className="input-group">
                                             <select
                                                 className="form-control"
-                                                value={this.state.tipoConcepto}
-                                                ref={this.refTipoConcepto}
+                                                value={this.state.tipo}
+                                                ref={this.refTipo}
                                                 onChange={(event) => {
                                                     if (event.target.value.trim().length > 0) {
                                                         this.setState({
-                                                            tipoConcepto: event.target.value,
+                                                            tipo: event.target.value,
                                                             messageWarning: '',
                                                         });
                                                     } else {
                                                         this.setState({
-                                                            tipoConcepto: event.target.value,
+                                                            tipo: event.target.value,
                                                             messageWarning: 'Seleccione el concepto',
                                                         });
                                                     }
@@ -323,6 +330,18 @@ class Conceptos extends React.Component {
                                                 <option value="1">CONCEPTO DE GASTO</option>
                                                 <option value="2">CONCEPTO DE COBRO</option>
                                             </select>
+                                        </div>
+                                    </div>
+
+                                    <div className="form-group col-md-12">
+                                        <label>Código:</label>
+                                        <div className="input-group">
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                value={this.state.codigo}
+                                                onChange={(event) => this.setState({ codigo: event.target.value })}
+                                                placeholder="Código" />
                                         </div>
                                     </div>
                                 </div>
@@ -406,7 +425,7 @@ class Conceptos extends React.Component {
                                                     <tr key={index}>
                                                         <td className="text-center">{item.id}</td>
                                                         <td>{item.nombre}</td>
-                                                        <td>{item.tipoConcepto === 1 ? 'CONCEPTO DE GASTO' : 'CONCEPTO DE COBRO'}</td>
+                                                        <td>{item.tipo === 1 ? 'CONCEPTO DE GASTO' : 'CONCEPTO DE COBRO'}</td>
                                                         <td>{item.fecha}{<br />}{timeForma24(item.hora)}</td>
                                                         <td className="text-center">
                                                             <button

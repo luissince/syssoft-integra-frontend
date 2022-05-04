@@ -245,6 +245,33 @@ class Factura {
                     idCobro = "CB0001";
                 }
 
+                let comprobanteCobro = await conec.execute(connection, `SELECT 
+                serie,
+                numeracion 
+                FROM comprobante 
+                WHERE idComprobante  = ?
+                `, [
+                    req.body.idComprobanteCobro
+                ]);
+
+                let numeracionCobro = 0;
+
+                let cobros = await conec.execute(connection, 'SELECT numeracion  FROM cobro WHERE idComprobante = ?', [
+                    req.body.idComprobanteCobro
+                ]);
+
+                if (cobros.length > 0) {
+                    let quitarValor = cobros.map(function (item) {
+                        return parseInt(item.numeracion);
+                    });
+
+                    let valorActual = Math.max(...quitarValor);
+                    let incremental = valorActual + 1;
+                    numeracionCobro = incremental;
+                } else {
+                    numeracionCobro = comprobanteCobro[0].numeracion;
+                }
+
                 await conec.execute(connection, `INSERT INTO cobro(
                 idCobro, 
                 idCliente, 
@@ -253,12 +280,15 @@ class Factura {
                 idBanco, 
                 idProcedencia,
                 idProyecto,
+                idComprobante,
+                serie,
+                numeracion,
                 metodoPago, 
                 estado, 
                 observacion, 
                 fecha, 
                 hora) 
-                VALUES(?,?,?,?,?,?,?,?,?,?,?,?)`, [
+                VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, [
                     idCobro,
                     req.body.idCliente,
                     req.body.idUsuario,
@@ -266,6 +296,9 @@ class Factura {
                     req.body.idBanco,
                     idVenta,
                     req.body.idProyecto,
+                    req.body.idComprobanteCobro,
+                    comprobanteCobro[0].serie,
+                    numeracionCobro,
                     req.body.metodoPago,
                     1,
                     'INGRESO DEL PAGO TOTAL',
@@ -331,6 +364,34 @@ class Factura {
                         idCobro = "CB0001";
                     }
 
+
+                    let comprobanteCobro = await conec.execute(connection, `SELECT 
+                    serie,
+                    numeracion 
+                    FROM comprobante 
+                    WHERE idComprobante  = ?
+                    `, [
+                        req.body.idComprobanteCobro
+                    ]);
+
+                    let numeracionCobro = 0;
+
+                    let cobros = await conec.execute(connection, 'SELECT numeracion  FROM cobro WHERE idComprobante = ?', [
+                        req.body.idComprobanteCobro
+                    ]);
+
+                    if (cobros.length > 0) {
+                        let quitarValor = cobros.map(function (item) {
+                            return parseInt(item.numeracion);
+                        });
+
+                        let valorActual = Math.max(...quitarValor);
+                        let incremental = valorActual + 1;
+                        numeracionCobro = incremental;
+                    } else {
+                        numeracionCobro = comprobanteCobro[0].numeracion;
+                    }
+
                     await conec.execute(connection, `INSERT INTO cobro(
                         idCobro, 
                         idCliente, 
@@ -339,12 +400,15 @@ class Factura {
                         idBanco, 
                         idProcedencia,
                         idProyecto,
+                        idComprobante,
+                        serie,
+                        numeracion,
                         metodoPago, 
                         estado, 
                         observacion, 
                         fecha, 
                         hora) 
-                        VALUES(?,?,?,?,?,?,?,?,?,?,?,?)`, [
+                        VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, [
                         idCobro,
                         req.body.idCliente,
                         req.body.idUsuario,
@@ -352,6 +416,9 @@ class Factura {
                         req.body.idBanco,
                         idVenta,
                         req.body.idProyecto,
+                        req.body.idComprobanteCobro,
+                        comprobanteCobro[0].serie,
+                        numeracionCobro,
                         req.body.metodoPago,
                         1,
                         'INICIAL',

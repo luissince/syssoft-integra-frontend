@@ -102,6 +102,33 @@ router.post('/add', async function (req, res) {
             idGasto = "GT0001";
         }
 
+        let comprobante = await conec.execute(connection, `SELECT 
+        serie,
+        numeracion 
+        FROM comprobante 
+        WHERE idComprobante  = ?
+        `, [
+            req.body.idComprobante
+        ]);
+
+        let numeracion = 0;
+
+        let gastos = await conec.execute(connection, 'SELECT numeracion FROM gasto WHERE idComprobante = ?', [
+            req.body.idComprobante
+        ]);
+
+        if (gastos.length > 0) {
+            let quitarValor = gastos.map(function (item) {
+                return parseInt(item.numeracion);
+            });
+
+            let valorActual = Math.max(...quitarValor);
+            let incremental = valorActual + 1;
+            numeracion = incremental;
+        } else {
+            numeracion = comprobante[0].numeracion;
+        }
+
         await conec.execute(connection, `INSERT INTO gasto(
             idGasto, 
             idCliente,
@@ -110,12 +137,15 @@ router.post('/add', async function (req, res) {
             idBanco,
             idProcedencia,
             idProyecto,
+            idComprobante,
+            serie,
+            numeracion,
             metodoPago,
             estado,
             observacion,
             fecha,
             hora) 
-            VALUES(?,?,?,?,?,?,?,?,?,?,?,?)`, [
+            VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, [
             idGasto,
             req.body.idCliente,
             req.body.idUsuario,
@@ -123,6 +153,9 @@ router.post('/add', async function (req, res) {
             req.body.idBanco,
             '',
             req.body.idProyecto,
+            req.body.idComprobante,
+            comprobante[0].serie,
+            numeracion,
             req.body.metodoPago,
             req.body.estado,
             req.body.observacion,

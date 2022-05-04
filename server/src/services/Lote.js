@@ -1,4 +1,5 @@
 const Conexion = require('../database/Conexion');
+const { currentDate, currentTime } = require('../tools/Tools');
 const conec = new Conexion();
 
 class Lote {
@@ -108,8 +109,13 @@ class Lote {
                 limiteDerecho,
                 limiteIzquierdo,
                 limitePosterior,
-                ubicacionLote
-                ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)        
+                ubicacionLote,
+                fecha,
+                hora,
+                fupdate,
+                hupdate,
+                idUsuario
+                ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)        
                 `, [
                 idLote,
                 req.body.idManzana,
@@ -128,6 +134,11 @@ class Lote {
                 req.body.limiteIzquierdo,
                 req.body.limitePosterior,
                 req.body.ubicacionLote,
+                currentDate(),
+                currentTime(),
+                currentDate(),
+                currentTime(),
+                req.body.idUsuario,
             ])
 
             await conec.commit(connection);
@@ -188,7 +199,10 @@ class Lote {
                     limiteDerecho = ?,
                     limiteIzquierdo = ?,
                     limitePosterior = ?,
-                    ubicacionLote = ?
+                    ubicacionLote = ?,
+                    fupdate = ?,
+                    hupdate = ?,
+                    idUsuario = ?
                     WHERE idLote = ?
                     `, [
                     req.body.idManzana,
@@ -204,8 +218,11 @@ class Lote {
                     req.body.limiteIzquierdo,
                     req.body.limitePosterior,
                     req.body.ubicacionLote,
-                    req.body.idLote,
-                ])
+                    currentDate(),
+                    currentTime(),
+                    req.body.idUsuario,
+                    req.body.idLote
+                ]);
 
                 await conec.commit(connection);
                 return "update";
@@ -226,7 +243,10 @@ class Lote {
                     limiteDerecho = ?,
                     limiteIzquierdo = ?,
                     limitePosterior = ?,
-                    ubicacionLote = ?
+                    ubicacionLote = ?,
+                    fupdate = ?,
+                    hupdate = ?,
+                    idUsuario = ?
                     WHERE idLote = ?
                     `, [
                     req.body.idManzana,
@@ -245,6 +265,9 @@ class Lote {
                     req.body.limiteIzquierdo,
                     req.body.limitePosterior,
                     req.body.ubicacionLote,
+                    currentDate(),
+                    currentTime(),
+                    req.body.idUsuario,
                     req.body.idLote,
                 ])
 
@@ -427,7 +450,9 @@ class Lote {
     async listarComboLoteCliente(req) {
         try {
             let result = await conec.query(`SELECT 
-                l.idLote, l.descripcion AS lote, m.nombre AS manzana
+                l.idLote, 
+                l.descripcion AS lote, 
+                m.nombre AS manzana
                 FROM venta AS v
                 INNER JOIN cliente AS c ON v.idCliente = c.idCliente
                 INNER JOIN ventaDetalle AS vd ON v.idVenta = vd.idVenta

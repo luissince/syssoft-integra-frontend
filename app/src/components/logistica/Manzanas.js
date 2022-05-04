@@ -22,6 +22,7 @@ class Manzanas extends React.Component {
             idManzana: '',
             nombre: '',
             idProyecto: this.props.token.project.idProyecto,
+            idUsuario: this.props.token.userToken.idUsuario,
 
             loadModal: false,
             nameModal: 'Nuevo Manzana',
@@ -193,7 +194,8 @@ class Manzanas extends React.Component {
                 if (this.state.idManzana === "") {
                     const result = await axios.post("/api/manzana/", {
                         "nombre": this.state.nombre,
-                        "idProyecto": this.state.idProyecto
+                        "idProyecto": this.state.idProyecto,
+                        "idUsuario": this.state.idUsuario
                     });
 
                     ModalAlertSuccess("Manzana", result.data, () => {
@@ -203,7 +205,8 @@ class Manzanas extends React.Component {
                     const result = await axios.put("/api/manzana", {
                         "idManzana": this.state.idManzana,
                         "nombre": this.state.nombre,
-                        "idProyecto": this.state.idProyecto
+                        "idProyecto": this.state.idProyecto,
+                        "idUsuario": this.state.idUsuario
                     });
 
                     ModalAlertSuccess("Manzana", result.data, () => {

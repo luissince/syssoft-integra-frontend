@@ -28,6 +28,7 @@ class Comprobantes extends React.Component {
             numeracion: '',
             impresion: '',
             estado: true,
+            preferida: false,
             idUsuario: this.props.token.userToken.idUsuario,
 
             loadModal: false,
@@ -227,6 +228,7 @@ class Comprobantes extends React.Component {
                         "numeracion": this.state.numeracion,
                         "impresion": this.state.impresion.trim(),
                         "estado": this.state.estado,
+                        "preferida": this.state.preferida,
                         "idUsuario": this.state.idUsuario,
                         "idComprobante": this.state.idComprobante,
                     });
@@ -242,6 +244,7 @@ class Comprobantes extends React.Component {
                         "numeracion": this.state.numeracion,
                         "impresion": this.state.impresion.trim(),
                         "estado": this.state.estado,
+                        "preferida": this.state.preferida,
                         "idUsuario": this.state.idUsuario
                     });
 
@@ -316,12 +319,13 @@ class Comprobantes extends React.Component {
                                     >
                                         <option value="">- Seleccione -</option>
                                         <option value="1">Facturación</option>
-                                        <option value="2">Nota de Crédito</option>
-                                        <option value="3">Nota de Debito</option>
-                                        <option value="4">Recibo de Caja</option>
+                                        <option value="2">Venta Libre</option>
+                                        <option value="3">Nota de Crédito</option>
+                                        <option value="4">Nota de Debito</option>
                                         <option value="5">Comprobante de Ingreso</option>
                                         <option value="6">Comprobante de Egreso</option>
                                         <option value="7">Cotización</option>
+                                        <option value="8">Guía de Remisión</option>
                                     </select>
                                 </div>
 
@@ -374,17 +378,32 @@ class Comprobantes extends React.Component {
                                     />
                                 </div>
 
-                                <div className="form-group">
-                                    <div className="custom-control custom-switch">
-                                        <input
-                                            type="checkbox"
-                                            className="custom-control-input"
-                                            id="switch1"
-                                            checked={this.state.estado}
-                                            onChange={(value) => this.setState({ estado: value.target.checked })} />
-                                        <label className="custom-control-label" htmlFor="switch1">Activo o Inactivo</label>
+                                <div className="form-row">
+                                    <div className="form-group col-md-6">
+                                        <div className="custom-control custom-switch">
+                                            <input
+                                                type="checkbox"
+                                                className="custom-control-input"
+                                                id="cbEstado"
+                                                checked={this.state.estado}
+                                                onChange={(value) => this.setState({ estado: value.target.checked })} />
+                                            <label className="custom-control-label" htmlFor="cbEstado">Activo o Inactivo</label>
+                                        </div>
+                                    </div>
+
+                                    <div className="form-group col-md-6">
+                                        <div className="custom-control custom-switch">
+                                            <input
+                                                type="checkbox"
+                                                className="custom-control-input"
+                                                id="cbPreferido"
+                                                checked={this.state.preferida}
+                                                onChange={(value) => this.setState({ preferida: value.target.checked })} />
+                                            <label className="custom-control-label" htmlFor="cbPreferido">Preferido</label>
+                                        </div>
                                     </div>
                                 </div>
+
                             </div>
                             <div className="modal-footer">
                                 <button type="button" className="btn btn-primary" onClick={() => this.onEventGuardar()}>Guardar</button>
@@ -438,41 +457,51 @@ class Comprobantes extends React.Component {
                             <table className="table table-striped table-bordered rounded">
                                 <thead>
                                     <tr>
-                                        <th width="5%" scope="col">#</th>
-                                        <th width="10%" scope="col">Tipo Comprobante</th>
-                                        <th width="20%" scope="col">Nombre</th>
-                                        <th width="15%" scope="col">Serie</th>
-                                        <th width="15%" scope="col">Numeración</th>
-                                        <th width="15%" scope="col">Creación</th>
-                                        <th width="10%" scope="col">Estado</th>
-                                        <th width="5%" scope="col">Edición</th>
-                                        <th width="5%" scope="col">Anular</th>
+                                        <th width="5%" className="text-center">#</th>
+                                        <th width="20%" >Tipo Comprobante</th>
+                                        <th width="20%" >Nombre</th>
+                                        <th width="10%" >Serie</th>
+                                        <th width="10%" >Numeración</th>
+                                        <th width="10%" >Creación</th>
+                                        <th width="10%" >Preferida</th>
+                                        <th width="10%" >Estado</th>
+                                        <th width="5%" className="text-center">Edición</th>
+                                        <th width="5%" className="text-center">Anular</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {
                                         this.state.loading ? (
                                             <tr>
-                                                <td className="text-center" colSpan="9">
+                                                <td className="text-center" colSpan="10">
                                                     {spinnerLoading()}
                                                 </td>
                                             </tr>
                                         ) : this.state.lista.length === 0 ? (
                                             <tr>
-                                                <td className="text-center" colSpan="9">¡No hay comprobantes registrados!</td>
+                                                <td className="text-center" colSpan="10">¡No hay comprobantes registrados!</td>
                                             </tr>
                                         ) :
                                             this.state.lista.map((item, index) => {
                                                 return (
                                                     <tr key={index}>
-                                                        <td>{item.id}</td>
+                                                        <td className="text-center">{item.id}</td>
                                                         <td>{item.tipo.toUpperCase()}</td>
                                                         <td>{item.nombre}</td>
                                                         <td>{item.serie}</td>
                                                         <td>{item.numeracion}</td>
                                                         <td>{<span>{item.fecha}</span>}{<br></br>}{<span>{timeForma24(item.hora)}</span>}</td>
-                                                        <td className="text-center"><div className={`badge ${item.estado === 1 ? "badge-info" : "badge-danger"}`}>{item.estado === 1 ? "ACTIVO" : "INACTIVO"}</div></td>
-                                                        <td>
+                                                        <td className="text-center">
+                                                            <div>
+                                                                {item.preferida === 1 ? "Si" : "No"}
+                                                            </div>
+                                                        </td>
+                                                        <td className="text-center">
+                                                            <div className={`badge ${item.estado === 1 ? "badge-info" : "badge-danger"}`}>
+                                                                {item.estado === 1 ? "ACTIVO" : "INACTIVO"}
+                                                            </div>
+                                                        </td>
+                                                        <td className="text-center">
                                                             <button
                                                                 className="btn btn-outline-warning btn-sm"
                                                                 title="Editar"
@@ -480,7 +509,7 @@ class Comprobantes extends React.Component {
                                                                 <i className="bi bi-pencil"></i>
                                                             </button>
                                                         </td>
-                                                        <td>
+                                                        <td className="text-center">
                                                             <button
                                                                 className="btn btn-outline-danger btn-sm"
                                                                 title="Anular"

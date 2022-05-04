@@ -1,6 +1,6 @@
 const Conexion = require('../database/Conexion');
-const conec = new Conexion();
 const { currentDate, currentTime } = require('../tools/Tools');
+const conec = new Conexion();
 
 class Manzana {
 
@@ -105,12 +105,24 @@ class Manzana {
                 idManzana = "MZ0001";
             }
 
-            await conec.execute(connection, 'INSERT INTO manzana (idManzana,nombre,idProyecto,fecha,hora) values (?,?,?,?,?)', [
+            await conec.execute(connection, `INSERT INTO manzana(
+            idManzana,
+            nombre,
+            idProyecto,
+            fecha,
+            hora,
+            fupdate,
+            hupdate,
+            idUsuario) 
+            VALUES(?,?,?,?,?,?,?,?)`, [
                 idManzana,
                 req.body.nombre,
                 req.body.idProyecto,
                 currentDate(),
-                currentTime()
+                currentTime(),
+                currentDate(),
+                currentTime(),
+                req.body.idUsuario,
             ])
 
             await conec.commit(connection);
@@ -130,10 +142,16 @@ class Manzana {
 
             await conec.execute(connection, `UPDATE manzana SET
             nombre = ?,
-            idProyecto = ?
+            idProyecto = ?,
+            fupdate = ?,
+            hupdate = ?,
+            idUsuario = ?
             WHERE idManzana  = ?`, [
                 req.body.nombre,
                 req.body.idProyecto,
+                currentDate(),
+                currentTime(),
+                req.body.idUsuario,
                 req.body.idManzana
             ])
 

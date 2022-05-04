@@ -50,11 +50,16 @@ class VentaProceso extends React.Component {
 
             importeTotal: 0,
             selectTipoPago: true,
+
             bancos: [],
+            comprobantesCobro: [],
+
+            idComprobanteContado: '',
             idBancoContado: '',
             metodoPagoContado: '',
             montoInicialCheck: false,
             inicial: '',
+            idComprobanteCredito: '',
             idBancoCredito: '',
             metodoPagoCredito: '',
             letraMensual: '',
@@ -66,10 +71,12 @@ class VentaProceso extends React.Component {
         this.refCliente = React.createRef();
         this.refMoneda = React.createRef();
 
+        this.refComprobanteContado = React.createRef();
         this.refBancoContado = React.createRef();
         this.refMetodoContado = React.createRef();
 
         this.refMontoInicial = React.createRef();
+        this.refComprobanteCredito = React.createRef();
         this.refBancoCredito = React.createRef();
         this.refMetodoCredito = React.createRef();
         this.refNumCutoas = React.createRef();
@@ -114,6 +121,16 @@ class VentaProceso extends React.Component {
 
             const comprobante = await axios.get("/api/comprobante/listcombo", {
                 signal: this.abortControllerView.signal,
+                params: {
+                    "tipo": "1"
+                }
+            });
+
+            const comprobanteCobro = await axios.get("/api/comprobante/listcombo", {
+                signal: this.abortControllerView.signal,
+                params: {
+                    "tipo": "5"
+                }
             });
 
             const cliente = await axios.get("/api/cliente/listcombo", {
@@ -139,19 +156,26 @@ class VentaProceso extends React.Component {
                 signal: this.abortControllerView.signal,
             });
 
+            const comprobanteFilter = comprobante.data.filter(item => item.preferida === 1);
+
+            const comprobanteCobroFilter = comprobanteCobro.data.filter(item => item.preferida === 1);
+
             const monedaFilter = moneda.data.filter(item => item.predeterminado === 1);
 
             await this.setStateAsync({
                 comprobantes: comprobante.data,
+                comprobantesCobro: comprobanteCobro.data,
                 clientes: cliente.data,
                 lotes: lote.data,
                 monedas: moneda.data,
                 impuestos: impuesto.data,
                 idMoneda: monedaFilter.length > 0 ? monedaFilter[0].idMoneda : '',
+                idComprobante: comprobanteFilter.length > 0 ? comprobanteFilter[0].idComprobante : '',
+                idComprobanteContado: comprobanteCobroFilter.length > 0 ? comprobanteCobroFilter[0].idComprobante : '',
+                idComprobanteCredito: comprobanteCobroFilter.length > 0 ? comprobanteCobroFilter[0].idComprobante : '',
                 bancos: banco.data,
                 loading: false,
             });
-
 
         } catch (error) {
             if (error.message !== "canceled") {
@@ -314,10 +338,13 @@ class VentaProceso extends React.Component {
             importeTotal: 0,
             selectTipoPago: true,
             bancos: [],
+            comprobantesCobro: [],
+            idComprobanteContado: '',
             idBancoContado: '',
             metodoPagoContado: '',
             montoInicialCheck: false,
             inicial: '',
+            idComprobanteCredito: '',
             idBancoCredito: '',
             metodoPagoCredito: '',
             letraMensual: '',
@@ -422,6 +449,11 @@ class VentaProceso extends React.Component {
     }
 
     async onEventGuardar() {
+        if (this.state.selectTipoPago && this.state.idComprobanteContado === "") {
+            this.refComprobanteContado.current.focus();
+            return;
+        }
+
         if (this.state.selectTipoPago && this.state.idBancoContado === "") {
             this.refBancoContado.current.focus();
             return;
@@ -439,6 +471,11 @@ class VentaProceso extends React.Component {
 
         if (parseFloat(this.state.inicial) <= 0) {
             this.refMontoInicial.current.focus();
+            return;
+        }
+
+        if (!this.state.selectTipoPago && this.state.montoInicialCheck && this.state.idComprobanteCredito === "") {
+            this.refComprobanteCredito.current.focus();
             return;
         }
 
@@ -476,6 +513,7 @@ class VentaProceso extends React.Component {
                         "tipo": this.state.selectTipoPago ? 1 : 2,
                         "selectTipoPago": this.state.selectTipoPago,
                         "montoInicialCheck": this.state.montoInicialCheck,
+                        "idComprobanteCobro": this.state.selectTipoPago ? this.state.idComprobanteContado : this.state.idComprobanteCredito,
                         "idBanco": this.state.selectTipoPago ? this.state.idBancoContado : this.state.montoInicialCheck ? this.state.idBancoCredito : "",
                         "metodoPago": this.state.selectTipoPago ? this.state.metodoPagoContado : this.state.montoInicialCheck ? this.state.metodoPagoCredito : "",
                         "inicial": this.state.selectTipoPago ? 0 : this.state.montoInicialCheck ? parseFloat(this.state.inicial) : 0,
@@ -591,6 +629,29 @@ class VentaProceso extends React.Component {
                                                     <div className="form-group col-md-12">
                                                         <div className="input-group">
                                                             <div className="input-group-prepend">
+                                                                <div className="input-group-text"><i className="bi bi-receipt"></i></div>
+                                                            </div>
+                                                            <select
+                                                                title="Lista de caja o banco a depositar"
+                                                                className="form-control"
+                                                                ref={this.refComprobanteContado}
+                                                                value={this.state.idComprobanteContado}
+                                                                onChange={(event) => this.setState({ idComprobanteContado: event.target.value })}>
+                                                                <option value="">-- Comprobante --</option>
+                                                                {
+                                                                    this.state.comprobantesCobro.map((item, index) => (
+                                                                        <option key={index} value={item.idComprobante}>{item.nombre}</option>
+                                                                    ))
+                                                                }
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div className="form-row">
+                                                    <div className="form-group col-md-12">
+                                                        <div className="input-group">
+                                                            <div className="input-group-prepend">
                                                                 <div className="input-group-text"><i className="bi bi-bank"></i></div>
                                                             </div>
                                                             <select
@@ -679,6 +740,33 @@ class VentaProceso extends React.Component {
                                                         </div>
                                                     </div>
                                                 </div>
+
+                                                {
+                                                    this.state.montoInicialCheck ?
+                                                        <div className="form-row">
+                                                            <div className="form-group col-md-12">
+                                                                <div className="input-group">
+                                                                    <div className="input-group-prepend">
+                                                                        <div className="input-group-text"><i className="bi bi-receipt"></i></div>
+                                                                    </div>
+                                                                    <select
+                                                                        title="Lista de caja o banco a depositar"
+                                                                        className="form-control"
+                                                                        ref={this.refComprobanteCredito}
+                                                                        value={this.state.idComprobanteCredito}
+                                                                        onChange={(event) => this.setState({ idComprobanteCredito: event.target.value })}>
+                                                                        <option value="">-- Comprobante --</option>
+                                                                        {
+                                                                            this.state.comprobantesCobro.map((item, index) => (
+                                                                                <option key={index} value={item.idComprobante}>{item.nombre}</option>
+                                                                            ))
+                                                                        }
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        : null
+                                                }
 
                                                 {
                                                     this.state.montoInicialCheck ?
