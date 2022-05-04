@@ -23,6 +23,8 @@ class GastoProceso extends React.Component {
             idCliente: '',
             clientes: [],
             conceptos: [],
+            idComprobante: '',
+            comprobantes: [],
             idBanco: '',
             cuentasBancarias: [],
             idMoneda: '',
@@ -42,7 +44,7 @@ class GastoProceso extends React.Component {
             messageWarning: '',
             msgLoading: 'Cargando datos...'
         }
-
+        this.refComprobante = React.createRef();
         this.refConcepto = React.createRef()
         this.refMonto = React.createRef()
 
@@ -70,6 +72,13 @@ class GastoProceso extends React.Component {
 
     loadData = async () => {
         try {
+            const comprobante = await axios.get("/api/comprobante/listcombo", {
+                signal: this.abortControllerView.signal,
+                params: {
+                    "tipo": "6"
+                }
+            });
+
             const concepto = await axios.get("/api/concepto/listcombogasto", {
                 signal: this.abortControllerView.signal,
             });
@@ -90,14 +99,18 @@ class GastoProceso extends React.Component {
                 signal: this.abortControllerView.signal,
             });
 
+            const comprobanteFilter = comprobante.data.filter(item => item.preferida === 1);
+
             const monedaFilter = moneda.data.filter(item => item.predeterminado === 1);
 
             await this.setStateAsync({
+                comprobantes: comprobante.data,
                 conceptos: concepto.data,
                 clientes: cliente.data,
                 cuentasBancarias: cuentaBancaria.data,
                 monedas: moneda.data,
                 idMoneda: monedaFilter.length > 0 ? monedaFilter[0].idMoneda : '',
+                idComprobante: comprobanteFilter.length > 0 ? comprobanteFilter[0].idComprobante : '',
                 impuestos: impuesto.data,
                 loading: false,
             });
@@ -194,72 +207,90 @@ class GastoProceso extends React.Component {
     }
 
     async onEventGuardar() {
+        if (this.state.idComprobante === '') {
+            await this.setStateAsync({ messageWarning: "Seleccione el comprobante." })
+            this.refComprobante.current.focus();
+            return;
+        }
+
         if (this.state.idBanco === "") {
             await this.setStateAsync({ messageWarning: "Seleccione el banco a desembolsar." })
             this.refCuentaBancaria.current.focus();
-        } else if (this.state.metodoPago === "") {
+            return;
+        }
+
+        if (this.state.metodoPago === "") {
             await this.setStateAsync({ messageWarning: "Seleccione el metodo de pago." })
             this.refMetodoPago.current.focus();
-        } else if (this.state.idMoneda === '') {
+            return;
+        }
+
+        if (this.state.idMoneda === '') {
             await this.setStateAsync({ messageWarning: "Seleccione un moneda." })
             this.refMoneda.current.focus();
-        } else if (this.state.detalleConcepto.length <= 0) {
-            await this.setStateAsync({ messageWarning: "Agregar datos a la tabla." })
-            this.refConcepto.current.focus()
-        } else {
-
-            let validate = this.state.detalleConcepto.reduce((acumulador, item) =>
-                item.idImpuesto === "" ? acumulador + 1 : acumulador + 0
-                , 0);
-
-            if (validate > 0) {
-                await this.setStateAsync({ messageWarning: "Hay detalles en la tabla sin impuesto seleccionado." });
-                let count = 0;
-                for (let item of this.state.detalleConcepto) {
-                    count++;
-                    if (item.idImpuesto === "") {
-                        document.getElementById(count + "img").focus()
-                    }
-                }
-                return;
-            } else {
-                await this.setStateAsync({ messageWarning: "" });
-            }
-
-            ModalAlertDialog("Gasto", "¿Estás seguro de continuar?", async (event) => {
-                if (event) {
-                    try {
-                        ModalAlertInfo("Gasto", "Procesando información...");
-
-                        let result = await axios.post('/api/gasto/add', {
-                            "idCliente": this.state.idCliente,
-                            "idUsuario": this.state.idUsuario,
-                            'idMoneda': this.state.idMoneda,
-                            "idBanco": this.state.idBanco,
-                            "metodoPago": this.state.metodoPago,
-                            "estado": 1,
-                            "observacion": this.state.observacion.trim().toUpperCase(),
-                            "idProyecto": this.state.idProyecto,
-                            "gastoDetalle": this.state.detalleConcepto
-                        });
-
-                        ModalAlertSuccess("Gasto", result.data, () => {
-                            this.onEventLimpiar()
-                        });
-                    } catch (error) {
-                        if (error.response !== undefined) {
-                            ModalAlertWarning("Gasto", error.response.data)
-                        } else {
-                            ModalAlertWarning("Gasto", "Se genero un error interno, intente nuevamente.")
-                        }
-                    }
-                }
-            });
+            return;
         }
+
+        if (this.state.detalleConcepto.length <= 0) {
+            await this.setStateAsync({ messageWarning: "Agregar datos a la tabla." })
+            this.refConcepto.current.focus();
+            return;
+        }
+
+        let validate = this.state.detalleConcepto.reduce((acumulador, item) =>
+            item.idImpuesto === "" ? acumulador + 1 : acumulador + 0
+            , 0);
+
+        if (validate > 0) {
+            await this.setStateAsync({ messageWarning: "Hay detalles en la tabla sin impuesto seleccionado." });
+            let count = 0;
+            for (let item of this.state.detalleConcepto) {
+                count++;
+                if (item.idImpuesto === "") {
+                    document.getElementById(count + "img").focus()
+                }
+            }
+            return;
+        } else {
+            await this.setStateAsync({ messageWarning: "" });
+        }
+
+        ModalAlertDialog("Gasto", "¿Estás seguro de continuar?", async (event) => {
+            if (event) {
+                try {
+                    ModalAlertInfo("Gasto", "Procesando información...");
+
+                    let result = await axios.post('/api/gasto/add', {
+                        "idComprobante": this.state.idComprobante,
+                        "idCliente": this.state.idCliente,
+                        "idUsuario": this.state.idUsuario,
+                        'idMoneda': this.state.idMoneda,
+                        "idBanco": this.state.idBanco,
+                        "metodoPago": this.state.metodoPago,
+                        "estado": 1,
+                        "observacion": this.state.observacion.trim().toUpperCase(),
+                        "idProyecto": this.state.idProyecto,
+                        "gastoDetalle": this.state.detalleConcepto
+                    });
+
+                    ModalAlertSuccess("Gasto", result.data, () => {
+                        this.onEventLimpiar()
+                    });
+                } catch (error) {
+                    if (error.response !== undefined) {
+                        ModalAlertWarning("Gasto", error.response.data)
+                    } else {
+                        ModalAlertWarning("Gasto", "Se genero un error interno, intente nuevamente.")
+                    }
+                }
+            }
+        });
     }
 
     async onEventLimpiar() {
         await this.setStateAsync({
+            idComprobante: '',
+            comprobantes: [],
             idMoneda: '',
             idCliente: '',
             clientes: [],
@@ -507,6 +538,26 @@ class GastoProceso extends React.Component {
                                 </div>
 
                                 <div className="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12">
+                                    <div className="form-group">
+                                        <div className="input-group">
+                                            <div className="input-group-prepend">
+                                                <div className="input-group-text"><i className="bi bi-receipt"></i></div>
+                                            </div>
+                                            <select
+                                                title="Comprobantes de venta"
+                                                className="form-control"
+                                                ref={this.refComprobante}
+                                                value={this.state.idComprobante}
+                                                onChange={(event) => this.setState({ idComprobante: event.target.value })}>
+                                                <option value="">-- Comprobantes --</option>
+                                                {
+                                                    this.state.comprobantes.map((item, index) => (
+                                                        <option key={index} value={item.idComprobante}>{item.nombre}</option>
+                                                    ))
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
 
                                     <div className="form-group">
                                         <div className="input-group">

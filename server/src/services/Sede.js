@@ -259,6 +259,7 @@ class Sede {
             return 'Error interno de conexión, intente nuevamente.';
         }
     }
+
 }
 
 module.exports = Sede

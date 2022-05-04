@@ -22,6 +22,8 @@ class CreditoProceso extends React.Component {
             plazos: [],
 
             idBanco: '',
+            idComprobante: '',
+            comprobantes: [],
             metodoPago: '',
             observacion: '',
             idUsuario: this.props.token.userToken.idUsuario,
@@ -32,6 +34,7 @@ class CreditoProceso extends React.Component {
             messageWarning: '',
             msgLoading: 'Cargando datos...',
         }
+        this.refComprobante = React.createRef();
         this.refBanco = React.createRef();
         this.refMetodoPago = React.createRef();
 
@@ -56,6 +59,8 @@ class CreditoProceso extends React.Component {
                 idBanco: '',
                 metodoPago: '',
                 observacion: '',
+                idComprobante: '',
+                comprobantes: [],
             });
         });
     }
@@ -96,6 +101,13 @@ class CreditoProceso extends React.Component {
                 }
             });
 
+            const comprobante = await axios.get("/api/comprobante/listcombo", {
+                signal: this.abortControllerTable.signal,
+                params: {
+                    "tipo": "5"
+                }
+            });
+
             const banco = await axios.get("/api/banco/listcombo", {
                 signal: this.abortControllerTable.signal,
             });
@@ -107,11 +119,16 @@ class CreditoProceso extends React.Component {
                 }
             });
 
+            const comprobanteFilter = comprobante.data.filter(item => item.preferida === 1);
+
             await this.setStateAsync({
                 venta: credito.data.venta,
                 plazos: plazosSelected,
 
+                comprobantes: comprobante.data,
                 bancos: banco.data,
+
+                idComprobante: comprobanteFilter.length > 0 ? comprobanteFilter[0].idComprobante : '',
 
                 loading: false,
             });
@@ -134,6 +151,11 @@ class CreditoProceso extends React.Component {
     }
 
     async onEventCobrar() {
+        if (this.state.idComprobante === '') {
+            this.refComprobante.current.focus();
+            return;
+        }
+
         if (this.state.idBanco === "") {
             this.refBanco.current.focus();
             return;
@@ -148,6 +170,7 @@ class CreditoProceso extends React.Component {
             ModalAlertInfo("Cobro", "Procesando información...")
             hideModal("modalCobro");
             let result = await axios.post("/api/cobro/cobro", {
+                "idComprobante": this.state.idComprobante,
                 "idCliente": this.state.venta.idCliente,
                 "idUsuario": this.state.idUsuario,
                 'idMoneda': this.state.venta.idMoneda,
@@ -253,6 +276,27 @@ class CreditoProceso extends React.Component {
                                 </button>
                             </div>
                             <div className="modal-body">
+
+                                <div className="form-group">
+                                    <div className="input-group">
+                                        <div className="input-group-prepend">
+                                            <div className="input-group-text"><i className="bi bi-receipt"></i></div>
+                                        </div>
+                                        <select
+                                            title="Comprobantes de venta"
+                                            className="form-control"
+                                            ref={this.refComprobante}
+                                            value={this.state.idComprobante}
+                                            onChange={(event) => this.setState({ idComprobante: event.target.value })}>
+                                            <option value="">-- Comprobantes --</option>
+                                            {
+                                                this.state.comprobantes.map((item, index) => (
+                                                    <option key={index} value={item.idComprobante}>{item.nombre}</option>
+                                                ))
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
 
                                 <div className="form-row">
                                     <div className="form-group col-md-6">

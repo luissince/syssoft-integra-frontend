@@ -9,7 +9,7 @@ router.get('/list', async function (req, res) {
         let lista = await conec.query(`SELECT 
             idConcepto,
             nombre,
-            tipoConcepto,
+            tipo,
             DATE_FORMAT(fecha,'%d/%m/%Y') as fecha,
             hora 
             FROM concepto
@@ -85,10 +85,24 @@ router.post('/add', async function (req, res) {
 
         await conec.execute(connection, `INSERT INTO concepto(
             idConcepto, 
-            nombre, tipoConcepto, fecha, hora) 
-            VALUES(?,?,?,?,?)`, [
+            nombre, 
+            tipo,
+            codigo,
+            fecha, 
+            hora,
+            fupdate,
+            hupdate,
+            idUsuario) 
+            VALUES(?,?,?,?,?,?,?,?,?)`, [
             idConcepto,
-            req.body.nombre, req.body.tipoConcepto, currentDate(), currentTime()
+            req.body.nombre,
+            req.body.tipo,
+            req.body.codigo,
+            currentDate(),
+            currentTime(),
+            currentDate(),
+            currentTime(),
+            req.body.idUsuario
         ])
 
         await conec.commit(connection);
@@ -124,11 +138,19 @@ router.post('/update', async function (req, res) {
 
         await conec.execute(connection, `UPDATE concepto SET 
         nombre=?, 
-        tipoConcepto=?
+        tipo=?,
+        codigo=?,
+        fupdate=?,
+        hupdate=?,
+        idUsuario=?
         WHERE idConcepto=?`, [
-            req.body.nombre, req.body.tipoConcepto,
+            req.body.nombre,
+            req.body.tipo,
+            req.body.codigo,
+            currentDate(),
+            currentTime(),
+            req.body.idUsuario,
             req.body.idConcepto,
-
         ])
 
         await conec.commit(connection)
@@ -192,7 +214,7 @@ router.delete('/', async function (req, res) {
 
 router.get('/listcombo', async function (req, res) {
     try {
-        let result = await conec.query('SELECT idConcepto, nombre FROM concepto WHERE tipoConcepto = 2');
+        let result = await conec.query('SELECT idConcepto, nombre FROM concepto WHERE tipo = 2');
         res.status(200).send(result);
     } catch (error) {
         res.status(500).send("Error interno de conexión, intente nuevamente.");
@@ -201,7 +223,7 @@ router.get('/listcombo', async function (req, res) {
 
 router.get('/listcombogasto', async function (req, res) {
     try {
-        let result = await conec.query('SELECT idConcepto, nombre FROM concepto WHERE tipoConcepto = 1');
+        let result = await conec.query('SELECT idConcepto, nombre FROM concepto WHERE tipo = 1');
         res.status(200).send(result);
     } catch (error) {
         res.status(500).send("Error interno de conexión, intente nuevamente.");

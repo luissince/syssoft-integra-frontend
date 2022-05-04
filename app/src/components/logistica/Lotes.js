@@ -23,6 +23,8 @@ class Lotes extends React.Component {
             idLote: '',
             idManzana: '',
             manzanas: [],
+            idConcepto: '',
+            conceptos: [],
             descripcion: '',
             costo: '',
             precio: '',
@@ -39,6 +41,7 @@ class Lotes extends React.Component {
             limitePosterior: '',
             ubicacionLote: '',
             idProyecto: this.props.token.project.idProyecto,
+            idUsuario: this.props.token.userToken.idUsuario,
 
             loadModal: false,
             nameModal: 'Nuevo Lote',
@@ -57,6 +60,7 @@ class Lotes extends React.Component {
         }
 
         this.refManzana = React.createRef();
+        this.refConcepto = React.createRef();
         this.refDescripcion = React.createRef();
         this.refCosto = React.createRef();
         this.refPrecio = React.createRef();
@@ -100,6 +104,8 @@ class Lotes extends React.Component {
                 idLote: '',
                 idManzana: '',
                 manzanas: [],
+                idConcepto: '',
+                conceptos: [],
                 descripcion: '',
                 costo: '',
                 precio: '',
@@ -216,9 +222,13 @@ class Lotes extends React.Component {
                 signal: this.abortControllerModal.signal,
             });
 
+            const concepto = await axios.get("/api/concepto/listcombo", {
+                signal: this.abortControllerModal.signal,
+            });
+
             await this.setStateAsync({
                 manzanas: manzana.data,
-
+                conceptos: concepto.data,
                 loadModal: false
             });
         } catch (error) {
@@ -236,6 +246,10 @@ class Lotes extends React.Component {
                 signal: this.abortControllerModal.signal,
             });
 
+            const concepto = await axios.get("/api/concepto/listcombo", {
+                signal: this.abortControllerModal.signal,
+            });
+
             let result = await axios.get('/api/lote/id', {
                 signal: this.abortControllerModal.signal,
                 params: {
@@ -245,6 +259,7 @@ class Lotes extends React.Component {
             await this.setStateAsync({
                 idLote: result.data.idLote,
                 idManzana: result.data.idManzana,
+                idConcepto: result.data.idConcepto,
                 descripcion: result.data.descripcion,
                 costo: result.data.costo.toString(),
                 precio: result.data.precio.toString(),
@@ -262,6 +277,7 @@ class Lotes extends React.Component {
                 ubicacionLote: result.data.ubicacionLote,
 
                 manzanas: manzana.data,
+                conceptos: concepto.data,
 
                 loadModal: false
             });
@@ -314,6 +330,7 @@ class Lotes extends React.Component {
                         "limiteIzquierdo": this.state.limiteIzquierdo,
                         "limitePosterior": this.state.limitePosterior,
                         "ubicacionLote": this.state.ubicacionLote,
+                        "idUsuario": this.state.idUsuario
                     });
 
                     ModalAlertSuccess("Lote", result.data, () => {
@@ -337,6 +354,7 @@ class Lotes extends React.Component {
                         "limiteIzquierdo": this.state.limiteIzquierdo,
                         "limitePosterior": this.state.limitePosterior,
                         "ubicacionLote": this.state.ubicacionLote,
+                        "idUsuario": this.state.idUsuario
                     });
 
                     ModalAlertSuccess("Lote", result.data, () => {
@@ -411,7 +429,8 @@ class Lotes extends React.Component {
                                     <div className="clearfix absolute-all bg-white">
                                         {spinnerLoading(this.state.msgModal)}
                                     </div>
-                                    : null}
+                                    : null
+                                }
 
                                 {
                                     this.state.messageWarning === '' ? null :
@@ -455,6 +474,26 @@ class Lotes extends React.Component {
                                                     {
                                                         this.state.manzanas.map((item, index) => (
                                                             <option key={index} value={item.idManzana}>{item.nombre}</option>
+                                                        ))
+                                                    }
+                                                </select>
+                                            </div>
+
+                                            <div className="form-group">
+                                                <label htmlFor="manzana">Concepto <i className="fa fa-asterisk text-danger small"></i></label>
+                                                <select
+                                                    className="form-control"
+                                                    id="manzana"
+                                                    ref={this.refConcepto}
+                                                    value={this.state.idConcepto}
+                                                    onChange={(event) => {
+                                                        this.setState({ idConcepto: event.target.value })
+                                                    }}
+                                                >
+                                                    <option value="">- Seleccione -</option>
+                                                    {
+                                                        this.state.conceptos.map((item, index) => (
+                                                            <option key={index} value={item.idConcepto}>{item.nombre}</option>
                                                         ))
                                                     }
                                                 </select>

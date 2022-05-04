@@ -10,18 +10,20 @@ router.get('/list', async function (req, res) {
         let lista = await conec.query(`SELECT 
             idComprobante,
             CASE
-            WHEN 1 THEN 'Facturación'
-            WHEN 2 THEN 'Nota de Crédito'
-            WHEN 3 THEN 'Nota de Debito'
-            WHEN 4 THEN 'Recibo de Caja'
-            WHEN 5 THEN 'Comprobante de Ingreso'
-            WHEN 6 THEN 'Comprobante de Egreso'
-            ELSE 'Cotización' END AS 'tipo',
+            WHEN tipo = 1 THEN 'Facturación'
+            WHEN tipo = 2 THEN 'Venta Libre'
+            WHEN tipo = 3 THEN 'Nota de Crédito'
+            WHEN tipo = 4 THEN 'Nota de Debito'
+            WHEN tipo = 5 THEN 'Comprobante de Ingreso'
+            WHEN tipo = 6 THEN 'Comprobante de Egreso'
+            WHEN tipo = 7 THEN 'Cotización'
+            ELSE 'Guía de Remisión' END AS 'tipo',
             nombre,
             serie, 
             numeracion,
             impresion,
             estado, 
+            preferida,
             DATE_FORMAT(fecha,'%d/%m/%Y') as fecha,
             hora
             FROM comprobante
@@ -138,10 +140,11 @@ router.post('/add', async function (req, res) {
         numeracion,
         impresion,
         estado,
+        preferida,
         fecha,
         hora,
         idUsuario) 
-        VALUES(?,=,?,?,?,?,?,?,?,?)`, [
+        VALUES(?,?,?,?,?,?,?,?,?,?,?)`, [
             idComprobante,
             req.body.tipo,
             req.body.nombre,
@@ -149,19 +152,29 @@ router.post('/add', async function (req, res) {
             req.body.numeracion,
             req.body.impresion,
             req.body.estado,
+            req.body.preferida,
             currentDate(),
             currentTime(),
             req.body.idUsuario,
-        ])
+        ]);
+
+        let comprobante = await conec.execute(connection, `SELECT * FROM comprobante WHERE tipo = ?`, [
+            req.body.tipo,
+        ]);
+
+        if (comprobante.length === 0) {
+            await conec.execute(connection, `UPDATE comprobante SET preferida = 1 WHERE idComprobante = ?`, [
+                idComprobante
+            ]);
+        }
 
         await conec.commit(connection);
-        res.status(200).send('Se registró el comprobante.')
-
-    } catch (err) {
+        res.status(200).send('Se registró el comprobante.');
+    } catch (error) {
         if (connection != null) {
             await conec.rollback(connection);
         }
-        res.status(500).send(connection);
+        res.status(500).send("Se produjo un error de servidor, intente nuevamente.");
     }
 });
 
@@ -180,6 +193,7 @@ router.post('/edit', async function (req, res) {
             nombre = ?,
             impresion = ?,
             estado = ?,
+            preferida = ?,
             fecha = ?,
             hora = ?,
             idUsuario = ?
@@ -188,6 +202,7 @@ router.post('/edit', async function (req, res) {
                 req.body.nombre,
                 req.body.impresion,
                 req.body.estado,
+                req.body.preferida,
                 currentDate(),
                 currentTime(),
                 req.body.idUsuario,
@@ -204,6 +219,7 @@ router.post('/edit', async function (req, res) {
             numeracion = ?,
             impresion = ?,
             estado = ?,
+            preferida = ?,
             fecha = ?,
             hora = ?,
             idUsuario = ?
@@ -214,6 +230,7 @@ router.post('/edit', async function (req, res) {
                 req.body.numeracion,
                 req.body.impresion,
                 req.body.estado,
+                req.body.preferida,
                 currentDate(),
                 currentTime(),
                 req.body.idUsuario,
@@ -228,7 +245,7 @@ router.post('/edit', async function (req, res) {
         if (connection != null) {
             await conec.rollback(connection);
         }
-        res.status(500).send(connection);
+        res.status(500).send("Se produjo un error de servidor, intente nuevamente.");
     }
 });
 
@@ -257,16 +274,24 @@ router.delete('/', async function (req, res) {
         if (connection != null) {
             await conec.rollback(connection);
         }
-        res.status(500).send("Error interno de conexión, intente nuevamente.");
+        res.status(500).send("Se produjo un error de servidor, intente nuevamente.");
     }
 })
 
 router.get('/listcombo', async function (req, res) {
     try {
-        let result = await conec.query('SELECT idComprobante, nombre, estado FROM comprobante');
+        let result = await conec.query(`SELECT 
+        idComprobante, 
+        nombre, 
+        estado, 
+        preferida 
+        FROM comprobante
+        WHERE tipo = ?`, [
+            req.query.tipo
+        ]);
         res.status(200).send(result);
     } catch (error) {
-        res.status(500).send("Error interno de conexión, intente nuevamente.");
+        res.status(500).send("Se produjo un error de servidor, intente nuevamente.");
     }
 });
 
