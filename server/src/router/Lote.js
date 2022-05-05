@@ -142,8 +142,7 @@ router.get('/reptipolotes', async function (req, res) {
             res.send(data);
         }
     }else{
-        res.status(500).send(detalle)
-        
+        res.status(500).send(detalle);        
     }
 })
 

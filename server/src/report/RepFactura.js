@@ -241,8 +241,8 @@ class RepFactura {
         })
     }
 
-    async repFiltroVentas(req, sedeInfo, data=''){
-        try{
+    async repVentas(req, sedeInfo, data) {
+        try {
             const doc = new PDFDocument({
                 margins: {
                     top: 40,
@@ -262,9 +262,9 @@ class RepFactura {
             let titleX = orgX + 150;
             let medioX = (doc.page.width - doc.options.margins.left - doc.options.margins.right) / 2;
 
-            let h1 = 14;
-            let h2 = 12;
-            let h3 = 10;
+            let h1 = 13;
+            let h2 = 11;
+            let h3 = 9;
 
             doc.image(path.join(__dirname, "..", "path/to/logo.png"), doc.x, doc.y, { width: 75 });
 
@@ -290,7 +290,6 @@ class RepFactura {
 
             doc.fontSize(h2).text(
                 "REPORTE GENERAL DE VENTAS",
-                // (doc.page.width - orgX - orgY) / 2,
                 titleX,
                 cabeceraY,
                 {
@@ -299,7 +298,7 @@ class RepFactura {
                 }
             );
 
-            doc.fontSize(11).text(
+            doc.fontSize(h3).text(
                 `PERIODO: ${req.query.fechaIni} al ${req.query.fechaIFin}`,
                 orgX,
                 cabeceraY + 26,
@@ -310,12 +309,11 @@ class RepFactura {
             );
 
             doc.rect(
-                orgX, // EJE X
-                filtroY, // EJE Y
-                doc.page.width - doc.options.margins.left - doc.options.margins.right, // ANCHO
-                50).stroke(); // ALTO
-        
-            // left
+                orgX,
+                filtroY,
+                doc.page.width - doc.options.margins.left - doc.options.margins.right,
+                50).stroke();
+
             doc.fontSize(h3).text(
                 `Comprobante(s): TODOS`,
                 orgX + 5,
@@ -331,8 +329,7 @@ class RepFactura {
                 orgX + 5,
                 filtroY + 34
             );
-        
-            // right
+
             doc.fontSize(h3).text(
                 `Tipo(s): TODOS`,
                 medioX + 15,
@@ -344,18 +341,29 @@ class RepFactura {
                 filtroY + 20
             );
 
-            let content = [ ["11-01-2022", "PUBLICO GENERAL", "N001-1", "CONTADO", "EFECTIVO", "COBRADO", "S/ 10.00"] ];
-            content.push(["", "CONTADO", "S/ 10.00", "CREDITO", "S/ 10.00", "TOTAL", "S/ 20.00" ]);
+            console.log(data)
 
-            //Tabla
+            let content = data.map((item, index) => {
+                return [
+                    item.fecha,
+                    item.documento + "\n" + item.informacion,
+                    item.comprobante+"\n"+item.serie+"-"+item.numeracion,
+                    item.tipo,
+                    item.estado,
+                    numberFormat(item.total, item.codiso)]
+            });
+
             const table = {
-                // title: "Detalle",
                 subtitle: "DETALLE",
-                headers: ["Fecha", "Cliente", "Comprobante", "Tipo", "Metodo", "Estado", "Importe"],
-                rows: content
+                headers: ["Fecha", "Cliente", "Comprobante", "Tipo", "Estado", "Importe"],
+                rows: content.length == 0 ? ["No hay datos para mostrar", "", "", "", "", ""] : content
             };
-        
+
             doc.table(table, {
+                prepareHeader: () => doc.font("Helvetica-Bold").fontSize(h3),
+                prepareRow: () => {
+                    doc.font("Helvetica").fontSize(h3);
+                },
                 x: orgX,
                 y: bodY,
                 width: doc.page.width - doc.options.margins.left - doc.options.margins.right
@@ -364,11 +372,11 @@ class RepFactura {
             doc.end();
 
             return getStream.buffer(doc);
-
-        } catch(error){
+        } catch (error) {
             return "Se genero un error al generar el reporte.";
         }
     }
+
 
 }
 
