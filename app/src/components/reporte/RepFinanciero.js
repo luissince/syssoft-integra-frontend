@@ -15,11 +15,6 @@ class RepFinanciero extends React.Component {
             idCliente: '',
             clientes: [],
 
-            idConpCobro: '',
-            cobros: [],
-
-            metodoPago: '',
-
             idBanco: '',
             bancos: [],
 
@@ -34,6 +29,10 @@ class RepFinanciero extends React.Component {
         }
 
         this.refFechaIni = React.createRef();
+
+        this.refCliente = React.createRef();
+        this.refBanco = React.createRef();
+
         this.refUsuario = React.createRef();
         this.refBancoGasto = React.createRef();
 
@@ -57,10 +56,6 @@ class RepFinanciero extends React.Component {
     loadData = async () => {
         try {
 
-            const cobro = await axios.get("/api/concepto/listcombo", {
-                signal: this.abortControllerView.signal
-            });
-
             const cliente = await axios.get("/api/cliente/listcombo", {
                 signal: this.abortControllerView.signal
             });
@@ -75,7 +70,6 @@ class RepFinanciero extends React.Component {
 
             await this.setStateAsync({
                 //cobro
-                cobros: cobro.data,
                 clientes: cliente.data,
                 bancos: banco.data,
                 //gasto
@@ -95,6 +89,36 @@ class RepFinanciero extends React.Component {
         }
     }
 
+    async onEventImpCobro() {
+
+        if (this.state.fechaFin < this.state.fechaIni) {
+            this.setState({ messageWarning: "La Fecha inicial no puede ser mayor a la fecha final." })
+            this.refFechaIni.current.focus();
+        } else {
+            const data = {
+
+                "idSede": "SD0001",
+                "fechaIni": this.state.fechaIni,
+                "fechaFin": this.state.fechaFin,
+
+                "opcion": (this.state.idCliente === '' && this.state.idBanco === '') ? 1
+                    : (this.state.idUsuario !== '' && this.state.idBanco === '') ? 2
+                        : (this.state.idUsuario === '' && this.state.idBanco !== '') ? 3 : 4,
+
+                "idBanco": this.state.idBanco === '' ? 0 : this.state.idBanco,
+                "idCliente": this.state.idCliente === '' ? 0 : this.state.idCliente,
+                "banco": this.refBanco.current.options[this.refBanco.current.options.selectedIndex].innerHTML,
+                "cliente": this.refCliente.current.options[this.refCliente.current.options.selectedIndex].innerHTML
+
+            }
+
+            let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
+            let params = new URLSearchParams({ "params": ciphertext });
+            window.open("/api/cobro/repgeneralcobros?" + params, "_blank");
+
+        }
+    }
+
     async onEventImpGastos() {
 
         // console.log(this.refUsuario.current.options)
@@ -104,50 +128,24 @@ class RepFinanciero extends React.Component {
         if (this.state.fechaFin < this.state.fechaIni) {
             this.setState({ messageWarning: "La Fecha inicial no puede ser mayor a la fecha final." })
             this.refFechaIni.current.focus();
-        }
-        else {
+        } else {
             const data = {
                 "idSede": "SD0001",
                 "fechaIni": this.state.fechaIni,
                 "fechaFin": this.state.fechaFin,
-                "opcion": ( this.state.idUsuario === '' && this.state.idBancoDes === '' ) ? 1 
-                            : ( this.state.idUsuario !== '' && this.state.idBancoDes === '' ) ? 2 
-                            : ( this.state.idUsuario === '' && this.state.idBancoDes !== '' ) ? 3 : 4,
+                "opcion": (this.state.idUsuario === '' && this.state.idBancoDes === '') ? 1
+                    : (this.state.idUsuario !== '' && this.state.idBancoDes === '') ? 2
+                        : (this.state.idUsuario === '' && this.state.idBancoDes !== '') ? 3 : 4,
                 "idBanco": this.state.idBancoDes === '' ? 0 : this.state.idBancoDes,
                 "idUsuario": this.state.idUsuario === '' ? 0 : this.state.idUsuario,
                 "banco": this.refBancoGasto.current.options[this.refBancoGasto.current.options.selectedIndex].innerHTML,
                 "usuario": this.refUsuario.current.options[this.refUsuario.current.options.selectedIndex].innerHTML
-                
             }
 
             let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
             let params = new URLSearchParams({ "params": ciphertext });
             window.open("/api/gasto/repgeneralgastos?" + params, "_blank");
-            // console.log(data)
-        }
-    }
 
-    async onEventImpCobro() {
-        if (this.state.fechaFin < this.state.fechaIni) {
-            this.setState({ messageWarning: "La Fecha inicial no puede ser mayor a la fecha final." })
-            this.refFechaIni.current.focus();
-        }
-        else {
-            const data = {
-                // "idLote": this.state.idLote,
-                "idConcepto": this.state.idConpCobro === '' ? 0 : this.state.idConpCobro,
-                "metodoPago": this.state.metodoPago === '' ? 0 : this.state.metodoPago,
-                "idBanco": this.state.idBanco === '' ? 0 : this.state.idBanco,
-                "idCliente": this.state.idCliente === '' ? 0 : this.state.idCliente,
-                "idSede": "SD0001",
-                "fechaIni": this.state.fechaIni,
-                "fechaFin": this.state.fechaFin
-            }
-
-            let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
-            let params = new URLSearchParams({ "params": ciphertext });
-            window.open("/api/cobro/repgeneralcobros?" + params, "_blank");
-            // console.log(data)
         }
     }
 
@@ -248,56 +246,36 @@ class RepFinanciero extends React.Component {
                                     <div className="row">
                                         <div className="col">
                                             <div className="form-group">
-                                                <label>Concepto de Cobro(s)</label>
+                                                <label>Cliente(s)</label>
                                                 <div className="input-group">
                                                     <select
-                                                        title="Lista Concepto de cobros"
+                                                        title="Lista de clientes"
                                                         className="form-control"
-                                                        value={this.state.idConpCobro}
+                                                        ref={this.refCliente}
+                                                        value={this.state.idCliente}
                                                         onChange={async (event) => {
-                                                            await this.setStateAsync({ idConpCobro: event.target.value });
+                                                            await this.setStateAsync({ idCliente: event.target.value });
                                                         }}
                                                     >
                                                         <option value="">-- Todos --</option>
                                                         {
-                                                            this.state.cobros.map((item, index) => (
-                                                                <option key={index} value={item.idConcepto}>{item.nombre}</option>
+                                                            this.state.clientes.map((item, index) => (
+                                                                <option key={index} value={item.idCliente}>{item.informacion}</option>
                                                             ))
                                                         }
                                                     </select>
+
                                                 </div>
                                             </div>
                                         </div>
                                         <div className="col">
                                             <div className="form-group">
-                                                <label>Metodo de pago(s)</label>
-                                                <div className="input-group">
-                                                    <select
-                                                        title="Lista metodo de pagos"
-                                                        className="form-control"
-                                                        value={this.state.metodoPago}
-                                                        onChange={async (event) => {
-                                                            await this.setStateAsync({ metodoPago: event.target.value });
-                                                        }}
-                                                    >
-                                                        <option value="">-- Todos --</option>
-                                                        <option value="1">Efectivo</option>
-                                                        <option value="2">Consignación</option>
-                                                        <option value="3">Transferencia</option>
-                                                        <option value="4">Cheque</option>
-                                                        <option value="5">Tarjeta crédito</option>
-                                                        <option value="6">Tarjeta débito</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="col">
-                                            <div className="form-group">
-                                                <label>Caja Banco(s) depositado</label>
+                                                <label>Caja Banco(s)</label>
                                                 <div className="input-group">
                                                     <select
                                                         title="Lista caja banco a depositar"
                                                         className="form-control"
+                                                        ref={this.refBanco}
                                                         value={this.state.idBanco}
                                                         onChange={async (event) => {
                                                             await this.setStateAsync({ idBanco: event.target.value });
@@ -315,44 +293,14 @@ class RepFinanciero extends React.Component {
                                         </div>
                                     </div>
 
-                                    <div className="row">
-
-                                        <div className="col">
-                                            <div className="form-group">
-                                                <label>Cliente(s)</label>
-                                                <div className="input-group">
-                                                    <select
-                                                        title="Lista de clientes"
-                                                        className="form-control"
-                                                        value={this.state.idCliente}
-                                                        onChange={async (event) => {
-                                                            await this.setStateAsync({ idCliente: event.target.value });
-                                                        }}
-                                                    >
-                                                        <option value="">-- Todos --</option>
-                                                        {
-                                                            this.state.clientes.map((item, index) => (
-                                                                <option key={index} value={item.idCliente}>{item.informacion}</option>
-                                                            ))
-                                                        }
-                                                    </select>
-
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="col"></div>
-                                        <div className="col"></div>
-
-                                    </div>
-
                                     <div className="row mt-3">
                                         <div className="col"></div>
                                         <div className="col">
                                             <button className="btn btn-outline-warning btn-sm" onClick={() => this.onEventImpCobro()}><i className="bi bi-file-earmark-pdf-fill"></i> Reporte Pdf</button>
                                         </div>
-                                        <div className="col">
+                                        {/* <div className="col">
                                             <button className="btn btn-outline-success btn-sm"><i className="bi bi-file-earmark-excel-fill"></i> Reporte Excel</button>
-                                        </div>
+                                        </div> */}
                                         <div className="col"></div>
                                     </div>
                                 </div>
@@ -424,9 +372,9 @@ class RepFinanciero extends React.Component {
                                         <div className="col">
                                             <button className="btn btn-outline-warning btn-sm" onClick={() => this.onEventImpGastos()}><i className="bi bi-file-earmark-pdf-fill"></i> Reporte Pdf</button>
                                         </div>
-                                        <div className="col">
+                                        {/* <div className="col">
                                             <button className="btn btn-outline-success btn-sm"><i className="bi bi-file-earmark-excel-fill"></i> Reporte Excel</button>
-                                        </div>
+                                        </div> */}
                                         <div className="col"></div>
                                     </div>
 

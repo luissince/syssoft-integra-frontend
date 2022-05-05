@@ -326,9 +326,7 @@ router.get('/repgeneralgastos', async function (req, res) {
 
     const detalle = await gasto.gastoGeneral(req)
 
-    console.log(req.query)
-
-    if (typeof detalle === 'object' ) {
+    if (typeof detalle === 'object') {
         let data = await repFinanciero.repFiltroGastos(req, sedeInfo, detalle)
 
         if (typeof data === 'string') {

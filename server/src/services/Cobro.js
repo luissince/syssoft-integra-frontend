@@ -540,6 +540,74 @@ class Factura {
         }
     }
 
+    async cobroGeneral(req) {
+        try {
+
+            let lista = await conec.query(`SELECT 
+                c.idCobro,
+                c.serie,
+                c.numeracion,
+                c.metodoPago,
+                c.estado,
+                c.observacion,
+                DATE_FORMAT(c.fecha,'%d/%m/%Y') as fecha,  
+                c.hora,
+                
+                comp.nombre AS comprobante,
+                mn.simbolo,
+                mn.codiso,
+                bn.nombre AS banco,
+
+                cl.informacion AS cliente,
+                cl.documento AS docCliente,
+
+                SUM(cd.precio * cd.cantidad) AS monto
+
+                FROM cobro AS c
+                INNER JOIN moneda AS mn ON mn.idMoneda = c.idMoneda
+                INNER JOIN banco AS bn ON bn.idBanco = c.idBanco
+                INNER JOIN cliente AS cl ON cl.idCliente = c.idCliente
+                INNER JOIN cobroDetalle AS cd ON cd.idCobro = c.idCobro
+                INNER JOIN comprobante AS comp ON comp.idComprobante = c.idComprobante
+
+                WHERE
+                ( ? = 1 AND c.fecha BETWEEN ? AND ? )
+                OR
+                ( ? = 2 AND c.fecha BETWEEN ? AND ? AND c.idCliente = ? )
+                OR
+                ( ? = 3 AND c.fecha BETWEEN ? AND ? AND c.idBanco = ? )
+                OR
+                ( ? = 4 AND c.fecha BETWEEN ? AND ? AND c.idCliente = ? AND c.idBanco = ? )
+                GROUP BY c.idCobro`, [
+                req.query.opcion,
+                req.query.fechaIni,
+                req.query.fechaFin,
+
+                req.query.opcion,
+                req.query.fechaIni,
+                req.query.fechaFin,
+                req.query.idCliente,
+
+                req.query.opcion,
+                req.query.fechaIni,
+                req.query.fechaFin,
+                req.query.idBanco,
+
+                req.query.opcion,
+                req.query.fechaIni,
+                req.query.fechaFin,
+                req.query.idCliente,
+                req.query.idBanco,
+            ])
+
+            return lista
+
+        } catch (error) {
+            // console.log(error)
+            return "Se produjo un error de servidor, intente nuevamente.";
+        }
+    }
+
 }
 
 module.exports = Factura
