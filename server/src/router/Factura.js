@@ -12,7 +12,7 @@ const repCuota = new RepCuota();
 const repFactura = new RepFactura();
 
 router.get("/list", async function (req, res) {
-    const result = await factura.listar(req)
+    const result = await factura.list(req)
     if (typeof result === 'object') {
         res.status(200).send(result);
     } else {
@@ -138,6 +138,8 @@ router.get("/repgeneralventas", async function (req, res) {
     req.query.fechaIni = decryptedData.fechaIni;
     req.query.fechaIFin = decryptedData.fechaIFin;
 
+    // console.log(req.query)
+
     const sedeInfo = await sede.infoSedeReporte(req)
 
     if (typeof sedeInfo !== 'object') {
@@ -145,14 +147,21 @@ router.get("/repgeneralventas", async function (req, res) {
         return;
     }
 
-    let data = await repFactura.repFiltroVentas(req, sedeInfo);
+    const ventas = await factura.detalleVenta(req)
 
-    if (typeof data === 'string') {
-        res.status(500).send(data);
+    if (Array.isArray(ventas)) {
+
+        let data = await repFactura.repVentas(req, sedeInfo, ventas);
+
+        if (typeof data === 'string') {
+            res.status(500).send(data);
+        } else {
+            res.setHeader('Content-disposition', `inline; filename=REPORTE DE VENTAS DEL ${req.query.fechaIni} AL ${req.query.fechaIFin}.pdf`);
+            res.contentType("application/pdf");
+            res.send(data);
+        }
     } else {
-        res.setHeader('Content-disposition', `inline; filename=REPORTE DE VENTAS DEL ${req.query.fechaIni} AL ${req.query.fechaIFin}.pdf`);
-        res.contentType("application/pdf");
-        res.send(data);
+        res.status(500).send(ventas);
     }
 
 });

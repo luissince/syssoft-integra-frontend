@@ -34,7 +34,13 @@ class RepVentas extends React.Component {
 
         }
 
-        this.FechaIni = React.createRef();
+        this.refFechaIni = React.createRef();
+        this.refFechaFin = React.createRef();
+        this.refComprobante = React.createRef();
+        this.refClientes = React.createRef();
+        this.refUsuario = React.createRef();
+        this.refTipoVenta = React.createRef();
+        this.refMetodoPago = React.createRef();
 
         this.abortControllerView = new AbortController()
     }
@@ -55,11 +61,12 @@ class RepVentas extends React.Component {
 
     loadData = async () => {
         try {
-
             const comprobante = await axios.get("/api/comprobante/listcombo", {
-                signal: this.abortControllerView.signal
+                signal: this.abortControllerView.signal,
+                params: {
+                    "tipo": "1"
+                }
             });
-
 
             const cliente = await axios.get("/api/cliente/listcombo", {
                 signal: this.abortControllerView.signal
@@ -99,7 +106,8 @@ class RepVentas extends React.Component {
                 "idCliente": this.state.idCliente === '' ? 0 : this.state.idCliente,
                 "idUsuario": this.state.idUsuario === '' ? 0 : this.state.idUsuario,
                 "tipoVenta": this.state.tipoVenta === '' ? 0 : this.state.tipoVenta,
-                "metodoPago": this.state.metodoPago === '' ? 0 : this.state.metodoPago,                
+                "metodoPago": this.state.metodoPago === '' ? 0 : this.state.metodoPago,
+                "comprobante": this.refComprobante.current.options[this.refComprobante.current.options.selectedIndex].innerHTML,
                 "idSede": "SD0001",
                 "fechaIni": this.state.fechaIni,
                 "fechaIFin": this.state.fechaFin
@@ -113,10 +121,8 @@ class RepVentas extends React.Component {
     }
 
     render() {
-
         return (
             <>
-
                 {
                     this.state.loading ?
                         <div className="clearfix absolute-all bg-white">
@@ -155,11 +161,10 @@ class RepVentas extends React.Component {
                                                         type="date"
                                                         className="form-control"
                                                         disabled={!this.state.isFechaActive}
-                                                        ref={this.FechaIni}
+                                                        ref={this.refFechaIni}
                                                         value={this.state.fechaIni}
                                                         onChange={(event) => {
-
-                                                            if (event.target.value <= this.state.fechaFin) {
+                                                            if (event.target.value <= this.state.fechaIni) {
                                                                 this.setState({
                                                                     fechaIni: event.target.value,
                                                                     messageWarning: '',
@@ -182,8 +187,21 @@ class RepVentas extends React.Component {
                                                         type="date"
                                                         className="form-control"
                                                         disabled={!this.state.isFechaActive}
+                                                        ref={this.refFechaFin}
                                                         value={this.state.fechaFin}
-                                                        onChange={(event) => this.setState({ fechaFin: event.target.value })} />
+                                                        onChange={(event) => {
+                                                            if (event.target.value <= this.state.fechaFin) {
+                                                                this.setState({
+                                                                    fechaFin: event.target.value,
+                                                                    messageWarning: '',
+                                                                });
+                                                            } else {
+                                                                this.setState({
+                                                                    fechaFin: event.target.value,
+                                                                    messageWarning: 'La Fecha fin no puede ser mayor a la fecha final.',
+                                                                });
+                                                            }
+                                                        }} />
                                                 </div>
                                             </div>
                                         </div>
@@ -193,7 +211,9 @@ class RepVentas extends React.Component {
                             </div>
 
                             {
-                                this.state.messageWarning === '' ? null :
+                                this.state.messageWarning === ''
+                                    ? null
+                                    :
                                     <div className="alert alert-warning" role="alert">
                                         <i className="bi bi-exclamation-diamond-fill"></i> {this.state.messageWarning}
                                     </div>
@@ -212,6 +232,7 @@ class RepVentas extends React.Component {
                                                     <select
                                                         title="Lista de comprobantes"
                                                         className="form-control"
+                                                        ref={this.refComprobante}
                                                         value={this.state.idComprobante}
                                                         disabled={this.state.comprobanteCheck}
                                                         onChange={async (event) => {
@@ -437,7 +458,7 @@ class RepVentas extends React.Component {
                                     <div className="row">
                                         <div className="col"></div>
                                         <div className="col">
-                                            <button className="btn btn-outline-warning btn-sm" onClick={ () => this.onEventImprimir() }><i className="bi bi-file-earmark-pdf-fill"></i> Reporte Pdf</button>
+                                            <button className="btn btn-outline-warning btn-sm" onClick={() => this.onEventImprimir()}><i className="bi bi-file-earmark-pdf-fill"></i> Reporte Pdf</button>
                                         </div>
                                         <div className="col">
                                             <button className="btn btn-outline-success btn-sm"><i className="bi bi-file-earmark-excel-fill"></i> Reporte Excel</button>
@@ -445,87 +466,10 @@ class RepVentas extends React.Component {
                                         <div className="col"></div>
                                     </div>
 
-                                    {/* <div className="row">
-                                        <div className="col">
-                                            <button className="btn btn-outline-success btn-sm">Reporte de Ventas</button>
-                                        </div>
-                                        <div className="col">
-                                            <button className="btn btn-outline-secondary btn-sm">Ventas anuladas</button>
-                                        </div>
-                                        <div className="col">
-                                            <button className="btn btn-outline-success btn-sm">Ventas x Vendedor</button>
-                                        </div>
-                                        <div className="col">
-                                            <button className="btn btn-outline-primary btn-sm">Cuotas x Cobrar</button>
-                                        </div>
-                                        <div className="col">
-                                            <button className="btn btn-outline-primary btn-sm">Total Créditos por Cobrar</button>
-                                        </div>
-                                        <div className="col">
-                                            <button className="btn btn-outline-primary btn-sm">Detalle de Ventas</button>
-                                        </div>
-                                    </div> */}
-
                                 </div>
                             </div>
-
-                            {/* <div className="card my-1">
-                                <h6 className="card-header">Reporte de Ventas por Cliente</h6>
-                                <div className="card-body">
-                                    <div className="row">
-                                        <div className="col">
-                                            <div className="form-group">
-                                                <div className="input-group">
-                                                    <div className="input-group-prepend">
-                                                        <div className="input-group-text"><i className="bi bi-person-fill"></i></div>
-                                                    </div>
-                                                    <select
-                                                        title="Lista de clientes"
-                                                        className="form-control"
-                                                    >
-                                                        <option value="">Buscar cliente</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="col">
-                                            <button className="btn btn-outline-success btn-sm">Ventas x Cliente</button>
-                                        </div>
-                                        <div className="col">
-                                            <button className="btn btn-outline-primary btn-sm">Recibos x Cliente</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div> */}
-
-                            {/* <div className="card my-1">
-                                <h6 className="card-header">Reporte de Vouchers</h6>
-                                <div className="card-body">
-                                    <div className="row">
-                                        <div className="col">
-                                            <div className="form-group">
-                                                <div className="input-group">
-                                                    <div className="input-group-prepend">
-                                                        <div className="input-group-text"><i className="bi bi-person-fill"></i></div>
-                                                    </div>
-                                                    <select
-                                                        title="Lista de clientes"
-                                                        className="form-control"
-                                                    >
-                                                        <option value="">Buscar Cliente con Venta al Crédito Exitosa</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="col">
-                                            <button className="btn btn-outline-success btn-sm">Vouchers x Venta</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div> */}
                         </>
                 }
-
             </>
         )
     }
