@@ -24,11 +24,6 @@ class RepFinanciero extends React.Component {
             bancos: [],
 
             //Gasto
-            idConpGasto: '',
-            gastos: [],
-
-            metPagGasto: '',
-
             idBancoDes: '',
 
             idUsuario: '',
@@ -38,7 +33,9 @@ class RepFinanciero extends React.Component {
             messageWarning: '',
         }
 
-        this.FechaIni = React.createRef();
+        this.refFechaIni = React.createRef();
+        this.refUsuario = React.createRef();
+        this.refBancoGasto = React.createRef();
 
         this.abortControllerView = new AbortController()
     }
@@ -72,10 +69,6 @@ class RepFinanciero extends React.Component {
                 signal: this.abortControllerView.signal
             });
 
-            const gasto = await axios.get("/api/concepto/listcombogasto", {
-                signal: this.abortControllerView.signal
-            });
-
             const usuario = await axios.get("/api/usuario/listcombo", {
                 signal: this.abortControllerView.signal
             });
@@ -86,7 +79,6 @@ class RepFinanciero extends React.Component {
                 clientes: cliente.data,
                 bancos: banco.data,
                 //gasto
-                gastos: gasto.data,
                 usuarios: usuario.data,
 
                 loading: false,
@@ -104,20 +96,28 @@ class RepFinanciero extends React.Component {
     }
 
     async onEventImpGastos() {
+
+        // console.log(this.refUsuario.current.options)
+        // console.log(this.refUsuario.current.options.selectedIndex)
+        // console.log(this.refUsuario.current.options[this.refUsuario.current.options.selectedIndex].innerHTML)
+
         if (this.state.fechaFin < this.state.fechaIni) {
             this.setState({ messageWarning: "La Fecha inicial no puede ser mayor a la fecha final." })
-            this.FechaIni.current.focus();
+            this.refFechaIni.current.focus();
         }
         else {
             const data = {
-                // "idLote": this.state.idLote,
-                "idConcepto": this.state.idConpGasto === '' ? 0 : this.state.idConpGasto,
-                "metodoPago": this.state.metPagGasto === '' ? 0 : this.state.metPagGasto,
-                "idBanco": this.state.idBancoDes === '' ? 0 : this.state.idBancoDes,
-                "idUsuario": this.state.idUsuario === '' ? 0 : this.state.idUsuario,
                 "idSede": "SD0001",
                 "fechaIni": this.state.fechaIni,
-                "fechaIFin": this.state.fechaFin
+                "fechaFin": this.state.fechaFin,
+                "opcion": ( this.state.idUsuario === '' && this.state.idBancoDes === '' ) ? 1 
+                            : ( this.state.idUsuario !== '' && this.state.idBancoDes === '' ) ? 2 
+                            : ( this.state.idUsuario === '' && this.state.idBancoDes !== '' ) ? 3 : 4,
+                "idBanco": this.state.idBancoDes === '' ? 0 : this.state.idBancoDes,
+                "idUsuario": this.state.idUsuario === '' ? 0 : this.state.idUsuario,
+                "banco": this.refBancoGasto.current.options[this.refBancoGasto.current.options.selectedIndex].innerHTML,
+                "usuario": this.refUsuario.current.options[this.refUsuario.current.options.selectedIndex].innerHTML
+                
             }
 
             let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
@@ -130,7 +130,7 @@ class RepFinanciero extends React.Component {
     async onEventImpCobro() {
         if (this.state.fechaFin < this.state.fechaIni) {
             this.setState({ messageWarning: "La Fecha inicial no puede ser mayor a la fecha final." })
-            this.FechaIni.current.focus();
+            this.refFechaIni.current.focus();
         }
         else {
             const data = {
@@ -141,7 +141,7 @@ class RepFinanciero extends React.Component {
                 "idCliente": this.state.idCliente === '' ? 0 : this.state.idCliente,
                 "idSede": "SD0001",
                 "fechaIni": this.state.fechaIni,
-                "fechaIFin": this.state.fechaFin
+                "fechaFin": this.state.fechaFin
             }
 
             let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
@@ -192,7 +192,7 @@ class RepFinanciero extends React.Component {
                                                         type="date"
                                                         className="form-control"
                                                         disabled={!this.state.isFechaActive}
-                                                        ref={this.FechaIni}
+                                                        ref={this.refFechaIni}
                                                         value={this.state.fechaIni}
                                                         onChange={(event) => {
 
@@ -348,7 +348,7 @@ class RepFinanciero extends React.Component {
                                     <div className="row mt-3">
                                         <div className="col"></div>
                                         <div className="col">
-                                            <button className="btn btn-outline-warning btn-sm" onClick={ () => this.onEventImpCobro() }><i className="bi bi-file-earmark-pdf-fill"></i> Reporte Pdf</button>
+                                            <button className="btn btn-outline-warning btn-sm" onClick={() => this.onEventImpCobro()}><i className="bi bi-file-earmark-pdf-fill"></i> Reporte Pdf</button>
                                         </div>
                                         <div className="col">
                                             <button className="btn btn-outline-success btn-sm"><i className="bi bi-file-earmark-excel-fill"></i> Reporte Excel</button>
@@ -370,62 +370,37 @@ class RepFinanciero extends React.Component {
 
                                         <div className="col">
                                             <div className="form-group">
-                                                <label>Concepto de Gasto(s)</label>
+                                                <label>Usuario(s)</label>
                                                 <div className="input-group">
                                                     <select
-                                                        title="Lista Concepto de gastos"
+                                                        title="Lista de usuarios"
                                                         className="form-control"
-                                                        value={this.state.idConpGasto}
-
+                                                        ref={this.refUsuario}
+                                                        value={this.state.idUsuario}
                                                         onChange={async (event) => {
-                                                            await this.setStateAsync({ idConpGasto: event.target.value });
+                                                            await this.setStateAsync({ idUsuario: event.target.value });
                                                         }}
                                                     >
                                                         <option value="">-- Todos --</option>
                                                         {
-                                                            this.state.gastos.map((item, index) => (
-                                                                <option key={index} value={item.idConcepto}>{item.nombre}</option>
+                                                            this.state.usuarios.map((item, index) => (
+                                                                <option key={index} value={item.idUsuario}>{item.nombres + ' ' + item.apellidos}</option>
                                                             ))
                                                         }
                                                     </select>
-
                                                 </div>
                                             </div>
                                         </div>
 
                                         <div className="col">
                                             <div className="form-group">
-                                                <label>Metodo de pago(s) desembolsado</label>
-                                                <div className="input-group">
-                                                    <select
-                                                        title="Lista metodo de pagos"
-                                                        className="form-control"
-                                                        value={this.state.metPagGasto}
-                                                        onChange={async (event) => {
-                                                            await this.setStateAsync({ metPagGasto: event.target.value });
-                                                        }}
-                                                    >
-                                                        <option value="">-- Todos --</option>
-                                                        <option value="1">Efectivo</option>
-                                                        <option value="2">Consignación</option>
-                                                        <option value="3">Transferencia</option>
-                                                        <option value="4">Cheque</option>
-                                                        <option value="5">Tarjeta crédito</option>
-                                                        <option value="6">Tarjeta débito</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div className="col">
-                                            <div className="form-group">
-                                                <label>Caja Banco(s) desembolsado</label>
+                                                <label>Caja Banco(s)</label>
                                                 <div className="input-group">
                                                     <select
                                                         title="Lista caja banco a desembolsar"
                                                         className="form-control"
+                                                        ref={this.refBancoGasto}
                                                         value={this.state.idBancoDes}
-
                                                         onChange={async (event) => {
                                                             await this.setStateAsync({ idBancoDes: event.target.value });
                                                         }}
@@ -444,37 +419,10 @@ class RepFinanciero extends React.Component {
 
                                     </div>
 
-                                    <div className="row">
-                                        <div className="col">
-                                            <div className="form-group">
-                                                <label>Usuario(s)</label>
-                                                <div className="input-group">
-                                                    <select
-                                                        title="Lista de usuarios"
-                                                        className="form-control"
-                                                        value={this.state.idUsuario}
-                                                        onChange={async (event) => {
-                                                            await this.setStateAsync({ idUsuario: event.target.value });
-                                                        }}
-                                                    >
-                                                        <option value="">-- Todos --</option>
-                                                        {
-                                                            this.state.usuarios.map((item, index) => (
-                                                                <option key={index} value={item.idUsuario}>{item.nombres + ' ' + item.apellidos}</option>
-                                                            ))
-                                                        }
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="col"></div>
-                                        <div className="col"></div>
-                                    </div>
-
                                     <div className="row mt-3">
                                         <div className="col"></div>
                                         <div className="col">
-                                            <button className="btn btn-outline-warning btn-sm" onClick={ () => this.onEventImpGastos() }><i className="bi bi-file-earmark-pdf-fill"></i> Reporte Pdf</button>
+                                            <button className="btn btn-outline-warning btn-sm" onClick={() => this.onEventImpGastos()}><i className="bi bi-file-earmark-pdf-fill"></i> Reporte Pdf</button>
                                         </div>
                                         <div className="col">
                                             <button className="btn btn-outline-success btn-sm"><i className="bi bi-file-earmark-excel-fill"></i> Reporte Excel</button>

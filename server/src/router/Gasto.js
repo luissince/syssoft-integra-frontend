@@ -7,9 +7,11 @@ const Conexion = require('../database/Conexion');
 const conec = new Conexion();
 
 const Sede = require('../services/Sede');
+const Gasto = require('../services/Gasto');
 const RepFinanciero = require('../report/RepFinanciero')
 
 const sede = new Sede();
+const gasto = new Gasto();
 const repFinanciero = new RepFinanciero();
 
 router.get('/list', async function (req, res) {
@@ -306,13 +308,14 @@ router.delete('/anular', async function (req, res) {
 
 router.get('/repgeneralgastos', async function (req, res) {
     const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
-    req.query.idConcepto = decryptedData.idConcepto;
-    req.query.metodoPago = decryptedData.metodoPago;
     req.query.idBanco = decryptedData.idBanco;
     req.query.idUsuario = decryptedData.idUsuario;
+    req.query.banco = decryptedData.banco;
+    req.query.usuario = decryptedData.usuario;
+    req.query.opcion = decryptedData.opcion;
     req.query.idSede = decryptedData.idSede;
     req.query.fechaIni = decryptedData.fechaIni;
-    req.query.fechaIFin = decryptedData.fechaIFin;
+    req.query.fechaFin = decryptedData.fechaFin;
 
     const sedeInfo = await sede.infoSedeReporte(req)
 
@@ -321,15 +324,25 @@ router.get('/repgeneralgastos', async function (req, res) {
         return;
     }
 
-    let data = await repFinanciero.repFiltroGastos(req, sedeInfo)
+    const detalle = await gasto.gastoGeneral(req)
 
-    if (typeof data === 'string') {
-        res.status(500).send(data)
+    console.log(req.query)
+
+    if (typeof detalle === 'object' ) {
+        let data = await repFinanciero.repFiltroGastos(req, sedeInfo, detalle)
+
+        if (typeof data === 'string') {
+            res.status(500).send(data)
+        } else {
+            res.setHeader('Content-disposition', `inline; filename=REPORTE DE GASTOS DEL ${req.query.fechaIni} AL ${req.query.fechaFin}.pdf`);
+            res.contentType("application/pdf");
+            res.send(data);
+        }
     } else {
-        res.setHeader('Content-disposition', 'inline; filename=Reporte de gastos.pdf');
-        res.contentType("application/pdf");
-        res.send(data);
+        res.status(500).send(detalle)
     }
+
+
 })
 
 module.exports = router;
