@@ -1,7 +1,7 @@
 import React from 'react';
 import axios from 'axios';
+import CryptoJS from 'crypto-js';
 import {
-    isNumeric,
     spinnerLoading,
     dateFormat,
     formatMoney
@@ -116,24 +116,15 @@ class Creditos extends React.Component {
     }
 
     onEventCronograma = async (item) => {
-        console.log(item)
-        // window.open("/api/login/report/cuotas", "_blank");
-
-        try {
-            let result = await axios.get("/api/login/report/cuotas/", {
-                responseType: "blob",
-                params: {
-
-                },
-            });
-
-            const file = new Blob([result.data], { type: "application/pdf" });
-            const fileURL = URL.createObjectURL(file);
-            window.open(fileURL, "_blank");
-
-        } catch (error) {
-            console.log(error)
+        const data = {
+            "idSede": "SD0001",
+            "idVenta": item.idVenta,
+            "proyecto": this.props.token.project.nombre,
         }
+
+        let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
+        let params = new URLSearchParams({ "params": ciphertext });
+        window.open("/api/factura/repcreditolote?" + params, "_blank");
     }
 
     onEventCobros = (item) => {

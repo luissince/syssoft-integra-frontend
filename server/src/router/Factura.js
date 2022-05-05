@@ -5,7 +5,6 @@ const Sede = require('../services/Sede');
 const RepCuota = require('../report/RepCuota');
 const RepFactura = require('../report/RepFactura');
 const { decrypt } = require('../tools/CryptoJS');
-const { route } = require('./Logins');
 
 const factura = new Factura();
 const sede = new Sede();
@@ -148,13 +147,13 @@ router.get("/repgeneralventas", async function (req, res) {
 
     let data = await repFactura.repFiltroVentas(req, sedeInfo);
 
-        if (typeof data === 'string') {
-            res.status(500).send(data);
-        } else {
-            res.setHeader('Content-disposition', `inline; filename=REPORTE DE VENTAS DEL ${req.query.fechaIni} AL ${req.query.fechaIFin}.pdf`);
-            res.contentType("application/pdf");
-            res.send(data);
-        }
+    if (typeof data === 'string') {
+        res.status(500).send(data);
+    } else {
+        res.setHeader('Content-disposition', `inline; filename=REPORTE DE VENTAS DEL ${req.query.fechaIni} AL ${req.query.fechaIFin}.pdf`);
+        res.contentType("application/pdf");
+        res.send(data);
+    }
 
 });
 

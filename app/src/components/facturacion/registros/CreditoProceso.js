@@ -27,6 +27,9 @@ class CreditoProceso extends React.Component {
             metodoPago: '',
             observacion: '',
             idUsuario: this.props.token.userToken.idUsuario,
+
+            idProyecto: this.props.token.project.idProyecto,
+
             valorRecibido: 0,
             bancos: [],
 
@@ -176,6 +179,7 @@ class CreditoProceso extends React.Component {
                 'idMoneda': this.state.venta.idMoneda,
                 "idBanco": this.state.idBanco,
                 "idVenta": this.state.venta.idVenta,
+                "idProyecto": this.state.idProyecto,
                 "metodoPago": this.state.metodoPago,
                 "estado": 1,
                 "observacion": this.state.observacion.trim().toUpperCase(),

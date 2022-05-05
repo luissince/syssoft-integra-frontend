@@ -15,6 +15,7 @@ class Principal extends React.Component {
         super(props);
         this.state = {
             data: [],
+            filter: [],
             loadModal: true,
             msgModal: "Cargando proyectos...",
         }
@@ -37,6 +38,7 @@ class Principal extends React.Component {
 
             await this.setStateAsync({
                 data: result.data,
+                filter: result.data,
                 loadModal: false
             });
 
@@ -54,7 +56,9 @@ class Principal extends React.Component {
     }
 
     onEventSearch = async (value) => {
-        console.log(value);
+        // console.log(this.state.data);
+        let data = this.state.data.filter((item) => item.nombre.toUpperCase().indexOf(value.toUpperCase()) > -1);
+        await this.setStateAsync({ filter: data });
     }
 
     onEventSignIn = async (event) => {
@@ -129,26 +133,29 @@ class Principal extends React.Component {
                             </div>
 
                             <div className="row">
-                                <div className="col-md-9 col-sm-8 col-12">
+                                <div className="col-md-12 col-sm-12 col-12">
                                     <div className="form-group">
-                                        <input
-                                            className="form-control mr-sm-2 bg-transparent"
-                                            placeholder="filtar por proyecto o nombre del proyecto"
-                                            aria-label="Search"
-                                            ref={this.refTxtSearch}
-                                            onKeyUp={(event) => this.onEventSearch(event.target.value)} />
-                                    </div>
-                                </div>
-                                <div className="col-md-3 col-sm-4 col-12">
-                                    <div className="form-group">
-                                        <button className="w-100 btn btn-outline-success my-2 my-sm-0" type="button" >Filtrar proyecto</button>
+                                        <div className="input-group">
+                                            <input
+                                                className="form-control bg-transparent"
+                                                type="search"
+                                                placeholder="filtar por proyecto o nombre del proyecto"
+                                                aria-label="Search"
+                                                ref={this.refTxtSearch}
+                                                onKeyUp={(event) => this.onEventSearch(event.target.value)} />
+                                            <div className="input-group-append">
+                                                <span className="input-group-text">
+                                                    <i className="bi bi-search"></i>
+                                                </span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
                             <div className="row">
                                 {
-                                    this.state.data.map((item, index) => (
+                                    this.state.filter.map((item, index) => (
                                         <div key={index} className="col-lg-4 col-md-4 col-sm-12 col-xs-12">
                                             <div className="form-group">
                                                 <div className="card">
