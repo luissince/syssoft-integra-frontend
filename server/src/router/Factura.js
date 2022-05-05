@@ -129,15 +129,21 @@ router.get("/repcreditolote", async function (req, res) {
 router.get("/repgeneralventas", async function (req, res) {
     const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
 
+    req.query.idSede = "SD0001";
+    req.query.fechaIni = decryptedData.fechaIni;
+    req.query.fechaFin = decryptedData.fechaFin;
     req.query.idComprobante = decryptedData.idComprobante;
     req.query.idCliente = decryptedData.idCliente;
     req.query.idUsuario = decryptedData.idUsuario;
     req.query.tipoVenta = decryptedData.tipoVenta;
-    req.query.metodoPago = decryptedData.metodoPago;
-    req.query.idSede = "SD0001";
-    req.query.fechaIni = decryptedData.fechaIni;
-    req.query.fechaIFin = decryptedData.fechaIFin;
 
+    req.query.comprobante = decryptedData.comprobante;
+    req.query.cliente = decryptedData.cliente;
+    req.query.usuario = decryptedData.usuario;
+    req.query.tipo = decryptedData.tipo;
+   
+
+    console.log(decryptedData)
     // console.log(req.query)
 
     const sedeInfo = await sede.infoSedeReporte(req)
@@ -156,7 +162,7 @@ router.get("/repgeneralventas", async function (req, res) {
         if (typeof data === 'string') {
             res.status(500).send(data);
         } else {
-            res.setHeader('Content-disposition', `inline; filename=REPORTE DE VENTAS DEL ${req.query.fechaIni} AL ${req.query.fechaIFin}.pdf`);
+            res.setHeader('Content-disposition', `inline; filename=REPORTE DE VENTAS DEL.pdf`);
             res.contentType("application/pdf");
             res.send(data);
         }

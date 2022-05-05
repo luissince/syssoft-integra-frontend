@@ -11,6 +11,10 @@ class RepVentas extends React.Component {
             fechaFin: '',
             isFechaActive: false,
 
+            idComprobante: '',
+            comprobantes: [],
+            comprobanteCheck: true,
+
             idCliente: '',
             clientes: [],
             clienteCheck: true,
@@ -19,15 +23,8 @@ class RepVentas extends React.Component {
             usuarios: [],
             usuarioCheck: true,
 
-            idComprobante: '',
-            comprobantes: [],
-            comprobanteCheck: true,
-
             tipoVenta: '',
             tipoVentaCheck: true,
-
-            metodoPago: '',
-            metodoPagoCheck: true,
 
             loading: true,
             messageWarning: '',
@@ -37,10 +34,9 @@ class RepVentas extends React.Component {
         this.refFechaIni = React.createRef();
         this.refFechaFin = React.createRef();
         this.refComprobante = React.createRef();
-        this.refClientes = React.createRef();
+        this.refCliente = React.createRef();
         this.refUsuario = React.createRef();
         this.refTipoVenta = React.createRef();
-        this.refMetodoPago = React.createRef();
 
         this.abortControllerView = new AbortController()
     }
@@ -96,28 +92,41 @@ class RepVentas extends React.Component {
 
     async onEventImprimir() {
         if (this.state.fechaFin < this.state.fechaIni) {
-            this.setState({ messageWarning: "La Fecha inicial no puede ser mayor a la fecha final." })
+            await this.setStateAsync({ messageWarning: "La Fecha inicial no puede ser mayor a la fecha final." })
             this.FechaIni.current.focus();
+            return;
         }
-        else {
-            const data = {
-                // "idLote": this.state.idLote,
-                "idComprobante": this.state.idComprobante === '' ? 0 : this.state.idComprobante,
-                "idCliente": this.state.idCliente === '' ? 0 : this.state.idCliente,
-                "idUsuario": this.state.idUsuario === '' ? 0 : this.state.idUsuario,
-                "tipoVenta": this.state.tipoVenta === '' ? 0 : this.state.tipoVenta,
-                "metodoPago": this.state.metodoPago === '' ? 0 : this.state.metodoPago,
-                "comprobante": this.refComprobante.current.options[this.refComprobante.current.options.selectedIndex].innerHTML,
-                "idSede": "SD0001",
-                "fechaIni": this.state.fechaIni,
-                "fechaIFin": this.state.fechaFin
-            }
 
-            let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
-            let params = new URLSearchParams({ "params": ciphertext });
-            window.open("/api/factura/repgeneralventas?" + params, "_blank");
-            // console.log(data)
+        if (!this.state.comprobanteCheck && this.state.idComprobante === "") {
+            await this.setStateAsync({ messageWarning: "Seleccione un comprobante." })
+            this.refComprobante.current.focus();
+            return;
         }
+
+        if (!this.state.clienteCheck && this.state.idCliente === "") {
+            await this.setStateAsync({ messageWarning: "Seleccione un cliente." })
+            this.refCliente.current.focus();
+            return;
+        }
+
+        const data = {
+            "idSede": "SD0001",
+            "fechaIni": this.state.fechaIni,
+            "fechaFin": this.state.fechaFin,
+            "idComprobante": this.state.idComprobante === '' ? '' : this.state.idComprobante,
+            "idCliente": this.state.idCliente === '' ? '' : this.state.idCliente,
+            "idUsuario": this.state.idUsuario === '' ? '' : this.state.idUsuario,
+            "tipoVenta": this.state.tipoVenta === '' ? '' : this.state.tipoVenta,
+            "comprobante": this.refComprobante.current.options[this.refComprobante.current.options.selectedIndex].innerHTML,
+            "cliente": this.refCliente.current.options[this.refCliente.current.options.selectedIndex].innerHTML,
+            "usuario": this.refUsuario.current.options[this.refUsuario.current.options.selectedIndex].innerHTML,
+            "tipo": this.refTipoVenta.current.options[this.refTipoVenta.current.options.selectedIndex].innerHTML,
+        }
+
+        let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
+        let params = new URLSearchParams({ "params": ciphertext });
+        window.open("/api/factura/repgeneralventas?" + params, "_blank");
+
     }
 
     render() {
@@ -281,6 +290,7 @@ class RepVentas extends React.Component {
                                                     <select
                                                         title="Lista de clientes"
                                                         className="form-control"
+                                                        ref={this.refCliente}
                                                         value={this.state.idCliente}
                                                         disabled={this.state.clienteCheck}
                                                         onChange={async (event) => {
@@ -327,6 +337,7 @@ class RepVentas extends React.Component {
                                                     <select
                                                         title="Lista de usuarios"
                                                         className="form-control"
+                                                        ref={this.refUsuario}
                                                         value={this.state.idUsuario}
                                                         disabled={this.state.usuarioCheck}
                                                         onChange={async (event) => {
@@ -374,6 +385,7 @@ class RepVentas extends React.Component {
                                                     <select
                                                         title="Lista tipos de venta"
                                                         className="form-control"
+                                                        ref={this.refTipoVenta}
                                                         value={this.state.tipoVenta}
                                                         disabled={this.state.tipoVentaCheck}
                                                         onChange={async (event) => {
@@ -407,51 +419,7 @@ class RepVentas extends React.Component {
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="col">
-                                            <div className="form-group">
-                                                <label>Metodo de pago(s)</label>
-                                                <div className="input-group">
-                                                    <select
-                                                        title="Lista metodo de pagos"
-                                                        className="form-control"
-                                                        value={this.state.metodoPago}
-                                                        disabled={this.state.metodoPagoCheck}
-                                                        onChange={async (event) => {
-                                                            await this.setStateAsync({ metodoPago: event.target.value });
-                                                            if (this.state.metodoPago === '') {
-                                                                await this.setStateAsync({ metodoPagoCheck: true });
-                                                            }
-                                                        }}
-                                                    >
-                                                        <option value="">-- Todos --</option>
-                                                        {/* <option value="">-- Metodo de pago --</option> */}
-                                                        <option value="1">Efectivo</option>
-                                                        <option value="2">Consignación</option>
-                                                        <option value="3">Transferencia</option>
-                                                        <option value="4">Cheque</option>
-                                                        <option value="5">Tarjeta crédito</option>
-                                                        <option value="6">Tarjeta débito</option>
-                                                    </select>
-                                                    <div className="input-group-append">
-                                                        <div className="input-group-text">
-                                                            <div className="form-check form-check-inline m-0">
-                                                                <input
-                                                                    className="form-check-input"
-                                                                    type="checkbox"
-                                                                    checked={this.state.metodoPagoCheck}
-                                                                    onChange={async (event) => {
-                                                                        await this.setStateAsync({ metodoPagoCheck: event.target.checked })
-                                                                        if (this.state.metodoPagoCheck) {
-                                                                            await this.setStateAsync({ metodoPago: '' });
-                                                                        }
-                                                                    }}
-                                                                />
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <div className="col"></div>
                                         <div className="col"></div>
                                     </div>
 

@@ -3,7 +3,7 @@ const PDFDocument = require("pdfkit-table");
 const getStream = require('get-stream');
 const qr = require("qrcode");
 const NumberLleters = require('../tools/NumberLleters');
-const { formatMoney, numberFormat, calculateTaxBruto, calculateTax } = require('../tools/Tools');
+const { formatMoney, numberFormat, calculateTaxBruto, calculateTax ,dateFormat} = require('../tools/Tools');
 
 const numberLleters = new NumberLleters();
 
@@ -242,6 +242,7 @@ class RepFactura {
     }
 
     async repVentas(req, sedeInfo, data) {
+        // console.log(req.query)
         try {
             const doc = new PDFDocument({
                 margins: {
@@ -252,7 +253,7 @@ class RepFactura {
                 }
             });
 
-            doc.info["Title"] = `REPORTE DE VENTAS DEL ${req.query.fechaIni} AL ${req.query.fechaIFin}`
+            doc.info["Title"] = `REPORTE DE VENTAS DEL ${req.query.fechaIni} AL ${req.query.fechaFin}`
 
             let orgX = doc.x;
             let orgY = doc.y;
@@ -261,10 +262,12 @@ class RepFactura {
             let bodY = filtroY + 65;
             let titleX = orgX + 150;
             let medioX = (doc.page.width - doc.options.margins.left - doc.options.margins.right) / 2;
+            let widthContent = doc.page.width  - doc.options.margins.left - doc.options.margins.right;
 
             let h1 = 13;
             let h2 = 11;
             let h3 = 9;
+            
 
             doc.image(path.join(__dirname, "..", "path/to/logo.png"), doc.x, doc.y, { width: 75 });
 
@@ -290,16 +293,16 @@ class RepFactura {
 
             doc.fontSize(h2).text(
                 "REPORTE GENERAL DE VENTAS",
-                titleX,
+                doc.options.margins.left,
                 cabeceraY,
                 {
-                    width: 200,
+                    width: widthContent,
                     align: "center",
                 }
             );
 
             doc.fontSize(h3).text(
-                `PERIODO: ${req.query.fechaIni} al ${req.query.fechaIFin}`,
+                `PERIODO: ${dateFormat(req.query.fechaIni)} al ${dateFormat(req.query.fechaFin)}`,
                 orgX,
                 cabeceraY + 26,
                 {
@@ -315,33 +318,26 @@ class RepFactura {
                 50).stroke();
 
             doc.fontSize(h3).text(
-                `Comprobante(s): TODOS`,
+                `Comprobante(s): ${req.query.idComprobante === '' ? "TODOS":req.query.comprobante}`,
                 orgX + 5,
                 filtroY + 6
             );
             doc.fontSize(h3).text(
-                `Cliente(s): TODOS`,
+                `Cliente(s): ${req.query.idCliente === '' ? "TODOS":req.query.cliente}`,
                 orgX + 5,
                 filtroY + 20
             );
             doc.fontSize(h3).text(
-                `Vendedor(s): TODOS`,
+                `Vendedor(s): ${req.query.idUsuario === '' ? "TODOS":req.query.usuario}`,
                 orgX + 5,
                 filtroY + 34
             );
 
             doc.fontSize(h3).text(
-                `Tipo(s): TODOS`,
+                `Tipo(s): ${req.query.tipoVenta === '' ? "TODOS":req.query.tipo}`,
                 medioX + 15,
                 filtroY + 6
             );
-            doc.fontSize(h3).text(
-                `Metodo de pago(s): TODOS`,
-                medioX + 15,
-                filtroY + 20
-            );
-
-            console.log(data)
 
             let content = data.map((item, index) => {
                 return [
@@ -356,7 +352,7 @@ class RepFactura {
             const table = {
                 subtitle: "DETALLE",
                 headers: ["Fecha", "Cliente", "Comprobante", "Tipo", "Estado", "Importe"],
-                rows: content.length == 0 ? ["No hay datos para mostrar", "", "", "", "", ""] : content
+                rows: content.length == 0 ? [["No hay datos para mostrar"]] : content
             };
 
             doc.table(table, {
@@ -368,6 +364,7 @@ class RepFactura {
                 y: bodY,
                 width: doc.page.width - doc.options.margins.left - doc.options.margins.right
             });
+
 
             doc.end();
 

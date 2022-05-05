@@ -117,16 +117,6 @@ class RepLote {
 
             doc.moveDown();
 
-            // doc.fontSize(h2).text(
-            //     "DETALLE DE PAGOS ASOCIADOS",
-            //     titX,
-            //     afterInfoY + 10,
-            //     {
-            //         width: 250,
-            //         align: "center",
-            //     }
-            // );
-
             let content = data.detalle.map((item, index) => {
                 return [item.concepto, formatMoney(item.monto), item.metodo, item.banco, item.fecha]
             })

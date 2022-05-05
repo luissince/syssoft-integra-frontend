@@ -819,7 +819,7 @@ class Factura {
         }
     }
 
-    async detalleVenta(req){
+    async detalleVenta(req) {
         try {
 
             let ventas = await conec.query(`SELECT 
@@ -845,12 +845,69 @@ class Factura {
             IFNULL(SUM(vd.precio*vd.cantidad),0) AS total
             FROM venta AS v 
             INNER JOIN cliente AS c ON v.idCliente = c.idCliente
-            INNER JOIN comprobante AS co ON v.idComprobante = co.idComprobante
+            INNER JOIN comprobante AS co ON v.idComprobante = co.idComprobante 
             INNER JOIN moneda AS m ON v.idMoneda = m.idMoneda
             LEFT JOIN ventaDetalle AS vd ON vd.idVenta = v.idVenta
+            WHERE 
+            v.fecha BETWEEN ? AND ? AND 
+            (
+                ? = '' AND ? = '' AND ? = ''
+                OR 
+                v.idComprobante = ? AND ? = '' AND ? = ''
+                OR 
+                ? = '' AND c.idCliente = ? AND ? = ''
+                OR
+                ? = '' AND ? = '' AND v.idUsuario = ?
+                OR
+                
+                v.idComprobante = ? AND c.idCliente = ? AND ? = ''
+                OR
+                v.idComprobante = ? AND ? = '' AND v.idUsuario = ?
+                OR
+                v.idComprobante = ? AND c.idCliente = ? AND v.idUsuario = ?
+                OR
 
+                ? = '' AND c.idCliente = ? AND v.idUsuario = ?
+                
+            )
             GROUP BY v.idVenta
-            ORDER BY v.fecha DESC, v.hora DESC`);
+            ORDER BY v.fecha DESC, v.hora DESC`, [
+                req.query.fechaIni,
+                req.query.fechaFin,
+
+                req.query.idComprobante,
+                req.query.idCliente,
+                req.query.idUsuario,
+
+                req.query.idComprobante,
+                req.query.idCliente,
+                req.query.idUsuario,
+
+                req.query.idComprobante,
+                req.query.idCliente,
+                req.query.idUsuario,
+
+                req.query.idComprobante,
+                req.query.idCliente,
+                req.query.idUsuario,
+
+                req.query.idComprobante,
+                req.query.idCliente,
+                req.query.idUsuario,
+
+                req.query.idComprobante,
+                req.query.idCliente,
+                req.query.idUsuario,
+
+                req.query.idComprobante,
+                req.query.idCliente,
+                req.query.idUsuario,
+
+                req.query.idComprobante,
+                req.query.idCliente,
+                req.query.idUsuario,
+            ]);
+            console.log(req.query.idCliente)
 
             return ventas;
         } catch (error) {
