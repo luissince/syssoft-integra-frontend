@@ -26,34 +26,26 @@ class Banco {
             ])
 
             let lista = await conec.query(`SELECT 
-                DATE_FORMAT(bd.fecha,'%d/%m/%Y') as fecha, 
-                bd.hora,
-                IFNULL(CASE 
-                    WHEN c.idCobro IS NOT NULL 
-                    THEN cc.informacion 
-                    ELSE IFNULL(cg.informacion,'') END,'') AS proveedor,
-                IFNULL(IFNULL(cnc.nombre,CONCAT(cp.nombre,' ',v.serie,'-',v.numeracion)),cng.nombre) AS cuenta,
-                bd.tipo,
-                SUM(CASE WHEN bd.tipo = 1 THEN bd.monto ELSE 0 END ) AS ingreso,
-                SUM(CASE WHEN bd.tipo = 0 THEN bd.monto ELSE 0 END ) AS salida
-                FROM bancoDetalle AS bd 
-                INNER JOIN banco AS b ON b.idBanco = bd.idBanco
-                LEFT JOIN cobro AS c ON c.idCobro = bd.idProcedencia
-                LEFT JOIN cliente AS cc ON cc.idCliente = c.idCliente
-                LEFT JOIN cobroDetalle AS cd ON c.idCobro = cd.idCobro
-                LEFT JOIN concepto AS cnc ON cd.idConcepto = cnc.idConcepto 
-                LEFT JOIN cobroVenta AS cv ON cv.idCobro = c.idCobro 
-                LEFT JOIN venta AS v ON cv.idVenta = v.idVenta 
-                LEFT JOIN comprobante AS cp ON v.idComprobante = cp.idComprobante
-                
-                LEFT JOIN gasto AS g ON g.idGasto = bd.idProcedencia
-                LEFT JOIN cliente AS cg ON cg.idCliente = g.idCliente
-                LEFT JOIN gastoDetalle AS gd ON g.idGasto = gd.idGasto
-                LEFT JOIN concepto AS cng ON gd.idConcepto = cng.idConcepto 
-                
-                WHERE b.idBanco = ?
-
-                GROUP BY bd.idBanco,bd.idProcedencia`, [
+            DATE_FORMAT(bd.fecha,'%d/%m/%Y') as fecha, 
+            bd.hora,
+            IFNULL(cl.informacion,IFNULL(cf.informacion,'')) AS proveedor,
+            IFNULL(CONCAT(cc.nombre,' ',c.serie,'-',c.numeracion),
+                   CONCAT(cg.nombre,' ',g.serie,'-',g.numeracion)) AS cuenta,
+            bd.tipo,
+            SUM(CASE WHEN bd.tipo = 1 THEN bd.monto ELSE 0 END ) AS ingreso,
+            SUM(CASE WHEN bd.tipo = 0 THEN bd.monto ELSE 0 END ) AS salida
+            FROM bancoDetalle AS bd 
+            INNER JOIN banco AS b ON b.idBanco = bd.idBanco
+            LEFT JOIN cobro AS c ON c.idCobro = bd.idProcedencia     
+            LEFT JOIN cliente AS cl ON cl.idCliente = c.idCliente
+            LEFT JOIN comprobante AS cc ON cc.idComprobante = c.idComprobante
+            LEFT JOIN gasto AS g ON g.idGasto = bd.idProcedencia
+            LEFT JOIN cliente AS cf ON cf.idCliente = g.idCliente
+            LEFT JOIN comprobante AS cg ON cg.idComprobante = g.idComprobante
+            
+            WHERE bd.idBanco = ?
+            GROUP BY bd.idBanco,bd.idProcedencia
+            ORDER BY bd.fecha DESC,bd.hora DESC`, [
                 req.query.idBanco
             ])
 

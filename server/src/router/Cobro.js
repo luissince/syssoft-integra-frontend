@@ -56,13 +56,17 @@ router.delete('/anular', async function (req, res) {
 
 router.get('/repgeneralcobros', async function (req, res) {
     const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
-    req.query.idConcepto = decryptedData.idConcepto;
-    req.query.metodoPago = decryptedData.metodoPago;
-    req.query.idBanco = decryptedData.idBanco;
-    req.query.idUsuario = decryptedData.idUsuario;
+
     req.query.idSede = decryptedData.idSede;
     req.query.fechaIni = decryptedData.fechaIni;
-    req.query.fechaIFin = decryptedData.fechaIFin;
+    req.query.fechaFin = decryptedData.fechaFin;
+    req.query.opcion = decryptedData.opcion;
+
+    req.query.idBanco = decryptedData.idBanco;
+    req.query.idCliente = decryptedData.idCliente;
+
+    req.query.banco = decryptedData.banco;
+    req.query.cliente = decryptedData.cliente;
 
     const sedeInfo = await sede.infoSedeReporte(req);
 
@@ -71,15 +75,24 @@ router.get('/repgeneralcobros', async function (req, res) {
         return;
     }
 
-    let data = await repFinanciero.repFiltroCobros(req, sedeInfo);
+    const detalle = await cobro.cobroGeneral(req)
 
-    if (typeof data === 'string') {
-        res.status(500).send(data);
+
+    if (typeof detalle === 'object') {
+        let data = await repFinanciero.repFiltroCobros(req, sedeInfo, detalle);
+
+        if (typeof data === 'string') {
+            res.status(500).send(data);
+        } else {
+            res.setHeader('Content-disposition', `inline; filename=REPORTE DE COBROS DEL ${req.query.fechaIni} AL ${req.query.fechaFin}.pdf`);
+            res.contentType("application/pdf");
+            res.send(data);
+        }
     } else {
-        res.setHeader('Content-disposition', 'inline; filename=Reporte de cobros.pdf');
-        res.contentType("application/pdf");
-        res.send(data);
+        res.status(500).send(detalle)
     }
+
+
 });
 
 module.exports = router;

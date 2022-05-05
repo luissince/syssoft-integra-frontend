@@ -5,10 +5,159 @@ const { formatMoney, numberFormat, currentDate } = require('../tools/Tools');
 
 class RepFinanciero {
 
-    async repFiltroGastos(req, sedeInfo, data) {
+    async repFiltroCobros(req, sedeInfo, data) {
+
+        console.log(data);
+
         try {
 
+            const doc = new PDFDocument({
+                margins: {
+                    top: 40,
+                    bottom: 40,
+                    left: 40,
+                    right: 40
+                }
+            });
 
+            doc.info["Title"] = `REPORTE DE COBROS DEL ${req.query.fechaIni} AL ${req.query.fechaFin}`
+
+            let orgX = doc.x;
+            let orgY = doc.y;
+            let cabeceraY = orgY + 70;
+            let filtroY = cabeceraY + 40;
+            let bodY = filtroY + 40;
+            let titleX = orgX + 150;
+            // let footerY = bodY + 65;
+            let medioX = (doc.page.width - doc.options.margins.left - doc.options.margins.right) / 2;
+
+            let h1 = 13;
+            let h2 = 11;
+            let h3 = 9;
+
+            doc.image(path.join(__dirname, "..", "path/to/logo.png"), doc.x, doc.y, { width: 75 });
+
+            doc.fontSize(h1).text(
+                `${sedeInfo.nombreEmpresa}`,
+                titleX,
+                orgY,
+                {
+                    width: 250,
+                    align: "center"
+                }
+            );
+
+            doc.fontSize(h3).text(
+                `RUC: ${sedeInfo.ruc}\n${sedeInfo.direccion}\nCelular: ${sedeInfo.celular} / Telefono: ${sedeInfo.telefono}`,
+                titleX,
+                orgY + 17,
+                {
+                    width: 250,
+                    align: "center",
+                }
+            );
+
+            doc.fontSize(h2).text(
+                "REPORTE DE COBROS",
+                (doc.page.width - orgX - orgY) / 2,
+                cabeceraY,
+                {
+                    width: 200,
+                    align: "left",
+                }
+            );
+
+            doc.fontSize(11).text(
+                `PERIODO: ${req.query.fechaIni} al ${req.query.fechaFin}`,
+                orgX,
+                cabeceraY + 25,
+                {
+                    width: 300,
+                    align: "left",
+                }
+            );
+
+            doc.rect(
+                orgX, // EJE X
+                filtroY, // EJE Y
+                doc.page.width - doc.options.margins.left - doc.options.margins.right, // ANCHO
+                20).stroke(); // ALTO
+
+            // left
+            doc.fontSize(h3).text(
+                `Cliente(s): ${req.query.idCliente === 0 ? 'TODOS' : req.query.cliente}`,
+                orgX + 5,
+                filtroY + 6
+            );
+
+            // doc.fontSize(h3).text(
+            //     `Metodo de Pago(s): TODOS`,
+            //     orgX + 5,
+            //     filtroY + 24
+            // );
+
+            // right
+            doc.fontSize(h3).text(
+                `Caja Banco(s): ${req.query.idBanco === 0 ? 'TODOS' : req.query.banco}`,
+                medioX + 15,
+                filtroY + 6
+            );
+            // doc.fontSize(h3).text(
+            //     `Usuario(s): TODOS`,
+            //     medioX + 15,
+            //     filtroY + 24
+            // );
+
+            let total = 0;
+
+            let content = data.map((item, index) => {
+
+                let metodoPago = item.metodoPago === 1 ? 'Efectivo'
+                    : item.metodoPago === 2 ? 'Consignación'
+                        : item.metodoPago === 3 ? 'Transferencia'
+                            : item.metodoPago === 4 ? 'Cheque'
+                                : item.metodoPago === 5 ? 'Tarjeta crédito' : 'Tarjeta débito'
+
+                total = total + item.monto;
+
+                return [
+                    item.fecha + ' - ' + item.hora,
+                    item.comprobante + ' ' + item.serie + '-' + item.numeracion,
+                    item.cliente + ' - ' + item.docCliente,
+                    item.banco,
+                    metodoPago,
+                    numberFormat(item.monto, item.codiso)
+                ]
+            })
+
+            // let content = [["11-01-2022", "publico general", "Caja 1", "Efectivo", "Ninguna", "S/ 10.00"]];
+            // content.push(["", "", "", "", "TOTAL", "S/ 20.00"]);
+
+            //Tabla
+            const table = {
+                // title: "Detalle",
+                subtitle: "DETALLE",
+                headers: ["Fecha", "Comprobante", "Cliente", "Cuenta Bancaria", "Metodo Pago", "Importe"],
+                rows: content
+            };
+
+            doc.table(table, {
+                x: orgX,
+                y: bodY,
+                width: doc.page.width - doc.options.margins.left - doc.options.margins.right
+            });
+
+            doc.end();
+
+            return getStream.buffer(doc);
+
+        } catch (error) {
+            return "Se genero un error al generar el reporte.";
+        }
+    }
+
+    async repFiltroGastos(req, sedeInfo, data) {
+        try {
 
             const doc = new PDFDocument({
                 margins: {
@@ -86,14 +235,14 @@ class RepFinanciero {
 
             // left
             doc.fontSize(h3).text(
-                `Usuario(s): ${ req.query.idUsuario === 0 ? 'TODOS' : req.query.usuario }`,
+                `Usuario(s): ${req.query.idUsuario === 0 ? 'TODOS' : req.query.usuario}`,
                 orgX + 5,
                 filtroY + 6
             );
 
             // right
             doc.fontSize(h3).text(
-                `Caja / Banco(s): ${ req.query.idBanco === 0 ? 'TODOS' : req.query.banco }`,
+                `Caja / Banco(s): ${req.query.idBanco === 0 ? 'TODOS' : req.query.banco}`,
                 medioX + 15,
                 filtroY + 6
             );
@@ -149,127 +298,6 @@ class RepFinanciero {
         }
     }
 
-    async repFiltroCobros(req, sedeInfo, data = '') {
-        try {
-
-            const doc = new PDFDocument({
-                margins: {
-                    top: 40,
-                    bottom: 40,
-                    left: 40,
-                    right: 40
-                }
-            });
-
-            let orgX = doc.x;
-            let orgY = doc.y;
-            let cabeceraY = orgY + 70;
-            let filtroY = cabeceraY + 40;
-            let bodY = filtroY + 55;
-            let titleX = orgX + 150;
-            let medioX = (doc.page.width - doc.options.margins.left - doc.options.margins.right) / 2;
-
-            let h1 = 14;
-            let h2 = 12;
-            let h3 = 10;
-
-            doc.image(path.join(__dirname, "..", "path/to/logo.png"), doc.x, doc.y, { width: 75 });
-
-            doc.fontSize(h1).text(
-                `${sedeInfo.nombreEmpresa}`,
-                titleX,
-                orgY,
-                {
-                    width: 250,
-                    align: "center"
-                }
-            );
-
-            doc.fontSize(h3).text(
-                `RUC: ${sedeInfo.ruc}\n${sedeInfo.direccion}\nCelular: ${sedeInfo.celular} / Telefono: ${sedeInfo.telefono}`,
-                titleX,
-                orgY + 17,
-                {
-                    width: 250,
-                    align: "center",
-                }
-            );
-
-            doc.fontSize(h2).text(
-                "REPORTE DE COBROS",
-                (doc.page.width - orgX - orgY) / 2,
-                cabeceraY,
-                {
-                    width: 200,
-                    align: "left",
-                }
-            );
-
-            doc.fontSize(11).text(
-                `PERIODO: ${req.query.fechaIni} al ${req.query.fechaIFin}`,
-                orgX,
-                cabeceraY + 25,
-                {
-                    width: 300,
-                    align: "left",
-                }
-            );
-
-            doc.rect(
-                orgX, // EJE X
-                filtroY, // EJE Y
-                doc.page.width - doc.options.margins.left - doc.options.margins.right, // ANCHO
-                40).stroke(); // ALTO
-
-            // left
-            doc.fontSize(h3).text(
-                `Cobros(s): TODOS`,
-                orgX + 5,
-                filtroY + 6
-            );
-            doc.fontSize(h3).text(
-                `Metodo de Pago(s): TODOS`,
-                orgX + 5,
-                filtroY + 24
-            );
-
-            // right
-            doc.fontSize(h3).text(
-                `Caja Banco(s): TODOS`,
-                medioX + 15,
-                filtroY + 6
-            );
-            doc.fontSize(h3).text(
-                `Usuario(s): TODOS`,
-                medioX + 15,
-                filtroY + 24
-            );
-
-            let content = [["11-01-2022", "publico general", "Caja 1", "Efectivo", "Ninguna", "S/ 10.00"]];
-            content.push(["", "", "", "", "TOTAL", "S/ 20.00"]);
-
-            //Tabla
-            const table = {
-                // title: "Detalle",
-                subtitle: "DETALLE",
-                headers: ["Fecha", "Cliente", "Cuenta Bancaria", "Metodo Pago", "Observación", "Importe"],
-                rows: content
-            };
-
-            doc.table(table, {
-                x: orgX,
-                y: bodY,
-                width: doc.page.width - doc.options.margins.left - doc.options.margins.right
-            });
-
-            doc.end();
-
-            return getStream.buffer(doc);
-
-        } catch (error) {
-            return "Se genero un error al generar el reporte.";
-        }
-    }
 
     async repDetalleBanco(sedeInfo, data) {
 
