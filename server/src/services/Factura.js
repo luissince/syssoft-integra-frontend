@@ -658,6 +658,7 @@ class Factura {
                 return "Datos no encontrados";
             }
         } catch (error) {
+            console.log(error)
             return "Error interno de conexión, intente nuevamente.";
         }
     }
@@ -830,9 +831,9 @@ class Factura {
                 req.query.idUsuario,
                 req.query.tipoVenta,
             ]);
-            
+
             return ventas
-        } catch (error) {           
+        } catch (error) {
             return "Error interno de conexión, intente nuevamente."
         }
     }
