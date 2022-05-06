@@ -2,12 +2,15 @@ const { currentDate, currentTime } = require('../tools/Tools');
 const Conexion = require('../database/Conexion');
 const conec = new Conexion();
 
-class Factura {
+class Cobro {
 
     async list(req) {
         try {
             let lista = await conec.query(`SELECT 
             c.idCobro, 
+            co.nombre as comprobante,
+            c.serie,
+            c.numeracion,
             cl.documento,
             cl.informacion,  
             CASE 
@@ -23,6 +26,7 @@ class Factura {
             INNER JOIN cliente AS cl ON c.idCliente = cl.idCliente
             INNER JOIN banco AS b ON c.idBanco = b.idBanco
             INNER JOIN moneda AS m ON c.idMoneda = m.idMoneda 
+            INNER JOIN comprobante AS co ON co.idComprobante = c.idComprobante
             LEFT JOIN cobroDetalle AS cd ON c.idCobro = cd.idCobro
             LEFT JOIN concepto AS cn ON cd.idConcepto = cn.idConcepto 
             LEFT JOIN cobroVenta AS cv ON cv.idCobro = c.idCobro 
@@ -388,17 +392,23 @@ class Factura {
         try {
             let result = await conec.query(`SELECT
             c.idCobro,
+            co.nombre as comprobante,
+            c.serie,
+            c.numeracion,
             c.metodoPago,
             c.estado,
             c.observacion,
             DATE_FORMAT(c.fecha,'%d/%m/%Y') as fecha,
             c.hora,
-    
+            
+            td.nombre AS tipoDoc,  
             cl.documento,
             cl.informacion,
+            cl.direccion,
     
-            b.nombre as banco,
-    
+            b.nombre as banco,   
+                     
+            m.nombre as moneda,
             m.codiso,
             m.simbolo,
     
@@ -406,8 +416,10 @@ class Factura {
     
             FROM cobro AS c
             INNER JOIN cliente AS cl ON c.idCliente = cl.idCliente
+            INNER JOIN tipoDocumento AS td ON td.idTipoDocumento = cl.idTipoDocumento 
             INNER JOIN banco AS b ON c.idBanco = b.idBanco
             INNER JOIN moneda AS m ON c.idMoneda = m.idMoneda
+            INNER JOIN comprobante AS co ON co.idComprobante = c.idComprobante
             LEFT JOIN cobroDetalle AS cb ON c.idCobro = cb.idCobro
             LEFT JOIN cobroVenta AS cv ON c.idCobro  = cv.idCobro 
             WHERE c.idCobro = ?
@@ -421,6 +433,7 @@ class Factura {
                 co.nombre as concepto,
                 cd.precio,
                 cd.cantidad,
+                imp.idImpuesto,
                 imp.nombre as impuesto,
                 imp.porcentaje
                 FROM cobroDetalle AS cd 
@@ -561,14 +574,15 @@ class Factura {
                 cl.informacion AS cliente,
                 cl.documento AS docCliente,
 
-                SUM(cd.precio * cd.cantidad) AS monto
+                IFNULL(SUM(cd.precio * cd.cantidad),cv.precio) AS monto
 
                 FROM cobro AS c
+                INNER JOIN comprobante AS comp ON comp.idComprobante = c.idComprobante
                 INNER JOIN moneda AS mn ON mn.idMoneda = c.idMoneda
                 INNER JOIN banco AS bn ON bn.idBanco = c.idBanco
                 INNER JOIN cliente AS cl ON cl.idCliente = c.idCliente
-                INNER JOIN cobroDetalle AS cd ON cd.idCobro = c.idCobro
-                INNER JOIN comprobante AS comp ON comp.idComprobante = c.idComprobante
+                LEFT JOIN cobroDetalle AS cd ON cd.idCobro = c.idCobro
+                LEFT JOIN cobroVenta AS cv ON cv.idCobro = c.idCobro
 
                 WHERE
                 ( ? = 1 AND c.fecha BETWEEN ? AND ? )
@@ -610,4 +624,4 @@ class Factura {
 
 }
 
-module.exports = Factura
+module.exports = Cobro

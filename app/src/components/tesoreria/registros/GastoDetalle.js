@@ -1,5 +1,6 @@
 import React from 'react';
 import axios from 'axios';
+import CryptoJS from 'crypto-js';
 import {
     formatMoney,
     timeForma24,
@@ -14,7 +15,10 @@ class GastoDetalle extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            idGasto: '',
+            comprobante:'',
             estado: '',
+            cliente: '',
             usuario: '',
             fecha: '',
             cuentaBancaria: '',
@@ -65,7 +69,10 @@ class GastoDetalle extends React.Component {
             let cabecera = result.data.cabecera;
 
             await this.setStateAsync({
+                idGasto: id,
+                comprobante: cabecera.comprobante + "  " + cabecera.serie + "-" + cabecera.numeracion,
                 estado: cabecera.estado.toString(),
+                cliente: cabecera.documento + " - " + cabecera.informacion,
                 usuario: cabecera.apellidoUse + " " + cabecera.nombreUse,
                 fecha: cabecera.fecha + " " + timeForma24(cabecera.hora),
                 cuentaBancaria: cabecera.nombreBanco,
@@ -133,6 +140,17 @@ class GastoDetalle extends React.Component {
         )
     }
 
+    onEventImprimir(){
+        const data = {
+            "idSede": "SD0001",
+            "idGasto": this.state.idGasto,
+        }
+
+        let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
+        let params = new URLSearchParams({ "params": ciphertext });
+        window.open("/api/gasto/repcomprobante?" + params, "_blank");
+    }
+
     render() {
         return (
             <>
@@ -156,11 +174,7 @@ class GastoDetalle extends React.Component {
                             <div className="row">
                                 <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                                     <div className="form-group">
-                                        <button type="button" className="btn btn-light"><i className="fa fa-print"></i> Imprimir</button>
-                                        {" "}
-                                        <button type="button" className="btn btn-light"><i className="fa fa-edit"></i> Editar</button>
-                                        {" "}
-                                        <button type="button" className="btn btn-light"><i className="fa fa-remove"></i> Eliminar</button>
+                                        <button type="button" className="btn btn-light" onClick={() => this.onEventImprimir()}><i className="fa fa-print"></i> Imprimir</button>
                                         {" "}
                                         <button type="button" className="btn btn-light"><i className="fa fa-file-archive-o"></i> Adjuntar</button>
                                     </div>
@@ -175,15 +189,15 @@ class GastoDetalle extends React.Component {
                                                 <thead>
                                                     <tr>
                                                         <th className="table-secondary w-25 p-1 font-weight-normal "><span>Recibo de caja</span></th>
-                                                        <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal"></th>
+                                                        <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">{this.state.comprobante}</th>
                                                     </tr>
                                                     {/* <tr>
                                             <th className="table-secondary w-25 p-1 font-weight-normal ">Estado</th>
                                             <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal"></th>
                                         </tr> */}
                                                     <tr>
-                                                        <th className="table-secondary w-25 p-1 font-weight-normal ">Usuario</th>
-                                                        <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">{this.state.usuario}</th>
+                                                        <th className="table-secondary w-25 p-1 font-weight-normal ">Cliente</th>
+                                                        <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">{this.state.cliente}</th>
                                                     </tr>
                                                     <tr>
                                                         <th className="table-secondary w-25 p-1 font-weight-normal ">Fecha</th>

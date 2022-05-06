@@ -819,41 +819,20 @@ class Factura {
         }
     }
 
-    async detalleVenta(req){
+    async detalleVenta(req) {
         try {
+            let ventas = await conec.procedure(`CALL Listar_Ventas(?,?,?,?,?,?)`, [
+                req.query.fechaIni,
+                req.query.fechaFin,
 
-            let ventas = await conec.query(`SELECT 
-            v.idVenta,
-            c.idCliente,
-            c.documento, 
-            c.informacion,             
-            v.idComprobante,  
-            co.nombre as comprobante,
-            v.serie,
-            v.numeracion,
-            DATE_FORMAT(v.fecha,'%d/%m/%Y') as fecha, 
-            v.hora, 
-            CASE v.tipo 
-            WHEN 1 THEN 'CONTADO'
-            ELSE 'CRÉDITO' END AS tipo, 
-            CASE v.estado
-            WHEN 1 THEN 'COBRADO'
-            WHEN 2 THEN 'POR COBRAR'
-            ELSE 'ANULADO' END AS estado,
-            m.idMoneda,
-            m.codiso,
-            IFNULL(SUM(vd.precio*vd.cantidad),0) AS total
-            FROM venta AS v 
-            INNER JOIN cliente AS c ON v.idCliente = c.idCliente
-            INNER JOIN comprobante AS co ON v.idComprobante = co.idComprobante
-            INNER JOIN moneda AS m ON v.idMoneda = m.idMoneda
-            LEFT JOIN ventaDetalle AS vd ON vd.idVenta = v.idVenta
-
-            GROUP BY v.idVenta
-            ORDER BY v.fecha DESC, v.hora DESC`);
-
-            return ventas;
-        } catch (error) {
+                req.query.idComprobante,
+                req.query.idCliente,
+                req.query.idUsuario,
+                req.query.tipoVenta,
+            ]);
+            
+            return ventas
+        } catch (error) {           
             return "Error interno de conexión, intente nuevamente."
         }
     }

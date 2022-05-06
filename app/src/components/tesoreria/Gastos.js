@@ -200,9 +200,10 @@ class Gastos extends React.Component {
                                     <tr>
                                         <th width="5%" className="text-center">#</th>
                                         <th width="10%">Cliente</th>
-                                        <th width="15%">Detalle</th>
+                                        <th width="10%">Correlativo</th>
                                         <th width="10%">Creación</th>
                                         <th width="10%">Cuenta</th>
+                                        <th width="15%">Detalle</th>
                                         <th width="10%">Monto</th>
                                         <th width="5%" className="text-center">Detalle</th>
                                         <th width="5%" className="text-center">Eliminar</th>
@@ -212,13 +213,13 @@ class Gastos extends React.Component {
                                     {
                                         this.state.loading ? (
                                             <tr>
-                                                <td className="text-center" colSpan="8">
+                                                <td className="text-center" colSpan="9">
                                                     {spinnerLoading()}
                                                 </td>
                                             </tr>
                                         ) : this.state.lista.length === 0 ? (
                                             <tr className="text-center">
-                                                <td colSpan="8">¡No hay datos registrados!</td>
+                                                <td colSpan="9">¡No hay datos registrados!</td>
                                             </tr>
                                         ) : (
                                             this.state.lista.map((item, index) => {
@@ -226,9 +227,10 @@ class Gastos extends React.Component {
                                                     <tr key={index}>
                                                         <td className="text-center">{item.id}</td>
                                                         <td>{item.documento}{<br />}{item.informacion}</td>
-                                                        <td>{item.detalle}</td>
+                                                        <td>{item.comprobante}{<br />}{item.serie + "-" + item.numeracion}</td>
                                                         <td>{item.fecha}{<br />}{timeForma24(item.hora)}</td>
                                                         <td>{item.banco}</td>
+                                                        <td>{item.detalle}</td>
                                                         <td>{item.simbolo + " " + formatMoney(item.monto)}</td>
                                                         <td className="text-center">
                                                             <button

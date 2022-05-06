@@ -25,6 +25,19 @@ class Conexion {
         }); 
     }
 
+    procedure(slq, param = []) {
+        return new Promise((resolve, reject) => {
+            this.pool.getConnection((err, connection) => {
+                if (err) return reject(err.sqlMessage);
+                connection.query(slq, param, (err, result) => {
+                    if (err) return reject(err.sqlMessage);
+                    connection.release();
+                    return resolve(result[0]);
+                });
+            });
+        }); 
+    }
+
     beginTransaction() {
         return new Promise((resolve, reject) => {
             this.pool.getConnection((err, connection) => {

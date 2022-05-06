@@ -10,6 +10,22 @@ function currentTime() {
     let formatted_time = (time.getHours() > 9 ? time.getHours() : '0' + time.getHours()) + ":" + (time.getMinutes() > 9 ? time.getMinutes() : '0' + time.getMinutes()) + ":" + (time.getSeconds() > 9 ? time.getSeconds() : '0' + time.getSeconds());
     return formatted_time;
 }
+
+ function dateFormat(value) {
+    var parts = value.split("-");
+    let today = new Date(parts[0], parts[1] - 1, parts[2]);
+    return (
+      (today.getDate() > 9 ? today.getDate() : "0" + today.getDate()) +
+      "/" +
+      (today.getMonth() + 1 > 9
+        ? today.getMonth() + 1
+        : "0" + (today.getMonth() + 1)) +
+      "/" +
+      today.getFullYear()
+    );
+  }
+
+  
 function formatMoney(amount, decimalCount = 2, decimal = ".", thousands = "") {
     try {
         decimalCount = Math.abs(decimalCount);
@@ -88,4 +104,4 @@ function calculateTax(porcentaje, valor) {
     return valor * igv;
 }
 
-module.exports = { currentDate, currentTime, formatMoney, calculateTaxBruto, calculateTax, numberFormat };
+module.exports = { currentDate, currentTime, dateFormat,formatMoney, calculateTaxBruto, calculateTax, numberFormat };

@@ -1,16 +1,12 @@
 const path = require('path');
 const PDFDocument = require("pdfkit-table");
 const getStream = require('get-stream');
-const { formatMoney, numberFormat, currentDate } = require('../tools/Tools');
+const { dateFormat, numberFormat, currentDate } = require('../tools/Tools');
 
 class RepFinanciero {
 
     async repFiltroCobros(req, sedeInfo, data) {
-
-        console.log(data);
-
         try {
-
             const doc = new PDFDocument({
                 margins: {
                     top: 40,
@@ -30,6 +26,7 @@ class RepFinanciero {
             let titleX = orgX + 150;
             // let footerY = bodY + 65;
             let medioX = (doc.page.width - doc.options.margins.left - doc.options.margins.right) / 2;
+            let widthContent = doc.page.width - doc.options.margins.left - doc.options.margins.right;
 
             let h1 = 13;
             let h2 = 11;
@@ -59,16 +56,16 @@ class RepFinanciero {
 
             doc.fontSize(h2).text(
                 "REPORTE DE COBROS",
-                (doc.page.width - orgX - orgY) / 2,
+                doc.options.margins.left,
                 cabeceraY,
                 {
-                    width: 200,
-                    align: "left",
+                    width: widthContent,
+                    align: "center",
                 }
             );
 
-            doc.fontSize(11).text(
-                `PERIODO: ${req.query.fechaIni} al ${req.query.fechaFin}`,
+            doc.fontSize(h3).text(
+                `PERIODO: ${dateFormat(req.query.fechaIni)} al ${dateFormat(req.query.fechaFin)}`,
                 orgX,
                 cabeceraY + 25,
                 {
@@ -90,23 +87,12 @@ class RepFinanciero {
                 filtroY + 6
             );
 
-            // doc.fontSize(h3).text(
-            //     `Metodo de Pago(s): TODOS`,
-            //     orgX + 5,
-            //     filtroY + 24
-            // );
-
             // right
             doc.fontSize(h3).text(
                 `Caja Banco(s): ${req.query.idBanco === 0 ? 'TODOS' : req.query.banco}`,
                 medioX + 15,
                 filtroY + 6
             );
-            // doc.fontSize(h3).text(
-            //     `Usuario(s): TODOS`,
-            //     medioX + 15,
-            //     filtroY + 24
-            // );
 
             let total = 0;
 
@@ -118,20 +104,17 @@ class RepFinanciero {
                             : item.metodoPago === 4 ? 'Cheque'
                                 : item.metodoPago === 5 ? 'Tarjeta crédito' : 'Tarjeta débito'
 
-                total = total + item.monto;
+                total += item.monto;
 
                 return [
-                    item.fecha + ' - ' + item.hora,
-                    item.comprobante + ' ' + item.serie + '-' + item.numeracion,
-                    item.cliente + ' - ' + item.docCliente,
+                    item.fecha + '\n' + item.hora,
+                    item.comprobante + '\n' + item.serie + '-' + item.numeracion,
+                    item.docCliente + '\n' + item.cliente,
                     item.banco,
                     metodoPago,
                     numberFormat(item.monto, item.codiso)
                 ]
             })
-
-            // let content = [["11-01-2022", "publico general", "Caja 1", "Efectivo", "Ninguna", "S/ 10.00"]];
-            // content.push(["", "", "", "", "TOTAL", "S/ 20.00"]);
 
             //Tabla
             const table = {
@@ -142,9 +125,41 @@ class RepFinanciero {
             };
 
             doc.table(table, {
+                prepareHeader: () => doc.font("Helvetica-Bold").fontSize(h3),
+                prepareRow: () => {
+                    doc.font("Helvetica").fontSize(h3);
+                },
+                padding: 5,
+                columnSpacing: 5,
+                columnsSize: [80, 102, 80, 90, 90, 90],
                 x: orgX,
                 y: bodY,
                 width: doc.page.width - doc.options.margins.left - doc.options.margins.right
+            });
+
+            let ypost = doc.y + 5;
+            doc.fontSize(h3);
+
+            let nameContado = "TOTAL DE INGRESOS:";
+            let widthNameContado = doc.widthOfString(nameContado);
+
+            let totalContado = numberFormat(total);
+
+            let widthTotalContado = doc.widthOfString(totalContado);
+
+            doc.text(nameContado,
+                doc.page.width - doc.options.margins.right - widthNameContado - widthTotalContado - 20,
+                ypost, {
+                width: widthNameContado + 10,
+                align: "right",
+            });
+
+            doc.text(totalContado,
+                doc.page.width - doc.options.margins.right - widthTotalContado,
+                ypost, {
+                width: widthTotalContado,
+                stroke: "black",
+                align: "right",
             });
 
             doc.end();
@@ -178,7 +193,7 @@ class RepFinanciero {
             let titleX = orgX + 150;
             // let footerY = bodY + 65;
             let medioX = (doc.page.width - doc.options.margins.left - doc.options.margins.right) / 2;
-            //let tercioX = (doc.page.width - doc.options.margins.left - doc.options.margins.right) / 3;
+            let widthContent = doc.page.width - doc.options.margins.left - doc.options.margins.right;
 
             let h1 = 13;
             let h2 = 11;
@@ -208,17 +223,17 @@ class RepFinanciero {
 
             doc.fontSize(h2).text(
                 "REPORTE DE GASTOS",
-                (doc.page.width - orgX - orgY) / 2,
+                doc.page.margins.left,
                 cabeceraY,
                 {
-                    width: 200,
-                    align: "left",
+                    width: widthContent,
+                    align: "center",
                 }
             );
 
 
             doc.fontSize(h3).text(
-                `PERIODO: ${req.query.fechaIni} al ${req.query.fechaFin}`,
+                `PERIODO: ${dateFormat(req.query.fechaIni)} al ${dateFormat(req.query.fechaFin)}`,
                 orgX,
                 cabeceraY + 25,
                 {
@@ -261,10 +276,10 @@ class RepFinanciero {
 
                 return [
                     item.fecha,
+                    item.comprobante+"\n"+ item.serie+"-"+ item.numeracion,
                     item.usuario,
-                    metodoPago,
                     item.banco,
-                    item.observacion === '' ? '-' : item.observacion,
+                    metodoPago,
                     numberFormat(item.monto, item.codiso)
                 ]
             })
@@ -275,7 +290,7 @@ class RepFinanciero {
             const table = {
                 // title: "Detalle",
                 subtitle: "DETALLE",
-                headers: ["Fecha", "Usuario", "Metodo Pago", "Cuenta Bancaria", "Observación", "Importe"],
+                headers: ["Fecha", "Comprobante", "Usuario", "Cuenta Bancaria", "Metodo Pago",  "Importe"],
                 rows: content
             };
 
@@ -284,10 +299,39 @@ class RepFinanciero {
                 prepareRow: () => {
                     doc.font("Helvetica").fontSize(h3);
                 },
+                padding: 5,
+                columnSpacing: 5,
+                columnsSize: [80, 102, 80, 90, 90, 90],
                 x: orgX,
                 y: bodY,
                 width: doc.page.width - doc.options.margins.left - doc.options.margins.right
             });
+
+            let ypost = doc.y + 5;
+            doc.fontSize(h3);
+
+            let nameContado = "TOTAL DE INGRESOS:";
+            let widthNameContado = doc.widthOfString(nameContado);
+
+            let totalContado = numberFormat(total);
+
+            let widthTotalContado = doc.widthOfString(totalContado);
+
+            doc.text(nameContado,
+                doc.page.width - doc.options.margins.right - widthNameContado - widthTotalContado - 20,
+                ypost, {
+                width: widthNameContado + 10,
+                align: "right",
+            });
+
+            doc.text(totalContado,
+                doc.page.width - doc.options.margins.right - widthTotalContado,
+                ypost, {
+                width: widthTotalContado,
+                stroke: "black",
+                align: "right",
+            });
+
 
             doc.end();
 
@@ -297,7 +341,6 @@ class RepFinanciero {
             return "Se genero un error al generar el reporte.";
         }
     }
-
 
     async repDetalleBanco(sedeInfo, data) {
 
