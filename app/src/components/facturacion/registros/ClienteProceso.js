@@ -12,6 +12,7 @@ import {
 import { connect } from 'react-redux';
 import reniec from '../../../recursos/images/reniec.png';
 import sunat from '../../../recursos/images/sunat.png';
+import SearchBar from "../../tools/SearchBar";
 
 class ClienteProceso extends React.Component {
     constructor(props) {
@@ -28,11 +29,17 @@ class ClienteProceso extends React.Component {
             email: '',
             genero: '',
             direccion: '',
+
+            idUbigeo: '',
             ubigeo: '',
+
             estadoCivil: '',
             estado: true,
             observacion: '',
             idUsuario: this.props.token.userToken.idUsuario,
+
+            filter: false,
+            filteredData: [],
 
             loading: true,
             messageWarning: '',
@@ -45,8 +52,12 @@ class ClienteProceso extends React.Component {
         this.refCelular = React.createRef();
 
         this.refDireccion = React.createRef();
+        this.refUbigeo = React.createRef();
+        this.refFechaNacimiento = React.createRef();
 
         this.abortControllerTable = new AbortController();
+
+        this.selectItem = false;
     }
 
     setStateAsync(state) {
@@ -71,7 +82,7 @@ class ClienteProceso extends React.Component {
 
     loadData = async () => {
         try {
-            const documento = await axios.get("/api/tipodcumento/listcombo", {
+            const documento = await axios.get("/api/tipodocumento/listcombo", {
                 signal: this.abortControllerTable.signal,
             });
 
@@ -91,43 +102,53 @@ class ClienteProceso extends React.Component {
 
     loadDataId = async (id) => {
         try {
-            const documento = await axios.get("/api/tipodcumento/listcombo", {
+
+            const documento = await axios.get("/api/tipodocumento/listcombo", {
                 signal: this.abortControllerTable.signal
             });
 
-            const cliente = await axios.get("/api/cliente/id", {
+            const result = await axios.get("/api/cliente/id", {
                 signal: this.abortControllerTable.signal,
                 params: {
-                    idCliente: id
+                    "idCliente": id
                 }
             });
 
+            const data = result.data
+
+            // console.log(data)
+
             await this.setStateAsync({
-                idTipoDocumento: cliente.data.idTipoDocumento,
-                documento: cliente.data.documento,
-                informacion: cliente.data.informacion,
-                telefono: cliente.data.telefono,
-                celular: cliente.data.celular,
-                fechaNacimiento: cliente.data.fechaNacimiento,
-                email: cliente.data.email,
-                genero: cliente.data.genero,
-                direccion: cliente.data.direccion,
-                ubigeo: cliente.data.ubigeo,
-                estadoCivil: cliente.data.estadoCivil,
-                estado: cliente.data.estado,
-                observacion: cliente.data.observacion,
-                idCliente: cliente.data.idCliente,
+                idCliente: data.idCliente,
+                idTipoDocumento: data.idTipoDocumento,
+                documento: data.documento,
+                informacion: data.informacion,
+                telefono: data.telefono,
+                celular: data.celular,
+                fechaNacimiento: data.fechaNacimiento,
+                email: data.email,
+                genero: data.genero,
+                direccion: data.direccion,
+
+                idUbigeo: data.idUbigeo === 0 ? '' : data.idUbigeo.toString(),
+                ubigeo: data.ubigeo === '' ? '' : data.departamento + "-" + data.provincia + "-" + data.distrito + " (" + data.ubigeo + ")",
+
+                estadoCivil: data.estadoCivil,
+                estado: data.estado,
+                observacion: data.observacion,
 
                 tiposDocumentos: documento.data,
 
                 loading: false
             })
+            this.selectItem = data.idUbigeo === 0 ? false : true;
         } catch (error) {
             if (error.message !== "canceled") {
                 await this.setStateAsync({
                     msgLoading: "Se produjo un error un interno, intente nuevamente."
                 });
             }
+            // console.log(error.message)
         }
     }
 
@@ -169,7 +190,7 @@ class ClienteProceso extends React.Component {
                     "email": this.state.email.trim().toUpperCase(),
                     "genero": this.state.genero,
                     "direccion": this.state.direccion.trim().toUpperCase(),
-                    "ubigeo": this.state.ubigeo.trim().toUpperCase(),
+                    "idUbigeo": this.state.idUbigeo,
                     "estadoCivil": this.state.estadoCivil,
                     "estado": this.state.estado,
                     "observacion": this.state.observacion.trim().toUpperCase(),
@@ -191,7 +212,7 @@ class ClienteProceso extends React.Component {
                     "email": this.state.email.trim().toUpperCase(),
                     "genero": this.state.genero,
                     "direccion": this.state.direccion.trim().toUpperCase(),
-                    "ubigeo": this.state.ubigeo.trim().toUpperCase(),
+                    "idUbigeo": this.state.idUbigeo,
                     "estadoCivil": this.state.estadoCivil,
                     "estado": this.state.estado,
                     "observacion": this.state.observacion.trim().toUpperCase(),
@@ -225,9 +246,10 @@ class ClienteProceso extends React.Component {
                 timeout: 5000,
             });
 
+
             await this.setStateAsync({
                 documento: convertNullText(result.data.dni),
-                informacion: convertNullText(result.data.apellidoMaterno) + " " + convertNullText(result.data.apellidoPaterno) + " " + convertNullText(result.data.nombres),
+                informacion: convertNullText(result.data.apellidoPaterno) + " " + convertNullText(result.data.apellidoMaterno) + " " + convertNullText(result.data.nombres),
                 loading: false,
             });
         } catch (error) {
@@ -258,6 +280,45 @@ class ClienteProceso extends React.Component {
         } catch (error) {
 
         }
+    }
+
+    handleFilter = async (event) => {
+
+        const searchWord = this.selectItem ? "" : event.target.value;
+        await this.setStateAsync({ idUbigeo: '', ubigeo: searchWord });
+        this.selectItem = false;
+        if (searchWord.length === 0) {
+            await this.setStateAsync({ filteredData: [] });
+            return;
+        }
+
+        if (this.state.filter) return;
+
+        try {
+            await this.setStateAsync({ filter: true });
+            let result = await axios.get("/api/ubigeo/", {
+                params: {
+                    filtrar: searchWord,
+                },
+            });
+            await this.setStateAsync({ filter: false, filteredData: result.data });
+        } catch (error) {
+            await this.setStateAsync({ filter: false, filteredData: [] });
+        }
+    }
+
+    onEventSelectItem = async (value) => {
+        await this.setStateAsync({
+            ubigeo: value.departamento + "-" + value.provincia + "-" + value.distrito + " (" + value.ubigeo + ")",
+            filteredData: [],
+            idUbigeo: value.idUbigeo
+        });
+        this.selectItem = true;
+    }
+
+    onEventClearInput = async () => {
+        await this.setStateAsync({ filteredData: [], idUbigeo: '', ubigeo: "" });
+        this.selectItem = false;
     }
 
     render() {
@@ -438,6 +499,7 @@ class ClienteProceso extends React.Component {
                                         <input
                                             type="date"
                                             className="form-control"
+                                            ref={this.refFechaNacimiento}
                                             value={this.state.fechaNacimiento}
                                             onChange={(event) => this.setState({ fechaNacimiento: event.target.value })}
                                         />
@@ -485,18 +547,15 @@ class ClienteProceso extends React.Component {
                                 <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
                                     <div className="form-group">
                                         <label>Ubigeo</label>
-                                        <div className="input-group">
-                                            <input
-                                                type="text"
-                                                className="form-control"
-                                                ref={this.refUbigeo}
-                                                value={this.state.ubigeo}
-                                                onChange={(event) => this.setState({ ubigeo: event.target.value })}
-                                                placeholder="Ingrese el ubigeo" />
-                                            <div className="input-group-append">
-                                                <button className="btn btn-outline-secondary" type="button" title="Ubigeo" onClick={() => console.log("ubigeo")}><i className="bi bi-building"></i></button>
-                                            </div>
-                                        </div>
+                                        <SearchBar
+                                            placeholder="Escribe para iniciar a filtrar..."
+                                            refTxtUbigeo={this.refUbigeo}
+                                            ubigeo={this.state.ubigeo}
+                                            filteredData={this.state.filteredData}
+                                            onEventClearInput={this.onEventClearInput}
+                                            handleFilter={this.handleFilter}
+                                            onEventSelectItem={this.onEventSelectItem}
+                                        />
                                     </div>
                                 </div>
                             </div>

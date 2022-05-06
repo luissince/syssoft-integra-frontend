@@ -119,7 +119,7 @@ class Usuarios extends React.Component {
                 configClave: '',
 
                 loadModal: false,
-                nameModal: 'Nuevo Comprobante',
+                nameModal: 'Resetear Contraseña',
                 messageWarning: '',
                 msgModal: 'Cargando datos...',
             });
@@ -482,7 +482,7 @@ class Usuarios extends React.Component {
                                     <div className="tab-pane fade show active" id="datos" role="tabpanel" aria-labelledby="datos-tab">
 
                                         <div className="form-group">
-                                            <label htmlFor="dni">Dni</label>
+                                            <label htmlFor="dni">Dni <i className="fa fa-asterisk text-danger small"></i></label>
                                             <input
                                                 type="number"
                                                 className="form-control"
@@ -607,7 +607,7 @@ class Usuarios extends React.Component {
 
                                         <div className="form-row">
                                             <div className="form-group col-md-6">
-                                                <label htmlFor="telefono">Telefono</label>
+                                                <label htmlFor="telefono">Telefono o celular</label>
                                                 <input
                                                     type="number"
                                                     className="form-control"
@@ -684,6 +684,7 @@ class Usuarios extends React.Component {
                                             <label htmlFor="perfil">Perfil</label>
                                             <select
                                                 className="form-control"
+                                                ref={this.refPerfil}
                                                 value={this.state.idPerfil}
                                                 onChange={(event) => this.setState({ idPerfil: event.target.value })}
                                             >

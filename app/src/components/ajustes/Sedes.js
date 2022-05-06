@@ -74,7 +74,6 @@ class Sedes extends React.Component {
         this.refDireccion = React.createRef();
         this.refUbigeo = React.createRef();
 
-
         this.refTxtSearch = React.createRef();
         this.refFileImagen = React.createRef();
 

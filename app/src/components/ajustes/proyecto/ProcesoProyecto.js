@@ -400,7 +400,6 @@ class ProcesoProyecto extends React.Component {
         }
     }
 
-
     render() {
         return (
             <>

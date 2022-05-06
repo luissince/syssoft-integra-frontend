@@ -113,7 +113,7 @@ router.post('/add', async function (req, res) {
             email, 
             genero, 
             direccion,
-            ubigeo, 
+            idUbigeo, 
             estadoCivil,
             estado, 
             observacion,
@@ -131,7 +131,7 @@ router.post('/add', async function (req, res) {
             req.body.email,
             req.body.genero,
             req.body.direccion,
-            req.body.ubigeo,
+            req.body.idUbigeo,
             req.body.estadoCivil,
             req.body.estado,
             req.body.observacion,
@@ -155,27 +155,35 @@ router.get('/id', async function (req, res) {
     try {
 
         let result = await conec.query(`SELECT 
-        idCliente,
-        idTipoDocumento,
-        documento,
-        informacion,
-        celular,
-        telefono, 
-        fechaNacimiento,
-        email, 
-        genero,  
-        direccion,
-        ubigeo,
-        estadoCivil,
-        estado, 
-        observacion
-        FROM cliente WHERE idCliente  = ?`, [
+        cl.idCliente,
+        cl.idTipoDocumento,
+        cl.documento,
+        cl.informacion,
+        cl.celular,
+        cl.telefono, 
+        DATE_FORMAT(cl.fechaNacimiento,'%d/%m/%Y') as fecha,
+        cl.email, 
+        cl.genero,  
+        cl.direccion,
+        IFNULL(cl.idUbigeo,0) AS idUbigeo,
+        IFNULL(u.ubigeo, '') AS ubigeo,
+        IFNULL(u.departamento, '') AS departamento,
+        IFNULL(u.provincia, '') AS provincia,
+        IFNULL(u.distrito, '') AS distrito,
+        cl.estadoCivil,
+        cl.estado, 
+        cl.observacion
+        FROM cliente AS cl 
+        LEFT JOIN ubigeo AS u ON u.idUbigeo = cl.idUbigeo
+        WHERE 
+        cl.idCliente = ?`, [
             req.query.idCliente,
         ]);
 
         if (result.length > 0) {
             res.status(200).send(result[0]);
         } else {
+            console.log(result)
             res.status(400).send("Datos no encontrados");
         }
 
@@ -201,7 +209,7 @@ router.post('/update', async function (req, res) {
         email=?,
         genero=?, 
         direccion=?, 
-        ubigeo=?,
+        idUbigeo=?,
         estadoCivil=?, 
         estado=?,
         observacion=?,
@@ -216,7 +224,7 @@ router.post('/update', async function (req, res) {
             req.body.email,
             req.body.genero,
             req.body.direccion,
-            req.body.ubigeo,
+            req.body.idUbigeo,
             req.body.estadoCivil,
             req.body.estado,
             req.body.observacion,
