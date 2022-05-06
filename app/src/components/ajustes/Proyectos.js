@@ -188,7 +188,7 @@ class Proyectos extends React.Component {
                                     <tr>
                                         <th width="5%">#</th>
                                         <th width="20%">Proyecto</th>
-                                        <th width="10%">Área Total(Has)</th>
+                                        <th width="10%">Área Total(m²)</th>
                                         <th width="30%">Ubicación</th>
                                         <th width="10%">Precio X m2</th>
                                         <th width="10%">Estado</th>
