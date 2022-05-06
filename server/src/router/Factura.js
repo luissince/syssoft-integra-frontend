@@ -142,10 +142,6 @@ router.get("/repgeneralventas", async function (req, res) {
     req.query.usuario = decryptedData.usuario;
     req.query.tipo = decryptedData.tipo;
    
-
-    console.log(decryptedData)
-    // console.log(req.query)
-
     const sedeInfo = await sede.infoSedeReporte(req)
 
     if (typeof sedeInfo !== 'object') {

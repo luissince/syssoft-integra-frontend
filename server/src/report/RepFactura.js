@@ -3,7 +3,7 @@ const PDFDocument = require("pdfkit-table");
 const getStream = require('get-stream');
 const qr = require("qrcode");
 const NumberLleters = require('../tools/NumberLleters');
-const { formatMoney, numberFormat, calculateTaxBruto, calculateTax ,dateFormat} = require('../tools/Tools');
+const { formatMoney, numberFormat, calculateTaxBruto, calculateTax, dateFormat } = require('../tools/Tools');
 
 const numberLleters = new NumberLleters();
 
@@ -242,7 +242,6 @@ class RepFactura {
     }
 
     async repVentas(req, sedeInfo, data) {
-        // console.log(req.query)
         try {
             const doc = new PDFDocument({
                 margins: {
@@ -262,12 +261,12 @@ class RepFactura {
             let bodY = filtroY + 65;
             let titleX = orgX + 150;
             let medioX = (doc.page.width - doc.options.margins.left - doc.options.margins.right) / 2;
-            let widthContent = doc.page.width  - doc.options.margins.left - doc.options.margins.right;
+            let widthContent = doc.page.width - doc.options.margins.left - doc.options.margins.right;
 
             let h1 = 13;
             let h2 = 11;
             let h3 = 9;
-            
+
 
             doc.image(path.join(__dirname, "..", "path/to/logo.png"), doc.x, doc.y, { width: 75 });
 
@@ -318,36 +317,43 @@ class RepFactura {
                 50).stroke();
 
             doc.fontSize(h3).text(
-                `Comprobante(s): ${req.query.idComprobante === '' ? "TODOS":req.query.comprobante}`,
+                `Comprobante(s): ${req.query.idComprobante === '' ? "TODOS" : req.query.comprobante}`,
                 orgX + 5,
                 filtroY + 6
             );
             doc.fontSize(h3).text(
-                `Cliente(s): ${req.query.idCliente === '' ? "TODOS":req.query.cliente}`,
+                `Cliente(s): ${req.query.idCliente === '' ? "TODOS" : req.query.cliente}`,
                 orgX + 5,
                 filtroY + 20
             );
             doc.fontSize(h3).text(
-                `Vendedor(s): ${req.query.idUsuario === '' ? "TODOS":req.query.usuario}`,
+                `Vendedor(s): ${req.query.idUsuario === '' ? "TODOS" : req.query.usuario}`,
                 orgX + 5,
                 filtroY + 34
             );
 
             doc.fontSize(h3).text(
-                `Tipo(s): ${req.query.tipoVenta === '' ? "TODOS":req.query.tipo}`,
+                `Tipo(s): ${req.query.tipoVenta === '' ? "TODOS" : req.query.tipo}`,
                 medioX + 15,
                 filtroY + 6
             );
 
+            let contadoCount = 0;
+            let creditoCount = 0;
+
             let content = data.map((item, index) => {
+                contadoCount += item.tipo === "CRÉDITO" && item.estado !== "ANULADO" ? item.total : 0;
+                creditoCount += item.tipo === "CONTADO" && item.estado !== "ANULADO" ? item.total : 0;
                 return [
                     item.fecha,
                     item.documento + "\n" + item.informacion,
-                    item.comprobante+"\n"+item.serie+"-"+item.numeracion,
+                    item.comprobante + "\n" + item.serie + "-" + item.numeracion,
                     item.tipo,
                     item.estado,
                     numberFormat(item.total, item.codiso)]
             });
+
+            console.log(contadoCount)
 
             const table = {
                 subtitle: "DETALLE",
@@ -365,11 +371,57 @@ class RepFactura {
                 width: doc.page.width - doc.options.margins.left - doc.options.margins.right
             });
 
+            let ypost = doc.y + 5;
+            doc.fontSize(h3);
+
+            let nameContado = "TOTAL AL CONTADO:";
+            let nameCredito = "TOTAL AL CRÉDITO:";
+            let widthNameContado = doc.widthOfString(nameContado);
+            let widthNameCredito = doc.widthOfString(nameCredito);
+
+            let totalContado = numberFormat(contadoCount);
+            let totalCredito = numberFormat(creditoCount);
+
+            let widthTotalContado = doc.widthOfString(totalContado);
+            let widthTotalCredito = doc.widthOfString(totalCredito);
+
+            doc.text(nameContado,
+                doc.page.width - doc.options.margins.right - widthNameContado - widthTotalContado - 20,
+                ypost, {
+                width: widthNameContado + 10,
+                align: "right",
+            });
+
+            doc.text(totalContado,
+                doc.page.width - doc.options.margins.right - widthTotalContado,
+                ypost, {
+                width: widthTotalContado,
+                stroke: "black",
+                align: "right",
+            });
+
+            ypost = doc.y + 5;
+
+            doc.text(nameCredito,
+                doc.page.width - doc.options.margins.right - widthNameCredito - widthTotalCredito - 20,
+                ypost, {
+                width: widthNameCredito + 10,
+                align: "right"
+            });
+
+            doc.text(totalCredito,
+                doc.page.width - doc.options.margins.right - widthTotalCredito,
+                ypost, {
+                width: widthTotalCredito,
+                stroke: "black",
+                align: "right",
+            });
 
             doc.end();
 
             return getStream.buffer(doc);
         } catch (error) {
+            console.log(error)
             return "Se genero un error al generar el reporte.";
         }
     }

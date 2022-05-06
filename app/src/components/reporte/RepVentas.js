@@ -109,6 +109,12 @@ class RepVentas extends React.Component {
             return;
         }
 
+        if (!this.state.tipoVentaCheck && this.state.tipoVenta === "") {
+            await this.setStateAsync({ messageWarning: "Seleccione el tipo de venta." })
+            this.refTipoVenta.current.focus();
+            return;
+        }
+
         const data = {
             "idSede": "SD0001",
             "fechaIni": this.state.fechaIni,
@@ -125,7 +131,7 @@ class RepVentas extends React.Component {
 
         let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
         let params = new URLSearchParams({ "params": ciphertext });
-        window.open("/api/factura/repgeneralventas?" + params, "_blank");
+        window.open("http://localhost:5000/api/factura/repgeneralventas?" + params, "_blank");
 
     }
 
@@ -397,7 +403,7 @@ class RepVentas extends React.Component {
                                                     >
                                                         <option value="">-- Todos --</option>
                                                         <option value="1">AL CONTADO</option>
-                                                        <option value="1">AL CREDITO</option>
+                                                        <option value="2">AL CREDITO</option>
                                                     </select>
                                                     <div className="input-group-append">
                                                         <div className="input-group-text">
