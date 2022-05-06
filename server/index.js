@@ -52,6 +52,8 @@ app.use('/api/acceso', require('./src/router/Acceso'));
 app.use('/api/ubigeo', require('./src/router/Ubigeo'));
 app.use('/api/tipodcumento', require('./src/router/TipoDocumento'));
 
+app.use('/api/dashboard', require('./src/router/Dashboard'));
+
 
 app.use((req, res, next) => {
     res.sendFile(path.join(__dirname, "..", "app/build", "index.html"));

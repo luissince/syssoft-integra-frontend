@@ -302,6 +302,8 @@ router.get('/inicio', async function (req, res) {
         p.idProyecto,
         p.nombre,
         p.ubicacion,
+        p.area,
+        m.codiso,
         m.nombre as moneda,
         m.simbolo,
         p.imagen,

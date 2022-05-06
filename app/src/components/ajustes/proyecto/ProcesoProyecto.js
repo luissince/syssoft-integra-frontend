@@ -414,7 +414,12 @@ class ProcesoProyecto extends React.Component {
                 <div className='row'>
                     <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
                         <div className="form-group">
-                            <h5>Proyectos <small className="text-secondary">LISTA</small></h5>
+                            <div className="form-group">
+                                <h5>
+                                    <span role="button" onClick={() => this.props.history.goBack()}><i className="bi bi-arrow-left-short"></i></span> Proyectos
+                                    <small className="text-secondary"> LISTA</small>
+                                </h5>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -478,7 +483,7 @@ class ProcesoProyecto extends React.Component {
                                 </div>
                                 <div className="form-row">
                                     <div className="form-group col-md-6">
-                                        <label>Area Total(Has): <i className="fa fa-asterisk text-danger small"></i></label>
+                                        <label>Area Total(m²): <i className="fa fa-asterisk text-danger small"></i></label>
                                         <input
                                             type="text"
                                             className="form-control"
