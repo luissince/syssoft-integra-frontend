@@ -658,8 +658,7 @@ class Factura {
                 return "Datos no encontrados";
             }
         } catch (error) {
-            console.log(error)
-            return "Error interno de conexión, intente nuevamente.";
+            return error;
         }
     }
 
