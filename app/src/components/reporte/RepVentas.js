@@ -131,8 +131,7 @@ class RepVentas extends React.Component {
 
         let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
         let params = new URLSearchParams({ "params": ciphertext });
-        window.open("http://localhost:5000/api/factura/repgeneralventas?" + params, "_blank");
-
+        window.open("/api/factura/repgeneralventas?" + params, "_blank");
     }
 
     render() {

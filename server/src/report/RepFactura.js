@@ -101,18 +101,21 @@ class RepFactura {
                 return [++index, "ZZ", item.cantidad, item.lote, numberFormat(item.precio, cabecera.codiso), numberFormat((item.precio * item.cantidad), cabecera.codiso)];
             });
 
+
             const table = {
                 subtitle: "DETALLE",
-                headers: ["Ítem", "Unidad de medida", "Cant.", "Descripción", "Valor Unitario", "Precio de Venta"],
+                headers: ["Ítem", "Unidad de medida", "Cantidad", "Descripción", "Valor Unitario", "Precio de Venta"],
                 rows: detalle,
             };
-
 
             doc.table(table, {
                 prepareHeader: () => doc.font("Helvetica-Bold").fontSize(h3),
                 prepareRow: () => {
                     doc.font("Helvetica").fontSize(h3);
                 },
+                padding: 5,
+                columnSpacing: 5,
+                columnsSize: [30, 90, 80, 152, 90, 90],
                 x: doc.x,
                 y: doc.y + 20,
                 width: doc.page.width - doc.options.margins.left - doc.options.margins.right
@@ -158,41 +161,127 @@ class RepFactura {
                 }
             }
 
-            doc.fontSize(h3).text(`IMPORTE BRUTO: ${numberFormat(subTotal, cabecera.codiso)}`,
-                doc.page.width - doc.options.margins.right - 200,
-                doc.y + 5, {
-                width: 200,
+            let ypost = doc.y + 5;
+            doc.fontSize(h3);
+
+            let text = "IMPORTE BRUTO:";
+            let widthtext = doc.widthOfString(text);
+
+            let subtext = numberFormat(subTotal, cabecera.codiso);
+            let widthsubtext = doc.widthOfString(subtext);
+
+            doc.text(text,
+                doc.page.width - doc.options.margins.right - widthtext - widthsubtext - 20,
+                ypost, {
+                width: widthtext + 10,
                 align: "right",
             });
 
-            doc.fontSize(h3).text("DESCUENTO: 0.00",
-                doc.page.width - doc.options.margins.right - 200,
-                doc.y + 5, {
-                width: 200,
-                align: "right"
+            doc.text(subtext,
+                doc.page.width - doc.options.margins.right - widthsubtext,
+                ypost, {
+                width: widthsubtext,
+                stroke: true,
+                align: "right",
             });
 
-            doc.fontSize(h3).text(`SUB IMPORTE: ${numberFormat(subTotal, cabecera.codiso)}`,
-                doc.page.width - doc.options.margins.right - 200,
-                doc.y + 5, {
-                width: 200,
-                align: "right"
+            // 
+            ypost = doc.y + 5;
+
+            text = "DESCUENTO:";
+            widthtext = doc.widthOfString(text);
+
+            subtext = numberFormat(0, cabecera.codiso);
+            widthsubtext = doc.widthOfString(subtext);
+
+            doc.text(text,
+                doc.page.width - doc.options.margins.right - widthtext - widthsubtext - 20,
+                ypost, {
+                width: widthtext + 10,
+                align: "right",
             });
+
+            doc.text(subtext,
+                doc.page.width - doc.options.margins.right - widthsubtext,
+                ypost, {
+                width: widthsubtext,
+                stroke: true,
+                align: "right",
+            });
+
+            // 
+            ypost = doc.y + 5;
+
+            text = "SUB IMPORTE:";
+            widthtext = doc.widthOfString(text);
+
+            subtext = numberFormat(subTotal, cabecera.codiso);
+            widthsubtext = doc.widthOfString(subtext);
+
+            doc.text(text,
+                doc.page.width - doc.options.margins.right - widthtext - widthsubtext - 20,
+                ypost, {
+                width: widthtext + 10,
+                align: "right",
+            });
+
+            doc.text(subtext,
+                doc.page.width - doc.options.margins.right - widthsubtext,
+                ypost, {
+                width: widthsubtext,
+                stroke: true,
+                align: "right",
+            });
+
+            // 
 
             for (let item of arrayImpuestos) {
-                doc.fontSize(h3).text(`${item.nombre}: ${numberFormat(item.valor, cabecera.codiso)}`,
-                    doc.page.width - doc.options.margins.right - 200,
-                    doc.y + 5, {
-                    width: 200,
-                    align: "right"
+                ypost = doc.y + 5;
+
+                text = item.nombre;
+                widthtext = doc.widthOfString(text);
+
+                subtext = numberFormat(item.valor, cabecera.codiso);
+                widthsubtext = doc.widthOfString(subtext);
+
+                doc.text(text,
+                    doc.page.width - doc.options.margins.right - widthtext - widthsubtext - 20,
+                    ypost, {
+                    width: widthtext + 10,
+                    align: "right",
+                });
+
+                doc.text(subtext,
+                    doc.page.width - doc.options.margins.right - widthsubtext,
+                    ypost, {
+                    width: widthsubtext,
+                    stroke: true,
+                    align: "right",
                 });
             }
 
-            doc.fontSize(h3).text(`IMPORTE NETO: ${numberFormat(total, cabecera.codiso)}`,
-                doc.page.width - doc.options.margins.right - 200,
-                doc.y + 5, {
-                width: 200,
-                align: "right"
+            // 
+            ypost = doc.y + 5;
+
+            text = "IMPORTE NETO:";
+            widthtext = doc.widthOfString(text);
+
+            subtext = numberFormat(total, cabecera.codiso);
+            widthsubtext = doc.widthOfString(subtext);
+
+            doc.text(text,
+                doc.page.width - doc.options.margins.right - widthtext - widthsubtext - 20,
+                ypost, {
+                width: widthtext + 10,
+                align: "right",
+            });
+
+            doc.text(subtext,
+                doc.page.width - doc.options.margins.right - widthsubtext,
+                ypost, {
+                width: widthsubtext,
+                stroke: true,
+                align: "right",
             });
 
             doc.fontSize(h3).text(`SON: ${numberLleters.getResult(formatMoney(total), cabecera.moneda)}`,
@@ -211,6 +300,534 @@ class RepFactura {
             ${cabecera.documento}|`);
 
             doc.image(qrResult, doc.options.margins.left, doc.y, { width: 100, });
+
+            doc.end();
+            return getStream.buffer(doc);
+
+        } catch (error) {
+            return "Se genero un error al generar el reporte.";
+        }
+    }
+
+    async repCobro(req, sedeInfo, data) {
+        const cabecera = data.cabecera;
+        try {
+            const doc = new PDFDocument({
+                font: 'Helvetica',
+                margins: {
+                    top: 40,
+                    bottom: 40,
+                    left: 40,
+                    right: 40
+                }
+            });
+
+            doc.info["Title"] = `${cabecera.comprobante} ${cabecera.serie + "-" + cabecera.numeracion}`
+
+            let orgX = doc.x;
+            let orgY = doc.y;
+
+            let medioX = doc.page.width / 2;
+
+            let h1 = 13;
+            let h2 = 11;
+            let h3 = 9;
+
+            doc.image(path.join(__dirname, "..", "path/to/logo.png"), orgX, orgY, { width: 75, });
+
+            let center = doc.page.width - doc.options.margins.left - doc.options.margins.right - 150 - 150;
+
+            doc.fontSize(h1).text(
+                `${sedeInfo.nombreEmpresa}`,
+                doc.options.margins.left + 150,
+                orgY + 10,
+                {
+                    width: center,
+                    align: "center"
+                }
+            );
+
+            doc.fontSize(h3).text(
+                `${sedeInfo.direccion}\nCelular: ${sedeInfo.celular} / Telefono: ${sedeInfo.telefono}\n${sedeInfo.email}`,
+                doc.options.margins.left + 150,
+                orgY + 27,
+                {
+                    width: center,
+                    align: "center",
+                }
+            );
+
+            doc.fontSize(h2).text(
+                `RUC: ${sedeInfo.ruc}\n${cabecera.comprobante}\n${cabecera.serie + "-" + cabecera.numeracion}`,
+                doc.page.width - 150 - doc.options.margins.right,
+                orgY + 20,
+                {
+                    width: 150,
+                    align: "center",
+                }
+            );
+
+            doc.rect(
+                doc.page.width - 150 - doc.options.margins.right,
+                orgY,
+                150,
+                70).stroke();
+
+            doc.fontSize(h2).fill('#777').text(
+                "INFORMACIÓN",
+                doc.options.margins.top,
+                doc.y + 20
+            );
+
+            doc.fill("#000000");
+
+            let topCebecera = doc.y + 5;
+
+            doc.fontSize(h3).text(
+                `Tipo de documento: ${cabecera.tipoDoc} \nN° de documento: ${cabecera.documento} \nNombre/Razón Social: ${cabecera.informacion}\nDirección: ${cabecera.direccion}`,
+                doc.options.margins.left,
+                topCebecera
+            );
+
+            doc.fontSize(h3).text(
+                `Fecha: ${cabecera.fecha} \nMoneda: ${cabecera.moneda + " - " + cabecera.codiso}`,
+                medioX,
+                topCebecera
+            );
+
+            doc.x = doc.options.margins.left;
+
+
+            let detalle = data.detalle.length > 0 ?
+                data.detalle.map((item, index) => {
+                    return [++index, item.concepto, item.cantidad, item.impuesto, numberFormat(item.precio, cabecera.codiso), numberFormat((item.precio * item.cantidad), cabecera.codiso)];
+                })
+                :
+                data.venta.map((item, index) => {
+                    return [++index, item.comprobante, numberFormat(item.total, cabecera.codiso), numberFormat(item.cobrado, cabecera.codiso), numberFormat(item.total - item.cobrado, cabecera.codiso), numberFormat(item.precio, cabecera.codiso)];
+                });
+
+            const table = {
+                subtitle: "DETALLE",
+                headers: data.detalle.length > 0 ? ["Ítem", "Concepto", "Cantidad", "Impuesto", "Valor", "Monto"] : ["Ítem", "Concepto", "Total", "Cobrado", "Por Cobrar", "Monto"],
+                rows: detalle,
+            };
+
+            doc.table(table, {
+                prepareHeader: () => doc.font("Helvetica-Bold").fontSize(h3),
+                prepareRow: () => {
+                    doc.font("Helvetica").fontSize(h3);
+                },
+                padding: 5,
+                columnSpacing: 5,
+                columnsSize: [30, 152, 80, 90, 90, 90],
+                x: doc.x,
+                y: doc.y + 30,
+                width: doc.page.width - doc.options.margins.left - doc.options.margins.right
+            });
+
+            doc.x = 0;
+
+            let subTotal = 0;
+            let impuestoTotal = 0;
+            let total = 0;
+            let impuestos = [];
+            let arrayImpuestos = [];
+
+            if (data.detalle.length > 0) {
+                for (let item of data.detalle) {
+                    let cantidad = item.cantidad;
+                    let valor = item.precio;
+
+                    let impuesto = item.porcentaje;
+
+                    let valorActual = cantidad * valor;
+                    let valorSubNeto = calculateTaxBruto(impuesto, valorActual);
+                    let valorImpuesto = calculateTax(impuesto, valorSubNeto);
+                    let valorNeto = valorSubNeto + valorImpuesto;
+
+                    impuestos.push({ "idImpuesto": item.idImpuesto, "nombre": item.impuesto, "valor": valorImpuesto });
+
+                    subTotal += valorSubNeto;
+                    impuestoTotal += valorImpuesto;
+                    total += valorNeto;
+                }
+
+
+                for (let item of impuestos) {
+                    if (this.duplicateImpuestos(impuestos, item)) {
+                        arrayImpuestos.push(item)
+                    } else {
+                        for (let newItem of arrayImpuestos) {
+                            if (newItem.idImpuesto === item.idImpuesto) {
+                                let currenteObject = newItem;
+                                currenteObject.valor += parseFloat(item.valor);
+                                break;
+                            }
+                        }
+                    }
+                }
+            } else {
+                for (let item of data.venta) {
+                    total += item.cobrado;
+                }
+            }
+
+            // 
+            if (data.detalle.length > 0) {
+                let ypost = doc.y + 5;
+
+                let text = "SUB IMPORTE:";
+                let widthtext = doc.widthOfString(text);
+
+                let subtext = numberFormat(subTotal, cabecera.codiso);
+                let widthsubtext = doc.widthOfString(subtext);
+
+                doc.text(text,
+                    doc.page.width - doc.options.margins.right - widthtext - widthsubtext - 20,
+                    ypost, {
+                    width: widthtext + 10,
+                    align: "right",
+                });
+
+                doc.text(subtext,
+                    doc.page.width - doc.options.margins.right - widthsubtext,
+                    ypost, {
+                    width: widthsubtext,
+                    stroke: true,
+                    align: "right",
+                });
+
+                // 
+
+                for (let item of arrayImpuestos) {
+                    ypost = doc.y + 5;
+
+                    text = item.nombre;
+                    widthtext = doc.widthOfString(text);
+
+                    subtext = numberFormat(item.valor, cabecera.codiso);
+                    widthsubtext = doc.widthOfString(subtext);
+
+                    doc.text(text,
+                        doc.page.width - doc.options.margins.right - widthtext - widthsubtext - 20,
+                        ypost, {
+                        width: widthtext + 10,
+                        align: "right",
+                    });
+
+                    doc.text(subtext,
+                        doc.page.width - doc.options.margins.right - widthsubtext,
+                        ypost, {
+                        width: widthsubtext,
+                        stroke: true,
+                        align: "right",
+                    });
+                }
+
+                // 
+                ypost = doc.y + 5;
+
+                text = "IMPORTE NETO:";
+                widthtext = doc.widthOfString(text);
+
+                subtext = numberFormat(total, cabecera.codiso);
+                widthsubtext = doc.widthOfString(subtext);
+
+                doc.text(text,
+                    doc.page.width - doc.options.margins.right - widthtext - widthsubtext - 20,
+                    ypost, {
+                    width: widthtext + 10,
+                    align: "right",
+                });
+
+                doc.text(subtext,
+                    doc.page.width - doc.options.margins.right - widthsubtext,
+                    ypost, {
+                    width: widthsubtext,
+                    stroke: true,
+                    align: "right",
+                });
+            } else {
+                let ypost = doc.y + 5;
+
+                let text = "IMPORTE TOTAL:";
+                let widthtext = doc.widthOfString(text);
+
+                let subtext = numberFormat(total, cabecera.codiso);
+                let widthsubtext = doc.widthOfString(subtext);
+
+                doc.text(text,
+                    doc.page.width - doc.options.margins.right - widthtext - widthsubtext - 20,
+                    ypost, {
+                    width: widthtext + 10,
+                    align: "right",
+                });
+
+                doc.text(subtext,
+                    doc.page.width - doc.options.margins.right - widthsubtext,
+                    ypost, {
+                    width: widthsubtext,
+                    stroke: true,
+                    align: "right",
+                });
+            }
+
+            doc.fontSize(h3).text(`SON: ${numberLleters.getResult(formatMoney(total), cabecera.moneda)}`,
+                doc.options.margins.left,
+                doc.y + 5);
+
+            // let qrResult = await this.qrGenerate(`|
+            // ${sedeInfo.ruc}|
+            // ${cabecera.codigoVenta}|
+            // ${cabecera.serie}|
+            // ${cabecera.numeracion}|
+            // ${impuestoTotal}|
+            // ${total}|
+            // ${cabecera.fecha}|
+            // ${cabecera.codigoCliente}|
+            // ${cabecera.documento}|`);
+
+            // doc.image(qrResult, doc.options.margins.left, doc.y, { width: 100, });
+
+            doc.end();
+            return getStream.buffer(doc);
+
+        } catch (error) {
+            console.log(error);
+            return "Se genero un error al generar el reporte.";
+        }
+    }
+
+    async repGasto(req, sedeInfo, data) {
+        const cabecera = data.cabecera;
+        try {
+            const doc = new PDFDocument({
+                font: 'Helvetica',
+                margins: {
+                    top: 40,
+                    bottom: 40,
+                    left: 40,
+                    right: 40
+                }
+            });
+
+            doc.info["Title"] = `${cabecera.comprobante} ${cabecera.serie + "-" + cabecera.numeracion}`
+
+            let orgX = doc.x;
+            let orgY = doc.y;
+
+            let medioX = doc.page.width / 2;
+
+            let h1 = 13;
+            let h2 = 11;
+            let h3 = 9;
+
+            doc.image(path.join(__dirname, "..", "path/to/logo.png"), orgX, orgY, { width: 75, });
+
+            let center = doc.page.width - doc.options.margins.left - doc.options.margins.right - 150 - 150;
+
+            doc.fontSize(h1).text(
+                `${sedeInfo.nombreEmpresa}`,
+                doc.options.margins.left + 150,
+                orgY + 10,
+                {
+                    width: center,
+                    align: "center"
+                }
+            );
+
+            doc.fontSize(h3).text(
+                `${sedeInfo.direccion}\nCelular: ${sedeInfo.celular} / Telefono: ${sedeInfo.telefono}\n${sedeInfo.email}`,
+                doc.options.margins.left + 150,
+                orgY + 27,
+                {
+                    width: center,
+                    align: "center",
+                }
+            );
+
+            doc.fontSize(h2).text(
+                `RUC: ${sedeInfo.ruc}\n${cabecera.comprobante}\n${cabecera.serie + "-" + cabecera.numeracion}`,
+                doc.page.width - 150 - doc.options.margins.right,
+                orgY + 20,
+                {
+                    width: 150,
+                    align: "center",
+                }
+            );
+
+            doc.rect(
+                doc.page.width - 150 - doc.options.margins.right,
+                orgY,
+                150,
+                70).stroke();
+
+            doc.fontSize(h2).fill('#777').text(
+                "INFORMACIÓN",
+                doc.options.margins.top,
+                doc.y + 20
+            );
+
+            doc.fill("#000000");
+
+            let topCebecera = doc.y + 5;
+
+            doc.fontSize(h3).text(
+                `Tipo de documento: ${cabecera.tipoDoc} \nN° de documento: ${cabecera.documento} \nNombre/Razón Social: ${cabecera.informacion}\nDirección: ${cabecera.direccion}`,
+                doc.options.margins.left,
+                topCebecera
+            );
+
+            doc.fontSize(h3).text(
+                `Fecha: ${cabecera.fecha} \nMoneda: ${cabecera.moneda + " - " + cabecera.codiso}`,
+                medioX,
+                topCebecera
+            );
+
+            doc.x = doc.options.margins.left;
+
+            let detalle = data.detalle.map((item, index) => {
+                return [++index, item.concepto, item.cantidad, item.impuesto, numberFormat(item.precio, cabecera.codiso), numberFormat((item.precio * item.cantidad), cabecera.codiso)];
+            })
+
+            const table = {
+                subtitle: "DETALLE",
+                headers: ["Ítem", "Concepto", "Cantidad", "Impuesto", "Valor", "Monto"],
+                rows: detalle,
+            };
+
+            doc.table(table, {
+                prepareHeader: () => doc.font("Helvetica-Bold").fontSize(h3),
+                prepareRow: () => {
+                    doc.font("Helvetica").fontSize(h3);
+                },
+                padding: 5,
+                columnSpacing: 5,
+                columnsSize: [30, 152, 80, 90, 90, 90],
+                x: doc.x,
+                y: doc.y + 30,
+                width: doc.page.width - doc.options.margins.left - doc.options.margins.right
+            });
+
+            doc.x = 0;
+
+            let subTotal = 0;
+            let impuestoTotal = 0;
+            let total = 0;
+            let impuestos = [];
+            let arrayImpuestos = [];
+
+            for (let item of data.detalle) {
+                let cantidad = item.cantidad;
+                let valor = item.precio;
+
+                let impuesto = item.porcentaje;
+
+                let valorActual = cantidad * valor;
+                let valorSubNeto = calculateTaxBruto(impuesto, valorActual);
+                let valorImpuesto = calculateTax(impuesto, valorSubNeto);
+                let valorNeto = valorSubNeto + valorImpuesto;
+
+                impuestos.push({ "idImpuesto": item.idImpuesto, "nombre": item.impuesto, "valor": valorImpuesto });
+
+                subTotal += valorSubNeto;
+                impuestoTotal += valorImpuesto;
+                total += valorNeto;
+            }
+
+
+            for (let item of impuestos) {
+                if (this.duplicateImpuestos(impuestos, item)) {
+                    arrayImpuestos.push(item)
+                } else {
+                    for (let newItem of arrayImpuestos) {
+                        if (newItem.idImpuesto === item.idImpuesto) {
+                            let currenteObject = newItem;
+                            currenteObject.valor += parseFloat(item.valor);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            let ypost = doc.y + 5;
+
+            let text = "SUB IMPORTE:";
+            let widthtext = doc.widthOfString(text);
+
+            let subtext = numberFormat(subTotal, cabecera.codiso);
+            let widthsubtext = doc.widthOfString(subtext);
+
+            doc.text(text,
+                doc.page.width - doc.options.margins.right - widthtext - widthsubtext - 20,
+                ypost, {
+                width: widthtext + 10,
+                align: "right",
+            });
+
+            doc.text(subtext,
+                doc.page.width - doc.options.margins.right - widthsubtext,
+                ypost, {
+                width: widthsubtext,
+                stroke: true,
+                align: "right",
+            });
+
+            // 
+
+            for (let item of arrayImpuestos) {
+                ypost = doc.y + 5;
+
+                text = item.nombre;
+                widthtext = doc.widthOfString(text);
+
+                subtext = numberFormat(item.valor, cabecera.codiso);
+                widthsubtext = doc.widthOfString(subtext);
+
+                doc.text(text,
+                    doc.page.width - doc.options.margins.right - widthtext - widthsubtext - 20,
+                    ypost, {
+                    width: widthtext + 10,
+                    align: "right",
+                });
+
+                doc.text(subtext,
+                    doc.page.width - doc.options.margins.right - widthsubtext,
+                    ypost, {
+                    width: widthsubtext,
+                    stroke: true,
+                    align: "right",
+                });
+            }
+
+            // 
+            ypost = doc.y + 5;
+
+            text = "IMPORTE NETO:";
+            widthtext = doc.widthOfString(text);
+
+            subtext = numberFormat(total, cabecera.codiso);
+            widthsubtext = doc.widthOfString(subtext);
+
+            doc.text(text,
+                doc.page.width - doc.options.margins.right - widthtext - widthsubtext - 20,
+                ypost, {
+                width: widthtext + 10,
+                align: "right",
+            });
+
+            doc.text(subtext,
+                doc.page.width - doc.options.margins.right - widthsubtext,
+                ypost, {
+                width: widthsubtext,
+                stroke: true,
+                align: "right",
+            });
+
+            doc.fontSize(h3).text(`SON: ${numberLleters.getResult(formatMoney(total), cabecera.moneda)}`,
+                doc.options.margins.left,
+                doc.y + 5);
 
             doc.end();
             return getStream.buffer(doc);

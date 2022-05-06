@@ -1,7 +1,7 @@
 const path = require('path');
 const PDFDocument = require("pdfkit-table");
 const getStream = require('get-stream');
-const { formatMoney, currentDate} = require('../tools/Tools');
+const { numberFormat, formatMoney, currentDate } = require('../tools/Tools');
 
 class RepLote {
 
@@ -19,6 +19,7 @@ class RepLote {
                     right: 40
                 }
             });
+
 
             doc.info["Title"] = "Detalle del Lote.pdf"
 
@@ -149,13 +150,7 @@ class RepLote {
     }
 
     async repTipoLote(req, sedeInfo, data) {
-
         try {
-
-            const estadoLote = req.query.estadoLote == 0 ? 'TODOS LOS LOTES' 
-                            : req.query.estadoLote == 1 ? 'LOTES DISPONIBLES'
-                            : req.query.estadoLote == 2 ? 'LOTES RESERVADOS' 
-                            : req.query.estadoLote == 3 ? 'LOTES VENDIDOS' : 'LOTES INACTIVOS';
 
             const doc = new PDFDocument({
                 font: 'Helvetica',
@@ -175,9 +170,9 @@ class RepLote {
             let titleX = orgX + 150;
             let medioX = (doc.page.width - doc.options.margins.left - doc.options.margins.right) / 2;
 
-            let h1 = 14;
-            let h2 = 12;
-            let h3 = 10;   
+            let h1 = 13;
+            let h2 = 11;
+            let h3 = 9;
 
             doc.image(path.join(__dirname, "..", "path/to/logo.png"), doc.x, doc.y, { width: 75, });
 
@@ -212,26 +207,30 @@ class RepLote {
             );
 
 
+            const estadoLote = req.query.estadoLote == 0 ? 'TODOS LOS LOTES'
+                : req.query.estadoLote == 1 ? 'LOTES DISPONIBLES'
+                    : req.query.estadoLote == 2 ? 'LOTES RESERVADOS'
+                        : req.query.estadoLote == 3 ? 'LOTES VENDIDOS' : 'LOTES INACTIVOS';
+
             let totalCosto = 0;
             let totalPrecio = 0;
             let totalUtilidad = 0;
 
             let content = data.map((item, index) => {
                 let estado = item.estado === 1 ? 'DISPONIBLE'
-                                : item.estado === 2 ? 'RESERVADO' 
-                                : item.estado === 3 ? 'VENDIDO' : 'INACTIVO';
-                
+                    : item.estado === 2 ? 'RESERVADO'
+                        : item.estado === 3 ? 'VENDIDO' : 'INACTIVO';
+
                 totalCosto = totalCosto + item.costo;
                 totalPrecio = totalPrecio + item.precio;
                 totalUtilidad = totalUtilidad + (item.precio + item.costo);
 
-                return [++index, item.lote+' '+item.manzana, item.areaLote, estado, item.costo, item.precio, item.precio - item.costo]
+                return [++index, item.lote + ' ' + item.manzana, item.areaLote, estado, numberFormat(item.costo), numberFormat(item.precio), numberFormat(item.precio - item.costo)]
             })
 
-            content.push(["", "", "", "TOTAL", totalCosto, totalPrecio, totalUtilidad])
+            content.push(["", "", "", "TOTAL", numberFormat(totalCosto), numberFormat(totalPrecio), numberFormat(totalUtilidad)])
 
             const table1 = {
-                //title: `Resumen asociados al filtro: ${estadoLote} al ${currentDate()}`,
                 subtitle: `RESUMEN ASOCIADOS AL FILTRO: ${estadoLote} AL ${currentDate()}`,
                 headers: ["N°", "Lotes", "Area m²", "Estado", "Costo", "Venta", "Utilidad"],
                 rows: content
@@ -242,6 +241,9 @@ class RepLote {
                 prepareRow: () => {
                     doc.font("Helvetica").fontSize(h3);
                 },
+                padding: 5,
+                columnSpacing:5,
+                columnsSize:[30,152,70,70,70,70,70],
                 width: doc.page.width - doc.options.margins.left - doc.options.margins.right,
                 x: orgX,
                 y: doc.y + 10,
