@@ -122,7 +122,7 @@ class RepVentas extends React.Component {
             "idComprobante": this.state.idComprobante === '' ? '' : this.state.idComprobante,
             "idCliente": this.state.idCliente === '' ? '' : this.state.idCliente,
             "idUsuario": this.state.idUsuario === '' ? '' : this.state.idUsuario,
-            "tipoVenta": this.state.tipoVenta === '' ? '' : this.state.tipoVenta,
+            "tipoVenta": this.state.tipoVenta === '' ? 0 : this.state.tipoVenta,
             "comprobante": this.refComprobante.current.options[this.refComprobante.current.options.selectedIndex].innerHTML,
             "cliente": this.refCliente.current.options[this.refCliente.current.options.selectedIndex].innerHTML,
             "usuario": this.refUsuario.current.options[this.refUsuario.current.options.selectedIndex].innerHTML,

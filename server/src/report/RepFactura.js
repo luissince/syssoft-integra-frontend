@@ -950,7 +950,7 @@ class RepFactura {
             );
 
             doc.fontSize(h3).text(
-                `Tipo(s): ${req.query.tipoVenta === '' ? "TODOS" : req.query.tipo}`,
+                `Tipo(s): ${req.query.tipoVenta === 0 ? "TODOS" : req.query.tipo}`,
                 medioX + 15,
                 filtroY + 6
             );
