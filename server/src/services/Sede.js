@@ -256,7 +256,8 @@ class Sede {
                 return "Datos no encontrados";
             }
         } catch (error) {
-            return error;
+            console.log(error);
+            return 'Error interno de conexión, intente nuevamente.';
         }
     }
 

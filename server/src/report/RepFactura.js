@@ -305,7 +305,7 @@ class RepFactura {
             return getStream.buffer(doc);
 
         } catch (error) {
-            return error;
+            return "Se genero un error al generar el reporte.";
         }
     }
 
@@ -970,8 +970,6 @@ class RepFactura {
                     numberFormat(item.total, item.codiso)]
             });
 
-            console.log(contadoCount)
-
             const table = {
                 subtitle: "DETALLE",
                 headers: ["Fecha", "Cliente", "Comprobante", "Tipo", "Estado", "Importe"],
@@ -1038,7 +1036,7 @@ class RepFactura {
 
             return getStream.buffer(doc);
         } catch (error) {
-            console.log(error)
+            console.log(error);
             return "Se genero un error al generar el reporte.";
         }
     }

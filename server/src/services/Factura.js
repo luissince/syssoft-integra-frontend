@@ -658,7 +658,7 @@ class Factura {
                 return "Datos no encontrados";
             }
         } catch (error) {
-            return error;
+            return "Error interno de conexión, intente nuevamente.";
         }
     }
 
@@ -831,8 +831,9 @@ class Factura {
                 req.query.tipoVenta,
             ]);
 
-            return ventas
+            return ventas;
         } catch (error) {
+            console.log(error);
             return "Error interno de conexión, intente nuevamente."
         }
     }
