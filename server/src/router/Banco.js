@@ -12,7 +12,6 @@ const sede = new Sede();
 const repFinanciero = new RepFinanciero();
 
 const Conexion = require('../database/Conexion');
-const { route } = require('./Logins');
 const conec = new Conexion();
 
 router.get('/list', async function (req, res) {

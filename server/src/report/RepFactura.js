@@ -959,8 +959,8 @@ class RepFactura {
             let creditoCount = 0;
 
             let content = data.map((item, index) => {
-                contadoCount += item.tipo === "CRÉDITO" && item.estado !== "ANULADO" ? item.total : 0;
-                creditoCount += item.tipo === "CONTADO" && item.estado !== "ANULADO" ? item.total : 0;
+                creditoCount += item.tipo === "CRÉDITO" && item.estado !== "ANULADO" ? item.total : 0;
+                contadoCount += item.tipo === "CONTADO" && item.estado !== "ANULADO" ? item.total : 0;
                 return [
                     item.fecha,
                     item.documento + "\n" + item.informacion,
@@ -981,6 +981,9 @@ class RepFactura {
                 prepareRow: () => {
                     doc.font("Helvetica").fontSize(h3);
                 },
+                padding: 5,
+                columnSpacing: 5,
+                columnsSize: [60, 102, 100, 90, 90,90],
                 x: orgX,
                 y: bodY,
                 width: doc.page.width - doc.options.margins.left - doc.options.margins.right

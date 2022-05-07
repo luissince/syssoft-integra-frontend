@@ -556,68 +556,106 @@ class Cobro {
     async cobroGeneral(req) {
         try {
 
-            let lista = await conec.query(`SELECT 
-                c.idCobro,
-                c.serie,
-                c.numeracion,
-                c.metodoPago,
-                c.estado,
-                c.observacion,
-                DATE_FORMAT(c.fecha,'%d/%m/%Y') as fecha,  
-                c.hora,
-                
-                comp.nombre AS comprobante,
-                mn.simbolo,
-                mn.codiso,
-                bn.nombre AS banco,
-
-                cl.informacion AS cliente,
-                cl.documento AS docCliente,
-
-                IFNULL(SUM(cd.precio * cd.cantidad),cv.precio) AS monto
-
-                FROM cobro AS c
-                INNER JOIN comprobante AS comp ON comp.idComprobante = c.idComprobante
-                INNER JOIN moneda AS mn ON mn.idMoneda = c.idMoneda
-                INNER JOIN banco AS bn ON bn.idBanco = c.idBanco
-                INNER JOIN cliente AS cl ON cl.idCliente = c.idCliente
-                LEFT JOIN cobroDetalle AS cd ON cd.idCobro = c.idCobro
-                LEFT JOIN cobroVenta AS cv ON cv.idCobro = c.idCobro
-
-                WHERE
-                ( ? = 1 AND c.fecha BETWEEN ? AND ? )
-                OR
-                ( ? = 2 AND c.fecha BETWEEN ? AND ? AND c.idCliente = ? )
-                OR
-                ( ? = 3 AND c.fecha BETWEEN ? AND ? AND c.idBanco = ? )
-                OR
-                ( ? = 4 AND c.fecha BETWEEN ? AND ? AND c.idCliente = ? AND c.idBanco = ? )
-                GROUP BY c.idCobro`, [
-                req.query.opcion,
+            let cobros = await conec.query(`SELECT
+            IFNULL(co.idConcepto,'CV01') AS idConcepto,
+            IFNULL(co.nombre,'POR VENTA') AS concepto,
+            'INGRESO' AS tipo,
+            b.idBanco,
+            b.nombre,
+            CASE 
+            WHEN b.tipoCuenta = 1 THEN 'Banco'
+            WHEN b.tipoCuenta = 2 THEN 'Tarjeta'
+            ELSE 'Efectivo' END AS 'tipoCuenta',
+            IFNULL(SUM(cd.precio*cd.cantidad),SUM(cv.precio)) AS monto
+            FROM cobro as c
+            LEFT JOIN banco AS b ON c.idBanco = b.idBanco
+            LEFT JOIN cobroDetalle AS cd ON c.idCobro = cd.idCobro
+            LEFT JOIN concepto AS co ON co.idConcepto = cd.idConcepto
+            LEFT JOIN cobroVenta AS cv ON cv.idCobro = c.idCobro
+            WHERE c.fecha BETWEEN ? AND ?
+            GROUP BY c.idCobro
+            `, [
                 req.query.fechaIni,
                 req.query.fechaFin,
+            ]);
 
-                req.query.opcion,
+            let gastos = await conec.query(`
+            SELECT
+            co.idConcepto,
+            co.nombre AS concepto,
+            'EGRESO' AS tipo,
+            b.idBanco,
+            b.nombre,
+            CASE 
+            WHEN b.tipoCuenta = 1 THEN 'Banco'
+            WHEN b.tipoCuenta = 2 THEN 'Tarjeta'
+            ELSE 'Efectivo' END AS 'tipoCuenta',
+            SUM(gd.precio*gd.cantidad) AS monto
+            FROM gasto as g
+            LEFT JOIN banco AS b ON g.idBanco = b.idBanco
+            LEFT JOIN gastoDetalle AS gd ON g.idGasto = gd.idGasto
+            LEFT JOIN concepto AS co ON co.idConcepto = gd.idConcepto
+            WHERE g.fecha BETWEEN ? AND ?
+            GROUP BY g.idGasto
+            `, [
                 req.query.fechaIni,
                 req.query.fechaFin,
-                req.query.idCliente,
+            ]);
 
-                req.query.opcion,
-                req.query.fechaIni,
-                req.query.fechaFin,
-                req.query.idBanco,
+            let lista = [...cobros,...gastos];
+            let conceptos = [];
 
-                req.query.opcion,
-                req.query.fechaIni,
-                req.query.fechaFin,
-                req.query.idCliente,
-                req.query.idBanco,
-            ])
+            for (let item of lista) {
+                if (conceptos.filter(f => f.idConcepto === item.idConcepto).length === 0) {
+                    conceptos.push({
+                        "idConcepto": item.idConcepto,
+                        "concepto": item.concepto,
+                        "tipo": item.tipo,
+                        "idBanco": item.idBanco,
+                        "nombre": item.nombre,
+                        "tipoCuenta": item.tipoCuenta,
+                        "cantidad": 1,
+                        "monto": item.monto
+                    })
+                } else {
+                    for (let newItem of conceptos) {
+                        if (newItem.idConcepto === item.idConcepto) {
+                            let currenteObject = newItem;
+                            currenteObject.cantidad += 1;
+                            currenteObject.monto += parseFloat(item.monto);
+                            break;
+                        }
+                    }
+                }
+            }
 
-            return lista
 
+            let bancos = [];
+
+            for (let item of lista) {
+                if (bancos.filter(f => f.idBanco === item.idBanco).length === 0) {
+                    bancos.push({
+                        "idConcepto": item.idConcepto,
+                        "concepto": item.concepto,
+                        "tipo": item.tipo,
+                        "idBanco": item.idBanco,
+                        "nombre": item.nombre,
+                        "tipoCuenta": item.tipoCuenta,
+                        "monto": item.tipo === "INGRESO" ? item.monto : -item.monto
+                    })
+                } else {
+                    for (let newItem of bancos) {
+                        if (newItem.idBanco === item.idBanco) {
+                            let currenteObject = newItem;
+                            currenteObject.monto += item.tipo === "INGRESO" ? parseFloat(item.monto) : -parseFloat(item.monto);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            return { "conceptos": conceptos, "bancos": bancos };
         } catch (error) {
-            // console.log(error)
             return "Se produjo un error de servidor, intente nuevamente.";
         }
     }

@@ -93,13 +93,12 @@ router.get('/repgeneralcobros', async function (req, res) {
     req.query.idSede = decryptedData.idSede;
     req.query.fechaIni = decryptedData.fechaIni;
     req.query.fechaFin = decryptedData.fechaFin;
-    req.query.opcion = decryptedData.opcion;
 
-    req.query.idBanco = decryptedData.idBanco;
-    req.query.idCliente = decryptedData.idCliente;
+    // req.query.idBanco = decryptedData.idBanco;
+    // req.query.idCliente = decryptedData.idCliente;
 
-    req.query.banco = decryptedData.banco;
-    req.query.cliente = decryptedData.cliente;
+    // req.query.banco = decryptedData.banco;
+    // req.query.cliente = decryptedData.cliente;
 
     const sedeInfo = await sede.infoSedeReporte(req);
 

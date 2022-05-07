@@ -206,6 +206,38 @@ class RepLote {
                 }
             );
 
+            console.log(data.proyecto)
+
+            doc.fontSize(h3).text(
+                `PROYECTO: ${data.proyecto.nombre}`,
+                orgX,
+                doc.y + 25,
+                {
+                    width: 300,
+                    align: "left",
+                }
+            );
+
+            doc.fontSize(h3).text(
+                `UBICACIÓN: ${data.proyecto.ubicacion}`,
+                orgX,
+                doc.y +5,
+                {
+                    width: 300,
+                    align: "left",
+                }
+            );
+
+            doc.fontSize(h3).text(
+                `ÁREA: ${data.proyecto.area}  m²`,
+                orgX,
+                doc.y +5,
+                {
+                    width: 300,
+                    align: "left",
+                }
+            );
+
 
             const estadoLote = req.query.estadoLote == 0 ? 'TODOS LOS LOTES'
                 : req.query.estadoLote == 1 ? 'LOTES DISPONIBLES'
@@ -216,7 +248,7 @@ class RepLote {
             let totalPrecio = 0;
             let totalUtilidad = 0;
 
-            let content = data.map((item, index) => {
+            let content = data.lista.map((item, index) => {
                 let estado = item.estado === 1 ? 'DISPONIBLE'
                     : item.estado === 2 ? 'RESERVADO'
                         : item.estado === 3 ? 'VENDIDO' : 'INACTIVO';

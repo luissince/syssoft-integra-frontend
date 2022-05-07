@@ -205,6 +205,7 @@ class Conceptos extends React.Component {
                     const result = await axios.post('/api/concepto/update', {
                         "nombre": this.state.nombre.trim().toUpperCase(),
                         "tipo": this.state.tipo,
+                        "codigo": this.state.codigo,
                         "idUsuario": this.state.idUsuario,
                         "idConcepto": this.state.idConcepto
                     })
@@ -216,6 +217,7 @@ class Conceptos extends React.Component {
                     const result = await axios.post('/api/concepto/add', {
                         "nombre": this.state.nombre.trim().toUpperCase(),
                         "tipo": this.state.tipo,
+                        "codigo": this.state.codigo,
                         "idUsuario": this.state.idUsuario,
                     });
 

@@ -77,41 +77,4 @@ router.get('/repcomprobante', async function (req, res) {
     }
 });
 
-router.get('/repgeneralgastos', async function (req, res) {
-    const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
-    req.query.idBanco = decryptedData.idBanco;
-    req.query.idUsuario = decryptedData.idUsuario;
-    req.query.banco = decryptedData.banco;
-    req.query.usuario = decryptedData.usuario;
-    req.query.opcion = decryptedData.opcion;
-    req.query.idSede = decryptedData.idSede;
-    req.query.fechaIni = decryptedData.fechaIni;
-    req.query.fechaFin = decryptedData.fechaFin;
-
-    const sedeInfo = await sede.infoSedeReporte(req)
-
-    if (typeof sedeInfo !== 'object') {
-        res.status(500).send(sedeInfo)
-        return;
-    }
-
-    const detalle = await gasto.gastoGeneral(req)
-
-    if (typeof detalle === 'object') {
-        let data = await repFinanciero.repFiltroGastos(req, sedeInfo, detalle)
-
-        if (typeof data === 'string') {
-            res.status(500).send(data)
-        } else {
-            res.setHeader('Content-disposition', `inline; filename=REPORTE DE GASTOS DEL ${req.query.fechaIni} AL ${req.query.fechaFin}.pdf`);
-            res.contentType("application/pdf");
-            res.send(data);
-        }
-    } else {
-        res.status(500).send(detalle)
-    }
-
-
-})
-
 module.exports = router;

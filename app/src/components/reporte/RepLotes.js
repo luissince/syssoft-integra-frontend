@@ -1,12 +1,14 @@
 import React from 'react';
 import axios from 'axios';
 import CryptoJS from 'crypto-js';
-import { spinnerLoading, currentDate } from '../tools/Tools';
+import { connect } from 'react-redux';
+import { spinnerLoading } from '../tools/Tools';
 
 class RepLotes extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            idProyecto: this.props.token.project.idProyecto,
 
             lote: '',
             loteCheck: true,
@@ -53,9 +55,10 @@ class RepLotes extends React.Component {
     }
 
     async onEventImprimir() {
-
+        
         const data = {
             // "idLote": this.state.idLote,
+            "idProyecto": this.state.idProyecto,
             "estadoLote": this.state.lote === '' ? 0 : this.state.lote,
             "idSede": "SD0001"
         }
@@ -162,4 +165,10 @@ class RepLotes extends React.Component {
     }
 }
 
-export default RepLotes;
+const mapStateToProps = (state) => {
+    return {
+        token: state.reducer
+    }
+}
+
+export default connect(mapStateToProps, null)(RepLotes);

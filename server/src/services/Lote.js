@@ -468,8 +468,11 @@ class Lote {
     }
 
     async listaEstadoLote(req) {
-        
         try {
+
+            let proyecto = await conec.query(`SELECT nombre,ubicacion,area FROM proyecto WHERE idProyecto = ?`, [
+                req.query.idProyecto,
+            ]);
 
             let lista = await conec.query(`SELECT 
                 l.idLote,
@@ -486,18 +489,19 @@ class Lote {
                 FROM lote AS l INNER JOIN manzana AS m 
                 ON l.idManzana = m.idManzana 
                 WHERE
-                ? = 0
+                ? = 0 AND m.idProyecto = ?
                 OR
-                (? <> 0 AND l.estado = ? )`, [
+                (? <> 0 AND l.estado = ? AND m.idProyecto = ?)`, [
+                req.query.estadoLote,
+                req.query.idProyecto,
+
                 req.query.estadoLote,
                 req.query.estadoLote,
-                req.query.estadoLote
+                req.query.idProyecto,
             ])
 
-            return lista;
-
+            return { "proyecto": proyecto[0], "lista": lista };
         } catch (error) {
-            // console.log(error)
             return 'Error interno de conexión, intente nuevamente.'
         }
     }

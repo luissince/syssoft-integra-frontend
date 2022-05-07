@@ -108,6 +108,7 @@ router.post('/add', async function (req, res) {
         await conec.commit(connection);
         res.status(200).send('Datos insertados correctamente')
     } catch (error) {
+        console.log(error)
         if (connection != null) {
             await conec.rollback(connection);
         }

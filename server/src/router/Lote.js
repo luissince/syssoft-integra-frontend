@@ -120,6 +120,7 @@ router.get('/reptipolotes', async function (req, res) {
     // req.query.idLote = decryptedData.idLote;
     req.query.estadoLote = decryptedData.estadoLote;
     req.query.idSede = decryptedData.idSede;
+    req.query.idProyecto = decryptedData.idProyecto;
 
     const sedeInfo = await sede.infoSedeReporte(req)
 
@@ -130,7 +131,7 @@ router.get('/reptipolotes', async function (req, res) {
 
     const detalle = await lote.listaEstadoLote(req)
 
-    if (Array.isArray(detalle)){
+    if (typeof detalle === 'object') {
 
         let data = await repLote.repTipoLote(req, sedeInfo, detalle)
         

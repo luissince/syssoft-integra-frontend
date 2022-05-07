@@ -18,8 +18,6 @@ class RepFinanciero extends React.Component {
             idBanco: '',
             bancos: [],
 
-            //Gasto
-            idBancoDes: '',
 
             idUsuario: '',
             usuarios: [],
@@ -56,24 +54,24 @@ class RepFinanciero extends React.Component {
     loadData = async () => {
         try {
 
-            const cliente = await axios.get("/api/cliente/listcombo", {
-                signal: this.abortControllerView.signal
-            });
+            // const cliente = await axios.get("/api/cliente/listcombo", {
+            //     signal: this.abortControllerView.signal
+            // });
 
-            const banco = await axios.get("/api/banco/listcombo", {
-                signal: this.abortControllerView.signal
-            });
+            // const banco = await axios.get("/api/banco/listcombo", {
+            //     signal: this.abortControllerView.signal
+            // });
 
-            const usuario = await axios.get("/api/usuario/listcombo", {
-                signal: this.abortControllerView.signal
-            });
+            // const usuario = await axios.get("/api/usuario/listcombo", {
+            //     signal: this.abortControllerView.signal
+            // });
 
             await this.setStateAsync({
                 //cobro
-                clientes: cliente.data,
-                bancos: banco.data,
+                // clientes: cliente.data,
+                // bancos: banco.data,
                 //gasto
-                usuarios: usuario.data,
+                // usuarios: usuario.data,
 
                 loading: false,
                 fechaIni: currentDate(),
@@ -100,52 +98,16 @@ class RepFinanciero extends React.Component {
                 "idSede": "SD0001",
                 "fechaIni": this.state.fechaIni,
                 "fechaFin": this.state.fechaFin,
-
-                "opcion": (this.state.idCliente === '' && this.state.idBanco === '') ? 1
-                    : (this.state.idUsuario !== '' && this.state.idBanco === '') ? 2
-                        : (this.state.idUsuario === '' && this.state.idBanco !== '') ? 3 : 4,
-
-                "idBanco": this.state.idBanco === '' ? 0 : this.state.idBanco,
-                "idCliente": this.state.idCliente === '' ? 0 : this.state.idCliente,
-                "banco": this.refBanco.current.options[this.refBanco.current.options.selectedIndex].innerHTML,
-                "cliente": this.refCliente.current.options[this.refCliente.current.options.selectedIndex].innerHTML
+                // "idBanco": this.state.idBanco === '' ? '' : this.state.idBanco,
+                // "idCliente": this.state.idCliente === '' ? '' : this.state.idCliente,
+                // "banco": this.refBanco.current.options[this.refBanco.current.options.selectedIndex].innerHTML,
+                // "cliente": this.refCliente.current.options[this.refCliente.current.options.selectedIndex].innerHTML
 
             }
 
             let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
             let params = new URLSearchParams({ "params": ciphertext });
             window.open("/api/cobro/repgeneralcobros?" + params, "_blank");
-
-        }
-    }
-
-    async onEventImpGastos() {
-
-        // console.log(this.refUsuario.current.options)
-        // console.log(this.refUsuario.current.options.selectedIndex)
-        // console.log(this.refUsuario.current.options[this.refUsuario.current.options.selectedIndex].innerHTML)
-
-        if (this.state.fechaFin < this.state.fechaIni) {
-            this.setState({ messageWarning: "La Fecha inicial no puede ser mayor a la fecha final." })
-            this.refFechaIni.current.focus();
-        } else {
-            const data = {
-                "idSede": "SD0001",
-                "fechaIni": this.state.fechaIni,
-                "fechaFin": this.state.fechaFin,
-                "opcion": (this.state.idUsuario === '' && this.state.idBancoDes === '') ? 1
-                    : (this.state.idUsuario !== '' && this.state.idBancoDes === '') ? 2
-                        : (this.state.idUsuario === '' && this.state.idBancoDes !== '') ? 3 : 4,
-                "idBanco": this.state.idBancoDes === '' ? 0 : this.state.idBancoDes,
-                "idUsuario": this.state.idUsuario === '' ? 0 : this.state.idUsuario,
-                "banco": this.refBancoGasto.current.options[this.refBancoGasto.current.options.selectedIndex].innerHTML,
-                "usuario": this.refUsuario.current.options[this.refUsuario.current.options.selectedIndex].innerHTML
-            }
-
-            let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
-            let params = new URLSearchParams({ "params": ciphertext });
-            window.open("/api/gasto/repgeneralgastos?" + params, "_blank");
-
         }
     }
 
@@ -159,8 +121,18 @@ class RepFinanciero extends React.Component {
                         </div> :
                         <>
                             <div className="card my-1">
-                                <h6 className="card-header">Filtros Generales</h6>
+                                <h6 className="card-header">Reporte de Ingreso y Egresos</h6>
                                 <div className="card-body">
+
+
+                                    {
+                                        this.state.messageWarning === '' ? null :
+                                            <div className="alert alert-warning" role="alert">
+                                                <i className="bi bi-exclamation-diamond-fill"></i> {this.state.messageWarning}
+                                            </div>
+                                    }
+
+
                                     <div className="row">
                                         <div className="col">
                                             <div className="form-group">
@@ -225,25 +197,7 @@ class RepFinanciero extends React.Component {
                                         </div>
                                     </div>
 
-                                </div>
-                            </div>
-
-                            {
-                                this.state.messageWarning === '' ? null :
-                                    <div className="alert alert-warning" role="alert">
-                                        <i className="bi bi-exclamation-diamond-fill"></i> {this.state.messageWarning}
-                                    </div>
-                            }
-
-                            <div className="card my-1">
-                                <h6 className="card-header d-flex" data-bs-toggle="collapse" href="#ingresos" role="button" aria-controls="ingresos">Reporte de Cobros
-                                    <div className="col text-right pr-0">
-                                        <i className="bi bi-caret-down-fill"></i>
-                                    </div>
-                                </h6>
-                                <div className="card-body collapse" id="ingresos">
-
-                                    <div className="row">
+                                    {/* <div className="row">
                                         <div className="col">
                                             <div className="form-group">
                                                 <label>Cliente(s)</label>
@@ -291,86 +245,12 @@ class RepFinanciero extends React.Component {
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    </div> */}
 
                                     <div className="row mt-3">
                                         <div className="col"></div>
                                         <div className="col">
                                             <button className="btn btn-outline-warning btn-sm" onClick={() => this.onEventImpCobro()}><i className="bi bi-file-earmark-pdf-fill"></i> Reporte Pdf</button>
-                                        </div>
-                                        {/* <div className="col">
-                                            <button className="btn btn-outline-success btn-sm"><i className="bi bi-file-earmark-excel-fill"></i> Reporte Excel</button>
-                                        </div> */}
-                                        <div className="col"></div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="card my-1">
-                                <h6 className="card-header d-flex" data-bs-toggle="collapse" href="#gastos" role="button" aria-controls="gastos">Reporte de Gastos
-                                    <div className="col text-right pr-0">
-                                        <i className="bi bi-caret-down-fill"></i>
-                                    </div>
-                                </h6>
-                                <div className="card-body collapse" id="gastos">
-
-                                    <div className="row">
-
-                                        <div className="col">
-                                            <div className="form-group">
-                                                <label>Usuario(s)</label>
-                                                <div className="input-group">
-                                                    <select
-                                                        title="Lista de usuarios"
-                                                        className="form-control"
-                                                        ref={this.refUsuario}
-                                                        value={this.state.idUsuario}
-                                                        onChange={async (event) => {
-                                                            await this.setStateAsync({ idUsuario: event.target.value });
-                                                        }}
-                                                    >
-                                                        <option value="">-- Todos --</option>
-                                                        {
-                                                            this.state.usuarios.map((item, index) => (
-                                                                <option key={index} value={item.idUsuario}>{item.nombres + ' ' + item.apellidos}</option>
-                                                            ))
-                                                        }
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div className="col">
-                                            <div className="form-group">
-                                                <label>Caja Banco(s)</label>
-                                                <div className="input-group">
-                                                    <select
-                                                        title="Lista caja banco a desembolsar"
-                                                        className="form-control"
-                                                        ref={this.refBancoGasto}
-                                                        value={this.state.idBancoDes}
-                                                        onChange={async (event) => {
-                                                            await this.setStateAsync({ idBancoDes: event.target.value });
-                                                        }}
-                                                    >
-                                                        <option value="">-- Todos --</option>
-                                                        {
-                                                            this.state.bancos.map((item, index) => (
-                                                                <option key={index} value={item.idBanco}>{item.nombre}</option>
-                                                            ))
-                                                        }
-                                                    </select>
-
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                    </div>
-
-                                    <div className="row mt-3">
-                                        <div className="col"></div>
-                                        <div className="col">
-                                            <button className="btn btn-outline-warning btn-sm" onClick={() => this.onEventImpGastos()}><i className="bi bi-file-earmark-pdf-fill"></i> Reporte Pdf</button>
                                         </div>
                                         {/* <div className="col">
                                             <button className="btn btn-outline-success btn-sm"><i className="bi bi-file-earmark-excel-fill"></i> Reporte Excel</button>
