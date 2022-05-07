@@ -397,14 +397,14 @@ class Impuestos extends React.Component {
                             <table className="table table-striped table-bordered rounded">
                                 <thead>
                                     <tr>
-                                        <th width="5%" scope="col">#</th>
-                                        <th width="20%" scope="col">Fecha</th>
-                                        <th width="20%" scope="col">Nombre</th>
-                                        <th width="15%" scope="col">Porcentaje</th>
-                                        <th width="15%" scope="col">Código</th>
-                                        <th width="15%" scope="col">Estado</th>
-                                        <th width="5%" scope="col">Editar</th>
-                                        <th width="5%" scope="col">Anular</th>
+                                        <th width="5%" className="text-center">#</th>
+                                        <th width="20%">Fecha</th>
+                                        <th width="20%" >Nombre</th>
+                                        <th width="15%" >Porcentaje</th>
+                                        <th width="15%" >Código</th>
+                                        <th width="15%" >Estado</th>
+                                        <th width="5%" className="text-center">Editar</th>
+                                        <th width="5%" className="text-center">Anular</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -423,13 +423,13 @@ class Impuestos extends React.Component {
                                             this.state.lista.map((item, index) => {
                                                 return (
                                                     <tr key={index}>
-                                                        <td>{item.id}</td>
+                                                        <td className="text-center">{item.id}</td>
                                                         <td>{<span>{item.fecha}</span>}{<br></br>}{<span>{timeForma24(item.hora)}</span>}</td>
                                                         <td>{item.nombre}</td>
                                                         <td>{item.porcentaje + "%"}</td>
                                                         <td>{item.codigo}</td>
                                                         <td className="text-center"><div className={`badge ${item.estado === 1 ? "badge-info" : "badge-danger"}`}>{item.estado === 1 ? "ACTIVO" : "INACTIVO"}</div></td>
-                                                        <td>
+                                                        <td className="text-center">
                                                             <button
                                                                 className="btn btn-outline-warning btn-sm"
                                                                 title="Editar"
@@ -437,7 +437,7 @@ class Impuestos extends React.Component {
                                                                 <i className="bi bi-pencil"></i>
                                                             </button>
                                                         </td>
-                                                        <td>
+                                                        <td className="text-center">
                                                             <button
                                                                 className="btn btn-outline-danger btn-sm"
                                                                 title="Anular"

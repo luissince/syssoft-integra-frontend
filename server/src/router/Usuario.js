@@ -15,11 +15,13 @@ router.get('/list', async function (req, res) {
         u.dni,
         u.nombres,
         u.apellidos,
+        u.telefono,
+        u.email,
         u.representante,
-        p.descripcion AS perfil,
+        IFNULL(p.descripcion,'-') AS perfil,
         u.estado
-        FROM usuario AS u INNER JOIN perfil AS p
-        ON u.idPerfil  = p.idPerfil
+        FROM usuario AS u 
+        LEFT JOIN perfil AS p ON u.idPerfil  = p.idPerfil
         WHERE 
         ? = 0
         OR
@@ -52,8 +54,7 @@ router.get('/list', async function (req, res) {
         });
 
         let total = await conec.query(`SELECT COUNT(*) AS Total 
-        FROM usuario AS u INNER JOIN perfil AS p
-        ON u.idPerfil  = p.idPerfil
+        FROM usuario AS u LEFT JOIN perfil AS p ON u.idPerfil  = p.idPerfil
         WHERE 
         ? = 0
         OR
@@ -80,7 +81,7 @@ router.get('/list', async function (req, res) {
     }
 });
 
-router.post('/add', async function (req, res) {
+router.post('/', async function (req, res) {
     let connection = null;
     try {
         connection = await conec.beginTransaction();
@@ -134,15 +135,16 @@ router.post('/add', async function (req, res) {
             direccion, 
             telefono, 
             email,
-            empresa, 
             idPerfil, 
             representante, 
             estado, 
             usuario, 
             clave,
             fecha,
-            hora) 
-            VALUES(?, ?,?,?,?,?,?,?, ?,?,?,?,?,?,?,?)`, [
+            hora,
+            fupdate,
+            hupdate ) 
+            VALUES(?, ?,?,?,?,?,?,?, ?,?,?,?,?,?,?,?,?)`, [
             idUsuario,
             req.body.nombres,
             req.body.apellidos,
@@ -151,7 +153,6 @@ router.post('/add', async function (req, res) {
             req.body.direccion,
             req.body.telefono,
             req.body.email,
-            req.body.empresa,
             req.body.idPerfil,
             req.body.representante,
             req.body.estado,
@@ -159,22 +160,23 @@ router.post('/add', async function (req, res) {
             hash,
             currentDate(),
             currentTime(),
+            currentDate(),
+            currentTime(),
         ])
 
         await conec.commit(connection);
-        res.status(200).send('Datos insertados correctamente')
+        res.status(200).send('Los datos se registrarón correctamente.')
     } catch (error) {
         if (connection != null) {
             await conec.rollback(connection);
         }
-        res.status(500).send("Error de servidor");
+        res.status(500).send("Se produjo un error de servidor, intente nuevamente.");
     }
 });
 
-router.post('/update', async function (req, res) {
+router.put('/', async function (req, res) {
     let connection = null;
     try {
-
         connection = await conec.beginTransaction();
 
         let usuario = await conec.execute(connection, `SELECT * FROM usuario
@@ -197,13 +199,12 @@ router.post('/update', async function (req, res) {
             direccion=?, 
             telefono=?, 
             email=?, 
-            empresa=?, 
             idPerfil=?, 
             representante=?, 
             estado=?, 
             usuario=?,
-            fecha=?,
-            hora=?,
+            fupdate=?,
+            hupdate=?
             WHERE idUsuario=?`, [
             req.body.nombres,
             req.body.apellidos,
@@ -212,7 +213,6 @@ router.post('/update', async function (req, res) {
             req.body.direccion,
             req.body.telefono,
             req.body.email,
-            req.body.empresa,
             req.body.idPerfil,
             req.body.representante,
             req.body.estado,
@@ -223,8 +223,9 @@ router.post('/update', async function (req, res) {
         ])
 
         await conec.commit(connection)
-        res.status(200).send('Los datos se actualizaron correctamente.')
+        res.status(200).send('Los datos se actualizarón correctamente.')
     } catch (error) {
+        console.log(error)
         if (connection != null) {
             await conec.rollback(connection);
         }
@@ -270,7 +271,7 @@ router.get('/id', async function (req, res) {
         }
 
     } catch (error) {
-        res.status(500).send("Error interno de conexión, intente nuevamente.");
+        res.status(500).send("Se produjo un error de servidor, intente nuevamente.");
     }
 });
 
@@ -279,12 +280,10 @@ router.get('/listcombo', async function (req, res) {
         let result = await conec.query(`SELECT 
             idUsuario, nombres, apellidos, dni, estado
             FROM usuario`);
-        // return result
         res.status(200).send(result);
 
     } catch (error) {
-        // return "Error interno de conexión, intente nuevamente."
-        res.status(500).send("Error interno de conexión, intente nuevamente.");
+        res.status(500).send("Se produjo un error de servidor, intente nuevamente.");
     }
 })
 

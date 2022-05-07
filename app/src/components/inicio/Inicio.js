@@ -31,11 +31,12 @@ import CobroDetalle from '../facturacion/registros/CobroDetalle';
 import GastoProceso from '../tesoreria/registros/GastoProceso';
 import GastoDetalle from '../tesoreria/registros/GastoDetalle';
 import CreditoProceso from '../facturacion/registros/CreditoProceso';
-import Perfiles from '../seguridad/Perfiles'
-import Usuarios from '../seguridad/Usuarios'
-import Accesos from '../seguridad/Accesos'
-import Conceptos from '../tesoreria/Conceptos'
-import Gastos from '../tesoreria/Gastos'
+import Perfiles from '../seguridad/Perfiles';
+import Usuarios from '../seguridad/Usuarios';
+import Accesos from '../seguridad/Accesos';
+import UsuarioProceso from '../seguridad/registros/UsuarioProceso';
+import Conceptos from '../tesoreria/Conceptos';
+import Gastos from '../tesoreria/Gastos';
 import RepVentas from '../reporte/RepVentas';
 import RepFinanciero from '../reporte/RepFinanciero';
 import RepLotes from '../reporte/RepLotes';
@@ -120,8 +121,15 @@ class Inicio extends React.Component {
                         />
                         <Route
                             path={`${path}/usuarios`}
+                            exact={true}
                             render={(props) => <Usuarios {...props} />}
                         />
+                        <Route
+                            path={`${path}/usuarios/proceso`}
+                            exact={true}
+                            render={(props) => <UsuarioProceso {...props} />}
+                        />
+
                         <Route
                             path={`${path}/accesos`}
                             render={(props) => <Accesos {...props} />}

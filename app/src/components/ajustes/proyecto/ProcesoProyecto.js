@@ -416,7 +416,7 @@ class ProcesoProyecto extends React.Component {
                             <div className="form-group">
                                 <h5>
                                     <span role="button" onClick={() => this.props.history.goBack()}><i className="bi bi-arrow-left-short"></i></span> Proyectos
-                                    <small className="text-secondary"> LISTA</small>
+                                    <small className="text-secondary"> PROCESO</small>
                                 </h5>
                             </div>
                         </div>

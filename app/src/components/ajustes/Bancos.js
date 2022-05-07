@@ -285,7 +285,7 @@ class Bancos extends React.Component {
         ModalAlertDialog("Banco", "¿Estás seguro de eliminar el banco?", async (event) => {
             if (event) {
                 try {
-                    ModalAlertInfo("Moneda", "Procesando información...")
+                    ModalAlertInfo("Banco", "Procesando información...")
                     let result = await axios.delete('/api/banco', {
                         params: {
                             "idBanco": idBanco
@@ -478,7 +478,7 @@ class Bancos extends React.Component {
                                             this.state.lista.map((item, index) => {
                                                 return (
                                                     <tr key={index}>
-                                                        <td>{item.id}</td>
+                                                        <td className="text-center">{item.id}</td>
                                                         <td>{item.nombre}</td>
                                                         <td>{item.tipoCuenta.toUpperCase()}</td>
                                                         <td>{item.moneda}</td>
