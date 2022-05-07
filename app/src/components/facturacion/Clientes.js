@@ -2,6 +2,9 @@ import React from 'react';
 import axios from 'axios';
 import {
     spinnerLoading,
+    ModalAlertInfo,
+    ModalAlertSuccess,
+    ModalAlertWarning,
     ModalAlertDialog
 } from '../tools/Tools';
 import Paginacion from '../tools/Paginacion';
@@ -127,7 +130,23 @@ class Clientes extends React.Component {
     onEventEliminarCliente(idCliente) {
         ModalAlertDialog("Eliminar cliente", "¿Está seguro de que desea eliminar el contacto? Esta operación no se puede deshacer.", async (value) => {
             if (value) {
-
+                try {
+                    ModalAlertInfo("Cliente", "Procesando información...")
+                    let result = await axios.delete('/api/cliente', {
+                        params: {
+                            "idCliente": idCliente
+                        }
+                    })
+                    ModalAlertSuccess("Cliente", result.data, () => {
+                        this.loadInit();
+                    })
+                } catch (error) {
+                    if (error.response !== undefined) {
+                        ModalAlertWarning("Cliente", error.response.data)
+                    } else {
+                        ModalAlertWarning("Cliente", "Se genero un error interno, intente nuevamente.")
+                    }
+                }
             }
         })
     }

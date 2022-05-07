@@ -285,7 +285,7 @@ class Bancos extends React.Component {
         ModalAlertDialog("Banco", "¿Estás seguro de eliminar el banco?", async (event) => {
             if (event) {
                 try {
-                    ModalAlertInfo("Moneda", "Procesando información...")
+                    ModalAlertInfo("Banco", "Procesando información...")
                     let result = await axios.delete('/api/banco', {
                         params: {
                             "idBanco": idBanco

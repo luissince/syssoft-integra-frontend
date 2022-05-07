@@ -1,6 +1,7 @@
 import React from 'react';
 import axios from 'axios';
 import {
+    currentDate,
     keyNumberPhone,
     keyNumberInteger,
     spinnerLoading,
@@ -25,7 +26,7 @@ class ClienteProceso extends React.Component {
             informacion: '',
             telefono: '',
             celular: '',
-            fechaNacimiento: '',
+            fechaNacimiento: currentDate(),
             email: '',
             genero: '',
             direccion: '',
@@ -50,6 +51,7 @@ class ClienteProceso extends React.Component {
         this.refDocumento = React.createRef();
         this.refInformacion = React.createRef();
         this.refCelular = React.createRef();
+        this.refGenero = React.createRef();
 
         this.refDireccion = React.createRef();
         this.refUbigeo = React.createRef();
@@ -102,7 +104,6 @@ class ClienteProceso extends React.Component {
 
     loadDataId = async (id) => {
         try {
-
             const documento = await axios.get("/api/tipodocumento/listcombo", {
                 signal: this.abortControllerTable.signal
             });
@@ -115,8 +116,6 @@ class ClienteProceso extends React.Component {
             });
 
             const data = result.data
-
-            // console.log(data)
 
             await this.setStateAsync({
                 idCliente: data.idCliente,
@@ -148,32 +147,42 @@ class ClienteProceso extends React.Component {
                     msgLoading: "Se produjo un error un interno, intente nuevamente."
                 });
             }
-            // console.log(error.message)
         }
     }
 
     async onEventGuardar() {
         if (this.state.idTipoDocumento === "") {
             this.setState({ messageWarning: "Seleccione el tipo de documento." });
+            this.onFocusTab("datos-tab", "datos");
             this.refTipoDocumento.current.focus();
             return;
         }
 
         if (this.state.documento === "") {
             this.setState({ messageWarning: "Ingrese el número de documento." });
+            this.onFocusTab("datos-tab", "datos");
             this.refDocumento.current.focus();
             return;
         }
 
         if (this.state.informacion === "") {
-            this.setState({ messageWarning: "Ingrese los apellidos y nombres." })
+            this.setState({ messageWarning: "Ingrese los apellidos y nombres." });
+            this.onFocusTab("datos-tab", "datos");
             this.refInformacion.current.focus();
             return;
         }
 
         if (this.state.celular === "") {
             this.setState({ messageWarning: "Ingrese el número de celular." });
+            this.onFocusTab("contacto-tab", "contacto");
             this.refCelular.current.focus();
+            return;
+        }
+
+        if (this.state.genero === "") {
+            this.setState({ messageWarning: "Seleccione un genero." });
+            this.onFocusTab("datos-tab", "datos");
+            this.refGenero.current.focus();
             return;
         }
 
@@ -228,6 +237,19 @@ class ClienteProceso extends React.Component {
             } else {
                 ModalAlertWarning("Venta", "Se genero un error interno, intente nuevamente.")
             }
+        }
+    }
+
+    onFocusTab(idTab, idContent) {
+        if (!document.getElementById(idTab).classList.contains('active')) {
+            for (let child of document.getElementById('myTab').childNodes) {
+                child.childNodes[0].classList.remove('active')
+            }
+            for (let child of document.getElementById('myTabContent').childNodes) {
+                child.classList.remove('show', 'active')
+            }
+            document.getElementById(idTab).classList.add('active');
+            document.getElementById(idContent).classList.add('show', 'active');
         }
     }
 
@@ -348,261 +370,259 @@ class ClienteProceso extends React.Component {
                                     </div>
                             }
 
-                            <div className="row">
-                                <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
-                                    <div className="form-group">
-                                        <label>Tipo Documento <i className="fa fa-asterisk text-danger small"></i></label>
-                                        <select
-                                            className="form-control"
-                                            value={this.state.idTipoDocumento}
-                                            ref={this.refTipoDocumento}
-                                            onChange={(event) => {
-                                                if (event.target.value.trim().length > 0) {
-                                                    this.setState({
-                                                        idTipoDocumento: event.target.value,
-                                                        messageWarning: '',
-                                                    });
-                                                } else {
-                                                    this.setState({
-                                                        idTipoDocumento: event.target.value,
-                                                        messageWarning: 'Seleccione el tipo de documento',
-                                                    });
-                                                }
-                                            }}>
-                                            <option value="">-- Seleccione --</option>
-                                            {
-                                                this.state.tiposDocumentos.map((item, index) => (
-                                                    <option key={index} value={item.idTipoDocumento}>{item.nombre}</option>
-                                                ))
-                                            }
-                                        </select>
-                                    </div>
-                                </div>
-                                <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
-                                    <div className="form-group">
-                                        <label>N° de documento <i className="fa fa-asterisk text-danger small"></i></label>
-                                        <div className="input-group">
-                                            <input
-                                                type="text"
-                                                className="form-control"
-                                                ref={this.refDocumento}
-                                                value={this.state.documento}
-                                                onChange={(event) => {
-                                                    if (event.target.value.trim().length > 0) {
-                                                        this.setState({
-                                                            documento: event.target.value,
-                                                            messageWarning: '',
-                                                        });
-                                                    } else {
-                                                        this.setState({
-                                                            documento: event.target.value,
-                                                            messageWarning: 'Ingrese el número de documento',
-                                                        });
-                                                    }
-                                                }}
-                                                onKeyPress={keyNumberInteger}
-                                                placeholder='00000000' />
-                                            <div className="input-group-append">
-                                                <button
-                                                    className="btn btn-outline-secondary"
-                                                    type="button"
-                                                    title="Reniec"
-                                                    onClick={() => this.onEventGetApiReniec()}>
-                                                    <img src={reniec} alt="Reniec" width="12" />
-                                                </button>
+                            <div className='row'>
+                                <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
+                                    <ul className="nav nav-tabs" id="myTab" role="tablist">
+                                        <li className="nav-item" role="presentation">
+                                            <a className="nav-link active" id="datos-tab" data-bs-toggle="tab" href="#datos" role="tab" aria-controls="datos" aria-selected="true">
+                                                <i className="bi bi-info-circle"></i> Datos
+                                            </a>
+                                        </li>
+                                        <li className="nav-item" role="presentation">
+                                            <a className="nav-link" id="contacto-tab" data-bs-toggle="tab" href="#contacto" role="tab" aria-controls="contacto" aria-selected="false">
+                                                <i className="bi bi-person-workspace"></i> Contacto
+                                            </a>
+                                        </li>
+                                    </ul>
+
+                                    <div className="tab-content pt-2" id="myTabContent">
+                                        <div className="tab-pane fade show active" id="datos" role="tabpanel" aria-labelledby="datos-tab">
+
+                                            <div className="form-row">
+                                                <div className="form-group col-md-6">
+                                                    <label>Tipo Documento <i className="fa fa-asterisk text-danger small"></i></label>
+                                                    <select
+                                                        className="form-control"
+                                                        value={this.state.idTipoDocumento}
+                                                        ref={this.refTipoDocumento}
+                                                        onChange={(event) => {
+                                                            if (event.target.value.trim().length > 0) {
+                                                                this.setState({
+                                                                    idTipoDocumento: event.target.value,
+                                                                    messageWarning: '',
+                                                                });
+                                                            } else {
+                                                                this.setState({
+                                                                    idTipoDocumento: event.target.value,
+                                                                    messageWarning: 'Seleccione el tipo de documento',
+                                                                });
+                                                            }
+                                                        }}>
+                                                        <option value="">-- Seleccione --</option>
+                                                        {
+                                                            this.state.tiposDocumentos.map((item, index) => (
+                                                                <option key={index} value={item.idTipoDocumento}>{item.nombre}</option>
+                                                            ))
+                                                        }
+                                                    </select>
+                                                </div>
+
+                                                <div className="form-group col-md-6">
+                                                    <label>N° de documento <i className="fa fa-asterisk text-danger small"></i></label>
+                                                    <div className="input-group">
+                                                        <input
+                                                            type="text"
+                                                            className="form-control"
+                                                            ref={this.refDocumento}
+                                                            value={this.state.documento}
+                                                            onChange={(event) => {
+                                                                if (event.target.value.trim().length > 0) {
+                                                                    this.setState({
+                                                                        documento: event.target.value,
+                                                                        messageWarning: '',
+                                                                    });
+                                                                } else {
+                                                                    this.setState({
+                                                                        documento: event.target.value,
+                                                                        messageWarning: 'Ingrese el número de documento',
+                                                                    });
+                                                                }
+                                                            }}
+                                                            onKeyPress={keyNumberInteger}
+                                                            placeholder='00000000' />
+                                                        <div className="input-group-append">
+                                                            <button
+                                                                className="btn btn-outline-secondary"
+                                                                type="button"
+                                                                title="Reniec"
+                                                                onClick={() => this.onEventGetApiReniec()}>
+                                                                <img src={reniec} alt="Reniec" width="12" />
+                                                            </button>
+                                                        </div>
+                                                        <div className="input-group-append">
+                                                            <button
+                                                                className="btn btn-outline-secondary"
+                                                                type="button"
+                                                                title="Sunat"
+                                                                onClick={() => this.onEventGetApiSunat()}>
+                                                                <img src={sunat} alt="Sunat" width="12" />
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div className="input-group-append">
-                                                <button
-                                                    className="btn btn-outline-secondary"
-                                                    type="button"
-                                                    title="Sunat"
-                                                    onClick={() => this.onEventGetApiSunat()}>
-                                                    <img src={sunat} alt="Sunat" width="12" />
-                                                </button>
+
+                                            <div className="form-group">
+                                                <label>Razón Social/Apellidos y Nombres <i className="fa fa-asterisk text-danger small"></i></label>
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    value={this.state.informacion}
+                                                    onChange={(event) => {
+                                                        if (event.target.value.trim().length > 0) {
+                                                            this.setState({
+                                                                informacion: event.target.value,
+                                                                messageWarning: '',
+                                                            });
+                                                        } else {
+                                                            this.setState({
+                                                                informacion: event.target.value,
+                                                                messageWarning: 'Ingrese la razón social o apellidos y nombres',
+                                                            });
+                                                        }
+                                                    }}
+                                                    placeholder='Ingrese la razón social o apellidos y nombres' />
+                                            </div>
+
+                                            <div className="form-group">
+                                                <label>Fecha de Nacimiento</label>
+                                                <input
+                                                    type="date"
+                                                    className="form-control"
+                                                    ref={this.refFechaNacimiento}
+                                                    value={this.state.fechaNacimiento}
+                                                    onChange={(event) => this.setState({ fechaNacimiento: event.target.value })}
+                                                />
+                                            </div>
+
+                                            <div className="form-row">
+                                                <div className="form-group col-md-6">
+                                                    <label>Genero <i className="fa fa-asterisk text-danger small"></i></label>
+                                                    <select
+                                                        className="form-control"
+                                                        ref={this.refGenero}
+                                                        value={this.state.genero}
+                                                        onChange={(event) => this.setState({ genero: event.target.value })}>
+                                                        <option value="">-- Seleccione --</option>
+                                                        <option value="1">Masculino</option>
+                                                        <option value="2">Femenino</option>
+                                                    </select>
+                                                </div>
+
+                                                <div className="form-group col-md-6">
+                                                    <label>Estado Civil</label>
+                                                    <select
+                                                        className="form-control"
+                                                        value={this.state.estadoCivil}
+                                                        onChange={(event) => this.setState({ estadoCivil: event.target.value })}>
+                                                        <option value="">-- seleccione --</option>
+                                                        <option value="1">Soltero(a)</option>
+                                                        <option value="2">Casado(a)</option>
+                                                        <option value="3">Viudo(a)</option>
+                                                        <option value="4">Divorciado(a)</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div className="form-group">
+                                                <label>Observación</label>
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    value={this.state.observacion}
+                                                    onChange={(event) => this.setState({ observacion: event.target.value })}
+                                                    placeholder='Ingrese alguna observación' />
+                                            </div>
+
+                                            <div className="form-group">
+                                                <label>Estado:</label>
+                                                <div className="custom-control custom-switch">
+                                                    <input
+                                                        type="checkbox"
+                                                        className="custom-control-input"
+                                                        id="switch1"
+                                                        checked={this.state.estado}
+                                                        onChange={(value) => this.setState({ estado: value.target.checked })} />
+                                                    <label className="custom-control-label" htmlFor="switch1">{this.state.estado === true ? "Activo" : "Inactivo"}</label>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </div>
-                            </div>
 
-                            <div className="row">
-                                <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
-                                    <div className="form-group">
-                                        <label>Razón Social/Apellidos y Nombres <i className="fa fa-asterisk text-danger small"></i></label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            value={this.state.informacion}
-                                            onChange={(event) => {
-                                                if (event.target.value.trim().length > 0) {
-                                                    this.setState({
-                                                        informacion: event.target.value,
-                                                        messageWarning: '',
-                                                    });
-                                                } else {
-                                                    this.setState({
-                                                        informacion: event.target.value,
-                                                        messageWarning: 'Ingrese la razón social o apellidos y nombres',
-                                                    });
-                                                }
-                                            }}
-                                            placeholder='Ingrese la razón social o apellidos y nombres' />
-                                    </div>
-                                </div>
-                            </div>
+                                        <div className="tab-pane fade" id="contacto" role="tabpanel" aria-labelledby="contacto-tab">
 
-                            <div className="row">
-                                <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
-                                    <div className="form-group">
-                                        <label>N° de Celular <i className="fa fa-asterisk text-danger small"></i></label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            value={this.state.celular}
-                                            ref={this.refCelular}
-                                            onChange={(event) => {
-                                                if (event.target.value.trim().length > 0) {
-                                                    this.setState({
-                                                        celular: event.target.value,
-                                                        messageWarning: '',
-                                                    });
-                                                } else {
-                                                    this.setState({
-                                                        celular: event.target.value,
-                                                        messageWarning: 'Ingrese el número de celular.',
-                                                    });
-                                                }
-                                            }}
-                                            onKeyPress={keyNumberPhone}
-                                            placeholder='Ingrese el número de celular.' />
-                                    </div>
-                                </div>
-                                <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
-                                    <div className="form-group">
-                                        <label>N° de Telefono</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            value={this.state.telefono}
-                                            ref={this.refTelefono}
-                                            onChange={(event) => this.setState({ telefono: event.target.value, })}
-                                            onKeyPress={keyNumberPhone}
-                                            placeholder='Ingrese el número de telefono.' />
-                                    </div>
-                                </div>
-                            </div>
+                                            <div className="form-group">
+                                                <label>N° de Celular <i className="fa fa-asterisk text-danger small"></i></label>
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    value={this.state.celular}
+                                                    ref={this.refCelular}
+                                                    onChange={(event) => {
+                                                        if (event.target.value.trim().length > 0) {
+                                                            this.setState({
+                                                                celular: event.target.value,
+                                                                messageWarning: '',
+                                                            });
+                                                        } else {
+                                                            this.setState({
+                                                                celular: event.target.value,
+                                                                messageWarning: 'Ingrese el número de celular.',
+                                                            });
+                                                        }
+                                                    }}
+                                                    onKeyPress={keyNumberPhone}
+                                                    placeholder='Ingrese el número de celular.' />
+                                            </div>
 
-                            <div className="row">
-                                <div className="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12">
-                                    <div className="form-group">
-                                        <label>Fecha de Nacimiento</label>
-                                        <input
-                                            type="date"
-                                            className="form-control"
-                                            ref={this.refFechaNacimiento}
-                                            value={this.state.fechaNacimiento}
-                                            onChange={(event) => this.setState({ fechaNacimiento: event.target.value })}
-                                        />
-                                    </div>
-                                </div>
-                                <div className="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12">
-                                    <div className="form-group">
-                                        <label>E-Mail</label>
-                                        <input
-                                            type="email"
-                                            className="form-control"
-                                            value={this.state.email}
-                                            onChange={(event) => this.setState({ email: event.target.value })}
-                                            placeholder='Ingrese el email' />
-                                    </div>
-                                </div>
-                                <div className="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12">
-                                    <div className="form-group">
-                                        <label>Genero</label>
-                                        <select
-                                            className="form-control"
-                                            value={this.state.genero}
-                                            onChange={(event) => this.setState({ genero: event.target.value })}>
-                                            <option value="">-- Seleccione --</option>
-                                            <option value="1">Masculino</option>
-                                            <option value="2">Femenino</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
+                                            <div className="form-group">
+                                                <label>N° de Telefono</label>
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    value={this.state.telefono}
+                                                    ref={this.refTelefono}
+                                                    onChange={(event) => this.setState({ telefono: event.target.value, })}
+                                                    onKeyPress={keyNumberPhone}
+                                                    placeholder='Ingrese el número de telefono.' />
+                                            </div>
 
-                            <div className="row">
-                                <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
-                                    <div className="form-group">
-                                        <label>Dirección</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            value={this.state.direccion}
-                                            ref={this.refDireccion}
-                                            onChange={(event) => this.setState({ direccion: event.target.value })}
-                                            placeholder='Ingrese la dirección' />
-                                    </div>
-                                </div>
-                                <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
-                                    <div className="form-group">
-                                        <label>Ubigeo</label>
-                                        <SearchBar
-                                            placeholder="Escribe para iniciar a filtrar..."
-                                            refTxtUbigeo={this.refUbigeo}
-                                            ubigeo={this.state.ubigeo}
-                                            filteredData={this.state.filteredData}
-                                            onEventClearInput={this.onEventClearInput}
-                                            handleFilter={this.handleFilter}
-                                            onEventSelectItem={this.onEventSelectItem}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
+                                            <div className="form-group">
+                                                <label>E-Mail</label>
+                                                <input
+                                                    type="email"
+                                                    className="form-control"
+                                                    value={this.state.email}
+                                                    onChange={(event) => this.setState({ email: event.target.value })}
+                                                    placeholder='Ingrese el email' />
+                                            </div>
 
-                            <div className="row">
-                                <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
-                                    <div className="form-group">
-                                        <label>Estado Civil</label>
-                                        <select
-                                            className="form-control"
-                                            value={this.state.estadoCivil}
-                                            onChange={(event) => this.setState({ estadoCivil: event.target.value })}>
-                                            <option value="">-- seleccione --</option>
-                                            <option value="1">Soltero(a)</option>
-                                            <option value="2">Casado(a)</option>
-                                            <option value="3">Viudo(a)</option>
-                                            <option value="4">Divorciado(a)</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
-                                    <div className="form-group">
-                                        <label>Estado:</label>
-                                        <div className="custom-control custom-switch">
-                                            <input
-                                                type="checkbox"
-                                                className="custom-control-input"
-                                                id="switch1"
-                                                checked={this.state.estado}
-                                                onChange={(value) => this.setState({ estado: value.target.checked })} />
-                                            <label className="custom-control-label" htmlFor="switch1">{this.state.estado === true ? "Activo" : "Inactivo"}</label>
+                                            <div className="form-group">
+                                                <label>Dirección</label>
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    value={this.state.direccion}
+                                                    ref={this.refDireccion}
+                                                    onChange={(event) => this.setState({ direccion: event.target.value })}
+                                                    placeholder='Ingrese la dirección' />
+                                            </div>
+
+                                            <div className="form-group">
+                                                <label>Ubigeo</label>
+                                                <SearchBar
+                                                    placeholder="Escribe para iniciar a filtrar..."
+                                                    refTxtUbigeo={this.refUbigeo}
+                                                    ubigeo={this.state.ubigeo}
+                                                    filteredData={this.state.filteredData}
+                                                    onEventClearInput={this.onEventClearInput}
+                                                    handleFilter={this.handleFilter}
+                                                    onEventSelectItem={this.onEventSelectItem}
+                                                />
+                                            </div>
+
                                         </div>
                                     </div>
-                                </div>
-                            </div>
 
-                            <div className="row">
-                                <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
-                                    <div className="form-group">
-                                        <label>Observación</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            value={this.state.observacion}
-                                            onChange={(event) => this.setState({ observacion: event.target.value })}
-                                            placeholder='Ingrese alguna observación' />
-                                    </div>
                                 </div>
                             </div>
 
