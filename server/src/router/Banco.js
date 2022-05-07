@@ -12,7 +12,6 @@ const sede = new Sede();
 const repFinanciero = new RepFinanciero();
 
 const Conexion = require('../database/Conexion');
-const { route } = require('./Logins');
 const conec = new Conexion();
 
 router.get('/list', async function (req, res) {
@@ -162,7 +161,7 @@ router.post('/update', async function (req, res) {
             req.body.idUsuario,
             req.body.idBanco
         ]);
-        
+
         await conec.commit(connection);
         res.status(200).send('Datos actulizados correctamente');
     } catch (error) {
@@ -239,7 +238,7 @@ router.get('/listcombo', async function (req, res) {
 
 router.get('/detalle', async function (req, res) {
     const result = await banco.detalleBanco(req)
-    if ( typeof result === 'object') {
+    if (typeof result === 'object') {
         res.status(200).send(result)
     } else {
         res.status(500).send(result)

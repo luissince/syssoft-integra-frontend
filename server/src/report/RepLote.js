@@ -225,7 +225,7 @@ class RepLote {
                 totalPrecio = totalPrecio + item.precio;
                 totalUtilidad = totalUtilidad + (item.precio + item.costo);
 
-                return [++index, item.lote + ' ' + item.manzana, item.areaLote, estado, numberFormat(item.costo), numberFormat(item.precio), numberFormat(item.precio - item.costo)]
+                return [++index, item.manzana + '\n' + item.lote, item.areaLote, estado, numberFormat(item.costo), numberFormat(item.precio), numberFormat(item.precio - item.costo)]
             })
 
             content.push(["", "", "", "TOTAL", numberFormat(totalCosto), numberFormat(totalPrecio), numberFormat(totalUtilidad)])
@@ -242,8 +242,8 @@ class RepLote {
                     doc.font("Helvetica").fontSize(h3);
                 },
                 padding: 5,
-                columnSpacing:5,
-                columnsSize:[30,152,70,70,70,70,70],
+                columnSpacing: 5,
+                columnsSize: [30, 152, 70, 70, 70, 70, 70],
                 width: doc.page.width - doc.options.margins.left - doc.options.margins.right,
                 x: orgX,
                 y: doc.y + 10,

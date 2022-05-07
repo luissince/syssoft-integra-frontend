@@ -478,7 +478,7 @@ class Bancos extends React.Component {
                                             this.state.lista.map((item, index) => {
                                                 return (
                                                     <tr key={index}>
-                                                        <td>{item.id}</td>
+                                                        <td className="text-center">{item.id}</td>
                                                         <td>{item.nombre}</td>
                                                         <td>{item.tipoCuenta.toUpperCase()}</td>
                                                         <td>{item.moneda}</td>

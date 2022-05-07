@@ -186,14 +186,14 @@ class Proyectos extends React.Component {
                             <table className="table table-striped table-bordered rounded">
                                 <thead>
                                     <tr>
-                                        <th width="5%">#</th>
+                                        <th width="5%" className="text-center">#</th>
                                         <th width="20%">Proyecto</th>
                                         <th width="10%">Área Total(m²)</th>
                                         <th width="30%">Ubicación</th>
                                         <th width="10%">Precio X m2</th>
                                         <th width="10%">Estado</th>
-                                        <th width="5%">Editar</th>
-                                        <th width="5%">Eliminar</th>
+                                        <th width="5%" className="text-center">Editar</th>
+                                        <th width="5%" className="text-center">Eliminar</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -212,13 +212,13 @@ class Proyectos extends React.Component {
                                             this.state.lista.map((item, index) => {
                                                 return (
                                                     <tr key={index}>
-                                                        <td>{item.id}</td>
+                                                        <td className="text-center">{item.id}</td>
                                                         <td>{item.nombre}</td>
                                                         <td>{item.area}</td>
                                                         <td>{item.ubicacion}</td>
                                                         <td>{item.simbolo}{" "}{item.preciometro}</td>
                                                         <td>{item.estado === 1 ? <span className="badge badge-success">VENTA</span> : <span className="badge badge-danger">LITIGIO</span>}</td>
-                                                        <td>
+                                                        <td className="text-center">
                                                             <button
                                                                 className="btn btn-outline-warning btn-sm"
                                                                 title="Editar"
@@ -229,7 +229,7 @@ class Proyectos extends React.Component {
                                                                 <i className="bi bi-pencil"></i>
                                                             </button>
                                                         </td>
-                                                        <td>
+                                                        <td className="text-center">
                                                             <button
                                                                 className="btn btn-outline-danger btn-sm"
                                                                 title="Eliminar"

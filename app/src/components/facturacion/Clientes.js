@@ -199,14 +199,14 @@ class Clientes extends React.Component {
                             <table className="table table-striped table-bordered rounded">
                                 <thead>
                                     <tr>
-                                        <th width="5%">#</th>
+                                        <th width="5%" className="text-center">#</th>
                                         <th width="10%">DNI / RUC</th>
                                         <th width="20%">Cliente</th>
                                         <th width="15%">Cel. / Tel.</th>
                                         <th width="20%">Dirección</th>
                                         <th width="12%">Estado</th>
-                                        <th width="5%">Editar</th>
-                                        <th width="5%">Eliminar</th>
+                                        <th width="5%" className="text-center">Editar</th>
+                                        <th width="5%" className="text-center">Eliminar</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -226,7 +226,7 @@ class Clientes extends React.Component {
                                             this.state.lista.map((item, index) => {
                                                 return (
                                                     <tr key={index}>
-                                                        <td>{item.id}</td>
+                                                        <td className="text-center">{item.id}</td>
                                                         <td>{item.tipodocumento}{<br />}{item.documento}</td>
                                                         <td>{item.informacion}</td>
                                                         <td>{item.celular}{<br />}{item.telefono}</td>
@@ -236,10 +236,10 @@ class Clientes extends React.Component {
                                                                 {item.estado === 1 ? "ACTIVO" : "INACTIVO"}
                                                             </div>
                                                         </td>
-                                                        <td>
+                                                        <td className="text-center">
                                                             <button className="btn btn-outline-warning btn-sm" title="Editar" onClick={() => this.onEventEditarCliente(item.idCliente)}><i className="bi bi-pencil"></i></button>
                                                         </td>
-                                                        <td>
+                                                        <td className="text-center">
                                                             <button className="btn btn-outline-danger btn-sm" title="Editar" onClick={() => this.onEventEliminarCliente(item.idCliente)}><i className="bi bi-trash"></i></button>
                                                         </td>
                                                     </tr>

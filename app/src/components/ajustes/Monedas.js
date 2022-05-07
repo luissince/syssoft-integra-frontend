@@ -391,14 +391,13 @@ class Monedas extends React.Component {
                             <table className="table table-striped table-bordered rounded">
                                 <thead>
                                     <tr>
-                                        <th width="5%">#</th>
-                                        {/* <th width="17%">Empresa</th> */}
+                                        <th width="5%" className="text-center">#</th>
                                         <th width="15%">Moneda</th>
                                         <th width="15%">Codigo ISO</th>
                                         <th width="15%">Símbolo</th>
                                         <th width="15%">Estado</th>
-                                        <th width="5%">Editar</th>
-                                        <th width="5%">Eliminar</th>
+                                        <th width="5%" className="text-center">Editar</th>
+                                        <th width="5%" className="text-center">Eliminar</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -417,19 +416,19 @@ class Monedas extends React.Component {
                                             this.state.lista.map((item, index) => {
                                                 return (
                                                     <tr key={index}>
-                                                        <td>{item.id}</td>
+                                                        <td className="text-center">{item.id}</td>
                                                         <td>{item.nombre}</td>
                                                         <td>{item.codiso}</td>
                                                         <td>{item.simbolo}</td>
                                                         <td><div className={`badge ${item.estado === 1 ? "badge-info" : "badge-danger"}`}>{item.estado === 1 ? "ACTIVO" : "INACTIVO"}</div></td>
-                                                        <td>
+                                                        <td className="text-center">
                                                             <button
                                                                 className="btn btn-outline-warning btn-sm"
                                                                 title="Editar"
                                                                 onClick={() => this.openModal(item.idMoneda)}>
                                                                 <i className="bi bi-pencil"></i></button>
                                                         </td>
-                                                        <td>
+                                                        <td className="text-center">
                                                             <button
                                                                 className="btn btn-outline-danger btn-sm"
                                                                 title="Eliminar"

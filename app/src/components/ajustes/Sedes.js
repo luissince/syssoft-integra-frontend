@@ -712,7 +712,7 @@ class Sedes extends React.Component {
                             <table className="table table-striped table-bordered rounded">
                                 <thead>
                                     <tr>
-                                        <th width="5%">#</th>
+                                        <th width="5%" className="text-center">#</th>
                                         <th width="10%">Sede</th>
                                         <th width="15%">Empresa</th>
                                         <th width="20%">Dirección</th>
@@ -737,7 +737,7 @@ class Sedes extends React.Component {
                                             this.state.lista.map((item, index) => {
                                                 return (
                                                     <tr key={index}>
-                                                        <td>{item.id}</td>
+                                                        <td className="text-center">{item.id}</td>
                                                         <td>{item.nombreSede}</td>
                                                         <td>{item.nombreEmpresa}</td>
                                                         <td>{item.direccion}</td>
