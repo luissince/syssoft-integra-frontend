@@ -139,7 +139,7 @@ class RepCuota {
             return "Se genero un error al generar el reporte.";
         }
     }
-
+ 
 }
 
 module.exports = RepCuota;
