@@ -2,6 +2,7 @@ import React from 'react';
 import axios from 'axios';
 import {
     spinnerLoading,
+    numberFormat,
     timeForma24,
     formatMoney,
     ModalAlertInfo,
@@ -231,7 +232,7 @@ class Ventas extends React.Component {
                                                                 ? <span>Contado</span>
                                                                 : <span>Crédito</span>}
                                                         </td>
-                                                        <td>{item.simbolo + " " + formatMoney(item.total)}</td>
+                                                        <td>{ numberFormat(item.total)}</td>
                                                         <td className="text-center">
                                                             {
                                                                 item.estado === 1

@@ -16,7 +16,7 @@ class RepFinanciero {
                 }
             });
 
-            doc.info["Title"] = `REPORTE DE COBROS DEL ${req.query.fechaIni} AL ${req.query.fechaFin}`
+            doc.info["Title"] = `REPORTE DE COBROS Y GASTOS DEL ${req.query.fechaIni} AL ${req.query.fechaFin}`
 
             let orgX = doc.x;
             let orgY = doc.y;
@@ -55,7 +55,7 @@ class RepFinanciero {
             );
 
             doc.fontSize(h2).text(
-                "REPORTE DE COBROS",
+                "REPORTE DE COBROS Y GASTOS",
                 doc.options.margins.left,
                 cabeceraY,
                 {

@@ -1,7 +1,7 @@
 const path = require('path');
 const PDFDocument = require("pdfkit-table");
 const getStream = require('get-stream');
-const { formatMoney } = require('../tools/Tools');
+const { formatMoney,numberFormat } = require('../tools/Tools');
 
 class RepCuota {
 
@@ -73,19 +73,19 @@ class RepCuota {
             doc.fill('#000').stroke('#000');
 
             doc.fontSize(h3).text(
-                `Cliente: ${venta.informacion}\nMonto Total: ${venta.simbolo} ${venta.total}\nMonto Cobrado: ${venta.simbolo} ${venta.cobrado}\nMonto Restante: ${venta.simbolo} ${venta.total - venta.cobrado}`,
+                `Cliente: ${venta.informacion}\nMonto Total: ${numberFormat(venta.total)}\nMonto Cobrado: ${numberFormat(venta.cobrado)}\nMonto Restante: ${numberFormat(venta.total - venta.cobrado)}`,
                 orgX,
                 cabeceraY + 25
             );
 
             doc.fontSize(h3).text(
-                `Dni/Ruc: ${venta.documento}\nMonto Inicial: ${venta.simbolo} ${data.inicial}\nN° Cuotas: ${venta.numCuota}\nComprobante: ${venta.nombre} ${venta.serie} - ${venta.numeracion}`,
+                `Dni/Ruc: ${venta.documento}\nMonto Inicial:  ${numberFormat(data.inicial)}\nN° Cuotas: ${venta.numCuota}\nComprobante: ${venta.nombre} ${venta.serie} - ${venta.numeracion}`,
                 medioX,
                 cabeceraY + 25
             );
 
             let lotes = data.lotes.map((item, index) => {
-                return [++index, item.lote, item.precio, item.areaLote, item.manzana]
+                return [++index, item.lote, numberFormat(item.precio), item.areaLote, item.manzana]
             })
 
             const lotesTabla = {
@@ -100,6 +100,8 @@ class RepCuota {
                 prepareRow: () => {
                     doc.font("Helvetica").fontSize(h3);
                 },
+                padding: 5,
+                columnSpacing: 5,
                 width: (doc.page.width - doc.options.margins.left - doc.options.margins.right),
                 x: orgX,
                 y: cabeceraY + 90,
@@ -107,11 +109,11 @@ class RepCuota {
             });
 
             let credito = venta.total - data.inicial
-            let arrayIni = [0, '', '', formatMoney(credito), ''];
+            let arrayIni = [0, '', '', numberFormat(credito), ''];
 
             let content = data.plazos.map((item, index) => {
                 credito = credito - item.monto
-                return [++index, item.fecha, item.estado === 1 ? 'COBRADO' : 'POR COBRAR', formatMoney(credito), formatMoney(item.monto)]
+                return [++index, item.fecha, item.estado === 1 ? 'COBRADO' : 'POR COBRAR', numberFormat(credito), numberFormat(item.monto)]
             })
 
             content.unshift(arrayIni)
@@ -124,9 +126,18 @@ class RepCuota {
 
             doc.table(table1, {
                 prepareHeader: () => doc.font("Helvetica-Bold").fontSize(h3),
-                prepareRow: () => {
-                    doc.font("Helvetica").fontSize(h3);
+                prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) => {             
+                    if(indexColumn === 2){
+                        if(row[2] === "COBRADO"){
+                            doc.font("Helvetica").fontSize(h3).fillColor("green");
+                        }                   
+                    }else{
+                        doc.font("Helvetica").fontSize(h3).fillColor("black");
+                    }
+                  
                 },
+                padding: 5,
+                columnSpacing: 5,
                 width: doc.page.width - doc.options.margins.left - doc.options.margins.right,
                 x: orgX,
                 y: doc.y + 10,
@@ -134,7 +145,6 @@ class RepCuota {
 
             doc.end();
             return getStream.buffer(doc);
-
         } catch (error) {
             return "Se genero un error al generar el reporte.";
         }

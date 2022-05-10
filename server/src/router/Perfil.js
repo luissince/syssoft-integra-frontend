@@ -100,18 +100,18 @@ router.post('/add', async function (req, res) {
 
         let menus = await conec.execute(connection, `SELECT idMenu,nombre FROM menu`);
         for (let menu of menus) {
-            await conec.execute(connection, `INSERT INTO permisomenu(idPerfil ,idMenu ,estado)values(?,?,?)`, [
+            await conec.execute(connection, `INSERT INTO permisoMenu(idPerfil ,idMenu ,estado)values(?,?,?)`, [
                 idPerfil,
                 menu.idMenu,
                 0
             ]);
 
-            let submenus = await conec.execute(connection, `SELECT idSubMenu  FROM submenu WHERE idMenu = ?`, [
+            let submenus = await conec.execute(connection, `SELECT idSubMenu  FROM subMenu WHERE idMenu = ?`, [
                 menu.idMenu
             ]);
 
             for (let submenu of submenus) {
-                await conec.execute(connection, `INSERT INTO permisosubmenu(idPerfil ,idMenu , idSubMenu ,estado)values(?,?,?,?)`, [
+                await conec.execute(connection, `INSERT INTO permisoSubMenu(idPerfil ,idMenu , idSubMenu ,estado)values(?,?,?,?)`, [
                     idPerfil,
                     menu.idMenu,
                     submenu.idSubMenu,
@@ -189,11 +189,11 @@ router.delete('/', async function (req, res) {
             req.query.idPerfil
         ]);
 
-        await conec.execute(connection, `DELETE FROM permisomenu WHERE idPerfil  = ?`, [
+        await conec.execute(connection, `DELETE FROM permisoMenu WHERE idPerfil  = ?`, [
             req.query.idPerfil
         ]);
 
-        await conec.execute(connection, `DELETE FROM permisosubmenu WHERE idPerfil  = ?`, [
+        await conec.execute(connection, `DELETE FROM permisoSubMenu WHERE idPerfil  = ?`, [
             req.query.idPerfil
         ]);
 

@@ -84,7 +84,7 @@ class Factura {
             return { "result": resultLista, "total": total[0].Total }
 
         } catch (error) {
-            return "Error interno de conexión, intente nuevamente."
+            return "Se produjo un error de servidor, intente nuevamente.";
         }
     }
 
@@ -503,11 +503,10 @@ class Factura {
             await conec.commit(connection);
             return "insert";
         } catch (error) {
-            console.log(error)
             if (connection != null) {
                 await conec.rollback(connection);
             }
-            return "Error interno de conexión, intente nuevamente."
+            return "Se produjo un error de servidor, intente nuevamente.";
         }
     }
 
@@ -594,7 +593,7 @@ class Factura {
             if (connection != null) {
                 await conec.rollback(connection);
             }
-            return "Error interno de conexión, intente nuevamente.";
+            return "Se produjo un error de servidor, intente nuevamente.";
         }
     }
 
@@ -658,12 +657,12 @@ class Factura {
                 return "Datos no encontrados";
             }
         } catch (error) {
-            return "Error interno de conexión, intente nuevamente.";
+            return "Se produjo un error de servidor, intente nuevamente.";
         }
     }
 
     async credito(req) {
-        try {
+        try { 
             let lista = await conec.query(`SELECT 
             v.idVenta, 
             cl.idCliente,
@@ -672,8 +671,8 @@ class Factura {
             cm.nombre, 
             v.serie, 
             v.numeracion, 
-            v.numCuota, 
-            (SELECT IFNULL(MIN(fecha),'') FROM plazo WHERE estado = 0) AS fechaPago,
+            (SELECT IFNULL(COUNT(*), 0) FROM plazo AS p WHERE p.estado = 0 AND p.idVenta = v.idVenta) AS numCuota, 
+            (SELECT IFNULL(MIN(p.fecha),'') FROM plazo AS p WHERE p.estado = 0 AND p.idVenta = v.idVenta) AS fechaPago,
             v.fecha, 
             v.hora, 
             v.estado,
@@ -742,7 +741,7 @@ class Factura {
 
             return { "result": resultLista, "total": total[0].Total }
         } catch (error) {
-            return "Error interno de conexión, intente nuevamente."
+            return "Se produjo un error de servidor, intente nuevamente.";
         }
     }
 
@@ -815,7 +814,7 @@ class Factura {
             return { "venta": venta[0], "plazos": plazos, "lotes": lotes, "inicial": inicial[0].inicial }
 
         } catch (error) {
-            return "Error interno de conexión, intente nuevamente."
+            return "Se produjo un error de servidor, intente nuevamente.";
         }
     }
 
@@ -833,10 +832,9 @@ class Factura {
 
             return ventas;
         } catch (error) {
-            console.log(error);
-            return "Error interno de conexión, intente nuevamente."
+            return "Se produjo un error de servidor, intente nuevamente.";
         }
     }
 }
 
-module.exports = Factura
+module.exports = Factura;

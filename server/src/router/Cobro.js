@@ -115,7 +115,7 @@ router.get('/repgeneralcobros', async function (req, res) {
         if (typeof data === 'string') {
             res.status(500).send(data);
         } else {
-            res.setHeader('Content-disposition', `inline; filename=REPORTE DE COBROS DEL ${req.query.fechaIni} AL ${req.query.fechaFin}.pdf`);
+            res.setHeader('Content-disposition', `inline; filename=REPORTE DE COBROS Y GASTOS DEL ${req.query.fechaIni} AL ${req.query.fechaFin}.pdf`);
             res.contentType("application/pdf");
             res.send(data);
         }

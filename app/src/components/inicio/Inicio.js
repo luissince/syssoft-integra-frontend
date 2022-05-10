@@ -40,6 +40,7 @@ import Gastos from '../tesoreria/Gastos';
 import RepVentas from '../reporte/RepVentas';
 import RepFinanciero from '../reporte/RepFinanciero';
 import RepLotes from '../reporte/RepLotes';
+import RepClientes from '../reporte/RepClientes';
 
 import logoEmpresa from '../../recursos/images/INMOBILIARIA.png';
 
@@ -272,6 +273,10 @@ class Inicio extends React.Component {
                         <Route
                             path={`${path}/replotes`}
                             render={(props) => <RepLotes {...props} />}
+                        />
+                        <Route 
+                            path={`${path}/RepClientes`}
+                            render={(props) => <RepClientes {...props} />}
                         />
                         <Route component={Page404} />
                     </Switch>

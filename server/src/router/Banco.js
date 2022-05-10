@@ -274,7 +274,6 @@ router.get('/repdetallebanco', async function (req, res) {
 
     } else {
         res.status(500).send(detalle);
-
     }
 });
 

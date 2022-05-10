@@ -1,303 +1,125 @@
 const express = require('express');
 const router = express.Router();
-const { currentDate, currentTime } = require('../tools/Tools');
-const Conexion = require('../database/Conexion');
-const conec = new Conexion()
+const { decrypt } = require('../tools/CryptoJS');
+const Sede = require('../services/Sede');
+const Cliente = require('../services/Cliente');
+const RepCliente = require('../report/RepCliente');
+
+const sede = new Sede();
+const cliente = new Cliente();
+const repCliente = new RepCliente();
 
 router.get('/list', async function (req, res) {
-    try {
-        let lista = await conec.query(`SELECT 
-        c.idCliente ,
-        td.nombre as tipodocumento,
-        c.documento,
-        c.informacion,
-        c.celular,
-        c.telefono,
-        c.direccion,
-        c.estado
-        FROM cliente AS c
-        INNER JOIN tipoDocumento AS td ON td.idTipoDocumento = c.idTipoDocumento
-        WHERE 
-        ? = 0
-        OR
-        ? = 1 and c.documento like concat(?,'%')
-        OR
-        ? = 1 and c.informacion like concat(?,'%')
-        ORDER BY c.fecha DESC, c.hora DESC
-        LIMIT ?,?`, [
-            parseInt(req.query.opcion),
-
-            parseInt(req.query.opcion),
-            req.query.buscar,
-
-            parseInt(req.query.opcion),
-            req.query.buscar,
-
-            parseInt(req.query.posicionPagina),
-            parseInt(req.query.filasPorPagina)
-        ])
-
-        let resultLista = lista.map(function (item, index) {
-            return {
-                ...item,
-                id: (index + 1) + parseInt(req.query.posicionPagina)
-            }
-        });
-
-        let total = await conec.query(`SELECT COUNT(*) AS Total 
-        FROM cliente AS c
-        INNER JOIN tipoDocumento AS td ON td.idTipoDocumento = c.idTipoDocumento
-        WHERE 
-        ? = 0
-        OR
-        ? = 1 and c.documento like concat(?,'%')
-        OR
-        ? = 1 and c.informacion like concat(?,'%')`, [
-
-            parseInt(req.query.opcion),
-
-            parseInt(req.query.opcion),
-            req.query.buscar,
-
-            parseInt(req.query.opcion),
-            req.query.buscar
-        ]);
-
-        res.status(200).send({ "result": resultLista, "total": total[0].Total })
-
-    } catch (error) {
-        console.log(error)
-        res.status(500).send("Error interno de conexión, intente nuevamente.")
+    const result = await cliente.list(req)
+    if (typeof result === 'object') {
+        res.status(200).send(result);
+    } else {
+        res.status(500).send(result);
     }
 });
 
 router.post('/add', async function (req, res) {
-    let connection = null;
-    try {
-        connection = await conec.beginTransaction();
-
-        let result = await conec.execute(connection, 'SELECT idCliente FROM cliente');
-        let idCliente = "";
-        if (result.length != 0) {
-
-            let quitarValor = result.map(function (item) {
-                return parseInt(item.idCliente.replace("CL", ''));
-            });
-
-            let valorActual = Math.max(...quitarValor);
-            let incremental = valorActual + 1;
-            let codigoGenerado = "";
-            if (incremental <= 9) {
-                codigoGenerado = 'CL000' + incremental;
-            } else if (incremental >= 10 && incremental <= 99) {
-                codigoGenerado = 'CL00' + incremental;
-            } else if (incremental >= 100 && incremental <= 999) {
-                codigoGenerado = 'CL0' + incremental;
-            } else {
-                codigoGenerado = 'CL' + incremental;
-            }
-
-            idCliente = codigoGenerado;
-        } else {
-            idCliente = "CL0001";
-        }
-
-        await conec.execute(connection, `INSERT INTO cliente(
-            idCliente, 
-            idTipoDocumento,
-            documento,
-            informacion,
-            celular,
-            telefono,
-            fechaNacimiento,
-            email, 
-            genero, 
-            direccion,
-            idUbigeo, 
-            estadoCivil,
-            estado, 
-            observacion,
-            fecha,
-            hora,
-            idUsuario)
-            VALUES(?, ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, [
-            idCliente,
-            req.body.idTipoDocumento,
-            req.body.documento,
-            req.body.informacion,
-            req.body.celular,
-            req.body.telefono,
-            req.body.fechaNacimiento,
-            req.body.email,
-            req.body.genero,
-            req.body.direccion,
-            req.body.idUbigeo,
-            req.body.estadoCivil,
-            req.body.estado,
-            req.body.observacion,
-            currentDate(),
-            currentTime(),
-            req.body.idUsuario,
-        ])
-
-        await conec.commit(connection);
-        res.status(200).send('Datos insertados correctamente')
-    } catch (error) {
-        if (connection != null) {
-            conec.rollback(connection);
-        }
-        res.status(500).send("Se produjo un error de servidor, intente nuevamente.");
-        console.log(error)
+    const result = await cliente.add(req)
+    if (result === 'insert') {
+        res.status(201).send("Se registró correctamente el cliente.");
+    } else {
+        res.status(500).send(result);
     }
 });
 
 router.get('/id', async function (req, res) {
-    try {
-
-        let result = await conec.query(`SELECT 
-        cl.idCliente,
-        cl.idTipoDocumento,
-        cl.documento,
-        cl.informacion,
-        cl.celular,
-        cl.telefono, 
-        DATE_FORMAT(cl.fechaNacimiento,'%d/%m/%Y') as fecha,
-        cl.email, 
-        cl.genero,  
-        cl.direccion,
-        IFNULL(cl.idUbigeo,0) AS idUbigeo,
-        IFNULL(u.ubigeo, '') AS ubigeo,
-        IFNULL(u.departamento, '') AS departamento,
-        IFNULL(u.provincia, '') AS provincia,
-        IFNULL(u.distrito, '') AS distrito,
-        cl.estadoCivil,
-        cl.estado, 
-        cl.observacion
-        FROM cliente AS cl 
-        LEFT JOIN ubigeo AS u ON u.idUbigeo = cl.idUbigeo
-        WHERE 
-        cl.idCliente = ?`, [
-            req.query.idCliente,
-        ]);
-
-        if (result.length > 0) {
-            res.status(200).send(result[0]);
-        } else {
-            console.log(result)
-            res.status(400).send("Datos no encontrados");
-        }
-
-    } catch (error) {
-        console.log(error)
-        res.status(500).send("Error interno de conexión, intente nuevamente.");
+    const result = await cliente.id(req)
+    if (typeof result === 'object') {
+        res.status(200).send(result);
+    } else {
+        res.status(500).send(result);
     }
-
 });
 
 router.post('/update', async function (req, res) {
-    let connection = null;
-    try {
-
-        connection = await conec.beginTransaction();
-        await conec.execute(connection, `UPDATE cliente SET
-        idTipoDocumento=?, 
-        documento=?,
-        informacion=?, 
-        celular=?,
-        telefono=?,
-        fechaNacimiento=?,
-        email=?,
-        genero=?, 
-        direccion=?, 
-        idUbigeo=?,
-        estadoCivil=?, 
-        estado=?,
-        observacion=?,
-        idUsuario=?
-        WHERE idCliente=?`, [
-            req.body.idTipoDocumento,
-            req.body.documento,
-            req.body.informacion,
-            req.body.celular,
-            req.body.telefono,
-            req.body.fechaNacimiento,
-            req.body.email,
-            req.body.genero,
-            req.body.direccion,
-            req.body.idUbigeo,
-            req.body.estadoCivil,
-            req.body.estado,
-            req.body.observacion,
-            req.body.idUsuario,
-            req.body.idCliente
-        ])
-
-        await conec.commit(connection)
-        res.status(200).send('Los datos se actualizaron correctamente.')
-    } catch (error) {
-        if (connection != null) {
-            conec.rollback(connection);
-        }
-        res.status(500).send("Se produjo un error de servidor, intente nuevamente.");
-        console.log(error)
+    const result = await cliente.add(req)
+    if (result === 'update') {
+        res.status(201).send("Se actualizó correctamente el cliente.");
+    } else {
+        res.status(500).send(result);
     }
 });
 
 router.delete('/', async function (req, res) {
-    let connection = null;
-    try {
-        connection = await conec.beginTransaction();
-
-        let cobro = await conec.execute(connection, `SELECT * FROM cobro WHERE idCliente = ?`, [
-            req.query.idCliente
-        ]);
-
-        if (cobro.length > 0) {
-            await conec.rollback(connection);
-            res.status(400).send('No se puede eliminar el cliente ya que esta ligada a un cobro.')
-            return;
-        }
-
-        let gasto = await conec.execute(connection, `SELECT * FROM gasto WHERE idCliente = ?`, [
-            req.query.idCliente
-        ]);
-
-        if (gasto.length > 0) {
-            await conec.rollback(connection);
-            res.status(400).send('No se puede eliminar el cliente ya que esta ligada a un gasto.')
-            return;
-        }
-
-        let venta = await conec.execute(connection, `SELECT * FROM venta WHERE idCliente = ?`, [
-            req.query.idCliente
-        ]);
-
-        if (venta.length > 0) {
-            await conec.rollback(connection);
-            res.status(400).send('No se puede eliminar el cliente ya que esta ligada a una venta.')
-            return;
-        }
-
-        await conec.execute(connection, `DELETE FROM cliente WHERE idCliente  = ?`, [
-            req.query.idCliente
-        ]);
-
-        await conec.commit(connection);
-        res.status(200).send('Se eliminó correctamente el banco.');
-    } catch (error) {
-        if (connection != null) {
-            await conec.rollback(connection);
-        }
-        res.status(500).send("Error interno de conexión, intente nuevamente.");
+    const result = await cliente.delete(req)
+    if (result === 'delete') {
+        res.status(201).send("Se eliminó correctamente el cliente.");
+    } else {
+        res.status(500).send(result);
     }
 });
 
 router.get('/listcombo', async function (req, res) {
-    try {
-        let result = await conec.query('SELECT idCliente, documento, informacion FROM cliente');
-        res.status(200).send(result);
-    } catch (error) {
-        res.status(500).send("Error interno de conexión, intente nuevamente.");
+    const result = await cliente.listcombo(req)
+    if (Array.isArray(result)) {
+        res.status(201).send(result);
+    } else {
+        res.status(500).send(result);
+    }
+});
+
+router.get('/repcliente', async function (req, res) {
+    const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
+    req.query.idSede = decryptedData.idSede;
+    req.query.fechaIni = decryptedData.fechaIni;
+    req.query.fechaFin = decryptedData.fechaFin;
+    req.query.idCliente = decryptedData.idCliente;
+    req.query.cliente = decryptedData.cliente;
+
+    const sedeInfo = await sede.infoSedeReporte(req);
+
+    if (typeof sedeInfo !== 'object') {
+        res.status(500).send(sedeInfo);
+        return;
+    }
+
+    const detalle = await cliente.listapagos(req)
+
+    if (Array.isArray(detalle)) {
+        let data = await repCliente.repGeneral(req, sedeInfo, detalle);
+
+        if (typeof data === 'string') {
+            res.status(500).send(data);
+        } else {
+            res.setHeader('Content-disposition', `inline; filename=REPORTE DE APORTACIONES DE LOS CLIENTES.pdf`);
+            res.contentType("application/pdf");
+            res.send(data);
+        }
+    } else {
+        res.status(500).send(detalle);
+    }
+});
+
+router.get('/repdeduas', async function (req, res) {
+    const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
+    req.query.idSede = decryptedData.idSede;
+
+    const sedeInfo = await sede.infoSedeReporte(req);
+
+    if (typeof sedeInfo !== 'object') {
+        res.status(500).send(sedeInfo);
+        return;
+    }
+
+    const detalle = await cliente.listadeudas(req)
+
+    if (Array.isArray(detalle)) {
+        let data = await repCliente.repDeudas(req, sedeInfo, detalle);
+
+        if (typeof data === 'string') {
+            res.status(500).send(data);
+        } else {
+            res.setHeader('Content-disposition', `inline; filename=LISTA DE DEUDAS.pdf`);
+            res.contentType("application/pdf");
+            res.send(data);
+        }
+    } else {
+        res.status(500).send(detalle);
     }
 });
 

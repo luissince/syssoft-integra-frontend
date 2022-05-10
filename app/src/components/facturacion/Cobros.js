@@ -1,6 +1,7 @@
 import React from 'react';
 import axios from 'axios';
 import {
+    numberFormat,
     formatMoney,
     timeForma24,
     spinnerLoading,
@@ -232,7 +233,7 @@ class Cobros extends React.Component {
                                                         <td>{item.fecha}{<br />}{timeForma24(item.hora)}</td>
                                                         <td>{item.banco}</td>
                                                         <td>{item.detalle}</td>
-                                                        <td>{item.simbolo + " " + formatMoney(item.monto)}</td>
+                                                        <td>{numberFormat(item.monto)}</td>
                                                         <td className="text-center">
                                                             <button className="btn btn-outline-info btn-sm" title="Detalle" onClick={() => {
                                                                 this.props.history.push({ pathname: `${this.props.location.pathname}/detalle`, search: "?idCobro=" + item.idCobro })

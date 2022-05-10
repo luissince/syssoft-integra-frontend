@@ -4,6 +4,7 @@ import CryptoJS from 'crypto-js';
 import {
     spinnerLoading,
     dateFormat,
+    numberFormat,
     formatMoney
 } from '../tools/Tools';
 import { connect } from 'react-redux';
@@ -177,9 +178,9 @@ class Creditos extends React.Component {
                                 <thead>
                                     <tr>
                                         <th width="5%" className="text-center">#</th>
-                                        <th width="10%">Cliente</th>
-                                        <th width="10%">Comprobante</th>
-                                        <th width="10%">N° Cuotas</th>
+                                        <th width="15%">Cliente</th>
+                                        <th width="15%">Comprobante</th>
+                                        <th width="15%">Cuotas Pendientes</th>
                                         <th width="10%">Sig. Pago</th>
                                         <th width="10%">Total</th>
                                         <th width="10%">Cobrado</th>
@@ -209,9 +210,9 @@ class Creditos extends React.Component {
                                                         <td>{item.nombre}{<br />}{item.serie + "-" + item.numeracion}</td>
                                                         <td>{item.numCuota === 1 ? item.numCuota + " Cuota" : item.numCuota + " Cuotas"}</td>
                                                         <td>{item.fechaPago === "" ? "-" : dateFormat(item.fechaPago)}</td>
-                                                        <td className="text-right">{item.simbolo + " " + formatMoney(item.total)}</td>
-                                                        <td className="text-right text-success">{item.simbolo + " " + formatMoney(item.cobrado)}</td>
-                                                        <td className="text-right text-danger">{item.simbolo + " " + formatMoney(item.total - item.cobrado)}</td>
+                                                        <td className="text-right">{numberFormat(item.total)}</td>
+                                                        <td className="text-right text-success">{numberFormat(item.cobrado)}</td>
+                                                        <td className="text-right text-danger">{numberFormat(item.total - item.cobrado)}</td>
                                                         <td className="text-center">
                                                             <button
                                                                 className="btn btn-outline-info btn-sm"

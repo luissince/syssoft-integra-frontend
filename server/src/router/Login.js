@@ -48,7 +48,7 @@ router.get('/createsession', async function (req, res) {
                 m.ruta,
                 pm.estado,
                 m.icon 
-                FROM permisomenu as pm 
+                FROM permisoMenu as pm 
                 INNER JOIN perfil as p on pm.idPerfil = p.idPerfil
                 INNER JOIN menu as m on pm.idMenu = m.idMenu
                 WHERE p.idPerfil = ?
@@ -63,9 +63,9 @@ router.get('/createsession', async function (req, res) {
                 sm.nombre,
                 sm.ruta,
                 psm.estado
-                FROM permisosubmenu as psm
+                FROM permisoSubMenu as psm
                 INNER JOIN perfil AS p ON psm.idPerfil = p.idPerfil
-                INNER JOIN submenu AS sm on sm.idMenu = psm.idMenu and sm.idSubMenu = psm.idSubMenu
+                INNER JOIN subMenu AS sm on sm.idMenu = psm.idMenu and sm.idSubMenu = psm.idSubMenu
                 WHERE psm.idPerfil = ?
                 `, [
                     usuario[0].idPerfil,
