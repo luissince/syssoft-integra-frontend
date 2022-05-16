@@ -547,9 +547,16 @@ summary {
   cursor: pointer;
 }
 
+.cursor-pointer {
+  cursor: pointer;
+}
+
+
 template {
   display: none;
 }
+
+
 
 [hidden] {
   display: none !important;
@@ -605,6 +612,19 @@ h6,
 .lead {
   font-size: 1.25rem;
   font-weight: 300;
+}
+
+.display-block {
+  display: block !important;
+}
+
+.display-initial {
+  display: initial !important;
+}
+
+
+.display-none {
+  display: none !important;
 }
 
 .display-1 {

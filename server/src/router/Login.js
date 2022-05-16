@@ -71,9 +71,22 @@ router.get('/createsession', async function (req, res) {
                     usuario[0].idPerfil,
                 ]);
 
+                let privilegio = await conec.query(`SELECT
+                pp.idPrivilegio,
+                pp.idSubMenu,
+                pp.idMenu,
+                pv.nombre,
+                pp.estado
+                FROM permisoPrivilegio AS pp
+                INNER JOIN perfil AS p ON p.idPerfil = pp.idPerfil
+                INNER JOIN privilegio AS pv ON pv.idPrivilegio = pp.idPrivilegio AND pv.idSubMenu = pp.idSubMenu AND pv.idMenu = pp.idMenu
+                WHERE pp.idPerfil = ?`, [
+                    usuario[0].idPerfil,
+                ]);
+
                 const token = await createToken(user, 'userkeylogin');
 
-                res.status(200).send({ ...user, token, menu, submenu })
+                res.status(200).send({ ...user, token, menu, submenu, privilegio })
             } else {
                 res.status(400).send("Datos incorrectos, intente nuevamente.")
             }

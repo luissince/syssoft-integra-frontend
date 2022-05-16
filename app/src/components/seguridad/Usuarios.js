@@ -8,7 +8,8 @@ import {
     ModalAlertInfo,
     ModalAlertSuccess,
     ModalAlertWarning,
-    spinnerLoading
+    spinnerLoading,
+    statePrivilegio
 } from '../tools/Tools';
 import Paginacion from '../tools/Paginacion';
 
@@ -17,6 +18,10 @@ class Usuarios extends React.Component {
         super(props);
         this.state = {
             resetClave: '',
+
+            add: statePrivilegio(this.props.token.userToken.menus[1].submenu[1].privilegio[0].estado),
+            edit: statePrivilegio(this.props.token.userToken.menus[1].submenu[1].privilegio[1].estado),
+            reset: statePrivilegio(this.props.token.userToken.menus[1].submenu[1].privilegio[2].estado),
 
             loading: false,
             lista: [],
@@ -28,7 +33,7 @@ class Usuarios extends React.Component {
             messageTable: 'Cargando información...',
             messagePaginacion: 'Mostranto 0 de 0 Páginas'
         }
-
+        
         this.refResetClave = React.createRef();
 
         this.refTxtSearch = React.createRef();
@@ -218,7 +223,7 @@ class Usuarios extends React.Component {
                         <div className="form-group">
                             <button className="btn btn-outline-info" onClick={() => {
                                 this.props.history.push({ pathname: `${this.props.location.pathname}/proceso` })
-                            }}>
+                            }} disabled={!this.state.add}>
                                 <i className="bi bi-file-plus"></i> Nuevo Registro
                             </button>
                             {" "}
@@ -270,12 +275,21 @@ class Usuarios extends React.Component {
                                                         <td>{item.representante === 1 ? "SI" : "NO"}</td>
                                                         <td className="text-center"><div className={`badge ${item.estado === 1 ? "badge-info" : "badge-danger"}`}>{item.estado === 1 ? "ACTIVO" : "INACTIVO"}</div></td>
                                                         <td>
-                                                            <button className="btn btn-outline-warning btn-sm" title="Editar" onClick={() => {
+                                                            <button 
+                                                            className="btn btn-outline-warning btn-sm"
+                                                             title="Editar" 
+                                                             onClick={() => {
                                                                 this.props.history.push({ pathname: `${this.props.location.pathname}/proceso`, search: "?idUsuario=" + item.idUsuario })
-                                                            }}><i className="bi bi-pencil"></i></button>
+                                                            }}
+                                                            disabled={!this.state.edit}><i className="bi bi-pencil"></i></button>
                                                         </td>
                                                         <td>
-                                                            <button className="btn btn-outline-info btn-sm" title="Resetear" onClick={() => this.openReset(item.idUsuario)}><i className="bi bi-key"></i></button>
+                                                            <button 
+                                                            className="btn btn-outline-info btn-sm"
+                                                             title="Resetear" 
+                                                             onClick={() => this.openReset(item.idUsuario)}
+                                                             disabled={!this.state.reset}
+                                                             ><i className="bi bi-key"></i></button>
                                                         </td>
                                                     </tr>
                                                 )

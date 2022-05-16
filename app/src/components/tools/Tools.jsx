@@ -1,6 +1,11 @@
 import bootstrap from "../../recursos/js/bootstrap";
 import Swal from "../../recursos/js/sweetalert";
 
+export function statePrivilegio(value){
+  if(value === undefined) return false;
+  return value === 1 ? true : false;
+}
+
 export function formatMoney(
   amount,
   decimalCount = 2,

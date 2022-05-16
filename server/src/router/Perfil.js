@@ -117,16 +117,36 @@ router.post('/add', async function (req, res) {
                     submenu.idSubMenu,
                     0
                 ]);
+
+                let privilegios = await conec.execute(connection, `SELECT idPrivilegio, idSubMenu, idMenu FROM privilegio WHERE idSubMenu = ? AND idMenu=?`, [
+                    submenu.idSubMenu,
+                    menu.idMenu
+                ]);
+
+                for (let privilegio of privilegios){
+                    await conec.execute(connection, `INSERT INTO permisoPrivilegio(idPrivilegio, idSubMenu ,idMenu, idPerfil, estado) VALUES (?,?,?,?,?)`,[
+                        privilegio.idPrivilegio,
+                        privilegio.idSubMenu,
+                        privilegio.idMenu,
+                        idPerfil,
+                        0
+                    ])
+
+                    // console.log(privilegio)
+                }
             }
         }
+
 
         await conec.commit(connection);
         res.status(200).send('Datos insertados correctamente')
     } catch (error) {
+        console.log(error)
+
         if (connection != null) {
             await conec.rollback(connection);
         }
-        res.status(500).send("Error de servidor");
+        res.status(500).send("Error de servidor")
     }
 });
 

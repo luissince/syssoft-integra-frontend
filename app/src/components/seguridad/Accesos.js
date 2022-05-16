@@ -1,7 +1,14 @@
 import React from 'react';
 import axios from 'axios';
-import NavTree from '../../recursos/js/tree.js';
-import { ModalAlertInfo, ModalAlertSuccess, ModalAlertWarning, spinnerLoading } from '../tools/Tools';
+import { connect } from 'react-redux';
+import Tree from '../../recursos/js/treeone.js';
+import {
+  ModalAlertInfo,
+  ModalAlertSuccess,
+  ModalAlertWarning,
+  spinnerLoading,
+  statePrivilegio
+} from '../tools/Tools';
 
 class Accesos extends React.Component {
   constructor(props) {
@@ -11,8 +18,12 @@ class Accesos extends React.Component {
       idPerfil: "",
       perfiles: [],
       menu: [],
+      catalogo: [],
       loading: true,
       msgLoading: 'Cargando datos...',
+
+      save: statePrivilegio(this.props.token.userToken.menus[1].submenu[2].privilegio[0].estado),
+      update: statePrivilegio(this.props.token.userToken.menus[1].submenu[2].privilegio[1].estado),
 
       messageWarning: ""
     }
@@ -26,7 +37,7 @@ class Accesos extends React.Component {
     });
   }
 
-  componentDidMount() {
+  async componentDidMount() {
     this.loadData();
   }
 
@@ -61,25 +72,45 @@ class Accesos extends React.Component {
       });
 
       const accesos = await axios.get("/api/acceso/accesos", {
-        // signal: this.abortControllerView.signal,
+        signal: this.abortControllerView.signal,
         params: {
           idPerfil: id
         }
       });
 
       let menus = accesos.data.menu.map((item, index) => {
-
         let submenu = [];
-
         for (let value of accesos.data.submenu) {
+          let privilegio = [];
+
           if (item.idMenu === value.idMenu) {
-            submenu.push(value);
+
+            for (let content of accesos.data.privilegio) {
+              if (content.idSubMenu === value.idSubMenu && item.idMenu === content.idMenu) {
+                privilegio.push({
+                  "estado": content.estado,
+                  "idMenu": content.idMenu,
+                  "idPrivilegio": content.idPrivilegio,
+                  "idSubMenu": content.idSubMenu,
+                  "nombre": content.nombre,
+                  "children": []
+                });
+              }
+            }
+
+            submenu.push({
+              "estado": value.estado,
+              "idMenu": value.idMenu,
+              "idSubMenu": value.idSubMenu,
+              "nombre": value.nombre,
+              "children": privilegio
+            });
           }
         }
 
         return {
           ...item,
-          submenu
+          "children": submenu
         }
       });
 
@@ -88,21 +119,8 @@ class Accesos extends React.Component {
         loading: false,
       });
 
-      NavTree.createBySelector("#nav-tree", {
-        searchable: false,
-        showEmptyGroups: true,
+      new Tree("#tree1");
 
-        groupOpenIconClass: "fa",
-        groupOpenIcon: "fa-folder-open",
-
-        groupCloseIconClass: "fa",
-        groupCloseIcon: "fa-folder",
-
-        linkIconClass: "fa",
-        linkIcon: "fa-th",
-
-        searchPlaceholderText: "Search",
-      });
     } catch (error) {
       console.log(error)
     }
@@ -131,11 +149,18 @@ class Accesos extends React.Component {
         menu.estado = event.target.checked ? 1 : 0;
         break;
       } else {
-        if (menu.submenu.length !== 0) {
-          for (let submenu of menu.submenu) {
-            if ((submenu.idSubMenu + menu.idMenu) === event.target.value) {
+        if (menu.children.length !== 0) {
+          for (let submenu of menu.children) {
+            if ((menu.idMenu + submenu.idSubMenu) === event.target.value) {
               submenu.estado = event.target.checked ? 1 : 0;
               break;
+            } else {
+              for (let privilegio of submenu.children) {
+                if ((menu.idMenu + submenu.idSubMenu + privilegio.idPrivilegio) === event.target.value) {
+                  privilegio.estado = event.target.checked ? 1 : 0;
+                  break;
+                }
+              }
             }
           }
         }
@@ -154,6 +179,33 @@ class Accesos extends React.Component {
       ModalAlertInfo("Acceso", "Procesando información...");
 
       let result = await axios.post('/api/acceso/save', {
+        "idPerfil": this.state.idPerfil,
+        "menu": this.state.menu
+      });
+
+      ModalAlertSuccess("Acceso", result.data, async () => {
+        await this.setStateAsync({
+          idPerfil: "",
+          menu: [],
+        });
+      });
+
+    } catch (error) {
+      ModalAlertWarning("Acceso",
+        "Se produjo un error un interno, intente nuevamente.");
+    }
+  }
+
+  async onEventUpdateData() {
+    if (this.state.idPerfil === "") {
+      await this.setStateAsync({ messageWarning: "Seleccione el perfil." })
+      return;
+    }
+    try {
+
+      ModalAlertInfo("Acceso", "Procesando información...");
+
+      let result = await axios.post('/api/acceso/updatedata', {
         "idPerfil": this.state.idPerfil,
         "menu": this.state.menu
       });
@@ -197,7 +249,6 @@ class Accesos extends React.Component {
             null
         }
 
-
         <div className='row'>
           <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
             <label>Empresa: </label>
@@ -231,271 +282,8 @@ class Accesos extends React.Component {
         </div>
 
         <div className="row">
-          <div className="col-xl-12 col-lg-12 col-md-12 col-sm-4 col-12">
-            <ul id="nav-tree">
-              {
-                this.state.menu.map((item, index) => (
-                  item.submenu.length === 0 ?
-                    <li key={index} data-value={`li${index + 1}`}>
-                      <div className="form-check">
-                        <input
-                          className="form-check-input"
-                          type="checkbox"
-                          id={`id${item.nombre}`}
-                          value={item.idMenu}
-                          checked={item.estado === 1 ? true : false}
-                          onChange={this.handleCheck} />
-                        <label className="form-check-label" htmlFor={`id${item.nombre}`}>
-                          {item.nombre}
-                        </label>
-                      </div>
-                    </li>
-                    :
-                    <li key={index} id={`li${index + 1}`} data-value={`li${index + 1}`}>
-                      <button type="button" className="btn">
-                        {item.nombre}
-                      </button>
-                      <ul>
-                        {
-                          item.submenu.map((submenu, index) => (
-                            <li key={index} id={`li${index + 1}`} data-value={`li${index + 1}`} >
-                              <div className="form-check">
-                                <input
-                                  className="form-check-input"
-                                  type="checkbox"
-                                  id={`id${submenu.nombre}`}
-                                  value={submenu.idSubMenu + item.idMenu}
-                                  checked={submenu.estado === 1 ? true : false}
-                                  onChange={this.handleCheck} />
-                                <label className="form-check-label" htmlFor={`id${submenu.nombre}`}>
-                                  {submenu.nombre}
-                                </label>
-                              </div>
-                            </li>
-                          ))
-                        }
-                      </ul>
-                    </li>
-                ))
-              }
-              {/*
-              <li data-value="li1">
-                <div className="form-check">
-                  <input className="form-check-input" type="checkbox" value="" id="idDashboard" />
-                  <label className="form-check-label" htmlFor="idDashboard">
-                    Dashboard
-                  </label>
-                </div>
-              </li>
-
-              <li id="li2" data-value="li2">
-                <button type="button" className="btn">
-                  Seguridad
-                </button>
-                <ul>
-                  <li id="li3" data-value="li3">
-                    <div className="form-check">
-                      <input className="form-check-input" type="checkbox" value="" id="idPerfiles" />
-                      <label className="form-check-label" htmlFor="idPerfiles">
-                        Perfiles
-                      </label>
-                    </div>
-                  </li>
-                  <li id="li4" data-value="li4">
-                    <div className="form-check">
-                      <input className="form-check-input" type="checkbox" value="" id="idUsuarios" />
-                      <label className="form-check-label" htmlFor="idUsuarios">
-                        Usuarios
-                      </label>
-                    </div>
-                  </li>
-                  <li id="li5" data-value="li5">
-                    <div className="form-check">
-                      <input className="form-check-input" type="checkbox" value="" id="idAccesos" />
-                      <label className="form-check-label" htmlFor="idAccesos">
-                        Accessos
-                      </label>
-                    </div>
-                  </li>
-                </ul>
-              </li>
-
-              <li id="li6" data-value="li6">
-                <button type="button" className="btn">
-                  Facturación
-                </button>
-                <ul>
-                  <li id="li7" data-value="li7">
-                    <div className="form-check">
-                      <input className="form-check-input" type="checkbox" value="" id="idClientes" />
-                      <label className="form-check-label" htmlFor="idClientes">
-                        Clientes
-                      </label>
-                    </div>
-                  </li>
-                  <li id="li8" data-value="li8">
-                    <div className="form-check">
-                      <input className="form-check-input" type="checkbox" value="" id="idVentas" />
-                      <label className="form-check-label" htmlFor="idVentas">
-                        Ventas
-                      </label>
-                    </div>
-                  </li>
-                  <li id="li9" data-value="li9">
-                    <div className="form-check">
-                      <input className="form-check-input" type="checkbox" value="" id="idCreditos" />
-                      <label className="form-check-label" htmlFor="idCreditos">
-                        Créditos
-                      </label>
-                    </div>
-                  </li>
-                  <li id="li10" data-value="li10">
-                    <div className="form-check">
-                      <input className="form-check-input" type="checkbox" value="" id="idCobros" />
-                      <label className="form-check-label" htmlFor="idCobros">
-                        Cobros
-                      </label>
-                    </div>
-                  </li>
-                </ul>
-              </li>
-
-              <li id="li11" data-value="li11">
-                <button type="button" className="btn">
-                  Logistica
-                </button>
-                <ul>
-                  <li id="li12" data-value="li12">
-                    <div className="form-check">
-                      <input className="form-check-input" type="checkbox" value="" id="idManzanas" />
-                      <label className="form-check-label" htmlFor="idManzanas">
-                        Manzanas
-                      </label>
-                    </div>
-                  </li>
-                  <li id="li13" data-value="li13">
-                    <div className="form-check">
-                      <input className="form-check-input" type="checkbox" value="" id="idLotes" />
-                      <label className="form-check-label" htmlFor="idLotes">
-                        Lotes
-                      </label>
-                    </div>
-                  </li>
-                </ul>
-              </li>
-
-              <li id="li14" data-value="li14">
-                <button type="button" className="btn">
-                  Tesorería
-                </button>
-                <ul>
-                  <li id="li15" data-value="li15">
-                    <div className="form-check">
-                      <input className="form-check-input" type="checkbox" value="" id="idConceptos" />
-                      <label className="form-check-label" htmlFor="idConceptos">
-                        Conceptos
-                      </label>
-                    </div>
-                  </li>
-                  <li id="li16" data-value="li16">
-                    <div className="form-check">
-                      <input className="form-check-input" type="checkbox" value="" id="idGastos" />
-                      <label className="form-check-label" htmlFor="idGastos">
-                        Gastos
-                      </label>
-                    </div>
-                  </li>
-                </ul>
-              </li>
-
-              <li id="li7" data-value="li17">
-                <button type="button" className="btn">
-                  Ajustes
-                </button>
-                <ul>
-                  <li id="li18" data-value="li18">
-                    <div className="form-check">
-                      <input className="form-check-input" type="checkbox" value="" id="idComprobantes" />
-                      <label className="form-check-label" htmlFor="idComprobantes">
-                        Comprobantes
-                      </label>
-                    </div>
-                  </li>
-                  <li id="li19" data-value="li19">
-                    <div className="form-check">
-                      <input className="form-check-input" type="checkbox" value="" id="idMonedas" />
-                      <label className="form-check-label" htmlFor="idMonedas">
-                        Monedas
-                      </label>
-                    </div>
-                  </li>
-                  <li id="li20" data-value="li20">
-                    <div className="form-check">
-                      <input className="form-check-input" type="checkbox" value="" id="idBancos" />
-                      <label className="form-check-label" htmlFor="idBancos">
-                        Bancos
-                      </label>
-                    </div>
-                  </li>
-                  <li id="li21" data-value="li21">
-                    <div className="form-check">
-                      <input className="form-check-input" type="checkbox" value="" id="idSedes" />
-                      <label className="form-check-label" htmlFor="idSedes">
-                        Sedes
-                      </label>
-                    </div>
-                  </li>
-                  <li id="li22" data-value="li22">
-                    <div className="form-check">
-                      <input className="form-check-input" type="checkbox" value="" id="idProyectos" />
-                      <label className="form-check-label" htmlFor="idProyectos">
-                        Proyectos
-                      </label>
-                    </div>
-                  </li>
-                </ul>
-              </li>
-
-              <li id="li23" data-value="li23">
-                <button type="button" className="btn">
-                  Reporte
-                </button>
-                <ul>
-                  <li id="li24" data-value="li24">
-                    <div className="form-check">
-                      <input className="form-check-input" type="checkbox" value="" id="idRVentas" />
-                      <label className="form-check-label" htmlFor="idRVentas">
-                        R. Ventas
-                      </label>
-                    </div>
-                  </li>
-                  <li id="li25" data-value="li25">
-                    <div className="form-check">
-                      <input className="form-check-input" type="checkbox" value="" id="idRFinanciero" />
-                      <label className="form-check-label" htmlFor="idRFinanciero">
-                        R. Financiero
-                      </label>
-                    </div>
-                  </li>
-                  <li id="li26" data-value="li26">
-                    <div className="form-check">
-                      <input className="form-check-input" type="checkbox" value="" id="idRLotes" />
-                      <label className="form-check-label" htmlFor="idRLotes">
-                        R. Lotes
-                      </label>
-                    </div>
-                  </li>
-                  <li id="li27" data-value="li27">
-                    <div className="form-check">
-                      <input className="form-check-input" type="checkbox" value="" id="idRClientes" />
-                      <label className="form-check-label" htmlFor="idRClientes">
-                        R. Clientes
-                      </label>
-                    </div>
-                  </li>
-                </ul>
-              </li> */}
-            </ul>
+          <div className="col-md-12">
+            {<OptionsList options={this.state.menu} handleCheck={this.handleCheck} />}
           </div>
         </div>
 
@@ -504,8 +292,17 @@ class Accesos extends React.Component {
             <button
               type="button"
               className="btn btn-primary"
-              onClick={() => this.onEventGuardar()}>
+              onClick={() => this.onEventGuardar()}
+              disabled={!this.state.save}>
               <i className="fa fa-save"></i> Guardar
+            </button>
+            {" "}
+            <button
+              type="button"
+              className="btn btn-info"
+              onClick={() => this.onEventUpdateData()}
+              disabled={!this.state.update}>
+              <i className="fa fa-refresh"></i> Actualizar
             </button>
             {" "}
             <button type="button" className="btn btn-outline-danger">
@@ -518,4 +315,62 @@ class Accesos extends React.Component {
   }
 }
 
-export default Accesos
+const OptionsList = ({ options, handleCheck }) => {
+  return (
+    <ul id="tree1">
+      {
+        options.map((option, index) => {
+          if (option.children.length === 0) {
+            let value = option.idMenu + (option.idSubMenu === undefined ? "" : option.idSubMenu) + (option.idPrivilegio === undefined ? "" : option.idPrivilegio)
+            return <li key={index}>
+              <div className="form-check-inline m-1">
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  id={`id${option.nombre}`}
+                  value={value}
+                  checked={option.estado === 1 ? true : false}
+                  onChange={handleCheck} />
+                <label className="form-check-label" htmlFor={`id${option.nombre}`}>
+                  {option.nombre}
+                </label>
+              </div>
+            </li>
+          } else {
+            let value = option.idMenu + (option.idSubMenu === undefined ? "" : option.idSubMenu) + (option.idPrivilegio === undefined ? "" : option.idPrivilegio)
+            return <li key={index}>
+              <i className='cursor-pointer mr-1 mt-1 mb-1 fa fa-plus-square'></i>
+              <div className="form-check-inline m-1 pl-1">
+                <input
+                  type="checkbox"
+                  className="form-check-input"
+                  id={`id${option.nombre}`}
+                  value={value}
+                  checked={option.estado === 1 ? true : false}
+                  onChange={handleCheck} />
+                <label className="form-check-label" htmlFor={`id${option.nombre}`}>
+                  {option.nombre}
+                </label>
+              </div>
+              {
+                (option.children.length) &&
+                <OptionsList
+                  options={option.children}
+                  handleCheck={handleCheck}
+                />
+              }
+            </li>
+          }
+        })
+      }
+    </ul>
+  )
+}
+
+const mapStateToProps = (state) => {
+  return {
+    token: state.reducer
+  }
+}
+
+export default connect(mapStateToProps, null)(Accesos);

@@ -30,11 +30,9 @@ class Login extends React.Component {
     }
 
     componentDidMount() {
-
-        if(this.usuarioInput.current !== null){
+        if (this.usuarioInput.current !== null) {
             this.usuarioInput.current.focus();
         }
-        
     }
 
     onEventForm = async () => {
@@ -62,12 +60,33 @@ class Login extends React.Component {
                     "password": this.state.password
                 }
             });
-
+           
             let menus = result.data.menu.map((item, index) => {
                 let submenu = [];
                 for (let value of result.data.submenu) {
+                    let privilegio = [];
                     if (item.idMenu == value.idMenu) {
-                        submenu.push(value);
+
+                        for (let content of result.data.privilegio) {
+                            if (content.idSubMenu === value.idSubMenu && item.idMenu === content.idMenu) {
+                                privilegio.push({
+                                    "estado": content.estado,
+                                    "idMenu": content.idMenu,
+                                    "idPrivilegio": content.idPrivilegio,
+                                    "idSubMenu": content.idSubMenu,
+                                    "nombre": content.nombre,
+                                });
+                            }
+                        }
+
+                        submenu.push({
+                            "estado": value.estado,
+                            "idMenu": value.idMenu,
+                            "idSubMenu": value.idSubMenu,
+                            "nombre": value.nombre,
+                            "ruta": value.ruta,
+                            "privilegio": privilegio
+                        });
                     }
                 }
 
@@ -85,16 +104,16 @@ class Login extends React.Component {
                 "token": result.data.token,
                 menus
             }
-
+         
             window.localStorage.setItem('login', JSON.stringify(user));
             this.props.restore(JSON.parse(window.localStorage.getItem('login')));
             this.props.history.push("principal");
             // document.cookie = `token=${user.data.token}; max-age=${10}; path=/; samesite=strict`;
 
         } catch (error) {
+            console.log(error)
             if (error.response !== undefined) {
                 await this.setStateAsync({ loading: false, message: error.response.data });
-                console.log(error.response)
             } else {
                 await this.setStateAsync({ loading: false, message: "Se genero un error de cliente, intente nuevamente." });
             }
@@ -209,7 +228,7 @@ class Login extends React.Component {
                             </label>
                         </div>
                         <button onClick={this.onEventForm} type="button" className="btn btn-lg btn-primary btn-block">Ingresar</button>
-                        <button onClick={this.onEventRecuperar} type="button" className="btn btn-lg btn-outline-primary btn-block">Recuperar</button>
+                        {/* <button onClick={this.onEventRecuperar} type="button" className="btn btn-lg btn-outline-primary btn-block">Recuperar</button> */}
                         <p className="mt-5 mb-3 text-muted">© 2022</p>
                     </form>
                 </div>
