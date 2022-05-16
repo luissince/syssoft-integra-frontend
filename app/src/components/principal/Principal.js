@@ -49,14 +49,28 @@ class Principal extends React.Component {
                 });
             }
         }
+        window.addEventListener('focus', this.onEventFocused)
     }
 
     componentWillUnmount() {
         this.abortControllerTable.abort();
+        window.removeEventListener('focus', this.onEventFocused)
+    }
+
+    onEventFocused = (event) => {
+        let userToken = window.localStorage.getItem('login');
+        if (userToken === null) {
+            this.props.restore();
+            this.props.history.push("login");
+        } else {
+            let projectToken = window.localStorage.getItem('project');
+            if (projectToken !== null) {
+                this.props.project(JSON.parse(projectToken));
+            }
+        }
     }
 
     onEventSearch = async (value) => {
-        // console.log(this.state.data);
         let data = this.state.data.filter((item) => item.nombre.toUpperCase().indexOf(value.toUpperCase()) > -1);
         await this.setStateAsync({ filter: data });
     }

@@ -5,11 +5,12 @@ import {
     showModal,
     hideModal,
     clearModal,
+    ModalAlertDialog,
     ModalAlertInfo,
     ModalAlertSuccess,
     ModalAlertWarning,
     spinnerLoading,
-    statePrivilegio
+    statePrivilegio,
 } from '../tools/Tools';
 import Paginacion from '../tools/Paginacion';
 
@@ -21,7 +22,8 @@ class Usuarios extends React.Component {
 
             add: statePrivilegio(this.props.token.userToken.menus[1].submenu[1].privilegio[0].estado),
             edit: statePrivilegio(this.props.token.userToken.menus[1].submenu[1].privilegio[1].estado),
-            reset: statePrivilegio(this.props.token.userToken.menus[1].submenu[1].privilegio[2].estado),
+            remove: statePrivilegio(this.props.token.userToken.menus[1].submenu[1].privilegio[2].estado),
+            reset: statePrivilegio(this.props.token.userToken.menus[1].submenu[1].privilegio[3].estado),
 
             loading: false,
             lista: [],
@@ -130,6 +132,30 @@ class Usuarios extends React.Component {
                 });
             }
         }
+    }
+
+    onEventEliminarUsuario(idUsuario) {
+        ModalAlertDialog("Eliminar Usuario", "¿Está seguro de que desea eliminar el usuario? Esta operación no se puede deshacer.", async (value) => {
+            if (value) {
+                try {
+                    ModalAlertInfo("Usuario", "Procesando información...")
+                    let result = await axios.delete('/api/usuario', {
+                        params: {
+                            "idUsuario": idUsuario
+                        }
+                    })
+                    ModalAlertSuccess("Usuario", result.data, () => {
+                        this.loadInit();
+                    })
+                } catch (error) {
+                    if (error.response !== undefined) {
+                        ModalAlertWarning("Usuario", error.response.data)
+                    } else {
+                        ModalAlertWarning("Usuario", "Se genero un error interno, intente nuevamente.")
+                    }
+                }
+            }
+        })
     }
 
     async openReset(id) {
@@ -248,6 +274,7 @@ class Usuarios extends React.Component {
                                         <th width="10%">Representante</th>
                                         <th width="5%">Estado</th>
                                         <th width="5%">Editar</th>
+                                        <th width="5%">Eliminar</th>
                                         <th width="5%">Resetear</th>
                                     </tr>
                                 </thead>
@@ -255,13 +282,13 @@ class Usuarios extends React.Component {
                                     {
                                         this.state.loading ? (
                                             <tr>
-                                                <td className="text-center" colSpan="9">
+                                                <td className="text-center" colSpan="10">
                                                     {spinnerLoading()}
                                                 </td>
                                             </tr>
                                         ) : this.state.lista.length === 0 ? (
                                             <tr className="text-center">
-                                                <td colSpan="9">¡No hay datos registrados!</td>
+                                                <td colSpan="10">¡No hay datos registrados!</td>
                                             </tr>
                                         ) : (
                                             this.state.lista.map((item, index) => {
@@ -282,6 +309,15 @@ class Usuarios extends React.Component {
                                                                 this.props.history.push({ pathname: `${this.props.location.pathname}/proceso`, search: "?idUsuario=" + item.idUsuario })
                                                             }}
                                                             disabled={!this.state.edit}><i className="bi bi-pencil"></i></button>
+                                                        </td>
+                                                        <td className="text-center">
+                                                            <button
+                                                                className="btn btn-outline-danger btn-sm"
+                                                                title="Editar"
+                                                                onClick={() => this.onEventEliminarUsuario(item.idUsuario )}
+                                                                disabled={!this.state.remove}>
+                                                                <i className="bi bi-trash">
+                                                                </i></button>
                                                         </td>
                                                         <td>
                                                             <button 

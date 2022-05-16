@@ -33,6 +33,19 @@ class Login extends React.Component {
         if (this.usuarioInput.current !== null) {
             this.usuarioInput.current.focus();
         }
+        window.addEventListener('focus', this.onEventFocused)
+    }
+
+    componentWillUnmount() {
+        window.removeEventListener('focus', this.onEventFocused)
+    }
+
+    onEventFocused =(event)=> {
+        let userToken = window.localStorage.getItem('login');        
+        if (userToken !== null) {
+            this.props.restore(JSON.parse(userToken));
+            this.props.history.push("principal");
+        }
     }
 
     onEventForm = async () => {
@@ -111,7 +124,6 @@ class Login extends React.Component {
             // document.cookie = `token=${user.data.token}; max-age=${10}; path=/; samesite=strict`;
 
         } catch (error) {
-            console.log(error)
             if (error.response !== undefined) {
                 await this.setStateAsync({ loading: false, message: error.response.data });
             } else {

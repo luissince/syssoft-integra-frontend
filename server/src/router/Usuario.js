@@ -233,6 +233,175 @@ router.put('/', async function (req, res) {
     }
 });
 
+router.delete('/', async function (req, res) {
+    let connection = null;
+    try {
+        connection = await conec.beginTransaction();
+
+        let venta = await conec.execute(connection, `SELECT * FROM venta WHERE idUsuario = ?`, [
+            req.query.idUsuario
+        ]);
+
+        if (venta.length > 0) {
+            await conec.rollback(connection);
+            res.status(400).send('No se puede eliminar el usuario ya que esta ligada a una venta.')
+            return;
+        }
+
+        let sede = await conec.execute(connection, `SELECT * FROM sede WHERE idUsuario = ?`, [
+            req.query.idUsuario
+        ]);
+
+        if (sede.length > 0) {
+            await conec.rollback(connection);
+            res.status(400).send('No se puede eliminar el usuario ya que esta ligada a una sede.')
+            return;
+        }
+
+        let proyecto = await conec.execute(connection, `SELECT * FROM proyecto WHERE idUsuario = ?`, [
+            req.query.idUsuario
+        ]);
+
+        if (proyecto.length > 0) {
+            await conec.rollback(connection);
+            res.status(400).send('No se puede eliminar el usuario ya que esta ligado a un proyecto.')
+            return;
+        }
+
+        let perfil = await conec.execute(connection, `SELECT * FROM perfil WHERE idUsuario = ?`, [
+            req.query.idUsuario
+        ]);
+
+        if (perfil.length > 0) {
+            await conec.rollback(connection);
+            res.status(400).send('No se puede eliminar el usuario ya que esta ligada a un perfil.')
+            return;
+        }
+
+        let moneda = await conec.execute(connection, `SELECT * FROM moneda WHERE idUsuario = ?`, [
+            req.query.idUsuario
+        ]);
+
+        if (moneda.length > 0) {
+            await conec.rollback(connection);
+            res.status(400).send('No se puede eliminar el usuario ya que esta ligada a una moneda.')
+            return;
+        }
+
+        let manzana = await conec.execute(connection, `SELECT * FROM manzana WHERE idUsuario = ?`, [
+            req.query.idUsuario
+        ]);
+
+        if (manzana.length > 0) {
+            await conec.rollback(connection);
+            res.status(400).send('No se puede eliminar el usuario ya que esta ligada a una manzana.')
+            return;
+        }
+
+        let lote = await conec.execute(connection, `SELECT * FROM lote WHERE idUsuario = ?`, [
+            req.query.idUsuario
+        ]);
+
+        if (lote.length > 0) {
+            await conec.rollback(connection);
+            res.status(400).send('No se puede eliminar el usuario ya que esta ligado a un lote.')
+            return;
+        }
+
+        let impuesto = await conec.execute(connection, `SELECT * FROM impuesto WHERE idUsuario = ?`, [
+            req.query.idUsuario
+        ]);
+
+        if (impuesto.length > 0) {
+            await conec.rollback(connection);
+            res.status(400).send('No se puede eliminar el usuario ya que esta ligado a un impuesto.')
+            return;
+        }
+
+        let gasto = await conec.execute(connection, `SELECT * FROM gasto WHERE idUsuario = ?`, [
+            req.query.idUsuario
+        ]);
+
+        if (gasto.length > 0) {
+            await conec.rollback(connection);
+            res.status(400).send('No se puede eliminar el usuario ya que esta ligado a un gasto.')
+            return;
+        }
+
+        let concepto = await conec.execute(connection, `SELECT * FROM concepto WHERE idUsuario = ?`, [
+            req.query.idUsuario
+        ]);
+
+        if (concepto.length > 0) {
+            await conec.rollback(connection);
+            res.status(400).send('No se puede eliminar el usuario ya que esta ligado a un concepto.')
+            return;
+        }
+
+        let comprobante = await conec.execute(connection, `SELECT * FROM comprobante WHERE idUsuario = ?`, [
+            req.query.idUsuario
+        ]);
+
+        if (comprobante.length > 0) {
+            await conec.rollback(connection);
+            res.status(400).send('No se puede eliminar el usuario ya que esta ligado a un comprobante.')
+            return;
+        }
+
+        let cobro = await conec.execute(connection, `SELECT * FROM cobro WHERE idUsuario = ?`, [
+            req.query.idUsuario
+        ]);
+
+        if (cobro.length > 0) {
+            await conec.rollback(connection);
+            res.status(400).send('No se puede eliminar el usuario ya que esta ligado a un cobro.')
+            return;
+        }
+
+        let cliente = await conec.execute(connection, `SELECT * FROM cliente WHERE idUsuario = ?`, [
+            req.query.idUsuario
+        ]);
+
+        if (cliente.length > 0) {
+            await conec.rollback(connection);
+            res.status(400).send('No se puede eliminar el usuario ya que esta ligado a un cliente.')
+            return;
+        }
+
+        let bancoDetalle = await conec.execute(connection, `SELECT * FROM bancoDetalle WHERE idUsuario = ?`, [
+            req.query.idUsuario
+        ]);
+
+        if (bancoDetalle.length > 0) {
+            await conec.rollback(connection);
+            res.status(400).send('No se puede eliminar el usuario ya que esta ligado a un bancoDetalle.')
+            return;
+        }
+
+        let banco = await conec.execute(connection, `SELECT * FROM banco WHERE idUsuario = ?`, [
+            req.query.idUsuario
+        ]);
+
+        if (banco.length > 0) {
+            await conec.rollback(connection);
+            res.status(400).send('No se puede eliminar el usuario ya que esta ligado a un banco.')
+            return;
+        }
+
+        await conec.execute(connection, `DELETE FROM usuario WHERE idUsuario = ?`, [
+            req.query.idUsuario
+        ]);
+
+        await conec.commit(connection);
+        res.status(200).send('Se eliminó correctamente el usuario.');
+    } catch (error) {
+        if (connection != null) {
+            await conec.rollback(connection);
+        }
+        res.status(500).send("Error interno de conexión, intente nuevamente.");
+    }
+});
+
 router.post('/reset', async function (req, res) {
     let connection = null;
     try {

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Switch, Route, Redirect, } from 'react-router-dom';
 import { connect } from 'react-redux';
+import { signOut, closeProject } from '../../redux/actions';
 import Menu from '../layouts/menu/Menu';
 import Head from '../layouts/head/Head';
 import Footer from '../layouts/footer/Footer';
@@ -70,8 +71,32 @@ class Inicio extends React.Component {
         this.menuRef = React.createRef();
     }
 
-    async componentDidMount() {
+    componentDidMount() {
+        window.addEventListener('focus', this.onEventFocused)
+    }
 
+    componentWillUnmount() {
+        window.removeEventListener('focus', this.onEventFocused)
+    }
+
+    onEventFocused = (event) => {
+        let userToken = window.localStorage.getItem('login');
+        if (userToken === null) {
+            this.props.restore();
+            this.props.history.push("login");
+        } else {
+            let tokenCurrent = JSON.parse(userToken);
+            let tokenOld = this.props.token.userToken;
+            if (tokenCurrent.token !== tokenOld.token && tokenCurrent.idUsuario !== tokenOld.idUsuario) {
+                window.location.href = "/";
+                return;
+            }
+
+            let projectToken = window.localStorage.getItem('project');
+            if (projectToken === null) {
+                this.props.restoreProject();
+            }
+        }
     }
 
     setOpen = () => {
@@ -274,7 +299,7 @@ class Inicio extends React.Component {
                             path={`${path}/replotes`}
                             render={(props) => <RepLotes {...props} />}
                         />
-                        <Route 
+                        <Route
                             path={`${path}/RepClientes`}
                             render={(props) => <RepClientes {...props} />}
                         />
@@ -295,4 +320,11 @@ const mapStateToProps = (state) => {
     }
 }
 
-export default connect(mapStateToProps, null)(Inicio);
+const mapDispatchToProps = (dispatch) => {
+    return {
+        restore: () => dispatch(signOut()),
+        restoreProject: () => dispatch(closeProject())
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Inicio);

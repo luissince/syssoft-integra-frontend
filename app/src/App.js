@@ -19,7 +19,7 @@ class App extends React.Component {
         this.menuRef = React.createRef();
     }
 
-    async componentDidMount() {  
+    async componentDidMount() {
         try {
             let userToken = window.localStorage.getItem('login');
             let user = JSON.parse(userToken);
@@ -39,7 +39,7 @@ class App extends React.Component {
             this.props.restore(user);
         } catch (error) {
             this.props.restore(null);
-        }
+        }   
     }
 
     render() {

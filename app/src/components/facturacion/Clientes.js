@@ -237,10 +237,20 @@ class Clientes extends React.Component {
                                                             </div>
                                                         </td>
                                                         <td className="text-center">
-                                                            <button className="btn btn-outline-warning btn-sm" title="Editar" onClick={() => this.onEventEditarCliente(item.idCliente)}><i className="bi bi-pencil"></i></button>
+                                                            <button
+                                                                className="btn btn-outline-warning btn-sm"
+                                                                title="Editar"
+                                                                onClick={() => this.onEventEditarCliente(item.idCliente)}>
+                                                                <i className="bi bi-pencil"></i>
+                                                            </button>
                                                         </td>
                                                         <td className="text-center">
-                                                            <button className="btn btn-outline-danger btn-sm" title="Editar" onClick={() => this.onEventEliminarCliente(item.idCliente)}><i className="bi bi-trash"></i></button>
+                                                            <button
+                                                                className="btn btn-outline-danger btn-sm"
+                                                                title="Editar"
+                                                                onClick={() => this.onEventEliminarCliente(item.idCliente)}>
+                                                                <i className="bi bi-trash">
+                                                                </i></button>
                                                         </td>
                                                     </tr>
                                                 )
