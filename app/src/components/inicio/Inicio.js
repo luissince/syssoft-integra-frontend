@@ -44,6 +44,7 @@ import RepLotes from '../reporte/RepLotes';
 import RepClientes from '../reporte/RepClientes';
 
 import logoEmpresa from '../../recursos/images/INMOBILIARIA.png';
+import icono from '../../recursos/images/inmobiliarianav.png';
 
 const Page404 = (props) => {
     return (
@@ -129,7 +130,8 @@ class Inicio extends React.Component {
                     <div className='pro-sidebar-inner'>
                         <div className='pro-sidebar-layout'>
                             <div className="sidebar-header">
-                                <h4>INMOBILIARIA GMYC</h4>
+                            <img className="d-block mx-auto mb-4" src={icono} alt="Logo" width="150" />
+                                <h5>INMOBILIARIA GMYC</h5>
                             </div>
 
                             <ul className="list-unstyled components">
