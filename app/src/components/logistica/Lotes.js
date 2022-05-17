@@ -11,7 +11,8 @@ import {
     ModalAlertInfo,
     ModalAlertSuccess,
     ModalAlertWarning,
-    spinnerLoading
+    spinnerLoading,
+    statePrivilegio
 } from '../tools/Tools';
 import { connect } from 'react-redux';
 import Paginacion from '../tools/Paginacion';
@@ -43,6 +44,11 @@ class Lotes extends React.Component {
             idProyecto: this.props.token.project.idProyecto,
             idUsuario: this.props.token.userToken.idUsuario,
 
+            add: statePrivilegio(this.props.token.userToken.menus[3].submenu[1].privilegio[0].estado),
+            view: statePrivilegio(this.props.token.userToken.menus[3].submenu[1].privilegio[1].estado),
+            edit: statePrivilegio(this.props.token.userToken.menus[3].submenu[1].privilegio[2].estado),
+            remove: statePrivilegio(this.props.token.userToken.menus[3].submenu[1].privilegio[3].estado),
+
             loadModal: false,
             nameModal: 'Nuevo Lote',
             messageWarning: '',
@@ -58,7 +64,6 @@ class Lotes extends React.Component {
             messageTable: 'Cargando información...',
             messagePaginacion: 'Mostranto 0 de 0 Páginas'
         }
-
         this.refManzana = React.createRef();
         this.refConcepto = React.createRef();
         this.refDescripcion = React.createRef();
@@ -779,7 +784,7 @@ class Lotes extends React.Component {
                     </div>
                     <div className="col-md-6 col-sm-12">
                         <div className="form-group">
-                            <button className="btn btn-outline-info" onClick={() => this.openModal('')}>
+                            <button className="btn btn-outline-info" onClick={() => this.openModal('')} disabled={!this.state.add}>
                                 <i className="bi bi-file-plus"></i> Nuevo Registro
                             </button>
                             {" "}
@@ -842,7 +847,8 @@ class Lotes extends React.Component {
                                                             <button
                                                                 className="btn btn-outline-info btn-sm"
                                                                 title="Detalle"
-                                                                onClick={() => this.onEventMostrar(item.idLote)}>
+                                                                onClick={() => this.onEventMostrar(item.idLote)}
+                                                                disabled={!this.state.view}>
                                                                 <i className="bi bi-eye"></i>
                                                             </button>
                                                         </td>
@@ -850,7 +856,8 @@ class Lotes extends React.Component {
                                                             <button
                                                                 className="btn btn-outline-warning btn-sm"
                                                                 title="Editar"
-                                                                onClick={() => this.openModal(item.idLote)}>
+                                                                onClick={() => this.openModal(item.idLote)}
+                                                                disabled={!this.state.edit}>
                                                                 <i className="bi bi-pencil"></i>
                                                             </button>
                                                         </td>
@@ -858,7 +865,8 @@ class Lotes extends React.Component {
                                                             <button
                                                                 className="btn btn-outline-danger btn-sm"
                                                                 title="Anular"
-                                                                onClick={() => this.onEventDelete(item.idLote)}>
+                                                                onClick={() => this.onEventDelete(item.idLote)}
+                                                                disabled={!this.state.remove}>
                                                                 <i className="bi bi-trash"></i>
                                                             </button>
                                                         </td>

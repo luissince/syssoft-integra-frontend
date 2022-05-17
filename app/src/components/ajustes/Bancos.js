@@ -10,7 +10,8 @@ import {
     ModalAlertInfo,
     ModalAlertSuccess,
     ModalAlertWarning,
-    spinnerLoading
+    spinnerLoading,
+    statePrivilegio
 } from '../tools/Tools';
 import { connect } from 'react-redux';
 import Paginacion from '../tools/Paginacion';
@@ -28,6 +29,11 @@ class Bancos extends React.Component {
             cci: '',
             idUsuario: this.props.token.userToken.idUsuario,
 
+            add: statePrivilegio(this.props.token.userToken.menus[5].submenu[2].privilegio[0].estado),
+            view: statePrivilegio(this.props.token.userToken.menus[5].submenu[2].privilegio[1].estado),
+            edit: statePrivilegio(this.props.token.userToken.menus[5].submenu[2].privilegio[2].estado),
+            remove: statePrivilegio(this.props.token.userToken.menus[5].submenu[2].privilegio[3].estado),
+
             loadModal: false,
             nameModal: 'Nuevo Comprobante',
             msgModal: 'Cargando datos...',
@@ -43,7 +49,6 @@ class Bancos extends React.Component {
             messagePaginacion: 'Mostranto 0 de 0 Páginas'
 
         }
-
         this.refTxtNombre = React.createRef();
         this.refTipoCuenta = React.createRef();
         this.refTxtMoneda = React.createRef();
@@ -434,7 +439,7 @@ class Bancos extends React.Component {
                     </div>
                     <div className="col-md-6 col-sm-12">
                         <div className="form-group">
-                            <button className="btn btn-outline-info" onClick={() => this.openModal('')}>
+                            <button className="btn btn-outline-info" onClick={() => this.openModal('')} disabled={!this.state.add}>
                                 <i className="bi bi-file-plus"></i> Nuevo Registro
                             </button>
                             {" "}
@@ -488,7 +493,8 @@ class Bancos extends React.Component {
                                                         <td className="text-center">
                                                             <button className="btn btn-outline-info btn-sm" title="Detalle" onClick={() => {
                                                                 this.props.history.push({ pathname: `${this.props.location.pathname}/detalle`, search: "?idBanco=" + item.idBanco })
-                                                            }}>
+                                                            }}
+                                                            disabled={!this.state.view}>
                                                                 <i className="fa fa-eye"></i>
                                                             </button>
                                                         </td>
@@ -497,7 +503,8 @@ class Bancos extends React.Component {
                                                             <button
                                                                 className="btn btn-outline-warning btn-sm"
                                                                 title="Editar"
-                                                                onClick={() => this.openModal(item.idBanco)}>
+                                                                onClick={() => this.openModal(item.idBanco)}
+                                                                disabled={!this.state.edit}>
                                                                 <i className="bi bi-pencil"></i>
                                                             </button>
                                                         </td>
@@ -505,7 +512,8 @@ class Bancos extends React.Component {
                                                             <button
                                                                 className="btn btn-outline-danger btn-sm"
                                                                 title="Anular"
-                                                                onClick={() => this.onEventDelete(item.idBanco)}>
+                                                                onClick={() => this.onEventDelete(item.idBanco)}
+                                                                disabled={!this.state.remove}>
                                                                 <i className="bi bi-trash"></i>
                                                             </button>
                                                         </td>

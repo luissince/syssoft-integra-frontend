@@ -134,7 +134,7 @@ class Usuarios extends React.Component {
         }
     }
 
-    onEventEliminarUsuario(idUsuario) {
+    onEventDelete(idUsuario) {
         ModalAlertDialog("Eliminar Usuario", "¿Está seguro de que desea eliminar el usuario? Esta operación no se puede deshacer.", async (value) => {
             if (value) {
                 try {
@@ -314,7 +314,7 @@ class Usuarios extends React.Component {
                                                             <button
                                                                 className="btn btn-outline-danger btn-sm"
                                                                 title="Editar"
-                                                                onClick={() => this.onEventEliminarUsuario(item.idUsuario )}
+                                                                onClick={() => this.onEventDelete(item.idUsuario )}
                                                                 disabled={!this.state.remove}>
                                                                 <i className="bi bi-trash">
                                                                 </i></button>

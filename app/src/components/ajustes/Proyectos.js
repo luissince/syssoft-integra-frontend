@@ -6,7 +6,9 @@ import {
     ModalAlertSuccess,
     ModalAlertWarning,
     ModalAlertDialog,
+    statePrivilegio
 } from '../tools/Tools';
+import { connect } from 'react-redux';
 import Paginacion from '../tools/Paginacion';
 
 class Proyectos extends React.Component {
@@ -14,6 +16,10 @@ class Proyectos extends React.Component {
         super(props);
         this.state = {
             idProyecto: '',
+
+            add: statePrivilegio(this.props.token.userToken.menus[5].submenu[4].privilegio[0].estado),
+            edit: statePrivilegio(this.props.token.userToken.menus[5].submenu[4].privilegio[1].estado),
+            remove: statePrivilegio(this.props.token.userToken.menus[5].submenu[4].privilegio[2].estado),
 
             loading: false,
             lista: [],
@@ -25,7 +31,6 @@ class Proyectos extends React.Component {
             messageTable: 'Cargando información...',
             messagePaginacion: 'Mostranto 0 de 0 Páginas'
         }
-
         this.refTxtSearch = React.createRef();
 
         this.abortControllerTable = new AbortController();
@@ -169,7 +174,7 @@ class Proyectos extends React.Component {
                     </div>
                     <div className="col-md-6 col-sm-12">
                         <div className="form-group">
-                            <button className="btn btn-outline-info" onClick={() => this.props.history.push(`${this.props.location.pathname}/proceso`)}>
+                            <button className="btn btn-outline-info" onClick={() => this.props.history.push(`${this.props.location.pathname}/proceso`)} disabled={!this.state.add}>
                                 <i className="bi bi-file-plus"></i> Nuevo Registro
                             </button>
                             {" "}
@@ -225,7 +230,7 @@ class Proyectos extends React.Component {
                                                                 onClick={() => {
                                                                     this.props.history.push({ pathname: `${this.props.location.pathname}/proceso`, search: "?idProyecto=" + item.idProyecto })
                                                                 }}
-                                                            >
+                                                                disabled={!this.state.edit}>
                                                                 <i className="bi bi-pencil"></i>
                                                             </button>
                                                         </td>
@@ -234,7 +239,9 @@ class Proyectos extends React.Component {
                                                                 className="btn btn-outline-danger btn-sm"
                                                                 title="Eliminar"
                                                                 onClick={() => this.onEventDelete(item.idProyecto)}
-                                                            ><i className="bi bi-trash"></i></button>
+                                                                disabled={!this.state.remove}>
+                                                                <i className="bi bi-trash"></i>
+                                                                </button>
                                                         </td>
                                                     </tr>
                                                 )
@@ -272,4 +279,10 @@ class Proyectos extends React.Component {
     }
 }
 
-export default Proyectos
+const mapStateToProps = (state) => {
+    return {
+        token: state.reducer
+    }
+}
+
+export default connect(mapStateToProps, null)(Proyectos);

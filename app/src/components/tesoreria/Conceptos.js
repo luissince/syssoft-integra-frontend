@@ -10,7 +10,8 @@ import {
     ModalAlertInfo,
     ModalAlertSuccess,
     ModalAlertWarning,
-    spinnerLoading
+    spinnerLoading,
+    statePrivilegio
 } from '../tools/Tools';
 import { connect } from 'react-redux';
 import Paginacion from '../tools/Paginacion';
@@ -29,6 +30,10 @@ class Conceptos extends React.Component {
             nameModal: 'Nuevo Comprobante',
             messageWarning: '',
             msgModal: 'Cargando datos...',
+
+            add: statePrivilegio(this.props.token.userToken.menus[4].submenu[0].privilegio[0].estado),
+            edit: statePrivilegio(this.props.token.userToken.menus[4].submenu[0].privilegio[1].estado),
+            remove: statePrivilegio(this.props.token.userToken.menus[4].submenu[0].privilegio[2].estado),
 
             loading: false,
             lista: [],
@@ -384,7 +389,7 @@ class Conceptos extends React.Component {
                     </div>
                     <div className="col-md-6 col-sm-12">
                         <div className="form-group">
-                            <button className="btn btn-outline-info" onClick={() => this.openModal('')}>
+                            <button className="btn btn-outline-info" onClick={() => this.openModal('')} disabled={!this.state.add}>
                                 <i className="bi bi-file-plus"></i> Nuevo Registro
                             </button>
                             {" "}
@@ -433,7 +438,8 @@ class Conceptos extends React.Component {
                                                             <button
                                                                 className="btn btn-outline-warning btn-sm"
                                                                 title="Editar"
-                                                                onClick={() => this.openModal(item.idConcepto)}>
+                                                                onClick={() => this.openModal(item.idConcepto)}
+                                                                disabled={!this.state.edit}>
                                                                 <i className="bi bi-pencil"></i>
                                                             </button>
                                                         </td>
@@ -441,7 +447,8 @@ class Conceptos extends React.Component {
                                                             <button
                                                                 className="btn btn-outline-danger btn-sm"
                                                                 title="Anular"
-                                                                onClick={() => this.onEventDelete(item.idConcepto)}>
+                                                                onClick={() => this.onEventDelete(item.idConcepto)}
+                                                                disabled={!this.state.remove}>
                                                                 <i className="bi bi-trash"></i>
                                                             </button>
                                                         </td>

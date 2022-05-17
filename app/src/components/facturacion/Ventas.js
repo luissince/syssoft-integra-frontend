@@ -4,12 +4,12 @@ import {
     spinnerLoading,
     numberFormat,
     timeForma24,
-    formatMoney,
     ModalAlertInfo,
     ModalAlertDialog,
     ModalAlertSuccess,
     ModalAlertWarning,
-    ModalAlertError
+    ModalAlertError,
+    statePrivilegio
 } from '../tools/Tools';
 import { connect } from 'react-redux';
 import Paginacion from '../tools/Paginacion';
@@ -20,6 +20,10 @@ class Ventas extends React.Component {
         this.state = {
             loading: false,
             lista: [],
+
+            add: statePrivilegio(this.props.token.userToken.menus[2].submenu[1].privilegio[0].estado),
+            view: statePrivilegio(this.props.token.userToken.menus[2].submenu[1].privilegio[1].estado),
+            remove: statePrivilegio(this.props.token.userToken.menus[2].submenu[1].privilegio[2].estado),
 
             idProyecto: this.props.token.project.idProyecto,
 
@@ -178,7 +182,7 @@ class Ventas extends React.Component {
                     </div>
                     <div className="col-md-6 col-sm-12">
                         <div className="form-group">
-                            <button className="btn btn-outline-info" onClick={this.onEventNuevaVenta}>
+                            <button className="btn btn-outline-info" onClick={this.onEventNuevaVenta} disabled={!this.state.add}>
                                 <i className="bi bi-file-plus"></i> Nuevo Registro
                             </button>
                             {" "}
@@ -232,7 +236,7 @@ class Ventas extends React.Component {
                                                                 ? <span>Contado</span>
                                                                 : <span>Crédito</span>}
                                                         </td>
-                                                        <td>{ numberFormat(item.total)}</td>
+                                                        <td>{numberFormat(item.total)}</td>
                                                         <td className="text-center">
                                                             {
                                                                 item.estado === 1
@@ -243,18 +247,20 @@ class Ventas extends React.Component {
                                                             }
                                                         </td>
                                                         <td className="text-center">
-                                                            <button className="btn btn-outline-primary btn-sm" title="Ver detalle" onClick={() => {
-                                                                this.props.history.push({ pathname: `${this.props.location.pathname}/detalle`, search: "?idVenta=" + item.idVenta })
-                                                            }}><i className="fa fa-eye"></i></button>
+                                                            <button
+                                                                className="btn btn-outline-primary btn-sm"
+                                                                title="Ver detalle"
+                                                                onClick={() => {
+                                                                    this.props.history.push({ pathname: `${this.props.location.pathname}/detalle`, search: "?idVenta=" + item.idVenta })
+                                                                }}
+                                                                disabled={!this.state.view}><i className="fa fa-eye"></i></button>
                                                         </td>
-                                                        {/* <td className="text-center">
-                                                            <button className="btn btn-outline-warning btn-sm" disabled={item.estado === 1 ? true : false} title="Editar" onClick={() => { }}><i className="fa fa-edit"></i></button>
-                                                        </td> */}
                                                         <td className="text-center">
                                                             <button
                                                                 className="btn btn-outline-danger btn-sm"
-                                                                // disabled={item.estado === 1 ? true : false}
-                                                                title="Anular" onClick={() => this.onEventAnularVenta(item.idVenta)}>
+                                                                title="Anular"
+                                                                onClick={() => this.onEventAnularVenta(item.idVenta)}
+                                                                disabled={!this.state.remove}>
                                                                 <i className="fa fa-remove"></i>
                                                             </button>
                                                         </td>

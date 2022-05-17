@@ -78,7 +78,7 @@ class Login extends React.Component {
                 let submenu = [];
                 for (let value of result.data.submenu) {
                     let privilegio = [];
-                    if (item.idMenu == value.idMenu) {
+                    if (item.idMenu === value.idMenu) {
 
                         for (let content of result.data.privilegio) {
                             if (content.idSubMenu === value.idSubMenu && item.idMenu === content.idMenu) {

@@ -9,7 +9,8 @@ import {
     ModalAlertInfo,
     ModalAlertSuccess,
     ModalAlertWarning,
-    spinnerLoading
+    spinnerLoading,
+    statePrivilegio
 } from '../tools/Tools';
 import { connect } from 'react-redux';
 import Paginacion from '../tools/Paginacion';
@@ -23,6 +24,10 @@ class Manzanas extends React.Component {
             nombre: '',
             idProyecto: this.props.token.project.idProyecto,
             idUsuario: this.props.token.userToken.idUsuario,
+
+            add: statePrivilegio(this.props.token.userToken.menus[3].submenu[0].privilegio[0].estado),
+            edit: statePrivilegio(this.props.token.userToken.menus[3].submenu[0].privilegio[1].estado),
+            remove: statePrivilegio(this.props.token.userToken.menus[3].submenu[0].privilegio[2].estado),
 
             loadModal: false,
             nameModal: 'Nuevo Manzana',
@@ -38,7 +43,6 @@ class Manzanas extends React.Component {
             messageTable: 'Cargando información...',
             messagePaginacion: 'Mostranto 0 de 0 Páginas'
         };
-
         this.refNombre = React.createRef();
 
         this.refTxtSearch = React.createRef();
@@ -312,7 +316,7 @@ class Manzanas extends React.Component {
                     </div>
                     <div className="col-md-6 col-sm-12">
                         <div className="form-group">
-                            <button className="btn btn-outline-info" onClick={() => this.openModal('')}>
+                            <button className="btn btn-outline-info" onClick={() => this.openModal('')} disabled={!this.state.add}>
                                 <i className="bi bi-file-plus"></i> Nuevo Registro
                             </button>
                             {" "}
@@ -359,7 +363,8 @@ class Manzanas extends React.Component {
                                                             <button
                                                                 className="btn btn-outline-warning btn-sm"
                                                                 title="Editar"
-                                                                onClick={() => this.openModal(item.idManzana)}>
+                                                                onClick={() => this.openModal(item.idManzana)}
+                                                                disabled={!this.state.edit}>
                                                                 <i className="bi bi-pencil"></i>
                                                             </button>
                                                         </td>
@@ -367,7 +372,8 @@ class Manzanas extends React.Component {
                                                             <button
                                                                 className="btn btn-outline-danger btn-sm"
                                                                 title="Anular"
-                                                                onClick={() => this.onEventDelete(item.idManzana)}>
+                                                                onClick={() => this.onEventDelete(item.idManzana)}
+                                                                disabled={!this.state.remove}>
                                                                 <i className="bi bi-trash"></i>
                                                             </button>
                                                         </td>

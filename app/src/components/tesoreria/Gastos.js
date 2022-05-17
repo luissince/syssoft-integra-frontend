@@ -8,7 +8,8 @@ import {
     ModalAlertInfo,
     ModalAlertSuccess,
     ModalAlertWarning,
-    ModalAlertError
+    ModalAlertError,
+    statePrivilegio
 } from '../tools/Tools';
 import { connect } from 'react-redux';
 import Paginacion from '../tools/Paginacion';
@@ -21,6 +22,10 @@ class Gastos extends React.Component {
             lista: [],
 
             idProyecto: this.props.token.project.idProyecto,
+
+            add: statePrivilegio(this.props.token.userToken.menus[4].submenu[1].privilegio[0].estado),
+            view: statePrivilegio(this.props.token.userToken.menus[4].submenu[1].privilegio[1].estado),
+            remove: statePrivilegio(this.props.token.userToken.menus[4].submenu[1].privilegio[2].estado),
 
             opcion: 0,
             paginacion: 0,
@@ -181,7 +186,7 @@ class Gastos extends React.Component {
                     </div>
                     <div className="col-md-6 col-sm-12">
                         <div className="form-group">
-                            <button className="btn btn-outline-info" onClick={() => this.onEventNuevoGasto()}>
+                            <button className="btn btn-outline-info" onClick={() => this.onEventNuevoGasto()} disabled={!this.state.add}>
                                 <i className="bi bi-file-plus"></i> Nuevo Registro
                             </button>
                             {" "}
@@ -203,7 +208,7 @@ class Gastos extends React.Component {
                                         <th width="10%">Correlativo</th>
                                         <th width="10%">Creación</th>
                                         <th width="10%">Cuenta</th>
-                                        <th width="15%">Detalle</th>
+                                        <th width="15%">Observación</th>
                                         <th width="10%">Monto</th>
                                         <th width="5%" className="text-center">Detalle</th>
                                         <th width="5%" className="text-center">Eliminar</th>
@@ -238,7 +243,8 @@ class Gastos extends React.Component {
                                                                 title="Detalle"
                                                                 onClick={() => {
                                                                     this.props.history.push({ pathname: `${this.props.location.pathname}/detalle`, search: "?idGasto=" + item.idGasto })
-                                                                }}>
+                                                                }}
+                                                                disabled={!this.state.view}>
                                                                 <i className="fa fa-eye"></i>
                                                             </button>
                                                         </td>
@@ -246,7 +252,8 @@ class Gastos extends React.Component {
                                                             <button
                                                                 className="btn btn-outline-danger btn-sm"
                                                                 title="Eliminar"
-                                                                onClick={() => this.onEventAnularGasto(item.idGasto)}>
+                                                                onClick={() => this.onEventAnularGasto(item.idGasto)}
+                                                                disabled={!this.state.remove}>
                                                                 <i className="fa fa-remove"></i>
                                                             </button>
                                                         </td>

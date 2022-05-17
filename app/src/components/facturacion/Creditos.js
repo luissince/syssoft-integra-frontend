@@ -5,7 +5,7 @@ import {
     spinnerLoading,
     dateFormat,
     numberFormat,
-    formatMoney
+    statePrivilegio
 } from '../tools/Tools';
 import { connect } from 'react-redux';
 import Paginacion from '../tools/Paginacion';
@@ -16,6 +16,9 @@ class Creditos extends React.Component {
         this.state = {
             loading: false,
             lista: [],
+
+            view:statePrivilegio(this.props.token.userToken.menus[2].submenu[2].privilegio[0].estado),
+            pay:statePrivilegio(this.props.token.userToken.menus[2].submenu[2].privilegio[1].estado),
 
             idProyecto: this.props.token.project.idProyecto,
 
@@ -216,14 +219,16 @@ class Creditos extends React.Component {
                                                         <td className="text-center">
                                                             <button
                                                                 className="btn btn-outline-info btn-sm"
-                                                                onClick={() => this.onEventCronograma(item)}>
+                                                                onClick={() => this.onEventCronograma(item)}
+                                                                disabled={!this.state.view}>
                                                                 <i className="fa fa-calendar"></i></button>
                                                         </td>
                                                         <td className="text-center">
                                                             <button className="btn btn-outline-info btn-sm"
                                                                 onClick={() => {
                                                                     this.onEventCobros(item)
-                                                                }}><i className="fa fa-file-text-o"></i></button>
+                                                                }}
+                                                                disabled={!this.state.pay}><i className="fa fa-file-text-o"></i></button>
                                                         </td>
                                                     </tr>
                                                 )

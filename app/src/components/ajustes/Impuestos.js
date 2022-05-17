@@ -12,7 +12,8 @@ import {
     ModalAlertInfo,
     ModalAlertSuccess,
     ModalAlertWarning,
-    spinnerLoading
+    spinnerLoading,
+    statePrivilegio
 } from '../tools/Tools';
 import { connect } from 'react-redux';
 import Paginacion from '../tools/Paginacion';
@@ -28,6 +29,10 @@ class Impuestos extends React.Component {
             codigo: '',
             estado: true,
             idUsuario: this.props.token.userToken.idUsuario,
+
+            add: statePrivilegio(this.props.token.userToken.menus[5].submenu[5].privilegio[0].estado),
+            edit: statePrivilegio(this.props.token.userToken.menus[5].submenu[5].privilegio[1].estado),
+            remove: statePrivilegio(this.props.token.userToken.menus[5].submenu[5].privilegio[2].estado),
 
             loadModal: false,
             nameModal: 'Nuevo Impuesto',
@@ -380,7 +385,7 @@ class Impuestos extends React.Component {
                     </div>
                     <div className="col-md-6 col-sm-12">
                         <div className="form-group">
-                            <button className="btn btn-outline-info" onClick={() => this.openModal('')}>
+                            <button className="btn btn-outline-info" onClick={() => this.openModal('')} disabled={!this.state.add}>
                                 <i className="bi bi-file-plus"></i> Nuevo Registro
                             </button>
                             {" "}
@@ -433,7 +438,8 @@ class Impuestos extends React.Component {
                                                             <button
                                                                 className="btn btn-outline-warning btn-sm"
                                                                 title="Editar"
-                                                                onClick={() => this.openModal(item.idImpuesto)}>
+                                                                onClick={() => this.openModal(item.idImpuesto)}
+                                                                disabled={!this.state.edit}>
                                                                 <i className="bi bi-pencil"></i>
                                                             </button>
                                                         </td>
@@ -441,7 +447,8 @@ class Impuestos extends React.Component {
                                                             <button
                                                                 className="btn btn-outline-danger btn-sm"
                                                                 title="Anular"
-                                                                onClick={() => this.onEventDelete(item.idImpuesto)}>
+                                                                onClick={() => this.onEventDelete(item.idImpuesto)}
+                                                                disabled={!this.state.remove}>
                                                                 <i className="bi bi-trash"></i>
                                                             </button>
                                                         </td>

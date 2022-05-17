@@ -13,7 +13,9 @@ import {
     getExtension,
     readDataURL,
     imageSizeData,
+    statePrivilegio
 } from '../tools/Tools';
+import { connect } from 'react-redux';
 import noImage from '../../recursos/images/noimage.jpg';
 import SearchBar from "../tools/SearchBar";
 import Paginacion from '../tools/Paginacion';
@@ -54,6 +56,8 @@ class Sedes extends React.Component {
             nameModal: 'Nuevo Comprobante',
             msgModal: 'Cargando datos...',
 
+            edit: statePrivilegio(this.props.token.userToken.menus[5].submenu[3].privilegio[0].estado),
+
             loading: false,
             lista: [],
 
@@ -64,7 +68,6 @@ class Sedes extends React.Component {
             messageTable: 'Cargando información...',
             messagePaginacion: 'Mostranto 0 de 0 Páginas'
         }
-
         this.refRuc = React.createRef();
         this.refRazonSocial = React.createRef();
         this.refNombreEmpresa = React.createRef();
@@ -744,7 +747,13 @@ class Sedes extends React.Component {
                                                         <td>{item.telefono}</td>
                                                         <td>{item.celular}</td>
                                                         <td className="text-center">
-                                                            <button className="btn btn-outline-warning btn-sm" title="Editar" onClick={() => this.openModal(item.idSede)}><i className="bi bi-pencil"></i></button>
+                                                            <button 
+                                                            className="btn btn-outline-warning btn-sm"
+                                                             title="Editar" 
+                                                             onClick={() => this.openModal(item.idSede)}
+                                                             disabled={!this.state.edit}>
+                                                                 <i className="bi bi-pencil"></i>
+                                                                 </button>
                                                         </td>
                                                     </tr>
                                                 )
@@ -781,7 +790,12 @@ class Sedes extends React.Component {
             </>
         )
     }
-
 }
 
-export default Sedes
+const mapStateToProps = (state) => {
+    return {
+        token: state.reducer
+    }
+}
+
+export default connect(mapStateToProps, null)(Sedes);

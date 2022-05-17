@@ -2,14 +2,14 @@ import React from 'react';
 import axios from 'axios';
 import {
     numberFormat,
-    formatMoney,
     timeForma24,
     spinnerLoading,
     ModalAlertDialog,
     ModalAlertInfo,
     ModalAlertSuccess,
     ModalAlertWarning,
-    ModalAlertError
+    ModalAlertError,
+    statePrivilegio
 } from '../tools/Tools';
 import { connect } from 'react-redux';
 import Paginacion from '../tools/Paginacion';
@@ -21,6 +21,10 @@ class Cobros extends React.Component {
             idCobro: '',
 
             idProyecto: this.props.token.project.idProyecto,
+
+            add: statePrivilegio(this.props.token.userToken.menus[2].submenu[3].privilegio[0].estado),
+            view: statePrivilegio(this.props.token.userToken.menus[2].submenu[3].privilegio[1].estado),
+            remove: statePrivilegio(this.props.token.userToken.menus[2].submenu[3].privilegio[2].estado),
 
             loading: false,
             lista: [],
@@ -183,7 +187,7 @@ class Cobros extends React.Component {
                     </div>
                     <div className="col-md-6 col-sm-12">
                         <div className="form-group">
-                            <button className="btn btn-outline-info" onClick={() => this.onEventNuevoCobro()}>
+                            <button className="btn btn-outline-info" onClick={() => this.onEventNuevoCobro()} disabled={!this.state.add}>
                                 <i className="bi bi-file-plus"></i> Nuevo Registro
                             </button>
                             {" "}
@@ -205,7 +209,7 @@ class Cobros extends React.Component {
                                         <th width="10%">Correlativo</th>
                                         <th width="10%">Creación</th>
                                         <th width="10%">Cuenta</th>
-                                        <th width="15%">Detalle</th>
+                                        <th width="15%">Observación</th>
                                         <th width="10%">Monto</th>
                                         <th width="5%" className="text-center">Detalle</th>
                                         <th width="5%" className="text-center">Eliminar</th>
@@ -229,15 +233,19 @@ class Cobros extends React.Component {
                                                     <tr key={index}>
                                                         <td className="text-center">{item.id}</td>
                                                         <td>{item.documento}{<br />}{item.informacion}</td>
-                                                        <td>{item.comprobante}{<br />}{item.serie+ "-" + item.numeracion}</td>                                                       
+                                                        <td>{item.comprobante}{<br />}{item.serie + "-" + item.numeracion}</td>
                                                         <td>{item.fecha}{<br />}{timeForma24(item.hora)}</td>
                                                         <td>{item.banco}</td>
                                                         <td>{item.detalle}</td>
                                                         <td>{numberFormat(item.monto)}</td>
                                                         <td className="text-center">
-                                                            <button className="btn btn-outline-info btn-sm" title="Detalle" onClick={() => {
-                                                                this.props.history.push({ pathname: `${this.props.location.pathname}/detalle`, search: "?idCobro=" + item.idCobro })
-                                                            }}>
+                                                            <button
+                                                                className="btn btn-outline-info btn-sm"
+                                                                title="Detalle"
+                                                                onClick={() => {
+                                                                    this.props.history.push({ pathname: `${this.props.location.pathname}/detalle`, search: "?idCobro=" + item.idCobro })
+                                                                }}
+                                                                disabled={!this.state.view}>
                                                                 <i className="fa fa-eye"></i>
                                                             </button>
                                                         </td>
@@ -245,7 +253,8 @@ class Cobros extends React.Component {
                                                             <button
                                                                 className="btn btn-outline-danger btn-sm"
                                                                 title="Eliminar"
-                                                                onClick={() => this.onEventAnularCobro(item.idCobro)}>
+                                                                onClick={() => this.onEventAnularCobro(item.idCobro)}
+                                                                disabled={!this.state.remove}>
                                                                 <i className="fa fa-remove"></i>
                                                             </button>
                                                         </td>

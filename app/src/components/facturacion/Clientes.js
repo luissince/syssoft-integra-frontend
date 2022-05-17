@@ -1,11 +1,13 @@
 import React from 'react';
 import axios from 'axios';
+import { connect } from 'react-redux';
 import {
     spinnerLoading,
     ModalAlertInfo,
     ModalAlertSuccess,
     ModalAlertWarning,
-    ModalAlertDialog
+    ModalAlertDialog,
+    statePrivilegio
 } from '../tools/Tools';
 import Paginacion from '../tools/Paginacion';
 
@@ -15,6 +17,10 @@ class Clientes extends React.Component {
         this.state = {
             loading: false,
             lista: [],
+
+            add:statePrivilegio(this.props.token.userToken.menus[2].submenu[0].privilegio[0].estado),
+            edit:statePrivilegio(this.props.token.userToken.menus[2].submenu[0].privilegio[1].estado),
+            remove:statePrivilegio(this.props.token.userToken.menus[2].submenu[0].privilegio[2].estado),
 
             opcion: 0,
             paginacion: 0,
@@ -114,20 +120,20 @@ class Clientes extends React.Component {
         }
     }
 
-    onEventNuevoCliente() {
+    onEventAdd() {
         this.props.history.push({
             pathname: `${this.props.location.pathname}/proceso`
         })
     }
 
-    onEventEditarCliente(idCliente) {
+    onEventEdit(idCliente) {
         this.props.history.push({
             pathname: `${this.props.location.pathname}/proceso`,
             search: "?idCliente=" + idCliente
         })
     }
 
-    onEventEliminarCliente(idCliente) {
+    onEventDelete(idCliente) {
         ModalAlertDialog("Eliminar cliente", "¿Está seguro de que desea eliminar el contacto? Esta operación no se puede deshacer.", async (value) => {
             if (value) {
                 try {
@@ -181,7 +187,7 @@ class Clientes extends React.Component {
                     <div className="col-md-6 col-sm-12">
                         <div className="form-group">
                             <div className="form-group">
-                                <button className="btn btn-outline-info" onClick={() => this.onEventNuevoCliente()}>
+                                <button className="btn btn-outline-info" onClick={() => this.onEventAdd()} disabled={!this.state.add}>
                                     <i className="bi bi-file-plus"></i> Nuevo Registro
                                 </button>
                                 {" "}
@@ -240,7 +246,8 @@ class Clientes extends React.Component {
                                                             <button
                                                                 className="btn btn-outline-warning btn-sm"
                                                                 title="Editar"
-                                                                onClick={() => this.onEventEditarCliente(item.idCliente)}>
+                                                                onClick={() => this.onEventEdit(item.idCliente)}
+                                                                disabled={!this.state.edit}>
                                                                 <i className="bi bi-pencil"></i>
                                                             </button>
                                                         </td>
@@ -248,7 +255,8 @@ class Clientes extends React.Component {
                                                             <button
                                                                 className="btn btn-outline-danger btn-sm"
                                                                 title="Editar"
-                                                                onClick={() => this.onEventEliminarCliente(item.idCliente)}>
+                                                                onClick={() => this.onEventDelete(item.idCliente)}
+                                                                disabled={!this.state.remove}>
                                                                 <i className="bi bi-trash">
                                                                 </i></button>
                                                         </td>
@@ -287,4 +295,11 @@ class Clientes extends React.Component {
     }
 }
 
-export default Clientes;
+const mapStateToProps = (state) => {
+    return {
+        token: state.reducer
+    }
+}
+
+
+export default connect(mapStateToProps, null)(Clientes);

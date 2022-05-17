@@ -10,10 +10,10 @@ import {
     ModalAlertInfo,
     ModalAlertSuccess,
     ModalAlertWarning,
+    statePrivilegio
 } from '../tools/Tools';
 import { connect } from 'react-redux';
 import Paginacion from '../tools/Paginacion';
-
 
 class Monedas extends React.Component {
     constructor(props) {
@@ -25,6 +25,10 @@ class Monedas extends React.Component {
             simbolo: '',
             estado: true,
             idUsuario: this.props.token.userToken.idUsuario,
+
+            add: statePrivilegio(this.props.token.userToken.menus[5].submenu[1].privilegio[0].estado),
+            edit: statePrivilegio(this.props.token.userToken.menus[5].submenu[1].privilegio[1].estado),
+            remove: statePrivilegio(this.props.token.userToken.menus[5].submenu[1].privilegio[2].estado),
 
             loadModal: false,
             nameModal: 'Nuevo Comprobante',
@@ -40,7 +44,6 @@ class Monedas extends React.Component {
             messageTable: 'Cargando información...',
             messagePaginacion: 'Mostranto 0 de 0 Páginas'
         }
-
         this.refTxtNombre = React.createRef();
         this.refTxtCodIso = React.createRef();
         this.refTxtSimbolo = React.createRef();
@@ -374,7 +377,7 @@ class Monedas extends React.Component {
                     </div>
                     <div className="col-md-6 col-sm-12">
                         <div className="form-group">
-                            <button className="btn btn-outline-info" onClick={() => this.openModal('')}>
+                            <button className="btn btn-outline-info" onClick={() => this.openModal('')} disabled={!this.state.add}>
                                 <i className="bi bi-file-plus"></i> Nuevo Registro
                             </button>
                             {" "}
@@ -425,14 +428,16 @@ class Monedas extends React.Component {
                                                             <button
                                                                 className="btn btn-outline-warning btn-sm"
                                                                 title="Editar"
-                                                                onClick={() => this.openModal(item.idMoneda)}>
+                                                                onClick={() => this.openModal(item.idMoneda)}
+                                                                disabled={!this.state.edit}>
                                                                 <i className="bi bi-pencil"></i></button>
                                                         </td>
                                                         <td className="text-center">
                                                             <button
                                                                 className="btn btn-outline-danger btn-sm"
                                                                 title="Eliminar"
-                                                                onClick={() => this.onEventDelete(item.idMoneda)}>
+                                                                onClick={() => this.onEventDelete(item.idMoneda)}
+                                                                disabled={!this.state.remove}>
                                                                 <i className="bi bi-trash"></i></button>
                                                         </td>
                                                     </tr>

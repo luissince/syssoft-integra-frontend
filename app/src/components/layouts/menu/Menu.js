@@ -34,6 +34,7 @@ class Menu extends React.Component {
 
     render() {
         const { project, userToken } = this.props.token;
+        console.log(userToken)
         return (
             <ProSidebar
                 image={this.state.image ? sidebarBg : false}
