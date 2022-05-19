@@ -1,20 +1,9 @@
-
 a,
 a:hover,
 a:focus {
     color: inherit;
     text-decoration: none;
     transition: all 0.3s;
-}
-
-/* ---------------------------------------------------
-    SIDEBAR STYLE
------------------------------------------------------ */
-
-.wrapper {
-    display: flex;
-    width: 100%;
-    align-items: stretch;
 }
 
 #sidebar {
@@ -26,16 +15,17 @@ a:focus {
     color: #fff;
     transition: all 0.3s;
     z-index: 1009;
+
 }
 
-#sidebar .pro-sidebar-inner{
-    /* background: linear-gradient(90deg,#404952,#343a40); */
+#sidebar .pro-sidebar-inner {
+    background: #7386D5;
     height: 100%;
     position: relative;
     z-index: 101;
 }
 
-#sidebar .pro-sidebar-inner > .pro-sidebar-layout{
+#sidebar .pro-sidebar-inner>.pro-sidebar-layout {
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -49,11 +39,23 @@ a:focus {
     margin-left: -270px;
 }
 
+#sidebar .overlay {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, .3);
+    z-index: 100;
+    display: none;
+}
+
 #sidebar .sidebar-header {
     padding: 20px;
     background: #6d7fcc;
     text-align: center;
 }
+
 
 #sidebar ul.components {
     padding: 10px 0;
@@ -74,7 +76,7 @@ a:focus {
     position: relative
 }
 
-#sidebar ul li .pro-inner-item > .pro-icon-wrapper{
+#sidebar ul li .pro-inner-item>.pro-icon-wrapper {
     display: inline-block;
     font-size: 14px;
     height: 35px;
@@ -85,14 +87,14 @@ a:focus {
     width: 35px;
 }
 
-#sidebar ul li .pro-inner-item > .pro-icon-wrapper .pro-icon{
+#sidebar ul li .pro-inner-item>.pro-icon-wrapper .pro-icon {
     align-items: center;
     display: flex;
     height: 100%;
     justify-content: center;
 }
 
-#sidebar ul li .pro-inner-item > .pro-item-content{
+#sidebar ul li .pro-inner-item>.pro-item-content {
     flex-grow: 1;
     flex-shrink: 1;
     overflow: hidden;
@@ -100,12 +102,12 @@ a:focus {
     white-space: nowrap;
 }
 
-#sidebar ul li .suffix-wrapper{
+#sidebar ul li .suffix-wrapper {
     opacity: 1;
     transition: opacity .2s;
 }
 
-#sidebar ul li .pro-inner-item > .pro-arrow-wrapper{
+#sidebar ul li .pro-inner-item>.pro-arrow-wrapper {
     position: absolute;
     right: 20px;
     top: 50%;
@@ -113,7 +115,7 @@ a:focus {
     transform: translateY(-50%);
 }
 
-#sidebar ul li .pro-inner-item > .pro-arrow-wrapper > .pro-arrow{
+#sidebar ul li .pro-inner-item>.pro-arrow-wrapper>.pro-arrow {
     border-color: #ffffff;
     border-style: solid;
     border-width: 0 2px 2px 0;
@@ -123,8 +125,13 @@ a:focus {
     transform: rotate(-45deg);
     transition: -webkit-transform .3s;
     transition: transform .3s;
-    transition: transform .3s,-webkit-transform .3s;
+    transition: transform .3s, -webkit-transform .3s;
     vertical-align: middle;
+}
+
+#sidebar ul li .pro-inner-item[aria-expanded="true"]>.pro-arrow-wrapper>.pro-arrow {
+    -webkit-transform: rotate(45deg);
+    transform: rotate(45deg);
 }
 
 #sidebar ul li .pro-inner-item:hover {
@@ -135,72 +142,56 @@ a[data-bs-toggle="collapse"] {
     position: relative;
 }
 
-.active-link{
-    color: #6d7fcc !important;
+.active-link {
+    color: #6172c0 !important;
     background: #d9e0fc;
     font-weight: bold;
 }
 
 a[aria-expanded="true"] {
     background: #6172c0;
-    /* font-weight: bold; */
+}
+
+ul.collapse {
+    background: #6172c0;
+}
+
+.transition-03 {
+    transition: all 0.3s;
 }
 
 ul ul a {
     font-size: 0.9em !important;
     padding-left: 30px !important;
-    background: #6172c0;
 }
 
-ul.CTAs {
+.sidebar-footer {
     padding: 20px;
 }
 
-ul.CTAs a {
+.sidebar-footer .article {
+    display: block;
     text-align: center;
     font-size: 0.9em !important;
-    display: block;
+
     border-radius: 5px;
     margin-bottom: 5px;
     padding: 10px;
-}
-
-a.download {
     background: #fff;
     color: #7386D5;
 }
 
-a.article,
-a.article:hover {
-    background: #6d7fcc !important;
-    color: #fff !important;
-}
-
-/* ---------------------------------------------------
-    CONTENT STYLE
------------------------------------------------------ */
-
-#content {
-    width: 100%;
-    padding: 20px;
-    min-height: 100vh;
-    transition: all 0.3s;
-}
-
-/* ---------------------------------------------------
-    MEDIAQUERIES
------------------------------------------------------ */
-
 @media (max-width: 768px) {
     #sidebar {
-        margin-left: -270px;
+        position: fixed;
+        left: -270px;
     }
 
-    #sidebar.active {
-        margin-left: 0;
+    #sidebar.toggled {
+        left: 0;
     }
 
-    #sidebarCollapse span {
-        display: none;
+    #sidebar.toggled .overlay {
+        display: block;
     }
 }

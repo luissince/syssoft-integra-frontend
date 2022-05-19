@@ -1,5 +1,5 @@
 import React from 'react';
-import { Switch, Route, Redirect, Link, NavLink} from 'react-router-dom';
+import { Switch, Route, Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { signOut, closeProject } from '../../redux/actions';
 import Menu from '../layouts/menu/Menu';
@@ -44,7 +44,7 @@ import RepLotes from '../reporte/RepLotes';
 import RepClientes from '../reporte/RepClientes';
 
 import logoEmpresa from '../../recursos/images/INMOBILIARIA.png';
-import icono from '../../recursos/images/inmobiliarianav.png';
+
 
 const Page404 = (props) => {
     return (
@@ -69,15 +69,18 @@ class Inicio extends React.Component {
         this.state = {
             isModal: false
         }
-        this.menuRef = React.createRef();
     }
 
     componentDidMount() {
-        window.addEventListener('focus', this.onEventFocused)
+        window.addEventListener('focus', this.onEventFocused);
+        window.addEventListener('resize', this.onEventResize);
+        window.addEventListener('click', this.onEventClick);
     }
 
     componentWillUnmount() {
-        window.removeEventListener('focus', this.onEventFocused)
+        window.removeEventListener('focus', this.onEventFocused);
+        window.removeEventListener('resize', this.onEventResize);
+        window.removeEventListener('click', this.onEventClick);
     }
 
     onEventFocused = (event) => {
@@ -100,15 +103,41 @@ class Inicio extends React.Component {
         }
     }
 
-    setOpen = () => {
-        // this.setState({ isModal: !this.state.isModal }, () => {
-        //     this.menuRef.current.handleToggleSidebar(this.state.isModal);
-        // });
-        console.log("dd")
+    onEventResize(event) {
+        if (event.target.innerWidth <= 768 && document.getElementById("sidebar").classList.contains("active")) {
+            document.getElementById("sidebar").classList.remove("active");
+        }
     }
 
-    setMinimun = () => {
-        document.getElementById("sidebar").classList.toggle("active");
+    onEventClick = (event) => {
+        let sidebar = document.getElementById("sidebar");
+        let overlaySidebar = document.getElementById("overlay-sidebar");
+        if (!(event.target !== overlaySidebar && !this.isChild(event.target, overlaySidebar))) {
+            sidebar.classList.remove("toggled");
+            sidebar.removeChild(overlaySidebar)
+        }
+    }
+
+    isChild = (child, parent) => {
+        while ((child = child.parentNode) && child !== parent);
+        return !!child;
+    }
+
+    openAndClose = () => {
+        let windowWidth = window.innerWidth;
+        if (windowWidth <= 768) {
+            document.getElementById("sidebar").classList.add("toggled");
+
+            let overlay = document.createElement("div");
+            overlay.setAttribute("id", "overlay-sidebar")
+            overlay.setAttribute("role", "button");
+            overlay.setAttribute("tabindex", "0");
+            overlay.setAttribute("aria-label", "overlay");
+            overlay.classList.add("overlay");
+            document.getElementById("sidebar").appendChild(overlay);
+        } else {
+            document.getElementById("sidebar").classList.toggle("active");
+        }
     }
 
     render() {
@@ -121,162 +150,13 @@ class Inicio extends React.Component {
         }
 
         const { path, url } = this.props.match;
-        const { project, userToken } = this.props.token;
         return (
             <div className='app'>
-                {/* <Menu  {...this.props} ref={this.menuRef} url={url} /> */}
-
-                <nav id="sidebar">
-                    <div className='pro-sidebar-inner'>
-                        <div className='pro-sidebar-layout'>
-                            <div className="sidebar-header">
-                            <img className="d-block mx-auto mb-4" src={icono} alt="Logo" width="150" />
-                                <h5>INMOBILIARIA GMYC</h5>
-                            </div>
-
-                            <ul className="list-unstyled components">
-                                <p>{project.nombre}</p>
-                                <div className="line"></div>
-                                {
-                                    userToken.menus.map((menu, index) => (
-                                        menu.submenu.length === 0 && menu.estado === 1 ?
-                                            <li key={index} className="">
-                                                <NavLink to={`${url}/${menu.ruta}`}
-                                                    className="pro-inner-item" 
-                                                    activeClassName='active-link'
-                                                    role="button">
-                                                    <span className="pro-icon-wrapper">
-                                                        <span className="pro-icon">
-                                                            {<i className={menu.icon}></i>}
-                                                        </span>
-                                                    </span>
-                                                    <span className="pro-item-content">
-                                                        {menu.nombre}
-                                                    </span>
-                                                </NavLink>
-                                            </li>
-                                            :
-
-                                            menu.submenu.filter(submenu => submenu.estado === 1).length !== 0 ?
-                                                <li key={index}>
-                                                    <a href={"#mn"+index}
-                                                        data-bs-toggle="collapse"
-                                                        aria-expanded="false"
-                                                        className="pro-inner-item"
-                                                        role="button">
-                                                        <span className="pro-icon-wrapper">
-                                                            <span className="pro-icon">
-                                                                {<i className={menu.icon}></i>}
-                                                            </span>
-                                                        </span>
-                                                        <span className="pro-item-content">
-                                                            {menu.nombre}
-                                                        </span>
-                                                        <span className="suffix-wrapper">
-                                                            <span className="badge yellow">{menu.submenu.filter(submenu => submenu.estado === 1).length}</span>
-                                                        </span>
-                                                        <span className="pro-arrow-wrapper">
-                                                            <span className="pro-arrow"></span>
-                                                        </span>
-                                                    </a>
-
-                                                    <ul className="collapse list-unstyled" id={"mn"+index}>
-                                                        {
-                                                            menu.submenu.map((submenu, indexm) => (
-                                                                submenu.estado === 1 ?
-                                                                    <li key={indexm}>
-                                                                        <NavLink to={`${url}/${submenu.ruta}`} 
-                                                                        className="pro-inner-item"
-                                                                        activeClassName='active-link'
-                                                                        role="button">
-                                                                            <span className="pro-icon-wrapper">
-                                                                                <span className="pro-icon">
-                                                                                    <i className="fa fa-minus"></i>
-                                                                                </span>
-                                                                            </span>
-                                                                            <span className="pro-item-content">
-                                                                                {submenu.nombre}
-                                                                            </span>
-                                                                        </NavLink>
-                                                                    </li>
-                                                                    :
-                                                                    null
-                                                            ))
-                                                        }
-                                                    </ul>
-                                                </li>
-
-                                                :
-                                                null
-                                    ))
-                                }
-                                {/* <li className="active">
-                                    <a className="pro-inner-item" role="button">
-                                        <span className="pro-icon-wrapper">
-                                            <span className="pro-icon">
-                                                <i className="bi bi-apple"></i>
-                                            </span>
-                                        </span>
-                                        <span className="pro-item-content">
-                                            Dashboard
-                                        </span>
-                                    </a>
-                                </li>
-
-                                <li>
-                                    <a href="#homeSubmenu" data-bs-toggle="collapse" aria-expanded="false" className="pro-inner-item" role="button">
-                                        <span className="pro-icon-wrapper">
-                                            <span className="pro-icon">
-                                                <i className="bi bi-apple"></i>
-                                            </span>
-                                        </span>
-                                        <span className="pro-item-content">
-                                            Seguridad
-                                        </span>
-                                        <span className="suffix-wrapper">
-                                            <span className="badge yellow">3</span>
-                                        </span>
-                                        <span className="pro-arrow-wrapper">
-                                            <span className="pro-arrow"></span>
-                                        </span>
-                                    </a>
-
-                                    <ul className="collapse list-unstyled" id="homeSubmenu">
-                                        <li >
-                                            <a href="#" className="pro-inner-item">
-                                                <span className="pro-icon-wrapper">
-                                                    <span className="pro-icon">
-                                                        <i className="fa fa-minus"></i>
-                                                    </span>
-                                                </span>
-                                                <span className="pro-item-content">
-                                                    Home 1
-                                                </span>
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </li> */}
-                            </ul>
-
-                            <ul className="list-unstyled CTAs">
-                                {/* <li>
-                                    <a href="https://bootstrapious.com/tutorial/files/sidebar.zip" className="download">
-                                        Download source
-                                    </a>
-                                </li> */}
-                                <li>
-                                    <a href="https://bootstrapious.com/p/bootstrap-sidebar" className="article">
-                                        {userToken.nombres + " " + userToken.apellidos}
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </nav>
+                <Menu  {...this.props} url={url} />
 
                 <main className=' position-relative'>
                     <div className="container-fluid">
-                        <Head {...this.props} setOpen={this.setOpen} setMinimun={this.setMinimun} />
+                        <Head {...this.props} openAndClose={this.openAndClose} />
 
                         <Switch>
                             <Route
