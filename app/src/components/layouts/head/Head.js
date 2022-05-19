@@ -11,43 +11,18 @@ class Menu extends React.Component {
 
     render() {
         return (
-            <>
-                <header className="mb-1">
-                    <div className='row'>
-                        <div className="col-lg-12" navbar-scroll="true">
-                            <div className='row'>
-                                <div className='col-lg-3 col-md-3 col-sm-4 col-xs-12'>
-                                    <div className='form-group'>
-                                        <div className="block d-block">
-                                            <button className="btn btn-dark" onClick={this.props.openAndClose} >
-                                                <i className="bi bi-list" id="btnMenu"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className='col-lg-9 col-md-9 col-sm-8 col-xs-12'>
-                                    <div className="form-inline float-lg-right float-md-right float-sm-right float-xs-left" >
-                                        {/* <div className="form-group">
-                                            <div className="input-group">
-                                                <input className="form-control  bg-transparent" type="search" placeholder="Buscar modulos" aria-label="Search" />
-                                                <div className="input-group-append">
-                                                    <button className="btn btn-outline-success" type="button">
-                                                        <i className="bi bi-search"></i>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div> */}
+            <header className="app-header">
+                <span className="app-sidebar__toggle" type="button" onClick={this.props.openAndClose}>
+                </span>
 
-                                        <div className="form-group ml-xl-2 ml-lg-2 ml-md-2 ml-sm-2 ml-0">
-                                            <button type="button" onClick={() => this.onEventCloseProject()} className="btn btn-outline-light" >Regresar</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </header>
-            </>
+                <ul className="app-nav">
+                    <span className="app-nav__item"  type="button" onClick={() => this.onEventCloseProject()}>
+                        <i className="fa fa-sign-out fa-sm"></i>
+                        <span className="app-nav_text">&nbsp; Cerrar Sesión<span>
+                        </span></span>
+                    </span>
+                </ul>
+            </header>
         );
     }
 }

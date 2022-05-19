@@ -154,188 +154,191 @@ class Inicio extends React.Component {
             <div className='app'>
                 <Menu  {...this.props} url={url} />
 
-                <main className=' position-relative'>
-                    <div className="container-fluid">
-                        <Head {...this.props} openAndClose={this.openAndClose} />
+                <main className="position-relative">
+                    <Head {...this.props} openAndClose={this.openAndClose} />
 
-                        <Switch>
-                            <Route
-                                path="/inicio"
-                                exact={true}>
-                                <Redirect to={`${path}/main`} />
-                            </Route>
-                            <Route
-                                path={`${path}/main`}
-                                render={(props) => <Main {...props} />}
-                            />
-                            <Route
-                                path={`${path}/dashboard`}
-                                render={(props) => <Dashboard {...props} />}
-                            />
-                            <Route
-                                path={`${path}/perfiles`}
-                                render={(props) => <Perfiles {...props} />}
-                            />
-                            <Route
-                                path={`${path}/usuarios`}
-                                exact={true}
-                                render={(props) => <Usuarios {...props} />}
-                            />
-                            <Route
-                                path={`${path}/usuarios/proceso`}
-                                exact={true}
-                                render={(props) => <UsuarioProceso {...props} />}
-                            />
+                    <div className="container-fluid mt-3">
+                        <div className="bg-white p-3 border border-light-purple rounded">
 
-                            <Route
-                                path={`${path}/accesos`}
-                                render={(props) => <Accesos {...props} />}
-                            />
-                            <Route
-                                path={`${path}/clientes`}
-                                exact={true}
-                                render={(props) => <Clientes {...props} />}
-                            />
-                            <Route
-                                path={`${path}/clientes/proceso`}
-                                exact={true}
-                                render={(props) => <ClienteProceso {...props} />}
-                            />
-                            <Route
-                                path={`${path}/ventas`}
-                                exact={true}
-                                render={(props) => <Ventas {...props} />}
-                            />
-                            <Route
-                                path={`${path}/ventas/proceso`}
-                                exact={true}
-                                render={(props) => <VentaProceso {...props} />}
-                            />
-                            <Route
-                                path={`${path}/ventas/detalle`}
-                                exact={true}
-                                render={(props) => <VentaDetalle {...props} />}
-                            />
-                            <Route
-                                path={`${path}/cobros`}
-                                exact={true}
-                                render={(props) => <Cobros {...props} />}
-                            />
-                            <Route
-                                path={`${path}/cobros/proceso`}
-                                exact={true}
-                                render={(props) => <CobroProceso {...props} />}
-                            />
-                            <Route
-                                path={`${path}/cobros/detalle`}
-                                exact={true}
-                                render={(props) => <CobroDetalle {...props} />}
-                            />
-                            <Route
-                                path={`${path}/creditos`}
-                                exact={true}
-                                render={(props) => <Creditos {...props} />}
-                            />
-                            <Route
-                                path={`${path}/creditos/proceso`}
-                                exact={true}
-                                render={(props) => <CreditoProceso {...props} />}
-                            />
-                            <Route
-                                path={`${path}/cotizaciones`}
-                                render={(props) => <Cotizaciones {...props} />}
-                            />
-                            <Route
-                                path={`${path}/reservas`}
-                                render={(props) => <Reservas {...props} />}
-                            />
-                            <Route
-                                path={`${path}/monedas`}
-                                render={(props) => <Monedas {...props} />}
-                            />
-                            <Route
-                                path={`${path}/comprobantes`}
-                                render={(props) => <Comprobantes {...props} />}
-                            />
-                            <Route
-                                path={`${path}/bancos`}
-                                exact={true}
-                                render={(props) => <Bancos {...props} />}
-                            />
-                            <Route
-                                path={`${path}/bancos/detalle`}
-                                exact={true}
-                                render={(props) => <BancoDetalle {...props} />}
-                            />
-                            <Route
-                                path={`${path}/sedes`}
-                                render={(props) => <Sedes {...props} />}
-                            />
-                            <Route
-                                path={`${path}/proyectos`}
-                                exact={true}
-                                render={(props) => <Proyectos {...props} />}
-                            />
-                            <Route
-                                path={`${path}/proyectos/proceso`}
-                                exact={true}
-                                render={(props) => <ProcesoProyecto {...props} />}
-                            />
-                            <Route
-                                path={`${path}/impuestos`}
-                                render={(props) => <Impuestos {...props} />}
-                            />
-                            <Route
-                                path={`${path}/manzanas`}
-                                render={(props) => <Manzanas {...props} />}
-                            />
-                            <Route
-                                path={`${path}/lotes`}
-                                exact={true}
-                                render={(props) => <Lotes {...props} />}
-                            />
-                            <Route
-                                path={`${path}/lotes/detalle`}
-                                exact={true}
-                                render={(props) => <LoteDetalle {...props} />}
-                            />
-                            <Route
-                                path={`${path}/conceptos`}
-                                render={(props) => <Conceptos {...props} />}
-                            />
-                            <Route
-                                path={`${path}/gastos`}
-                                exact={true}
-                                render={(props) => <Gastos {...props} />}
-                            />
-                            <Route
-                                path={`${path}/gastos/proceso`}
-                                exact={true}
-                                render={(props) => <GastoProceso {...props} />}
-                            />
-                            <Route
-                                path={`${path}/gastos/detalle`}
-                                exact={true}
-                                render={(props) => <GastoDetalle {...props} />}
-                            />
-                            <Route
-                                path={`${path}/repventas`}
-                                render={(props) => <RepVentas {...props} />}
-                            />
-                            <Route
-                                path={`${path}/repfinanciero`}
-                                render={(props) => <RepFinanciero {...props} />}
-                            />
-                            <Route
-                                path={`${path}/replotes`}
-                                render={(props) => <RepLotes {...props} />}
-                            />
-                            <Route
-                                path={`${path}/RepClientes`}
-                                render={(props) => <RepClientes {...props} />}
-                            />
-                            <Route component={Page404} />
-                        </Switch>
+                            <Switch>
+                                <Route
+                                    path="/inicio"
+                                    exact={true}>
+                                    <Redirect to={`${path}/main`} />
+                                </Route>
+                                <Route
+                                    path={`${path}/main`}
+                                    render={(props) => <Main {...props} />}
+                                />
+                                <Route
+                                    path={`${path}/dashboard`}
+                                    render={(props) => <Dashboard {...props} />}
+                                />
+                                <Route
+                                    path={`${path}/perfiles`}
+                                    render={(props) => <Perfiles {...props} />}
+                                />
+                                <Route
+                                    path={`${path}/usuarios`}
+                                    exact={true}
+                                    render={(props) => <Usuarios {...props} />}
+                                />
+                                <Route
+                                    path={`${path}/usuarios/proceso`}
+                                    exact={true}
+                                    render={(props) => <UsuarioProceso {...props} />}
+                                />
+
+                                <Route
+                                    path={`${path}/accesos`}
+                                    render={(props) => <Accesos {...props} />}
+                                />
+                                <Route
+                                    path={`${path}/clientes`}
+                                    exact={true}
+                                    render={(props) => <Clientes {...props} />}
+                                />
+                                <Route
+                                    path={`${path}/clientes/proceso`}
+                                    exact={true}
+                                    render={(props) => <ClienteProceso {...props} />}
+                                />
+                                <Route
+                                    path={`${path}/ventas`}
+                                    exact={true}
+                                    render={(props) => <Ventas {...props} />}
+                                />
+                                <Route
+                                    path={`${path}/ventas/proceso`}
+                                    exact={true}
+                                    render={(props) => <VentaProceso {...props} />}
+                                />
+                                <Route
+                                    path={`${path}/ventas/detalle`}
+                                    exact={true}
+                                    render={(props) => <VentaDetalle {...props} />}
+                                />
+                                <Route
+                                    path={`${path}/cobros`}
+                                    exact={true}
+                                    render={(props) => <Cobros {...props} />}
+                                />
+                                <Route
+                                    path={`${path}/cobros/proceso`}
+                                    exact={true}
+                                    render={(props) => <CobroProceso {...props} />}
+                                />
+                                <Route
+                                    path={`${path}/cobros/detalle`}
+                                    exact={true}
+                                    render={(props) => <CobroDetalle {...props} />}
+                                />
+                                <Route
+                                    path={`${path}/creditos`}
+                                    exact={true}
+                                    render={(props) => <Creditos {...props} />}
+                                />
+                                <Route
+                                    path={`${path}/creditos/proceso`}
+                                    exact={true}
+                                    render={(props) => <CreditoProceso {...props} />}
+                                />
+                                <Route
+                                    path={`${path}/cotizaciones`}
+                                    render={(props) => <Cotizaciones {...props} />}
+                                />
+                                <Route
+                                    path={`${path}/reservas`}
+                                    render={(props) => <Reservas {...props} />}
+                                />
+                                <Route
+                                    path={`${path}/monedas`}
+                                    render={(props) => <Monedas {...props} />}
+                                />
+                                <Route
+                                    path={`${path}/comprobantes`}
+                                    render={(props) => <Comprobantes {...props} />}
+                                />
+                                <Route
+                                    path={`${path}/bancos`}
+                                    exact={true}
+                                    render={(props) => <Bancos {...props} />}
+                                />
+                                <Route
+                                    path={`${path}/bancos/detalle`}
+                                    exact={true}
+                                    render={(props) => <BancoDetalle {...props} />}
+                                />
+                                <Route
+                                    path={`${path}/sedes`}
+                                    render={(props) => <Sedes {...props} />}
+                                />
+                                <Route
+                                    path={`${path}/proyectos`}
+                                    exact={true}
+                                    render={(props) => <Proyectos {...props} />}
+                                />
+                                <Route
+                                    path={`${path}/proyectos/proceso`}
+                                    exact={true}
+                                    render={(props) => <ProcesoProyecto {...props} />}
+                                />
+                                <Route
+                                    path={`${path}/impuestos`}
+                                    render={(props) => <Impuestos {...props} />}
+                                />
+                                <Route
+                                    path={`${path}/manzanas`}
+                                    render={(props) => <Manzanas {...props} />}
+                                />
+                                <Route
+                                    path={`${path}/lotes`}
+                                    exact={true}
+                                    render={(props) => <Lotes {...props} />}
+                                />
+                                <Route
+                                    path={`${path}/lotes/detalle`}
+                                    exact={true}
+                                    render={(props) => <LoteDetalle {...props} />}
+                                />
+                                <Route
+                                    path={`${path}/conceptos`}
+                                    render={(props) => <Conceptos {...props} />}
+                                />
+                                <Route
+                                    path={`${path}/gastos`}
+                                    exact={true}
+                                    render={(props) => <Gastos {...props} />}
+                                />
+                                <Route
+                                    path={`${path}/gastos/proceso`}
+                                    exact={true}
+                                    render={(props) => <GastoProceso {...props} />}
+                                />
+                                <Route
+                                    path={`${path}/gastos/detalle`}
+                                    exact={true}
+                                    render={(props) => <GastoDetalle {...props} />}
+                                />
+                                <Route
+                                    path={`${path}/repventas`}
+                                    render={(props) => <RepVentas {...props} />}
+                                />
+                                <Route
+                                    path={`${path}/repfinanciero`}
+                                    render={(props) => <RepFinanciero {...props} />}
+                                />
+                                <Route
+                                    path={`${path}/replotes`}
+                                    render={(props) => <RepLotes {...props} />}
+                                />
+                                <Route
+                                    path={`${path}/RepClientes`}
+                                    render={(props) => <RepClientes {...props} />}
+                                />
+                                <Route component={Page404} />
+                            </Switch>
+                        </div>                        
                     </div>
                     <Footer />
                 </main>

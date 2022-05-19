@@ -145,14 +145,10 @@ a[data-bs-toggle="collapse"] {
 .active-link {
     color: #6172c0 !important;
     background: #d9e0fc;
-    font-weight: bold;
+    transition: all 0.3s;
 }
 
 a[aria-expanded="true"] {
-    background: #6172c0;
-}
-
-ul.collapse {
     background: #6172c0;
 }
 
@@ -160,9 +156,22 @@ ul.collapse {
     transition: all 0.3s;
 }
 
+ul ul {
+    background: #6172c0;
+   
+}
+
+ul ul li{
+    padding: 5px 0px 10px 0px;
+}
+
 ul ul a {
+    background: #6172c0;
     font-size: 0.9em !important;
     padding-left: 30px !important;
+    margin: 0 10px;
+    border-radius: 0.25rem;
+   
 }
 
 .sidebar-footer {

@@ -94,7 +94,6 @@ class Dashboard extends React.Component {
                             {spinnerLoading(this.state.msgLoading)}
                         </div>
                         :
-
                         <div className='col-lg-12 col-md-12 mt-8 mb-12'>
                             <div className="container-fluid py-4 ">
 
