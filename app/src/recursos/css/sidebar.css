@@ -157,8 +157,7 @@ a[aria-expanded="true"] {
 }
 
 ul ul {
-    background: #6172c0;
-   
+    background: #6172c0;   
 }
 
 ul ul li{
@@ -168,10 +167,9 @@ ul ul li{
 ul ul a {
     background: #6172c0;
     font-size: 0.9em !important;
-    padding-left: 30px !important;
+    padding: 5px 0px 5px 20px !important;
     margin: 0 10px;
     border-radius: 0.25rem;
-   
 }
 
 .sidebar-footer {
