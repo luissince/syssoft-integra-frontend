@@ -8,8 +8,8 @@ const Menu = ({ url, token: { project, userToken } }) => {
             <div className='pro-sidebar-inner'>
                 <div className='pro-sidebar-layout'>
                     <div className="sidebar-header">
-                        <img className="d-block mx-auto mb-4" src={icono} alt="Logo" width="150" />
-                        <h5>INMOBILIARIA GMYC</h5>
+                        <img className="d-block mx-auto m-1" src={icono} alt="Logo" width="150" />
+                        <h5 className="m-0">INMOBILIARIA GMYC</h5>
                     </div>
 
                     <ul className="list-unstyled components">

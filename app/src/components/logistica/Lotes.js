@@ -225,6 +225,9 @@ class Lotes extends React.Component {
         try {
             let manzana = await axios.get('/api/manzana/listcombo', {
                 signal: this.abortControllerModal.signal,
+                params: {
+                    "idProyecto": this.state.idProyecto,
+                }
             });
 
             const concepto = await axios.get("/api/concepto/listcombo", {

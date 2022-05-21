@@ -144,6 +144,7 @@ class Cliente {
             if (connection != null) {
                 await conec.rollback(connection);
             }
+            console.log(error)
             return "Se produjo un error de servidor, intente nuevamente.";
         }
     }
@@ -157,7 +158,7 @@ class Cliente {
             cl.informacion,
             cl.celular,
             cl.telefono, 
-            DATE_FORMAT(cl.fechaNacimiento,'%d/%m/%Y') as fecha,
+            DATE_FORMAT(cl.fechaNacimiento,'%Y-%m-%d') as fechaNacimiento,
             cl.email, 
             cl.genero,  
             cl.direccion,
@@ -192,21 +193,21 @@ class Cliente {
 
             connection = await conec.beginTransaction();
             await conec.execute(connection, `UPDATE cliente SET
-        idTipoDocumento=?, 
-        documento=?,
-        informacion=?, 
-        celular=?,
-        telefono=?,
-        fechaNacimiento=?,
-        email=?,
-        genero=?, 
-        direccion=?, 
-        idUbigeo=?,
-        estadoCivil=?, 
-        estado=?,
-        observacion=?,
-        idUsuario=?
-        WHERE idCliente=?`, [
+                idTipoDocumento=?, 
+                documento=?,
+                informacion=?, 
+                celular=?,
+                telefono=?,
+                fechaNacimiento=?,
+                email=?,
+                genero=?, 
+                direccion=?, 
+                idUbigeo=?,
+                estadoCivil=?, 
+                estado=?,
+                observacion=?,
+                idUsuario=?
+                WHERE idCliente=?`, [
                 req.body.idTipoDocumento,
                 req.body.documento,
                 req.body.informacion,
@@ -230,6 +231,8 @@ class Cliente {
             if (connection != null) {
                 await conec.rollback(connection);
             }
+            console.log(error)
+
             return "Se produjo un error de servidor, intente nuevamente.";
         }
     }

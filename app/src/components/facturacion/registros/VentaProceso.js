@@ -49,7 +49,7 @@ class VentaProceso extends React.Component {
             msgLoading: 'Cargando datos...',
 
             importeTotal: 0,
-            selectTipoPago: true,
+            selectTipoPago: 1,
 
             bancos: [],
             comprobantesCobro: [],
@@ -63,6 +63,14 @@ class VentaProceso extends React.Component {
             idBancoCredito: '',
             metodoPagoCredito: '',
             letraMensual: '',
+
+            inicialCreditoVariableCheck: false,
+            inicialCreditoVariable: '',
+            idComprobanteCreditoVariable: '',
+            idBancoCreditoVariable: '',
+            metodoPagoCreditoVariable: '',
+            frecuenciaPago: ''
+
         }
 
         this.refLote = React.createRef();
@@ -80,6 +88,12 @@ class VentaProceso extends React.Component {
         this.refBancoCredito = React.createRef();
         this.refMetodoCredito = React.createRef();
         this.refNumCutoas = React.createRef();
+
+        this.refInicialCreditoVariable = React.createRef();
+        this.refComprobanteCreditoVariable = React.createRef();
+        this.refBancoCreditoVariable = React.createRef();
+        this.refMetodoCreditoVariable = React.createRef();
+        this.refFrecuenciaPago = React.createRef();
 
         this.abortControllerView = new AbortController();
     }
@@ -99,7 +113,7 @@ class VentaProceso extends React.Component {
 
         clearModal("modalVentaProceso", async () => {
             await this.setStateAsync({
-                selectTipoPago: true,
+                selectTipoPago: 1,
                 idBancoContado: '',
                 metodoPagoContado: '',
                 montoInicialCheck: false,
@@ -107,6 +121,13 @@ class VentaProceso extends React.Component {
                 idBancoCredito: '',
                 metodoPagoCredito: '',
                 letraMensual: '',
+
+                inicialCreditoVariableCheck: false,
+                inicialCreditoVariable: '',
+                // idComprobanteCreditoVariable: '',
+                idBancoCreditoVariable: '',
+                metodoPagoCreditoVariable: '',
+                frecuenciaPago: ''
             });
         })
     }
@@ -173,6 +194,9 @@ class VentaProceso extends React.Component {
                 idComprobante: comprobanteFilter.length > 0 ? comprobanteFilter[0].idComprobante : '',
                 idComprobanteContado: comprobanteCobroFilter.length > 0 ? comprobanteCobroFilter[0].idComprobante : '',
                 idComprobanteCredito: comprobanteCobroFilter.length > 0 ? comprobanteCobroFilter[0].idComprobante : '',
+
+                idComprobanteCreditoVariable: comprobanteCobroFilter.length > 0 ? comprobanteCobroFilter[0].idComprobante : '',
+
                 bancos: banco.data,
                 loading: false,
             });
@@ -336,7 +360,7 @@ class VentaProceso extends React.Component {
             messageWarning: '',
 
             importeTotal: 0,
-            selectTipoPago: true,
+            selectTipoPago: 1,
             bancos: [],
             comprobantesCobro: [],
             idComprobanteContado: '',
@@ -348,6 +372,13 @@ class VentaProceso extends React.Component {
             idBancoCredito: '',
             metodoPagoCredito: '',
             letraMensual: '',
+
+            inicialCreditoVariableCheck: false,
+            inicialCreditoVariable: '',
+            idComprobanteCreditoVariable: '',
+            idBancoCreditoVariable: '',
+            metodoPagoCreditoVariable: '',
+            frecuenciaPago: ''
         });
 
         this.loadData();
@@ -448,77 +479,122 @@ class VentaProceso extends React.Component {
 
     }
 
-    async onEventGuardar() {
-        if (this.state.selectTipoPago && this.state.idComprobanteContado === "") {
-            this.refComprobanteContado.current.focus();
-            return;
+    onEventGuardar() {
+
+        if (this.state.selectTipoPago === 1) {
+            // Al contado
+            if (this.state.idComprobanteContado === "") {
+                this.refComprobanteContado.current.focus();
+            } else if (this.state.idBancoContado === "") {
+                this.refBancoContado.current.focus();
+            } else if (this.state.metodoPagoContado === "") {
+                this.refMetodoContado.current.focus();
+            } else {
+                this.onSave(this.state.selectTipoPago)
+            }
+
+        } else if (this.state.selectTipoPago === 2) {
+            // Al credito fijo
+            if (this.state.montoInicialCheck && !isNumeric(this.state.inicial)) {
+                this.refMontoInicial.current.focus();
+            } else if (parseFloat(this.state.inicial) <= 0) {
+                this.refMontoInicial.current.focus();
+            } else if (this.state.montoInicialCheck && this.state.idComprobanteCredito === "") {
+                this.refComprobanteCredito.current.focus();
+            } else if (this.state.montoInicialCheck && this.state.idBancoCredito === "") {
+                this.refBancoCredito.current.focus();
+            } else if (this.state.montoInicialCheck && this.state.metodoPagoCredito === "") {
+                this.refMetodoCredito.current.focus();
+            } else if (!isNumeric(this.state.numCuota)) {
+                this.refNumCutoas.current.focus();
+            } else if (parseInt(this.state.numCuota) <= 0) {
+                this.refNumCutoas.current.focus();
+            } else {
+                this.onSave(this.state.selectTipoPago)
+            }
+
+        } else {
+            // Al credito variable
+            if (this.state.inicialCreditoVariableCheck && !isNumeric(this.state.inicialCreditoVariable)) {
+                this.refInicialCreditoVariable.current.focus();
+            } else if (parseFloat(this.state.inicialCreditoVariable) <= 0) {
+                this.refInicialCreditoVariable.current.focus();
+            } else if (this.state.inicialCreditoVariableCheck && this.state.idComprobanteCreditoVariable === "") {
+                this.refComprobanteCreditoVariable.current.focus();
+            } else if (this.state.inicialCreditoVariableCheck && this.state.idBancoCreditoVariable === "") {
+                this.refBancoCreditoVariable.current.focus();
+            } else if (this.state.inicialCreditoVariableCheck && this.state.metodoPagoCreditoVariable === "") {
+                this.refMetodoCreditoVariable.current.focus();
+            } else if (this.state.frecuenciaPago === '') {
+                this.refFrecuenciaPago.current.focus();
+            } else {
+                this.onSave(this.state.selectTipoPago)
+            }
+
         }
 
-        if (this.state.selectTipoPago && this.state.idBancoContado === "") {
-            this.refBancoContado.current.focus();
-            return;
-        }
+    }
 
-        if (this.state.selectTipoPago && this.state.metodoPagoContado === "") {
-            this.refMetodoContado.current.focus();
-            return;
-        }
-
-        if (!this.state.selectTipoPago && this.state.montoInicialCheck && !isNumeric(this.state.inicial)) {
-            this.refMontoInicial.current.focus();
-            return;
-        }
-
-        if (parseFloat(this.state.inicial) <= 0) {
-            this.refMontoInicial.current.focus();
-            return;
-        }
-
-        if (!this.state.selectTipoPago && this.state.montoInicialCheck && this.state.idComprobanteCredito === "") {
-            this.refComprobanteCredito.current.focus();
-            return;
-        }
-
-        if (!this.state.selectTipoPago && this.state.montoInicialCheck && this.state.idBancoCredito === "") {
-            this.refBancoCredito.current.focus();
-            return;
-        }
-
-        if (!this.state.selectTipoPago && this.state.montoInicialCheck && this.state.metodoPagoCredito === "") {
-            this.refMetodoCredito.current.focus();
-            return;
-        }
-
-        if (!this.state.selectTipoPago && !isNumeric(this.state.numCuota)) {
-            this.refNumCutoas.current.focus();
-            return;
-        }
-
-        if (parseInt(this.state.numCuota) <= 0) {
-            this.refNumCutoas.current.focus();
-            return;
-        }
-
-
+    async onSave(selectTipoPago) {
         ModalAlertDialog("Venta", "¿Estás seguro de continuar?", async (event) => {
             if (event) {
                 try {
                     ModalAlertInfo("Venta", "Procesando información...");
                     hideModal("modalVentaProceso")
+
                     let result = await axios.post('/api/factura/add', {
                         "idCliente": this.state.idCliente,
                         "idUsuario": this.state.idUsuario,
                         "idComprobante": this.state.idComprobante,
                         "idMoneda": this.state.idMoneda,
-                        "tipo": this.state.selectTipoPago ? 1 : 2,
-                        "selectTipoPago": this.state.selectTipoPago,
-                        "montoInicialCheck": this.state.montoInicialCheck,
-                        "idComprobanteCobro": this.state.selectTipoPago ? this.state.idComprobanteContado : this.state.idComprobanteCredito,
-                        "idBanco": this.state.selectTipoPago ? this.state.idBancoContado : this.state.montoInicialCheck ? this.state.idBancoCredito : "",
-                        "metodoPago": this.state.selectTipoPago ? this.state.metodoPagoContado : this.state.montoInicialCheck ? this.state.metodoPagoCredito : "",
-                        "inicial": this.state.selectTipoPago ? 0 : this.state.montoInicialCheck ? parseFloat(this.state.inicial) : 0,
-                        "numCuota": this.state.selectTipoPago ? 0 : parseInt(this.state.numCuota),
-                        "estado": this.state.selectTipoPago ? 1 : 2,
+                        // "tipo": this.state.selectTipoPago ? 1 : 2,
+                        "tipo": selectTipoPago === 1 ? 1 : 2,
+                        // "selectTipoPago": this.state.selectTipoPago,
+                        "selectTipoPago": selectTipoPago === 1 ? 1
+                            : selectTipoPago === 2 ? 2
+                                : selectTipoPago === 3 ? 3 : 0,
+
+                        // "montoInicialCheck": this.state.montoInicialCheck,
+                        "montoInicialCheck": selectTipoPago === 1 ? false
+                            : selectTipoPago === 2 && this.state.montoInicialCheck ? this.state.montoInicialCheck
+                                : selectTipoPago === 2 && !this.state.montoInicialCheck ? false
+                                    : selectTipoPago === 3 && this.state.inicialCreditoVariableCheck ? this.state.inicialCreditoVariableCheck
+                                        : selectTipoPago === 3 && !this.state.inicialCreditoVariableCheck ? false : false,
+
+                        // "idComprobanteCobro": this.state.selectTipoPago ? this.state.idComprobanteContado : this.state.idComprobanteCredito,
+                        "idComprobanteCobro": selectTipoPago === 1 ? this.state.idComprobanteContado
+                            : selectTipoPago === 2 ? this.state.idComprobanteCredito : this.state.idComprobanteCreditoVariable,
+                        // "idBanco": this.state.selectTipoPago ? this.state.idBancoContado : this.state.montoInicialCheck ? this.state.idBancoCredito : "",
+                        "idBanco": selectTipoPago === 1 ? this.state.idBancoContado
+                            : selectTipoPago === 2 && this.state.montoInicialCheck ? this.state.idBancoCredito
+                                : selectTipoPago === 2 && !this.state.montoInicialCheck ? ""
+                                    : selectTipoPago === 3 && this.state.inicialCreditoVariableCheck ? this.state.idBancoCreditoVariable
+                                        : selectTipoPago === 3 && !this.state.inicialCreditoVariableCheck ? "" : "",
+
+                        // "metodoPago": this.state.selectTipoPago ? this.state.metodoPagoContado : this.state.montoInicialCheck ? this.state.metodoPagoCredito : "",
+                        "metodoPago": selectTipoPago === 1 ? this.state.metodoPagoContado
+                            : selectTipoPago === 2 && this.state.montoInicialCheck ? this.state.metodoPagoCredito
+                                : selectTipoPago === 2 && !this.state.montoInicialCheck ? ""
+                                    : selectTipoPago === 3 && this.state.inicialCreditoVariableCheck ? this.state.metodoPagoCreditoVariable
+                                        : selectTipoPago === 3 && !this.state.inicialCreditoVariableCheck ? "" : "",
+
+                        // "inicial": this.state.selectTipoPago ? 0 : this.state.montoInicialCheck ? parseFloat(this.state.inicial) : 0,
+                        "inicial": selectTipoPago === 1 ? 0
+                            : selectTipoPago === 2 && this.state.montoInicialCheck ? parseFloat(this.state.inicial)
+                                : selectTipoPago === 2 && !this.state.montoInicialCheck ? 0
+                                    : selectTipoPago === 3 && this.state.inicialCreditoVariableCheck ? parseFloat(this.state.inicialCreditoVariable)
+                                        : selectTipoPago === 3 && !this.state.inicialCreditoVariableCheck ? 0 : 0,
+
+                        // "numCuota": this.state.selectTipoPago ? 0 : parseInt(this.state.numCuota),
+                        "numCuota": selectTipoPago === 1 ? 0
+                            : selectTipoPago === 2 ? parseInt(this.state.numCuota)
+                                : selectTipoPago === 3 ? 0 : 0,
+
+                        // "estado": this.state.selectTipoPago ? 1 : 2,
+                        "estado": selectTipoPago === 1 ? 1 : 2,
+                        "frecuenciaPago": selectTipoPago === 1 ? 0
+                            : selectTipoPago === 2 ? 0
+                                : selectTipoPago === 3 ? this.state.frecuenciaPago : 0,
                         "idProyecto": this.state.idProyecto,
                         "detalleVenta": this.state.detalleVenta,
                     });
@@ -537,6 +613,8 @@ class VentaProceso extends React.Component {
             }
         });
     }
+
+
 
     handleSelect = async (event, idDetalle) => {
         let updatedList = [...this.state.detalleVenta];
@@ -586,11 +664,11 @@ class VentaProceso extends React.Component {
                                 </div>
 
                                 <div className="row">
-                                    <div className="col-md-6 col-sm-6">
-                                        <button className={`btn ${this.state.selectTipoPago ? "btn-primary" : "btn-light"} btn-block`}
+                                    <div className="col-md-4 col-sm-4">
+                                        <button className={`btn ${this.state.selectTipoPago === 1 ? "btn-primary" : "btn-light"} btn-block`}
                                             type="button"
                                             title="Pago al contado"
-                                            onClick={() => this.setState({ selectTipoPago: !this.state.selectTipoPago })}>
+                                            onClick={() => this.setState({ selectTipoPago: 1 })}>
                                             <div className="row">
                                                 <div className="col-md-12">
                                                     <i className="bi bi-cash-coin fa-2x"></i>
@@ -602,27 +680,44 @@ class VentaProceso extends React.Component {
                                         </button>
                                     </div>
 
-                                    <div className="col-md-6 col-sm-6">
-                                        <button className={`btn ${!this.state.selectTipoPago ? "btn-primary" : "btn-light"} btn-block`}
+                                    <div className="col-md-4 col-sm-4">
+                                        <button className={`btn ${this.state.selectTipoPago === 2 ? "btn-primary" : "btn-light"} btn-block`}
                                             type="button"
                                             title="Pago al credito"
-                                            onClick={() => this.setState({ selectTipoPago: !this.state.selectTipoPago })}>
+                                            onClick={() => this.setState({ selectTipoPago: 2 })}>
                                             <div className="row">
                                                 <div className="col-md-12">
                                                     <i className="bi bi-boxes fa-2x"></i>
                                                 </div>
                                             </div>
                                             <div className="text-center">
-                                                <label>Crédito</label>
+                                                <label>Crédito fijo</label>
                                             </div>
                                         </button>
                                     </div>
+
+                                    <div className="col-md-4 col-sm-4">
+                                        <button className={`btn ${this.state.selectTipoPago === 3 ? "btn-primary" : "btn-light"} btn-block`}
+                                            type="button"
+                                            title="Pago al credito"
+                                            onClick={() => this.setState({ selectTipoPago: 3 })}>
+                                            <div className="row">
+                                                <div className="col-md-12">
+                                                    <i className="bi bi-columns-gap fa-2x"></i>
+                                                </div>
+                                            </div>
+                                            <div className="text-center">
+                                                <label>Crédito variable</label>
+                                            </div>
+                                        </button>
+                                    </div>
+
                                 </div>
 
                                 <br />
                                 {/* contado detalle */}
                                 {
-                                    this.state.selectTipoPago ?
+                                    this.state.selectTipoPago === 1 ?
                                         <div className="row">
                                             <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
                                                 <div className="form-row">
@@ -696,12 +791,12 @@ class VentaProceso extends React.Component {
                                                 </div>
                                             </div>
                                         </div>
-                                        :
-                                        null
+                                        : null
                                 }
-                                {/* crédito detalle */}
+
+                                {/* crédito fijo */}
                                 {
-                                    !this.state.selectTipoPago ?
+                                    this.state.selectTipoPago === 2 ?
                                         <div className={`row`}>
                                             <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
 
@@ -729,7 +824,7 @@ class VentaProceso extends React.Component {
                                                                     <input
                                                                         className="form-check-input"
                                                                         type="checkbox"
-                                                                        value={this.state.montoInicialCheck}
+                                                                        checked={this.state.montoInicialCheck}
                                                                         onChange={async (event) => {
                                                                             await this.setStateAsync({ montoInicialCheck: event.target.checked })
                                                                             this.refMontoInicial.current.focus();
@@ -858,6 +953,163 @@ class VentaProceso extends React.Component {
                                         </div>
                                         : null
                                 }
+
+                                {/* crédito variable */}
+                                {
+                                    this.state.selectTipoPago === 3 ?
+                                        <div className={`row`}>
+                                            <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+
+                                                <div className="form-group">
+                                                    <div className="input-group">
+                                                        <div className="input-group-prepend">
+                                                            <div className="input-group-text"><i className="bi bi-tag-fill"></i></div>
+                                                        </div>
+                                                        <input
+                                                            title="Monto inicial"
+                                                            type="text"
+                                                            className="form-control"
+                                                            ref={this.refInicialCreditoVariable}
+                                                            disabled={!this.state.inicialCreditoVariableCheck}
+                                                            placeholder='Monto inicial'
+                                                            value={this.state.inicialCreditoVariable}
+                                                            onChange={async (event) => {
+                                                                await this.setStateAsync({ inicialCreditoVariable: event.target.value })
+
+                                                            }}
+                                                            onKeyPress={keyNumberFloat} />
+                                                        <div className="input-group-append">
+                                                            <div className="input-group-text">
+                                                                <div className="form-check form-check-inline m-0">
+                                                                    <input
+                                                                        className="form-check-input"
+                                                                        type="checkbox"
+                                                                        checked={this.state.inicialCreditoVariableCheck}
+                                                                        onChange={async (event) => {
+                                                                            await this.setStateAsync({ inicialCreditoVariableCheck: event.target.checked })
+                                                                            this.refInicialCreditoVariable.current.focus();
+                                                                        }}
+                                                                    />
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {
+                                                    this.state.inicialCreditoVariableCheck ?
+                                                        <>
+                                                            <div className="form-row">
+                                                                <div className="form-group col-md-12">
+                                                                    <div className="input-group">
+                                                                        <div className="input-group-prepend">
+                                                                            <div className="input-group-text"><i className="bi bi-receipt"></i></div>
+                                                                        </div>
+                                                                        <select
+                                                                            title="Lista de caja o banco a depositar"
+                                                                            className="form-control"
+                                                                            ref={this.refComprobanteCreditoVariable}
+                                                                            value={this.state.idComprobanteCreditoVariable}
+                                                                            onChange={(event) => this.setState({ idComprobanteCreditoVariable: event.target.value })}>
+                                                                            <option value="">-- Comprobante --</option>
+                                                                            {
+                                                                                this.state.comprobantesCobro.map((item, index) => (
+                                                                                    <option key={index} value={item.idComprobante}>{item.nombre}</option>
+                                                                                ))
+                                                                            }
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div className="form-group">
+                                                                <div className="input-group">
+                                                                    <div className="input-group-prepend">
+                                                                        <div className="input-group-text"><i className="bi bi-bank"></i></div>
+                                                                    </div>
+                                                                    <select
+                                                                        title="Lista de caja o banco a depositar"
+                                                                        className="form-control"
+                                                                        ref={this.refBancoCreditoVariable}
+                                                                        value={this.state.idBancoCreditoVariable}
+                                                                        onChange={(event) => this.setState({ idBancoCreditoVariable: event.target.value })}>
+                                                                        <option value="">-- Cuenta bancaria --</option>
+                                                                        {
+                                                                            this.state.bancos.map((item, index) => (
+                                                                                <option key={index} value={item.idBanco}>{item.nombre}</option>
+                                                                            ))
+                                                                        }
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                            <div className="form-group">
+                                                                <div className="input-group">
+                                                                    <div className="input-group-prepend">
+                                                                        <div className="input-group-text"><i className="bi bi-credit-card-2-back"></i></div>
+                                                                    </div>
+                                                                    <select
+                                                                        title="Lista metodo de pago"
+                                                                        className="form-control"
+                                                                        ref={this.refMetodoCreditoVariable}
+                                                                        value={this.state.metodoPagoCreditoVariable}
+                                                                        onChange={(event) => this.setState({ metodoPagoCreditoVariable: event.target.value })}>
+                                                                        <option value="">-- Metodo de pago --</option>
+                                                                        <option value="1">Efectivo</option>
+                                                                        <option value="2">Consignación</option>
+                                                                        <option value="3">Transferencia</option>
+                                                                        <option value="4">Cheque</option>
+                                                                        <option value="5">Tarjeta crédito</option>
+                                                                        <option value="6">Tarjeta débito</option>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                        </>
+
+                                                        : null
+                                                }
+
+                                                <div className="form-group">
+                                                    <div className="input-group">
+                                                        <div className="input-group-prepend">
+                                                            <div className="input-group-text"><i className="bi bi-credit-card-2-back"></i></div>
+                                                        </div>
+                                                        <select
+                                                            title="Lista frecuencia de pago"
+                                                            className="form-control"
+                                                            ref={this.refFrecuenciaPago}
+                                                            value={this.state.frecuenciaPago}
+                                                            onChange={(event) => this.setState({ frecuenciaPago: event.target.value })}
+                                                        >
+                                                            <option value="">-- Frecuencia de pago --</option>
+                                                            <option value="1">Semanal</option>
+                                                            <option value="2">Quinsenal</option>
+                                                            <option value="3">Mensual</option>
+                                                            <option value="4">Bimestral</option>
+                                                            <option value="5">Trimestral</option>
+                                                            <option value="6">Semestral</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <div className="form-group">
+                                                    <div className="input-group">
+                                                        <div className="input-group-prepend">
+                                                            <div className="input-group-text"><i className="bi bi-piggy-bank-fill"></i></div>
+                                                        </div>
+                                                        <input
+                                                            title="Deuda restante"
+                                                            type="text"
+                                                            className="form-control"
+                                                            placeholder='0.00'
+                                                            value={formatMoney(this.state.importeTotal - this.state.inicialCreditoVariable)}
+                                                            disabled={true} />
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                        : null
+                                }
+
                             </div>
 
                             <div className="modal-footer">

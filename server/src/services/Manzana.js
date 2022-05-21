@@ -196,7 +196,9 @@ class Manzana {
 
     async listcombo(req) {
         try {
-            let result = await conec.query('SELECT idManzana,nombre FROM manzana');
+            let result = await conec.query('SELECT idManzana,nombre FROM manzana WHERE idProyecto = ?',[
+                req.query.idProyecto
+            ]);
             return result;
         } catch (error) {
             return "Error interno de conexión, intente nuevamente.";

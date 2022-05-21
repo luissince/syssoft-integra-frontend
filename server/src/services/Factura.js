@@ -218,7 +218,7 @@ class Factura {
                 montoTotal += parseFloat(item.precioContado) * item.cantidad;
             }
 
-            if (req.body.selectTipoPago) {
+            if (req.body.selectTipoPago === 1) {
                 let cobro = await conec.execute(connection, 'SELECT idCobro FROM cobro');
                 let idCobro = "";
                 if (cobro.length != 0) {

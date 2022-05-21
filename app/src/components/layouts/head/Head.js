@@ -18,7 +18,7 @@ class Menu extends React.Component {
                 <ul className="app-nav">
                     <span className="app-nav__item"  type="button" onClick={() => this.onEventCloseProject()}>
                         <i className="fa fa-sign-out fa-sm"></i>
-                        <span className="app-nav_text">&nbsp; Cerrar Sesión<span>
+                        <span className="app-nav_text">&nbsp; Salir<span>
                         </span></span>
                     </span>
                 </ul>

@@ -156,11 +156,11 @@ a[aria-expanded="true"] {
     transition: all 0.3s;
 }
 
-ul ul {
+#sidebar ul ul {
     background: #6172c0;   
 }
 
-ul ul li{
+#sidebar ul ul li{
     padding: 0px 0px 10px 0px;
 }
 

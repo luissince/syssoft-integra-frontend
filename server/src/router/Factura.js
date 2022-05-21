@@ -21,6 +21,8 @@ router.get("/list", async function (req, res) {
 });
 
 router.post("/add", async function (req, res) {
+    console.log(req.body)
+
     const result = await factura.add(req)
     if (result === "insert") {
         res.status(200).send("Datos registrados correctamente");

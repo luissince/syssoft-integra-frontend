@@ -37,7 +37,7 @@ router.get('/id', async function (req, res) {
 });
 
 router.post('/update', async function (req, res) {
-    const result = await cliente.add(req)
+    const result = await cliente.update(req)
     if (result === 'update') {
         res.status(201).send("Se actualizó correctamente el cliente.");
     } else {
