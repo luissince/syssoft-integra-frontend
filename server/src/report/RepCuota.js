@@ -1,7 +1,7 @@
 const path = require('path');
 const PDFDocument = require("pdfkit-table");
 const getStream = require('get-stream');
-const { formatMoney,numberFormat } = require('../tools/Tools');
+const { numberFormat } = require('../tools/Tools');
 
 class RepCuota {
 
@@ -23,7 +23,7 @@ class RepCuota {
 
             let orgX = doc.x;
             let orgY = doc.y;
-            let cabeceraY = orgY + 80;
+            let cabeceraY = orgY + 70;
             let titleX = orgX + 150;
             let medioX = doc.page.width / 2;
 
@@ -53,36 +53,52 @@ class RepCuota {
                 }
             );
 
-            doc.fontSize(h2).text(
+            doc.fontSize(h2);
+
+            const title = "CRONOGRAMA DE CUOTAS PAGAS";
+            let widthtext = doc.widthOfString(title);
+            console.log(widthtext)
+
+            doc.text(
+                title,
+                (doc.page.width - widthtext) / 2,
+                cabeceraY,
+                {
+                    width: widthtext
+                }
+            );
+
+            doc.opacity(0.7)
+            doc.fontSize(h3).text(
                 `${req.query.proyecto}`,
                 orgX,
-                cabeceraY,
+                doc.y + 10,
                 {
                     width: 250,
                     align: "left",
                 }
             );
-
-            // doc.rect(
-            //     orgX, 
-            //     cabeceraY + 20,
-            //     doc.page.width - doc.options.margins.left - doc.options.margins.right, 
-            //     57).fillAndStroke('#eeeeee', '#eeeeee');
-
             // reset 
             doc.fill('#000').stroke('#000');
+            doc.lineGap(4);
+            doc.opacity(1)
+
+            let filtroY = doc.y;
 
             doc.fontSize(h3).text(
                 `Cliente: ${venta.informacion}\nMonto Total: ${numberFormat(venta.total)}\nMonto Cobrado: ${numberFormat(venta.cobrado)}\nMonto Restante: ${numberFormat(venta.total - venta.cobrado)}`,
                 orgX,
-                cabeceraY + 25
+                filtroY + 10
             );
 
+
             doc.fontSize(h3).text(
-                `Dni/Ruc: ${venta.documento}\nMonto Inicial:  ${numberFormat(data.inicial)}\nN° Cuotas: ${venta.numCuota}\nComprobante: ${venta.nombre} ${venta.serie} - ${venta.numeracion}`,
+                `Dni/Ruc: ${venta.documento}\nMonto Inicial:  ${numberFormat(data.inicial)}\nN° Cuotas: ${venta.credito === 1 ? "Variable" : venta.numCuota}\nComprobante: ${venta.nombre} ${venta.serie} - ${venta.numeracion}`,
                 medioX,
-                cabeceraY + 25
+                filtroY + 10
             );
+
+            doc.lineGap(0);
 
             let lotes = data.lotes.map((item, index) => {
                 return [++index, item.lote, numberFormat(item.precio), item.areaLote, item.manzana]
@@ -104,7 +120,7 @@ class RepCuota {
                 columnSpacing: 5,
                 width: (doc.page.width - doc.options.margins.left - doc.options.margins.right),
                 x: orgX,
-                y: cabeceraY + 90,
+                y: doc.y + 15,
 
             });
 
@@ -126,15 +142,15 @@ class RepCuota {
 
             doc.table(table1, {
                 prepareHeader: () => doc.font("Helvetica-Bold").fontSize(h3),
-                prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) => {             
-                    if(indexColumn === 2){
-                        if(row[2] === "COBRADO"){
+                prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) => {
+                    if (indexColumn === 2) {
+                        if (row[2] === "COBRADO") {
                             doc.font("Helvetica").fontSize(h3).fillColor("green");
-                        }                   
-                    }else{
+                        }
+                    } else {
                         doc.font("Helvetica").fontSize(h3).fillColor("black");
                     }
-                  
+
                 },
                 padding: 5,
                 columnSpacing: 5,
@@ -149,7 +165,7 @@ class RepCuota {
             return "Se genero un error al generar el reporte.";
         }
     }
- 
+
 }
 
 module.exports = RepCuota;

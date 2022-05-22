@@ -61,7 +61,6 @@ router.get('/repcomprobante', async function (req, res) {
     req.query.idSede = decryptedData.idSede;
     req.query.idCobro = decryptedData.idCobro;
 
-
     const sedeInfo = await sede.infoSedeReporte(req)
 
     if (typeof sedeInfo !== 'object') {

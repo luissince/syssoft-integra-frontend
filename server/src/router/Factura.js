@@ -21,8 +21,6 @@ router.get("/list", async function (req, res) {
 });
 
 router.post("/add", async function (req, res) {
-    console.log(req.body)
-
     const result = await factura.add(req)
     if (result === "insert") {
         res.status(200).send("Datos registrados correctamente");
@@ -41,7 +39,7 @@ router.delete("/anular", async function (req, res) {
 });
 
 router.get("/id", async function (req, res) {
-    const result = await factura.dataId(req)
+    const result = await factura.id(req)
     if (typeof result === "object") {
         res.status(200).send(result);
     } else {
@@ -79,7 +77,7 @@ router.get('/repcomprobante', async function (req, res) {
         return;
     }
 
-    const detalle = await factura.dataId(req)
+    const detalle = await factura.id(req)
 
     if (typeof detalle === 'object') {
 

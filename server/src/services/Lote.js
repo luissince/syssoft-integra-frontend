@@ -359,7 +359,7 @@ class Lote {
             INNER JOIN comprobante AS c ON c.idComprobante = v.idComprobante
             INNER JOIN cliente AS cl ON cl.idCliente = v.idCliente
             LEFT JOIN ventaDetalle AS vdv ON vdv.idVenta = v.idVenta
-            WHERE l.idLote = ?
+            WHERE l.idLote = ? AND v.estado <> 3
             GROUP BY v.idVenta`, [
                 req.query.idLote,
             ]);

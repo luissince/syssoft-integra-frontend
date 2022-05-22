@@ -17,8 +17,8 @@ class Creditos extends React.Component {
             loading: false,
             lista: [],
 
-            view:statePrivilegio(this.props.token.userToken.menus[2].submenu[2].privilegio[0].estado),
-            pay:statePrivilegio(this.props.token.userToken.menus[2].submenu[2].privilegio[1].estado),
+            view: statePrivilegio(this.props.token.userToken.menus[2].submenu[2].privilegio[0].estado),
+            pay: statePrivilegio(this.props.token.userToken.menus[2].submenu[2].privilegio[1].estado),
 
             idProyecto: this.props.token.project.idProyecto,
 
@@ -183,7 +183,7 @@ class Creditos extends React.Component {
                                         <th width="5%" className="text-center">#</th>
                                         <th width="15%">Cliente</th>
                                         <th width="15%">Comprobante</th>
-                                        <th width="15%">Cuotas Pendientes</th>
+                                        <th width="15%">Cuotas Pendientes / Frecuencia</th>
                                         <th width="10%">Sig. Pago</th>
                                         <th width="10%">Total</th>
                                         <th width="10%">Cobrado</th>
@@ -211,7 +211,7 @@ class Creditos extends React.Component {
                                                         <td className="text-center">{item.id}</td>
                                                         <td>{item.documento}{<br />}{item.informacion}</td>
                                                         <td>{item.nombre}{<br />}{item.serie + "-" + item.numeracion}</td>
-                                                        <td>{item.numCuota === 1 ? item.numCuota + " Cuota" : item.numCuota + " Cuotas"}</td>
+                                                        <td>{item.credito === 1 ? item.frecuencia : item.numCuota === 1 ? item.numCuota + " Cuota" : item.numCuota + " Cuotas"}</td>
                                                         <td>{item.fechaPago === "" ? "-" : dateFormat(item.fechaPago)}</td>
                                                         <td className="text-right">{numberFormat(item.total)}</td>
                                                         <td className="text-right text-success">{numberFormat(item.cobrado)}</td>

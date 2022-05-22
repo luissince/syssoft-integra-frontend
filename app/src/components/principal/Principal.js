@@ -175,9 +175,9 @@ class Principal extends React.Component {
                                                 <div className="card">
                                                     <img src={item.imagen === "" ? noImage : `data:image/${item.extensionimagen};base64,${item.imagen}`} alt="" className="card-img-top" />
                                                     <div className="card-body m-2">
-                                                        <h6 className='text-info font-weight-bold'>{item.nombre}</h6>
+                                                        <h6 className='text-primary font-weight-bold'>{item.nombre}</h6>
                                                         <h6 className='text-secondary'>{item.ubicacion}</h6>
-                                                        <button onClick={() => this.onEventIngresar(item)} type="button" className="btn btn-block btn-outline-primary text-info" >
+                                                        <button onClick={() => this.onEventIngresar(item)} type="button" className="btn btn-block btn-outline-primary" >
                                                             <i className="bi bi-arrow-right-circle-fill"></i> Ingresar
                                                         </button>
                                                     </div>
@@ -187,18 +187,11 @@ class Principal extends React.Component {
                                                             <li className="list-group-item border-0 px-0 pt-0"><i className="bi bi-geo-fill"></i> Moneda {item.moneda}({item.simbolo})</li>
                                                             <li className="list-group-item border-0 px-0"><i className="bi bi-geo-fill"></i> Total de lotes {item.lotes.length}</li>
                                                             <li className="list-group-item border-0 px-0"><i className="bi bi-geo-fill"></i> Lotes disponibles {item.lotes.filter(lote => lote.estado === 1).length}</li>
-                                                            <li className="list-group-item border-0 px-0"><i className="bi bi-grid-1x2-fill"></i>
+                                                            <li className="list-group-item border-0 px-0"><i className="fa fa-info"></i>
                                                                 {
                                                                     item.estado === 1 ? <span className='text-success'> Estado en Venta</span> : <span className='text-danger'> Estado en Litigio</span>
                                                                 }</li>
                                                         </ul>
-                                                        {/* <div className="row pt-3">
-                                                    <div className="col-12">
-                                                        <div className="progress">
-                                                            <div className="progress-bar bg-info w-10" role="progressbar" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100">50%</div>
-                                                        </div>
-                                                    </div>
-                                                </div> */}
                                                     </div>
                                                 </div>
                                             </div>

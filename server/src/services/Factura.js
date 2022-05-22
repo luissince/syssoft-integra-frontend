@@ -1,4 +1,4 @@
-const { currentDate, currentTime } = require('../tools/Tools');
+const { currentDate, currentTime, frecuenciaPago } = require('../tools/Tools');
 const Conexion = require('../database/Conexion');
 const conec = new Conexion();
 
@@ -174,10 +174,12 @@ class Factura {
                 idMoneda,
                 tipo, 
                 numCuota,
+                credito,
+                frecuencia,
                 estado, 
                 fecha, 
                 hora)
-                VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)
+                VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
                 `, [
                 idVenta,
                 req.body.idCliente,
@@ -189,6 +191,8 @@ class Factura {
                 req.body.idMoneda,
                 req.body.tipo,
                 req.body.numCuota,
+                req.body.selectTipoPago == 3 ? 1 : 0,
+                req.body.frecuenciaPago,
                 req.body.estado,
                 currentDate(),
                 currentTime()
@@ -336,7 +340,8 @@ class Factura {
                     req.body.idUsuario,
                 ]);
 
-            } else {
+            } else if (req.body.selectTipoPago === 2) {
+
                 if (req.body.montoInicialCheck) {
                     let cobro = await conec.execute(connection, 'SELECT idCobro FROM cobro');
                     let idCobro = "";
@@ -498,6 +503,127 @@ class Factura {
                     ]);
                     idPlazo++;
                 }
+
+            } else {
+                if (req.body.montoInicialCheck) {
+                    let cobro = await conec.execute(connection, 'SELECT idCobro FROM cobro');
+                    let idCobro = "";
+                    if (cobro.length != 0) {
+
+                        let quitarValor = cobro.map(function (item) {
+                            return parseInt(item.idCobro.replace("CB", ''));
+                        });
+
+                        let valorActual = Math.max(...quitarValor);
+                        let incremental = valorActual + 1;
+                        let codigoGenerado = "";
+                        if (incremental <= 9) {
+                            codigoGenerado = 'CB000' + incremental;
+                        } else if (incremental >= 10 && incremental <= 99) {
+                            codigoGenerado = 'CB00' + incremental;
+                        } else if (incremental >= 100 && incremental <= 999) {
+                            codigoGenerado = 'CB0' + incremental;
+                        } else {
+                            codigoGenerado = 'CB' + incremental;
+                        }
+
+                        idCobro = codigoGenerado;
+                    } else {
+                        idCobro = "CB0001";
+                    }
+
+
+                    let comprobanteCobro = await conec.execute(connection, `SELECT 
+                    serie,
+                    numeracion 
+                    FROM comprobante 
+                    WHERE idComprobante  = ?
+                    `, [
+                        req.body.idComprobanteCobro
+                    ]);
+
+                    let numeracionCobro = 0;
+
+                    let cobros = await conec.execute(connection, 'SELECT numeracion  FROM cobro WHERE idComprobante = ?', [
+                        req.body.idComprobanteCobro
+                    ]);
+
+                    if (cobros.length > 0) {
+                        let quitarValor = cobros.map(function (item) {
+                            return parseInt(item.numeracion);
+                        });
+
+                        let valorActual = Math.max(...quitarValor);
+                        let incremental = valorActual + 1;
+                        numeracionCobro = incremental;
+                    } else {
+                        numeracionCobro = comprobanteCobro[0].numeracion;
+                    }
+
+                    await conec.execute(connection, `INSERT INTO cobro(
+                        idCobro, 
+                        idCliente, 
+                        idUsuario, 
+                        idMoneda, 
+                        idBanco, 
+                        idProcedencia,
+                        idProyecto,
+                        idComprobante,
+                        serie,
+                        numeracion,
+                        metodoPago, 
+                        estado, 
+                        observacion, 
+                        fecha, 
+                        hora) 
+                        VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, [
+                        idCobro,
+                        req.body.idCliente,
+                        req.body.idUsuario,
+                        req.body.idMoneda,
+                        req.body.idBanco,
+                        idVenta,
+                        req.body.idProyecto,
+                        req.body.idComprobanteCobro,
+                        comprobanteCobro[0].serie,
+                        numeracionCobro,
+                        req.body.metodoPago,
+                        1,
+                        'INICIAL',
+                        currentDate(),
+                        currentTime()
+                    ]);
+
+                    await conec.execute(connection, `INSERT INTO cobroVenta(
+                        idCobro,
+                        idVenta,
+                        idPlazo,
+                        precio) 
+                        VALUES (?,?,?,?)`, [
+                        idCobro,
+                        idVenta,
+                        0,
+                        req.body.inicial
+                    ]);
+
+                    await conec.execute(connection, `INSERT INTO bancoDetalle(
+                        idBanco,
+                        idProcedencia,
+                        tipo,
+                        monto,
+                        fecha,
+                        hora,
+                        idUsuario)
+                        VALUES(?,?,?,?,?,?,?)`, [
+                        req.body.idBanco,
+                        idCobro,
+                        1,
+                        req.body.inicial,
+                        currentDate(),
+                        currentTime(),
+                        req.body.idUsuario,
+                    ]);
+                }
             }
 
             await conec.commit(connection);
@@ -597,7 +723,7 @@ class Factura {
         }
     }
 
-    async dataId(req) {
+    async id(req) {
         try {
 
             let result = await conec.query(`SELECT
@@ -662,7 +788,7 @@ class Factura {
     }
 
     async credito(req) {
-        try { 
+        try {
             let lista = await conec.query(`SELECT 
             v.idVenta, 
             cl.idCliente,
@@ -672,10 +798,14 @@ class Factura {
             v.serie, 
             v.numeracion, 
             (SELECT IFNULL(COUNT(*), 0) FROM plazo AS p WHERE p.estado = 0 AND p.idVenta = v.idVenta) AS numCuota, 
-            (SELECT IFNULL(MIN(p.fecha),'') FROM plazo AS p WHERE p.estado = 0 AND p.idVenta = v.idVenta) AS fechaPago,
+            CASE 
+            WHEN v.credito = 1 THEN DATE_ADD(v.fecha,interval v.frecuencia day)
+            ELSE (SELECT IFNULL(MIN(p.fecha),'') FROM plazo AS p WHERE p.estado = 0 AND p.idVenta = v.idVenta) END AS fechaPago,
             v.fecha, 
             v.hora, 
             v.estado,
+            v.credito,
+            v.frecuencia,
             m.idMoneda,
             m.simbolo,
             IFNULL(SUM(vd.precio*vd.cantidad),0) AS total,
@@ -712,7 +842,8 @@ class Factura {
             let resultLista = lista.map(function (item, index) {
                 return {
                     ...item,
-                    id: (index + 1) + parseInt(req.query.posicionPagina)
+                    id: (index + 1) + parseInt(req.query.posicionPagina),
+                    frecuencia: item.credito === 0 ? "" : frecuenciaPago(item.frecuencia)
                 }
             });
 
@@ -765,6 +896,8 @@ class Factura {
             DATE_FORMAT(v.fecha,'%d/%m/%Y') as fecha, 
             v.hora, 
             v.estado,
+            v.credito,
+            v.frecuencia,
             m.idMoneda,
             m.simbolo,
             IFNULL(SUM(vd.precio*vd.cantidad),0) AS total,

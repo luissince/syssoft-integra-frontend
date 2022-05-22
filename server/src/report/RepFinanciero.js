@@ -73,7 +73,7 @@ class RepFinanciero {
                     align: "left",
                 }
             );
-            
+
             let sumaIngreso = 0;
             let sumaEgreso = 0;
 
@@ -89,12 +89,12 @@ class RepFinanciero {
                 ];
             });
 
-            conceptos.push(["", "", "TOTAL:", numberFormat(sumaIngreso), numberFormat(sumaEgreso),numberFormat(sumaIngreso-sumaEgreso)]);
+            conceptos.push(["", "", "TOTAL:", numberFormat(sumaIngreso), numberFormat(sumaEgreso), numberFormat(sumaIngreso - sumaEgreso)]);
 
             //Tabla
             const tableConcepto = {
                 subtitle: "RESUMEN DE CONCEPTOS",
-                headers: ["#", "Concepto", "Cantidad", "Ingreso", "salida","Total"],
+                headers: ["#", "Concepto", "Cantidad", "Ingreso", "salida", "Total"],
                 rows: conceptos
             };
 
@@ -106,7 +106,7 @@ class RepFinanciero {
                 },
                 padding: 5,
                 columnSpacing: 5,
-                columnsSize: [40, 132, 90, 90, 90,90],
+                columnsSize: [40, 132, 90, 90, 90, 90],
                 x: orgX,
                 y: bodY,
                 width: doc.page.width - doc.options.margins.left - doc.options.margins.right
@@ -201,8 +201,6 @@ class RepFinanciero {
             let orgX = doc.x;
             let orgY = doc.y;
             let cabeceraY = orgY + 70;
-            let filtroY = cabeceraY + 30;
-            let bodY = filtroY + 55;
             let titleX = orgX + 150;
             let medioX = (doc.page.width - doc.options.margins.left - doc.options.margins.right) / 2;
 
@@ -242,35 +240,38 @@ class RepFinanciero {
                 }
             );
 
+            doc.fontSize(h3).opacity(0.7).text(
+                "INFORMACIÓN",
+                doc.options.margins.top,
+                doc.y + 20
+            );
 
-            doc.rect(
-                orgX, // EJE X
-                filtroY, // EJE Y
-                doc.page.width - doc.options.margins.left - doc.options.margins.right, // ANCHO
-                40).stroke(); // ALTO
+            doc.opacity(1).fill("#000000");
+
+            let filtroY = doc.y;
 
             // left
             doc.fontSize(h3).text(
                 `Caja / Banco: ${cabecera.nombre}`,
-                orgX + 5,
-                filtroY + 6
+                doc.options.margins.left,
+                filtroY + 4
             );
             doc.fontSize(h3).text(
                 `Moneda: ${cabecera.moneda}`,
-                orgX + 5,
-                filtroY + 24
+                doc.options.margins.left,
+                filtroY + 20
             );
 
             // right
             doc.fontSize(h3).text(
                 `Tipo de cuenta: ${cabecera.tipoCuenta}`,
                 medioX + 15,
-                filtroY + 6
+                filtroY + 4
             );
             doc.fontSize(h3).text(
                 `Saldo: ${numberFormat(cabecera.saldo, cabecera.codiso)}`,
                 medioX + 15,
-                filtroY + 24
+                filtroY + 20
             );
 
             let content = data.lista.map((item, index) => {
@@ -299,7 +300,7 @@ class RepFinanciero {
                 padding: 5,
                 columnSpacing: 5,
                 x: orgX,
-                y: bodY,
+                y: doc.y + 10,
                 width: doc.page.width - doc.options.margins.left - doc.options.margins.right
             });
 

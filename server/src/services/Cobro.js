@@ -15,7 +15,8 @@ class Cobro {
             cl.informacion,  
             CASE 
             WHEN cn.idConcepto IS NOT NULL THEN cn.nombre
-            ELSE CONCAT(cp.nombre,': ',v.serie,'-',v.numeracion) END AS detalle,
+            ELSE CASE WHEN cv.idPlazo = 0 THEN 'CUOTA INICIAL' ELSE 'CUOTA' END END AS detalle,
+            IFNULL(CONCAT(cp.nombre,' ',v.serie,'-',v.numeracion),'') AS comprobante,
             m.simbolo,
             b.nombre as banco,  
             c.observacion, 
@@ -350,9 +351,9 @@ class Cobro {
                     ]);
 
                     await conec.execute(connection, `UPDATE plazo 
-                SET estado = 1
-                WHERE idPlazo  = ?
-                `, [
+                    SET estado = 1
+                    WHERE idPlazo  = ?
+                    `, [
                         item.idPlazo
                     ]);
 
@@ -444,10 +445,14 @@ class Cobro {
                     req.query.idCobro
                 ]);
 
+
                 let venta = await conec.query(`SELECT  
                 cp.nombre AS comprobante,
                 v.serie,
                 v.numeracion,
+                CASE 
+                WHEN cv.idPlazo = 0 THEN 'CUOTA INICIAL'
+                ELSE 'CUOTA' END AS concepto,
                 (SELECT IFNULL(SUM(vd.precio*vd.cantidad),0) FROM ventaDetalle AS vd WHERE vd.idVenta = v.idVenta ) AS total,
                 (SELECT IFNULL(SUM(cv.precio),0) FROM cobroVenta AS cv WHERE cv.idVenta = v.idVenta ) AS cobrado,
                 cv.precio
@@ -456,12 +461,20 @@ class Cobro {
                 INNER JOIN comprobante AS cp ON v.idComprobante = cp.idComprobante
                 WHERE cv.idCobro = ?`, [
                     req.query.idCobro
-                ]);
+                ]); 
+
+
+                let newVenta = venta.map((item, index) => {
+                    return {
+                        ...item,
+                        concepto: item.concepto === "CUOTA INICIAL" ? item.concepto : item.concepto + " " + (++index)
+                    }
+                });
 
                 return {
                     "cabecera": result[0],
                     "detalle": detalle,
-                    "venta": venta
+                    "venta": newVenta
                 };
             } else {
                 return "Datos no encontrados";
@@ -602,7 +615,7 @@ class Cobro {
                 req.query.fechaFin,
             ]);
 
-            let lista = [...cobros,...gastos];
+            let lista = [...cobros, ...gastos];
             let conceptos = [];
 
             for (let item of lista) {

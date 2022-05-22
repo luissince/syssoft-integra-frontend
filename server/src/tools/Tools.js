@@ -11,21 +11,21 @@ function currentTime() {
     return formatted_time;
 }
 
- function dateFormat(value) {
+function dateFormat(value) {
     var parts = value.split("-");
     let today = new Date(parts[0], parts[1] - 1, parts[2]);
     return (
-      (today.getDate() > 9 ? today.getDate() : "0" + today.getDate()) +
-      "/" +
-      (today.getMonth() + 1 > 9
-        ? today.getMonth() + 1
-        : "0" + (today.getMonth() + 1)) +
-      "/" +
-      today.getFullYear()
+        (today.getDate() > 9 ? today.getDate() : "0" + today.getDate()) +
+        "/" +
+        (today.getMonth() + 1 > 9
+            ? today.getMonth() + 1
+            : "0" + (today.getMonth() + 1)) +
+        "/" +
+        today.getFullYear()
     );
-  }
+}
 
-  
+
 function formatMoney(amount, decimalCount = 2, decimal = ".", thousands = "") {
     try {
         decimalCount = Math.abs(decimalCount);
@@ -104,4 +104,13 @@ function calculateTax(porcentaje, valor) {
     return valor * igv;
 }
 
-module.exports = { currentDate, currentTime, dateFormat,formatMoney, calculateTaxBruto, calculateTax, numberFormat };
+function frecuenciaPago(value) {
+    if (value === 7) return "SEMANAL";
+    if (value === 15) return "QUINCENAL";
+    if (value === 30) return "MENSUAL";
+    if (value === 60) return "BIMESTRAL";
+    if (value === 90) return "TRIMESTRAL";
+    return "NINGUNO";
+}
+
+module.exports = { currentDate, currentTime, dateFormat, formatMoney, calculateTaxBruto, calculateTax, numberFormat,frecuenciaPago };

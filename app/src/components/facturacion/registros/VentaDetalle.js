@@ -203,7 +203,7 @@ class VentaDetalle extends React.Component {
                                                     </tr>
                                                     <tr>
                                                         <th className="table-secondary w-25 p-1 font-weight-normal ">Estado</th>
-                                                        <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">{this.state.estado === 1 ? <span className="text-success font-weight-bold">Cobrado</span> : <span className="text-danger font-weight-bold">Por cobrar</span>}</th>
+                                                        <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">{this.state.estado === 1 ? <span className="text-success font-weight-bold">Cobrado</span> : this.state.estado === 2 ? <span className="text-warning font-weight-bold">Por cobrar</span>:  <span className="text-danger font-weight-bold">Anulado</span>}</th>
                                                     </tr>
                                                     <tr>
                                                         <th className="table-secondary w-25 p-1 font-weight-normal ">Total</th>

@@ -267,9 +267,8 @@ class CobroDetalle extends React.Component {
                                                             <tr>
                                                                 <th>#</th>
                                                                 <th>Concepto</th>
-                                                                <th>Total</th>
-                                                                <th>Cobrado</th>
-                                                                <th>Por Cobrar</th>
+                                                                <th>Cantidad</th>
+                                                                <th>Valor</th>
                                                                 <th>Monto</th>
                                                             </tr>
                                                     }
@@ -292,10 +291,9 @@ class CobroDetalle extends React.Component {
                                                             this.state.detalle.map((item, index) => (
                                                                 <tr key={index}>
                                                                     <td>{++index}</td>
-                                                                    <td>{item.comprobante + ": " + item.serie + "-" + item.numeracion}</td>
-                                                                    <td className="text-right">{numberFormat(item.total, this.state.codiso)}</td>
-                                                                    <td className="text-right">{numberFormat(item.cobrado, this.state.codiso)}</td>
-                                                                    <td className="text-right">{numberFormat(item.total - item.cobrado, this.state.codiso)}</td>
+                                                                    <td>{item.concepto}<br/><small>{item.comprobante+" "+item.serie+"-"+item.numeracion}</small></td>
+                                                                    <td className="text-right">{1}</td>
+                                                                    <td className="text-right">{numberFormat(item.precio, this.state.codiso)}</td>
                                                                     <td className="text-right">{numberFormat(item.precio, this.state.codiso)}</td>
                                                                 </tr>
                                                             ))

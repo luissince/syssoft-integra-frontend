@@ -66,11 +66,17 @@ class RepLote {
 
             doc.x = doc.options.margins.left;
 
+            doc.opacity(0.7);
+
             doc.fontSize(h3).text(
                 "COMPROBANTE",
                 orgX,
                 doc.y + 14
             )
+
+            doc.fill("#000000");
+            doc.lineGap(4);
+            doc.opacity(1);
 
             doc.fontSize(h3).text(
                 `Cliente: ${cabecera.cliente} ${cabecera.documento}\nFecha: ${cabecera.fecha} - ${cabecera.hora}\nNotas: ...\nForma de venta: ${cabecera.tipo === 1 ? "CONTADO" : "CRÉDITO"}\nEstado: ${cabecera.estado === 1 ? "COBRADO" : "POR COBRAR"}\nTotal: ${cabecera.simbolo} ${cabecera.monto}\nArchivos adjuntos: ...`,
@@ -78,13 +84,20 @@ class RepLote {
                 doc.y + 5
             );
 
+            doc.lineGap(0);
+
             let colY = doc.y + 10;
 
+            doc.opacity(0.7);
             doc.fontSize(h3).text(
                 "DESCRIPCIÓN",
                 orgX,
                 colY
             );
+
+            doc.fill("#000000");
+            doc.lineGap(4);
+            doc.opacity(1);
 
             doc.fontSize(h3).text(
                 `Manzana: ${cabecera.manzana}\nLote: ${cabecera.lote}\nEstado: ${cabecera.lotestado}`,
@@ -92,11 +105,18 @@ class RepLote {
                 doc.y + 5
             );
 
+            doc.lineGap(0);
+
+            doc.opacity(0.7);
             doc.fontSize(h3).text(
                 "MEDIDAS",
                 orgX + 170,
                 colY
             );
+
+            doc.fill("#000000");
+            doc.lineGap(4);
+            doc.opacity(1);
 
             doc.fontSize(h3).text(
                 `Medida Frontal: ${cabecera.medidaFrontal}\nCoste Derecho: ${cabecera.costadoDerecho}\nCoste Izquierdo: ${cabecera.costadoIzquierdo}\nMedida Fondo: ${cabecera.medidaFondo}\nArea Lote: ${cabecera.areaLote}\nN° Partida: ${cabecera.numeroPartida}`,
@@ -104,17 +124,26 @@ class RepLote {
                 doc.y + 5
             );
 
+            doc.lineGap(0);
+
+            doc.opacity(0.7);
             doc.fontSize(h3).text(
                 "LÍMITE",
                 orgX + 340,
                 colY
             );
 
+            doc.fill("#000000");
+            doc.lineGap(4);
+            doc.opacity(1);
+
             doc.fontSize(h3).text(
                 `Limite, Frontal / Norte / Noroeste: ${cabecera.limiteFrontal === '' ? '-' : cabecera.limiteFrontal}\nLímite, Derecho / Este / Sureste: ${cabecera.limiteDerecho === '' ? '-' : cabecera.limiteDerecho}\nLímite, Iquierdo / Sur / Sureste: ${cabecera.limiteIzquierdo === '' ? '-' : cabecera.limiteIzquierdo}\nLímite, Posterior / Oeste / Noroeste: ${cabecera.limitePosterior === '' ? '-' : cabecera.limitePosterior}\nUbicación del Lote: ${cabecera.ubicacionLote === '' ? '-' : cabecera.ubicacionLote}`,
                 orgX + 340,
                 doc.y + 5
             );
+
+            doc.lineGap(0);
 
             doc.moveDown();
 
@@ -130,7 +159,7 @@ class RepLote {
             };
 
             doc.table(table1, {
-                prepareHeader: () => doc.font("Helvetica-Bold").fontSize(h3),
+                prepareHeader: () => doc.font("Helvetica-Bold").fontSize(h2),
                 prepareRow: () => {
                     doc.font("Helvetica").fontSize(h3);
                 },

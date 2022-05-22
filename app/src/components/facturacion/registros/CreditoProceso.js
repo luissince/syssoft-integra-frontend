@@ -143,12 +143,13 @@ class CreditoProceso extends React.Component {
     }
 
     async onEventOpenModal() {
-        let validate = this.state.plazos.reduce((acumulador, item) => item.selected ? acumulador + 1 : acumulador + 0, 0);
+        console.log(this.state.venta.credito)
+        // let validate = this.state.plazos.reduce((acumulador, item) => item.selected ? acumulador + 1 : acumulador + 0, 0);
 
-        if (validate <= 0) {
-            await this.setStateAsync({ messageWarning: "Seleccione algún crédito  a cobrar." })
-            return;
-        }
+        // if (validate <= 0) {
+        //     await this.setStateAsync({ messageWarning: "Seleccione algún crédito a cobrar." })
+        //     return;
+        // }
 
         showModal("modalCobro")
     }
@@ -263,6 +264,7 @@ class CreditoProceso extends React.Component {
             numeracion,
             numCuota,
             simbolo,
+            credito,
             total,
             cobrado
         } = this.state.venta;
@@ -432,7 +434,7 @@ class CreditoProceso extends React.Component {
                     </div>
                     <div className="col">
                         <div className="form-group">
-                            <div className="pt-1 pb-1">N° de Cuotas: <strong>{numCuota === 1 ? numCuota + " Cuota" : numCuota + " Cuotas"}</strong></div>
+                            <div className="pt-1 pb-1">N° de Cuotas: <strong>{credito === 1 ? "Variable" : numCuota === 1 ? numCuota + " Cuota" : numCuota + " Cuotas"}</strong></div>
                             <div className="pt-1 pb-1">Monto Total: <strong>{simbolo + " " + formatMoney(total)}</strong></div>
                             <div className="pt-1 pb-1">Monto Cobrado: <span className="text-success">{simbolo + " " + formatMoney(cobrado)}</span></div>
                             <div className="pt-1 pb-1">Monto Restante: <span className="text-danger">{simbolo + " " + formatMoney(total - cobrado)}</span></div>

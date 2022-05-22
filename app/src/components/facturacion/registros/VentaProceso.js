@@ -552,7 +552,7 @@ class VentaProceso extends React.Component {
                         // "selectTipoPago": this.state.selectTipoPago,
                         "selectTipoPago": selectTipoPago === 1 ? 1
                             : selectTipoPago === 2 ? 2
-                                : selectTipoPago === 3 ? 3 : 0,
+                                : 3,
 
                         // "montoInicialCheck": this.state.montoInicialCheck,
                         "montoInicialCheck": selectTipoPago === 1 ? false
@@ -1080,12 +1080,11 @@ class VentaProceso extends React.Component {
                                                             onChange={(event) => this.setState({ frecuenciaPago: event.target.value })}
                                                         >
                                                             <option value="">-- Frecuencia de pago --</option>
-                                                            <option value="1">Semanal</option>
-                                                            <option value="2">Quinsenal</option>
-                                                            <option value="3">Mensual</option>
-                                                            <option value="4">Bimestral</option>
-                                                            <option value="5">Trimestral</option>
-                                                            <option value="6">Semestral</option>
+                                                            <option value="7">Semanal</option>
+                                                            <option value="15">Quinsenal</option>
+                                                            <option value="30">Mensual</option>
+                                                            <option value="60">Bimestral</option>
+                                                            <option value="90">Trimestral</option>
                                                         </select>
                                                     </div>
                                                 </div>
