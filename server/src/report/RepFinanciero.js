@@ -21,11 +21,7 @@ class RepFinanciero {
             let orgX = doc.x;
             let orgY = doc.y;
             let cabeceraY = orgY + 70;
-            let filtroY = cabeceraY + 40;
-            let bodY = filtroY + 40;
             let titleX = orgX + 150;
-            // let footerY = bodY + 65;
-            let medioX = (doc.page.width - doc.options.margins.left - doc.options.margins.right) / 2;
             let widthContent = doc.page.width - doc.options.margins.left - doc.options.margins.right;
 
             let h1 = 13;
@@ -108,7 +104,7 @@ class RepFinanciero {
                 columnSpacing: 5,
                 columnsSize: [40, 132, 90, 90, 90, 90],
                 x: orgX,
-                y: bodY,
+                y: doc.y+10,
                 width: doc.page.width - doc.options.margins.left - doc.options.margins.right
             });
 

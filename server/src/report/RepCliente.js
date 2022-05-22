@@ -21,9 +21,8 @@ class RepCliente {
 
             let orgX = doc.x;
             let orgY = doc.y;
-            let cabeceraY = orgY + 80;
+            let cabeceraY = orgY + 70;
             let titleX = orgX + 150;
-            let medioX = doc.page.width / 2;
             let widthContent = doc.page.width - doc.options.margins.left - doc.options.margins.right;
 
             let h1 = 13;
@@ -74,13 +73,12 @@ class RepCliente {
             doc.fontSize(h3).text(
                 `PERIODO: ${dateFormat(req.query.fechaIni)} al ${dateFormat(req.query.fechaFin)}`,
                 orgX,
-                doc.y + 10,
+                doc.y + 5,
                 {
                     width: 300,
                     align: "left",
                 }
             );
-
 
             if (req.query.idCliente !== "") {
                 let content = data.map((item, index) => {
@@ -184,9 +182,8 @@ class RepCliente {
 
             let orgX = doc.x;
             let orgY = doc.y;
-            let cabeceraY = orgY + 80;
+            let cabeceraY = orgY + 70;
             let titleX = orgX + 150;
-            let medioX = doc.page.width / 2;
             let widthContent = doc.page.width - doc.options.margins.left - doc.options.margins.right;
 
             let h1 = 13;
