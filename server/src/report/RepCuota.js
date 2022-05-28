@@ -55,9 +55,8 @@ class RepCuota {
 
             doc.fontSize(h2);
 
-            const title = "CRONOGRAMA DE CUOTAS PAGAS";
-            let widthtext = doc.widthOfString(title);
-            console.log(widthtext)
+            const title = "CRONOGRAMA DE CUOTAS";
+            let widthtext = Math.round(doc.widthOfString(title));
 
             doc.text(
                 title,

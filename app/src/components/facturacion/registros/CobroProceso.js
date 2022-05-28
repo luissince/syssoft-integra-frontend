@@ -117,8 +117,7 @@ class CobroProceso extends React.Component {
                 idMoneda: monedaFilter.length > 0 ? monedaFilter[0].idMoneda : '',
                 idComprobante: comprobanteFilter.length > 0 ? comprobanteFilter[0].idComprobante : '',
                 impuestos: impuesto.data,
-                loading: false,
-
+                loading: false
             });
 
         } catch (error) {

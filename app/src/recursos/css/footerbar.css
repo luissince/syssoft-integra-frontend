@@ -1,0 +1,39 @@
+#fotterbar{
+    background-color: rgb(255, 255, 255);
+    display: flex;
+    align-items: center;
+    position: fixed;
+    height: 40px;
+    left: 270px;
+    bottom: 0;
+    right: 0;
+    transition: all 0.3s;
+    box-shadow: rgb(64 64 64 / 40%) 0px 1px 10px -5px;
+    border-top: 1px solid #d9e0fc;
+}
+
+#fotterbar.active {
+    left: 0px;
+}
+
+#fotterbar .fotterbar-left{
+    width: 70%;
+    padding: 1rem;
+}
+
+#fotterbar .fotterbar-right{
+    width: 30%;
+}
+
+#fotterbar .fotterbar-right-content{
+    padding: 1rem;
+
+}
+
+
+@media (max-width: 768px) {
+    #fotterbar{
+        left: 0;
+    }
+    
+}

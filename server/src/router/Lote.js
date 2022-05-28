@@ -30,7 +30,7 @@ router.post('/', async function (req, res) {
 });
 
 router.get('/id', async function (req, res) {
-    const result = await lote.dataId(req)
+    const result = await lote.id(req)
     if (typeof result === "object") {
         res.status(200).send(result)
     } else {

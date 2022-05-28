@@ -1,10 +1,14 @@
 const express = require('express');
 const router = express.Router();
+const path = require('path');
+const fs = require('fs');
+const mime = require('mime');
 const Factura = require('../services/Factura');
 const Sede = require('../services/Sede');
 const RepCuota = require('../report/RepCuota');
 const RepFactura = require('../report/RepFactura');
 const { decrypt } = require('../tools/CryptoJS');
+const { generateExcel } = require('../excel/FileVentas')
 
 const factura = new Factura();
 const sede = new Sede();
@@ -141,7 +145,7 @@ router.get("/repgeneralventas", async function (req, res) {
     req.query.cliente = decryptedData.cliente;
     req.query.usuario = decryptedData.usuario;
     req.query.tipo = decryptedData.tipo;
-   
+
     const sedeInfo = await sede.infoSedeReporte(req)
 
     if (typeof sedeInfo !== 'object') {
@@ -152,7 +156,7 @@ router.get("/repgeneralventas", async function (req, res) {
     const ventas = await factura.detalleVenta(req)
 
     if (Array.isArray(ventas)) {
-
+ 
         let data = await repFactura.repVentas(req, sedeInfo, ventas);
 
         if (typeof data === 'string') {
@@ -165,7 +169,45 @@ router.get("/repgeneralventas", async function (req, res) {
     } else {
         res.status(500).send(ventas);
     }
-
 });
+
+router.get('/excelgeneralventas', async function (req, res) {
+    const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
+ 
+    req.query.idSede = "SD0001";
+    req.query.fechaIni = decryptedData.fechaIni;
+    req.query.fechaFin = decryptedData.fechaFin;
+    req.query.idComprobante = decryptedData.idComprobante;
+    req.query.idCliente = decryptedData.idCliente;
+    req.query.idUsuario = decryptedData.idUsuario;
+    req.query.tipoVenta = decryptedData.tipoVenta;
+   
+    req.query.comprobante = decryptedData.comprobante;
+    req.query.cliente = decryptedData.cliente;
+    req.query.usuario = decryptedData.usuario; 
+    req.query.tipo = decryptedData.tipo;
+
+    const sedeInfo = await sede.infoSedeReporte(req)
+
+    if (typeof sedeInfo !== 'object') {
+        res.status(500).send(sedeInfo)
+        return;
+    }
+
+    const ventas = await factura.detalleVenta(req)
+
+    if (Array.isArray(ventas)) {
+
+        const data = await generateExcel(req, sedeInfo, ventas);
+
+        if (typeof data === 'string') {
+            res.status(500).send(data);
+        } else {
+            res.end(data);
+        }
+    } else {
+        res.status(500).send(ventas);
+    }
+})
 
 module.exports = router;

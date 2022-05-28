@@ -1,6 +1,7 @@
 import React from 'react';
 import axios from 'axios';
 import CryptoJS from 'crypto-js';
+import FileDownloader from "./hooks/FileDownloader";
 import { spinnerLoading, currentDate } from '../tools/Tools';
 
 class RepVentas extends React.Component {
@@ -28,7 +29,6 @@ class RepVentas extends React.Component {
 
             loading: true,
             messageWarning: '',
-
         }
 
         this.refFechaIni = React.createRef();
@@ -37,6 +37,7 @@ class RepVentas extends React.Component {
         this.refCliente = React.createRef();
         this.refUsuario = React.createRef();
         this.refTipoVenta = React.createRef();
+        this.refUseFile = React.createRef();
 
         this.abortControllerView = new AbortController()
     }
@@ -134,7 +135,57 @@ class RepVentas extends React.Component {
         window.open("/api/factura/repgeneralventas?" + params, "_blank");
     }
 
+    async onEventExcel() {
+        if (this.state.fechaFin < this.state.fechaIni) {
+            await this.setStateAsync({ messageWarning: "La Fecha inicial no puede ser mayor a la fecha final." })
+            this.FechaIni.current.focus();
+            return;
+        }
+
+        if (!this.state.comprobanteCheck && this.state.idComprobante === "") {
+            await this.setStateAsync({ messageWarning: "Seleccione un comprobante." })
+            this.refComprobante.current.focus();
+            return;
+        }
+
+        if (!this.state.clienteCheck && this.state.idCliente === "") {
+            await this.setStateAsync({ messageWarning: "Seleccione un cliente." })
+            this.refCliente.current.focus();
+            return;
+        }
+
+        if (!this.state.tipoVentaCheck && this.state.tipoVenta === "") {
+            await this.setStateAsync({ messageWarning: "Seleccione el tipo de venta." })
+            this.refTipoVenta.current.focus();
+            return;
+        }
+
+        const data = {
+            "idSede": "SD0001",
+            "fechaIni": this.state.fechaIni,
+            "fechaFin": this.state.fechaFin,
+            "idComprobante": this.state.idComprobante === '' ? '' : this.state.idComprobante,
+            "idCliente": this.state.idCliente === '' ? '' : this.state.idCliente,
+            "idUsuario": this.state.idUsuario === '' ? '' : this.state.idUsuario,
+            "tipoVenta": this.state.tipoVenta === '' ? 0 : this.state.tipoVenta,
+            "comprobante": this.refComprobante.current.options[this.refComprobante.current.options.selectedIndex].innerHTML,
+            "cliente": this.refCliente.current.options[this.refCliente.current.options.selectedIndex].innerHTML,
+            "usuario": this.refUsuario.current.options[this.refUsuario.current.options.selectedIndex].innerHTML,
+            "tipo": this.refTipoVenta.current.options[this.refTipoVenta.current.options.selectedIndex].innerHTML,
+        }
+
+        let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
+
+        this.refUseFile.current.download({
+            "name": "Reporte de Ventas",
+            "file": "/api/factura/excelgeneralventas",
+            "filename": "ventas.xlsx",
+            "params":  ciphertext 
+        });
+    }
+
     render() {
+
         return (
             <>
                 {
@@ -434,13 +485,15 @@ class RepVentas extends React.Component {
                                             <button className="btn btn-outline-warning btn-sm" onClick={() => this.onEventImprimir()}><i className="bi bi-file-earmark-pdf-fill"></i> Reporte Pdf</button>
                                         </div>
                                         <div className="col">
-                                            <button className="btn btn-outline-success btn-sm"><i className="bi bi-file-earmark-excel-fill"></i> Reporte Excel</button>
+                                            <button className="btn btn-outline-success btn-sm" onClick={() => this.onEventExcel()}><i className="bi bi-file-earmark-excel-fill"></i> Reporte Excel</button>
                                         </div>
                                         <div className="col"></div>
                                     </div>
 
                                 </div>
                             </div>
+
+                            <FileDownloader ref={this.refUseFile} />
                         </>
                 }
             </>

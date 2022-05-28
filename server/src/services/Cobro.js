@@ -219,7 +219,7 @@ class Cobro {
         }
     }
 
-    async cobro(req) {
+    async plazo(req) {
         let connection = null;
         try {
             connection = await conec.beginTransaction();
@@ -327,7 +327,7 @@ class Cobro {
                 currentTime()
             ]);
 
-            let montoCobrado = cobrado[0].total + parseFloat(req.body.valorRecibido);
+            let montoCobrado = cobrado[0].total + parseFloat(req.body.plazosSumados);
             if (montoCobrado >= total[0].total) {
                 await conec.execute(connection, `UPDATE venta SET estado = 1 WHERE idVenta = ?`, [
                     req.body.idVenta,
@@ -374,6 +374,193 @@ class Cobro {
                 idCobro,
                 1,
                 monto,
+                currentDate(),
+                currentTime(),
+                req.body.idUsuario,
+            ]);
+
+            await conec.commit(connection);
+            return "insert";
+        } catch (error) {
+            if (connection != null) {
+                await conec.rollback(connection);
+            }
+            return "Se produjo un error de servidor, intente nuevamente.";
+        }
+    }
+
+    async cuota(req) {
+        let connection = null;
+        try {
+            connection = await conec.beginTransaction();
+            console.log(req.body)
+
+            let cobro = await conec.execute(connection, 'SELECT idCobro FROM cobro');
+            let idCobro = "";
+            if (cobro.length != 0) {
+
+                let quitarValor = cobro.map(function (item) {
+                    return parseInt(item.idCobro.replace("CB", ''));
+                });
+
+                let valorActual = Math.max(...quitarValor);
+                let incremental = valorActual + 1;
+                let codigoGenerado = "";
+                if (incremental <= 9) {
+                    codigoGenerado = 'CB000' + incremental;
+                } else if (incremental >= 10 && incremental <= 99) {
+                    codigoGenerado = 'CB00' + incremental;
+                } else if (incremental >= 100 && incremental <= 999) {
+                    codigoGenerado = 'CB0' + incremental;
+                } else {
+                    codigoGenerado = 'CB' + incremental;
+                }
+
+                idCobro = codigoGenerado;
+            } else {
+                idCobro = "CB0001";
+            }
+
+            let total = await conec.execute(connection, `SELECT 
+            IFNULL(SUM(vd.precio*vd.cantidad),0) AS total 
+            FROM venta AS v
+            LEFT JOIN ventaDetalle AS vd ON v.idVenta  = vd.idVenta
+            WHERE v.idVenta  = ?`, [
+                req.body.idVenta,
+            ]);
+
+            let cobrado = await conec.execute(connection, `SELECT 
+            IFNULL(SUM(cv.precio),0) AS total
+            FROM cobro AS c 
+            LEFT JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro
+            WHERE c.idProcedencia = ?`, [
+                req.body.idVenta,
+            ]);
+
+            let comprobante = await conec.execute(connection, `SELECT 
+            serie,
+            numeracion 
+            FROM comprobante 
+            WHERE idComprobante  = ?
+            `, [
+                req.body.idComprobante
+            ]);
+
+            let numeracion = 0;
+
+            let cobros = await conec.execute(connection, 'SELECT numeracion FROM cobro WHERE idComprobante = ?', [
+                req.body.idComprobante
+            ]);
+
+            if (cobros.length > 0) {
+                let quitarValor = cobros.map(function (item) {
+                    return parseInt(item.numeracion);
+                });
+
+                let valorActual = Math.max(...quitarValor);
+                let incremental = valorActual + 1;
+                numeracion = incremental;
+            } else {
+                numeracion = comprobante[0].numeracion;
+            }
+
+            await conec.execute(connection, `INSERT INTO cobro(
+            idCobro, 
+            idCliente, 
+            idUsuario, 
+            idMoneda, 
+            idBanco, 
+            idProcedencia,
+            idProyecto,
+            idComprobante,
+            serie,
+            numeracion,
+            metodoPago, 
+            estado, 
+            observacion, 
+            fecha, 
+            hora) 
+            VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, [
+                idCobro,
+                req.body.idCliente,
+                req.body.idUsuario,
+                req.body.idMoneda,
+                req.body.idBanco,
+                req.body.idVenta,
+                req.body.idProyecto,
+                req.body.idComprobante,
+                comprobante[0].serie,
+                numeracion,
+                req.body.metodoPago,
+                req.body.estado,
+                req.body.observacion,
+                currentDate(),
+                currentTime()
+            ]);
+
+            let montoCobrado = cobrado[0].total + parseFloat(req.body.montoCuota);
+            if (montoCobrado >= total[0].total) {
+                await conec.execute(connection, `UPDATE venta SET estado = 1 WHERE idVenta = ?`, [
+                    req.body.idVenta,
+                ]);
+            }
+
+            let plazo = await conec.execute(connection, 'SELECT idPlazo FROM plazo');
+            let idPlazo = 0;
+            if (plazo.length != 0) {
+
+                let quitarValor = plazo.map(function (item) {
+                    return parseInt(item.idPlazo);
+                });
+
+                let valorActual = Math.max(...quitarValor);
+                let incremental = valorActual + 1;
+                idPlazo = incremental;
+            } else {
+                idPlazo = 1;
+            }
+
+            await conec.execute(connection, `INSERT INTO cobroVenta(
+                idCobro,
+                idVenta,
+                idPlazo,
+                precio) 
+                VALUES (?,?,?,?)`, [
+                idCobro,
+                req.body.idVenta,
+                idPlazo,
+                parseFloat(req.body.montoCuota)
+            ]);
+
+            await conec.execute(connection, `INSERT INTO plazo(
+                idPlazo,
+                idVenta,
+                fecha,
+                hora,
+                monto,
+                estado) 
+                VALUES(?,?,?,?,?,?)`, [
+                idPlazo,
+                req.body.idVenta,
+                currentDate(),
+                currentTime(),
+                parseFloat(req.body.montoCuota),
+                1
+            ]);
+
+            await conec.execute(connection, `INSERT INTO bancoDetalle(
+            idBanco,
+            idProcedencia,
+            tipo,
+            monto,
+            fecha,
+            hora,
+            idUsuario)
+            VALUES(?,?,?,?,?,?,?)`, [
+                req.body.idBanco,
+                idCobro,
+                1,
+                parseFloat(req.body.montoCuota),
                 currentDate(),
                 currentTime(),
                 req.body.idUsuario,
@@ -461,7 +648,7 @@ class Cobro {
                 INNER JOIN comprobante AS cp ON v.idComprobante = cp.idComprobante
                 WHERE cv.idCobro = ?`, [
                     req.query.idCobro
-                ]); 
+                ]);
 
 
                 let newVenta = venta.map((item, index) => {

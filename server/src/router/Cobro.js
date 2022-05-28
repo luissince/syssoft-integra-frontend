@@ -29,8 +29,17 @@ router.post('/add', async function (req, res) {
     }
 });
 
-router.post('/cobro', async function (req, res) {
-    const result = await cobro.cobro(req)
+router.post('/plazo', async function (req, res) {
+    const result = await cobro.plazo(req)
+    if (result === 'insert') {
+        res.status(201).send("Se registró correctamente el cobro.");
+    } else {
+        res.status(500).send(result);
+    }
+});
+
+router.post('/cuota', async function (req, res) {
+    const result = await cobro.cuota(req)
     if (result === 'insert') {
         res.status(201).send("Se registró correctamente el cobro.");
     } else {

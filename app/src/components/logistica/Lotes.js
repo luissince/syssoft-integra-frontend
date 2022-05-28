@@ -29,6 +29,8 @@ class Lotes extends React.Component {
             descripcion: '',
             costo: '',
             precio: '',
+            idMedida: '',
+            medidas: [],
             estado: '',
             medidaFrontal: '',
             costadoDerecho: '',
@@ -69,6 +71,7 @@ class Lotes extends React.Component {
         this.refDescripcion = React.createRef();
         this.refCosto = React.createRef();
         this.refPrecio = React.createRef();
+        this.refMedida = React.createRef();
         this.refEstado = React.createRef();
 
         this.refMedidaFrontal = React.createRef();
@@ -114,6 +117,8 @@ class Lotes extends React.Component {
                 descripcion: '',
                 costo: '',
                 precio: '',
+                idMedida: '',
+                medidas: [],
                 estado: '',
                 medidaFrontal: '',
                 costadoDerecho: '',
@@ -230,12 +235,17 @@ class Lotes extends React.Component {
                 }
             });
 
+            let medida = await axios.get('/api/medida/listcombo', {
+                signal: this.abortControllerModal.signal,
+            });
+
             const concepto = await axios.get("/api/concepto/listcombo", {
                 signal: this.abortControllerModal.signal,
             });
 
             await this.setStateAsync({
                 manzanas: manzana.data,
+                medidas: medida.data,
                 conceptos: concepto.data,
                 loadModal: false
             });
@@ -258,6 +268,10 @@ class Lotes extends React.Component {
                 signal: this.abortControllerModal.signal,
             });
 
+            let medida = await axios.get('/api/medida/listcombo', {
+                signal: this.abortControllerModal.signal,
+            });
+
             let result = await axios.get('/api/lote/id', {
                 signal: this.abortControllerModal.signal,
                 params: {
@@ -271,6 +285,7 @@ class Lotes extends React.Component {
                 descripcion: result.data.descripcion,
                 costo: result.data.costo.toString(),
                 precio: result.data.precio.toString(),
+                idMedida: result.data.idMedida,
                 estado: result.data.estado,
                 medidaFrontal: result.data.medidaFrontal,
                 costadoDerecho: result.data.costadoDerecho,
@@ -285,6 +300,7 @@ class Lotes extends React.Component {
                 ubicacionLote: result.data.ubicacionLote,
 
                 manzanas: manzana.data,
+                medidas: medida.data,
                 conceptos: concepto.data,
 
                 loadModal: false
@@ -302,76 +318,96 @@ class Lotes extends React.Component {
         if (this.state.idManzana === "") {
             this.onFocusTab("info-tab", "info");
             this.refManzana.current.focus();
-        } else if (this.state.descripcion === "") {
+            return;
+        }
+
+        if (this.state.descripcion === "") {
             this.onFocusTab("info-tab", "info");
             this.refDescripcion.current.focus();
-        } else if (!isNumeric(this.state.costo)) {
+            return;
+        }
+
+        if (!isNumeric(this.state.costo)) {
             this.onFocusTab("info-tab", "info");
             this.refCosto.current.focus();
-        } else if (!isNumeric(this.state.precio)) {
+            return;
+        }
+
+        if (!isNumeric(this.state.precio)) {
             this.onFocusTab("info-tab", "info");
             this.refPrecio.current.focus();
-        } else if (this.state.estado === "") {
+            return;
+        }
+
+        if (this.state.idMedida === "") {
+            this.onFocusTab("info-tab", "info");
+            this.refMedida.current.focus();
+            return;
+        }
+
+        if (this.state.estado === "") {
             this.onFocusTab("info-tab", "info");
             this.refEstado.current.focus();
+            return;
         }
-        else {
-            try {
-                ModalAlertInfo("Lote", "Procesando información...");
-                hideModal("modalLote");
-                if (this.state.idLote !== '') {
-                    let result = await axios.put("/api/lote", {
-                        "idLote": this.state.idLote,
-                        "idManzana": this.state.idManzana,
-                        "descripcion": this.state.descripcion.trim().toUpperCase(),
-                        "costo": this.state.costo,
-                        "precio": this.state.precio,
-                        "estado": this.state.estado,
-                        "medidaFrontal": this.state.medidaFrontal,
-                        "costadoDerecho": this.state.costadoDerecho,
-                        "costadoIzquierdo": this.state.costadoIzquierdo,
-                        "medidaFondo": this.state.medidaFondo,
-                        "areaLote": this.state.areaLote,
-                        "numeroPartida": this.state.numeroPartida,
-                        "limiteFrontal": this.state.limiteFrontal,
-                        "limiteDerecho": this.state.limiteDerecho,
-                        "limiteIzquierdo": this.state.limiteIzquierdo,
-                        "limitePosterior": this.state.limitePosterior,
-                        "ubicacionLote": this.state.ubicacionLote,
-                        "idUsuario": this.state.idUsuario
-                    });
 
-                    ModalAlertSuccess("Lote", result.data, () => {
-                        this.onEventPaginacion();
-                    });
-                } else {
-                    let result = await axios.post("/api/lote", {
-                        "idManzana": this.state.idManzana,
-                        "descripcion": this.state.descripcion.trim().toUpperCase(),
-                        "costo": this.state.costo,
-                        "precio": this.state.precio,
-                        "estado": this.state.estado,
-                        "medidaFrontal": this.state.medidaFrontal,
-                        "costadoDerecho": this.state.costadoDerecho,
-                        "costadoIzquierdo": this.state.costadoIzquierdo,
-                        "medidaFondo": this.state.medidaFondo,
-                        "areaLote": this.state.areaLote,
-                        "numeroPartida": this.state.numeroPartida,
-                        "limiteFrontal": this.state.limiteFrontal,
-                        "limiteDerecho": this.state.limiteDerecho,
-                        "limiteIzquierdo": this.state.limiteIzquierdo,
-                        "limitePosterior": this.state.limitePosterior,
-                        "ubicacionLote": this.state.ubicacionLote,
-                        "idUsuario": this.state.idUsuario
-                    });
+        try {
+            ModalAlertInfo("Lote", "Procesando información...");
+            hideModal("modalLote");
+            if (this.state.idLote !== '') {
+                let result = await axios.put("/api/lote", {
+                    "idLote": this.state.idLote,
+                    "idManzana": this.state.idManzana,
+                    "descripcion": this.state.descripcion.trim().toUpperCase(),
+                    "costo": this.state.costo,
+                    "precio": this.state.precio,
+                    "idMedida":this.state.idMedida,
+                    "estado": this.state.estado,
+                    "medidaFrontal": this.state.medidaFrontal,
+                    "costadoDerecho": this.state.costadoDerecho,
+                    "costadoIzquierdo": this.state.costadoIzquierdo,
+                    "medidaFondo": this.state.medidaFondo,
+                    "areaLote": this.state.areaLote,
+                    "numeroPartida": this.state.numeroPartida,
+                    "limiteFrontal": this.state.limiteFrontal,
+                    "limiteDerecho": this.state.limiteDerecho,
+                    "limiteIzquierdo": this.state.limiteIzquierdo,
+                    "limitePosterior": this.state.limitePosterior,
+                    "ubicacionLote": this.state.ubicacionLote,
+                    "idUsuario": this.state.idUsuario
+                });
 
-                    ModalAlertSuccess("Lote", result.data, () => {
-                        this.loadInit();
-                    });
-                }
-            } catch (error) {
-                ModalAlertWarning("Lote", "Se produjo un error un interno, intente nuevamente.");
+                ModalAlertSuccess("Lote", result.data, () => {
+                    this.onEventPaginacion();
+                });
+            } else {
+                let result = await axios.post("/api/lote", {
+                    "idManzana": this.state.idManzana,
+                    "descripcion": this.state.descripcion.trim().toUpperCase(),
+                    "costo": this.state.costo,
+                    "precio": this.state.precio,
+                    "idMedida":this.state.idMedida,
+                    "estado": this.state.estado,
+                    "medidaFrontal": this.state.medidaFrontal,
+                    "costadoDerecho": this.state.costadoDerecho,
+                    "costadoIzquierdo": this.state.costadoIzquierdo,
+                    "medidaFondo": this.state.medidaFondo,
+                    "areaLote": this.state.areaLote,
+                    "numeroPartida": this.state.numeroPartida,
+                    "limiteFrontal": this.state.limiteFrontal,
+                    "limiteDerecho": this.state.limiteDerecho,
+                    "limiteIzquierdo": this.state.limiteIzquierdo,
+                    "limitePosterior": this.state.limitePosterior,
+                    "ubicacionLote": this.state.ubicacionLote,
+                    "idUsuario": this.state.idUsuario
+                });
+
+                ModalAlertSuccess("Lote", result.data, () => {
+                    this.loadInit();
+                });
             }
+        } catch (error) {
+            ModalAlertWarning("Lote", "Se produjo un error un interno, intente nuevamente.");
         }
     }
 
@@ -556,23 +592,43 @@ class Lotes extends React.Component {
                                                 </div>
                                             </div>
 
-                                            <div className="form-group">
-                                                <label htmlFor="estado">Estado <i className="fa fa-asterisk text-danger small"></i></label>
-                                                <select
-                                                    className="form-control"
-                                                    id="estado"
-                                                    ref={this.refEstado}
-                                                    value={this.state.estado}
-                                                    onChange={(event) => {
-                                                        this.setState({ estado: event.target.value })
-                                                    }}
-                                                >
-                                                    <option value="">- Seleccione -</option>
-                                                    <option value="1">Disponible</option>
-                                                    <option value="2">Reservado</option>
-                                                    <option value="3">Vendido</option>
-                                                    <option value="4">Inactivo</option>
-                                                </select>
+                                            <div className="form-row">
+                                                <div className="form-group col-md-6">
+                                                    <label htmlFor="medida">Tipo de Medida(Sunat) <i className="fa fa-asterisk text-danger small"></i></label>
+                                                    <select
+                                                        className="form-control"
+                                                        id="medida"
+                                                        ref={this.refMedida}
+                                                        value={this.state.idMedida}
+                                                        onChange={(event) => {
+                                                            this.setState({ idMedida: event.target.value })
+                                                        }}>
+                                                        <option value="">- Seleccione -</option>
+                                                        {
+                                                            this.state.medidas.map((item, index) => (
+                                                                <option key={index} value={item.idMedida}>{item.nombre}</option>
+                                                            ))
+                                                        }
+                                                    </select>
+                                                </div>
+                                                <div className="form-group col-md-6">
+                                                    <label htmlFor="estado">Estado <i className="fa fa-asterisk text-danger small"></i></label>
+                                                    <select
+                                                        className="form-control"
+                                                        id="estado"
+                                                        ref={this.refEstado}
+                                                        value={this.state.estado}
+                                                        onChange={(event) => {
+                                                            this.setState({ estado: event.target.value })
+                                                        }}
+                                                    >
+                                                        <option value="">- Seleccione -</option>
+                                                        <option value="1">Disponible</option>
+                                                        <option value="2">Reservado</option>
+                                                        <option value="3">Vendido</option>
+                                                        <option value="4">Inactivo</option>
+                                                    </select>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

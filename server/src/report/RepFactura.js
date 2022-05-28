@@ -415,12 +415,12 @@ class RepFactura {
                 })
                 :
                 data.venta.map((item, index) => {
-                    return [++index, item.concepto+"\n"+item.comprobante+" "+item.serie+"-"+item.numeracion, "",1,  numberFormat(item.precio, cabecera.codiso), numberFormat(item.precio, cabecera.codiso)];
+                    return [++index, item.concepto + "\n" + item.comprobante + " " + item.serie + "-" + item.numeracion, "", 1, numberFormat(item.precio, cabecera.codiso), numberFormat(item.precio, cabecera.codiso)];
                 });
 
             const table = {
                 subtitle: "DETALLE",
-                headers: data.detalle.length > 0 ? ["Ítem", "Concepto", "Cantidad", "Impuesto", "Valor", "Monto"] : ["Ítem", "Concepto", "","Cantidad", "Valor",  "Monto"],
+                headers: data.detalle.length > 0 ? ["Ítem", "Concepto", "Cantidad", "Impuesto", "Valor", "Monto"] : ["Ítem", "Concepto", "", "Cantidad", "Valor", "Monto"],
                 rows: detalle,
             };
 
@@ -479,7 +479,7 @@ class RepFactura {
                     }
                 }
             } else {
-                for (let item of data.venta) {                    
+                for (let item of data.venta) {
                     total += item.precio;
                 }
             }
@@ -513,7 +513,7 @@ class RepFactura {
                 for (let item of arrayImpuestos) {
                     ypost = doc.y + 5;
 
-                    text = item.nombre+":";
+                    text = item.nombre + ":";
                     widthtext = doc.widthOfString(text);
 
                     subtext = numberFormat(item.valor, cabecera.codiso);
@@ -881,7 +881,7 @@ class RepFactura {
             let orgY = doc.y;
             let cabeceraY = orgY + 70;
             let filtroY = cabeceraY + 40;
-            let bodY = filtroY + 65;
+            let bodY = filtroY + 55;
             let titleX = orgX + 150;
             let medioX = (doc.page.width - doc.options.margins.left - doc.options.margins.right) / 2;
             let widthContent = doc.page.width - doc.options.margins.left - doc.options.margins.right;
@@ -923,7 +923,7 @@ class RepFactura {
                 }
             );
 
-            doc.fontSize(h3).text(
+            doc.fontSize(h3).opacity(0.7).text(
                 `PERIODO: ${dateFormat(req.query.fechaIni)} al ${dateFormat(req.query.fechaFin)}`,
                 orgX,
                 cabeceraY + 26,
@@ -933,25 +933,21 @@ class RepFactura {
                 }
             );
 
-            doc.rect(
-                orgX,
-                filtroY,
-                doc.page.width - doc.options.margins.left - doc.options.margins.right,
-                50).stroke();
+            doc.opacity(1);
 
             doc.fontSize(h3).text(
                 `Comprobante(s): ${req.query.idComprobante === '' ? "TODOS" : req.query.comprobante}`,
-                orgX + 5,
+                orgX,
                 filtroY + 6
             );
             doc.fontSize(h3).text(
                 `Cliente(s): ${req.query.idCliente === '' ? "TODOS" : req.query.cliente}`,
-                orgX + 5,
+                orgX,
                 filtroY + 20
             );
             doc.fontSize(h3).text(
                 `Vendedor(s): ${req.query.idUsuario === '' ? "TODOS" : req.query.usuario}`,
-                orgX + 5,
+                orgX,
                 filtroY + 34
             );
 
@@ -996,18 +992,19 @@ class RepFactura {
             });
 
             let ypost = doc.y + 5;
-            doc.fontSize(h3);
+            doc.fontSize(h3).font("Helvetica-Bold");
 
             let nameContado = "TOTAL AL CONTADO:";
             let nameCredito = "TOTAL AL CRÉDITO:";
-            let widthNameContado = doc.widthOfString(nameContado);
-            let widthNameCredito = doc.widthOfString(nameCredito);
+            let widthNameContado = Math.ceil(doc.widthOfString(nameContado));
+            let widthNameCredito = Math.ceil(doc.widthOfString(nameCredito));
 
             let totalContado = numberFormat(contadoCount);
             let totalCredito = numberFormat(creditoCount);
 
-            let widthTotalContado = doc.widthOfString(totalContado);
-            let widthTotalCredito = doc.widthOfString(totalCredito);
+            let widthTotalContado = Math.ceil(doc.widthOfString(totalContado));
+            let widthTotalCredito = Math.ceil(doc.widthOfString(totalCredito));
+
 
             doc.text(nameContado,
                 doc.page.width - doc.options.margins.right - widthNameContado - widthTotalContado - 20,
@@ -1020,7 +1017,6 @@ class RepFactura {
                 doc.page.width - doc.options.margins.right - widthTotalContado,
                 ypost, {
                 width: widthTotalContado,
-                stroke: "black",
                 align: "right",
             });
 
@@ -1037,11 +1033,10 @@ class RepFactura {
                 doc.page.width - doc.options.margins.right - widthTotalCredito,
                 ypost, {
                 width: widthTotalCredito,
-                stroke: "black",
                 align: "right",
             });
 
-            doc.end();
+            doc.end();  
 
             return getStream.buffer(doc);
         } catch (error) {

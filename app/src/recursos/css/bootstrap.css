@@ -220,6 +220,7 @@ body {
   flex-direction: column;
   overflow-y: auto;
   background-color: #e5e5e5;
+  padding-bottom: 40px;
 }
 
 .app main header {
@@ -6332,16 +6333,16 @@ a.badge-dark.focus {
 }
 
 .progress-bar-animated {
-  -webkit-animation: 1s linear infinite progress-bar-stripes;
-  animation: 1s linear infinite progress-bar-stripes;
+  -webkit-animation: 1s progress-bar-stripes 1s linear infinite;
+  animation: progress-bar-stripes 1s linear infinite;
 }
 
-@media (prefers-reduced-motion: reduce) {
+/* @media (prefers-reduced-motion: reduce) {
   .progress-bar-animated {
     -webkit-animation: none;
     animation: none;
   }
-}
+} */
 
 .media {
   display: -ms-flexbox;

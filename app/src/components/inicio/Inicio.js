@@ -42,9 +42,7 @@ import RepVentas from '../reporte/RepVentas';
 import RepFinanciero from '../reporte/RepFinanciero';
 import RepLotes from '../reporte/RepLotes';
 import RepClientes from '../reporte/RepClientes';
-
 import logoEmpresa from '../../recursos/images/INMOBILIARIA.png';
-
 
 const Page404 = (props) => {
     return (
@@ -61,7 +59,6 @@ const Page404 = (props) => {
     )
 }
 
-
 class Inicio extends React.Component {
 
     constructor(props) {
@@ -75,6 +72,7 @@ class Inicio extends React.Component {
         window.addEventListener('focus', this.onEventFocused);
         window.addEventListener('resize', this.onEventResize);
         window.addEventListener('click', this.onEventClick);
+        this.onEventSideBar();
     }
 
     componentWillUnmount() {
@@ -106,7 +104,12 @@ class Inicio extends React.Component {
     onEventResize(event) {
         if (event.target.innerWidth <= 768 && document.getElementById("sidebar").classList.contains("active")) {
             document.getElementById("sidebar").classList.remove("active");
+            document.getElementById("fotterbar").classList.remove("active");
         }
+
+        // if(event.target.innerWidth > 768 && document.getElementById("fotterbar").classList.contains("active")){
+        //     document.getElementById("fotterbar").classList.remove("active");
+        // }
     }
 
     onEventClick = (event) => {
@@ -137,7 +140,22 @@ class Inicio extends React.Component {
             document.getElementById("sidebar").appendChild(overlay);
         } else {
             document.getElementById("sidebar").classList.toggle("active");
+            document.getElementById("fotterbar").classList.toggle("active");
         }
+    }
+
+    onEventSideBar() {
+        let value = document.querySelectorAll('#sidebar ul li .pro-inner-item[data-bs-toggle="collapse"]');
+        value.forEach(element => {
+            element.parentNode.querySelector('ul').addEventListener('shown.bs.collapse', function (event) {
+                value.forEach(item => {
+                    if (event.target.getAttribute('id') !== item.parentNode.querySelector('ul').getAttribute('id')) {
+                        item.setAttribute("aria-expanded", "false");
+                        item.parentNode.querySelector('ul').classList.remove("show");
+                    }
+                });
+            });
+        });
     }
 
     render() {
@@ -338,12 +356,24 @@ class Inicio extends React.Component {
                                 />
                                 <Route component={Page404} />
                             </Switch>
-                        </div>                        
+                        </div>
                     </div>
                     <Footer />
-                </main>
 
-            </div>
+                    <div id="fotterbar">
+                        <div className="fotterbar-left">
+                            <span><i className="fa fa-user small"></i> Administrador</span>
+                        </div>
+                        <div className="fotterbar-right">
+                            <div className="fotterbar-right-content">
+                                <div className="progress">
+                                    <div className="progress-bar progress-bar-striped" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style={{ "width": "10%" }}>0%</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div> 
         )
     }
 }

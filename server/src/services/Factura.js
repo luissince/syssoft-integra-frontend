@@ -789,52 +789,11 @@ class Factura {
 
     async credito(req) {
         try {
-            let lista = await conec.query(`SELECT 
-            v.idVenta, 
-            cl.idCliente,
-            cl.documento, 
-            cl.informacion, 
-            cm.nombre, 
-            v.serie, 
-            v.numeracion, 
-            (SELECT IFNULL(COUNT(*), 0) FROM plazo AS p WHERE p.estado = 0 AND p.idVenta = v.idVenta) AS numCuota, 
-            CASE 
-            WHEN v.credito = 1 THEN DATE_ADD(v.fecha,interval v.frecuencia day)
-            ELSE (SELECT IFNULL(MIN(p.fecha),'') FROM plazo AS p WHERE p.estado = 0 AND p.idVenta = v.idVenta) END AS fechaPago,
-            v.fecha, 
-            v.hora, 
-            v.estado,
-            v.credito,
-            v.frecuencia,
-            m.idMoneda,
-            m.simbolo,
-            IFNULL(SUM(vd.precio*vd.cantidad),0) AS total,
-            (SELECT IFNULL(SUM(cv.precio),0) FROM cobro AS c LEFT JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro WHERE c.idProcedencia = v.idVenta ) AS cobrado 
-            FROM venta AS v 
-            INNER JOIN moneda AS m ON m.idMoneda = v.idMoneda
-            INNER JOIN comprobante AS cm ON v.idComprobante = cm.idComprobante 
-            INNER JOIN cliente AS cl ON v.idCliente = cl.idCliente 
-            LEFT JOIN ventaDetalle AS vd ON vd.idVenta = v.idVenta 
-            WHERE  
-            ? = 0 AND v.estado = 2 AND v.idProyecto = ?
-            OR
-            ? = 1 and cl.informacion like concat(?,'%') AND v.estado = 2 AND v.idProyecto = ? 
-            OR
-            ? = 1 and cl.documento like concat(?,'%') AND v.estado = 2 AND v.idProyecto = ?
-            GROUP BY v.idVenta
-            ORDER BY v.fecha DESC, v.hora DESC
-            LIMIT ?,?`, [
+            let lista = await conec.procedure(`CALL Listar_Creditos(?,?,?,?,?,?)`, [
                 parseInt(req.query.opcion),
                 req.query.idProyecto,
-
-                parseInt(req.query.opcion),
                 req.query.buscar,
-                req.query.idProyecto,
-
-                parseInt(req.query.opcion),
-                req.query.buscar,
-                req.query.idProyecto,
-
+                parseInt(req.query.todos),
                 parseInt(req.query.posicionPagina),
                 parseInt(req.query.filasPorPagina)
             ]);
@@ -847,27 +806,11 @@ class Factura {
                 }
             });
 
-            let total = await conec.query(`SELECT COUNT(*) AS Total 
-            FROM venta AS v 
-            INNER JOIN moneda AS m ON m.idMoneda = v.idMoneda
-            INNER JOIN comprobante AS cm ON v.idComprobante = cm.idComprobante 
-            INNER JOIN cliente AS cl ON v.idCliente = cl.idCliente  
-            WHERE  
-            ? = 0 AND v.estado = 2 AND v.idProyecto = ?
-            OR
-            ? = 1 and cl.informacion like concat(?,'%') AND v.estado = 2 AND v.idProyecto = ?
-            OR
-            ? = 1 and cl.documento like concat(?,'%') AND v.estado = 2 AND v.idProyecto = ?`, [
+            let total = await conec.procedure(`CALL Listar_Creditos_Count(?,?,?,?)`, [
                 parseInt(req.query.opcion),
                 req.query.idProyecto,
-
-                parseInt(req.query.opcion),
                 req.query.buscar,
-                req.query.idProyecto,
-
-                parseInt(req.query.opcion),
-                req.query.buscar,
-                req.query.idProyecto,
+                parseInt(req.query.todos)
             ]);
 
             return { "result": resultLista, "total": total[0].Total }

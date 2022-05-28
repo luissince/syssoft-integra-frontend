@@ -83,7 +83,6 @@ const Menu = ({ url, token: { project, userToken } }) => {
                                                 }
                                             </ul>
                                         </li>
-
                                         :
                                         null
                             ))

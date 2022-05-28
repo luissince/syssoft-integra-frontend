@@ -98,6 +98,7 @@ class Lote {
                 descripcion,
                 costo,
                 precio,
+                idMedida,
                 estado,
                 medidaFrontal,
                 costadoDerecho,
@@ -115,13 +116,14 @@ class Lote {
                 fupdate,
                 hupdate,
                 idUsuario
-                ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)        
+                ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)        
                 `, [
                 idLote,
                 req.body.idManzana,
                 req.body.descripcion,
                 req.body.costo,
                 req.body.precio,
+                req.body.idMedida,
                 req.body.estado,
                 req.body.medidaFrontal,
                 req.body.costadoDerecho,
@@ -153,7 +155,7 @@ class Lote {
         }
     }
 
-    async dataId(req) {
+    async id(req) {
         try {
             let result = await conec.query('SELECT * FROM lote WHERE idLote = ?', [
                 req.query.idLote,
@@ -189,6 +191,7 @@ class Lote {
                 await conec.execute(connection, `UPDATE lote SET        
                     idManzana = ?,
                     descripcion = ?,
+                    idMedida = ?,
                     medidaFrontal =?,
                     costadoDerecho = ?,
                     costadoIzquierdo = ?,
@@ -207,6 +210,7 @@ class Lote {
                     `, [
                     req.body.idManzana,
                     req.body.descripcion,
+                    req.body.idMedida,
                     req.body.medidaFrontal,
                     req.body.costadoDerecho,
                     req.body.costadoIzquierdo,

@@ -23,6 +23,7 @@ class Creditos extends React.Component {
             idProyecto: this.props.token.project.idProyecto,
 
             opcion: 0,
+            todos: 0,
             paginacion: 0,
             totalPaginacion: 0,
             filasPorPagina: 10,
@@ -92,6 +93,7 @@ class Creditos extends React.Component {
                 params: {
                     "opcion": opcion,
                     "buscar": buscar,
+                    "todos": this.state.todos,
                     "idProyecto": this.state.idProyecto,
                     "posicionPagina": ((this.state.paginacion - 1) * this.state.filasPorPagina),
                     "filasPorPagina": this.state.filasPorPagina
@@ -162,14 +164,31 @@ class Creditos extends React.Component {
                                     placeholder="Buscar..."
                                     ref={this.refTxtSearch}
                                     onKeyUp={(event) => this.searchText(event.target.value)} />
+                                <div className="input-group-append">
+                                    <button className="input-group-text" type="button" onClick={() => this.loadInit()}>
+                                        <i className="bi bi-arrow-clockwise"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
                     <div className="col-md-6 col-sm-12">
-                        <div className="form-group">
-                            <button className="btn btn-outline-secondary" onClick={() => this.loadInit()}>
-                                <i className="bi bi-arrow-clockwise"></i>
-                            </button>
+                        <div className="form-inline">
+                            <div className="form-group">
+                                <select className="form-control"
+                                    value={this.state.todos}
+                                    onChange={async (value) => {
+                                        await this.setStateAsync({ todos: value.target.value })
+                                        this.onEventPaginacion()
+                                    }}>
+                                    <option value="0">
+                                        Listar Ventas al Crédito
+                                    </option>
+                                    <option value="1">
+                                        Listar Todas Ventas
+                                    </option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </div>
