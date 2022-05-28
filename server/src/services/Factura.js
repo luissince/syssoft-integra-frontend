@@ -222,6 +222,15 @@ class Factura {
                 montoTotal += parseFloat(item.precioContado) * item.cantidad;
             }
 
+            await conec.execute(connection, `INSERT asociado(idVenta ,idCliente , estado, fecha, hora, idUsuario) VALUES(?,?,?,?,?,?)`, [
+                idVenta,
+                req.body.idCliente,
+                1,
+                currentDate(),
+                currentTime(),
+                req.body.idUsuario
+            ]);
+
             if (req.body.selectTipoPago === 1) {
                 let cobro = await conec.execute(connection, 'SELECT idCobro FROM cobro');
                 let idCobro = "";

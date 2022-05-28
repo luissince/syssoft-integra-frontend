@@ -2,6 +2,7 @@ import React from 'react';
 import axios from 'axios';
 import CryptoJS from 'crypto-js';
 import { connect } from 'react-redux';
+import FileDownloader from "./hooks/FileDownloader";
 import { spinnerLoading, currentDate } from '../tools/Tools';
 
 class RepClientes extends React.Component {
@@ -21,8 +22,8 @@ class RepClientes extends React.Component {
         }
 
         this.refFechaIni = React.createRef();
-
         this.refCliente = React.createRef();
+        this.refUseFile = React.createRef();
 
         this.abortControllerView = new AbortController()
     }
@@ -91,9 +92,40 @@ class RepClientes extends React.Component {
         window.open("/api/cliente/repcliente?" + params, "_blank");
     }
 
+    async onEventExcelCobro() {
+        if (this.state.fechaFin < this.state.fechaIni) {
+            this.setState({ messageWarning: "La Fecha inicial no puede ser mayor a la fecha final." })
+            this.refFechaIni.current.focus();
+            return;
+        }
+
+        if (!this.state.clienteCheck && this.state.idCliente == "") {
+            this.setState({ messageWarning: "Seleccione un cliente." })
+            this.refCliente.current.focus();
+            return;
+        }
+
+        const data = {
+            "idSede": "SD0001",
+            "fechaIni": this.state.fechaIni,
+            "fechaFin": this.state.fechaFin,
+            "idCliente": this.state.idCliente,
+            "cliente": this.refCliente.current.options[this.refCliente.current.options.selectedIndex].innerHTML
+        }
+
+        let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
+
+        this.refUseFile.current.download({
+            "name": "Reporte Cliente Aportaciones",
+            "file": "/api/cliente/excelcliente",
+            "filename": "aportaciones.xlsx",
+            "params": ciphertext
+        });
+    }
+
     async onEventDeudas() {
         const data = {
-            "idSede": "SD0001"           
+            "idSede": "SD0001"
         }
 
         let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
@@ -237,7 +269,7 @@ class RepClientes extends React.Component {
                                             <button className="btn btn-outline-warning btn-sm" onClick={() => this.onEventImpCobro()}><i className="bi bi-file-earmark-pdf-fill"></i> Reporte Pdf</button>
                                         </div>
                                         <div className="col">
-                                            <button className="btn btn-outline-success btn-sm"><i className="bi bi-file-earmark-excel-fill"></i> Reporte Excel</button>
+                                            <button className="btn btn-outline-success btn-sm" onClick={() => this.onEventExcelCobro()}><i className="bi bi-file-earmark-excel-fill"></i> Reporte Excel</button>
                                         </div>
                                         <div className="col"></div>
                                     </div>
@@ -262,6 +294,8 @@ class RepClientes extends React.Component {
 
                                 </div>
                             </div>
+
+                            <FileDownloader ref={this.refUseFile} />
                         </>
                 }
             </>

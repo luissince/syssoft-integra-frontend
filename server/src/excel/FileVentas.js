@@ -5,7 +5,7 @@ async function generateExcel(req, sedeInfo, data) {
     try {
         const wb = new xl.Workbook();
 
-        let ws = wb.addWorksheet('Sheet 1');
+        let ws = wb.addWorksheet('Hoja 1');
 
         const styleTitle = wb.createStyle({
             alignment: {
@@ -67,7 +67,7 @@ async function generateExcel(req, sedeInfo, data) {
                 color: '#000000',
                 size: 12,
             },
-            numberFormat: '#,##0.00; (#,##0.00); 0.00;',
+            numberFormat: '#,##0.00; (#,##0.00); 0',
         });
 
         ws.column(1).setWidth(15);

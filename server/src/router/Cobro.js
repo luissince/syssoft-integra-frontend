@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { decrypt } = require('../tools/CryptoJS');
+const { generateExcel } = require('../excel/FileFinanza')
 const Cobro = require('../services/Cobro');
 const Sede = require('../services/Sede');
 const RepFinanciero = require('../report/RepFinanciero');
@@ -120,6 +121,36 @@ router.get('/repgeneralcobros', async function (req, res) {
             res.setHeader('Content-disposition', `inline; filename=REPORTE DE COBROS Y GASTOS DEL ${req.query.fechaIni} AL ${req.query.fechaFin}.pdf`);
             res.contentType("application/pdf");
             res.send(data);
+        }
+    } else {
+        res.status(500).send(detalle)
+    }
+});
+
+router.get('/excelgeneralcobros', async function (req, res) {
+    const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
+
+    req.query.idSede = decryptedData.idSede;
+    req.query.fechaIni = decryptedData.fechaIni;
+    req.query.fechaFin = decryptedData.fechaFin;
+
+    const sedeInfo = await sede.infoSedeReporte(req);
+
+    if (typeof sedeInfo !== 'object') {
+        res.status(500).send(sedeInfo);
+        return;
+    }
+
+    const detalle = await cobro.cobroGeneral(req);
+
+    if (typeof detalle === 'object') {
+
+        const data = await generateExcel(req, sedeInfo, detalle);
+
+        if (typeof data === 'string') {
+            res.status(500).send(data);
+        } else {
+            res.end(data);
         }
     } else {
         res.status(500).send(detalle)

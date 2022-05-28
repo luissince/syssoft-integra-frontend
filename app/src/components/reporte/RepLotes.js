@@ -151,9 +151,9 @@ class RepLotes extends React.Component {
                                             <button className="btn btn-outline-warning btn-sm" onClick={ () => this.onEventImprimir() }><i className="bi bi-file-earmark-pdf-fill"></i> Reporte Pdf</button>
                                         </div>
 
-                                        <div className="col text-center">
+                                        {/* <div className="col text-center">
                                             <button className="btn btn-outline-success btn-sm"><i className="bi bi-file-earmark-excel-fill"></i> Reporte Excel</button>
-                                        </div>
+                                        </div> */}
 
                                     </div>
                                 </div>
