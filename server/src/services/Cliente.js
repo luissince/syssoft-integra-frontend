@@ -117,8 +117,10 @@ class Cliente {
             observacion,
             fecha,
             hora,
+            fupdate,
+            hupdate,
             idUsuario)
-            VALUES(?, ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, [
+            VALUES(?, ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, [
                 idCliente,
                 req.body.idTipoDocumento,
                 req.body.documento,
@@ -133,6 +135,8 @@ class Cliente {
                 req.body.estadoCivil,
                 req.body.estado,
                 req.body.observacion,
+                currentDate(),
+                currentTime(),
                 currentDate(),
                 currentTime(),
                 req.body.idUsuario,
@@ -206,6 +210,8 @@ class Cliente {
                 estadoCivil=?, 
                 estado=?,
                 observacion=?,
+                fupdate=?,
+                hupdate=?,
                 idUsuario=?
                 WHERE idCliente=?`, [
                 req.body.idTipoDocumento,
@@ -221,6 +227,8 @@ class Cliente {
                 req.body.estadoCivil,
                 req.body.estado,
                 req.body.observacion,
+                currentDate(),
+                currentTime(),
                 req.body.idUsuario,
                 req.body.idCliente
             ])
@@ -321,10 +329,10 @@ class Cliente {
         }
     }
 
-    async listapagos(req){
-        try{           
+    async listapagos(req) {
+        try {
 
-            if(req.query.idCliente !== ""){
+            if (req.query.idCliente !== "") {
                 let lista = await conec.query(`SELECT 
                 c.idCobro, 
                 co.nombre as comprobante,
@@ -351,12 +359,12 @@ class Cliente {
                 LEFT JOIN comprobante AS cp ON v.idComprobante = cp.idComprobante
                 WHERE c.idCliente = ?
                 GROUP BY c.idCobro
-                ORDER BY c.fecha DESC,c.hora DESC`,[
-                    req.query.idCliente 
+                ORDER BY c.fecha DESC,c.hora DESC`, [
+                    req.query.idCliente
                 ]);
-    
+
                 return lista;
-            }else{
+            } else {
                 let lista = await conec.query(`SELECT
                 c.idCliente,
                 c.documento,
@@ -366,15 +374,15 @@ class Cliente {
                 FROM cobro AS co
                 INNER JOIN cliente AS c ON c.idCliente = co.idCliente
                 WHERE 
-                co.fecha BETWEEN ? AND ?`,[
+                co.fecha BETWEEN ? AND ?`, [
                     req.query.fechaIni,
                     req.query.fechaFin,
                     ,
                 ]);
-    
+
                 return lista;
-            }            
-        }catch (error) {
+            }
+        } catch (error) {
             return "Se produjo un error de servidor, intente nuevamente.";
         }
     }
