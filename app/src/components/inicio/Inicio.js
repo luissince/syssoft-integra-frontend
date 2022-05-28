@@ -360,7 +360,7 @@ class Inicio extends React.Component {
                     </div>
                     <Footer />
 
-                    <div id="fotterbar">
+                    {/* <div id="fotterbar">
                         <div className="fotterbar-left">
                             <span><i className="fa fa-user small"></i> Administrador</span>
                         </div>
@@ -371,7 +371,7 @@ class Inicio extends React.Component {
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </div> */}
                 </main>
             </div> 
         )
