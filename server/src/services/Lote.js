@@ -95,6 +95,7 @@ class Lote {
             await conec.execute(connection, `INSERT INTO lote(
                 idLote, 
                 idManzana,
+                idConcepto,
                 descripcion,
                 costo,
                 precio,
@@ -116,10 +117,11 @@ class Lote {
                 fupdate,
                 hupdate,
                 idUsuario
-                ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)        
+                ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)        
                 `, [
                 idLote,
                 req.body.idManzana,
+                req.body.idConcepto,
                 req.body.descripcion,
                 req.body.costo,
                 req.body.precio,
