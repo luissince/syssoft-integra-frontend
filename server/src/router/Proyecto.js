@@ -295,7 +295,6 @@ router.delete('/', async function (req, res) {
     }
 });
 
-
 router.get('/inicio', async function (req, res) {
     try {
         let result = await conec.query(`SELECT 
