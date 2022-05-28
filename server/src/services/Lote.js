@@ -147,6 +147,7 @@ class Lote {
             return "insert";
 
         } catch (error) {
+            console.log(error)
             if (connection != null) {
                 await conec.rollback(connection);
             }
