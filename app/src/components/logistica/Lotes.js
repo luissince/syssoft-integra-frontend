@@ -384,6 +384,7 @@ class Lotes extends React.Component {
             } else {
                 let result = await axios.post("/api/lote", {
                     "idManzana": this.state.idManzana,
+                    "idConcepto": this.state.idConcepto,
                     "descripcion": this.state.descripcion.trim().toUpperCase(),
                     "costo": this.state.costo,
                     "precio": this.state.precio,
