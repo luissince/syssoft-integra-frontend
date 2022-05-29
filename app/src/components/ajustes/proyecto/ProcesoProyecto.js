@@ -274,7 +274,7 @@ class ProcesoProyecto extends React.Component {
                 });
             }
         } catch (error) {
-            if (error.response !== undefined) {
+            if (error.response) {
                 ModalAlertWarning("Proyecto", error.response.data)
             } else {
                 ModalAlertWarning("Proyecto", "Se genero un error interno, intente nuevamente.")
@@ -698,8 +698,10 @@ class ProcesoProyecto extends React.Component {
                 </div>
 
                 <div className='row'>
-                    <button type="button" className="btn btn-primary" onClick={() => this.onEventGuardar()}>Guardar</button>
-                    <button type="button" className="btn btn-secondary ml-2" onClick={() => this.props.history.goBack()}>Cerrar</button>
+                    <div className="col-md-12">
+                        <button type="button" className="btn btn-primary" onClick={() => this.onEventGuardar()}>Guardar</button>
+                        <button type="button" className="btn btn-secondary ml-2" onClick={() => this.props.history.goBack()}>Cerrar</button>
+                    </div>
                 </div>
 
             </>

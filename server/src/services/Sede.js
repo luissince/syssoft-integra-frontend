@@ -1,4 +1,5 @@
 const Conexion = require('../database/Conexion');
+const { currentDate, currentTime } = require('../tools/Tools');
 const conec = new Conexion();
 
 class Sede {
@@ -199,7 +200,9 @@ class Sede {
             claveCert=?,
 
             imagen=?,
-            extension=?
+            extension=?,
+            fupdate=?,
+            hupdate=?
             WHERE idSede = ?`, [
                 req.body.ruc,
                 req.body.razonSocial,
@@ -220,6 +223,8 @@ class Sede {
 
                 req.body.imagen,
                 req.body.extension,
+                currentDate(),
+                currentTime(),
                 req.body.idSede
             ]);
 

@@ -6,7 +6,7 @@ export const restoreToken = (user) => (
         token: user
     }
 )
-
+ 
 export const signIn = (user) => (
     {
         type: SIGN_IN,

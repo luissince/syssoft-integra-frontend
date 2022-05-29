@@ -66,7 +66,7 @@ class RepClientes extends React.Component {
         }
     }
 
-    async onEventImpCobro() {
+    async onEventRepCobro() {
         if (this.state.fechaFin < this.state.fechaIni) {
             this.setState({ messageWarning: "La Fecha inicial no puede ser mayor a la fecha final." })
             this.refFechaIni.current.focus();
@@ -123,14 +123,29 @@ class RepClientes extends React.Component {
         });
     }
 
-    async onEventDeudas() {
+    async onEventRepDeudas() {
         const data = {
             "idSede": "SD0001"
         }
 
         let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
         let params = new URLSearchParams({ "params": ciphertext });
-        window.open("/api/cliente/repdeduas?" + params, "_blank");
+        window.open("/api/cliente/repdeudas?" + params, "_blank");
+    }
+
+    async onEventExcelDeudas() {
+        const data = {
+            "idSede": "SD0001"
+        }
+
+        let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
+
+        this.refUseFile.current.download({
+            "name": "Reporte Deudas",
+            "file": "/api/cliente/exceldeudas",
+            "filename": "deudas.xlsx",
+            "params": ciphertext
+        });
     }
 
     render() {
@@ -266,7 +281,7 @@ class RepClientes extends React.Component {
                                     <div className="row mt-3">
                                         <div className="col"></div>
                                         <div className="col">
-                                            <button className="btn btn-outline-warning btn-sm" onClick={() => this.onEventImpCobro()}><i className="bi bi-file-earmark-pdf-fill"></i> Reporte Pdf</button>
+                                            <button className="btn btn-outline-warning btn-sm" onClick={() => this.onEventRepCobro()}><i className="bi bi-file-earmark-pdf-fill"></i> Reporte Pdf</button>
                                         </div>
                                         <div className="col">
                                             <button className="btn btn-outline-success btn-sm" onClick={() => this.onEventExcelCobro()}><i className="bi bi-file-earmark-excel-fill"></i> Reporte Excel</button>
@@ -284,10 +299,10 @@ class RepClientes extends React.Component {
                                     <div className="row mt-3">
                                         <div className="col"></div>
                                         <div className="col">
-                                            <button className="btn btn-outline-warning btn-sm" onClick={() => this.onEventDeudas()}><i className="bi bi-file-earmark-pdf-fill"></i> Reporte Pdf</button>
+                                            <button className="btn btn-outline-warning btn-sm" onClick={() => this.onEventRepDeudas()}><i className="bi bi-file-earmark-pdf-fill"></i> Reporte Pdf</button>
                                         </div>
                                         <div className="col">
-                                            <button className="btn btn-outline-success btn-sm"><i className="bi bi-file-earmark-excel-fill"></i> Reporte Excel</button>
+                                            <button className="btn btn-outline-success btn-sm" onClick={() => this.onEventExcelDeudas()}><i className="bi bi-file-earmark-excel-fill"></i> Reporte Excel</button>
                                         </div>
                                         <div className="col"></div>
                                     </div>

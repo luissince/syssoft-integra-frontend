@@ -220,7 +220,6 @@ body {
   flex-direction: column;
   overflow-y: auto;
   background-color: #e5e5e5;
-  padding-bottom: 40px;
 }
 
 .app main header {

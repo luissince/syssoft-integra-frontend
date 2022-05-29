@@ -503,7 +503,7 @@ class Lotes extends React.Component {
                                     </li>
                                 </ul>
                                 <div className="tab-content pt-2" id="myTabContent">
-                                    <div className="tab-pane fade show active" id="info" role="tabpanel" aria-labelledby="info-tab">
+                                    <div className="tab-pane fade active show" id="info" role="tabpanel" aria-labelledby="info-tab">
                                         <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
                                             <div className="form-group">
                                                 <label htmlFor="manzana">Manzana <i className="fa fa-asterisk text-danger small"></i></label>
@@ -596,10 +596,10 @@ class Lotes extends React.Component {
 
                                             <div className="form-row">
                                                 <div className="form-group col-md-6">
-                                                    <label htmlFor="medida">Tipo de Medida(Sunat) <i className="fa fa-asterisk text-danger small"></i></label>
+                                                    <label htmlFor="medidaSunat">Tipo de Medida(Sunat) <i className="fa fa-asterisk text-danger small"></i></label>
                                                     <select
                                                         className="form-control"
-                                                        id="medida"
+                                                        id="medidaSunat"
                                                         ref={this.refMedida}
                                                         value={this.state.idMedida}
                                                         onChange={(event) => {

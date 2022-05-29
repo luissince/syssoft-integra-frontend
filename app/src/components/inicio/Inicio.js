@@ -104,7 +104,7 @@ class Inicio extends React.Component {
     onEventResize(event) {
         if (event.target.innerWidth <= 768 && document.getElementById("sidebar").classList.contains("active")) {
             document.getElementById("sidebar").classList.remove("active");
-            document.getElementById("fotterbar").classList.remove("active");
+            // document.getElementById("fotterbar").classList.remove("active");
         }
 
         // if(event.target.innerWidth > 768 && document.getElementById("fotterbar").classList.contains("active")){
@@ -140,7 +140,7 @@ class Inicio extends React.Component {
             document.getElementById("sidebar").appendChild(overlay);
         } else {
             document.getElementById("sidebar").classList.toggle("active");
-            document.getElementById("fotterbar").classList.toggle("active");
+            // document.getElementById("fotterbar").classList.toggle("active");
         }
     }
 

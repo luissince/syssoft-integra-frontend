@@ -60,6 +60,7 @@ router.get('/list', async function (req, res) {
 });
 
 router.post('/', async function (req, res) {
+    console.log(req.body)
     let connection = null;
     try {
         connection = await conec.beginTransaction();
@@ -112,8 +113,10 @@ router.post('/', async function (req, res) {
             extension,
             fecha,
             hora,
+            fupdate,
+            hupdate,
             idUsuario) 
-            values (?, ?,?,?,?, ?,?, ?,?,?,?, ?,?,?,?,?,?,?,?,?,?,?)`, [
+            values (?, ?,?,?,?, ?,?, ?,?,?,?, ?,?,?,?,?,?,?,?,?,?,?,?,?)`, [
             idProyecto,
             //datos
             req.body.nombre,
@@ -138,6 +141,8 @@ router.post('/', async function (req, res) {
             //imagen
             req.body.imagen,
             req.body.extension,
+            currentDate(),
+            currentTime(),
             currentDate(),
             currentTime(),
             req.body.idUsuario,
@@ -177,8 +182,8 @@ router.put('/', async function (req, res) {
             numRecibocCorrelativo=?,
             imagen=?,
             extension=?,
-            fecha=?,
-            hora=?,
+            fupdate=?,
+            hupdate=?,
             idUsuario=?
             WHERE idProyecto=?`, [
             //datos

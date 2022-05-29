@@ -223,7 +223,15 @@ class RepCliente {
             );
 
             let content = data.map((item, index) => {
-                return [++index, item.documento + "\n" + item.informacion, item.cuotasRetrasadas, item.cuotasPendientes, item.fechaPago, numberFormat(item.montoPendiente, item.codiso), numberFormat(item.montoActual, item.codiso)];
+                return [
+                    ++index,
+                    item.documento + "\n" + item.informacion,
+                    item.cuotasRetrasadas,
+                    item.cuotasPendientes,
+                    item.fechaPago,
+                    numberFormat(item.montoPendiente, item.codiso),
+                    numberFormat(item.montoActual, item.codiso)
+                ];
             });
 
             const table = {
