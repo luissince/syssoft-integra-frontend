@@ -17,8 +17,7 @@
     "dev:server": "npm run dev --workspace=server",
     "save": "git add . && git commit -m 'act'",
     "push": "git push origin master",
-    "pull": "git pull origin master",
-    "deploy":"pull build production"
+    "pull": "git pull origin master"
   },
   "keywords": [],
   "author": "",
