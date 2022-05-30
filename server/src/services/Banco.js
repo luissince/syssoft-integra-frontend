@@ -1,7 +1,173 @@
+const { currentDate, currentTime } = require('../tools/Tools');
 const Conexion = require('../database/Conexion');
 const conec = new Conexion();
 
 class Banco {
+
+    async add(req) {
+        let connection = null;
+        try {
+            connection = await conec.beginTransaction();
+
+            let result = await conec.execute(connection, 'SELECT idBanco FROM banco');
+            let idBanco = "";
+            if (result.length != 0) {
+
+                let quitarValor = result.map(function (item) {
+                    return parseInt(item.idBanco.replace("BC", ''));
+                });
+
+                let valorActual = Math.max(...quitarValor);
+                let incremental = valorActual + 1;
+                let codigoGenerado = "";
+                if (incremental <= 9) {
+                    codigoGenerado = 'BC000' + incremental;
+                } else if (incremental >= 10 && incremental <= 99) {
+                    codigoGenerado = 'BC00' + incremental;
+                } else if (incremental >= 100 && incremental <= 999) {
+                    codigoGenerado = 'BC0' + incremental;
+                } else {
+                    codigoGenerado = 'BC' + incremental;
+                }
+
+                idBanco = codigoGenerado;
+            } else {
+                idBanco = "BC0001";
+            }
+
+            await conec.execute(connection, `INSERT INTO banco(
+            idBanco,
+            nombre,
+            tipoCuenta,
+            idMoneda,
+            numCuenta,
+            cci, 
+            fecha,
+            hora,
+            fupdate,
+            hupdate,
+            idUsuario) 
+            values (?,?,?,?,?,?,?,?,?,?,?)`, [
+                idBanco,
+                req.body.nombre,
+                req.body.tipoCuenta,
+                req.body.idMoneda,
+                req.body.numCuenta,
+                req.body.cci,
+                currentDate(),
+                currentTime(),
+                currentDate(),
+                currentTime(),
+                req.body.idUsuario
+            ]);
+
+            await conec.commit(connection);
+            return "insert";
+        } catch (error) {
+            if (connection != null) {
+                await conec.rollback(connection);
+            }
+            return "Se produjo un error de servidor, intente nuevamente.";
+        }
+    }
+
+    async id(req) {
+        try {
+            let result = await conec.query('SELECT * FROM banco WHERE idBanco = ?', [
+                req.query.idBanco,
+            ]);
+
+            if (result.length > 0) {
+                return result[0];
+            } else {
+                return "Datos no encontrados";
+            }
+        } catch (error) {
+            return "Se produjo un error de servidor, intente nuevamente.";
+        }
+    }
+
+    async update(req) {
+        let connection = null;
+        try {
+            connection = await conec.beginTransaction();
+            await conec.execute(connection, `UPDATE banco SET 
+            nombre=?, 
+            tipoCuenta=?, 
+            idMoneda=?, 
+            numCuenta=?, 
+            cci=?, 
+            fecha=?,
+            hora=?,
+            idUsuario=?
+            WHERE idBanco=?`, [
+                req.body.nombre,
+                req.body.tipoCuenta,
+                req.body.idMoneda,
+                req.body.numCuenta,
+                req.body.cci,
+                currentDate(),
+                currentTime(),
+                req.body.idUsuario,
+                req.body.idBanco
+            ]);
+
+            await conec.commit(connection);
+            return "update";
+        } catch (error) {
+            console.log(error)
+            if (connection != null) {
+                await conec.rollback(connection);
+            }
+            return "Se produjo un error de servidor, intente nuevamente.";
+        }
+    }
+
+    async delete(req) {
+        let connection = null;
+        try {
+            connection = await conec.beginTransaction();
+
+            let cobro = await conec.execute(connection, `SELECT * FROM cobro WHERE idBanco = ?`, [
+                req.query.idBanco
+            ]);
+
+            if (cobro.length > 0) {
+                await conec.rollback(connection);
+                return 'No se puede eliminar el banco ya que esta ligada a un cobro.';
+            }
+
+            let gasto = await conec.execute(connection, `SELECT * FROM gasto WHERE idBanco = ?`, [
+                req.query.idBanco
+            ]);
+
+            if (gasto.length > 0) {
+                await conec.rollback(connection);
+                return 'No se puede eliminar el banco ya que esta ligada a un gasto.';
+            }
+
+            await conec.execute(connection, `DELETE FROM banco WHERE idBanco = ?`, [
+                req.query.idBanco
+            ]);
+
+            await conec.commit(connection);
+            return "delete";
+        } catch (error) {
+            if (connection != null) {
+                await conec.rollback(connection);
+            }
+            return "Se produjo un error de servidor, intente nuevamente.";
+        }
+    }
+
+    async listcombo() {
+        try {
+            let result = await conec.query('SELECT idBanco, nombre, tipoCuenta FROM banco');
+            return result;
+        } catch (error) {
+            return "Se produjo un error de servidor, intente nuevamente.";
+        }
+    }
 
     async detalleBanco(req) {
         try {

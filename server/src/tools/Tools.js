@@ -113,4 +113,13 @@ function frecuenciaPago(value) {
     return "NINGUNO";
 }
 
-module.exports = { currentDate, currentTime, dateFormat, formatMoney, calculateTaxBruto, calculateTax, numberFormat,frecuenciaPago };
+module.exports = {
+    currentDate,
+    currentTime,
+    dateFormat,
+    formatMoney,
+    calculateTaxBruto,
+    calculateTax,
+    numberFormat,
+    frecuenciaPago
+};

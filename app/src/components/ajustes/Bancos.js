@@ -249,7 +249,7 @@ class Bancos extends React.Component {
                 ModalAlertInfo("Banco", "Procesando información...");
                 hideModal("modalBanco");
                 if (this.state.idBanco !== '') {
-                    const result = await axios.post('/api/banco/update', {
+                    const result = await axios.put('/api/banco/', {
                         "nombre": this.state.nombre.trim().toUpperCase(),
                         "tipoCuenta": this.state.tipoCuenta,
                         "idMoneda": this.state.idMoneda.trim().toUpperCase(),
@@ -263,7 +263,7 @@ class Bancos extends React.Component {
                         this.onEventPaginacion();
                     });
                 } else {
-                    const result = await axios.post('/api/banco/add', {
+                    const result = await axios.post('/api/banco/', {
                         "nombre": this.state.nombre.trim().toUpperCase(),
                         "tipoCuenta": this.state.tipoCuenta,
                         "idMoneda": this.state.idMoneda.trim().toUpperCase(),

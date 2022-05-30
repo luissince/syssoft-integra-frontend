@@ -48,6 +48,7 @@ class Monedas extends React.Component {
         this.refTxtCodIso = React.createRef();
         this.refTxtSimbolo = React.createRef();
         this.refTxtSearch = React.createRef();
+        this.refEstado = React.createRef();
 
         this.idCodigo = "";
         this.abortControllerTable = new AbortController();
@@ -204,48 +205,59 @@ class Monedas extends React.Component {
     async onEventGuardar() {
         if (this.state.nombre === "") {
             this.refTxtNombre.current.focus();
-        } else if (this.state.codIso === "") {
+            return;
+        }
+
+        if (this.state.codIso === "") {
             this.refTxtCodIso.current.focus();
-        } else if (this.state.estado === "") {
-            this.estado.current.focus();
-        } else {
-            try {
-                ModalAlertInfo("Moneda", "Procesando información...");
-                hideModal("modalMoneda");
+            return;
+        }
 
-                if (this.state.idMoneda !== '') {
-                    const result = await axios.post('/api/moneda/update', {
-                        "nombre": this.state.nombre.trim().toUpperCase(),
-                        "codiso": this.state.codIso.trim().toUpperCase(),
-                        "simbolo": this.state.simbolo.trim().toUpperCase(),
-                        "estado": this.state.estado,
-                        "idUsuario": this.state.idUsuario,
-                        "idMoneda": this.state.idMoneda
-                    })
-                    ModalAlertSuccess("Moneda", result.data, () => {
-                        this.onEventPaginacion();
-                    });
+        if (this.state.estado === "") {
+            this.refEstado.current.focus();
+            return;
+        }
 
-                } else {
-                    const result = await axios.post('/api/moneda/add', {
-                        "nombre": this.state.nombre.trim().toUpperCase(),
-                        "codiso": this.state.codIso.trim().toUpperCase(),
-                        "simbolo": this.state.simbolo.trim().toUpperCase(),
-                        "estado": this.state.estado,
-                        "idUsuario": this.state.idUsuario
-                    });
-                    ModalAlertSuccess("Moneda", result.data, () => {
-                        this.loadInit();
-                    });
-                }
-            } catch (error) {
-                if (error.response !== undefined) {
-                    ModalAlertWarning("Moneda", error.response.data)
-                } else {
-                    ModalAlertWarning("Moneda", "Se genero un error interno, intente nuevamente.")
+        ModalAlertDialog("Moneda", "¿Está seguro de continuar?", async (value) => {
+            if (value) {
+                try {
+                    ModalAlertInfo("Moneda", "Procesando información...");
+                    hideModal("modalMoneda");
+
+                    if (this.state.idMoneda !== '') {
+                        const result = await axios.post('/api/moneda/update', {
+                            "nombre": this.state.nombre.trim().toUpperCase(),
+                            "codiso": this.state.codIso.trim().toUpperCase(),
+                            "simbolo": this.state.simbolo.trim().toUpperCase(),
+                            "estado": this.state.estado,
+                            "idUsuario": this.state.idUsuario,
+                            "idMoneda": this.state.idMoneda
+                        })
+                        ModalAlertSuccess("Moneda", result.data, () => {
+                            this.onEventPaginacion();
+                        });
+
+                    } else {
+                        const result = await axios.post('/api/moneda/add', {
+                            "nombre": this.state.nombre.trim().toUpperCase(),
+                            "codiso": this.state.codIso.trim().toUpperCase(),
+                            "simbolo": this.state.simbolo.trim().toUpperCase(),
+                            "estado": this.state.estado,
+                            "idUsuario": this.state.idUsuario
+                        });
+                        ModalAlertSuccess("Moneda", result.data, () => {
+                            this.loadInit();
+                        });
+                    }
+                } catch (error) {
+                    if (error.response) {
+                        ModalAlertWarning("Moneda", error.response.data)
+                    } else {
+                        ModalAlertWarning("Moneda", "Se genero un error interno, intente nuevamente.")
+                    }
                 }
             }
-        }
+        });
     }
 
     onEventDelete(idMoneda) {
@@ -294,7 +306,7 @@ class Monedas extends React.Component {
 
                                 <div className="form-row">
                                     <div className="form-group col-md-6">
-                                        <label>Moneda:</label>
+                                        <label>Moneda: <i className="fa fa-asterisk text-danger small"></i></label>
                                         <input
                                             type="text"
                                             className="form-control"
@@ -304,7 +316,7 @@ class Monedas extends React.Component {
                                             placeholder="Soles, dolares, etc" />
                                     </div>
                                     <div className="form-group col-md-6">
-                                        <label>Código ISO:</label>
+                                        <label>Código ISO: <i className="fa fa-asterisk text-danger small"></i></label>
                                         <input
                                             type="text"
                                             className="form-control"
@@ -334,6 +346,7 @@ class Monedas extends React.Component {
                                                 type="checkbox"
                                                 className="custom-control-input"
                                                 id="switch1"
+                                                ref={this.refEstado}
                                                 checked={this.state.estado}
                                                 onChange={(value) => this.setState({ estado: value.target.checked })} />
                                             <label className="custom-control-label" htmlFor="switch1">Activo o Inactivo</label>

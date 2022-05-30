@@ -58,7 +58,7 @@ router.delete('/', async function (req, res) {
 router.get('/listcombo', async function (req, res) {
     const result = await cliente.listcombo(req)
     if (Array.isArray(result)) {
-        res.status(201).send(result);
+        res.status(200).send(result);
     } else {
         res.status(500).send(result);
     }

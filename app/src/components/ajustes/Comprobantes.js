@@ -27,6 +27,7 @@ class Comprobantes extends React.Component {
             nombre: '',
             serie: '',
             numeracion: '',
+            codigo: '',
             impresion: '',
             estado: true,
             preferida: false,
@@ -85,6 +86,7 @@ class Comprobantes extends React.Component {
                 nombre: '',
                 serie: '',
                 numeracion: '',
+                codigo: '',
                 impresion: '',
                 estado: true,
 
@@ -198,6 +200,7 @@ class Comprobantes extends React.Component {
                 nombre: result.data.nombre,
                 serie: result.data.serie,
                 numeracion: result.data.numeracion,
+                codigo: result.data.codigo,
                 impresion: result.data.impresion,
                 estado: result.data.estado === 1 ? true : false,
                 loadModal: false
@@ -231,6 +234,7 @@ class Comprobantes extends React.Component {
                         "nombre": this.state.nombre.trim().toUpperCase(),
                         "serie": this.state.serie.trim().toUpperCase(),
                         "numeracion": this.state.numeracion,
+                        "codigo": this.state.codigo,
                         "impresion": this.state.impresion.trim(),
                         "estado": this.state.estado,
                         "preferida": this.state.preferida,
@@ -248,6 +252,7 @@ class Comprobantes extends React.Component {
                         "serie": this.state.serie.trim().toUpperCase(),
                         "numeracion": this.state.numeracion,
                         "impresion": this.state.impresion.trim(),
+                        "codigo": this.state.codigo,
                         "estado": this.state.estado,
                         "preferida": this.state.preferida,
                         "idUsuario": this.state.idUsuario
@@ -281,7 +286,7 @@ class Comprobantes extends React.Component {
                         this.loadInit();
                     })
                 } catch (error) {
-                    if (error.response !== undefined) {
+                    if (error.response) {
                         ModalAlertWarning("Comprobante", error.response.data)
                     } else {
                         ModalAlertWarning("Comprobante", "Se genero un error interno, intente nuevamente.")
@@ -372,15 +377,28 @@ class Comprobantes extends React.Component {
                                     </div>
                                 </div>
 
-                                <div className="form-group">
-                                    <label htmlFor="impresion" className="col-form-label">Nombre de Impresión:</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        id="impresion"
-                                        value={this.state.impresion}
-                                        onChange={(event) => this.setState({ impresion: event.target.value })}
-                                    />
+                                <div className="form-row">
+                                    <div className="form-group col-md-6">
+                                        <label htmlFor="impresion" className="col-form-label">Nombre de Impresión:</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            id="impresion"
+                                            value={this.state.impresion}
+                                            onChange={(event) => this.setState({ impresion: event.target.value })}
+                                        />
+                                    </div>
+
+                                    <div className="form-group col-md-6">
+                                        <label htmlFor="codigo" className="col-form-label">Código:</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            id="codigo"
+                                            value={this.state.codigo}
+                                            onChange={(event) => this.setState({ codigo: event.target.value })}
+                                        />
+                                    </div>
                                 </div>
 
                                 <div className="form-row">

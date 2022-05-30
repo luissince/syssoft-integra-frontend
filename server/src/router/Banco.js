@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { currentDate, currentTime } = require('../tools/Tools');
+const { currentDate } = require('../tools/Tools');
 const { decrypt } = require('../tools/CryptoJS');
 
 const Banco = require('../services/Banco');
@@ -72,167 +72,48 @@ router.get('/list', async function (req, res) {
     }
 });
 
-router.post('/add', async function (req, res) {
-    let connection = null;
-    try {
-        connection = await conec.beginTransaction();
-
-        let result = await conec.execute(connection, 'SELECT idBanco FROM banco');
-        let idBanco = "";
-        if (result.length != 0) {
-
-            let quitarValor = result.map(function (item) {
-                return parseInt(item.idBanco.replace("BC", ''));
-            });
-
-            let valorActual = Math.max(...quitarValor);
-            let incremental = valorActual + 1;
-            let codigoGenerado = "";
-            if (incremental <= 9) {
-                codigoGenerado = 'BC000' + incremental;
-            } else if (incremental >= 10 && incremental <= 99) {
-                codigoGenerado = 'BC00' + incremental;
-            } else if (incremental >= 100 && incremental <= 999) {
-                codigoGenerado = 'BC0' + incremental;
-            } else {
-                codigoGenerado = 'BC' + incremental;
-            }
-
-            idBanco = codigoGenerado;
-        } else {
-            idBanco = "BC0001";
-        }
-
-        await conec.execute(connection, `INSERT INTO banco(
-        idBanco,
-        nombre,
-        tipoCuenta,
-        idMoneda,
-        numCuenta,
-        cci, 
-        fecha,
-        hora,
-        idUsuario) 
-        values (?,?,?,?,?,?,?,?,?)`, [
-            idBanco,
-            req.body.nombre,
-            req.body.tipoCuenta,
-            req.body.idMoneda,
-            req.body.numCuenta,
-            req.body.cci,
-            req.body.representante,
-            currentDate(),
-            currentTime(),
-            req.body.idUsuario
-        ]);
-
-        await conec.commit(connection);
-        res.status(200).send('Datos insertados correctamente');
-    } catch (err) {
-        if (connection != null) {
-            await conec.rollback(connection);
-        }
-        res.status(500).send(error);
+router.post('/', async function (req, res) {
+    const result = await banco.add(req)
+    if (result === 'insert') {
+        res.status(201).send("Se registró correctamente el banco.");
+    } else {
+        res.status(500).send(result);
     }
 });
 
-router.post('/update', async function (req, res) {
-    let connection = null;
-    try {
-        connection = await conec.beginTransaction();
-
-        await conec.execute(connection, `UPDATE banco SET 
-        nombre=?, 
-        tipoCuenta=?, 
-        idMoneda=?, 
-        numCuenta=?, 
-        cci=?, 
-        fecha=?,
-        hora=?,
-        idUsuario=?
-        WHERE idBanco=?`, [
-            req.body.nombre,
-            req.body.tipoCuenta,
-            req.body.idMoneda,
-            req.body.numCuenta,
-            req.body.cci,
-            currentDate(),
-            currentTime(),
-            req.body.idUsuario,
-            req.body.idBanco
-        ]);
-
-        await conec.commit(connection);
-        res.status(200).send('Datos actulizados correctamente');
-    } catch (error) {
-        if (connection != null) {
-            await conec.rollback(connection);
-        }
-        res.status(500).send(error);
+router.put('/', async function (req, res) {
+    const result = await banco.update(req)
+    if (result === 'update') {
+        res.status(201).send("Se actualizó correctamente el banco.");
+    } else {
+        res.status(500).send(result);
     }
 });
 
 router.get('/id', async function (req, res) {
-    try {
-        let result = await conec.query('SELECT * FROM banco WHERE idBanco = ?', [
-            req.query.idBanco,
-        ]);
-
-        if (result.length > 0) {
-            res.status(200).send(result[0]);
-        } else {
-            res.status(400).send("Datos no encontrados");
-        }
-    } catch (error) {
-        res.status(500).send("Error interno de conexión, intente nuevamente.");
+    const result = await banco.id(req)
+    if (typeof result === 'object') {
+        res.status(200).send(result);
+    } else {
+        res.status(500).send(result);
     }
 });
 
 router.delete('/', async function (req, res) {
-    let connection = null;
-    try {
-        connection = await conec.beginTransaction();
-
-        let cobro = await conec.execute(connection, `SELECT * FROM cobro WHERE idBanco = ?`, [
-            req.query.idBanco
-        ]);
-
-        if (cobro.length > 0) {
-            await conec.rollback(connection);
-            res.status(400).send('No se puede eliminar el banco ya que esta ligada a un cobro.')
-            return;
-        }
-
-        let gasto = await conec.execute(connection, `SELECT * FROM gasto WHERE idBanco = ?`, [
-            req.query.idBanco
-        ]);
-
-        if (gasto.length > 0) {
-            await conec.rollback(connection);
-            res.status(400).send('No se puede eliminar el banco ya que esta ligada a un gasto.')
-            return;
-        }
-
-        await conec.execute(connection, `DELETE FROM banco WHERE idBanco = ?`, [
-            req.query.idBanco
-        ]);
-
-        await conec.commit(connection);
-        res.status(200).send('Se eliminó correctamente el banco.');
-    } catch (error) {
-        if (connection != null) {
-            await conec.rollback(connection);
-        }
-        res.status(500).send("Error interno de conexión, intente nuevamente.");
+    const result = await banco.delete(req)
+    if (result === 'delete') {
+        res.status(201).send("Se eliminó correctamente el banco.");
+    } else {
+        res.status(500).send(result);
     }
 });
 
 router.get('/listcombo', async function (req, res) {
-    try {
-        let result = await conec.query('SELECT idBanco, nombre, tipoCuenta FROM banco');
+    const result = await banco.listcombo(req)
+    if (Array.isArray(result)) {
         res.status(200).send(result);
-    } catch (error) {
-        res.status(500).send("Error interno de conexión, intente nuevamente.");
+    } else {
+        res.status(500).send(result);
     }
 });
 

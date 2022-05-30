@@ -85,6 +85,7 @@ class Impuestos extends React.Component {
 
                 loadModal: false,
                 nameModal: 'Nuevo Impuesto',
+                messageWarning: '',
                 msgModal: 'Cargando datos...',
             });
             this.idCodigo = "";

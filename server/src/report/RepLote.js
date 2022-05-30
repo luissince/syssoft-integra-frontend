@@ -66,26 +66,6 @@ class RepLote {
 
             doc.x = doc.options.margins.left;
 
-            doc.opacity(0.7);
-
-            doc.fontSize(h3).text(
-                "COMPROBANTE",
-                orgX,
-                doc.y + 14
-            )
-
-            doc.fill("#000000");
-            doc.lineGap(4);
-            doc.opacity(1);
-
-            doc.fontSize(h3).text(
-                `Cliente: ${lote.cliente} ${lote.documento}\nFecha: ${lote.fecha} - ${lote.hora}\nNotas: ...\nForma de venta: ${lote.tipo === 1 ? "CONTADO" : "CRÉDITO"}\nEstado: ${lote.estado === 1 ? "COBRADO" : "POR COBRAR"}\nTotal: ${lote.simbolo} ${lote.monto}\nArchivos adjuntos: ...`,
-                orgX,
-                doc.y + 5
-            );
-
-            doc.lineGap(0);
-
             let colY = doc.y + 10;
 
             doc.opacity(0.7);
@@ -143,37 +123,86 @@ class RepLote {
                 doc.y + 5
             );
 
+            colY = doc.y + 10;
+
             doc.lineGap(0);
 
-            doc.moveDown();
+            const contentSocios = data.socios.map((item, index) => {
+                return [++index, item.documento, item.informacion, item.estado === 1 ? "ACTIVO" : "ANULADO"];
+            });
 
-            let content = data.detalle.map((item, index) => {
-                return [item.concepto, formatMoney(item.monto), item.metodo, item.banco, item.fecha]
-            })
-
-            const table1 = {
-                //title: "CRONOGRAMA DE PAGOS MENSUALES VENTA AL CRÉDITO",
-                subtitle: "DETALLE DE PAGOS ASOCIADOS",
-                headers: ["Concepto", "Monto", "Método", "Banco", "Fecha"],
-                rows: content.length === 0 ? [["No hay pagos asociados."]] : content
+            const socios = {
+                subtitle: "SOCIOS",
+                headers: ["#", "N° Documento", "Información", "Estado"],
+                rows: contentSocios
             };
 
-            doc.table(table1, {
-                prepareHeader: () => doc.font("Helvetica-Bold").fontSize(h2),
+            doc.table(socios, {
+                prepareHeader: () => doc.font("Helvetica-Bold").fontSize(h3),
                 prepareRow: () => {
                     doc.font("Helvetica").fontSize(h3);
                 },
+                padding: 5,
+                columnSpacing: 5,
+                columnsSize: [40, 172, 230, 90],//532
                 width: doc.page.width - doc.options.margins.left - doc.options.margins.right,
                 x: orgX,
-                y: doc.y + 10,
+                y: colY,
             });
+
+            colY = doc.y + 10;
+
+            console.log(data.detalle)
+            const contentCobros = data.detalle.map((item, index) => {
+                return [++index, item.informacion, item.detalle, item.fecha + "\n" + item.hora, item.comprobante + "\n" + item.serie + "-" + item.numeracion, item.banco, numberFormat(item.monto, item.codiso)];
+            });
+
+            const cobros = {
+                subtitle: "COBRO ASOCIADOS",
+                headers: ["#", "Socio", "Concepto", "Fecha", "Comprobante", "Banco", "Monto"],
+                rows: contentCobros
+            };
+
+            doc.table(cobros, {
+                prepareHeader: () => doc.font("Helvetica-Bold").fontSize(h3),
+                prepareRow: () => {
+                    doc.font("Helvetica").fontSize(h3);
+                },
+                padding: 5,
+                columnSpacing: 5,
+                columnsSize: [40, 62, 130, 70, 90, 70, 70],//532
+                width: doc.page.width - doc.options.margins.left - doc.options.margins.right,
+                x: orgX,
+                y: colY,
+            });
+
+            // doc.moveDown();
+
+            // let content = data.detalle.map((item, index) => {
+            //     return [item.concepto, formatMoney(item.monto), item.metodo, item.banco, item.fecha]
+            // })
+
+            // const table1 = {
+            //     subtitle: "DETALLE DE PAGOS ASOCIADOS",
+            //     headers: ["Concepto", "Monto", "Método", "Banco", "Fecha"],
+            //     rows: content.length === 0 ? [["No hay pagos asociados."]] : content
+            // };
+
+            // doc.table(table1, {
+            //     prepareHeader: () => doc.font("Helvetica-Bold").fontSize(h2),
+            //     prepareRow: () => {
+            //         doc.font("Helvetica").fontSize(h3);
+            //     },
+            //     width: doc.page.width - doc.options.margins.left - doc.options.margins.right,
+            //     x: orgX,
+            //     y: doc.y + 10,
+            // });
 
 
             doc.end();
 
             return getStream.buffer(doc);
         } catch (error) {
-            // return error.message;
             return "Se genero un error al generar el reporte.";
         }
     }
@@ -250,7 +279,7 @@ class RepLote {
             doc.fontSize(h3).text(
                 `UBICACIÓN: ${data.proyecto.ubicacion}`,
                 orgX,
-                doc.y +5,
+                doc.y + 5,
                 {
                     width: 300,
                     align: "left",
@@ -260,7 +289,7 @@ class RepLote {
             doc.fontSize(h3).text(
                 `ÁREA: ${data.proyecto.area}  m²`,
                 orgX,
-                doc.y +5,
+                doc.y + 5,
                 {
                     width: 300,
                     align: "left",

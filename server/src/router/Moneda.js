@@ -53,7 +53,7 @@ router.get('/list', async function (req, res) {
         res.status(200).send({ "result": resultLista, "total": total[0].Total })
 
     } catch (error) {
-        res.status(500).send("Error interno de conexión, intente nuevamente.")
+        res.status(500).send("Se produjo un error de servidor, intente nuevamente.")
     }
 });
 
@@ -97,8 +97,10 @@ router.post('/add', async function (req, res) {
             predeterminado,
             fecha, 
             hora, 
+            fupdate,
+            hupdate,
             idUsuario) 
-            values (?,?,?,?,?,?,?,?,?)`, [
+            values (?,?,?,?,?,?,?,?,?,?,?)`, [
             idMoneda,
             req.body.nombre,
             req.body.codiso,
@@ -107,17 +109,18 @@ router.post('/add', async function (req, res) {
             0,
             currentDate(),
             currentTime(),
+            currentDate(),
+            currentTime(),
             req.body.idUsuario,
         ])
 
         await conec.commit(connection);
         res.status(200).send('Datos insertados correctamente')
-
     } catch (err) {
         if (connection != null) {
-            conec.rollback(connection);
+           await conec.rollback(connection);
         }
-        res.status(500).send(connection);
+        res.status(500).send("Se produjo un error de servidor, intente nuevamente.")
     }
 });
 
@@ -151,7 +154,7 @@ router.post('/update', async function (req, res) {
         if (connection != null) {
             await conec.rollback(connection);
         }
-        res.status(500).send("Error interno de conexión, intente nuevamente.");
+        res.status(500).send("Se produjo un error de servidor, intente nuevamente.")
     }
 });
 
@@ -168,7 +171,7 @@ router.get('/id', async function (req, res) {
         }
 
     } catch (error) {
-        res.status(500).send("Error interno de conexión, intente nuevamente.");
+        res.status(500).send("Se produjo un error de servidor, intente nuevamente.")
     }
 });
 
@@ -227,7 +230,7 @@ router.delete('/', async function (req, res) {
         if (connection != null) {
             await conec.rollback(connection);
         }
-        res.status(500).send("Error interno de conexión, intente nuevamente.");
+        res.status(500).send("Se produjo un error de servidor, intente nuevamente.")
     }
 });
 
@@ -236,7 +239,7 @@ router.get('/listcombo', async function (req, res) {
         let result = await conec.query('SELECT idMoneda,nombre, simbolo, codiso, predeterminado FROM moneda WHERE estado = 1');
         res.status(200).send(result);
     } catch (error) {
-        res.status(500).send("Error interno de conexión, intente nuevamente.");
+        res.status(500).send("Se produjo un error de servidor, intente nuevamente.")
     }
 });
 

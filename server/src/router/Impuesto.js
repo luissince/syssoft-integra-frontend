@@ -96,13 +96,17 @@ router.post('/add', async function (req, res) {
             estado,
             fecha,
             hora,
+            fupdate,
+            hupdate,
             idUsuario) 
-            VALUES(?,?,?,?,?,?,?,?)`, [
+            VALUES(?,?,?,?,?,?,?,?,?,?)`, [
             idImpuesto,
             req.body.nombre,
             req.body.porcentaje,
             req.body.codigo,
             req.body.estado,
+            currentDate(),
+            currentTime(),
             currentDate(),
             currentTime(),
             req.body.idUsuario,

@@ -66,6 +66,11 @@ class Lote {
         try {
             connection = await conec.beginTransaction();
 
+            if(req.body.estado === '3'){
+                await conec.rollback(connection);
+                return "No se puede usar el estado vendido al insertar un lote, cambie los datos e intente nuevamente.";
+            }
+
             let result = await conec.execute(connection, 'SELECT idLote FROM lote');
             let idLote = "";
             if (result.length != 0) {
@@ -222,7 +227,6 @@ class Lote {
 
             if (lote[0].estado === 3) {
                 await conec.execute(connection, `UPDATE lote SET        
-                    idManzana = ?,
                     descripcion = ?,
                     idMedida = ?,
                     medidaFrontal =?,
@@ -241,7 +245,6 @@ class Lote {
                     idUsuario = ?
                     WHERE idLote = ?
                     `, [
-                    req.body.idManzana,
                     req.body.descripcion,
                     req.body.idMedida,
                     req.body.medidaFrontal,
@@ -428,6 +431,7 @@ class Lote {
                 ELSE CASE WHEN cv.idPlazo = 0 THEN 'CUOTA INICIAL' ELSE 'CUOTA' END END AS detalle,
                 IFNULL(CONCAT(cp.nombre,' ',v.serie,'-',v.numeracion),'') AS comprobanteRef,
                 m.simbolo,
+                m.codiso,
                 b.nombre as banco,  
                 c.observacion, 
                 DATE_FORMAT(c.fecha,'%d/%m/%Y') as fecha, 
@@ -449,8 +453,6 @@ class Lote {
                     req.query.idLote,
                 ]);
 
-                console.log(detalle);
-
                 return {
                     "lote": cabecera[0],
                     "venta": venta[0],
@@ -458,10 +460,7 @@ class Lote {
                     "detalle": detalle
                 }
             } else {
-                return {
-                    "lote": cabecera[0],
-                    "detalle": []
-                }
+                return "No hay información para mostrar.";
             }
         } catch (error) {
             return "Se produjo un error de servidor, intente nuevamente.";

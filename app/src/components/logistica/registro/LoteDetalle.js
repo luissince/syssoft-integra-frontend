@@ -122,7 +122,7 @@ class LoteDetalle extends React.Component {
                 }
             });
 
-            // console.log( result.data)
+            console.log(result.data)
 
             await this.setStateAsync({
                 lote: result.data.lote,
@@ -235,7 +235,6 @@ class LoteDetalle extends React.Component {
     }
 
     render() {
-        const { manzana, lote, lotestado } = this.state.lote;
         return (
             <>
                 {/* Inicio modal */}
@@ -307,51 +306,6 @@ class LoteDetalle extends React.Component {
                                 </div>
                             </div>
 
-                            {/* <div className="row">
-                                <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                                    <p className="lead">Descripcion</p>
-                                    <div className="table-responsive">
-                                        <table className="table table-borderless">
-                                            <thead>
-                                                <tr>
-                                                    <th className="w-20 font-weight-normal p-0">Comprobante:</th>
-                                                    <th className="w-80 font-weight-bold p-0">{comprobante + " " + serie + "-" + numeracion}</th>
-                                                </tr>
-                                                <tr>
-                                                    <th className="w-20 font-weight-normal p-0">Cliente:</th>
-                                                    <th className="w-80 font-weight-bold p-0">{documento + " " + cliente}</th>
-                                                </tr>
-                                                <tr>
-                                                    <th className="w-20 font-weight-normal p-0">Fecha:</th>
-                                                    <th className="w-80 font-weight-bold p-0">{fecha + " " + hora}</th>
-                                                </tr>
-                                                <tr>
-                                                    <th className="w-20 font-weight-normal p-0">Notas:</th>
-                                                    <th className="w-80 font-weight-bold p-0">{ }</th>
-                                                </tr>
-                                                <tr>
-                                                    <th className="w-20 font-weight-normal p-0">Forma de venta:</th>
-                                                    <th className="w-80 font-weight-bold p-0"> {tipo === 1 ? "CONTADO" : "CRÉDITO"}</th>
-                                                </tr>
-                                                <tr>
-                                                    <th className="w-20 font-weight-normal p-0">Estado:</th>
-                                                    <th className="w-80 font-weight-bold p-0"> {estado === 1 ? "COBRADO" : "POR COBRAR"}</th>
-                                                </tr>
-                                                <tr>
-                                                    <th className="w-20 font-weight-normal p-0">Total:</th>
-                                                    <th className="w-80 font-weight-bold p-0"> {simbolo + " " + formatMoney(monto)}</th>
-                                                </tr>
-                                                <tr>
-                                                    <th className="w-20 font-weight-normal p-0">Archivos adjuntos:</th>
-                                                    <th className="w-80 font-weight-bold p-0"> { }</th>
-                                                </tr>
-                                            </thead>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div> */}
-
-
                             <div className="row">
                                 <div className="col-lg-4 col-md-4 col-sm-12 col-xs-12">
                                     <p className="lead">Descripcion</p>
@@ -360,15 +314,15 @@ class LoteDetalle extends React.Component {
                                             <thead>
                                                 <tr>
                                                     <th className="w-35 font-weight-normal p-0">Manzana:</th>
-                                                    <th className="w-65 font-weight-bold p-0">{manzana}</th>
+                                                    <th className="w-65 font-weight-bold p-0">{this.state.lote.manzana}</th>
                                                 </tr>
                                                 <tr>
                                                     <th className="w-35 font-weight-normal p-0">Lote:</th>
-                                                    <th className="w-65 font-weight-bold p-0">{lote}</th>
+                                                    <th className="w-65 font-weight-bold p-0">{this.state.lote.lote}</th>
                                                 </tr>
                                                 <tr>
                                                     <th className="w-35 font-weight-normal p-0">Estado:</th>
-                                                    <th className="w-65 font-weight-bold p-0"> {lotestado}</th>
+                                                    <th className="w-65 font-weight-bold p-0"> {this.state.lote.lotestado}</th>
                                                 </tr>
                                             </thead>
                                         </table>
@@ -381,28 +335,28 @@ class LoteDetalle extends React.Component {
                                         <table className="table table-borderless">
                                             <thead>
                                                 <tr>
-                                                    <th className="w-35 font-weight-normal p-0">Medida Frontal (ML)</th>
-                                                    <th className="w-65 font-weight-bold p-0">{ }</th>
+                                                    <th className="w-35 font-weight-normal p-0">Medida Frontal (ML):</th>
+                                                    <th className="w-65 font-weight-bold p-0">{this.state.lote.medidaFrontal}</th>
                                                 </tr>
                                                 <tr>
-                                                    <th className="w-35 font-weight-normal p-0">Costado Derecho (ML)</th>
-                                                    <th className="w-65 font-weight-bold p-0">{ }</th>
+                                                    <th className="w-35 font-weight-normal p-0">Costado Derecho (ML):</th>
+                                                    <th className="w-65 font-weight-bold p-0">{this.state.lote.costadoDerecho}</th>
                                                 </tr>
                                                 <tr>
-                                                    <th className="w-35 font-weight-normal p-0">Costado Izquierdo (ML)</th>
-                                                    <th className="w-65 font-weight-bold p-0">{ }</th>
+                                                    <th className="w-35 font-weight-normal p-0">Costado Izquierdo (ML):</th>
+                                                    <th className="w-65 font-weight-bold p-0">{this.state.lote.costadoIzquierdo}</th>
                                                 </tr>
                                                 <tr>
-                                                    <th className="w-35 font-weight-normal p-0"> Medida Fondo (ML)</th>
-                                                    <th className="w-65 font-weight-bold p-0">{ }</th>
+                                                    <th className="w-35 font-weight-normal p-0"> Medida Fondo (ML):</th>
+                                                    <th className="w-65 font-weight-bold p-0">{this.state.lote.medidaFondo}</th>
                                                 </tr>
                                                 <tr>
-                                                    <th className="w-35 font-weight-normal p-0"> Area Lote (ML)</th>
-                                                    <th className="w-65 font-weight-bold p-0"> { }</th>
+                                                    <th className="w-35 font-weight-normal p-0"> Area Lote (ML):</th>
+                                                    <th className="w-65 font-weight-bold p-0"> {this.state.lote.areaLote}</th>
                                                 </tr>
                                                 <tr>
-                                                    <th className="w-35 font-weight-normal p-0"> N° Partida</th>
-                                                    <th className="w-65 font-weight-bold p-0"> { }</th>
+                                                    <th className="w-35 font-weight-normal p-0"> N° Partida:</th>
+                                                    <th className="w-65 font-weight-bold p-0"> {this.state.lote.numeroPartida}</th>
                                                 </tr>
                                             </thead>
                                         </table>
@@ -415,24 +369,24 @@ class LoteDetalle extends React.Component {
                                         <table className="table table-borderless">
                                             <thead>
                                                 <tr>
-                                                    <th className="w-35 font-weight-normal p-0">Limite, Frontal / Norte / Noroeste</th>
-                                                    <th className="w-65 font-weight-bold p-0">{ }</th>
+                                                    <th className="w-35 font-weight-normal p-0">Limite, Frontal / Norte / Noroeste:</th>
+                                                    <th className="w-65 font-weight-bold p-0">{this.state.lote.limiteFrontal}</th>
                                                 </tr>
                                                 <tr>
-                                                    <th className="w-35 font-weight-normal p-0">Límite, Derecho / Este / Sureste</th>
-                                                    <th className="w-65 font-weight-bold p-0">{ }</th>
+                                                    <th className="w-35 font-weight-normal p-0">Límite, Derecho / Este / Sureste:</th>
+                                                    <th className="w-65 font-weight-bold p-0">{this.state.lote.limiteDerecho}</th>
                                                 </tr>
                                                 <tr>
-                                                    <th className="w-35 font-weight-normal p-0">Límite, Iquierdo / Sur / Sureste</th>
-                                                    <th className="w-65 font-weight-bold p-0">{ }</th>
+                                                    <th className="w-35 font-weight-normal p-0">Límite, Iquierdo / Sur / Sureste:</th>
+                                                    <th className="w-65 font-weight-bold p-0">{this.state.lote.limiteIzquierdo}</th>
                                                 </tr>
                                                 <tr>
-                                                    <th className="w-35 font-weight-normal p-0">Límite, Posterior / Oeste / Noroeste</th>
-                                                    <th className="w-65 font-weight-bold p-0">{ }</th>
+                                                    <th className="w-35 font-weight-normal p-0">Límite, Posterior / Oeste / Noroeste:</th>
+                                                    <th className="w-65 font-weight-bold p-0">{this.state.lote.limitePosterior}</th>
                                                 </tr>
                                                 <tr>
-                                                    <th className="w-35 font-weight-normal p-0">Ubicación del Lote</th>
-                                                    <th className="w-65 font-weight-bold p-0"> { }</th>
+                                                    <th className="w-35 font-weight-normal p-0">Ubicación del Lote:</th>
+                                                    <th className="w-65 font-weight-bold p-0"> {this.state.lote.ubicacionLote}</th>
                                                 </tr>
                                             </thead>
                                         </table>

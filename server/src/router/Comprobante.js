@@ -82,22 +82,7 @@ router.get('/list', async function (req, res) {
 
         res.status(200).send({ "result": resultLista, "total": total[0].Total });
     } catch (error) {
-        res.status(500).send("Error interno de conexión, intente nuevamente.");
-    }
-});
-
-router.get('/id', async function (req, res) {
-    try {
-        let result = await conec.query(`SELECT * FROM comprobante WHERE idComprobante = ?`, [
-            req.query.idComprobante
-        ]);
-        if (result.length > 0) {
-            res.status(200).send(result[0]);
-        } else {
-            res.status(400).send("Datos no encontrados");
-        }
-    } catch (error) {
-        res.status(500).send("Error interno de conexión, intente nuevamente.");
+        res.status(500).send("Se produjo un error de servidor, intente nuevamente.");
     }
 });
 
@@ -138,21 +123,27 @@ router.post('/add', async function (req, res) {
         nombre,
         serie,
         numeracion,
+        codigo,
         impresion,
         estado,
         preferida,
         fecha,
         hora,
+        fupdate,
+        hupdate,
         idUsuario) 
-        VALUES(?,?,?,?,?,?,?,?,?,?,?)`, [
+        VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, [
             idComprobante,
             req.body.tipo,
             req.body.nombre,
             req.body.serie,
             req.body.numeracion,
+            req.body.codigo,
             req.body.impresion,
             req.body.estado,
             req.body.preferida,
+            currentDate(),
+            currentTime(),
             currentDate(),
             currentTime(),
             req.body.idUsuario,
@@ -171,12 +162,29 @@ router.post('/add', async function (req, res) {
         await conec.commit(connection);
         res.status(200).send('Se registró el comprobante.');
     } catch (error) {
+        console.log(error)
         if (connection != null) {
             await conec.rollback(connection);
         }
         res.status(500).send("Se produjo un error de servidor, intente nuevamente.");
     }
 });
+
+router.get('/id', async function (req, res) {
+    try {
+        let result = await conec.query(`SELECT * FROM comprobante WHERE idComprobante = ?`, [
+            req.query.idComprobante
+        ]);
+        if (result.length > 0) {
+            res.status(200).send(result[0]);
+        } else {
+            res.status(400).send("Datos no encontrados");
+        }
+    } catch (error) {
+        res.status(500).send("Se produjo un error de servidor, intente nuevamente.");
+    }
+});
+
 
 router.post('/edit', async function (req, res) {
     let connection = null;
@@ -192,15 +200,17 @@ router.post('/edit', async function (req, res) {
             tipo = ?,
             nombre = ?,
             impresion = ?,
+            codigo = ?,
             estado = ?,
             preferida = ?,
-            fecha = ?,
-            hora = ?,
+            fupdate = ?,
+            hupdate = ?,
             idUsuario = ?
             WHERE idComprobante = ?`, [
                 req.body.tipo,
                 req.body.nombre,
                 req.body.impresion,
+                req.body.codigo,
                 req.body.estado,
                 req.body.preferida,
                 currentDate(),
@@ -220,8 +230,8 @@ router.post('/edit', async function (req, res) {
             impresion = ?,
             estado = ?,
             preferida = ?,
-            fecha = ?,
-            hora = ?,
+            fupdate = ?,
+            hupdate = ?,
             idUsuario = ?
             WHERE idComprobante = ?`, [
                 req.body.tipo,
@@ -241,7 +251,7 @@ router.post('/edit', async function (req, res) {
             res.status(200).send('Se actualizó correctamente el comprobante.');
         }
 
-    } catch (err) {
+    } catch (error) {
         if (connection != null) {
             await conec.rollback(connection);
         }
