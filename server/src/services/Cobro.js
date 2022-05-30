@@ -16,8 +16,9 @@ class Cobro {
             CASE 
             WHEN cn.idConcepto IS NOT NULL THEN cn.nombre
             ELSE CASE WHEN cv.idPlazo = 0 THEN 'CUOTA INICIAL' ELSE 'CUOTA' END END AS detalle,
-            IFNULL(CONCAT(cp.nombre,' ',v.serie,'-',v.numeracion),'') AS comprobante,
+            IFNULL(CONCAT(cp.nombre,' ',v.serie,'-',v.numeracion),'') AS comprobanteRef,
             m.simbolo,
+            m.codiso,
             b.nombre as banco,  
             c.observacion, 
             DATE_FORMAT(c.fecha,'%d/%m/%Y') as fecha, 

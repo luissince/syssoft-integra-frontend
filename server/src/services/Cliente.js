@@ -309,7 +309,9 @@ class Cliente {
             v.numCuota, 
             (SELECT IFNULL(COUNT(*), 0) FROM plazo AS p WHERE p.estado = 0 AND p.fecha < CURRENT_DATE() AND p.idVenta = v.idVenta) AS cuotasRetrasadas,
             (SELECT IFNULL(COUNT(*), 0) FROM plazo AS p WHERE p.estado = 0 AND p.idVenta = v.idVenta) AS cuotasPendientes,
-            (SELECT IFNULL(DATE_FORMAT(MIN(p.fecha),'%d/%m/%Y'),'') FROM plazo AS p WHERE p.estado = 0 AND p.idVenta = v.idVenta) AS fechaPago,
+            CASE 
+            WHEN v.credito = 1 THEN DATE_FORMAT(DATE_ADD(v.fecha,interval v.frecuencia day),'%d/%m/%Y')
+            ELSE (SELECT IFNULL(DATE_FORMAT(MIN(p.fecha),'%d/%m/%Y'),'') FROM plazo AS p WHERE p.estado = 0 AND p.idVenta = v.idVenta) END AS fechaPago,
             m.simbolo,
             m.codiso,
             (SELECT IFNULL(SUM(p.monto),0) FROM plazo AS p WHERE p.estado = 0 AND p.fecha < CURRENT_DATE() AND p.idVenta = v.idVenta) AS montoPendiente,
@@ -321,7 +323,7 @@ class Cliente {
             LEFT JOIN ventaDetalle AS vd ON vd.idVenta = v.idVenta 
 			WHERE v.estado = 2
             GROUP BY v.idVenta
-            ORDER BY v.fecha ASC, v.hora ASC`, []);
+            ORDER BY v.fecha ASC, v.hora ASC`);
 
             return lista;
         } catch (error) {

@@ -229,6 +229,7 @@ class VentaDetalle extends React.Component {
                                                     <tr>
                                                         <th>#</th>
                                                         <th>Concepto</th>
+                                                        <th>Unidad</th>
                                                         <th>Cantidad</th>
                                                         <th>Impuesto</th>
                                                         <th>Precio</th>
@@ -241,6 +242,7 @@ class VentaDetalle extends React.Component {
                                                             <tr key={index}>
                                                                 <td>{++index}</td>
                                                                 <td>{item.lote}</td>
+                                                                <td>{item.medida}</td>
                                                                 <td className="text-right">{formatMoney(item.cantidad)}</td>
                                                                 <td className="text-right">{item.impuesto}</td>
                                                                 <td className="text-right">{numberFormat(item.precio, this.state.codiso)}</td>
@@ -248,7 +250,6 @@ class VentaDetalle extends React.Component {
                                                             </tr>
                                                         ))
                                                     }
-
                                                 </tbody>
                                             </table>
                                         </div>

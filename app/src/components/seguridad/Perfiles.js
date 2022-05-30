@@ -232,43 +232,46 @@ class Perfiles extends React.Component {
 
     async onEventGuardar() {
         if (this.state.idSede === "") {
-            this.setState({ messageWarning: "Ingrese el nombre de la empresa" });
+            await this.setStateAsync({ messageWarning: "Ingrese el nombre de la empresa" });
             this.refEmpresa.current.focus();
-        } else if (this.state.descripcion === "") {
-            this.setState({ messageWarning: "Ingrese una descripción de perfil" });
+            return;
+        }
+
+        if (this.state.descripcion === "") {
+            await this.setStateAsync({ messageWarning: "Ingrese una descripción de perfil" });
             this.refDescripcion.current.focus();
-        } else {
-            try {
+            return;
+        }
 
-                ModalAlertInfo("Perfil", "Procesando información...");
-                hideModal("modalPerfil");
-                if (this.state.idPerfil !== '') {
-                    let result = await axios.post('/api/perfil/update', {
-                        "descripcion": this.state.descripcion.trim().toUpperCase(),
-                        "idSede": this.state.idSede.trim().toUpperCase(),
-                        "idUsuario": this.state.idUsuario,
-                        "idPerfil": this.state.idPerfil
-                    });
+        try {
+            ModalAlertInfo("Perfil", "Procesando información...");
+            hideModal("modalPerfil");
+            if (this.state.idPerfil !== '') {
+                let result = await axios.post('/api/perfil/update', {
+                    "descripcion": this.state.descripcion.trim().toUpperCase(),
+                    "idSede": this.state.idSede.trim().toUpperCase(),
+                    "idUsuario": this.state.idUsuario,
+                    "idPerfil": this.state.idPerfil
+                });
 
-                    ModalAlertSuccess("Perfil", result.data, () => {
-                        this.onEventPaginacion();
-                    });
+                ModalAlertSuccess("Perfil", result.data, () => {
+                    this.onEventPaginacion();
+                });
 
-                } else {
-                    let result = await axios.post('/api/perfil/add', {
-                        "descripcion": this.state.descripcion.trim().toUpperCase(),
-                        "idSede": this.state.idSede.trim().toUpperCase(),
-                        "idUsuario": this.state.idUsuario,
-                    });
+            } else {
+                let result = await axios.post('/api/perfil/add', {
+                    "descripcion": this.state.descripcion.trim().toUpperCase(),
+                    "idSede": this.state.idSede.trim().toUpperCase(),
+                    "idUsuario": this.state.idUsuario,
+                });
 
 
-                    ModalAlertSuccess("Comprobante", result.data, () => {
-                        this.loadInit();
-                    });
-                }
-            } catch (error) {
-                ModalAlertWarning("Comprobante", "Se produjo un error un interno, intente nuevamente.");
+                ModalAlertSuccess("Comprobante", result.data, () => {
+                    this.loadInit();
+                });
             }
+        } catch (error) {
+            ModalAlertWarning("Comprobante", "Se produjo un error un interno, intente nuevamente.");
         }
     }
 
@@ -491,6 +494,5 @@ const mapStateToProps = (state) => {
         token: state.reducer
     }
 }
-
 
 export default connect(mapStateToProps, null)(Perfiles);

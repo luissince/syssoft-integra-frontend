@@ -269,7 +269,7 @@ export function clearModal(id, callback = function () {}) {
   myModalEl.addEventListener("hidden.bs.modal", callback);
 }
 
-export function spinnerLoading(message = "Cargando datos..") {
+export function spinnerLoading(message = "Cargando datos...") {
   return (
     <div className="d-flex flex-column justify-content-center align-items-center h-100">
       <div>

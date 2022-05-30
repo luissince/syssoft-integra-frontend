@@ -102,13 +102,13 @@ class RepFactura {
             doc.x = doc.options.margins.left;
 
             let detalle = data.detalle.map((item, index) => {
-                return [++index, "ZZ", item.cantidad, item.lote, numberFormat(item.precio, cabecera.codiso), numberFormat((item.precio * item.cantidad), cabecera.codiso)];
+                return [++index, item.medida, item.cantidad, item.lote, numberFormat(item.precio, cabecera.codiso), numberFormat((item.precio * item.cantidad), cabecera.codiso)];
             });
 
 
             const table = {
                 subtitle: "DETALLE",
-                headers: ["Ítem", "Unidad de medida", "Cantidad", "Descripción", "Valor Unitario", "Precio de Venta"],
+                headers: ["Ítem", "Medida", "Cantidad", "Descripción", "Valor Unitario", "Precio de Venta"],
                 rows: detalle,
             };
 
@@ -119,7 +119,7 @@ class RepFactura {
                 },
                 padding: 5,
                 columnSpacing: 5,
-                columnsSize: [30, 90, 80, 152, 90, 90],
+                columnsSize: [30, 80, 90, 152, 90, 90],
                 x: doc.x,
                 y: doc.y + 20,
                 width: doc.page.width - doc.options.margins.left - doc.options.margins.right

@@ -23,7 +23,16 @@ router.get('/list', async function (req, res) {
 router.post('/', async function (req, res) {
     const result = await lote.add(req)
     if (result === "insert") {
-        res.status(200).send("Datos registrados correctamente")
+        res.status(200).send("Datos registrados correctamente.")
+    } else {
+        res.status(500).send(result)
+    }
+});
+
+router.post('/socio', async function (req, res) {
+    const result = await lote.socio(req)
+    if (result === "insert") {
+        res.status(200).send("Datos registrados correctamente.")
     } else {
         res.status(500).send(result)
     }
@@ -57,6 +66,15 @@ router.delete('/', async function (req, res) {
         res.status(500).send(result)
     }
 });
+
+router.delete('/socio', async function (req, res) {
+    const result = await lote.deleteSocio(req);
+    if (result === "delete") {
+        res.status(200).send("Se anulo el socio correctamente.");
+    } else {
+        res.status(500).send(result)
+    }
+})
 
 router.get('/detalle', async function (req, res) {
     const result = await lote.detalleLote(req)

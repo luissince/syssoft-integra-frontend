@@ -236,7 +236,7 @@ class Cobros extends React.Component {
                                                         <td>{item.comprobante}{<br />}{item.serie + "-" + item.numeracion}</td>
                                                         <td>{item.fecha}{<br />}{timeForma24(item.hora)}</td>
                                                         <td>{item.banco}</td>
-                                                        <td>{item.detalle}<br /><small>{item.comprobante}</small></td>
+                                                        <td>{item.detalle}<br /><small>{item.comprobanteRef}</small></td>
                                                         <td>{numberFormat(item.monto)}</td>
                                                         <td className="text-center">
                                                             <button

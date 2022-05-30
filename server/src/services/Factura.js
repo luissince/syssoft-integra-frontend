@@ -767,10 +767,11 @@ class Factura {
             GROUP BY v.idVenta`, [
                 req.query.idVenta
             ]);
-
             if (result.length > 0) {
+
                 let detalle = await conec.query(`SELECT 
                 l.descripcion AS lote,
+                md.codigo AS medida, 
                 m.nombre AS manzana, 
                 p.nombre AS proyecto,
                 vd.precio,
@@ -780,6 +781,7 @@ class Factura {
                 imp.porcentaje
                 FROM ventaDetalle AS vd 
                 INNER JOIN lote AS l ON vd.idLote = l.idLote 
+                INNER JOIN medida AS md ON md.idMedida = l.idMedida 
                 INNER JOIN manzana AS m ON l.idManzana = m.idManzana 
                 INNER JOIN proyecto AS p ON m.idProyecto = p.idProyecto
                 INNER JOIN impuesto AS imp ON vd.idImpuesto  = imp.idImpuesto 

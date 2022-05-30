@@ -57,7 +57,7 @@ class Lote {
             ]);
             return { "result": resultLista, "total": total[0].Total }
         } catch (error) {
-            return 'Error interno de conexión, intente nuevamente.'
+            return "Se produjo un error de servidor, intente nuevamente.";
         }
     }
 
@@ -147,14 +147,44 @@ class Lote {
 
             await conec.commit(connection);
             return "insert";
-
         } catch (error) {
             console.log(error)
             if (connection != null) {
                 await conec.rollback(connection);
             }
-            return "Error interno de conexión, intente nuevamente."
+            return "Se produjo un error de servidor, intente nuevamente.";
+        }
+    }
 
+    async socio(req) {
+        let connection = null;
+        try {
+            connection = await conec.beginTransaction();
+
+            await conec.execute(connection, `INSERT INTO asociado(
+            idVenta ,
+            idCliente,
+            estado,
+            fecha,
+            hora,
+            idUsuario
+            ) 
+            VALUES(?,?,?,?,?,?)`, [
+                req.body.idVenta,
+                req.body.idCliente,
+                1,
+                currentDate(),
+                currentTime(),
+                req.body.idUsuario
+            ]);
+
+            await conec.commit(connection);
+            return "insert";
+        } catch (error) {
+            if (connection != null) {
+                await conec.rollback(connection);
+            }
+            return "Se produjo un error de servidor, intente nuevamente.";
         }
     }
 
@@ -167,11 +197,11 @@ class Lote {
             if (result.length > 0) {
                 return result[0]
             } else {
-                return "Datos no encontrados"
+                return "Datos no encontrados";
             }
 
         } catch (error) {
-            return "Error interno de conexión, intente nuevamente."
+            return "Se produjo un error de servidor, intente nuevamente.";
         }
     }
 
@@ -285,7 +315,7 @@ class Lote {
             if (connection != null) {
                 await conec.rollback(connection);
             }
-            return "Error interno de conexión, intente nuevamente."
+            return "Se produjo un error de servidor, intente nuevamente.";
         }
     }
 
@@ -313,7 +343,27 @@ class Lote {
             if (connection != null) {
                 await conec.rollback(connection);
             }
-            return "Error interno de conexión, intente nuevamente.";
+            return "Se produjo un error de servidor, intente nuevamente.";
+        }
+    }
+
+    async deleteSocio(req) {
+        let connection = null;
+        try {
+            connection = await conec.beginTransaction();
+
+            await conec.execute(connection, `UPDATE asociado SET estado = 0 WHERE idVenta  = ? AND idCliente = ?`, [
+                req.query.idVenta,
+                req.query.idCliente,
+            ]);
+
+            await conec.commit(connection)
+            return "delete";
+        } catch (error) {
+            if (connection != null) {
+                await conec.rollback(connection);
+            }
+            return "Se produjo un error de servidor, intente nuevamente.";
         }
     }
 
@@ -342,96 +392,79 @@ class Lote {
             l.limiteDerecho,
             l.limiteIzquierdo,
             l.limitePosterior,
-            l.ubicacionLote,
-    
-            c.nombre as comprobante,
-            cl.informacion as cliente,
-    
-            v.idVenta,
-            v.serie,
-            v.numeracion,
-            DATE_FORMAT(v.fecha,'%d/%m/%Y') as fecha, 
-            v.hora,
-            v.tipo,
-            v.estado,
-            mo.simbolo,
-            cl.documento,
-            IFNULL(SUM(vdv.precio*vdv.cantidad),0) AS monto
+            l.ubicacionLote
     
             FROM lote AS l
-            INNER JOIN manzana AS m  ON l.idManzana = m.idManzana
-            INNER JOIN ventaDetalle AS vd ON l.idLote = vd.idLote
-            INNER JOIN venta AS v ON v.idVenta = vd.idVenta
-            INNER JOIN moneda AS mo ON v.idMoneda = mo.idMoneda
-            INNER JOIN comprobante AS c ON c.idComprobante = v.idComprobante
-            INNER JOIN cliente AS cl ON cl.idCliente = v.idCliente
-            LEFT JOIN ventaDetalle AS vdv ON vdv.idVenta = v.idVenta
-            WHERE l.idLote = ? AND v.estado <> 3
-            GROUP BY v.idVenta`, [
+            INNER JOIN manzana AS m  ON l.idManzana = m.idManzana`, [
                 req.query.idLote,
             ]);
 
-            if (cabecera.length > 0) {
-                let detalle = await conec.query(`SELECT 
-                c.idCobro,
-                m.simbolo,
-                c.observacion AS concepto,
-                SUM(cv.precio) AS monto,
-                CASE 
-                WHEN c.metodoPago = 1 THEN 'Efectivo'
-                WHEN c.metodoPago = 2 THEN 'Consignación'
-                WHEN c.metodoPago = 3 THEN 'Transferencia'
-                WHEN c.metodoPago = 4 THEN 'Cheque'
-                WHEN c.metodoPago = 5 THEN 'Tarjeta crédito'
-                ELSE 'Tarjeta débito' END AS metodo,
-                b.nombre AS  banco,
-                DATE_FORMAT(c.fecha,'%d/%m/%Y') as fecha, 
-                c.hora
-                FROM cobro AS c
-                INNER JOIN moneda AS m ON c.idMoneda = m.idMoneda
-                INNER JOIN banco AS b ON b.idBanco = c.idBanco
-                INNER JOIN cobroVenta AS cv ON cv.idCobro = c.idCobro
-                WHERE 
-                c.idProcedencia <> '' AND c.idProcedencia = ? 
-                GROUP by c.idCobro`, [
-                    cabecera[0].idVenta
+            let venta = await conec.query(`SELECT idVenta FROM ventaDetalle WHERE idLote = ?`, [
+                req.query.idLote,
+            ])
+
+            if (venta.length > 0) {
+
+                let socios = await conec.query(`SELECT 
+                c.idCliente ,
+                c.documento,
+                c.informacion,
+                a.estado
+                FROM asociado AS a
+                INNER JOIN cliente AS c ON a.idCliente = c.idCliente
+                WHERE a.idVenta = ?`, [
+                    venta[0].idVenta
                 ]);
 
-                let concepto = await conec.query(`SELECT 
+                let detalle = await conec.query(`SELECT 
                 c.idCobro,
-                m.simbolo,
-                co.nombre AS concepto,
-                SUM(cd.precio*cd.cantidad)
-                AS monto,
+                co.nombre as comprobante,
+                c.serie,
+                c.numeracion,
+                cl.documento,
+                cl.informacion,
                 CASE 
-                WHEN c.metodoPago = 1 THEN 'Efectivo'
-                WHEN c.metodoPago = 2 THEN 'Consignación'
-                WHEN c.metodoPago = 3 THEN 'Transferencia'
-                WHEN c.metodoPago = 4 THEN 'Cheque'
-                WHEN c.metodoPago = 5 THEN 'Tarjeta crédito'
-                ELSE 'Tarjeta débito' END AS metodo,
-                b.nombre AS  banco,
+                WHEN cn.idConcepto IS NOT NULL THEN cn.nombre
+                ELSE CASE WHEN cv.idPlazo = 0 THEN 'CUOTA INICIAL' ELSE 'CUOTA' END END AS detalle,
+                IFNULL(CONCAT(cp.nombre,' ',v.serie,'-',v.numeracion),'') AS comprobanteRef,
+                m.simbolo,
+                b.nombre as banco,  
+                c.observacion, 
                 DATE_FORMAT(c.fecha,'%d/%m/%Y') as fecha, 
-                c.hora
+                c.hora,
+                IFNULL(SUM(cd.precio*cd.cantidad),SUM(cv.precio)) AS monto
                 FROM cobro AS c
-                INNER JOIN moneda AS m ON c.idMoneda = m.idMoneda
-                INNER JOIN banco AS b ON b.idBanco = c.idBanco
-                INNER JOIN cobroDetalle AS cd ON cd.idCobro = c.idCobro 
-                INNER JOIN concepto AS co ON co.idConcepto = cd.idConcepto
-                WHERE c.idProcedencia <> '' AND c.idProcedencia = ?
-                GROUP BY cd.idConcepto`, [
-                    req.query.idLote
-                ])
+                INNER JOIN cliente AS cl ON c.idCliente = cl.idCliente
+                INNER JOIN banco AS b ON c.idBanco = b.idBanco
+                INNER JOIN moneda AS m ON c.idMoneda = m.idMoneda 
+                INNER JOIN comprobante AS co ON co.idComprobante = c.idComprobante
+                LEFT JOIN cobroDetalle AS cd ON c.idCobro = cd.idCobro
+                LEFT JOIN concepto AS cn ON cd.idConcepto = cn.idConcepto 
+                LEFT JOIN cobroVenta AS cv ON cv.idCobro = c.idCobro 
+                LEFT JOIN venta AS v ON cv.idVenta = v.idVenta 
+                LEFT JOIN comprobante AS cp ON v.idComprobante = cp.idComprobante
+                WHERE c.idProcedencia = ? OR c.idProcedencia = ?
+                GROUP BY c.idCobro`, [
+                    venta[0].idVenta,
+                    req.query.idLote,
+                ]);
+
+                console.log(detalle);
 
                 return {
-                    "cabecera": cabecera[0],
-                    "detalle": [...detalle, ...concepto]
+                    "lote": cabecera[0],
+                    "venta": venta[0],
+                    "socios": socios,
+                    "detalle": detalle
                 }
             } else {
-                return "No se pudo cargar la información requerida."
+                return {
+                    "lote": cabecera[0],
+                    "detalle": []
+                }
             }
         } catch (error) {
-            return "Error interno de conexión, intente nuevamente."
+            return "Se produjo un error de servidor, intente nuevamente.";
         }
     }
 
@@ -450,7 +483,7 @@ class Lote {
             return result
 
         } catch (error) {
-            return "Error interno de conexión, intente nuevamente."
+            return "Se produjo un error de servidor, intente nuevamente.";
         }
     }
 
@@ -470,7 +503,7 @@ class Lote {
             ]);
             return result
         } catch (error) {
-            return "Error interno de conexión, intente nuevamente."
+            return "Se produjo un error de servidor, intente nuevamente.";
         }
     }
 
@@ -509,7 +542,7 @@ class Lote {
 
             return { "proyecto": proyecto[0], "lista": lista };
         } catch (error) {
-            return 'Error interno de conexión, intente nuevamente.'
+            return "Se produjo un error de servidor, intente nuevamente.";
         }
     }
 
