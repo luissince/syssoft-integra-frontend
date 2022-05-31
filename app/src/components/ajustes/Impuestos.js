@@ -404,8 +404,7 @@ class Impuestos extends React.Component {
                                 <thead>
                                     <tr>
                                         <th width="5%" className="text-center">#</th>
-                                        <th width="20%">Fecha</th>
-                                        <th width="20%" >Nombre</th>
+                                        <th width="40%" >Nombre</th>
                                         <th width="15%" >Porcentaje</th>
                                         <th width="15%" >Código</th>
                                         <th width="15%" >Estado</th>
@@ -430,7 +429,6 @@ class Impuestos extends React.Component {
                                                 return (
                                                     <tr key={index}>
                                                         <td className="text-center">{item.id}</td>
-                                                        <td>{<span>{item.fecha}</span>}{<br></br>}{<span>{timeForma24(item.hora)}</span>}</td>
                                                         <td>{item.nombre}</td>
                                                         <td>{item.porcentaje + "%"}</td>
                                                         <td>{item.codigo}</td>

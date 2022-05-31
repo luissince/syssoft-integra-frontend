@@ -22,7 +22,8 @@ const Menu = ({ url, token: { project, userToken } }) => {
                                         <NavLink to={`${url}/${menu.ruta}`}
                                             className="pro-inner-item"
                                             activeClassName='active-link'
-                                            role="button">
+                                            role="button"
+                                            id={`${menu.ruta}`}>
                                             <span className="pro-icon-wrapper">
                                                 <span className="pro-icon">
                                                     {<i className={menu.icon}></i>}
@@ -34,7 +35,6 @@ const Menu = ({ url, token: { project, userToken } }) => {
                                         </NavLink>
                                     </li>
                                     :
-
                                     menu.submenu.filter(submenu => submenu.estado === 1).length !== 0 ?
                                         <li key={index}>
                                             <a href={"#mn" + index}
@@ -66,7 +66,8 @@ const Menu = ({ url, token: { project, userToken } }) => {
                                                                 <NavLink to={`${url}/${submenu.ruta}`}
                                                                     className="pro-inner-item"
                                                                     activeClassName='active-link'
-                                                                    role="button">
+                                                                    role="button"
+                                                                    id={`${submenu.ruta}`}>
                                                                     <span className="pro-icon-wrapper">
                                                                         <span className="pro-icon">
                                                                             <i className="fa fa-minus"></i>

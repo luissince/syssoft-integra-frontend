@@ -140,10 +140,17 @@ class VentaProceso extends React.Component {
     loadData = async () => {
         try {
 
-            const comprobante = await axios.get("/api/comprobante/listcombo", {
+            const comprobanteFacturado = await axios.get("/api/comprobante/listcombo", {
                 signal: this.abortControllerView.signal,
                 params: {
                     "tipo": "1"
+                }
+            });
+
+            const comprobanteLibre = await axios.get("/api/comprobante/listcombo", {
+                signal: this.abortControllerView.signal,
+                params: {
+                    "tipo": "2"
                 }
             });
 
@@ -177,14 +184,14 @@ class VentaProceso extends React.Component {
                 signal: this.abortControllerView.signal,
             });
 
-            const comprobanteFilter = comprobante.data.filter(item => item.preferida === 1);
+            const comprobanteFilter = [...comprobanteFacturado.data, ...comprobanteLibre.data].filter(item => item.preferida === 1);
 
             const comprobanteCobroFilter = comprobanteCobro.data.filter(item => item.preferida === 1);
 
             const monedaFilter = moneda.data.filter(item => item.predeterminado === 1);
 
             await this.setStateAsync({
-                comprobantes: comprobante.data,
+                comprobantes: [...comprobanteFacturado.data, ...comprobanteLibre.data],
                 comprobantesCobro: comprobanteCobro.data,
                 clientes: cliente.data,
                 lotes: lote.data,
@@ -229,12 +236,10 @@ class VentaProceso extends React.Component {
 
         let nombreLote = "";
         let nombreManzana = "";
-        let precioContado = 0;
         for (let item of this.state.lotes) {
             if (this.refLote.current.value === item.idLote) {
                 nombreLote = item.nombreLote;
                 nombreManzana = item.nombreManzana;
-                precioContado = item.precio;
                 break;
             }
         }
@@ -247,7 +252,7 @@ class VentaProceso extends React.Component {
                 "cantidad": 1,
                 "idImpuesto": "",
                 "impuestos": this.state.impuestos,
-                "precioContado": precioContado
+                "precioContado": this.state.precioContado 
             }
 
             this.state.detalleVenta.push(detalle)
@@ -262,7 +267,6 @@ class VentaProceso extends React.Component {
         }
 
         let newArr = [...this.state.detalleVenta];
-
 
         await this.setStateAsync({
             detalleVenta: newArr,

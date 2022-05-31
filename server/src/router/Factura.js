@@ -69,6 +69,15 @@ router.get("/credito/detalle", async function (req, res) {
     }
 });
 
+router.get("/cpesunat", async function (req, res) {
+    const result = await factura.cpesunat(req)
+    if (typeof result === 'object') {
+        res.status(200).send(result);
+    } else {
+        res.status(500).send(result);
+    }
+});
+
 router.get('/repcomprobante', async function (req, res) {
     const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
     req.query.idSede = decryptedData.idSede;

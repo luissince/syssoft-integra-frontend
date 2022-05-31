@@ -250,7 +250,6 @@ router.post('/edit', async function (req, res) {
             await conec.commit(connection);
             res.status(200).send('Se actualizó correctamente el comprobante.');
         }
-
     } catch (error) {
         if (connection != null) {
             await conec.rollback(connection);

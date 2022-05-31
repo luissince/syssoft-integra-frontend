@@ -923,6 +923,59 @@ class Factura {
             return "Se produjo un error de servidor, intente nuevamente.";
         }
     }
+
+    async cpesunat(req) {
+        try {
+
+            let lista = await conec.query(`SELECT 
+            v.idVenta,
+            c.idCliente,
+            c.documento, 
+            c.informacion,             
+            v.idComprobante,  
+            co.nombre as comprobante,
+            v.serie,
+            v.numeracion,
+            DATE_FORMAT(v.fecha,'%d/%m/%Y') as fecha, 
+            v.hora, 
+            v.tipo, 
+            v.estado,
+            m.idMoneda,
+            m.simbolo,
+            IFNULL(SUM(vd.precio*vd.cantidad),0) AS total
+            FROM venta AS v 
+            INNER JOIN cliente AS c ON v.idCliente = c.idCliente
+            INNER JOIN comprobante AS co ON v.idComprobante = co.idComprobante
+            INNER JOIN moneda AS m ON v.idMoneda = m.idMoneda
+            LEFT JOIN ventaDetalle AS vd ON vd.idVenta = v.idVenta
+            
+            GROUP BY v.idVenta
+            ORDER BY v.fecha DESC, v.hora DESC
+            LIMIT ?,?`, [
+
+            ]);
+
+            let resultLista = lista.map(function (item, index) {
+                return {
+                    ...item,
+                    id: (index + 1) + parseInt(req.query.posicionPagina)
+                }
+            });
+
+            let total = await conec.query(`SELECT COUNT(*) AS Total 
+            FROM venta AS v 
+            INNER JOIN cliente AS c ON v.idCliente = c.idCliente
+            INNER JOIN comprobante as co ON v.idComprobante = co.idComprobante
+            INNER JOIN moneda AS m ON v.idMoneda = m.idMoneda`, [
+
+            ]);
+
+
+            return { "result": resultLista, "total": total[0].Total }
+        } catch (error) {
+            return "Se produjo un error de servidor, intente nuevamente.";
+        }
+    }
 }
 
 module.exports = Factura;

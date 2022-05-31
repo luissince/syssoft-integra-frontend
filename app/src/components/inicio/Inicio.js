@@ -42,6 +42,8 @@ import RepVentas from '../reporte/RepVentas';
 import RepFinanciero from '../reporte/RepFinanciero';
 import RepLotes from '../reporte/RepLotes';
 import RepClientes from '../reporte/RepClientes';
+import CpeConsultar from '../cpesunat/CpeConsultar';
+import CpeElectronicos from '../cpesunat/CpeElectronicos';
 import logoEmpresa from '../../recursos/images/INMOBILIARIA.png';
 
 const Page404 = (props) => {
@@ -148,8 +150,8 @@ class Inicio extends React.Component {
         let value = document.querySelectorAll('#sidebar ul li .pro-inner-item[data-bs-toggle="collapse"]');
         value.forEach(element => {
             element.parentNode.querySelector('ul').addEventListener('shown.bs.collapse', function (event) {
-                value.forEach(item => {
-                    if (event.target.getAttribute('id') !== item.parentNode.querySelector('ul').getAttribute('id')) {
+                value.forEach(item => {                    
+                    if (event.target.getAttribute('id') !== item.parentNode.querySelector('ul').getAttribute('id')) {                        
                         item.setAttribute("aria-expanded", "false");
                         item.parentNode.querySelector('ul').classList.remove("show");
                     }
@@ -351,8 +353,16 @@ class Inicio extends React.Component {
                                     render={(props) => <RepLotes {...props} />}
                                 />
                                 <Route
-                                    path={`${path}/RepClientes`}
+                                    path={`${path}/repclientes`}
                                     render={(props) => <RepClientes {...props} />}
+                                />
+                                <Route
+                                    path={`${path}/cpeelectronicos`}
+                                    render={(props) => <CpeElectronicos {...props} />}
+                                />
+                                <Route
+                                    path={`${path}/cpeconsultar`}
+                                    render={(props) => <CpeConsultar {...props} />}
                                 />
                                 <Route component={Page404} />
                             </Switch>

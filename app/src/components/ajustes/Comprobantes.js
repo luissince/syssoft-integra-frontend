@@ -89,6 +89,7 @@ class Comprobantes extends React.Component {
                 codigo: '',
                 impresion: '',
                 estado: true,
+                preferida: false,
 
                 loadModal: false,
                 nameModal: 'Nuevo Comprobante',
@@ -203,6 +204,7 @@ class Comprobantes extends React.Component {
                 codigo: result.data.codigo,
                 impresion: result.data.impresion,
                 estado: result.data.estado === 1 ? true : false,
+                preferida: result.data.preferida === 1 ? true : false,
                 loadModal: false
             });
 
