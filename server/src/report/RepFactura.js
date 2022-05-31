@@ -150,9 +150,10 @@ class RepFactura {
                 total += valorNeto;
             }
 
+            // console.log(impuestos)
             let arrayImpuestos = [];
             for (let item of impuestos) {
-                if (this.duplicateImpuestos(impuestos, item)) {
+                if (!this.duplicateImpuestos(arrayImpuestos, item)) {
                     arrayImpuestos.push(item)
                 } else {
                     for (let newItem of arrayImpuestos) {
@@ -466,7 +467,7 @@ class RepFactura {
 
 
                 for (let item of impuestos) {
-                    if (this.duplicateImpuestos(impuestos, item)) {
+                    if (!this.duplicateImpuestos(arrayImpuestos, item)) {
                         arrayImpuestos.push(item)
                     } else {
                         for (let newItem of arrayImpuestos) {
@@ -744,7 +745,7 @@ class RepFactura {
 
 
             for (let item of impuestos) {
-                if (this.duplicateImpuestos(impuestos, item)) {
+                if (!this.duplicateImpuestos(arrayImpuestos, item)) {
                     arrayImpuestos.push(item)
                 } else {
                     for (let newItem of arrayImpuestos) {
