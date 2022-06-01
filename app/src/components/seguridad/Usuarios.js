@@ -2,6 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import axios from 'axios';
 import {
+    viewModal,
     showModal,
     hideModal,
     clearModal,
@@ -35,7 +36,7 @@ class Usuarios extends React.Component {
             messageTable: 'Cargando información...',
             messagePaginacion: 'Mostranto 0 de 0 Páginas'
         }
-        
+
         this.refResetClave = React.createRef();
 
         this.refTxtSearch = React.createRef();
@@ -51,6 +52,10 @@ class Usuarios extends React.Component {
 
     async componentDidMount() {
         this.loadInit();
+
+        viewModal("modalClave", () => {
+            this.refResetClave.current.focus();
+        })
 
         clearModal("modalClave", async () => {
             await this.setStateAsync({
@@ -167,17 +172,22 @@ class Usuarios extends React.Component {
     async onEventReset() {
         if (this.state.resetClave === "") {
             this.refResetClave.current.focus();
-        } else {
-            try {
-                ModalAlertInfo("Usuario", "Procesando información...");
-                hideModal("modalClave");
-                let result = await axios.post("/api/usuario/reset", {
-                    "clave": this.state.resetClave,
-                    "idUsuario": this.state.idUsuario
-                });
+            return;
+        }
 
-                ModalAlertSuccess("Usuario", result.data);
-            } catch (error) {
+        try {
+            ModalAlertInfo("Usuario", "Procesando información...");
+            hideModal("modalClave");
+            let result = await axios.post("/api/usuario/reset", {
+                "clave": this.state.resetClave,
+                "idUsuario": this.state.idUsuario
+            });
+
+            ModalAlertSuccess("Usuario", result.data);
+        } catch (error) {
+            if (error.response) {
+                ModalAlertWarning("Usuario", error.response.data);
+            } else {
                 ModalAlertWarning("Usuario", "Se produjo un error un interno, intente nuevamente.");
             }
         }
@@ -303,30 +313,30 @@ class Usuarios extends React.Component {
                                                         <td>{item.representante === 1 ? "SI" : "NO"}</td>
                                                         <td className="text-center"><div className={`badge ${item.estado === 1 ? "badge-info" : "badge-danger"}`}>{item.estado === 1 ? "ACTIVO" : "INACTIVO"}</div></td>
                                                         <td>
-                                                            <button 
-                                                            className="btn btn-outline-warning btn-sm"
-                                                             title="Editar" 
-                                                             onClick={() => {
-                                                                this.props.history.push({ pathname: `${this.props.location.pathname}/proceso`, search: "?idUsuario=" + item.idUsuario })
-                                                            }}
-                                                            disabled={!this.state.edit}><i className="bi bi-pencil"></i></button>
+                                                            <button
+                                                                className="btn btn-outline-warning btn-sm"
+                                                                title="Editar"
+                                                                onClick={() => {
+                                                                    this.props.history.push({ pathname: `${this.props.location.pathname}/proceso`, search: "?idUsuario=" + item.idUsuario })
+                                                                }}
+                                                                disabled={!this.state.edit}><i className="bi bi-pencil"></i></button>
                                                         </td>
                                                         <td className="text-center">
                                                             <button
                                                                 className="btn btn-outline-danger btn-sm"
                                                                 title="Editar"
-                                                                onClick={() => this.onEventDelete(item.idUsuario )}
+                                                                onClick={() => this.onEventDelete(item.idUsuario)}
                                                                 disabled={!this.state.remove}>
                                                                 <i className="bi bi-trash">
                                                                 </i></button>
                                                         </td>
                                                         <td>
-                                                            <button 
-                                                            className="btn btn-outline-info btn-sm"
-                                                             title="Resetear" 
-                                                             onClick={() => this.openReset(item.idUsuario)}
-                                                             disabled={!this.state.reset}
-                                                             ><i className="bi bi-key"></i></button>
+                                                            <button
+                                                                className="btn btn-outline-info btn-sm"
+                                                                title="Resetear"
+                                                                onClick={() => this.openReset(item.idUsuario)}
+                                                                disabled={!this.state.reset}
+                                                            ><i className="bi bi-key"></i></button>
                                                         </td>
                                                     </tr>
                                                 )

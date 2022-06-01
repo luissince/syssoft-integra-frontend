@@ -112,18 +112,21 @@ router.post('/', async function (req, res) {
             idUsuario = "US0001";
         }
 
-        const salt = bcrypt.genSaltSync(saltRounds);
-        const hash = bcrypt.hashSync(req.body.clave, salt);
+        let hash = "";
+        if (req.body.activeLogin) {
+            const salt = bcrypt.genSaltSync(saltRounds);
+            hash = bcrypt.hashSync(req.body.clave, salt);
 
-        let usuario = await conec.execute(connection, `SELECT * FROM usuario
-        WHERE usuario = ?`, [
-            req.body.usuario,
-        ]);
+            let usuario = await conec.execute(connection, `SELECT * FROM usuario
+            WHERE usuario = ?`, [
+                req.body.usuario,
+            ]);
 
-        if (usuario.length > 0) {
-            await conec.rollback(connection);
-            res.status(400).send("Hay un usuario con el mismo valor.");
-            return;
+            if (usuario.length > 0) {
+                await conec.rollback(connection);
+                res.status(400).send("Hay un usuario con el mismo valor.");
+                return;
+            }
         }
 
         await conec.execute(connection, `INSERT INTO usuario(
@@ -138,13 +141,14 @@ router.post('/', async function (req, res) {
             idPerfil, 
             representante, 
             estado, 
+            login,
             usuario, 
             clave,
             fecha,
             hora,
             fupdate,
             hupdate ) 
-            VALUES(?, ?,?,?,?,?,?,?, ?,?,?,?,?,?,?,?,?)`, [
+            VALUES(?,?, ?,?,?,?,?,?,?, ?,?,?,?,?,?,?,?,?)`, [
             idUsuario,
             req.body.nombres,
             req.body.apellidos,
@@ -156,6 +160,7 @@ router.post('/', async function (req, res) {
             req.body.idPerfil,
             req.body.representante,
             req.body.estado,
+            req.body.activeLogin,
             req.body.usuario,
             hash,
             currentDate(),
@@ -167,6 +172,7 @@ router.post('/', async function (req, res) {
         await conec.commit(connection);
         res.status(200).send('Los datos se registrarón correctamente.')
     } catch (error) {
+        console.log(error)
         if (connection != null) {
             await conec.rollback(connection);
         }
@@ -179,16 +185,18 @@ router.put('/', async function (req, res) {
     try {
         connection = await conec.beginTransaction();
 
-        let usuario = await conec.execute(connection, `SELECT * FROM usuario
-        WHERE usuario = ? AND idUsuario <> ?`, [
-            req.body.usuario,
-            req.body.idUsuario
-        ]);
+        if (req.body.activeLogin) {
+            let usuario = await conec.execute(connection, `SELECT * FROM usuario
+            WHERE usuario = ? AND idUsuario <> ?`, [
+                req.body.usuario,
+                req.body.idUsuario
+            ]);
 
-        if (usuario.length > 0) {
-            await conec.rollback(connection);
-            res.status(400).send("Hay un usuario con el mismo valor.");
-            return;
+            if (usuario.length > 0) {
+                await conec.rollback(connection);
+                res.status(400).send("Hay un usuario con el mismo valor.");
+                return;
+            }
         }
 
         await conec.execute(connection, `UPDATE usuario SET 
@@ -202,6 +210,7 @@ router.put('/', async function (req, res) {
             idPerfil=?, 
             representante=?, 
             estado=?, 
+            login=?,
             usuario=?,
             fupdate=?,
             hupdate=?
@@ -216,6 +225,7 @@ router.put('/', async function (req, res) {
             req.body.idPerfil,
             req.body.representante,
             req.body.estado,
+            req.body.activeLogin,
             req.body.usuario,
             currentDate(),
             currentTime(),
@@ -225,7 +235,6 @@ router.put('/', async function (req, res) {
         await conec.commit(connection)
         res.status(200).send('Los datos se actualizarón correctamente.')
     } catch (error) {
-        console.log(error)
         if (connection != null) {
             await conec.rollback(connection);
         }
@@ -407,6 +416,16 @@ router.post('/reset', async function (req, res) {
     try {
         connection = await conec.beginTransaction();
 
+        let usuario = await conec.execute(connection,`SELECT * FROM usuario WHERE idUsuario = ? AND login = 0`,[
+            req.body.idUsuario
+        ]);
+
+        if(usuario.length > 0){
+            await conec.rollback(connection);
+            res.status(400).send("El usuario no tiene cuenta para resetear su contraseña.");
+            return;
+        }
+  
         const salt = bcrypt.genSaltSync(saltRounds);
         const hash = bcrypt.hashSync(req.body.clave, salt);
 

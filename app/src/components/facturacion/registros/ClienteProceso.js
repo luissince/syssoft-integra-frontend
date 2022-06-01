@@ -172,17 +172,17 @@ class ClienteProceso extends React.Component {
             return;
         }
 
-        if (this.state.celular === "") {
-            this.setState({ messageWarning: "Ingrese el número de celular." });
-            this.onFocusTab("contacto-tab", "contacto");
-            this.refCelular.current.focus();
-            return;
-        }
-
         if (this.state.genero === "") {
             this.setState({ messageWarning: "Seleccione un genero." });
             this.onFocusTab("datos-tab", "datos");
             this.refGenero.current.focus();
+            return;
+        }
+
+        if (this.state.celular === "") {
+            this.setState({ messageWarning: "Ingrese el número de celular." });
+            this.onFocusTab("contacto-tab", "contacto");
+            this.refCelular.current.focus();
             return;
         }
 
@@ -232,7 +232,7 @@ class ClienteProceso extends React.Component {
                 });
             }
         } catch (error) {
-            if (error.response !== undefined) {
+            if (error.response) {
                 ModalAlertWarning("Cliente", error.response.data)
             } else {
                 ModalAlertWarning("Cliente", "Se genero un error interno, intente nuevamente.")
@@ -467,6 +467,7 @@ class ClienteProceso extends React.Component {
                                                 <input
                                                     type="text"
                                                     className="form-control"
+                                                    ref={this.refInformacion}
                                                     value={this.state.informacion}
                                                     onChange={(event) => {
                                                         if (event.target.value.trim().length > 0) {

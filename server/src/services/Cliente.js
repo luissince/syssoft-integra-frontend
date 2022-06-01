@@ -23,7 +23,7 @@ class Cliente {
             ? = 1 and c.documento like concat(?,'%')
             OR
             ? = 1 and c.informacion like concat(?,'%')
-            ORDER BY c.fecha DESC, c.hora DESC
+            ORDER BY c.fecha ASC, c.hora ASC
             LIMIT ?,?`, [
                 parseInt(req.query.opcion),
 
@@ -73,6 +73,15 @@ class Cliente {
         let connection = null;
         try {
             connection = await conec.beginTransaction();
+
+            let validate = await conec.execute(connection, `SELECT * FROM cliente WHERE documento = ?`, [
+                req.body.documento,
+            ]);
+
+            if (validate.length > 0) {
+                await conec.rollback(connection);
+                return `El número de documento a ingresar ya se encuentre registrado con los datos de ${validate[0].informacion}`;
+            }
 
             let result = await conec.execute(connection, 'SELECT idCliente FROM cliente');
             let idCliente = "";
@@ -194,8 +203,19 @@ class Cliente {
     async update(req) {
         let connection = null;
         try {
-
             connection = await conec.beginTransaction();
+
+            console.log(req.body)
+            let validate = await conec.execute(connection, `SELECT * FROM cliente WHERE idCliente = ? AND documento <> ?`, [
+                req.body.idCliente,
+                req.body.documento,
+            ]);
+
+            if (validate.length > 0) {
+                await conec.rollback(connection);
+                return `El número de documento a ingresar ya se encuentre registrado con los datos de ${validate[0].informacion}`;
+            }
+
             await conec.execute(connection, `UPDATE cliente SET
                 idTipoDocumento=?, 
                 documento=?,
@@ -236,11 +256,11 @@ class Cliente {
             await conec.commit(connection)
             return "update";
         } catch (error) {
+            console.error("error---------------------")
+            console.log(error)
             if (connection != null) {
                 await conec.rollback(connection);
             }
-            console.log(error)
-
             return "Se produjo un error de servidor, intente nuevamente.";
         }
     }

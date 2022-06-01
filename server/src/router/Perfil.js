@@ -89,10 +89,22 @@ router.post('/add', async function (req, res) {
             idPerfil = "PF0001";
         }
 
-        await conec.execute(connection, `INSERT INTO perfil(idPerfil, idSede, descripcion, fecha, hora, idUsuario) VALUES(?,?,?,?,?,?)`, [
+        await conec.execute(connection, `INSERT INTO perfil
+        (
+        idPerfil, 
+        idSede, 
+        descripcion,
+        fecha,
+        hora,
+        fupdate,
+        hupdate,
+        idUsuario) 
+        VALUES(?,?,?,?,?,?,?,?)`, [
             idPerfil,
             req.body.idSede,
             req.body.descripcion,
+            currentDate(),
+            currentTime(),
             currentDate(),
             currentTime(),
             req.body.idUsuario,
@@ -123,8 +135,8 @@ router.post('/add', async function (req, res) {
                     menu.idMenu
                 ]);
 
-                for (let privilegio of privilegios){
-                    await conec.execute(connection, `INSERT INTO permisoPrivilegio(idPrivilegio, idSubMenu ,idMenu, idPerfil, estado) VALUES (?,?,?,?,?)`,[
+                for (let privilegio of privilegios) {
+                    await conec.execute(connection, `INSERT INTO permisoPrivilegio(idPrivilegio, idSubMenu ,idMenu, idPerfil, estado) VALUES (?,?,?,?,?)`, [
                         privilegio.idPrivilegio,
                         privilegio.idSubMenu,
                         privilegio.idMenu,
@@ -142,7 +154,6 @@ router.post('/add', async function (req, res) {
         res.status(200).send('Datos insertados correctamente')
     } catch (error) {
         console.log(error)
-
         if (connection != null) {
             await conec.rollback(connection);
         }

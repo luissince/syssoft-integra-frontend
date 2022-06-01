@@ -4,6 +4,64 @@ const conec = new Conexion();
 
 class Banco {
 
+    async list(req) {
+        try {
+            let lista = await conec.query(`SELECT 
+            b.idBanco, 
+            b.nombre, 
+            CASE 
+            WHEN b.tipoCuenta = 1 THEN 'Banco'
+            WHEN b.tipoCuenta = 2 THEN 'Tarjeta'
+            ELSE 'Efectivo' END AS 'tipoCuenta',
+            m.nombre as moneda,
+            m.codiso,
+            b.numCuenta,
+            b.cci,
+            IFNULL(SUM(CASE WHEN bd.tipo = 1 THEN bd.monto ELSE -bd.monto END),0)AS saldo
+            FROM banco AS b 
+            INNER JOIN moneda AS m ON m.idMoneda = b.idMoneda 
+            LEFT JOIN bancoDetalle AS bd ON bd.idBanco = b.idBanco 
+            WHERE 
+            ? = 0
+            OR
+            ? = 1 and b.nombre like concat(?,'%')
+            GROUP BY b.idBanco
+            LIMIT ?,?`, [
+                parseInt(req.query.opcion),
+
+                parseInt(req.query.opcion),
+                req.query.buscar,
+
+                parseInt(req.query.posicionPagina),
+                parseInt(req.query.filasPorPagina)
+            ])
+
+            let resultLista = lista.map(function (item, index) {
+                return {
+                    ...item,
+                    id: (index + 1) + parseInt(req.query.posicionPagina)
+                }
+            });
+
+            let total = await conec.query(`SELECT COUNT(*) AS Total 
+            FROM banco AS b INNER JOIN moneda AS m
+            ON m.idMoneda = b.idMoneda 
+            WHERE 
+            ? = 0
+            OR
+            ? = 1 and b.nombre like concat(?,'%')`, [
+                parseInt(req.query.opcion),
+
+                parseInt(req.query.opcion),
+                req.query.buscar
+            ]);
+
+            return { "result": resultLista, "total": total[0].Total };
+        } catch (error) {
+            return "Se produjo un error de servidor, intente nuevamente.";
+        }
+    }
+
     async add(req) {
         let connection = null;
         try {
@@ -115,7 +173,6 @@ class Banco {
             await conec.commit(connection);
             return "update";
         } catch (error) {
-            console.log(error)
             if (connection != null) {
                 await conec.rollback(connection);
             }

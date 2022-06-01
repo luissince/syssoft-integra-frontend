@@ -23,7 +23,8 @@ router.get('/createsession', async function (req, res) {
                 nombres,
                 apellidos,
                 idPerfil,
-                estado
+                estado,
+                login
                 FROM usuario
                 WHERE idUsuario = ?`, [
                     validate[0].idUsuario
@@ -31,6 +32,11 @@ router.get('/createsession', async function (req, res) {
 
                 if (usuario[0].estado === 0) {
                     res.status(400).send("Su cuenta se encuentra inactiva.")
+                    return;
+                }
+
+                if(usuario[0].login === 0){
+                    res.status(400).send("Su cuenta no tiene acceso al sistema.")
                     return;
                 }
 
@@ -94,7 +100,6 @@ router.get('/createsession', async function (req, res) {
             res.status(400).send("Datos incorrectos, intente nuevamente.")
         }
     } catch (error) {
-        console.log(error)
         res.status(500).send("Se produjo un error de servidor, intente nuevamente.")
     }
 });

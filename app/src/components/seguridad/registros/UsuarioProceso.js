@@ -3,8 +3,9 @@ import axios from 'axios';
 import {
     keyNumberPhone,
     isNumeric,
-    keyNumberFloat,
+    keyNumberInteger,
     getExtension,
+    ModalAlertDialog,
     ModalAlertInfo,
     ModalAlertSuccess,
     ModalAlertWarning,
@@ -34,6 +35,8 @@ class UsuarioProceso extends React.Component {
             usuario: '',
             clave: '',
             configClave: '',
+            tipo: false,
+            activeLogin: false,
 
             loading: true,
             messageWarning: '',
@@ -86,6 +89,7 @@ class UsuarioProceso extends React.Component {
 
             await this.setStateAsync({
                 perfiles: perfil.data,
+                tipo: true,
                 loading: false,
             });
 
@@ -124,11 +128,13 @@ class UsuarioProceso extends React.Component {
                 idPerfil: result.data.idPerfil,
                 representante: result.data.representante,
                 estado: result.data.estado,
+                activeLogin: result.data.login,
                 usuario: result.data.usuario,
                 clave: result.data.clave,
                 configClave: result.data.clave,
 
                 idUsuario: result.data.idUsuario,
+                tipo: false,
                 loading: false
             });
 
@@ -141,7 +147,7 @@ class UsuarioProceso extends React.Component {
         }
     }
 
-    async onEventGuardar() {
+    onEventGuardar() {
         if (this.state.dni === "") {
             this.setState({ messageWarning: "Ingrese el numero de DNI" })
             this.onFocusTab("datos-tab", "datos");
@@ -177,69 +183,95 @@ class UsuarioProceso extends React.Component {
             return;
         }
 
-        try {
-            ModalAlertInfo("Usuario", "Procesando información...");
+        if (this.state.activeLogin && this.state.usuario === "") {
+            this.setState({ messageWarning: "Ingrese su usuario para el inicio de sesión." });
+            this.onFocusTab("login-tab", "login");
+            this.refUsuario.current.focus();
+            return;
+        }
 
-            if (this.state.idUsuario !== '') {
-                let result = await axios.put('/api/usuario/', {
-                    //datos
-                    "nombres": this.state.nombres.trim().toUpperCase(),
-                    "apellidos": this.state.apellidos.trim().toUpperCase(),
-                    "dni": this.state.dni.toString().trim().toUpperCase(),
-                    "genero": this.state.genero,
-                    "direccion": this.state.direccion.trim().toUpperCase(),
-                    "telefono": this.state.telefono.toString().trim().toUpperCase(),
-                    "email": this.state.email.trim().toUpperCase(),
-                    //login
-                    "idPerfil": this.state.idPerfil.trim().toUpperCase(),
-                    "representante": this.state.representante,
-                    "estado": this.state.estado,
-                    "usuario": this.state.usuario.trim().toUpperCase(),
-                    "clave": this.state.clave.trim().toUpperCase(),
+        if (this.state.activeLogin && this.state.clave === "") {
+            this.setState({ messageWarning: "Ingrese su clave para el inicio de sesión." });
+            this.onFocusTab("login-tab", "login");
+            this.refClave.current.focus();
+            return;
+        }
 
-                    //idUsuario
-                    "idUsuario": this.state.idUsuario
-                })
-                ModalAlertSuccess("Usuario", result.data, () => {
-                    this.props.history.goBack();
-                });
+        if (this.state.activeLogin && this.state.configClave == "") {
+            this.setState({ messageWarning: "Ingrese nuevamente su clave para el inicio de sesión." });
+            this.onFocusTab("login-tab", "login");
+            this.refConfigClave.current.focus();
+            return;
+        }
 
-            } else {
-                if (this.state.clave !== this.state.configClave) {
-                    this.setState({ messageWarning: "Las contraseñas no coinciden" });
-                    this.onFocusTab("login-tab", "login");
-                    this.refConfigClave.current.focus();
-                } else {
-                    let result = await axios.post('/api/usuario/', {
-                        //datos
-                        "nombres": this.state.nombres.trim().toUpperCase(),
-                        "apellidos": this.state.apellidos.trim().toUpperCase(),
-                        "dni": this.state.dni.toString().trim().toUpperCase(),
-                        "genero": this.state.genero,
-                        "direccion": this.state.direccion.trim().toUpperCase(),
-                        "telefono": this.state.telefono.toString().trim().toUpperCase(),
-                        "email": this.state.email.trim().toUpperCase(),
-                        //login
-                        "idPerfil": this.state.idPerfil.trim().toUpperCase(),
-                        "representante": this.state.representante,
-                        "estado": this.state.estado,
-                        "usuario": this.state.usuario.trim().toUpperCase(),
-                        "clave": this.state.clave.trim().toUpperCase(),
-                    });
+        if (this.state.activeLogin && this.state.clave !== this.state.configClave) {
+            this.setState({ messageWarning: "Las contraseñas con coinciden." });
+            this.onFocusTab("login-tab", "login");
+            this.refClave.current.focus();
+            return;
+        }
 
-                    ModalAlertSuccess("Usuario", result.data, () => {
-                        this.props.history.goBack();
-                    });
+        ModalAlertDialog("Usuario", "¿Está seguro de continuar?", async (value) => {
+            if (value) {
+                try {
+                    ModalAlertInfo("Usuario", "Procesando información...");
+
+                    if (this.state.idUsuario !== '') {
+                        let result = await axios.put('/api/usuario/', {
+                            //datos
+                            "nombres": this.state.nombres.trim().toUpperCase(),
+                            "apellidos": this.state.apellidos.trim().toUpperCase(),
+                            "dni": this.state.dni.toString().trim().toUpperCase(),
+                            "genero": this.state.genero,
+                            "direccion": this.state.direccion.trim().toUpperCase(),
+                            "telefono": this.state.telefono.toString().trim().toUpperCase(),
+                            "email": this.state.email.trim().toUpperCase(),
+                            //login
+                            "idPerfil": this.state.idPerfil.trim().toUpperCase(),
+                            "representante": this.state.representante,
+                            "estado": this.state.estado,
+                            "activeLogin": this.state.activeLogin,
+                            "usuario": this.state.usuario.trim().toUpperCase(),
+                            "clave": this.state.clave.trim().toUpperCase(),
+
+                            //idUsuario
+                            "idUsuario": this.state.idUsuario
+                        })
+                        ModalAlertSuccess("Usuario", result.data, () => {
+                            this.props.history.goBack();
+                        });
+                    } else {
+                        let result = await axios.post('/api/usuario/', {
+                            //datos
+                            "nombres": this.state.nombres.trim().toUpperCase(),
+                            "apellidos": this.state.apellidos.trim().toUpperCase(),
+                            "dni": this.state.dni.toString().trim().toUpperCase(),
+                            "genero": this.state.genero,
+                            "direccion": this.state.direccion.trim().toUpperCase(),
+                            "telefono": this.state.telefono.toString().trim().toUpperCase(),
+                            "email": this.state.email.trim().toUpperCase(),
+                            //login
+                            "idPerfil": this.state.idPerfil.trim().toUpperCase(),
+                            "representante": this.state.representante,
+                            "estado": this.state.estado,
+                            "activeLogin": this.state.activeLogin,
+                            "usuario": this.state.usuario.trim().toUpperCase(),
+                            "clave": this.state.clave.trim().toUpperCase(),
+                        });
+
+                        ModalAlertSuccess("Usuario", result.data, () => {
+                            this.props.history.goBack();
+                        });
+                    }
+                } catch (error) {
+                    if (error.response) {
+                        ModalAlertWarning("Usuario", error.response.data);
+                    } else {
+                        ModalAlertWarning("Usuario", "Se produjo un error un interno, intente nuevamente.");
+                    }
                 }
             }
-        } catch (error) {
-            if (error.response !== undefined) {
-                ModalAlertWarning("Usuario", error.response.data);
-            } else {
-                ModalAlertWarning("Usuario", "Se produjo un error un interno, intente nuevamente.");
-            }
-
-        }
+        })
     }
 
     onFocusTab(idTab, idContent) {
@@ -307,7 +339,7 @@ class UsuarioProceso extends React.Component {
                                 <div className="form-group">
                                     <label htmlFor="dni">Dni <i className="fa fa-asterisk text-danger small"></i></label>
                                     <input
-                                        type="number"
+                                        type="text"
                                         className="form-control"
                                         id="dni"
                                         value={this.state.dni}
@@ -325,7 +357,8 @@ class UsuarioProceso extends React.Component {
                                                 });
                                             }
                                         }}
-                                        placeholder='Ingrese el numero de DNI' />
+                                        placeholder='Ingrese el numero de DNI'
+                                        onKeyPress={keyNumberInteger} />
                                 </div>
 
                                 <div className="form-row">
@@ -539,8 +572,19 @@ class UsuarioProceso extends React.Component {
                                     </div>
                                 </div>
 
+                                {/* Start Login */}
                                 <div className="form-group">
-                                    <label htmlFor="usuario">usuario</label>
+                                    <label>
+                                        <div className="custom-control custom-switch">
+                                            <input
+                                                type="checkbox"
+                                                className="custom-control-input"
+                                                id="cbActiveLogin"
+                                                checked={this.state.activeLogin}
+                                                onChange={(value) => this.setState({ activeLogin: value.target.checked })} />
+                                            <label className="custom-control-label" htmlFor="cbActiveLogin">Usar login</label>
+                                        </div>
+                                    </label>
                                     <input
                                         type="text"
                                         className="form-control"
@@ -560,11 +604,12 @@ class UsuarioProceso extends React.Component {
                                                 });
                                             }
                                         }}
-                                        placeholder='Ingrese el usuario' />
+                                        placeholder='Ingrese el usuario'
+                                        disabled={!this.state.activeLogin} />
                                 </div>
 
                                 {
-                                    this.state.idUsuario === "" ?
+                                    this.state.tipo ?
                                         <div className="form-row">
                                             <div className="form-group col-md-6">
                                                 <label htmlFor="contraseña">Contraseña</label>
@@ -587,7 +632,8 @@ class UsuarioProceso extends React.Component {
                                                             });
                                                         }
                                                     }}
-                                                    placeholder='Ingrese la contraseña' />
+                                                    placeholder='Ingrese la contraseña'
+                                                    disabled={!this.state.activeLogin} />
                                             </div>
                                             <div className="form-group col-md-6">
                                                 <label htmlFor="contraseña2">Confirmar Contraseña</label>
@@ -610,11 +656,14 @@ class UsuarioProceso extends React.Component {
                                                             });
                                                         }
                                                     }}
-                                                    placeholder='Ingrese contraseña nuevamente' />
+                                                    placeholder='Ingrese contraseña nuevamente'
+                                                    disabled={!this.state.activeLogin} />
                                             </div>
                                         </div>
                                         : null
                                 }
+
+                                {/* End Login */}
                             </div>
                         </div>
                     </div>
