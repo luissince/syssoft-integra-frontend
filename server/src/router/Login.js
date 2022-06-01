@@ -95,7 +95,7 @@ router.get('/createsession', async function (req, res) {
         }
     } catch (error) {
         console.log(error)
-        res.status(500).send("Error interno de conexión, intente nuevamente.")
+        res.status(500).send("Se produjo un error de servidor, intente nuevamente.")
     }
 });
 
