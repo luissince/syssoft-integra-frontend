@@ -314,7 +314,7 @@ class Factura {
                     numeracionCobro,
                     req.body.metodoPago,
                     1,
-                    'INGRESO DEL PAGO TOTAL',
+                    'COBRO AL CONTADO',
                     currentDate(),
                     currentTime()
                 ]);
@@ -827,6 +827,7 @@ class Factura {
 
             return { "result": resultLista, "total": total[0].Total }
         } catch (error) {
+            console.error(error);
             return "Se produjo un error de servidor, intente nuevamente.";
         }
     }

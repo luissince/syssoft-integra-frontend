@@ -51,7 +51,6 @@ router.get('/list', async function (req, res) {
         res.status(200).send({ "result": resultLista, "total": total[0].Total })
 
     } catch (error) {
-        console.log(error)
         res.status(500).send("Error interno de conexión, intente nuevamente.")
     }
 });
@@ -115,12 +114,10 @@ router.post('/add', async function (req, res) {
         await conec.commit(connection);
         res.status(200).send('Datos insertados correctamente')
     } catch (error) {
-        console.log(error)
         if (connection != null) {
-            conec.rollback(connection);
+            await conec.rollback(connection);
         }
         res.status(500).send("Error de servidor");
-
     }
 });
 
@@ -137,10 +134,8 @@ router.get('/id', async function (req, res) {
         }
 
     } catch (error) {
-        console.log(error)
         res.status(500).send("Error interno de conexión, intente nuevamente.");
     }
-
 });
 
 router.post('/edit', async function (req, res) {
@@ -166,9 +161,8 @@ router.post('/edit', async function (req, res) {
         await conec.commit(connection)
         res.status(200).send('Los datos se actualizarón correctamente.')
     } catch (error) {
-        console.log(error)
         if (connection != null) {
-            conec.rollback(connection);
+           await conec.rollback(connection);
         }
         res.status(500).send("Se produjo un error de servidor, intente nuevamente.");
     }
