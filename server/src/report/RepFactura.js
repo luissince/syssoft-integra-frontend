@@ -986,17 +986,17 @@ class RepFactura {
             // console.log(doc.y)
             let yPos = 130;
 
-            doc.fontSize(10).text("12345 |",
-                doc.options.margins.left + 95,
+            doc.fontSize(10).text("12345 ||",
+                doc.options.margins.left + 100,
                 yPos);
 
-            doc.fontSize(10).text("referencia |",
-                doc.options.margins.left + 160,
+            doc.fontSize(10).text("referencia ||",
+                doc.options.margins.left + 170,
                 yPos);
 
             doc.fontSize(10).text("20/20/20202 |",
                 doc.options.margins.left + 240,
-                yPos+10);
+                yPos+8);
 
             doc.fontSize(10).text("lima perú |",
                 doc.options.margins.left + 320,
@@ -1004,13 +1004,13 @@ class RepFactura {
 
             doc.fontSize(10).text("20/20/20202 |",
                 doc.options.margins.left + 380,
-                yPos+1);
+                yPos+9);
 
             doc.fontSize(10).text("SOLES |",
-                doc.options.margins.left + 460,
+                doc.options.margins.left + 470,
                 yPos);
 
-            yPos = doc.y + 50;
+            yPos = 170;
 
             doc.fontSize(10).text("monto en letras",
                 doc.options.margins.left + 160,
