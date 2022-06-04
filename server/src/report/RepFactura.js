@@ -1040,7 +1040,7 @@ class RepFactura {
                 doc.options.margins.left + 490,
                 yPos);
 
-            yPos = 230;
+            yPos = 235;
             console.log(yPos)
 
             doc.fontSize(10).text("domicilio 12345",
@@ -1064,7 +1064,7 @@ class RepFactura {
                 yPos);
 
 
-            yPos = doc.y + 5;
+            yPos = doc.y + 10;
 
             doc.fontSize(10).text("aval permatenerasd",
                 doc.options.margins.left + 150,
