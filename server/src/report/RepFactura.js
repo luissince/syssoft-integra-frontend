@@ -848,7 +848,7 @@ class RepFactura {
     async repCobroA5(req) {
         try {
             const doc = new PDFDocument({
-                size: [595.28, 419.53],
+                size: [419.53,595.28],
                 // size: 'A5',
                 font: 'Helvetica',
                 // layout: 'landscape',
