@@ -881,16 +881,16 @@ class RepFactura {
 
             let yPos = doc.y;
 
-            doc.fontSize(10).text("24/06/2021",
+            doc.fontSize(10).text("24/06/2021 |",
                 doc.options.margins.left + 22,
-                yPos + 12);
+                yPos + 14);
 
-            doc.fontSize(9).text("00000002508",
+            doc.fontSize(9).text("00000002508 |",
                 doc.options.margins.left + 400,
-                yPos + 12);
+                yPos + 14);
 
 
-            yPos = doc.y;
+            yPos = doc.y+5;
 
             doc.fontSize(10).text("HERRERA CARDOZO ROSARIO DEL CARMEN 000000",
                 doc.options.margins.left + 22,
@@ -905,32 +905,39 @@ class RepFactura {
             { "id": "123121", "name": "asdas asdas", "monto": "S/ 10000.00" }];
 
 
-            yPos = doc.y + 50;
+            yPos = doc.y + 30;
 
             for (let ar of array) {
                 doc.fontSize(10).text(ar.id,
-                doc.options.margins.left + 22,
+                doc.options.margins.left + 10,
                 yPos);
 
                 doc.fontSize(10).text(ar.name,
-                doc.options.margins.left + 100,
+                doc.options.margins.left + 80,
+                yPos);
+
+                doc.fontSize(10).text("0",
+                doc.options.margins.left + 400,
                 yPos);
 
                 doc.fontSize(10).text(ar.monto,
-                doc.options.margins.left + 400,
-                yPos);
+                    doc.options.margins.left + 460,
+                    yPos);
+    
 
                 yPos += 10;
             }
 
-            yPos = doc.y + 100;
+            yPos = 305;
+
+            console.log(yPos)
 
             doc.fontSize(10).text("Monto el letras sii...........",
-                doc.options.margins.left + 22,
+                doc.options.margins.left + 10,
                 yPos);
 
                 doc.fontSize(10).text("S/ 600000.00",
-                doc.options.margins.left + 400,
+                doc.options.margins.left + 460,
                 yPos);
 
 
