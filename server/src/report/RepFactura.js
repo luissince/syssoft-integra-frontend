@@ -850,6 +850,7 @@ class RepFactura {
             const doc = new PDFDocument({
                 size: 'A5',
                 font: 'Helvetica',
+                layout: 'landscape',
                 margins: {
                     top: 40,
                     bottom: 40,
@@ -871,10 +872,17 @@ class RepFactura {
 
             doc.rect(doc.x, doc.y,
                 doc.page.width - doc.options.margins.left - doc.options.margins.right,
-                doc.page.height - doc.options.margins.top-doc.options.margins.bottom).stroke();
+                doc.page.height - doc.options.margins.top - doc.options.margins.bottom).stroke();
 
             doc.image(path.join(__dirname, "..", "path/to/logo.png"), orgX, orgY, { width: 75, });
 
+            doc.fontSize(12).text("fecha",
+                doc.options.margins.left + 20,
+                doc.y + 10);
+
+            doc.fontSize(12).text("socio",
+                doc.options.margins.left + 20,
+                doc.y + 5);
 
 
             doc.end();
