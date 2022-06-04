@@ -139,7 +139,7 @@ class CpeElectronicos extends React.Component {
                 try {
                     ModalAlertInfo("Facturación", "Firmando xml y enviando a sunat.");
 
-                    let result = await axios.get("http://localhost:8080/ApiCPESunat/app/examples/boleta.php", {
+                    let result = await axios.get("http://apisunat.inmobiliariagmyc.com/app/examples/boleta.php", {
                         params: {
                             "idventa": idVenta
                         }
