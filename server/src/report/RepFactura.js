@@ -1053,7 +1053,7 @@ class RepFactura {
                 doc.options.margins.left + 240,
                 yPos);
 
-            yPos = 264;
+            yPos = 263;
            
 
             doc.fontSize(10).text("DOI |",
@@ -1065,40 +1065,40 @@ class RepFactura {
                 yPos);
 
 
-            yPos = 284;
+            yPos = 283;
            
 
             doc.fontSize(10).text("aval permatenerasd |",
                 doc.options.margins.left + 170,
                 yPos);
 
-            yPos = 305;
+            yPos = 304;
             
-            doc.fontSize(10).text("ven ami casa baby av. las rocas n° 126",
+            doc.fontSize(10).text("ven ami casa baby av. las rocas n° 126 1",
                 doc.options.margins.left + 120,
                 yPos);
 
-            yPos = 330;
+            yPos = 335;
            
 
-            doc.fontSize(10).text("localidad",
-                doc.options.margins.left + 120,
+            doc.fontSize(10).text("localidad |",
+                doc.options.margins.left + 130,
                 yPos);
 
             doc.fontSize(10).text("MARIA",
                 doc.options.margins.left + 230,
                 yPos);
 
-            yPos = 344;
+            yPos = 351;
             console.log(yPos) 
 
             doc.fontSize(10).text("HOLA BEB |",
                 doc.options.margins.left + 120,
                 yPos);
 
-                yPos = 350;
+                yPos = 355;
 
-            doc.fontSize(10).text("ESTAS LOCA |",
+            doc.fontSize(10).text("ESTAS LOCA | |",
                 doc.options.margins.left + 350,
                 yPos);
 
