@@ -987,111 +987,111 @@ class RepFactura {
             let yPos = 123;
 
             doc.fontSize(10).text("12345",
-                doc.options.margins.left + 80,
+                doc.options.margins.left + 100,
                 yPos);
 
             doc.fontSize(10).text("referencia",
-                doc.options.margins.left + 120,
-                yPos);
-
-            doc.fontSize(10).text("20/20/20202",
                 doc.options.margins.left + 180,
                 yPos);
 
+            doc.fontSize(10).text("20/20/20202",
+                doc.options.margins.left + 210,
+                yPos+20);
+
             doc.fontSize(10).text("lima perú",
-                doc.options.margins.left + 300,
+                doc.options.margins.left + 320,
                 yPos);
 
             doc.fontSize(10).text("20/20/20202",
-                doc.options.margins.left + 350,
-                yPos);
+                doc.options.margins.left + 370,
+                yPos+20);
 
             doc.fontSize(10).text("SOLES",
-                doc.options.margins.left + 420,
+                doc.options.margins.left + 460,
                 yPos);
 
-            yPos = doc.y + 50;
+            yPos = doc.y + 30;
 
             doc.fontSize(10).text("monto en letras",
-                doc.options.margins.left + 80,
+                doc.options.margins.left + 180,
                 yPos);
 
             yPos = doc.y + 10;
 
             doc.fontSize(10).text("afectanasdas asd",
-                doc.options.margins.left + 160,
+                doc.options.margins.left + 140,
                 yPos);
 
             yPos = doc.y + 10;
 
-            doc.fontSize(10).text("tu banco mi banco",
-                doc.options.margins.left + 250,
+            doc.fontSize(10).text("BCP",
+                doc.options.margins.left + 300,
                 yPos);
 
             doc.fontSize(10).text("office",
-                doc.options.margins.left + 340,
-                yPos);
-
-            doc.fontSize(10).text("12345678901",
                 doc.options.margins.left + 370,
                 yPos);
 
+            doc.fontSize(10).text("12345678901",
+                doc.options.margins.left + 400,
+                yPos);
+
             doc.fontSize(10).text("56230",
-                doc.options.margins.left + 450,
+                doc.options.margins.left + 480,
                 yPos);
 
-            yPos = doc.y + 10;
+            yPos = doc.y + 3;
 
-            doc.fontSize(10).text("domicilio",
-                doc.options.margins.left + 160,
+            doc.fontSize(10).text("domicilio 45",
+                doc.options.margins.left + 140,
                 yPos);
 
-            yPos = doc.y + 10;
+            yPos = doc.y + 5;
 
-            doc.fontSize(10).text("localitdad mi cada",
+            doc.fontSize(10).text("localitdad mi cada 123",
                 doc.options.margins.left + 250,
                 yPos);
 
-            yPos = doc.y + 10;
+            yPos = doc.y + 5;
 
-            doc.fontSize(10).text("1234567890",
-                doc.options.margins.left + 160,
+            doc.fontSize(10).text("DOI",
+                doc.options.margins.left + 140,
                 yPos);
 
-            doc.fontSize(10).text("963852741",
-                doc.options.margins.left + 250,
+            doc.fontSize(10).text("TELEFONO",
+                doc.options.margins.left + 220,
                 yPos);
 
 
-            yPos = doc.y + 20;
+            yPos = doc.y + 5;
 
             doc.fontSize(10).text("aval permatenerasd",
-                doc.options.margins.left + 160,
+                doc.options.margins.left + 140,
                 yPos);
 
             yPos = doc.y + 10;
 
             doc.fontSize(10).text("ven ami casa baby av. las rocas n° 126",
-                doc.options.margins.left + 160,
+                doc.options.margins.left + 140,
                 yPos);
 
             yPos = doc.y + 10;
 
-            doc.fontSize(10).text("localidad",
-                doc.options.margins.left + 160,
+            doc.fontSize(10).text("localidad JAUN",
+                doc.options.margins.left + 140,
                 yPos);
 
-            doc.fontSize(10).text("963852741",
+            doc.fontSize(10).text("MARIA",
                 doc.options.margins.left + 250,
                 yPos);
 
             yPos = doc.y + 10;
 
-            doc.fontSize(10).text("1234567890",
-                doc.options.margins.left + 160,
+            doc.fontSize(10).text("HOLA BEB",
+                doc.options.margins.left + 140,
                 yPos);
 
-            doc.fontSize(10).text("1234567890",
+            doc.fontSize(10).text("ESTAS LOCA",
                 doc.options.margins.left + 350,
                 yPos);
 
