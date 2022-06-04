@@ -1041,58 +1041,64 @@ class RepFactura {
                 yPos);
 
             yPos = 235;
-            console.log(yPos)
+            
 
             doc.fontSize(10).text("domicilio 12345",
                 doc.options.margins.left + 140,
                 yPos);
 
-            yPos = doc.y + 5;
+            yPos = 251.56;
 
             doc.fontSize(10).text("LIMA",
                 doc.options.margins.left + 240,
                 yPos);
 
-            yPos = doc.y + 2;
+            yPos = 264;
+           
 
-            doc.fontSize(10).text("DOI",
+            doc.fontSize(10).text("DOI |",
                 doc.options.margins.left + 140,
                 yPos);
 
-            doc.fontSize(10).text("TELEFONO",
+            doc.fontSize(10).text("TELEFONO |",
                 doc.options.margins.left + 230,
                 yPos);
 
 
-            yPos = doc.y + 10;
+            yPos = 284;
+           
 
-            doc.fontSize(10).text("aval permatenerasd",
-                doc.options.margins.left + 150,
+            doc.fontSize(10).text("aval permatenerasd |",
+                doc.options.margins.left + 170,
                 yPos);
 
-            yPos = doc.y + 11;
-
+            yPos = 305;
+            
             doc.fontSize(10).text("ven ami casa baby av. las rocas n° 126",
-                doc.options.margins.left + 140,
+                doc.options.margins.left + 120,
                 yPos);
 
-            yPos = doc.y + 15;
+            yPos = 330;
+           
 
-            doc.fontSize(10).text("localidad JAUN",
-                doc.options.margins.left + 140,
+            doc.fontSize(10).text("localidad",
+                doc.options.margins.left + 120,
                 yPos);
 
             doc.fontSize(10).text("MARIA",
-                doc.options.margins.left + 250,
+                doc.options.margins.left + 230,
                 yPos);
 
-            yPos = doc.y + 2;
+            yPos = 344;
+            console.log(yPos) 
 
-            doc.fontSize(10).text("HOLA BEB",
-                doc.options.margins.left + 140,
+            doc.fontSize(10).text("HOLA BEB |",
+                doc.options.margins.left + 120,
                 yPos);
 
-            doc.fontSize(10).text("ESTAS LOCA",
+                yPos = 350;
+
+            doc.fontSize(10).text("ESTAS LOCA |",
                 doc.options.margins.left + 350,
                 yPos);
 
