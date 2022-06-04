@@ -916,9 +916,9 @@ class RepFactura {
                 doc.options.margins.left + 80,
                 yPos);
 
-                doc.fontSize(8).text("0",
-                doc.options.margins.left + 400,
-                yPos);
+                // doc.fontSize(8).text("0",
+                // doc.options.margins.left + 400,
+                // yPos);
 
                 doc.fontSize(8).text(ar.monto,
                     doc.options.margins.left + 460,
@@ -928,7 +928,7 @@ class RepFactura {
                 yPos += 10;
             }
 
-            yPos = 320;
+            yPos = 323;
 
             console.log(yPos)
 
