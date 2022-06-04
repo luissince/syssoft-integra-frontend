@@ -848,7 +848,8 @@ class RepFactura {
     async repCobroA5(req) {
         try {
             const doc = new PDFDocument({
-                size: 'A5',
+                size: [595.28, 419.53],
+                // size: 'A5',
                 font: 'Helvetica',
                 // layout: 'landscape',
                 margins: {
@@ -859,6 +860,8 @@ class RepFactura {
                 }
             });
 
+            console.log(doc.page.width)
+            console.log(doc.page.height)
             // doc.info["Title"] = `${cabecera.comprobante} ${cabecera.serie + "-" + cabecera.numeracion}`
 
             let orgX = doc.x;
