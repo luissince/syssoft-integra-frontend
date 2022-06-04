@@ -240,7 +240,7 @@ class RepFactura {
             for (let item of arrayImpuestos) {
                 ypost = doc.y + 5;
 
-                text = item.nombre+ ":";
+                text = item.nombre + ":";
                 widthtext = doc.widthOfString(text);
 
                 subtext = numberFormat(item.valor, cabecera.codiso);
@@ -789,7 +789,7 @@ class RepFactura {
             for (let item of arrayImpuestos) {
                 ypost = doc.y + 5;
 
-                text = item.nombre+":";
+                text = item.nombre + ":";
                 widthtext = doc.widthOfString(text);
 
                 subtext = numberFormat(item.valor, cabecera.codiso);
@@ -845,7 +845,7 @@ class RepFactura {
         }
     }
 
-    async repCobroA5(req){
+    async repCobroA5(req) {
         try {
             const doc = new PDFDocument({
                 size: 'A5',
@@ -869,7 +869,13 @@ class RepFactura {
             let h2 = 11;
             let h3 = 9;
 
+            doc.rect(doc.x, doc.y,
+                doc.page.width - doc.options.margins.left - doc.options.margins.right,
+                doc.page.height - doc.options.margins.top-doc.options.margins.bottom).stroke();
+
             doc.image(path.join(__dirname, "..", "path/to/logo.png"), orgX, orgY, { width: 75, });
+
+
 
             doc.end();
             return getStream.buffer(doc);
@@ -1073,7 +1079,7 @@ class RepFactura {
                 align: "right",
             });
 
-            doc.end();  
+            doc.end();
 
             return getStream.buffer(doc);
         } catch (error) {
