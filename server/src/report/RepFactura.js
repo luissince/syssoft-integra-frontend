@@ -851,7 +851,7 @@ class RepFactura {
                 size: [595.28,395.28],
                 // size: 'A5',
                 font: 'Helvetica',
-                layout: 'portrait ',
+                // layout: 'portrait ',
                 margins: {
                     top: 40,
                     bottom: 40,
