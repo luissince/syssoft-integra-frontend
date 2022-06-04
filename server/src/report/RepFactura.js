@@ -1043,40 +1043,40 @@ class RepFactura {
             yPos = 230;
             console.log(yPos)
 
-            doc.fontSize(10).text("domicilio 45",
+            doc.fontSize(10).text("domicilio 12345",
                 doc.options.margins.left + 140,
                 yPos);
 
             yPos = doc.y + 5;
 
-            doc.fontSize(10).text("localitdad mi cada 123",
-                doc.options.margins.left + 250,
+            doc.fontSize(10).text("LIMA",
+                doc.options.margins.left + 240,
                 yPos);
 
-            yPos = doc.y + 5;
+            yPos = doc.y + 2;
 
             doc.fontSize(10).text("DOI",
                 doc.options.margins.left + 140,
                 yPos);
 
             doc.fontSize(10).text("TELEFONO",
-                doc.options.margins.left + 220,
+                doc.options.margins.left + 230,
                 yPos);
 
 
             yPos = doc.y + 5;
 
             doc.fontSize(10).text("aval permatenerasd",
-                doc.options.margins.left + 140,
+                doc.options.margins.left + 150,
                 yPos);
 
-            yPos = doc.y + 10;
+            yPos = doc.y + 11;
 
             doc.fontSize(10).text("ven ami casa baby av. las rocas n° 126",
                 doc.options.margins.left + 140,
                 yPos);
 
-            yPos = doc.y + 10;
+            yPos = doc.y + 15;
 
             doc.fontSize(10).text("localidad JAUN",
                 doc.options.margins.left + 140,
@@ -1086,7 +1086,7 @@ class RepFactura {
                 doc.options.margins.left + 250,
                 yPos);
 
-            yPos = doc.y + 10;
+            yPos = doc.y + 2;
 
             doc.fontSize(10).text("HOLA BEB",
                 doc.options.margins.left + 140,
