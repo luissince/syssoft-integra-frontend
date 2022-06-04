@@ -984,7 +984,7 @@ class RepFactura {
 
             // doc.image(path.join(__dirname, "..", "path/to/logo.png"), orgX, orgY, { width: 75, });
             // console.log(doc.y)
-            let yPos = 123;
+            let yPos = 140;
 
             doc.fontSize(10).text("12345",
                 doc.options.margins.left + 100,
@@ -995,25 +995,25 @@ class RepFactura {
                 yPos);
 
             doc.fontSize(10).text("20/20/20202",
-                doc.options.margins.left + 210,
-                yPos+20);
+                doc.options.margins.left + 230,
+                yPos+15);
 
             doc.fontSize(10).text("lima perú",
                 doc.options.margins.left + 320,
                 yPos);
 
             doc.fontSize(10).text("20/20/20202",
-                doc.options.margins.left + 370,
+                doc.options.margins.left + 360,
                 yPos+20);
 
             doc.fontSize(10).text("SOLES",
                 doc.options.margins.left + 460,
                 yPos);
 
-            yPos = doc.y + 30;
+            yPos = doc.y + 50;
 
             doc.fontSize(10).text("monto en letras",
-                doc.options.margins.left + 180,
+                doc.options.margins.left + 160,
                 yPos);
 
             yPos = doc.y + 10;
