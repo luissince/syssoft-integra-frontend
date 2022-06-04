@@ -879,13 +879,59 @@ class RepFactura {
 
             doc.image(path.join(__dirname, "..", "path/to/logo.png"), orgX, orgY, { width: 75, });
 
-            doc.fontSize(10).text("fecha",
-                doc.options.margins.left + 22,
-                doc.y + 12);
+            let yPos = doc.y;
 
-            doc.fontSize(10).text("socio",
+            doc.fontSize(10).text("24/06/2021",
                 doc.options.margins.left + 22,
-                doc.y);
+                yPos + 12);
+
+            doc.fontSize(9).text("00000002508",
+                doc.options.margins.left + 400,
+                yPos + 12);
+
+
+            yPos = doc.y;
+
+            doc.fontSize(10).text("HERRERA CARDOZO ROSARIO DEL CARMEN 000000",
+                doc.options.margins.left + 22,
+                yPos);
+
+            doc.fontSize(10).text("MASADASDAS",
+                doc.options.margins.left + 400,
+                yPos);
+
+            let array = [{ "id": "123121", "name": "asdas asdas", "monto": "S/ 10000.00" },
+            { "id": "123121", "name": "asdas asdas", "monto": "S/ 10000.00" },
+            { "id": "123121", "name": "asdas asdas", "monto": "S/ 10000.00" }];
+
+
+            yPos = doc.y + 50;
+
+            for (let ar of array) {
+                doc.fontSize(10).text(ar.id,
+                doc.options.margins.left + 22,
+                yPos);
+
+                doc.fontSize(10).text(ar.name,
+                doc.options.margins.left + 100,
+                yPos);
+
+                doc.fontSize(10).text(ar.monto,
+                doc.options.margins.left + 400,
+                yPos);
+
+                yPos += 10;
+            }
+
+            yPos = doc.y + 100;
+
+            doc.fontSize(10).text("Monto el letras sii...........",
+                doc.options.margins.left + 22,
+                yPos);
+
+                doc.fontSize(10).text("S/ 600000.00",
+                doc.options.margins.left + 400,
+                yPos);
 
 
             doc.end();
