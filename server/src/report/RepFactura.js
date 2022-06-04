@@ -848,10 +848,10 @@ class RepFactura {
     async repCobroA5(req) {
         try {
             const doc = new PDFDocument({
-                size: [595.28,395.28],
-                // size: 'A5',
-                font: 'Helvetica',
-                // layout: 'portrait ',
+                // size: [595.28,(841.98/2)],
+                size: 'A4',
+                // font: 'Helvetica',
+                // layout: 'landscape',
                 margins: {
                     top: 40,
                     bottom: 40,
@@ -873,9 +873,9 @@ class RepFactura {
             let h2 = 11;
             let h3 = 9;
 
-            doc.rect(doc.x, doc.y,
-                doc.page.width - doc.options.margins.left - doc.options.margins.right,
-                doc.page.height - doc.options.margins.top - doc.options.margins.bottom).stroke();
+            // doc.rect(doc.x, doc.y,
+            //     doc.page.width - doc.options.margins.left - doc.options.margins.right,
+            //     doc.page.height - doc.options.margins.top - doc.options.margins.bottom).stroke();
 
             doc.image(path.join(__dirname, "..", "path/to/logo.png"), orgX, orgY, { width: 75, });
 
