@@ -850,7 +850,7 @@ class RepFactura {
             const doc = new PDFDocument({
                 size: 'A5',
                 font: 'Helvetica',
-                // layout: 'landscape',
+                layout: 'landscape',
                 margins: {
                     top: 40,
                     bottom: 40,
