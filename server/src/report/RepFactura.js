@@ -1050,7 +1050,7 @@ class RepFactura {
             yPos = 251.56;
 
             doc.fontSize(10).text("LIMA",
-                doc.options.margins.left + 240,
+                doc.options.margins.left + 230,
                 yPos);
 
             yPos = 263;
