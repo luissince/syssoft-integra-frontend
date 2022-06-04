@@ -943,17 +943,21 @@ class Factura {
             v.estado,
             m.idMoneda,
             m.simbolo,
+            IFNULL(v.xmlSunat,'') AS xmlSunat,
+            IFNULL(v.xmlDescripcion,'') AS xmlDescripcion,
             IFNULL(SUM(vd.precio*vd.cantidad),0) AS total
             FROM venta AS v 
             INNER JOIN cliente AS c ON v.idCliente = c.idCliente
             INNER JOIN comprobante AS co ON v.idComprobante = co.idComprobante
             INNER JOIN moneda AS m ON v.idMoneda = m.idMoneda
             LEFT JOIN ventaDetalle AS vd ON vd.idVenta = v.idVenta
+            WHERE co.tipo = 1
             
             GROUP BY v.idVenta
             ORDER BY v.fecha DESC, v.hora DESC
             LIMIT ?,?`, [
-
+                parseInt(req.query.posicionPagina),
+                parseInt(req.query.filasPorPagina)
             ]);
 
             let resultLista = lista.map(function (item, index) {
@@ -967,8 +971,9 @@ class Factura {
             FROM venta AS v 
             INNER JOIN cliente AS c ON v.idCliente = c.idCliente
             INNER JOIN comprobante as co ON v.idComprobante = co.idComprobante
-            INNER JOIN moneda AS m ON v.idMoneda = m.idMoneda`, [
-
+            INNER JOIN moneda AS m ON v.idMoneda = m.idMoneda
+            WHERE co.tipo = 1`, [
+                
             ]);
 
 

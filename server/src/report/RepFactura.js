@@ -50,7 +50,7 @@ class RepFactura {
             doc.fontSize(h3).text(
                 `${sedeInfo.direccion}\nCelular: ${sedeInfo.celular} / Telefono: ${sedeInfo.telefono}\n${sedeInfo.email}`,
                 doc.options.margins.left + 150,
-                orgY + 27,
+                doc.y,
                 {
                     width: center,
                     align: "center",
@@ -76,7 +76,7 @@ class RepFactura {
             doc.fontSize(h3).opacity(0.7).text(
                 "INFORMACIÓN",
                 doc.options.margins.top,
-                doc.y + 20
+                doc.y + 30
             );
 
             doc.opacity(1).fill("#000000");
@@ -240,7 +240,7 @@ class RepFactura {
             for (let item of arrayImpuestos) {
                 ypost = doc.y + 5;
 
-                text = item.nombre;
+                text = item.nombre+ ":";
                 widthtext = doc.widthOfString(text);
 
                 subtext = numberFormat(item.valor, cabecera.codiso);
@@ -360,7 +360,7 @@ class RepFactura {
             doc.fontSize(h3).text(
                 `${sedeInfo.direccion}\nCelular: ${sedeInfo.celular} / Telefono: ${sedeInfo.telefono}\n${sedeInfo.email}`,
                 doc.options.margins.left + 150,
-                orgY + 27,
+                doc.y,
                 {
                     width: center,
                     align: "center",
@@ -386,7 +386,7 @@ class RepFactura {
             doc.fontSize(h3).fill('#777').text(
                 "INFORMACIÓN",
                 doc.options.margins.top,
-                doc.y + 20
+                doc.y + 30
             );
 
             doc.fill("#000000");
@@ -647,7 +647,7 @@ class RepFactura {
             doc.fontSize(h3).text(
                 `${sedeInfo.direccion}\nCelular: ${sedeInfo.celular} / Telefono: ${sedeInfo.telefono}\n${sedeInfo.email}`,
                 doc.options.margins.left + 150,
-                orgY + 27,
+                doc.y,
                 {
                     width: center,
                     align: "center",
@@ -673,12 +673,14 @@ class RepFactura {
             doc.fontSize(h3).fill('#777').text(
                 "INFORMACIÓN",
                 doc.options.margins.top,
-                doc.y + 20
+                doc.y + 30
             );
 
             doc.fill("#000000");
 
             let topCebecera = doc.y + 5;
+
+            doc.lineGap(4);
 
             doc.fontSize(h3).text(
                 `Tipo de documento: ${cabecera.tipoDoc} \nN° de documento: ${cabecera.documento} \nNombre/Razón Social: ${cabecera.informacion}\nDirección: ${cabecera.direccion}`,
@@ -691,6 +693,8 @@ class RepFactura {
                 medioX,
                 topCebecera
             );
+
+            doc.lineGap(0);
 
             doc.x = doc.options.margins.left;
 
@@ -766,18 +770,17 @@ class RepFactura {
             let subtext = numberFormat(subTotal, cabecera.codiso);
             let widthsubtext = doc.widthOfString(subtext);
 
-            doc.text(text,
+            doc.font('Helvetica').text(text,
                 doc.page.width - doc.options.margins.right - widthtext - widthsubtext - 20,
                 ypost, {
                 width: widthtext + 10,
                 align: "right",
             });
 
-            doc.text(subtext,
+            doc.font('Helvetica-Bold').text(subtext,
                 doc.page.width - doc.options.margins.right - widthsubtext,
                 ypost, {
                 width: widthsubtext,
-                stroke: true,
                 align: "right",
             });
 
@@ -786,24 +789,23 @@ class RepFactura {
             for (let item of arrayImpuestos) {
                 ypost = doc.y + 5;
 
-                text = item.nombre;
+                text = item.nombre+":";
                 widthtext = doc.widthOfString(text);
 
                 subtext = numberFormat(item.valor, cabecera.codiso);
                 widthsubtext = doc.widthOfString(subtext);
 
-                doc.text(text,
+                doc.font('Helvetica').text(text,
                     doc.page.width - doc.options.margins.right - widthtext - widthsubtext - 20,
                     ypost, {
                     width: widthtext + 10,
                     align: "right",
                 });
 
-                doc.text(subtext,
+                doc.font('Helvetica-Bold').text(subtext,
                     doc.page.width - doc.options.margins.right - widthsubtext,
                     ypost, {
                     width: widthsubtext,
-                    stroke: true,
                     align: "right",
                 });
             }
@@ -817,22 +819,21 @@ class RepFactura {
             subtext = numberFormat(total, cabecera.codiso);
             widthsubtext = doc.widthOfString(subtext);
 
-            doc.text(text,
+            doc.font('Helvetica').text(text,
                 doc.page.width - doc.options.margins.right - widthtext - widthsubtext - 20,
                 ypost, {
                 width: widthtext + 10,
                 align: "right",
             });
 
-            doc.text(subtext,
+            doc.font('Helvetica-Bold').text(subtext,
                 doc.page.width - doc.options.margins.right - widthsubtext,
                 ypost, {
                 width: widthsubtext,
-                stroke: true,
                 align: "right",
             });
 
-            doc.fontSize(h3).text(`SON: ${numberLleters.getResult(formatMoney(total), cabecera.moneda)}`,
+            doc.font('Helvetica').fontSize(h3).text(`SON: ${numberLleters.getResult(formatMoney(total), cabecera.moneda)}`,
                 doc.options.margins.left,
                 doc.y + 5);
 

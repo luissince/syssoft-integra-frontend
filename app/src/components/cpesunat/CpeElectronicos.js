@@ -4,13 +4,18 @@ import {
     spinnerLoading,
     numberFormat,
     timeForma24,
+    limitarCadena,
     ModalAlertInfo,
     ModalAlertDialog,
     ModalAlertSuccess,
     ModalAlertWarning,
     ModalAlertError,
-    statePrivilegio
 } from '../tools/Tools';
+import sunat from '../../recursos/images/sunat.png';
+import reuse from '../../recursos/images/reuse.svg';
+import accept from '../../recursos/images/accept.svg';
+import unable from '../../recursos/images/unable.svg';
+import error from '../../recursos/images/error.svg';
 import { connect } from 'react-redux';
 import Paginacion from '../tools/Paginacion';
 
@@ -23,6 +28,13 @@ class CpeElectronicos extends React.Component {
             loading: false,
             lista: [],
 
+            fechaInicio: '',
+            fechaFinal: '',
+            idComprobante: '',
+            comprobantes: [],
+            idEstado: 0,
+            estados: [{ "id": 0, "nombre": "TODO" }, { "id": 1, "nombre": "DECLARAR", }, { "id": 2, "nombre": "ANULADO", }],
+
             opcion: 0,
             paginacion: 0,
             totalPaginacion: 0,
@@ -33,6 +45,12 @@ class CpeElectronicos extends React.Component {
         this.refTxtSearch = React.createRef();
 
         this.abortControllerTable = new AbortController();
+    }
+
+    setStateAsync(state) {
+        return new Promise((resolve) => {
+            this.setState(state, resolve)
+        });
     }
 
     componentDidMount() {
@@ -115,6 +133,41 @@ class CpeElectronicos extends React.Component {
         }
     }
 
+    onEventSendFactura = (idVenta) => {
+        ModalAlertDialog("Facturación", "¿Está seguro de enviar el comprobante electrónico?", async (value) => {
+            if (value) {
+                try {
+                    ModalAlertInfo("Facturación", "Firmando xml y enviando a sunat.");
+
+                    let result = await axios.get("http://localhost:8080/ApiCPESunat/app/examples/boleta.php", {
+                        params: {
+                            "idventa": idVenta
+                        }
+                    });
+
+                    let object = result.data;
+                    if (object.state) {
+                        if (object.accept) {
+                            ModalAlertSuccess("Facturación", "Código " + object.code + " " + object.description, () => {
+                                this.onEventPaginacion()
+                            });
+                        } else {
+                            ModalAlertWarning("Facturación", "Código " + object.code + " " + object.description);
+                        }
+                    } else {
+                        ModalAlertWarning("Facturación", "Código " + object.code + " " + object.description);
+                    }
+                } catch (error) {
+                    if (error.response) {
+                        ModalAlertWarning("Facturación", error.response.data);
+                    } else {
+                        ModalAlertError("Facturación", "Se produjo un error interno, intente nuevamente por favor.");
+                    }
+                }
+            }
+        });
+    }
+
     render() {
         return (
             <>
@@ -122,6 +175,73 @@ class CpeElectronicos extends React.Component {
                     <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
                         <div className="form-group">
                             <h5>Comprobante de Pago Electrónico <small className="text-secondary">LISTA</small></h5>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="row">
+                    <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
+                        <div className="form-group">
+                            <span>Resumen de Boletas/Facturas/Nota Crédito/Nota Débito</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="row">
+                    <div className='col-lg-2 col-md-2 col-sm-12 col-xs-12'>
+                        <div className="form-group">
+                            <img src={sunat} width="24" /> <span>Estados SUNAT:</span>
+                        </div>
+                    </div>
+                    <div className='col-lg-2 col-md-2 col-sm-12 col-xs-12'>
+                        <div className="form-group">
+                            <img src={accept} width="24" /> <span>Aceptado</span>
+                        </div>
+                    </div>
+                    <div className='col-lg-2 col-md-2 col-sm-12 col-xs-12'>
+                        <div className="form-group">
+                            <img src={unable} width="24" /> <span>Rechazado</span>
+                        </div>
+                    </div>
+                    <div className='col-lg-2 col-md-2 col-sm-12 col-xs-12'>
+                        <div className="form-group">
+                            <img src={reuse} width="24" /> <span>Pendiente de Envío</span>
+                        </div>
+                    </div>
+                    <div className='col-lg-2 col-md-2 col-sm-12 col-xs-12'>
+                        <div className="form-group">
+                            <img src={error} width="24" /> <span> Comunicación de Baja (Anulado)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="row">
+                    <div className='col-lg-3 col-md-3 col-sm-12 col-xs-12'>
+                        <div className="form-group">
+                            <label>Fecha de Inicio:</label>
+                            <input className="form-control" type="date" />
+                        </div>
+                    </div>
+                    <div className='col-lg-3 col-md-3 col-sm-12 col-xs-12'>
+                        <div className="form-group">
+                            <label>Fecha de Fin:</label>
+                            <input className="form-control" type="date" />
+                        </div>
+                    </div>
+                    <div className='col-lg-3 col-md-3 col-sm-12 col-xs-12'>
+                        <div className="form-group">
+                            <label>Comprobantes:</label>
+                            <select className="form-control">
+                                <option value="">TODOS</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div className='col-lg-3 col-md-3 col-sm-12 col-xs-12'>
+                        <div className="form-group">
+                            <label>Estados:</label>
+                            <select className="form-control">
+                                <option value="">TODOS</option>
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -142,11 +262,7 @@ class CpeElectronicos extends React.Component {
                     </div>
                     <div className="col-md-6 col-sm-12">
                         <div className="form-group">
-                            <button className="btn btn-outline-info" >
-                                <i className="bi bi-file-plus"></i> Nuevo Registro
-                            </button>
-                            {" "}
-                            <button className="btn btn-outline-secondary">
+                            <button className="btn btn-outline-light" onClick={() => this.loadInit()}>
                                 <i className="bi bi-arrow-clockwise"></i>
                             </button>
                         </div>
@@ -159,16 +275,16 @@ class CpeElectronicos extends React.Component {
                             <table className="table table-striped table-bordered rounded">
                                 <thead>
                                     <tr>
-                                    <th width="5%" className="text-center">#</th>
-                                        <th width="10%">Cliente</th>
-                                        <th width="10%">Comprobante</th>
+                                        <th width="5%" className="text-center">#</th>
+                                        <th width="5%">Pdf</th>
+                                        <th width="5%">Xml</th>
                                         <th width="10%">Fecha</th>
-                                        <th width="10%">Tipo</th>
+                                        <th width="10%">Comprobante</th>
+                                        <th width="10%">Cliente</th>
+                                        <th width="10%">Estado</th>
                                         <th width="10%">Total</th>
-                                        <th width="10%" className="text-center">Estado</th>
-                                        <th width="5%" className="text-center">Detalle</th>
-                                        {/* <th width="5%" className="text-center">Editar</th> */}
-                                        <th width="5%" className="text-center">Anular</th>
+                                        <th width="10%">Estado Sunat</th>
+                                        <th width="10%">Observación SUNAT</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -185,41 +301,39 @@ class CpeElectronicos extends React.Component {
                                             </tr>
                                         ) : (
                                             this.state.lista.map((item, index) => {
+                                                // console.log(item)
+
+                                                const estadoSunat = item.estado === 3 ?
+                                                    <button className="btn btn-light btn-sm" onClick={() => this.onEventSendFactura(item.idVenta)}><img src={error} width="22" /></button>
+                                                    : item.xmlSunat === "" ?
+                                                        <button className="btn btn-light btn-sm" onClick={() => this.onEventSendFactura(item.idVenta)}><img src={reuse} width="22" /></button>
+                                                        : item.xmlSunat === "0" ?
+                                                            <button className="btn btn-light btn-sm" ><img src={accept} width="22" /></button>
+                                                            : <button className="btn btn-light btn-sm" onClick={() => this.onEventSendFactura(item.idVenta)}><img src={unable} width="22" /></button>;
+
+                                                const descripcion = (item.xmlDescripcion === "" ? "Por Generar Xml" : limitarCadena(item.xmlDescripcion, 90, '...'));
+
                                                 return (
                                                     <tr key={index}>
                                                         <td className="text-center">{item.id}</td>
-                                                        <td>{item.documento}{<br />}{item.informacion}</td>
-                                                        <td>{item.comprobante}{<br />}{item.serie + "-" + item.numeracion}</td>
+                                                        <td><button className="btn btn-danger btn-sm"><i className="fa fa-file-pdf-o"></i></button></td>
+                                                        <td><button className="btn btn-success btn-sm"><i className="fa fa-file-excel-o"></i></button></td>
                                                         <td>{<span>{item.fecha}</span>}{<br></br>}{<span>{timeForma24(item.hora)}</span>}</td>
-                                                        <td>
-                                                            {item.tipo === 1
-                                                                ? <span>Contado</span>
-                                                                : <span>Crédito</span>}
-                                                        </td>
-                                                        <td>{numberFormat(item.total)}</td>
+                                                        <td>{item.comprobante}{<br />}{item.serie + "-" + item.numeracion}</td>
+                                                        <td>{item.documento}{<br />}{item.informacion}</td>
+
+
                                                         <td className="text-center">
                                                             {
-                                                                item.estado === 1
-                                                                    ? <span className="text-success">Cobrado</span>
-                                                                    : item.estado === 2 ?
-                                                                        <span className="text-warning">Por Cobrar</span>
-                                                                        : <span className="text-danger">Anulado</span>
+                                                                item.estado === 3
+                                                                    ? <span className="text-danger">ANULADO</span>
+                                                                    : <span className="text-success">DECLARAR</span>
                                                             }
                                                         </td>
-                                                        <td className="text-center">
-                                                            <button
-                                                                className="btn btn-outline-primary btn-sm"
-                                                                title="Ver detalle">
-                                                                <i className="fa fa-eye"></i>
-                                                            </button>
-                                                        </td>
-                                                        <td className="text-center">
-                                                            <button
-                                                                className="btn btn-outline-danger btn-sm"
-                                                                title="Anular">
-                                                                <i className="fa fa-remove"></i>
-                                                            </button>
-                                                        </td>
+
+                                                        <td>{numberFormat(item.total)}</td>
+                                                        <td className="text-center">{estadoSunat}</td>
+                                                        <td>{descripcion}</td>
                                                     </tr>
                                                 )
                                             })

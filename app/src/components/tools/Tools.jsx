@@ -240,6 +240,13 @@ export function getCookie(cname) {
   return "";
 }
 
+export function limitarCadena(cadena, limite, sufijo) {
+  if (cadena.length > limite) {
+      return cadena.substr(0, limite) + sufijo;
+  }
+  return cadena;
+}
+
 export function calculateTaxBruto(impuesto, monto) {
   return monto / ((impuesto + 100) * 0.01);
 }
