@@ -119,6 +119,17 @@ router.get('/repcomprobantea5', async function (req, res) {
     }
 })
 
+router.get('/repletra5', async function (req, res) {
+    let data = await repFactura.repLetraA5(req);
+    if (typeof data === 'string') {
+        res.status(500).send(data);
+    } else {
+        res.setHeader('Content-disposition', `inline; filename=comprobantea5.pdf`);
+        res.contentType("application/pdf");
+        res.send(data);
+    }
+})
+
 router.get("/repcreditolote", async function (req, res) {
     const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
     req.query.idSede = decryptedData.idSede;
