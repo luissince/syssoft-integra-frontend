@@ -1003,41 +1003,43 @@ class RepFactura {
                 yPos);
 
             doc.fontSize(10).text("20/20/20202 |",
-                doc.options.margins.left + 380,
-                yPos+9);
+                doc.options.margins.left + 385,
+                yPos+8);
 
             doc.fontSize(10).text("SOLES |",
                 doc.options.margins.left + 470,
                 yPos);
 
-            yPos = 170;
+            yPos = 172;
 
-            doc.fontSize(10).text("monto en letras",
+            doc.fontSize(10).text("monto en letras |",
                 doc.options.margins.left + 160,
                 yPos);
 
-            yPos = doc.y + 10;
+            yPos = 194;
 
-            doc.fontSize(10).text("afectanasdas asd",
+            console.log(yPos)
+
+            doc.fontSize(10).text("afectanasdas asd |",
                 doc.options.margins.left + 140,
                 yPos);
 
             yPos = doc.y + 10;
 
-            doc.fontSize(10).text("BCP",
-                doc.options.margins.left + 300,
+            doc.fontSize(10).text("BCP |",
+                doc.options.margins.left + 320,
                 yPos);
 
-            doc.fontSize(10).text("office",
+            doc.fontSize(10).text("office |",
                 doc.options.margins.left + 370,
                 yPos);
 
-            doc.fontSize(10).text("12345678901",
-                doc.options.margins.left + 400,
+            doc.fontSize(10).text("12345678901 |",
+                doc.options.margins.left + 420,
                 yPos);
 
-            doc.fontSize(10).text("56230",
-                doc.options.margins.left + 480,
+            doc.fontSize(10).text("56230 |",
+                doc.options.margins.left + 500,
                 yPos);
 
             yPos = doc.y + 3;
