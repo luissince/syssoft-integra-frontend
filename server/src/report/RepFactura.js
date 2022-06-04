@@ -984,7 +984,7 @@ class RepFactura {
 
             // doc.image(path.join(__dirname, "..", "path/to/logo.png"), orgX, orgY, { width: 75, });
             // console.log(doc.y)
-            let yPos = 140;
+            let yPos = 130;
 
             doc.fontSize(10).text("12345",
                 doc.options.margins.left + 100,
