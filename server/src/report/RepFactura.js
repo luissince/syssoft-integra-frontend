@@ -860,8 +860,8 @@ class RepFactura {
                 }
             });
 
-            console.log(doc.page.width)
-            console.log(doc.page.height)
+            // console.log(doc.page.width)
+            // console.log(doc.page.height)
             // doc.info["Title"] = `${cabecera.comprobante} ${cabecera.serie + "-" + cabecera.numeracion}`
 
             let orgX = doc.x;
@@ -877,26 +877,26 @@ class RepFactura {
             //     doc.page.width - doc.options.margins.left - doc.options.margins.right,
             //     doc.page.height - doc.options.margins.top - doc.options.margins.bottom).stroke();
 
-            doc.image(path.join(__dirname, "..", "path/to/logo.png"), orgX, orgY, { width: 75, });
+            // doc.image(path.join(__dirname, "..", "path/to/logo.png"), orgX, orgY, { width: 75, });
+            // console.log(doc.y)
+            let yPos = 101.00;
 
-            let yPos = doc.y;
-
-            doc.fontSize(10).text("24/06/2021 |",
+            doc.fontSize(10).text("24/06/2021 |-",
                 doc.options.margins.left + 22,
                 yPos + 14);
 
-            doc.fontSize(9).text("00000002508 |",
+            doc.fontSize(9).text("00000002508 |-",
                 doc.options.margins.left + 400,
                 yPos + 14);
 
 
-            yPos = doc.y+5;
+            yPos = doc.y+4;
 
-            doc.fontSize(10).text("HERRERA CARDOZO ROSARIO DEL CARMEN 000000",
+            doc.fontSize(10).text("HERRERA CARDOZO ROSARIO DEL CARMEN 000000 |-",
                 doc.options.margins.left + 22,
                 yPos);
 
-            doc.fontSize(10).text("MASADASDAS",
+            doc.fontSize(10).text("MASADASDAS |-",
                 doc.options.margins.left + 400,
                 yPos);
 
@@ -905,7 +905,7 @@ class RepFactura {
             { "id": "123121", "name": "asdas asdas", "monto": "S/ 10000.00" }];
 
 
-            yPos = doc.y + 30;
+            yPos = doc.y + 20;
 
             for (let ar of array) {
                 doc.fontSize(10).text(ar.id,
@@ -916,11 +916,11 @@ class RepFactura {
                 doc.options.margins.left + 80,
                 yPos);
 
-                doc.fontSize(10).text("0",
+                doc.fontSize(8).text("0",
                 doc.options.margins.left + 400,
                 yPos);
 
-                doc.fontSize(10).text(ar.monto,
+                doc.fontSize(8).text(ar.monto,
                     doc.options.margins.left + 460,
                     yPos);
     
@@ -928,15 +928,15 @@ class RepFactura {
                 yPos += 10;
             }
 
-            yPos = 305;
+            yPos = 310;
 
             console.log(yPos)
 
-            doc.fontSize(10).text("Monto el letras sii...........",
+            doc.fontSize(10).text("Monto el letras sii...........|-",
                 doc.options.margins.left + 10,
                 yPos);
 
-                doc.fontSize(10).text("S/ 600000.00",
+                doc.fontSize(8).text("S/ 600000.00|-",
                 doc.options.margins.left + 460,
                 yPos);
 
