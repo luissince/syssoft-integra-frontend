@@ -986,9 +986,6 @@ class RepFactura {
             // console.log(doc.y)
             let yPos = 323;
 
-
-            yPos = doc.y + 3;
-
             doc.fontSize(10).text("12345",
                 doc.options.margins.left + 80,
                 yPos);
