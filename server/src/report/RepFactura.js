@@ -890,7 +890,7 @@ class RepFactura {
                 yPos + 14);
 
 
-            yPos = doc.y+4;
+            yPos = doc.y+3;
 
             doc.fontSize(10).text("HERRERA CARDOZO ROSARIO DEL CARMEN 000000 |-",
                 doc.options.margins.left + 22,
@@ -905,7 +905,7 @@ class RepFactura {
             { "id": "123121", "name": "asdas asdas", "monto": "S/ 10000.00" }];
 
 
-            yPos = doc.y + 20;
+            yPos = doc.y + 25;
 
             for (let ar of array) {
                 doc.fontSize(10).text(ar.id,
@@ -928,7 +928,7 @@ class RepFactura {
                 yPos += 10;
             }
 
-            yPos = 310;
+            yPos = 320;
 
             console.log(yPos)
 
