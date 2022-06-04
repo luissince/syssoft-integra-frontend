@@ -848,7 +848,7 @@ class RepFactura {
     async repCobroA5(req) {
         try {
             const doc = new PDFDocument({
-                size: [419.53,595.28],
+                size: [595.28,595.28],
                 // size: 'A5',
                 font: 'Helvetica',
                 // layout: 'landscape',
@@ -879,13 +879,13 @@ class RepFactura {
 
             doc.image(path.join(__dirname, "..", "path/to/logo.png"), orgX, orgY, { width: 75, });
 
-            doc.fontSize(12).text("fecha",
-                doc.options.margins.left + 20,
-                doc.y + 10);
+            doc.fontSize(10).text("fecha",
+                doc.options.margins.left + 22,
+                doc.y + 12);
 
-            doc.fontSize(12).text("socio",
-                doc.options.margins.left + 20,
-                doc.y + 5);
+            doc.fontSize(10).text("socio",
+                doc.options.margins.left + 22,
+                doc.y);
 
 
             doc.end();
