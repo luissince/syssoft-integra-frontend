@@ -1010,15 +1010,13 @@ class RepFactura {
                 doc.options.margins.left + 470,
                 yPos);
 
-            yPos = 172;
+            yPos = 171;
 
             doc.fontSize(10).text("monto en letras |",
-                doc.options.margins.left + 160,
+                doc.options.margins.left + 150,
                 yPos);
 
-            yPos = 194;
-
-            console.log(yPos)
+            yPos = 205;
 
             doc.fontSize(10).text("afectanasdas asd |",
                 doc.options.margins.left + 140,
@@ -1039,10 +1037,11 @@ class RepFactura {
                 yPos);
 
             doc.fontSize(10).text("56230 |",
-                doc.options.margins.left + 500,
+                doc.options.margins.left + 490,
                 yPos);
 
-            yPos = doc.y + 3;
+            yPos = 230;
+            console.log(yPos)
 
             doc.fontSize(10).text("domicilio 45",
                 doc.options.margins.left + 140,
