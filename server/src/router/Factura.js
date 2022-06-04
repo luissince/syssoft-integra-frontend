@@ -108,6 +108,17 @@ router.get('/repcomprobante', async function (req, res) {
     }
 })
 
+router.get('/repcomprobantea5', async function (req, res) {
+    let data = await repFactura.repCobroA5(req);
+    if (typeof data === 'string') {
+        res.status(500).send(data);
+    } else {
+        res.setHeader('Content-disposition', `inline; filename=comprobantea5.pdf`);
+        res.contentType("application/pdf");
+        res.send(data);
+    }
+})
+
 router.get("/repcreditolote", async function (req, res) {
     const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
     req.query.idSede = decryptedData.idSede;
@@ -165,7 +176,7 @@ router.get("/repgeneralventas", async function (req, res) {
     const ventas = await factura.detalleVenta(req)
 
     if (Array.isArray(ventas)) {
- 
+
         let data = await repFactura.repVentas(req, sedeInfo, ventas);
 
         if (typeof data === 'string') {
@@ -182,7 +193,7 @@ router.get("/repgeneralventas", async function (req, res) {
 
 router.get('/excelgeneralventas', async function (req, res) {
     const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
- 
+
     req.query.idSede = "SD0001";
     req.query.fechaIni = decryptedData.fechaIni;
     req.query.fechaFin = decryptedData.fechaFin;
@@ -190,10 +201,10 @@ router.get('/excelgeneralventas', async function (req, res) {
     req.query.idCliente = decryptedData.idCliente;
     req.query.idUsuario = decryptedData.idUsuario;
     req.query.tipoVenta = decryptedData.tipoVenta;
-   
+
     req.query.comprobante = decryptedData.comprobante;
     req.query.cliente = decryptedData.cliente;
-    req.query.usuario = decryptedData.usuario; 
+    req.query.usuario = decryptedData.usuario;
     req.query.tipo = decryptedData.tipo;
 
     const sedeInfo = await sede.infoSedeReporte(req)

@@ -845,6 +845,41 @@ class RepFactura {
         }
     }
 
+    async repCobroA5(req){
+        try {
+            const doc = new PDFDocument({
+                size: 'A5',
+                font: 'Helvetica',
+                margins: {
+                    top: 40,
+                    bottom: 40,
+                    left: 40,
+                    right: 40
+                }
+            });
+
+            // doc.info["Title"] = `${cabecera.comprobante} ${cabecera.serie + "-" + cabecera.numeracion}`
+
+            let orgX = doc.x;
+            let orgY = doc.y;
+
+            let medioX = doc.page.width / 2;
+
+            let h1 = 13;
+            let h2 = 11;
+            let h3 = 9;
+
+            doc.image(path.join(__dirname, "..", "path/to/logo.png"), orgX, orgY, { width: 75, });
+
+            doc.end();
+            return getStream.buffer(doc);
+
+        } catch (error) {
+            console.log(error);
+            return "Se genero un error al generar el reporte.";
+        }
+    }
+
     duplicateImpuestos(array, impuesto) {
         let value = false
         for (let item of array) {
