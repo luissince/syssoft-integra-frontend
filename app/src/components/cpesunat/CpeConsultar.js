@@ -254,7 +254,7 @@ class CpeElectronicos extends React.Component {
     }
 
     onEventDownload() {
-        let ruta_completa = "http://localhost:8090/app/files/" + this.state.file;
+        let ruta_completa = "http://sunat.inmobiliariagmyc.com/app/files/" + this.state.file;
         window.open(ruta_completa, 'Download');
     }
 
