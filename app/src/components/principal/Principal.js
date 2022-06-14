@@ -1,5 +1,4 @@
 import React from 'react';
-import './Principal.css';
 import axios from 'axios';
 import { Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
@@ -7,7 +6,7 @@ import { signOut, selectProject } from '../../redux/actions';
 import { spinnerLoading } from '../tools/Tools';
 
 import noImage from '../../recursos/images/noimage.jpg'
-import logoInmobiliaria from './INMOBILIARIA.png';
+import logoInmobiliaria from '../../recursos/images/INMOBILIARIA.png';
 
 class Principal extends React.Component {
 

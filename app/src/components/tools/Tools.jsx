@@ -1,6 +1,16 @@
 import bootstrap from "../../recursos/js/bootstrap";
 import Swal from "../../recursos/js/sweetalert";
 
+export function makeid(length) {
+  var result = "";
+  var characters = '0123456789';
+  for (var i = 0; i < length; i++) {
+    result += characters[Math.floor(Math.random() * characters.length)];
+  }
+  result = result.match(/\d{1,4}/g).join("");
+  return result;
+}
+
 export function statePrivilegio(value){
   if(value === undefined) return false;
   return value === 1 ? true : false;

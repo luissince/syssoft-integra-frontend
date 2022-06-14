@@ -1,6 +1,5 @@
 import React from 'react';
 import axios from 'axios';
-import { getCookie } from '../tools/Tools';
 import { Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { signIn } from '../../redux/actions';
@@ -40,8 +39,8 @@ class Login extends React.Component {
         window.removeEventListener('focus', this.onEventFocused)
     }
 
-    onEventFocused =(event)=> {
-        let userToken = window.localStorage.getItem('login');        
+    onEventFocused = (event) => {
+        let userToken = window.localStorage.getItem('login');
         if (userToken !== null) {
             this.props.restore(JSON.parse(userToken));
             this.props.history.push("principal");
@@ -73,7 +72,7 @@ class Login extends React.Component {
                     "password": this.state.password
                 }
             });
-           
+
             let menus = result.data.menu.map((item, index) => {
                 let submenu = [];
                 for (let value of result.data.submenu) {
@@ -114,14 +113,19 @@ class Login extends React.Component {
                 "estado": result.data.estado,
                 "idUsuario": result.data.idUsuario,
                 "nombres": result.data.nombres,
+                "rol": result.data.rol,
                 "token": result.data.token,
                 menus
             }
-         
+
+            // console.log(user)
+            // console.log(currentTime())
+
             window.localStorage.setItem('login', JSON.stringify(user));
             this.props.restore(JSON.parse(window.localStorage.getItem('login')));
             this.props.history.push("principal");
-            // document.cookie = `token=${user.data.token}; max-age=${10}; path=/; samesite=strict`;
+
+            // document.cookie = `token=12312; max-age=${(1 * 60 * 3600)}; path=/; samesite=strict`;
 
         } catch (error) {
             if (error.response !== undefined) {
@@ -133,7 +137,6 @@ class Login extends React.Component {
     }
 
     onEventRecuperar = () => {
-        console.log(getCookie("token"))
         window.open("/api/login/report", "_blank");
     }
 

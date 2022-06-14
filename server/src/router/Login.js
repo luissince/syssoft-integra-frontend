@@ -19,14 +19,16 @@ router.get('/createsession', async function (req, res) {
             if (hash) {
 
                 let usuario = await conec.query(`SELECT 
-                idUsuario, 
-                nombres,
-                apellidos,
-                idPerfil,
-                estado,
-                login
-                FROM usuario
-                WHERE idUsuario = ?`, [
+                u.idUsuario, 
+                u.nombres,
+                u.apellidos,
+                u.idPerfil,
+                u.estado,
+                u.login,
+                p.descripcion AS rol
+                FROM usuario AS u
+                INNER JOIN perfil AS p ON u.idPerfil = p.idPerfil
+                WHERE u.idUsuario = ?`, [
                     validate[0].idUsuario
                 ]);
 
@@ -44,7 +46,8 @@ router.get('/createsession', async function (req, res) {
                     idUsuario: usuario[0].idUsuario,
                     nombres: usuario[0].nombres,
                     apellidos: usuario[0].apellidos,
-                    estado: usuario[0].estado
+                    estado: usuario[0].estado,
+                    rol: usuario[0].rol
                 }
 
                 let menu = await conec.query(`
@@ -100,6 +103,7 @@ router.get('/createsession', async function (req, res) {
             res.status(400).send("Datos incorrectos, intente nuevamente.")
         }
     } catch (error) {
+        console.log(error)
         res.status(500).send("Se produjo un error de servidor, intente nuevamente.")
     }
 });

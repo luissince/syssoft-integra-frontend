@@ -16,7 +16,7 @@ class CobroDetalle extends React.Component {
         super(props);
         this.state = {
             idCobro: '',
-            comprobante:'',
+            comprobante: '',
             estado: '',
             cliente: '',
             fecha: '',
@@ -70,7 +70,7 @@ class CobroDetalle extends React.Component {
 
             await this.setStateAsync({
                 idCobro: id,
-                comprobante: cabecera.comprobante+" "+cabecera.serie+"-"+ cabecera.numeracion,
+                comprobante: cabecera.comprobante + " " + cabecera.serie + "-" + cabecera.numeracion,
                 estado: cabecera.estado.toString(),
                 cliente: cabecera.documento + " - " + cabecera.informacion,
                 fecha: cabecera.fecha + " " + timeForma24(cabecera.hora),
@@ -157,7 +157,7 @@ class CobroDetalle extends React.Component {
         )
     }
 
-    onEventImprimir(){
+    onEventImprimir() {
         const data = {
             "idSede": "SD0001",
             "idCobro": this.state.idCobro,
@@ -166,6 +166,17 @@ class CobroDetalle extends React.Component {
         let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
         let params = new URLSearchParams({ "params": ciphertext });
         window.open("/api/cobro/repcomprobante?" + params, "_blank");
+    }
+
+    onEventMatricial() {
+        const data = {
+            "idSede": "SD0001",
+            "idCobro": this.state.idCobro,
+        }
+
+        let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
+        let params = new URLSearchParams({ "params": ciphertext });
+        window.open("/api/cobro/repcomprobantematricial?" + params, "_blank");
     }
 
     render() {
@@ -191,7 +202,9 @@ class CobroDetalle extends React.Component {
                             <div className="row">
                                 <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                                     <div className="form-group">
-                                        <button type="button" className="btn btn-light" onClick={() => this.onEventImprimir()}><i className="fa fa-print"></i> Imprimir</button>
+                                        <button type="button" className="btn btn-light" onClick={() => this.onEventImprimir()}><i className="fa fa-print"></i> Imprimir A4</button>
+                                        {" "}
+                                        <button type="button" className="btn btn-light" onClick={() => this.onEventMatricial()}><i className="fa fa-print"></i> Imprimir Matricial</button>
                                         {" "}
                                         <button type="button" className="btn btn-light"><i className="fa fa-file-archive-o"></i> Adjuntar</button>
                                     </div>
@@ -291,7 +304,7 @@ class CobroDetalle extends React.Component {
                                                             this.state.detalle.map((item, index) => (
                                                                 <tr key={index}>
                                                                     <td>{++index}</td>
-                                                                    <td>{item.concepto}<br/><small>{item.comprobante+" "+item.serie+"-"+item.numeracion}</small></td>
+                                                                    <td>{item.concepto}<br /><small>{item.comprobante + " " + item.serie + "-" + item.numeracion}</small></td>
                                                                     <td className="text-right">{1}</td>
                                                                     <td className="text-right">{numberFormat(item.precio, this.state.codiso)}</td>
                                                                     <td className="text-right">{numberFormat(item.precio, this.state.codiso)}</td>

@@ -17,13 +17,12 @@ router.post('/add', async function (req, res) {
     if (result === "insert") {
         res.status(200).send("Datos registrados correctamente")
     } else {
-        console.log(result)
         res.status(500).send(result)
     } 
 });
 
 router.get('/id', async function (req, res) {
-    const result = await sede.dataId(req)
+    const result = await sede.id(req)
     if (typeof result === "object") {
         res.status(200).send(result)
     } else {
@@ -39,7 +38,16 @@ router.post('/update', async function (req, res) {
         console.log(result)
         res.status(500).send(result)
     }
-})
+});
+
+router.get('/infosede', async function (req, res){
+    const result = await sede.idInfoSede(req)
+    if (typeof result === "object") {
+        res.status(200).send(result)
+    } else {
+        res.status(500).send(result)
+    }
+});
 
 router.get('/listcombo', async function (req, res) {
     const result = await sede.listarCombo(req)

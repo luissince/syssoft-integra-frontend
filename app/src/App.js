@@ -38,6 +38,8 @@ class App extends React.Component {
 
             this.props.restore(user);
         } catch (error) {
+            window.localStorage.removeItem('login');
+            window.localStorage.removeItem('project');
             this.props.restore(null);
         }   
     }

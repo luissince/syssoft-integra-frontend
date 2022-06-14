@@ -855,7 +855,7 @@ class Factura {
             v.credito,
             v.frecuencia,
             m.idMoneda,
-            m.simbolo,
+            m.codiso,
             IFNULL(SUM(vd.precio*vd.cantidad),0) AS total,
             (SELECT IFNULL(SUM(cv.precio),0) FROM cobro AS c LEFT JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro WHERE c.idProcedencia = v.idVenta ) AS cobrado 
             FROM venta AS v 
@@ -880,6 +880,49 @@ class Factura {
                 req.query.idVenta
             ]);
 
+            let cobros = await conec.query(`SELECT idCobro FROM
+            cobro WHERE idProcedencia = ?`, [
+                req.query.idVenta
+            ]);
+
+            let newPlazos = [];
+
+            for (let item of plazos) {
+             
+                let newCobros = [];
+                for (let cobro of cobros) {
+                       
+                    let cobroPlazo = await conec.query(`SELECT 
+                    cv.idPlazo,
+                    cp.nombre,
+                    c.serie,
+                    c.numeracion,
+                    DATE_FORMAT(c.fecha,'%d/%m/%Y') as fecha, 
+                    c.hora,
+                    bc.nombre as banco,
+                    mo.codiso,
+                    cv.precio
+                    FROM cobro AS c 
+                    INNER JOIN banco AS bc ON bc.idBanco = c.idBanco
+                    INNER JOIN moneda AS mo ON mo.idMoneda = c.idMoneda
+                    INNER JOIN comprobante AS cp ON cp.idComprobante = c.idComprobante
+                    INNER JOIN cobroVenta AS cv ON cv.idCobro = c.idCobro
+                    WHERE cv.idPlazo = ? AND cv.idVenta = ? AND c.idCobro = ?`, [
+                        parseInt(item.idPlazo),
+                        req.query.idVenta,
+                        cobro.idCobro
+                    ]);
+                    
+                    if (cobroPlazo.length > 0) {
+                        newCobros.push(cobroPlazo[0]);
+                    }
+                }
+                newPlazos.push({
+                    ...item,
+                    "cobros": newCobros
+                });
+            }
+
             let lotes = await conec.query(`SELECT
                 l.descripcion AS lote,
                 l.precio, 
@@ -900,7 +943,7 @@ class Factura {
                 WHERE v.idVenta = ?
                 `, [req.query.idVenta])
 
-            return { "venta": venta[0], "plazos": plazos, "lotes": lotes, "inicial": inicial[0].inicial }
+            return { "venta": venta[0], "plazos": newPlazos, "lotes": lotes, "inicial": inicial[0].inicial }
 
         } catch (error) {
             return "Se produjo un error de servidor, intente nuevamente.";
@@ -927,35 +970,14 @@ class Factura {
 
     async cpesunat(req) {
         try {
-
-            let lista = await conec.query(`SELECT 
-            v.idVenta,
-            c.idCliente,
-            c.documento, 
-            c.informacion,             
-            v.idComprobante,  
-            co.nombre as comprobante,
-            v.serie,
-            v.numeracion,
-            DATE_FORMAT(v.fecha,'%d/%m/%Y') as fecha, 
-            v.hora, 
-            v.tipo, 
-            v.estado,
-            m.idMoneda,
-            m.simbolo,
-            IFNULL(v.xmlSunat,'') AS xmlSunat,
-            IFNULL(v.xmlDescripcion,'') AS xmlDescripcion,
-            IFNULL(SUM(vd.precio*vd.cantidad),0) AS total
-            FROM venta AS v 
-            INNER JOIN cliente AS c ON v.idCliente = c.idCliente
-            INNER JOIN comprobante AS co ON v.idComprobante = co.idComprobante
-            INNER JOIN moneda AS m ON v.idMoneda = m.idMoneda
-            LEFT JOIN ventaDetalle AS vd ON vd.idVenta = v.idVenta
-            WHERE co.tipo = 1
-            
-            GROUP BY v.idVenta
-            ORDER BY v.fecha DESC, v.hora DESC
-            LIMIT ?,?`, [
+            let lista = await conec.procedure(`CALL Listar_CpeSunat(?,?,?,?,?,?,?,?,?)`, [
+                parseInt(req.query.opcion),
+                req.query.idProyecto,
+                req.query.buscar,
+                req.query.fechaInicio,
+                req.query.fechaFinal,
+                req.query.idComprobante,
+                parseInt(req.query.idEstado),
                 parseInt(req.query.posicionPagina),
                 parseInt(req.query.filasPorPagina)
             ]);
@@ -967,18 +989,19 @@ class Factura {
                 }
             });
 
-            let total = await conec.query(`SELECT COUNT(*) AS Total 
-            FROM venta AS v 
-            INNER JOIN cliente AS c ON v.idCliente = c.idCliente
-            INNER JOIN comprobante as co ON v.idComprobante = co.idComprobante
-            INNER JOIN moneda AS m ON v.idMoneda = m.idMoneda
-            WHERE co.tipo = 1`, [
-                
+            let total = await conec.procedure(`CALL Listar_CpeSunat_Count(?,?,?,?,?,?,?)`, [
+                parseInt(req.query.opcion),
+                req.query.idProyecto,
+                req.query.buscar,
+                req.query.fechaInicio,
+                req.query.fechaFinal,
+                req.query.idComprobante,
+                parseInt(req.query.idEstado),
             ]);
-
 
             return { "result": resultLista, "total": total[0].Total }
         } catch (error) {
+            console.log(error);
             return "Se produjo un error de servidor, intente nuevamente.";
         }
     }

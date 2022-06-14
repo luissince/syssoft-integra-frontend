@@ -138,7 +138,7 @@ a:focus {
     color: #d9e0fc;
 }
 
-a[data-bs-toggle="collapse"] {
+#sidebar a[data-bs-toggle="collapse"] {
     position: relative;
 }
 
@@ -148,7 +148,7 @@ a[data-bs-toggle="collapse"] {
     transition: all 0.3s;
 }
 
-a[aria-expanded="true"] {
+#sidebar a[aria-expanded="true"] {
     background: #6172c0;
 }
 

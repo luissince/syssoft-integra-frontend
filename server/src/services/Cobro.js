@@ -393,8 +393,6 @@ class Cobro {
     async cuota(req) {
         let connection = null;
         try {
-            connection = await conec.beginTransaction();
-            console.log(req.body)
 
             let cobro = await conec.execute(connection, 'SELECT idCobro FROM cobro');
             let idCobro = "";
@@ -577,6 +575,179 @@ class Cobro {
         }
     }
 
+    async adelanto(req) {
+        let connection = null;
+        try {
+            connection = await conec.beginTransaction();
+
+            let cobro = await conec.execute(connection, 'SELECT idCobro FROM cobro');
+            let idCobro = "";
+            if (cobro.length != 0) {
+
+                let quitarValor = cobro.map(function (item) {
+                    return parseInt(item.idCobro.replace("CB", ''));
+                });
+
+                let valorActual = Math.max(...quitarValor);
+                let incremental = valorActual + 1;
+                let codigoGenerado = "";
+                if (incremental <= 9) {
+                    codigoGenerado = 'CB000' + incremental;
+                } else if (incremental >= 10 && incremental <= 99) {
+                    codigoGenerado = 'CB00' + incremental;
+                } else if (incremental >= 100 && incremental <= 999) {
+                    codigoGenerado = 'CB0' + incremental;
+                } else {
+                    codigoGenerado = 'CB' + incremental;
+                }
+
+                idCobro = codigoGenerado;
+            } else {
+                idCobro = "CB0001";
+            }
+
+            let total = await conec.execute(connection, `SELECT * FROM plazo WHERE idPlazo = ?`, [
+                req.body.idPlazo
+            ]);
+
+            let cobrado = await conec.execute(connection, `SELECT 
+            IFNULL(SUM(cv.precio),0) AS total
+            FROM cobro AS c 
+            LEFT JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro
+            WHERE cv.idPlazo  = ?`, [
+                req.body.idPlazo
+            ]);
+
+            let comprobante = await conec.execute(connection, `SELECT 
+            serie,
+            numeracion 
+            FROM comprobante 
+            WHERE idComprobante  = ?
+            `, [
+                req.body.idComprobante
+            ]);
+
+            let numeracion = 0;
+
+            let cobros = await conec.execute(connection, 'SELECT numeracion FROM cobro WHERE idComprobante = ?', [
+                req.body.idComprobante
+            ]);
+
+            if (cobros.length > 0) {
+                let quitarValor = cobros.map(function (item) {
+                    return parseInt(item.numeracion);
+                });
+
+                let valorActual = Math.max(...quitarValor);
+                let incremental = valorActual + 1;
+                numeracion = incremental;
+            } else {
+                numeracion = comprobante[0].numeracion;
+            }
+
+            await conec.execute(connection, `INSERT INTO cobro(
+            idCobro, 
+            idCliente, 
+            idUsuario, 
+            idMoneda, 
+            idBanco, 
+            idProcedencia,
+            idProyecto,
+            idComprobante,
+            serie,
+            numeracion,
+            metodoPago, 
+            estado, 
+            observacion, 
+            fecha, 
+            hora) 
+            VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, [
+                idCobro,
+                req.body.idCliente,
+                req.body.idUsuario,
+                req.body.idMoneda,
+                req.body.idBanco,
+                req.body.idVenta,
+                req.body.idProyecto,
+                req.body.idComprobante,
+                comprobante[0].serie,
+                numeracion,
+                req.body.metodoPago,
+                req.body.estado,
+                req.body.observacion,
+                currentDate(),
+                currentTime()
+            ]);
+
+            let montoCobrado = cobrado[0].total + parseFloat(req.body.montoCuota);
+            if (montoCobrado >= total[0].monto) {
+                // await conec.execute(connection, `UPDATE venta SET estado = 1 WHERE idVenta = ?`, [
+                //     req.body.idVenta,
+                // ]);
+
+                await conec.execute(connection, `UPDATE plazo SET estado = 1 WHERE idPlazo = ?`, [
+                    req.body.idPlazo,
+                ]);
+            }
+
+            // console.log(req.body)
+
+            let monto = parseFloat(req.body.montoCuota);
+
+            // for (let item of req.body.plazos) {
+            // if (item.selected) {
+            await conec.execute(connection, `INSERT INTO cobroVenta(
+            idCobro,
+            idVenta,
+            idPlazo,
+            precio) 
+            VALUES (?,?,?,?)`, [
+                idCobro,
+                req.body.idVenta,
+                req.body.idPlazo,
+                parseFloat(req.body.montoCuota)
+            ]);
+
+            // await conec.execute(connection, `UPDATE plazo 
+            // SET estado = 1
+            // WHERE idPlazo  = ?
+            // `, [
+            //     item.idPlazo
+            // ]);
+
+            // monto += parseFloat(item.monto)
+            // }
+            // }
+
+            await conec.execute(connection, `INSERT INTO bancoDetalle(
+            idBanco,
+            idProcedencia,
+            tipo,
+            monto,
+            fecha,
+            hora,
+            idUsuario)
+            VALUES(?,?,?,?,?,?,?)`, [
+                req.body.idBanco,
+                idCobro,
+                1,
+                monto,
+                currentDate(),
+                currentTime(),
+                req.body.idUsuario,
+            ]);
+
+            await conec.commit(connection);
+            return "insert";
+        } catch (error) {
+            console.log(error);
+            if (connection != null) {
+                await conec.rollback(connection);
+            }
+            return "Se produjo un error de servidor, intente nuevamente.";
+        }
+    }
+
     async id(req) {
         try {
             let result = await conec.query(`SELECT
@@ -589,6 +760,10 @@ class Cobro {
             c.observacion,
             DATE_FORMAT(c.fecha,'%d/%m/%Y') as fecha,
             c.hora,
+
+            CASE WHEN vn.idVenta IS NOT NULL 
+            THEN CONCAT(cov.nombre,' ',vn.serie,'-',vn.numeracion)
+            ELSE '' END AS compRelacion,
             
             td.nombre AS tipoDoc,  
             cl.documento,
@@ -611,6 +786,9 @@ class Cobro {
             INNER JOIN comprobante AS co ON co.idComprobante = c.idComprobante
             LEFT JOIN cobroDetalle AS cb ON c.idCobro = cb.idCobro
             LEFT JOIN cobroVenta AS cv ON c.idCobro  = cv.idCobro 
+
+            LEFT JOIN venta AS vn ON vn.idVenta = c.idProcedencia
+            LEFT JOIN comprobante AS cov ON vn.idComprobante = cov.idComprobante
             WHERE c.idCobro = ?
             GROUP BY  c.idCobro`, [
                 req.query.idCobro
@@ -673,6 +851,38 @@ class Cobro {
         }
     }
 
+    async idPlazo(req) {
+        try {
+            let plazo = await conec.query(`SELECT 
+            pl.idPlazo,
+            cl.documento,
+            cl.informacion,
+            cl.direccion,
+            cl.celular,
+            IFNULL(ub.departamento,'') AS localidad,
+            mo.nombre AS moneda,
+            SUM(cv.precio)  AS monto
+            FROM cobroVenta AS cv
+            INNER JOIN plazo AS pl ON pl.idPlazo = cv.idPlazo
+            INNER JOIN cobro AS c ON c.idCobro = cv.idCobro
+            INNER JOIN moneda AS mo ON mo.idMoneda = c.idMoneda
+            INNER JOIN cliente AS cl ON cl.idCliente = c.idCliente
+            LEFT JOIN ubigeo AS ub ON ub.idUbigeo = cl.idUbigeo
+            WHERE cv.idPlazo = 1`, [
+                req.query.idPlazo
+            ]);
+
+            if(plazo.length > 0){
+                return plazo[0];
+            }else{
+                return "No hay datos para mostrar";
+            }
+        } catch (error) {
+            console.error(error);
+            return "Se produjo un error de servidor, intente nuevamente.";
+        }
+    }
+
     async delete(req) {
         let connection = null;
         try {
@@ -722,7 +932,7 @@ class Cobro {
                             venta[0].idVenta
                         ]);
                     } else {
-                        res.status(400).send("No se puede eliminar el cobro ya tiene plazos ligados que son inferiores.");
+                        res.status(400).send("No se puede eliminar el cobro, hay plazos(cobros) ligados que son inferiores.");
                         return;
                     }
                 }

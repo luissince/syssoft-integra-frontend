@@ -48,6 +48,15 @@ router.post('/cuota', async function (req, res) {
     }
 });
 
+router.post('/adelanto', async function (req, res){
+    const result = await cobro.adelanto(req)
+    if (result === 'insert') {
+        res.status(201).send("Se registró correctamente el cobro.");
+    } else {
+        res.status(500).send(result);
+    }
+});
+
 router.get('/id', async function (req, res) {
     const result = await cobro.id(req)
     if (typeof result === 'object') {
@@ -63,6 +72,64 @@ router.delete('/anular', async function (req, res) {
         res.status(201).send("Se eliminó correctamente el cobro.");
     } else {
         res.status(500).send(result);
+    }
+});
+
+router.get('/repletramatricial', async function (req, res){
+    const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
+    req.query.idSede = decryptedData.idSede;
+    req.query.idPlazo = decryptedData.idPlazo;
+
+    const sedeInfo = await sede.infoSedeReporte(req)
+
+    if (typeof sedeInfo !== 'object') {
+        res.status(500).send(sedeInfo)
+        return;
+    }
+
+    const detalle = await cobro.idPlazo(req)
+
+    if (typeof detalle === 'object') {
+
+        let data = await repFactura.repLetraA5(req, sedeInfo, detalle);
+        if (typeof data === 'string') {
+            res.status(500).send(data);
+        } else {
+            res.setHeader('Content-disposition', `inline; filename=comprobantea5.pdf`);
+            res.contentType("application/pdf");
+            res.send(data);
+        }
+    } else {
+        res.status(500).send(detalle);
+    }
+});
+
+router.get('/repcomprobantematricial', async function (req, res) {
+    const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
+    req.query.idSede = decryptedData.idSede;
+    req.query.idCobro = decryptedData.idCobro;
+
+    const sedeInfo = await sede.infoSedeReporte(req)
+
+    if (typeof sedeInfo !== 'object') {
+        res.status(500).send(sedeInfo)
+        return;
+    }
+
+    const detalle = await cobro.id(req)
+
+    if (typeof detalle === 'object') {
+
+        let data = await repFactura.repCobroA5(req, sedeInfo, detalle);
+        if (typeof data === 'string') {
+            res.status(500).send(data);
+        } else {
+            res.setHeader('Content-disposition', `inline; filename=${detalle.cabecera.comprobante + " " + detalle.cabecera.serie + "-" + detalle.cabecera.numeracion}.pdf`);
+            res.contentType("application/pdf");
+            res.send(data);
+        }
+    } else {
+        res.status(500).send(detalle);
     }
 });
 

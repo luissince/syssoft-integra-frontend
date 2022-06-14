@@ -7,7 +7,16 @@ class Sede {
     async listar(req) {
         try {
             let lista = await conec.query(`SELECT 
-                idSede, ruc, razonSocial, nombreEmpresa, nombreSede, direccion, celular, telefono, email, web
+                idSede, 
+                ruc, 
+                razonSocial, 
+                nombreEmpresa, 
+                nombreSede, 
+                direccion, 
+                celular, 
+                telefono, 
+                email, 
+                web
                 FROM sede 
                 WHERE 
                 ? = 0
@@ -30,8 +39,9 @@ class Sede {
                 }
             });
 
-            let total = await conec.query(`SELECT COUNT(*) AS Total FROM sede
-            where  
+            let total = await conec.query(`SELECT COUNT(*) AS Total 
+            FROM sede 
+            WHERE
             ? = 0
             OR
             ? = 1 and nombreSede like concat(?,'%')`, [
@@ -131,7 +141,7 @@ class Sede {
         }
     }
 
-    async dataId(req) {
+    async id(req) {
         try {
             let result = await conec.query(`SELECT 
                 s.idSede,
@@ -196,8 +206,6 @@ class Sede {
             descripcion=?,
             useSol=?,
             claveSol=?,
-            certificado=?,
-            claveCert=?,
 
             imagen=?,
             extension=?,
@@ -218,8 +226,8 @@ class Sede {
                 req.body.descripcion,
                 req.body.useSol,
                 req.body.claveSol,
-                req.body.certificado,
-                req.body.claveCert,
+                // req.body.certificado,
+                // req.body.claveCert,
 
                 req.body.imagen,
                 req.body.extension,
@@ -250,7 +258,46 @@ class Sede {
     async infoSedeReporte(req) {
         try {
             let result = await conec.query(`SELECT 
-                idSede, ruc, razonSocial, nombreEmpresa, nombreSede, direccion, celular, telefono, email, web
+                idSede, 
+                ruc, 
+                razonSocial, 
+                nombreEmpresa, 
+                nombreSede, 
+                direccion, 
+                celular, 
+                telefono, 
+                email, 
+                web
+                FROM sede WHERE idSede = ?`, [
+                req.query.idSede,
+            ]);
+
+            if (result.length > 0) {
+                return result[0];
+            } else {
+                return "Datos no encontrados";
+            }
+        } catch (error) {
+            return 'Error interno de conexión, intente nuevamente.';
+        }
+    }
+
+    async idInfoSede(req){
+        try {
+            let result = await conec.query(`SELECT 
+                idSede, 
+                ruc, 
+                razonSocial, 
+                nombreEmpresa, 
+                nombreSede, 
+                direccion, 
+                celular, 
+                telefono, 
+                email, 
+                web,
+                useSol,
+                claveSol,
+                claveCert
                 FROM sede WHERE idSede = ?`, [
                 req.query.idSede,
             ]);

@@ -3,7 +3,7 @@ const PDFDocument = require("pdfkit-table");
 const getStream = require('get-stream');
 const qr = require("qrcode");
 const NumberLleters = require('../tools/NumberLleters');
-const { formatMoney, numberFormat, calculateTaxBruto, calculateTax, dateFormat } = require('../tools/Tools');
+const { formatMoney, numberFormat, calculateTaxBruto, calculateTax, dateFormat, zfill } = require('../tools/Tools');
 
 const numberLleters = new NumberLleters();
 
@@ -845,13 +845,12 @@ class RepFactura {
         }
     }
 
-    async repCobroA5(req) {
+    async repCobroA5(req, sedeInfo, data) {
+
+        const cabecera = data.cabecera;
         try {
             const doc = new PDFDocument({
-                // size: [595.28,(841.98/2)],
                 size: 'A4',
-                // font: 'Helvetica',
-                // layout: 'landscape',
                 margins: {
                     top: 40,
                     bottom: 40,
@@ -860,83 +859,87 @@ class RepFactura {
                 }
             });
 
-            // console.log(doc.page.width)
-            // console.log(doc.page.height)
-            // doc.info["Title"] = `${cabecera.comprobante} ${cabecera.serie + "-" + cabecera.numeracion}`
+            doc.info["Title"] = `${cabecera.comprobante} ${cabecera.serie + "-" + cabecera.numeracion}`
 
-            let orgX = doc.x;
-            let orgY = doc.y;
-
-            let medioX = doc.page.width / 2;
-
-            let h1 = 13;
-            let h2 = 11;
-            let h3 = 9;
-
-            // doc.rect(doc.x, doc.y,
-            //     doc.page.width - doc.options.margins.left - doc.options.margins.right,
-            //     doc.page.height - doc.options.margins.top - doc.options.margins.bottom).stroke();
-
-            // doc.image(path.join(__dirname, "..", "path/to/logo.png"), orgX, orgY, { width: 75, });
-            // console.log(doc.y)
             let yPos = 101.00;
 
-            doc.fontSize(10).text("24/06/2021 |-",
+            doc.fontSize(9).text(`${cabecera.fecha}`,
                 doc.options.margins.left + 22,
                 yPos + 14);
 
-            doc.fontSize(9).text("00000002508 |-",
+            doc.fontSize(9).text(`${zfill(cabecera.numeracion)}`,
                 doc.options.margins.left + 400,
                 yPos + 14);
 
 
             yPos = doc.y + 3;
 
-            doc.fontSize(10).text("HERRERA CARDOZO ROSARIO DEL CARMEN 000000 |-",
+            doc.fontSize(9).text(`${cabecera.informacion}  ${cabecera.documento}`,
                 doc.options.margins.left + 22,
                 yPos);
 
-            doc.fontSize(10).text("MASADASDAS |-",
+            doc.fontSize(8).text(`${cabecera.compRelacion}`,
                 doc.options.margins.left + 400,
                 yPos);
 
-            let array = [{ "id": "123121", "name": "asdas asdas", "monto": "S/ 10000.00" },
-            { "id": "123121", "name": "asdas asdas", "monto": "S/ 10000.00" },
-            { "id": "123121", "name": "asdas asdas", "monto": "S/ 10000.00" }];
+            let total = 0;
+
+            if (data.detalle.length > 0) {
+                yPos = doc.y + 25;
+
+                data.detalle.map((item, index) => {
+                    doc.fontSize(10).text((index + 1),
+                        doc.options.margins.left + 10,
+                        yPos);
+
+                    doc.fontSize(9).text(item.concepto,
+                        doc.options.margins.left + 80,
+                        yPos);
+
+                    // doc.fontSize(8).text("0",
+                    // doc.options.margins.left + 400,
+                    // yPos);
+
+                    doc.fontSize(8).text(numberFormat(item.precio, cabecera.codiso),
+                        doc.options.margins.left + 460,
+                        yPos);
 
 
-            yPos = doc.y + 25;
+                    yPos += 10;
+                });
+            } else {
+                yPos = doc.y + 25;
 
-            for (let ar of array) {
-                doc.fontSize(10).text(ar.id,
-                    doc.options.margins.left + 10,
-                    yPos);
+                data.venta.map((item, index) => {
+                    doc.fontSize(10).text((index + 1),
+                        doc.options.margins.left + 10,
+                        yPos);
 
-                doc.fontSize(10).text(ar.name,
-                    doc.options.margins.left + 80,
-                    yPos);
+                    doc.fontSize(9).text(item.concepto,
+                        doc.options.margins.left + 80,
+                        yPos);
 
-                // doc.fontSize(8).text("0",
-                // doc.options.margins.left + 400,
-                // yPos);
+                    // doc.fontSize(8).text("0",
+                    // doc.options.margins.left + 400,
+                    // yPos);
 
-                doc.fontSize(8).text(ar.monto,
-                    doc.options.margins.left + 460,
-                    yPos);
+                    doc.fontSize(8).text(numberFormat(item.precio, cabecera.codiso),
+                        doc.options.margins.left + 460,
+                        yPos);
 
 
-                yPos += 10;
+                    yPos += 10;
+                    total += item.precio;
+                });
             }
 
             yPos = 323;
 
-            console.log(yPos)
-
-            doc.fontSize(10).text("Monto el letras sii...........|-",
+            doc.fontSize(9).text(`SON: ${numberLleters.getResult(formatMoney(total), cabecera.moneda)}`,
                 doc.options.margins.left + 10,
                 yPos);
 
-            doc.fontSize(8).text("S/ 600000.00|-",
+            doc.fontSize(8).text(`${numberFormat(total, cabecera.codiso)}`,
                 doc.options.margins.left + 460,
                 yPos);
 
@@ -950,13 +953,11 @@ class RepFactura {
         }
     }
 
-    async repLetraA5(req) {
+    async repLetraA5(req, sedeInfo, data) {
+        console.log(data)
         try {
             const doc = new PDFDocument({
-                // size: [595.28,(841.98/2)],
                 size: 'A4',
-                // font: 'Helvetica',
-                // layout: 'landscape',
                 margins: {
                     top: 40,
                     bottom: 40,
@@ -965,28 +966,11 @@ class RepFactura {
                 }
             });
 
-            // console.log(doc.page.width)
-            // console.log(doc.page.height)
-            // doc.info["Title"] = `${cabecera.comprobante} ${cabecera.serie + "-" + cabecera.numeracion}`
-
-            let orgX = doc.x;
-            let orgY = doc.y;
-
-            let medioX = doc.page.width / 2;
-
-            let h1 = 13;
-            let h2 = 11;
-            let h3 = 9;
-
-            // doc.rect(doc.x, doc.y,
-            //     doc.page.width - doc.options.margins.left - doc.options.margins.right,
-            //     doc.page.height - doc.options.margins.top - doc.options.margins.bottom).stroke();
-
-            // doc.image(path.join(__dirname, "..", "path/to/logo.png"), orgX, orgY, { width: 75, });
-            // console.log(doc.y)
             let yPos = 130;
 
-            doc.fontSize(10).text("12345 ||",
+            // 
+
+            doc.fontSize(10).text(`${data.idPlazo}`,
                 doc.options.margins.left + 100,
                 yPos);
 
@@ -996,7 +980,7 @@ class RepFactura {
 
             doc.fontSize(10).text("20/20/20202 |",
                 doc.options.margins.left + 240,
-                yPos+8);
+                yPos + 8);
 
             doc.fontSize(10).text("lima perú |",
                 doc.options.margins.left + 320,
@@ -1004,23 +988,29 @@ class RepFactura {
 
             doc.fontSize(10).text("20/20/20202 |",
                 doc.options.margins.left + 385,
-                yPos+8);
+                yPos + 8);
 
             doc.fontSize(10).text("SOLES |",
                 doc.options.margins.left + 470,
                 yPos);
 
+            // 
+
             yPos = 171;
 
-            doc.fontSize(10).text("monto en letras |",
+            doc.fontSize(10).text(`${numberLleters.getResult(formatMoney(data.monto), data.moneda)}`,
                 doc.options.margins.left + 150,
                 yPos);
 
+            // 
+
             yPos = 205;
 
-            doc.fontSize(10).text("afectanasdas asd |",
+            doc.fontSize(10).text(`${data.informacion}`,
                 doc.options.margins.left + 140,
                 yPos);
+
+            // 
 
             yPos = doc.y + 10;
 
@@ -1040,46 +1030,51 @@ class RepFactura {
                 doc.options.margins.left + 500,
                 yPos);
 
-            yPos = 235;
-            
+            // 
 
-            doc.fontSize(10).text("domicilio 12345",
+            yPos = 235;
+
+            doc.fontSize(10).text(`${data.direccion}`,
                 doc.options.margins.left + 140,
                 yPos);
 
             yPos = 251.56;
 
-            doc.fontSize(10).text("LIMA",
+            doc.fontSize(10).text(`${data.localidad}`,
                 doc.options.margins.left + 230,
                 yPos);
+            
+            // 
 
             yPos = 263;
-           
 
             doc.fontSize(10).text("DOI |",
                 doc.options.margins.left + 140,
                 yPos);
 
-            doc.fontSize(10).text("TELEFONO |",
+            doc.fontSize(10).text(`${data.celular}`,
                 doc.options.margins.left + 230,
                 yPos);
 
+            // 
 
             yPos = 283;
-           
 
             doc.fontSize(10).text("aval permatenerasd |",
                 doc.options.margins.left + 160,
                 yPos);
+            
+            // 
 
             yPos = 309;
-            
+
             doc.fontSize(10).text("ven ami casa baby av. las rocas n° 126 1",
                 doc.options.margins.left + 140,
                 yPos);
 
+            // 
+
             yPos = 335;
-           
 
             doc.fontSize(10).text("localidad |",
                 doc.options.margins.left + 140,
@@ -1089,13 +1084,17 @@ class RepFactura {
                 doc.options.margins.left + 235,
                 yPos);
 
+            // 
+
             yPos = 351;
 
             doc.fontSize(10).text("HOLA BEB |",
                 doc.options.margins.left + 120,
                 yPos);
 
-                yPos = 358;
+            // 
+
+            yPos = 358;
 
             doc.fontSize(10).text("ESTAS LOCA | |",
                 doc.options.margins.left + 345,
