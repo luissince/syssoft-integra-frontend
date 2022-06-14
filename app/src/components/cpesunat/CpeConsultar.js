@@ -46,7 +46,6 @@ class CpeElectronicos extends React.Component {
     }
 
     componentDidMount() {
-        console.log(process.env)
         this.loadData();
     }
 
@@ -195,7 +194,7 @@ class CpeElectronicos extends React.Component {
                 try {
                     ModalAlertInfo("Consultar Comprobante", "Procesando petición...");
 
-                    let data = await axios.get("http://localhost:8090/app/examples/pages/cdrStatus.php", {
+                    let data = await axios.get("http://sunat.inmobiliariagmyc.com/app/examples/pages/cdrStatus.php", {
                         params: {
                             rucSol: this.state.ruc,
                             userSol: this.state.usuario,

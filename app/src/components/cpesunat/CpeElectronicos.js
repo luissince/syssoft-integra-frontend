@@ -217,7 +217,7 @@ class CpeElectronicos extends React.Component {
                     // "http://localhost:8090/app/examples/boleta.php"
                     // "http://apisunat.inmobiliariagmyc.com/app/examples/boleta.php"
 
-                    let result = await axios.get("http://localhost:8090/app/examples/boleta.php", {
+                    let result = await axios.get("http://sunat.inmobiliariagmyc.com/app/examples/boleta.php", {
                         params: {
                             "idventa": idVenta
                         }
@@ -255,7 +255,7 @@ class CpeElectronicos extends React.Component {
                     // "http://localhost:8090/app/examples/resumen.php"
                     // "http://apisunat.inmobiliariagmyc.com/app/examples/resumen.php"
 
-                    let result = await axios.get("http://localhost:8090/app/examples/resumen.php", {
+                    let result = await axios.get("http://sunat.inmobiliariagmyc.com/app/examples/resumen.php", {
                         params: {
                             "idventa": idVenta
                         }
