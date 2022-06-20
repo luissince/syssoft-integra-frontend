@@ -722,6 +722,8 @@ class Factura {
                     req.query.idVenta
                 ]);
 
+                await connec.execute(connection,`DELETE FROM `);
+
                 await conec.commit(connection);
                 return "anulado";
             }

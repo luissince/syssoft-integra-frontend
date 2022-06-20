@@ -115,7 +115,7 @@ class CpeElectronicos extends React.Component {
                 try {
                     ModalAlertInfo("Consultar Comprobante", "Procesando petición...");
 
-                    let data = await axios.get("http://sunat.inmobiliariagmyc.com/app/examples/pages/cdrStatus.php", {
+                    let data = await axios.get("https://sunat.inmobiliariagmyc.com/app/examples/pages/cdrStatus.php", {
                         params: {
                             rucSol: this.state.ruc,
                             userSol: this.state.usuario,
@@ -194,7 +194,7 @@ class CpeElectronicos extends React.Component {
                 try {
                     ModalAlertInfo("Consultar Comprobante", "Procesando petición...");
 
-                    let data = await axios.get("http://sunat.inmobiliariagmyc.com/app/examples/pages/cdrStatus.php", {
+                    let data = await axios.get("https://sunat.inmobiliariagmyc.com/app/examples/pages/cdrStatus.php", {
                         params: {
                             rucSol: this.state.ruc,
                             userSol: this.state.usuario,
@@ -254,7 +254,7 @@ class CpeElectronicos extends React.Component {
     }
 
     onEventDownload() {
-        let ruta_completa = "http://sunat.inmobiliariagmyc.com/app/files/" + this.state.file;
+        let ruta_completa = "https://sunat.inmobiliariagmyc.com/app/files/" + this.state.file;
         window.open(ruta_completa, 'Download');
     }
 
