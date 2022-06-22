@@ -46,6 +46,8 @@ class CpeElectronicos extends React.Component {
     }
 
     componentDidMount() {
+        console.log(process.env.NODE_ENV)
+        // console.log(process.env.REACT_APP_URL)
         this.loadData();
     }
 
@@ -115,7 +117,7 @@ class CpeElectronicos extends React.Component {
                 try {
                     ModalAlertInfo("Consultar Comprobante", "Procesando petición...");
 
-                    let data = await axios.get("https://sunat.inmobiliariagmyc.com/app/examples/pages/cdrStatus.php", {
+                    let data = await axios.get(`${process.env.REACT_APP_URL}/app/examples/pages/cdrStatus.php`, {
                         params: {
                             rucSol: this.state.ruc,
                             userSol: this.state.usuario,
@@ -194,7 +196,7 @@ class CpeElectronicos extends React.Component {
                 try {
                     ModalAlertInfo("Consultar Comprobante", "Procesando petición...");
 
-                    let data = await axios.get("https://sunat.inmobiliariagmyc.com/app/examples/pages/cdrStatus.php", {
+                    let data = await axios.get(`${process.env.REACT_APP_URL}/app/examples/pages/cdrStatus.php`, {
                         params: {
                             rucSol: this.state.ruc,
                             userSol: this.state.usuario,
@@ -254,7 +256,7 @@ class CpeElectronicos extends React.Component {
     }
 
     onEventDownload() {
-        let ruta_completa = "https://sunat.inmobiliariagmyc.com/app/files/" + this.state.file;
+        let ruta_completa = `${process.env.REACT_APP_URL}/app/files/${this.state.file}`;
         window.open(ruta_completa, 'Download');
     }
 

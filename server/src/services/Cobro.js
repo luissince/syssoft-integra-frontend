@@ -393,7 +393,8 @@ class Cobro {
     async cuota(req) {
         let connection = null;
         try {
-
+            connection = await conec.beginTransaction();
+        
             let cobro = await conec.execute(connection, 'SELECT idCobro FROM cobro');
             let idCobro = "";
             if (cobro.length != 0) {
@@ -573,7 +574,7 @@ class Cobro {
             }
             return "Se produjo un error de servidor, intente nuevamente.";
         }
-    }
+    }  
 
     async adelanto(req) {
         let connection = null;
@@ -868,13 +869,13 @@ class Cobro {
             INNER JOIN moneda AS mo ON mo.idMoneda = c.idMoneda
             INNER JOIN cliente AS cl ON cl.idCliente = c.idCliente
             LEFT JOIN ubigeo AS ub ON ub.idUbigeo = cl.idUbigeo
-            WHERE cv.idPlazo = 1`, [
+            WHERE cv.idPlazo = ?`, [
                 req.query.idPlazo
             ]);
-
-            if(plazo.length > 0){
+            
+            if (plazo.length > 0) {
                 return plazo[0];
-            }else{
+            } else {
                 return "No hay datos para mostrar";
             }
         } catch (error) {
@@ -903,37 +904,45 @@ class Cobro {
                         venta[0].idVenta
                     ]);
 
-                    let arrPlazos = plazos.map(function (item) {
-                        return item.idPlazo;
-                    });
+                    if (plazos.length > 0) {
 
-                    let maxPlazo = Math.max(...arrPlazos);
 
-                    let cobroVenta = await conec.execute(connection, `SELECT idPlazo FROM cobroVenta 
-                    WHERE idCobro = ?`, [
-                        req.query.idCobro
-                    ]);
+                        let arrPlazos = plazos.map(function (item) {
+                            return item.idPlazo;
+                        });
 
-                    let arrCobroVenta = cobroVenta.map(function (item) {
-                        return item.idPlazo;
-                    });
+                        let maxPlazo = Math.max(...arrPlazos);
 
-                    let maxCobroVenta = Math.max(...arrCobroVenta);
-
-                    if (maxPlazo == maxCobroVenta) {
-                        for (let item of cobroVenta) {
-                            await conec.execute(connection, `UPDATE plazo SET estado = 0 WHERE idPlazo = ?`, [
-                                item.idPlazo
-                            ]);
-                        }
-
-                        await conec.execute(connection, `UPDATE venta SET estado = 2
-                        WHERE idVenta = ?`, [
-                            venta[0].idVenta
+                        let cobroVenta = await conec.execute(connection, `SELECT idPlazo FROM cobroVenta 
+                        WHERE idCobro = ?`, [
+                            req.query.idCobro
                         ]);
-                    } else {
-                        res.status(400).send("No se puede eliminar el cobro, hay plazos(cobros) ligados que son inferiores.");
-                        return;
+
+                        let arrCobroVenta = cobroVenta.map(function (item) {
+                            return item.idPlazo;
+                        });
+
+                        let maxCobroVenta = Math.max(...arrCobroVenta);
+                        
+                        if (maxPlazo == maxCobroVenta) {
+                            //             for (let item of cobroVenta) {
+                            //                 await conec.execute(connection, `UPDATE plazo SET estado = 0 WHERE idPlazo = ?`, [
+                            //                     item.idPlazo
+                            //                 ]);
+                            //             }
+
+                            await conec.execute(connection, `UPDATE plazo SET estado = 0 WHERE idPlazo = ?`, [
+                                maxCobroVenta
+                            ]);
+
+                            await conec.execute(connection, `UPDATE venta SET estado = 2
+                            WHERE idVenta = ?`, [
+                                venta[0].idVenta
+                            ]);
+                        } else {
+                            res.status(400).send("No se puede eliminar el cobro, hay plazos(cobros) ligados que son inferiores.");
+                            return;
+                        }
                     }
                 }
             }

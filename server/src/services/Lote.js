@@ -269,9 +269,11 @@ class Lote {
             } else {
                 await conec.execute(connection, `UPDATE lote SET        
                     idManzana = ?,
+                    idConcepto = ?,
                     descripcion = ?,
                     costo = ?,
                     precio = ?,
+                    idMedida = ?,
                     estado = ?,
                     medidaFrontal =?,
                     costadoDerecho = ?,
@@ -290,9 +292,11 @@ class Lote {
                     WHERE idLote = ?
                     `, [
                     req.body.idManzana,
+                    req.body.idConcepto,
                     req.body.descripcion,
                     req.body.costo,
                     req.body.precio,
+                    req.body.idMedida,
                     req.body.estado,
                     req.body.medidaFrontal,
                     req.body.costadoDerecho,

@@ -26,6 +26,7 @@ class Ventas extends React.Component {
             remove: statePrivilegio(this.props.token.userToken.menus[2].submenu[1].privilegio[2].estado),
 
             idProyecto: this.props.token.project.idProyecto,
+            idUsuario: this.props.token.userToken.idUsuario,
 
             opcion: 0,
             paginacion: 0,
@@ -137,6 +138,7 @@ class Ventas extends React.Component {
                     let result = await axios.delete('/api/factura/anular', {
                         params: {
                             "idVenta": idVenta,
+                            "idUsuario": this.state.idUsuario
                         }
                     })
                     ModalAlertSuccess("Venta", result.data, () => {

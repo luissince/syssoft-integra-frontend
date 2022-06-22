@@ -182,8 +182,6 @@ class CreditoProceso extends React.Component {
             });
 
 
-            console.log(credito.data)
-
             const plazosSelected = credito.data.plazos.map((item) => {
                 return {
                     ...item,
@@ -205,7 +203,7 @@ class CreditoProceso extends React.Component {
                 idComprobanteAdelanto: comprobanteFilter.length === 1 ? comprobanteFilter[0].idComprobante : '',
 
                 loading: false,
-            });
+            }); 
         } catch (error) {
             if (error.message !== "canceled") {
                 this.props.history.goBack();

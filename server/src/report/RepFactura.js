@@ -954,7 +954,6 @@ class RepFactura {
     }
 
     async repLetraA5(req, sedeInfo, data) {
-        console.log(data)
         try {
             const doc = new PDFDocument({
                 size: 'A4',
@@ -1104,7 +1103,6 @@ class RepFactura {
             return getStream.buffer(doc);
 
         } catch (error) {
-            console.log(error);
             return "Se genero un error al generar el reporte.";
         }
     }

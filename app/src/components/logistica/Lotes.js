@@ -324,6 +324,12 @@ class Lotes extends React.Component {
             return;
         }
 
+        if(this.state.idConcepto === ""){
+            this.onFocusTab("info-tab", "info");
+            this.refConcepto.current.focus();
+            return;
+        }
+
         if (this.state.descripcion === "") {
             this.onFocusTab("info-tab", "info");
             this.refDescripcion.current.focus();

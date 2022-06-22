@@ -122,8 +122,6 @@ class LoteDetalle extends React.Component {
                 }
             });
 
-            console.log(result.data)
-
             await this.setStateAsync({
                 lote: result.data.lote,
                 socios: result.data.socios,
@@ -446,7 +444,7 @@ class LoteDetalle extends React.Component {
                                             <tbody>
                                                 {
                                                     this.state.detalle.length === 0 ?
-                                                        <tr><td colSpan="5" className="text-center">No hay cobros asociados.</td></tr>
+                                                        <tr><td colSpan="7" className="text-center">No hay cobros asociados.</td></tr>
                                                         :
                                                         this.state.detalle.map((item, index) => {
                                                             return (

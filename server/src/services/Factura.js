@@ -651,11 +651,15 @@ class Factura {
         try {
             connection = await conec.beginTransaction();
 
-            let vanta = await conec.execute(connection, `SELECT idVenta FROM venta 
-                WHERE idVenta = ? AND estado = 3`, [
+            let venta = await conec.execute(connection, `SELECT 
+            idVenta,
+            serie,
+            numeracion 
+            FROM venta 
+            WHERE idVenta = ? AND estado = 3`, [
                 req.query.idVenta
             ]);
-            if (vanta.length !== 0) {
+            if (venta.length !== 0) {
                 await conec.rollback(connection);
                 return "La venta ya se encuentra anulada."
             } else {
@@ -722,7 +726,40 @@ class Factura {
                     req.query.idVenta
                 ]);
 
-                await connec.execute(connection,`DELETE FROM `);
+                await conec.execute(connection, `DELETE FROM asociado WHERE idVenta = ?`, [
+                    req.query.idVenta
+                ]);
+
+                let result = await conec.execute(connection, 'SELECT idAuditoria FROM auditoria');
+                let idAuditoria = 0;
+                if (result.length != 0) {
+                    let quitarValor = result.map(function (item) {
+                        return parseInt(item.idAuditoria);
+                    });
+
+                    let valorActual = Math.max(...quitarValor);
+                    let incremental = valorActual + 1;
+
+                    idAuditoria = incremental;
+                } else {
+                    idAuditoria = 1;
+                }
+
+                await conec.execute(connection, `INSERT INTO auditoria(
+                    idAuditoria,
+                    idProcedencia,
+                    descripcion,
+                    fecha,
+                    hora,
+                    idUsuario) 
+                    VALUES(?,?,?,?,?,?)`, [
+                    idAuditoria,
+                    req.query.idVenta,
+                    `ANULACION DEL COMPROBANTE ${venta[0].serie}-${venta[0].numeracion}`,
+                    currentDate(),
+                    currentTime(),
+                    req.query.idUsuario
+                ]);
 
                 await conec.commit(connection);
                 return "anulado";
@@ -890,10 +927,10 @@ class Factura {
             let newPlazos = [];
 
             for (let item of plazos) {
-             
+
                 let newCobros = [];
                 for (let cobro of cobros) {
-                       
+
                     let cobroPlazo = await conec.query(`SELECT 
                     cv.idPlazo,
                     cp.nombre,
@@ -914,7 +951,7 @@ class Factura {
                         req.query.idVenta,
                         cobro.idCobro
                     ]);
-                    
+
                     if (cobroPlazo.length > 0) {
                         newCobros.push(cobroPlazo[0]);
                     }
