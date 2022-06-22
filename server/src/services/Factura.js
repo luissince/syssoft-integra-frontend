@@ -635,6 +635,37 @@ class Factura {
                 }
             }
 
+            let resultAuditoria = await conec.execute(connection, 'SELECT idAuditoria FROM auditoria');
+            let idAuditoria = 0;
+            if (resultAuditoria.length != 0) {
+                let quitarValor = resultAuditoria.map(function (item) {
+                    return parseInt(item.idAuditoria);
+                });
+
+                let valorActual = Math.max(...quitarValor);
+                let incremental = valorActual + 1;
+
+                idAuditoria = incremental;
+            } else {
+                idAuditoria = 1;
+            }
+
+            await conec.execute(connection, `INSERT INTO auditoria(
+                idAuditoria,
+                idProcedencia,
+                descripcion,
+                fecha,
+                hora,
+                idUsuario) 
+                VALUES(?,?,?,?,?,?)`, [
+                idAuditoria,
+                idVenta,
+                `REGISTRO DEL COMPROBANTE ${comprobante[0].serie}-${numeracion}`,
+                currentDate(),
+                currentTime(),
+                req.body.idUsuario
+            ]);
+
             await conec.commit(connection);
             return "insert";
         } catch (error) {
@@ -730,10 +761,10 @@ class Factura {
                     req.query.idVenta
                 ]);
 
-                let result = await conec.execute(connection, 'SELECT idAuditoria FROM auditoria');
+                let resultAuditoria = await conec.execute(connection, 'SELECT idAuditoria FROM auditoria');
                 let idAuditoria = 0;
-                if (result.length != 0) {
-                    let quitarValor = result.map(function (item) {
+                if (resultAuditoria.length != 0) {
+                    let quitarValor = resultAuditoria.map(function (item) {
                         return parseInt(item.idAuditoria);
                     });
 
@@ -745,6 +776,15 @@ class Factura {
                     idAuditoria = 1;
                 }
 
+                let venta = await conec.execute(connection, `SELECT 
+                idVenta,
+                serie,
+                numeracion 
+                FROM venta 
+                WHERE idVenta = ?`, [
+                    req.query.idVenta
+                ]);
+                
                 await conec.execute(connection, `INSERT INTO auditoria(
                     idAuditoria,
                     idProcedencia,
@@ -755,7 +795,7 @@ class Factura {
                     VALUES(?,?,?,?,?,?)`, [
                     idAuditoria,
                     req.query.idVenta,
-                    `ANULACION DEL COMPROBANTE ${venta[0].serie}-${venta[0].numeracion}`,
+                    `ANULACIÓN DEL COMPROBANTE ${venta[0].serie}-${venta[0].numeracion}`,
                     currentDate(),
                     currentTime(),
                     req.query.idUsuario
@@ -765,6 +805,7 @@ class Factura {
                 return "anulado";
             }
         } catch (error) {
+            console.log(error);
             if (connection != null) {
                 await conec.rollback(connection);
             }

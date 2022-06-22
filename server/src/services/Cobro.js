@@ -210,6 +210,37 @@ class Cobro {
                 req.body.idUsuario,
             ]);
 
+            let resultAuditoria = await conec.execute(connection, 'SELECT idAuditoria FROM auditoria');
+            let idAuditoria = 0;
+            if (resultAuditoria.length != 0) {
+                let quitarValor = resultAuditoria.map(function (item) {
+                    return parseInt(item.idAuditoria);
+                });
+
+                let valorActual = Math.max(...quitarValor);
+                let incremental = valorActual + 1;
+
+                idAuditoria = incremental;
+            } else {
+                idAuditoria = 1;
+            }
+
+            await conec.execute(connection, `INSERT INTO auditoria(
+                idAuditoria,
+                idProcedencia,
+                descripcion,
+                fecha,
+                hora,
+                idUsuario) 
+                VALUES(?,?,?,?,?,?)`, [
+                idAuditoria,
+                idCobro,
+                `REGSITRO DEL COBRO ${comprobante[0].serie}-${numeracion}`,
+                currentDate(),
+                currentTime(),
+                req.body.idUsuario
+            ]);
+
             await conec.commit(connection);
             return 'insert';
         } catch (error) {
@@ -378,6 +409,37 @@ class Cobro {
                 currentDate(),
                 currentTime(),
                 req.body.idUsuario,
+            ]);
+
+            let resultAuditoria = await conec.execute(connection, 'SELECT idAuditoria FROM auditoria');
+            let idAuditoria = 0;
+            if (resultAuditoria.length != 0) {
+                let quitarValor = resultAuditoria.map(function (item) {
+                    return parseInt(item.idAuditoria);
+                });
+
+                let valorActual = Math.max(...quitarValor);
+                let incremental = valorActual + 1;
+
+                idAuditoria = incremental;
+            } else {
+                idAuditoria = 1;
+            }
+
+            await conec.execute(connection, `INSERT INTO auditoria(
+                idAuditoria,
+                idProcedencia,
+                descripcion,
+                fecha,
+                hora,
+                idUsuario) 
+                VALUES(?,?,?,?,?,?)`, [
+                idAuditoria,
+                idCobro,
+                `REGISTRO DEL COBRO ${comprobante[0].serie}-${numeracion}`,
+                currentDate(),
+                currentTime(),
+                req.body.idUsuario
             ]);
 
             await conec.commit(connection);
@@ -566,6 +628,38 @@ class Cobro {
                 req.body.idUsuario,
             ]);
 
+            
+            let resultAuditoria = await conec.execute(connection, 'SELECT idAuditoria FROM auditoria');
+            let idAuditoria = 0;
+            if (resultAuditoria.length != 0) {
+                let quitarValor = resultAuditoria.map(function (item) {
+                    return parseInt(item.idAuditoria);
+                });
+
+                let valorActual = Math.max(...quitarValor);
+                let incremental = valorActual + 1;
+
+                idAuditoria = incremental;
+            } else {
+                idAuditoria = 1;
+            }
+
+            await conec.execute(connection, `INSERT INTO auditoria(
+                idAuditoria,
+                idProcedencia,
+                descripcion,
+                fecha,
+                hora,
+                idUsuario) 
+                VALUES(?,?,?,?,?,?)`, [
+                idAuditoria,
+                idCobro,
+                `REGISTRO DEL COBRO ${comprobante[0].serie}-${numeracion}`,
+                currentDate(),
+                currentTime(),
+                req.body.idUsuario
+            ]);
+
             await conec.commit(connection);
             return "insert";
         } catch (error) {
@@ -738,10 +832,41 @@ class Cobro {
                 req.body.idUsuario,
             ]);
 
+            let resultAuditoria = await conec.execute(connection, 'SELECT idAuditoria FROM auditoria');
+            let idAuditoria = 0;
+            if (resultAuditoria.length != 0) {
+                let quitarValor = resultAuditoria.map(function (item) {
+                    return parseInt(item.idAuditoria);
+                });
+
+                let valorActual = Math.max(...quitarValor);
+                let incremental = valorActual + 1;
+
+                idAuditoria = incremental;
+            } else {
+                idAuditoria = 1;
+            }
+
+            await conec.execute(connection, `INSERT INTO auditoria(
+                idAuditoria,
+                idProcedencia,
+                descripcion,
+                fecha,
+                hora,
+                idUsuario) 
+                VALUES(?,?,?,?,?,?)`, [
+                idAuditoria,
+                idCobro,
+                `REGISTRO DEL COBRO ${comprobante[0].serie}-${numeracion}`,
+                currentDate(),
+                currentTime(),
+                req.body.idUsuario
+            ]);
+
+
             await conec.commit(connection);
             return "insert";
         } catch (error) {
-            console.log(error);
             if (connection != null) {
                 await conec.rollback(connection);
             }
@@ -934,6 +1059,10 @@ class Cobro {
                             await conec.execute(connection, `UPDATE plazo SET estado = 0 WHERE idPlazo = ?`, [
                                 maxCobroVenta
                             ]);
+
+                            // await conec.execute(connection, `DELETE FROM plazo WHERE idPlazo = ?`,[
+                            //     maxCobroVenta
+                            // ]);
 
                             await conec.execute(connection, `UPDATE venta SET estado = 2
                             WHERE idVenta = ?`, [
