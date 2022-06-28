@@ -9,6 +9,7 @@ class Lote {
             let lista = await conec.query(`SELECT 
                 l.idLote,
                 l.descripcion,
+                m.nombre as manzana,
                 l.precio,
                 l.estado,
                 l.medidaFrontal,
@@ -497,14 +498,15 @@ class Lote {
                 l.descripcion AS lote, 
                 m.nombre AS manzana
                 FROM venta AS v
-                INNER JOIN cliente AS c ON v.idCliente = c.idCliente
+                INNER JOIN asociado AS a ON a.idVenta = v.idVenta
+                INNER JOIN cliente AS c ON a.idCliente = c.idCliente
                 INNER JOIN ventaDetalle AS vd ON v.idVenta = vd.idVenta
                 INNER JOIN lote AS l ON l.idLote = vd.idLote
                 INNER JOIN manzana AS m ON m.idManzana = l.idManzana
                 WHERE c.idCliente = ? AND v.estado <> 3`, [
                 req.query.idCliente
             ]);
-            return result
+            return result;
         } catch (error) {
             return "Se produjo un error de servidor, intente nuevamente.";
         }

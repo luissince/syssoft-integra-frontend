@@ -900,7 +900,7 @@ class Lotes extends React.Component {
                                                 return (
                                                     <tr key={index}>
                                                         <td className="text-center">{item.id}</td>
-                                                        <td>{item.descripcion}</td>
+                                                        <td>{item.descripcion}{<br/>}{<small>{item.manzana}</small>}</td>
                                                         <td>{item.precio}</td>
                                                         <td>{item.medidaFondo}</td>
                                                         <td>{item.medidaFrontal}</td>
