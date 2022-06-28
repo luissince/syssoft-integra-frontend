@@ -231,6 +231,7 @@ router.delete('/', async function (req, res) {
         await conec.commit(connection);
         res.status(200).send('Se eliminó correctamente el perfil.');
     } catch (error) {
+        console.log(error);
         if (connection != null) {
             await conec.rollback(connection);
         }
