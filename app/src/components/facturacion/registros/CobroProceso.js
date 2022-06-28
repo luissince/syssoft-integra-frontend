@@ -14,6 +14,7 @@ import {
     ModalAlertWarning,
 } from '../../tools/Tools';
 import { connect } from 'react-redux';
+import SearchBarClient from "../../tools/SearchBarClient";
 
 class CobroProceso extends React.Component {
     constructor(props) {
@@ -21,6 +22,7 @@ class CobroProceso extends React.Component {
         this.state = {
             idCliente: '',
             clientes: [],
+            cliente: '',
             idComprobante: '',
             comprobantes: [],
             idMoneda: '',
@@ -58,6 +60,8 @@ class CobroProceso extends React.Component {
         this.refLote = React.createRef()
 
         this.abortControllerView = new AbortController();
+
+        this.selectItem = false;
     }
 
     setStateAsync(state) {
@@ -88,9 +92,9 @@ class CobroProceso extends React.Component {
                 signal: this.abortControllerView.signal,
             });
 
-            const cliente = await axios.get("/api/cliente/listcombo", {
-                signal: this.abortControllerView.signal,
-            });
+            // const cliente = await axios.get("/api/cliente/listcombo", {
+            //     signal: this.abortControllerView.signal,
+            // });
 
             const cuentaBancaria = await axios.get("/api/banco/listcombo", {
                 signal: this.abortControllerView.signal,
@@ -111,7 +115,7 @@ class CobroProceso extends React.Component {
             await this.setStateAsync({
                 comprobantes: comprobante.data,
                 conceptos: concepto.data,
-                clientes: cliente.data,
+                // clientes: cliente.data,
                 cuentasBancarias: cuentaBancaria.data,
                 monedas: moneda.data,
                 idMoneda: monedaFilter.length > 0 ? monedaFilter[0].idMoneda : '',
@@ -305,6 +309,8 @@ class CobroProceso extends React.Component {
             comprobantes: [],
             idCliente: '',
             clientes: [],
+            cliente: '',
+
             idMoneda: '',
             monedas: [],
             idConcepto: '',
@@ -414,6 +420,51 @@ class CobroProceso extends React.Component {
                 });
             }
         }
+    }
+
+    onEventClearInput = async () => {
+        await this.setStateAsync({ clientes: [], idCliente: '', cliente: "" });
+        this.selectItem = false;
+    }
+
+    handleFilter = async (event) => {
+
+        const searchWord = this.selectItem ? "" : event.target.value;
+        await this.setStateAsync({
+            idCliente: '',
+            cliente: searchWord,
+            idLote: '',
+            lotes: [],
+        });
+        this.selectItem = false;
+        if (searchWord.length === 0) {
+            await this.setStateAsync({ clientes: [] });
+            return;
+        }
+
+        if (this.state.filter) return;
+
+        try {
+            await this.setStateAsync({ filter: true });
+            let result = await axios.get("/api/cliente/listfiltrar", {
+                params: {
+                    filtrar: searchWord,
+                },
+            });
+            await this.setStateAsync({ filter: false, clientes: result.data });
+        } catch (error) {
+            await this.setStateAsync({ filter: false, clientes: [] });
+        }
+    }
+
+    onEventSelectItem = async (value) => {
+        await this.setStateAsync({
+            cliente: value.documento + " - " + value.informacion,
+            clientes: [],
+            idCliente: value.idCliente
+        });
+        this.selectItem = true;
+        this.loadLoteCliente(this.state.idCliente);
     }
 
     render() {
@@ -603,11 +654,16 @@ class CobroProceso extends React.Component {
                                     </div>
 
                                     <div className="form-group">
-                                        <div className="input-group">
-                                            <div className="input-group-prepend">
-                                                <div className="input-group-text"><i className="bi bi-person-fill"></i></div>
-                                            </div>
-                                            <select
+                                        <SearchBarClient
+                                            placeholder="Filtrar clientes..."
+                                            refCliente={this.refCliente}
+                                            cliente={this.state.cliente}
+                                            clientes={this.state.clientes}
+                                            onEventClearInput={this.onEventClearInput}
+                                            handleFilter={this.handleFilter}
+                                            onEventSelectItem={this.onEventSelectItem}
+                                        />
+                                        {/* <select
                                                 title="Lista de clientes"
                                                 className="form-control"
                                                 ref={this.refCliente}
@@ -632,8 +688,8 @@ class CobroProceso extends React.Component {
                                                         <option key={index} value={item.idCliente}>{item.informacion}</option>
                                                     ))
                                                 }
-                                            </select>
-                                        </div>
+                                            </select> */}
+
                                     </div>
 
                                     <div className="form-group">

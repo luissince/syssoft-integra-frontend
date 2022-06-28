@@ -21,6 +21,7 @@ class Cobros extends React.Component {
             idCobro: '',
 
             idProyecto: this.props.token.project.idProyecto,
+            idUsuario: this.props.token.userToken.idUsuario,
 
             add: statePrivilegio(this.props.token.userToken.menus[2].submenu[3].privilegio[0].estado),
             view: statePrivilegio(this.props.token.userToken.menus[2].submenu[3].privilegio[1].estado),
@@ -142,6 +143,7 @@ class Cobros extends React.Component {
                     let result = await axios.delete('/api/cobro/anular', {
                         params: {
                             "idCobro": idCobro,
+                            "idUsuario": this.state.idUsuario
                         }
                     })
                     ModalAlertSuccess("Cobro", result.data, () => {

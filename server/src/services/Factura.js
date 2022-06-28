@@ -486,14 +486,25 @@ class Factura {
                     idPlazo = 1;
                 }
 
-                let inicioDate = new Date();
-
-                let ultimoDate = new Date(inicioDate);
-                ultimoDate.setMonth(ultimoDate.getMonth() + parseInt(req.body.numCuota));
+                let inicioDate = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 
                 let cuotaMes = (montoTotal - req.body.inicial) / req.body.numCuota;
-                while (inicioDate < ultimoDate) {
+
+                let i = 0;
+                let frecuenciaPago = req.body.frecuenciaPago;
+
+                // while (inicioDate < ultimoDate) {                   
+                while (i < req.body.numCuota) {
                     inicioDate.setMonth(inicioDate.getMonth() + 1);
+                    let now = new Date();
+                    
+                    if (frecuenciaPago > 15) {
+                         now = new Date(inicioDate.getFullYear(), inicioDate.getMonth() + 1, 0);
+                    } else {
+                         now = new Date(inicioDate.getFullYear(), inicioDate.getMonth(), 15);
+                    }
+                   
+                    i++;
 
                     await conec.execute(connection, `INSERT INTO plazo(
                         idPlazo,
@@ -505,7 +516,7 @@ class Factura {
                         VALUES(?,?,?,?,?,?)`, [
                         idPlazo,
                         idVenta,
-                        inicioDate.getFullYear() + "-" + ((inicioDate.getMonth() + 1) < 10 ? "0" + (inicioDate.getMonth() + 1) : (inicioDate.getMonth() + 1)) + "-" + inicioDate.getDate(),
+                        now.getFullYear() + "-" + ((now.getMonth() + 1) < 10 ? "0" + (now.getMonth() + 1) : (now.getMonth() + 1)) + "-" + now.getDate(),
                         currentTime(),
                         cuotaMes,
                         0
@@ -669,7 +680,6 @@ class Factura {
             await conec.commit(connection);
             return "insert";
         } catch (error) {
-            console.log(error)
             if (connection != null) {
                 await conec.rollback(connection);
             }
@@ -761,6 +771,16 @@ class Factura {
                     req.query.idVenta
                 ]);
 
+                let venta = await conec.execute(connection, `SELECT 
+                idVenta,
+                serie,
+                numeracion 
+                FROM venta 
+                WHERE idVenta = ?`, [
+                    req.query.idVenta
+                ]);
+
+
                 let resultAuditoria = await conec.execute(connection, 'SELECT idAuditoria FROM auditoria');
                 let idAuditoria = 0;
                 if (resultAuditoria.length != 0) {
@@ -776,15 +796,6 @@ class Factura {
                     idAuditoria = 1;
                 }
 
-                let venta = await conec.execute(connection, `SELECT 
-                idVenta,
-                serie,
-                numeracion 
-                FROM venta 
-                WHERE idVenta = ?`, [
-                    req.query.idVenta
-                ]);
-                
                 await conec.execute(connection, `INSERT INTO auditoria(
                     idAuditoria,
                     idProcedencia,

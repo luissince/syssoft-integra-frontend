@@ -14,6 +14,7 @@ import {
     ModalAlertWarning,
 } from '../../tools/Tools';
 import { connect } from 'react-redux';
+import SearchBarClient from "../../tools/SearchBarClient";
 
 class GastoProceso extends React.Component {
     constructor(props) {
@@ -22,6 +23,7 @@ class GastoProceso extends React.Component {
             idConcepto: '',
             idCliente: '',
             clientes: [],
+            cliente: '',
             conceptos: [],
             idComprobante: '',
             comprobantes: [],
@@ -48,6 +50,7 @@ class GastoProceso extends React.Component {
         this.refConcepto = React.createRef()
         this.refMonto = React.createRef()
 
+        this.refCliente = React.createRef()
         this.refCuentaBancaria = React.createRef()
         this.refMoneda = React.createRef()
 
@@ -83,9 +86,9 @@ class GastoProceso extends React.Component {
                 signal: this.abortControllerView.signal,
             });
 
-            const cliente = await axios.get("/api/cliente/listcombo", {
-                signal: this.abortControllerView.signal,
-            });
+            // const cliente = await axios.get("/api/cliente/listcombo", {
+            //     signal: this.abortControllerView.signal,
+            // });
 
             const cuentaBancaria = await axios.get("/api/banco/listcombo", {
                 signal: this.abortControllerView.signal,
@@ -106,7 +109,7 @@ class GastoProceso extends React.Component {
             await this.setStateAsync({
                 comprobantes: comprobante.data,
                 conceptos: concepto.data,
-                clientes: cliente.data,
+                // clientes: cliente.data,
                 cuentasBancarias: cuentaBancaria.data,
                 monedas: moneda.data,
                 idMoneda: monedaFilter.length > 0 ? monedaFilter[0].idMoneda : '',
@@ -294,6 +297,8 @@ class GastoProceso extends React.Component {
             idMoneda: '',
             idCliente: '',
             clientes: [],
+            cliente: '',
+
             monedas: [],
             idConcepto: '',
             conceptos: [],
@@ -373,6 +378,45 @@ class GastoProceso extends React.Component {
         }
 
         await this.setStateAsync({ detalleConcepto: updatedList })
+    }
+
+    onEventClearInput = async () => {
+        await this.setStateAsync({ clientes: [], idCliente: '', cliente: "" });
+        this.selectItem = false;
+    }
+
+    handleFilter = async (event) => {
+
+        const searchWord = this.selectItem ? "" : event.target.value;
+        await this.setStateAsync({ idCliente: '', cliente: searchWord });
+        this.selectItem = false;
+        if (searchWord.length === 0) {
+            await this.setStateAsync({ clientes: [] });
+            return;
+        }
+
+        if (this.state.filter) return;
+
+        try {
+            await this.setStateAsync({ filter: true });
+            let result = await axios.get("/api/cliente/listfiltrar", {
+                params: {
+                    filtrar: searchWord,
+                },
+            });
+            await this.setStateAsync({ filter: false, clientes: result.data });
+        } catch (error) {
+            await this.setStateAsync({ filter: false, clientes: [] });
+        }
+    }
+
+    onEventSelectItem = async (value) => {
+        await this.setStateAsync({
+            cliente: value.documento + " - " + value.informacion,
+            clientes: [],
+            idCliente: value.idCliente
+        });
+        this.selectItem = true;
     }
 
     render() {
@@ -560,11 +604,16 @@ class GastoProceso extends React.Component {
                                     </div>
 
                                     <div className="form-group">
-                                        <div className="input-group">
-                                            <div className="input-group-prepend">
-                                                <div className="input-group-text"><i className="bi bi-person-fill"></i></div>
-                                            </div>
-                                            <select
+                                        <SearchBarClient
+                                            placeholder="Filtrar clientes..."
+                                            refCliente={this.refCliente}
+                                            cliente={this.state.cliente}
+                                            clientes={this.state.clientes}
+                                            onEventClearInput={this.onEventClearInput}
+                                            handleFilter={this.handleFilter}
+                                            onEventSelectItem={this.onEventSelectItem}
+                                        />
+                                        {/* <select
                                                 title="Lista de clientes"
                                                 className="form-control"
                                                 ref={this.refCliente}
@@ -588,8 +637,7 @@ class GastoProceso extends React.Component {
                                                         <option key={index} value={item.idCliente}>{item.informacion}</option>
                                                     ))
                                                 }
-                                            </select>
-                                        </div>
+                                            </select> */}
                                     </div>
 
                                     <div className="form-group">

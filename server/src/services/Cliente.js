@@ -320,6 +320,27 @@ class Cliente {
         }
     }
 
+    async listsearch(req) {
+        try {
+            let result = await conec.query(`
+            SELECT 
+            idCliente, 
+            documento, 
+            informacion 
+            FROM cliente
+            WHERE 
+            documento LIKE CONCAT(?,'%')
+            OR 
+            informacion LIKE CONCAT(?,'%')`,[
+                req.query.filtrar,
+                req.query.filtrar,
+            ]);
+            return result;
+        } catch (error) {
+            return "Se produjo un error de servidor, intente nuevamente.";
+        }
+    }
+
     async listadeudas(req) {
         try {
             let lista = await conec.query(`SELECT 

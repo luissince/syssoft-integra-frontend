@@ -19,6 +19,7 @@ import {
     ModalAlertWarning,
 } from '../../tools/Tools';
 import { connect } from 'react-redux';
+import SearchBarClient from "../../tools/SearchBarClient";
 
 class VentaProceso extends React.Component {
 
@@ -39,6 +40,7 @@ class VentaProceso extends React.Component {
             detalleVenta: [],
             comprobantes: [],
             clientes: [],
+            cliente: '',
 
             impuestos: [],
 
@@ -63,13 +65,15 @@ class VentaProceso extends React.Component {
             idBancoCredito: '',
             metodoPagoCredito: '',
             letraMensual: '',
+            frecuenciaPagoCredito: new Date().getDate() > 15 ? '30' : '15',
 
             inicialCreditoVariableCheck: false,
             inicialCreditoVariable: '',
             idComprobanteCreditoVariable: '',
+
             idBancoCreditoVariable: '',
             metodoPagoCreditoVariable: '',
-            frecuenciaPago: ''
+            frecuenciaPago: new Date().getDate() > 15 ? '30' : '15',
 
         }
 
@@ -88,6 +92,7 @@ class VentaProceso extends React.Component {
         this.refBancoCredito = React.createRef();
         this.refMetodoCredito = React.createRef();
         this.refNumCutoas = React.createRef();
+        this.refFrecuenciaPagoCredito = React.createRef();
 
         this.refInicialCreditoVariable = React.createRef();
         this.refComprobanteCreditoVariable = React.createRef();
@@ -96,6 +101,8 @@ class VentaProceso extends React.Component {
         this.refFrecuenciaPago = React.createRef();
 
         this.abortControllerView = new AbortController();
+
+        this.selectItem = false;
     }
 
     setStateAsync(state) {
@@ -121,13 +128,15 @@ class VentaProceso extends React.Component {
                 idBancoCredito: '',
                 metodoPagoCredito: '',
                 letraMensual: '',
+                frecuenciaPagoCredito: new Date().getDate() > 15 ? '30' : '15',
+                numCuota: '',
 
                 inicialCreditoVariableCheck: false,
                 inicialCreditoVariable: '',
                 // idComprobanteCreditoVariable: '',
                 idBancoCreditoVariable: '',
                 metodoPagoCreditoVariable: '',
-                frecuenciaPago: ''
+                frecuenciaPago: new Date().getDate() > 15 ? '30' : '15',
             });
         })
     }
@@ -161,9 +170,9 @@ class VentaProceso extends React.Component {
                 }
             });
 
-            const cliente = await axios.get("/api/cliente/listcombo", {
-                signal: this.abortControllerView.signal,
-            });
+            // const cliente = await axios.get("/api/cliente/listcombo", {
+            //     signal: this.abortControllerView.signal,
+            // });
 
             const lote = await axios.get("/api/lote/listcombo", {
                 signal: this.abortControllerView.signal,
@@ -193,7 +202,7 @@ class VentaProceso extends React.Component {
             await this.setStateAsync({
                 comprobantes: [...comprobanteFacturado.data, ...comprobanteLibre.data],
                 comprobantesCobro: comprobanteCobro.data,
-                clientes: cliente.data,
+                // clientes: cliente.data,
                 lotes: lote.data,
                 monedas: moneda.data,
                 impuestos: impuesto.data,
@@ -252,7 +261,7 @@ class VentaProceso extends React.Component {
                 "cantidad": 1,
                 "idImpuesto": "",
                 "impuestos": this.state.impuestos,
-                "precioContado": this.state.precioContado 
+                "precioContado": this.state.precioContado
             }
 
             this.state.detalleVenta.push(detalle)
@@ -357,6 +366,7 @@ class VentaProceso extends React.Component {
             detalleVenta: [],
             comprobantes: [],
             clientes: [],
+            cliente:'',
 
             impuestos: [],
 
@@ -376,13 +386,14 @@ class VentaProceso extends React.Component {
             idBancoCredito: '',
             metodoPagoCredito: '',
             letraMensual: '',
+            frecuenciaPagoCredito: new Date().getDate() > 15 ? '30' : '15',
 
             inicialCreditoVariableCheck: false,
             inicialCreditoVariable: '',
             idComprobanteCreditoVariable: '',
             idBancoCreditoVariable: '',
             metodoPagoCreditoVariable: '',
-            frecuenciaPago: ''
+            frecuenciaPago: new Date().getDate() > 15 ? '30' : '15',
         });
 
         this.loadData();
@@ -513,6 +524,8 @@ class VentaProceso extends React.Component {
                 this.refNumCutoas.current.focus();
             } else if (parseInt(this.state.numCuota) <= 0) {
                 this.refNumCutoas.current.focus();
+            } else if (this.state.frecuenciaPagoCredito === "") {
+                this.refFrecuenciaPagoCredito.current.focus();
             } else {
                 this.onSave(this.state.selectTipoPago)
             }
@@ -597,7 +610,7 @@ class VentaProceso extends React.Component {
                         // "estado": this.state.selectTipoPago ? 1 : 2,
                         "estado": selectTipoPago === 1 ? 1 : 2,
                         "frecuenciaPago": selectTipoPago === 1 ? 0
-                            : selectTipoPago === 2 ? 0
+                            : selectTipoPago === 2 ? this.state.frecuenciaPagoCredito
                                 : selectTipoPago === 3 ? this.state.frecuenciaPago : 0,
                         "idProyecto": this.state.idProyecto,
                         "detalleVenta": this.state.detalleVenta,
@@ -630,6 +643,45 @@ class VentaProceso extends React.Component {
         }
 
         await this.setStateAsync({ detalleVenta: updatedList })
+    }
+
+    onEventClearInput = async () => {
+        await this.setStateAsync({ clientes: [], idCliente: '', cliente: "" });
+        this.selectItem = false;
+    }
+
+    handleFilter = async (event) => {
+
+        const searchWord = this.selectItem ? "" : event.target.value;
+        await this.setStateAsync({ idCliente: '', cliente: searchWord });
+        this.selectItem = false;
+        if (searchWord.length === 0) {
+            await this.setStateAsync({ clientes: [] });
+            return;
+        }
+
+        if (this.state.filter) return;
+
+        try {
+            await this.setStateAsync({ filter: true });
+            let result = await axios.get("/api/cliente/listfiltrar", {
+                params: {
+                    filtrar: searchWord,
+                },
+            });
+            await this.setStateAsync({ filter: false, clientes: result.data });
+        } catch (error) {
+            await this.setStateAsync({ filter: false, clientes: [] });
+        }
+    }
+
+    onEventSelectItem = async (value) => {
+        await this.setStateAsync({
+            cliente: value.documento + " - " + value.informacion,
+            clientes: [],
+            idCliente: value.idCliente
+        });
+        this.selectItem = true;
     }
 
     render() {
@@ -941,6 +993,25 @@ class VentaProceso extends React.Component {
                                                 <div className="form-group">
                                                     <div className="input-group">
                                                         <div className="input-group-prepend">
+                                                            <div className="input-group-text"><i className="bi bi-credit-card-2-back"></i></div>
+                                                        </div>
+                                                        <select
+                                                            title="Lista frecuencia de pago"
+                                                            className="form-control"
+                                                            ref={this.refFrecuenciaPagoCredito}
+                                                            value={this.state.frecuenciaPagoCredito}
+                                                            onChange={(event) => this.setState({ frecuenciaPagoCredito: event.target.value })}
+                                                        >
+                                                            <option value="">-- Frecuencia de pago --</option>
+                                                            <option value="15">Quinsenal</option>
+                                                            <option value="30">Mensual</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <div className="form-group">
+                                                    <div className="input-group">
+                                                        <div className="input-group-prepend">
                                                             <div className="input-group-text"><i className="bi bi-coin"></i></div>
                                                         </div>
                                                         <input
@@ -1084,11 +1155,8 @@ class VentaProceso extends React.Component {
                                                             onChange={(event) => this.setState({ frecuenciaPago: event.target.value })}
                                                         >
                                                             <option value="">-- Frecuencia de pago --</option>
-                                                            <option value="7">Semanal</option>
                                                             <option value="15">Quinsenal</option>
                                                             <option value="30">Mensual</option>
-                                                            <option value="60">Bimestral</option>
-                                                            <option value="90">Trimestral</option>
                                                         </select>
                                                     </div>
                                                 </div>
@@ -1282,12 +1350,19 @@ class VentaProceso extends React.Component {
                                         </div>
                                     </div>
 
-                                    <div className="form-group">
-                                        <div className="input-group">
-                                            <div className="input-group-prepend">
-                                                <div className="input-group-text"><i className="bi bi-person-fill"></i></div>
-                                            </div>
-                                            <select
+
+                                    <div className="form-group ">
+                                                                                
+                                            <SearchBarClient
+                                                placeholder="Filtrar clientes..."
+                                                refCliente={this.refCliente}
+                                                cliente={this.state.cliente}
+                                                clientes={this.state.clientes}
+                                                onEventClearInput={this.onEventClearInput}
+                                                handleFilter={this.handleFilter}
+                                                onEventSelectItem={this.onEventSelectItem}
+                                            />
+                                            {/* <select
                                                 title="Lista de clientes"
                                                 className="form-control"
                                                 ref={this.refCliente}
@@ -1299,9 +1374,10 @@ class VentaProceso extends React.Component {
                                                         <option key={index} value={item.idCliente}>{item.informacion}</option>
                                                     ))
                                                 }
-                                            </select>
-                                        </div>
+                                            </select> */}
+                                        
                                     </div>
+
 
                                     <div className="form-group">
                                         <div className="input-group">

@@ -164,11 +164,6 @@ class Creditos extends React.Component {
                                     placeholder="Buscar..."
                                     ref={this.refTxtSearch}
                                     onKeyUp={(event) => this.searchText(event.target.value)} />
-                                <div className="input-group-append">
-                                    <button className="input-group-text" type="button" onClick={() => this.loadInit()}>
-                                        <i className="bi bi-arrow-clockwise"></i>
-                                    </button>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -188,6 +183,10 @@ class Creditos extends React.Component {
                                         Listar Todas Ventas
                                     </option>
                                 </select>
+                                &nbsp;
+                                <button className="btn btn-outline-secondary" onClick={() => this.loadInit()}>
+                                    <i className="bi bi-arrow-clockwise"></i>
+                                </button>
                             </div>
                         </div>
                     </div>
