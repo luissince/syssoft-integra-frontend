@@ -224,7 +224,7 @@ router.delete('/', async function (req, res) {
             req.query.idPerfil
         ]);
 
-        await conec.execute(connection,`DELETE FROM permisoprivilegio WHERE idPerfil = ?`,[
+        await conec.execute(connection,`DELETE FROM permisoPrivilegio WHERE idPerfil = ?`,[
             req.query.idPerfil
         ]);
 
