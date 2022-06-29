@@ -299,11 +299,11 @@ class Perfiles extends React.Component {
                                             onChange={(event) => 
                                                 this.setState({ descripcion: event.target.value })
                                             }
-                                            onKeyDown={(event) => {
-                                                if (event.key === 'Enter') {
+                                            onKeyPress={(event)=>{
+                                                event.persist();
+                                                if(event.key === 'Enter'){
                                                     this.onEventGuardar();
-                                                    event.preventDefault();
-                                                }                                                
+                                                }
                                             }}
                                             placeholder='Ingrese la descripción' />
                                     </div>
