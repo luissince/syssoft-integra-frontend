@@ -29,19 +29,19 @@ router.post('/', async function (req, res) {
     }
 });
 
-router.put('/', async function (req, res) {
-    const result = await banco.update(req)
-    if (result === 'update') {
-        res.status(201).send("Se actualizó correctamente el banco.");
+router.get('/id', async function (req, res) {
+    const result = await banco.id(req)
+    if (typeof result === 'object') {
+        res.status(200).send(result);
     } else {
         res.status(500).send(result);
     }
 });
 
-router.get('/id', async function (req, res) {
-    const result = await banco.id(req)
-    if (typeof result === 'object') {
-        res.status(200).send(result);
+router.put('/', async function (req, res) {
+    const result = await banco.update(req)
+    if (result === 'update') {
+        res.status(201).send("Se actualizó correctamente el banco.");
     } else {
         res.status(500).send(result);
     }

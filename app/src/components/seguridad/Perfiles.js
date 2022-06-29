@@ -22,8 +22,6 @@ class Perfiles extends React.Component {
         this.state = {
             idPerfil: '',
             descripcion: '',
-            idSede: '',
-            sedes: [],
             idUsuario: this.props.token.userToken.idUsuario,
 
             idComprobante: '',
@@ -77,11 +75,9 @@ class Perfiles extends React.Component {
         clearModal("modalPerfil", async () => {
             this.abortControllerModal.abort();
             await this.setStateAsync({
-                idSede: '',
                 descripcion: '',
                 idPerfil: '',
                 loadModal: false,
-                sedes: [],
                 idComprobante: '',
                 nameModal: 'Nuevo Comprobante',
                 msgModal: 'Cargando datos...',
@@ -180,33 +176,11 @@ class Perfiles extends React.Component {
     }
 
     loadData = async () => {
-        try {
-            const sede = await axios.get("/api/sede/listcombo", {
-                signal: this.abortControllerModal.signal,
-            });
-
-            let idSede = sede.data.length === 1 ? sede.data[0].idSede : "";
-
-            await this.setStateAsync({
-                sedes: sede.data,
-                idSede: idSede,
-                loadModal: false
-            });
-        } catch (error) {
-            if (error.message !== "canceled") {
-                await this.setStateAsync({
-                    msgModal: "Se produjo un error interno, intente nuevamente"
-                });
-            }
-        }
+        await this.setStateAsync({ loadModal: false });
     }
 
     loadDataId = async (id) => {
         try {
-            const sede = await axios.get("/api/sede/listcombo", {
-                signal: this.abortControllerModal.signal,
-            });
-
             const perfil = await axios.get("/api/perfil/id", {
                 signal: this.abortControllerModal.signal,
                 params: {
@@ -215,9 +189,7 @@ class Perfiles extends React.Component {
             });
 
             await this.setStateAsync({
-                sedes: sede.data,
                 descripcion: perfil.data.descripcion,
-                idSede: perfil.data.idSede,
                 idPerfil: perfil.data.idPerfil,
                 loadModal: false
             });
@@ -231,12 +203,6 @@ class Perfiles extends React.Component {
     }
 
     async onEventGuardar() {
-        if (this.state.idSede === "") {
-            await this.setStateAsync({ messageWarning: "Ingrese el nombre de la empresa" });
-            this.refEmpresa.current.focus();
-            return;
-        }
-
         if (this.state.descripcion === "") {
             await this.setStateAsync({ messageWarning: "Ingrese una descripción de perfil" });
             this.refDescripcion.current.focus();
@@ -249,7 +215,7 @@ class Perfiles extends React.Component {
             if (this.state.idPerfil !== '') {
                 let result = await axios.post('/api/perfil/update', {
                     "descripcion": this.state.descripcion.trim().toUpperCase(),
-                    "idSede": this.state.idSede.trim().toUpperCase(),
+                    "idSede": "SD0001",
                     "idUsuario": this.state.idUsuario,
                     "idPerfil": this.state.idPerfil
                 });
@@ -261,7 +227,7 @@ class Perfiles extends React.Component {
             } else {
                 let result = await axios.post('/api/perfil/add', {
                     "descripcion": this.state.descripcion.trim().toUpperCase(),
-                    "idSede": this.state.idSede.trim().toUpperCase(),
+                    "idSede": "SD0001",
                     "idUsuario": this.state.idUsuario,
                 });
 
@@ -318,39 +284,22 @@ class Perfiles extends React.Component {
                                     <div className="clearfix absolute-all bg-white">
                                         {spinnerLoading(this.state.msgModal)}
                                     </div>
-                                    : null}
-
-                                <div className='row py-1'>
-                                    <div className='col-lg-4 col-md-4 col-sm-12 col-xs-12'>
-                                        <label>Empresa: </label>
-                                    </div>
-                                    <div className='col-lg-8 col-md-8 col-sm-12 col-xs-12'>
-                                        <select
-                                            className="form-control"
-                                            ref={this.refEmpresa}
-                                            value={this.state.idSede}
-                                            onChange={(event) => this.setState({ idSede: event.target.value })}
-                                        >
-                                            <option value="">- Seleccione -</option>
-                                            {
-                                                this.state.sedes.map((item, index) => (
-                                                    <option key={index} value={item.idSede}>{item.nombreSede}</option>
-                                                ))
-                                            }
-                                        </select>
-                                    </div>
-                                </div>
-                                <div className='row py-1'>
-                                    <div className='col-lg-4 col-md-4 col-sm-12 col-xs-12'>
-                                        <label>Descripción: </label>
-                                    </div>
-                                    <div className='col-lg-8 col-md-8 col-sm-12 col-xs-12'>
+                                    : null
+                                }
+                                <div className="form-row">
+                                    <div className="form-group col-md-12">
+                                        <label>Descripción: <i className="fa fa-asterisk text-danger small"></i></label>
                                         <input
                                             type="text"
                                             className="form-control"
                                             value={this.state.descripcion}
                                             ref={this.refDescripcion}
                                             onChange={(event) => this.setState({ descripcion: event.target.value })}
+                                            onKeyUp={(event) => {
+                                                if (event.keyCode === 13) {
+                                                    this.onEventGuardar()
+                                                }
+                                            }}
                                             placeholder='Ingrese la descripción' />
                                     </div>
                                 </div>

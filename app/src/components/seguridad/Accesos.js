@@ -251,18 +251,6 @@ class Accesos extends React.Component {
 
         <div className='row'>
           <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
-            <label>Empresa: </label>
-            <div className='form-group'>
-              <input
-                type="text"
-                className="form-control"
-                placeholder='Ingrese la empresa' />
-            </div>
-          </div>
-        </div>
-
-        <div className='row'>
-          <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
             <label>Perfil: </label>
             <div className='form-group'>
               <select
@@ -373,4 +361,4 @@ const mapStateToProps = (state) => {
   }
 }
 
-export default connect(mapStateToProps, null)(Accesos);
+export default connect(mapStateToProps, null)(Accesos); 
