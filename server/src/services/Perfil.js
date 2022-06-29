@@ -245,4 +245,4 @@ class Perfil {
     }
 }
 
-module.exports = Perfil;
+module.exports =new Perfil();
