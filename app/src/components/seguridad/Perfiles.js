@@ -45,7 +45,6 @@ class Perfiles extends React.Component {
         }
 
         this.refDescripcion = React.createRef();
-        this.refEmpresa = React.createRef();
 
         this.refTxtSearch = React.createRef();
 
@@ -70,6 +69,7 @@ class Perfiles extends React.Component {
             } else {
                 this.loadData();
             }
+            this.refDescripcion.current.focus();
         });
 
         clearModal("modalPerfil", async () => {
@@ -209,36 +209,38 @@ class Perfiles extends React.Component {
             return;
         }
 
-        try {
-            ModalAlertInfo("Perfil", "Procesando información...");
-            hideModal("modalPerfil");
-            if (this.state.idPerfil !== '') {
-                let result = await axios.post('/api/perfil/update', {
-                    "descripcion": this.state.descripcion.trim().toUpperCase(),
-                    "idSede": "SD0001",
-                    "idUsuario": this.state.idUsuario,
-                    "idPerfil": this.state.idPerfil
-                });
+        ModalAlertDialog("Perfil", "¿Estás seguro de continuar?", async (event) => {
+            if (event) {
+                try {
+                    ModalAlertInfo("Perfil", "Procesando información...");
+                    hideModal("modalPerfil");
+                    if (this.state.idPerfil !== '') {
+                        let result = await axios.post('/api/perfil/update', {
+                            "descripcion": this.state.descripcion.trim().toUpperCase(),
+                            "idSede": "SD0001",
+                            "idUsuario": this.state.idUsuario,
+                            "idPerfil": this.state.idPerfil
+                        });
 
-                ModalAlertSuccess("Perfil", result.data, () => {
-                    this.onEventPaginacion();
-                });
+                        ModalAlertSuccess("Perfil", result.data, () => {
+                            this.onEventPaginacion();
+                        });
+                    } else {
+                        let result = await axios.post('/api/perfil/add', {
+                            "descripcion": this.state.descripcion.trim().toUpperCase(),
+                            "idSede": "SD0001",
+                            "idUsuario": this.state.idUsuario,
+                        });
 
-            } else {
-                let result = await axios.post('/api/perfil/add', {
-                    "descripcion": this.state.descripcion.trim().toUpperCase(),
-                    "idSede": "SD0001",
-                    "idUsuario": this.state.idUsuario,
-                });
-
-
-                ModalAlertSuccess("Comprobante", result.data, () => {
-                    this.loadInit();
-                });
+                        ModalAlertSuccess("Comprobante", result.data, () => {
+                            this.loadInit();
+                        });
+                    }
+                } catch (error) {
+                    ModalAlertWarning("Comprobante", "Se produjo un error un interno, intente nuevamente.");
+                }
             }
-        } catch (error) {
-            ModalAlertWarning("Comprobante", "Se produjo un error un interno, intente nuevamente.");
-        }
+        });
     }
 
     onEventDelete(idPerfil) {
@@ -294,11 +296,14 @@ class Perfiles extends React.Component {
                                             className="form-control"
                                             value={this.state.descripcion}
                                             ref={this.refDescripcion}
-                                            onChange={(event) => this.setState({ descripcion: event.target.value })}
-                                            onKeyUp={(event) => {
-                                                if (event.keyCode === 13) {
-                                                    this.onEventGuardar()
-                                                }
+                                            onChange={(event) => 
+                                                this.setState({ descripcion: event.target.value })
+                                            }
+                                            onKeyDown={(event) => {
+                                                if (event.key === 'Enter') {
+                                                    this.onEventGuardar();
+                                                    event.preventDefault();
+                                                }                                                
                                             }}
                                             placeholder='Ingrese la descripción' />
                                     </div>
