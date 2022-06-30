@@ -1,5 +1,6 @@
 import React from 'react';
 import axios from 'axios';
+import './recursos/css/loader.css';
 import Login from './components/login/Login';
 import Inicio from './components/inicio/Inicio';
 import Principal from './components/principal/Principal';
@@ -9,7 +10,27 @@ import { restoreToken } from './redux/actions';
 import { BrowserRouter, Switch, Route, Redirect } from 'react-router-dom';
 
 const Loader = () => {
-    return <div>Cargando....</div>
+    return (
+        <>
+            <div className="loader text-center">
+                <div className="loader-inner">
+
+                    <div className="lds-roller mb-3">
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                    </div>
+
+                    <h4 className="text-uppercase font-weight-bold">Cargando...</h4>
+                    <p className="font-italic text-muted">Se está estableciendo conexión con el servidor...</p>
+                </div>
+            </div>
+        </>);
 }
 
 class App extends React.Component {
@@ -35,13 +56,13 @@ class App extends React.Component {
                 ...user,
                 project: project
             }
-
+            
             this.props.restore(user);
         } catch (error) {
             window.localStorage.removeItem('login');
             window.localStorage.removeItem('project');
             this.props.restore(null);
-        }   
+        }
     }
 
     render() {

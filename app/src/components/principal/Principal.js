@@ -31,6 +31,7 @@ class Principal extends React.Component {
 
     async componentDidMount() {
         try {
+
             let result = await axios.get("/api/proyecto/inicio", {
                 signal: this.abortControllerTable.signal
             });
@@ -108,99 +109,97 @@ class Principal extends React.Component {
         return (
             <>
                 <div className='container'>
-
-                    {this.state.loadModal ?
-                        <div className="clearfix absolute-all bg-white">
-                            {spinnerLoading(this.state.msgModal)}
-                        </div>
-                        :
-                        <>
-
-                            <div className='row'>
-                                <div className='col-md-3 col-12' >
-                                    <div className='d-flex h-100 justify-content-start align-items-center'>
-                                        <div className="form-group">
-                                            <img className="img-fluid" src={logoInmobiliaria} alt="logo" width="140" />
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className='col-md-6 col-12' >
-                                    <div className='d-flex h-100 flex-column justify-content-center align-items-center'>
-                                        <div className="form-group text-center">
-                                            <h3 className="text-dark">Empresa Inmobiliaria sac</h3>
-                                            <h5 className="text-secondary">Ruc: 12345678952</h5>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className='col-md-3 col-12' >
-                                    <div className='d-flex h-100 justify-content-end align-items-center'>
-                                        <div className="form-group">
-                                            <button onClick={this.onEventSignIn} className="btn btn-outline-success" type="button">
-                                                <i className="bi bi-box-arrow-right"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
+                    {
+                        this.state.loadModal ?
+                            <div className="clearfix absolute-all bg-white">
+                                {spinnerLoading(this.state.msgModal)}
                             </div>
+                            :
+                            <>
+                                <div className='row'>
+                                    <div className='col-md-3 col-12' >
+                                        <div className='d-flex h-100 justify-content-start align-items-center'>
+                                            <div className="form-group">
+                                                <img className="img-fluid" src={logoInmobiliaria} alt="logo" width="140" />
+                                            </div>
+                                        </div>
+                                    </div>
 
-                            <div className="row">
-                                <div className="col-md-12 col-sm-12 col-12">
-                                    <div className="form-group">
-                                        <div className="input-group">
-                                            <input
-                                                className="form-control bg-transparent"
-                                                type="search"
-                                                placeholder="filtar por proyecto o nombre del proyecto"
-                                                aria-label="Search"
-                                                ref={this.refTxtSearch}
-                                                onKeyUp={(event) => this.onEventSearch(event.target.value)} />
-                                            <div className="input-group-append">
-                                                <span className="input-group-text">
-                                                    <i className="bi bi-search"></i>
-                                                </span>
+                                    <div className='col-md-6 col-12' >
+                                        <div className='d-flex h-100 flex-column justify-content-center align-items-center'>
+                                            <div className="form-group text-center">
+                                                <h3 className="text-dark">Empresa Inmobiliaria sac</h3>
+                                                <h5 className="text-secondary">Ruc: 12345678952</h5>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className='col-md-3 col-12' >
+                                        <div className='d-flex h-100 justify-content-end align-items-center'>
+                                            <div className="form-group">
+                                                <button onClick={this.onEventSignIn} className="btn btn-outline-success" type="button">
+                                                    <i className="bi bi-box-arrow-right"></i>
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <div className="row">
-                                {
-                                    this.state.filter.map((item, index) => (
-                                        <div key={index} className="col-lg-4 col-md-4 col-sm-12 col-xs-12">
-                                            <div className="form-group">
-                                                <div className="card">
-                                                    <img src={item.imagen === "" ? noImage : `data:image/${item.extensionimagen};base64,${item.imagen}`} alt="" className="card-img-top" />
-                                                    <div className="card-body m-2">
-                                                        <h6 className='text-primary font-weight-bold'>{item.nombre}</h6>
-                                                        <h6 className='text-secondary'>{item.ubicacion}</h6>
-                                                        <button onClick={() => this.onEventIngresar(item)} type="button" className="btn btn-block btn-outline-primary" >
-                                                            <i className="bi bi-arrow-right-circle-fill"></i> Ingresar
-                                                        </button>
-                                                    </div>
-                                                    <hr className="m-0" />
-                                                    <div className="card-body m-2">
-                                                        <ul className="list-group text-left pt-0">
-                                                            <li className="list-group-item border-0 px-0 pt-0"><i className="bi bi-geo-fill"></i> Moneda {item.moneda}({item.simbolo})</li>
-                                                            <li className="list-group-item border-0 px-0"><i className="bi bi-geo-fill"></i> Total de lotes {item.lotes.length}</li>
-                                                            <li className="list-group-item border-0 px-0"><i className="bi bi-geo-fill"></i> Lotes disponibles {item.lotes.filter(lote => lote.estado === 1).length}</li>
-                                                            <li className="list-group-item border-0 px-0"><i className="fa fa-info"></i>
-                                                                {
-                                                                    item.estado === 1 ? <span className='text-success'> Estado en Venta</span> : <span className='text-danger'> Estado en Litigio</span>
-                                                                }</li>
-                                                        </ul>
-                                                    </div>
+                                <div className="row">
+                                    <div className="col-md-12 col-sm-12 col-12">
+                                        <div className="form-group">
+                                            <div className="input-group">
+                                                <input
+                                                    className="form-control bg-transparent"
+                                                    type="search"
+                                                    placeholder="filtar por proyecto o nombre del proyecto"
+                                                    aria-label="Search"
+                                                    ref={this.refTxtSearch}
+                                                    onKeyUp={(event) => this.onEventSearch(event.target.value)} />
+                                                <div className="input-group-append">
+                                                    <span className="input-group-text">
+                                                        <i className="bi bi-search"></i>
+                                                    </span>
                                                 </div>
                                             </div>
                                         </div>
-                                    ))
-                                }
-                            </div>
-                        </>
-                    }
+                                    </div>
+                                </div>
 
+                                <div className="row">
+                                    {
+                                        this.state.filter.map((item, index) => (
+                                            <div key={index} className="col-lg-4 col-md-4 col-sm-12 col-xs-12">
+                                                <div className="form-group">
+                                                    <div className="card">
+                                                        <img src={item.imagen === "" ? noImage : `data:image/${item.extensionimagen};base64,${item.imagen}`} alt="" className="card-img-top" />
+                                                        <div className="card-body m-2">
+                                                            <h6 className='text-primary font-weight-bold'>{item.nombre}</h6>
+                                                            <h6 className='text-secondary'>{item.ubicacion}</h6>
+                                                            <button onClick={() => this.onEventIngresar(item)} type="button" className="btn btn-block btn-outline-primary" >
+                                                                <i className="bi bi-arrow-right-circle-fill"></i> Ingresar
+                                                            </button>
+                                                        </div>
+                                                        <hr className="m-0" />
+                                                        <div className="card-body m-2">
+                                                            <ul className="list-group text-left pt-0">
+                                                                <li className="list-group-item border-0 px-0 pt-0"><i className="bi bi-geo-fill"></i> Moneda {item.moneda}({item.simbolo})</li>
+                                                                <li className="list-group-item border-0 px-0"><i className="bi bi-geo-fill"></i> Total de lotes {item.lotes.length}</li>
+                                                                <li className="list-group-item border-0 px-0"><i className="bi bi-geo-fill"></i> Lotes disponibles {item.lotes.filter(lote => lote.estado === 1).length}</li>
+                                                                <li className="list-group-item border-0 px-0"><i className="fa fa-info"></i>
+                                                                    {
+                                                                        item.estado === 1 ? <span className='text-success'> Estado en Venta</span> : <span className='text-danger'> Estado en Litigio</span>
+                                                                    }</li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))
+                                    }
+                                </div>
+                            </>
+                    }
                 </div>
             </>
         );

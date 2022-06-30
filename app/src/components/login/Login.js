@@ -42,8 +42,14 @@ class Login extends React.Component {
     onEventFocused = (event) => {
         let userToken = window.localStorage.getItem('login');
         if (userToken !== null) {
-            this.props.restore(JSON.parse(userToken));
-            this.props.history.push("principal");
+            let projectToken = window.localStorage.getItem('project');
+            if (projectToken !== null) {
+                this.props.restore(JSON.parse(userToken));
+                this.props.history.push("/");
+            } else {
+                this.props.restore(JSON.parse(userToken));
+                this.props.history.push("principal");
+            }
         }
     }
 

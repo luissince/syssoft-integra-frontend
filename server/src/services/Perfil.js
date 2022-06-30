@@ -1,10 +1,11 @@
 const { currentDate, currentTime } = require('../tools/Tools');
+const { sendSuccess, sendClient, sendError } = require('../tools/Message');
 const Conexion = require('../database/Conexion');
 const conec = new Conexion();
 
 class Perfil {
 
-    async list(req) {
+    async list(req, res) {
         try {
             let lista = await conec.query(`SELECT 
             p.idPerfil,
@@ -49,13 +50,13 @@ class Perfil {
                 req.query.buscar
             ]);
 
-            return { "result": resultLista, "total": total[0].Total };
+            return sendSuccess(res, { "result": resultLista, "total": total[0].Total })
         } catch (error) {
-            return "Se produjo un error de servidor, intente nuevamente.";
+            return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
         }
     }
 
-    async add(req) {
+    async add(req, res) {
         let connection = null;
         try {
             connection = await conec.beginTransaction();
@@ -145,32 +146,32 @@ class Perfil {
             }
 
             await conec.commit(connection);
-            return "insert";
+            return sendSuccess(res, "Se registró correctamente el perfil.");
         } catch (error) {
             if (connection != null) {
                 await conec.rollback(connection);
             }
-            return "Se produjo un error de servidor, intente nuevamente.";
+            return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
         }
     }
 
-    async id(req) {
+    async id(req, res) {
         try {
             let result = await conec.query('SELECT * FROM perfil WHERE idPerfil  = ?', [
                 req.query.idPerfil,
             ]);
 
             if (result.length > 0) {
-                return result[0];
+                return sendSuccess(res, result[0]);
             } else {
-                return "Datos no encontrados";
+                return sendClient(res, "Datos incorrectos, intente nuevamente.");
             }
         } catch (error) {
-            return "Se produjo un error de servidor, intente nuevamente.";
+            return sendError(res);
         }
     }
 
-    async update(req) {
+    async update(req, res) {
         let connection = null;
         try {
 
@@ -186,63 +187,63 @@ class Perfil {
             ])
 
             await conec.commit(connection)
-            return "update";
+            return sendSuccess(res, "Se actualizó correctamente el Perfil.");
         } catch (error) {
             if (connection != null) {
                 await conec.rollback(connection);
             }
-            return "Se produjo un error de servidor, intente nuevamente.";
+            return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
         }
     }
 
-    async delete(req){
+    async delete(req, res) {
         let connection = null;
         try {
             connection = await conec.beginTransaction();
-    
+
             let usuario = await conec.execute(connection, `SELECT * FROM usuario WHERE idPerfil = ?`, [
                 req.query.idPerfil
             ]);
-    
+
             if (usuario.length > 0) {
                 await conec.rollback(connection);
-                return 'No se puede eliminar el perfil ya que esta ligada a un usuario.';
+                return sendClient(res, 'No se puede eliminar el perfil ya que esta ligada a un usuario.');
             }
-    
+
             await conec.execute(connection, `DELETE FROM perfil WHERE idPerfil  = ?`, [
                 req.query.idPerfil
             ]);
-    
+
             await conec.execute(connection, `DELETE FROM permisoMenu WHERE idPerfil  = ?`, [
                 req.query.idPerfil
             ]);
-    
+
             await conec.execute(connection, `DELETE FROM permisoSubMenu WHERE idPerfil  = ?`, [
                 req.query.idPerfil
             ]);
-    
-            await conec.execute(connection,`DELETE FROM permisoPrivilegio WHERE idPerfil = ?`,[
+
+            await conec.execute(connection, `DELETE FROM permisoPrivilegio WHERE idPerfil = ?`, [
                 req.query.idPerfil
             ]);
-    
+
             await conec.commit(connection);
-            return "delete";
+            return sendSuccess(res, "Se eliminó correctamente el Perfil.");
         } catch (error) {
             if (connection != null) {
                 await conec.rollback(connection);
             }
-            return "Se produjo un error de servidor, intente nuevamente.";
+            return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
         }
     }
 
-    async listcombo(req) {
+    async listcombo(req, res) {
         try {
             let result = await conec.query('SELECT idPerfil,descripcion FROM perfil');
-            return result;
+            return sendSuccess(res, result);
         } catch (error) {
-            return "Se produjo un error de servidor, intente nuevamente.";
+            return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
         }
     }
 }
 
-module.exports =new Perfil();
+module.exports = new Perfil();

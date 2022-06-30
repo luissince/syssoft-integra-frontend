@@ -1,6 +1,15 @@
 import bootstrap from "../../recursos/js/bootstrap";
 import Swal from "../../recursos/js/sweetalert";
 
+/**
+ * 
+ * @param {Number} time Tiempo de espera del time out
+ * @returns 
+ */
+export function sleep(time) {
+  return new Promise((resolve) => setTimeout(resolve, time));
+}
+
 export function makeid(length) {
   var result = "";
   var characters = '0123456789';

@@ -1,9 +1,10 @@
+const { sendSuccess, sendError } = require('../tools/Message');
 const Conexion = require('../database/Conexion');
 const conec = new Conexion();
 
 class Acceso {
 
-    async accesos(req) {
+    async accesos(req, res) {
         try {
             let menu = await conec.query(`
             SELECT 
@@ -45,13 +46,13 @@ class Acceso {
                 req.query.idPerfil,
             ]);
 
-            return { "menu": menu, "submenu": submenu, "privilegio": privilegio };
+            return sendSuccess(res, { "menu": menu, "submenu": submenu, "privilegio": privilegio });
         } catch (error) {
-            return "Se produjo un error de servidor, intente nuevamente.";
+            return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
         }
     }
 
-    async save(req) {
+    async save(req, res) {
         let connection = null;
         try {
             connection = await conec.beginTransaction();
@@ -94,16 +95,16 @@ class Acceso {
             }
 
             await conec.commit(connection);
-            return "insert";
+            return sendSuccess(res, "Se registro correctamente el acceso.");
         } catch (error) {
             if (connection != null) {
                 conec.rollback(connection);
             }
-            return "Se produjo un error de servidor, intente nuevamente.";
+            return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
         }
     }
 
-    async updatedata(req) {
+    async updatedata(req, res) {
         let connection = null;
         try {
 
@@ -194,12 +195,12 @@ class Acceso {
             }
 
             await conec.commit(connection);
-            return "update";
+            return sendSuccess(res, "Modulos actualizados correctamente.");
         } catch (error) {
             if (connection != null) {
                 conec.rollback(connection);
             }
-            return "Se produjo un error de servidor, intente nuevamente.";
+            return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
         }
     }
 

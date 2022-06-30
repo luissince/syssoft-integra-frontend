@@ -1,22 +1,66 @@
 
-function success(res, result) {
-    res.status(200).send(result);
+/**
+*Esta función se encarga de resporder las peticiones exitosas con estado 200 http. 
+*@author Luis Alexander Lara <https://www.facebook.com/luisal.laras>
+*
+*@param {object} res El objeto de respuesta del request
+*@param {object} result El objeto de respuesta de la petición
+*@returns {object} Retorna 
+*     res.send(new Buffer('wahoo'));
+*     res.send({ some: 'json' });
+*     res.send('<p>some html</p>');
+*     res.status(404).send('Sorry, cant find that');
+*/
+function sendSuccess(res, result) {
+    return res.status(200).send(result);
 }
 
-function error(res, result) {
-    res.status(500).send(result);
+/**
+*Esta función se encarga de resporder las peticiones fallidas con estado 500 http. 
+*@author Luis Alexander Lara <https://www.facebook.com/luisal.laras>
+*
+*@param {object} res El objeto de respuesta del request
+*@param {object} result{"Se produjo un error de servidor, intente nuevamente."} El objeto de respuesta de la petición
+*@returns {object} Retorna 
+*     res.send(new Buffer('wahoo'));
+*     res.send({ some: 'json' });
+*     res.send('<p>some html</p>');
+*     res.status(404).send('Sorry, cant find that');
+*/
+function sendError(res, result = "Se produjo un error de servidor, intente nuevamente.") {
+    return res.status(500).send(result);
 }
 
-function response(res, result) {
-    if (typeof result === 'object') {
-        res.status(200).send(result);
-    } else if (result === "insert") {
-        res.status(200).send(result);
-    } else if (result === "update") {
-        res.status(200).send(result);
-    } else {
-        res.status(500).send(result);
-    }
+/**
+*Esta función se encarga de resporder las peticiones de error del cliente con estado 400 http. 
+*@author Luis Alexander Lara <https://www.facebook.com/luisal.laras>
+*
+*@param {object} res El objeto de respuesta del request
+*@param {object} result El objeto de respuesta de la petición
+*@returns {object} Retorna 
+*     res.send(new Buffer('wahoo'));
+*     res.send({ some: 'json' });
+*     res.send('<p>some html</p>');
+*     res.status(404).send('Sorry, cant find that');
+*/
+function sendClient(res, result) {
+    return res.status(400).send(result);
 }
 
-module.exports = { success, error, response };
+/**
+*Esta función se encarga de resporder las peticiones expiradas 403 http. 
+*@author Luis Alexander Lara <https://www.facebook.com/luisal.laras>
+*
+*@param {object} res El objeto de respuesta del request
+*@param {object} result El objeto de respuesta de la petición
+*@returns {object} Retorna 
+*     res.send(new Buffer('wahoo'));
+*     res.send({ some: 'json' });
+*     res.send('<p>some html</p>');
+*     res.status(404).send('Sorry, cant find that');
+*/
+function sendExpired(res, result) {
+    return res.status(403).send(result);
+}
+
+module.exports = { sendSuccess, sendError, sendClient, sendExpired };
