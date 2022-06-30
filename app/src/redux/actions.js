@@ -1,4 +1,4 @@
-import { RESTORE_TOKEN, SIGN_IN, SIGN_OUT,PROJECT_ACTIVE,PROJECT_CLOSE } from './types';
+import { RESTORE_TOKEN, SIGN_IN, SIGN_OUT,PROJECT_ACTIVE,PROJECT_CLOSE, CONFIG } from './types';
 
 export const restoreToken = (user) => (
     {
@@ -30,6 +30,13 @@ export const selectProject = (project) => (
 export const closeProject = () => (
     {
         type: PROJECT_CLOSE
+    }
+)
+
+export const config = () => (
+    {
+        type: CONFIG,
+        isConfig: true
     }
 )
 

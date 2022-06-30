@@ -1,15 +1,10 @@
 import React from 'react';
 import axios from 'axios';
 import {
-    formatMoney,
     numberFormat,
-    calculateTaxBruto,
-    calculateTax,
-    timeForma24,
     spinnerLoading,
 } from '../tools/Tools';
 import { connect } from 'react-redux';
-
 import noImage from '../../recursos/images/noimage.jpg';
 
 class Dashboard extends React.Component {
@@ -17,6 +12,7 @@ class Dashboard extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            token: this.props.token.userToken.token,
 
             totales: {},
             proyectos: [],
@@ -28,7 +24,6 @@ class Dashboard extends React.Component {
 
         this.abortControllerView = new AbortController();
     }
-
 
     setStateAsync(state) {
         return new Promise((resolve) => {
@@ -46,12 +41,14 @@ class Dashboard extends React.Component {
 
     async loadInit() {
         try {
-
             const total = await axios.get("/api/dashboard/totales", {
                 signal: this.abortControllerView.signal,
+                headers: {
+                    Authorization: "Bearer " + this.state.token
+                },
                 params: {
                     "idProyecto": this.props.token.project.idProyecto
-                }
+                },
             });
 
             const proyecto = await axios.get("/api/proyecto/inicio", {
@@ -66,16 +63,11 @@ class Dashboard extends React.Component {
                 codiso: actual[0].codiso,
                 loading: false
             });
-
-            // console.log(this.state.codiso)
-
-
         } catch (error) {
             if (error.message !== "canceled") {
                 this.setState({
                     msgLoading: "Se produjo un error interno, intente nuevamente."
                 })
-                console.log(error.message)
             }
         }
     }
@@ -83,7 +75,6 @@ class Dashboard extends React.Component {
     onClickeToogle = () => {
         // this.menuRef.handleToggleSidebar(true)
     }
-
 
     render() {
         return (
@@ -157,7 +148,6 @@ class Dashboard extends React.Component {
                                 </div>
 
                                 <div className="row mt-4">
-
                                     {
                                         this.state.proyectos.length === 0 ?
                                             (
@@ -170,7 +160,6 @@ class Dashboard extends React.Component {
                                             :
                                             (
                                                 this.state.proyectos.map((item, index) => {
-
                                                     return (
                                                         <div className="col-lg-4 col-md-6 mt-4 mb-4" key={index}>
                                                             <div className={`card z-index-2 border ${item.idProyecto === this.props.token.project.idProyecto ? 'border-primary' : ''}`} style={{ borderRadius: 10, boxShadow: '0 7px 10px -5px rgba(64,64,64,.4)' }}>
@@ -203,12 +192,9 @@ class Dashboard extends React.Component {
                                                 })
                                             )
                                     }
-
                                 </div>
-
                             </div>
                         </div>
-
                 }
             </>
         );
@@ -222,5 +208,3 @@ const mapStateToProps = (state) => {
 }
 
 export default connect(mapStateToProps, null)(Dashboard);
-
-// export default Dashboard;

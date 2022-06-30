@@ -336,12 +336,11 @@ class Sedes extends React.Component {
                 hideModal("modalSede");
 
             } catch (error) {
-                if (error.response != null) {
+                if (error.response) {
                     ModalAlertWarning("Sede", error.response.data);
                 } else {
                     ModalAlertWarning("Sede", "Se produjo un error un interno, intente nuevamente.");
                 }
-
             }
         }
     }
@@ -576,7 +575,7 @@ class Sedes extends React.Component {
 
                                 <div className="form-row">
                                     <div className="form-group col-md-6">
-                                        <label>WebSite:</label>
+                                        <label>Página Web:</label>
                                         <input
                                             type="text"
                                             className="form-control"

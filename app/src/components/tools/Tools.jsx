@@ -20,8 +20,8 @@ export function makeid(length) {
   return result;
 }
 
-export function statePrivilegio(value){
-  if(value === undefined) return false;
+export function statePrivilegio(value) {
+  if (value === undefined) return false;
   return value === 1 ? true : false;
 }
 
@@ -48,9 +48,9 @@ export function formatMoney(
       i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + thousands) +
       (decimalCount
         ? decimal +
-          Math.abs(amount - i)
-            .toFixed(decimalCount)
-            .slice(2)
+        Math.abs(amount - i)
+          .toFixed(decimalCount)
+          .slice(2)
         : "")
     );
   } catch (e) {
@@ -201,10 +201,16 @@ export function keyNumberFloat(event) {
 export function keyNumberPhone(event) {
   var key = window.Event ? event.which : event.keyCode;
   var c = String.fromCharCode(key);
-  if ((c < "0" || c > "9") && c !== "\b" && c !== "." && c !== "+") {
+  if ((c < "0" || c > "9") && c !== "\b" && c !== "-" && c !== "+" && c !== "(" && c !== ")") {
     event.preventDefault();
   }
-  if (c === "." && event.target.value.includes(".")) {
+  if (c === "-" && event.target.value.includes("-")) {
+    event.preventDefault();
+  }
+  if (c === "(" && event.target.value.includes("(")) {
+    event.preventDefault();
+  }
+  if (c === ")" && event.target.value.includes(")")) {
     event.preventDefault();
   }
   if (c === "+" && event.target.value.includes("+")) {
@@ -261,7 +267,7 @@ export function getCookie(cname) {
 
 export function limitarCadena(cadena, limite, sufijo) {
   if (cadena.length > limite) {
-      return cadena.substr(0, limite) + sufijo;
+    return cadena.substr(0, limite) + sufijo;
   }
   return cadena;
 }
@@ -285,12 +291,12 @@ export function hideModal(id) {
   myModal.hide();
 }
 
-export function viewModal(id, callback = function () {}) {
+export function viewModal(id, callback = function () { }) {
   let myModalEl = document.getElementById(id);
   myModalEl.addEventListener("shown.bs.modal", callback);
 }
 
-export function clearModal(id, callback = function () {}) {
+export function clearModal(id, callback = function () { }) {
   let myModalEl = document.getElementById(id);
   myModalEl.addEventListener("hidden.bs.modal", callback);
 }
@@ -357,7 +363,7 @@ export function ModalAlertInfo(title, message) {
   });
 }
 
-export function ModalAlertSuccess(title, message, callback = function () {}) {
+export function ModalAlertSuccess(title, message, callback = function () { }) {
   Swal({
     title: title,
     text: message,
@@ -369,7 +375,7 @@ export function ModalAlertSuccess(title, message, callback = function () {}) {
   });
 }
 
-export function ModalAlertWarning(title, message, callback = function () {}) {
+export function ModalAlertWarning(title, message, callback = function () { }) {
   Swal({
     title: title,
     text: message,

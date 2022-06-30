@@ -53,6 +53,7 @@ app.use('/api/ubigeo', require('./src/router/Ubigeo'));
 app.use('/api/tipodocumento', require('./src/router/TipoDocumento'));
 app.use('/api/medida', require('./src/router/Medida'));
 
+app.use('/api/empresa', require('./src/router/Empresa'));
 app.use('/api/dashboard', require('./src/router/Dashboard'));
 
 

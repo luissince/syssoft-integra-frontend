@@ -20,6 +20,8 @@ class Perfiles extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            token: this.props.token.userToken.token,
+
             idPerfil: '',
             descripcion: '',
             idUsuario: this.props.token.userToken.idUsuario,
@@ -133,6 +135,9 @@ class Perfiles extends React.Component {
 
             const result = await axios.get('/api/perfil/list', {
                 signal: this.abortControllerTable.signal,
+                headers: {
+                    Authorization: "Bearer " + this.state.token
+                },
                 params: {
                     "opcion": opcion,
                     "buscar": buscar.trim().toUpperCase(),
@@ -183,6 +188,9 @@ class Perfiles extends React.Component {
         try {
             const perfil = await axios.get("/api/perfil/id", {
                 signal: this.abortControllerModal.signal,
+                headers: {
+                    Authorization: "Bearer " + this.state.token
+                },
                 params: {
                     idPerfil: id
                 }
@@ -220,6 +228,10 @@ class Perfiles extends React.Component {
                             "idSede": "SD0001",
                             "idUsuario": this.state.idUsuario,
                             "idPerfil": this.state.idPerfil
+                        }, {
+                            headers: {
+                                Authorization: "Bearer " + this.state.token
+                            },
                         });
 
                         ModalAlertSuccess("Perfil", result.data, () => {
@@ -230,6 +242,10 @@ class Perfiles extends React.Component {
                             "descripcion": this.state.descripcion.trim().toUpperCase(),
                             "idSede": "SD0001",
                             "idUsuario": this.state.idUsuario,
+                        }, {
+                            headers: {
+                                Authorization: "Bearer " + this.state.token
+                            },
                         });
 
                         ModalAlertSuccess("Comprobante", result.data, () => {
@@ -249,6 +265,9 @@ class Perfiles extends React.Component {
                 try {
                     ModalAlertInfo("Perfil", "Procesando información...")
                     let result = await axios.delete('/api/perfil', {
+                        headers: {
+                            Authorization: "Bearer " + this.state.token
+                        },
                         params: {
                             "idPerfil": idPerfil
                         }
@@ -296,12 +315,12 @@ class Perfiles extends React.Component {
                                             className="form-control"
                                             value={this.state.descripcion}
                                             ref={this.refDescripcion}
-                                            onChange={(event) => 
+                                            onChange={(event) =>
                                                 this.setState({ descripcion: event.target.value })
                                             }
-                                            onKeyPress={(event)=>{
+                                            onKeyPress={(event) => {
                                                 event.persist();
-                                                if(event.key === 'Enter'){
+                                                if (event.key === 'Enter') {
                                                     this.onEventGuardar();
                                                 }
                                             }}
