@@ -48,6 +48,23 @@ function sendClient(res, result) {
 }
 
 /**
+*Esta función se encarga de resporder las peticiones que no tiene autorización con estado 401 http. 
+*@author Luis Alexander Lara <https://www.facebook.com/luisal.laras>
+*
+*@param {object} res El objeto de respuesta del request
+*@param {object} result El objeto de respuesta de la petición
+*@returns {object} Retorna 
+*     res.send(new Buffer('wahoo'));
+*     res.send({ some: 'json' });
+*     res.send('<p>some html</p>');
+*     res.status(404).send('Sorry, cant find that');
+*/
+function sendNoAutorizado(res, result) {
+    return res.status(401).send(result);
+}
+
+
+/**
 *Esta función se encarga de resporder las peticiones expiradas 403 http. 
 *@author Luis Alexander Lara <https://www.facebook.com/luisal.laras>
 *
@@ -63,4 +80,4 @@ function sendExpired(res, result) {
     return res.status(403).send(result);
 }
 
-module.exports = { sendSuccess, sendError, sendClient, sendExpired };
+module.exports = { sendSuccess, sendError, sendClient, sendExpired ,sendNoAutorizado};

@@ -1,5 +1,4 @@
 const express = require('express');
-// const bodyParser = require('body-parser');
 const path = require('path');
 const app = express();
 const cors = require('cors');
@@ -8,25 +7,38 @@ require('dotenv').config();
 
 //cors para peticiones fuera del servidor
 /**
- setHeader('Access-Control-Allow-Origin', '*')
- setHeader('Access-Control-Allow-Headers', 'X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method')
- setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE')
+* setHeader('Access-Control-Allow-Origin', '*')
+* setHeader('Access-Control-Allow-Headers', 'X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method')
+* setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE')
 */
 app.use(cors());
 
+/**
+ * 
+ */
 app.set('port', process.env.PORT || 5000);
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: false }));
 
+/**
+ * 
+ */
 app.use(express.static(path.join(__dirname, "..", "app/build")));
-// app.get("/", function (req, res) {
-//     res.send("server running inmobiliaria...");
-// })
 
-//api rest
-// app.use('/api/usuario', require('./router/Usuario'));
-// app.use('/api/facultad', require('./router/Facultad'));
+/**
+ * 
+ */
+app.use(express.static(path.join(__dirname, "src/path/proyect")));
+
+/**
+ * 
+ */
+app.use(express.static(path.join(__dirname, "src/path/company")));
+
+/**
+ * 
+ */
 app.use('/api/comprobante', require('./src/router/Comprobante'));
 app.use('/api/moneda', require('./src/router/Moneda'));
 app.use('/api/banco', require('./src/router/Banco'));
@@ -56,11 +68,16 @@ app.use('/api/medida', require('./src/router/Medida'));
 app.use('/api/empresa', require('./src/router/Empresa'));
 app.use('/api/dashboard', require('./src/router/Dashboard'));
 
-
+/**
+ * 
+ */
 app.use((req, res, next) => {
     res.sendFile(path.join(__dirname, "..", "app/build", "index.html"));
 });
 
+/**
+ * 
+ */
 app.listen(app.get("port"), () => {
     console.log(`El servidor está corriendo en el puerto ${app.get("port")}`);
 });

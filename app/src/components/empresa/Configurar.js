@@ -12,6 +12,8 @@ import {
     ModalAlertSuccess,
     ModalAlertWarning,
 } from '../tools/Tools';
+import { connect } from 'react-redux';
+import { configSave } from '../../redux/actions';
 import sunat from '../../recursos/images/sunat.png';
 import noImage from '../../recursos/images/noimage.jpg'
 
@@ -171,10 +173,10 @@ class Configurar extends React.Component {
                     });
 
                     ModalAlertSuccess("Mi Empresa", result.data, () => {
-
+                        this.props.configSave();
+                        window.location.href = "/";
                     });
                 } catch (error) {
-                    console.log(error);
                     if (error.response) {
                         ModalAlertWarning("Mi Empresa", error.response.data);
                     } else {
@@ -220,7 +222,7 @@ class Configurar extends React.Component {
 
                 <div className="py-5 text-center">
                     <h3>Configuración Básica</h3>
-                    <p className="lead">Rellene nos datos requeridos <i className="fa fa-asterisk text-danger small"></i></p>
+                    <p className="lead">Rellene los datos requeridos <i className="fa fa-asterisk text-danger small"></i></p>
                 </div>
 
 
@@ -405,4 +407,16 @@ class Configurar extends React.Component {
 
 }
 
-export default Configurar;
+const mapStateToProps = (state) => {
+    return {
+        token: state.reducer
+    }
+}
+
+const mapDispatchToProps = (dispatch) => {
+    return {
+        configSave: () => dispatch(configSave())
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Configurar);

@@ -6,7 +6,6 @@ import { signOut, selectProject } from '../../redux/actions';
 import { spinnerLoading } from '../tools/Tools';
 
 import noImage from '../../recursos/images/noimage.jpg'
-import logoInmobiliaria from '../../recursos/images/INMOBILIARIA.png';
 
 class Principal extends React.Component {
 
@@ -105,13 +104,14 @@ class Principal extends React.Component {
         if (this.props.token.project !== null) {
             return <Redirect to="/inicio" />
         }
-
+        // console.log(this.props.token.empresa)
+        const { documento, razonSocial, nombreEmpresa, rutaImage } = this.props.token.empresa
         return (
             <>
                 <div className='container'>
                     {
                         this.state.loadModal ?
-                            <div className="clearfix absolute-all bg-white">
+                            <div className="clearfix fixed-all bg-white">
                                 {spinnerLoading(this.state.msgModal)}
                             </div>
                             :
@@ -120,7 +120,7 @@ class Principal extends React.Component {
                                     <div className='col-md-3 col-12' >
                                         <div className='d-flex h-100 justify-content-start align-items-center'>
                                             <div className="form-group">
-                                                <img className="img-fluid" src={logoInmobiliaria} alt="logo" width="140" />
+                                                <img className="img-fluid" src={`${rutaImage !== "" ? '/' + rutaImage : noImage}`} alt="logo" width="140" />
                                             </div>
                                         </div>
                                     </div>
@@ -128,8 +128,8 @@ class Principal extends React.Component {
                                     <div className='col-md-6 col-12' >
                                         <div className='d-flex h-100 flex-column justify-content-center align-items-center'>
                                             <div className="form-group text-center">
-                                                <h3 className="text-dark">Empresa Inmobiliaria sac</h3>
-                                                <h5 className="text-secondary">Ruc: 12345678952</h5>
+                                                <h3 className="text-dark">{nombreEmpresa == "" ? razonSocial : nombreEmpresa}</h3>
+                                                <h5 className="text-secondary">Ruc: {documento}</h5>
                                             </div>
                                         </div>
                                     </div>

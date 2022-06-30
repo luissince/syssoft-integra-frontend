@@ -1,9 +1,10 @@
-import { RESTORE_TOKEN, SIGN_IN, SIGN_OUT,PROJECT_ACTIVE,PROJECT_CLOSE, CONFIG } from './types';
+import { RESTORE_TOKEN, SIGN_IN, SIGN_OUT,PROJECT_ACTIVE,PROJECT_CLOSE, CONFIG, CONFIG_SAVE } from './types';
 
-export const restoreToken = (user) => (
+export const restoreToken = (user, empresa) => (
     {
         type: RESTORE_TOKEN,
-        token: user
+        token: user,
+        empresa: empresa
     }
 )
  
@@ -37,6 +38,12 @@ export const config = () => (
     {
         type: CONFIG,
         isConfig: true
+    }
+)
+
+export const configSave = () => (
+    {
+        type: CONFIG_SAVE,
     }
 )
 

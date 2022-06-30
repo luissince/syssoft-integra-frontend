@@ -314,6 +314,12 @@ class Proyecto {
             `);
 
             let proyectos = await Promise.all(result.map(async (proyecto) => {
+
+                let file = path.join(__dirname, '../', 'path/company');
+                console.log(proyecto)
+
+                await fs.chmod(file, 777);
+
                 let lotes = await conec.query(`SELECT estado FROM 
                 lote AS l INNER JOIN manzana AS m
                 ON l.idManzana = m.idManzana

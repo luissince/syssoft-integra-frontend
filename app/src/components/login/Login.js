@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { signIn } from '../../redux/actions';
-import logoEmpresa from '../../recursos/images/INMOBILIARIA.png';
+import noimage from '../../recursos/images/noimage.jpg';
 import './Login.css';
 
 class Login extends React.Component {
@@ -20,6 +20,7 @@ class Login extends React.Component {
 
         this.usuarioInput = React.createRef();
         this.passwordInput = React.createRef();
+        // console.log(process.env.REACT_APP_IMAGE)
     }
 
     setStateAsync(state) {
@@ -29,6 +30,7 @@ class Login extends React.Component {
     }
 
     componentDidMount() {
+
         if (this.usuarioInput.current !== null) {
             this.usuarioInput.current.focus();
         }
@@ -174,12 +176,13 @@ class Login extends React.Component {
         }
     }
 
-    render() {
-
+    render() {        
         const { usuario, password, message } = this.state;
         if (this.props.token.userToken != null) {
             return <Redirect to="/principal" />
         }
+
+        const { rutaImage, rutaLogo } = this.props.token.empresa;
 
         return (
             <>
@@ -187,8 +190,8 @@ class Login extends React.Component {
 
                 <div className="form-content text-center bg-white">
                     <form className="form-signin">
-                        <img className="mb-4" src={logoEmpresa} alt="Logo" width="150" />
-                        <h1 className="h3 mb-3 font-weight-normal">Ingrese los datos</h1>
+                        <img className="mb-4" src={`${rutaImage !== "" ? '/'+rutaImage : noimage}`} alt="Logo" width="150" />
+                        <h4 className="mb-3 font-weight-normal">Ingrese los datos</h4>
                         {
                             message !== "" ?
                                 <div className="alert alert-warning d-flex align-items-center" role="alert">
