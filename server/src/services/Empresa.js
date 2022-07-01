@@ -177,7 +177,6 @@ class Empresa {
     }
 
     async config(req, res) {
-        console.log("config")
         try {
             let result = await conec.query(`SELECT 
             idEmpresa,
@@ -197,8 +196,7 @@ class Empresa {
         }
     }
 
-    async save(req, res) {
-        console.log("save");
+    async save(req, res) {       
         let connection = null;
         try {
             connection = await conec.beginTransaction();
@@ -313,7 +311,6 @@ class Empresa {
             await conec.commit(connection);
             return sendSuccess(res, "Se registró correctamente la empresa.");
         } catch (error) {
-            console.log(error);
             if (connection != null) {
                 await conec.rollback(connection);
             }
