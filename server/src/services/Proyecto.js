@@ -183,6 +183,7 @@ class Proyecto {
     }
 
     async id(req) {
+        console.log("id")
         try {
             let result = await conec.query(`SELECT 
             p.idProyecto,
