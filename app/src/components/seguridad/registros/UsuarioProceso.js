@@ -2,9 +2,7 @@ import React from 'react';
 import axios from 'axios';
 import {
     keyNumberPhone,
-    isNumeric,
     keyNumberInteger,
-    getExtension,
     ModalAlertDialog,
     ModalAlertInfo,
     ModalAlertSuccess,

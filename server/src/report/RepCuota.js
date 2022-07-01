@@ -1,7 +1,7 @@
 const path = require('path');
 const PDFDocument = require("pdfkit-table");
 const getStream = require('get-stream');
-const { numberFormat } = require('../tools/Tools');
+const { numberFormat,isFile } = require('../tools/Tools');
 
 class RepCuota {
 
@@ -31,7 +31,11 @@ class RepCuota {
             let h2 = 11;
             let h3 = 9;
 
-            doc.image(path.join(__dirname, "..", "path/to/logo.png"), orgX, orgY, { width: 75, });
+            if (isFile(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo))) {
+                doc.image(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo), orgX, orgY, { width: 75 });
+            } else {
+                doc.image(path.join(__dirname, "..", "path/to/noimage.jpg"), orgX, orgY, { width: 75 });
+            }
 
             doc.fontSize(h1).text(
                 `${sedeInfo.nombreEmpresa}`,

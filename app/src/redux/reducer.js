@@ -45,7 +45,6 @@ const reducer = (state = initialState, action) => {
                 isVisible: false,
                 isConfig: false,
                 userToken: null,
-                empresa: null,
                 project: null
             };
         case PROJECT_ACTIVE:

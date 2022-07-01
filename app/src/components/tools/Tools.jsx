@@ -25,6 +25,19 @@ export function statePrivilegio(value) {
   return value === 1 ? true : false;
 }
 
+export async function imageBase64(ref) {
+  let files = ref.current.files;
+  if (files.length !== 0) {
+    let read = await readDataURL(files);
+    let base64String = read.replace(/^data:.+;base64,/, '');
+    let extension = getExtension(files[0].name);
+    let { width, height } = await imageSizeData(read);
+    return { base64String, extension, width, height }
+  } else {
+    return false;
+  }
+}
+
 export function formatMoney(
   amount,
   decimalCount = 2,

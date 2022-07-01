@@ -166,7 +166,7 @@ class Dashboard extends React.Component {
                                                                 <div className="card-header p-0 position-relative mt-n4 mx-3 z-index-2 bg-light" style={{ borderRadius: 10 }}>
                                                                     <div className="shadow-primary py-1 px-1  pe-1" style={{ borderRadius: 10, boxShadow: '0 7px 10px -5px rgba(153,153,153,.4)', border: '1px solid #999' }}>
                                                                         <div className="chart">
-                                                                            <img src={item.imagen === "" ? noImage : `data:image/${item.extensionimagen};base64,${item.imagen}`} alt="" className="img-fluid rounded" />
+                                                                            <img src={item.ruta === "" ? noImage : "/" + item.ruta} alt="" className="img-fluid rounded" />
                                                                         </div>
                                                                     </div>
                                                                 </div>

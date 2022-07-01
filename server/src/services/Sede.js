@@ -101,14 +101,8 @@ class Sede {
             telefono,
             email,
             web,
-            descripcion,
-            useSol,
-            claveSol,
-            certificado,
-            claveCert,
-
-            imagen,
-            extension) values (?,?,?,?,?,?,?, ?,?,?,?,?,?,?,?,?, ?,?)`, [
+            descripcion) 
+            VALUES (?,?,?,?,?,?,?, ?,?,?,?,?)`, [
                 idSede,
                 req.body.ruc,
                 req.body.razonSocial,
@@ -121,14 +115,7 @@ class Sede {
                 req.body.telefono,
                 req.body.email,
                 req.body.web,
-                req.body.descripcion,
-                req.body.useSol,
-                req.body.claveSol,
-                req.body.certificado,
-                req.body.claveCert,
-
-                req.body.imagen,
-                req.body.extension
+                req.body.descripcion
             ]);
 
             await conec.commit(connection);
@@ -161,14 +148,7 @@ class Sede {
                 s.telefono,
                 s.email,
                 s.web,
-                s.descripcion,
-                s.useSol,
-                s.claveSol,
-                s.certificado,
-                s.claveCert,
-    
-                s.imagen,
-                s.extension
+                s.descripcion
     
                 FROM sede AS s
                 INNER JOIN ubigeo AS u ON s.idUbigeo = u.idUbigeo
@@ -204,11 +184,7 @@ class Sede {
             email=?,
             web=?,
             descripcion=?,
-            useSol=?,
-            claveSol=?,
 
-            imagen=?,
-            extension=?,
             fupdate=?,
             hupdate=?
             WHERE idSede = ?`, [
@@ -224,13 +200,7 @@ class Sede {
                 req.body.email,
                 req.body.web,
                 req.body.descripcion,
-                req.body.useSol,
-                req.body.claveSol,
-                // req.body.certificado,
-                // req.body.claveCert,
 
-                req.body.imagen,
-                req.body.extension,
                 currentDate(),
                 currentTime(),
                 req.body.idSede
@@ -257,11 +227,8 @@ class Sede {
 
     async infoSedeReporte(req) {
         try {
-            let result = await conec.query(`SELECT 
+            let sede = await conec.query(`SELECT 
                 idSede, 
-                ruc, 
-                razonSocial, 
-                nombreEmpresa, 
                 nombreSede, 
                 direccion, 
                 celular, 
@@ -272,8 +239,21 @@ class Sede {
                 req.query.idSede,
             ]);
 
-            if (result.length > 0) {
-                return result[0];
+            let empresa = await conec.query(`SELECT 
+                idEmpresa,
+                documento as ruc,
+                razonSocial as nombreEmpresa,
+                rutaLogo,
+                rutaImage
+                FROM empresa LIMIT 1`);
+
+            let result = [...sede, ...empresa];
+
+            if (result.length > 1) {
+                return {
+                    ...result[0],
+                    ...result[1],
+                };
             } else {
                 return "Datos no encontrados";
             }
@@ -281,37 +261,6 @@ class Sede {
             return 'Error interno de conexión, intente nuevamente.';
         }
     }
-
-    async idInfoSede(req){
-        try {
-            let result = await conec.query(`SELECT 
-                idSede, 
-                ruc, 
-                razonSocial, 
-                nombreEmpresa, 
-                nombreSede, 
-                direccion, 
-                celular, 
-                telefono, 
-                email, 
-                web,
-                useSol,
-                claveSol,
-                claveCert
-                FROM sede WHERE idSede = ?`, [
-                req.query.idSede,
-            ]);
-
-            if (result.length > 0) {
-                return result[0];
-            } else {
-                return "Datos no encontrados";
-            }
-        } catch (error) {
-            return 'Error interno de conexión, intente nuevamente.';
-        }
-    }
-
 }
 
 module.exports = Sede

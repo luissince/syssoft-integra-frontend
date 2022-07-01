@@ -4,9 +4,6 @@ import CryptoJS from 'crypto-js';
 import {
     formatMoney,
     numberFormat,
-    calculateTaxBruto,
-    calculateTax,
-    timeForma24,
     spinnerLoading,
 } from '../../tools/Tools';
 

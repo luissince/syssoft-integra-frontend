@@ -40,14 +40,6 @@ router.post('/update', async function (req, res) {
     }
 });
 
-router.get('/infosede', async function (req, res){
-    const result = await sede.idInfoSede(req)
-    if (typeof result === "object") {
-        res.status(200).send(result)
-    } else {
-        res.status(500).send(result)
-    }
-});
 
 router.get('/listcombo', async function (req, res) {
     const result = await sede.listarCombo(req)

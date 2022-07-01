@@ -1,10 +1,11 @@
 const { currentDate, currentTime } = require('../tools/Tools');
+const { sendSuccess,sendError,sendClient } = require('../tools/Message');
 const Conexion = require('../database/Conexion');
 const conec = new Conexion();
 
 class Comprobante {
 
-    async list(req) {
+    async list(req,res) {
         try {
 
             let lista = await conec.query(`SELECT 
@@ -80,13 +81,13 @@ class Comprobante {
                 req.query.buscar,
             ]);
 
-            return { "result": resultLista, "total": total[0].Total };
+            return sendSuccess(res,{ "result": resultLista, "total": total[0].Total })
         } catch (error) {
-            return "Se produjo un error de servidor, intente nuevamente.";
+            return sendError(res, "Se produjo un error de servidor, intente nuevamente.")
         }
     }
 
-    async add(req) {
+    async add(req,res) {
         let connection = null;
         try {
             connection = await conec.beginTransaction();
@@ -159,32 +160,32 @@ class Comprobante {
                 ]);
             }
 
-            await conec.commit(connection);
-            return "insert";
+            await conec.commit(connection);       
+            return sendSuccess(res,"Se inserto correctamente el comprobante.")
         } catch (error) {
             if (connection != null) {
                 await conec.rollback(connection);
             }
-            return "Se produjo un error de servidor, intente nuevamente.";
+            sendError(res, "Se produjo un error de servidor, intente nuevamente.");
         }
     }
 
-    async id(req) {
+    async id(req,res) {
         try {
             let result = await conec.query(`SELECT * FROM comprobante WHERE idComprobante = ?`, [
                 req.query.idComprobante
             ]);
-            if (result.length > 0) {
-                return result[0];
+            if (result.length > 0) {             
+                return sendSuccess(res, result[0])
             } else {
-                return "Datos no encontrados";
+                return sendClient(res, "Datos incorrectos, intente nuevamente.");           
             }
         } catch (error) {
-            return "Se produjo un error de servidor, intente nuevamente.";
+            return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
         }
     }
 
-    async edit(req) {
+    async edit(req,res) {
         let connection = null;
         try {
             connection = await conec.beginTransaction();
@@ -217,8 +218,8 @@ class Comprobante {
                     req.body.idComprobante
                 ]);
 
-                await conec.commit(connection);
-                return "updateend";
+                await conec.commit(connection);               
+                sendSuccess(res,"Se actualizó correctamente el comprobante. !Hay campos que no se van editar ya que el comprobante esta ligado a un venta¡");
             } else {
                 await conec.execute(connection, `UPDATE comprobante SET 
                 tipo = ?,
@@ -245,18 +246,18 @@ class Comprobante {
                     req.body.idComprobante
                 ]);
 
-                await conec.commit(connection);
-                return "update";
+                await conec.commit(connection);                
+                return sendSuccess(res,"Se actualizó correctamente el comprobante.");
             }
         } catch (error) {
             if (connection != null) {
                 await conec.rollback(connection);
             }
-            return "Se produjo un error de servidor, intente nuevamente.";
+            return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
         }
     }
 
-    async delete(req) {
+    async delete(req,res) {
         let connection = null;
         try {
             connection = await conec.beginTransaction();
@@ -267,7 +268,7 @@ class Comprobante {
 
             if (venta.length > 0) {
                 await conec.rollback(connection);
-                return 'No se puede eliminar el comprobante ya que esta ligada a un venta.';
+                sendClient(res, 'No se puede eliminar el comprobante ya que esta ligada a un venta.');
             }
 
             await conec.execute(connection, `DELETE FROM comprobante WHERE idComprobante = ?`, [
@@ -275,16 +276,16 @@ class Comprobante {
             ]);
 
             await conec.commit(connection)
-            return "delete";
+            return sendSuccess(res,'Se eliminó correctamente el comprobante.');
         } catch (error) {
             if (connection != null) {
                 await conec.rollback(connection);
             }
-            return "Se produjo un error de servidor, intente nuevamente.";
+            sendError(res, "Se produjo un error de servidor, intente nuevamente.");
         }
     }
 
-    async listcombo(req) {
+    async listcombo(req,res) {
         try {
             let result = await conec.query(`SELECT 
             idComprobante, 
@@ -295,9 +296,9 @@ class Comprobante {
             WHERE tipo = ?`, [
                 req.query.tipo
             ]);
-            return result;
+            return sendSuccess(res,result);
         } catch (error) {
-            return "Se produjo un error de servidor, intente nuevamente.";
+            return sendError(res, "Se produjo un error de servidor, intente nuevamente.")
         }
     }
 

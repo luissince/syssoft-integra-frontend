@@ -2,8 +2,7 @@ import React from 'react';
 import axios from 'axios';
 import {
     convertNullText,
-    readDataURL,
-    getExtension,
+    imageBase64,
     keyNumberInteger,
     keyNumberPhone,
     spinnerLoading,
@@ -152,8 +151,13 @@ class Configurar extends React.Component {
         ModalAlertDialog("Mi Empresa", "¿Está seguro de continuar?", async (event) => {
             if (event) {
                 try {
-                    const { base64String: baseLogo, extension: extLogo } = await this.imageDataSend(this.refFileLogo)
-                    const { base64String: baseImage, extension: extImage } = await this.imageDataSend(this.refFileImagen)
+                    let logoSend = await imageBase64(this.refFileLogo);
+                    let baseLogo = logoSend ? logoSend.base64String : "";
+                    let extLogo = logoSend ? logoSend.extension : "";
+
+                    let imageSend = await imageBase64(this.refFileImagen);
+                    let baseImage = imageSend ? imageSend.base64String : "";
+                    let extImage = imageSend ? imageSend.extension : "";
 
                     ModalAlertInfo("Mi Empresa", "Procesando información...");
 
@@ -185,19 +189,6 @@ class Configurar extends React.Component {
                 }
             }
         });
-    }
-
-    async imageDataSend(ref) {
-        let files = ref.current.files;
-        let base64String = "";
-        let extension = "";
-        if (files.length !== 0) {
-            let read = await readDataURL(files);
-            base64String = read.replace(/^data:.+;base64,/, '');
-            extension = getExtension(files[0].name);
-        }
-
-        return { base64String, extension }
     }
 
     render() {

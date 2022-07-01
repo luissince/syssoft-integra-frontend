@@ -104,7 +104,7 @@ class Principal extends React.Component {
         if (this.props.token.project !== null) {
             return <Redirect to="/inicio" />
         }
-        // console.log(this.props.token.empresa)
+
         const { documento, razonSocial, nombreEmpresa, rutaImage } = this.props.token.empresa
         return (
             <>
@@ -172,7 +172,7 @@ class Principal extends React.Component {
                                             <div key={index} className="col-lg-4 col-md-4 col-sm-12 col-xs-12">
                                                 <div className="form-group">
                                                     <div className="card">
-                                                        <img src={item.imagen === "" ? noImage : `data:image/${item.extensionimagen};base64,${item.imagen}`} alt="" className="card-img-top" />
+                                                        <img src={item.ruta === "" ? noImage : "/" + item.ruta} alt="" className="card-img-top" />
                                                         <div className="card-body m-2">
                                                             <h6 className='text-primary font-weight-bold'>{item.nombre}</h6>
                                                             <h6 className='text-secondary'>{item.ubicacion}</h6>
@@ -189,7 +189,8 @@ class Principal extends React.Component {
                                                                 <li className="list-group-item border-0 px-0"><i className="fa fa-info"></i>
                                                                     {
                                                                         item.estado === 1 ? <span className='text-success'> Estado en Venta</span> : <span className='text-danger'> Estado en Litigio</span>
-                                                                    }</li>
+                                                                    }
+                                                                </li>
                                                             </ul>
                                                         </div>
                                                     </div>

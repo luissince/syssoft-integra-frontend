@@ -3,7 +3,7 @@ const PDFDocument = require("pdfkit-table");
 const getStream = require('get-stream');
 const qr = require("qrcode");
 const NumberLleters = require('../tools/NumberLleters');
-const { formatMoney, numberFormat, calculateTaxBruto, calculateTax, dateFormat, zfill } = require('../tools/Tools');
+const { formatMoney, numberFormat, calculateTaxBruto, calculateTax, dateFormat, zfill, isFile } = require('../tools/Tools');
 
 const numberLleters = new NumberLleters();
 
@@ -33,7 +33,11 @@ class RepFactura {
             let h2 = 11;
             let h3 = 9;
 
-            doc.image(path.join(__dirname, "..", "path/to/logo.png"), orgX, orgY, { width: 75, });
+            if (isFile(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo))) {
+                doc.image(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo), orgX, orgY, { width: 75 });
+            } else {
+                doc.image(path.join(__dirname, "..", "path/to/noimage.jpg"), orgX, orgY, { width: 75 });
+            }
 
             let center = doc.page.width - doc.options.margins.left - doc.options.margins.right - 150 - 150;
 
@@ -343,7 +347,11 @@ class RepFactura {
             let h2 = 11;
             let h3 = 9;
 
-            doc.image(path.join(__dirname, "..", "path/to/logo.png"), orgX, orgY, { width: 75, });
+            if (isFile(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo))) {
+                doc.image(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo), orgX, orgY, { width: 75 });
+            } else {
+                doc.image(path.join(__dirname, "..", "path/to/noimage.jpg"), orgX, orgY, { width: 75 });
+            }
 
             let center = doc.page.width - doc.options.margins.left - doc.options.margins.right - 150 - 150;
 
@@ -630,7 +638,11 @@ class RepFactura {
             let h2 = 11;
             let h3 = 9;
 
-            doc.image(path.join(__dirname, "..", "path/to/logo.png"), orgX, orgY, { width: 75, });
+            if (isFile(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo))) {
+                doc.image(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo), orgX, orgY, { width: 75 });
+            } else {
+                doc.image(path.join(__dirname, "..", "path/to/noimage.jpg"), orgX, orgY, { width: 75 });
+            }
 
             let center = doc.page.width - doc.options.margins.left - doc.options.margins.right - 150 - 150;
 
@@ -1042,7 +1054,7 @@ class RepFactura {
             doc.fontSize(10).text(`${data.localidad}`,
                 doc.options.margins.left + 230,
                 yPos);
-            
+
             // 
 
             yPos = 263;
@@ -1062,7 +1074,7 @@ class RepFactura {
             doc.fontSize(10).text("aval permatenerasd |",
                 doc.options.margins.left + 160,
                 yPos);
-            
+
             // 
 
             yPos = 309;
@@ -1154,8 +1166,11 @@ class RepFactura {
             let h2 = 11;
             let h3 = 9;
 
-
-            doc.image(path.join(__dirname, "..", "path/to/logo.png"), doc.x, doc.y, { width: 75 });
+            if (isFile(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo))) {
+                doc.image(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo), doc.x, doc.y, { width: 75 });
+            } else {
+                doc.image(path.join(__dirname, "..", "path/to/noimage.jpg"), doc.x, doc.y, { width: 75 });
+            }
 
             doc.fontSize(h1).text(
                 `${sedeInfo.nombreEmpresa}`,

@@ -1,7 +1,15 @@
+const {
+    currentDate,
+    currentTime,
+    isDirectory,
+    removeFile,
+    writeFile,
+    mkdir,
+    chmod,
+} = require('../tools/Tools');
+const path = require("path");
 const Conexion = require('../database/Conexion');
-const { currentDate, currentTime } = require('../tools/Tools');
 const conec = new Conexion();
-
 
 class Proyecto {
 
@@ -90,6 +98,21 @@ class Proyecto {
                 idProyecto = "PR0001";
             }
 
+            let file = path.join(__dirname, '../', 'path/proyect');
+
+            if (!isDirectory(file)) {
+                mkdir(file);
+                chmod(file);
+            }
+
+            let fileImage = "";
+            if (req.body.imagen !== "") {
+                let nameImage = `${Date.now() + idProyecto}.${req.body.extension}`;
+
+                writeFile(path.join(file, nameImage), req.body.imagen);
+                fileImage = nameImage;
+            }
+
             await conec.execute(connection, `INSERT INTO proyecto (
                 idProyecto,
                 nombre, 
@@ -110,12 +133,13 @@ class Proyecto {
                 numRecibocCorrelativo, 
                 imagen,
                 extension,
+                ruta,
                 fecha,
                 hora,
                 fupdate,
                 hupdate,
                 idUsuario) 
-                values (?, ?,?,?,?, ?,?, ?,?,?,?, ?,?,?,?,?,?,?,?,?,?,?,?,?)`, [
+                values (?, ?,?,?,?, ?,?, ?,?,?,?, ?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, [
                 idProyecto,
                 //datos
                 req.body.nombre,
@@ -140,6 +164,7 @@ class Proyecto {
                 //imagen
                 req.body.imagen,
                 req.body.extension,
+                '',
                 currentDate(),
                 currentTime(),
                 currentDate(),
@@ -183,8 +208,7 @@ class Proyecto {
             p.costoxlote,
             p.numContratoCorrelativo,
             p.numRecibocCorrelativo,
-            p.imagen,
-            p.extension
+            p.ruta
             FROM proyecto AS p
             INNER JOIN ubigeo AS u ON u.idUbigeo = p.idUbigeo
             WHERE p.idProyecto = ?`, [
@@ -206,6 +230,31 @@ class Proyecto {
         try {
             connection = await conec.beginTransaction();
 
+            let file = path.join(__dirname, '../', 'path/proyect');
+
+            if (!isDirectory(file)) {
+                mkdir(file);
+                chmod(file);
+            }
+
+            let proyecto = await conec.execute(connection, `SELECT
+            ruta
+            FROM proyecto
+            WHERE idProyecto = ?`, [
+                req.body.idProyecto
+            ]);
+
+            let fileImage = "";
+            if (req.body.imagen !== "") {
+                removeFile(path.join(file, proyecto[0].ruta));
+
+                let nameImage = `${Date.now() + req.body.idProyecto}.${req.body.extension}`;
+                writeFile(path.join(file, nameImage), req.body.imagen);
+                fileImage = nameImage;
+            } else {
+                fileImage = proyecto[0].ruta;
+            }
+
             await conec.execute(connection, `UPDATE proyecto SET
                 nombre=?, 
                 idSede=?,
@@ -225,6 +274,7 @@ class Proyecto {
                 numRecibocCorrelativo=?,
                 imagen=?,
                 extension=?,
+                ruta=?,
                 fupdate=?,
                 hupdate=?,
                 idUsuario=?
@@ -252,15 +302,19 @@ class Proyecto {
                 //imagen
                 req.body.imagen,
                 req.body.extension,
+                fileImage,
                 currentDate(),
                 currentTime(),
                 req.body.idUsuario,
                 req.body.idProyecto
             ])
 
+
+
             await conec.commit(connection)
             return 'update';
         } catch (error) {
+            console.log(error)
             if (connection != null) {
                 await conec.rollback(connection);
             }
@@ -273,6 +327,15 @@ class Proyecto {
         try {
             connection = await conec.beginTransaction();
 
+            let proyecto = await conec.execute(connection, `SELECT ruta FROM proyecto WHERE idProyecto = ?`, [
+                req.query.idProyecto
+            ]);
+
+            if (proyecto.length == 0) {
+                await conec.rollback(connection);
+                return "El proyecto a eliminar no existe, recargue su pantalla.";
+            }
+
             let manzana = await conec.execute(connection, `SELECT * FROM manzana WHERE idProyecto = ?`, [
                 req.query.idProyecto
             ]);
@@ -282,6 +345,36 @@ class Proyecto {
                 return 'No se puede eliminar el proyecto ya que esta ligada a una manzana.';
             }
 
+            let cobro = await conec.execute(connection, `SELECT idCobro FROM cobro WHERE idProyecto = ?`, [
+                req.query.idProyecto
+            ]);
+
+            if (cobro.length > 0) {
+                await conec.rollback(connection);
+                return 'No se puede eliminar el proyecto ya que esta ligada a unos cobros.';
+            }
+
+            let gasto = await conec.execute(connection, `SELECT idGasto FROM gasto WHERE idProyecto = ?`, [
+                req.query.idProyecto
+            ]);
+
+            if (gasto.length > 0) {
+                await conec.rollback(connection);
+                return 'No se puede eliminar el proyecto ya que esta ligada a unos gastos.';
+            }
+
+            let venta = await conec.execute(connection, `SELECT idVenta  FROM venta WHERE idProyecto = ?`, [
+                req.query.idProyecto
+            ]);
+
+            if (venta.length > 0) {
+                await conec.rollback(connection);
+                return 'No se puede eliminar el proyecto ya que esta ligada a unas ventas.';
+            }
+
+            let file = path.join(__dirname, '../', 'path/proyect');
+            removeFile(path.join(file, proyecto[0].ruta));
+
             await conec.execute(connection, `DELETE FROM proyecto WHERE idProyecto = ?`, [
                 req.query.idProyecto
             ]);
@@ -289,6 +382,7 @@ class Proyecto {
             await conec.commit(connection);
             return "delete";
         } catch (error) {
+            console.log(error)
             if (connection != null) {
                 await conec.rollback(connection);
             }
@@ -306,20 +400,13 @@ class Proyecto {
             m.codiso,
             m.nombre as moneda,
             m.simbolo,
-            p.imagen,
-            p.extension,
+            p.ruta,
             p.estado
             FROM proyecto AS p
             INNER JOIN moneda AS m ON m.idMoneda = p.idMoneda
             `);
 
             let proyectos = await Promise.all(result.map(async (proyecto) => {
-
-                let file = path.join(__dirname, '../', 'path/company');
-                console.log(proyecto)
-
-                await fs.chmod(file, 777);
-
                 let lotes = await conec.query(`SELECT estado FROM 
                 lote AS l INNER JOIN manzana AS m
                 ON l.idManzana = m.idManzana

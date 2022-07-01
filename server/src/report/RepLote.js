@@ -1,7 +1,7 @@
 const path = require('path');
 const PDFDocument = require("pdfkit-table");
 const getStream = require('get-stream');
-const { numberFormat, formatMoney, currentDate } = require('../tools/Tools');
+const { numberFormat, currentDate ,isFile} = require('../tools/Tools');
 
 class RepLote {
 
@@ -33,7 +33,11 @@ class RepLote {
             let h2 = 11;
             let h3 = 9;
 
-            doc.image(path.join(__dirname, "..", "path/to/logo.png"), doc.x, doc.y, { width: 75, });
+            if (isFile(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo))) {
+                doc.image(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo), doc.x,  doc.y, { width: 75 });
+            } else {
+                doc.image(path.join(__dirname, "..", "path/to/noimage.jpg"), doc.x, doc.y, { width: 75 });
+            }
 
             doc.fontSize(h1).text(
                 `${sedeInfo.nombreEmpresa}`,
@@ -232,7 +236,11 @@ class RepLote {
             let h2 = 11;
             let h3 = 9;
 
-            doc.image(path.join(__dirname, "..", "path/to/logo.png"), doc.x, doc.y, { width: 75, });
+            if (isFile(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo))) {
+                doc.image(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo), doc.x,  doc.y, { width: 75 });
+            } else {
+                doc.image(path.join(__dirname, "..", "path/to/noimage.jpg"), doc.x, doc.y, { width: 75 });
+            }
 
             doc.fontSize(h1).text(
                 `${sedeInfo.nombreEmpresa}`,

@@ -1,5 +1,16 @@
-const { sendSuccess, sendError, sendClient, sendNoAutorizado } = require('../tools/Message');
-const fs = require("fs").promises;
+const {
+    sendSuccess,
+    sendError,
+    sendNoAutorizado
+} = require('../tools/Message');
+const {
+    currentDate,
+    currentTime,
+    isDirectory,
+    writeFile,
+    mkdir,
+    chmod,
+} = require('../tools/Tools');
 const path = require("path");
 const Conexion = require('../database/Conexion');
 const conec = new Conexion();
@@ -64,20 +75,26 @@ class Empresa {
             }
 
             let file = path.join(__dirname, '../', 'path/company');
-
-            await fs.chmod(file, 777);
+            if (!isDirectory(file)) {
+                mkdir(file);
+                chmod(file);
+            }
 
             let fileLogo = "";
             let fileImage = "";
 
             if (req.body.logo !== "") {
-                await fs.writeFile(path.join(file, `logo.${req.body.extlogo}`), req.body.logo, 'base64');
-                fileLogo = `logo.${req.body.extlogo}`;
+                let nameImage = `${Date.now() + 'logo'}.${req.body.extlogo}`;
+
+                writeFile(path.join(file, nameImage), req.body.logo)
+                fileLogo = nameImage;
             }
 
             if (req.body.image !== "") {
-                await fs.writeFile(path.join(file, `image.${req.body.extimage}`), req.body.image, 'base64');
-                fileImage = `image.${req.body.extimage}`;
+                let nameImage = `${Date.now() + 'image'}.${req.body.extimage}`;
+
+                writeFile(path.join(file, nameImage), req.body.image);
+                fileImage = nameImage;
             }
 
             await conec.execute(connection, `INSERT INTO empresa(
@@ -95,8 +112,16 @@ class Empresa {
                 extlogo,
                 extimage,
                 rutaLogo,
-                rutaImage
-             ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, [
+                rutaImage,
+                useSol,
+                claveSol,
+                certificado,
+                certificado,
+                fecha,
+                hora,
+                fupdate,
+                hupdate
+             ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, [
                 idEmpresa,
                 req.body.documento,
                 req.body.razonSocial,
@@ -111,7 +136,15 @@ class Empresa {
                 req.body.extlogo,
                 req.body.extimage,
                 fileLogo,
-                fileImage
+                fileImage,
+                '',
+                '',
+                '',
+                '',
+                currentDate(),
+                currentTime(),
+                currentDate(),
+                currentTime(),
             ]);
 
             await conec.commit(connection);

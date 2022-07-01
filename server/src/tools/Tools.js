@@ -1,3 +1,46 @@
+const fs = require("fs");
+
+
+function isDirectory(file) {
+    try {
+        let result = fs.lstatSync(file).isDirectory()
+        return result;
+    } catch (error) {
+        return false;
+    }
+}
+
+function isFile(file) {
+    try {
+        let result = fs.lstatSync(file).isFile()
+        return result;
+    } catch (error) {
+        return false;
+    }
+}
+
+
+function removeFile(file) {
+    try {
+        fs.unlinkSync(file)
+        return true;
+    } catch (error) {
+        return false;
+    }
+}
+
+function writeFile(file, data, options = 'base64') {
+    fs.writeFile(file, data, options, function () { });
+}
+
+function mkdir(file) {
+    fs.mkdirSync(file);
+}
+
+function chmod(file, mode = 777) {
+    fs.chmod(file, mode);
+}
+
 function currentDate() {
     let date = new Date();
     let formatted_date = date.getFullYear() + "-" + ((date.getMonth() + 1) > 9 ? (date.getMonth() + 1) : '0' + (
@@ -142,5 +185,11 @@ module.exports = {
     calculateTax,
     numberFormat,
     frecuenciaPago,
-    zfill
+    zfill,
+    isDirectory,
+    isFile,
+    removeFile,
+    writeFile,
+    mkdir,
+    chmod
 };

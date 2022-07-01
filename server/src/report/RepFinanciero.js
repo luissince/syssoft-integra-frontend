@@ -1,7 +1,7 @@
 const path = require('path');
 const PDFDocument = require("pdfkit-table");
 const getStream = require('get-stream');
-const { dateFormat, numberFormat, currentDate } = require('../tools/Tools');
+const { dateFormat, numberFormat, currentDate,isFile } = require('../tools/Tools');
 
 class RepFinanciero {
 
@@ -28,7 +28,11 @@ class RepFinanciero {
             let h2 = 11;
             let h3 = 9;
 
-            doc.image(path.join(__dirname, "..", "path/to/logo.png"), doc.x, doc.y, { width: 75 });
+            if (isFile(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo))) {
+                doc.image(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo), doc.x, doc.y, { width: 75 });
+            } else {
+                doc.image(path.join(__dirname, "..", "path/to/noimage.jpg"), doc.x, doc.y, { width: 75 });
+            }
 
             doc.fontSize(h1).text(
                 `${sedeInfo.nombreEmpresa}`,
@@ -104,7 +108,7 @@ class RepFinanciero {
                 columnSpacing: 5,
                 columnsSize: [40, 132, 90, 90, 90, 90],
                 x: orgX,
-                y: doc.y+10,
+                y: doc.y + 10,
                 width: doc.page.width - doc.options.margins.left - doc.options.margins.right
             });
 
@@ -204,7 +208,11 @@ class RepFinanciero {
             let h2 = 11;
             let h3 = 9;
 
-            doc.image(path.join(__dirname, "..", "path/to/logo.png"), doc.x, doc.y, { width: 75 });
+            if (isFile(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo))) {
+                doc.image(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo), doc.x, doc.y, { width: 75 });
+            } else {
+                doc.image(path.join(__dirname, "..", "path/to/noimage.jpg"), doc.x, doc.y, { width: 75 });
+            }
 
             doc.fontSize(h1).text(
                 `${sedeInfo.nombreEmpresa}`,

@@ -19,6 +19,7 @@ import Impuestos from '../ajustes/Impuestos';
 import Bancos from '../ajustes/Bancos';
 import BancoDetalle from '../ajustes/registros/BancoDetalle';
 import Sedes from '../ajustes/Sedes';
+import SedeProceso from '../ajustes/registros/SedeProceso';
 import Proyectos from '../ajustes/Proyectos';
 import ProcesoProyecto from '../ajustes/proyecto/ProcesoProyecto';
 import Manzanas from '../logistica/Manzanas';
@@ -291,7 +292,13 @@ class Inicio extends React.Component {
                                 />
                                 <Route
                                     path={`${path}/sedes`}
+                                    exact={true}
                                     render={(props) => <Sedes {...props} />}
+                                />
+                                <Route
+                                    path={`${path}/sedes/proceso`}
+                                    exact={true}
+                                    render={(props) => <SedeProceso {...props} />}
                                 />
                                 <Route
                                     path={`${path}/proyectos`}

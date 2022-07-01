@@ -1,9 +1,11 @@
 import React from 'react';
 import axios from 'axios';
 import {
+    imageBase64,
     isNumeric,
     keyNumberFloat,
     getExtension,
+    ModalAlertDialog,
     ModalAlertInfo,
     ModalAlertSuccess,
     ModalAlertWarning,
@@ -44,8 +46,6 @@ class ProcesoProyecto extends React.Component {
             numRecibocCorrelativo: '',
 
             imagen: noImage,
-            imageBase64: null,
-            extenBase64: null,
 
             idUsuario: this.props.token.userToken.idUsuario,
 
@@ -179,9 +179,8 @@ class ProcesoProyecto extends React.Component {
                 numContratoCorrelativo: data.numContratoCorrelativo,
                 numRecibocCorrelativo: data.numRecibocCorrelativo,
 
-                imagen: data.imagen !== "" ? `data:image/${data.extensionimagen};base64,${data.imagen}` : noImage,
-                imageBase64: data.imagen,
-                extenBase64: data.extension,
+                // imagen: data.imagen !== "" ? `data:image/${data.extensionimagen};base64,${data.imagen}` : noImage,
+                imagen: data.ruta !== "" ? "/" + data.ruta : noImage,
 
                 sedes: sede.data,
                 monedas: moneda.data,
@@ -251,35 +250,37 @@ class ProcesoProyecto extends React.Component {
             return;
         }
 
-        try {
-            ModalAlertInfo("Proyecto", "Procesando información...");
-            let files = this.refFileImagen.current.files;
-            if (files.length !== 0) {
-                let read = await readDataURL(files);
-                let base64String = read.replace(/^data:.+;base64,/, '');
-                let ext = getExtension(files[0].name);
-                let { width, height } = await imageSizeData(read);
-                if (width === 1024 && height === 629) {
-                    let result = await this.saveProject(base64String, ext);
-                    ModalAlertSuccess("Proyecto", result.data, () => {
-                        this.props.history.goBack();
-                    });
-                } else {
-                    ModalAlertWarning("Proyecto", "La imagen a subir no tiene el tamaño establecido.");
+        ModalAlertDialog("Mi Empresa", "¿Está seguro de continuar?", async (event) => {
+            if (event) {
+                try {
+                    ModalAlertInfo("Proyecto", "Procesando información...");
+
+                    const imageSend = await imageBase64(this.refFileImagen)
+                    if (imageSend) {
+                        const { base64String, extension, width, height } = imageSend;
+                        if (width === 1024 && height === 629) {
+                            let result = await this.saveProject(base64String, extension);
+                            ModalAlertSuccess("Proyecto", result.data, () => {
+                                this.props.history.goBack();
+                            });
+                        } else {
+                            ModalAlertWarning("Proyecto", "La imagen a subir no tiene el tamaño establecido.");
+                        }
+                    } else {
+                        let result = await this.saveProject("", "");
+                        ModalAlertSuccess("Proyecto", result.data, () => {
+                            this.props.history.goBack();
+                        });
+                    }
+                } catch (error) {
+                    if (error.response) {
+                        ModalAlertWarning("Proyecto", error.response.data)
+                    } else {
+                        ModalAlertWarning("Proyecto", "Se genero un error interno, intente nuevamente.")
+                    }
                 }
-            } else {
-                let result = await this.saveProject("", "");
-                ModalAlertSuccess("Proyecto", result.data, () => {
-                    this.props.history.goBack();
-                });
             }
-        } catch (error) {
-            if (error.response) {
-                ModalAlertWarning("Proyecto", error.response.data)
-            } else {
-                ModalAlertWarning("Proyecto", "Se genero un error interno, intente nuevamente.")
-            }
-        }
+        });
     }
 
     async saveProject(image, extension) {
@@ -306,8 +307,8 @@ class ProcesoProyecto extends React.Component {
                 "numContratoCorrelativo": this.state.numContratoCorrelativo.trim().toUpperCase(),
                 "numRecibocCorrelativo": this.state.numRecibocCorrelativo.trim().toUpperCase(),
                 //imagen
-                "imagen": image === "" ? this.state.imageBase64 == null ? "" : this.state.imageBase64 : image,
-                "extension": extension === "" ? this.state.extenBase64 == null ? "" : this.state.extenBase64 : extension,
+                "imagen": image === "" ? "" : image,
+                "extension": extension === "" ? "" : extension,
                 "idUsuario": this.state.idUsuario,
             });
         } else {
@@ -333,8 +334,8 @@ class ProcesoProyecto extends React.Component {
                 "numContratoCorrelativo": this.state.numContratoCorrelativo.trim().toUpperCase(),
                 "numRecibocCorrelativo": this.state.numRecibocCorrelativo.trim().toUpperCase(),
                 //imagen
-                "imagen": image === "" ? this.state.imageBase64 == null ? "" : this.state.imageBase64 : image,
-                "extension": extension === "" ? this.state.extenBase64 == null ? "" : this.state.extenBase64 : extension,
+                "imagen": image === "" ? "" : image,
+                "extension": extension === "" ? "" : extension,
                 "idUsuario": this.state.idUsuario,
                 "idProyecto": this.state.idProyecto,
             });
@@ -397,6 +398,19 @@ class ProcesoProyecto extends React.Component {
             }
             document.getElementById(idTab).classList.add('active');
             document.getElementById(idContent).classList.add('show', 'active');
+        }
+    }
+
+    async imageDataSend(ref) {
+        let files = ref.current.files;
+        if (files.length !== 0) {
+            let read = await readDataURL(files);
+            let base64String = read.replace(/^data:.+;base64,/, '');
+            let extension = getExtension(files[0].name);
+            let { width, height } = await imageSizeData(read);
+            return { base64String, extension, width, height }
+        } else {
+            return false;
         }
     }
 

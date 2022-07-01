@@ -182,7 +182,7 @@ class Login extends React.Component {
             return <Redirect to="/principal" />
         }
 
-        const { rutaImage, rutaLogo } = this.props.token.empresa;
+        const { rutaImage } = this.props.token.empresa;
 
         return (
             <>
