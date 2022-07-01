@@ -1017,7 +1017,7 @@ class RepFactura {
 
             yPos = 205;
 
-            doc.fontSize(10).text(``,
+            doc.fontSize(10).text(`${data.informacion}`,
                 doc.options.margins.left + 140,
                 yPos);
 
@@ -1051,7 +1051,7 @@ class RepFactura {
 
             yPos = 251.56;
 
-            doc.fontSize(10).text(`${data.localidad}`,
+            doc.fontSize(10).text(``,
                 doc.options.margins.left + 230,
                 yPos);
 
@@ -1063,7 +1063,7 @@ class RepFactura {
                 doc.options.margins.left + 140,
                 yPos);
 
-            doc.fontSize(10).text(`${data.celular}`,
+            doc.fontSize(10).text(``,
                 doc.options.margins.left + 230,
                 yPos);
 
