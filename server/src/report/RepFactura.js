@@ -985,7 +985,7 @@ class RepFactura {
                 doc.options.margins.left + 100,
                 yPos);
 
-            doc.fontSize(10).text("|",
+            doc.fontSize(10).text("",
                 doc.options.margins.left + 170,
                 yPos);
 
