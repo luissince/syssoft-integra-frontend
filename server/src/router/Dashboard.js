@@ -3,7 +3,7 @@ const router = express.Router();
 const { token } = require('../services/Jwt');
 const dashboard = require('../services/Dashboard');
 
-router.get('/totales', token, async function (req, res) {
+router.get('/totales', async function (req, res) {
     return await dashboard.totales(req, res);
 });
 

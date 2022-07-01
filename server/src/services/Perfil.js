@@ -240,7 +240,8 @@ class Perfil {
         try {
             let result = await conec.query('SELECT idPerfil,descripcion FROM perfil');
             return sendSuccess(res, result);
-        } catch (error) {
+        } catch (error) { 
+            console.log(error);
             return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
         }
     }

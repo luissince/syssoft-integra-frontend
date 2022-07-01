@@ -57,6 +57,7 @@ class Accesos extends React.Component {
       });
 
     } catch (error) {
+      console.log(error);
       await this.setStateAsync({
         msgLoading: "Se produjo un error interno, intente nuevamente."
       });
