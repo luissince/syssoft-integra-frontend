@@ -981,7 +981,7 @@ class RepFactura {
 
             // 
 
-            doc.fontSize(10).text(`${data.idPlazo}`,
+            doc.fontSize(10).text(``,
                 doc.options.margins.left + 100,
                 yPos);
 
