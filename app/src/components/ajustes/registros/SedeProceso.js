@@ -20,9 +20,6 @@ class SedeProceso extends React.Component {
         this.state = {
             idSede: '',
 
-            ruc: '',
-            razonSocial: '',
-            nombreEmpresa: '',
             nombreSede: '',
             direccion: '',
 
@@ -43,9 +40,7 @@ class SedeProceso extends React.Component {
             msgLoading: 'Cargando datos...',
 
         }
-        this.refRuc = React.createRef();
-        this.refRazonSocial = React.createRef();
-        this.refNombreEmpresa = React.createRef();
+
         this.refNombreSede = React.createRef();
         this.refCelular = React.createRef();
 
@@ -88,9 +83,7 @@ class SedeProceso extends React.Component {
 
             await this.setStateAsync({
                 idSede: data.idSede,
-                ruc: data.ruc,
-                razonSocial: data.razonSocial,
-                nombreEmpresa: data.nombreEmpresa,
+    
                 nombreSede: data.nombreSede,
                 direccion: data.direccion,
 
@@ -117,13 +110,7 @@ class SedeProceso extends React.Component {
 
     async onEventGuardar() {
 
-        if (this.state.ruc === "") {
-            this.refRuc.current.focus();
-        } else if (this.state.razonSocial === "") {
-            this.refRazonSocial.current.focus();
-        } else if (this.state.nombreEmpresa === "") {
-            this.refNombreEmpresa.current.focus();
-        } else if (this.state.nombreSede === "") {
+       if (this.state.nombreSede === "") {
             this.refNombreSede.current.focus();
         } else if (this.state.direccion === "") {
             this.refDireccion.current.focus();
@@ -137,10 +124,7 @@ class SedeProceso extends React.Component {
                 ModalAlertInfo("Sede", "Procesando información...");
 
                 if (this.state.idSede !== '') {
-                    let result = await axios.post('/api/sede/update', {
-                        "ruc": this.state.ruc,
-                        "razonSocial": this.state.razonSocial.trim().toUpperCase(),
-                        "nombreEmpresa": this.state.nombreEmpresa.trim().toUpperCase(),
+                    let result = await axios.post('/api/sede/update', {                    
                         "nombreSede": this.state.nombreSede.trim().toUpperCase(),
                         "direccion": this.state.direccion.trim().toUpperCase(),
 
@@ -151,8 +135,8 @@ class SedeProceso extends React.Component {
                         "email": this.state.email.trim().toUpperCase(),
                         "web": this.state.web.trim().toUpperCase(),
                         "descripcion": this.state.descripcion.trim().toUpperCase(),
-                  
-    
+
+
                         "idSede": this.state.idSede
                     })
 
@@ -161,9 +145,6 @@ class SedeProceso extends React.Component {
                     });
                 } else {
                     let result = await axios.post('/api/sede/add', {
-                        "ruc": this.state.ruc,
-                        "razonSocial": this.state.razonSocial.trim().toUpperCase(),
-                        "nombreEmpresa": this.state.nombreEmpresa.trim().toUpperCase(),
                         "nombreSede": this.state.nombreSede.trim().toUpperCase(),
                         "direccion": this.state.direccion.trim().toUpperCase(),
 
@@ -173,7 +154,7 @@ class SedeProceso extends React.Component {
                         "telefono": this.state.telefono.trim(),
                         "email": this.state.email.trim().toUpperCase(),
                         "web": this.state.web.trim().toUpperCase(),
-                        "descripcion": this.state.descripcion.trim().toUpperCase()                   
+                        "descripcion": this.state.descripcion.trim().toUpperCase()
                     });
 
                     ModalAlertSuccess("Sede", result.data, () => {
@@ -259,41 +240,8 @@ class SedeProceso extends React.Component {
                         : null
                 }
 
-                <div className="form-row">
-                    <div className="form-group col-md-6">
-                        <label>RUC: <i className="fa fa-asterisk text-danger small"></i></label>
-                        <input
-                            type="text"
-                            className="form-control"
-                            ref={this.refRuc}
-                            value={this.state.ruc}
-                            onChange={(event) => this.setState({ ruc: event.target.value })}
-                            onKeyPress={keyNumberInteger}
-                            placeholder="Ingrese el número del ruc" />
-                    </div>
-                    <div className="form-group col-md-6">
-                        <label>Razon Social: <i className="fa fa-asterisk text-danger small"></i></label>
-                        <input
-                            type="text"
-                            className="form-control"
-                            ref={this.refRazonSocial}
-                            value={this.state.razonSocial}
-                            onChange={(event) => this.setState({ razonSocial: event.target.value })}
-                            placeholder="Ingrese la razon social" />
-                    </div>
-                </div>
 
                 <div className="form-row">
-                    <div className="form-group col-md-6">
-                        <label>Nombre de Empresa: <i className="fa fa-asterisk text-danger small"></i></label>
-                        <input
-                            type="text"
-                            className="form-control"
-                            ref={this.refNombreEmpresa}
-                            value={this.state.nombreEmpresa}
-                            onChange={(event) => this.setState({ nombreEmpresa: event.target.value })}
-                            placeholder="Ingrese el nombre comercial de la empresa" />
-                    </div>
                     <div className="form-group col-md-6">
                         <label>Nombre de Sede: <i className="fa fa-asterisk text-danger small"></i></label>
                         <input
@@ -332,7 +280,7 @@ class SedeProceso extends React.Component {
                 </div>
 
                 <div className="form-row">
-                    <div className="form-group col-md-4">
+                    <div className="form-group col-md-6">
                         <label>celular: <i className="fa fa-asterisk text-danger small"></i></label>
                         <input
                             type="text"
@@ -343,7 +291,7 @@ class SedeProceso extends React.Component {
                             onKeyPress={keyNumberInteger}
                             placeholder="Ingrese el número de celular" />
                     </div>
-                    <div className="form-group col-md-4">
+                    <div className="form-group col-md-6">
                         <label>Telefono: </label>
                         <input
                             type="text"
@@ -352,15 +300,6 @@ class SedeProceso extends React.Component {
                             onChange={(event) => this.setState({ telefono: event.target.value })}
                             onKeyPress={keyNumberInteger}
                             placeholder="Ingrese el número de telefono" />
-                    </div>
-                    <div className="form-group col-md-4">
-                        <label>Email:</label>
-                        <input
-                            type="text"
-                            className="form-control"
-                            value={this.state.email}
-                            onChange={(event) => this.setState({ email: event.target.value })}
-                            placeholder="Ingrese el email" />
                     </div>
                 </div>
 
@@ -375,6 +314,18 @@ class SedeProceso extends React.Component {
                             placeholder="Ingrese la url" />
                     </div>
                     <div className="form-group col-md-6">
+                        <label>Email:</label>
+                        <input
+                            type="text"
+                            className="form-control"
+                            value={this.state.email}
+                            onChange={(event) => this.setState({ email: event.target.value })}
+                            placeholder="Ingrese el email" />
+                    </div>
+                </div>
+
+                <div className="form-row">
+                    <div className="form-group col-md-12">
                         <label>Descripción:</label>
                         <input
                             type="text"

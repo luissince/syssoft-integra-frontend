@@ -8,9 +8,6 @@ class Sede {
         try {
             let lista = await conec.query(`SELECT 
                 idSede, 
-                ruc, 
-                razonSocial, 
-                nombreEmpresa, 
                 nombreSede, 
                 direccion, 
                 celular, 
@@ -90,9 +87,6 @@ class Sede {
 
             await conec.execute(connection, `INSERT INTO sede (
             idSede,
-            ruc,
-            razonSocial,
-            nombreEmpresa,
             nombreSede,
             direccion,
             idUbigeo,
@@ -102,11 +96,8 @@ class Sede {
             email,
             web,
             descripcion) 
-            VALUES (?,?,?,?,?,?,?, ?,?,?,?,?)`, [
+            VALUES (?,?,?,?, ?,?,?,?,?)`, [
                 idSede,
-                req.body.ruc,
-                req.body.razonSocial,
-                req.body.nombreEmpresa,
                 req.body.nombreSede,
                 req.body.direccion,
                 req.body.idUbigeo,
@@ -132,9 +123,6 @@ class Sede {
         try {
             let result = await conec.query(`SELECT 
                 s.idSede,
-                s.ruc,
-                s.razonSocial,
-                s.nombreEmpresa,
                 s.nombreSede,
                 s.direccion,
     
@@ -172,9 +160,6 @@ class Sede {
 
             connection = await conec.beginTransaction();
             await conec.execute(connection, `UPDATE sede SET 
-            ruc=?,
-            razonSocial=?,
-            nombreEmpresa=?,
             nombreSede=?,
             direccion=?,
             idUbigeo=?,
@@ -188,9 +173,6 @@ class Sede {
             fupdate=?,
             hupdate=?
             WHERE idSede = ?`, [
-                req.body.ruc,
-                req.body.razonSocial,
-                req.body.nombreEmpresa,
                 req.body.nombreSede,
                 req.body.direccion,
                 req.body.idUbigeo,
@@ -230,7 +212,6 @@ class Sede {
             let sede = await conec.query(`SELECT 
                 idSede, 
                 nombreSede, 
-                direccion, 
                 celular, 
                 telefono, 
                 email, 
@@ -243,6 +224,7 @@ class Sede {
                 idEmpresa,
                 documento as ruc,
                 razonSocial as nombreEmpresa,
+                direccion,
                 rutaLogo,
                 rutaImage
                 FROM empresa LIMIT 1`);

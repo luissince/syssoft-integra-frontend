@@ -34,6 +34,7 @@ const reducer = (state = initialState, action) => {
             return {
                 ...state,
                 userToken: action.token,
+                project:  action.project,
                 isSignout: false,
                 isVisible: true,
                 isConfig: false,

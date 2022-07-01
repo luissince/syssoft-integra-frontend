@@ -60,7 +60,7 @@ class Principal extends React.Component {
         let userToken = window.localStorage.getItem('login');
         if (userToken === null) {
             this.props.restore();
-            this.props.history.push("login");
+            // this.props.history.push("login");
         } else {
             let projectToken = window.localStorage.getItem('project');
             if (projectToken !== null) {

@@ -12,37 +12,8 @@ class Sedes extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            idSede: '',
 
-            ruc: '',
-            razonSocial: '',
-            nombreEmpresa: '',
-            nombreSede: '',
-            direccion: '',
-
-            idUbigeo: '',
-            ubigeo: '',
-
-            celular: '',
-            telefono: '',
-            email: '',
-            web: '',
-            descripcion: '',
-            useSol: '',
-            claveSol: '',
-            certificado: '',
-            claveCert: '',
-
-            filter: false,
-            filteredData: [],
-
-            imagen: noImage,
-            imageBase64: null,
-            extenBase64: null,
-
-            loadModal: false,
-            nameModal: 'Nuevo Comprobante',
-            msgModal: 'Cargando datos...',
+            empresa: [],
 
             edit: statePrivilegio(this.props.token.userToken.menus[5].submenu[3].privilegio[0].estado),
 
@@ -80,18 +51,18 @@ class Sedes extends React.Component {
     }
 
     async componentDidMount() {
-        this.loadInit();
+        this.loadInit(true);
     }
 
     componentWillUnmount() {
         this.abortControllerTable.abort();
     }
 
-    loadInit = async () => {
+    loadInit = async (empresa) => {
         if (this.state.loading) return;
 
         await this.setStateAsync({ paginacion: 1 });
-        this.fillTable(0, "");
+        this.fillTable(0, "", empresa);
         await this.setStateAsync({ opcion: 0 });
     }
 
@@ -101,7 +72,7 @@ class Sedes extends React.Component {
         if (text.trim().length === 0) return;
 
         await this.setStateAsync({ paginacion: 1 });
-        this.fillTable(1, text.trim());
+        this.fillTable(1, text.trim(), false);
         await this.setStateAsync({ opcion: 1 });
     }
 
@@ -113,20 +84,28 @@ class Sedes extends React.Component {
     onEventPaginacion = () => {
         switch (this.state.opcion) {
             case 0:
-                this.fillTable(0, "");
+                this.fillTable(0, "", false);
                 break;
             case 1:
-                this.fillTable(1, this.refTxtSearch.current.value);
+                this.fillTable(1, this.refTxtSearch.current.value, false);
                 break;
-            default: this.fillTable(0, "");
+            default: this.fillTable(0, "", false);
         }
     }
 
-    fillTable = async (opcion, buscar) => {
+    fillTable = async (opcion, buscar, loadEmpresa) => {
         try {
             await this.setStateAsync({ loading: true, lista: [], messageTable: "Cargando información...", messagePaginacion: "Mostranto 0 de 0 Páginas" });
 
-            const result = await axios.get('/api/sede/list', {
+            let listEmpresa = loadEmpresa ? [] : this.state.empresa;
+            if (loadEmpresa) {
+                const load = await axios.get('/api/empresa/load', {
+                    signal: this.abortControllerTable.signal,
+                });
+                listEmpresa.push(load.data);
+            }
+
+            const sede = await axios.get('/api/sede/list', {
                 signal: this.abortControllerTable.signal,
                 params: {
                     "opcion": opcion,
@@ -136,12 +115,15 @@ class Sedes extends React.Component {
                 }
             });
 
-            let totalPaginacion = parseInt(Math.ceil((parseFloat(result.data.total) / this.state.filasPorPagina)));
-            let messagePaginacion = `Mostrando ${result.data.result.length} de ${totalPaginacion} Páginas`;
+            let totalPaginacion = parseInt(Math.ceil((parseFloat(sede.data.total) / this.state.filasPorPagina)));
+            let messagePaginacion = `Mostrando ${sede.data.result.length} de ${totalPaginacion} Páginas`;
 
             await this.setStateAsync({
                 loading: false,
-                lista: result.data.result,
+                lista: sede.data.result,
+
+                empresa: listEmpresa,
+
                 totalPaginacion: totalPaginacion,
                 messagePaginacion: messagePaginacion
             });
@@ -160,17 +142,92 @@ class Sedes extends React.Component {
         }
     }
 
-    onEventEdit(idSede) {
+
+    onEventEditEmpresa(idEmpresa) {
+        this.props.history.push({
+            pathname: `${this.props.location.pathname}/empresa`,
+            search: "?idEmpresa=" + idEmpresa
+        })
+    }
+
+    onEventEditSede(idSede) {
         this.props.history.push({
             pathname: `${this.props.location.pathname}/proceso`,
             search: "?idSede=" + idSede
         })
     }
 
-
     render() {
         return (
             <>
+                <div className='row'>
+                    <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
+                        <div className="form-group">
+                            <h5>Empresa <small className="text-secondary"></small></h5>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="row">
+                    <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <div className="table-responsive">
+                            <table className="table table-striped table-bordered rounded">
+                                <thead>
+                                    <tr>
+                                        <th width="5%" className="text-center">#</th>
+                                        <th width="10%">N° Documento</th>
+                                        <th width="15%">Razón Social</th>
+                                        <th width="15%">Nombre Comercial</th>
+                                        <th width="15%">Dirección Fiscal</th>
+                                        <th width="10%">Logo</th>
+                                        <th width="10%">Imagen</th>
+                                        <th width="5%" className="text-center">Editar</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {
+                                        this.state.loading ? (
+                                            <tr>
+                                                <td className="text-center" colSpan="8">
+                                                    {spinnerLoading()}
+                                                </td>
+                                            </tr>
+                                        ) : this.state.empresa.length === 0 ? (
+                                            <tr className="text-center">
+                                                <td colSpan="8">¡No hay datos registrados!</td>
+                                            </tr>
+                                        ) : (
+                                            this.state.empresa.map((item, index) => {
+                                                return (
+                                                    <tr key={index}>
+                                                        <td className="text-center">{++index}</td>
+                                                        <td>{item.documento}</td>
+                                                        <td>{item.razonSocial}</td>
+                                                        <td>{item.nombreEmpresa}</td>
+                                                        <td>{item.direccion}</td>
+                                                        <td><img src={item.rutaLogo !== "" ? "/" + item.rutaLogo : noImage} alt="Logo" width="100" /></td>
+                                                        <td><img src={item.rutaImage !== "" ? "/" + item.rutaImage : noImage} alt="Imagen" width="100" /></td>
+                                                        <td className="text-center">
+                                                            <button
+                                                                className="btn btn-outline-warning btn-sm"
+                                                                title="Editar"
+                                                                onClick={() => this.onEventEditEmpresa(item.idEmpresa)}
+                                                                disabled={!this.state.edit}>
+                                                                <i className="bi bi-pencil"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                )
+                                            })
+                                        )
+                                    }
+                                </tbody>
+
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
                 <div className='row'>
                     <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
                         <div className="form-group">
@@ -197,11 +254,7 @@ class Sedes extends React.Component {
                     </div>
                     <div className="col-md-6 col-sm-12">
                         <div className="form-group">
-                            {/* <button className="btn btn-outline-info" onClick={() => this.openModal(this.state.idSede)}>
-                                <i className="bi bi-file-plus"></i> Nuevo Registro
-                            </button>
-                            {" "} */}
-                            <button className="btn btn-outline-secondary" onClick={() => this.fillTable(0, 1, "")}>
+                            <button className="btn btn-outline-secondary" onClick={() => this.loadInit(true)}>
                                 <i className="bi bi-arrow-clockwise"></i>
                             </button>
                         </div>
@@ -216,7 +269,6 @@ class Sedes extends React.Component {
                                     <tr>
                                         <th width="5%" className="text-center">#</th>
                                         <th width="10%">Sede</th>
-                                        <th width="15%">Empresa</th>
                                         <th width="20%">Dirección</th>
                                         <th width="10%">Telefono</th>
                                         <th width="15%">Celular</th>
@@ -227,13 +279,13 @@ class Sedes extends React.Component {
                                     {
                                         this.state.loading ? (
                                             <tr>
-                                                <td className="text-center" colSpan="7">
+                                                <td className="text-center" colSpan="6">
                                                     {spinnerLoading()}
                                                 </td>
                                             </tr>
                                         ) : this.state.lista.length === 0 ? (
                                             <tr className="text-center">
-                                                <td colSpan="7">¡No hay datos registrados!</td>
+                                                <td colSpan="6">¡No hay datos registrados!</td>
                                             </tr>
                                         ) : (
                                             this.state.lista.map((item, index) => {
@@ -241,7 +293,6 @@ class Sedes extends React.Component {
                                                     <tr key={index}>
                                                         <td className="text-center">{item.id}</td>
                                                         <td>{item.nombreSede}</td>
-                                                        <td>{item.nombreEmpresa}</td>
                                                         <td>{item.direccion}</td>
                                                         <td>{item.telefono}</td>
                                                         <td>{item.celular}</td>
@@ -249,7 +300,7 @@ class Sedes extends React.Component {
                                                             <button
                                                                 className="btn btn-outline-warning btn-sm"
                                                                 title="Editar"
-                                                                onClick={() => this.onEventEdit(item.idSede)}
+                                                                onClick={() => this.onEventEditSede(item.idSede)}
                                                                 disabled={!this.state.edit}>
                                                                 <i className="bi bi-pencil"></i>
                                                             </button>
@@ -265,7 +316,6 @@ class Sedes extends React.Component {
                         </div>
                     </div>
                 </div>
-
 
                 <div className="row">
                     <div className="col-sm-12 col-md-5">

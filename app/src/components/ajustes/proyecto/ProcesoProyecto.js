@@ -4,13 +4,10 @@ import {
     imageBase64,
     isNumeric,
     keyNumberFloat,
-    getExtension,
     ModalAlertDialog,
     ModalAlertInfo,
     ModalAlertSuccess,
     ModalAlertWarning,
-    readDataURL,
-    imageSizeData,
     spinnerLoading
 } from '../../tools/Tools';
 import { connect } from 'react-redux';
@@ -250,7 +247,7 @@ class ProcesoProyecto extends React.Component {
             return;
         }
 
-        ModalAlertDialog("Mi Empresa", "¿Está seguro de continuar?", async (event) => {
+        ModalAlertDialog("Proyecto", "¿Está seguro de continuar?", async (event) => {
             if (event) {
                 try {
                     ModalAlertInfo("Proyecto", "Procesando información...");
@@ -398,19 +395,6 @@ class ProcesoProyecto extends React.Component {
             }
             document.getElementById(idTab).classList.add('active');
             document.getElementById(idContent).classList.add('show', 'active');
-        }
-    }
-
-    async imageDataSend(ref) {
-        let files = ref.current.files;
-        if (files.length !== 0) {
-            let read = await readDataURL(files);
-            let base64String = read.replace(/^data:.+;base64,/, '');
-            let extension = getExtension(files[0].name);
-            let { width, height } = await imageSizeData(read);
-            return { base64String, extension, width, height }
-        } else {
-            return false;
         }
     }
 

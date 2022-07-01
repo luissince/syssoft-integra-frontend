@@ -224,6 +224,7 @@ class CpeElectronicos extends React.Component {
                     });
 
                     let object = result.data;
+                  
                     if (object.state) {
                         if (object.accept) {
                             ModalAlertSuccess("Facturación", "Código " + object.code + " " + object.description, () => {
@@ -236,6 +237,7 @@ class CpeElectronicos extends React.Component {
                         ModalAlertWarning("Facturación", "Código " + object.code + " " + object.description);
                     }
                 } catch (error) {
+                    console.log(error.response);
                     if (error.response) {
                         ModalAlertWarning("Facturación", error.response.data);
                     } else {

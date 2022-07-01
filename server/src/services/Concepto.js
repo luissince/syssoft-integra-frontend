@@ -1,10 +1,11 @@
 const { currentDate, currentTime } = require('../tools/Tools');
+const { sendSuccess, sendError, sendClient } = require('../tools/Message');
 const Conexion = require('../database/Conexion');
 const conec = new Conexion();
 
 class Concepto {
 
-    async list(req) {
+    async list(req, res) {
         try {
             let lista = await conec.query(`SELECT 
                 idConcepto,
@@ -45,13 +46,14 @@ class Concepto {
                 req.query.buscar
             ]);
 
-            return { "result": resultLista, "total": total[0].Total };
+
+            return sendSuccess(res, { "result": resultLista, "total": total[0].Total })
         } catch (error) {
-            return "Se produjo un error de servidor, intente nuevamente.";
+            return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
         }
     }
 
-    async add(req) {
+    async add(req, res) {
         let connection = null;
         try {
             connection = await conec.beginTransaction();
@@ -105,32 +107,32 @@ class Concepto {
             ])
 
             await conec.commit(connection);
-            return "insert";
+            return sendSuccess(res, "Se registró correctamente el concepto.");
         } catch (error) {
             if (connection != null) {
                 await conec.rollback(connection);
             }
-            return "Se produjo un error de servidor, intente nuevamente.";
+            return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
         }
     }
 
-    async id(req) {
+    async id(req, res) {
         try {
             let result = await conec.query('SELECT * FROM concepto WHERE idConcepto  = ?', [
                 req.query.idConcepto
             ]);
 
             if (result.length > 0) {
-                return result[0];
+                return sendSuccess(res, result[0]);
             } else {
-                return "Datos no encontrados";
+                return sendClient(res, 'Datos no encontados.');
             }
         } catch (error) {
-            return "Se produjo un error de servidor, intente nuevamente.";
+            return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
         }
     }
 
-    async update(req) {
+    async update(req, res) {
         let connection = null;
         try {
             connection = await conec.beginTransaction();
@@ -153,16 +155,16 @@ class Concepto {
             ])
 
             await conec.commit(connection)
-            return "update";
+            return sendSuccess(res, 'Se actualizó correctamente el concepto.');
         } catch (error) {
             if (connection != null) {
                 await conec.rollback(connection);
             }
-            return "Se produjo un error de servidor, intente nuevamente.";
+            return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
         }
     }
 
-    async delete(req) {
+    async delete(req, res) {
         let connection = null;
         try {
             connection = await conec.beginTransaction();
@@ -173,7 +175,7 @@ class Concepto {
 
             if (cobroDetalle.length > 0) {
                 await conec.rollback(connection);
-                return 'No se puede eliminar el concepto ya que esta ligada a un detalle de cobro.';
+                return sendClient(res, 'No se puede eliminar el concepto ya que esta ligada a un detalle de cobro.');
             }
 
             let gastoDetalle = await conec.execute(connection, `SELECT * FROM gastoDetalle WHERE idConcepto = ?`, [
@@ -182,7 +184,7 @@ class Concepto {
 
             if (gastoDetalle.length > 0) {
                 await conec.rollback(connection);
-                return 'No se puede eliminar el concepto ya que esta ligada a un detalle de gasto.';
+                return sendClient(res, 'No se puede eliminar el concepto ya que esta ligada a un detalle de gasto.');
             }
 
             let lote = await conec.execute(connection, `SELECT * FROM lote WHERE idConcepto = ?`, [
@@ -191,7 +193,7 @@ class Concepto {
 
             if (lote.length > 0) {
                 await conec.rollback(connection);
-                return 'No se puede eliminar el concepto ya que esta ligada a un lote.';
+                return sendClient(res, 'No se puede eliminar el concepto ya que esta ligada a un lote.');
             }
 
             await conec.execute(connection, `DELETE FROM concepto WHERE idConcepto = ?`, [
@@ -199,30 +201,30 @@ class Concepto {
             ]);
 
             await conec.commit(connection)
-            return "delete";
+            return sendSuccess(res, 'Se eliminó correctamente el concepto.');
         } catch (error) {
             if (connection != null) {
                 await conec.rollback(connection);
             }
-            return "Se produjo un error de servidor, intente nuevamente.";
+            return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
         }
     }
 
-    async listcombo(req) {
+    async listcombo(req, res) {
         try {
             let result = await conec.query('SELECT idConcepto, nombre FROM concepto WHERE tipo = 2');
-            return result;
+            return sendSuccess(res,result);;
         } catch (error) {
-            return "Se produjo un error de servidor, intente nuevamente.";
+            return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
         }
     }
 
-    async listcombogasto(req){
+    async listcombogasto(req, res) {
         try {
             let result = await conec.query('SELECT idConcepto, nombre FROM concepto WHERE tipo = 1');
-            return result;
+            return sendSuccess(res, result);
         } catch (error) {
-            return "Se produjo un error de servidor, intente nuevamente.";
+            return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
         }
     }
 }

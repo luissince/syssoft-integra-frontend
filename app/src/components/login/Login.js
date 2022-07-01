@@ -20,7 +20,6 @@ class Login extends React.Component {
 
         this.usuarioInput = React.createRef();
         this.passwordInput = React.createRef();
-        // console.log(process.env.REACT_APP_IMAGE)
     }
 
     setStateAsync(state) {
@@ -30,7 +29,6 @@ class Login extends React.Component {
     }
 
     componentDidMount() {
-
         if (this.usuarioInput.current !== null) {
             this.usuarioInput.current.focus();
         }
@@ -46,8 +44,7 @@ class Login extends React.Component {
         if (userToken !== null) {
             let projectToken = window.localStorage.getItem('project');
             if (projectToken !== null) {
-                this.props.restore(JSON.parse(userToken));
-                this.props.history.push("/");
+                this.props.restore(JSON.parse(userToken), JSON.parse(projectToken));
             } else {
                 this.props.restore(JSON.parse(userToken));
                 this.props.history.push("principal");
@@ -176,7 +173,7 @@ class Login extends React.Component {
         }
     }
 
-    render() {        
+    render() {
         const { usuario, password, message } = this.state;
         if (this.props.token.userToken != null) {
             return <Redirect to="/principal" />
@@ -190,7 +187,7 @@ class Login extends React.Component {
 
                 <div className="form-content text-center bg-white">
                     <form className="form-signin">
-                        <img className="mb-4" src={`${rutaImage !== "" ? '/'+rutaImage : noimage}`} alt="Logo" width="150" />
+                        <img className="mb-4" src={`${rutaImage !== "" ? '/' + rutaImage : noimage}`} alt="Logo" width="150" />
                         <h4 className="mb-3 font-weight-normal">Ingrese los datos</h4>
                         {
                             message !== "" ?
@@ -269,7 +266,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        restore: (user) => dispatch(signIn(user))
+        restore: (user, project = null) => dispatch(signIn(user, project))
     }
 }
 

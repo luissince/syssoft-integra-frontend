@@ -238,6 +238,8 @@ class Proyecto {
             }
 
             let proyecto = await conec.execute(connection, `SELECT
+            imagen,
+            extension,
             ruta
             FROM proyecto
             WHERE idProyecto = ?`, [
@@ -245,14 +247,20 @@ class Proyecto {
             ]);
 
             let fileImage = "";
+            let extImage = "";
+            let rutaImage = "";
             if (req.body.imagen !== "") {
                 removeFile(path.join(file, proyecto[0].ruta));
 
                 let nameImage = `${Date.now() + req.body.idProyecto}.${req.body.extension}`;
                 writeFile(path.join(file, nameImage), req.body.imagen);
-                fileImage = nameImage;
+                fileImage = req.body.imagen;
+                extImage = req.body.extension;
+                rutaImage = nameImage;
             } else {
-                fileImage = proyecto[0].ruta;
+                fileImage = proyecto[0].imagen;
+                extImage = proyecto[0].extension;
+                rutaImage = proyecto[0].ruta;
             }
 
             await conec.execute(connection, `UPDATE proyecto SET
@@ -300,9 +308,9 @@ class Proyecto {
                 req.body.numContratoCorrelativo,
                 req.body.numRecibocCorrelativo,
                 //imagen
-                req.body.imagen,
-                req.body.extension,
                 fileImage,
+                extImage,
+                rutaImage,
                 currentDate(),
                 currentTime(),
                 req.body.idUsuario,

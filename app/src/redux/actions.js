@@ -8,10 +8,11 @@ export const restoreToken = (user, empresa) => (
     }
 )
  
-export const signIn = (user) => (
+export const signIn = (user , project = null) => (
     {
         type: SIGN_IN,
-        token: user
+        token: user,
+        project: project
     }
 )
 

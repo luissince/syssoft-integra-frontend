@@ -1,5 +1,6 @@
 const {
     sendSuccess,
+    sendClient,
     sendError,
     sendNoAutorizado
 } = require('../tools/Message');
@@ -7,6 +8,7 @@ const {
     currentDate,
     currentTime,
     isDirectory,
+    removeFile,
     writeFile,
     mkdir,
     chmod,
@@ -16,6 +18,163 @@ const Conexion = require('../database/Conexion');
 const conec = new Conexion();
 
 class Empresa {
+
+    async load(req, res) {
+        try {
+            let empresa = await conec.query(`SELECT
+            idEmpresa ,
+            documento,
+            razonSocial,
+            nombreEmpresa,
+            direccion,
+            rutaLogo,
+            rutaImage
+            FROM empresa LIMIT 1`);
+
+            if (empresa.length > 0) {
+                return sendSuccess(res, empresa[0])
+            } else {
+                return sendClient(res, "Datos no encontrados.");
+            }
+        } catch (error) {
+            sendError(res, "Se produjo un error de servidor, intente nuevamente.")
+        }
+    }
+
+    async id(req, res) {
+        try {
+            let empresa = await conec.query(`SELECT  
+            idEmpresa,
+            documento,
+            razonSocial,
+            nombreEmpresa,
+            direccion,
+            rutaLogo,
+            rutaImage,
+            useSol,
+            claveSol
+            FROM empresa
+            WHERE idEmpresa = ?`, [
+                req.query.idEmpresa
+            ]);
+
+            if (empresa.length > 0) {
+                return sendSuccess(res, empresa[0])
+            } else {
+                return sendClient(res, "Datos no encontrados.");
+            }
+        } catch (error) {
+            return sendError(res, "Se produjo un error de servidor, intente nuevamente.")
+        }
+    }
+
+    async update(req, res) {
+        let connection = null;
+        try {
+            connection = await conec.beginTransaction();
+
+            let file = path.join(__dirname, '../', 'path/company');
+
+            if (!isDirectory(file)) {
+                mkdir(file);
+                chmod(file);
+            }
+
+            let empresa = await conec.execute(connection, `SELECT
+            logo,
+            image,
+            extlogo,
+            extimage,
+            rutaLogo,
+            rutaImage
+            FROM empresa
+            WHERE idEmpresa  = ?`, [
+                req.body.idEmpresa
+            ]);
+
+            let fileLogo = "";
+            let extLogo = "";
+            let rutaLogo = "";
+            if (req.body.logo !== "") {
+                removeFile(path.join(file, empresa[0].rutaLogo));
+
+                let nameImage = `${Date.now() + req.body.idEmpresa}.${req.body.extlogo}`;
+                writeFile(path.join(file, nameImage), req.body.logo);
+
+                fileLogo = req.body.logo;
+                extLogo = req.body.extlogo;
+                rutaLogo = nameImage;
+            } else {
+                fileLogo = empresa[0].logo;
+                extLogo = empresa[0].extlogo;
+                rutaLogo = empresa[0].rutaLogo;
+            }
+
+            let fileImage = "";
+            let extImage = "";
+            let rutaImage = "";
+            if (req.body.image !== "") {
+                removeFile(path.join(file, empresa[0].rutaImage));
+
+                let nameImage = `${Date.now() + req.body.idEmpresa}.${req.body.extimage}`;
+                writeFile(path.join(file, nameImage), req.body.image);
+
+                fileImage = req.body.image;
+                extImage = req.body.extimage;
+                rutaImage = nameImage;
+            } else {
+                fileImage = empresa[0].image;
+                extImage = empresa[0].extimage;
+                rutaImage = empresa[0].rutaImage;
+            }
+
+            await conec.execute(connection, `UPDATE empresa SET 
+            documento = ?,
+            razonSocial = ?,
+            nombreEmpresa = ?,
+            direccion=?,
+
+            logo=?,
+            image=?,
+            extlogo=?,
+            extimage=?,
+            rutaLogo=?,
+            rutaImage=?,
+
+            useSol=?,
+            claveSol=?,
+            fupdate= ?,
+            hupdate=?
+            WHERE idEmpresa =?`, [
+                req.body.documento,
+                req.body.razonSocial,
+                req.body.nombreEmpresa,
+                req.body.direccion,
+
+                fileLogo,
+                fileImage,
+                extLogo,
+                extImage,
+                rutaLogo,
+                rutaImage,
+
+                req.body.useSol,
+                req.body.claveSol,
+                currentDate(),
+                currentTime(),
+                req.body.idEmpresa
+            ]);
+
+            await conec.commit(connection);
+            return sendSuccess(res, "Se actualizó correctamente la empresa.");
+        } catch (error) {
+            console.log(error);
+            if (connection != null) {
+                await conec.rollback(connection);
+            }
+            return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
+        }
+    }
 
     async config(req, res) {
         try {
@@ -28,12 +187,12 @@ class Empresa {
             rutaImage
             FROM empresa LIMIT 1`);
             if (result.length > 0) {
-                sendSuccess(res, result[0]);
+                return sendSuccess(res, result[0]);
             } else {
-                sendNoAutorizado(res, "Iniciar configuración.");
+                return sendNoAutorizado(res, "Iniciar configuración.");
             }
         } catch (error) {
-            sendNoAutorizado(res, "Iniciar configuración.");
+            return sendNoAutorizado(res, "Iniciar configuración.");
         }
     }
 
@@ -98,7 +257,8 @@ class Empresa {
             }
 
             await conec.execute(connection, `INSERT INTO empresa(
-                idEmpresa ,
+                idEmpresa,
+                idTipoDocumento,
                 documento,
                 razonSocial,
                 nombreEmpresa,
@@ -121,8 +281,9 @@ class Empresa {
                 hora,
                 fupdate,
                 hupdate
-             ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, [
+             ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, [
                 idEmpresa,
+                'TD0003',
                 req.body.documento,
                 req.body.razonSocial,
                 req.body.nombreEmpresa,
@@ -148,13 +309,12 @@ class Empresa {
             ]);
 
             await conec.commit(connection);
-            sendSuccess(res, "Se registro correctamente la empresa.");
+            return sendSuccess(res, "Se registró correctamente la empresa.");
         } catch (error) {
-            console.log(error);
             if (connection != null) {
                 await conec.rollback(connection);
             }
-            sendError(res, "Se produjo un error de servidor, intente nuevamente.");
+            return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
         }
     }
 

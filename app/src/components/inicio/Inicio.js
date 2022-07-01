@@ -20,6 +20,7 @@ import Bancos from '../ajustes/Bancos';
 import BancoDetalle from '../ajustes/registros/BancoDetalle';
 import Sedes from '../ajustes/Sedes';
 import SedeProceso from '../ajustes/registros/SedeProceso';
+import EmpresaProceso from '../ajustes/registros/EmpresaProceso';
 import Proyectos from '../ajustes/Proyectos';
 import ProcesoProyecto from '../ajustes/proyecto/ProcesoProyecto';
 import Manzanas from '../logistica/Manzanas';
@@ -98,6 +99,15 @@ class Inicio extends React.Component {
             }
 
             let projectToken = window.localStorage.getItem('project');
+            
+            let projectCurrent = JSON.parse(projectToken)
+            let projectOld = this.props.token.project;
+            
+            if(JSON.stringify(projectCurrent) !== JSON.stringify(projectOld)) {
+                window.location.href = "/";
+                return;
+            }
+
             if (projectToken === null) {
                 this.props.restoreProject();
             }
@@ -151,8 +161,8 @@ class Inicio extends React.Component {
         let value = document.querySelectorAll('#sidebar ul li .pro-inner-item[data-bs-toggle="collapse"]');
         value.forEach(element => {
             element.parentNode.querySelector('ul').addEventListener('shown.bs.collapse', function (event) {
-                value.forEach(item => {                    
-                    if (event.target.getAttribute('id') !== item.parentNode.querySelector('ul').getAttribute('id')) {                        
+                value.forEach(item => {
+                    if (event.target.getAttribute('id') !== item.parentNode.querySelector('ul').getAttribute('id')) {
                         item.setAttribute("aria-expanded", "false");
                         item.parentNode.querySelector('ul').classList.remove("show");
                     }
@@ -301,6 +311,11 @@ class Inicio extends React.Component {
                                     render={(props) => <SedeProceso {...props} />}
                                 />
                                 <Route
+                                    path={`${path}/sedes/empresa`}
+                                    exact={true}
+                                    render={(props) => <EmpresaProceso {...props} />}
+                                />
+                                <Route
                                     path={`${path}/proyectos`}
                                     exact={true}
                                     render={(props) => <Proyectos {...props} />}
@@ -390,7 +405,7 @@ class Inicio extends React.Component {
                         </div>
                     </div> */}
                 </main>
-            </div> 
+            </div>
         )
     }
 }
