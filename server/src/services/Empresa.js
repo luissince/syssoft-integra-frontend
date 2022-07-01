@@ -177,6 +177,7 @@ class Empresa {
     }
 
     async config(req, res) {
+        console.log("config")
         try {
             let result = await conec.query(`SELECT 
             idEmpresa,
