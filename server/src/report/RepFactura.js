@@ -1017,7 +1017,7 @@ class RepFactura {
 
             yPos = 205;
 
-            doc.fontSize(10).text(`${data.informacion}`,
+            doc.fontSize(10).text(``,
                 doc.options.margins.left + 140,
                 yPos);
 
