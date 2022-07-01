@@ -197,6 +197,7 @@ class Empresa {
     }
 
     async save(req, res) {
+        console.log("save");
         let connection = null;
         try {
             connection = await conec.beginTransaction();
