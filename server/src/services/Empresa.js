@@ -278,7 +278,6 @@ class Empresa {
                 useSol,
                 claveSol,
                 certificado,
-                certificado,
                 fecha,
                 hora,
                 fupdate,
