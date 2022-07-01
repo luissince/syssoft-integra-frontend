@@ -311,7 +311,7 @@ class Empresa {
             await conec.commit(connection);
             return sendSuccess(res, "Se registró correctamente la empresa.");
         } catch (error) {
-            console.error(error);
+            console.log(error);
             if (connection != null) {
                 await conec.rollback(connection);
             }
