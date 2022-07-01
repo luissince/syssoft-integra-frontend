@@ -182,8 +182,7 @@ class Proyecto {
         }
     }
 
-    async id(req) {
-        console.log("id")
+    async id(req) {       
         try {
             let result = await conec.query(`SELECT 
             p.idProyecto,
@@ -215,15 +214,13 @@ class Proyecto {
             WHERE p.idProyecto = ?`, [
                 req.query.idProyecto,
             ]);
-            console.log(req.query)
-            console.log(result)
+         
             if (result.length > 0) {
                 return result[0];
             } else {
                 return "Datos no encontrados";
             }
         } catch (error) {
-            console.log(error)
             return "Error interno de conexión, intente nuevamente.";
         }
     }

@@ -185,8 +185,7 @@ class ProcesoProyecto extends React.Component {
                 loading: false,
             });
             this.selectItem = true;
-        } catch (error) {
-            console.log(error.response)
+        } catch (error) {           
             if (error.message !== "canceled") {
                 await this.setStateAsync({
                     msgLoading: "Se produjo un error un interno, intente nuevamente."
