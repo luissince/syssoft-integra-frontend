@@ -8,7 +8,8 @@ import {
     ModalAlertWarning,
     spinnerLoading,
     keyNumberInteger,
-    imageBase64
+    imageBase64,
+    readDataURL
 } from '../../tools/Tools';
 import { connect } from 'react-redux';
 import sunat from '../../../recursos/images/sunat.png';
@@ -353,6 +354,7 @@ class EmpresaProceso extends React.Component {
                             placeholder="********" />
                     </div>
                 </div>
+
 
                 <div className="form-row">
                     <div className="form-group col-md-6 text-center">

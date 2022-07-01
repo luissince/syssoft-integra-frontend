@@ -985,23 +985,23 @@ class RepFactura {
                 doc.options.margins.left + 100,
                 yPos);
 
-            doc.fontSize(10).text("referencia ||",
+            doc.fontSize(10).text("|",
                 doc.options.margins.left + 170,
                 yPos);
 
-            doc.fontSize(10).text("20/20/20202 |",
+            doc.fontSize(10).text("",
                 doc.options.margins.left + 240,
                 yPos + 8);
 
-            doc.fontSize(10).text("lima perú |",
+            doc.fontSize(10).text("",
                 doc.options.margins.left + 320,
                 yPos);
 
-            doc.fontSize(10).text("20/20/20202 |",
+            doc.fontSize(10).text("",
                 doc.options.margins.left + 385,
                 yPos + 8);
 
-            doc.fontSize(10).text("SOLES |",
+            doc.fontSize(10).text("",
                 doc.options.margins.left + 470,
                 yPos);
 
@@ -1025,19 +1025,19 @@ class RepFactura {
 
             yPos = doc.y + 10;
 
-            doc.fontSize(10).text("BCP |",
+            doc.fontSize(10).text("",
                 doc.options.margins.left + 320,
                 yPos);
 
-            doc.fontSize(10).text("office |",
+            doc.fontSize(10).text("",
                 doc.options.margins.left + 370,
                 yPos);
 
-            doc.fontSize(10).text("12345678901 |",
+            doc.fontSize(10).text("",
                 doc.options.margins.left + 420,
                 yPos);
 
-            doc.fontSize(9).text("56230",
+            doc.fontSize(9).text("",
                 doc.options.margins.left + 500,
                 yPos);
 
@@ -1059,7 +1059,7 @@ class RepFactura {
 
             yPos = 263;
 
-            doc.fontSize(10).text("DOI |",
+            doc.fontSize(10).text("",
                 doc.options.margins.left + 140,
                 yPos);
 
@@ -1071,7 +1071,7 @@ class RepFactura {
 
             yPos = 283;
 
-            doc.fontSize(10).text("aval permatenerasd |",
+            doc.fontSize(10).text("",
                 doc.options.margins.left + 160,
                 yPos);
 
@@ -1079,7 +1079,7 @@ class RepFactura {
 
             yPos = 309;
 
-            doc.fontSize(10).text("ven ami casa baby av. las rocas n° 126 1",
+            doc.fontSize(10).text("",
                 doc.options.margins.left + 140,
                 yPos);
 
@@ -1087,11 +1087,11 @@ class RepFactura {
 
             yPos = 335;
 
-            doc.fontSize(10).text("localidad |",
+            doc.fontSize(10).text("",
                 doc.options.margins.left + 140,
                 yPos);
 
-            doc.fontSize(10).text("MARIA",
+            doc.fontSize(10).text("",
                 doc.options.margins.left + 235,
                 yPos);
 
@@ -1099,7 +1099,7 @@ class RepFactura {
 
             yPos = 351;
 
-            doc.fontSize(10).text("HOLA BEB |",
+            doc.fontSize(10).text("",
                 doc.options.margins.left + 120,
                 yPos);
 
@@ -1107,7 +1107,7 @@ class RepFactura {
 
             yPos = 358;
 
-            doc.fontSize(10).text("ESTAS LOCA | |",
+            doc.fontSize(10).text("",
                 doc.options.margins.left + 345,
                 yPos);
 
