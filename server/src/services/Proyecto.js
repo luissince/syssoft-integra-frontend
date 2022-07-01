@@ -215,7 +215,8 @@ class Proyecto {
             WHERE p.idProyecto = ?`, [
                 req.query.idProyecto,
             ]);
-
+            console.log(req.query)
+            console.log(result)
             if (result.length > 0) {
                 return result[0];
             } else {
