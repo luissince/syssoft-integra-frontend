@@ -1,5 +1,4 @@
 import React from 'react';
-import axios from 'axios';
 import Loader from './Loader';
 import Configurar from './components/empresa/Configurar';
 import Login from './components/login/Login';

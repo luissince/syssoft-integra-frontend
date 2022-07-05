@@ -4,7 +4,6 @@ import './recursos/css/loader.css';
 import { connect } from 'react-redux';
 import { config, restoreToken } from './redux/actions';
 
-
 class Loader extends React.Component {
 
     async componentDidMount() {      

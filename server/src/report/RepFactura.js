@@ -973,15 +973,14 @@ class RepFactura {
                     top: 40,
                     bottom: 40,
                     left: 40,
-                    right: 40
+                    right: 0
                 }
             });
 
             let yPos = 130;
-
             // 
 
-            doc.fontSize(10).text(``,
+            doc.fontSize(10).text(`${req.query.index}`,
                 doc.options.margins.left + 100,
                 yPos);
 
@@ -993,15 +992,15 @@ class RepFactura {
                 doc.options.margins.left + 240,
                 yPos + 8);
 
-            doc.fontSize(10).text("",
+            doc.fontSize(10).text(`${sedeInfo.departamento}`,
                 doc.options.margins.left + 320,
                 yPos);
 
-            doc.fontSize(10).text("",
+            doc.fontSize(10).text(`${data.fecha}`,
                 doc.options.margins.left + 385,
                 yPos + 8);
 
-            doc.fontSize(10).text("",
+            doc.fontSize(10).text(`${data.simbolo} ${data.monto}`,
                 doc.options.margins.left + 470,
                 yPos);
 
@@ -1020,7 +1019,6 @@ class RepFactura {
             doc.fontSize(10).text(`${data.informacion}`,
                 doc.options.margins.left + 140,
                 yPos);
-
             // 
 
             yPos = doc.y + 10;
@@ -1045,7 +1043,7 @@ class RepFactura {
 
             yPos = 235;
 
-            doc.fontSize(10).text(`${data.direccion}`,
+            doc.fontSize(10).text(`${data.descripcion}`,
                 doc.options.margins.left + 140,
                 yPos);
 
@@ -1115,6 +1113,7 @@ class RepFactura {
             return getStream.buffer(doc);
 
         } catch (error) {
+            console.log(error);
             return "Se genero un error al generar el reporte.";
         }
     }

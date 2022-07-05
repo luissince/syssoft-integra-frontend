@@ -210,13 +210,17 @@ class Sede {
     async infoSedeReporte(req) {
         try {
             let sede = await conec.query(`SELECT 
-                idSede, 
-                nombreSede, 
-                celular, 
-                telefono, 
-                email, 
-                web
-                FROM sede WHERE idSede = ?`, [
+                s.idSede, 
+                s.nombreSede, 
+                s.celular, 
+                s.telefono, 
+                s.email, 
+                s.web,
+                u.departamento,
+                u.distrito
+                FROM sede AS s 
+                INNER JOIN ubigeo AS u ON s.idUbigeo  = u.idUbigeo 
+                WHERE s.idSede = ?`, [
                 req.query.idSede,
             ]);
 

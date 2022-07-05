@@ -978,27 +978,48 @@ class Cobro {
 
     async idPlazo(req) {
         try {
+            let lote = await conec.query(`SELECT l.descripcion
+            FROM ventaDetalle AS v 
+            INNER JOIN lote AS l ON l.idLote = v.idLote
+            WHERE v.idVenta = ?`, [
+                req.query.idVenta
+            ]);
+
+            let venta = await conec.query(`SELECT
+            c.informacion,
+            m.simbolo,
+            m.nombre as moneda
+            FROM venta AS v 
+            INNER JOIN moneda AS m ON m.idMoneda  = v.idMoneda 
+            INNER JOIN cliente AS c ON c.idCliente = v.idCliente
+            WHERE v.idVenta = ?`, [
+                req.query.idVenta
+            ]);
+
             let plazo = await conec.query(`SELECT 
-            pl.idPlazo,
-            cl.documento,
-            cl.informacion,
-            cl.direccion,
-            cl.celular,
-            IFNULL(ub.departamento,'') AS localidad,
-            mo.nombre AS moneda,
-            SUM(cv.precio)  AS monto
-            FROM cobroVenta AS cv
-            INNER JOIN plazo AS pl ON pl.idPlazo = cv.idPlazo
-            INNER JOIN cobro AS c ON c.idCobro = cv.idCobro
-            INNER JOIN moneda AS mo ON mo.idMoneda = c.idMoneda
-            INNER JOIN cliente AS cl ON cl.idCliente = c.idCliente
-            LEFT JOIN ubigeo AS ub ON ub.idUbigeo = cl.idUbigeo
-            WHERE cv.idPlazo = ?`, [
+            p.idPlazo,
+            DATE_FORMAT(p.fecha,'%d/%m/%Y') as fecha
+            FROM
+            plazo as p 
+            WHERE p.idPlazo = ?`, [
                 req.query.idPlazo
             ]);
 
-            if (plazo.length > 0) {
-                return plazo[0];
+            let monto = await conec.query(`SELECT
+            monto 
+            FROM plazo 
+            WHERE idPlazo = ?`, [
+                req.query.idPlazo
+            ]);
+
+
+            if (lote.length > 0 && venta.length > 0 && plazo.length > 0 && monto.length > 0) {
+                return {
+                    ...lote[0],
+                    ...venta[0],
+                    ...plazo[0],
+                    ...monto[0],
+                };
             } else {
                 return "No hay datos para mostrar";
             }
@@ -1056,7 +1077,7 @@ class Cobro {
                                     maxCobroVenta
                                 ]);
                             }
-                           
+
                             await conec.execute(connection, `UPDATE venta SET estado = 2
                             WHERE idVenta = ?`, [
                                 venta[0].idVenta

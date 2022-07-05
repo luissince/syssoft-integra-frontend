@@ -203,7 +203,7 @@ class CreditoProceso extends React.Component {
                 idComprobanteAdelanto: comprobanteFilter.length === 1 ? comprobanteFilter[0].idComprobante : '',
 
                 loading: false,
-            }); 
+            });
         } catch (error) {
             if (error.message !== "canceled") {
                 this.props.history.goBack();
@@ -457,9 +457,11 @@ class CreditoProceso extends React.Component {
         window.open("/api/factura/repcreditolote?" + params, "_blank");
     }
 
-    async onEventImprimirLetra(idPlazo) {
+    async onEventImprimirLetra(index, idPlazo) {
         const data = {
             "idSede": "SD0001",
+            "index": index,
+            "idVenta": this.state.venta.idVenta,
             "idPlazo": idPlazo,
         }
 
@@ -927,7 +929,7 @@ class CreditoProceso extends React.Component {
                                                 let montoActual = item.monto;
                                                 return <React.Fragment key={makeid((index + 1))}>
                                                     <tr className="table-success">
-                                                        <td className="text-center">{++index}</td>
+                                                        <td className="text-center">{index + 1}</td>
                                                         <td>{item.fecha}</td>
                                                         <td className={`${item.estado === 0 ? "text-danger" : "text-success"}`}>{item.estado === 0 ? "Por Cobrar" : "Cobrado"}</td>
                                                         <td>{numberFormat(item.monto, codiso)}</td>
@@ -965,8 +967,9 @@ class CreditoProceso extends React.Component {
                                                             <button
                                                                 type="button"
                                                                 className="btn btn-light btn-sm"
-                                                                onClick={() => this.onEventImprimirLetra(item.idPlazo)}
-                                                                disabled={item.estado === 1 ? false : true}>
+                                                                onClick={() => this.onEventImprimirLetra((index + 1), item.idPlazo)}
+                                                            // disabled={item.estado === 1 ? false : true}
+                                                            >
                                                                 <i className="fa fa-print"></i>
                                                             </button>
                                                         </td>
@@ -985,7 +988,7 @@ class CreditoProceso extends React.Component {
                                                         item.cobros.map((cobro, index) => {
                                                             montoActual = montoActual - cobro.precio;
                                                             return <tr key={index}>
-                                                                <td className="small">{(index+1)}</td>
+                                                                <td className="small">{(index + 1)}</td>
                                                                 <td className="small">{cobro.nombre}{<br />}{cobro.serie + "-" + cobro.numeracion}</td>
                                                                 <td className="small">{cobro.banco}</td>
                                                                 <td className="small">{cobro.fecha}{<br />}{cobro.hora}</td>
