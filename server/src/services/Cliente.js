@@ -329,9 +329,9 @@ class Cliente {
             informacion 
             FROM cliente
             WHERE 
-            documento LIKE CONCAT(?,'%')
+            documento LIKE CONCAT('%',?,'%')
             OR 
-            informacion LIKE CONCAT(?,'%')`,[
+            informacion LIKE CONCAT('%',?,'%')`,[
                 req.query.filtrar,
                 req.query.filtrar,
             ]);
