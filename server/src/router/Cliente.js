@@ -65,7 +65,7 @@ router.get('/listcombo', async function (req, res) {
 });
 
 router.get('/listfiltrar', async function (req, res) {
-    const result = await cliente.listcombo(req)
+    const result = await cliente.listsearch(req)
     if (Array.isArray(result)) {
         res.status(200).send(result);
     } else {
