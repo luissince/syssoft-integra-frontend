@@ -241,7 +241,7 @@ class VentaDetalle extends React.Component {
                                                         this.state.detalle.map((item, index) => (
                                                             <tr key={index}>
                                                                 <td>{++index}</td>
-                                                                <td>{item.lote}</td>
+                                                                <td>{item.lote}{<br/>}{<small>{item.manzana}</small>}</td>
                                                                 <td>{item.medida}</td>
                                                                 <td className="text-right">{formatMoney(item.cantidad)}</td>
                                                                 <td className="text-right">{item.impuesto}</td>

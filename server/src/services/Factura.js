@@ -497,13 +497,13 @@ class Factura {
                 while (i < req.body.numCuota) {
                     inicioDate.setMonth(inicioDate.getMonth() + 1);
                     let now = new Date();
-                    
+
                     if (frecuenciaPago > 15) {
-                         now = new Date(inicioDate.getFullYear(), inicioDate.getMonth() + 1, 0);
+                        now = new Date(inicioDate.getFullYear(), inicioDate.getMonth() + 1, 0);
                     } else {
-                         now = new Date(inicioDate.getFullYear(), inicioDate.getMonth(), 15);
+                        now = new Date(inicioDate.getFullYear(), inicioDate.getMonth(), 15);
                     }
-                   
+
                     i++;
 
                     await conec.execute(connection, `INSERT INTO plazo(
@@ -877,7 +877,7 @@ class Factura {
                 INNER JOIN manzana AS m ON l.idManzana = m.idManzana 
                 INNER JOIN proyecto AS p ON m.idProyecto = p.idProyecto
                 INNER JOIN impuesto AS imp ON vd.idImpuesto  = imp.idImpuesto 
-                WHERE idVenta = ? `, [
+                WHERE vd.idVenta = ? `, [
                     req.query.idVenta
                 ]);
 
@@ -961,6 +961,26 @@ class Factura {
                 req.query.idVenta
             ]);
 
+            let detalle = await conec.query(`SELECT 
+            l.descripcion AS lote,
+            md.codigo AS medida, 
+            m.nombre AS manzana, 
+            p.nombre AS proyecto,
+            vd.precio,
+            vd.cantidad,
+            vd.idImpuesto,
+            imp.nombre as impuesto,
+            imp.porcentaje
+            FROM ventaDetalle AS vd 
+            INNER JOIN lote AS l ON vd.idLote = l.idLote 
+            INNER JOIN medida AS md ON md.idMedida = l.idMedida 
+            INNER JOIN manzana AS m ON l.idManzana = m.idManzana 
+            INNER JOIN proyecto AS p ON m.idProyecto = p.idProyecto
+            INNER JOIN impuesto AS imp ON vd.idImpuesto  = imp.idImpuesto 
+            WHERE vd.idVenta = ? `, [
+                req.query.idVenta
+            ]);
+
             let plazos = await conec.query(`SELECT 
             idPlazo,        
             DATE_FORMAT(fecha,'%d/%m/%Y') as fecha,
@@ -1034,7 +1054,7 @@ class Factura {
                 WHERE v.idVenta = ?
                 `, [req.query.idVenta])
 
-            return { "venta": venta[0], "plazos": newPlazos, "lotes": lotes, "inicial": inicial[0].inicial }
+            return { "venta": venta[0], "detalle": detalle, "plazos": newPlazos, "lotes": lotes, "inicial": inicial[0].inicial }
 
         } catch (error) {
             return "Se produjo un error de servidor, intente nuevamente.";

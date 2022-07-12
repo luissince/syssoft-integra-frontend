@@ -25,6 +25,7 @@ class CreditoProceso extends React.Component {
         this.state = {
             inicial: '',
             venta: {},
+            detalle: [],
             plazos: [],
             bancos: [],
             comprobantes: [],
@@ -143,6 +144,7 @@ class CreditoProceso extends React.Component {
         try {
             await this.setStateAsync({
                 venta: {},
+                detalle: [],
                 plazos: [],
                 bancos: [],
                 comprobantes: [],
@@ -169,7 +171,7 @@ class CreditoProceso extends React.Component {
                     "idVenta": id
                 }
             });
-
+  
             const comprobante = await axios.get("/api/comprobante/listcombo", {
                 signal: this.abortControllerTable.signal,
                 params: {
@@ -180,7 +182,6 @@ class CreditoProceso extends React.Component {
             const banco = await axios.get("/api/banco/listcombo", {
                 signal: this.abortControllerTable.signal,
             });
-
 
             const plazosSelected = credito.data.plazos.map((item) => {
                 return {
@@ -194,6 +195,7 @@ class CreditoProceso extends React.Component {
             await this.setStateAsync({
                 inicial: credito.data.inicial,
                 venta: credito.data.venta,
+                detalle: credito.data.detalle,
                 plazos: plazosSelected,
                 bancos: banco.data,
                 comprobantes: comprobante.data,
@@ -882,6 +884,7 @@ class CreditoProceso extends React.Component {
 
                 <div className="row">
                     <div className="col">
+                        <p className="lead">Cliente</p>
                         <div className="form-group">
                             <div className="pt-1 pb-1">Cliente: <strong>{documento + " " + informacion}</strong></div>
                             <div className="pt-1 pb-1">Teléfono y celular: <strong>{telefono + " " + celular}</strong></div>
@@ -892,6 +895,7 @@ class CreditoProceso extends React.Component {
                         </div>
                     </div>
                     <div className="col">
+                        <p className="lead">Cobros</p>
                         <div className="form-group">
                             <div className="pt-1 pb-1">Inicial: <strong>{this.state.inicial === 0 ? "Sin Inicial" : numberFormat(this.state.inicial, codiso)}</strong></div>
                             <div className="pt-1 pb-1">N° de Cuotas: <strong>{credito === 1 ? "Variable" : numCuota === 1 ? numCuota + " Cuota" : numCuota + " Cuotas"}</strong></div>
@@ -904,6 +908,37 @@ class CreditoProceso extends React.Component {
 
                 <div className="row">
                     <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <p className="lead">Detalle</p>
+                        <div className="table-responsive">
+                            <table className="table table-light">
+                                <thead>
+                                    <tr className="table-active">
+                                        <th width="5%" className="text-center">#</th>
+                                        <th width="20%">Detalle</th>
+                                        <th width="15%" className="text-center">Unidad</th>
+                                        <th width="10%" className="text-center">Cantidad</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {
+                                        this.state.detalle.map((item, index) => (
+                                            <tr key={index}>
+                                                <td className="text-center">{(index + 1)}</td>
+                                                <td className="text-left">{item.lote}{<br />}{<small>{item.manzana}</small>}</td>
+                                                <td className="text-center">{item.medida}</td>
+                                                <td className="text-center">{item.cantidad}</td>
+                                            </tr>
+                                        ))
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="row">
+                    <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <p className="lead">Cuotas</p>
                         <div className="table-responsive">
                             <table className="table table-light">
                                 <thead>
@@ -995,13 +1030,11 @@ class CreditoProceso extends React.Component {
                                                                 <td className="small">{numberFormat(cobro.precio, cobro.codiso)}</td>
                                                                 <td className="small">{montoActual}</td>
                                                             </tr>
-                                                        }
-                                                        )
+                                                        })
                                                     }
 
                                                 </React.Fragment>
-                                            }
-                                            )
+                                            })
                                     }
                                 </tbody>
                             </table>
