@@ -1028,7 +1028,7 @@ class CreditoProceso extends React.Component {
                                                                 <td className="small">{cobro.banco}</td>
                                                                 <td className="small">{cobro.fecha}{<br />}{cobro.hora}</td>
                                                                 <td className="small">{numberFormat(cobro.precio, cobro.codiso)}</td>
-                                                                <td className="small">{montoActual}</td>
+                                                                <td className="small">{numberFormat(montoActual, cobro.codiso)}</td>
                                                             </tr>
                                                         })
                                                     }
