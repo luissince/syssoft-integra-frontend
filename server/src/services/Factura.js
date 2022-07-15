@@ -33,10 +33,29 @@ class Factura {
                 ? = 1 and c.informacion like concat(?,'%') AND v.idProyecto = ?
                 OR
                 ? = 1 and c.documento like concat(?,'%') AND v.idProyecto = ?
+                OR
+                ? = 1 and v.serie = ? AND v.idProyecto = ?
+                OR
+                ? = 1 and v.numeracion = ? AND v.idProyecto = ?
+                OR
+                ? = 1 and concat(v.serie,'-',v.numeracion) = ? AND v.idProyecto = ?
+
                 GROUP BY v.idVenta
                 ORDER BY v.fecha DESC, v.hora DESC
                 LIMIT ?,?`, [
                 parseInt(req.query.opcion),
+                req.query.idProyecto,
+
+                parseInt(req.query.opcion),
+                req.query.buscar,
+                req.query.idProyecto,
+
+                parseInt(req.query.opcion),
+                req.query.buscar,
+                req.query.idProyecto,
+
+                parseInt(req.query.opcion),
+                req.query.buscar,
                 req.query.idProyecto,
 
                 parseInt(req.query.opcion),
@@ -68,8 +87,26 @@ class Factura {
                 OR
                 ? = 1 and c.informacion like concat(?,'%') AND v.idProyecto = ?
                 OR
-                ? = 1 and c.documento like concat(?,'%') AND v.idProyecto = ?`, [
+                ? = 1 and c.documento like concat(?,'%') AND v.idProyecto = ?
+                OR
+                ? = 1 and v.serie = ? AND v.idProyecto = ?
+                OR
+                ? = 1 and v.numeracion = ? AND v.idProyecto = ?
+                OR
+                ? = 1 and concat(v.serie,'-',v.numeracion) = ? AND v.idProyecto = ?`, [
                 parseInt(req.query.opcion),
+                req.query.idProyecto,
+
+                parseInt(req.query.opcion),
+                req.query.buscar,
+                req.query.idProyecto,
+
+                parseInt(req.query.opcion),
+                req.query.buscar,
+                req.query.idProyecto,
+
+                parseInt(req.query.opcion),
+                req.query.buscar,
                 req.query.idProyecto,
 
                 parseInt(req.query.opcion),

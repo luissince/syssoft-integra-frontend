@@ -38,10 +38,29 @@ class Cobro {
             ? = 0 AND c.idProyecto = ?
             OR
             ? = 1 AND cl.informacion LIKE CONCAT(?,'%') AND c.idProyecto = ?
+            OR
+            ? = 1 AND c.serie = ? AND c.idProyecto = ?
+            OR
+            ? = 1 AND c.numeracion = ? AND c.idProyecto = ?
+            OR
+            ? = 1 AND CONCAT(c.serie,'-',c.numeracion) = ? AND c.idProyecto = ?
+
             GROUP BY c.idCobro
             ORDER BY c.fecha DESC,c.hora DESC
             LIMIT ?,?`, [
                 parseInt(req.query.opcion),
+                req.query.idProyecto,
+
+                parseInt(req.query.opcion),
+                req.query.buscar,
+                req.query.idProyecto,
+
+                parseInt(req.query.opcion),
+                req.query.buscar,
+                req.query.idProyecto,
+
+                parseInt(req.query.opcion),
+                req.query.buscar,
                 req.query.idProyecto,
 
                 parseInt(req.query.opcion),
@@ -67,8 +86,26 @@ class Cobro {
             WHERE 
             ? = 0 AND c.idProyecto = ?
             OR
-            ? = 1 AND cl.informacion LIKE CONCAT(?,'%') AND c.idProyecto = ?`, [
+            ? = 1 AND cl.informacion LIKE CONCAT(?,'%') AND c.idProyecto = ?
+            OR
+            ? = 1 AND c.serie = ? AND c.idProyecto = ?
+            OR
+            ? = 1 AND c.numeracion = ? AND c.idProyecto = ?
+            OR
+            ? = 1 AND CONCAT(c.serie,'-',c.numeracion) = ? AND c.idProyecto = ?`, [
                 parseInt(req.query.opcion),
+                req.query.idProyecto,
+
+                parseInt(req.query.opcion),
+                req.query.buscar,
+                req.query.idProyecto,
+
+                parseInt(req.query.opcion),
+                req.query.buscar,
+                req.query.idProyecto,
+
+                parseInt(req.query.opcion),
+                req.query.buscar,
                 req.query.idProyecto,
 
                 parseInt(req.query.opcion),
@@ -1141,6 +1178,7 @@ class Cobro {
             await conec.commit(connection);
             return "delete";
         } catch (error) {
+            console.log(error)
             if (connection != null) {
                 await conec.rollback(connection);
             }
