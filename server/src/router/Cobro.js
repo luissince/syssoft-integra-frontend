@@ -67,7 +67,7 @@ router.get('/id', async function (req, res) {
 });
 
 router.delete('/anular', async function (req, res) {
-    const result = await cobro.delete(req)
+    const result = await cobro.delete(req,res)
     if (result === 'delete') {
         res.status(201).send("Se eliminó correctamente el cobro.");
     } else {

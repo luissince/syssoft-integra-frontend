@@ -1120,8 +1120,7 @@ class Cobro {
                                 venta[0].idVenta
                             ]);
                         } else {
-                            res.status(400).send("No se puede eliminar el cobro, hay plazos(cobros) ligados que son inferiores.");
-                            return;
+                            return "No se puede eliminar el cobro, hay plazos(cobros) ligados que son inferiores.";                            
                         }
                     }
                 }
