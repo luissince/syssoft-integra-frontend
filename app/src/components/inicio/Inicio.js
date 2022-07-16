@@ -29,6 +29,7 @@ import LoteDetalle from '../logistica/registro/LoteDetalle';
 import VentaProceso from '../facturacion/registros/VentaProceso';
 import VentaDetalle from '../facturacion/registros/VentaDetalle';
 import ClienteProceso from '../facturacion/registros/ClienteProceso';
+import ClienteDetalle from '../facturacion/registros/ClienteDetalle';
 import CobroProceso from '../facturacion/registros/CobroProceso';
 import CobroDetalle from '../facturacion/registros/CobroDetalle';
 import GastoProceso from '../tesoreria/registros/GastoProceso';
@@ -233,6 +234,11 @@ class Inicio extends React.Component {
                                     path={`${path}/clientes/proceso`}
                                     exact={true}
                                     render={(props) => <ClienteProceso {...props} />}
+                                />
+                                <Route
+                                    path={`${path}/clientes/detalle`}
+                                    exact={true}
+                                    render={(props) => <ClienteDetalle {...props} />}
                                 />
                                 <Route
                                     path={`${path}/ventas`}

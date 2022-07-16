@@ -126,6 +126,13 @@ class Clientes extends React.Component {
         })
     }
 
+    onEventDetail(idCliente) {
+        this.props.history.push({
+            pathname: `${this.props.location.pathname}/detalle`,
+            search: "?idCliente=" + idCliente
+        })
+    }
+
     onEventEdit(idCliente) {
         this.props.history.push({
             pathname: `${this.props.location.pathname}/proceso`,
@@ -211,6 +218,7 @@ class Clientes extends React.Component {
                                         <th width="15%">Cel. / Tel.</th>
                                         <th width="20%">Dirección</th>
                                         <th width="12%">Estado</th>
+                                        <th width="5%" className="text-center">Detalle</th>
                                         <th width="5%" className="text-center">Editar</th>
                                         <th width="5%" className="text-center">Eliminar</th>
                                     </tr>
@@ -220,13 +228,13 @@ class Clientes extends React.Component {
                                         this.state.loading ? (
 
                                             <tr>
-                                                <td className="text-center" colSpan="8">
+                                                <td className="text-center" colSpan="9">
                                                     {spinnerLoading()}
                                                 </td>
                                             </tr>
                                         ) : this.state.lista.length === 0 ? (
                                             <tr className="text-center">
-                                                <td colSpan="8">¡No hay datos registrados!</td>
+                                                <td colSpan="9">¡No hay datos registrados!</td>
                                             </tr>
                                         ) : (
                                             this.state.lista.map((item, index) => {
@@ -241,6 +249,15 @@ class Clientes extends React.Component {
                                                             <div className={`badge ${item.estado === 1 ? "badge-info" : "badge-danger"}`}>
                                                                 {item.estado === 1 ? "ACTIVO" : "INACTIVO"}
                                                             </div>
+                                                        </td>
+                                                        <td className="text-center">
+                                                            <button
+                                                                className="btn btn-outline-info btn-sm"
+                                                                title="Editar"
+                                                                onClick={() => this.onEventDetail(item.idCliente)}
+                                                                disabled={!this.state.edit}>
+                                                                <i className="bi bi-eye"></i>
+                                                            </button>
                                                         </td>
                                                         <td className="text-center">
                                                             <button

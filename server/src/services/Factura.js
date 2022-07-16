@@ -929,11 +929,12 @@ class Factura {
 
     async credito(req) {
         try {
-            let lista = await conec.procedure(`CALL Listar_Creditos(?,?,?,?,?,?)`, [
+            let lista = await conec.procedure(`CALL Listar_Creditos(?,?,?,?,?,?,?)`, [
                 parseInt(req.query.opcion),
                 req.query.idProyecto,
                 req.query.buscar,
                 parseInt(req.query.todos),
+                parseInt(req.query.cada),
                 parseInt(req.query.posicionPagina),
                 parseInt(req.query.filasPorPagina)
             ]);
@@ -946,11 +947,12 @@ class Factura {
                 }
             });
 
-            let total = await conec.procedure(`CALL Listar_Creditos_Count(?,?,?,?)`, [
+            let total = await conec.procedure(`CALL Listar_Creditos_Count(?,?,?,?,?)`, [
                 parseInt(req.query.opcion),
                 req.query.idProyecto,
                 req.query.buscar,
-                parseInt(req.query.todos)
+                parseInt(req.query.todos),                
+                parseInt(req.query.cada),
             ]);
 
             return { "result": resultLista, "total": total[0].Total }

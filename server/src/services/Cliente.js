@@ -331,7 +331,7 @@ class Cliente {
             WHERE 
             documento LIKE CONCAT('%',?,'%')
             OR 
-            informacion LIKE CONCAT('%',?,'%')`,[
+            informacion LIKE CONCAT('%',?,'%')`, [
                 req.query.filtrar,
                 req.query.filtrar,
             ]);
@@ -424,6 +424,79 @@ class Cliente {
                 ]);
 
                 return lista;
+            }
+        } catch (error) {
+            return "Se produjo un error de servidor, intente nuevamente.";
+        }
+    }
+
+    async listventasasociadas(req) {
+        try {
+
+            let cliente = await conec.query(`select
+            tp.nombre as tipoDocumento,
+            c.documento,
+            c.informacion,
+            c.celular,
+            c.telefono,
+            c.email,
+            c.direccion
+            from 
+            cliente as c 
+            inner join tipoDocumento as tp on tp.idTipoDocumento = c.idTipoDocumento
+            where c.idCliente = ?`, [
+                req.query.idCliente,
+            ]);
+
+            if (cliente.length > 0) {
+
+                let ventas = await conec.query(`select 
+                v.idVenta,
+                co.nombre as comprobante,
+                v.serie,
+                v.numeracion,
+                DATE_FORMAT(v.fecha,'%d/%m/%Y') as fecha, 
+                v.hora,
+                sum(vd.cantidad * vd.precio) as total
+                from venta as v
+                inner join ventaDetalle as vd on vd.idVenta = v.idVenta
+                inner join comprobante as co on co.idComprobante = v.idComprobante
+                where v.idCliente = ?
+                group by v.idVenta
+                order by v.fecha desc, v.hora desc`, [
+                    req.query.idCliente,
+                ]);
+
+                let newVentas = [];
+
+                for (let venta of ventas) {
+
+                    let detalle = await conec.query(`select 
+                    l.descripcion,
+                    m.nombre as manzana,
+                    p.nombre as proyecto,
+                    im.porcentaje,
+                    im.nombre as impuesto,
+                    vd.cantidad,
+                    vd.precio
+                    from ventaDetalle as vd
+                    inner join impuesto as im on im.idImpuesto = vd.idImpuesto
+                    inner join lote as l on l.idLote = vd.idLote
+                    inner join manzana as m on m.idManzana = l.idManzana
+                    inner join proyecto as p on p.idProyecto = m.idProyecto
+                    where vd.idVenta = ?`, [
+                        venta.idVenta
+                    ]);
+
+                    newVentas.push({
+                        ...venta,
+                        "detalle": detalle
+                    });
+                }
+
+                return { "cliente": cliente[0], "venta": newVentas };
+            } else {
+                return "Datos no encontrados";
             }
         } catch (error) {
             return "Se produjo un error de servidor, intente nuevamente.";

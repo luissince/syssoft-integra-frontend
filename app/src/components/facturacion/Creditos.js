@@ -24,6 +24,7 @@ class Creditos extends React.Component {
 
             opcion: 0,
             todos: 0,
+            cada: 0,
             paginacion: 0,
             totalPaginacion: 0,
             filasPorPagina: 10,
@@ -94,6 +95,7 @@ class Creditos extends React.Component {
                     "opcion": opcion,
                     "buscar": buscar,
                     "todos": this.state.todos,
+                    "cada": this.state.cada,
                     "idProyecto": this.state.idProyecto,
                     "posicionPagina": ((this.state.paginacion - 1) * this.state.filasPorPagina),
                     "filasPorPagina": this.state.filasPorPagina
@@ -144,7 +146,7 @@ class Creditos extends React.Component {
         return (
             <>
                 <div className='row'>
-                    <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
+                    <div className='col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12'>
                         <div className="form-group">
                             <h5>Lista de Créditos <small className="text-secondary">LISTA</small></h5>
                         </div>
@@ -152,7 +154,59 @@ class Creditos extends React.Component {
                 </div>
 
                 <div className="row">
-                    <div className="col-md-6 col-sm-12">
+                    <div className="col-xl-2 col-lg-2 col-md-12 col-sm-12 col-12">
+                        <div className="form-group">
+                            <div className="input-group">
+                                <button className="btn btn-outline-secondary" onClick={() => this.loadInit()}>
+                                    <i className="bi bi-arrow-clockwise"></i>  Recargar Vista
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="row">
+                    <div className="col-xl-3 col-lg-4 col-md-12 col-sm-12 col-12">
+                        <div className="form-group">
+                            <select className="form-control"
+                                value={this.state.todos}
+                                onChange={async (value) => {
+                                    await this.setStateAsync({ todos: value.target.value })
+                                    this.onEventPaginacion()
+                                }}>
+                                <option value="0">
+                                    Listar Ventas al Crédito
+                                </option>
+                                <option value="1">
+                                    Listar Todas Ventas
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div className="col-xl-3 col-lg-4 col-md-12 col-sm-12 col-12">
+                        <div className="form-group">
+                            <select className="form-control"
+                                value={this.state.cada}
+                                onChange={async (value) => {
+                                    await this.setStateAsync({ cada: value.target.value })
+                                    this.onEventPaginacion()
+                                }}>
+                                <option value="0">
+                                    - Seleccione
+                                </option>
+                                <option value="15">
+                                    Listar Ventas de cada 15
+                                </option>
+                                <option value="30">
+                                    Listar Ventas de cada 30
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="row">
+                    <div className="col-xl-6 col-lg-12 col-md-12 col-sm-12 col-12">
                         <div className="form-group">
                             <div className="input-group mb-2">
                                 <div className="input-group-prepend">
@@ -164,29 +218,6 @@ class Creditos extends React.Component {
                                     placeholder="Buscar..."
                                     ref={this.refTxtSearch}
                                     onKeyUp={(event) => this.searchText(event.target.value)} />
-                            </div>
-                        </div>
-                    </div>
-                    <div className="col-md-6 col-sm-12">
-                        <div className="form-inline">
-                            <div className="form-group">
-                                <select className="form-control"
-                                    value={this.state.todos}
-                                    onChange={async (value) => {
-                                        await this.setStateAsync({ todos: value.target.value })
-                                        this.onEventPaginacion()
-                                    }}>
-                                    <option value="0">
-                                        Listar Ventas al Crédito
-                                    </option>
-                                    <option value="1">
-                                        Listar Todas Ventas
-                                    </option>
-                                </select>
-                                &nbsp;
-                                <button className="btn btn-outline-secondary" onClick={() => this.loadInit()}>
-                                    <i className="bi bi-arrow-clockwise"></i>
-                                </button>
                             </div>
                         </div>
                     </div>

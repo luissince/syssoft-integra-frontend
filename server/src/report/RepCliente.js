@@ -1,7 +1,7 @@
 const path = require('path');
 const PDFDocument = require("pdfkit-table");
 const getStream = require('get-stream');
-const { numberFormat, dateFormat,isFile } = require('../tools/Tools');
+const { numberFormat, dateFormat, isFile } = require('../tools/Tools');
 
 class RepCliente {
 
@@ -162,6 +162,127 @@ class RepCliente {
                     width: doc.page.width - doc.options.margins.left - doc.options.margins.right
                 });
             }
+
+            doc.end();
+            return getStream.buffer(doc);
+        } catch (error) {
+            return "Se genero un error al generar el reporte.";
+        }
+    }
+
+    async repHistorial(req, sedeInfo, data) {
+        try {
+            const doc = new PDFDocument({
+                font: 'Helvetica',
+                margins: {
+                    top: 40,
+                    bottom: 40,
+                    left: 40,
+                    right: 40
+                }
+            });
+
+            doc.info["Title"] = "HISTORIAL DEL CLIENTE.pdf"
+
+            let orgX = doc.x;
+            let orgY = doc.y;
+            let cabeceraY = orgY + 70;
+            let titleX = orgX + 150;
+            let medioX = doc.page.width / 2;
+            let widthContent = doc.page.width - doc.options.margins.left - doc.options.margins.right;
+
+            let h1 = 13;
+            let h2 = 11;
+            let h3 = 9;
+
+            if (isFile(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo))) {
+                doc.image(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo), orgX, orgY, { width: 75 });
+            } else {
+                doc.image(path.join(__dirname, "..", "path/to/noimage.jpg"), orgX, orgY, { width: 75 });
+            }
+
+            doc.fontSize(h1).text(
+                `${sedeInfo.nombreEmpresa}`,
+                titleX,
+                orgY,
+                {
+                    width: 250,
+                    align: "center"
+                }
+            );
+
+            doc.fontSize(h3).text(
+                `RUC: ${sedeInfo.ruc}\n${sedeInfo.direccion}\nCelular: ${sedeInfo.celular} / Telefono: ${sedeInfo.telefono}`,
+                titleX,
+                orgY + 17,
+                {
+                    width: 250,
+                    align: "center",
+                }
+            );
+
+            doc.fontSize(h2).text(
+                "HISTORIAL DEL CLIENTE",
+                doc.options.margins.left,
+                cabeceraY,
+                {
+                    width: widthContent,
+                    align: "center",
+                }
+            );
+
+            doc.fill('#000').stroke('#000');
+            doc.lineGap(4);
+            doc.opacity(1);
+
+
+            let filtroY = doc.y;
+
+            doc.fontSize(h3).text(
+                `N° de Documento: ${data.cliente.tipoDocumento + " - " + data.cliente.documento}\nInformación: ${data.cliente.informacion}\nDirección: ${data.cliente.direccion}`,
+                orgX,
+                doc.y + 10,
+                {
+                    align: "left",
+                }
+            );
+
+            doc.fontSize(h3).text(
+                `Celular: ${data.cliente.celular}\nTeléfono: ${data.cliente.telefono}\nEmail: ${data.cliente.email}`,
+                medioX,
+                filtroY + 10
+            );
+
+            doc.lineGap(0);
+
+            let ventas = data.venta.map((item, index) => {
+                return [
+                    ++index,
+                    item.fecha,
+                    item.comprobante + "\n" + item.serie + "-" + item.numeracion,
+                    numberFormat(item.total, item.codigo)
+                ]
+            })
+
+            const ventasTabla = {
+                subtitle: `Historial`,
+                headers: ["N°", "FECHA", "COMPROBANTE", "TOTAL"],
+                rows: ventas
+            };
+
+            doc.table(ventasTabla, {
+                prepareHeader: () => doc.font("Helvetica-Bold").fontSize(h3),
+                prepareRow: () => {
+                    doc.font("Helvetica").fontSize(h3);
+                },
+                padding: 5,
+                columnSpacing: 5,
+                columnsSize: [40, 172, 230, 90],//532
+                width: (doc.page.width - doc.options.margins.left - doc.options.margins.right),
+                x: orgX,
+                y: doc.y + 15,
+
+            });
 
             doc.end();
             return getStream.buffer(doc);

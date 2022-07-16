@@ -247,6 +247,8 @@ header.app-header {
   display: flex;
   background-color: var(--principal);
   padding-right: 15px;
+  padding-top: 5px;
+  padding-bottom: 5px;
   box-shadow: rgb(64 64 64 / 40%) 0px 1px 10px -5px;
 }
 
