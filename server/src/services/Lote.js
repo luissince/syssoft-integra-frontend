@@ -403,7 +403,8 @@ class Lote {
             l.ubicacionLote
     
             FROM lote AS l
-            INNER JOIN manzana AS m  ON l.idManzana = m.idManzana`, [
+            INNER JOIN manzana AS m  ON l.idManzana = m.idManzana
+            WHERE l.idLote = ?`, [
                 req.query.idLote,
             ]);
 
