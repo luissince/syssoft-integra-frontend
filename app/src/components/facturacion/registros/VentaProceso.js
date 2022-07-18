@@ -20,6 +20,7 @@ import {
 } from '../../tools/Tools';
 import { connect } from 'react-redux';
 import SearchBarClient from "../../tools/SearchBarClient";
+import SearchBarLote from "../../tools/SearchBarLote";
 
 class VentaProceso extends React.Component {
 
@@ -35,12 +36,17 @@ class VentaProceso extends React.Component {
             monedas: [],
 
             lotes: [],
+            lote: '',
+            idLote: '',
+            filterLote: false,
+            manzana : '',
             precioContado: '',
 
             detalleVenta: [],
             comprobantes: [],
             clientes: [],
             cliente: '',
+            filterCliente: false,
 
             impuestos: [],
 
@@ -102,7 +108,8 @@ class VentaProceso extends React.Component {
 
         this.abortControllerView = new AbortController();
 
-        this.selectItem = false;
+        this.selectItemClient = false;
+        this.selectItemLote = false;
     }
 
     setStateAsync(state) {
@@ -174,12 +181,12 @@ class VentaProceso extends React.Component {
             //     signal: this.abortControllerView.signal,
             // });
 
-            const lote = await axios.get("/api/lote/listcombo", {
-                signal: this.abortControllerView.signal,
-                params: {
-                    "idProyecto": this.state.idProyecto
-                }
-            });
+            // const lote = await axios.get("/api/lote/listcombo", {
+            //     signal: this.abortControllerView.signal,
+            //     params: {
+            //         "idProyecto": this.state.idProyecto
+            //     }
+            // });
 
             const moneda = await axios.get("/api/moneda/listcombo", {
                 signal: this.abortControllerView.signal,
@@ -203,7 +210,7 @@ class VentaProceso extends React.Component {
                 comprobantes: [...comprobanteFacturado.data, ...comprobanteLibre.data],
                 comprobantesCobro: comprobanteCobro.data,
                 // clientes: cliente.data,
-                lotes: lote.data,
+                // lotes: lote.data,
                 monedas: moneda.data,
                 impuestos: impuesto.data,
                 idMoneda: monedaFilter.length > 0 ? monedaFilter[0].idMoneda : '',
@@ -227,35 +234,30 @@ class VentaProceso extends React.Component {
     }
 
     async addObjectTable() {
-        if (this.refLote.current.value === '') {
-            this.setState({ messageWarning: "Seleccione un lote" })
+        if (this.state.idLote === '') {
+            await this.setStateAsync({ messageWarning: "Seleccione un lote" })
             this.refLote.current.focus();
             return;
         }
+
         if (!isNumeric(this.state.precioContado)) {
-            this.setState({ messageWarning: "Ingrese el precio de venta total" })
+            await this.setStateAsync({ messageWarning: "Ingrese el precio de venta total" })
             this.refPrecioContado.current.focus();
             return;
         }
+
         if (this.state.precioContado <= 0) {
-            this.setState({ messageWarning: "Ingrese un precio mayor a 0" })
+            await this.setStateAsync({ messageWarning: "Ingrese un precio mayor a 0" })
             this.refPrecioContado.current.focus();
             return;
         }
 
-        let nombreLote = "";
-        let nombreManzana = "";
-        for (let item of this.state.lotes) {
-            if (this.refLote.current.value === item.idLote) {
-                nombreLote = item.nombreLote;
-                nombreManzana = item.nombreManzana;
-                break;
-            }
-        }
+        let nombreLote = this.state.lote;
+        let nombreManzana = this.state.manzana;
 
-        if (!this.validarDuplicado(this.refLote.current.value)) {
+        if (!this.validarDuplicado(this.state.idLote)) {
             let detalle = {
-                "idDetalle": this.refLote.current.value,
+                "idDetalle": this.state.idLote,
                 "nombreLote": nombreLote,
                 "nombreManzana": nombreManzana,
                 "cantidad": 1,
@@ -267,7 +269,7 @@ class VentaProceso extends React.Component {
             this.state.detalleVenta.push(detalle)
         } else {
             for (let item of this.state.detalleVenta) {
-                if (item.idDetalle === this.refLote.current.value) {
+                if (item.idDetalle === this.state.idLote) {
                     let currenteObject = item;
                     currenteObject.cantidad = parseFloat(currenteObject.cantidad) + 1;
                     break;
@@ -281,6 +283,9 @@ class VentaProceso extends React.Component {
             detalleVenta: newArr,
             messageWarning: '',
             precioContado: '',
+            lote: '',
+            idLote: '' ,
+            manzana: ''
         });
 
         const { total } = this.calcularTotales();
@@ -289,7 +294,7 @@ class VentaProceso extends React.Component {
             importeTotal: total
         });
 
-        this.refLote.current.value = '';
+        // this.refLote.current.value = '';
     }
 
     validarDuplicado(id) {
@@ -366,7 +371,7 @@ class VentaProceso extends React.Component {
             detalleVenta: [],
             comprobantes: [],
             clientes: [],
-            cliente:'',
+            cliente: '',
 
             impuestos: [],
 
@@ -631,8 +636,6 @@ class VentaProceso extends React.Component {
         });
     }
 
-
-
     handleSelect = async (event, idDetalle) => {
         let updatedList = [...this.state.detalleVenta];
         for (let item of updatedList) {
@@ -645,43 +648,88 @@ class VentaProceso extends React.Component {
         await this.setStateAsync({ detalleVenta: updatedList })
     }
 
-    onEventClearInput = async () => {
-        await this.setStateAsync({ clientes: [], idCliente: '', cliente: "" });
-        this.selectItem = false;
+    /** */
+    onEventClearInputLote = async () => {
+        await this.setStateAsync({ lotes: [], idLote: '', lote: "", manzana: "" });
+        this.selectItemLote = false;
     }
 
-    handleFilter = async (event) => {
+    handleFilterLote = async (event) => {
 
-        const searchWord = this.selectItem ? "" : event.target.value;
+        const searchWord = this.selectItemLote ? "" : event.target.value;
+        await this.setStateAsync({ idLote: '', lote: searchWord });
+        this.selectItemLote = false;
+        if (searchWord.length === 0) {
+            await this.setStateAsync({ lotes: [] });
+            return;
+        }
+
+        if (this.state.filterLote) return;
+
+        try {
+            await this.setStateAsync({ filterLote: true });
+            let result = await axios.get("/api/lote/listfilter", {
+                params: {
+                    idProyecto: this.state.idProyecto,
+                    filtrar: searchWord,
+                },
+            });
+            await this.setStateAsync({ filterLote: false, lotes: result.data });
+        } catch (error) {
+            await this.setStateAsync({ filterLote: false, lotes: [] });
+        }
+    }
+
+    onEventSelectItemLote = async (value) => {
+        await this.setStateAsync({
+            lote: value.nombreLote,
+            lotes: [],
+            idLote: value.idLote,
+            manzana:  value.nombreManzana,
+            precioContado: value.precio.toString()
+        });
+        this.selectItemLote = true;
+        this.refPrecioContado.current.focus();
+    }
+
+    /** */
+    onEventClearInputClient = async () => {
+        await this.setStateAsync({ clientes: [], idCliente: '', cliente: "" });
+        this.selectItemClient = false;
+    }
+
+    handleFilterClient = async (event) => {
+
+        const searchWord = this.selectItemClient ? "" : event.target.value;
         await this.setStateAsync({ idCliente: '', cliente: searchWord });
-        this.selectItem = false;
+        this.selectItemClient = false;
         if (searchWord.length === 0) {
             await this.setStateAsync({ clientes: [] });
             return;
         }
 
-        if (this.state.filter) return;
+        if (this.state.filterCliente) return;
 
         try {
-            await this.setStateAsync({ filter: true });
+            await this.setStateAsync({ filterCliente: true });
             let result = await axios.get("/api/cliente/listfiltrar", {
                 params: {
                     filtrar: searchWord,
                 },
             });
-            await this.setStateAsync({ filter: false, clientes: result.data });
+            await this.setStateAsync({ filterCliente: false, clientes: result.data });
         } catch (error) {
-            await this.setStateAsync({ filter: false, clientes: [] });
+            await this.setStateAsync({ filterCliente: false, clientes: [] });
         }
     }
 
-    onEventSelectItem = async (value) => {
+    onEventSelectItemClient = async (value) => {
         await this.setStateAsync({
             cliente: value.documento + " - " + value.informacion,
             clientes: [],
             idCliente: value.idCliente
         });
-        this.selectItem = true;
+        this.selectItemClient = true;
     }
 
     render() {
@@ -1219,13 +1267,18 @@ class VentaProceso extends React.Component {
                             <div className="row">
                                 <div className="col-xl-8 col-lg-8 col-md-8 col-sm-12 col-12">
 
-                                    <div className="form-row">
-                                        <div className="form-group col-md-6">
-                                            <div className="input-group">
-                                                <div className="input-group-prepend">
-                                                    <div className="input-group-text"><i className="bi bi-cart4"></i></div>
-                                                </div>
-                                                <select
+                                    <div className="row">
+                                        <div className="col-xl-7 col-lg-7 col-md-12 col-sm-12 col-12">
+                                            <SearchBarLote
+                                                placeholder="Filtrar lotes..."
+                                                refLote={this.refLote}
+                                                lote={this.state.lote}
+                                                lotes={this.state.lotes}
+                                                onEventClearInput={this.onEventClearInputLote}
+                                                handleFilter={this.handleFilterLote}
+                                                onEventSelectItem={this.onEventSelectItemLote}
+                                            />
+                                            {/* <select
                                                     title="Lista de lotes"
                                                     className="form-control"
                                                     ref={this.refLote}
@@ -1236,40 +1289,50 @@ class VentaProceso extends React.Component {
                                                             <option key={index} value={item.idLote}>{`${item.nombreLote} / ${item.nombreManzana} - ${item.precio}`}</option>
                                                         ))
                                                     }
-                                                </select>
-                                            </div>
+                                                </select> */}
                                         </div>
-                                        <div className="form-group col-md-6">
-                                            <div className="input-group">
-                                                <div className="input-group-prepend">
-                                                    <div className="input-group-text"><i className="bi bi-tag-fill"></i></div>
+
+                                        <div className="col-xl-5 col-lg-5 col-md-12 col-sm-12 col-12">
+                                            <div className="form-group">
+                                                <div className="input-group">
+                                                    <div className="input-group-prepend">
+                                                        <div className="input-group-text"><i className="bi bi-tag-fill"></i></div>
+                                                    </div>
+                                                    <input
+                                                        title="Precio de venta"
+                                                        type="text"
+                                                        className="form-control"
+                                                        placeholder='0.00'
+                                                        ref={this.refPrecioContado}
+                                                        value={this.state.precioContado}
+                                                        onChange={async (event) => {
+
+                                                            if (event.target.value.trim().length > 0) {
+                                                                await this.setStateAsync({
+                                                                    precioContado: event.target.value,
+                                                                    messageWarning: '',
+                                                                });
+                                                            } else {
+                                                                await this.setStateAsync({
+                                                                    setStateAsync: event.target.value,
+                                                                    messageWarning: 'Ingrese el precio de venta.',
+                                                                });
+                                                            }
+                                                        }}
+                                                        onKeyPress={keyNumberFloat} />
+                                                    <div className="input-group-append">
+                                                        <button
+                                                            className="btn btn-outline-secondary"
+                                                            type="button"
+                                                            title="Agregar"
+                                                            onClick={() => this.addObjectTable()}>
+                                                            <i className="bi bi-plus-circle"></i>
+                                                        </button>
+                                                    </div>
                                                 </div>
-                                                <input
-                                                    title="Precio de venta"
-                                                    type="text"
-                                                    className="form-control"
-                                                    placeholder='0.00'
-                                                    ref={this.refPrecioContado}
-                                                    value={this.state.precioContado}
-                                                    onChange={(event) => {
-
-                                                        if (event.target.value.trim().length > 0) {
-                                                            this.setState({
-                                                                precioContado: event.target.value,
-                                                                messageWarning: '',
-                                                            });
-                                                        } else {
-                                                            this.setState({
-                                                                precioContado: event.target.value,
-                                                                messageWarning: 'Ingrese el precio de venta.',
-                                                            });
-                                                        }
-                                                    }}
-                                                    onKeyPress={keyNumberFloat} />
-
-                                                <button className="btn btn-outline-secondary ml-1" type="button" title="Agregar" onClick={() => this.addObjectTable()}><i className="bi bi-plus-circle"></i></button>
                                             </div>
                                         </div>
+
                                     </div>
 
                                     <div className="form-row">
@@ -1352,17 +1415,17 @@ class VentaProceso extends React.Component {
 
 
                                     <div className="form-group ">
-                                                                                
-                                            <SearchBarClient
-                                                placeholder="Filtrar clientes..."
-                                                refCliente={this.refCliente}
-                                                cliente={this.state.cliente}
-                                                clientes={this.state.clientes}
-                                                onEventClearInput={this.onEventClearInput}
-                                                handleFilter={this.handleFilter}
-                                                onEventSelectItem={this.onEventSelectItem}
-                                            />
-                                            {/* <select
+
+                                        <SearchBarClient
+                                            placeholder="Filtrar clientes..."
+                                            refCliente={this.refCliente}
+                                            cliente={this.state.cliente}
+                                            clientes={this.state.clientes}
+                                            onEventClearInput={this.onEventClearInputClient}
+                                            handleFilter={this.handleFilterClient}
+                                            onEventSelectItem={this.onEventSelectItemClient}
+                                        />
+                                        {/* <select
                                                 title="Lista de clientes"
                                                 className="form-control"
                                                 ref={this.refCliente}
@@ -1375,7 +1438,7 @@ class VentaProceso extends React.Component {
                                                     ))
                                                 }
                                             </select> */}
-                                        
+
                                     </div>
 
 

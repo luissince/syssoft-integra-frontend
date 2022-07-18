@@ -94,6 +94,15 @@ router.get('/listcombo', async function (req, res) {
     }
 });
 
+router.get('/listfilter', async function (req, res) {
+    const result = await lote.listarFilter(req)
+    if (Array.isArray(result)) {
+        res.status(200).send(result)
+    } else {
+        res.status(500).send(result)
+    }
+});
+
 router.get('/lotecliente', async function (req, res) {
     const result = await lote.listarComboLoteCliente(req)
     if (Array.isArray(result)) {

@@ -1,7 +1,7 @@
 import React from "react";
 import "./SearchBar.css";
 
-class SearchBarClient extends React.Component {
+class SearchBarLote extends React.Component {
   constructor(props) {
     super(props);
     this.index = -1;
@@ -16,7 +16,7 @@ class SearchBarClient extends React.Component {
   }
 
   onEventWindowClick = (event) => {
-    let parent = document.getElementById("idDataResultClient");
+    let parent = document.getElementById("idDataResultLote");
     let click = event.target.parentElement.parentElement;
 
     if (parent == null) return;
@@ -33,9 +33,9 @@ class SearchBarClient extends React.Component {
 
   onEventKeyUp(event) {
     if (event.keyCode === 40 || event.which === 40) {
-      if (this.props.clientes.length === 0) return;
+      if (this.props.lotes.length === 0) return;
 
-      const dataResult = document.getElementById("idDataResultClient");
+      const dataResult = document.getElementById("idDataResultLote");
       dataResult.focus();
       let children = dataResult.children;
       if (children.length > 0) {
@@ -43,9 +43,9 @@ class SearchBarClient extends React.Component {
         children[this.index].focus();
       }
     } else if (event.keyCode === 13) {
-      if (this.props.clientes.length === 0) return;
+      if (this.props.lotes.length === 0) return;
 
-      const dataResult = document.getElementById("idDataResultClient");
+      const dataResult = document.getElementById("idDataResultLote");
       dataResult.focus();
       let children = dataResult.children;
       if (children.length > 0) {
@@ -57,7 +57,7 @@ class SearchBarClient extends React.Component {
 
   onEventKeyDown(event) {
     if (event.keyCode === 38) {
-      let children = document.getElementById("idDataResultClient").children;
+      let children = document.getElementById("idDataResultLote").children;
 
       if (this.index !== 0) {
         if (this.index > 0) {
@@ -66,7 +66,7 @@ class SearchBarClient extends React.Component {
         }
       }
     } else if (event.keyCode === 40) {
-      let children = document.getElementById("idDataResultClient").children;
+      let children = document.getElementById("idDataResultLote").children;
 
       if (this.index < children.length - 1) {
         this.index++;
@@ -78,17 +78,17 @@ class SearchBarClient extends React.Component {
   render() {
     return (
       <div className="search">
-        <div className="form-group position-relative mb-0">
+        <div className="form-group position-relative">
           <div className="input-group">
             <div className="input-group-prepend">
-              <div className="input-group-text"><i className="bi bi-person-fill"></i></div>
+              <div className="input-group-text"><i className="bi bi-cart4"></i></div>
             </div>
             <input
               type="text"
               className="form-control"
               placeholder={this.props.placeholder}
-              ref={this.props.refCliente}
-              value={this.props.cliente}
+              ref={this.props.refLote}
+              value={this.props.lote}
               onChange={this.props.handleFilter}
               onKeyUp={(event) => this.onEventKeyUp(event)}
             />
@@ -98,7 +98,7 @@ class SearchBarClient extends React.Component {
                 type="button"
                 onClick={() => {
                   this.props.onEventClearInput();
-                  this.props.refCliente.current.focus();
+                  this.props.refLote.current.focus();
                   this.index = -1;
                 }}
               >
@@ -107,24 +107,24 @@ class SearchBarClient extends React.Component {
             </div>
           </div>
 
-          {this.props.clientes.length !== 0 && (
+          {this.props.lotes.length !== 0 && (
             <div
               className="dataResult"
-              id="idDataResultClient"
+              id="idDataResultLote"
               tabIndex="-1"
               onKeyDown={(event) => this.onEventKeyDown(event)}
             >
-              {this.props.clientes.map((value, index) => (
+              {this.props.lotes.map((value, index) => (
                 <button
                   key={index}
                   className="list-group-item list-group-item-action"
                   onClick={() => {
                     this.props.onEventSelectItem(value);
-                    this.props.refCliente.current.focus();
+                    this.props.refLote.current.focus();
                     this.index = -1;
                   }}
                 >
-                  {value.documento + " - " + value.informacion}
+                  {value.nombreLote}{"/"}{<small>{value.nombreManzana}</small>}
                 </button>
               ))}
             </div>
@@ -135,4 +135,4 @@ class SearchBarClient extends React.Component {
   }
 }
 
-export default SearchBarClient;
+export default SearchBarLote;

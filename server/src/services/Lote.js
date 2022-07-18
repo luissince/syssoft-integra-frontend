@@ -492,6 +492,32 @@ class Lote {
         }
     }
 
+    async listarFilter(req) {
+        try {
+            let result = await conec.query(`SELECT 
+            l.idLote, 
+            l.descripcion AS nombreLote, 
+            l.precio,
+            m.nombre AS nombreManzana 
+            FROM lote AS l INNER JOIN manzana AS m 
+            ON l.idManzana = m.idManzana
+            WHERE 
+            m.idProyecto = ? AND l.estado = 1 AND l.descripcion LIKE CONCAT(?,'%')
+            OR
+            m.idProyecto = ? AND l.estado = 1 AND m.nombre LIKE CONCAT(?,'%')`, [
+                req.query.idProyecto,
+                req.query.filtrar,
+
+                req.query.idProyecto,
+                req.query.filtrar,
+            ]);
+            return result
+
+        } catch (error) {
+            return "Se produjo un error de servidor, intente nuevamente.";
+        }
+    }
+
     async listarComboLoteCliente(req) {
         try {
             let result = await conec.query(`SELECT 

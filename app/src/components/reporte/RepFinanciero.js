@@ -2,11 +2,14 @@ import React from 'react';
 import CryptoJS from 'crypto-js';
 import FileDownloader from "./hooks/FileDownloader";
 import { spinnerLoading, currentDate } from '../tools/Tools';
+import { connect } from 'react-redux';
 
 class RepFinanciero extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            idProyecto: this.props.token.project.idProyecto,
+            
             fechaIni: '',
             fechaFin: '',
             isFechaActive: false,
@@ -219,4 +222,10 @@ class RepFinanciero extends React.Component {
     }
 }
 
-export default RepFinanciero;
+const mapStateToProps = (state) => {
+    return {
+        token: state.reducer
+    }
+}
+
+export default connect(mapStateToProps, null)(RepFinanciero);
