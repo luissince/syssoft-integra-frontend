@@ -1090,8 +1090,9 @@ class Cobro {
                         let arrPlazos = plazos.map(function (item) {
                             return item.idPlazo;
                         });
-
+  
                         let maxPlazo = Math.max(...arrPlazos);
+                        console.log(maxPlazo)
 
                         let cobroVenta = await conec.execute(connection, `SELECT idPlazo FROM cobroVenta 
                         WHERE idCobro = ?`, [
@@ -1103,6 +1104,7 @@ class Cobro {
                         });
 
                         let maxCobroVenta = Math.max(...arrCobroVenta);
+                        console.log(maxCobroVenta)
 
                         if (maxPlazo == maxCobroVenta) {
                             if (venta[0].credito === 1) {
@@ -1110,9 +1112,15 @@ class Cobro {
                                     maxCobroVenta
                                 ]);
                             } else {
-                                await conec.execute(connection, `UPDATE plazo SET estado = 0 WHERE idPlazo = ?`, [
+                                let plazosCobros = await conec.execute(connection,`SELECT * FROM cobroVenta WHERE idPlazo = ?`,[
                                     maxCobroVenta
                                 ]);
+
+                                if (plazosCobros.length <= 1) {
+                                    await conec.execute(connection, `UPDATE plazo SET estado = 0 WHERE idPlazo = ?`, [
+                                        maxCobroVenta
+                                    ]);
+                                }
                             }
 
                             await conec.execute(connection, `UPDATE venta SET estado = 2
@@ -1120,7 +1128,7 @@ class Cobro {
                                 venta[0].idVenta
                             ]);
                         } else {
-                            return "No se puede eliminar el cobro, hay plazos(cobros) ligados que son inferiores.";                            
+                            return "No se puede eliminar el cobro, hay plazos(cobros) ligados que son inferiores.";
                         }
                     }
                 }
