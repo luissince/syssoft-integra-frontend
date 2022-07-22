@@ -98,7 +98,7 @@ class Acceso {
             return sendSuccess(res, "Se registro correctamente el acceso.");
         } catch (error) {
             if (connection != null) {
-                conec.rollback(connection);
+                await conec.rollback(connection);
             }
             return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
         }
@@ -198,7 +198,7 @@ class Acceso {
             return sendSuccess(res, "Modulos actualizados correctamente.");
         } catch (error) {
             if (connection != null) {
-                conec.rollback(connection);
+              await  conec.rollback(connection);
             }
             return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
         }

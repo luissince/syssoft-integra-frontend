@@ -366,12 +366,17 @@ class VentaProceso extends React.Component {
             monedas: [],
 
             lotes: [],
+            lote: '',
+            idLote: '',
+            filterLote: false,
+            manzana : '',
             precioContado: '',
 
             detalleVenta: [],
             comprobantes: [],
             clientes: [],
             cliente: '',
+            filterCliente: false,
 
             impuestos: [],
 
