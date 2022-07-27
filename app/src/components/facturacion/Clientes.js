@@ -18,9 +18,9 @@ class Clientes extends React.Component {
             loading: false,
             lista: [],
 
-            add:statePrivilegio(this.props.token.userToken.menus[2].submenu[0].privilegio[0].estado),
-            edit:statePrivilegio(this.props.token.userToken.menus[2].submenu[0].privilegio[1].estado),
-            remove:statePrivilegio(this.props.token.userToken.menus[2].submenu[0].privilegio[2].estado),
+            add: statePrivilegio(this.props.token.userToken.menus[2].submenu[0].privilegio[0].estado),
+            edit: statePrivilegio(this.props.token.userToken.menus[2].submenu[0].privilegio[1].estado),
+            remove: statePrivilegio(this.props.token.userToken.menus[2].submenu[0].privilegio[2].estado),
 
             opcion: 0,
             paginacion: 0,
@@ -215,9 +215,10 @@ class Clientes extends React.Component {
                                         <th width="5%" className="text-center">#</th>
                                         <th width="10%">DNI / RUC</th>
                                         <th width="20%">Cliente</th>
-                                        <th width="15%">Cel. / Tel.</th>
-                                        <th width="20%">Dirección</th>
-                                        <th width="12%">Estado</th>
+                                        <th width="10%">Cel. / Tel.</th>
+                                        <th width="15%">Dirección</th>
+                                        <th width="15%">Propiedad</th>
+                                        <th width="7%">Estado</th>
                                         <th width="5%" className="text-center">Detalle</th>
                                         <th width="5%" className="text-center">Editar</th>
                                         <th width="5%" className="text-center">Eliminar</th>
@@ -228,13 +229,13 @@ class Clientes extends React.Component {
                                         this.state.loading ? (
 
                                             <tr>
-                                                <td className="text-center" colSpan="9">
+                                                <td className="text-center" colSpan="10">
                                                     {spinnerLoading()}
                                                 </td>
                                             </tr>
                                         ) : this.state.lista.length === 0 ? (
                                             <tr className="text-center">
-                                                <td colSpan="9">¡No hay datos registrados!</td>
+                                                <td colSpan="10">¡No hay datos registrados!</td>
                                             </tr>
                                         ) : (
                                             this.state.lista.map((item, index) => {
@@ -245,6 +246,14 @@ class Clientes extends React.Component {
                                                         <td>{item.informacion}</td>
                                                         <td>{item.celular}{<br />}{item.telefono}</td>
                                                         <td>{item.direccion}</td>
+                                                        <td>{
+                                                            item.detalle.map((detalle, indexd) => (
+                                                                <div key={indexd}>
+                                                                    <span>{detalle.descripcion}{<br />}{<small>{detalle.manzana}</small>}</span>
+                                                                    <br /><hr />
+                                                                </div>
+                                                            ))
+                                                        }</td>
                                                         <td className="text-center">
                                                             <div className={`badge ${item.estado === 1 ? "badge-info" : "badge-danger"}`}>
                                                                 {item.estado === 1 ? "ACTIVO" : "INACTIVO"}

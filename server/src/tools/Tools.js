@@ -176,6 +176,14 @@ function zfill(number, width = 6) {
     }
 }
 
+function manzanaLote(lot,manz){
+    let manzana = manz;
+    let lote = lot;
+
+    return lote + " - " + manzana;
+
+}
+
 module.exports = {
     currentDate,
     currentTime,
@@ -191,5 +199,6 @@ module.exports = {
     removeFile,
     writeFile,
     mkdir,
-    chmod
+    chmod,
+    manzanaLote
 };

@@ -3,7 +3,8 @@ const PDFDocument = require("pdfkit-table");
 const getStream = require('get-stream');
 const qr = require("qrcode");
 const NumberLleters = require('../tools/NumberLleters');
-const { formatMoney, numberFormat, calculateTaxBruto, calculateTax, dateFormat, zfill, isFile } = require('../tools/Tools');
+const { formatMoney, numberFormat, calculateTaxBruto, calculateTax, dateFormat, zfill, isFile, manzanaLote } = require('../tools/Tools');
+
 
 const numberLleters = new NumberLleters();
 
@@ -106,7 +107,8 @@ class RepFactura {
             doc.x = doc.options.margins.left;
 
             let detalle = data.detalle.map((item, index) => {
-                return [++index, item.medida, item.cantidad, item.lote, numberFormat(item.precio, cabecera.codiso), numberFormat((item.precio * item.cantidad), cabecera.codiso)];
+                console.log(item.lote)
+                return [++index, item.medida, item.cantidad, manzanaLote(item.lote, item.manzana), numberFormat(item.precio, cabecera.codiso), numberFormat((item.precio * item.cantidad), cabecera.codiso)];
             });
 
 
@@ -711,7 +713,7 @@ class RepFactura {
             doc.x = doc.options.margins.left;
 
             let detalle = data.detalle.map((item, index) => {
-                return [++index, item.concepto, item.cantidad, item.impuesto, numberFormat(item.precio, cabecera.codiso), numberFormat((item.precio * item.cantidad), cabecera.codiso)];
+                return [++index, item.concepto, item.cantidad, item.impuesto, , numberFormat((item.precio * item.cantidad), cabecera.codiso)];
             })
 
             const table = {
@@ -1043,7 +1045,8 @@ class RepFactura {
 
             yPos = 235;
 
-            doc.fontSize(10).text(`${data.descripcion}`,
+            
+            doc.fontSize(10).text(`${manzanaLote(data.descripcion, data.manzana)}`,
                 doc.options.margins.left + 140,
                 yPos);
 

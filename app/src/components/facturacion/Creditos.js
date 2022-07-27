@@ -230,13 +230,14 @@ class Creditos extends React.Component {
                                 <thead>
                                     <tr>
                                         <th width="5%" className="text-center">#</th>
-                                        <th width="15%">Cliente</th>
-                                        <th width="15%">Comprobante</th>
-                                        <th width="15%">Cuotas Pendientes / Frecuencia</th>
-                                        <th width="10%">Sig. Pago</th>
-                                        <th width="10%">Total</th>
-                                        <th width="10%">Cobrado</th>
-                                        <th width="10%">Por Cobrar</th>
+                                        <th width="14%">Cliente</th>
+                                        <th width="7%">Propiedad</th>
+                                        <th width="14%">Comprobante</th>
+                                        <th width="14%">Ctas Pendientes / Frecuencia</th>
+                                        <th width="9%">Sig. Pago</th>
+                                        <th width="9%">Total</th>
+                                        <th width="9%">Cobrado</th>
+                                        <th width="9%">Por Cobrar</th>
                                         <th width="5%">Cronograma</th>
                                         <th width="5%">Cobros</th>
                                     </tr>
@@ -245,13 +246,13 @@ class Creditos extends React.Component {
                                     {
                                         this.state.loading ? (
                                             <tr>
-                                                <td className="text-center" colSpan="10">
+                                                <td className="text-center" colSpan="11">
                                                     {spinnerLoading()}
                                                 </td>
                                             </tr>
                                         ) : this.state.lista.length === 0 ? (
                                             <tr className="text-center">
-                                                <td colSpan="10">¡No hay datos registrados!</td>
+                                                <td colSpan="11">¡No hay datos registrados!</td>
                                             </tr>
                                         ) : (
                                             this.state.lista.map((item, index) => {
@@ -259,6 +260,14 @@ class Creditos extends React.Component {
                                                     <tr key={index}>
                                                         <td className="text-center">{item.id}</td>
                                                         <td>{item.documento}{<br />}{item.informacion}</td>
+                                                        <td>{
+                                                            item.detalle.map((detalle, indexd) => (
+                                                                <div key={indexd}>
+                                                                    <span>{detalle.lote}{<br />}{<small>{detalle.manzana}</small>}</span>
+                                                                    <br />
+                                                                </div>
+                                                            ))
+                                                        }</td>
                                                         <td>{item.nombre}{<br />}{item.serie + "-" + item.numeracion}</td>
                                                         <td>{item.credito === 1 ? item.frecuencia : item.numCuota === 1 ? item.numCuota + " Cuota" : item.numCuota + " Cuotas"}</td>
                                                         <td>{item.fechaPago === "" ? "-" : dateFormat(item.fechaPago)}</td>

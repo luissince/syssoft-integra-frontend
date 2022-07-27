@@ -13,6 +13,7 @@ import Cobros from '../facturacion/Cobros';
 import Creditos from '../facturacion/Creditos';
 import Cotizaciones from '../facturacion/Cotizaciones';
 import Reservas from '../facturacion/Reservas';
+import Socios from '../facturacion/Socios';
 import Monedas from '../ajustes/Monedas';
 import Comprobantes from '../ajustes/Comprobantes';
 import Impuestos from '../ajustes/Impuestos';
@@ -279,6 +280,11 @@ class Inicio extends React.Component {
                                     path={`${path}/creditos/proceso`}
                                     exact={true}
                                     render={(props) => <CreditoProceso {...props} />}
+                                />
+                                <Route 
+                                    path={`${path}/socios`}
+                                    exact={true}
+                                    render={(props) => <Socios {...props} />}
                                 />
                                 <Route
                                     path={`${path}/cotizaciones`}

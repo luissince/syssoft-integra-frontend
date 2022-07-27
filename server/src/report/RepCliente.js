@@ -358,14 +358,16 @@ class RepCliente {
                     item.cuotasRetrasadas,
                     item.cuotasPendientes,
                     item.fechaPago,
+                    item.frecuencia == 15 ? 'Quincenal' : 'Mensual',
                     numberFormat(item.montoPendiente, item.codiso),
                     numberFormat(item.montoActual, item.codiso)
+                    
                 ];
             });
 
             const table = {
                 subtitle: "DETALLE",
-                headers: ["N°", "Cliente", "Cuotas Retrasadas", "Cuotas Pendientes", "Fecha de Cobro", "Monto Retrasado", "Cuota Actual"],
+                headers: ["N°", "Cliente", "Cuotas Retrasadas", "Cuotas Pendientes", "Fecha de Cobro", "Frecuencia", "Monto Retrasado", "Cuota Actual"],
                 rows: content
             };
 
@@ -376,7 +378,7 @@ class RepCliente {
                 },
                 padding: 5,
                 columnSpacing: 5,
-                columnsSize: [30, 100, 100, 102, 70, 65, 65],
+                columnsSize: [30, 100, 70, 70, 70, 62, 65, 65],
                 x: doc.x,
                 y: doc.y + 15,
                 width: doc.page.width - doc.options.margins.left - doc.options.margins.right

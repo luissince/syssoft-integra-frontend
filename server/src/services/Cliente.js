@@ -37,7 +37,31 @@ class Cliente {
                 parseInt(req.query.filasPorPagina)
             ])
 
-            let resultLista = lista.map(function (item, index) {
+            let newLista = []
+
+
+            // console.log(lista)
+
+            for (let value of lista) {
+                let detalle = await conec.query(`select 
+                    l.descripcion,
+                    m.nombre as manzana
+                    from venta as v
+                    inner join ventaDetalle as vd on vd.idVenta = v.idVenta
+                    inner join lote as l on l.idLote = vd.idLote
+                    inner join manzana as m on m.idManzana = l.idManzana
+                    where v.idCliente = ?`, [
+                    value.idCliente
+                ]);
+
+                newLista.push({
+                    ...value,
+                    detalle
+                });
+            }
+
+
+            let resultLista = newLista.map(function (item, index) {
                 return {
                     ...item,
                     id: (index + 1) + parseInt(req.query.posicionPagina)
@@ -65,6 +89,7 @@ class Cliente {
 
             return { "result": resultLista, "total": total[0].Total };
         } catch (error) {
+            console.log(error)
             return "Se produjo un error de servidor, intente nuevamente.";
         }
     }
@@ -342,7 +367,39 @@ class Cliente {
     }
 
     async listadeudas(req) {
+        console.log(req.query)
         try {
+
+            if (req.query.frecuencia !== '' && req.query.frecuencia !== 0) {
+                let lista = await conec.query(`SELECT 
+                v.idVenta, 
+                cl.documento, 
+                cl.informacion, 
+                v.numCuota, 
+                (SELECT IFNULL(COUNT(*), 0) FROM plazo AS p WHERE p.estado = 0 AND p.fecha < CURRENT_DATE() AND p.idVenta = v.idVenta) AS cuotasRetrasadas,
+                (SELECT IFNULL(COUNT(*), 0) FROM plazo AS p WHERE p.estado = 0 AND p.idVenta = v.idVenta) AS cuotasPendientes,
+                CASE 
+                WHEN v.credito = 1 THEN DATE_FORMAT(DATE_ADD(v.fecha,interval v.frecuencia day),'%d/%m/%Y')
+                ELSE (SELECT IFNULL(DATE_FORMAT(MIN(p.fecha),'%d/%m/%Y'),'') FROM plazo AS p WHERE p.estado = 0 AND p.idVenta = v.idVenta) END AS fechaPago,
+                m.simbolo,
+                m.codiso,
+                (SELECT IFNULL(SUM(p.monto),0) FROM plazo AS p WHERE p.estado = 0 AND p.fecha < CURRENT_DATE() AND p.idVenta = v.idVenta) AS montoPendiente,
+                (SELECT IFNULL(MIN(p.monto),0) FROM plazo AS p WHERE p.estado = 0 AND p.idVenta = v.idVenta) AS montoActual,
+                v.frecuencia
+                FROM venta AS v 
+                INNER JOIN moneda AS m ON m.idMoneda = v.idMoneda
+                INNER JOIN comprobante AS cm ON v.idComprobante = cm.idComprobante 
+                INNER JOIN cliente AS cl ON v.idCliente = cl.idCliente 
+                LEFT JOIN ventaDetalle AS vd ON vd.idVenta = v.idVenta 
+                WHERE v.estado = 2
+                and v.frecuencia = ?
+                GROUP BY v.idVenta
+                ORDER BY v.fecha ASC, v.hora ASC`, [
+                    req.query.frecuencia
+                ]);
+    
+                return lista;
+            } else {
             let lista = await conec.query(`SELECT 
             v.idVenta, 
             cl.documento, 
@@ -356,7 +413,8 @@ class Cliente {
             m.simbolo,
             m.codiso,
             (SELECT IFNULL(SUM(p.monto),0) FROM plazo AS p WHERE p.estado = 0 AND p.fecha < CURRENT_DATE() AND p.idVenta = v.idVenta) AS montoPendiente,
-            (SELECT IFNULL(MIN(p.monto),0) FROM plazo AS p WHERE p.estado = 0 AND p.idVenta = v.idVenta) AS montoActual
+            (SELECT IFNULL(MIN(p.monto),0) FROM plazo AS p WHERE p.estado = 0 AND p.idVenta = v.idVenta) AS montoActual,
+            v.frecuencia
             FROM venta AS v 
             INNER JOIN moneda AS m ON m.idMoneda = v.idMoneda
             INNER JOIN comprobante AS cm ON v.idComprobante = cm.idComprobante 
@@ -366,7 +424,8 @@ class Cliente {
             GROUP BY v.idVenta
             ORDER BY v.fecha ASC, v.hora ASC`);
 
-            return lista;
+                return lista;
+            }
         } catch (error) {
             return "Se produjo un error de servidor, intente nuevamente.";
         }
@@ -401,9 +460,12 @@ class Cliente {
                 LEFT JOIN venta AS v ON cv.idVenta = v.idVenta 
                 LEFT JOIN comprobante AS cp ON v.idComprobante = cp.idComprobante
                 WHERE c.idCliente = ?
+                AND (c.fecha BETWEEN ? AND ?)
                 GROUP BY c.idCobro
                 ORDER BY c.fecha DESC,c.hora DESC`, [
-                    req.query.idCliente
+                    req.query.idCliente,
+                    req.query.fechaIni,
+                    req.query.fechaFin
                 ]);
 
                 return lista;
@@ -419,8 +481,7 @@ class Cliente {
                 WHERE 
                 co.fecha BETWEEN ? AND ?`, [
                     req.query.fechaIni,
-                    req.query.fechaFin,
-                    ,
+                    req.query.fechaFin
                 ]);
 
                 return lista;

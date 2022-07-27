@@ -16,14 +16,18 @@ class RepClientes extends React.Component {
             idCliente: '',
             clientes: [],
             clienteCheck: true,
+            frecuenciaCheck: true,
 
             loading: true,
             messageWarning: '',
+
+            cada: 0,
         }
 
         this.refFechaIni = React.createRef();
         this.refCliente = React.createRef();
         this.refUseFile = React.createRef();
+        this.refFrecuencia = React.createRef();
 
         this.abortControllerView = new AbortController()
     }
@@ -53,6 +57,8 @@ class RepClientes extends React.Component {
                 clientes: cliente.data,
 
                 loading: false,
+                // cambiar
+                // fechaIni: '2022-07-19',
                 fechaIni: currentDate(),
                 fechaFin: currentDate()
             });
@@ -124,8 +130,15 @@ class RepClientes extends React.Component {
     }
 
     async onEventRepDeudas() {
+        if(!this.state.frecuenciaCheck && this.state.cada == 0){
+            this.setState({ messageWarning: "Seleccione una frecuencia de pago" })
+            this.refFrecuencia.current.focus();
+            return;
+        }
+
         const data = {
-            "idSede": "SD0001"
+            "idSede": "SD0001",
+            "frecuencia": this.state.cada
         }
 
         let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
@@ -134,8 +147,15 @@ class RepClientes extends React.Component {
     }
 
     async onEventExcelDeudas() {
+        if(!this.state.frecuenciaCheck && this.state.cada == 0){
+            this.setState({ messageWarning: "Seleccione una frecuencia de pago" })
+            this.refFrecuencia.current.focus();
+            return;
+        }
+
         const data = {
-            "idSede": "SD0001"
+            "idSede": "SD0001",
+            "frecuencia": this.state.cada
         }
 
         let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
@@ -178,6 +198,11 @@ class RepClientes extends React.Component {
                                                         checked={this.state.isFechaActive}
                                                         onChange={(event) => {
                                                             this.setState({ isFechaActive: event.target.checked, fechaIni: currentDate(), fechaFin: currentDate(), messageWarning: '' })
+                                                            /*// if(event.target.checked){
+                                                            //     this.setState({ isFechaActive: event.target.checked, fechaIni: currentDate(), fechaFin: currentDate(), messageWarning: '' })
+                                                            // }else{
+                                                            //     this.setState({ isFechaActive: event.target.checked, fechaIni: '2022-07-19', fechaFin: currentDate(), messageWarning: '' })
+                                                            // }*/
                                                         }}
                                                     >
                                                     </input>
@@ -295,6 +320,53 @@ class RepClientes extends React.Component {
                             <div className="card my-1">
                                 <h6 className="card-header">Lista de Deudas por Cliente</h6>
                                 <div className="card-body">
+
+                                    <div className="col-lg-4 col-md-6 col-sm-12">
+                                        <div className="form-group">
+                                            <label>Seleccione segun frecuencia de pago</label>
+                                            <div className="input-group">
+                                                <select
+                                                    title="frecuencia de deuda"
+                                                    className="form-control"
+                                                    ref={this.refFrecuencia}
+                                                    value={this.state.cada}
+                                                    disabled={this.state.frecuenciaCheck}
+                                                    onChange={async (event) => {
+                                                        await this.setStateAsync({ cada: event.target.value });
+                                                        if (this.state.cada === 0) {
+                                                            await this.setStateAsync({ frecuenciaCheck: true });
+                                                        }
+
+                                                    }}>
+                                                    <option value="0">
+                                                        - Seleccione
+                                                    </option>
+                                                    <option value="15">
+                                                        Listar Ventas de cada 15
+                                                    </option>
+                                                    <option value="30">
+                                                        Listar Ventas de cada 30
+                                                    </option>
+                                                </select>
+                                                <div className="input-group-append">
+                                                    <div className="input-group-text">
+                                                        <div className="form-check form-check-inline m-0">
+                                                            <input
+                                                                className="form-check-input"
+                                                                type="checkbox"
+                                                                checked={this.state.frecuenciaCheck}
+                                                                onChange={async (event) => {
+                                                                    await this.setStateAsync({ frecuenciaCheck: event.target.checked });
+                                                                    if (this.state.frecuenciaCheck) {
+                                                                        await this.setStateAsync({ cada: '' });
+                                                                    }
+                                                                }} />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
 
                                     <div className="row mt-3">
                                         <div className="col"></div>

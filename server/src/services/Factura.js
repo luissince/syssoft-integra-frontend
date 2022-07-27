@@ -939,7 +939,26 @@ class Factura {
                 parseInt(req.query.filasPorPagina)
             ]);
 
-            let resultLista = lista.map(function (item, index) {
+            let newLista = []
+
+            for (let value of lista) {
+                let detalle = await conec.query(`SELECT 
+                l.descripcion AS lote,
+                m.nombre AS manzana
+                FROM ventaDetalle AS vd 
+                INNER JOIN lote AS l ON vd.idLote = l.idLote 
+                INNER JOIN manzana AS m ON l.idManzana = m.idManzana 
+                WHERE vd.idVenta = ? `, [
+                    value.idVenta
+                ]);
+
+                newLista.push({
+                    ...value,
+                    detalle
+                });
+            }
+
+            let resultLista = newLista.map(function (item, index) {
                 return {
                     ...item,
                     id: (index + 1) + parseInt(req.query.posicionPagina),
@@ -951,7 +970,7 @@ class Factura {
                 parseInt(req.query.opcion),
                 req.query.idProyecto,
                 req.query.buscar,
-                parseInt(req.query.todos),                
+                parseInt(req.query.todos),
                 parseInt(req.query.cada),
             ]);
 
