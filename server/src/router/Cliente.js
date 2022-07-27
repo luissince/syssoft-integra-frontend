@@ -2,11 +2,10 @@ const express = require('express');
 const router = express.Router();
 const { decrypt } = require('../tools/CryptoJS');
 const { generateExcelCliente, generateExcelDeudas } = require('../excel/FileClientes')
-const Sede = require('../services/Sede');
+const sede = require('../services/Sede');
 const Cliente = require('../services/Cliente');
 const RepCliente = require('../report/RepCliente');
 
-const sede = new Sede();
 const cliente = new Cliente();
 const repCliente = new RepCliente();
 

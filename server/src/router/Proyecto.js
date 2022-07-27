@@ -1,60 +1,29 @@
 const express = require('express');
 const router = express.Router();
-const Proyecto = require('../services/Proyecto');
-const proyecto = new Proyecto();
+const proyecto = require('../services/Proyecto');
 
 router.get('/list', async function (req, res) {
-    const result = await proyecto.list(req)
-    if (typeof result === 'object') {
-        res.status(200).send(result)
-    } else {
-        res.status(500).send(result)
-    }
+    return await proyecto.list(req, res);
 });
 
 router.post('/', async function (req, res) {
-    const result = await proyecto.add(req);
-    if (result === 'insert') {
-        res.status(201).send("Se registró correctamente el proyecto.");
-    } else {
-        res.status(500).send(result);
-    }
+    return await proyecto.add(req, res);
 });
 
 router.put('/', async function (req, res) {
-    const result = await proyecto.edit(req);
-    if (result === 'update') {
-        res.status(201).send("Se actualizó correctamente el proyecto.");
-    } else {
-        res.status(500).send(result);
-    }
+    return await proyecto.edit(req, res);
 });
 
 router.get('/id', async function (req, res) {
-    const result = await proyecto.id(req);
-    if (typeof result === 'object') {
-        res.status(200).send(result)
-    } else {
-        res.status(500).send(result)
-    }
+    return await proyecto.id(req, res);
 });
 
 router.delete('/', async function (req, res) {
-    const result = await proyecto.delete(req);
-    if (result === 'delete') {
-        res.status(201).send("Se eliminó correctamente la manzana.");
-    } else {
-        res.status(500).send(result);
-    }
+    return await proyecto.delete(req, res);
 });
 
 router.get('/inicio', async function (req, res) {
-    const result = await proyecto.inicio(req)
-    if (Array.isArray(result)) {
-        res.status(200).send(result)
-    } else {
-        res.status(500).send(result)
-    }
+    return await proyecto.inicio(req, res);
 });
 
 module.exports = router;

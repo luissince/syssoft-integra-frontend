@@ -7,4 +7,4 @@ router.get('/totales', async function (req, res) {
     return await dashboard.totales(req, res);
 });
 
-module.exports = router;
+module.exports = router; 

@@ -1,14 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const Factura = require('../services/Factura');
-const Sede = require('../services/Sede');
+const sede = require('../services/Sede');
 const RepCuota = require('../report/RepCuota');
 const RepFactura = require('../report/RepFactura');
 const { decrypt } = require('../tools/CryptoJS');
 const { generateExcel } = require('../excel/FileVentas')
 
 const factura = new Factura();
-const sede = new Sede();
 const repCuota = new RepCuota();
 const repFactura = new RepFactura();
 

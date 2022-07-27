@@ -8,12 +8,13 @@ const {
     chmod,
 } = require('../tools/Tools');
 const path = require("path");
+const { sendSuccess, sendSave, sendClient, sendError } = require('../tools/Message');
 const Conexion = require('../database/Conexion');
 const conec = new Conexion();
 
 class Proyecto {
 
-    async list(req) {
+    async list(req, res) {
         try {
             let lista = await conec.query(`SELECT  
             p.idProyecto,
@@ -61,13 +62,13 @@ class Proyecto {
 
             ]);
 
-            return { "result": resultLista, "total": total[0].Total };
+            return sendSuccess(res,{ "result": resultLista, "total": total[0].Total });
         } catch (error) {
-            return "Se produjo un error de servidor, intente nuevamente.";
+            return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
         }
     }
 
-    async add(req) {
+    async add(req, res) {
         let connection = null;
         try {
             connection = await conec.beginTransaction();
@@ -173,16 +174,16 @@ class Proyecto {
             ])
 
             await conec.commit(connection);
-            return "insert";
+            return sendSave(res, "Se registró correctamente el proyecto.");
         } catch (err) {
             if (connection != null) {
                 await conec.rollback(connection);
             }
-            return "Se produjo un error de servidor, intente nuevamente.";
+            return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
         }
     }
 
-    async id(req) {       
+    async id(req, res) {
         try {
             let result = await conec.query(`SELECT 
             p.idProyecto,
@@ -214,18 +215,18 @@ class Proyecto {
             WHERE p.idProyecto = ?`, [
                 req.query.idProyecto,
             ]);
-         
+
             if (result.length > 0) {
-                return result[0];
+                return sendSuccess(res, result[0]);
             } else {
-                return "Datos no encontrados";
+                return sendClient(res, "Datos no encontrados");
             }
         } catch (error) {
-            return "Error interno de conexión, intente nuevamente.";
+            return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
         }
     }
 
-    async edit(req) {
+    async edit(req, res) {
         let connection = null;
         try {
             connection = await conec.beginTransaction();
@@ -315,22 +316,19 @@ class Proyecto {
                 currentTime(),
                 req.body.idUsuario,
                 req.body.idProyecto
-            ])
-
-
+            ]);
 
             await conec.commit(connection)
-            return 'update';
+            return sendSave(res, 'Se actualizó correctamente el proyecto.');
         } catch (error) {
-            console.log(error)
             if (connection != null) {
                 await conec.rollback(connection);
             }
-            return "Se produjo un error de servidor, intente nuevamente.";
+            return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
         }
     }
 
-    async delete(req) {
+    async delete(req, res) {
         let connection = null;
         try {
             connection = await conec.beginTransaction();
@@ -341,7 +339,7 @@ class Proyecto {
 
             if (proyecto.length == 0) {
                 await conec.rollback(connection);
-                return "El proyecto a eliminar no existe, recargue su pantalla.";
+                return sendClient(res, "El proyecto a eliminar no existe, recargue su pantalla.");
             }
 
             let manzana = await conec.execute(connection, `SELECT * FROM manzana WHERE idProyecto = ?`, [
@@ -350,7 +348,7 @@ class Proyecto {
 
             if (manzana.length > 0) {
                 await conec.rollback(connection);
-                return 'No se puede eliminar el proyecto ya que esta ligada a una manzana.';
+                return sendClient(res, 'No se puede eliminar el proyecto ya que esta ligada a una manzana.');
             }
 
             let cobro = await conec.execute(connection, `SELECT idCobro FROM cobro WHERE idProyecto = ?`, [
@@ -359,7 +357,7 @@ class Proyecto {
 
             if (cobro.length > 0) {
                 await conec.rollback(connection);
-                return 'No se puede eliminar el proyecto ya que esta ligada a unos cobros.';
+                return sendClient(res, 'No se puede eliminar el proyecto ya que esta ligada a unos cobros.');
             }
 
             let gasto = await conec.execute(connection, `SELECT idGasto FROM gasto WHERE idProyecto = ?`, [
@@ -368,7 +366,7 @@ class Proyecto {
 
             if (gasto.length > 0) {
                 await conec.rollback(connection);
-                return 'No se puede eliminar el proyecto ya que esta ligada a unos gastos.';
+                return sendClient(res, 'No se puede eliminar el proyecto ya que esta ligada a unos gastos.');
             }
 
             let venta = await conec.execute(connection, `SELECT idVenta  FROM venta WHERE idProyecto = ?`, [
@@ -377,7 +375,7 @@ class Proyecto {
 
             if (venta.length > 0) {
                 await conec.rollback(connection);
-                return 'No se puede eliminar el proyecto ya que esta ligada a unas ventas.';
+                return sendClient(res, 'No se puede eliminar el proyecto ya que esta ligada a unas ventas.');
             }
 
             let file = path.join(__dirname, '../', 'path/proyect');
@@ -388,17 +386,16 @@ class Proyecto {
             ]);
 
             await conec.commit(connection);
-            return "delete";
+            return sendSave(res, "Se eliminó correctamente el proyecto.");
         } catch (error) {
-            console.log(error)
             if (connection != null) {
                 await conec.rollback(connection);
             }
-            return "Se produjo un error de servidor, intente nuevamente.";
+            return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
         }
     }
 
-    async inicio(req) {
+    async inicio(req, res) {
         try {
             let result = await conec.query(`SELECT 
             p.idProyecto,
@@ -427,12 +424,12 @@ class Proyecto {
                 }
             }))
 
-            return proyectos;
+            return sendSuccess(res, proyectos);
         } catch (error) {
-            return "Se produjo un error de servidor, intente nuevamente.";
+            return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
         }
     }
 
 }
 
-module.exports = Proyecto;
+module.exports = new Proyecto();

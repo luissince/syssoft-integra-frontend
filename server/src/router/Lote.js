@@ -1,13 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const Lote = require('../services/Lote');
-const Sede = require('../services/Sede');
+const sede = require('../services/Sede');
 const RepLote = require('../report/RepLote');
 const { decrypt } = require('../tools/CryptoJS');
 const { currentDate } = require('../tools/Tools')
 
 const lote = new Lote();
-const sede = new Sede();
 
 const repLote = new RepLote();
 

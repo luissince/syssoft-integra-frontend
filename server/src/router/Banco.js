@@ -4,11 +4,10 @@ const { currentDate } = require('../tools/Tools');
 const { decrypt } = require('../tools/CryptoJS');
 
 const Banco = require('../services/Banco');
-const Sede = require('../services/Sede');
+const sede = require('../services/Sede');
 const RepFinanciero = require('../report/RepFinanciero');
 
 const banco = new Banco();
-const sede = new Sede();
 const repFinanciero = new RepFinanciero();
 
 router.get('/list', async function (req, res) {

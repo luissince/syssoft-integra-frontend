@@ -9,10 +9,26 @@
 *     res.send(new Buffer('wahoo'));
 *     res.send({ some: 'json' });
 *     res.send('<p>some html</p>');
-*     res.status(404).send('Sorry, cant find that');
+*     res.status(200).send('Sorry, cant find that');
 */
 function sendSuccess(res, result) {
     return res.status(200).send(result);
+}
+
+/**
+*Esta función se encarga de resporder las peticiones registradas con estado 201 http. 
+*@author Luis Alexander Lara <https://www.facebook.com/luisal.laras>
+*
+*@param {object} res El objeto de respuesta del request
+*@param {object} result El objeto de respuesta de la petición
+*@returns {object} Retorna 
+*     res.send(new Buffer('wahoo'));
+*     res.send({ some: 'json' });
+*     res.send('<p>some html</p>');
+*     res.status(201).send('Sorry, cant find that');
+*/
+function sendSave(res, result) {
+    return res.status(201).send(result);
 }
 
 /**
@@ -25,7 +41,7 @@ function sendSuccess(res, result) {
 *     res.send(new Buffer('wahoo'));
 *     res.send({ some: 'json' });
 *     res.send('<p>some html</p>');
-*     res.status(404).send('Sorry, cant find that');
+*     res.status(500).send('Sorry, cant find that');
 */
 function sendError(res, result = "Se produjo un error de servidor, intente nuevamente.") {
     return res.status(500).send(result);
@@ -41,7 +57,7 @@ function sendError(res, result = "Se produjo un error de servidor, intente nueva
 *     res.send(new Buffer('wahoo'));
 *     res.send({ some: 'json' });
 *     res.send('<p>some html</p>');
-*     res.status(404).send('Sorry, cant find that');
+*     res.status(400).send('Sorry, cant find that');
 */
 function sendClient(res, result) {
     return res.status(400).send(result);
@@ -57,7 +73,7 @@ function sendClient(res, result) {
 *     res.send(new Buffer('wahoo'));
 *     res.send({ some: 'json' });
 *     res.send('<p>some html</p>');
-*     res.status(404).send('Sorry, cant find that');
+*     res.status(401).send('Sorry, cant find that');
 */
 function sendNoAutorizado(res, result) {
     return res.status(401).send(result);
@@ -80,4 +96,4 @@ function sendExpired(res, result) {
     return res.status(403).send(result);
 }
 
-module.exports = { sendSuccess, sendError, sendClient, sendExpired, sendNoAutorizado };
+module.exports = { sendSuccess, sendSave,sendError, sendClient, sendExpired, sendNoAutorizado };

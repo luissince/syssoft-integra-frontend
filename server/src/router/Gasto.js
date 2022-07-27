@@ -1,14 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const { decrypt } = require('../tools/CryptoJS');
-const Sede = require('../services/Sede');
+const sede = require('../services/Sede');
 const Gasto = require('../services/Gasto');
 const RepFinanciero = require('../report/RepFinanciero')
 const RepFactura = require('../report/RepFactura');
 
-const sede = new Sede();
 const gasto = new Gasto();
-const repFinanciero = new RepFinanciero();
 const repFactura = new RepFactura();
 
 router.get('/list', async function (req, res) {

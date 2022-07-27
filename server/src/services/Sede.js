@@ -1,10 +1,11 @@
 const Conexion = require('../database/Conexion');
+const { sendSuccess, sendSave, sendClient, sendError } = require('../tools/Message');
 const { currentDate, currentTime } = require('../tools/Tools');
 const conec = new Conexion();
 
 class Sede {
 
-    async listar(req) {
+    async listar(req, res) {
         try {
             let lista = await conec.query(`SELECT 
                 idSede, 
@@ -48,13 +49,13 @@ class Sede {
                 req.query.buscar,
             ]);
 
-            return { "result": resultLista, "total": total[0].Total };
+            return sendSuccess(res, { "result": resultLista, "total": total[0].Total });
         } catch (error) {
-            return "Error interno de conexión, intente nuevamente.";
+            return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
         }
     }
 
-    async add(req) {
+    async add(req, res) {
         let connection = null;
         try {
             connection = await conec.beginTransaction();
@@ -110,16 +111,16 @@ class Sede {
             ]);
 
             await conec.commit(connection);
-            return "insert";
+            return sendSave(res, "Datos registrados correctamente.");
         } catch (err) {
             if (connection != null) {
                 await conec.rollback(connection);
             }
-            return 'Error interno de conexión, intente nuevamente.';
+            return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
         }
     }
 
-    async id(req) {
+    async id(req, res) {
         try {
             let result = await conec.query(`SELECT 
                 s.idSede,
@@ -145,16 +146,16 @@ class Sede {
             ]);
 
             if (result.length > 0) {
-                return result[0];
+                return sendSuccess(res, result[0]);
             } else {
-                return "Datos no encontrados";
+                return sendClient(res, "Datos no encontrados.");
             }
         } catch (error) {
-            return "Error interno de conexión, intente nuevamente.";
+            return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
         }
     }
 
-    async update(req) {
+    async update(req,res) {
         let connection = null;
         try {
 
@@ -189,21 +190,21 @@ class Sede {
             ]);
 
             await conec.commit(connection);
-            return "update";
+            return sendSave(res, "Datos actualizados correctamente.");
         } catch (error) {
             if (connection != null) {
                 await conec.rollback(connection);
             }
-            return "Error interno de conexión, intente nuevamente.";
+            return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
         }
     }
 
-    async listarCombo(req) {
+    async listarCombo(req,res) {
         try {
             let result = await conec.query('SELECT idSede,nombreSede FROM sede');
-            return result;
+            return sendSuccess(res,result);
         } catch (error) {
-            return "Error interno de conexión, intente nuevamente."
+            return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
         }
     }
 
@@ -249,4 +250,4 @@ class Sede {
     }
 }
 
-module.exports = Sede
+module.exports = new Sede(); 

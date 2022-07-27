@@ -3,11 +3,10 @@ const router = express.Router();
 const { decrypt } = require('../tools/CryptoJS');
 const { generateExcel } = require('../excel/FileFinanza')
 const Cobro = require('../services/Cobro');
-const Sede = require('../services/Sede');
+const sede = require('../services/Sede');
 const RepFinanciero = require('../report/RepFinanciero');
 const RepFactura = require('../report/RepFactura');
 
-const sede = new Sede();
 const cobro = new Cobro();
 const repFinanciero = new RepFinanciero();
 const repFactura = new RepFactura();
