@@ -17,7 +17,7 @@ router.get('/list', async function (req, res) {
         res.status(500).send(result);
     }
 });
-
+ 
 router.post('/add', async function (req, res) {
     const result = await cliente.add(req)
     if (result === 'insert') {
@@ -160,12 +160,24 @@ router.get('/excelcliente', async function (req, res) {
     const detalle = await cliente.listapagos(req)
 
     if (Array.isArray(detalle)) {
-        const data = await generateExcelCliente(req, sedeInfo, detalle);
+        
+        if(req.query.idCliente == ''){
+            const data = await generateExcelCliente(req, sedeInfo, detalle, 0);
 
-        if (typeof data === 'string') {
-            res.status(500).send(data);
-        } else {
-            res.end(data);
+            if (typeof data === 'string') {
+                res.status(500).send(data);
+            } else {
+                res.end(data);
+            }
+        }else{
+            console.log(detalle);
+            const data = await generateExcelCliente(req, sedeInfo, detalle, 1);
+
+            if (typeof data === 'string') {
+                res.status(500).send(data);
+            } else {
+                res.end(data);
+            }
         }
     } else {
         res.status(500).send(detalle);
@@ -175,6 +187,7 @@ router.get('/excelcliente', async function (req, res) {
 router.get('/repdeudas', async function (req, res) {
     const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
     req.query.idSede = decryptedData.idSede;
+    req.query.frecuencia = decryptedData.frecuencia;
 
     const sedeInfo = await sede.infoSedeReporte(req);
 
@@ -203,6 +216,7 @@ router.get('/repdeudas', async function (req, res) {
 router.get('/exceldeudas', async function (req, res) {
     const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
     req.query.idSede = decryptedData.idSede;
+    req.query.frecuencia = decryptedData.frecuencia;
 
     const sedeInfo = await sede.infoSedeReporte(req);
 

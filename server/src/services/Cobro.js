@@ -1015,9 +1015,10 @@ class Cobro {
 
     async idPlazo(req) {
         try {
-            let lote = await conec.query(`SELECT l.descripcion
+            let loteManzana = await conec.query(`SELECT l.descripcion, m.nombre AS manzana
             FROM ventaDetalle AS v 
             INNER JOIN lote AS l ON l.idLote = v.idLote
+            INNER JOIN manzana AS m ON m.idManzana = l.idManzana
             WHERE v.idVenta = ?`, [
                 req.query.idVenta
             ]);
@@ -1050,9 +1051,9 @@ class Cobro {
             ]);
 
 
-            if (lote.length > 0 && venta.length > 0 && plazo.length > 0 && monto.length > 0) {
+            if (loteManzana.length > 0 && venta.length > 0 && plazo.length > 0 && monto.length > 0) {
                 return {
-                    ...lote[0],
+                    ...loteManzana[0],
                     ...venta[0],
                     ...plazo[0],
                     ...monto[0],
@@ -1067,6 +1068,10 @@ class Cobro {
     }
 
     async delete(req) {
+
+        console.log(req.query.idCobro)
+        console.log(req.query.idUsuario)
+
         let connection = null;
         try {
             connection = await conec.beginTransaction();
@@ -1106,7 +1111,7 @@ class Cobro {
                         let maxCobroVenta = Math.max(...arrCobroVenta);
                         console.log(maxCobroVenta)
 
-                        if (maxPlazo == maxCobroVenta) {
+                        if (maxPlazo <= maxCobroVenta) {
                             if (venta[0].credito === 1) {
                                 await conec.execute(connection, `DELETE FROM plazo WHERE idPlazo = ?`, [
                                     maxCobroVenta
