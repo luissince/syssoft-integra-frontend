@@ -1097,7 +1097,6 @@ class Cobro {
                         });
   
                         let maxPlazo = Math.max(...arrPlazos);
-                        console.log(maxPlazo)
 
                         let cobroVenta = await conec.execute(connection, `SELECT idPlazo FROM cobroVenta 
                         WHERE idCobro = ?`, [
@@ -1109,7 +1108,6 @@ class Cobro {
                         });
 
                         let maxCobroVenta = Math.max(...arrCobroVenta);
-                        console.log(maxCobroVenta)
 
                         if (maxPlazo <= maxCobroVenta) {
                             if (venta[0].credito === 1) {
