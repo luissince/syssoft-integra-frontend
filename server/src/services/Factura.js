@@ -1021,6 +1021,7 @@ class Factura {
 
             let detalle = await conec.query(`SELECT 
             l.descripcion AS lote,
+            md.idMedida,
             md.codigo AS medida, 
             m.nombre AS manzana, 
             p.nombre AS proyecto,

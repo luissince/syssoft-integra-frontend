@@ -169,7 +169,12 @@ class CpeElectronicos extends React.Component {
 
     fillTable = async (opcion, buscar, fechaInicio, fechaFinal, idComprobante, idEstado) => {
         try {
-            await this.setStateAsync({ loading: true, lista: [], messageTable: "Cargando información...", messagePaginacion: "Mostranto 0 de 0 Páginas" });
+            await this.setStateAsync({
+                loading: true,
+                lista: [],
+                messageTable: "Cargando información...",
+                messagePaginacion: "Mostranto 0 de 0 Páginas"
+            });
 
             const result = await axios.get('/api/factura/cpesunat', {
                 signal: this.abortControllerTable.signal,
@@ -208,7 +213,7 @@ class CpeElectronicos extends React.Component {
         }
     }
 
-    onEventSendFactura = (idVenta) => {
+    onEventSendFactura = (idCobro) => {
         ModalAlertDialog("Facturación", "¿Está seguro de enviar el comprobante electrónico?", async (value) => {
             if (value) {
                 try {
@@ -219,12 +224,12 @@ class CpeElectronicos extends React.Component {
 
                     let result = await axios.get(`${process.env.REACT_APP_URL}/app/examples/boleta.php`, {
                         params: {
-                            "idventa": idVenta
+                            "idCobro": idCobro
                         }
                     });
 
                     let object = result.data;
-                  
+
                     if (object.state) {
                         if (object.accept) {
                             ModalAlertSuccess("Facturación", "Código " + object.code + " " + object.description, () => {
@@ -237,7 +242,6 @@ class CpeElectronicos extends React.Component {
                         ModalAlertWarning("Facturación", "Código " + object.code + " " + object.description);
                     }
                 } catch (error) {
-                    console.log(error.response);
                     if (error.response) {
                         ModalAlertWarning("Facturación", error.response.data);
                     } else {
@@ -248,7 +252,7 @@ class CpeElectronicos extends React.Component {
         });
     }
 
-    onEventSendAnular = (idVenta) => {
+    onEventSendAnular = (idCobro) => {
         ModalAlertDialog("Facturación", "¿Está seguro de anular el comprobante electrónico?", async (value) => {
             if (value) {
                 try {
@@ -259,7 +263,7 @@ class CpeElectronicos extends React.Component {
 
                     let result = await axios.get(`${process.env.REACT_APP_URL}/app/examples/resumen.php`, {
                         params: {
-                            "idventa": idVenta
+                            "idCobro": idCobro 
                         }
                     });
                     // console.log(result.data);
@@ -287,15 +291,15 @@ class CpeElectronicos extends React.Component {
         });
     }
 
-    onEventImprimir = async (idVenta) => {
+    onEventImprimir = async (idCobro) => {
         const data = {
             "idSede": "SD0001",
-            "idVenta": idVenta,
+            "idCobro": idCobro,
         }
 
         let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
         let params = new URLSearchParams({ "params": ciphertext });
-        window.open("/api/factura/repcomprobante?" + params, "_blank");
+        window.open("/api/cobro/repcomprobante?" + params, "_blank");
     }
 
     render() {
@@ -475,12 +479,12 @@ class CpeElectronicos extends React.Component {
                                                     this.state.lista.map((item, index) => {
 
                                                         const estadoSunat = item.estado === 3 ?
-                                                            <button className="btn btn-light btn-sm" onClick={() => this.onEventSendFactura(item.idVenta)}><img src={error} width="22" /></button>
+                                                            <button className="btn btn-light btn-sm" onClick={() => this.onEventSendFactura(item.idCobro)}><img src={error} width="22" /></button>
                                                             : item.xmlSunat === "" ?
-                                                                <button className="btn btn-light btn-sm" onClick={() => this.onEventSendFactura(item.idVenta)}><img src={reuse} width="22" /></button>
+                                                                <button className="btn btn-light btn-sm" onClick={() => this.onEventSendFactura(item.idCobro)}><img src={reuse} width="22" /></button>
                                                                 : item.xmlSunat === "0" ?
                                                                     <button className="btn btn-light btn-sm" ><img src={accept} width="22" /></button>
-                                                                    : <button className="btn btn-light btn-sm" onClick={() => this.onEventSendFactura(item.idVenta)}><img src={unable} width="22" /></button>;
+                                                                    : <button className="btn btn-light btn-sm" onClick={() => this.onEventSendFactura(item.idCobro)}><img src={unable} width="22" /></button>;
 
                                                         const descripcion = (item.xmlDescripcion === "" ? "Por Generar Xml" : limitarCadena(item.xmlDescripcion, 90, '...'));
 
@@ -495,13 +499,13 @@ class CpeElectronicos extends React.Component {
 
                                                                         <ul className="dropdown-menu" aria-labelledby="dropdownMenuLink">
                                                                             <li>
-                                                                                <button className="dropdown-item" type="button" onClick={() => this.onEventImprimir(item.idVenta)}><img src={pdf} width="22" alt="Pdf" /> Archivo Pdf</button>
+                                                                                <button className="dropdown-item" type="button" onClick={() => this.onEventImprimir(item.idCobro)}><img src={pdf} width="22" alt="Pdf" /> Archivo Pdf</button>
                                                                             </li>
                                                                             <li>
                                                                                 <button className="dropdown-item" type="button"><img src={xml} width="22" alt="Xml" /> Archivo Xml</button>
                                                                             </li>
                                                                             <li>
-                                                                                <button className="dropdown-item" type="button" onClick={() => this.onEventSendAnular(item.idVenta)}><img src={error} width="22" alt="Error" /> Resumen Diario</button>
+                                                                                <button className="dropdown-item" type="button" onClick={() => this.onEventSendAnular(item.idCobro)}><img src={error} width="22" alt="Error" /> Resumen Diario</button>
                                                                             </li>
                                                                         </ul>
                                                                     </div>

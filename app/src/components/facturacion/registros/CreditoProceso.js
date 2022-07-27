@@ -29,6 +29,8 @@ class CreditoProceso extends React.Component {
             plazos: [],
             bancos: [],
             comprobantes: [],
+            idImpuesto: '',
+            idMedida: '',
 
             idBancoPlazo: '',
             idComprobantePlazo: '',
@@ -171,7 +173,14 @@ class CreditoProceso extends React.Component {
                     "idVenta": id
                 }
             });
-  
+
+            const facturado = await axios.get("/api/comprobante/listcombo", {
+                signal: this.abortControllerTable.signal,
+                params: {
+                    "tipo": "1"
+                }
+            });
+
             const comprobante = await axios.get("/api/comprobante/listcombo", {
                 signal: this.abortControllerTable.signal,
                 params: {
@@ -190,15 +199,17 @@ class CreditoProceso extends React.Component {
                 }
             });
 
-            const comprobanteFilter = comprobante.data.filter(item => item.preferida === 1);
-
+            const comprobanteFilter = [...comprobante.data, ...facturado.data].filter(item => item.preferida === 1);
+            console.log(credito.data.detalle)
             await this.setStateAsync({
                 inicial: credito.data.inicial,
                 venta: credito.data.venta,
                 detalle: credito.data.detalle,
                 plazos: plazosSelected,
                 bancos: banco.data,
-                comprobantes: comprobante.data,
+                comprobantes: [...comprobante.data, ...facturado.data],
+                idImpuesto: credito.data.detalle.length > 0 ? credito.data.detalle[0].idImpuesto : '',
+                idMedida:  credito.data.detalle.length > 0 ? credito.data.detalle[0].idMedida : '',
 
                 idComprobantePlazo: comprobanteFilter.length === 1 ? comprobanteFilter[0].idComprobante : '',
                 idComprobanteCuota: comprobanteFilter.length === 1 ? comprobanteFilter[0].idComprobante : '',
@@ -283,7 +294,9 @@ class CreditoProceso extends React.Component {
                         "estado": 1,
                         "observacion": this.state.observacionPlazo.trim().toUpperCase(),
                         "plazosSumados": this.state.plazosSumados,
-                        "plazos": this.state.plazos
+                        "plazos": this.state.plazos,
+                        "idImpuesto": this.state.idImpuesto,
+                        "idMedida": this.state.idMedida
                     })
 
                     ModalAlertSuccess("Cobro", result.data, () => {
@@ -319,7 +332,6 @@ class CreditoProceso extends React.Component {
 
         ModalAlertDialog("Cobro", "¿Estás seguro de continuar?", async (event) => {
             if (event) {
-
                 try {
                     ModalAlertInfo("Cobro", "Procesando información...")
                     hideModal("modalCuota");
@@ -336,6 +348,8 @@ class CreditoProceso extends React.Component {
                         "estado": 1,
                         "observacion": this.state.observacionCuota.trim().toUpperCase(),
                         "montoCuota": this.state.montoCuota,
+                        "idImpuesto": this.state.idImpuesto,
+                        "idMedida": this.state.idMedida
                     })
 
                     ModalAlertSuccess("Cobro", result.data, () => {
@@ -346,7 +360,6 @@ class CreditoProceso extends React.Component {
                 }
             }
         });
-
     }
 
     onEventCobrarAdelanto() {
@@ -389,14 +402,15 @@ class CreditoProceso extends React.Component {
                         "estado": 1,
                         "observacion": this.state.observacionAdelanto.trim().toUpperCase(),
                         "montoCuota": this.state.montoAdelanto,
-                        "idPlazo": this.state.idPlazo
+                        "idPlazo": this.state.idPlazo,
+                        "idImpuesto": this.state.idImpuesto,
+                        "idMedida": this.state.idMedida
                     })
 
                     ModalAlertSuccess("Cobro", result.data, () => {
                         this.loadInit();
                     });
                 } catch (error) {
-                    console.error(error);
                     ModalAlertWarning("Cobro", "Se produjo un error un interno, intente nuevamente.");
 
                 }

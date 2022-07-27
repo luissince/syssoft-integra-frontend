@@ -39,7 +39,7 @@ class VentaProceso extends React.Component {
             lote: '',
             idLote: '',
             filterLote: false,
-            manzana : '',
+            manzana: '',
             precioContado: '',
 
             detalleVenta: [],
@@ -156,12 +156,12 @@ class VentaProceso extends React.Component {
     loadData = async () => {
         try {
 
-            const comprobanteFacturado = await axios.get("/api/comprobante/listcombo", {
-                signal: this.abortControllerView.signal,
-                params: {
-                    "tipo": "1"
-                }
-            });
+            // const comprobanteFacturado = await axios.get("/api/comprobante/listcombo", {
+            //     signal: this.abortControllerView.signal,
+            //     params: {
+            //         "tipo": "1"
+            //     }
+            // });
 
             const comprobanteLibre = await axios.get("/api/comprobante/listcombo", {
                 signal: this.abortControllerView.signal,
@@ -200,14 +200,14 @@ class VentaProceso extends React.Component {
                 signal: this.abortControllerView.signal,
             });
 
-            const comprobanteFilter = [...comprobanteFacturado.data, ...comprobanteLibre.data].filter(item => item.preferida === 1);
+            const comprobanteFilter = comprobanteLibre.data.filter(item => item.preferida === 1);
 
             const comprobanteCobroFilter = comprobanteCobro.data.filter(item => item.preferida === 1);
 
             const monedaFilter = moneda.data.filter(item => item.predeterminado === 1);
 
             await this.setStateAsync({
-                comprobantes: [...comprobanteFacturado.data, ...comprobanteLibre.data],
+                comprobantes: comprobanteLibre.data,
                 comprobantesCobro: comprobanteCobro.data,
                 // clientes: cliente.data,
                 // lotes: lote.data,
@@ -284,7 +284,7 @@ class VentaProceso extends React.Component {
             messageWarning: '',
             precioContado: '',
             lote: '',
-            idLote: '' ,
+            idLote: '',
             manzana: ''
         });
 
@@ -369,7 +369,7 @@ class VentaProceso extends React.Component {
             lote: '',
             idLote: '',
             filterLote: false,
-            manzana : '',
+            manzana: '',
             precioContado: '',
 
             detalleVenta: [],
@@ -690,7 +690,7 @@ class VentaProceso extends React.Component {
             lote: value.nombreLote,
             lotes: [],
             idLote: value.idLote,
-            manzana:  value.nombreManzana,
+            manzana: value.nombreManzana,
             precioContado: value.precio.toString()
         });
         this.selectItemLote = true;

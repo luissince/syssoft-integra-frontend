@@ -832,12 +832,16 @@ class Cobro {
             idCobro,
             idVenta,
             idPlazo,
-            precio) 
-            VALUES (?,?,?,?)`, [
+            precio,
+            idImpuesto,
+            idMedida) 
+            VALUES (?,?,?,?,?,?)`, [
                 idCobro,
                 req.body.idVenta,
                 req.body.idPlazo,
-                parseFloat(req.body.montoCuota)
+                parseFloat(req.body.montoCuota),
+                req.body.idImpuesto,
+                req.body.idMedida,
             ]);
 
             // await conec.execute(connection, `UPDATE plazo 
@@ -1062,19 +1066,25 @@ class Cobro {
                 return "No hay datos para mostrar";
             }
         } catch (error) {
-            console.error(error);
             return "Se produjo un error de servidor, intente nuevamente.";
         }
     }
 
     async delete(req) {
-
-        console.log(req.query.idCobro)
-        console.log(req.query.idUsuario)
-
         let connection = null;
         try {
             connection = await conec.beginTransaction();
+
+            let facturado = await conec.execute(connection, `SELECT c.idCobro FROM cobro as c inner join comprobante as cm
+            on c.idComprobante = cm.idComprobante
+            where cm.tipo = 1 and c.idCobro = ?`, [
+                req.query.idCobro
+            ]);
+
+            if (facturado.length > 0) {
+                await conec.rollback(connection);
+                return "Los comprontes facturados no pueden ser eliminados.";
+            }
 
             let cobro = await conec.execute(connection, `SELECT idProcedencia,serie,numeracion FROM cobro WHERE idCobro = ?`, [
                 req.query.idCobro
@@ -1095,7 +1105,7 @@ class Cobro {
                         let arrPlazos = plazos.map(function (item) {
                             return item.idPlazo;
                         });
-  
+
                         let maxPlazo = Math.max(...arrPlazos);
 
                         let cobroVenta = await conec.execute(connection, `SELECT idPlazo FROM cobroVenta 
@@ -1115,7 +1125,7 @@ class Cobro {
                                     maxCobroVenta
                                 ]);
                             } else {
-                                let plazosCobros = await conec.execute(connection,`SELECT * FROM cobroVenta WHERE idPlazo = ?`,[
+                                let plazosCobros = await conec.execute(connection, `SELECT * FROM cobroVenta WHERE idPlazo = ?`, [
                                     maxCobroVenta
                                 ]);
 
@@ -1131,6 +1141,7 @@ class Cobro {
                                 venta[0].idVenta
                             ]);
                         } else {
+                            await conec.rollback(connection);
                             return "No se puede eliminar el cobro, hay plazos(cobros) ligados que son inferiores.";
                         }
                     }
@@ -1188,7 +1199,6 @@ class Cobro {
             await conec.commit(connection);
             return "delete";
         } catch (error) {
-            console.log(error)
             if (connection != null) {
                 await conec.rollback(connection);
             }
