@@ -219,7 +219,7 @@ router.delete('/', async function (req, res) {
 
 router.get('/listcombo', async function (req, res) {
     try {
-        let result = await conec.query('SELECT idImpuesto,nombre,porcentaje	 FROM impuesto');
+        let result = await conec.query('SELECT idImpuesto,nombre,porcentaje,preferida FROM impuesto');
         res.status(200).send(result);
     } catch (error) {
         res.status(500).send("Error interno de conexión, intente nuevamente.");

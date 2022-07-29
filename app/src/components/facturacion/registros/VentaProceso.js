@@ -48,8 +48,13 @@ class VentaProceso extends React.Component {
             cliente: '',
             filterCliente: false,
 
+            idImpuesto: '',
             impuestos: [],
 
+            idMedida: '',
+            medidas: [],
+
+            expandedOpciones: true,
             idProyecto: this.props.token.project.idProyecto,
 
             loading: true,
@@ -86,8 +91,12 @@ class VentaProceso extends React.Component {
         this.refLote = React.createRef();
         this.refPrecioContado = React.createRef();
         this.refComprobante = React.createRef();
+        this.refImpuesto = React.createRef();
+        this.refMedida = React.createRef();
         this.refCliente = React.createRef();
         this.refMoneda = React.createRef();
+        this.refCollpse = React.createRef();
+        this.refCollpseContent = React.createRef();
 
         this.refComprobanteContado = React.createRef();
         this.refBancoContado = React.createRef();
@@ -155,14 +164,6 @@ class VentaProceso extends React.Component {
 
     loadData = async () => {
         try {
-
-            // const comprobanteFacturado = await axios.get("/api/comprobante/listcombo", {
-            //     signal: this.abortControllerView.signal,
-            //     params: {
-            //         "tipo": "1"
-            //     }
-            // });
-
             const comprobanteLibre = await axios.get("/api/comprobante/listcombo", {
                 signal: this.abortControllerView.signal,
                 params: {
@@ -177,16 +178,9 @@ class VentaProceso extends React.Component {
                 }
             });
 
-            // const cliente = await axios.get("/api/cliente/listcombo", {
-            //     signal: this.abortControllerView.signal,
-            // });
-
-            // const lote = await axios.get("/api/lote/listcombo", {
-            //     signal: this.abortControllerView.signal,
-            //     params: {
-            //         "idProyecto": this.state.idProyecto
-            //     }
-            // });
+            let medida = await axios.get('/api/medida/listcombo', {
+                signal: this.abortControllerView.signal,
+            });
 
             const moneda = await axios.get("/api/moneda/listcombo", {
                 signal: this.abortControllerView.signal,
@@ -206,18 +200,24 @@ class VentaProceso extends React.Component {
 
             const monedaFilter = moneda.data.filter(item => item.predeterminado === 1);
 
+            const impuestoFilter = impuesto.data.filter(item => item.preferida === 1);
+
+            const medidaFilter = medida.data.filter(item => item.preferida === 1);
+
             await this.setStateAsync({
                 comprobantes: comprobanteLibre.data,
                 comprobantesCobro: comprobanteCobro.data,
-                // clientes: cliente.data,
-                // lotes: lote.data,
                 monedas: moneda.data,
+
+                medidas: medida.data,
                 impuestos: impuesto.data,
+
                 idMoneda: monedaFilter.length > 0 ? monedaFilter[0].idMoneda : '',
+                idMedida: medidaFilter.length > 0 ? medidaFilter[0].idMedida : '',
+                idImpuesto: impuestoFilter.length > 0 ? impuestoFilter[0].idImpuesto : '',
                 idComprobante: comprobanteFilter.length > 0 ? comprobanteFilter[0].idComprobante : '',
                 idComprobanteContado: comprobanteCobroFilter.length > 0 ? comprobanteCobroFilter[0].idComprobante : '',
                 idComprobanteCredito: comprobanteCobroFilter.length > 0 ? comprobanteCobroFilter[0].idComprobante : '',
-
                 idComprobanteCreditoVariable: comprobanteCobroFilter.length > 0 ? comprobanteCobroFilter[0].idComprobante : '',
 
                 bancos: banco.data,
@@ -252,6 +252,38 @@ class VentaProceso extends React.Component {
             return;
         }
 
+        if (this.state.idImpuesto == "") {
+            await this.setStateAsync({ messageWarning: "Seleccione un impuesto." });
+
+            if (!this.refCollpseContent.current.classList.contains("show")) {
+                this.refCollpse.current.classList.remove("collapsed");
+                this.refCollpseContent.current.classList.add("show");
+                this.refCollpse.current.attributes["aria-expanded"].value = true;
+                await this.setStateAsync({
+                    expandedOpciones: !(this.refCollpse.current.attributes["aria-expanded"].value.toLowerCase() === 'true')
+                });
+            }
+
+            this.refImpuesto.current.focus();
+            return;
+        }
+
+        if (this.state.idMedida == "") {
+            await this.setStateAsync({ messageWarning: "Seleccione una unidad." })
+
+            if (!this.refCollpseContent.current.classList.contains("show")) {
+                this.refCollpse.current.classList.remove("collapsed");
+                this.refCollpseContent.current.classList.add("show");
+                this.refCollpse.current.attributes["aria-expanded"].value = true;
+                await this.setStateAsync({
+                    expandedOpciones: !(this.refCollpse.current.attributes["aria-expanded"].value.toLowerCase() === 'true')
+                });
+            }
+
+            this.refMedida.current.focus();
+            return;
+        }
+
         let nombreLote = this.state.lote;
         let nombreManzana = this.state.manzana;
 
@@ -261,8 +293,10 @@ class VentaProceso extends React.Component {
                 "nombreLote": nombreLote,
                 "nombreManzana": nombreManzana,
                 "cantidad": 1,
-                "idImpuesto": "",
-                "impuestos": this.state.impuestos,
+                "idImpuesto": this.state.idImpuesto,
+                "impuesto": this.refImpuesto.current.children[this.refImpuesto.current.selectedIndex].innerText,
+                "idMedida": this.state.idMedida,
+                "medida": this.refMedida.current.children[this.refMedida.current.selectedIndex].innerText,
                 "precioContado": this.state.precioContado
             }
 
@@ -279,13 +313,19 @@ class VentaProceso extends React.Component {
 
         let newArr = [...this.state.detalleVenta];
 
+        const impuestoFilter = this.state.impuestos.filter(item => item.preferida === 1);
+
+        const medidaFilter = this.state.medidas.filter(item => item.preferida === 1);
+
         await this.setStateAsync({
             detalleVenta: newArr,
             messageWarning: '',
             precioContado: '',
             lote: '',
             idLote: '',
-            manzana: ''
+            manzana: '',
+            idMedida: medidaFilter.length > 0 ? medidaFilter[0].idMedida : '',
+            idImpuesto: impuestoFilter.length > 0 ? impuestoFilter[0].idImpuesto : '',
         });
 
         const { total } = this.calcularTotales();
@@ -293,8 +333,6 @@ class VentaProceso extends React.Component {
         await this.setStateAsync({
             importeTotal: total
         });
-
-        // this.refLote.current.value = '';
     }
 
     validarDuplicado(id) {
@@ -378,15 +416,23 @@ class VentaProceso extends React.Component {
             cliente: '',
             filterCliente: false,
 
+            idImpuesto: '',
             impuestos: [],
+
+            idMedida: '',
+            medidas: [],
+
+            expandedOpciones: true,
 
             loading: true,
             messageWarning: '',
 
             importeTotal: 0,
             selectTipoPago: 1,
+
             bancos: [],
             comprobantesCobro: [],
+
             idComprobanteContado: '',
             idBancoContado: '',
             metodoPagoContado: '',
@@ -401,6 +447,7 @@ class VentaProceso extends React.Component {
             inicialCreditoVariableCheck: false,
             inicialCreditoVariable: '',
             idComprobanteCreditoVariable: '',
+
             idBancoCreditoVariable: '',
             metodoPagoCreditoVariable: '',
             frecuenciaPago: new Date().getDate() > 15 ? '30' : '15',
@@ -417,7 +464,7 @@ class VentaProceso extends React.Component {
         for (let item of this.state.detalleVenta) {
             let cantidad = item.cantidad;
             let valor = parseFloat(item.precioContado);
-            let filter = item.impuestos.filter(imp =>
+            let filter = this.state.impuestos.filter(imp =>
                 imp.idImpuesto === item.idImpuesto
             )
             let impuesto = filter.length > 0 ? filter[0].porcentaje : 0;
@@ -574,6 +621,8 @@ class VentaProceso extends React.Component {
                         "idUsuario": this.state.idUsuario,
                         "idComprobante": this.state.idComprobante,
                         "idMoneda": this.state.idMoneda,
+                        "idMedida": this.state.idMedida,
+                        "idImpuesto": this.state.idImpuesto,
                         // "tipo": this.state.selectTipoPago ? 1 : 2,
                         "tipo": selectTipoPago === 1 ? 1 : 2,
                         // "selectTipoPago": this.state.selectTipoPago,
@@ -631,7 +680,7 @@ class VentaProceso extends React.Component {
                     });
                 }
                 catch (error) {
-                    if (error.response !== undefined) {
+                    if (error.response) {
                         ModalAlertWarning("Venta", error.response.data)
                     } else {
                         ModalAlertWarning("Venta", "Se genero un error interno, intente nuevamente.")
@@ -704,7 +753,6 @@ class VentaProceso extends React.Component {
     }
 
     handleFilterClient = async (event) => {
-
         const searchWord = this.selectItemClient ? "" : event.target.value;
         await this.setStateAsync({ idCliente: '', cliente: searchWord });
         this.selectItemClient = false;
@@ -1273,7 +1321,7 @@ class VentaProceso extends React.Component {
                                 <div className="col-xl-8 col-lg-8 col-md-8 col-sm-12 col-12">
 
                                     <div className="row">
-                                        <div className="col-xl-7 col-lg-7 col-md-12 col-sm-12 col-12">
+                                        <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
                                             <SearchBarLote
                                                 placeholder="Filtrar lotes..."
                                                 refLote={this.refLote}
@@ -1283,25 +1331,15 @@ class VentaProceso extends React.Component {
                                                 handleFilter={this.handleFilterLote}
                                                 onEventSelectItem={this.onEventSelectItemLote}
                                             />
-                                            {/* <select
-                                                    title="Lista de lotes"
-                                                    className="form-control"
-                                                    ref={this.refLote}
-                                                    onChange={(event) => this.changeLote(event)}>
-                                                    <option value="">-- seleccione --</option>
-                                                    {
-                                                        this.state.lotes.map((item, index) => (
-                                                            <option key={index} value={item.idLote}>{`${item.nombreLote} / ${item.nombreManzana} - ${item.precio}`}</option>
-                                                        ))
-                                                    }
-                                                </select> */}
                                         </div>
 
-                                        <div className="col-xl-5 col-lg-5 col-md-12 col-sm-12 col-12">
+                                        <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
                                             <div className="form-group">
                                                 <div className="input-group">
                                                     <div className="input-group-prepend">
-                                                        <div className="input-group-text"><i className="bi bi-tag-fill"></i></div>
+                                                        <div className="input-group-text">
+                                                            <i className="bi bi-cash-coin"></i>
+                                                        </div>
                                                     </div>
                                                     <input
                                                         title="Precio de venta"
@@ -1337,60 +1375,110 @@ class VentaProceso extends React.Component {
                                                 </div>
                                             </div>
                                         </div>
-
                                     </div>
 
-                                    <div className="form-row">
-                                        <div className="table-responsive">
-                                            <table className="table table-striped table-bordered rounded">
-                                                <thead>
-                                                    <tr>
-                                                        <th width="10%">#</th>
-                                                        <th width="30%">Descripción</th>
-                                                        <th width="10%">Cantidad </th>
-                                                        <th width="20%">Impuesto</th>
-                                                        <th width="10%">Precio </th>
-                                                        <th width="10%">Importe </th>
-                                                        <th width="5%">Quitar</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {
-                                                        this.state.detalleVenta.length === 0 ? (
-                                                            <tr className="text-center">
-                                                                <td colSpan="7"> Agregar datos a la tabla </td>
-                                                            </tr>
-                                                        ) : (
-                                                            this.state.detalleVenta.map((item, index) => (
-                                                                <tr key={index}>
-                                                                    <td>{++index}</td>
-                                                                    <td>{`${item.nombreLote} / ${item.nombreManzana}`}</td>
-                                                                    <td>{item.cantidad}</td>
-                                                                    <td>
-                                                                        <select className="form-control"
-                                                                            id={index + "imv"}
-                                                                            value={item.idImpuesto}
-                                                                            onChange={(event) => this.handleSelect(event, item.idDetalle)}>
-                                                                            <option value="">- Seleccione -</option>
-                                                                            {
-                                                                                item.impuestos.map((imp, iimp) => (
-                                                                                    <option key={iimp} value={imp.idImpuesto}
-                                                                                    >{imp.nombre}</option>
-                                                                                ))
-                                                                            }
-                                                                        </select>
-                                                                    </td>
-                                                                    <td>{item.precioContado}</td>
-                                                                    <td>{item.precioContado * item.cantidad}</td>
-                                                                    <td>
-                                                                        <button className="btn btn-outline-danger btn-sm" title="Eliminar" onClick={() => this.removeObjectTable(item.idDetalle)}><i className="bi bi-trash"></i></button>
-                                                                    </td>
-                                                                </tr>
+                                    <div className="row">
+                                        <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                                            <div className="form-group">
+                                                <a
+                                                    onClick={async () => await this.setStateAsync({
+                                                        expandedOpciones: !(this.refCollpse.current.attributes["aria-expanded"].value.toLowerCase() === 'true')
+                                                    })}
+                                                    ref={this.refCollpse}
+                                                    className="icon-link collapsed"
+                                                    data-bs-toggle="collapse"
+                                                    href="#collapseOpciones"
+                                                    role="button"
+                                                    aria-expanded="false"
+                                                    aria-controls="collapseOpciones">
+                                                    Opciones {this.state.expandedOpciones ? <i className="fa fa-plus-square"></i> : <i className="fa fa-minus-square"></i>}
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div ref={this.refCollpseContent} className="collapse" id="collapseOpciones">
+                                        <div className="row">
+                                            <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
+                                                <div className="form-group">
+                                                    <select
+                                                        title="Lista de lotes"
+                                                        className="form-control"
+                                                        value={this.state.idImpuesto}
+                                                        ref={this.refImpuesto}
+                                                        onChange={(event) => this.setState({ idImpuesto: event.target.value })}
+                                                    >
+                                                        <option value="">-- Impuesto --</option>
+                                                        {
+                                                            this.state.impuestos.map((item, index) => (
+                                                                <option key={index} value={item.idImpuesto}>{item.nombre}</option>
                                                             ))
-                                                        )
-                                                    }
-                                                </tbody>
-                                            </table>
+                                                        }
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
+                                                <div className="form-group">
+                                                    <select
+                                                        title="Lista de lotes"
+                                                        className="form-control"
+                                                        value={this.state.idMedida}
+                                                        ref={this.refMedida}
+                                                        onChange={(event) => this.setState({ idMedida: event.target.value })}
+                                                    >
+                                                        <option value="">-- Unidad --</option>
+                                                        {
+                                                            this.state.medidas.map((item, index) => (
+                                                                <option key={index} value={item.idMedida}>{item.nombre}</option>
+                                                            ))
+                                                        }
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="row">
+                                        <div className=" col-md-12 col-sm-12 col-12">
+                                            <div className="table-responsive">
+                                                <table className="table table-striped table-bordered rounded">
+                                                    <thead>
+                                                        <tr>
+                                                            <th width="10%" className="text-center">#</th>
+                                                            <th width="30%">Descripción</th>
+                                                            <th width="10%">Cantidad </th>
+                                                            <th width="20%">Impuesto</th>
+                                                            <th width="10%">Precio </th>
+                                                            <th width="10%">Importe </th>
+                                                            <th width="5%">Quitar</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {
+                                                            this.state.detalleVenta.length === 0 ? (
+                                                                <tr className="text-center">
+                                                                    <td colSpan="7"> Agregar datos a la tabla </td>
+                                                                </tr>
+                                                            ) : (
+                                                                this.state.detalleVenta.map((item, index) => (
+                                                                    <tr key={index}>
+                                                                        <td className="text-center">{++index}</td>
+                                                                        <td>{item.nombreLote}{<br />}{<small>{item.nombreManzana}</small>}</td>
+                                                                        <td>{item.cantidad}{<br />}{<small>{item.medida}</small>}</td>
+                                                                        <td>{item.impuesto}</td>
+                                                                        <td>{formatMoney(item.precioContado)}</td>
+                                                                        <td>{formatMoney(item.precioContado * item.cantidad)}</td>
+                                                                        <td>
+                                                                            <button className="btn btn-outline-danger btn-sm" title="Eliminar" onClick={() => this.removeObjectTable(item.idDetalle)}><i className="bi bi-trash"></i></button>
+                                                                        </td>
+                                                                    </tr>
+                                                                ))
+                                                            )
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

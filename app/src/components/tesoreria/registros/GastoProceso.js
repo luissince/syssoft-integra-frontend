@@ -460,8 +460,8 @@ class GastoProceso extends React.Component {
                                                     className="form-control"
                                                     ref={this.refConcepto}
                                                     value={this.state.idConcepto}
-                                                    onChange={(event) => {
-                                                        this.setState({
+                                                    onChange={async (event) => {
+                                                        await this.setStateAsync({
                                                             idConcepto: event.target.value,
                                                             monto: "1"
                                                         });
@@ -505,7 +505,15 @@ class GastoProceso extends React.Component {
                                                     placeholder="Ingrese el monto"
                                                     onKeyPress={keyNumberFloat}
                                                 />
-                                                <button className="btn btn-outline-secondary ml-1" type="button" title="Agregar" onClick={() => this.addConcepto()}><i className="bi bi-plus-circle"></i></button>
+                                                <div className="input-group-append">
+                                                    <button
+                                                        className="btn btn-outline-secondary"
+                                                        type="button"
+                                                        title="Agregar"
+                                                        onClick={() => this.addConcepto()}>
+                                                        <i className="bi bi-plus-circle"></i>
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -613,31 +621,6 @@ class GastoProceso extends React.Component {
                                             handleFilter={this.handleFilter}
                                             onEventSelectItem={this.onEventSelectItem}
                                         />
-                                        {/* <select
-                                                title="Lista de clientes"
-                                                className="form-control"
-                                                ref={this.refCliente}
-                                                value={this.state.idCliente}
-                                                onChange={async (event) => {
-                                                    if (event.target.value.trim().length > 0) {
-                                                        await this.setStateAsync({
-                                                            idCliente: event.target.value,
-                                                            messageWarning: '',
-                                                        });
-                                                    } else {
-                                                        await this.setStateAsync({
-                                                            idCliente: event.target.value,
-                                                            messageWarning: "Seleccione el cliente.",
-                                                        });
-                                                    }
-                                                }}>
-                                                <option value="">-- Cliente --</option>
-                                                {
-                                                    this.state.clientes.map((item, index) => (
-                                                        <option key={index} value={item.idCliente}>{item.informacion}</option>
-                                                    ))
-                                                }
-                                            </select> */}
                                     </div>
 
                                     <div className="form-group">

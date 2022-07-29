@@ -1,77 +1,42 @@
 const express = require('express');
 const router = express.Router();
-const Factura = require('../services/Factura');
+const factura = require('../services/Factura');
 const sede = require('../services/Sede');
 const RepCuota = require('../report/RepCuota');
 const RepFactura = require('../report/RepFactura');
 const { decrypt } = require('../tools/CryptoJS');
-const { generateExcel } = require('../excel/FileVentas')
+const { generateExcel } = require('../excel/FileVentas');
+const { sendError } = require('../tools/Message');
 
-const factura = new Factura();
 const repCuota = new RepCuota();
 const repFactura = new RepFactura();
 
 router.get("/list", async function (req, res) {
-    const result = await factura.list(req)
-    if (typeof result === 'object') {
-        res.status(200).send(result);
-    } else {
-        res.status(500).send(result);
-    }
+    return await factura.list(req, res);
 });
 
 router.post("/add", async function (req, res) {
-    const result = await factura.add(req)
-    if (result === "insert") {
-        res.status(200).send("Datos registrados correctamente");
-    } else {
-        res.status(500).send(result);
-    }
+    return await factura.add(req, res);
 });
 
 router.delete("/anular", async function (req, res) {
-    const result = await factura.anular(req)
-    if (result === "anulado") {
-        res.status(200).send("Se anulo correctamente la venta.");
-    } else {
-        res.status(500).send(result);
-    }
+    return await factura.anular(req, res);
 });
 
 router.get("/id", async function (req, res) {
-    const result = await factura.id(req)
-    if (typeof result === "object") {
-        res.status(200).send(result);
-    } else {
-        res.status(500).send(result);
-    }
+    return await factura.id(req, res);
 });
 
 router.get("/credito", async function (req, res) {
-    const result = await factura.credito(req)
-    if (typeof result === 'object') {
-        res.status(200).send(result);
-    } else {
-        res.status(500).send(result);
-    }
+    return await factura.credito(req, res);
 });
 
 router.get("/credito/detalle", async function (req, res) {
-    const result = await factura.detalleCredito(req)
-    if (typeof result === 'object') {
-        res.status(200).send(result);
-    } else {
-        res.status(500).send(result);
-    }
+    return await factura.detalleCredito(req, res);
 });
 
 router.get("/cpesunat", async function (req, res) {
-    const result = await factura.cpesunat(req)
-    if (typeof result === 'object') {
-        res.status(200).send(result);
-    } else {
-        res.status(500).send(result);
-    }
+    return await factura.cpesunat(req, res);
 });
 
 router.get('/repcomprobante', async function (req, res) {
@@ -82,36 +47,24 @@ router.get('/repcomprobante', async function (req, res) {
     const sedeInfo = await sede.infoSedeReporte(req)
 
     if (typeof sedeInfo !== 'object') {
-        res.status(500).send(sedeInfo)
-        return;
+        return sendError(res, sedeInfo);
     }
 
-    const detalle = await factura.id(req)
+    const detalle = await factura.idReport(req);
 
     if (typeof detalle === 'object') {
 
         let data = await repFactura.repComprobante(req, sedeInfo, detalle);
 
         if (typeof data === 'string') {
-            res.status(500).send(data);
+            return sendError(res, data);
         } else {
             res.setHeader('Content-disposition', `inline; filename=${detalle.cabecera.comprobante + " " + detalle.cabecera.serie + "-" + detalle.cabecera.numeracion}.pdf`);
             res.contentType("application/pdf");
             res.send(data);
         }
     } else {
-        res.status(500).send(detalle);
-    }
-})
-
-router.get('/repletra5', async function (req, res) {
-    let data = await repFactura.repLetraA5(req);
-    if (typeof data === 'string') {
-        res.status(500).send(data);
-    } else {
-        res.setHeader('Content-disposition', `inline; filename=comprobantea5.pdf`);
-        res.contentType("application/pdf");
-        res.send(data);
+        return sendError(res, detalle);
     }
 });
 
@@ -121,28 +74,27 @@ router.get("/repcreditolote", async function (req, res) {
     req.query.idVenta = decryptedData.idVenta;
     req.query.proyecto = decryptedData.proyecto;
 
-    const sedeInfo = await sede.infoSedeReporte(req)
+    const sedeInfo = await sede.infoSedeReporte(req);
 
     if (typeof sedeInfo !== 'object') {
-        res.status(500).send(sedeInfo)
-        return;
+        return sendError(res, sedeInfo);
     }
 
-    const detalle = await factura.detalleCredito(req);
+    const detalle = await factura.detalleCreditoReport(req);
 
     if (typeof detalle === 'object') {
 
         let data = await repCuota.repDetalleCuota(req, sedeInfo, detalle);
 
         if (typeof data === 'string') {
-            res.status(500).send(data);
+            return sendError(res, data);
         } else {
             res.setHeader('Content-disposition', 'inline; filename=Cronograma de Pagos.pdf');
             res.contentType("application/pdf");
             res.send(data);
         }
     } else {
-        res.status(500).send(detalle);
+        return sendError(res, detalle);
     }
 });
 
@@ -162,28 +114,26 @@ router.get("/repgeneralventas", async function (req, res) {
     req.query.usuario = decryptedData.usuario;
     req.query.tipo = decryptedData.tipo;
 
-    const sedeInfo = await sede.infoSedeReporte(req)
+    const sedeInfo = await sede.infoSedeReporte(req);
 
     if (typeof sedeInfo !== 'object') {
-        res.status(500).send(sedeInfo)
-        return;
+        return sendError(res, sedeInfo);
     }
 
-    const ventas = await factura.detalleVenta(req)
+    const ventas = await factura.detalleVenta(req);
 
     if (Array.isArray(ventas)) {
-
         let data = await repFactura.repVentas(req, sedeInfo, ventas);
 
         if (typeof data === 'string') {
-            res.status(500).send(data);
+            return sendError(res, data);
         } else {
             res.setHeader('Content-disposition', `inline; filename=REPORTE DE VENTAS DEL.pdf`);
             res.contentType("application/pdf");
             res.send(data);
         }
     } else {
-        res.status(500).send(ventas);
+        return sendError(res, ventas);
     }
 });
 
@@ -203,27 +153,26 @@ router.get('/excelgeneralventas', async function (req, res) {
     req.query.usuario = decryptedData.usuario;
     req.query.tipo = decryptedData.tipo;
 
-    const sedeInfo = await sede.infoSedeReporte(req)
+    const sedeInfo = await sede.infoSedeReporte(req);
 
     if (typeof sedeInfo !== 'object') {
-        res.status(500).send(sedeInfo)
-        return;
+        return sendError(res, sedeInfo);
     }
 
-    const ventas = await factura.detalleVenta(req)
+    const ventas = await factura.detalleVenta(req);
 
     if (Array.isArray(ventas)) {
 
         const data = await generateExcel(req, sedeInfo, ventas);
 
         if (typeof data === 'string') {
-            res.status(500).send(data);
+            return sendError(res, data);
         } else {
             res.end(data);
         }
     } else {
-        res.status(500).send(ventas);
+        return sendError(res, ventas);
     }
-})
+});
 
 module.exports = router;

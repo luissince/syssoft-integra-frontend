@@ -96,4 +96,4 @@ function sendExpired(res, result) {
     return res.status(403).send(result);
 }
 
-module.exports = { sendSuccess, sendSave,sendError, sendClient, sendExpired, sendNoAutorizado };
+module.exports = { sendSuccess, sendSave, sendError, sendClient, sendExpired, sendNoAutorizado };
