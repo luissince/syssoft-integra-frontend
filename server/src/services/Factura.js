@@ -571,7 +571,7 @@ class Factura {
 
                 let i = 0;
                 let frecuenciaPago = req.body.frecuenciaPago;
-
+                let cuota = 0;
                 // while (inicioDate < ultimoDate) {                   
                 while (i < req.body.numCuota) {
                     inicioDate.setMonth(inicioDate.getMonth() + 1);
@@ -584,17 +584,20 @@ class Factura {
                     }
 
                     i++;
+                    cuota++;
 
                     await conec.execute(connection, `INSERT INTO plazo(
                         idPlazo,
                         idVenta,
+                        cuota,
                         fecha,
                         hora,
                         monto,
                         estado) 
-                        VALUES(?,?,?,?,?,?)`, [
+                        VALUES(?,?,?,?,?,?,?)`, [
                         idPlazo,
                         idVenta,
+                        cuota,
                         now.getFullYear() + "-" + ((now.getMonth() + 1) < 10 ? "0" + (now.getMonth() + 1) : (now.getMonth() + 1)) + "-" + now.getDate(),
                         currentTime(),
                         cuotaMes,
@@ -875,7 +878,6 @@ class Factura {
                     req.query.idVenta
                 ]);
 
-
                 let resultAuditoria = await conec.execute(connection, 'SELECT idAuditoria FROM auditoria');
                 let idAuditoria = 0;
                 if (resultAuditoria.length != 0) {
@@ -1099,7 +1101,8 @@ class Factura {
             ]);
 
             let plazos = await conec.query(`SELECT 
-            idPlazo,        
+            idPlazo,      
+            cuota,  
             DATE_FORMAT(fecha,'%d/%m/%Y') as fecha,
             monto,
             estado

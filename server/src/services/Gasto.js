@@ -175,13 +175,15 @@ class Gasto {
                     idConcepto,
                     precio,
                     cantidad,
-                    idImpuesto)
-                    VALUES(?,?,?,?,?)`, [
+                    idImpuesto,
+                    idMedida)
+                    VALUES(?,?,?,?,?,?)`, [
                     idGasto,
                     item.idConcepto,
                     item.monto,
                     item.cantidad,
-                    item.idImpuesto
+                    item.idImpuesto,
+                    item.idMedida,
                 ]);
 
                 monto += item.cantidad * item.monto;

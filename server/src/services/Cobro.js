@@ -15,7 +15,7 @@ class Cobro {
             cl.informacion,  
             CASE 
             WHEN cn.idConcepto IS NOT NULL THEN cn.nombre
-            ELSE CASE WHEN cv.idPlazo = 0 THEN 'CUOTA INICIAL' ELSE 'CUOTA' END END AS detalle,
+            ELSE CASE WHEN cv.idPlazo = 0 THEN 'CUOTA INICIAL' ELSE CONCAT('CUOTA',' ',pl.cuota) END END AS detalle,
             IFNULL(CONCAT(cp.nombre,' ',v.serie,'-',v.numeracion),'') AS comprobanteRef,
             m.simbolo,
             m.codiso,
@@ -32,6 +32,7 @@ class Cobro {
             LEFT JOIN cobroDetalle AS cd ON c.idCobro = cd.idCobro
             LEFT JOIN concepto AS cn ON cd.idConcepto = cn.idConcepto 
             LEFT JOIN cobroVenta AS cv ON cv.idCobro = c.idCobro 
+            LEFT JOIN plazo AS pl ON pl.idPlazo = cv.idPlazo
             LEFT JOIN venta AS v ON cv.idVenta = v.idVenta 
             LEFT JOIN comprobante AS cp ON v.idComprobante = cp.idComprobante
             WHERE 
@@ -218,13 +219,15 @@ class Cobro {
                 idConcepto, 
                 precio, 
                 cantidad, 
-                idImpuesto)
-                VALUES(?,?,?,?,?)`, [
+                idImpuesto,
+                idMedida)
+                VALUES(?,?,?,?,?,?)`, [
                     idCobro,
                     item.idConcepto,
                     item.monto,
                     item.cantidad,
-                    item.idImpuesto
+                    item.idImpuesto,
+                    item.idMedida,
                 ])
                 monto += item.cantidad * item.monto;
             }
@@ -411,12 +414,16 @@ class Cobro {
                     idCobro,
                     idVenta,
                     idPlazo,
-                    precio) 
-                    VALUES (?,?,?,?)`, [
+                    precio,
+                    idImpuesto,
+                    idMedida) 
+                    VALUES (?,?,?,?,?,?)`, [
                         idCobro,
                         req.body.idVenta,
                         item.idPlazo,
-                        parseFloat(item.monto)
+                        parseFloat(item.monto),
+                        req.body.idImpuesto,
+                        req.body.idMedida,
                     ]);
 
                     await conec.execute(connection, `UPDATE plazo 
@@ -623,24 +630,36 @@ class Cobro {
                 idCobro,
                 idVenta,
                 idPlazo,
-                precio) 
-                VALUES (?,?,?,?)`, [
+                precio,
+                idImpuesto,
+                idMedida) 
+                VALUES (?,?,?,?,?,?)`, [
                 idCobro,
                 req.body.idVenta,
                 idPlazo,
-                parseFloat(req.body.montoCuota)
+                parseFloat(req.body.montoCuota),
+                req.body.idImpuesto,
+                req.body.idMedida,
+            ]);
+
+            let cuota = await conec.execute(connection,`SELECT (IFNULL(MAX(cuota),0)+ 1) AS cuota 
+            FROM  plazo 
+            WHERE idVenta = ?`,[
+                req.body.idVenta
             ]);
 
             await conec.execute(connection, `INSERT INTO plazo(
                 idPlazo,
                 idVenta,
+                cuota,
                 fecha,
                 hora,
                 monto,
                 estado) 
-                VALUES(?,?,?,?,?,?)`, [
+                VALUES(?,?,?,?,?,?,?)`, [
                 idPlazo,
                 req.body.idVenta,
+                cuota[0].cuota,
                 currentDate(),
                 currentTime(),
                 parseFloat(req.body.montoCuota),
@@ -813,21 +832,14 @@ class Cobro {
 
             let montoCobrado = cobrado[0].total + parseFloat(req.body.montoCuota);
             if (montoCobrado >= total[0].monto) {
-                // await conec.execute(connection, `UPDATE venta SET estado = 1 WHERE idVenta = ?`, [
-                //     req.body.idVenta,
-                // ]);
 
                 await conec.execute(connection, `UPDATE plazo SET estado = 1 WHERE idPlazo = ?`, [
                     req.body.idPlazo,
                 ]);
             }
 
-            // console.log(req.body)
-
             let monto = parseFloat(req.body.montoCuota);
 
-            // for (let item of req.body.plazos) {
-            // if (item.selected) {
             await conec.execute(connection, `INSERT INTO cobroVenta(
             idCobro,
             idVenta,
@@ -843,17 +855,6 @@ class Cobro {
                 req.body.idImpuesto,
                 req.body.idMedida,
             ]);
-
-            // await conec.execute(connection, `UPDATE plazo 
-            // SET estado = 1
-            // WHERE idPlazo  = ?
-            // `, [
-            //     item.idPlazo
-            // ]);
-
-            // monto += parseFloat(item.monto)
-            // }
-            // }
 
             await conec.execute(connection, `INSERT INTO bancoDetalle(
             idBanco,
@@ -952,7 +953,7 @@ class Cobro {
             INNER JOIN comprobante AS co ON co.idComprobante = c.idComprobante
             LEFT JOIN cobroDetalle AS cb ON c.idCobro = cb.idCobro
             LEFT JOIN cobroVenta AS cv ON c.idCobro  = cv.idCobro 
-
+            
             LEFT JOIN venta AS vn ON vn.idVenta = c.idProcedencia
             LEFT JOIN comprobante AS cov ON vn.idComprobante = cov.idComprobante
             WHERE c.idCobro = ?
@@ -984,29 +985,22 @@ class Cobro {
                 v.numeracion,
                 CASE 
                 WHEN cv.idPlazo = 0 THEN 'CUOTA INICIAL'
-                ELSE 'CUOTA' END AS concepto,
+                ELSE CONCAT('CUOTA',' ',pl.cuota) END AS concepto,
                 (SELECT IFNULL(SUM(vd.precio*vd.cantidad),0) FROM ventaDetalle AS vd WHERE vd.idVenta = v.idVenta ) AS total,
                 (SELECT IFNULL(SUM(cv.precio),0) FROM cobroVenta AS cv WHERE cv.idVenta = v.idVenta ) AS cobrado,
                 cv.precio
                 FROM cobroVenta AS cv
+                LEFT JOIN plazo AS pl ON pl.idPlazo = cv.idPlazo 
                 INNER JOIN venta AS v ON cv.idVenta = v.idVenta 
                 INNER JOIN comprobante AS cp ON v.idComprobante = cp.idComprobante
                 WHERE cv.idCobro = ?`, [
                     req.query.idCobro
                 ]);
 
-
-                let newVenta = venta.map((item, index) => {
-                    return {
-                        ...item,
-                        concepto: item.concepto === "CUOTA INICIAL" ? item.concepto : item.concepto + " " + (++index)
-                    }
-                });
-
                 return {
                     "cabecera": result[0],
                     "detalle": detalle,
-                    "venta": newVenta
+                    "venta": venta
                 };
             } else {
                 return "Datos no encontrados";
@@ -1040,6 +1034,7 @@ class Cobro {
 
             let plazo = await conec.query(`SELECT 
             p.idPlazo,
+            cuota,
             DATE_FORMAT(p.fecha,'%d/%m/%Y') as fecha
             FROM
             plazo as p 

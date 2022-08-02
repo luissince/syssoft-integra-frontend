@@ -31,7 +31,14 @@ class GastoProceso extends React.Component {
             cuentasBancarias: [],
             idMoneda: '',
             monedas: [],
+
+            idImpuesto: '',
             impuestos: [],
+
+            idMedida: '',
+            medidas: [],
+
+            expandedOpciones: true,
 
             monto: '',
             metodoPago: '',
@@ -47,14 +54,18 @@ class GastoProceso extends React.Component {
             msgLoading: 'Cargando datos...'
         }
         this.refComprobante = React.createRef();
-        this.refConcepto = React.createRef()
-        this.refMonto = React.createRef()
+        this.refConcepto = React.createRef();
+        this.refMonto = React.createRef();
 
-        this.refCliente = React.createRef()
-        this.refCuentaBancaria = React.createRef()
-        this.refMoneda = React.createRef()
+        this.refCliente = React.createRef();
+        this.refCuentaBancaria = React.createRef();
+        this.refMoneda = React.createRef();
+        this.refImpuesto = React.createRef();
+        this.refMedida = React.createRef();
+        this.refCollpse = React.createRef();
+        this.refCollpseContent = React.createRef();
 
-        this.refMetodoPago = React.createRef()
+        this.refMetodoPago = React.createRef();
 
         this.abortControllerView = new AbortController();
     }
@@ -86,10 +97,6 @@ class GastoProceso extends React.Component {
                 signal: this.abortControllerView.signal,
             });
 
-            // const cliente = await axios.get("/api/cliente/listcombo", {
-            //     signal: this.abortControllerView.signal,
-            // });
-
             const cuentaBancaria = await axios.get("/api/banco/listcombo", {
                 signal: this.abortControllerView.signal,
             });
@@ -102,19 +109,33 @@ class GastoProceso extends React.Component {
                 signal: this.abortControllerView.signal,
             });
 
+            let medida = await axios.get('/api/medida/listcombo', {
+                signal: this.abortControllerView.signal,
+            });
+
             const comprobanteFilter = comprobante.data.filter(item => item.preferida === 1);
 
             const monedaFilter = moneda.data.filter(item => item.predeterminado === 1);
 
+            const impuestoFilter = impuesto.data.filter(item => item.preferida === 1);
+
+            const medidaFilter = medida.data.filter(item => item.preferida === 1);
+
             await this.setStateAsync({
                 comprobantes: comprobante.data,
                 conceptos: concepto.data,
-                // clientes: cliente.data,
                 cuentasBancarias: cuentaBancaria.data,
                 monedas: moneda.data,
+
                 idMoneda: monedaFilter.length > 0 ? monedaFilter[0].idMoneda : '',
                 idComprobante: comprobanteFilter.length > 0 ? comprobanteFilter[0].idComprobante : '',
+
+                medidas: medida.data,
                 impuestos: impuesto.data,
+
+                idMedida: medidaFilter.length > 0 ? medidaFilter[0].idMedida : '',
+                idImpuesto: impuestoFilter.length > 0 ? impuestoFilter[0].idImpuesto : '',
+
                 loading: false,
             });
         } catch (error) {
@@ -145,6 +166,38 @@ class GastoProceso extends React.Component {
             return;
         }
 
+        if (this.state.idImpuesto == "") {
+            await this.setStateAsync({ messageWarning: "Seleccione un impuesto." });
+
+            if (!this.refCollpseContent.current.classList.contains("show")) {
+                this.refCollpse.current.classList.remove("collapsed");
+                this.refCollpseContent.current.classList.add("show");
+                this.refCollpse.current.attributes["aria-expanded"].value = true;
+                await this.setStateAsync({
+                    expandedOpciones: !(this.refCollpse.current.attributes["aria-expanded"].value.toLowerCase() === 'true')
+                });
+            }
+
+            this.refImpuesto.current.focus();
+            return;
+        }
+
+        if (this.state.idMedida == "") {
+            await this.setStateAsync({ messageWarning: "Seleccione una unidad." })
+
+            if (!this.refCollpseContent.current.classList.contains("show")) {
+                this.refCollpse.current.classList.remove("collapsed");
+                this.refCollpseContent.current.classList.add("show");
+                this.refCollpse.current.attributes["aria-expanded"].value = true;
+                await this.setStateAsync({
+                    expandedOpciones: !(this.refCollpse.current.attributes["aria-expanded"].value.toLowerCase() === 'true')
+                });
+            }
+
+            this.refMedida.current.focus();
+            return;
+        }
+
         let nombre = "";
         for (let item of this.state.conceptos) {
             if (this.state.idConcepto === item.idConcepto) {
@@ -158,8 +211,10 @@ class GastoProceso extends React.Component {
                 "idConcepto": this.state.idConcepto,
                 "concepto": nombre,
                 "cantidad": 1,
-                "idImpuesto": "",
-                "impuestos": this.state.impuestos,
+                "idImpuesto": this.state.idImpuesto,
+                "impuesto": this.refImpuesto.current.children[this.refImpuesto.current.selectedIndex].innerText,
+                "idMedida": this.state.idMedida,
+                "medida": this.refMedida.current.children[this.refMedida.current.selectedIndex].innerText,
                 "monto": this.state.monto
             }
 
@@ -176,10 +231,16 @@ class GastoProceso extends React.Component {
 
         let newArr = [...this.state.detalleConcepto];
 
+        const impuestoFilter = this.state.impuestos.filter(item => item.preferida === 1);
+
+        const medidaFilter = this.state.medidas.filter(item => item.preferida === 1);
+
         await this.setStateAsync({
             detalleConcepto: newArr,
             idConcepto: '',
-            messageWarning: ''
+            messageWarning: '',
+            idMedida: medidaFilter.length > 0 ? medidaFilter[0].idMedida : '',
+            idImpuesto: impuestoFilter.length > 0 ? impuestoFilter[0].idImpuesto : '',
         });
         this.refConcepto.current.focus();
     }
@@ -269,6 +330,8 @@ class GastoProceso extends React.Component {
                         "idUsuario": this.state.idUsuario,
                         'idMoneda': this.state.idMoneda,
                         "idBanco": this.state.idBanco,
+                        "idMedida": this.state.idMedida,
+                        "idImpuesto": this.state.idImpuesto,
                         "metodoPago": this.state.metodoPago,
                         "estado": 1,
                         "observacion": this.state.observacion.trim().toUpperCase(),
@@ -310,7 +373,13 @@ class GastoProceso extends React.Component {
 
             monto: '',
 
+            idImpuesto: '',
             impuestos: [],
+
+            idMedida: '',
+            medidas: [],
+
+            expandedOpciones: true,
 
             loading: true,
         });
@@ -326,7 +395,7 @@ class GastoProceso extends React.Component {
         for (let item of this.state.detalleConcepto) {
             let cantidad = item.cantidad;
             let valor = parseFloat(item.monto);
-            let filter = item.impuestos.filter(imp =>
+            let filter = this.state.impuestos.filter(imp =>
                 imp.idImpuesto === item.idImpuesto
             )
             let impuesto = filter.length > 0 ? filter[0].porcentaje : 0;
@@ -518,6 +587,68 @@ class GastoProceso extends React.Component {
                                         </div>
                                     </div>
 
+                                    <div className="row">
+                                        <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                                            <div className="form-group">
+                                                <a
+                                                    onClick={async () => await this.setStateAsync({
+                                                        expandedOpciones: !(this.refCollpse.current.attributes["aria-expanded"].value.toLowerCase() === 'true')
+                                                    })}
+                                                    ref={this.refCollpse}
+                                                    className="icon-link collapsed"
+                                                    data-bs-toggle="collapse"
+                                                    href="#collapseOpciones"
+                                                    role="button"
+                                                    aria-expanded="false"
+                                                    aria-controls="collapseOpciones">
+                                                    Opciones {this.state.expandedOpciones ? <i className="fa fa-plus-square"></i> : <i className="fa fa-minus-square"></i>}
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div ref={this.refCollpseContent} className="collapse" id="collapseOpciones">
+                                        <div className="row">
+                                            <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
+                                                <div className="form-group">
+                                                    <select
+                                                        title="Lista de lotes"
+                                                        className="form-control"
+                                                        value={this.state.idImpuesto}
+                                                        ref={this.refImpuesto}
+                                                        onChange={(event) => this.setState({ idImpuesto: event.target.value })}
+                                                    >
+                                                        <option value="">-- Impuesto --</option>
+                                                        {
+                                                            this.state.impuestos.map((item, index) => (
+                                                                <option key={index} value={item.idImpuesto}>{item.nombre}</option>
+                                                            ))
+                                                        }
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
+                                                <div className="form-group">
+                                                    <select
+                                                        title="Lista de lotes"
+                                                        className="form-control"
+                                                        value={this.state.idMedida}
+                                                        ref={this.refMedida}
+                                                        onChange={(event) => this.setState({ idMedida: event.target.value })}
+                                                    >
+                                                        <option value="">-- Unidad --</option>
+                                                        {
+                                                            this.state.medidas.map((item, index) => (
+                                                                <option key={index} value={item.idMedida}>{item.nombre}</option>
+                                                            ))
+                                                        }
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <div className="form-row">
                                         <div className="table-responsive">
                                             <table className="table table-striped table-bordered rounded">
@@ -543,8 +674,9 @@ class GastoProceso extends React.Component {
                                                                 <tr key={index}>
                                                                     <td>{++index}</td>
                                                                     <td>{item.concepto}</td>
-                                                                    <td>{formatMoney(item.cantidad)}</td>
-                                                                    <td>
+                                                                    <td>{formatMoney(item.cantidad)}{<br/>}{<small>{item.medida}</small>}</td>
+                                                                    <td>{item.impuesto}</td>
+                                                                    {/* <td>
                                                                         <select className="form-control"
                                                                             id={index + "img"}
                                                                             value={item.idImpuesto}
@@ -557,7 +689,7 @@ class GastoProceso extends React.Component {
                                                                                 ))
                                                                             }
                                                                         </select>
-                                                                    </td>
+                                                                    </td> */}
                                                                     <td>{formatMoney(item.monto)}</td>
                                                                     <td>{formatMoney(item.cantidad * item.monto)}</td>
                                                                     <td>

@@ -18,6 +18,15 @@ router.get('/list', async function (req, res) {
     }
 });
  
+router.get('/listsocios', async function (req, res) {
+    const result = await cliente.listsocios(req)
+    if (typeof result === 'object') {
+        res.status(200).send(result);
+    } else {
+        res.status(500).send(result);
+    }
+});
+
 router.post('/add', async function (req, res) {
     const result = await cliente.add(req)
     if (result === 'insert') {

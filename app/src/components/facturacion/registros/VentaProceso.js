@@ -171,6 +171,13 @@ class VentaProceso extends React.Component {
                 }
             });
 
+            const facturadoCobro = await axios.get("/api/comprobante/listcombo", {
+                signal: this.abortControllerView.signal,
+                params: {
+                    "tipo": "1"
+                }
+            });
+
             const comprobanteCobro = await axios.get("/api/comprobante/listcombo", {
                 signal: this.abortControllerView.signal,
                 params: {
@@ -196,7 +203,7 @@ class VentaProceso extends React.Component {
 
             const comprobanteFilter = comprobanteLibre.data.filter(item => item.preferida === 1);
 
-            const comprobanteCobroFilter = comprobanteCobro.data.filter(item => item.preferida === 1);
+            const comprobanteCobroFilter = [...facturadoCobro.data,...comprobanteCobro.data].filter(item => item.preferida === 1);
 
             const monedaFilter = moneda.data.filter(item => item.predeterminado === 1);
 
@@ -206,7 +213,7 @@ class VentaProceso extends React.Component {
 
             await this.setStateAsync({
                 comprobantes: comprobanteLibre.data,
-                comprobantesCobro: comprobanteCobro.data,
+                comprobantesCobro: [...facturadoCobro.data,...comprobanteCobro.data],
                 monedas: moneda.data,
 
                 medidas: medida.data,
@@ -604,9 +611,7 @@ class VentaProceso extends React.Component {
             } else {
                 this.onSave(this.state.selectTipoPago)
             }
-
         }
-
     }
 
     async onSave(selectTipoPago) {

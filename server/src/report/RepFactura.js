@@ -982,7 +982,7 @@ class RepFactura {
             let yPos = 130;
             // 
 
-            doc.fontSize(10).text(`${req.query.index}`,
+            doc.fontSize(10).text(`${data.cuota}`,
                 doc.options.margins.left + 100,
                 yPos);
 

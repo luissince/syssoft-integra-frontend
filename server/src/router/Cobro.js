@@ -77,7 +77,6 @@ router.delete('/anular', async function (req, res) {
 router.get('/repletramatricial', async function (req, res){
     const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
     req.query.idSede = decryptedData.idSede;
-    req.query.index = decryptedData.index;
     req.query.idVenta = decryptedData.idVenta;
     req.query.idPlazo = decryptedData.idPlazo;
 
