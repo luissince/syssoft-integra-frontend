@@ -642,9 +642,9 @@ class Cobro {
                 req.body.idMedida,
             ]);
 
-            let cuota = await conec.execute(connection,`SELECT (IFNULL(MAX(cuota),0)+ 1) AS cuota 
+            let cuota = await conec.execute(connection, `SELECT (IFNULL(MAX(cuota),0)+ 1) AS cuota 
             FROM  plazo 
-            WHERE idVenta = ?`,[
+            WHERE idVenta = ?`, [
                 req.body.idVenta
             ]);
 
@@ -985,6 +985,7 @@ class Cobro {
 
 
                 let venta = await conec.query(`SELECT  
+                v.idVenta,
                 cp.nombre AS comprobante,
                 v.serie,
                 v.numeracion,
@@ -999,6 +1000,7 @@ class Cobro {
                 CASE 
                 WHEN cv.idPlazo = 0 THEN 'CUOTA INICIAL'
                 ELSE CONCAT('CUOTA',' ',pl.cuota) END AS concepto,
+                DATE_FORMAT(pl.fecha,'%d/%m/%Y') as fecha,                
 
                 (SELECT IFNULL(SUM(vd.precio*vd.cantidad),0) FROM ventaDetalle AS vd WHERE vd.idVenta = v.idVenta ) AS total,
                 (SELECT IFNULL(SUM(cv.precio),0) FROM cobroVenta AS cv WHERE cv.idVenta = v.idVenta ) AS cobrado,
@@ -1013,16 +1015,30 @@ class Cobro {
                     req.query.idCobro
                 ]);
 
+
+                let lote = await conec.query(`SELECT 
+                    l.descripcion as lote,
+                    m.nombre as manzana 
+                    FROM ventaDetalle AS vd
+                    INNER JOIN lote AS l on l.idLote = vd.idLote
+                    INNER JOIN manzana as m ON m.idManzana = l.idManzana
+                    WHERE vd.idVenta = ?`, [
+                    venta[0].idVenta
+                ]);
+                // console.log(lote[0])                
+
                 return {
                     "cabecera": result[0],
                     "detalle": detalle,
-                    "venta": venta
+                    "venta": venta,
+                    "lote": lote
                 };
             } else {
                 return "Datos no encontrados";
             }
 
         } catch (error) {
+            console.log(error);
             return "Se produjo un error de servidor, intente nuevamente.";
         }
     }
@@ -1324,8 +1340,8 @@ class Cobro {
         }
     }
 
-    async xmlGenerate(req){
-        try{
+    async xmlGenerate(req) {
+        try {
             let xml = await conec.query(`SELECT 
             co.nombre AS comprobante,
             c.serie,
@@ -1333,17 +1349,17 @@ class Cobro {
             c.xmlGenerado 
             FROM cobro AS c 
             INNER JOIN comprobante AS co ON co.idComprobante = c.idComprobante 
-            WHERE c.idCobro  = ? AND c.xmlSunat = ?`,[
+            WHERE c.idCobro  = ? AND c.xmlSunat = ?`, [
                 req.query.idCobro,
                 req.query.xmlSunat,
             ]);
 
-            if(xml.length > 0){
+            if (xml.length > 0) {
                 return xml[0];
-            }else{
+            } else {
                 return "Datos no encontrados";
             }
-        }catch (error){
+        } catch (error) {
             return "Se produjo un error de servidor, intente nuevamente.";
         }
     }

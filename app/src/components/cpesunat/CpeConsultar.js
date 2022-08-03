@@ -52,15 +52,15 @@ class CpeElectronicos extends React.Component {
     loadData = async () => {
         try {
 
-            let result = await axios.get("/api/sede/infosede", {
+            let result = await axios.get("/api/empresa/load", {
                 params: {
                     "idSede": "SD0001",
                 }
             });
 
             await this.setStateAsync({
-                ruc: result.data.ruc,
-                rucEmisor: result.data.ruc,
+                ruc: result.data.documento,
+                rucEmisor: result.data.razonSocial,
                 usuario: result.data.useSol,
                 clave: result.data.claveSol,
 

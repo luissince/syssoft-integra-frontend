@@ -120,7 +120,7 @@ router.get('/repcomprobantematricial', async function (req, res) {
     const detalle = await cobro.id(req)
 
     if (typeof detalle === 'object') {
-
+        // console.log(detalle)
         let data = await repFactura.repCobroA5(req, sedeInfo, detalle);
         if (typeof data === 'string') {
             res.status(500).send(data);

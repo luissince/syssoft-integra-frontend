@@ -483,8 +483,8 @@ class RepFactura {
             let impuestoTotal = 0;
             let total = 0;
             let impuestos = [];
-            
-            let listaDetalle =  data.detalle.length > 0  ? data.detalle: data.venta;
+
+            let listaDetalle = data.detalle.length > 0 ? data.detalle : data.venta;
 
             for (let item of listaDetalle) {
                 let cantidad = item.cantidad;
@@ -969,13 +969,19 @@ class RepFactura {
                 });
             } else {
                 yPos = doc.y + 25;
-
+                
                 data.venta.map((item, index) => {
                     doc.fontSize(10).text((index + 1),
                         doc.options.margins.left + 10,
                         yPos);
 
-                    doc.fontSize(9).text(item.concepto,
+                    let concepto = item.concepto + " - F.V: " + item.fecha;
+
+                    data.lote.map((lote, index) => {
+                        concepto += "\n" + lote.lote + " - " + lote.manzana;
+                    });
+
+                    doc.fontSize(9).text(concepto,
                         doc.options.margins.left + 80,
                         yPos);
 

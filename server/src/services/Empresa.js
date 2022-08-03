@@ -28,7 +28,9 @@ class Empresa {
             nombreEmpresa,
             direccion,
             rutaLogo,
-            rutaImage
+            rutaImage,
+            useSol,
+            claveSol
             FROM empresa LIMIT 1`);
 
             if (empresa.length > 0) {
