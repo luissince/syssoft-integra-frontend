@@ -282,7 +282,6 @@ class CpeElectronicos extends React.Component {
                         ModalAlertWarning("Facturación", "Código " + object.code + " " + object.description);
                     }
                 } catch (error) {
-                    console.log(error);
                     if (error.response) {
                         ModalAlertWarning("Facturación", error.response.data);
                     } else {

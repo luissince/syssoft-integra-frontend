@@ -46,8 +46,6 @@ class CpeElectronicos extends React.Component {
     }
 
     componentDidMount() {
-        console.log(process.env.NODE_ENV)
-        // console.log(process.env.REACT_APP_URL)
         this.loadData();
     }
 
