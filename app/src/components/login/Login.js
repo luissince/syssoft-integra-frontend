@@ -123,9 +123,6 @@ class Login extends React.Component {
                 menus
             }
 
-            // console.log(user)
-            // console.log(currentTime())
-
             window.localStorage.setItem('login', JSON.stringify(user));
             this.props.restore(JSON.parse(window.localStorage.getItem('login')));
             this.props.history.push("principal");

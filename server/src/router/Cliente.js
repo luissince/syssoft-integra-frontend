@@ -17,7 +17,7 @@ router.get('/list', async function (req, res) {
         res.status(500).send(result);
     }
 });
- 
+
 router.get('/listsocios', async function (req, res) {
     const result = await cliente.listsocios(req)
     if (typeof result === 'object') {
@@ -83,9 +83,9 @@ router.get('/listfiltrar', async function (req, res) {
 
 router.get('/listventasasociadas', async function (req, res) {
     const result = await cliente.listventasasociadas(req);
-    if(typeof result === 'object'){
+    if (typeof result === 'object') {
         res.status(200).send(result);
-    }else{
+    } else {
         res.status(500).send(result);
     }
 });
@@ -169,8 +169,8 @@ router.get('/excelcliente', async function (req, res) {
     const detalle = await cliente.listapagos(req)
 
     if (Array.isArray(detalle)) {
-        
-        if(req.query.idCliente == ''){
+
+        if (req.query.idCliente == '') {
             const data = await generateExcelCliente(req, sedeInfo, detalle, 0);
 
             if (typeof data === 'string') {
@@ -178,8 +178,7 @@ router.get('/excelcliente', async function (req, res) {
             } else {
                 res.end(data);
             }
-        }else{
-            console.log(detalle);
+        } else {
             const data = await generateExcelCliente(req, sedeInfo, detalle, 1);
 
             if (typeof data === 'string') {
@@ -233,18 +232,18 @@ router.get('/exceldeudas', async function (req, res) {
         res.status(500).send(sedeInfo);
         return;
     }
-
+ 
     const detalle = await cliente.listadeudas(req)
 
     if (Array.isArray(detalle)) {
         const data = await generateExcelDeudas(req, sedeInfo, detalle);
 
         if (typeof data === 'string') {
-            res.status(500).send(data);
+            res.status(500).send(data); 
         } else {
             res.end(data);
         }
-    } else {
+    } else { 
         res.status(500).send(detalle);
     }
 });

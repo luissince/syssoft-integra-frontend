@@ -1,5 +1,6 @@
 import React from "react";
 import "./index.css";
+import { readDataBlob } from '../../tools/Tools';
 import Axios from "axios";
 
 const Downloader = ({ files = [], remove }) => {
@@ -55,19 +56,26 @@ class DownloadItem extends React.Component {
         Axios.get(this.props.file.file, {
             responseType: "blob",
             ...options,
-        }).then( (response)=> {
+        }).then(async (response) => {
+            if (this.props.file.filename == undefined) {
+                let result = await readDataBlob(response.data);
 
-            const url = window.URL.createObjectURL(
-                new Blob([response.data], {
-                    type: response.headers["content-type"],
-                })
-            );
+                const url = window.URL.createObjectURL(new Blob([result.data], { type: "text/xml" }));
 
-            const link = document.createElement("a");
-            link.href = url;
-            link.setAttribute("download", this.props.file.filename);
-            document.body.appendChild(link);
-            link.click();
+                const link = document.createElement("a");
+                link.href = url;
+                link.setAttribute("download", result.name);
+                document.body.appendChild(link);
+                link.click();
+            } else {
+                const url = window.URL.createObjectURL(response.data);
+    
+                const link = document.createElement("a");
+                link.href = url;
+                link.setAttribute("download", this.props.file.filename);
+                document.body.appendChild(link);
+                link.click();
+            }
 
             this.setState({
                 ...this.state,
@@ -102,13 +110,13 @@ class DownloadItem extends React.Component {
                                     </>
                                 )}
 
-                                {this.state.loaded === 0 && <>Initializing...</>}
+                                {this.state.loaded === 0 && <>Iniciando...</>}
                             </small>
                         </div>
                         <div className="d-inline ml-2 ml-auto">
                             {this.state.completed && (
                                 <span className="text-success">
-                                    Completed <i icon="fa fa-check-circle"></i>
+                                    Completado <i icon="fa fa-check-circle"></i>
                                 </span>
                             )}
                         </div>

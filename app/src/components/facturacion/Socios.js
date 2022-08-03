@@ -18,6 +18,8 @@ class Socios extends React.Component {
             loading: false,
             lista: [],
 
+            view: statePrivilegio(this.props.token.userToken.menus[2].submenu[4].privilegio[0].estado),
+
             opcion: 0,
             paginacion: 0,
             totalPaginacion: 0,
@@ -239,14 +241,16 @@ class Socios extends React.Component {
                                                             item.detalle.map((detalle, indexd) => (
                                                                 <div key={indexd}>
                                                                     <span>{detalle.descripcion}{<br />}{<small>{detalle.manzana}</small>}</span>
-                                                                    <br /><hr />
+                                                                    <br />
+                                                                    {indexd == item.detalle.length - 1  ? null :  <hr />}
                                                                 </div>
                                                             ))
                                                         }</td>
                                                         <td className="text-center">
                                                             <button
                                                                 className="btn btn-outline-info btn-sm"
-                                                                title="Editar">
+                                                                title="Editar" 
+                                                                disabled={!this.state.view}>
                                                                 <i className="bi bi-eye"></i>
                                                             </button>
                                                         </td>

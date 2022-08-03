@@ -342,6 +342,18 @@ export function readDataURL(files) {
   });
 }
 
+export function readDataBlob(blob) {
+  return new Promise((resolve, reject) => {
+    var reader = new FileReader();
+    reader.onload = () => {
+      resolve(JSON.parse(reader.result));
+    };
+    reader.onerror = reject;
+    reader.readAsText(blob);
+  });
+}
+
+
 export function imageSizeData(data) {
   return new Promise((resolve, reject) => {
     let image = new Image();

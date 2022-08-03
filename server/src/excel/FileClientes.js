@@ -177,7 +177,6 @@ async function generateExcelCliente(req, sedeInfo, data, condicion) {
 
             let rowY = 11;
 
-            console.log()
             array.map((item, index) => {
                 rowY = rowY + 1;
 
@@ -306,7 +305,6 @@ async function generateExcelDeudas(req, sedeInfo, data) {
             ws.cell(rowY, 9).number(parseFloat(formatMoney(item.montoActual))).style(styleBodyFloat)
         });
         rowY = rowY + 1;
-
 
         return wb.writeToBuffer();
     } catch (error) {

@@ -21,6 +21,7 @@ class Clientes extends React.Component {
             add: statePrivilegio(this.props.token.userToken.menus[2].submenu[0].privilegio[0].estado),
             edit: statePrivilegio(this.props.token.userToken.menus[2].submenu[0].privilegio[1].estado),
             remove: statePrivilegio(this.props.token.userToken.menus[2].submenu[0].privilegio[2].estado),
+            view: statePrivilegio(this.props.token.userToken.menus[2].submenu[0].privilegio[3].estado),
 
             opcion: 0,
             paginacion: 0,
@@ -250,7 +251,8 @@ class Clientes extends React.Component {
                                                             item.detalle.map((detalle, indexd) => (
                                                                 <div key={indexd}>
                                                                     <span>{detalle.descripcion}{<br />}{<small>{detalle.manzana}</small>}</span>
-                                                                    <br /><hr />
+                                                                    <br />
+                                                                    {indexd == item.detalle.length - 1  ? null :  <hr />}
                                                                 </div>
                                                             ))
                                                         }</td>
@@ -264,7 +266,7 @@ class Clientes extends React.Component {
                                                                 className="btn btn-outline-info btn-sm"
                                                                 title="Editar"
                                                                 onClick={() => this.onEventDetail(item.idCliente)}
-                                                                disabled={!this.state.edit}>
+                                                                disabled={!this.state.view}>
                                                                 <i className="bi bi-eye"></i>
                                                             </button>
                                                         </td>

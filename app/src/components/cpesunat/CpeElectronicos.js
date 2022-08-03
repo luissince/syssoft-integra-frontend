@@ -22,6 +22,7 @@ import error from '../../recursos/images/error.svg';
 import pdf from '../../recursos/images/pdf.svg';
 import xml from '../../recursos/images/xml.png';
 import { connect } from 'react-redux';
+import FileDownloader from "../reporte/hooks/FileDownloader";
 import Paginacion from '../tools/Paginacion';
 
 class CpeElectronicos extends React.Component {
@@ -51,6 +52,7 @@ class CpeElectronicos extends React.Component {
             messagePaginacion: 'Mostranto 0 de 0 Páginas'
         }
         this.refTxtSearch = React.createRef();
+        this.refUseFileXml = React.createRef();
 
         this.abortControllerView = new AbortController();
         this.abortControllerTable = new AbortController();
@@ -263,7 +265,7 @@ class CpeElectronicos extends React.Component {
 
                     let result = await axios.get(`${process.env.REACT_APP_URL}/app/examples/resumen.php`, {
                         params: {
-                            "idCobro": idCobro 
+                            "idCobro": idCobro
                         }
                     });
                     // console.log(result.data);
@@ -280,7 +282,7 @@ class CpeElectronicos extends React.Component {
                         ModalAlertWarning("Facturación", "Código " + object.code + " " + object.description);
                     }
                 } catch (error) {
-                    // console.log(error.response);
+                    console.log(error);
                     if (error.response) {
                         ModalAlertWarning("Facturación", error.response.data);
                     } else {
@@ -302,6 +304,22 @@ class CpeElectronicos extends React.Component {
         window.open("/api/cobro/repcomprobante?" + params, "_blank");
     }
 
+    onEventXmlSunat = async (idCobro) => {
+        const data = {
+            "idSede": "SD0001",
+            "idCobro": idCobro,
+            "xmlSunat": "0"
+        }
+
+        let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
+
+        this.refUseFileXml.current.download({
+            "name": "Xml Sunat",
+            "file": "/api/cobro/xmlsunat",
+            "params": ciphertext
+        });
+    }
+
     render() {
         return (
             <>
@@ -309,8 +327,8 @@ class CpeElectronicos extends React.Component {
                     <div className="clearfix absolute-all bg-white">
                         {spinnerLoading(this.state.msgMessage)}
                     </div>
-                    : <>
-
+                    :
+                    <>
                         <div className='row'>
                             <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
                                 <div className="form-group">
@@ -502,7 +520,7 @@ class CpeElectronicos extends React.Component {
                                                                                 <button className="dropdown-item" type="button" onClick={() => this.onEventImprimir(item.idCobro)}><img src={pdf} width="22" alt="Pdf" /> Archivo Pdf</button>
                                                                             </li>
                                                                             <li>
-                                                                                <button className="dropdown-item" type="button"><img src={xml} width="22" alt="Xml" /> Archivo Xml</button>
+                                                                                <button className="dropdown-item" type="button" onClick={() => this.onEventXmlSunat(item.idCobro)}><img src={xml} width="22" alt="Xml" /> Archivo Xml</button>
                                                                             </li>
                                                                             <li>
                                                                                 <button className="dropdown-item" type="button" onClick={() => this.onEventSendAnular(item.idCobro)}><img src={error} width="22" alt="Error" /> Resumen Diario</button>
@@ -556,9 +574,9 @@ class CpeElectronicos extends React.Component {
                                 </div>
                             </div>
                         </div>
-                    </>}
-
-
+                    </>
+                }
+                 <FileDownloader ref={this.refUseFileXml} />
             </>
         );
     }

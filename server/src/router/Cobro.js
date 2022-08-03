@@ -225,4 +225,33 @@ router.get('/excelgeneralcobros', async function (req, res) {
     }
 });
 
+router.get('/xmlsunat',async function(req, res) {
+    const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
+    req.query.idSede = decryptedData.idSede;
+    req.query.idCobro = decryptedData.idCobro;
+    req.query.xmlSunat = decryptedData.xmlSunat;
+
+    
+    const sedeInfo = await sede.infoSedeReporte(req);
+
+    if (typeof sedeInfo !== 'object') {
+        res.status(500).send(sedeInfo);
+        return;
+    }
+
+    const detalle = await cobro.xmlGenerate(req);
+
+    if (typeof detalle === 'object') {
+        const object = {
+            "name": `${sedeInfo.nombreEmpresa} ${detalle.comprobante} ${detalle.serie}-${detalle.numeracion}.xml`,
+            "data": detalle.xmlGenerado
+        };
+        const buffXmlSunat = Buffer.from(JSON.stringify(object), "utf-8");
+        res.end(buffXmlSunat);
+    } else {
+        console.log(detalle)
+        res.status(500).send(detalle)
+    }
+});
+
 module.exports = router;

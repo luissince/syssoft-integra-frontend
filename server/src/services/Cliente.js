@@ -459,7 +459,6 @@ class Cliente {
     }
 
     async listadeudas(req) {
-        console.log(req.query)
         try {
 
             if (req.query.frecuencia !== '' && req.query.frecuencia !== 0) {
@@ -489,32 +488,32 @@ class Cliente {
                 ORDER BY v.fecha ASC, v.hora ASC`, [
                     req.query.frecuencia
                 ]);
-    
+
                 return lista;
             } else {
-            let lista = await conec.query(`SELECT 
-            v.idVenta, 
-            cl.documento, 
-            cl.informacion, 
-            v.numCuota, 
-            (SELECT IFNULL(COUNT(*), 0) FROM plazo AS p WHERE p.estado = 0 AND p.fecha < CURRENT_DATE() AND p.idVenta = v.idVenta) AS cuotasRetrasadas,
-            (SELECT IFNULL(COUNT(*), 0) FROM plazo AS p WHERE p.estado = 0 AND p.idVenta = v.idVenta) AS cuotasPendientes,
-            CASE 
-            WHEN v.credito = 1 THEN DATE_FORMAT(DATE_ADD(v.fecha,interval v.frecuencia day),'%d/%m/%Y')
-            ELSE (SELECT IFNULL(DATE_FORMAT(MIN(p.fecha),'%d/%m/%Y'),'') FROM plazo AS p WHERE p.estado = 0 AND p.idVenta = v.idVenta) END AS fechaPago,
-            m.simbolo,
-            m.codiso,
-            (SELECT IFNULL(SUM(p.monto),0) FROM plazo AS p WHERE p.estado = 0 AND p.fecha < CURRENT_DATE() AND p.idVenta = v.idVenta) AS montoPendiente,
-            (SELECT IFNULL(MIN(p.monto),0) FROM plazo AS p WHERE p.estado = 0 AND p.idVenta = v.idVenta) AS montoActual,
-            v.frecuencia
-            FROM venta AS v 
-            INNER JOIN moneda AS m ON m.idMoneda = v.idMoneda
-            INNER JOIN comprobante AS cm ON v.idComprobante = cm.idComprobante 
-            INNER JOIN cliente AS cl ON v.idCliente = cl.idCliente 
-            LEFT JOIN ventaDetalle AS vd ON vd.idVenta = v.idVenta 
-			WHERE v.estado = 2
-            GROUP BY v.idVenta
-            ORDER BY v.fecha ASC, v.hora ASC`);
+                let lista = await conec.query(`SELECT 
+                v.idVenta, 
+                cl.documento, 
+                cl.informacion, 
+                v.numCuota, 
+                (SELECT IFNULL(COUNT(*), 0) FROM plazo AS p WHERE p.estado = 0 AND p.fecha < CURRENT_DATE() AND p.idVenta = v.idVenta) AS cuotasRetrasadas,
+                (SELECT IFNULL(COUNT(*), 0) FROM plazo AS p WHERE p.estado = 0 AND p.idVenta = v.idVenta) AS cuotasPendientes,
+                CASE 
+                WHEN v.credito = 1 THEN DATE_FORMAT(DATE_ADD(v.fecha,interval v.frecuencia day),'%d/%m/%Y')
+                ELSE (SELECT IFNULL(DATE_FORMAT(MIN(p.fecha),'%d/%m/%Y'),'') FROM plazo AS p WHERE p.estado = 0 AND p.idVenta = v.idVenta) END AS fechaPago,
+                m.simbolo,
+                m.codiso,
+                (SELECT IFNULL(SUM(p.monto),0) FROM plazo AS p WHERE p.estado = 0 AND p.fecha < CURRENT_DATE() AND p.idVenta = v.idVenta) AS montoPendiente,
+                (SELECT IFNULL(MIN(p.monto),0) FROM plazo AS p WHERE p.estado = 0 AND p.idVenta = v.idVenta) AS montoActual,
+                v.frecuencia
+                FROM venta AS v 
+                INNER JOIN moneda AS m ON m.idMoneda = v.idMoneda
+                INNER JOIN comprobante AS cm ON v.idComprobante = cm.idComprobante 
+                INNER JOIN cliente AS cl ON v.idCliente = cl.idCliente 
+                LEFT JOIN ventaDetalle AS vd ON vd.idVenta = v.idVenta 
+                WHERE v.estado = 2
+                GROUP BY v.idVenta
+                ORDER BY v.fecha ASC, v.hora ASC`);
 
                 return lista;
             }

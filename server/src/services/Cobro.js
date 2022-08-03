@@ -967,12 +967,17 @@ class Cobro {
                 co.nombre as concepto,
                 cd.precio,
                 cd.cantidad,
+
+                md.codigo as medida,
+
                 imp.idImpuesto,
                 imp.nombre as impuesto,
                 imp.porcentaje
+
                 FROM cobroDetalle AS cd 
                 INNER JOIN concepto AS co ON cd.idConcepto = co.idConcepto
-                INNER JOIN impuesto AS imp ON cd.idImpuesto  = imp.idImpuesto 
+                INNER JOIN impuesto AS imp ON cd.idImpuesto  = imp.idImpuesto
+                INNER JOIN medida AS md ON md.idMedida = cd.idMedida 
                 WHERE cd.idCobro = ?
                 `, [
                     req.query.idCobro
@@ -983,14 +988,25 @@ class Cobro {
                 cp.nombre AS comprobante,
                 v.serie,
                 v.numeracion,
+                1 AS cantidad,
+
+                md.codigo as medida,
+
+                imp.idImpuesto,
+                imp.nombre as impuesto,
+                imp.porcentaje,
+
                 CASE 
                 WHEN cv.idPlazo = 0 THEN 'CUOTA INICIAL'
                 ELSE CONCAT('CUOTA',' ',pl.cuota) END AS concepto,
+
                 (SELECT IFNULL(SUM(vd.precio*vd.cantidad),0) FROM ventaDetalle AS vd WHERE vd.idVenta = v.idVenta ) AS total,
                 (SELECT IFNULL(SUM(cv.precio),0) FROM cobroVenta AS cv WHERE cv.idVenta = v.idVenta ) AS cobrado,
                 cv.precio
                 FROM cobroVenta AS cv
                 LEFT JOIN plazo AS pl ON pl.idPlazo = cv.idPlazo 
+                INNER JOIN impuesto AS imp ON cv.idImpuesto  = imp.idImpuesto
+                INNER JOIN medida AS md ON cv.idMedida = md.idMedida 
                 INNER JOIN venta AS v ON cv.idVenta = v.idVenta 
                 INNER JOIN comprobante AS cp ON v.idComprobante = cp.idComprobante
                 WHERE cv.idCobro = ?`, [
@@ -1304,6 +1320,30 @@ class Cobro {
 
             return { "conceptos": conceptos, "bancos": bancos };
         } catch (error) {
+            return "Se produjo un error de servidor, intente nuevamente.";
+        }
+    }
+
+    async xmlGenerate(req){
+        try{
+            let xml = await conec.query(`SELECT 
+            co.nombre AS comprobante,
+            c.serie,
+            c.numeracion,
+            c.xmlGenerado 
+            FROM cobro AS c 
+            INNER JOIN comprobante AS co ON co.idComprobante = c.idComprobante 
+            WHERE c.idCobro  = ? AND c.xmlSunat = ?`,[
+                req.query.idCobro,
+                req.query.xmlSunat,
+            ]);
+
+            if(xml.length > 0){
+                return xml[0];
+            }else{
+                return "Datos no encontrados";
+            }
+        }catch (error){
             return "Se produjo un error de servidor, intente nuevamente.";
         }
     }
