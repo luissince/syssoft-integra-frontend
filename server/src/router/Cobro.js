@@ -117,8 +117,6 @@ router.get('/email', async function (req, res) {
                                     pass: sedeInfo.claveEmail, // generated ethereal password
                                 },
                             });
-                            console.log( sedeInfo.usuarioEmail)
-                            console.log( sedeInfo.claveEmail)
                             // send mail with defined transport object
                             // Message object
                             let message = {
