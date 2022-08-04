@@ -906,6 +906,7 @@ class RepFactura {
 
     async repCobroA5(req, sedeInfo, data) {
 
+        console.log(data)
         const cabecera = data.cabecera;
         try {
             const doc = new PDFDocument({
@@ -937,9 +938,17 @@ class RepFactura {
                 doc.options.margins.left + 22,
                 yPos);
 
-            doc.fontSize(8).text(`${cabecera.compRelacion}`,
+            // doc.fontSize(8).text(`${cabecera.compRelacion}`,
+            //     doc.options.margins.left + 400,
+            //     yPos);
+
+            data.lote.map((lote, index) => {
+                
+                doc.fontSize(8).text(lote.lote + " - " + lote.manzana,
                 doc.options.margins.left + 400,
                 yPos);
+
+            });
 
             let total = 0;
 
@@ -976,9 +985,9 @@ class RepFactura {
 
                     let concepto = item.concepto + " - F.V: " + item.fecha;
 
-                    data.lote.map((lote, index) => {
-                        concepto += "\n" + lote.lote + " - " + lote.manzana;
-                    });
+                    // data.lote.map((lote, index) => {
+                    //     concepto += "\n" + lote.lote + " - " + lote.manzana;
+                    // });
 
                     doc.fontSize(9).text(concepto,
                         doc.options.margins.left + 80,
