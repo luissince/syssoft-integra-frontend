@@ -147,7 +147,7 @@ router.get('/email', async function (req, res) {
                                 // An array of attachments
                                 attachments: [
                                     {
-                                        filename: `${sedeInfo.nombreEmpresa} ${detalle.comprobante} ${detalle.serie}-${detalle.numeracion}.xml`,
+                                        filename: `${sedeInfo.nombreEmpresa} ${detalle.cabecera.comprobante} ${detalle.cabecera.serie}-${detalle.cabecera.numeracion}.xml`,
                                         content: xml.xmlGenerado,
                                         contentType: 'text/plain'
                                     },
