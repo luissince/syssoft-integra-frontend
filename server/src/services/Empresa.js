@@ -53,6 +53,8 @@ class Empresa {
             direccion,
             rutaLogo,
             rutaImage,
+            usuarioEmail,
+            claveEmail,
             useSol,
             claveSol
             FROM empresa
@@ -143,6 +145,9 @@ class Empresa {
             rutaLogo=?,
             rutaImage=?,
 
+            usuarioEmail=?,
+            claveEmail=?,
+
             useSol=?,
             claveSol=?,
             fupdate= ?,
@@ -159,6 +164,9 @@ class Empresa {
                 extImage,
                 rutaLogo,
                 rutaImage,
+
+                req.body.usuarioEmail,
+                req.body.claveEmail,
 
                 req.body.useSol,
                 req.body.claveSol,
@@ -275,6 +283,8 @@ class Empresa {
                 extimage,
                 rutaLogo,
                 rutaImage,
+                usuarioEmail,
+                claveEmail,
                 useSol,
                 claveSol,
                 certificado,
@@ -283,7 +293,7 @@ class Empresa {
                 hora,
                 fupdate,
                 hupdate
-             ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, [
+             ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, [
                 idEmpresa,
                 'TD0003',
                 req.body.documento,
@@ -300,6 +310,8 @@ class Empresa {
                 req.body.extimage,
                 fileLogo,
                 fileImage,
+                '',
+                '',
                 '',
                 '',
                 '',

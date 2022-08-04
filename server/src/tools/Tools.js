@@ -1,5 +1,9 @@
 const fs = require("fs");
 
+function isEmail(value) {
+    const validRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
+    return value.match(validRegex) != null ? true : false;
+}
 
 function isDirectory(file) {
     try {
@@ -176,7 +180,7 @@ function zfill(number, width = 6) {
     }
 }
 
-function manzanaLote(lot,manz){
+function manzanaLote(lot, manz) {
     let manzana = manz;
     let lote = lot;
 
@@ -200,5 +204,6 @@ module.exports = {
     writeFile,
     mkdir,
     chmod,
-    manzanaLote
+    manzanaLote,
+    isEmail
 };

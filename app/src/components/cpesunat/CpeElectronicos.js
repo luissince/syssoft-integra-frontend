@@ -21,6 +21,7 @@ import unable from '../../recursos/images/unable.svg';
 import error from '../../recursos/images/error.svg';
 import pdf from '../../recursos/images/pdf.svg';
 import xml from '../../recursos/images/xml.png';
+import email from '../../recursos/images/email.svg';
 import { connect } from 'react-redux';
 import FileDownloader from "../reporte/hooks/FileDownloader";
 import Paginacion from '../tools/Paginacion';
@@ -303,6 +304,29 @@ class CpeElectronicos extends React.Component {
         window.open("/api/cobro/repcomprobante?" + params, "_blank");
     }
 
+    async onEventSendEmail(idCobro) {
+
+        try {
+            ModalAlertInfo("Email", "Envíando Correo.");
+
+            let result = await axios.get("/api/cobro/email", {
+                params: {
+                    "idSede": "SD0001",
+                    "idCobro": idCobro,
+                    "xmlSunat": "0"
+                }
+            });
+
+            ModalAlertSuccess("Email", result.data);
+        } catch (error) {
+            if (error.response) {
+                ModalAlertWarning("Email", error.response.data);
+            } else {
+                ModalAlertError("Email", "Se produjo un error interno, intente nuevamente por favor.");
+            }
+        }
+    }
+
     onEventXmlSunat = async (idCobro) => {
         const data = {
             "idSede": "SD0001",
@@ -522,6 +546,9 @@ class CpeElectronicos extends React.Component {
                                                                                 <button className="dropdown-item" type="button" onClick={() => this.onEventXmlSunat(item.idCobro)}><img src={xml} width="22" alt="Xml" /> Archivo Xml</button>
                                                                             </li>
                                                                             <li>
+                                                                                <button className="dropdown-item" type="button" onClick={() => this.onEventSendEmail(item.idCobro)}><img src={email} width="22" alt="Email" /> Enviar Correo</button>
+                                                                            </li>
+                                                                            <li>
                                                                                 <button className="dropdown-item" type="button" onClick={() => this.onEventSendAnular(item.idCobro)}><img src={error} width="22" alt="Error" /> Resumen Diario</button>
                                                                             </li>
                                                                         </ul>
@@ -575,7 +602,7 @@ class CpeElectronicos extends React.Component {
                         </div>
                     </>
                 }
-                 <FileDownloader ref={this.refUseFileXml} />
+                <FileDownloader ref={this.refUseFileXml} />
             </>
         );
     }

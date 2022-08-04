@@ -936,6 +936,7 @@ class Cobro {
             cl.documento,
             cl.informacion,
             cl.direccion,
+            cl.email,
     
             b.nombre as banco,   
                      

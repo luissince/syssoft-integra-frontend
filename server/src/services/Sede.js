@@ -231,7 +231,9 @@ class Sede {
                 razonSocial as nombreEmpresa,
                 direccion,
                 rutaLogo,
-                rutaImage
+                rutaImage,
+                usuarioEmail,
+                claveEmail
                 FROM empresa LIMIT 1`);
 
             let result = [...sede, ...empresa];

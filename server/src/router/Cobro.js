@@ -1,11 +1,13 @@
 const express = require('express');
 const router = express.Router();
+const nodemailer = require("nodemailer");
 const { decrypt } = require('../tools/CryptoJS');
 const { generateExcel } = require('../excel/FileFinanza')
 const Cobro = require('../services/Cobro');
 const sede = require('../services/Sede');
 const RepFinanciero = require('../report/RepFinanciero');
 const RepFactura = require('../report/RepFactura');
+const { isEmail } = require('../tools/Tools');
 
 const cobro = new Cobro();
 const repFinanciero = new RepFinanciero();
@@ -47,7 +49,7 @@ router.post('/cuota', async function (req, res) {
     }
 });
 
-router.post('/adelanto', async function (req, res){
+router.post('/adelanto', async function (req, res) {
     const result = await cobro.adelanto(req)
     if (result === 'insert') {
         res.status(201).send("Se registró correctamente el cobro.");
@@ -66,7 +68,7 @@ router.get('/id', async function (req, res) {
 });
 
 router.delete('/anular', async function (req, res) {
-    const result = await cobro.delete(req,res)
+    const result = await cobro.delete(req, res)
     if (result === 'delete') {
         res.status(201).send("Se eliminó correctamente el cobro.");
     } else {
@@ -74,7 +76,107 @@ router.delete('/anular', async function (req, res) {
     }
 });
 
-router.get('/repletramatricial', async function (req, res){
+router.get('/email', async function (req, res) {
+    try {
+
+        const sedeInfo = await sede.infoSedeReporte(req)
+
+        if (typeof sedeInfo !== 'object') {
+            res.status(500).send(sedeInfo)
+            return;
+        }
+
+        const detalle = await cobro.id(req)
+
+        if (typeof detalle === 'object') {
+
+            let pdf = await repFactura.repCobro(req, sedeInfo, detalle);
+
+            if (typeof pdf === 'string') {
+                res.status(500).send(pdf);
+            } else {
+
+                const xml = await cobro.xmlGenerate(req);
+
+                if (typeof xml === 'string') {
+                    res.status(500).send(xml);
+                } else {
+                    if (!isEmail(sedeInfo.usuarioEmail) && !isEmail(sedeInfo.claveEmail)) {
+                        res.status(400).send("Las credenciales del correo para el envío no pueden ser vacios.");
+                    } else {
+                        if (!isEmail(detalle.cabecera.email)) {
+                            res.status(400).send("El correo del cliente no es valido.");
+                        } else {
+                            // create reusable transporter object using the default SMTP transport
+                            let transporter = nodemailer.createTransport({
+                                host: "smtp-mail.outlook.com.",
+                                port: 587,
+                                secure: false, // true for 465, false for other ports
+                                auth: {
+                                    user: sedeInfo.usuarioEmail, // generated ethereal user
+                                    pass: sedeInfo.claveEmail, // generated ethereal password
+                                },
+                            });
+                            console.log( sedeInfo.usuarioEmail)
+                            console.log( sedeInfo.claveEmail)
+                            // send mail with defined transport object
+                            // Message object
+                            let message = {
+                                from: `"${sedeInfo.nombreEmpresa} 👻" ${sedeInfo.usuarioEmail}`,
+
+                                // Comma separated list of recipients
+                                to: detalle.cabecera.email,
+                                // bcc: 'andris@ethereal.email',
+
+                                // Subject of the message
+                                subject: 'Comprobante Electrónico ✔',
+
+                                // plaintext body
+                                text: sedeInfo.ruc,
+
+                                // HTML body
+                                html:
+                                    `<p>Estimado Cliente <b>${detalle.cabecera.informacion}</b>.</p>
+                                    <p>Le envíamos la información de su comprobante electrónico.</p>
+                                    <span>Tipo de Documento: <b>${detalle.cabecera.comprobante}</b></span><br/>
+                                    <span>Número de Serie: <b>${detalle.cabecera.serie}</b></span><br/>
+                                    <span>Número de Documento: <b>${detalle.cabecera.numeracion}</b></span><br/>
+                                    <span>N° RUC del Emisor: <b>${sedeInfo.ruc}</b></span><br/>
+                                    <span>N° RUC/DNI del Cliente: <b>${detalle.cabecera.documento}</b></span><br/>
+                                    <span>Fecha de Emisión: <b>${detalle.cabecera.fecha}</b></span><br/>
+                                    <p>Atentamente ,</p>`,
+
+                                // An array of attachments
+                                attachments: [
+                                    {
+                                        filename: `${sedeInfo.nombreEmpresa} ${detalle.comprobante} ${detalle.serie}-${detalle.numeracion}.xml`,
+                                        content: xml.xmlGenerado,
+                                        contentType: 'text/plain'
+                                    },
+
+                                    {
+                                        filename: `${sedeInfo.nombreEmpresa} ${detalle.cabecera.comprobante} ${detalle.cabecera.serie}-${detalle.cabecera.numeracion}.pdf`,
+                                        content: pdf,
+                                        contentType: 'application/pdf'
+                                    },
+                                ]
+                            };
+
+                            await transporter.sendMail(message);
+                            res.status(200).send("Se envío correctamente el correo a " + detalle.cabecera.email);
+                        }
+                    }
+                }
+            }
+        } else {
+            res.status(500).send(detalle);
+        }
+    } catch (error) {
+        res.status(500).send("Se produjo un error de servidor, intente nuevamente.");
+    }
+});
+
+router.get('/repletramatricial', async function (req, res) {
     const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
     req.query.idSede = decryptedData.idSede;
     req.query.idVenta = decryptedData.idVenta;
@@ -108,7 +210,7 @@ router.get('/repcomprobantematricial', async function (req, res) {
     const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
     req.query.idSede = decryptedData.idSede;
     req.query.idCobro = decryptedData.idCobro;
-    
+
 
     const sedeInfo = await sede.infoSedeReporte(req)
 
@@ -120,7 +222,7 @@ router.get('/repcomprobantematricial', async function (req, res) {
     const detalle = await cobro.id(req)
 
     if (typeof detalle === 'object') {
-        // console.log(detalle)
+      
         let data = await repFactura.repCobroA5(req, sedeInfo, detalle);
         if (typeof data === 'string') {
             res.status(500).send(data);
@@ -225,13 +327,13 @@ router.get('/excelgeneralcobros', async function (req, res) {
     }
 });
 
-router.get('/xmlsunat',async function(req, res) {
+router.get('/xmlsunat', async function (req, res) {
     const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
     req.query.idSede = decryptedData.idSede;
     req.query.idCobro = decryptedData.idCobro;
     req.query.xmlSunat = decryptedData.xmlSunat;
 
-    
+
     const sedeInfo = await sede.infoSedeReporte(req);
 
     if (typeof sedeInfo !== 'object') {
@@ -249,8 +351,7 @@ router.get('/xmlsunat',async function(req, res) {
         const buffXmlSunat = Buffer.from(JSON.stringify(object), "utf-8");
         res.end(buffXmlSunat);
     } else {
-        console.log(detalle)
-        res.status(500).send(detalle)
+        res.status(500).send(detalle);
     }
 });
 

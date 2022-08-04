@@ -60,7 +60,7 @@ class CpeElectronicos extends React.Component {
 
             await this.setStateAsync({
                 ruc: result.data.documento,
-                rucEmisor: result.data.razonSocial,
+                rucEmisor: result.data.documento,
                 usuario: result.data.useSol,
                 clave: result.data.claveSol,
 

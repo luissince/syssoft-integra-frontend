@@ -656,7 +656,6 @@ class RepFactura {
 
             doc.end();
             return getStream.buffer(doc);
-
         } catch (error) {
             return "Se genero un error al generar el reporte.";
         }

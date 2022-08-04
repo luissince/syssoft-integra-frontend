@@ -31,6 +31,8 @@ class EmpresaProceso extends React.Component {
             direccion: '',
             useSol: '',
             claveSol: '',
+            usuarioEmail: '',
+            claveEmail: '',
             logo: noImage,
             image: noImage,
 
@@ -140,6 +142,9 @@ class EmpresaProceso extends React.Component {
                 useSol: data.useSol,
                 claveSol: data.claveSol,
 
+                usuarioEmail: data.usuarioEmail,
+                claveEmail: data.claveEmail,
+
                 logo: data.rutaLogo !== "" ? "/" + data.rutaLogo : noImage,
                 image: data.rutaImage !== "" ? "/" + data.rutaImage : noImage,
 
@@ -219,6 +224,9 @@ class EmpresaProceso extends React.Component {
 
                     "useSol": this.state.useSol.trim(),
                     "claveSol": this.state.claveSol.trim(),
+
+                    "usuarioEmail": this.state.usuarioEmail.trim(),
+                    "claveEmail": this.state.claveEmail.trim(),
 
                     "logo": baseLogo,
                     "image": baseImage,
@@ -335,7 +343,29 @@ class EmpresaProceso extends React.Component {
 
                 <div className="form-row">
                     <div className="form-group col-md-6">
-                        <label>Usuario Sol(Sunat): </label>
+                        <label>Usuario Email (<small>Para el envío del correo</small>): </label>
+                        <input
+                            type="text"
+                            className="form-control"
+                            value={this.state.usuarioEmail}
+                            onChange={(event) => this.setState({ usuarioEmail: event.target.value })}
+                            placeholder="Email de Envío" />
+                    </div>
+
+                    <div className="form-group col-md-6">
+                        <label>Contraseña Email (<small>Para el envío del correo</small>): </label>
+                        <input
+                            type="password"
+                            className="form-control"
+                            value={this.state.claveEmail}
+                            onChange={(event) => this.setState({ claveEmail: event.target.value })}
+                            placeholder="********" />
+                    </div>
+                </div>
+
+                <div className="form-row">
+                    <div className="form-group col-md-6">
+                        <label>Usuario Sol(<small>Para el envío a Sunat</small>): </label>
                         <input
                             type="text"
                             className="form-control"
@@ -345,16 +375,15 @@ class EmpresaProceso extends React.Component {
                     </div>
 
                     <div className="form-group col-md-6">
-                        <label>Clave Sol(Sunat): </label>
+                        <label>Clave Sol(<small>Para el envío a Sunat</small>): </label>
                         <input
-                            type="text"
+                            type="password"
                             className="form-control"
                             value={this.state.claveSol}
                             onChange={(event) => this.setState({ claveSol: event.target.value })}
                             placeholder="********" />
                     </div>
                 </div>
-
 
                 <div className="form-row">
                     <div className="form-group col-md-6 text-center">
