@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const nodemailer = require("nodemailer");
+const smtpTransport = require('nodemailer-smtp-transport');
 const { decrypt } = require('../tools/CryptoJS');
 const { generateExcel } = require('../excel/FileFinanza')
 const Cobro = require('../services/Cobro');
@@ -108,17 +109,15 @@ router.get('/email', async function (req, res) {
                             res.status(400).send("El correo del cliente no es valido.");
                         } else {
                             // create reusable transporter object using the default SMTP transport
-                            let transporter = nodemailer.createTransport({
-                                // host: "smtp-mail.outlook.com.",
+                            let transporter = nodemailer.createTransport(smtpTransport({
+                                 // host: "smtp-mail.outlook.com.",
                                 // port: 587,
-                                host: "smtp.gmail.com",
-                                port: 465,
-                                secure: true, // true for 465, false for other ports
+                                service: 'gmail',
                                 auth: {
                                     user: sedeInfo.usuarioEmail, // generated ethereal user
                                     pass: sedeInfo.claveEmail, // generated ethereal password
-                                },
-                            });
+                                }
+                            }));
                             // send mail with defined transport object
                             // Message object
                             let message = {
@@ -172,6 +171,7 @@ router.get('/email', async function (req, res) {
             res.status(500).send(detalle);
         }
     } catch (error) {
+        console.log(error)
         res.status(500).send("Se produjo un error de servidor, intente nuevamente.");
     }
 });
