@@ -109,8 +109,10 @@ router.get('/email', async function (req, res) {
                         } else {
                             // create reusable transporter object using the default SMTP transport
                             let transporter = nodemailer.createTransport({
-                                host: "smtp-mail.outlook.com.",
-                                port: 587,
+                                // host: "smtp-mail.outlook.com.",
+                                // port: 587,
+                                host: "smtp.gmail.com",
+                                port: 465,
                                 secure: false, // true for 465, false for other ports
                                 auth: {
                                     user: sedeInfo.usuarioEmail, // generated ethereal user

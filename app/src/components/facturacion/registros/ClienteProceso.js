@@ -189,7 +189,7 @@ class ClienteProceso extends React.Component {
         try {
             ModalAlertInfo("Cliente", "Procesando información...");
             if (this.state.idCliente !== '') {
-                const cliente = await axios.post('/api/cliente/update', {
+                const cliente = await axios.put('/api/cliente/update', {
                     "idTipoDocumento": this.state.idTipoDocumento,
                     "documento": this.state.documento.toString().trim().toUpperCase(),
                     "informacion": this.state.informacion.trim().toUpperCase(),
