@@ -113,7 +113,7 @@ router.get('/email', async function (req, res) {
                                 // port: 587,
                                 host: "smtp.gmail.com",
                                 port: 465,
-                                secure: false, // true for 465, false for other ports
+                                secure: true, // true for 465, false for other ports
                                 auth: {
                                     user: sedeInfo.usuarioEmail, // generated ethereal user
                                     pass: sedeInfo.claveEmail, // generated ethereal password
