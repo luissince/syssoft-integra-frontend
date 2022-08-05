@@ -15,6 +15,8 @@ class Clientes extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            idProyecto: this.props.token.project.idProyecto,
+
             loading: false,
             lista: [],
 
@@ -94,6 +96,7 @@ class Clientes extends React.Component {
                 params: {
                     "opcion": opcion,
                     "buscar": buscar,
+                    "idProyecto": this.state.idProyecto,
                     "posicionPagina": ((this.state.paginacion - 1) * this.state.filasPorPagina),
                     "filasPorPagina": this.state.filasPorPagina
                 }

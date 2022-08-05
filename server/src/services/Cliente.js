@@ -8,6 +8,7 @@ class Cliente {
         try {
             let lista = await conec.query(`SELECT 
             c.idCliente ,
+            v.idProyecto,
             td.nombre as tipodocumento,
             c.documento,
             c.informacion,
@@ -17,21 +18,25 @@ class Cliente {
             c.estado
             FROM cliente AS c
             INNER JOIN tipoDocumento AS td ON td.idTipoDocumento = c.idTipoDocumento
+            INNER JOIN venta AS v ON v.idCliente = c.idCliente
             WHERE 
-            ? = 0
+            ? = 0 AND v.idProyecto = ?
             OR
-            ? = 1 and c.documento like concat(?,'%')
+            ? = 1 and c.documento like concat(?,'%') AND v.idProyecto = ?
             OR
-            ? = 1 and c.informacion like concat(?,'%')
+            ? = 1 and c.informacion like concat(?,'%') AND v.idProyecto = ?
             ORDER BY c.fecha ASC, c.hora ASC
             LIMIT ?,?`, [
                 parseInt(req.query.opcion),
+                req.query.idProyecto,
 
                 parseInt(req.query.opcion),
                 req.query.buscar,
+                req.query.idProyecto,
 
                 parseInt(req.query.opcion),
                 req.query.buscar,
+                req.query.idProyecto,
 
                 parseInt(req.query.posicionPagina),
                 parseInt(req.query.filasPorPagina)
@@ -50,8 +55,9 @@ class Cliente {
                     inner join ventaDetalle as vd on vd.idVenta = v.idVenta
                     inner join lote as l on l.idLote = vd.idLote
                     inner join manzana as m on m.idManzana = l.idManzana
-                    where v.idCliente = ?`, [
-                    value.idCliente
+                    where v.idCliente = ? and v.idProyecto = ?`, [
+                    value.idCliente,
+                    value.idProyecto
                 ]);
 
                 newLista.push({
@@ -71,20 +77,24 @@ class Cliente {
             let total = await conec.query(`SELECT COUNT(*) AS Total 
             FROM cliente AS c
             INNER JOIN tipoDocumento AS td ON td.idTipoDocumento = c.idTipoDocumento
+            INNER JOIN venta AS v ON v.idCliente = c.idCliente
             WHERE 
-            ? = 0
+            ? = 0 AND v.idProyecto = ?
             OR
-            ? = 1 and c.documento like concat(?,'%')
+            ? = 1 and c.documento like concat(?,'%') AND v.idProyecto = ?
             OR
-            ? = 1 and c.informacion like concat(?,'%')`, [
+            ? = 1 and c.informacion like concat(?,'%') AND v.idProyecto = ?`, [
 
                 parseInt(req.query.opcion),
+                req.query.idProyecto,
 
                 parseInt(req.query.opcion),
                 req.query.buscar,
+                req.query.idProyecto,
 
                 parseInt(req.query.opcion),
-                req.query.buscar
+                req.query.buscar,
+                req.query.idProyecto
             ]);
 
             return { "result": resultLista, "total": total[0].Total };
