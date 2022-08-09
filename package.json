@@ -27,6 +27,7 @@
     "js-file-download": "^0.4.12",
     "mime": "^3.0.0",
     "moment": "^2.29.3",
-    "nodemailer": "^6.7.7"
+    "nodemailer": "^6.7.7",
+    "nodemailer-smtp-transport": "^2.7.4"
   }
 }
