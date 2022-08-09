@@ -146,7 +146,7 @@ class Creditos extends React.Component {
         return (
             <>
                 <div className='row'>
-                    <div className='col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12'>
+                    <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                         <div className="form-group">
                             <h5>Lista de Créditos <small className="text-secondary">LISTA</small></h5>
                         </div>
@@ -154,7 +154,7 @@ class Creditos extends React.Component {
                 </div>
 
                 <div className="row">
-                    <div className="col-xl-2 col-lg-2 col-md-12 col-sm-12 col-12">
+                    <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                         <div className="form-group">
                             <div className="input-group">
                                 <button className="btn btn-outline-secondary" onClick={() => this.loadInit()}>
@@ -166,6 +166,26 @@ class Creditos extends React.Component {
                 </div>
 
                 <div className="row">
+
+                </div>
+
+                <div className="row">
+                    <div className="col-xl-6 col-lg-12 col-md-12 col-sm-12 col-12">
+                        <div className="form-group">
+                            <div className="input-group mb-2">
+                                <div className="input-group-prepend">
+                                    <div className="input-group-text"><i className="bi bi-search"></i></div>
+                                </div>
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    placeholder="Buscar..."
+                                    ref={this.refTxtSearch}
+                                    onKeyUp={(event) => this.searchText(event.target.value)} />
+                            </div>
+                        </div>
+                    </div>
+
                     <div className="col-xl-3 col-lg-4 col-md-12 col-sm-12 col-12">
                         <div className="form-group">
                             <select className="form-control"
@@ -201,24 +221,6 @@ class Creditos extends React.Component {
                                     Listar Ventas de cada 30
                                 </option>
                             </select>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="row">
-                    <div className="col-xl-6 col-lg-12 col-md-12 col-sm-12 col-12">
-                        <div className="form-group">
-                            <div className="input-group mb-2">
-                                <div className="input-group-prepend">
-                                    <div className="input-group-text"><i className="bi bi-search"></i></div>
-                                </div>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    placeholder="Buscar..."
-                                    ref={this.refTxtSearch}
-                                    onKeyUp={(event) => this.searchText(event.target.value)} />
-                            </div>
                         </div>
                     </div>
                 </div>

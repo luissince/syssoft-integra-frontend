@@ -27,6 +27,7 @@ class Clientes extends React.Component {
 
             opcion: 0,
             paginacion: 0,
+            fill: 'any',
             totalPaginacion: 0,
             filasPorPagina: 10,
             messageTable: 'Cargando información...',
@@ -97,6 +98,7 @@ class Clientes extends React.Component {
                     "opcion": opcion,
                     "buscar": buscar,
                     "idProyecto": this.state.idProyecto,
+                    "fill": this.state.fill,
                     "posicionPagina": ((this.state.paginacion - 1) * this.state.filasPorPagina),
                     "filasPorPagina": this.state.filasPorPagina
                 }
@@ -180,32 +182,54 @@ class Clientes extends React.Component {
                 </div>
 
                 <div className="row">
-                    <div className="col-md-6 col-sm-12">
+                    <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <div className="form-group">
+                            <button className="btn btn-outline-info" onClick={() => this.onEventAdd()} disabled={!this.state.add}>
+                                <i className="bi bi-file-plus"></i> Nuevo Registro
+                            </button>
+                            {" "}
+                            <button className="btn btn-outline-secondary" onClick={() => this.loadInit()}>
+                                <i className="bi bi-arrow-clockwise"></i> Recargar Vista
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="row">
+                    <div className="col-lg-6 col-md-6 col-sm-12 col-xs-12">
                         <div className="form-group">
                             <div className="input-group mb-2">
                                 <div className="input-group-prepend">
-                                    <div className="input-group-text"><i className="bi bi-search"></i></div>
+                                    <div className="input-group-text">
+                                        <i className="bi bi-search"></i>
+                                    </div>
                                 </div>
                                 <input
                                     type="text"
                                     className="form-control"
                                     placeholder="Buscar..."
                                     ref={this.refTxtSearch}
-                                    onKeyUp={(event) => this.searchText(event.target.value)} />
+                                    onKeyUp={(event) => this.searchText(event.target.value)}
+                                />
                             </div>
                         </div>
                     </div>
-                    <div className="col-md-6 col-sm-12">
+
+                    <div className="col-lg-4 col-md-6 col-sm-12 col-xs-12">
                         <div className="form-group">
-                            <div className="form-group">
-                                <button className="btn btn-outline-info" onClick={() => this.onEventAdd()} disabled={!this.state.add}>
-                                    <i className="bi bi-file-plus"></i> Nuevo Registro
-                                </button>
-                                {" "}
-                                <button className="btn btn-outline-secondary" onClick={() => this.loadInit()}>
-                                    <i className="bi bi-arrow-clockwise"></i>
-                                </button>
-                            </div>
+                            <select className="form-control"
+                                value={this.state.fill}
+                                onChange={async (value) => {
+                                    await this.setStateAsync({ fill: value.target.value })
+                                    this.loadInit();
+                                }}>
+                                <option value="any">
+                                    Listar clientes por proyecto
+                                </option>
+                                <option value="all">
+                                    Listar todos los clientes
+                                </option>
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -255,7 +279,7 @@ class Clientes extends React.Component {
                                                                 <div key={indexd}>
                                                                     <span>{detalle.descripcion}{<br />}{<small>{detalle.manzana}</small>}</span>
                                                                     <br />
-                                                                    {indexd == item.detalle.length - 1  ? null :  <hr />}
+                                                                    {indexd == item.detalle.length - 1 ? null : <hr />}
                                                                 </div>
                                                             ))
                                                         }</td>

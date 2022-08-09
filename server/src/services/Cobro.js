@@ -1365,6 +1365,26 @@ class Cobro {
         }
     }
 
+    async notificaciones(req) {
+        try {
+            const result = await conec.query(`SELECT 
+            c.serie,
+            co.nombre,
+            CASE c.estado
+            WHEN 3 THEN 'DAR DE BAJA'
+            ELSE 'POR DECLARAR' END AS 'estado',
+            COUNT(c.serie) AS 'cantidad'
+            FROM cobro AS c 
+            INNER JOIN comprobante AS co 
+            ON co.idComprobante = c.idComprobante
+            WHERE co.tipo = 1
+            GROUP BY c.serie,co.nombre`);
+            return result;
+        } catch (error) {
+            return "Se produjo un error de servidor, intente nuevamente.";
+        }
+    }
+
 }
 
 module.exports = Cobro

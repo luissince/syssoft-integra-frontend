@@ -47,6 +47,7 @@ class CpeElectronicos extends React.Component {
 
             opcion: 0,
             paginacion: 0,
+            fill: 'any',
             totalPaginacion: 0,
             filasPorPagina: 10,
             messageTable: 'Cargando información...',
@@ -189,6 +190,7 @@ class CpeElectronicos extends React.Component {
                     "idComprobante": idComprobante,
                     "idEstado": idEstado,
                     "idProyecto": this.state.idProyecto,
+                    "fill": this.state.fill,
                     "posicionPagina": ((this.state.paginacion - 1) * this.state.filasPorPagina),
                     "filasPorPagina": this.state.filasPorPagina
                 }
@@ -397,6 +399,16 @@ class CpeElectronicos extends React.Component {
                         </div>
 
                         <div className="row">
+                            <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                <div className="form-group">
+                                    <button className="btn btn-outline-light" onClick={() => this.loadInit()}>
+                                        <i className="bi bi-arrow-clockwise"></i> Recargar Vista
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="row">
                             <div className='col-lg-3 col-md-3 col-sm-12 col-xs-12'>
                                 <div className="form-group">
                                     <label>Fecha de Inicio:</label>
@@ -463,8 +475,9 @@ class CpeElectronicos extends React.Component {
                         </div>
 
                         <div className="row">
-                            <div className="col-md-6 col-sm-12">
+                            <div className="col-lg-6 col-md-6 col-sm-12 col-xs-12">
                                 <div className="form-group">
+                                    <label>Buscar:</label>
                                     <div className="input-group mb-2">
                                         <div className="input-group-prepend">
                                             <div className="input-group-text"><i className="bi bi-search"></i></div>
@@ -472,17 +485,28 @@ class CpeElectronicos extends React.Component {
                                         <input
                                             type="text"
                                             className="form-control"
-                                            placeholder="Buscar..."
+                                            placeholder="Ingrese los datos requeridos..."
                                             ref={this.refTxtSearch}
-                                            onKeyUp={(event) => this.searchText(event.target.value)} />
+                                            onKeyUp={(event) => this.searchText(event.target.value)}
+                                        />
                                     </div>
                                 </div>
                             </div>
-                            <div className="col-md-6 col-sm-12">
+                            <div className="col-lg-3 col-md-6 col-sm-12 col-xs-12">
                                 <div className="form-group">
-                                    <button className="btn btn-outline-light" onClick={() => this.loadInit()}>
-                                        <i className="bi bi-arrow-clockwise"></i>
-                                    </button>
+                                    <label>Listar:</label>
+                                    <select className="form-control" value={this.state.fill}
+                                        onChange={async (value) => {
+                                            await this.setStateAsync({ fill: value.target.value })
+                                            this.loadInit();
+                                        }}>
+                                        <option value="any">
+                                            Por proyecto
+                                        </option>
+                                        <option value="all">
+                                            Todos
+                                        </option>
+                                    </select>
                                 </div>
                             </div>
                         </div>

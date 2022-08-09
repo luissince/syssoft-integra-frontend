@@ -1185,7 +1185,7 @@ class Factura {
 
     async cpesunat(req, res) {
         try {
-            let lista = await conec.procedure(`CALL Listar_CpeSunat(?,?,?,?,?,?,?,?,?)`, [
+            let lista = await conec.procedure(`CALL Listar_CpeSunat(?,?,?,?,?,?,?,?,?,?)`, [
                 parseInt(req.query.opcion),
                 req.query.idProyecto,
                 req.query.buscar,
@@ -1193,6 +1193,7 @@ class Factura {
                 req.query.fechaFinal,
                 req.query.idComprobante,
                 parseInt(req.query.idEstado),
+                req.query.fill,
                 parseInt(req.query.posicionPagina),
                 parseInt(req.query.filasPorPagina)
             ]);
@@ -1204,7 +1205,7 @@ class Factura {
                 }
             });
 
-            let total = await conec.procedure(`CALL Listar_CpeSunat_Count(?,?,?,?,?,?,?)`, [
+            let total = await conec.procedure(`CALL Listar_CpeSunat_Count(?,?,?,?,?,?,?,?)`, [
                 parseInt(req.query.opcion),
                 req.query.idProyecto,
                 req.query.buscar,
@@ -1212,6 +1213,7 @@ class Factura {
                 req.query.fechaFinal,
                 req.query.idComprobante,
                 parseInt(req.query.idEstado),
+                req.query.fill,
             ]);
 
             return sendSuccess(res, { "result": resultLista, "total": total[0].Total });

@@ -20,23 +20,29 @@ class Cliente {
             INNER JOIN tipoDocumento AS td ON td.idTipoDocumento = c.idTipoDocumento
             INNER JOIN venta AS v ON v.idCliente = c.idCliente
             WHERE 
-            ? = 0 AND v.idProyecto = ?
+            ? = 0 AND (v.idProyecto = ? AND ? = 'any' OR ? = 'all')
             OR
-            ? = 1 and c.documento like concat(?,'%') AND v.idProyecto = ?
+            ? = 1 and c.documento like concat(?,'%') AND (v.idProyecto = ? AND ? = 'any' OR ? = 'all')
             OR
-            ? = 1 and c.informacion like concat(?,'%') AND v.idProyecto = ?
+            ? = 1 and c.informacion like concat(?,'%') AND (v.idProyecto = ? AND ? = 'any' OR ? = 'all')
             ORDER BY c.fecha ASC, c.hora ASC
             LIMIT ?,?`, [
                 parseInt(req.query.opcion),
                 req.query.idProyecto,
+                req.query.fill,
+                req.query.fill,
 
                 parseInt(req.query.opcion),
                 req.query.buscar,
                 req.query.idProyecto,
+                req.query.fill,
+                req.query.fill,
 
                 parseInt(req.query.opcion),
                 req.query.buscar,
                 req.query.idProyecto,
+                req.query.fill,
+                req.query.fill,
 
                 parseInt(req.query.posicionPagina),
                 parseInt(req.query.filasPorPagina)
@@ -79,22 +85,28 @@ class Cliente {
             INNER JOIN tipoDocumento AS td ON td.idTipoDocumento = c.idTipoDocumento
             INNER JOIN venta AS v ON v.idCliente = c.idCliente
             WHERE 
-            ? = 0 AND v.idProyecto = ?
+            ? = 0 AND (v.idProyecto = ? AND ? = 'any' OR ? = 'all')
             OR
-            ? = 1 and c.documento like concat(?,'%') AND v.idProyecto = ?
+            ? = 1 and c.documento like concat(?,'%') AND (v.idProyecto = ? AND ? = 'any' OR ? = 'all')
             OR
-            ? = 1 and c.informacion like concat(?,'%') AND v.idProyecto = ?`, [
+            ? = 1 and c.informacion like concat(?,'%') AND (v.idProyecto = ? AND ? = 'any' OR ? = 'all')`, [
 
                 parseInt(req.query.opcion),
                 req.query.idProyecto,
+                req.query.fill,
+                req.query.fill,
 
                 parseInt(req.query.opcion),
                 req.query.buscar,
                 req.query.idProyecto,
+                req.query.fill,
+                req.query.fill,
 
                 parseInt(req.query.opcion),
                 req.query.buscar,
-                req.query.idProyecto
+                req.query.idProyecto,
+                req.query.fill,
+                req.query.fill,
             ]);
 
             return { "result": resultLista, "total": total[0].Total };

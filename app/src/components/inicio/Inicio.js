@@ -1,4 +1,5 @@
 import React from 'react';
+import axios from 'axios';
 import { Switch, Route, Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { signOut, closeProject } from '../../redux/actions';
@@ -58,7 +59,9 @@ const Page404 = (props) => {
             <div className="col-lg-6 mx-auto">
                 <p className="lead mb-4">No se encuentra la página que ha solicitado.</p>
                 <div className="d-grid gap-2 d-sm-flex justify-content-sm-center">
-                    <button type="button" onClick={() => props.history.goBack()} className="btn btn-outline-secondary btn-lg px-4"><i className="bi bi-arrow-left"></i> Regresar</button>
+                    <button type="button" onClick={() => props.history.goBack()} className="btn btn-outline-secondary btn-lg px-4">
+                        <i className="bi bi-arrow-left"></i> Regresar
+                    </button>
                 </div>
             </div>
         </div>
@@ -70,15 +73,25 @@ class Inicio extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            isModal: false
+            isModal: false,
+            notificaciones:[],
         }
     }
 
-    componentDidMount() {
+    async componentDidMount() {
         window.addEventListener('focus', this.onEventFocused);
         window.addEventListener('resize', this.onEventResize);
         window.addEventListener('click', this.onEventClick);
         this.onEventSideBar();
+
+        try {
+            let result = await axios.get("/api/cobro/notificaciones");
+
+            this.setState({notificaciones:result.data})
+            // console.log(result.data);
+        } catch (error) {
+            console.log(error.response)
+        }
     }
 
     componentWillUnmount() {
@@ -101,11 +114,11 @@ class Inicio extends React.Component {
             }
 
             let projectToken = window.localStorage.getItem('project');
-            
+
             let projectCurrent = JSON.parse(projectToken)
             let projectOld = this.props.token.project;
-            
-            if(JSON.stringify(projectCurrent) !== JSON.stringify(projectOld)) {
+
+            if (JSON.stringify(projectCurrent) !== JSON.stringify(projectOld)) {
                 window.location.href = "/";
                 return;
             }
@@ -188,7 +201,7 @@ class Inicio extends React.Component {
                 <Menu  {...this.props} url={url} />
 
                 <main className="position-relative">
-                    <Head {...this.props} openAndClose={this.openAndClose} />
+                    <Head {...this.props} openAndClose={this.openAndClose} notificaciones={this.state.notificaciones}/>
 
                     <div className="container-fluid mt-3">
                         <div className="bg-white p-3 border border-light-purple rounded">
@@ -281,7 +294,7 @@ class Inicio extends React.Component {
                                     exact={true}
                                     render={(props) => <CreditoProceso {...props} />}
                                 />
-                                <Route 
+                                <Route
                                     path={`${path}/socios`}
                                     exact={true}
                                     render={(props) => <Socios {...props} />}
@@ -403,19 +416,6 @@ class Inicio extends React.Component {
                         </div>
                     </div>
                     <Footer />
-
-                    {/* <div id="fotterbar">
-                        <div className="fotterbar-left">
-                            <span><i className="fa fa-user small"></i> Administrador</span>
-                        </div>
-                        <div className="fotterbar-right">
-                            <div className="fotterbar-right-content">
-                                <div className="progress">
-                                    <div className="progress-bar progress-bar-striped" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style={{ "width": "10%" }}>0%</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div> */}
                 </main>
             </div>
         )

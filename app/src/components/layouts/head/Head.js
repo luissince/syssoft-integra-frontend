@@ -26,22 +26,57 @@ class Menu extends React.Component {
     render() {
         return (
             <header className="app-header">
-                <span className="app-sidebar__toggle" type="button" onClick={this.props.openAndClose}>
+                <span className="app-sidebar__toggle" onClick={this.props.openAndClose}>
                 </span>
 
                 <ul className="app-nav">
                     <div className="dropdown">
-                        <span className="app-nav__item" type="button">
+                        <a className="app-nav__item"
+                            href=""
+                            data-bs-toggle="dropdown"
+                            aria-label="Abrir Notificaciones"
+                            aria-expanded="false">
                             <i className="fa fa-bell-o fa-sm  fa-sm"></i>
-                            <span className="pl-1 pr-1 badge-warning rounded h7 icon-absolute ">0</span>
-                        </span>
+                            <span className="pl-1 pr-1 badge-warning rounded h7 icon-absolute ">{this.props.notificaciones.length}</span>
+                        </a>
+                        <ul className="dropdown-menu settings-menu dropdown-menu-right">
+
+                            <div className="app-notification__content">
+                                {
+                                    this.props.notificaciones.length != 0 ?
+                                        this.props.notificaciones.map((item, index) => (
+                                            <li key={index}>
+                                                <a className="app-notification__item">
+                                                    <span className="app-notification__icon">
+                                                        <span className="fa-stack fa-lg">
+                                                            <i className="fa fa-circle fa-stack-2x text-primary"></i>
+                                                            <i className="fa fa-warning fa-stack-1x fa-inverse"></i>
+                                                        </span>
+                                                    </span>
+                                                    <div>
+                                                        <p className="app-notification__message">{item.cantidad} {item.nombre}</p>
+                                                        <p className="app-notification__meta">{item.estado}</p>
+                                                    </div>
+                                                </a>
+                                            </li>
+                                        ))
+
+                                        : null
+                                }
+                            </div>
+                            {
+                                this.props.notificaciones.length == 0 ?
+                                    <li className="app-notification__footer">No hay notificaciones para mostrar.</li>
+                                    : null
+                            }
+                        </ul>
                     </div>
                     <div className="dropdown">
-                        <a className="app-nav__item" href=""
+                        <a className="app-nav__item"
+                            href=""
                             data-bs-toggle="dropdown"
-                            aria-label="Open Profile Menu"
-                            aria-expanded="false"
-                            type="button">
+                            aria-label="Abrir Perfil"
+                            aria-expanded="false">
                             <img src={usuario} className="user-image" alt="Usuario" />
                         </a>
                         <ul className="dropdown-menu settings-menu dropdown-menu-right">
