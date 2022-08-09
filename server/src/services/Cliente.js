@@ -118,8 +118,9 @@ class Cliente {
             FROM cliente AS c
             INNER JOIN tipoDocumento AS td ON td.idTipoDocumento = c.idTipoDocumento
             INNER JOIN venta AS v ON c.idCliente = v.idCliente AND v.estado = 1
+            INNER JOIN cobro AS cb On cb.idCliente = c.idCliente
             WHERE 
-            ? = 0
+            ? = 0 and  cb.fecha BETWEEN ? AND ? AND cb.idProyecto = ?
             OR
             ? = 1 and c.documento like concat(?,'%')
             OR
@@ -127,6 +128,9 @@ class Cliente {
             ORDER BY c.fecha ASC, c.hora ASC
             LIMIT ?,?`, [
                 parseInt(req.query.opcion),
+                req.query.fechaInicio,
+                req.query.fechaFin,
+                parseInt(req.query.idProyecto),
 
                 parseInt(req.query.opcion),
                 req.query.buscar,

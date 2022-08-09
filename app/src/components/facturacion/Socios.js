@@ -7,7 +7,9 @@ import {
     ModalAlertSuccess,
     ModalAlertWarning,
     ModalAlertDialog,
-    statePrivilegio
+    statePrivilegio,
+    currentDate,
+    validateDate
 } from '../tools/Tools';
 import Paginacion from '../tools/Paginacion';
 
@@ -17,6 +19,11 @@ class Socios extends React.Component {
         this.state = {
             loading: false,
             lista: [],
+            idConcepto: '',
+            conceptos: [],
+
+            fechaInicio: currentDate(),
+            fechaFinal: currentDate(),
 
             view: statePrivilegio(this.props.token.userToken.menus[2].submenu[4].privilegio[0].estado),
 
@@ -28,9 +35,12 @@ class Socios extends React.Component {
             messagePaginacion: 'Mostranto 0 de 0 Páginas'
         }
         this.refTxtSearch = React.createRef();
+        this.refConcepto = React.createRef();
 
         this.idCodigo = "";
         this.abortControllerTable = new AbortController();
+
+        this.abortControllerView = new AbortController();
     }
 
     setStateAsync(state) {
@@ -48,10 +58,27 @@ class Socios extends React.Component {
     }
 
     loadInit = async () => {
+        const concepto = await axios.get("/api/concepto/listcombo", {
+            signal: this.abortControllerView.signal,
+        });
+
         if (this.state.loading) return;
 
+        await this.setStateAsync({
+            conceptos: concepto.data
+        })
+
+        this.searchFecha();
+    }
+
+    async searchFecha() {
+        if (this.state.loading) return;
+
+        if (!validateDate(this.state.fechaInicio)) return;
+        if (!validateDate(this.state.fechaFinal)) return;
+
         await this.setStateAsync({ paginacion: 1 });
-        this.fillTable(0, "");
+        this.fillTable(0, "", this.state.fechaInicio, this.state.fechaFinal, this.state.idConcepto);
         await this.setStateAsync({ opcion: 0 });
     }
 
@@ -61,7 +88,7 @@ class Socios extends React.Component {
         if (text.trim().length === 0) return;
 
         await this.setStateAsync({ paginacion: 1 });
-        this.fillTable(1, text.trim());
+        this.fillTable(1, text.trim(), "", "", "");
         await this.setStateAsync({ opcion: 1 });
     }
 
@@ -82,7 +109,7 @@ class Socios extends React.Component {
         }
     }
 
-    fillTable = async (opcion, buscar) => {
+    fillTable = async (opcion, buscar, fechaInicio, fechaFinal, idConcepto) => {
         try {
             await this.setStateAsync({ loading: true, lista: [], messageTable: "Cargando información...", messagePaginacion: "Mostranto 0 de 0 Páginas" });
 
@@ -91,6 +118,10 @@ class Socios extends React.Component {
                 params: {
                     "opcion": opcion,
                     "buscar": buscar,
+                    "fechaInicio": fechaInicio,
+                    "fechaFinal": fechaFinal,
+                    "idConcepto": idConcepto,
+                    "idProyecto": this.state.idProyecto,
                     "posicionPagina": ((this.state.paginacion - 1) * this.state.filasPorPagina),
                     "filasPorPagina": this.state.filasPorPagina
                 }
@@ -174,8 +205,35 @@ class Socios extends React.Component {
                 </div>
 
                 <div className="row">
-                    <div className="col-md-6 col-sm-12">
+                    <div className='col-lg-2 col-md-3 col-sm-12 col-xs-12'>
                         <div className="form-group">
+                            <label>Fecha Inicio Cobro:</label>
+                            <input
+                                className="form-control"
+                                type="date"
+                                value={this.state.fechaInicio}
+                                onChange={async (event) => {
+                                    await this.setStateAsync({ fechaInicio: event.target.value })
+                                    this.searchFecha();
+                                }} />
+                        </div>
+                    </div>
+                    <div className='col-lg-2 col-md-3 col-sm-12 col-xs-12'>
+                        <div className="form-group">
+                            <label>Fecha Fin Cobro:</label>
+                            <input
+                                className="form-control"
+                                type="date"
+                                value={this.state.fechaFinal}
+                                onChange={async (event) => {
+                                    await this.setStateAsync({ fechaFinal: event.target.value })
+                                    this.searchFecha();
+                                }} />
+                        </div>
+                    </div>
+                    <div className="col-md-4 col-sm-12">
+                        <div className="form-group">
+                            <label>Busqueda socio / asociado:</label>
                             <div className="input-group mb-2">
                                 <div className="input-group-prepend">
                                     <div className="input-group-text"><i className="bi bi-search"></i></div>
@@ -189,8 +247,30 @@ class Socios extends React.Component {
                             </div>
                         </div>
                     </div>
-                    <div className="col-md-6 col-sm-12">
+                    <div className="col-md-3 col-sm-12">
+                        <label>Concepto:</label>
+                        <select
+                            title="Lista de conceptos"
+                            className="form-control"
+                            ref={this.refConcepto}
+                            value={this.state.idConcepto}
+                            onChange={(event) => {
+                                this.setState({
+                                    idConcepto: event.target.value
+                                })
+                            }}
+                        >
+                            <option value="">-- seleccione concepto --</option>
+                            {
+                                this.state.conceptos.map((item, index) => (
+                                    <option key={index} value={item.idConcepto}>{item.nombre}</option>
+                                ))
+                            }
+                        </select>
+                    </div>
+                    <div className="col-md-1 col-sm-12">
                         <div className="form-group">
+                            <label>Rec.</label>
                             <div className="form-group">
                                 <button className="btn btn-outline-secondary" onClick={() => this.loadInit()}>
                                     <i className="bi bi-arrow-clockwise"></i>
@@ -242,14 +322,14 @@ class Socios extends React.Component {
                                                                 <div key={indexd}>
                                                                     <span>{detalle.descripcion}{<br />}{<small>{detalle.manzana}</small>}</span>
                                                                     <br />
-                                                                    {indexd == item.detalle.length - 1  ? null :  <hr />}
+                                                                    {indexd == item.detalle.length - 1 ? null : <hr />}
                                                                 </div>
                                                             ))
                                                         }</td>
                                                         <td className="text-center">
                                                             <button
                                                                 className="btn btn-outline-info btn-sm"
-                                                                title="Editar" 
+                                                                title="Editar"
                                                                 disabled={!this.state.view}>
                                                                 <i className="bi bi-eye"></i>
                                                             </button>
