@@ -1377,7 +1377,10 @@ class Cobro {
             FROM cobro AS c 
             INNER JOIN comprobante AS co 
             ON co.idComprobante = c.idComprobante
-            WHERE co.tipo = 1
+            WHERE 
+            co.tipo = 1 AND IFNULL(c.xmlSunat,'') <> '0' AND IFNULL(c.xmlSunat,'') <> '1032'
+            OR
+            co.tipo = 1 AND IFNULL(c.xmlSunat,'') = '0' AND c.estado = 3
             GROUP BY c.serie,co.nombre`);
             return result;
         } catch (error) {

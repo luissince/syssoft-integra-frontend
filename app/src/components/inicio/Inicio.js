@@ -74,7 +74,7 @@ class Inicio extends React.Component {
         super(props);
         this.state = {
             isModal: false,
-            notificaciones:[],
+            notificaciones: [],
         }
     }
 
@@ -83,15 +83,7 @@ class Inicio extends React.Component {
         window.addEventListener('resize', this.onEventResize);
         window.addEventListener('click', this.onEventClick);
         this.onEventSideBar();
-
-        try {
-            let result = await axios.get("/api/cobro/notificaciones");
-
-            this.setState({notificaciones:result.data})
-            // console.log(result.data);
-        } catch (error) {
-            console.log(error.response)
-        }
+        this.loadNotifications();
     }
 
     componentWillUnmount() {
@@ -186,6 +178,15 @@ class Inicio extends React.Component {
         });
     }
 
+    async loadNotifications(){
+        try {
+            let result = await axios.get("/api/cobro/notificaciones");
+            this.setState({ notificaciones: result.data });
+        } catch (error) {
+            this.setState({ notificaciones: [] });
+        }
+    }
+
     render() {
         if (this.props.token.userToken == null) {
             return <Redirect to="/login" />
@@ -201,7 +202,7 @@ class Inicio extends React.Component {
                 <Menu  {...this.props} url={url} />
 
                 <main className="position-relative">
-                    <Head {...this.props} openAndClose={this.openAndClose} notificaciones={this.state.notificaciones}/>
+                    <Head {...this.props} openAndClose={this.openAndClose} notificaciones={this.state.notificaciones} />
 
                     <div className="container-fluid mt-3">
                         <div className="bg-white p-3 border border-light-purple rounded">
