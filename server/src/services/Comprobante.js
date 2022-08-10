@@ -293,7 +293,7 @@ class Comprobante {
             estado, 
             preferida 
             FROM comprobante
-            WHERE tipo = ?`, [
+            WHERE tipo = ? AND estado = 1`, [
                 req.query.tipo
             ]);
             return sendSuccess(res,result);

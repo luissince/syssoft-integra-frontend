@@ -91,8 +91,6 @@ class Inicio extends React.Component {
         this.onEventSideBar();
         this.loadNotifications();
 
-
-
         this.socket.on('message', text => {
             NotificationManager.info(text, "Notificación");
             if(this.audio !== undefined) this.audio.play();
