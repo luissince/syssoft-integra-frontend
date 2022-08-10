@@ -95,7 +95,6 @@ class Inicio extends React.Component {
             NotificationManager.info(text, "Notificación");
             if(this.audio !== undefined) this.audio.play();
         });
-
     }
 
     componentWillUnmount() {
