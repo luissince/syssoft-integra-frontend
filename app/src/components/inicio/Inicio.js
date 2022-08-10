@@ -1,5 +1,7 @@
 import React from 'react';
 import axios from 'axios';
+import { io } from "socket.io-client";
+import {NotificationContainer, NotificationManager} from 'react-notifications';
 import { Switch, Route, Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { signOut, closeProject } from '../../redux/actions';
@@ -50,6 +52,7 @@ import RepClientes from '../reporte/RepClientes';
 import CpeConsultar from '../cpesunat/CpeConsultar';
 import CpeElectronicos from '../cpesunat/CpeElectronicos';
 import logoEmpresa from '../../recursos/images/INMOBILIARIA.png';
+import mixkit from '../../recursos/sound/mixkit.wav';
 
 const Page404 = (props) => {
     return (
@@ -74,7 +77,7 @@ class Inicio extends React.Component {
         super(props);
         this.state = {
             isModal: false,
-            notificaciones: [],
+            notificaciones: [], 
         }
     }
 
@@ -84,6 +87,15 @@ class Inicio extends React.Component {
         window.addEventListener('click', this.onEventClick);
         this.onEventSideBar();
         this.loadNotifications();
+
+        const socket = io();
+
+        socket.on('message', text => {
+            NotificationManager.info(text,"Notificación");
+            let audio = new Audio(mixkit);
+            audio.play();
+        });
+       
     }
 
     componentWillUnmount() {
@@ -178,7 +190,7 @@ class Inicio extends React.Component {
         });
     }
 
-    async loadNotifications(){
+    async loadNotifications() {
         try {
             let result = await axios.get("/api/cobro/notificaciones");
             this.setState({ notificaciones: result.data });
@@ -418,6 +430,7 @@ class Inicio extends React.Component {
                     </div>
                     <Footer />
                 </main>
+                <NotificationContainer/>
             </div>
         )
     }

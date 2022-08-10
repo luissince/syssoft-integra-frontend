@@ -28,6 +28,10 @@
     "mime": "^3.0.0",
     "moment": "^2.29.3",
     "nodemailer": "^6.7.7",
-    "nodemailer-smtp-transport": "^2.7.4"
+    "nodemailer-smtp-transport": "^2.7.4",
+    "react-notifications": "^1.7.4",
+    "socket.io": "^4.5.1",
+    "socket.io-client": "^4.5.1",
+    "ws": "^8.8.1"
   }
 }

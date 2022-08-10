@@ -486,6 +486,8 @@ class Cobro {
                 req.body.idUsuario
             ]);
 
+            global.io.emit('message', `Cobro registro :D`);
+
             await conec.commit(connection);
             return "insert";
         } catch (error) {
@@ -716,6 +718,8 @@ class Cobro {
                 req.body.idUsuario
             ]);
 
+            global.io.emit('message', `Cobro registro :D`);
+
             await conec.commit(connection);
             return "insert";
         } catch (error) {
@@ -904,6 +908,8 @@ class Cobro {
                 currentTime(),
                 req.body.idUsuario
             ]);
+
+            global.io.emit('message', `Cobro registro :D`);
 
             await conec.commit(connection);
             return "insert";

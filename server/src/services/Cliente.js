@@ -394,7 +394,9 @@ class Cliente {
                 currentTime(),
                 req.body.idUsuario,
                 req.body.idCliente
-            ])
+            ]);
+
+            global.io.emit('message', `Cliente actualizo :D`);
 
             await conec.commit(connection)
             return "update";

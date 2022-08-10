@@ -1,16 +1,45 @@
+const http = require('http');
 const express = require('express');
-const path = require('path');
 const app = express();
+const path = require('path');
+const socket = require('socket.io');
 const cors = require('cors');
+
+/**
+ * Carga de variable de entorno
+ */
 require('dotenv').config();
 
-
-//cors para peticiones fuera del servidor
 /**
-* setHeader('Access-Control-Allow-Origin', '*')
-* setHeader('Access-Control-Allow-Headers', 'X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method')
-* setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE')
-*/
+ * Inicializando el constructor
+ */
+
+const server = http.createServer(app);
+const io = socket(server, {
+    cors: { origin: "*" }
+});
+global.io = io; 
+
+io.on('connection', (socket) => {
+    console.log('a user connected');
+
+    // socket.on('message', (message) => {
+        // console.log(message);
+        // io.emit('message', `${socket.id.substr(0, 2)} said ${message}`);
+    // });
+
+    socket.on("disconnect", () => {
+        console.log('desconnected '+socket.id)
+    });
+});
+
+
+/**
+ * CORS para peticiones externas
+ * setHeader('Access-Control-Allow-Origin', '*')
+ * setHeader('Access-Control-Allow-Headers', 'X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method')
+ * setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE')
+ */
 app.use(cors());
 
 /**
@@ -22,22 +51,22 @@ app.use(express.json({ limit: '1024mb' }));
 app.use(express.urlencoded({ limit: '1024mb', extended: false }));
 
 /**
- * 
+ * Cargar la app estatica compilada
  */
 app.use(express.static(path.join(__dirname, "..", "app/build")));
 
 /**
- * 
+ * Mostar estaticanmente las imagenes del proyecto
  */
 app.use(express.static(path.join(__dirname, "src/path/proyect")));
 
 /**
- * 
+ * Mostar estaticanmente las imagenes de la empresa
  */
 app.use(express.static(path.join(__dirname, "src/path/company")));
 
 /**
- * 
+ * Cargar las rutas de la apis
  */
 app.use('/api/comprobante', require('./src/router/Comprobante'));
 app.use('/api/moneda', require('./src/router/Moneda'));
@@ -75,9 +104,61 @@ app.use((req, res, next) => {
     res.sendFile(path.join(__dirname, "..", "app/build", "index.html"));
 });
 
+// // Se ejecuta cuando los clientes se conectan
+// io.on("connection", (socket) => {
+//     console.log(io.of("/").adapter);
+//     socket.on("joinRoom", ({ username, room }) => {
+//         const user = userJoin(socket.id, username, room);
+
+//         socket.join(user.room);
+
+//         // Mensaje de bienvenida
+//         socket.emit("message", formatMessage(botName, "Welcome to ChatCord!"));
+
+//         // Se emite un mensaje cuando un cliente se conecta
+//         socket.broadcast
+//             .to(user.room)
+//             .emit(
+//                 "message",
+//                 formatMessage(botName, `${user.username} has joined the chat`)
+//             );
+
+//         // Enviar información de usuarios y salas
+//         io.to(user.room).emit("roomUsers", {
+//             room: user.room,
+//             users: getRoomUsers(user.room),
+//         });
+//     });
+
+//     // Se listan los mensaje guardados
+//     socket.on("chatMessage", (msg) => {
+//         const user = getCurrentUser(socket.id);
+
+//         io.to(user.room).emit("message", formatMessage(user.username, msg));
+//     });
+
+//     // Se ejecuta cuando un cliente se desconecta
+//     socket.on("disconnect", () => {
+//         const user = userLeave(socket.id);
+
+//         if (user) {
+//             io.to(user.room).emit(
+//                 "message",
+//                 formatMessage(botName, `${user.username} has left the chat`)
+//             );
+
+//             // Enviar información de usuarios y salas
+//             io.to(user.room).emit("roomUsers", {
+//                 room: user.room,
+//                 users: getRoomUsers(user.room),
+//             });
+//         }
+//     });
+// });
+
 /**
  * 
  */
-app.listen(app.get("port"), () => {
+server.listen(app.get("port"), () => {
     console.log(`El servidor está corriendo en el puerto ${app.get("port")}`);
 });
