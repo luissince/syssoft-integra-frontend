@@ -50,9 +50,6 @@ class Cliente {
 
             let newLista = []
 
-
-            // console.log(lista)
-
             for (let value of lista) {
                 let detalle = await conec.query(`select 
                     l.descripcion,
@@ -111,7 +108,6 @@ class Cliente {
 
             return { "result": resultLista, "total": total[0].Total };
         } catch (error) {
-            console.log(error)
             return "Se produjo un error de servidor, intente nuevamente.";
         }
     }
@@ -155,9 +151,6 @@ class Cliente {
             ])
 
             let newLista = []
-
-
-            // console.log(lista)
 
             for (let value of lista) {
                 let detalle = await conec.query(`select 
@@ -207,7 +200,6 @@ class Cliente {
 
             return { "result": resultLista, "total": total[0].Total };
         } catch (error) {
-            console.log(error)
             return "Se produjo un error de servidor, intente nuevamente.";
         }
     }
@@ -300,7 +292,6 @@ class Cliente {
             if (connection != null) {
                 await conec.rollback(connection);
             }
-            console.log(error)
             return "Se produjo un error de servidor, intente nuevamente.";
         }
     }
@@ -348,7 +339,6 @@ class Cliente {
         try {
             connection = await conec.beginTransaction();
 
-            console.log(req.body)
             let validate = await conec.execute(connection, `SELECT * FROM cliente WHERE idCliente = ? AND documento <> ?`, [
                 req.body.idCliente,
                 req.body.documento,
@@ -401,8 +391,6 @@ class Cliente {
             await conec.commit(connection)
             return "update";
         } catch (error) {
-            console.error("error---------------------")
-            console.log(error)
             if (connection != null) {
                 await conec.rollback(connection);
             }

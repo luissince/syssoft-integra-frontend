@@ -1,7 +1,7 @@
 import React from 'react';
 import axios from 'axios';
 import { io } from "socket.io-client";
-import {NotificationContainer, NotificationManager} from 'react-notifications';
+import { NotificationContainer, NotificationManager } from 'react-notifications';
 import { Switch, Route, Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { signOut, closeProject } from '../../redux/actions';
@@ -77,8 +77,11 @@ class Inicio extends React.Component {
         super(props);
         this.state = {
             isModal: false,
-            notificaciones: [], 
+            notificaciones: [],
         }
+
+        this.socket = io();
+        this.audio = new Audio(mixkit);
     }
 
     async componentDidMount() {
@@ -88,20 +91,21 @@ class Inicio extends React.Component {
         this.onEventSideBar();
         this.loadNotifications();
 
-        const socket = io();
 
-        socket.on('message', text => {
-            NotificationManager.info(text,"Notificación");
-            let audio = new Audio(mixkit);
-            audio.play();
+
+        this.socket.on('message', text => {
+            NotificationManager.info(text, "Notificación");
+            if(this.audio !== undefined) this.audio.play();
         });
-       
+
     }
 
     componentWillUnmount() {
         window.removeEventListener('focus', this.onEventFocused);
         window.removeEventListener('resize', this.onEventResize);
         window.removeEventListener('click', this.onEventClick);
+
+        this.socket.disconnect();
     }
 
     onEventFocused = (event) => {
@@ -430,7 +434,7 @@ class Inicio extends React.Component {
                     </div>
                     <Footer />
                 </main>
-                <NotificationContainer/>
+                <NotificationContainer />
             </div>
         )
     }
