@@ -212,6 +212,7 @@ class Cobros extends React.Component {
                                         <th width="10%">Creación</th>
                                         <th width="10%">Cuenta</th>
                                         <th width="15%">Observación</th>
+                                        <th width="10%">Estado</th>
                                         <th width="10%">Monto</th>
                                         <th width="5%" className="text-center">Detalle</th>
                                         <th width="5%" className="text-center">Eliminar</th>
@@ -221,13 +222,13 @@ class Cobros extends React.Component {
                                     {
                                         this.state.loading ? (
                                             <tr>
-                                                <td className="text-center" colSpan="9">
+                                                <td className="text-center" colSpan="10">
                                                     {spinnerLoading()}
                                                 </td>
                                             </tr>
                                         ) : this.state.lista.length === 0 ? (
                                             <tr className="text-center">
-                                                <td colSpan="9">¡No hay datos registrados!</td>
+                                                <td colSpan="10">¡No hay datos registrados!</td>
                                             </tr>
                                         ) : (
                                             this.state.lista.map((item, index) => {
@@ -239,6 +240,7 @@ class Cobros extends React.Component {
                                                         <td>{item.fecha}{<br />}{timeForma24(item.hora)}</td>
                                                         <td>{item.banco}</td>
                                                         <td>{item.detalle}<br /><small>{item.comprobanteRef}</small></td>
+                                                        <td>{item.estado == 1 ? <span className="text-success">COBRADO</span> : <span className="text-danger">ANULADO</span>}</td>
                                                         <td>{numberFormat(item.monto)}</td>
                                                         <td className="text-center">
                                                             <button

@@ -4,7 +4,7 @@ const conec = new Conexion();
 
 class Lote {
 
-    async listar(req) {
+    async list(req) {
         try {
             let lista = await conec.query(`SELECT 
                 l.idLote,
@@ -453,7 +453,7 @@ class Lote {
                 LEFT JOIN cobroVenta AS cv ON cv.idCobro = c.idCobro 
                 LEFT JOIN venta AS v ON cv.idVenta = v.idVenta 
                 LEFT JOIN comprobante AS cp ON v.idComprobante = cp.idComprobante
-                WHERE c.idProcedencia = ? OR c.idProcedencia = ?
+                WHERE c.idProcedencia = ? AND c.estado = 1 OR c.idProcedencia = ? AND c.estado = 1
                 GROUP BY c.idCobro`, [
                     venta[0].idVenta,
                     req.query.idLote,

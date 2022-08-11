@@ -36,6 +36,8 @@ import ClienteProceso from '../facturacion/registros/ClienteProceso';
 import ClienteDetalle from '../facturacion/registros/ClienteDetalle';
 import CobroProceso from '../facturacion/registros/CobroProceso';
 import CobroDetalle from '../facturacion/registros/CobroDetalle';
+import NotaCredito from '../facturacion/NotaCredito';
+import NotaCreditoProceso from '../facturacion/registros/NotaCreditoProceso';
 import GastoProceso from '../tesoreria/registros/GastoProceso';
 import GastoDetalle from '../tesoreria/registros/GastoDetalle';
 import CreditoProceso from '../facturacion/registros/CreditoProceso';
@@ -312,6 +314,16 @@ class Inicio extends React.Component {
                                     path={`${path}/socios`}
                                     exact={true}
                                     render={(props) => <Socios {...props} />}
+                                />
+                                <Route
+                                    path={`${path}/notacredito`}
+                                    exact={false}
+                                    render={(props) => <NotaCredito {...props} />}
+                                />
+                                <Route
+                                    path={`${path}/notacreditoproceso`}
+                                    exact={false}
+                                    render={(props) => <NotaCreditoProceso {...props} />}
                                 />
                                 <Route
                                     path={`${path}/cotizaciones`}

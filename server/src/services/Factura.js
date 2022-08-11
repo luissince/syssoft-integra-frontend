@@ -935,6 +935,8 @@ class Factura {
             c.documento,
             c.informacion,
             c.direccion,
+
+            CONCAT(us.nombres,' ',us.apellidos) AS usuario,
     
             DATE_FORMAT(v.fecha,'%d/%m/%Y') as fecha,
             v.hora, 
@@ -947,6 +949,7 @@ class Factura {
             IFNULL(SUM(vd.precio*vd.cantidad),0) AS monto
             FROM venta AS v 
             INNER JOIN cliente AS c ON v.idCliente = c.idCliente
+            INNER JOIN usuario AS us ON us.idUsuario = v.idUsuario 
             INNER JOIN tipoDocumento AS td ON td.idTipoDocumento = c.idTipoDocumento 
             INNER JOIN comprobante AS com ON v.idComprobante = com.idComprobante
             INNER JOIN moneda AS m ON m.idMoneda = v.idMoneda
@@ -1066,7 +1069,7 @@ class Factura {
             m.idMoneda,
             m.codiso,
             IFNULL(SUM(vd.precio*vd.cantidad),0) AS total,
-            (SELECT IFNULL(SUM(cv.precio),0) FROM cobro AS c LEFT JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro WHERE c.idProcedencia = v.idVenta ) AS cobrado 
+            (SELECT IFNULL(SUM(cv.precio),0) FROM cobro AS c LEFT JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro WHERE c.idProcedencia = v.idVenta AND c.estado = 1) AS cobrado 
             FROM venta AS v 
             INNER JOIN moneda AS m ON m.idMoneda = v.idMoneda
             INNER JOIN comprobante AS cm ON v.idComprobante = cm.idComprobante 
@@ -1112,7 +1115,7 @@ class Factura {
             ]);
 
             let cobros = await conec.query(`SELECT idCobro FROM
-            cobro WHERE idProcedencia = ?`, [
+            cobro WHERE idProcedencia = ? AND estado = 1`, [
                 req.query.idVenta
             ]);
 
@@ -1314,7 +1317,7 @@ class Factura {
             m.idMoneda,
             m.codiso,
             IFNULL(SUM(vd.precio*vd.cantidad),0) AS total,
-            (SELECT IFNULL(SUM(cv.precio),0) FROM cobro AS c LEFT JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro WHERE c.idProcedencia = v.idVenta ) AS cobrado 
+            (SELECT IFNULL(SUM(cv.precio),0) FROM cobro AS c LEFT JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro WHERE c.idProcedencia = v.idVenta AND c.estado = 1) AS cobrado 
             FROM venta AS v 
             INNER JOIN moneda AS m ON m.idMoneda = v.idMoneda
             INNER JOIN comprobante AS cm ON v.idComprobante = cm.idComprobante 
@@ -1350,6 +1353,7 @@ class Factura {
 
             let plazos = await conec.query(`SELECT 
             idPlazo,        
+            cuota,
             DATE_FORMAT(fecha,'%d/%m/%Y') as fecha,
             monto,
             estado
@@ -1359,7 +1363,7 @@ class Factura {
             ]);
 
             let cobros = await conec.query(`SELECT idCobro FROM
-            cobro WHERE idProcedencia = ?`, [
+            cobro WHERE idProcedencia = ? AND estado = 1`, [
                 req.query.idVenta
             ]);
 
@@ -1432,6 +1436,7 @@ class Factura {
             };
 
         } catch (error) {
+            console.error(error);
             return "Se produjo un error de servidor, intente nuevamente.";
         }
     }

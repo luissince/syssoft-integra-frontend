@@ -132,22 +132,22 @@ class RepCuota {
 
             let content = data.plazos.map((item, index) => {
                 credito = credito - item.monto
-                return [++index, item.fecha, item.estado === 1 ? 'COBRADO' : 'POR COBRAR', numberFormat(credito), numberFormat(item.monto)]
+                return [++index,"CUOTA "+item.cuota ,item.fecha, item.estado === 1 ? 'COBRADO' : 'POR COBRAR', numberFormat(credito), numberFormat(item.monto)]
             })
 
             content.unshift(arrayIni)
 
             const table1 = {
                 subtitle: "CRONOGRAMA DE PAGOS MENSUALES - VENTA AL CRÉDITO",
-                headers: ["#", "FECHA DE PAGO", "ESTADO", "MONTO RESTANTE", "CUOTA MENSUAL"],
+                headers: ["#","CUOTA" ,"FECHA DE PAGO", "ESTADO", "MONTO RESTANTE", "CUOTA MENSUAL"],
                 rows: content
             };
 
             doc.table(table1, {
                 prepareHeader: () => doc.font("Helvetica-Bold").fontSize(h3),
                 prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) => {
-                    if (indexColumn === 2) {
-                        if (row[2] === "COBRADO") {
+                    if (indexColumn === 3) {
+                        if (row[3] === "COBRADO") {
                             doc.font("Helvetica").fontSize(h3).fillColor("green");
                         }
                     } else {
@@ -165,6 +165,7 @@ class RepCuota {
             doc.end();
             return getStream.buffer(doc);
         } catch (error) {
+            console.log(error);
             return "Se genero un error al generar el reporte.";
         }
     }

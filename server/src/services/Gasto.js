@@ -224,8 +224,7 @@ class Gasto {
             co.nombre as comprobante,
             g.serie,
             g.numeracion,
-            u.nombres AS nombreUse,
-            u.apellidos AS apellidoUse,
+            CONCAT(us.nombres, ' ', us.apellidos) AS usuario,
             
             IFNULL(td.nombre,'') AS tipoDoc,  
             IFNULL(cl.documento,'') AS documento,
@@ -249,7 +248,7 @@ class Gasto {
             FROM gasto AS g
             INNER JOIN cliente AS cl ON g.idCliente = cl.idCliente
             INNER JOIN tipoDocumento AS td ON td.idTipoDocumento = cl.idTipoDocumento
-            INNER JOIN usuario AS u ON g.idUsuario = u.idUsuario
+            INNER JOIN usuario AS us ON g.idUsuario = us.idUsuario
             INNER JOIN moneda AS m ON g.idMoneda = m.idMoneda
             INNER JOIN banco AS b ON g.idBanco = b.idBanco
             INNER JOIN comprobante AS co ON co.idComprobante = g.idComprobante

@@ -654,6 +654,16 @@ class RepFactura {
 
             doc.image(qrResult, doc.options.margins.left, doc.y, { width: 100, });
 
+            if (cabecera.estado === 0) {
+                doc.save();
+                doc.rotate(-45, { origin: [200, 450] });
+                doc.fontSize(100).fillColor("#cccccc").opacity(0.5).text('ANULADO', (doc.page.width - 500) / 2, 450, {
+                    textAlign: 'center',
+                });
+                doc.rotate(-45 * (-1), { origin: [200, 450] });
+                doc.restore();
+            }
+
             doc.end();
             return getStream.buffer(doc);
         } catch (error) {
@@ -896,6 +906,16 @@ class RepFactura {
                 doc.options.margins.left,
                 doc.y + 5);
 
+            if (cabecera.estado === 0) {
+                doc.save();
+                doc.rotate(-45, { origin: [200, 450] });
+                doc.fontSize(100).fillColor("#cccccc").opacity(0.5).text('ANULADO', (doc.page.width - 500) / 2, 450, {
+                    textAlign: 'center',
+                });
+                doc.rotate(-45 * (-1), { origin: [200, 450] });
+                doc.restore();
+            }
+
             doc.end();
             return getStream.buffer(doc);
 
@@ -943,10 +963,10 @@ class RepFactura {
             //     yPos);
 
             data.lote.map((lote, index) => {
-                
+
                 doc.fontSize(8).text(lote.lote + " - " + lote.manzana,
-                doc.options.margins.left + 400,
-                yPos);
+                    doc.options.margins.left + 400,
+                    yPos);
 
             });
 
@@ -977,7 +997,7 @@ class RepFactura {
                 });
             } else {
                 yPos = doc.y + 25;
-                
+
                 data.venta.map((item, index) => {
                     doc.fontSize(10).text((index + 1),
                         doc.options.margins.left + 10,
@@ -1016,6 +1036,17 @@ class RepFactura {
             doc.fontSize(8).text(`${numberFormat(total, cabecera.codiso)}`,
                 doc.options.margins.left + 460,
                 yPos);
+
+
+            if (cabecera.estado === 0) {
+                doc.save();
+                doc.rotate(-45, { origin: [200, 450] });
+                doc.fontSize(100).fillColor("#cccccc").opacity(0.5).text('ANULADO', (doc.page.width - 500) / 2, 450, {
+                    textAlign: 'center',
+                });
+                doc.rotate(-45 * (-1), { origin: [200, 450] });
+                doc.restore();
+            }
 
 
             doc.end();

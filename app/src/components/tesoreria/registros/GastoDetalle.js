@@ -27,6 +27,7 @@ class GastoDetalle extends React.Component {
             total: '',
             codiso: '',
             simbolo: '',
+            usuario: '',
 
             gasto: true,
             detalle: [],
@@ -71,7 +72,7 @@ class GastoDetalle extends React.Component {
             await this.setStateAsync({
                 idGasto: id,
                 comprobante: cabecera.comprobante + "  " + cabecera.serie + "-" + cabecera.numeracion,
-                estado: cabecera.estado.toString(),
+                estado: cabecera.estado,
                 cliente: cabecera.documento + " - " + cabecera.informacion,
                 usuario: cabecera.apellidoUse + " " + cabecera.nombreUse,
                 fecha: cabecera.fecha + " " + timeForma24(cabecera.hora),
@@ -86,6 +87,7 @@ class GastoDetalle extends React.Component {
                 total: formatMoney(cabecera.monto),
                 simbolo: cabecera.simbolo,
                 codiso: cabecera.codiso,
+                usuario: cabecera.usuario,
 
                 gasto: result.data.detalle.length !== 0 ? true : false,
                 detalle: result.data.detalle,
@@ -214,6 +216,14 @@ class GastoDetalle extends React.Component {
                                                     <tr>
                                                         <th className="table-secondary w-25 p-1 font-weight-normal ">Método de pago</th>
                                                         <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">{this.state.metodoPago}</th>
+                                                    </tr>
+                                                    <tr>
+                                                        <th className="table-secondary w-25 p-1 font-weight-normal ">Usuario</th>
+                                                        <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">{this.state.usuario}</th>
+                                                    </tr>
+                                                    <tr>
+                                                        <th className="table-secondary w-25 p-1 font-weight-normal ">Estado</th>
+                                                        <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">{this.state.estado == 1? <span className="text-success">COBRADO</span> : <span className="text-danger">ANULADO</span>}</th>
                                                     </tr>
                                                     <tr>
                                                         <th className="table-secondary w-25 p-1 font-weight-normal ">Total</th>

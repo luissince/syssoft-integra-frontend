@@ -17,12 +17,13 @@ class CobroDetalle extends React.Component {
         this.state = {
             idCobro: '',
             comprobante: '',
-            estado: '',
             cliente: '',
             fecha: '',
             cuentaBancaria: '',
             notas: '',
             metodoPago: '',
+            estado: '',
+            usuario: '',
             total: '',
             codiso: '',
             simbolo: '',
@@ -85,6 +86,8 @@ class CobroDetalle extends React.Component {
                 total: cabecera.monto,
                 simbolo: cabecera.simbolo,
                 codiso: cabecera.codiso,
+
+                usuario: cabecera.usuario,
 
                 cobro: result.data.detalle.length !== 0 ? true : false,
                 detalle: result.data.detalle.length !== 0 ? result.data.detalle : result.data.venta,
@@ -246,12 +249,20 @@ class CobroDetalle extends React.Component {
                                                         <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">{this.state.metodoPago}</th>
                                                     </tr>
                                                     <tr>
-                                                        <th className="table-secondary w-25 p-1 font-weight-normal ">Total</th>
-                                                        <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">{numberFormat(this.state.total, this.state.codiso)}</th>
+                                                        <th className="table-secondary w-25 p-1 font-weight-normal ">Usuario</th>
+                                                        <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">{this.state.usuario}</th>
+                                                    </tr>
+                                                    <tr>
+                                                        <th className="table-secondary w-25 p-1 font-weight-normal ">Estado</th>
+                                                        <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">{this.state.estado == 1 ? <span className="text-success">COBRADO</span> : <span className="text-danger">ANULADO</span>}</th>
                                                     </tr>
                                                     <tr>
                                                         <th className="table-secondary w-25 p-1 font-weight-normal ">Archivos adjuntos</th>
                                                         <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">{ }</th>
+                                                    </tr>
+                                                    <tr>
+                                                        <th className="table-secondary w-25 p-1 font-weight-normal ">Total</th>
+                                                        <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">{numberFormat(this.state.total, this.state.codiso)}</th>
                                                     </tr>
                                                 </thead>
                                             </table>

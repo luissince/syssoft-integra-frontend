@@ -23,6 +23,7 @@ class Cobro {
             c.observacion, 
             DATE_FORMAT(c.fecha,'%d/%m/%Y') as fecha, 
             c.hora,
+            c.estado,
             IFNULL(SUM(cd.precio*cd.cantidad),SUM(cv.precio)) AS monto
             FROM cobro AS c
             INNER JOIN cliente AS cl ON c.idCliente = cl.idCliente
@@ -486,7 +487,7 @@ class Cobro {
                 req.body.idUsuario
             ]);
 
-            global.io.emit('message', `Cobro registro :D`);
+            global.io.emit('message', `Cobro registrado :D`);
 
             await conec.commit(connection);
             return "insert";
@@ -718,7 +719,7 @@ class Cobro {
                 req.body.idUsuario
             ]);
 
-            global.io.emit('message', `Cobro registro :D`);
+            global.io.emit('message', `Cobro registrado :D`);
 
             await conec.commit(connection);
             return "insert";
@@ -909,7 +910,7 @@ class Cobro {
                 req.body.idUsuario
             ]);
 
-            global.io.emit('message', `Cobro registro :D`);
+            global.io.emit('message', `Cobro registrado :D`);
 
             await conec.commit(connection);
             return "insert";
@@ -949,11 +950,14 @@ class Cobro {
             m.nombre as moneda,
             m.codiso,
             m.simbolo,
+
+            CONCAT(us.nombres,' ',us.apellidos) AS usuario,            
     
             IFNULL(SUM(cb.precio*cb.cantidad),SUM(cv.precio)) AS monto
     
             FROM cobro AS c
             INNER JOIN cliente AS cl ON c.idCliente = cl.idCliente
+            INNER JOIN usuario AS us ON us.idUsuario = c.idUsuario
             INNER JOIN tipoDocumento AS td ON td.idTipoDocumento = cl.idTipoDocumento 
             INNER JOIN banco AS b ON c.idBanco = b.idBanco
             INNER JOIN moneda AS m ON c.idMoneda = m.idMoneda
@@ -1116,123 +1120,216 @@ class Cobro {
             ]);
 
             if (facturado.length > 0) {
-                await conec.rollback(connection);
-                return "Los comprontes facturados no pueden ser eliminados.";
-            }
 
-            let cobro = await conec.execute(connection, `SELECT idProcedencia,serie,numeracion FROM cobro WHERE idCobro = ?`, [
-                req.query.idCobro
-            ]);
+                let fecha = await conec.execute(connection, `SELECT fecha FROM cobro WHERE 
+                idCobro = ? AND fecha BETWEEN DATE_ADD(CURRENT_DATE, INTERVAL -4 DAY) AND CURRENT_DATE`, [
+                    req.query.idCobro
+                ]);
 
-            if (cobro.length > 0) {
+                if (fecha.length === 0) {
+                    await conec.rollback(connection);
+                    return "Los comprobantes facturados tienen un límite de 4 días para ser anulados.";
+                }
+
+                /**
+                 * 
+                 */
+
+                let cobro = await conec.execute(connection, `SELECT idCobro,idProcedencia,serie,numeracion FROM cobro WHERE idCobro = ?`, [
+                    req.query.idCobro
+                ]);
+
                 let venta = await conec.execute(connection, `SELECT idVenta,credito FROM venta WHERE idVenta  = ?`, [
                     cobro[0].idProcedencia
                 ]);
 
+                let cobroVenta = await conec.execute(connection, `SELECT idPlazo FROM cobroVenta 
+                            WHERE idCobro = ?`, [
+                    req.query.idCobro
+                ]);
+
                 if (venta.length > 0) {
-                    let plazos = await conec.execute(connection, `SELECT idPlazo,estado FROM plazo 
-                    WHERE idVenta = ? AND estado = 1`, [
-                        venta[0].idVenta
-                    ]);
-
-                    if (plazos.length > 0) {
-                        let arrPlazos = plazos.map(function (item) {
-                            return item.idPlazo;
-                        });
-
-                        let maxPlazo = Math.max(...arrPlazos);
-
-                        let cobroVenta = await conec.execute(connection, `SELECT idPlazo FROM cobroVenta 
-                        WHERE idCobro = ?`, [
-                            req.query.idCobro
+                    if (venta[0].credito === 1) {
+                        await conec.execute(connection, `DELETE FROM plazo WHERE idPlazo = ?`, [
+                            cobroVenta[0].idPlazo
+                        ]);
+                    } else {
+                        let plazosCobros = await conec.execute(connection, `SELECT * FROM cobroVenta WHERE idPlazo = ?`, [
+                            cobroVenta[0].idPlazo
                         ]);
 
-                        let arrCobroVenta = cobroVenta.map(function (item) {
-                            return item.idPlazo;
-                        });
-
-                        let maxCobroVenta = Math.max(...arrCobroVenta);
-
-                        if (maxPlazo <= maxCobroVenta) {
-                            if (venta[0].credito === 1) {
-                                await conec.execute(connection, `DELETE FROM plazo WHERE idPlazo = ?`, [
-                                    maxCobroVenta
-                                ]);
-                            } else {
-                                let plazosCobros = await conec.execute(connection, `SELECT * FROM cobroVenta WHERE idPlazo = ?`, [
-                                    maxCobroVenta
-                                ]);
-
-                                if (plazosCobros.length <= 1) {
-                                    await conec.execute(connection, `UPDATE plazo SET estado = 0 WHERE idPlazo = ?`, [
-                                        maxCobroVenta
-                                    ]);
-                                }
-                            }
-
-                            await conec.execute(connection, `UPDATE venta SET estado = 2
-                            WHERE idVenta = ?`, [
-                                venta[0].idVenta
+                        if (plazosCobros.length <= 1) {
+                            await conec.execute(connection, `UPDATE plazo SET estado = 0 WHERE idPlazo = ?`, [
+                                cobroVenta[0].idPlazo
                             ]);
-                        } else {
-                            await conec.rollback(connection);
-                            return "No se puede eliminar el cobro, hay plazos(cobros) ligados que son inferiores.";
                         }
                     }
                 }
-            }
 
-            await conec.execute(connection, `DELETE FROM cobro WHERE idCobro = ?`, [
-                req.query.idCobro
-            ]);
+                await conec.execute(connection, `UPDATE venta SET estado = 2
+                WHERE idVenta = ?`, [
+                    venta[0].idVenta
+                ]);
 
-            await conec.execute(connection, `DELETE FROM cobroDetalle WHERE idCobro = ?`, [
-                req.query.idCobro
-            ]);
+                /**
+                 * 
+                 */
 
-            await conec.execute(connection, `DELETE FROM cobroVenta WHERE idCobro = ?`, [
-                req.query.idCobro
-            ]);
+                await conec.execute(connection, `UPDATE cobro SET estado = 0 WHERE idCobro = ?`, [
+                    req.query.idCobro
+                ]);
 
-            await conec.execute(connection, `DELETE FROM bancoDetalle WHERE idProcedencia  = ?`, [
-                req.query.idCobro
-            ]);
+                await conec.execute(connection, `DELETE FROM bancoDetalle WHERE idProcedencia  = ?`, [
+                    req.query.idCobro
+                ]);
 
+                let resultAuditoria = await conec.execute(connection, 'SELECT idAuditoria FROM auditoria');
+                let idAuditoria = 0;
+                if (resultAuditoria.length != 0) {
+                    let quitarValor = resultAuditoria.map(function (item) {
+                        return parseInt(item.idAuditoria);
+                    });
 
-            let resultAuditoria = await conec.execute(connection, 'SELECT idAuditoria FROM auditoria');
-            let idAuditoria = 0;
-            if (resultAuditoria.length != 0) {
-                let quitarValor = resultAuditoria.map(function (item) {
-                    return parseInt(item.idAuditoria);
-                });
+                    let valorActual = Math.max(...quitarValor);
+                    let incremental = valorActual + 1;
 
-                let valorActual = Math.max(...quitarValor);
-                let incremental = valorActual + 1;
+                    idAuditoria = incremental;
+                } else {
+                    idAuditoria = 1;
+                }
 
-                idAuditoria = incremental;
-            } else {
-                idAuditoria = 1;
-            }
-
-            await conec.execute(connection, `INSERT INTO auditoria(
+                await conec.execute(connection, `INSERT INTO auditoria(
+                        idAuditoria,
+                        idProcedencia,
+                        descripcion,
+                        fecha,
+                        hora,
+                        idUsuario) 
+                        VALUES(?,?,?,?,?,?)`, [
                     idAuditoria,
-                    idProcedencia,
-                    descripcion,
-                    fecha,
-                    hora,
-                    idUsuario) 
-                    VALUES(?,?,?,?,?,?)`, [
-                idAuditoria,
-                '',
-                `ANULACIÓN DEL INGRESO ${cobro[0].serie}-${cobro[0].numeracion}`,
-                currentDate(),
-                currentTime(),
-                req.query.idUsuario
-            ]);
+                    cobro[0].idCobro,
+                    `ANULACIÓN DEL INGRESO ${cobro[0].serie}-${cobro[0].numeracion}`,
+                    currentDate(),
+                    currentTime(),
+                    req.query.idUsuario
+                ]);
+
+            } else {
+                let cobro = await conec.execute(connection, `SELECT idProcedencia,serie,numeracion FROM cobro WHERE idCobro = ?`, [
+                    req.query.idCobro
+                ]);
+
+                if (cobro.length > 0) {
+                    let venta = await conec.execute(connection, `SELECT idVenta,credito FROM venta WHERE idVenta  = ?`, [
+                        cobro[0].idProcedencia
+                    ]);
+
+                    if (venta.length > 0) {
+                        let plazos = await conec.execute(connection, `SELECT idPlazo,estado FROM plazo 
+                        WHERE idVenta = ? AND estado = 1`, [
+                            venta[0].idVenta
+                        ]);
+
+                        if (plazos.length > 0) {
+                            let arrPlazos = plazos.map(function (item) {
+                                return item.idPlazo;
+                            });
+
+                            let maxPlazo = Math.max(...arrPlazos);
+
+                            let cobroVenta = await conec.execute(connection, `SELECT idPlazo FROM cobroVenta 
+                            WHERE idCobro = ?`, [
+                                req.query.idCobro
+                            ]);
+
+                            let arrCobroVenta = cobroVenta.map(function (item) {
+                                return item.idPlazo;
+                            });
+
+                            let maxCobroVenta = Math.max(...arrCobroVenta);
+
+                            if (maxPlazo <= maxCobroVenta) {
+                                if (venta[0].credito === 1) {
+                                    await conec.execute(connection, `DELETE FROM plazo WHERE idPlazo = ?`, [
+                                        maxCobroVenta
+                                    ]);
+                                } else {
+                                    let plazosCobros = await conec.execute(connection, `SELECT * FROM cobroVenta WHERE idPlazo = ?`, [
+                                        maxCobroVenta
+                                    ]);
+
+                                    if (plazosCobros.length <= 1) {
+                                        await conec.execute(connection, `UPDATE plazo SET estado = 0 WHERE idPlazo = ?`, [
+                                            maxCobroVenta
+                                        ]);
+                                    }
+                                }
+
+                                await conec.execute(connection, `UPDATE venta SET estado = 2
+                                WHERE idVenta = ?`, [
+                                    venta[0].idVenta
+                                ]);
+                            } else {
+                                await conec.rollback(connection);
+                                return "No se puede eliminar el cobro, hay plazos(cobros) ligados que son inferiores.";
+                            }
+                        }
+                    }
+                }
+
+                await conec.execute(connection, `DELETE FROM cobro WHERE idCobro = ?`, [
+                    req.query.idCobro
+                ]);
+
+                await conec.execute(connection, `DELETE FROM cobroDetalle WHERE idCobro = ?`, [
+                    req.query.idCobro
+                ]);
+
+                await conec.execute(connection, `DELETE FROM cobroVenta WHERE idCobro = ?`, [
+                    req.query.idCobro
+                ]);
+
+                await conec.execute(connection, `DELETE FROM bancoDetalle WHERE idProcedencia  = ?`, [
+                    req.query.idCobro
+                ]);
+
+                let resultAuditoria = await conec.execute(connection, 'SELECT idAuditoria FROM auditoria');
+                let idAuditoria = 0;
+                if (resultAuditoria.length != 0) {
+                    let quitarValor = resultAuditoria.map(function (item) {
+                        return parseInt(item.idAuditoria);
+                    });
+
+                    let valorActual = Math.max(...quitarValor);
+                    let incremental = valorActual + 1;
+
+                    idAuditoria = incremental;
+                } else {
+                    idAuditoria = 1;
+                }
+
+                await conec.execute(connection, `INSERT INTO auditoria(
+                        idAuditoria,
+                        idProcedencia,
+                        descripcion,
+                        fecha,
+                        hora,
+                        idUsuario) 
+                        VALUES(?,?,?,?,?,?)`, [
+                    idAuditoria,
+                    '',
+                    `ANULACIÓN DEL INGRESO ${cobro[0].serie}-${cobro[0].numeracion}`,
+                    currentDate(),
+                    currentTime(),
+                    req.query.idUsuario
+                ]);
+
+            }
 
             await conec.commit(connection);
             return "delete";
         } catch (error) {
+            console.error(error)
             if (connection != null) {
                 await conec.rollback(connection);
             }

@@ -11,7 +11,7 @@ const lote = new Lote();
 const repLote = new RepLote();
 
 router.get('/list', async function (req, res) {
-    const result = await lote.listar(req)
+    const result = await lote.list(req)
     if (typeof result === 'object') {
         res.status(200).send(result)
     } else {
