@@ -182,7 +182,7 @@ class RepFinanciero {
         }
     }
 
-    async repFiltroDellesCobros(req, sedeInfo, data) {
+    async repFiltroCobrosDetallados(req, sedeInfo, data) {
         try {
             const doc = new PDFDocument({
                 margins: {
@@ -239,6 +239,91 @@ class RepFinanciero {
                     align: "center",
                 }
             );
+
+            doc.fontSize(h3).text(
+                `PERIODO: ${dateFormat(req.query.fechaIni)} al ${dateFormat(req.query.fechaFin)}`,
+                orgX,
+                cabeceraY + 25,
+                {
+                    width: 300,
+                    align: "left",
+                }
+            );
+
+            let sumaMontoCobros = 0;
+            let cobros = data.cobros.map((item, index) => {
+                sumaMontoCobros += item.monto;
+                return[
+                    ++index,
+                    item.comprobante + "\n" + item.serie + "-" + item.numeracion,
+                    item.documento + "\n" + item.informacion,
+                    item.detalle,
+                    item.banco,
+                    item.fecha + "\n" + item.hora,
+                    item.nombres,
+                    numberFormat(item.monto)
+                ]
+            });
+
+            cobros.push(["","","","","","", "TOTAL:", numberFormat(sumaMontoCobros)]);
+
+            //Tabla
+            const tableCobros = {
+                subtitle: "RESUMEN DE COBROS",
+                headers: ["#", "Correlativo", "Cliente", "Detalle", "Banco", "Fecha", "Usuario", "Monto"],
+                rows: cobros
+            };
+
+            doc.table(tableCobros, {
+                prepareHeader: () => doc.font("Helvetica-Bold").fontSize(h3),
+                prepareRow: () => {
+                    doc.font("Helvetica").fontSize(h3);
+                },
+                padding: 5,
+                columnSpacing: 5,
+                columnsSize: [30, 80, 100, 80, 60, 60, 70, 60],
+                x: orgX,
+                y: doc.y + 10,
+                width: doc.page.width - doc.options.margins.left - doc.options.margins.right
+            });
+
+            let sumaMontoGastos = 0;
+            let gastos = data.gastos.map((item, index) => {
+                sumaMontoGastos += item.monto;
+                return[
+                    ++index,
+                    item.comprobante + "\n" + item.serie + "-" + item.numeracion,
+                    item.documento + "\n" + item.informacion,
+                    item.detalle,
+                    item.banco,
+                    item.fecha + "\n" + item.hora,
+                    item.nombres,
+                    numberFormat(item.monto)
+                ]
+            });
+
+            gastos.push(["","","","","","", "TOTAL:", numberFormat(sumaMontoGastos)]);
+
+            //Tabla
+            const tableGastos = {
+                subtitle: "RESUMEN DE GASTOS",
+                headers: ["#", "Correlativo", "Cliente", "Detalle", "Banco", "Fecha", "Usuario", "Monto"],
+                rows: gastos
+            };
+
+            doc.table(tableGastos, {
+                prepareHeader: () => doc.font("Helvetica-Bold").fontSize(h3),
+                prepareRow: () => {
+                    doc.font("Helvetica").fontSize(h3);
+                },
+                padding: 5,
+                columnSpacing: 5,
+                columnsSize: [30, 80, 100, 80, 60, 60, 70, 60],
+                x: orgX,
+                y: doc.y + 10,
+                width: doc.page.width - doc.options.margins.left - doc.options.margins.right
+            });
+
             doc.end();
 
             return getStream.buffer(doc);
