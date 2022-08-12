@@ -285,7 +285,7 @@ router.get('/repgeneralcobros', async function (req, res) {
     const detalle = await cobro.cobroGeneral(req);
 
     if (typeof detalle === 'object') {
-        let data = req.query.isDetallado ? await repFinanciero.repFiltroDellesCobros(req, sedeInfo, detalle) : await repFinanciero.repFiltroCobros(req, sedeInfo, detalle);
+        let data = req.query.isDetallado ? await repFinanciero.repFiltroCobrosDetallados(req, sedeInfo, detalle) : await repFinanciero.repFiltroCobros(req, sedeInfo, detalle);
 
         if (typeof data === 'string') {
             res.status(500).send(data);
@@ -305,6 +305,8 @@ router.get('/excelgeneralcobros', async function (req, res) {
     req.query.idSede = decryptedData.idSede;
     req.query.fechaIni = decryptedData.fechaIni;
     req.query.fechaFin = decryptedData.fechaFin;
+    req.query.isDetallado = decryptedData.isDetallado;
+    req.query.idUsuario = decryptedData.idUsuario;
 
     const sedeInfo = await sede.infoSedeReporte(req);
 
@@ -317,7 +319,7 @@ router.get('/excelgeneralcobros', async function (req, res) {
 
     if (typeof detalle === 'object') {
 
-        const data = await generateExcel(req, sedeInfo, detalle);
+       const data = await generateExcel(req, sedeInfo, detalle);
 
         if (typeof data === 'string') {
             res.status(500).send(data);

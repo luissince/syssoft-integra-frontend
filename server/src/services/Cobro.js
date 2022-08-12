@@ -1,5 +1,6 @@
 const { currentDate, currentTime } = require('../tools/Tools');
 const Conexion = require('../database/Conexion');
+const { query } = require('express');
 const conec = new Conexion();
 
 class Cobro {
@@ -1339,47 +1340,166 @@ class Cobro {
 
     async cobroGeneral(req) {
         try {
-
             if (req.query.isDetallado) {
-                let cobros = await conec.query(`SELECT 
-                c.idCobro, 
-                co.nombre as comprobante,
-                c.serie,
-                c.numeracion,
-                cl.documento,
-                cl.informacion,  
-                CASE 
-                WHEN cn.idConcepto IS NOT NULL THEN cn.nombre
-                ELSE CASE WHEN cv.idPlazo = 0 THEN 'CUOTA INICIAL' ELSE CONCAT('CUOTA',' ',pl.cuota) END END AS detalle,
-                IFNULL(CONCAT(cp.nombre,' ',v.serie,'-',v.numeracion),'') AS comprobanteRef,
-                m.simbolo,
-                m.codiso,
-                b.nombre as banco,  
-                c.observacion, 
-                DATE_FORMAT(c.fecha,'%d/%m/%Y') as fecha, 
-                c.hora,
-                c.estado,
-                IFNULL(SUM(cd.precio*cd.cantidad),SUM(cv.precio)) AS monto
-                FROM cobro AS c
-                INNER JOIN cliente AS cl ON c.idCliente = cl.idCliente
-                INNER JOIN banco AS b ON c.idBanco = b.idBanco
-                INNER JOIN moneda AS m ON c.idMoneda = m.idMoneda 
-                INNER JOIN comprobante AS co ON co.idComprobante = c.idComprobante
-                LEFT JOIN cobroDetalle AS cd ON c.idCobro = cd.idCobro
-                LEFT JOIN concepto AS cn ON cd.idConcepto = cn.idConcepto 
-                LEFT JOIN cobroVenta AS cv ON cv.idCobro = c.idCobro 
-                LEFT JOIN plazo AS pl ON pl.idPlazo = cv.idPlazo
-                LEFT JOIN venta AS v ON cv.idVenta = v.idVenta 
-                LEFT JOIN comprobante AS cp ON v.idComprobante = cp.idComprobante
-                WHERE c.fecha BETWEEN ? AND ?
-                GROUP BY c.idCobro
-                ORDER BY c.fecha DESC,c.hora DESC
-                `, [
-                    req.query.fechaIni,
-                    req.query.fechaFin,
-                ]);
+                if (req.query.idUsuario != '') {
+                    let cobros = await conec.query(`SELECT 
+                    c.idCobro, 
+                    co.nombre as comprobante,
+                    c.serie,
+                    c.numeracion,
+                    cl.documento,
+                    cl.informacion,  
+                    CASE 
+                    WHEN cn.idConcepto IS NOT NULL THEN cn.nombre
+                    ELSE CASE WHEN cv.idPlazo = 0 THEN 'CUOTA INICIAL' ELSE CONCAT('CUOTA',' ',pl.cuota) END END AS detalle,
+                    IFNULL(CONCAT(cp.nombre,' ',v.serie,'-',v.numeracion),'') AS comprobanteRef,
+                    m.simbolo,
+                    m.codiso,
+                    b.nombre as banco,  
+                    c.observacion, 
+                    DATE_FORMAT(c.fecha,'%d/%m/%Y') as fecha, 
+                    c.hora,
+                    c.estado,
+                    IFNULL(SUM(cd.precio*cd.cantidad),SUM(cv.precio)) AS monto,
+                    u.nombres,
+                    u.apellidos
+                    FROM cobro AS c
+                    INNER JOIN cliente AS cl ON c.idCliente = cl.idCliente
+                    INNER JOIN banco AS b ON c.idBanco = b.idBanco
+                    INNER JOIN moneda AS m ON c.idMoneda = m.idMoneda 
+                    INNER JOIN comprobante AS co ON co.idComprobante = c.idComprobante
+                    LEFT JOIN cobroDetalle AS cd ON c.idCobro = cd.idCobro
+                    LEFT JOIN concepto AS cn ON cd.idConcepto = cn.idConcepto 
+                    LEFT JOIN cobroVenta AS cv ON cv.idCobro = c.idCobro 
+                    LEFT JOIN plazo AS pl ON pl.idPlazo = cv.idPlazo
+                    LEFT JOIN venta AS v ON cv.idVenta = v.idVenta 
+                    LEFT JOIN comprobante AS cp ON v.idComprobante = cp.idComprobante
+                    LEFT JOIN usuario AS u ON u.idUsuario = c.idUsuario
+                    WHERE c.fecha BETWEEN ? AND ?
+                    AND c.idUsuario = ?
+                    GROUP BY c.idCobro
+                    ORDER BY c.fecha DESC,c.hora DESC
+                    `, [
+                        req.query.fechaIni,
+                        req.query.fechaFin,
 
-                return { "cobros": cobros };
+                        req.query.idUsuario,
+                    ]);
+
+                    let gastos = await conec.query(`
+                    SELECT 
+                    g.idGasto,
+                    co.nombre as comprobante,
+                    g.serie,
+                    g.numeracion,
+                    IFNULL(cl.documento,'') AS documento,
+                    IFNULL(cl.informacion,'') AS informacion,
+                    IFNULL(cn.nombre,'') AS detalle,
+                    m.simbolo,
+                    b.nombre as banco, 
+                    g.observacion, 
+                    DATE_FORMAT(g.fecha,'%d/%m/%Y') as fecha, 
+                    g.hora,
+                    IFNULL(SUM(gd.precio*gd.cantidad),0) AS monto,
+                    u.nombres,
+                    u.apellidos
+                    FROM gasto AS g          
+                    LEFT JOIN cliente AS cl ON g.idCliente = cl.idCliente 
+                    INNER JOIN banco AS b ON g.idBanco = b.idBanco
+                    INNER JOIN moneda AS m ON g.idMoneda = m.idMoneda     
+                    INNER JOIN comprobante AS co ON co.idComprobante = g.idComprobante       
+                    LEFT JOIN gastoDetalle AS gd ON g.idGasto = gd.idGasto
+                    LEFT JOIN concepto AS cn ON gd.idConcepto = cn.idConcepto
+                    LEFT JOIN usuario AS u ON u.idUsuario = g.idUsuario 
+                    WHERE g.fecha BETWEEN ? AND ?
+                    AND g.idUsuario = ?
+                    GROUP BY g.idGasto                    
+                    ORDER BY g.fecha DESC, g.hora DESC
+                    `, [
+                        req.query.fechaIni,
+                        req.query.fechaFin,
+
+                        req.query.idUsuario,
+                    ]);
+
+                    return { "cobros": cobros, "gastos": gastos };
+                } else {
+                    let cobros = await conec.query(`SELECT 
+                    c.idCobro, 
+                    co.nombre as comprobante,
+                    c.serie,
+                    c.numeracion,
+                    cl.documento,
+                    cl.informacion,  
+                    CASE 
+                    WHEN cn.idConcepto IS NOT NULL THEN cn.nombre
+                    ELSE CASE WHEN cv.idPlazo = 0 THEN 'CUOTA INICIAL' ELSE CONCAT('CUOTA',' ',pl.cuota) END END AS detalle,
+                    IFNULL(CONCAT(cp.nombre,' ',v.serie,'-',v.numeracion),'') AS comprobanteRef,
+                    m.simbolo,
+                    m.codiso,
+                    b.nombre as banco,  
+                    c.observacion, 
+                    DATE_FORMAT(c.fecha,'%d/%m/%Y') as fecha, 
+                    c.hora,
+                    c.estado,
+                    IFNULL(SUM(cd.precio*cd.cantidad),SUM(cv.precio)) AS monto,
+                    u.nombres,
+                    u.apellidos
+                    FROM cobro AS c
+                    INNER JOIN cliente AS cl ON c.idCliente = cl.idCliente
+                    INNER JOIN banco AS b ON c.idBanco = b.idBanco
+                    INNER JOIN moneda AS m ON c.idMoneda = m.idMoneda 
+                    INNER JOIN comprobante AS co ON co.idComprobante = c.idComprobante
+                    LEFT JOIN cobroDetalle AS cd ON c.idCobro = cd.idCobro
+                    LEFT JOIN concepto AS cn ON cd.idConcepto = cn.idConcepto 
+                    LEFT JOIN cobroVenta AS cv ON cv.idCobro = c.idCobro 
+                    LEFT JOIN plazo AS pl ON pl.idPlazo = cv.idPlazo
+                    LEFT JOIN venta AS v ON cv.idVenta = v.idVenta 
+                    LEFT JOIN comprobante AS cp ON v.idComprobante = cp.idComprobante
+                    LEFT JOIN usuario AS u ON u.idUsuario = c.idUsuario
+                    WHERE c.fecha BETWEEN ? AND ?
+                    GROUP BY c.idCobro
+                    ORDER BY c.fecha DESC,c.hora DESC
+                    `, [
+                        req.query.fechaIni,
+                        req.query.fechaFin,
+                    ]);
+
+                    let gastos = await conec.query(`
+                    SELECT 
+                    g.idGasto,
+                    co.nombre as comprobante,
+                    g.serie,
+                    g.numeracion,
+                    IFNULL(cl.documento,'') AS documento,
+                    IFNULL(cl.informacion,'') AS informacion,
+                    IFNULL(cn.nombre,'') AS detalle,
+                    m.simbolo,
+                    b.nombre as banco, 
+                    g.observacion, 
+                    DATE_FORMAT(g.fecha,'%d/%m/%Y') as fecha, 
+                    g.hora,
+                    IFNULL(SUM(gd.precio*gd.cantidad),0) AS monto,
+                    u.nombres,
+                    u.apellidos
+                    FROM gasto AS g          
+                    LEFT JOIN cliente AS cl ON g.idCliente = cl.idCliente 
+                    INNER JOIN banco AS b ON g.idBanco = b.idBanco
+                    INNER JOIN moneda AS m ON g.idMoneda = m.idMoneda     
+                    INNER JOIN comprobante AS co ON co.idComprobante = g.idComprobante       
+                    LEFT JOIN gastoDetalle AS gd ON g.idGasto = gd.idGasto
+                    LEFT JOIN concepto AS cn ON gd.idConcepto = cn.idConcepto
+                    LEFT JOIN usuario AS u ON u.idUsuario = g.idUsuario 
+                    WHERE g.fecha BETWEEN ? AND ?
+                    GROUP BY g.idGasto
+                    ORDER BY g.fecha DESC, g.hora DESC
+                    `, [
+                        req.query.fechaIni,
+                        req.query.fechaFin,
+                    ]);
+
+                    return { "cobros": cobros, "gastos" : gastos };
+                }
                 // return { "conceptos": conceptos, "bancos": bancos };
             } else {
                 let cobros = await conec.query(`SELECT

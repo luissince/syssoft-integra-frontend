@@ -112,7 +112,9 @@ class RepFinanciero extends React.Component {
         const data = {
             "idSede": "SD0001",
             "fechaIni": this.state.fechaIni,
-            "fechaFin": this.state.fechaFin
+            "fechaFin": this.state.fechaFin,
+            "isDetallado": this.state.isDetallado,
+            "idUsuario": this.state.idUsuario === '' ? '' : this.state.idUsuario,
         }
 
         let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
