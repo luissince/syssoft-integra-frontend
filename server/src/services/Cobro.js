@@ -1049,7 +1049,6 @@ class Cobro {
             }
 
         } catch (error) {
-            console.log(error);
             return "Se produjo un error de servidor, intente nuevamente.";
         }
     }
@@ -1380,7 +1379,7 @@ class Cobro {
                     req.query.fechaFin,
                 ]);
 
-                return {"cobros":cobros};
+                return { "cobros": cobros };
                 // return { "conceptos": conceptos, "bancos": bancos };
             } else {
                 let cobros = await conec.query(`SELECT
@@ -1530,6 +1529,113 @@ class Cobro {
             GROUP BY c.serie,co.nombre`);
             return result;
         } catch (error) {
+            return "Se produjo un error de servidor, intente nuevamente.";
+        }
+    }
+
+    async searchComprobante(req) {
+        try {
+            let result = await conec.query(`SELECT
+            c.idCobro,
+            c.serie,
+            c.numeracion,
+            c.metodoPago,
+            c.estado,
+            c.observacion,
+            DATE_FORMAT(c.fecha,'%d/%m/%Y') as fecha,
+            c.hora,
+            
+            td.nombre AS tipoDoc,  
+            cl.idCliente,
+            cl.documento,
+            cl.informacion,
+            cl.direccion,
+            cl.email,
+                      
+            m.idMoneda,
+            m.codiso
+
+            FROM cobro AS c
+            INNER JOIN cliente AS cl ON c.idCliente = cl.idCliente
+            INNER JOIN tipoDocumento AS td ON td.idTipoDocumento = cl.idTipoDocumento 
+            INNER JOIN moneda AS m ON c.idMoneda = m.idMoneda
+            INNER JOIN comprobante AS co ON co.idComprobante = c.idComprobante
+
+            WHERE CONCAT(c.serie,'-',c.numeracion) = ? AND co.tipo = 1 AND co.estado = 1
+            GROUP BY c.idCobro`, [
+                req.query.search
+            ]);
+
+            if (result.length > 0) {
+
+                let detalle = await conec.query(`SELECT 
+                1 AS tipo,
+                0 AS idPlazo, 
+
+                co.idConcepto,
+                co.nombre as concepto,
+
+                md.idMedida,
+                md.codigo as medida,
+
+                imp.idImpuesto,
+                imp.nombre as impuesto,
+                imp.porcentaje,
+
+                cd.cantidad,
+                cd.precio
+
+                FROM cobroDetalle AS cd 
+                INNER JOIN concepto AS co ON cd.idConcepto = co.idConcepto
+                INNER JOIN impuesto AS imp ON cd.idImpuesto  = imp.idImpuesto
+                INNER JOIN medida AS md ON md.idMedida = cd.idMedida 
+                WHERE cd.idCobro = ?
+                `, [
+                    result[0].idCobro
+                ]);
+
+
+                let venta = await conec.query(`SELECT  
+                0 AS tipo,
+                '' AS idConcepto,
+
+                v.idVenta,
+                cv.idPlazo, 
+                CASE 
+                WHEN cv.idPlazo = 0 THEN 'CUOTA INICIAL'
+                ELSE CONCAT('CUOTA',' ',pl.cuota) END AS concepto,
+
+                md.idMedida,
+                md.codigo as medida,
+
+                imp.idImpuesto,
+                imp.nombre as impuesto,
+                imp.porcentaje,
+
+                1 AS cantidad,
+                cv.precio
+               
+                FROM cobroVenta AS cv
+                LEFT JOIN plazo AS pl ON pl.idPlazo = cv.idPlazo 
+                INNER JOIN impuesto AS imp ON cv.idImpuesto  = imp.idImpuesto
+                INNER JOIN medida AS md ON cv.idMedida = md.idMedida 
+                INNER JOIN venta AS v ON cv.idVenta = v.idVenta 
+                WHERE cv.idCobro = ?`, [
+                    result[0].idCobro
+                ]);
+
+
+                return {
+                    "cabecera": result[0],
+                    "detalle": detalle,
+                    "venta": venta,
+                };
+            } else {
+                return "Comprobante no encontrado.";
+            }
+
+        } catch (error) {
+            console.error(error);
             return "Se produjo un error de servidor, intente nuevamente.";
         }
     }

@@ -335,7 +335,6 @@ router.get('/xmlsunat', async function (req, res) {
     req.query.idCobro = decryptedData.idCobro;
     req.query.xmlSunat = decryptedData.xmlSunat;
 
-
     const sedeInfo = await sede.infoSedeReporte(req);
 
     if (typeof sedeInfo !== 'object') {
@@ -360,6 +359,15 @@ router.get('/xmlsunat', async function (req, res) {
 router.get('/notificaciones', async function (req, res) {
     const result = await cobro.notificaciones(req)
     if (Array.isArray(result)) {
+        res.status(200).send(result);
+    } else {
+        res.status(500).send(result);
+    }
+});
+
+router.get('/searchComprobante', async function (req, res){
+    const result = await cobro.searchComprobante(req)
+    if (typeof result === 'object') {
         res.status(200).send(result);
     } else {
         res.status(500).send(result);

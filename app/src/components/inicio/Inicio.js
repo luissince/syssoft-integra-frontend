@@ -317,12 +317,12 @@ class Inicio extends React.Component {
                                 />
                                 <Route
                                     path={`${path}/notacredito`}
-                                    exact={false}
+                                    exact={true}
                                     render={(props) => <NotaCredito {...props} />}
                                 />
                                 <Route
-                                    path={`${path}/notacreditoproceso`}
-                                    exact={false}
+                                    path={`${path}/notacredito/proceso`}
+                                    exact={true}
                                     render={(props) => <NotaCreditoProceso {...props} />}
                                 />
                                 <Route

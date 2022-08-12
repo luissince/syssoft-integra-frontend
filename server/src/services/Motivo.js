@@ -2,11 +2,11 @@ const Conexion = require('../database/Conexion');
 const { sendSuccess, sendError } = require('../tools/Message');
 const conec = new Conexion();
 
-class TipoDocumento {
+class Motivo {
 
     async listcombo(req, res) {
         try {
-            let result = await conec.query(`SELECT idTipoDocumento, nombre FROM tipoDocumento WHERE estado = 1`);
+            let result = await conec.query(`SELECT idMotivo, nombre FROM motivo WHERE estado = 1`);
             return sendSuccess(res, result)
         } catch (error) {
             return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
@@ -15,4 +15,4 @@ class TipoDocumento {
 
 }
 
-module.exports = new TipoDocumento();
+module.exports = new Motivo();

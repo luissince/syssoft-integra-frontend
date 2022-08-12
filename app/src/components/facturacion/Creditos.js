@@ -156,11 +156,9 @@ class Creditos extends React.Component {
                 <div className="row">
                     <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                         <div className="form-group">
-                            <div className="input-group">
-                                <button className="btn btn-outline-secondary" onClick={() => this.loadInit()}>
-                                    <i className="bi bi-arrow-clockwise"></i>  Recargar Vista
-                                </button>
-                            </div>
+                            <button className="btn btn-outline-secondary" onClick={() => this.loadInit()}>
+                                <i className="bi bi-arrow-clockwise"></i>  Recargar Vista
+                            </button>
                         </div>
                     </div>
                 </div>

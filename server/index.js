@@ -89,10 +89,12 @@ app.use('/api/concepto', require('./src/router/Concepto'));
 app.use('/api/gasto', require('./src/router/Gasto'));
 app.use('/api/cobro', require('./src/router/Cobro'));
 app.use('/api/acceso', require('./src/router/Acceso'));
+app.use('/api/notacredito', require('./src/router/NotaCredito'));
 
 app.use('/api/ubigeo', require('./src/router/Ubigeo'));
 app.use('/api/tipodocumento', require('./src/router/TipoDocumento'));
 app.use('/api/medida', require('./src/router/Medida'));
+app.use('/api/motivo', require('./src/router/Motivo'));
 
 app.use('/api/empresa', require('./src/router/Empresa'));
 app.use('/api/dashboard', require('./src/router/Dashboard'));

@@ -77,7 +77,7 @@ class RepFactura {
                 orgY,
                 150,
                 70).stroke();
-
+ 
             doc.fontSize(h3).opacity(0.7).text(
                 "INFORMACIÓN",
                 doc.options.margins.top,

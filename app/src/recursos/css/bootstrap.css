@@ -271,6 +271,7 @@ header.app-header .app-sidebar__toggle::before {
 header.app-header .app-sidebar__toggle:hover {
   color: #fff;
   background: #6d7fcc;
+  cursor: pointer;
 }
 
 header.app-header .app-nav {
