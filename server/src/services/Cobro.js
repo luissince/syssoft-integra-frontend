@@ -1175,8 +1175,9 @@ class Cobro {
                  * 
                  */
 
-                await conec.execute(connection, `UPDATE cobro SET estado = 0 WHERE idCobro = ?`, [
-                    req.query.idCobro
+                await conec.execute(connection, `UPDATE cobro SET estado = 0,observacion = ? WHERE idCobro = ?`, [
+                    req.query.idCobro,
+                    `ANULACIÓN DEL COMPROBANTE`
                 ]);
 
                 await conec.execute(connection, `DELETE FROM bancoDetalle WHERE idProcedencia  = ?`, [
@@ -1340,105 +1341,147 @@ class Cobro {
     async cobroGeneral(req) {
         try {
 
-            let cobros = await conec.query(`SELECT
-            IFNULL(co.idConcepto,'CV01') AS idConcepto,
-            IFNULL(co.nombre,'POR VENTA') AS concepto,
-            'INGRESO' AS tipo,
-            b.idBanco,
-            b.nombre,
-            CASE 
-            WHEN b.tipoCuenta = 1 THEN 'Banco'
-            WHEN b.tipoCuenta = 2 THEN 'Tarjeta'
-            ELSE 'Efectivo' END AS 'tipoCuenta',
-            IFNULL(SUM(cd.precio*cd.cantidad),SUM(cv.precio)) AS monto
-            FROM cobro as c
-            LEFT JOIN banco AS b ON c.idBanco = b.idBanco
-            LEFT JOIN cobroDetalle AS cd ON c.idCobro = cd.idCobro
-            LEFT JOIN concepto AS co ON co.idConcepto = cd.idConcepto
-            LEFT JOIN cobroVenta AS cv ON cv.idCobro = c.idCobro
-            WHERE c.fecha BETWEEN ? AND ?
-            GROUP BY c.idCobro
-            `, [
-                req.query.fechaIni,
-                req.query.fechaFin,
-            ]);
+            if (req.query.isDetallado) {
+                let cobros = await conec.query(`SELECT 
+                c.idCobro, 
+                co.nombre as comprobante,
+                c.serie,
+                c.numeracion,
+                cl.documento,
+                cl.informacion,  
+                CASE 
+                WHEN cn.idConcepto IS NOT NULL THEN cn.nombre
+                ELSE CASE WHEN cv.idPlazo = 0 THEN 'CUOTA INICIAL' ELSE CONCAT('CUOTA',' ',pl.cuota) END END AS detalle,
+                IFNULL(CONCAT(cp.nombre,' ',v.serie,'-',v.numeracion),'') AS comprobanteRef,
+                m.simbolo,
+                m.codiso,
+                b.nombre as banco,  
+                c.observacion, 
+                DATE_FORMAT(c.fecha,'%d/%m/%Y') as fecha, 
+                c.hora,
+                c.estado,
+                IFNULL(SUM(cd.precio*cd.cantidad),SUM(cv.precio)) AS monto
+                FROM cobro AS c
+                INNER JOIN cliente AS cl ON c.idCliente = cl.idCliente
+                INNER JOIN banco AS b ON c.idBanco = b.idBanco
+                INNER JOIN moneda AS m ON c.idMoneda = m.idMoneda 
+                INNER JOIN comprobante AS co ON co.idComprobante = c.idComprobante
+                LEFT JOIN cobroDetalle AS cd ON c.idCobro = cd.idCobro
+                LEFT JOIN concepto AS cn ON cd.idConcepto = cn.idConcepto 
+                LEFT JOIN cobroVenta AS cv ON cv.idCobro = c.idCobro 
+                LEFT JOIN plazo AS pl ON pl.idPlazo = cv.idPlazo
+                LEFT JOIN venta AS v ON cv.idVenta = v.idVenta 
+                LEFT JOIN comprobante AS cp ON v.idComprobante = cp.idComprobante
+                WHERE c.fecha BETWEEN ? AND ?
+                GROUP BY c.idCobro
+                ORDER BY c.fecha DESC,c.hora DESC
+                `, [
+                    req.query.fechaIni,
+                    req.query.fechaFin,
+                ]);
 
-            let gastos = await conec.query(`
-            SELECT
-            co.idConcepto,
-            co.nombre AS concepto,
-            'EGRESO' AS tipo,
-            b.idBanco,
-            b.nombre,
-            CASE 
-            WHEN b.tipoCuenta = 1 THEN 'Banco'
-            WHEN b.tipoCuenta = 2 THEN 'Tarjeta'
-            ELSE 'Efectivo' END AS 'tipoCuenta',
-            SUM(gd.precio*gd.cantidad) AS monto
-            FROM gasto as g
-            LEFT JOIN banco AS b ON g.idBanco = b.idBanco
-            LEFT JOIN gastoDetalle AS gd ON g.idGasto = gd.idGasto
-            LEFT JOIN concepto AS co ON co.idConcepto = gd.idConcepto
-            WHERE g.fecha BETWEEN ? AND ?
-            GROUP BY g.idGasto
-            `, [
-                req.query.fechaIni,
-                req.query.fechaFin,
-            ]);
+                return {"cobros":cobros};
+                // return { "conceptos": conceptos, "bancos": bancos };
+            } else {
+                let cobros = await conec.query(`SELECT
+                    IFNULL(co.idConcepto,'CV01') AS idConcepto,
+                    IFNULL(co.nombre,'POR VENTA') AS concepto,
+                    'INGRESO' AS tipo,
+                    b.idBanco,
+                    b.nombre,
+                    CASE 
+                    WHEN b.tipoCuenta = 1 THEN 'Banco'
+                    WHEN b.tipoCuenta = 2 THEN 'Tarjeta'
+                    ELSE 'Efectivo' END AS 'tipoCuenta',
+                    IFNULL(SUM(cd.precio*cd.cantidad),SUM(cv.precio)) AS monto
+                    FROM cobro as c
+                    LEFT JOIN banco AS b ON c.idBanco = b.idBanco
+                    LEFT JOIN cobroDetalle AS cd ON c.idCobro = cd.idCobro
+                    LEFT JOIN concepto AS co ON co.idConcepto = cd.idConcepto
+                    LEFT JOIN cobroVenta AS cv ON cv.idCobro = c.idCobro
+                    WHERE c.fecha BETWEEN ? AND ? AND c.estado = 1
+                    GROUP BY c.idCobro`,
+                    [
+                        req.query.fechaIni,
+                        req.query.fechaFin,
+                    ]);
 
-            let lista = [...cobros, ...gastos];
-            let conceptos = [];
+                let gastos = await conec.query(`
+                    SELECT
+                    co.idConcepto,
+                    co.nombre AS concepto,
+                    'EGRESO' AS tipo,
+                    b.idBanco,
+                    b.nombre,
+                    CASE 
+                    WHEN b.tipoCuenta = 1 THEN 'Banco'
+                    WHEN b.tipoCuenta = 2 THEN 'Tarjeta'
+                    ELSE 'Efectivo' END AS 'tipoCuenta',
+                    SUM(gd.precio*gd.cantidad) AS monto
+                    FROM gasto as g
+                    LEFT JOIN banco AS b ON g.idBanco = b.idBanco
+                    LEFT JOIN gastoDetalle AS gd ON g.idGasto = gd.idGasto
+                    LEFT JOIN concepto AS co ON co.idConcepto = gd.idConcepto
+                    WHERE g.fecha BETWEEN ? AND ?
+                    GROUP BY g.idGasto`,
+                    [
+                        req.query.fechaIni,
+                        req.query.fechaFin,
+                    ]);
 
-            for (let item of lista) {
-                if (conceptos.filter(f => f.idConcepto === item.idConcepto).length === 0) {
-                    conceptos.push({
-                        "idConcepto": item.idConcepto,
-                        "concepto": item.concepto,
-                        "tipo": item.tipo,
-                        "idBanco": item.idBanco,
-                        "nombre": item.nombre,
-                        "tipoCuenta": item.tipoCuenta,
-                        "cantidad": 1,
-                        "monto": item.monto
-                    })
-                } else {
-                    for (let newItem of conceptos) {
-                        if (newItem.idConcepto === item.idConcepto) {
-                            let currenteObject = newItem;
-                            currenteObject.cantidad += 1;
-                            currenteObject.monto += parseFloat(item.monto);
-                            break;
+                let lista = [...cobros, ...gastos];
+                let conceptos = [];
+
+                for (let item of lista) {
+                    if (conceptos.filter(f => f.idConcepto === item.idConcepto).length === 0) {
+                        conceptos.push({
+                            "idConcepto": item.idConcepto,
+                            "concepto": item.concepto,
+                            "tipo": item.tipo,
+                            "idBanco": item.idBanco,
+                            "nombre": item.nombre,
+                            "tipoCuenta": item.tipoCuenta,
+                            "cantidad": 1,
+                            "monto": item.monto
+                        })
+                    } else {
+                        for (let newItem of conceptos) {
+                            if (newItem.idConcepto === item.idConcepto) {
+                                let currenteObject = newItem;
+                                currenteObject.cantidad += 1;
+                                currenteObject.monto += parseFloat(item.monto);
+                                break;
+                            }
                         }
                     }
                 }
-            }
 
+                let bancos = [];
 
-            let bancos = [];
-
-            for (let item of lista) {
-                if (bancos.filter(f => f.idBanco === item.idBanco).length === 0) {
-                    bancos.push({
-                        "idConcepto": item.idConcepto,
-                        "concepto": item.concepto,
-                        "tipo": item.tipo,
-                        "idBanco": item.idBanco,
-                        "nombre": item.nombre,
-                        "tipoCuenta": item.tipoCuenta,
-                        "monto": item.tipo === "INGRESO" ? item.monto : -item.monto
-                    })
-                } else {
-                    for (let newItem of bancos) {
-                        if (newItem.idBanco === item.idBanco) {
-                            let currenteObject = newItem;
-                            currenteObject.monto += item.tipo === "INGRESO" ? parseFloat(item.monto) : -parseFloat(item.monto);
-                            break;
+                for (let item of lista) {
+                    if (bancos.filter(f => f.idBanco === item.idBanco).length === 0) {
+                        bancos.push({
+                            "idConcepto": item.idConcepto,
+                            "concepto": item.concepto,
+                            "tipo": item.tipo,
+                            "idBanco": item.idBanco,
+                            "nombre": item.nombre,
+                            "tipoCuenta": item.tipoCuenta,
+                            "monto": item.tipo === "INGRESO" ? item.monto : -item.monto
+                        })
+                    } else {
+                        for (let newItem of bancos) {
+                            if (newItem.idBanco === item.idBanco) {
+                                let currenteObject = newItem;
+                                currenteObject.monto += item.tipo === "INGRESO" ? parseFloat(item.monto) : -parseFloat(item.monto);
+                                break;
+                            }
                         }
                     }
                 }
-            }
 
-            return { "conceptos": conceptos, "bancos": bancos };
+                return { "conceptos": conceptos, "bancos": bancos };
+            }
         } catch (error) {
             return "Se produjo un error de servidor, intente nuevamente.";
         }

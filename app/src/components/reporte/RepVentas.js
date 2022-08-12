@@ -80,9 +80,10 @@ class RepVentas extends React.Component {
                 clientes: cliente.data,
                 usuarios: usuario.data,
                 comprobantes: comprobante.data,
-                loading: false,
                 fechaIni: currentDate(),
-                fechaFin: currentDate()
+                fechaFin: currentDate(),
+
+                loading: false,
             });
 
         } catch (error) {

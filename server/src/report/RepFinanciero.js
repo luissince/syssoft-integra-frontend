@@ -15,7 +15,7 @@ class RepFinanciero {
                     right: 40
                 }
             });
-
+            
             doc.info["Title"] = `REPORTE DE COBROS Y GASTOS DEL ${req.query.fechaIni} AL ${req.query.fechaFin}`
 
             let orgX = doc.x;
@@ -173,6 +173,72 @@ class RepFinanciero {
             //     align: "right",
             // });
 
+            doc.end();
+
+            return getStream.buffer(doc);
+
+        } catch (error) {
+            return "Se genero un error al generar el reporte.";
+        }
+    }
+
+    async repFiltroDellesCobros(req, sedeInfo, data) {
+        try {
+            const doc = new PDFDocument({
+                margins: {
+                    top: 40,
+                    bottom: 40,
+                    left: 40,
+                    right: 40
+                }
+            });
+            doc.info["Title"] = `REPORTE DE COBROS Y GASTOS DEL ${req.query.fechaIni} AL ${req.query.fechaFin}`
+
+            let orgX = doc.x;
+            let orgY = doc.y;
+            let cabeceraY = orgY + 70;
+            let titleX = orgX + 150;
+            let widthContent = doc.page.width - doc.options.margins.left - doc.options.margins.right;
+
+            let h1 = 13;
+            let h2 = 11;
+            let h3 = 9;
+
+            if (isFile(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo))) {
+                doc.image(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo), doc.x, doc.y, { width: 75 });
+            } else {
+                doc.image(path.join(__dirname, "..", "path/to/noimage.jpg"), doc.x, doc.y, { width: 75 });
+            }
+
+            doc.fontSize(h1).text(
+                `${sedeInfo.nombreEmpresa}`,
+                titleX,
+                orgY,
+                {
+                    width: 250,
+                    align: "center"
+                }
+            );
+
+            doc.fontSize(h3).text(
+                `RUC: ${sedeInfo.ruc}\n${sedeInfo.direccion}\nCelular: ${sedeInfo.celular} / Telefono: ${sedeInfo.telefono}`,
+                titleX,
+                orgY + 17,
+                {
+                    width: 250,
+                    align: "center",
+                }
+            );
+
+            doc.fontSize(h2).text(
+                "REPORTE DE COBROS Y GASTOS",
+                doc.options.margins.left,
+                cabeceraY,
+                {
+                    width: widthContent,
+                    align: "center",
+                }
+            );
             doc.end();
 
             return getStream.buffer(doc);

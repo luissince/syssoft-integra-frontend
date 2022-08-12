@@ -110,7 +110,7 @@ router.get('/email', async function (req, res) {
                         } else {
                             // create reusable transporter object using the default SMTP transport
                             let transporter = nodemailer.createTransport(smtpTransport({
-                                 // host: "smtp-mail.outlook.com.",
+                                // host: "smtp-mail.outlook.com.",
                                 // port: 587,
                                 service: 'gmail',
                                 auth: {
@@ -222,7 +222,7 @@ router.get('/repcomprobantematricial', async function (req, res) {
     const detalle = await cobro.id(req)
 
     if (typeof detalle === 'object') {
-      
+
         let data = await repFactura.repCobroA5(req, sedeInfo, detalle);
         if (typeof data === 'string') {
             res.status(500).send(data);
@@ -272,6 +272,8 @@ router.get('/repgeneralcobros', async function (req, res) {
     req.query.idSede = decryptedData.idSede;
     req.query.fechaIni = decryptedData.fechaIni;
     req.query.fechaFin = decryptedData.fechaFin;
+    req.query.isDetallado = decryptedData.isDetallado;
+    req.query.idUsuario = decryptedData.idUsuario;
 
     const sedeInfo = await sede.infoSedeReporte(req);
 
@@ -283,7 +285,7 @@ router.get('/repgeneralcobros', async function (req, res) {
     const detalle = await cobro.cobroGeneral(req);
 
     if (typeof detalle === 'object') {
-        let data = await repFinanciero.repFiltroCobros(req, sedeInfo, detalle);
+        let data = req.query.isDetallado ? await repFinanciero.repFiltroDellesCobros(req, sedeInfo, detalle) : await repFinanciero.repFiltroCobros(req, sedeInfo, detalle);
 
         if (typeof data === 'string') {
             res.status(500).send(data);
@@ -355,7 +357,7 @@ router.get('/xmlsunat', async function (req, res) {
     }
 });
 
-router.get('/notificaciones' , async function (req, res){
+router.get('/notificaciones', async function (req, res) {
     const result = await cobro.notificaciones(req)
     if (Array.isArray(result)) {
         res.status(200).send(result);

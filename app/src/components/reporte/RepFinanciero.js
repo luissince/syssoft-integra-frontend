@@ -1,5 +1,6 @@
 import React from 'react';
 import CryptoJS from 'crypto-js';
+import axios from 'axios';
 import FileDownloader from "./hooks/FileDownloader";
 import { spinnerLoading, currentDate } from '../tools/Tools';
 import { connect } from 'react-redux';
@@ -9,10 +10,11 @@ class RepFinanciero extends React.Component {
         super(props);
         this.state = {
             idProyecto: this.props.token.project.idProyecto,
-            
+
             fechaIni: '',
             fechaFin: '',
             isFechaActive: false,
+            isDetallado: false,
 
             //Cobro
             idCliente: '',
@@ -24,6 +26,7 @@ class RepFinanciero extends React.Component {
 
             idUsuario: '',
             usuarios: [],
+            usuarioCheck: true,
 
             loading: true,
             messageWarning: '',
@@ -57,9 +60,16 @@ class RepFinanciero extends React.Component {
 
     loadData = async () => {
         try {
+
+            const usuario = await axios.get("/api/usuario/listcombo", {
+                signal: this.abortControllerView.signal
+            });
+
             await this.setStateAsync({
                 fechaIni: currentDate(),
                 fechaFin: currentDate(),
+                usuarios: usuario.data,
+
                 loading: false
             });
 
@@ -82,7 +92,9 @@ class RepFinanciero extends React.Component {
         const data = {
             "idSede": "SD0001",
             "fechaIni": this.state.fechaIni,
-            "fechaFin": this.state.fechaFin
+            "fechaFin": this.state.fechaFin,
+            "isDetallado": this.state.isDetallado,
+            "idUsuario": this.state.idUsuario === '' ? '' : this.state.idUsuario,
         }
 
         let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
@@ -153,7 +165,6 @@ class RepFinanciero extends React.Component {
                                                     <label className="custom-control-label" htmlFor="customSwitch1">{this.state.isFechaActive ? 'Activo' : 'Inactivo'}</label>
                                                 </div>
                                             </div>
-
                                         </div>
 
                                         <div className="col">
@@ -184,6 +195,7 @@ class RepFinanciero extends React.Component {
                                                 </div>
                                             </div>
                                         </div>
+
                                         <div className="col">
                                             <div className="form-group">
                                                 <label>Fecha final <i className="fa fa-asterisk text-danger small"></i></label>
@@ -197,6 +209,74 @@ class RepFinanciero extends React.Component {
                                                 </div>
                                             </div>
                                         </div>
+                                    </div>
+
+                                    <div className="row">
+                                        <div className="col">
+                                            <div className="form-group">
+                                                <label>Detallado</label>
+                                                <div className="custom-control custom-switch">
+                                                    <input
+                                                        type="checkbox"
+                                                        className="custom-control-input"
+                                                        id="customSwitch2"
+                                                        checked={this.state.isDetallado}
+                                                        onChange={(event) => {
+                                                            this.setState({ isDetallado: event.target.checked})
+                                                        }}
+                                                    >
+                                                    </input>
+                                                    <label className="custom-control-label" htmlFor="customSwitch2">{this.state.isDetallado ? 'Si' : 'No'}</label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="col">
+                                            <div className="form-group">
+                                                <label>Usuario(s)</label>
+                                                <div className="input-group">
+                                                    <select
+                                                        title="Lista de usuarios"
+                                                        className="form-control"
+                                                        ref={this.refUsuario}
+                                                        value={this.state.idUsuario}
+                                                        disabled={this.state.usuarioCheck}
+                                                        onChange={async (event) => {
+                                                            await this.setStateAsync({ idUsuario: event.target.value });
+                                                            if (this.state.idUsuario === '') {
+                                                                await this.setStateAsync({ usuarioCheck: true });
+                                                            }
+                                                        }}
+                                                    >
+                                                        <option value="">-- Todos --</option>
+                                                        {
+                                                            this.state.usuarios.map((item, index) => (
+                                                                <option key={index} value={item.idUsuario}>{item.nombres + ' ' + item.apellidos}</option>
+                                                            ))
+                                                        }
+                                                    </select>
+                                                    <div className="input-group-append">
+                                                        <div className="input-group-text">
+                                                            <div className="form-check form-check-inline m-0">
+                                                                <input
+                                                                    className="form-check-input"
+                                                                    type="checkbox"
+                                                                    checked={this.state.usuarioCheck}
+                                                                    onChange={async (event) => {
+                                                                        await this.setStateAsync({ usuarioCheck: event.target.checked })
+                                                                        if (this.state.usuarioCheck) {
+                                                                            await this.setStateAsync({ idUsuario: '' });
+                                                                        }
+                                                                    }}
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="col"></div>
                                     </div>
 
                                     <div className="row mt-3">
