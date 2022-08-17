@@ -21,10 +21,6 @@ class NotaCredito extends React.Component {
             loading: false,
             lista: [],
 
-            add: statePrivilegio(this.props.token.userToken.menus[2].submenu[1].privilegio[0].estado),
-            view: statePrivilegio(this.props.token.userToken.menus[2].submenu[1].privilegio[1].estado),
-            remove: statePrivilegio(this.props.token.userToken.menus[2].submenu[1].privilegio[2].estado),
-
             idProyecto: this.props.token.project.idProyecto,
             idUsuario: this.props.token.userToken.idUsuario,
 
@@ -91,38 +87,39 @@ class NotaCredito extends React.Component {
 
     fillTable = async (opcion, buscar) => {
         try {
-            // await this.setStateAsync({ loading: true, lista: [], messageTable: "Cargando información...", messagePaginacion: "Mostranto 0 de 0 Páginas" });
+          
+            await this.setStateAsync({ loading: true, lista: [], messageTable: "Cargando información...", messagePaginacion: "Mostranto 0 de 0 Páginas" });
+         
+            const result = await axios.get('/api/notacredito/list', {
+                signal: this.abortControllerTable.signal,
+                params: {
+                    "opcion": opcion,
+                    "buscar": buscar,
+                    "idProyecto": this.state.idProyecto,
+                    "posicionPagina": ((this.state.paginacion - 1) * this.state.filasPorPagina),
+                    "filasPorPagina": this.state.filasPorPagina
+                }
+            });
+            
+            let totalPaginacion = parseInt(Math.ceil((parseFloat(result.data.total) / this.state.filasPorPagina)));
+            let messagePaginacion = `Mostrando ${result.data.result.length} de ${totalPaginacion} Páginas`;
 
-            // const result = await axios.get('/api/factura/list', {
-            //     signal: this.abortControllerTable.signal,
-            //     params: {
-            //         "opcion": opcion,
-            //         "buscar": buscar,
-            //         "idProyecto": this.state.idProyecto,
-            //         "posicionPagina": ((this.state.paginacion - 1) * this.state.filasPorPagina),
-            //         "filasPorPagina": this.state.filasPorPagina
-            //     }
-            // });
-
-            // let totalPaginacion = parseInt(Math.ceil((parseFloat(result.data.total) / this.state.filasPorPagina)));
-            // let messagePaginacion = `Mostrando ${result.data.result.length} de ${totalPaginacion} Páginas`;
-
-            // await this.setStateAsync({
-            //     loading: false,
-            //     lista: result.data.result,
-            //     totalPaginacion: totalPaginacion,
-            //     messagePaginacion: messagePaginacion
-            // });
+            await this.setStateAsync({
+                loading: false,
+                lista: result.data.result,
+                totalPaginacion: totalPaginacion,
+                messagePaginacion: messagePaginacion
+            });
         } catch (error) {
-            // if (error.message !== "canceled") {
-            //     await this.setStateAsync({
-            //         loading: false,
-            //         lista: [],
-            //         totalPaginacion: 0,
-            //         messageTable: "Se produjo un error interno, intente nuevamente por favor.",
-            //         messagePaginacion: "Mostranto 0 de 0 Páginas",
-            //     });
-            // }
+            if (error.message !== "canceled") {
+                await this.setStateAsync({
+                    loading: false,
+                    lista: [],
+                    totalPaginacion: 0,
+                    messageTable: "Se produjo un error interno, intente nuevamente por favor.",
+                    messagePaginacion: "Mostranto 0 de 0 Páginas",
+                });
+            }
         }
     }
 
@@ -184,7 +181,7 @@ class NotaCredito extends React.Component {
                     </div>
                     <div className="col-md-6 col-sm-12">
                         <div className="form-group">
-                            <button className="btn btn-outline-info" onClick={this.onEventNuevaVenta} disabled={!this.state.add}>
+                            <button className="btn btn-outline-info" onClick={this.onEventNuevaVenta}>
                                 <i className="bi bi-file-plus"></i> Nuevo Registro
                             </button>
                             {" "}
@@ -209,11 +206,30 @@ class NotaCredito extends React.Component {
                                         <th width="10%">Total</th>
                                         <th width="10%" className="text-center">Estado</th>
                                         <th width="5%" className="text-center">Detalle</th>
-                                        {/* <th width="5%" className="text-center">Editar</th> */}
                                         <th width="5%" className="text-center">Anular</th>
                                     </tr>
                                 </thead>
                                 <tbody>
+                                {
+                                        this.state.loading ? (
+                                            <tr>
+                                                <td className="text-center" colSpan="9">
+                                                    {spinnerLoading()}
+                                                </td>
+                                            </tr>
+                                        ) : this.state.lista.length === 0 ? (
+                                            <tr className="text-center">
+                                                <td colSpan="9">¡No hay datos registrados!</td>
+                                            </tr>
+                                        ) : (
+                                            this.state.lista.map((item, index) => {
+                                                return (
+                                                    <tr key={index}>
+                                                    </tr>
+                                                )
+                                            })
+                                        )
+                                    }
                                 </tbody>
 
                             </table>

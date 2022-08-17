@@ -82,7 +82,7 @@ class Inicio extends React.Component {
             notificaciones: [],
         }
 
-        this.socket = io();
+        // this.socket = io();
         this.audio = new Audio(mixkit);
     }
 
@@ -93,10 +93,10 @@ class Inicio extends React.Component {
         this.onEventSideBar();
         this.loadNotifications();
 
-        this.socket.on('message', text => {
-            NotificationManager.info(text, "Notificación");
-            if(this.audio !== undefined) this.audio.play();
-        });
+        // this.socket.on('message', text => {
+        //     NotificationManager.info(text, "Notificación");
+        //     if(this.audio !== undefined) this.audio.play();
+        // });
     }
 
     componentWillUnmount() {
@@ -104,7 +104,7 @@ class Inicio extends React.Component {
         window.removeEventListener('resize', this.onEventResize);
         window.removeEventListener('click', this.onEventClick);
 
-        this.socket.disconnect();
+        // this.socket.disconnect();
     }
 
     onEventFocused = (event) => {

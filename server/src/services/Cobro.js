@@ -1,6 +1,5 @@
 const { currentDate, currentTime } = require('../tools/Tools');
 const Conexion = require('../database/Conexion');
-const { query } = require('express');
 const conec = new Conexion();
 
 class Cobro {
@@ -16,7 +15,14 @@ class Cobro {
             cl.informacion,  
             CASE 
             WHEN cn.idConcepto IS NOT NULL THEN cn.nombre
-            ELSE CASE WHEN cv.idPlazo = 0 THEN 'CUOTA INICIAL' ELSE CONCAT('CUOTA',' ',pl.cuota) END END AS detalle,
+            ELSE 
+                CASE 
+                    WHEN cv.idPlazo = 0 THEN 'CUOTA INICIAL' 
+                    WHEN pl.cuota IS NOT NULL THEN CONCAT('CUOTA',' ',pl.cuota) 
+                    ELSE '-'
+                END 
+            END AS detalle,
+
             IFNULL(CONCAT(cp.nombre,' ',v.serie,'-',v.numeracion),'') AS comprobanteRef,
             m.simbolo,
             m.codiso,
@@ -25,6 +31,9 @@ class Cobro {
             DATE_FORMAT(c.fecha,'%d/%m/%Y') as fecha, 
             c.hora,
             c.estado,
+
+            nc.idNotaCredito,
+
             IFNULL(SUM(cd.precio*cd.cantidad),SUM(cv.precio)) AS monto
             FROM cobro AS c
             INNER JOIN cliente AS cl ON c.idCliente = cl.idCliente
@@ -35,8 +44,11 @@ class Cobro {
             LEFT JOIN concepto AS cn ON cd.idConcepto = cn.idConcepto 
             LEFT JOIN cobroVenta AS cv ON cv.idCobro = c.idCobro 
             LEFT JOIN plazo AS pl ON pl.idPlazo = cv.idPlazo
+
             LEFT JOIN venta AS v ON cv.idVenta = v.idVenta 
             LEFT JOIN comprobante AS cp ON v.idComprobante = cp.idComprobante
+
+            LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro
             WHERE 
             ? = 0 AND c.idProyecto = ?
             OR
@@ -86,6 +98,7 @@ class Cobro {
             INNER JOIN cliente AS cl ON c.idCliente = cl.idCliente
             INNER JOIN banco AS b ON c.idBanco = b.idBanco
             INNER JOIN moneda AS m ON c.idMoneda = m.idMoneda 
+            LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro
             WHERE 
             ? = 0 AND c.idProyecto = ?
             OR
@@ -336,7 +349,7 @@ class Cobro {
             IFNULL(SUM(cv.precio),0) AS total
             FROM cobro AS c 
             LEFT JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro
-            WHERE c.idProcedencia = ?`, [
+            WHERE c.idProcedencia = ? AND c.estado = 1`, [
                 req.body.idVenta,
             ]);
 
@@ -543,7 +556,7 @@ class Cobro {
             IFNULL(SUM(cv.precio),0) AS total
             FROM cobro AS c 
             LEFT JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro
-            WHERE c.idProcedencia = ?`, [
+            WHERE c.idProcedencia = ? AND c.estado = 1`, [
                 req.body.idVenta,
             ]);
 
@@ -763,18 +776,6 @@ class Cobro {
                 idCobro = "CB0001";
             }
 
-            let total = await conec.execute(connection, `SELECT * FROM plazo WHERE idPlazo = ?`, [
-                req.body.idPlazo
-            ]);
-
-            let cobrado = await conec.execute(connection, `SELECT 
-            IFNULL(SUM(cv.precio),0) AS total
-            FROM cobro AS c 
-            LEFT JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro
-            WHERE cv.idPlazo  = ?`, [
-                req.body.idPlazo
-            ]);
-
             let comprobante = await conec.execute(connection, `SELECT 
             serie,
             numeracion 
@@ -836,16 +837,6 @@ class Cobro {
                 currentTime()
             ]);
 
-            let montoCobrado = cobrado[0].total + parseFloat(req.body.montoCuota);
-            if (montoCobrado >= total[0].monto) {
-
-                await conec.execute(connection, `UPDATE plazo SET estado = 1 WHERE idPlazo = ?`, [
-                    req.body.idPlazo,
-                ]);
-            }
-
-            let monto = parseFloat(req.body.montoCuota);
-
             await conec.execute(connection, `INSERT INTO cobroVenta(
             idCobro,
             idVenta,
@@ -874,11 +865,51 @@ class Cobro {
                 req.body.idBanco,
                 idCobro,
                 1,
-                monto,
+                parseFloat(req.body.montoCuota),
                 currentDate(),
                 currentTime(),
                 req.body.idUsuario,
             ]);
+
+            let totalPlazo = await conec.execute(connection, `SELECT monto FROM plazo WHERE idPlazo = ?`, [
+                req.body.idPlazo
+            ]);
+
+            let cobradoPlazo = await conec.execute(connection, `SELECT 
+            IFNULL(SUM(cv.precio),0) AS total
+            FROM cobro AS c 
+            LEFT JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro
+            WHERE cv.idPlazo  = ? AND c.estado = 1`, [
+                req.body.idPlazo
+            ]);
+
+            if (cobradoPlazo[0].total >= totalPlazo[0].monto) {
+                await conec.execute(connection, `UPDATE plazo SET estado = 1 WHERE idPlazo = ?`, [
+                    req.body.idPlazo,
+                ]);
+            }
+
+            let total = await conec.execute(connection, `SELECT 
+            IFNULL(SUM(vd.precio*vd.cantidad),0) AS total 
+            FROM venta AS v
+            LEFT JOIN ventaDetalle AS vd ON v.idVenta  = vd.idVenta
+            WHERE v.idVenta  = ?`, [
+                req.body.idVenta,
+            ]);
+
+            let cobrado = await conec.execute(connection, `SELECT 
+            IFNULL(SUM(cv.precio),0) AS total
+            FROM cobro AS c 
+            LEFT JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro
+            WHERE c.idProcedencia = ? AND c.estado = 1`, [
+                req.body.idVenta,
+            ]);
+
+            if (cobrado[0].total >= total[0].total) {
+                await conec.execute(connection, `UPDATE venta SET estado = 1 WHERE idVenta = ?`, [
+                    req.body.idVenta,
+                ]);
+            }
 
             let resultAuditoria = await conec.execute(connection, 'SELECT idAuditoria FROM auditoria');
             let idAuditoria = 0;
@@ -952,6 +983,8 @@ class Cobro {
             m.codiso,
             m.simbolo,
 
+            nc.idNotaCredito,
+
             CONCAT(us.nombres,' ',us.apellidos) AS usuario,            
     
             IFNULL(SUM(cb.precio*cb.cantidad),SUM(cv.precio)) AS monto
@@ -968,6 +1001,8 @@ class Cobro {
             
             LEFT JOIN venta AS vn ON vn.idVenta = c.idProcedencia
             LEFT JOIN comprobante AS cov ON vn.idComprobante = cov.idComprobante
+
+            LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro
             WHERE c.idCobro = ?
             GROUP BY  c.idCobro`, [
                 req.query.idCobro
@@ -1010,8 +1045,11 @@ class Cobro {
                 imp.porcentaje,
 
                 CASE 
-                WHEN cv.idPlazo = 0 THEN 'CUOTA INICIAL'
-                ELSE CONCAT('CUOTA',' ',pl.cuota) END AS concepto,
+                    WHEN cv.idPlazo = 0 THEN 'CUOTA INICIAL'
+                    WHEN pl.cuota IS NOT NULL THEN CONCAT('CUOTA',' ',pl.cuota)
+                    ELSE '-' 
+                END AS concepto,
+
                 DATE_FORMAT(pl.fecha,'%d/%m/%Y') as fecha,                
 
                 (SELECT IFNULL(SUM(vd.precio*vd.cantidad),0) FROM ventaDetalle AS vd WHERE vd.idVenta = v.idVenta ) AS total,
@@ -1037,7 +1075,6 @@ class Cobro {
                     WHERE vd.idVenta = ?`, [
                     venta[0].idVenta
                 ]);
-                // console.log(lote[0])                
 
                 return {
                     "cabecera": result[0],
@@ -1143,8 +1180,7 @@ class Cobro {
                     cobro[0].idProcedencia
                 ]);
 
-                let cobroVenta = await conec.execute(connection, `SELECT idPlazo FROM cobroVenta 
-                            WHERE idCobro = ?`, [
+                let cobroVenta = await conec.execute(connection, `SELECT idPlazo FROM cobroVenta WHERE idCobro = ?`, [
                     req.query.idCobro
                 ]);
 
@@ -1154,30 +1190,74 @@ class Cobro {
                             cobroVenta[0].idPlazo
                         ]);
                     } else {
-                        let plazosCobros = await conec.execute(connection, `SELECT * FROM cobroVenta WHERE idPlazo = ?`, [
+                        let suma = await conec.execute(connection, `SELECT
+                            IFNULL(precio,0) AS total 
+                            FROM cobroVenta 
+                            WHERE idPlazo = ?`, [
                             cobroVenta[0].idPlazo
                         ]);
 
-                        if (plazosCobros.length <= 1) {
-                            await conec.execute(connection, `UPDATE plazo SET estado = 0 WHERE idPlazo = ?`, [
+                        let sumaTotal = suma.map(item => item.total).reduce((prev, current) => prev + current, 0)
+
+                        let actual = await conec.execute(connection, `SELECT 
+                            IFNULL(precio,0) AS total 
+                            FROM cobroVenta 
+                            WHERE idCobro = ?`, [
+                            req.query.idCobro
+                        ]);
+
+                        let plazoSuma = await conec.execute(connection, `SELECT 
+                            IFNULL(monto,0) AS total 
+                            FROM plazo 
+                            WHERE idPlazo = ?`, [
+                            cobroVenta[0].idPlazo
+                        ]);
+
+                        if (plazoSuma[0].total > sumaTotal - actual[0].total) {
+                            await conec.execute(connection, `UPDATE 
+                            plazo SET estado = 0 
+                            WHERE idPlazo = ?`, [
                                 cobroVenta[0].idPlazo
                             ]);
                         }
                     }
+
+                    let total = await conec.execute(connection, `SELECT 
+                        IFNULL(SUM(vd.precio*vd.cantidad),0) AS total 
+                        FROM venta AS v
+                        LEFT JOIN ventaDetalle AS vd ON v.idVenta  = vd.idVenta
+                        WHERE v.idVenta  = ?`, [
+                        venta[0].idVenta
+                    ]);
+
+                    let cobrado = await conec.execute(connection, `SELECT 
+                        IFNULL(SUM(cv.precio),0) AS total
+                        FROM cobro AS c 
+                        LEFT JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro
+                        WHERE c.idProcedencia = ? AND c.estado = 1`, [
+                        venta[0].idVenta
+                    ]);
+
+                    let actual = await conec.execute(connection, `SELECT 
+                        IFNULL(SUM(cv.precio),0) AS total
+                        FROM cobro AS c 
+                        LEFT JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro
+                        WHERE c.idCobro = ?`, [
+                        req.query.idCobro
+                    ]);
+
+                    let montoCobrado = cobrado[0].total - actual[0].total;
+                    if (montoCobrado < total[0].total) {
+                        await conec.execute(connection, `UPDATE venta SET estado = 2
+                        WHERE idVenta = ?`, [
+                            venta[0].idVenta
+                        ]);
+                    }
                 }
 
-                await conec.execute(connection, `UPDATE venta SET estado = 2
-                WHERE idVenta = ?`, [
-                    venta[0].idVenta
-                ]);
-
-                /**
-                 * 
-                 */
-
-                await conec.execute(connection, `UPDATE cobro SET estado = 0,observacion = ? WHERE idCobro = ?`, [
+                await conec.execute(connection, `UPDATE cobro SET estado = 0, observacion = ? WHERE idCobro = ?`, [
+                    `ANULACIÓN DEL COMPROBANTE`,
                     req.query.idCobro,
-                    `ANULACIÓN DEL COMPROBANTE`
                 ]);
 
                 await conec.execute(connection, `DELETE FROM bancoDetalle WHERE idProcedencia  = ?`, [
@@ -1214,32 +1294,36 @@ class Cobro {
                     currentTime(),
                     req.query.idUsuario
                 ]);
-
             } else {
+
                 let cobro = await conec.execute(connection, `SELECT idProcedencia,serie,numeracion FROM cobro WHERE idCobro = ?`, [
                     req.query.idCobro
                 ]);
 
                 if (cobro.length > 0) {
+
                     let venta = await conec.execute(connection, `SELECT idVenta,credito FROM venta WHERE idVenta  = ?`, [
                         cobro[0].idProcedencia
                     ]);
 
                     if (venta.length > 0) {
+
                         let plazos = await conec.execute(connection, `SELECT idPlazo,estado FROM plazo 
                         WHERE idVenta = ? AND estado = 1`, [
                             venta[0].idVenta
                         ]);
 
                         if (plazos.length > 0) {
+
                             let arrPlazos = plazos.map(function (item) {
                                 return item.idPlazo;
                             });
 
                             let maxPlazo = Math.max(...arrPlazos);
 
-                            let cobroVenta = await conec.execute(connection, `SELECT idPlazo FROM cobroVenta 
-                            WHERE idCobro = ?`, [
+                            let cobroVenta = await conec.execute(connection, `SELECT idPlazo 
+                                FROM cobroVenta 
+                                WHERE idCobro = ?`, [
                                 req.query.idCobro
                             ]);
 
@@ -1250,26 +1334,73 @@ class Cobro {
                             let maxCobroVenta = Math.max(...arrCobroVenta);
 
                             if (maxPlazo <= maxCobroVenta) {
+
                                 if (venta[0].credito === 1) {
                                     await conec.execute(connection, `DELETE FROM plazo WHERE idPlazo = ?`, [
                                         maxCobroVenta
                                     ]);
                                 } else {
-                                    let plazosCobros = await conec.execute(connection, `SELECT * FROM cobroVenta WHERE idPlazo = ?`, [
+                                    let suma = await conec.execute(connection, `SELECT
+                                        IFNULL(precio,0) AS total 
+                                        FROM cobroVenta 
+                                        WHERE idPlazo = ?`, [
                                         maxCobroVenta
                                     ]);
 
-                                    if (plazosCobros.length <= 1) {
+                                    let sumaTotal = suma.map(item => item.total).reduce((prev, current) => prev + current, 0)
+
+                                    let actual = await conec.execute(connection, `SELECT 
+                                        IFNULL(precio,0) AS total 
+                                        FROM cobroVenta 
+                                        WHERE idCobro = ?`, [
+                                        req.query.idCobro
+                                    ]);
+
+                                    let plazoSuma = await conec.execute(connection, `SELECT 
+                                        IFNULL(monto,0) AS total 
+                                        FROM plazo 
+                                        WHERE idPlazo = ?`, [
+                                        maxCobroVenta
+                                    ]);
+
+                                    if (plazoSuma[0].total > sumaTotal - actual[0].total) {
                                         await conec.execute(connection, `UPDATE plazo SET estado = 0 WHERE idPlazo = ?`, [
                                             maxCobroVenta
                                         ]);
                                     }
                                 }
 
-                                await conec.execute(connection, `UPDATE venta SET estado = 2
-                                WHERE idVenta = ?`, [
+                                let total = await conec.execute(connection, `SELECT 
+                                    IFNULL(SUM(vd.precio*vd.cantidad),0) AS total 
+                                    FROM venta AS v
+                                    LEFT JOIN ventaDetalle AS vd ON v.idVenta  = vd.idVenta
+                                    WHERE v.idVenta  = ?`, [
                                     venta[0].idVenta
                                 ]);
+
+                                let cobrado = await conec.execute(connection, `SELECT 
+                                    IFNULL(SUM(cv.precio),0) AS total
+                                    FROM cobro AS c 
+                                    LEFT JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro
+                                    WHERE c.idProcedencia = ? AND c.estado = 1`, [
+                                    venta[0].idVenta
+                                ]);
+
+                                let actual = await conec.execute(connection, `SELECT 
+                                    IFNULL(SUM(cv.precio),0) AS total
+                                    FROM cobro AS c 
+                                    LEFT JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro
+                                    WHERE c.idCobro = ?`, [
+                                    req.query.idCobro
+                                ]);
+
+                                let montoCobrado = cobrado[0].total - actual[0].total;
+                                if (montoCobrado < total[0].total) {
+                                    await conec.execute(connection, `UPDATE venta SET estado = 2
+                                    WHERE idVenta = ?`, [
+                                        venta[0].idVenta
+                                    ]);
+                                }
                             } else {
                                 await conec.rollback(connection);
                                 return "No se puede eliminar el cobro, hay plazos(cobros) ligados que son inferiores.";
@@ -1324,13 +1455,11 @@ class Cobro {
                     currentTime(),
                     req.query.idUsuario
                 ]);
-
             }
 
             await conec.commit(connection);
             return "delete";
         } catch (error) {
-            console.error(error)
             if (connection != null) {
                 await conec.rollback(connection);
             }
@@ -1341,8 +1470,8 @@ class Cobro {
     async cobroGeneral(req) {
         try {
             if (req.query.isDetallado) {
-                if (req.query.idUsuario != '') {
-                    let cobros = await conec.query(`SELECT 
+
+                let cobros = await conec.query(`SELECT 
                     c.idCobro, 
                     co.nombre as comprobante,
                     c.serie,
@@ -1359,6 +1488,7 @@ class Cobro {
                     c.observacion, 
                     DATE_FORMAT(c.fecha,'%d/%m/%Y') as fecha, 
                     c.hora,
+                    nc.idNotaCredito,
                     c.estado,
                     IFNULL(SUM(cd.precio*cd.cantidad),SUM(cv.precio)) AS monto,
                     u.nombres,
@@ -1375,19 +1505,16 @@ class Cobro {
                     LEFT JOIN venta AS v ON cv.idVenta = v.idVenta 
                     LEFT JOIN comprobante AS cp ON v.idComprobante = cp.idComprobante
                     LEFT JOIN usuario AS u ON u.idUsuario = c.idUsuario
+                    LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro
                     WHERE c.fecha BETWEEN ? AND ?
-                    AND c.idUsuario = ?
                     GROUP BY c.idCobro
                     ORDER BY c.fecha DESC,c.hora DESC
                     `, [
-                        req.query.fechaIni,
-                        req.query.fechaFin,
+                    req.query.fechaIni,
+                    req.query.fechaFin,
+                ]);
 
-                        req.query.idUsuario,
-                    ]);
-
-                    let gastos = await conec.query(`
-                    SELECT 
+                let gastos = await conec.query(`SELECT 
                     g.idGasto,
                     co.nombre as comprobante,
                     g.serie,
@@ -1400,107 +1527,23 @@ class Cobro {
                     g.observacion, 
                     DATE_FORMAT(g.fecha,'%d/%m/%Y') as fecha, 
                     g.hora,
-                    IFNULL(SUM(gd.precio*gd.cantidad),0) AS monto,
-                    u.nombres,
-                    u.apellidos
+                    IFNULL(SUM(gd.precio*gd.cantidad),0) AS monto
                     FROM gasto AS g          
                     LEFT JOIN cliente AS cl ON g.idCliente = cl.idCliente 
                     INNER JOIN banco AS b ON g.idBanco = b.idBanco
                     INNER JOIN moneda AS m ON g.idMoneda = m.idMoneda     
                     INNER JOIN comprobante AS co ON co.idComprobante = g.idComprobante       
                     LEFT JOIN gastoDetalle AS gd ON g.idGasto = gd.idGasto
-                    LEFT JOIN concepto AS cn ON gd.idConcepto = cn.idConcepto
-                    LEFT JOIN usuario AS u ON u.idUsuario = g.idUsuario 
-                    WHERE g.fecha BETWEEN ? AND ?
-                    AND g.idUsuario = ?
-                    GROUP BY g.idGasto                    
-                    ORDER BY g.fecha DESC, g.hora DESC
-                    `, [
-                        req.query.fechaIni,
-                        req.query.fechaFin,
-
-                        req.query.idUsuario,
-                    ]);
-
-                    return { "cobros": cobros, "gastos": gastos };
-                } else {
-                    let cobros = await conec.query(`SELECT 
-                    c.idCobro, 
-                    co.nombre as comprobante,
-                    c.serie,
-                    c.numeracion,
-                    cl.documento,
-                    cl.informacion,  
-                    CASE 
-                    WHEN cn.idConcepto IS NOT NULL THEN cn.nombre
-                    ELSE CASE WHEN cv.idPlazo = 0 THEN 'CUOTA INICIAL' ELSE CONCAT('CUOTA',' ',pl.cuota) END END AS detalle,
-                    IFNULL(CONCAT(cp.nombre,' ',v.serie,'-',v.numeracion),'') AS comprobanteRef,
-                    m.simbolo,
-                    m.codiso,
-                    b.nombre as banco,  
-                    c.observacion, 
-                    DATE_FORMAT(c.fecha,'%d/%m/%Y') as fecha, 
-                    c.hora,
-                    c.estado,
-                    IFNULL(SUM(cd.precio*cd.cantidad),SUM(cv.precio)) AS monto,
-                    u.nombres,
-                    u.apellidos
-                    FROM cobro AS c
-                    INNER JOIN cliente AS cl ON c.idCliente = cl.idCliente
-                    INNER JOIN banco AS b ON c.idBanco = b.idBanco
-                    INNER JOIN moneda AS m ON c.idMoneda = m.idMoneda 
-                    INNER JOIN comprobante AS co ON co.idComprobante = c.idComprobante
-                    LEFT JOIN cobroDetalle AS cd ON c.idCobro = cd.idCobro
-                    LEFT JOIN concepto AS cn ON cd.idConcepto = cn.idConcepto 
-                    LEFT JOIN cobroVenta AS cv ON cv.idCobro = c.idCobro 
-                    LEFT JOIN plazo AS pl ON pl.idPlazo = cv.idPlazo
-                    LEFT JOIN venta AS v ON cv.idVenta = v.idVenta 
-                    LEFT JOIN comprobante AS cp ON v.idComprobante = cp.idComprobante
-                    LEFT JOIN usuario AS u ON u.idUsuario = c.idUsuario
-                    WHERE c.fecha BETWEEN ? AND ?
-                    GROUP BY c.idCobro
-                    ORDER BY c.fecha DESC,c.hora DESC
-                    `, [
-                        req.query.fechaIni,
-                        req.query.fechaFin,
-                    ]);
-
-                    let gastos = await conec.query(`
-                    SELECT 
-                    g.idGasto,
-                    co.nombre as comprobante,
-                    g.serie,
-                    g.numeracion,
-                    IFNULL(cl.documento,'') AS documento,
-                    IFNULL(cl.informacion,'') AS informacion,
-                    IFNULL(cn.nombre,'') AS detalle,
-                    m.simbolo,
-                    b.nombre as banco, 
-                    g.observacion, 
-                    DATE_FORMAT(g.fecha,'%d/%m/%Y') as fecha, 
-                    g.hora,
-                    IFNULL(SUM(gd.precio*gd.cantidad),0) AS monto,
-                    u.nombres,
-                    u.apellidos
-                    FROM gasto AS g          
-                    LEFT JOIN cliente AS cl ON g.idCliente = cl.idCliente 
-                    INNER JOIN banco AS b ON g.idBanco = b.idBanco
-                    INNER JOIN moneda AS m ON g.idMoneda = m.idMoneda     
-                    INNER JOIN comprobante AS co ON co.idComprobante = g.idComprobante       
-                    LEFT JOIN gastoDetalle AS gd ON g.idGasto = gd.idGasto
-                    LEFT JOIN concepto AS cn ON gd.idConcepto = cn.idConcepto
-                    LEFT JOIN usuario AS u ON u.idUsuario = g.idUsuario 
+                    LEFT JOIN concepto AS cn ON gd.idConcepto = cn.idConcepto 
                     WHERE g.fecha BETWEEN ? AND ?
                     GROUP BY g.idGasto
                     ORDER BY g.fecha DESC, g.hora DESC
                     `, [
-                        req.query.fechaIni,
-                        req.query.fechaFin,
-                    ]);
+                    req.query.fechaIni,
+                    req.query.fechaFin,
+                ]);
 
-                    return { "cobros": cobros, "gastos" : gastos };
-                }
-                // return { "conceptos": conceptos, "bancos": bancos };
+                return { "cobros": cobros, "gastos": gastos };
             } else {
                 let cobros = await conec.query(`SELECT
                     IFNULL(co.idConcepto,'CV01') AS idConcepto,
@@ -1518,7 +1561,8 @@ class Cobro {
                     LEFT JOIN cobroDetalle AS cd ON c.idCobro = cd.idCobro
                     LEFT JOIN concepto AS co ON co.idConcepto = cd.idConcepto
                     LEFT JOIN cobroVenta AS cv ON cv.idCobro = c.idCobro
-                    WHERE c.fecha BETWEEN ? AND ? AND c.estado = 1
+                    LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro
+                    WHERE c.fecha BETWEEN ? AND ? AND c.estado = 1 AND nc.idNotaCredito IS NULL
                     GROUP BY c.idCobro`,
                     [
                         req.query.fechaIni,
@@ -1602,6 +1646,7 @@ class Cobro {
                 return { "conceptos": conceptos, "bancos": bancos };
             }
         } catch (error) {
+            console.error(error);
             return "Se produjo un error de servidor, intente nuevamente.";
         }
     }

@@ -252,7 +252,7 @@ class RepFinanciero {
 
             let sumaMontoCobros = 0;
             let cobros = data.cobros.map((item, index) => {
-                sumaMontoCobros += item.monto;
+                sumaMontoCobros += item.estado == 1 && item.idNotaCredito == null ?  item.monto : 0;
                 return[
                     ++index,
                     item.comprobante + "\n" + item.serie + "-" + item.numeracion,
@@ -261,7 +261,7 @@ class RepFinanciero {
                     item.banco,
                     item.fecha + "\n" + item.hora,
                     item.nombres,
-                    numberFormat(item.monto)
+                    item.estado == 1 && item.idNotaCredito == null ? numberFormat(item.monto) : 0
                 ]
             });
 
@@ -276,8 +276,17 @@ class RepFinanciero {
 
             doc.table(tableCobros, {
                 prepareHeader: () => doc.font("Helvetica-Bold").fontSize(h3),
-                prepareRow: () => {
-                    doc.font("Helvetica").fontSize(h3);
+                prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) => {
+                    // 
+                    // doc.font("Helvetica").fontSize(h3);
+                    
+                    if (indexColumn === 7) {
+                        if (row[7] == "0") {
+                            doc.font("Helvetica").fontSize(h3).fillColor("red");
+                        }
+                    } else {
+                        doc.font("Helvetica").fontSize(h3).fillColor("black");
+                    }
                 },
                 padding: 5,
                 columnSpacing: 5,
@@ -289,7 +298,7 @@ class RepFinanciero {
 
             let sumaMontoGastos = 0;
             let gastos = data.gastos.map((item, index) => {
-                sumaMontoGastos += item.monto;
+                sumaMontoGastos +=  item.monto;
                 return[
                     ++index,
                     item.comprobante + "\n" + item.serie + "-" + item.numeracion,

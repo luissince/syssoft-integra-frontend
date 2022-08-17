@@ -566,7 +566,8 @@ class Cliente {
                 LEFT JOIN cobroVenta AS cv ON cv.idCobro = c.idCobro 
                 LEFT JOIN venta AS v ON cv.idVenta = v.idVenta 
                 LEFT JOIN comprobante AS cp ON v.idComprobante = cp.idComprobante
-                WHERE c.idCliente = ?
+                LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro
+                WHERE c.idCliente = ? AND c.estado = 1 AND nc.idNotaCredito IS NULL
                 AND (c.fecha BETWEEN ? AND ?)
                 GROUP BY c.idCobro
                 ORDER BY c.fecha DESC,c.hora DESC`, [
@@ -585,8 +586,9 @@ class Cliente {
                 (SELECT IFNULL(SUM(cv.precio),0) FROM cobroVenta AS cv WHERE cv.idCobro = co.idCobro) AS ventas
                 FROM cobro AS co
                 INNER JOIN cliente AS c ON c.idCliente = co.idCliente
+                LEFT JOIN notaCredito AS nc ON nc.idCobro = co.idCobro
                 WHERE 
-                co.fecha BETWEEN ? AND ?`, [
+                co.fecha BETWEEN ? AND ? AND co.estado = 1 AND nc.idNotaCredito IS NULL`, [
                     req.query.fechaIni,
                     req.query.fechaFin
                 ]);

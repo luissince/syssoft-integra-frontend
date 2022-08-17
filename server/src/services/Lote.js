@@ -453,7 +453,12 @@ class Lote {
                 LEFT JOIN cobroVenta AS cv ON cv.idCobro = c.idCobro 
                 LEFT JOIN venta AS v ON cv.idVenta = v.idVenta 
                 LEFT JOIN comprobante AS cp ON v.idComprobante = cp.idComprobante
-                WHERE c.idProcedencia = ? AND c.estado = 1 OR c.idProcedencia = ? AND c.estado = 1
+                LEFT JOIN notaCredito AS nc ON c.idCobro = nc.idCobro
+
+                WHERE 
+                c.idProcedencia = ? AND c.estado = 1 AND nc.idNotaCredito IS NULL
+                OR 
+                c.idProcedencia = ? AND c.estado = 1 AND nc.idNotaCredito IS NULL
                 GROUP BY c.idCobro`, [
                     venta[0].idVenta,
                     req.query.idLote,

@@ -6,7 +6,43 @@ const conec = new Conexion();
 class NotaCredito {
 
     async list(req, res) {
+        try {
+            let lista = await conec.query(`SELECT 
+            nc.idNotaCredito,
+            co.nombre AS comprobante,
+            nc.serie,
+            nc.numeracion
+            FROM 
+            notaCredito AS nc 
+            INNER JOIN comprobante AS co ON co.idComprobante = nc.idComprobante
+            INNER JOIN cliente AS c ON c.idCliente = nc.idCliente 
+            
+            GROUP BY nc.idNotaCredito
+            ORDER BY nc.fecha DESC, nc.hora DESC
+            LIMIT ?,?`, [
 
+                parseInt(req.query.posicionPagina),
+                parseInt(req.query.filasPorPagina)
+            ]);
+
+            let resultLista = lista.map(function (item, index) {
+                return {
+                    ...item,
+                    id: (index + 1) + parseInt(req.query.posicionPagina)
+                }
+            });
+
+            let total = await conec.query(`SELECT COUNT(*) AS Total
+            FROM 
+            notaCredito AS nc 
+            INNER JOIN comprobante AS co ON co.idComprobante = nc.idComprobante
+            INNER JOIN cliente AS c ON c.idCliente = nc.idCliente `, [
+            ]);
+
+            return sendSuccess(res, { "result": resultLista, "total": total[0].Total });
+        } catch (error) {
+            return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
+        }
     }
 
     async id(req, res) {
@@ -165,21 +201,107 @@ class NotaCredito {
                         cobroVenta[0].idPlazo
                     ]);
                 } else {
-                    let plazosCobros = await conec.execute(connection, `SELECT * FROM cobroVenta WHERE idPlazo = ?`, [
+                    let suma = await conec.execute(connection, `SELECT 
+                        IFNULL(precio,0) AS total FROM cobroVenta 
+                        WHERE idPlazo = ?`, [
                         cobroVenta[0].idPlazo
                     ]);
 
-                    if (plazosCobros.length <= 1) {
-                        await conec.execute(connection, `UPDATE plazo SET estado = 0 WHERE idPlazo = ?`, [
+                    let sumaTotal = suma.map(item => item.total).reduce((prev, current) => prev + current, 0)
+
+                    let actual = await conec.execute(connection, `SELECT 
+                        IFNULL(precio,0) AS total 
+                        FROM cobroVenta 
+                        WHERE idCobro = ?`, [
+                        req.body.idCobro
+                    ]);
+
+                    let plazoSuma = await conec.execute(connection, `SELECT 
+                        IFNULL(monto,0) AS total 
+                        FROM plazo 
+                        WHERE idPlazo = ?`, [
+                        cobroVenta[0].idPlazo
+                    ]);
+
+                    if (plazoSuma[0].total > sumaTotal - actual[0].total) {
+                        await conec.execute(connection, `UPDATE plazo SET estado = 0 
+                        WHERE idPlazo = ?`, [
                             cobroVenta[0].idPlazo
                         ]);
                     }
                 }
+
+                let total = await conec.execute(connection, `SELECT 
+                    IFNULL(SUM(vd.precio*vd.cantidad),0) AS total 
+                    FROM venta AS v
+                    LEFT JOIN ventaDetalle AS vd ON v.idVenta  = vd.idVenta
+                    WHERE v.idVenta  = ?`, [
+                    venta[0].idVenta
+                ]);
+
+                let cobrado = await conec.execute(connection, `SELECT 
+                    IFNULL(SUM(cv.precio),0) AS total
+                    FROM cobro AS c 
+                    LEFT JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro
+                    WHERE c.idProcedencia = ? AND c.estado = 1`, [
+                    venta[0].idVenta
+                ]);
+
+                let actual = await conec.execute(connection, `SELECT 
+                    IFNULL(SUM(cv.precio),0) AS total
+                    FROM cobro AS c 
+                    LEFT JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro
+                    WHERE c.idCobro = ?`, [
+                    req.body.idCobro
+                ]);
+
+                let montoCobrado = cobrado[0].total - actual[0].total;
+                if (montoCobrado < total[0].total) {
+                    await conec.execute(connection, `UPDATE venta SET estado = 2
+                    WHERE idVenta = ?`, [
+                        venta[0].idVenta
+                    ]);
+                }
             }
 
-            await conec.execute(connection, `UPDATE venta SET estado = 2
-            WHERE idVenta = ?`, [
-                venta[0].idVenta
+            await conec.execute(connection, `UPDATE cobro SET observacion = ? WHERE idCobro = ?`, [
+                req.query.idCobro,
+                `ANULACIÓN CON NOTA DE CRÉDITO`
+            ]);
+
+            await conec.execute(connection, `DELETE FROM bancoDetalle WHERE idProcedencia  = ?`, [
+                req.body.idCobro
+            ]);
+
+            let resultAuditoria = await conec.execute(connection, 'SELECT idAuditoria FROM auditoria');
+            let idAuditoria = 0;
+            if (resultAuditoria.length != 0) {
+                let quitarValor = resultAuditoria.map(function (item) {
+                    return parseInt(item.idAuditoria);
+                });
+
+                let valorActual = Math.max(...quitarValor);
+                let incremental = valorActual + 1;
+
+                idAuditoria = incremental;
+            } else {
+                idAuditoria = 1;
+            }
+
+            await conec.execute(connection, `INSERT INTO auditoria(
+                        idAuditoria,
+                        idProcedencia,
+                        descripcion,
+                        fecha,
+                        hora,
+                        idUsuario) 
+                        VALUES(?,?,?,?,?,?)`, [
+                idAuditoria,
+                cobro[0].idCobro,
+                `ANULACIÓN CON NOTA DE CRÉDITO ${cobro[0].serie}-${cobro[0].numeracion}`,
+                currentDate(),
+                currentTime(),
+                req.body.idUsuario,
             ]);
 
             await conec.commit(connection);

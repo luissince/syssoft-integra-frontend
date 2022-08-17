@@ -1069,7 +1069,13 @@ class Factura {
             m.idMoneda,
             m.codiso,
             IFNULL(SUM(vd.precio*vd.cantidad),0) AS total,
-            (SELECT IFNULL(SUM(cv.precio),0) FROM cobro AS c LEFT JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro WHERE c.idProcedencia = v.idVenta AND c.estado = 1) AS cobrado 
+            (
+                SELECT IFNULL(SUM(cv.precio),0) 
+                FROM cobro AS c 
+                LEFT JOIN notaCredito AS nc ON c.idCobro = nc.idCobro
+                LEFT JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro 
+                WHERE c.idProcedencia = v.idVenta AND c.estado = 1 AND nc.idNotaCredito IS NULL
+            ) AS cobrado 
             FROM venta AS v 
             INNER JOIN moneda AS m ON m.idMoneda = v.idMoneda
             INNER JOIN comprobante AS cm ON v.idComprobante = cm.idComprobante 
@@ -1114,8 +1120,10 @@ class Factura {
                 req.query.idVenta
             ]);
 
-            let cobros = await conec.query(`SELECT idCobro FROM
-            cobro WHERE idProcedencia = ? AND estado = 1`, [
+            let cobros = await conec.query(`SELECT c.idCobro 
+            FROM cobro AS c 
+            LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro
+            WHERE c.idProcedencia = ? AND c.estado = 1 AND nc.idNotaCredito IS NULL`, [
                 req.query.idVenta
             ]);
 
@@ -1317,7 +1325,13 @@ class Factura {
             m.idMoneda,
             m.codiso,
             IFNULL(SUM(vd.precio*vd.cantidad),0) AS total,
-            (SELECT IFNULL(SUM(cv.precio),0) FROM cobro AS c LEFT JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro WHERE c.idProcedencia = v.idVenta AND c.estado = 1) AS cobrado 
+            (
+                SELECT IFNULL(SUM(cv.precio),0) 
+                FROM cobro AS c 
+                LEFT JOIN notaCredito AS nc ON c.idCobro = nc.idCobro
+                LEFT JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro 
+                WHERE c.idProcedencia = v.idVenta AND c.estado = 1 AND nc.idNotaCredito IS NULL
+            ) AS cobrado 
             FROM venta AS v 
             INNER JOIN moneda AS m ON m.idMoneda = v.idMoneda
             INNER JOIN comprobante AS cm ON v.idComprobante = cm.idComprobante 
@@ -1361,9 +1375,11 @@ class Factura {
             `, [
                 req.query.idVenta
             ]);
-
-            let cobros = await conec.query(`SELECT idCobro FROM
-            cobro WHERE idProcedencia = ? AND estado = 1`, [
+            
+            let cobros = await conec.query(`SELECT c.idCobro 
+            FROM cobro AS c 
+            LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro
+            WHERE c.idProcedencia = ? AND c.estado = 1 AND nc.idNotaCredito IS NULL`, [
                 req.query.idVenta
             ]);
 

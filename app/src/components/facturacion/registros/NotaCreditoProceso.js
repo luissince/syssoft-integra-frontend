@@ -178,7 +178,7 @@ class NotaCreditoProceso extends React.Component {
             if (event) {
                 try {
                     ModalAlertInfo("Nota de Crédito", "Procesando información...");
-
+                    console.log(this.state.idUsuario)
                     let result = await axios.post('/api/notacredito/add', {
                         idComprobante: this.state.idComprobante,
                         idMoneda: this.state.idMoneda,

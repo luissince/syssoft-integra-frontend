@@ -240,7 +240,12 @@ class Cobros extends React.Component {
                                                         <td>{item.fecha}{<br />}{timeForma24(item.hora)}</td>
                                                         <td>{item.banco}</td>
                                                         <td>{item.detalle}<br /><small>{item.comprobanteRef}</small></td>
-                                                        <td>{item.estado == 1 ? <span className="text-success">COBRADO</span> : <span className="text-danger">ANULADO</span>}</td>
+                                                        <td>{item.estado == 1 && item.idNotaCredito == null?
+                                                            <span className="text-success">COBRADO</span> :
+                                                            item.idNotaCredito != null ?
+                                                                <span className="text-danger">MODIFICADO</span> :
+                                                                <span className="text-danger">ANULADO</span>}
+                                                        </td>
                                                         <td>{numberFormat(item.monto)}</td>
                                                         <td className="text-center">
                                                             <button
