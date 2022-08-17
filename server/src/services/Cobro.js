@@ -348,8 +348,9 @@ class Cobro {
             let cobrado = await conec.execute(connection, `SELECT 
             IFNULL(SUM(cv.precio),0) AS total
             FROM cobro AS c 
-            LEFT JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro
-            WHERE c.idProcedencia = ? AND c.estado = 1`, [
+            INNER JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro
+            LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro
+            WHERE c.idProcedencia = ? AND c.estado = 1 AND nc.idNotaCredito IS NULL`, [
                 req.body.idVenta,
             ]);
 
@@ -555,8 +556,9 @@ class Cobro {
             let cobrado = await conec.execute(connection, `SELECT 
             IFNULL(SUM(cv.precio),0) AS total
             FROM cobro AS c 
-            LEFT JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro
-            WHERE c.idProcedencia = ? AND c.estado = 1`, [
+            INNER JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro
+            LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro
+            WHERE c.idProcedencia = ? AND c.estado = 1 AND nc.idNotaCredito IS NULL`, [
                 req.body.idVenta,
             ]);
 
@@ -878,8 +880,9 @@ class Cobro {
             let cobradoPlazo = await conec.execute(connection, `SELECT 
             IFNULL(SUM(cv.precio),0) AS total
             FROM cobro AS c 
-            LEFT JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro
-            WHERE cv.idPlazo  = ? AND c.estado = 1`, [
+            INNER JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro
+            LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro
+            WHERE cv.idPlazo  = ? AND c.estado = 1 AND nc.idNotaCredito IS NULL`, [
                 req.body.idPlazo
             ]);
 
@@ -900,8 +903,9 @@ class Cobro {
             let cobrado = await conec.execute(connection, `SELECT 
             IFNULL(SUM(cv.precio),0) AS total
             FROM cobro AS c 
-            LEFT JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro
-            WHERE c.idProcedencia = ? AND c.estado = 1`, [
+            INNER JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro
+            LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro
+            WHERE c.idProcedencia = ? AND c.estado = 1 AND nc.idNotaCredito IS NULL`, [
                 req.body.idVenta,
             ]);
 
@@ -1190,10 +1194,13 @@ class Cobro {
                             cobroVenta[0].idPlazo
                         ]);
                     } else {
+
                         let suma = await conec.execute(connection, `SELECT
-                            IFNULL(precio,0) AS total 
-                            FROM cobroVenta 
-                            WHERE idPlazo = ?`, [
+                            IFNULL(cv.precio,0) AS total 
+                            FROM cobro AS c 
+                            INNER JOIN cobroVenta cv ON c.idCobro = cv.idCobro 
+                            LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro
+                            WHERE cv.idPlazo = ? AND c.estado = 1 AND nc.idNotaCredito IS NULL`, [
                             cobroVenta[0].idPlazo
                         ]);
 
@@ -1212,7 +1219,7 @@ class Cobro {
                             WHERE idPlazo = ?`, [
                             cobroVenta[0].idPlazo
                         ]);
-
+                        
                         if (plazoSuma[0].total > sumaTotal - actual[0].total) {
                             await conec.execute(connection, `UPDATE 
                             plazo SET estado = 0 
@@ -1233,8 +1240,9 @@ class Cobro {
                     let cobrado = await conec.execute(connection, `SELECT 
                         IFNULL(SUM(cv.precio),0) AS total
                         FROM cobro AS c 
-                        LEFT JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro
-                        WHERE c.idProcedencia = ? AND c.estado = 1`, [
+                        INNER JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro
+                        LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro
+                        WHERE c.idProcedencia = ? AND c.estado = 1 AND nc.idNotaCredito IS NULL`, [
                         venta[0].idVenta
                     ]);
 
@@ -1341,9 +1349,11 @@ class Cobro {
                                     ]);
                                 } else {
                                     let suma = await conec.execute(connection, `SELECT
-                                        IFNULL(precio,0) AS total 
-                                        FROM cobroVenta 
-                                        WHERE idPlazo = ?`, [
+                                        IFNULL(cv.precio,0) AS total 
+                                        FROM cobro AS c 
+                                        INNER JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro 
+                                        LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro
+                                        WHERE cv.idPlazo  = ? AND c.estado = 1 AND nc.idNotaCredito IS NULL`, [
                                         maxCobroVenta
                                     ]);
 
@@ -1381,8 +1391,9 @@ class Cobro {
                                 let cobrado = await conec.execute(connection, `SELECT 
                                     IFNULL(SUM(cv.precio),0) AS total
                                     FROM cobro AS c 
-                                    LEFT JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro
-                                    WHERE c.idProcedencia = ? AND c.estado = 1`, [
+                                    INNER JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro
+                                    LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro
+                                    WHERE c.idProcedencia = ? AND c.estado = 1 AND nc.idNotaCredito IS NULL`, [
                                     venta[0].idVenta
                                 ]);
 
