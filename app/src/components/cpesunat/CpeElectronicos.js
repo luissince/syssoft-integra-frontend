@@ -202,7 +202,7 @@ class CpeElectronicos extends React.Component {
                     "filasPorPagina": this.state.filasPorPagina
                 }
             });
-            console.log(result)
+            
             let totalPaginacion = parseInt(Math.ceil((parseFloat(result.data.total) / this.state.filasPorPagina)));
             let messagePaginacion = `Mostrando ${result.data.result.length} de ${totalPaginacion} Páginas`;
 
@@ -325,84 +325,128 @@ class CpeElectronicos extends React.Component {
         }
     }
 
-    onEventXmlSunat = async (idCobro) => {
-        const data = {
-            "idSede": "SD0001",
-            "idCobro": idCobro,
-            "xmlSunat": "0"
+    onEventXmlSunat = async (idCpeSunat, tipo) => {
+        if (tipo === "f") {
+            const data = {
+                "idSede": "SD0001",
+                "idCobro": idCpeSunat,
+                "xmlSunat": "0"
+            }
+
+            let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
+
+            this.refUseFileXml.current.download({
+                "name": "Xml Sunat",
+                "file": "/api/cobro/xmlsunat",
+                "params": ciphertext
+            });
+        } else {
+            const data = {
+                "idSede": "SD0001",
+                "idNotaCredito": idCpeSunat,
+                "xmlSunat": "0"
+            }
+
+            let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
+
+            this.refUseFileXml.current.download({
+                "name": "Xml Sunat",
+                "file": "/api/notacredito/xmlsunat",
+                "params": ciphertext
+            });
         }
-
-        let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
-
-        this.refUseFileXml.current.download({
-            "name": "Xml Sunat",
-            "file": "/api/cobro/xmlsunat",
-            "params": ciphertext
-        });
     }
 
-    onEventSendEmail(idCobro) {
-        ModalAlertDialog("Email", "¿Está seguro de envíar el email?", async (value) => {
-            if (value) {
-                try {
-                    ModalAlertInfo("Email", "Envíando Correo.");
+    onEventSendEmail(idCpeSunat, tipo) {
+        if (tipo === "f") {
+            ModalAlertDialog("Email", "¿Está seguro de envíar el email?", async (value) => {
+                if (value) {
+                    try {
+                        ModalAlertInfo("Email", "Envíando Correo.");
 
-                    let result = await axios.get("/api/cobro/email", {
-                        params: {
-                            "idSede": "SD0001",
-                            "idCobro": idCobro,
-                            "xmlSunat": "0"
+                        let result = await axios.get("/api/cobro/email", {
+                            params: {
+                                "idSede": "SD0001",
+                                "idCobro": idCpeSunat,
+                                "xmlSunat": "0"
+                            }
+                        });
+
+                        ModalAlertSuccess("Email", result.data);
+                    } catch (error) {
+                        if (error.response) {
+                            ModalAlertWarning("Email", error.response.data);
+                        } else {
+                            ModalAlertError("Email", "Se produjo un error interno, intente nuevamente por favor.");
                         }
-                    });
-
-                    ModalAlertSuccess("Email", result.data);
-                } catch (error) {
-                    if (error.response) {
-                        ModalAlertWarning("Email", error.response.data);
-                    } else {
-                        ModalAlertError("Email", "Se produjo un error interno, intente nuevamente por favor.");
                     }
                 }
-            }
-        });
+            });
+        } else {
+            ModalAlertDialog("Email", "¿Está seguro de envíar el email?", async (value) => {
+                if (value) {
+                    try {
+                        ModalAlertInfo("Email", "Envíando Correo.");
+
+                        let result = await axios.get("/api/notacredito/email", {
+                            params: {
+                                "idSede": "SD0001",
+                                "idNotaCredito": idCpeSunat,
+                                "xmlSunat": "0"
+                            }
+                        });
+
+                        ModalAlertSuccess("Email", result.data);
+                    } catch (error) {
+                        if (error.response) {
+                            ModalAlertWarning("Email", error.response.data);
+                        } else {
+                            ModalAlertError("Email", "Se produjo un error interno, intente nuevamente por favor.");
+                        }
+                    }
+                }
+            });
+        }
     }
 
-    onEventSendAnular = (idCobro) => {
-        ModalAlertDialog("Facturación", "¿Está seguro de anular el comprobante electrónico?", async (value) => {
-            if (value) {
-                try {
-                    ModalAlertInfo("Facturación", "Firmando xml y enviando a sunat.");
+    onEventSendAnular = (idCpeSunat, tipo) => {
+        if (tipo === "f") {
+            ModalAlertDialog("Facturación", "¿Está seguro de anular el comprobante electrónico?", async (value) => {
+                if (value) {
+                    try {
+                        ModalAlertInfo("Facturación", "Firmando xml y enviando a sunat.");
 
-                    // "http://localhost:8090/app/examples/resumen.php"
-                    // "http://apisunat.inmobiliariagmyc.com/app/examples/resumen.php"
+                        // "http://localhost:8090/app/examples/resumen.php"
+                        // "http://apisunat.inmobiliariagmyc.com/app/examples/resumen.php"
 
-                    let result = await axios.get(`${process.env.REACT_APP_URL}/app/examples/resumen.php`, {
-                        params: {
-                            "idCobro": idCobro
-                        }
-                    });
-                    // console.log(result.data);
-                    let object = result.data;
-                    if (object.state) {
-                        if (object.accept) {
-                            ModalAlertSuccess("Facturación", "Código " + object.code + " " + object.description, () => {
-                                this.onEventPaginacion()
-                            });
+                        let result = await axios.get(`${process.env.REACT_APP_URL}/app/examples/resumen.php`, {
+                            params: {
+                                "idCobro": idCpeSunat
+                            }
+                        });
+                        // console.log(result.data);
+                        let object = result.data;
+                        if (object.state) {
+                            if (object.accept) {
+                                ModalAlertSuccess("Facturación", "Código " + object.code + " " + object.description, () => {
+                                    this.onEventPaginacion()
+                                });
+                            } else {
+                                ModalAlertWarning("Facturación", "Código " + object.code + " " + object.description);
+                            }
                         } else {
                             ModalAlertWarning("Facturación", "Código " + object.code + " " + object.description);
                         }
-                    } else {
-                        ModalAlertWarning("Facturación", "Código " + object.code + " " + object.description);
-                    }
-                } catch (error) {
-                    if (error.response) {
-                        ModalAlertWarning("Facturación", error.response.data);
-                    } else {
-                        ModalAlertError("Facturación", "Se produjo un error interno, intente nuevamente por favor.");
+                    } catch (error) {
+                        if (error.response) {
+                            ModalAlertWarning("Facturación", error.response.data);
+                        } else {
+                            ModalAlertError("Facturación", "Se produjo un error interno, intente nuevamente por favor.");
+                        }
                     }
                 }
-            }
-        });
+            });
+        }
     }
 
     render() {
@@ -627,13 +671,13 @@ class CpeElectronicos extends React.Component {
                                                                                 <button className="dropdown-item" type="button" onClick={() => this.onEventImprimir(item.idCpeSunat, item.tipo)}><img src={pdf} width="22" alt="Pdf" /> Archivo Pdf</button>
                                                                             </li>
                                                                             <li>
-                                                                                <button className="dropdown-item" type="button" onClick={() => this.onEventXmlSunat(item.idCobro, item.tipo)}><img src={xml} width="22" alt="Xml" /> Archivo Xml</button>
+                                                                                <button className="dropdown-item" type="button" onClick={() => this.onEventXmlSunat(item.idCpeSunat, item.tipo)}><img src={xml} width="22" alt="Xml" /> Archivo Xml</button>
                                                                             </li>
                                                                             <li>
-                                                                                <button className="dropdown-item" type="button" onClick={() => this.onEventSendEmail(item.idCobro, item.tipo)}><img src={email} width="22" alt="Email" /> Enviar Correo</button>
+                                                                                <button className="dropdown-item" type="button" onClick={() => this.onEventSendEmail(item.idCpeSunat, item.tipo)}><img src={email} width="22" alt="Email" /> Enviar Correo</button>
                                                                             </li>
                                                                             <li>
-                                                                                <button className="dropdown-item" type="button" onClick={() => this.onEventSendAnular(item.idCobro, item.tipo)}><img src={error} width="22" alt="Error" /> Resumen Diario</button>
+                                                                                <button className="dropdown-item" type="button" onClick={() => this.onEventSendAnular(item.idCpeSunat, item.tipo)}><img src={error} width="22" alt="Error" /> Resumen Diario</button>
                                                                             </li>
                                                                         </ul>
                                                                     </div>

@@ -231,6 +231,7 @@ class NotaCredito {
             cl.documento,
             cl.informacion,
             cl.direccion,
+            cl.email,
 
             coc.nombre AS comprobanteModi,
             c.serie AS serieModi,
@@ -562,6 +563,30 @@ class NotaCredito {
                 await conec.rollback(connection);
             }
             return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
+        }
+    }
+
+    async xmlGenerate(req) {
+        try {
+            let xml = await conec.query(`SELECT 
+            co.nombre AS comprobante,
+            nc.serie,
+            nc.numeracion,
+            nc.xmlGenerado 
+            FROM notaCredito AS nc
+            INNER JOIN comprobante AS co ON co.idComprobante = nc.idComprobante 
+            WHERE nc.idNotaCredito = ? AND nc.xmlSunat = ?`, [
+                req.query.idNotaCredito,
+                req.query.xmlSunat,
+            ]);
+
+            if (xml.length > 0) {
+                return xml[0];
+            } else {
+                return "Datos no encontrados";
+            }
+        } catch (error) {
+            return "Se produjo un error de servidor, intente nuevamente.";
         }
     }
 

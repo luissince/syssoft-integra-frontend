@@ -102,7 +102,7 @@ router.get('/email', async function (req, res) {
                 if (typeof xml === 'string') {
                     res.status(500).send(xml);
                 } else {
-                    if (!isEmail(sedeInfo.usuarioEmail) && !isEmail(sedeInfo.claveEmail)) {
+                    if (!isEmail(sedeInfo.usuarioEmail) && sedeInfo.claveEmail == "") {
                         res.status(400).send("Las credenciales del correo para el envío no pueden ser vacios.");
                     } else {
                         if (!isEmail(detalle.cabecera.email)) {
@@ -171,7 +171,6 @@ router.get('/email', async function (req, res) {
             res.status(500).send(detalle);
         }
     } catch (error) {
-        console.log(error)
         res.status(500).send("Se produjo un error de servidor, intente nuevamente.");
     }
 });
