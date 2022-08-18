@@ -954,8 +954,7 @@ class Factura {
             INNER JOIN comprobante AS com ON v.idComprobante = com.idComprobante
             INNER JOIN moneda AS m ON m.idMoneda = v.idMoneda
             LEFT JOIN ventaDetalle AS vd ON vd.idVenta = v.idVenta 
-            WHERE v.idVenta = ?
-            GROUP BY v.idVenta`, [
+            WHERE v.idVenta = ?`, [
                 req.query.idVenta
             ]);
 
@@ -969,7 +968,7 @@ class Factura {
                 vd.precio,
                 vd.cantidad,
                 vd.idImpuesto,
-                imp.nombre as impuesto,
+                imp.nombre AS impuesto,
                 imp.porcentaje
                 FROM ventaDetalle AS vd 
                 INNER JOIN lote AS l ON vd.idLote = l.idLote 
@@ -1226,8 +1225,10 @@ class Factura {
                 parseInt(req.query.idEstado),
                 req.query.fill,
             ]);
-
-            return sendSuccess(res, { "result": resultLista, "total": total[0].Total });
+            
+            let resultTotal = await total.map(item => item.Total).reduce((previousValue, currentValue) =>previousValue + currentValue,0);
+       
+            return sendSuccess(res, { "result": resultLista, "total": resultTotal });
         } catch (error) {
             return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
         }

@@ -97,7 +97,7 @@ class RepNotaCredito {
             );
 
             doc.fontSize(h3).text(
-                `Fecha: ${cabecera.fecha} \nMoneda: ${cabecera.moneda + " - " + cabecera.codiso} \nForma de Venta: ${cabecera.tipo == 1 ? "CONTADO" : "CRÉDITO"}`,
+                `Fecha: ${cabecera.fecha} \nMoneda: ${cabecera.moneda + " - " + cabecera.codiso}\nMotivo Anulación: ${cabecera.motivo}\nCompr. Modificado: ${cabecera.serieModi+"-"+cabecera.numeracionModi}`,
                 medioX,
                 topCebecera
             );
@@ -109,9 +109,9 @@ class RepNotaCredito {
             let detalle = data.detalle.map((item, index) => {
                 return [
                     ++index,
-                    item.medida,
+                    item.unidad,
                     item.cantidad,
-                    manzanaLote(item.lote, item.manzana),
+                    item.concepto,
                     numberFormat(item.precio, cabecera.codiso),
                     numberFormat((item.precio * item.cantidad), cabecera.codiso)
                 ];
@@ -252,7 +252,7 @@ class RepNotaCredito {
                 align: "right",
             });
 
-            // 
+            
 
             for (let item of arrayImpuestos) {
                 ypost = doc.y + 5;
@@ -318,15 +318,15 @@ class RepNotaCredito {
 
             doc.image(qrResult, doc.options.margins.left, doc.y, { width: 100, });
 
-            if (cabecera.estado === 3) {
-                doc.save();
-                doc.rotate(-45, { origin: [200, 450] });
-                doc.fontSize(100).fillColor("#cccccc").opacity(0.5).text('ANULADO', (doc.page.width - 500) / 2, 450, {
-                    textAlign: 'center',
-                });
-                doc.rotate(-45 * (-1), { origin: [200, 450] });
-                doc.restore();
-            }
+            // if (cabecera.estado === 3) {
+            //     doc.save();
+            //     doc.rotate(-45, { origin: [200, 450] });
+            //     doc.fontSize(100).fillColor("#cccccc").opacity(0.5).text('ANULADO', (doc.page.width - 500) / 2, 450, {
+            //         textAlign: 'center',
+            //     });
+            //     doc.rotate(-45 * (-1), { origin: [200, 450] });
+            //     doc.restore();
+            // }
 
             doc.end();
             return getStream.buffer(doc);

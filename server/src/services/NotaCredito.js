@@ -11,15 +11,70 @@ class NotaCredito {
             nc.idNotaCredito,
             co.nombre AS comprobante,
             nc.serie,
-            nc.numeracion
+            nc.numeracion,
+            DATE_FORMAT(nc.fecha,'%d/%m/%Y') as fecha, 
+            nc.hora, 
+            nc.estado,
+
+            cl.documento,
+            cl.informacion,
+
+            coc.nombre AS comprobanteModi,
+            c.serie AS serieModi,
+            c.numeracion AS numeracionModi,
+
+            m.idMoneda,
+            m.codiso,
+            IFNULL(SUM(ncd.precio*ncd.cantidad),0) AS total
+
             FROM 
             notaCredito AS nc 
             INNER JOIN comprobante AS co ON co.idComprobante = nc.idComprobante
-            INNER JOIN cliente AS c ON c.idCliente = nc.idCliente 
-            
+            INNER JOIN cliente AS cl ON cl.idCliente = nc.idCliente 
+            INNER JOIN moneda AS m ON nc.idMoneda = m.idMoneda
+            INNER JOIN cobro AS c ON nc.idCobro = c.idCobro
+            INNER JOIN comprobante AS coc ON coc.idComprobante = c.idComprobante 
+            LEFT JOIN notaCreditoDetalle AS ncd ON ncd.idNotaCredito = nc.idNotaCredito 
+
+            WHERE 
+            ? = 0 AND nc.idProyecto = ?
+            OR
+            ? = 1 and cl.documento = ? AND nc.idProyecto = ?
+            OR
+            ? = 1 and cl.informacion like concat(?,'%') AND nc.idProyecto = ?
+
+            OR
+            ? = 1 and nc.serie = ? AND nc.idProyecto = ?
+            OR
+            ? = 1 and nc.numeracion = ? AND nc.idProyecto = ?
+            OR
+            ? = 1 and concat(nc.serie,'-',nc.numeracion) = ? AND nc.idProyecto = ?
+
             GROUP BY nc.idNotaCredito
             ORDER BY nc.fecha DESC, nc.hora DESC
             LIMIT ?,?`, [
+                parseInt(req.query.opcion),
+                req.query.idProyecto,
+
+                parseInt(req.query.opcion),
+                req.query.buscar,
+                req.query.idProyecto,
+
+                parseInt(req.query.opcion),
+                req.query.buscar,
+                req.query.idProyecto,
+
+                parseInt(req.query.opcion),
+                req.query.buscar,
+                req.query.idProyecto,
+
+                parseInt(req.query.opcion),
+                req.query.buscar,
+                req.query.idProyecto,
+
+                parseInt(req.query.opcion),
+                req.query.buscar,
+                req.query.idProyecto,
 
                 parseInt(req.query.posicionPagina),
                 parseInt(req.query.filasPorPagina)
@@ -36,7 +91,45 @@ class NotaCredito {
             FROM 
             notaCredito AS nc 
             INNER JOIN comprobante AS co ON co.idComprobante = nc.idComprobante
-            INNER JOIN cliente AS c ON c.idCliente = nc.idCliente `, [
+            INNER JOIN cliente AS cl ON cl.idCliente = nc.idCliente
+            INNER JOIN moneda AS m ON nc.idMoneda = m.idMoneda
+            INNER JOIN cobro AS c ON nc.idCobro = c.idCobro
+            INNER JOIN comprobante AS coc ON coc.idComprobante = c.idComprobante 
+            WHERE 
+            ? = 0 AND nc.idProyecto = ?
+            OR
+            ? = 1 and cl.documento = ? AND nc.idProyecto = ?
+            OR
+            ? = 1 and cl.informacion like concat(?,'%') AND nc.idProyecto = ?
+            
+            OR
+            ? = 1 and nc.serie = ? AND nc.idProyecto = ?
+            OR
+            ? = 1 and nc.numeracion = ? AND nc.idProyecto = ?
+            OR
+            ? = 1 and concat(nc.serie,'-',nc.numeracion) = ? AND nc.idProyecto = ?`, [
+                parseInt(req.query.opcion),
+                req.query.idProyecto,
+
+                parseInt(req.query.opcion),
+                req.query.buscar,
+                req.query.idProyecto,
+
+                parseInt(req.query.opcion),
+                req.query.buscar,
+                req.query.idProyecto,
+                
+                parseInt(req.query.opcion),
+                req.query.buscar,
+                req.query.idProyecto,
+
+                parseInt(req.query.opcion),
+                req.query.buscar,
+                req.query.idProyecto,
+
+                parseInt(req.query.opcion),
+                req.query.buscar,
+                req.query.idProyecto,
             ]);
 
             return sendSuccess(res, { "result": resultLista, "total": total[0].Total });
@@ -46,7 +139,154 @@ class NotaCredito {
     }
 
     async id(req, res) {
+        try {
 
+            let result = await conec.query(`SELECT 
+            nc.idNotaCredito,
+            mt.nombre AS motivo,
+            co.nombre AS comprobante,
+            nc.serie,
+            nc.numeracion,
+            DATE_FORMAT(nc.fecha,'%d/%m/%Y') as fecha, 
+            nc.hora, 
+            nc.estado,
+
+            td.nombre AS tipoDoc,      
+            td.codigo AS codigoCliente,      
+            cl.documento,
+            cl.informacion,
+            cl.direccion,
+
+            coc.nombre AS comprobanteModi,
+            c.serie AS serieModi,
+            c.numeracion AS numeracionModi,
+
+            CONCAT(us.nombres,' ',us.apellidos) AS usuario,
+
+            m.idMoneda,
+            m.codiso,
+            IFNULL(SUM(ncd.precio*ncd.cantidad),0) AS total
+
+            FROM 
+            notaCredito AS nc 
+            INNER JOIN motivo AS mt ON mt.idMotivo = nc.idMotivo 
+            INNER JOIN comprobante AS co ON co.idComprobante = nc.idComprobante
+            INNER JOIN cliente AS cl ON cl.idCliente = nc.idCliente 
+            INNER JOIN tipoDocumento AS td ON td.idTipoDocumento = cl.idTipoDocumento 
+            INNER JOIN usuario AS us ON us.idUsuario = nc.idUsuario
+            INNER JOIN moneda AS m ON nc.idMoneda = m.idMoneda
+            INNER JOIN cobro AS c ON nc.idCobro = c.idCobro
+            INNER JOIN comprobante AS coc ON coc.idComprobante = c.idComprobante 
+            LEFT JOIN notaCreditoDetalle AS ncd ON ncd.idNotaCredito = nc.idNotaCredito 
+
+            WHERE nc.idNotaCredito = ?`, [
+                req.query.idNotaCredito
+            ]);
+
+            if (result.length > 0) {
+
+                let detalle = await conec.query(`SELECT 
+                CASE 
+                WHEN nc.tipo = 0 THEN CONCAT('CUOTA',' ',pl.cuota)
+                ELSE co.nombre END AS concepto,
+                md.nombre AS unidad,
+                nc.cantidad,
+                nc.precio,
+                nc.idImpuesto,
+                imp.nombre AS impuesto,
+                imp.porcentaje
+                FROM notaCreditoDetalle AS nc 
+                LEFT JOIN concepto AS co ON co.idConcepto = nc.idConcepto
+                LEFT JOIN plazo AS pl ON pl.idPlazo = nc.idPlazo 
+                INNER JOIN medida AS md ON md.idMedida = nc.idMedida
+                INNER JOIN impuesto AS imp ON imp.idImpuesto = nc.idImpuesto
+                WHERE nc.idNotaCredito = ?`, [
+                    req.query.idNotaCredito
+                ]);
+
+                return sendSuccess(res, { "cabecera": result[0], "detalle": detalle });
+            } else {
+                return sendClient(res, "Datos no encontrados");
+            }
+        } catch (error) {            
+            return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
+        }
+    }
+
+    async idReport(req) {
+        try {
+
+            let result = await conec.query(`SELECT 
+            nc.idNotaCredito,
+            mt.nombre AS motivo,
+            co.nombre AS comprobante,
+            nc.serie,
+            nc.numeracion,
+            DATE_FORMAT(nc.fecha,'%d/%m/%Y') AS fecha, 
+            nc.hora, 
+            nc.estado,
+
+            td.nombre AS tipoDoc,      
+            td.codigo AS codigoCliente,      
+            cl.documento,
+            cl.informacion,
+            cl.direccion,
+
+            coc.nombre AS comprobanteModi,
+            c.serie AS serieModi,
+            c.numeracion AS numeracionModi,
+
+            CONCAT(us.nombres,' ',us.apellidos) AS usuario,
+
+            m.idMoneda,
+            m.nombre AS moneda,
+            m.codiso,
+            IFNULL(SUM(ncd.precio*ncd.cantidad),0) AS total
+
+            FROM 
+            notaCredito AS nc 
+            INNER JOIN motivo AS mt ON mt.idMotivo = nc.idMotivo 
+            INNER JOIN comprobante AS co ON co.idComprobante = nc.idComprobante
+            INNER JOIN cliente AS cl ON cl.idCliente = nc.idCliente 
+            INNER JOIN tipoDocumento AS td ON td.idTipoDocumento = cl.idTipoDocumento 
+            INNER JOIN usuario AS us ON us.idUsuario = nc.idUsuario
+            INNER JOIN moneda AS m ON nc.idMoneda = m.idMoneda
+            INNER JOIN cobro AS c ON nc.idCobro = c.idCobro
+            INNER JOIN comprobante AS coc ON coc.idComprobante = c.idComprobante 
+            LEFT JOIN notaCreditoDetalle AS ncd ON ncd.idNotaCredito = nc.idNotaCredito 
+
+            WHERE nc.idNotaCredito = ?`, [
+                req.query.idNotaCredito
+            ]);
+
+            if (result.length > 0) {
+
+                let detalle = await conec.query(`SELECT 
+                CASE 
+                WHEN nc.tipo = 0 THEN CONCAT('CUOTA',' ',pl.cuota)
+                ELSE co.nombre END AS concepto,
+                md.nombre AS unidad,
+                nc.cantidad,
+                nc.precio,
+                nc.idImpuesto,
+                imp.nombre AS impuesto,
+                imp.porcentaje
+                FROM notaCreditoDetalle AS nc 
+                LEFT JOIN concepto AS co ON co.idConcepto = nc.idConcepto
+                LEFT JOIN plazo AS pl ON pl.idPlazo = nc.idPlazo 
+                INNER JOIN medida AS md ON md.idMedida = nc.idMedida
+                INNER JOIN impuesto AS imp ON imp.idImpuesto = nc.idImpuesto
+                WHERE nc.idNotaCredito = ?`, [
+                    req.query.idNotaCredito
+                ]);
+
+                return { "cabecera": result[0], "detalle": detalle };
+            } else {
+                return "Datos no encontrados";
+            }
+        } catch (error) {
+            return "Se produjo un error de servidor, intente nuevamente.";
+        }
     }
 
     async add(req, res) {
@@ -73,7 +313,7 @@ class NotaCredito {
 
             if (validate.length > 0) {
                 await conec.rollback(connection);
-                return sendClient(res, "El comprobante ya tiene asociado una nota de crédito");
+                return sendClient(res, "El comprobante ya tiene asociado una nota de crédito.");
             }
 
             let result = await conec.execute(connection, 'SELECT idNotaCredito FROM notaCredito');
@@ -183,15 +423,21 @@ class NotaCredito {
                 ]);
             }
 
-            let cobro = await conec.execute(connection, `SELECT idCobro,idProcedencia,serie,numeracion FROM cobro WHERE idCobro = ?`, [
+            let cobro = await conec.execute(connection, `SELECT idCobro,idProcedencia,serie,numeracion 
+                FROM cobro 
+                WHERE idCobro = ?`, [
                 req.body.idCobro
             ]);
 
-            let venta = await conec.execute(connection, `SELECT idVenta,credito FROM venta WHERE idVenta  = ?`, [
+            let venta = await conec.execute(connection, `SELECT idVenta,credito 
+                FROM venta 
+                WHERE idVenta  = ?`, [
                 cobro[0].idProcedencia
             ]);
 
-            let cobroVenta = await conec.execute(connection, `SELECT idPlazo FROM cobroVenta WHERE idCobro = ?`, [
+            let cobroVenta = await conec.execute(connection, `SELECT idPlazo 
+                FROM cobroVenta 
+                WHERE idCobro = ?`, [
                 req.body.idCobro
             ]);
 
@@ -201,9 +447,12 @@ class NotaCredito {
                         cobroVenta[0].idPlazo
                     ]);
                 } else {
-                    let suma = await conec.execute(connection, `SELECT 
-                        IFNULL(precio,0) AS total FROM cobroVenta 
-                        WHERE idPlazo = ?`, [
+                    let suma = await conec.execute(connection, `SELECT
+                    IFNULL(cv.precio,0) AS total 
+                    FROM cobro AS c 
+                    INNER JOIN cobroVenta cv ON c.idCobro = cv.idCobro 
+                    LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro
+                    WHERE cv.idPlazo = ? AND c.estado = 1 AND nc.idNotaCredito IS NULL`, [
                         cobroVenta[0].idPlazo
                     ]);
 
@@ -242,8 +491,9 @@ class NotaCredito {
                 let cobrado = await conec.execute(connection, `SELECT 
                     IFNULL(SUM(cv.precio),0) AS total
                     FROM cobro AS c 
-                    LEFT JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro
-                    WHERE c.idProcedencia = ? AND c.estado = 1`, [
+                    INNER JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro
+                    LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro
+                    WHERE c.idProcedencia = ? AND c.estado = 1 AND nc.idNotaCredito IS NULL`, [
                     venta[0].idVenta
                 ]);
 
@@ -308,7 +558,6 @@ class NotaCredito {
 
             return sendSave(res, "Se registró correctamente la nota de crédito.");
         } catch (error) {
-            console.error(error);
             if (connection != null) {
                 await conec.rollback(connection);
             }

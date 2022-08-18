@@ -1154,6 +1154,24 @@ class Cobro {
         try {
             connection = await conec.beginTransaction();
 
+            let validate = await conec.execute(connection, `SELECT * FROM cobro WHERE idCobro = ? AND estado = 0`, [
+                req.query.idCobro
+            ]);
+            if (validate.length > 0) {
+                await conec.rollback(connection);
+                return "El cobro ya se encuentra anulado.";
+            }
+
+            let notaCredito = await conec.execute(connection, `SELECT c.idCobro 
+                FROM cobro AS c INNER JOIN notaCredito AS nc ON nc.idCobro = c.idCobro
+                WHERE c.idCobro = ?`, [
+                req.query.idCobro
+            ]);
+            if (notaCredito.length > 0) {
+                await conec.rollback(connection);
+                return "El cobro tiene ligado una nota de crédito.";
+            }
+
             let facturado = await conec.execute(connection, `SELECT c.idCobro FROM cobro as c inner join comprobante as cm
             on c.idComprobante = cm.idComprobante
             where cm.tipo = 1 and c.idCobro = ?`, [
@@ -1219,7 +1237,7 @@ class Cobro {
                             WHERE idPlazo = ?`, [
                             cobroVenta[0].idPlazo
                         ]);
-                        
+
                         if (plazoSuma[0].total > sumaTotal - actual[0].total) {
                             await conec.execute(connection, `UPDATE 
                             plazo SET estado = 0 
@@ -1657,7 +1675,6 @@ class Cobro {
                 return { "conceptos": conceptos, "bancos": bancos };
             }
         } catch (error) {
-            console.error(error);
             return "Se produjo un error de servidor, intente nuevamente.";
         }
     }
@@ -1811,7 +1828,6 @@ class Cobro {
             }
 
         } catch (error) {
-            console.error(error);
             return "Se produjo un error de servidor, intente nuevamente.";
         }
     }

@@ -3,13 +3,7 @@ import axios from 'axios';
 import {
     spinnerLoading,
     numberFormat,
-    timeForma24,
-    ModalAlertInfo,
-    ModalAlertDialog,
-    ModalAlertSuccess,
-    ModalAlertWarning,
-    ModalAlertError,
-    statePrivilegio
+    timeForma24
 } from '../tools/Tools';
 import { connect } from 'react-redux';
 import Paginacion from '../tools/Paginacion';
@@ -87,9 +81,9 @@ class NotaCredito extends React.Component {
 
     fillTable = async (opcion, buscar) => {
         try {
-          
+
             await this.setStateAsync({ loading: true, lista: [], messageTable: "Cargando información...", messagePaginacion: "Mostranto 0 de 0 Páginas" });
-         
+
             const result = await axios.get('/api/notacredito/list', {
                 signal: this.abortControllerTable.signal,
                 params: {
@@ -125,31 +119,6 @@ class NotaCredito extends React.Component {
 
     onEventNuevaVenta = () => {
         this.props.history.push(`${this.props.location.pathname}/proceso`);
-    }
-
-    onEventAnularVenta(idVenta) {
-        ModalAlertDialog("Venta", "¿Está seguro de que desea eliminar la venta? Esta operación no se puede deshacer.", async (value) => {
-            if (value) {
-                try {
-                    ModalAlertInfo("Venta", "Procesando información...");
-                    let result = await axios.delete('/api/factura/anular', {
-                        params: {
-                            "idVenta": idVenta,
-                            "idUsuario": this.state.idUsuario
-                        }
-                    })
-                    ModalAlertSuccess("Venta", result.data, () => {
-                        this.loadInit();
-                    })
-                } catch (error) {
-                    if (error.response !== undefined) {
-                        ModalAlertWarning("Venta", error.response.data)
-                    } else {
-                        ModalAlertError("Venta", "Se genero un error interno, intente nuevamente.")
-                    }
-                }
-            }
-        })
     }
 
     render() {
@@ -202,29 +171,50 @@ class NotaCredito extends React.Component {
                                         <th width="10%">Cliente</th>
                                         <th width="10%">Comprobante</th>
                                         <th width="10%">Fecha</th>
-                                        <th width="10%">Tipo</th>
                                         <th width="10%">Total</th>
+                                        <th width="10%" className="text-center">Modificado</th>
                                         <th width="10%" className="text-center">Estado</th>
                                         <th width="5%" className="text-center">Detalle</th>
-                                        <th width="5%" className="text-center">Anular</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                {
+                                    {
                                         this.state.loading ? (
                                             <tr>
-                                                <td className="text-center" colSpan="9">
+                                                <td className="text-center" colSpan="8">
                                                     {spinnerLoading()}
                                                 </td>
                                             </tr>
                                         ) : this.state.lista.length === 0 ? (
                                             <tr className="text-center">
-                                                <td colSpan="9">¡No hay datos registrados!</td>
+                                                <td colSpan="8">¡No hay datos registrados!</td>
                                             </tr>
                                         ) : (
                                             this.state.lista.map((item, index) => {
                                                 return (
                                                     <tr key={index}>
+                                                        <td className="text-center">{item.id}</td>
+                                                        <td>{item.documento}{<br />}{item.informacion}</td>
+                                                        <td>{item.comprobante}{<br />}{item.serie + "-" + item.numeracion}</td>
+                                                        <td>{<span>{item.fecha}</span>}{<br></br>}{<span>{timeForma24(item.hora)}</span>}</td>
+                                                        <td>{numberFormat(item.total, item.codiso)}</td>
+                                                        <td>{item.comprobanteModi}{<br />}{item.serieModi+"-"+item.numeracionModi}</td>
+                                                        <td className="text-center">
+                                                            {
+                                                                item.estado === 1
+                                                                    ? <span className="text-success">Registrado</span>
+                                                                    : <span className="text-danger">Anulado</span>
+                                                            }
+                                                        </td>
+                                                        <td className="text-center">
+                                                            <button
+                                                                className="btn btn-outline-primary btn-sm"
+                                                                title="Ver detalle"
+                                                                onClick={() => {
+                                                                    this.props.history.push({ pathname: `${this.props.location.pathname}/detalle`, search: "?idNotaCredito=" + item.idNotaCredito })
+                                                                }}
+                                                                ><i className="fa fa-eye"></i></button>
+                                                        </td>
                                                     </tr>
                                                 )
                                             })

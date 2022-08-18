@@ -44,7 +44,7 @@ router.get('/repcomprobante', async function (req, res) {
     req.query.idSede = decryptedData.idSede;
     req.query.idVenta = decryptedData.idVenta;
 
-    const sedeInfo = await sede.infoSedeReporte(req)
+    const sedeInfo = await sede.infoSedeReporte(req);
 
     if (typeof sedeInfo !== 'object') {
         return sendError(res, sedeInfo);

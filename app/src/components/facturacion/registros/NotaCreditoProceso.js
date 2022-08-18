@@ -141,7 +141,6 @@ class NotaCreditoProceso extends React.Component {
                 loading: false
             });
         } catch (error) {
-
             if (error.response) {
                 ModalAlertWarning("Nota de Crédito", error.response.data)
             } else {
@@ -173,12 +172,11 @@ class NotaCreditoProceso extends React.Component {
             return;
         }
 
-
         ModalAlertDialog("Nota de Crédito", "¿Estás seguro de continuar?", async (event) => {
             if (event) {
                 try {
                     ModalAlertInfo("Nota de Crédito", "Procesando información...");
-                    console.log(this.state.idUsuario)
+                    
                     let result = await axios.post('/api/notacredito/add', {
                         idComprobante: this.state.idComprobante,
                         idMoneda: this.state.idMoneda,
