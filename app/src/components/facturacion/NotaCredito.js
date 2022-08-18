@@ -3,7 +3,8 @@ import axios from 'axios';
 import {
     spinnerLoading,
     numberFormat,
-    timeForma24
+    timeForma24,
+    statePrivilegio
 } from '../tools/Tools';
 import { connect } from 'react-redux';
 import Paginacion from '../tools/Paginacion';
@@ -14,6 +15,9 @@ class NotaCredito extends React.Component {
         this.state = {
             loading: false,
             lista: [],
+
+            add: statePrivilegio(this.props.token.userToken.menus[2].submenu[5].privilegio[0].estado),
+            view: statePrivilegio(this.props.token.userToken.menus[2].submenu[5].privilegio[1].estado),
 
             idProyecto: this.props.token.project.idProyecto,
             idUsuario: this.props.token.userToken.idUsuario,
@@ -26,7 +30,6 @@ class NotaCredito extends React.Component {
             messagePaginacion: 'Mostranto 0 de 0 Páginas'
         }
         this.refTxtSearch = React.createRef();
-
         this.abortControllerTable = new AbortController();
     }
 
@@ -150,7 +153,7 @@ class NotaCredito extends React.Component {
                     </div>
                     <div className="col-md-6 col-sm-12">
                         <div className="form-group">
-                            <button className="btn btn-outline-info" onClick={this.onEventNuevaVenta}>
+                            <button className="btn btn-outline-info" onClick={this.onEventNuevaVenta} disabled={!this.state.add}>
                                 <i className="bi bi-file-plus"></i> Nuevo Registro
                             </button>
                             {" "}
@@ -213,7 +216,7 @@ class NotaCredito extends React.Component {
                                                                 onClick={() => {
                                                                     this.props.history.push({ pathname: `${this.props.location.pathname}/detalle`, search: "?idNotaCredito=" + item.idNotaCredito })
                                                                 }}
-                                                                ><i className="fa fa-eye"></i></button>
+                                                                disabled={!this.state.view}><i className="fa fa-eye"></i></button>
                                                         </td>
                                                     </tr>
                                                 )

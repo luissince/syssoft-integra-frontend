@@ -243,7 +243,7 @@ class Cobros extends React.Component {
                                                         <td>{item.estado == 1 && item.idNotaCredito == null?
                                                             <span className="text-success">COBRADO</span> :
                                                             item.idNotaCredito != null ?
-                                                                <span className="text-danger">MODIFICADO</span> :
+                                                                <span className="text-warning">MODIFICADO</span> :
                                                                 <span className="text-danger">ANULADO</span>}
                                                         </td>
                                                         <td>{numberFormat(item.monto)}</td>
