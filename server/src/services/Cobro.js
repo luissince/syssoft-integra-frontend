@@ -1535,12 +1535,20 @@ class Cobro {
                     LEFT JOIN comprobante AS cp ON v.idComprobante = cp.idComprobante
                     LEFT JOIN usuario AS u ON u.idUsuario = c.idUsuario
                     LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro
-                    WHERE c.fecha BETWEEN ? AND ?
+                    WHERE 
+                    c.fecha BETWEEN ? AND ? AND ? = ''
+                    OR
+                    c.fecha BETWEEN ? AND ? AND u.idUsuario = ?
                     GROUP BY c.idCobro
                     ORDER BY c.fecha DESC,c.hora DESC
                     `, [
                     req.query.fechaIni,
                     req.query.fechaFin,
+                    req.query.idUsuario,
+
+                    req.query.fechaIni,
+                    req.query.fechaFin,
+                    req.query.idUsuario,
                 ]);
 
                 let gastos = await conec.query(`SELECT 
@@ -1558,18 +1566,27 @@ class Cobro {
                     g.hora,
                     IFNULL(SUM(gd.precio*gd.cantidad),0) AS monto
                     FROM gasto AS g          
-                    LEFT JOIN cliente AS cl ON g.idCliente = cl.idCliente 
+                    INNER JOIN cliente AS cl ON g.idCliente = cl.idCliente 
                     INNER JOIN banco AS b ON g.idBanco = b.idBanco
                     INNER JOIN moneda AS m ON g.idMoneda = m.idMoneda     
-                    INNER JOIN comprobante AS co ON co.idComprobante = g.idComprobante       
+                    INNER JOIN comprobante AS co ON co.idComprobante = g.idComprobante   
+                    LEFT JOIN usuario AS u ON u.idUsuario = g.idUsuario    
                     LEFT JOIN gastoDetalle AS gd ON g.idGasto = gd.idGasto
                     LEFT JOIN concepto AS cn ON gd.idConcepto = cn.idConcepto 
-                    WHERE g.fecha BETWEEN ? AND ?
+                    WHERE 
+                    g.fecha BETWEEN ? AND ? AND ? = ''
+                    OR
+                    g.fecha BETWEEN ? AND ? AND u.idUsuario = ?
                     GROUP BY g.idGasto
                     ORDER BY g.fecha DESC, g.hora DESC
                     `, [
                     req.query.fechaIni,
                     req.query.fechaFin,
+                    req.query.idUsuario,
+
+                    req.query.fechaIni,
+                    req.query.fechaFin,
+                    req.query.idUsuario,
                 ]);
 
                 return { "cobros": cobros, "gastos": gastos };

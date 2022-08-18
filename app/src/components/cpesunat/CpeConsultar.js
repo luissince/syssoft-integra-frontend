@@ -33,7 +33,7 @@ class CpeElectronicos extends React.Component {
             descarga: '',
             file: ''
         }
-
+       
         this.refTipo = React.createRef();
         this.refSerie = React.createRef();
         this.refCorrelativo = React.createRef();

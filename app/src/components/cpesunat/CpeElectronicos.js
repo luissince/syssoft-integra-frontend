@@ -8,11 +8,16 @@ import {
     timeForma24,
     currentDate,
     limitarCadena,
+    showModal,
+    hideModal,
+    viewModal,
+    clearModal,
     ModalAlertInfo,
     ModalAlertDialog,
     ModalAlertSuccess,
     ModalAlertWarning,
     ModalAlertError,
+    statePrivilegio,
 } from '../tools/Tools';
 import sunat from '../../recursos/images/sunat.png';
 import reuse from '../../recursos/images/reuse.svg';
@@ -37,6 +42,18 @@ class CpeElectronicos extends React.Component {
             loading: false,
             lista: [],
 
+            viewPdf: statePrivilegio(this.props.token.userToken.menus[7].submenu[0].privilegio[0].estado),
+            viewXml: statePrivilegio(this.props.token.userToken.menus[7].submenu[0].privilegio[1].estado),
+            viewEmail: statePrivilegio(this.props.token.userToken.menus[7].submenu[0].privilegio[2].estado),
+            ViewResumenDiario: statePrivilegio(this.props.token.userToken.menus[7].submenu[0].privilegio[3].estado),
+            viewDeclarar: statePrivilegio(this.props.token.userToken.menus[7].submenu[0].privilegio[4].estado),
+
+            loadModal: false,
+            nameModal: 'Nuevo Manzana',
+            msgModal: 'Cargando datos...',
+            fechaInicioModal: currentDate(),
+            fechaFinalModal: currentDate(),
+
             idProyecto: this.props.token.project.idProyecto,
             fechaInicio: currentDate(),
             fechaFinal: currentDate(),
@@ -51,7 +68,7 @@ class CpeElectronicos extends React.Component {
             totalPaginacion: 0,
             filasPorPagina: 10,
             messageTable: 'Cargando información...',
-            messagePaginacion: 'Mostranto 0 de 0 Páginas'
+            messagePaginacion: 'Mostranto 0 de 0 Páginas',
         }
         this.refTxtSearch = React.createRef();
         this.refUseFileXml = React.createRef();
@@ -68,6 +85,14 @@ class CpeElectronicos extends React.Component {
 
     componentDidMount() {
         this.loadData();
+
+        viewModal("modalExcel", () => {
+
+        });
+
+        clearModal("modalExcel", async () => {
+
+        });
     }
 
     componentWillUnmount() {
@@ -202,7 +227,7 @@ class CpeElectronicos extends React.Component {
                     "filasPorPagina": this.state.filasPorPagina
                 }
             });
-            
+
             let totalPaginacion = parseInt(Math.ceil((parseFloat(result.data.total) / this.state.filasPorPagina)));
             let messagePaginacion = `Mostrando ${result.data.result.length} de ${totalPaginacion} Páginas`;
 
@@ -223,6 +248,10 @@ class CpeElectronicos extends React.Component {
                 });
             }
         }
+    }
+
+    async openModal() {
+        showModal('modalExcel');
     }
 
     onEventSendFactura = (idCpeSunat, tipo) => {
@@ -452,284 +481,342 @@ class CpeElectronicos extends React.Component {
     render() {
         return (
             <>
-                {this.state.msgLoading ?
-                    <div className="clearfix absolute-all bg-white">
-                        {spinnerLoading(this.state.msgMessage)}
-                    </div>
-                    :
-                    <>
-                        <div className='row'>
-                            <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
-                                <div className="form-group">
-                                    <h5>Comprobante de Pago Electrónico <small className="text-secondary">LISTA</small></h5>
-                                </div>
-                            </div>
+                {
+                    this.state.msgLoading ?
+                        <div className="clearfix absolute-all bg-white">
+                            {spinnerLoading(this.state.msgMessage)}
                         </div>
+                        :
+                        null
+                }
 
-                        <div className="row">
-                            <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
-                                <div className="form-group">
-                                    <span>Resumen de Boletas/Facturas/Nota Crédito/Nota Débito</span>
-                                </div>
+                {/* Inicio modal nuevo cliente*/}
+                <div className="modal fade" id="modalExcel" tabIndex="-1" aria-labelledby="modalExcelLabel" aria-hidden="true">
+                    <div className="modal-dialog">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">Generar Excel</h5>
+                                <button type="button" className="close" data-bs-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
                             </div>
-                        </div>
+                            <div className="modal-body">
 
-                        <div className="row">
-                            <div className='col-lg-2 col-md-2 col-sm-12 col-xs-12'>
-                                <div className="form-group">
-                                    <img src={sunat} width="24" /> <span>Estados SUNAT:</span>
-                                </div>
-                            </div>
-                            <div className='col-lg-2 col-md-2 col-sm-12 col-xs-12'>
-                                <div className="form-group">
-                                    <img src={accept} width="24" /> <span>Aceptado</span>
-                                </div>
-                            </div>
-                            <div className='col-lg-2 col-md-2 col-sm-12 col-xs-12'>
-                                <div className="form-group">
-                                    <img src={unable} width="24" /> <span>Rechazado</span>
-                                </div>
-                            </div>
-                            <div className='col-lg-2 col-md-2 col-sm-12 col-xs-12'>
-                                <div className="form-group">
-                                    <img src={reuse} width="24" /> <span>Pendiente de Envío</span>
-                                </div>
-                            </div>
-                            <div className='col-lg-2 col-md-2 col-sm-12 col-xs-12'>
-                                <div className="form-group">
-                                    <img src={error} width="24" /> <span> Comunicación de Baja (Anulado)</span>
-                                </div>
-                            </div>
-                        </div>
+                                {this.state.loadModal ?
+                                    <div className="clearfix absolute-all bg-white">
+                                        {spinnerLoading(this.state.msgModal)}
+                                    </div>
+                                    : null
+                                }
 
-                        <div className="row">
-                            <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                                <div className="form-group">
-                                    <button className="btn btn-outline-light" onClick={() => this.loadInit()}>
-                                        <i className="bi bi-arrow-clockwise"></i> Recargar Vista
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="row">
-                            <div className='col-lg-3 col-md-3 col-sm-12 col-xs-12'>
-                                <div className="form-group">
-                                    <label>Fecha de Inicio:</label>
-                                    <input
-                                        className="form-control"
-                                        type="date"
-                                        value={this.state.fechaInicio}
-                                        onChange={async (event) => {
-                                            await this.setStateAsync({ fechaInicio: event.target.value })
-                                            this.searchFecha();
-                                        }} />
-                                </div>
-                            </div>
-                            <div className='col-lg-3 col-md-3 col-sm-12 col-xs-12'>
-                                <div className="form-group">
-                                    <label>Fecha de Fin:</label>
-                                    <input
-                                        className="form-control"
-                                        type="date"
-                                        value={this.state.fechaFinal}
-                                        onChange={async (event) => {
-                                            await this.setStateAsync({ fechaFinal: event.target.value })
-                                            this.searchFecha();
-                                        }} />
-                                </div>
-                            </div>
-                            <div className='col-lg-3 col-md-3 col-sm-12 col-xs-12'>
-                                <div className="form-group">
-                                    <label>Comprobantes:</label>
-                                    <select
-                                        className="form-control"
-                                        value={this.state.idComprobante}
-                                        onChange={async (event) => {
-                                            await this.setStateAsync({ idComprobante: event.target.value });
-                                            this.searchComprobante();
-                                        }}>
-                                        <option value="">TODOS</option>
-                                        {
-                                            this.state.comprobantes.map((item, index) => (
-                                                <option key={index} value={item.idComprobante}>{item.nombre}</option>
-                                            ))
-                                        }
-                                    </select>
-                                </div>
-                            </div>
-                            <div className='col-lg-3 col-md-3 col-sm-12 col-xs-12'>
-                                <div className="form-group">
-                                    <label>Estados:</label>
-                                    <select
-                                        className="form-control"
-                                        value={this.state.idEstado}
-                                        onChange={async (event) => {
-                                            await this.setStateAsync({ idEstado: event.target.value })
-                                            this.searchEstado();
-                                        }}>
-                                        {
-                                            this.state.estados.map((item, index) => (
-                                                <option key={index} value={item.id}>{item.nombre}</option>
-                                            ))
-                                        }
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="row">
-                            <div className="col-lg-6 col-md-6 col-sm-12 col-xs-12">
-                                <div className="form-group">
-                                    <label>Buscar:</label>
-                                    <div className="input-group mb-2">
-                                        <div className="input-group-prepend">
-                                            <div className="input-group-text"><i className="bi bi-search"></i></div>
-                                        </div>
+                                <div className="form-row">
+                                    <div className="form-group col-md-6">
+                                        <label htmlFor="manzana">Fecha Inicio <i className="fa fa-calendar text-danger small"></i></label>
                                         <input
-                                            type="text"
+                                            type="date"
                                             className="form-control"
-                                            placeholder="Ingrese los datos requeridos..."
-                                            ref={this.refTxtSearch}
-                                            onKeyUp={(event) => this.searchText(event.target.value)}
+                                            placeholder='00/00/0000'
+                                            value={this.state.fechaInicioModal}
+                                            onChange={(event) => this.setState({ fechaInicioModal: event.target.value })}
+                                        />
+                                    </div>
+
+                                    <div className="form-group col-md-6">
+                                        <label htmlFor="manzana">Fecha Final <i className="fa fa-calendar text-danger small"></i></label>
+                                        <input
+                                            type="date"
+                                            className="form-control"
+                                            placeholder='00/00/0000'
+                                            value={this.state.fechaFinalModal}
+                                            onChange={(event) => this.setState({ fechaFinalModal: event.target.value })}
                                         />
                                     </div>
                                 </div>
                             </div>
-                            <div className="col-lg-3 col-md-6 col-sm-12 col-xs-12">
-                                <div className="form-group">
-                                    <label>Listar:</label>
-                                    <select className="form-control" value={this.state.fill}
-                                        onChange={async (value) => {
-                                            await this.setStateAsync({ fill: value.target.value })
-                                            this.loadInit();
-                                        }}>
-                                        <option value="any">
-                                            Por proyecto
-                                        </option>
-                                        <option value="all">
-                                            Todos
-                                        </option>
-                                    </select>
-                                </div>
+
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-success">Generar</button>
+                                <button type="button" className="btn btn-danger" data-bs-dismiss="modal">Cerrar</button>
                             </div>
                         </div>
+                    </div>
+                </div>
+                {/* fin modal nuevo cliente*/}
 
-                        <div className="row">
-                            <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                                <div className="table-responsive">
-                                    <table className="table table-striped table-bordered rounded">
-                                        <thead>
+                <div className='row'>
+                    <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
+                        <div className="form-group">
+                            <h5>Comprobante de Pago Electrónico <small className="text-secondary">LISTA</small></h5>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="row">
+                    <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
+                        <div className="form-group">
+                            <span>Resumen de Boletas/Facturas/Nota Crédito/Nota Débito</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="row">
+                    <div className='col-lg-2 col-md-2 col-sm-12 col-xs-12'>
+                        <div className="form-group">
+                            <img src={sunat} width="24" /> <span>Estados SUNAT:</span>
+                        </div>
+                    </div>
+                    <div className='col-lg-2 col-md-2 col-sm-12 col-xs-12'>
+                        <div className="form-group">
+                            <img src={accept} width="24" /> <span>Aceptado</span>
+                        </div>
+                    </div>
+                    <div className='col-lg-2 col-md-2 col-sm-12 col-xs-12'>
+                        <div className="form-group">
+                            <img src={unable} width="24" /> <span>Rechazado</span>
+                        </div>
+                    </div>
+                    <div className='col-lg-2 col-md-2 col-sm-12 col-xs-12'>
+                        <div className="form-group">
+                            <img src={reuse} width="24" /> <span>Pendiente de Envío</span>
+                        </div>
+                    </div>
+                    <div className='col-lg-2 col-md-2 col-sm-12 col-xs-12'>
+                        <div className="form-group">
+                            <img src={error} width="24" /> <span> Comunicación de Baja (Anulado)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="row">
+                    <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <div className="form-group">
+                            <button className="btn btn-outline-light" onClick={() => this.loadInit()}>
+                                <i className="bi bi-arrow-clockwise"></i> Recargar Vista
+                            </button>
+                            {" "}
+                            <button className="btn btn-outline-success" onClick={() => this.openModal()}>
+                                <i className="bi bi-file-earmark-excel-fill"></i> Generar Excel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="row">
+                    <div className='col-lg-3 col-md-3 col-sm-12 col-xs-12'>
+                        <div className="form-group">
+                            <label>Fecha de Inicio:</label>
+                            <input
+                                className="form-control"
+                                type="date"
+                                value={this.state.fechaInicio}
+                                onChange={async (event) => {
+                                    await this.setStateAsync({ fechaInicio: event.target.value })
+                                    this.searchFecha();
+                                }} />
+                        </div>
+                    </div>
+                    <div className='col-lg-3 col-md-3 col-sm-12 col-xs-12'>
+                        <div className="form-group">
+                            <label>Fecha de Fin:</label>
+                            <input
+                                className="form-control"
+                                type="date"
+                                value={this.state.fechaFinal}
+                                onChange={async (event) => {
+                                    await this.setStateAsync({ fechaFinal: event.target.value })
+                                    this.searchFecha();
+                                }} />
+                        </div>
+                    </div>
+                    <div className='col-lg-3 col-md-3 col-sm-12 col-xs-12'>
+                        <div className="form-group">
+                            <label>Comprobantes:</label>
+                            <select
+                                className="form-control"
+                                value={this.state.idComprobante}
+                                onChange={async (event) => {
+                                    await this.setStateAsync({ idComprobante: event.target.value });
+                                    this.searchComprobante();
+                                }}>
+                                <option value="">TODOS</option>
+                                {
+                                    this.state.comprobantes.map((item, index) => (
+                                        <option key={index} value={item.idComprobante}>{item.nombre}</option>
+                                    ))
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div className='col-lg-3 col-md-3 col-sm-12 col-xs-12'>
+                        <div className="form-group">
+                            <label>Estados:</label>
+                            <select
+                                className="form-control"
+                                value={this.state.idEstado}
+                                onChange={async (event) => {
+                                    await this.setStateAsync({ idEstado: event.target.value })
+                                    this.searchEstado();
+                                }}>
+                                {
+                                    this.state.estados.map((item, index) => (
+                                        <option key={index} value={item.id}>{item.nombre}</option>
+                                    ))
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="row">
+                    <div className="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                        <div className="form-group">
+                            <label>Buscar:</label>
+                            <div className="input-group mb-2">
+                                <div className="input-group-prepend">
+                                    <div className="input-group-text"><i className="bi bi-search"></i></div>
+                                </div>
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    placeholder="Ingrese los datos requeridos..."
+                                    ref={this.refTxtSearch}
+                                    onKeyUp={(event) => this.searchText(event.target.value)}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                    <div className="col-lg-3 col-md-6 col-sm-12 col-xs-12">
+                        <div className="form-group">
+                            <label>Listar:</label>
+                            <select className="form-control" value={this.state.fill}
+                                onChange={async (value) => {
+                                    await this.setStateAsync({ fill: value.target.value })
+                                    this.loadInit();
+                                }}>
+                                <option value="any">
+                                    Por proyecto
+                                </option>
+                                <option value="all">
+                                    Todos
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="row">
+                    <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <div className="table-responsive">
+                            <table className="table table-striped table-bordered rounded">
+                                <thead>
+                                    <tr>
+                                        <th width="5%" className="text-center">#</th>
+                                        <th width="5%">Opciones</th>
+                                        <th width="10%">Fecha</th>
+                                        <th width="10%">Comprobante</th>
+                                        <th width="10%">Cliente</th>
+                                        <th width="10%">Estado</th>
+                                        <th width="10%">Total</th>
+                                        <th width="10%">Estado Sunat</th>
+                                        <th width="10%">Observación SUNAT</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {
+                                        this.state.loading ? (
                                             <tr>
-                                                <th width="5%" className="text-center">#</th>
-                                                <th width="5%">Opciones</th>
-                                                <th width="10%">Fecha</th>
-                                                <th width="10%">Comprobante</th>
-                                                <th width="10%">Cliente</th>
-                                                <th width="10%">Estado</th>
-                                                <th width="10%">Total</th>
-                                                <th width="10%">Estado Sunat</th>
-                                                <th width="10%">Observación SUNAT</th>
+                                                <td className="text-center" colSpan="10">
+                                                    {spinnerLoading()}
+                                                </td>
                                             </tr>
-                                        </thead>
-                                        <tbody>
-                                            {
-                                                this.state.loading ? (
-                                                    <tr>
-                                                        <td className="text-center" colSpan="10">
-                                                            {spinnerLoading()}
+                                        ) : this.state.lista.length === 0 ? (
+                                            <tr className="text-center">
+                                                <td colSpan="10">¡No hay datos registrados!</td>
+                                            </tr>
+                                        ) : (
+                                            this.state.lista.map((item, index) => {
+
+                                                const estadoSunat = item.estado === 3 ?
+                                                    <button className="btn btn-light btn-sm" onClick={() => this.onEventSendFactura(item.idCpeSunat, item.tipo)} disabled={!this.state.viewDeclarar}><img src={error} width="22" /></button>
+                                                    : item.xmlSunat === "" ?
+                                                        <button className="btn btn-light btn-sm" onClick={() => this.onEventSendFactura(item.idCpeSunat, item.tipo)} disabled={!this.state.viewDeclarar}><img src={reuse} width="22" /></button>
+                                                        : item.xmlSunat === "0" ?
+                                                            <button className="btn btn-light btn-sm" disabled={!this.state.viewDeclarar}><img src={accept} width="22" /></button>
+                                                            : <button className="btn btn-light btn-sm" onClick={() => this.onEventSendFactura(item.idCpeSunat, item.tipo)} disabled={!this.state.viewDeclarar}><img src={unable} width="22" /></button>;
+
+                                                const descripcion = (item.xmlDescripcion === "" ? "Por Generar Xml" : limitarCadena(item.xmlDescripcion, 90, '...'));
+
+                                                return (
+                                                    <tr key={index}>
+                                                        <td className="text-center">{item.id}</td>
+                                                        <td>
+                                                            <div className="dropdown">
+                                                                <a className="btn btn-primary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+                                                                    <i className="fa fa-th-list"></i>
+                                                                </a>
+
+                                                                <ul className="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                                                                    <li>
+                                                                        <button className="dropdown-item" type="button" onClick={() => this.onEventImprimir(item.idCpeSunat, item.tipo)} disabled={!this.state.viewPdf}><img src={pdf} width="22" alt="Pdf" /> Archivo Pdf</button>
+                                                                    </li>
+                                                                    <li>
+                                                                        <button className="dropdown-item" type="button" onClick={() => this.onEventXmlSunat(item.idCpeSunat, item.tipo)} disabled={!this.state.viewXml}><img src={xml} width="22" alt="Xml" /> Archivo Xml</button>
+                                                                    </li>
+                                                                    <li>
+                                                                        <button className="dropdown-item" type="button" onClick={() => this.onEventSendEmail(item.idCpeSunat, item.tipo)} disabled={!this.state.viewEmail}><img src={email} width="22" alt="Email" /> Enviar Correo</button>
+                                                                    </li>
+                                                                    <li>
+                                                                        <button className="dropdown-item" type="button" onClick={() => this.onEventSendAnular(item.idCpeSunat, item.tipo)} disabled={!this.state.ViewResumenDiario}><img src={error} width="22" alt="Error" /> Resumen Diario</button>
+                                                                    </li>
+                                                                </ul>
+                                                            </div>
                                                         </td>
+                                                        <td>{<span>{item.fecha}</span>}{<br></br>}{<span>{timeForma24(item.hora)}</span>}</td>
+                                                        <td>{item.comprobante}{<br />}{item.serie + "-" + item.numeracion}</td>
+                                                        <td>{item.documento}{<br />}{item.informacion}</td>
+
+
+                                                        <td className="text-center">
+                                                            {
+                                                                item.estado === 0
+                                                                    ? <span className="text-danger">DAR DE BAJA</span>
+                                                                    : <span className="text-success">DECLARAR</span>
+                                                            }
+                                                        </td>
+
+                                                        <td>{numberFormat(item.total)}</td>
+                                                        <td className="text-center">{estadoSunat}</td>
+                                                        <td>{descripcion}</td>
                                                     </tr>
-                                                ) : this.state.lista.length === 0 ? (
-                                                    <tr className="text-center">
-                                                        <td colSpan="10">¡No hay datos registrados!</td>
-                                                    </tr>
-                                                ) : (
-                                                    this.state.lista.map((item, index) => {
-
-                                                        const estadoSunat = item.estado === 3 ?
-                                                            <button className="btn btn-light btn-sm" onClick={() => this.onEventSendFactura(item.idCpeSunat, item.tipo)}><img src={error} width="22" /></button>
-                                                            : item.xmlSunat === "" ?
-                                                                <button className="btn btn-light btn-sm" onClick={() => this.onEventSendFactura(item.idCpeSunat, item.tipo)}><img src={reuse} width="22" /></button>
-                                                                : item.xmlSunat === "0" ?
-                                                                    <button className="btn btn-light btn-sm" ><img src={accept} width="22" /></button>
-                                                                    : <button className="btn btn-light btn-sm" onClick={() => this.onEventSendFactura(item.idCpeSunat, item.tipo)}><img src={unable} width="22" /></button>;
-
-                                                        const descripcion = (item.xmlDescripcion === "" ? "Por Generar Xml" : limitarCadena(item.xmlDescripcion, 90, '...'));
-
-                                                        return (
-                                                            <tr key={index}>
-                                                                <td className="text-center">{item.id}</td>
-                                                                <td>
-                                                                    <div className="dropdown">
-                                                                        <a className="btn btn-primary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
-                                                                            <i className="fa fa-th-list"></i>
-                                                                        </a>
-
-                                                                        <ul className="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                                                                            <li>
-                                                                                <button className="dropdown-item" type="button" onClick={() => this.onEventImprimir(item.idCpeSunat, item.tipo)}><img src={pdf} width="22" alt="Pdf" /> Archivo Pdf</button>
-                                                                            </li>
-                                                                            <li>
-                                                                                <button className="dropdown-item" type="button" onClick={() => this.onEventXmlSunat(item.idCpeSunat, item.tipo)}><img src={xml} width="22" alt="Xml" /> Archivo Xml</button>
-                                                                            </li>
-                                                                            <li>
-                                                                                <button className="dropdown-item" type="button" onClick={() => this.onEventSendEmail(item.idCpeSunat, item.tipo)}><img src={email} width="22" alt="Email" /> Enviar Correo</button>
-                                                                            </li>
-                                                                            <li>
-                                                                                <button className="dropdown-item" type="button" onClick={() => this.onEventSendAnular(item.idCpeSunat, item.tipo)}><img src={error} width="22" alt="Error" /> Resumen Diario</button>
-                                                                            </li>
-                                                                        </ul>
-                                                                    </div>
-                                                                </td>
-                                                                <td>{<span>{item.fecha}</span>}{<br></br>}{<span>{timeForma24(item.hora)}</span>}</td>
-                                                                <td>{item.comprobante}{<br />}{item.serie + "-" + item.numeracion}</td>
-                                                                <td>{item.documento}{<br />}{item.informacion}</td>
-
-
-                                                                <td className="text-center">
-                                                                    {
-                                                                        item.estado === 0
-                                                                            ? <span className="text-danger">DAR DE BAJA</span>
-                                                                            : <span className="text-success">DECLARAR</span>
-                                                                    }
-                                                                </td>
-
-                                                                <td>{numberFormat(item.total)}</td>
-                                                                <td className="text-center">{estadoSunat}</td>
-                                                                <td>{descripcion}</td>
-                                                            </tr>
-                                                        )
-                                                    })
                                                 )
-                                            }
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
+                                            })
+                                        )
+                                    }
+                                </tbody>
+                            </table>
                         </div>
+                    </div>
+                </div>
 
-                        <div className="row">
-                            <div className="col-sm-12 col-md-5">
-                                <div className="dataTables_info mt-2" role="status" aria-live="polite">{this.state.messagePaginacion}</div>
-                            </div>
-                            <div className="col-sm-12 col-md-7">
-                                <div className="dataTables_paginate paging_simple_numbers">
-                                    <nav aria-label="Page navigation example">
-                                        <ul className="pagination justify-content-end">
-                                            <Paginacion
-                                                loading={this.state.loading}
-                                                totalPaginacion={this.state.totalPaginacion}
-                                                paginacion={this.state.paginacion}
-                                                fillTable={this.paginacionContext}
-                                            />
-                                        </ul>
-                                    </nav>
-                                </div>
-                            </div>
+                <div className="row">
+                    <div className="col-sm-12 col-md-5">
+                        <div className="dataTables_info mt-2" role="status" aria-live="polite">{this.state.messagePaginacion}</div>
+                    </div>
+                    <div className="col-sm-12 col-md-7">
+                        <div className="dataTables_paginate paging_simple_numbers">
+                            <nav aria-label="Page navigation example">
+                                <ul className="pagination justify-content-end">
+                                    <Paginacion
+                                        loading={this.state.loading}
+                                        totalPaginacion={this.state.totalPaginacion}
+                                        paginacion={this.state.paginacion}
+                                        fillTable={this.paginacionContext}
+                                    />
+                                </ul>
+                            </nav>
                         </div>
-                    </>
-                }
+                    </div>
+                </div>
                 <FileDownloader ref={this.refUseFileXml} />
             </>
         );

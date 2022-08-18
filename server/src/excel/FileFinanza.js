@@ -2,7 +2,6 @@ const xl = require('excel4node');
 const { formatMoney, dateFormat } = require('../tools/Tools');
 
 async function generateExcel(req, sedeInfo, data) {
-    console.log(data);
     try {
         const wb = new xl.Workbook();
 
@@ -82,26 +81,31 @@ async function generateExcel(req, sedeInfo, data) {
             ws.column(8).setWidth(20);
             ws.column(9).setWidth(15);
             ws.column(10).setWidth(15);
+            ws.column(11).setWidth(15);
 
-            ws.cell(1, 1, 1, 10, true).string(`${sedeInfo.nombreEmpresa}`).style(styleTitle);
-            ws.cell(2, 1, 2, 10, true).string(`RUC: ${sedeInfo.ruc}`).style(styleTitle);
-            ws.cell(3, 1, 3, 10, true).string(`${sedeInfo.direccion}`).style(styleTitle);
-            ws.cell(4, 1, 4, 10, true).string(`Celular: ${sedeInfo.celular} / Telefono: ${sedeInfo.telefono}`).style(styleTitle);
+            ws.cell(1, 1, 1, 11, true).string(`${sedeInfo.nombreEmpresa}`).style(styleTitle);
+            ws.cell(2, 1, 2, 11, true).string(`RUC: ${sedeInfo.ruc}`).style(styleTitle);
+            ws.cell(3, 1, 3, 11, true).string(`${sedeInfo.direccion}`).style(styleTitle);
+            ws.cell(4, 1, 4, 11, true).string(`Celular: ${sedeInfo.celular} / Telefono: ${sedeInfo.telefono}`).style(styleTitle);
 
-            ws.cell(6, 1, 6, 10, true).string(`REPORTE DE COBROS Y GASTOS`).style(styleTitle);
-            ws.cell(7, 1, 7, 10, true).string(`PERIODO: ${dateFormat(req.query.fechaIni)} al ${dateFormat(req.query.fechaFin)}`).style(styleTitle);
+            ws.cell(6, 1, 6, 11, true).string(`REPORTE DE COBROS Y GASTOS`).style(styleTitle);
+            ws.cell(7, 1, 7, 11, true).string(`PERIODO: ${dateFormat(req.query.fechaIni)} al ${dateFormat(req.query.fechaFin)}`).style(styleTitle);
 
-            const headerCon = ["#", "Comprobante", "Correlativo", "Documento", "Cliente", "Detalle", "Banco", "Fecha", "Usuario", "Monto"];
+            const headerCon = ["#", "Comprobante", "Correlativo", "Documento", "Cliente", "Detalle", "Banco", "Fecha", "Usuario", "Monto", "Anulado"];
             headerCon.map((item, index) => ws.cell(9, 1 + index).string(item).style(styleTableHeader));
 
             let sumaMonto = 0;
             let rowY = 9;
 
             data.cobros.map((item, index) => {
-                sumaMonto += item.monto;
+                sumaMonto += item.estado == 1 && item.idNotaCredito == null ? item.monto : 0;
                 rowY = rowY + 1;
                 let correlativo = item.serie + "-" + item.numeracion
                 let fechaHora = item.fecha + " " + item.hora
+
+                styleBodyInteger.font.color = item.estado == 1 && item.idNotaCredito == null ? '#000000' : '#ff0000';
+                styleBody.font.color = item.estado == 1 && item.idNotaCredito == null ? '#000000' : '#ff0000';
+                styleBodyFloat.font.color = item.estado == 1 && item.idNotaCredito == null ? '#000000' : '#ff0000';
 
                 ws.cell(rowY, 1).number(1 + index).style(styleBodyInteger)
                 ws.cell(rowY, 2).string(item.comprobante).style(styleBody)
@@ -112,8 +116,12 @@ async function generateExcel(req, sedeInfo, data) {
                 ws.cell(rowY, 7).string(item.banco).style(styleBody)
                 ws.cell(rowY, 8).string(fechaHora).style(styleBody)
                 ws.cell(rowY, 9).string(item.nombres).style(styleBody)
-                ws.cell(rowY, 10).number(parseFloat(formatMoney(item.monto))).style(styleBodyFloat)
+                ws.cell(rowY, 10).number(parseFloat(formatMoney(item.estado == 1 && item.idNotaCredito == null ? item.monto : 0))).style(styleBodyFloat)
+                ws.cell(rowY, 11).number(parseFloat(formatMoney(item.estado == 1 && item.idNotaCredito == null ? 0 : item.monto))).style(styleBodyFloat)
             });
+
+            styleBody.font.color = '#000000';
+            styleBodyFloat.font.color = '#000000';
 
             rowY = rowY + 1;
 
@@ -190,7 +198,6 @@ async function generateExcel(req, sedeInfo, data) {
 
             ws.cell(rowY, 3).string("TOTAL:").style(styleBody)
             if (data.bancos.length > 0) ws.cell(rowY, 4).formula(`SUM(D${startPos}:D${endPos})`).style(styleBodyFloat)
-
         }
         return wb.writeToBuffer();
     } catch (error) {

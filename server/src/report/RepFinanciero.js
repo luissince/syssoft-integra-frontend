@@ -1,7 +1,7 @@
 const path = require('path');
 const PDFDocument = require("pdfkit-table");
 const getStream = require('get-stream');
-const { dateFormat, numberFormat, currentDate,isFile } = require('../tools/Tools');
+const { dateFormat, numberFormat, currentDate, isFile } = require('../tools/Tools');
 
 class RepFinanciero {
 
@@ -15,7 +15,7 @@ class RepFinanciero {
                     right: 40
                 }
             });
-            
+
             doc.info["Title"] = `REPORTE DE COBROS Y GASTOS DEL ${req.query.fechaIni} AL ${req.query.fechaFin}`
 
             let orgX = doc.x;
@@ -203,6 +203,7 @@ class RepFinanciero {
             let h1 = 13;
             let h2 = 11;
             let h3 = 9;
+            let h4 = 8;
 
             if (isFile(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo))) {
                 doc.image(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo), doc.x, doc.y, { width: 75 });
@@ -252,8 +253,8 @@ class RepFinanciero {
 
             let sumaMontoCobros = 0;
             let cobros = data.cobros.map((item, index) => {
-                sumaMontoCobros += item.estado == 1 && item.idNotaCredito == null ?  item.monto : 0;
-                return[
+                sumaMontoCobros += item.estado == 1 && item.idNotaCredito == null ? item.monto : 0;
+                return [
                     ++index,
                     item.comprobante + "\n" + item.serie + "-" + item.numeracion,
                     item.documento + "\n" + item.informacion,
@@ -261,36 +262,34 @@ class RepFinanciero {
                     item.banco,
                     item.fecha + "\n" + item.hora,
                     item.nombres,
-                    item.estado == 1 && item.idNotaCredito == null ? numberFormat(item.monto) : 0
+                    item.estado == 1 && item.idNotaCredito == null ? numberFormat(item.monto) : 0,
+                    item.estado == 1 && item.idNotaCredito == null ? 0 : numberFormat(item.monto)
                 ]
             });
 
-            cobros.push(["","","","","","", "TOTAL:", numberFormat(sumaMontoCobros)]);
+            cobros.push(["", "", "", "", "", "", "TOTAL:", numberFormat(sumaMontoCobros), ""]);
 
             //Tabla
             const tableCobros = {
                 subtitle: "RESUMEN DE COBROS",
-                headers: ["#", "Correlativo", "Cliente", "Detalle", "Banco", "Fecha", "Usuario", "Monto"],
+                headers: ["#", "Correlativo", "Cliente", "Detalle", "Banco", "Fecha", "Usuario", "Monto", "Anulado"],
                 rows: cobros
             };
 
             doc.table(tableCobros, {
                 prepareHeader: () => doc.font("Helvetica-Bold").fontSize(h3),
                 prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) => {
-                    // 
-                    // doc.font("Helvetica").fontSize(h3);
-                    
                     if (indexColumn === 7) {
                         if (row[7] == "0") {
-                            doc.font("Helvetica").fontSize(h3).fillColor("red");
+                            doc.font("Helvetica").fontSize(h4).fillColor("red");
                         }
                     } else {
-                        doc.font("Helvetica").fontSize(h3).fillColor("black");
+                        doc.font("Helvetica").fontSize(h4).fillColor("black");
                     }
                 },
                 padding: 5,
                 columnSpacing: 5,
-                columnsSize: [30, 80, 100, 80, 60, 60, 70, 60],
+                columnsSize: [22, 60, 80, 60, 60, 60, 70, 60, 60], //532
                 x: orgX,
                 y: doc.y + 10,
                 width: doc.page.width - doc.options.margins.left - doc.options.margins.right
@@ -298,8 +297,8 @@ class RepFinanciero {
 
             let sumaMontoGastos = 0;
             let gastos = data.gastos.map((item, index) => {
-                sumaMontoGastos +=  item.monto;
-                return[
+                sumaMontoGastos += item.monto;
+                return [
                     ++index,
                     item.comprobante + "\n" + item.serie + "-" + item.numeracion,
                     item.documento + "\n" + item.informacion,
@@ -311,7 +310,7 @@ class RepFinanciero {
                 ]
             });
 
-            gastos.push(["","","","","","", "TOTAL:", numberFormat(sumaMontoGastos)]);
+            gastos.push(["", "", "", "", "", "", "TOTAL:", numberFormat(sumaMontoGastos)]);
 
             //Tabla
             const tableGastos = {
@@ -327,7 +326,7 @@ class RepFinanciero {
                 },
                 padding: 5,
                 columnSpacing: 5,
-                columnsSize: [30, 80, 100, 80, 60, 60, 70, 60],
+                columnsSize: [22, 80, 100, 80, 60, 60, 70, 60], //532
                 x: orgX,
                 y: doc.y + 10,
                 width: doc.page.width - doc.options.margins.left - doc.options.margins.right
