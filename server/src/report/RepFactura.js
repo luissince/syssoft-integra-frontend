@@ -943,18 +943,18 @@ class RepFactura {
 
             let yPos = 101.00;
 
-            doc.fontSize(9).text(`${cabecera.fecha}`,
+            doc.fontSize(10).text(`${cabecera.fecha}`,
                 doc.options.margins.left + 22,
                 yPos + 14);
 
-            doc.fontSize(9).text(`${zfill(cabecera.numeracion)}`,
+            doc.fontSize(10).text(`${zfill(cabecera.numeracion)}`,
                 doc.options.margins.left + 400,
                 yPos + 14);
 
 
             yPos = doc.y + 3;
 
-            doc.fontSize(9).text(`${cabecera.informacion}  ${cabecera.documento}`,
+            doc.fontSize(10).text(`${cabecera.informacion}  ${cabecera.documento}`,
                 doc.options.margins.left + 22,
                 yPos);
 
@@ -964,7 +964,7 @@ class RepFactura {
 
             data.lote.map((lote, index) => {
 
-                doc.fontSize(8).text(lote.lote + " - " + lote.manzana,
+                doc.fontSize(9).text(lote.lote + " - " + lote.manzana,
                     doc.options.margins.left + 400,
                     yPos);
 
@@ -976,11 +976,11 @@ class RepFactura {
                 yPos = doc.y + 25;
 
                 data.detalle.map((item, index) => {
-                    doc.fontSize(10).text((index + 1),
+                    doc.fontSize(11).text((index + 1),
                         doc.options.margins.left + 10,
                         yPos);
 
-                    doc.fontSize(9).text(item.concepto,
+                    doc.fontSize(10).text(item.concepto,
                         doc.options.margins.left + 80,
                         yPos);
 
@@ -988,7 +988,7 @@ class RepFactura {
                     // doc.options.margins.left + 400,
                     // yPos);
 
-                    doc.fontSize(8).text(numberFormat(item.precio, cabecera.codiso),
+                    doc.fontSize(9).text(numberFormat(item.precio, cabecera.codiso),
                         doc.options.margins.left + 460,
                         yPos);
 
@@ -999,7 +999,7 @@ class RepFactura {
                 yPos = doc.y + 25;
 
                 data.venta.map((item, index) => {
-                    doc.fontSize(10).text((index + 1),
+                    doc.fontSize(11).text((index + 1),
                         doc.options.margins.left + 10,
                         yPos);
 
@@ -1009,7 +1009,7 @@ class RepFactura {
                     //     concepto += "\n" + lote.lote + " - " + lote.manzana;
                     // });
 
-                    doc.fontSize(9).text(concepto,
+                    doc.fontSize(10).text(concepto,
                         doc.options.margins.left + 80,
                         yPos);
 
@@ -1017,7 +1017,7 @@ class RepFactura {
                     // doc.options.margins.left + 400,
                     // yPos);
 
-                    doc.fontSize(8).text(numberFormat(item.precio, cabecera.codiso),
+                    doc.fontSize(9).text(numberFormat(item.precio, cabecera.codiso),
                         doc.options.margins.left + 460,
                         yPos);
 
@@ -1029,11 +1029,11 @@ class RepFactura {
 
             yPos = 323;
 
-            doc.fontSize(9).text(`SON: ${numberLleters.getResult(formatMoney(total), cabecera.moneda)}`,
+            doc.fontSize(10).text(`SON: ${numberLleters.getResult(formatMoney(total), cabecera.moneda)}`,
                 doc.options.margins.left + 10,
                 yPos);
 
-            doc.fontSize(8).text(`${numberFormat(total, cabecera.codiso)}`,
+            doc.fontSize(9).text(`${numberFormat(total, cabecera.codiso)}`,
                 doc.options.margins.left + 460,
                 yPos);
 
