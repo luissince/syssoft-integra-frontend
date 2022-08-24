@@ -151,6 +151,7 @@ class Acceso {
                         for (let submenuold of menuold.children) {
                             if (menuold.idMenu === menu.idMenu && submenuold.idSubMenu === submenu.idSubMenu) {
                                 estadoSubMenu = submenuold.estado;
+                                break;
                             }
                         }
                     }

@@ -41,6 +41,7 @@ class Dashboard extends React.Component {
 
     async loadInit() {
         try {
+
             const total = await axios.get("/api/dashboard/totales", {
                 signal: this.abortControllerView.signal,
                 headers: {

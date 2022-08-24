@@ -1069,28 +1069,31 @@ class Cobro {
                     req.query.idCobro
                 ]);
 
-
-                let lote = await conec.query(`SELECT 
+                let lote = null;
+                if (venta.length > 0) {
+                    lote = await conec.query(`SELECT 
                     l.descripcion as lote,
                     m.nombre as manzana 
                     FROM ventaDetalle AS vd
                     INNER JOIN lote AS l on l.idLote = vd.idLote
                     INNER JOIN manzana as m ON m.idManzana = l.idManzana
                     WHERE vd.idVenta = ?`, [
-                    venta[0].idVenta
-                ]);
+                        venta[0].idVenta
+                    ]);
+                }
 
                 return {
                     "cabecera": result[0],
                     "detalle": detalle,
                     "venta": venta,
-                    "lote": lote
+                    "lote": lote == null ? [] : lote
                 };
             } else {
                 return "Datos no encontrados";
             }
 
         } catch (error) {
+            console.log(error)
             return "Se produjo un error de servidor, intente nuevamente.";
         }
     }

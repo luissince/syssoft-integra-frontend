@@ -925,8 +925,6 @@ class RepFactura {
     }
 
     async repCobroA5(req, sedeInfo, data) {
-
-        console.log(data)
         const cabecera = data.cabecera;
         try {
             const doc = new PDFDocument({

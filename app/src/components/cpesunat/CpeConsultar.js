@@ -5,7 +5,7 @@ import {
     ModalAlertInfo,
     ModalAlertSuccess,
     ModalAlertWarning,
-    ModalAlertError,
+    ModalAlertError, 
     spinnerLoading
 } from '../tools/Tools';
 import { connect } from 'react-redux';

@@ -214,6 +214,7 @@ class Inicio extends React.Component {
 
         const { path, url } = this.props.match;
         return (
+
             <div className='app'>
                 <Menu  {...this.props} url={url} />
 
@@ -451,6 +452,8 @@ class Inicio extends React.Component {
                 </main>
                 <NotificationContainer />
             </div>
+
+
         )
     }
 }

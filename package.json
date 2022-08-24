@@ -30,6 +30,8 @@
     "nodemailer": "^6.7.7",
     "nodemailer-smtp-transport": "^2.7.4",
     "react-notifications": "^1.7.4",
+    "react-query": "^3.39.2",
+    "react-query-class-component": "^1.0.4",
     "socket.io": "^4.5.1",
     "socket.io-client": "^4.5.1",
     "ws": "^8.8.1"
