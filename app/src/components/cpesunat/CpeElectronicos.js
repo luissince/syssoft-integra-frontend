@@ -478,6 +478,28 @@ class CpeElectronicos extends React.Component {
         }
     }
 
+    onEventGenerarExcel = async ()=>{
+        if (!validateDate(this.state.fechaInicioModal)) return;
+        if (!validateDate(this.state.fechaFinalModal)) return;
+
+        const data = {
+            "idSede": "SD0001",
+            "fechaIni": this.state.fechaInicioModal,
+            "fechaFin": this.state.fechaFinalModal
+        }
+
+        let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
+
+        this.refUseFileXml.current.download({
+            "name": `CPE Electrónicos SUNAT ${this.state.fechaInicioModal} AL ${this.state.fechaFinalModal}`,
+            "file": "/api/cobro/excelcpesunat",
+            "filename": `CPE Electrónicos SUNAT ${this.state.fechaInicioModal} AL ${this.state.fechaFinalModal}.xlsx`,
+            "params": ciphertext
+        });
+
+        hideModal("modalExcel");
+    }
+
     render() {
         return (
             <>
@@ -535,7 +557,7 @@ class CpeElectronicos extends React.Component {
                             </div>
 
                             <div className="modal-footer">
-                                <button type="button" className="btn btn-success">Generar</button>
+                                <button type="button" className="btn btn-success" onClick={()=>this.onEventGenerarExcel()}>Generar</button>
                                 <button type="button" className="btn btn-danger" data-bs-dismiss="modal">Cerrar</button>
                             </div>
                         </div>

@@ -205,4 +205,136 @@ async function generateExcel(req, sedeInfo, data) {
     }
 }
 
-module.exports = { generateExcel }
+async function cpeSunat(req, sedeInfo, data) {
+    try {
+        const wb = new xl.Workbook();
+
+        let ws = wb.addWorksheet('Hoja 1');
+
+        const styleTitle = wb.createStyle({
+            alignment: {
+                horizontal: 'center'
+            },
+            font: {
+                color: '#000000',
+                size: 12,
+            },
+        });
+
+        const styleHeader = wb.createStyle({
+            alignment: {
+                horizontal: 'left'
+            },
+            font: {
+                color: '#000000',
+                size: 12,
+            }
+        });
+
+        const styleTableHeader = wb.createStyle({
+            alignment: {
+                horizontal: 'center'
+            },
+            font: {
+                bold: true,
+                color: '#000000',
+                size: 12,
+            },
+
+        });
+
+        const styleBody = wb.createStyle({
+            alignment: {
+                horizontal: 'left'
+            },
+            font: {
+                color: '#000000',
+                size: 12,
+            }
+        });
+
+        const styleBodyInteger = wb.createStyle({
+            alignment: {
+                horizontal: 'left'
+            },
+            font: {
+                color: '#000000',
+                size: 12,
+            }
+        });
+
+        const styleBodyFloat = wb.createStyle({
+            alignment: {
+                horizontal: 'left'
+            },
+            font: {
+                color: '#000000',
+                size: 12,
+            },
+            numberFormat: '#,##0.00; (#,##0.00); 0',
+        });
+
+        ws.column(1).setWidth(5);//#
+        ws.column(2).setWidth(20);//tipo documento
+        ws.column(3).setWidth(15);//n° documento
+        ws.column(4).setWidth(20);//cliente
+        ws.column(5).setWidth(20);//tipo comprobante
+        ws.column(6).setWidth(20);//comprobante
+        ws.column(7).setWidth(15);//serie
+        ws.column(8).setWidth(15);//numeracion
+        ws.column(9).setWidth(15);//fecha
+        ws.column(10).setWidth(15);//monedda
+        ws.column(11).setWidth(15);//base
+        ws.column(12).setWidth(15);//igv
+        ws.column(13).setWidth(15);//monto
+        ws.column(14).setWidth(15);//anulado
+        ws.column(15).setWidth(35);//sunat mensaje
+
+        ws.cell(1, 1, 1, 11, true).string(`${sedeInfo.nombreEmpresa}`).style(styleTitle);
+        ws.cell(2, 1, 2, 11, true).string(`RUC: ${sedeInfo.ruc}`).style(styleTitle);
+        ws.cell(3, 1, 3, 11, true).string(`${sedeInfo.direccion}`).style(styleTitle);
+        ws.cell(4, 1, 4, 11, true).string(`Celular: ${sedeInfo.celular} / Telefono: ${sedeInfo.telefono}`).style(styleTitle);
+
+        ws.cell(6, 1, 6, 11, true).string(`REPORTE DE COMPROBANTES EMITIDOS A SUNAT`).style(styleTitle);
+        ws.cell(7, 1, 7, 11, true).string(`PERIODO: ${dateFormat(req.query.fechaIni)} al ${dateFormat(req.query.fechaFin)}`).style(styleTitle);
+
+        const headerCon = ["#", "Tipo de Documento", "N° de Documento", "Cliente", "Tipo Comprobante", "Comprobante", "Serie", "Numeración", "Fecha", "Moneda", "Base", "Igv", "Monto", "Anulado", "Sunat Observación"];
+        headerCon.map((item, index) => ws.cell(9, 1 + index).string(item).style(styleTableHeader));
+
+        let rowY = 9;
+        data.map((item, index) => {
+            rowY = rowY + 1;
+
+            styleBodyInteger.font.color = item.xmlSunat !== "1032" || item.xmlSunat == "" ? '#000000' : '#ff0000';
+            styleBody.font.color = item.xmlSunat !== "1032" || item.xmlSunat == "" ? '#000000' : '#ff0000';
+            styleBodyFloat.font.color = item.xmlSunat !== "1032" || item.xmlSunat == "" ? '#000000' : '#ff0000';
+
+
+
+            let monto = item.xmlSunat !== "1032" || item.xmlSunat == "" ? (item.Base + item.Igv) : 0;
+            let anulado = item.xmlSunat !== "1032" || item.xmlSunat == "" ? 0 : (item.Base + item.Igv);
+
+            ws.cell(rowY, 1).number(1 + index).style(styleBodyInteger)
+            ws.cell(rowY, 2).string(item.tipoDocumento).style(styleBody)
+            ws.cell(rowY, 3).string(item.documento).style(styleBody)
+            ws.cell(rowY, 4).string(item.informacion).style(styleBody)
+            ws.cell(rowY, 5).string(item.codigoComprobante).style(styleBody)
+            ws.cell(rowY, 6).string(item.comprobante).style(styleBody)
+            ws.cell(rowY, 7).string(item.serie).style(styleBody)
+            ws.cell(rowY, 8).number(item.numeracion).style(styleBodyInteger)
+            ws.cell(rowY, 9).string(item.fecha).style(styleBody)
+            ws.cell(rowY, 10).string(item.codiso).style(styleBody)
+            ws.cell(rowY, 11).number(parseFloat(formatMoney(item.Base))).style(styleBodyFloat)
+            ws.cell(rowY, 12).number(parseFloat(formatMoney(item.Igv))).style(styleBodyFloat)
+            ws.cell(rowY, 13).number(parseFloat(formatMoney(monto))).style(styleBodyFloat)
+            ws.cell(rowY, 14).number(parseFloat(formatMoney(anulado))).style(styleBodyFloat)
+            ws.cell(rowY, 15).string(item.xmlDescripcion).style(styleBody)
+        });
+
+        return wb.writeToBuffer();
+    } catch (error) {
+        return "Error en generar el excel.";
+    }
+}
+
+module.exports = { generateExcel, cpeSunat }

@@ -3,7 +3,7 @@ const router = express.Router();
 const nodemailer = require("nodemailer");
 const smtpTransport = require('nodemailer-smtp-transport');
 const { decrypt } = require('../tools/CryptoJS');
-const { generateExcel } = require('../excel/FileFinanza')
+const { generateExcel, cpeSunat } = require('../excel/FileFinanza')
 const Cobro = require('../services/Cobro');
 const sede = require('../services/Sede');
 const RepFinanciero = require('../report/RepFinanciero');
@@ -319,6 +319,36 @@ router.get('/excelgeneralcobros', async function (req, res) {
     if (typeof detalle === 'object') {
 
        const data = await generateExcel(req, sedeInfo, detalle);
+
+        if (typeof data === 'string') {
+            res.status(500).send(data);
+        } else {
+            res.end(data);
+        }
+    } else {
+        res.status(500).send(detalle)
+    }
+});
+
+router.get('/excelcpesunat', async function (req, res) {
+    const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
+
+    req.query.idSede = decryptedData.idSede;
+    req.query.fechaIni = decryptedData.fechaIni;
+    req.query.fechaFin = decryptedData.fechaFin;
+
+    const sedeInfo = await sede.infoSedeReporte(req);
+
+    if (typeof sedeInfo !== 'object') {
+        res.status(500).send(sedeInfo);
+        return;
+    }
+
+    const detalle = await cobro.cpeSunat(req);
+
+    if (Array.isArray(detalle)) {
+
+       const data = await cpeSunat(req, sedeInfo, detalle);
 
         if (typeof data === 'string') {
             res.status(500).send(data);

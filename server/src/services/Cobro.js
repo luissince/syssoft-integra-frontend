@@ -1852,6 +1852,85 @@ class Cobro {
         }
     }
 
+    async cpeSunat(req) {
+        try {
+
+            const result = await conec.query(`SELECT 
+            v.idCobro AS idCpeSunat,
+            tp.nombre AS tipoDocumento,
+            c.documento, 
+            c.informacion,             
+            co.codigo as codigoComprobante,
+            co.nombre as comprobante,
+            v.serie,
+            v.numeracion,
+            DATE_FORMAT(v.fecha,'%d/%m/%Y') as fecha, 
+            v.hora, 
+            'f' as tipo, 
+            v.estado,
+            m.idMoneda,
+            m.simbolo,
+            m.codiso,
+            IFNULL(v.xmlSunat,'') AS xmlSunat,
+            IFNULL(v.xmlDescripcion,'') AS xmlDescripcion,
+            IFNULL(SUM(1 *((vd.precio-0)/((im.porcentaje+100)*0.01))),0) as Base,
+			IFNULL(SUM(1 *(((vd.precio-0)/((im.porcentaje+100)*0.01)) * (im.porcentaje /100) )),0) as Igv 
+            FROM cobro AS v 
+            INNER JOIN cliente AS c ON v.idCliente = c.idCliente
+            INNER JOIN tipoDocumento AS tp ON tp.idTipoDocumento = c.idTipoDocumento
+            INNER JOIN comprobante AS co ON v.idComprobante = co.idComprobante
+            INNER JOIN moneda AS m ON v.idMoneda = m.idMoneda
+            LEFT JOIN cobroVenta AS vd ON vd.idCobro = v.idCobro
+            LEFT JOIN impuesto AS im ON im.idImpuesto = vd.idImpuesto
+            WHERE co.tipo = 1 AND v.fecha BETWEEN ? AND ?
+            GROUP BY v.idCobro
+
+            UNION 
+
+            SELECT
+            nc.idNotaCredito AS idCpeSunat,
+            tp.nombre AS tipoDocumento,
+            c.documento, 
+            c.informacion,             
+            co.codigo as codigoComprobante,
+            co.nombre as comprobante,
+            nc.serie,
+            nc.numeracion,
+            DATE_FORMAT(nc.fecha,'%d/%m/%Y') as fecha, 
+            nc.hora, 
+            'nc' as tipo, 
+            nc.estado,
+            m.idMoneda,
+            m.simbolo,
+            m.codiso,
+            IFNULL(nc.xmlSunat,'') AS xmlSunat,
+            IFNULL(nc.xmlDescripcion,'') AS xmlDescripcion,
+            IFNULL(SUM(ncd.cantidad *((ncd.precio-0)/((im.porcentaje+100)*0.01))),0) as Base,
+			IFNULL(SUM(ncd.cantidad *(((ncd.precio-0)/((im.porcentaje+100)*0.01)) * (im.porcentaje /100) )),0) as Igv
+            FROM notaCredito AS nc
+            INNER JOIN cliente AS c ON c.idCliente = nc.idCliente
+            INNER JOIN tipoDocumento AS tp ON tp.idTipoDocumento = c.idTipoDocumento
+            INNER JOIN comprobante AS co ON co.idComprobante = nc.idComprobante
+            inNER JOIN moneda AS m ON m.idMoneda = nc.idMoneda
+            LEFT JOIN notaCreditoDetalle AS ncd ON ncd.idNotaCredito = nc.idNotaCredito
+            LEFT JOIN impuesto AS im ON im.idImpuesto = ncd.idImpuesto
+			WHERE co.tipo = 3 AND nc.fecha BETWEEN ? AND ?
+            GROUP BY nc.idNotaCredito             
+
+            ORDER BY fecha DESC, hora DESC`, [
+                req.query.fechaIni,
+                req.query.fechaFin,
+
+                req.query.fechaIni,
+                req.query.fechaFin,
+            ]);
+
+            return result;
+        } catch (error) {
+            return "Se produjo un error de servidor, intente nuevamente.";
+        }
+    }
+
 }
 
 module.exports = Cobro
