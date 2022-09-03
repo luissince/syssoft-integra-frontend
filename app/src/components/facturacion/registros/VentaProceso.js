@@ -259,7 +259,7 @@ class VentaProceso extends React.Component {
             return;
         }
 
-        if (this.state.idImpuesto == "") {
+        if (this.state.idImpuesto === "") {
             await this.setStateAsync({ messageWarning: "Seleccione un impuesto." });
 
             if (!this.refCollpseContent.current.classList.contains("show")) {
@@ -275,7 +275,7 @@ class VentaProceso extends React.Component {
             return;
         }
 
-        if (this.state.idMedida == "") {
+        if (this.state.idMedida === "") {
             await this.setStateAsync({ messageWarning: "Seleccione una unidad." })
 
             if (!this.refCollpseContent.current.classList.contains("show")) {
@@ -897,7 +897,7 @@ class VentaProceso extends React.Component {
                                                                 <option value="">-- Comprobante --</option>
                                                                 {
                                                                     this.state.comprobantesCobro.map((item, index) => (
-                                                                        <option key={index} value={item.idComprobante}>{item.nombre}</option>
+                                                                        <option key={index} value={item.idComprobante}>{item.nombre + " (" + item.serie + ")"}</option>
                                                                     ))
                                                                 }
                                                             </select>

@@ -11,7 +11,6 @@ import {
     ModalAlertSuccess,
     ModalAlertWarning,
     ModalAlertError,
-    statePrivilegio
 } from '../../tools/Tools';
 import { connect } from 'react-redux';
 
@@ -317,7 +316,7 @@ class NotaCreditoProceso extends React.Component {
                                 <option value="">- Seleccione -</option>
                                 {
                                     this.state.comprobantes.map((item, index) => (
-                                        <option key={index} value={item.idComprobante}>{item.nombre}</option>
+                                        <option key={index} value={item.idComprobante}>{item.nombre + " (" + item.serie + ")"}</option>
                                     ))
                                 }
                             </select>
@@ -448,7 +447,7 @@ class NotaCreditoProceso extends React.Component {
                                 </thead>
                                 <tbody>
                                     {
-                                        this.state.detalle.length == 0 ?
+                                        this.state.detalle.length === 0 ?
                                             <tr className="text-center">
                                                 <td colSpan="6">Agregar datos a la tabla</td>
                                             </tr>

@@ -315,7 +315,7 @@ class RepVentas extends React.Component {
                                                         <option value="">-- Todos --</option>
                                                         {
                                                             this.state.comprobantes.map((item, index) => (
-                                                                <option key={index} value={item.idComprobante}>{item.nombre}</option>
+                                                                <option key={index} value={item.idComprobante}>{item.nombre + " (" + item.serie + ")"}</option>
                                                             ))
                                                         }
                                                     </select>

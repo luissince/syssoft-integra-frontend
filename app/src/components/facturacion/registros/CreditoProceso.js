@@ -383,7 +383,7 @@ class CreditoProceso extends React.Component {
             return;
         }
 
-        if (this.state.idImpuestoCuota == "") {
+        if (this.state.idImpuestoCuota === "") {
             if (!this.refCollpseContentCuota.current.classList.contains("show")) {
                 this.refCollpseCuota.current.classList.remove("collapsed");
                 this.refCollpseContentCuota.current.classList.add("show");
@@ -397,7 +397,7 @@ class CreditoProceso extends React.Component {
             return;
         }
 
-        if (this.state.idMedidaCuota == "") {
+        if (this.state.idMedidaCuota === "") {
             if (!this.refCollpseContentCuota.current.classList.contains("show")) {
                 this.refCollpseCuota.current.classList.remove("collapsed");
                 this.refCollpseContentCuota.current.classList.add("show");
@@ -459,7 +459,7 @@ class CreditoProceso extends React.Component {
             return;
         }
 
-        if (this.state.idImpuestoPlazo == "") {
+        if (this.state.idImpuestoPlazo === "") {
             if (!this.refCollpseContentPlazo.current.classList.contains("show")) {
                 this.refCollpsePlazo.current.classList.remove("collapsed");
                 this.refCollpseContentPlazo.current.classList.add("show");
@@ -473,7 +473,7 @@ class CreditoProceso extends React.Component {
             return;
         }
 
-        if (this.state.idMedidaPlazo == "") {
+        if (this.state.idMedidaPlazo === "") {
             if (!this.refCollpseContentPlazo.current.classList.contains("show")) {
                 this.refCollpsePlazo.current.classList.remove("collapsed");
                 this.refCollpseContentPlazo.current.classList.add("show");
@@ -541,7 +541,7 @@ class CreditoProceso extends React.Component {
             return;
         }
 
-        if (this.state.idImpuestoAdelanto == "") {
+        if (this.state.idImpuestoAdelanto === "") {
             if (!this.refCollpseContentAdelanto.current.classList.contains("show")) {
                 this.refCollpseAdelanto.current.classList.remove("collapsed");
                 this.refCollpseContentAdelanto.current.classList.add("show");
@@ -555,7 +555,7 @@ class CreditoProceso extends React.Component {
             return;
         }
 
-        if (this.state.idMedidaAdelanto == "") {
+        if (this.state.idMedidaAdelanto === "") {
             if (!this.refCollpseContentAdelanto.current.classList.contains("show")) {
                 this.refCollpseAdelanto.current.classList.remove("collapsed");
                 this.refCollpseContentAdelanto.current.classList.add("show");
@@ -719,7 +719,7 @@ class CreditoProceso extends React.Component {
                                                 <option value="">-- Comprobantes --</option>
                                                 {
                                                     this.state.comprobantes.map((item, index) => (
-                                                        <option key={index} value={item.idComprobante}>{item.nombre}</option>
+                                                        <option key={index} value={item.idComprobante}>{item.nombre + " (" + item.serie + ")"}</option>
                                                     ))
                                                 }
                                             </select>

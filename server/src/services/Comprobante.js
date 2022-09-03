@@ -287,17 +287,30 @@ class Comprobante {
 
     async listcombo(req,res) {
         try {
+
+            let estado = req.query.estado == undefined ? "" : req.query.estado;
+
             let result = await conec.query(`SELECT 
             idComprobante, 
             nombre, 
+            serie,
             estado, 
             preferida 
             FROM comprobante
-            WHERE tipo = ? AND estado = 1`, [
-                req.query.tipo
+            WHERE 
+            tipo = ? AND estado = 1 AND ? = ''
+            OR
+            tipo = ? AND ? = 'all'
+            `, [
+                req.query.tipo,
+                estado,
+
+                req.query.tipo,
+                estado,
             ]);
             return sendSuccess(res,result);
         } catch (error) {
+            console.error(error);
             return sendError(res, "Se produjo un error de servidor, intente nuevamente.")
         }
     }

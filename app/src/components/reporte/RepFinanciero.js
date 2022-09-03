@@ -72,14 +72,16 @@ class RepFinanciero extends React.Component {
             const facturado = await axios.get("/api/comprobante/listcombo", {
                 signal: this.abortControllerView.signal,
                 params: {
-                    "tipo": "1"
+                    "tipo": "1",
+                    "estado": "all"
                 }
             });
 
             const comprobante = await axios.get("/api/comprobante/listcombo", {
                 signal: this.abortControllerView.signal,
                 params: {
-                    "tipo": "5"
+                    "tipo": "5",
+                    "estado": "all"
                 }
             });
 
@@ -135,7 +137,7 @@ class RepFinanciero extends React.Component {
             "fechaFin": this.state.fechaFin,
             "isDetallado": this.state.isDetallado,
             "idComprobante": this.state.idComprobante,
-            "idUsuario":  this.state.idUsuario,
+            "idUsuario": this.state.idUsuario,
         }
 
         let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
@@ -274,7 +276,7 @@ class RepFinanciero extends React.Component {
                                                         <option value="">-- Todos --</option>
                                                         {
                                                             this.state.comprobantes.map((item, index) => (
-                                                                <option key={index} value={item.idComprobante}>{item.nombre}</option>
+                                                                <option key={index} value={item.idComprobante}>{item.nombre + " (" + item.serie + ")"}</option>
                                                             ))
                                                         }
                                                     </select>
