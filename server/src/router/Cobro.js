@@ -272,6 +272,7 @@ router.get('/repgeneralcobros', async function (req, res) {
     req.query.fechaIni = decryptedData.fechaIni;
     req.query.fechaFin = decryptedData.fechaFin;
     req.query.isDetallado = decryptedData.isDetallado;
+    req.query.idComprobante = decryptedData.idComprobante;
     req.query.idUsuario = decryptedData.idUsuario;
 
     const sedeInfo = await sede.infoSedeReporte(req);
@@ -305,6 +306,7 @@ router.get('/excelgeneralcobros', async function (req, res) {
     req.query.fechaIni = decryptedData.fechaIni;
     req.query.fechaFin = decryptedData.fechaFin;
     req.query.isDetallado = decryptedData.isDetallado;
+    req.query.idComprobante = decryptedData.idComprobante;
     req.query.idUsuario = decryptedData.idUsuario;
 
     const sedeInfo = await sede.infoSedeReporte(req);
@@ -318,7 +320,7 @@ router.get('/excelgeneralcobros', async function (req, res) {
 
     if (typeof detalle === 'object') {
 
-       const data = await generateExcel(req, sedeInfo, detalle);
+        const data = await generateExcel(req, sedeInfo, detalle);
 
         if (typeof data === 'string') {
             res.status(500).send(data);
@@ -348,7 +350,7 @@ router.get('/excelcpesunat', async function (req, res) {
 
     if (Array.isArray(detalle)) {
 
-       const data = await cpeSunat(req, sedeInfo, detalle);
+        const data = await cpeSunat(req, sedeInfo, detalle);
 
         if (typeof data === 'string') {
             res.status(500).send(data);
@@ -396,7 +398,7 @@ router.get('/notificaciones', async function (req, res) {
     }
 });
 
-router.get('/searchComprobante', async function (req, res){
+router.get('/searchComprobante', async function (req, res) {
     const result = await cobro.searchComprobante(req)
     if (typeof result === 'object') {
         res.status(200).send(result);

@@ -1539,18 +1539,34 @@ class Cobro {
                     LEFT JOIN usuario AS u ON u.idUsuario = c.idUsuario
                     LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro
                     WHERE 
-                    c.fecha BETWEEN ? AND ? AND ? = ''
+                    c.fecha BETWEEN ? AND ? AND ? = '' AND ? = ''
                     OR
-                    c.fecha BETWEEN ? AND ? AND u.idUsuario = ?
+                    c.fecha BETWEEN ? AND ? AND ? = '' AND u.idUsuario = ?
+                    OR
+                    c.fecha BETWEEN ? AND ? AND co.idComprobante = ? AND ? = ''
+                    OR
+                    c.fecha BETWEEN ? AND ? AND co.idComprobante = ? AND u.idUsuario = ?
                     GROUP BY c.idCobro
                     ORDER BY c.fecha DESC,c.hora DESC
                     `, [
                     req.query.fechaIni,
                     req.query.fechaFin,
+                    req.query.idComprobante,
                     req.query.idUsuario,
 
                     req.query.fechaIni,
                     req.query.fechaFin,
+                    req.query.idComprobante,
+                    req.query.idUsuario,
+
+                    req.query.fechaIni,
+                    req.query.fechaFin,
+                    req.query.idComprobante,
+                    req.query.idUsuario,
+
+                    req.query.fechaIni,
+                    req.query.fechaFin,
+                    req.query.idComprobante,
                     req.query.idUsuario,
                 ]);
 
@@ -1611,11 +1627,32 @@ class Cobro {
                     LEFT JOIN concepto AS co ON co.idConcepto = cd.idConcepto
                     LEFT JOIN cobroVenta AS cv ON cv.idCobro = c.idCobro
                     LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro
-                    WHERE c.fecha BETWEEN ? AND ? AND c.estado = 1 AND nc.idNotaCredito IS NULL
+                    WHERE 
+                    c.fecha BETWEEN ? AND ? AND c.estado = 1 AND nc.idNotaCredito IS NULL AND (
+                        ? = '' AND ? = ''
+                        OR
+                        ? = '' AND c.idUsuario = ?
+                        OR
+                        c.idComprobante = ? AND ? = ''
+                        OR
+                        c.idComprobante = ? AND c.idUsuario = ?
+                    )
                     GROUP BY c.idCobro`,
                     [
                         req.query.fechaIni,
                         req.query.fechaFin,
+
+                        req.query.idComprobante,
+                        req.query.idUsuario,
+
+                        req.query.idComprobante,
+                        req.query.idUsuario,
+
+                        req.query.idComprobante,
+                        req.query.idUsuario,
+
+                        req.query.idComprobante,
+                        req.query.idUsuario,
                     ]);
 
                 let gastos = await conec.query(`
@@ -1634,11 +1671,19 @@ class Cobro {
                     LEFT JOIN banco AS b ON g.idBanco = b.idBanco
                     LEFT JOIN gastoDetalle AS gd ON g.idGasto = gd.idGasto
                     LEFT JOIN concepto AS co ON co.idConcepto = gd.idConcepto
-                    WHERE g.fecha BETWEEN ? AND ?
+                    WHERE g.fecha BETWEEN ? AND ? AND (
+                        ? = ''
+                        OR
+                        g.idUsuario = ?
+                    )
                     GROUP BY g.idGasto`,
                     [
                         req.query.fechaIni,
                         req.query.fechaFin,
+
+                        req.query.idUsuario,
+
+                        req.query.idUsuario,
                     ]);
 
                 let lista = [...cobros, ...gastos];

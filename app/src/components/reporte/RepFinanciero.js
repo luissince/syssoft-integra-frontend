@@ -23,6 +23,9 @@ class RepFinanciero extends React.Component {
             idBanco: '',
             bancos: [],
 
+            idComprobante: '',
+            comprobantes: [],
+            comprobanteCheck: true,
 
             idUsuario: '',
             usuarios: [],
@@ -37,6 +40,7 @@ class RepFinanciero extends React.Component {
         this.refCliente = React.createRef();
         this.refBanco = React.createRef();
 
+        this.refComprobante = React.createRef();
         this.refUsuario = React.createRef();
         this.refBancoGasto = React.createRef();
         this.refUseFile = React.createRef();
@@ -65,10 +69,25 @@ class RepFinanciero extends React.Component {
                 signal: this.abortControllerView.signal
             });
 
+            const facturado = await axios.get("/api/comprobante/listcombo", {
+                signal: this.abortControllerView.signal,
+                params: {
+                    "tipo": "1"
+                }
+            });
+
+            const comprobante = await axios.get("/api/comprobante/listcombo", {
+                signal: this.abortControllerView.signal,
+                params: {
+                    "tipo": "5"
+                }
+            });
+
             await this.setStateAsync({
                 fechaIni: currentDate(),
                 fechaFin: currentDate(),
                 usuarios: usuario.data,
+                comprobantes: [...comprobante.data, ...facturado.data],
 
                 loading: false
             });
@@ -94,7 +113,8 @@ class RepFinanciero extends React.Component {
             "fechaIni": this.state.fechaIni,
             "fechaFin": this.state.fechaFin,
             "isDetallado": this.state.isDetallado,
-            "idUsuario": this.state.idUsuario === '' ? '' : this.state.idUsuario,
+            "idComprobante": this.state.idComprobante,
+            "idUsuario": this.state.idUsuario,
         }
 
         let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
@@ -114,7 +134,8 @@ class RepFinanciero extends React.Component {
             "fechaIni": this.state.fechaIni,
             "fechaFin": this.state.fechaFin,
             "isDetallado": this.state.isDetallado,
-            "idUsuario": this.state.idUsuario === '' ? '' : this.state.idUsuario,
+            "idComprobante": this.state.idComprobante,
+            "idUsuario":  this.state.idUsuario,
         }
 
         let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
@@ -224,11 +245,56 @@ class RepFinanciero extends React.Component {
                                                         id="customSwitch2"
                                                         checked={this.state.isDetallado}
                                                         onChange={(event) => {
-                                                            this.setState({ isDetallado: event.target.checked})
+                                                            this.setState({ isDetallado: event.target.checked })
                                                         }}
                                                     >
                                                     </input>
                                                     <label className="custom-control-label" htmlFor="customSwitch2">{this.state.isDetallado ? 'Si' : 'No'}</label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="col">
+                                            <div className="form-group">
+                                                <label>Comprobante</label>
+                                                <div className="input-group">
+                                                    <select
+                                                        title="Lista de usuarios"
+                                                        className="form-control"
+                                                        ref={this.refComprobante}
+                                                        value={this.state.idComprobante}
+                                                        disabled={this.state.comprobanteCheck}
+                                                        onChange={async (event) => {
+                                                            await this.setStateAsync({ idComprobante: event.target.value });
+                                                            if (this.state.idComprobante === '') {
+                                                                await this.setStateAsync({ comprobanteCheck: true });
+                                                            }
+                                                        }}
+                                                    >
+                                                        <option value="">-- Todos --</option>
+                                                        {
+                                                            this.state.comprobantes.map((item, index) => (
+                                                                <option key={index} value={item.idComprobante}>{item.nombre}</option>
+                                                            ))
+                                                        }
+                                                    </select>
+                                                    <div className="input-group-append">
+                                                        <div className="input-group-text">
+                                                            <div className="form-check form-check-inline m-0">
+                                                                <input
+                                                                    className="form-check-input"
+                                                                    type="checkbox"
+                                                                    checked={this.state.comprobanteCheck}
+                                                                    onChange={async (event) => {
+                                                                        await this.setStateAsync({ comprobanteCheck: event.target.checked })
+                                                                        if (this.state.comprobanteCheck) {
+                                                                            await this.setStateAsync({ idComprobante: '' });
+                                                                        }
+                                                                    }}
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -278,7 +344,7 @@ class RepFinanciero extends React.Component {
                                             </div>
                                         </div>
 
-                                        <div className="col"></div>
+
                                     </div>
 
                                     <div className="row mt-3">
