@@ -18,7 +18,7 @@ class Cliente {
             c.estado
             FROM cliente AS c
             INNER JOIN tipoDocumento AS td ON td.idTipoDocumento = c.idTipoDocumento
-            INNER JOIN venta AS v ON v.idCliente = c.idCliente
+            INNER JOIN venta AS v ON v.idCliente = c.idCliente AND v.estado <> 3
             WHERE 
             ? = 0 AND (v.idProyecto = ? AND ? = 'any' OR ? = 'all')
             OR
