@@ -1354,7 +1354,6 @@ class VentaProceso extends React.Component {
                                                         ref={this.refPrecioContado}
                                                         value={this.state.precioContado}
                                                         onChange={async (event) => {
-
                                                             if (event.target.value.trim().length > 0) {
                                                                 await this.setStateAsync({
                                                                     precioContado: event.target.value,

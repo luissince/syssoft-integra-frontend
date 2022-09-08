@@ -156,7 +156,7 @@ class Inicio extends React.Component {
             sidebar.removeChild(overlaySidebar)
         }
     }
-
+ 
     isChild = (child, parent) => {
         while ((child = child.parentNode) && child !== parent);
         return !!child;

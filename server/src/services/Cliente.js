@@ -58,7 +58,7 @@ class Cliente {
                     inner join ventaDetalle as vd on vd.idVenta = v.idVenta
                     inner join lote as l on l.idLote = vd.idLote
                     inner join manzana as m on m.idManzana = l.idManzana
-                    where v.idCliente = ? and v.idProyecto = ?`, [
+                    where v.idCliente = ? and v.idProyecto = ? AND v.estado <> 3`, [
                     value.idCliente,
                     value.idProyecto
                 ]);
@@ -68,7 +68,6 @@ class Cliente {
                     detalle
                 });
             }
-
 
             let resultLista = newLista.map(function (item, index) {
                 return {
@@ -631,7 +630,7 @@ class Cliente {
                 from venta as v
                 inner join ventaDetalle as vd on vd.idVenta = v.idVenta
                 inner join comprobante as co on co.idComprobante = v.idComprobante
-                where v.idCliente = ?
+                where v.idCliente = ? and v.estado <> 3
                 group by v.idVenta
                 order by v.fecha desc, v.hora desc`, [
                     req.query.idCliente,
