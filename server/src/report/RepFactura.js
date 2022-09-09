@@ -77,7 +77,7 @@ class RepFactura {
                 orgY,
                 150,
                 70).stroke();
- 
+
             doc.fontSize(h3).opacity(0.7).text(
                 "INFORMACIÓN",
                 doc.options.margins.top,
@@ -519,13 +519,31 @@ class RepFactura {
                 }
             }
 
+            /**
+             * ==========================================================================================
+             */
             let ypost = doc.y + 5;
+
+            doc.font('Helvetica').text("(*) Sin Impuestos.",
+                doc.options.margins.left,
+                ypost, {
+                align: "left",
+            });
+
+            doc.font('Helvetica').text("(*) Incluye Impuestos, de ser Op. Gravada.",
+                doc.options.margins.left,
+                doc.y + 5, {
+                align: "left",
+            });
+
+            /**
+             * ==========================================================================================
+             */
+
             doc.fontSize(h3);
-
-            let text = "IMPORTE BRUTO:";
+            let text = "OP. Gravada:";
             let widthtext = doc.widthOfString(text);
-
-            let subtext = numberFormat(subTotal, cabecera.codiso);
+            let subtext = numberFormat(impuestoTotal == 0 ? 0 : subTotal, cabecera.codiso);
             let widthsubtext = doc.widthOfString(subtext);
 
             doc.font('Helvetica').text(text,
@@ -535,19 +553,38 @@ class RepFactura {
                 align: "right",
             });
 
-            doc.font('Helvetica-Bold').text(subtext,
+            doc.font('Helvetica').text(subtext,
                 doc.page.width - doc.options.margins.right - widthsubtext,
                 ypost, {
                 width: widthsubtext,
                 align: "right",
             });
 
-            // 
             ypost = doc.y + 5;
-
-            text = "DESCUENTO:";
+            doc.fontSize(h3);
+            text = "OP. Exonerada:";
             widthtext = doc.widthOfString(text);
+            subtext = numberFormat(impuestoTotal == 0 ? subTotal : 0, cabecera.codiso);
+            widthsubtext = doc.widthOfString(subtext);
 
+            doc.font('Helvetica').text(text,
+                doc.page.width - doc.options.margins.right - widthtext - widthsubtext - 20,
+                ypost, {
+                width: widthtext + 10,
+                align: "right",
+            });
+
+            doc.font('Helvetica').text(subtext,
+                doc.page.width - doc.options.margins.right - widthsubtext,
+                ypost, {
+                width: widthsubtext,
+                align: "right",
+            });
+
+            ypost = doc.y + 5;
+            doc.fontSize(h3);
+            text = "OP. Inacfecta:";
+            widthtext = doc.widthOfString(text);
             subtext = numberFormat(0, cabecera.codiso);
             widthsubtext = doc.widthOfString(subtext);
 
@@ -558,20 +595,18 @@ class RepFactura {
                 align: "right",
             });
 
-            doc.font('Helvetica-Bold').text(subtext,
+            doc.font('Helvetica').text(subtext,
                 doc.page.width - doc.options.margins.right - widthsubtext,
                 ypost, {
                 width: widthsubtext,
                 align: "right",
             });
 
-            // 
             ypost = doc.y + 5;
-
-            text = "SUB IMPORTE:";
+            doc.fontSize(h3);
+            text = "ISC:";
             widthtext = doc.widthOfString(text);
-
-            subtext = numberFormat(subTotal, cabecera.codiso);
+            subtext = numberFormat(0, cabecera.codiso);
             widthsubtext = doc.widthOfString(subtext);
 
             doc.font('Helvetica').text(text,
@@ -581,48 +616,105 @@ class RepFactura {
                 align: "right",
             });
 
-            doc.font('Helvetica-Bold').text(subtext,
+            doc.font('Helvetica').text(subtext,
                 doc.page.width - doc.options.margins.right - widthsubtext,
                 ypost, {
                 width: widthsubtext,
                 align: "right",
             });
-            // 
 
-            for (let item of arrayImpuestos) {
-                ypost = doc.y + 5;
-
-                text = item.nombre + ":";
-                widthtext = doc.widthOfString(text);
-
-                subtext = numberFormat(item.valor, cabecera.codiso);
-                widthsubtext = doc.widthOfString(subtext);
-
-                doc.font('Helvetica').text(text,
-                    doc.page.width - doc.options.margins.right - widthtext - widthsubtext - 20,
-                    ypost, {
-                    width: widthtext + 10,
-                    align: "right",
-                });
-
-                doc.font('Helvetica-Bold').text(subtext,
-                    doc.page.width - doc.options.margins.right - widthsubtext,
-                    ypost, {
-                    width: widthsubtext,
-                    align: "right",
-                });
-            }
-
-            // 
             ypost = doc.y + 5;
-
-            text = "IMPORTE NETO:";
+            doc.fontSize(h3);
+            text = "IGV:";
             widthtext = doc.widthOfString(text);
+            subtext = numberFormat(impuestoTotal, cabecera.codiso);
+            widthsubtext = doc.widthOfString(subtext);
 
+            doc.font('Helvetica').text(text,
+                doc.page.width - doc.options.margins.right - widthtext - widthsubtext - 20,
+                ypost, {
+                width: widthtext + 10,
+                align: "right",
+            });
+
+            doc.font('Helvetica').text(subtext,
+                doc.page.width - doc.options.margins.right - widthsubtext,
+                ypost, {
+                width: widthsubtext,
+                align: "right",
+            });
+
+            ypost = doc.y + 5;
+            doc.fontSize(h3);
+            text = "Otros Cargos:";
+            widthtext = doc.widthOfString(text);
+            subtext = numberFormat(0, cabecera.codiso);
+            widthsubtext = doc.widthOfString(subtext);
+
+            doc.font('Helvetica').text(text,
+                doc.page.width - doc.options.margins.right - widthtext - widthsubtext - 20,
+                ypost, {
+                width: widthtext + 10,
+                align: "right",
+            });
+
+            doc.font('Helvetica').text(subtext,
+                doc.page.width - doc.options.margins.right - widthsubtext,
+                ypost, {
+                width: widthsubtext,
+                align: "right",
+            });
+
+            ypost = doc.y + 5;
+            doc.fontSize(h3);
+            text = "Otros Tributos:";
+            widthtext = doc.widthOfString(text);
+            subtext = numberFormat(0, cabecera.codiso);
+            widthsubtext = doc.widthOfString(subtext);
+
+            doc.font('Helvetica').text(text,
+                doc.page.width - doc.options.margins.right - widthtext - widthsubtext - 20,
+                ypost, {
+                width: widthtext + 10,
+                align: "right",
+            });
+
+            doc.font('Helvetica').text(subtext,
+                doc.page.width - doc.options.margins.right - widthsubtext,
+                ypost, {
+                width: widthsubtext,
+                align: "right",
+            });
+
+            ypost = doc.y + 5;
+            doc.fontSize(h3);
+            text = "Monto De Redondeo:";
+            widthtext = doc.widthOfString(text);
+            subtext = numberFormat(0, cabecera.codiso);
+            widthsubtext = doc.widthOfString(subtext);
+
+            doc.font('Helvetica').text(text,
+                doc.page.width - doc.options.margins.right - widthtext - widthsubtext - 20,
+                ypost, {
+                width: widthtext + 10,
+                align: "right",
+            });
+
+            doc.font('Helvetica').text(subtext,
+                doc.page.width - doc.options.margins.right - widthsubtext,
+                ypost, {
+                width: widthsubtext,
+                align: "right",
+            });
+
+            ypost = doc.y + 5;
+            doc.fontSize(h3);
+            text = "Importe Total:";
+            widthtext = doc.widthOfString(text);
             subtext = numberFormat(total, cabecera.codiso);
             widthsubtext = doc.widthOfString(subtext);
 
-            doc.font('Helvetica').text(text,
+            doc.font('Helvetica-Bold').text(text,
                 doc.page.width - doc.options.margins.right - widthtext - widthsubtext - 20,
                 ypost, {
                 width: widthtext + 10,
@@ -636,7 +728,141 @@ class RepFactura {
                 align: "right",
             });
 
+            /**
+             * ===========================================================================================
+             */
 
+            /**
+             * 
+             */
+            // let ypost = doc.y + 5;
+            // doc.fontSize(h3);
+
+            // let text = "IMPORTE BRUTO:";
+            // let widthtext = doc.widthOfString(text);
+
+            // let subtext = numberFormat(subTotal, cabecera.codiso);
+            // let widthsubtext = doc.widthOfString(subtext);
+
+            // doc.font('Helvetica').text(text,
+            //     doc.page.width - doc.options.margins.right - widthtext - widthsubtext - 20,
+            //     ypost, {
+            //     width: widthtext + 10,
+            //     align: "right",
+            // });
+
+            // doc.font('Helvetica-Bold').text(subtext,
+            //     doc.page.width - doc.options.margins.right - widthsubtext,
+            //     ypost, {
+            //     width: widthsubtext,
+            //     align: "right",
+            // });
+
+            /**
+             * 
+             */
+            // ypost = doc.y + 5;
+
+            // text = "DESCUENTO:";
+            // widthtext = doc.widthOfString(text);
+
+            // subtext = numberFormat(0, cabecera.codiso);
+            // widthsubtext = doc.widthOfString(subtext);
+
+            // doc.font('Helvetica').text(text,
+            //     doc.page.width - doc.options.margins.right - widthtext - widthsubtext - 20,
+            //     ypost, {
+            //     width: widthtext + 10,
+            //     align: "right",
+            // });
+
+            // doc.font('Helvetica-Bold').text(subtext,
+            //     doc.page.width - doc.options.margins.right - widthsubtext,
+            //     ypost, {
+            //     width: widthsubtext,
+            //     align: "right",
+            // });
+
+            /**
+             * 
+             */
+            // ypost = doc.y + 5;
+
+            // text = "SUB IMPORTE:";
+            // widthtext = doc.widthOfString(text);
+
+            // subtext = numberFormat(subTotal, cabecera.codiso);
+            // widthsubtext = doc.widthOfString(subtext);
+
+            // doc.font('Helvetica').text(text,
+            //     doc.page.width - doc.options.margins.right - widthtext - widthsubtext - 20,
+            //     ypost, {
+            //     width: widthtext + 10,
+            //     align: "right",
+            // });
+
+            // doc.font('Helvetica-Bold').text(subtext,
+            //     doc.page.width - doc.options.margins.right - widthsubtext,
+            //     ypost, {
+            //     width: widthsubtext,
+            //     align: "right",
+            // });
+
+            /**
+             * 
+             */
+            // for (let item of arrayImpuestos) {
+            //     ypost = doc.y + 5;
+
+            //     text = item.nombre + ":";
+            //     widthtext = doc.widthOfString(text);
+
+            //     subtext = numberFormat(item.valor, cabecera.codiso);
+            //     widthsubtext = doc.widthOfString(subtext);
+
+            //     doc.font('Helvetica').text(text,
+            //         doc.page.width - doc.options.margins.right - widthtext - widthsubtext - 20,
+            //         ypost, {
+            //         width: widthtext + 10,
+            //         align: "right",
+            //     });
+
+            //     doc.font('Helvetica-Bold').text(subtext,
+            //         doc.page.width - doc.options.margins.right - widthsubtext,
+            //         ypost, {
+            //         width: widthsubtext,
+            //         align: "right",
+            //     });
+            // }
+
+            /**
+             * 
+             */
+            // ypost = doc.y + 5;
+
+            // text = "IMPORTE NETO:";
+            // widthtext = doc.widthOfString(text);
+
+            // subtext = numberFormat(total, cabecera.codiso);
+            // widthsubtext = doc.widthOfString(subtext);
+
+            // doc.font('Helvetica').text(text,
+            //     doc.page.width - doc.options.margins.right - widthtext - widthsubtext - 20,
+            //     ypost, {
+            //     width: widthtext + 10,
+            //     align: "right",
+            // });
+
+            // doc.font('Helvetica-Bold').text(subtext,
+            //     doc.page.width - doc.options.margins.right - widthsubtext,
+            //     ypost, {
+            //     width: widthsubtext,
+            //     align: "right",
+            // });
+
+            /**
+             * 
+             */
             doc.font("Helvetica").fontSize(h3).text(`SON: ${numberLleters.getResult(formatMoney(total), cabecera.moneda)}`,
                 doc.options.margins.left,
                 doc.y + 5);
@@ -652,7 +878,14 @@ class RepFactura {
             ${cabecera.codigoCliente}|
             ${cabecera.documento}|`);
 
-            doc.image(qrResult, doc.options.margins.left, doc.y, { width: 100, });
+            doc.image(qrResult, doc.options.margins.left, doc.y, { width: 100 });
+
+            doc.font("Helvetica").fontSize(h3).text(`Esta es una representación impresa de la Boleta de Venta Electrónica, generada desde un Sistema Propio. El Emisor Electrónico puede varificar utilizando su clave SOL, el Adquitiente o Usuario puede consultar su validez en SUNAT Virtual: www.sunat.gob.pe, en operaciones sin Clave SOL/Consulta de Validez del CPE.`,
+                doc.options.margins.left,
+                doc.y + 5, {
+                align: "center",
+            }
+            );
 
             if (cabecera.estado === 0) {
                 doc.save();
