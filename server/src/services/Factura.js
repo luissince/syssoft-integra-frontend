@@ -779,7 +779,7 @@ class Factura {
                 req.body.idUsuario
             ]);
 
-            await conec.rollback(connection);
+            await conec.commit(connection);
             return sendSave(res, "Se completo el proceso correctamente.");
         } catch (error) {
             if (connection != null) {
