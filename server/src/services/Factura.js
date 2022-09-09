@@ -565,7 +565,9 @@ class Factura {
                     idPlazo = 1;
                 }
 
-                let inicioDate = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+                const parts = req.body.fechaPago.split('-');
+
+                let inicioDate = new Date(parts[0], parts[1] - 1, 1);
 
                 let cuotaMes = (montoTotal - req.body.inicial) / req.body.numCuota;
 
@@ -574,7 +576,7 @@ class Factura {
                 let cuota = 0;
                 // while (inicioDate < ultimoDate) {                   
                 while (i < req.body.numCuota) {
-                    inicioDate.setMonth(inicioDate.getMonth() + 1);
+ 
                     let now = new Date();
 
                     if (frecuenciaPago > 15) {
@@ -582,7 +584,7 @@ class Factura {
                     } else {
                         now = new Date(inicioDate.getFullYear(), inicioDate.getMonth(), 15);
                     }
-
+                    
                     i++;
                     cuota++;
 
@@ -604,6 +606,8 @@ class Factura {
                         0
                     ]);
                     idPlazo++;
+
+                    inicioDate.setMonth(inicioDate.getMonth() + 1);
                 }
             }
 
@@ -775,7 +779,7 @@ class Factura {
                 req.body.idUsuario
             ]);
 
-            await conec.commit(connection);
+            await conec.rollback(connection);
             return sendSave(res, "Se completo el proceso correctamente.");
         } catch (error) {
             if (connection != null) {
@@ -1225,9 +1229,9 @@ class Factura {
                 parseInt(req.query.idEstado),
                 req.query.fill,
             ]);
-            
-            let resultTotal = await total.map(item => item.Total).reduce((previousValue, currentValue) =>previousValue + currentValue,0);
-       
+
+            let resultTotal = await total.map(item => item.Total).reduce((previousValue, currentValue) => previousValue + currentValue, 0);
+
             return sendSuccess(res, { "result": resultLista, "total": resultTotal });
         } catch (error) {
             return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
@@ -1376,7 +1380,7 @@ class Factura {
             `, [
                 req.query.idVenta
             ]);
-            
+
             let cobros = await conec.query(`SELECT c.idCobro 
             FROM cobro AS c 
             LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro

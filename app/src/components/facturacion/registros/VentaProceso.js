@@ -74,6 +74,7 @@ class VentaProceso extends React.Component {
             inicial: '',
             idComprobanteCredito: '',
             idBancoCredito: '',
+            fechaPago: '',
             metodoPagoCredito: '',
             letraMensual: '',
             frecuenciaPagoCredito: new Date().getDate() > 15 ? '30' : '15',
@@ -106,6 +107,7 @@ class VentaProceso extends React.Component {
         this.refComprobanteCredito = React.createRef();
         this.refBancoCredito = React.createRef();
         this.refMetodoCredito = React.createRef();
+        this.refFechaPagoCredito = React.createRef();
         this.refNumCutoas = React.createRef();
         this.refFrecuenciaPagoCredito = React.createRef();
 
@@ -203,7 +205,7 @@ class VentaProceso extends React.Component {
 
             const comprobanteFilter = comprobanteLibre.data.filter(item => item.preferida === 1);
 
-            const comprobanteCobroFilter = [...facturadoCobro.data,...comprobanteCobro.data].filter(item => item.preferida === 1);
+            const comprobanteCobroFilter = [...facturadoCobro.data, ...comprobanteCobro.data].filter(item => item.preferida === 1);
 
             const monedaFilter = moneda.data.filter(item => item.predeterminado === 1);
 
@@ -213,7 +215,7 @@ class VentaProceso extends React.Component {
 
             await this.setStateAsync({
                 comprobantes: comprobanteLibre.data,
-                comprobantesCobro: [...facturadoCobro.data,...comprobanteCobro.data],
+                comprobantesCobro: [...facturadoCobro.data, ...comprobanteCobro.data],
                 monedas: moneda.data,
 
                 medidas: medida.data,
@@ -447,6 +449,7 @@ class VentaProceso extends React.Component {
             inicial: '',
             idComprobanteCredito: '',
             idBancoCredito: '',
+            fechaPago: '',
             metodoPagoCredito: '',
             letraMensual: '',
             frecuenciaPagoCredito: new Date().getDate() > 15 ? '30' : '15',
@@ -588,7 +591,10 @@ class VentaProceso extends React.Component {
                 this.refNumCutoas.current.focus();
             } else if (parseInt(this.state.numCuota) <= 0) {
                 this.refNumCutoas.current.focus();
-            } else if (this.state.frecuenciaPagoCredito === "") {
+            } else if (this.state.fechaPago == "") {
+                this.refFechaPagoCredito.current.focus();
+            }
+            else if (this.state.frecuenciaPagoCredito === "") {
                 this.refFrecuenciaPagoCredito.current.focus();
             } else {
                 this.onSave(this.state.selectTipoPago)
@@ -665,6 +671,8 @@ class VentaProceso extends React.Component {
                                 : selectTipoPago === 2 && !this.state.montoInicialCheck ? 0
                                     : selectTipoPago === 3 && this.state.inicialCreditoVariableCheck ? parseFloat(this.state.inicialCreditoVariable)
                                         : selectTipoPago === 3 && !this.state.inicialCreditoVariableCheck ? 0 : 0,
+
+                        "fechaPago": selectTipoPago === 2 ? this.state.fechaPago : '',
 
                         // "numCuota": this.state.selectTipoPago ? 0 : parseInt(this.state.numCuota),
                         "numCuota": selectTipoPago === 1 ? 0
@@ -1099,6 +1107,25 @@ class VentaProceso extends React.Component {
                                                 <div className="form-group">
                                                     <div className="input-group">
                                                         <div className="input-group-prepend">
+                                                            <div className="input-group-text"><i className="bi bi-calendar"></i></div>
+                                                        </div>
+                                                        <input
+                                                            title="Inicio de Pago"
+                                                            type="date"
+                                                            className="form-control"
+                                                            placeholder='Inicio de Pago'
+                                                            ref={this.refFechaPagoCredito}
+                                                            value={this.state.fechaPago}
+                                                            onChange={async (event) => {
+                                                                await this.setStateAsync({ fechaPago: event.target.value })
+                                                            }}
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div className="form-group">
+                                                    <div className="input-group">
+                                                        <div className="input-group-prepend">
                                                             <div className="input-group-text"><i className="bi bi-credit-card-2-back"></i></div>
                                                         </div>
                                                         <select
@@ -1354,17 +1381,22 @@ class VentaProceso extends React.Component {
                                                         ref={this.refPrecioContado}
                                                         value={this.state.precioContado}
                                                         onChange={async (event) => {
-                                                            if (event.target.value.trim().length > 0) {
-                                                                await this.setStateAsync({
-                                                                    precioContado: event.target.value,
-                                                                    messageWarning: '',
-                                                                });
-                                                            } else {
-                                                                await this.setStateAsync({
-                                                                    setStateAsync: event.target.value,
-                                                                    messageWarning: 'Ingrese el precio de venta.',
-                                                                });
-                                                            }
+                                                            await this.setStateAsync({
+                                                                precioContado: event.target.value,
+                                                                messageWarning: '',
+                                                            });
+
+                                                            // if (event.target.value.trim().length > 0) {
+                                                            //     await this.setStateAsync({
+                                                            //         precioContado: event.target.value,
+                                                            //         messageWarning: '',
+                                                            //     });
+                                                            // } else {
+                                                            //     await this.setStateAsync({
+                                                            //         setStateAsync: event.target.value,
+                                                            //         messageWarning: 'Ingrese el precio de venta.',
+                                                            //     });
+                                                            // }
                                                         }}
                                                         onKeyPress={keyNumberFloat} />
                                                     <div className="input-group-append">
