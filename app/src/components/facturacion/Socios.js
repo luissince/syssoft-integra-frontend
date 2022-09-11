@@ -19,6 +19,8 @@ class Socios extends React.Component {
         this.state = {
             loading: false,
             lista: [],
+            restart: false,
+
             idConcepto: '',
             conceptos: [],
 
@@ -77,7 +79,7 @@ class Socios extends React.Component {
         if (!validateDate(this.state.fechaInicio)) return;
         if (!validateDate(this.state.fechaFinal)) return;
 
-        await this.setStateAsync({ paginacion: 1 });
+        await this.setStateAsync({ paginacion: 1, restart: true });
         this.fillTable(0, "", this.state.fechaInicio, this.state.fechaFinal, this.state.idConcepto);
         await this.setStateAsync({ opcion: 0 });
     }
@@ -87,13 +89,13 @@ class Socios extends React.Component {
 
         if (text.trim().length === 0) return;
 
-        await this.setStateAsync({ paginacion: 1 });
+        await this.setStateAsync({ paginacion: 1, restart: false });
         this.fillTable(1, text.trim(), "", "", "");
         await this.setStateAsync({ opcion: 1 });
     }
 
     paginacionContext = async (listid) => {
-        await this.setStateAsync({ paginacion: listid });
+        await this.setStateAsync({ paginacion: listid, restart: false });
         this.onEventPaginacion();
     }
 
@@ -358,6 +360,7 @@ class Socios extends React.Component {
                                         totalPaginacion={this.state.totalPaginacion}
                                         paginacion={this.state.paginacion}
                                         fillTable={this.paginacionContext}
+                                        restart={this.state.restart}
                                     />
                                 </ul>
                             </nav>

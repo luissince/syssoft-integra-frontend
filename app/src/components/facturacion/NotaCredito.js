@@ -15,6 +15,7 @@ class NotaCredito extends React.Component {
         this.state = {
             loading: false,
             lista: [],
+            restart: false,
 
             add: statePrivilegio(this.props.token.userToken.menus[2].submenu[5].privilegio[0].estado),
             view: statePrivilegio(this.props.token.userToken.menus[2].submenu[5].privilegio[1].estado),
@@ -50,7 +51,7 @@ class NotaCredito extends React.Component {
     loadInit = async () => {
         if (this.state.loading) return;
 
-        await this.setStateAsync({ paginacion: 1 });
+        await this.setStateAsync({ paginacion: 1, restart: true });
         this.fillTable(0, "");
         await this.setStateAsync({ opcion: 0 });
     }
@@ -60,13 +61,13 @@ class NotaCredito extends React.Component {
 
         if (text.trim().length === 0) return;
 
-        await this.setStateAsync({ paginacion: 1 });
+        await this.setStateAsync({ paginacion: 1, restart: false });
         this.fillTable(1, text.trim());
         await this.setStateAsync({ opcion: 1 });
     }
 
     paginacionContext = async (listid) => {
-        await this.setStateAsync({ paginacion: listid });
+        await this.setStateAsync({ paginacion: listid, restart: false });
         this.onEventPaginacion();
     }
 
@@ -97,7 +98,7 @@ class NotaCredito extends React.Component {
                     "filasPorPagina": this.state.filasPorPagina
                 }
             });
-            
+
             let totalPaginacion = parseInt(Math.ceil((parseFloat(result.data.total) / this.state.filasPorPagina)));
             let messagePaginacion = `Mostrando ${result.data.result.length} de ${totalPaginacion} Páginas`;
 
@@ -201,7 +202,7 @@ class NotaCredito extends React.Component {
                                                         <td>{item.comprobante}{<br />}{item.serie + "-" + item.numeracion}</td>
                                                         <td>{<span>{item.fecha}</span>}{<br></br>}{<span>{timeForma24(item.hora)}</span>}</td>
                                                         <td>{numberFormat(item.total, item.codiso)}</td>
-                                                        <td>{item.comprobanteModi}{<br />}{item.serieModi+"-"+item.numeracionModi}</td>
+                                                        <td>{item.comprobanteModi}{<br />}{item.serieModi + "-" + item.numeracionModi}</td>
                                                         <td className="text-center">
                                                             {
                                                                 item.estado === 1
@@ -243,6 +244,7 @@ class NotaCredito extends React.Component {
                                         totalPaginacion={this.state.totalPaginacion}
                                         paginacion={this.state.paginacion}
                                         fillTable={this.paginacionContext}
+                                        restart={this.state.restart}
                                     />
                                 </ul>
                             </nav>

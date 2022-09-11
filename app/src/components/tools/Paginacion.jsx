@@ -36,7 +36,6 @@ class Paginacion extends React.Component {
     this.setPrevAndNextBtnClass(listid);
   };
 
-
   btnPrevClick = async () => {
     if (this.props.loading) return;
 
@@ -80,6 +79,11 @@ class Paginacion extends React.Component {
   };
 
   render() {
+    if (this.props.restart) {
+      this.upperPageBound = 3;
+      this.lowerPageBound = 0;
+    }
+
     const pageNumbers = [];
     for (let i = 1; i <= this.props.totalPaginacion; i++) {
       pageNumbers.push(i);
@@ -147,7 +151,7 @@ class Paginacion extends React.Component {
 
     let renderPrevBtn = null;
     if (this.isPrevBtnActive === "disabled" ||
-    this.props.totalPaginacion <= 1) {
+      this.props.totalPaginacion <= 1) {
       renderPrevBtn = (
         <li className="page-item disabled">
           <span className="page-link"> Ante. </span>

@@ -41,6 +41,7 @@ class CpeElectronicos extends React.Component {
 
             loading: false,
             lista: [],
+            restart: false,
 
             viewPdf: statePrivilegio(this.props.token.userToken.menus[7].submenu[0].privilegio[0].estado),
             viewXml: statePrivilegio(this.props.token.userToken.menus[7].submenu[0].privilegio[1].estado),
@@ -130,8 +131,20 @@ class CpeElectronicos extends React.Component {
         }
     }
 
-    loadInit = () => {
-        this.searchFecha();
+    loadInit = async () => {
+        this.searchInit();
+    }
+
+    async searchInit() {
+        if (this.state.loading) return;
+
+        if (!validateDate(this.state.fechaInicio)) return;
+        if (!validateDate(this.state.fechaFinal)) return;
+        if (this.state.idEstado === "") return;
+
+        await this.setStateAsync({ paginacion: 1, restart: true });
+        this.fillTable(0, "", this.state.fechaInicio, this.state.fechaFinal, this.state.idComprobante, this.state.idEstado);
+        await this.setStateAsync({ opcion: 1 });
     }
 
     async searchFecha() {
@@ -141,7 +154,7 @@ class CpeElectronicos extends React.Component {
         if (!validateDate(this.state.fechaFinal)) return;
         if (this.state.idEstado === "") return;
 
-        await this.setStateAsync({ paginacion: 1 });
+        await this.setStateAsync({ paginacion: 1, restart: false });
         this.fillTable(0, "", this.state.fechaInicio, this.state.fechaFinal, this.state.idComprobante, this.state.idEstado);
         await this.setStateAsync({ opcion: 1 });
     }
@@ -151,7 +164,7 @@ class CpeElectronicos extends React.Component {
 
         if (text.trim().length === 0) return;
 
-        await this.setStateAsync({ paginacion: 1 });
+        await this.setStateAsync({ paginacion: 1, restart: false });
         this.fillTable(1, text.trim(), "", "", "", "0");
         await this.setStateAsync({ opcion: 1 });
     }
@@ -163,7 +176,7 @@ class CpeElectronicos extends React.Component {
         if (!validateDate(this.state.fechaFinal)) return;
         if (this.state.idEstado === "") return;
 
-        await this.setStateAsync({ paginacion: 1 });
+        await this.setStateAsync({ paginacion: 1, restart: false });
         this.fillTable(2, "", this.state.fechaInicio, this.state.fechaFinal, this.state.idComprobante, this.state.idEstado);
         await this.setStateAsync({ opcion: 2 });
     }
@@ -175,13 +188,13 @@ class CpeElectronicos extends React.Component {
         if (!validateDate(this.state.fechaFinal)) return;
         if (this.state.idEstado === "") return;
 
-        await this.setStateAsync({ paginacion: 1 });
+        await this.setStateAsync({ paginacion: 1, restart: false });
         this.fillTable(3, "", this.state.fechaInicio, this.state.fechaFinal, this.state.idComprobante, this.state.idEstado);
         await this.setStateAsync({ opcion: 3 });
     }
 
     paginacionContext = async (listid) => {
-        await this.setStateAsync({ paginacion: listid });
+        await this.setStateAsync({ paginacion: listid, restart: false });
         this.onEventPaginacion();
     }
 
@@ -478,7 +491,7 @@ class CpeElectronicos extends React.Component {
         }
     }
 
-    onEventGenerarExcel = async ()=>{
+    onEventGenerarExcel = async () => {
         if (!validateDate(this.state.fechaInicioModal)) return;
         if (!validateDate(this.state.fechaFinalModal)) return;
 
@@ -557,7 +570,7 @@ class CpeElectronicos extends React.Component {
                             </div>
 
                             <div className="modal-footer">
-                                <button type="button" className="btn btn-success" onClick={()=>this.onEventGenerarExcel()}>Generar</button>
+                                <button type="button" className="btn btn-success" onClick={() => this.onEventGenerarExcel()}>Generar</button>
                                 <button type="button" className="btn btn-danger" data-bs-dismiss="modal">Cerrar</button>
                             </div>
                         </div>
@@ -833,6 +846,7 @@ class CpeElectronicos extends React.Component {
                                         totalPaginacion={this.state.totalPaginacion}
                                         paginacion={this.state.paginacion}
                                         fillTable={this.paginacionContext}
+                                        restart={this.state.restart}
                                     />
                                 </ul>
                             </nav>

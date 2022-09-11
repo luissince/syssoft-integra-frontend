@@ -35,6 +35,7 @@ class Manzanas extends React.Component {
 
             loading: false,
             lista: [],
+            restart: false,
 
             opcion: 0,
             paginacion: 0,
@@ -87,7 +88,7 @@ class Manzanas extends React.Component {
     loadInit = async () => {
         if (this.state.loading) return;
 
-        await this.setStateAsync({ paginacion: 1 });
+        await this.setStateAsync({ paginacion: 1, restart: true });
         this.fillTable(0, "");
         await this.setStateAsync({ opcion: 0 });
     }
@@ -97,13 +98,13 @@ class Manzanas extends React.Component {
 
         if (text.trim().length === 0) return;
 
-        await this.setStateAsync({ paginacion: 1 });
+        await this.setStateAsync({ paginacion: 1, restart: false });
         this.fillTable(1, text.trim());
         await this.setStateAsync({ opcion: 1 });
     }
 
     paginacionContext = async (listid) => {
-        await this.setStateAsync({ paginacion: listid });
+        await this.setStateAsync({ paginacion: listid, restart: false });
         this.onEventPaginacion();
     }
 
@@ -401,6 +402,7 @@ class Manzanas extends React.Component {
                                         totalPaginacion={this.state.totalPaginacion}
                                         paginacion={this.state.paginacion}
                                         fillTable={this.paginacionContext}
+                                        restart={this.state.restart}
                                     />
                                 </ul>
                             </nav>
