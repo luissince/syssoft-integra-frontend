@@ -1,11 +1,11 @@
 const { currentDate, currentTime } = require('../tools/Tools');
-const { sendSuccess,sendError,sendClient } = require('../tools/Message');
+const { sendSuccess, sendError, sendClient } = require('../tools/Message');
 const Conexion = require('../database/Conexion');
 const conec = new Conexion();
 
 class Comprobante {
 
-    async list(req,res) {
+    async list(req, res) {
         try {
 
             let lista = await conec.query(`SELECT 
@@ -81,13 +81,13 @@ class Comprobante {
                 req.query.buscar,
             ]);
 
-            return sendSuccess(res,{ "result": resultLista, "total": total[0].Total })
+            return sendSuccess(res, { "result": resultLista, "total": total[0].Total })
         } catch (error) {
             return sendError(res, "Se produjo un error de servidor, intente nuevamente.")
         }
     }
 
-    async add(req,res) {
+    async add(req, res) {
         let connection = null;
         try {
             connection = await conec.beginTransaction();
@@ -128,12 +128,13 @@ class Comprobante {
             impresion,
             estado,
             preferida,
+            numeroCampo,
             fecha,
             hora,
             fupdate,
             hupdate,
             idUsuario) 
-            VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, [
+            VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, [
                 idComprobante,
                 req.body.tipo,
                 req.body.nombre,
@@ -143,6 +144,7 @@ class Comprobante {
                 req.body.impresion,
                 req.body.estado,
                 req.body.preferida,
+                req.body.numeroCampo,
                 currentDate(),
                 currentTime(),
                 currentDate(),
@@ -160,8 +162,8 @@ class Comprobante {
                 ]);
             }
 
-            await conec.commit(connection);       
-            return sendSuccess(res,"Se inserto correctamente el comprobante.")
+            await conec.commit(connection);
+            return sendSuccess(res, "Se inserto correctamente el comprobante.")
         } catch (error) {
             if (connection != null) {
                 await conec.rollback(connection);
@@ -170,22 +172,22 @@ class Comprobante {
         }
     }
 
-    async id(req,res) {
+    async id(req, res) {
         try {
             let result = await conec.query(`SELECT * FROM comprobante WHERE idComprobante = ?`, [
                 req.query.idComprobante
             ]);
-            if (result.length > 0) {             
+            if (result.length > 0) {
                 return sendSuccess(res, result[0])
             } else {
-                return sendClient(res, "Datos incorrectos, intente nuevamente.");           
+                return sendClient(res, "Datos incorrectos, intente nuevamente.");
             }
         } catch (error) {
             return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
         }
     }
 
-    async edit(req,res) {
+    async edit(req, res) {
         let connection = null;
         try {
             connection = await conec.beginTransaction();
@@ -202,6 +204,7 @@ class Comprobante {
                 codigo = ?,
                 estado = ?,
                 preferida = ?,
+                numeroCampo = ?,
                 fupdate = ?,
                 hupdate = ?,
                 idUsuario = ?
@@ -212,14 +215,15 @@ class Comprobante {
                     req.body.codigo,
                     req.body.estado,
                     req.body.preferida,
+                    req.body.numeroCampo,
                     currentDate(),
                     currentTime(),
                     req.body.idUsuario,
                     req.body.idComprobante
                 ]);
 
-                await conec.commit(connection);               
-                sendSuccess(res,"Se actualizó correctamente el comprobante. !Hay campos que no se van editar ya que el comprobante esta ligado a un venta¡");
+                await conec.commit(connection);
+                sendSuccess(res, "Se actualizó correctamente el comprobante. !Hay campos que no se van editar ya que el comprobante esta ligado a un venta¡");
             } else {
                 await conec.execute(connection, `UPDATE comprobante SET 
                 tipo = ?,
@@ -229,6 +233,7 @@ class Comprobante {
                 impresion = ?,
                 estado = ?,
                 preferida = ?,
+                numeroCampo = ?,
                 fupdate = ?,
                 hupdate = ?,
                 idUsuario = ?
@@ -240,14 +245,15 @@ class Comprobante {
                     req.body.impresion,
                     req.body.estado,
                     req.body.preferida,
+                    req.body.numeroCampo,
                     currentDate(),
                     currentTime(),
                     req.body.idUsuario,
                     req.body.idComprobante
                 ]);
 
-                await conec.commit(connection);                
-                return sendSuccess(res,"Se actualizó correctamente el comprobante.");
+                await conec.commit(connection);
+                return sendSuccess(res, "Se actualizó correctamente el comprobante.");
             }
         } catch (error) {
             if (connection != null) {
@@ -257,7 +263,7 @@ class Comprobante {
         }
     }
 
-    async delete(req,res) {
+    async delete(req, res) {
         let connection = null;
         try {
             connection = await conec.beginTransaction();
@@ -276,7 +282,7 @@ class Comprobante {
             ]);
 
             await conec.commit(connection)
-            return sendSuccess(res,'Se eliminó correctamente el comprobante.');
+            return sendSuccess(res, 'Se eliminó correctamente el comprobante.');
         } catch (error) {
             if (connection != null) {
                 await conec.rollback(connection);
@@ -285,7 +291,7 @@ class Comprobante {
         }
     }
 
-    async listcombo(req,res) {
+    async listcombo(req, res) {
         try {
 
             let estado = req.query.estado == undefined ? "" : req.query.estado;
@@ -295,7 +301,8 @@ class Comprobante {
             nombre, 
             serie,
             estado, 
-            preferida 
+            preferida,
+            numeroCampo
             FROM comprobante
             WHERE 
             tipo = ? AND estado = 1 AND ? = ''
@@ -308,9 +315,8 @@ class Comprobante {
                 req.query.tipo,
                 estado,
             ]);
-            return sendSuccess(res,result);
+            return sendSuccess(res, result);
         } catch (error) {
-            console.error(error);
             return sendError(res, "Se produjo un error de servidor, intente nuevamente.")
         }
     }

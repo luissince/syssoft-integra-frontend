@@ -338,7 +338,7 @@ class Cliente {
         try {
             connection = await conec.beginTransaction();
 
-            let validate = await conec.execute(connection, `SELECT * FROM cliente WHERE idCliente = ? AND documento <> ?`, [
+            let validate = await conec.execute(connection, `SELECT * FROM cliente WHERE idCliente <> ? AND documento = ?`, [
                 req.body.idCliente,
                 req.body.documento,
             ]);

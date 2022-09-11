@@ -31,6 +31,7 @@ class Comprobantes extends React.Component {
             impresion: '',
             estado: true,
             preferida: false,
+            numeroCampo: '',
             idUsuario: this.props.token.userToken.idUsuario,
 
             add: statePrivilegio(this.props.token.userToken.menus[5].submenu[0].privilegio[0].estado),
@@ -55,6 +56,7 @@ class Comprobantes extends React.Component {
         this.refNombre = React.createRef();
         this.refSerie = React.createRef();
         this.refNumeracion = React.createRef();
+        this.refNumeroCampo = React.createRef();
 
         this.refTxtSearch = React.createRef();
 
@@ -90,6 +92,7 @@ class Comprobantes extends React.Component {
                 impresion: '',
                 estado: true,
                 preferida: false,
+                numeroCampo: '',
 
                 loadModal: false,
                 nameModal: 'Nuevo Comprobante',
@@ -205,6 +208,7 @@ class Comprobantes extends React.Component {
                 impresion: result.data.impresion,
                 estado: result.data.estado === 1 ? true : false,
                 preferida: result.data.preferida === 1 ? true : false,
+                numeroCampo: result.data.numeroCampo,
                 loadModal: false
             });
 
@@ -220,56 +224,73 @@ class Comprobantes extends React.Component {
     async onEventGuardar() {
         if (this.state.tipo === "") {
             this.refTipo.current.focus();
-        } else if (this.state.nombre === "") {
+            return;
+        }
+
+        if (this.state.nombre === "") {
             this.refNombre.current.focus();
-        } else if (this.state.serie === "") {
+            return;
+        }
+
+        if (this.state.serie === "") {
             this.refSerie.current.focus();
-        } else if (this.state.numeracion === "") {
+            return;
+        }
+
+        if (this.state.numeracion === "") {
             this.refNumeracion.current.focus();
-        } else {
-            try {
-                ModalAlertInfo("Comprobante", "Procesando información...");
-                hideModal("modalComprobante");
-                if (this.state.idComprobante !== "") {
-                    const result = await axios.post('/api/comprobante/edit', {
-                        "tipo": this.state.tipo,
-                        "nombre": this.state.nombre.trim().toUpperCase(),
-                        "serie": this.state.serie.trim().toUpperCase(),
-                        "numeracion": this.state.numeracion,
-                        "codigo": this.state.codigo,
-                        "impresion": this.state.impresion.trim(),
-                        "estado": this.state.estado,
-                        "preferida": this.state.preferida,
-                        "idUsuario": this.state.idUsuario,
-                        "idComprobante": this.state.idComprobante,
-                    });
+            return;
+        }
 
-                    ModalAlertSuccess("Comprobante", result.data, () => {
-                        this.onEventPaginacion();
-                    });
-                } else {
-                    const result = await axios.post('/api/comprobante/add', {
-                        "tipo": this.state.tipo,
-                        "nombre": this.state.nombre.trim().toUpperCase(),
-                        "serie": this.state.serie.trim().toUpperCase(),
-                        "numeracion": this.state.numeracion,
-                        "impresion": this.state.impresion.trim(),
-                        "codigo": this.state.codigo,
-                        "estado": this.state.estado,
-                        "preferida": this.state.preferida,
-                        "idUsuario": this.state.idUsuario
-                    });
+        if (this.state.numeroCampo < 0 || this.state.numeroCampo > 128) {
+            this.refNumeroCampo.current.focus();
+            return;
+        }
 
-                    ModalAlertSuccess("Comprobante", result.data, () => {
-                        this.loadInit();
-                    });
-                }
-            } catch (error) {
-                if (error.response !== undefined) {
-                    ModalAlertWarning("Comprobante", error.response.data)
-                } else {
-                    ModalAlertWarning("Comprobante", "Se genero un error interno, intente nuevamente.")
-                }
+        try {
+            ModalAlertInfo("Comprobante", "Procesando información...");
+            hideModal("modalComprobante");
+            if (this.state.idComprobante !== "") {
+                const result = await axios.post('/api/comprobante/edit', {
+                    "tipo": this.state.tipo,
+                    "nombre": this.state.nombre.trim().toUpperCase(),
+                    "serie": this.state.serie.trim().toUpperCase(),
+                    "numeracion": this.state.numeracion,
+                    "codigo": this.state.codigo,
+                    "impresion": this.state.impresion.trim(),
+                    "estado": this.state.estado,
+                    "preferida": this.state.preferida,
+                    "numeroCampo": this.state.numeroCampo,
+                    "idUsuario": this.state.idUsuario,
+                    "idComprobante": this.state.idComprobante,
+                });
+
+                ModalAlertSuccess("Comprobante", result.data, () => {
+                    this.onEventPaginacion();
+                });
+            } else {
+                const result = await axios.post('/api/comprobante/add', {
+                    "tipo": this.state.tipo,
+                    "nombre": this.state.nombre.trim().toUpperCase(),
+                    "serie": this.state.serie.trim().toUpperCase(),
+                    "numeracion": this.state.numeracion,
+                    "impresion": this.state.impresion.trim(),
+                    "codigo": this.state.codigo,
+                    "estado": this.state.estado,
+                    "preferida": this.state.preferida,
+                    "numeroCampo": this.state.numeroCampo,
+                    "idUsuario": this.state.idUsuario
+                });
+
+                ModalAlertSuccess("Comprobante", result.data, () => {
+                    this.loadInit();
+                });
+            }
+        } catch (error) {
+            if (error.response !== undefined) {
+                ModalAlertWarning("Comprobante", error.response.data)
+            } else {
+                ModalAlertWarning("Comprobante", "Se genero un error interno, intente nuevamente.")
             }
         }
     }
@@ -426,6 +447,21 @@ class Comprobantes extends React.Component {
                                                 onChange={(value) => this.setState({ preferida: value.target.checked })} />
                                             <label className="custom-control-label" htmlFor="cbPreferido">Preferido</label>
                                         </div>
+                                    </div>
+                                </div>
+
+                                <div className="form-row">
+                                    <div className="form-group col-md-6">
+                                        <label htmlFor="numeracion">Caracteres a Usar</label>
+                                        <input
+                                            ref={this.refNumeroCampo}
+                                            type="text"
+                                            className="form-control"
+                                            id="numeracion"
+                                            placeholder={"0, 8, 11"}
+                                            value={this.state.numeroCampo}
+                                            onChange={(event) => this.setState({ numeroCampo: event.target.value })}
+                                            onKeyPress={keyNumberInteger} />
                                     </div>
                                 </div>
 
