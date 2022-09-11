@@ -135,6 +135,35 @@ export function currentTime() {
   return formatted_time;
 }
 
+export function getCurrentMonth() {
+  let today = new Date();
+  return (today.getMonth() + 1);
+}
+
+export function getCurrentYear() {
+  let today = new Date();
+  return today.getFullYear();
+}
+
+export function monthName(month) {
+  const months = [
+    "Enero",
+    "Febrero",
+    "Marzo",
+    "Abril",
+    "Mayo",
+    "Junio",
+    "Julio",
+    "Agosto",
+    "Septiembre",
+    "Octubre",
+    "Noviembre",
+    "Diciembre",
+  ];
+
+  return months[month - 1];
+}
+
 export function validateDate(date) {
   var regex = new RegExp(
     "([0-9]{4}[-](0[1-9]|1[0-2])[-]([0-2]{1}[0-9]{1}|3[0-1]{1})|([0-2]{1}[0-9]{1}|3[0-1]{1})[-](0[1-9]|1[0-2])[-][0-9]{4})"

@@ -565,9 +565,7 @@ class Factura {
                     idPlazo = 1;
                 }
 
-                const parts = req.body.fechaPago.split('-');
-
-                let inicioDate = new Date(parts[0], parts[1] - 1, 1);
+                let inicioDate = new Date(req.body.fechaPago[0], req.body.fechaPago[1] - 1, 1);
 
                 let cuotaMes = (montoTotal - req.body.inicial) / req.body.numCuota;
 

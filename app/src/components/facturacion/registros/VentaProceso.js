@@ -7,6 +7,9 @@ import {
     calculateTax,
     keyNumberInteger,
     keyNumberFloat,
+    getCurrentMonth,
+    getCurrentYear,
+    monthName,
     isNumeric,
     showModal,
     hideModal,
@@ -74,7 +77,8 @@ class VentaProceso extends React.Component {
             inicial: '',
             idComprobanteCredito: '',
             idBancoCredito: '',
-            fechaPago: '',
+            monthPago: getCurrentMonth(),
+            yearPago: getCurrentYear(),
             metodoPagoCredito: '',
             letraMensual: '',
             frecuenciaPagoCredito: new Date().getDate() > 15 ? '30' : '15',
@@ -86,6 +90,9 @@ class VentaProceso extends React.Component {
             idBancoCreditoVariable: '',
             metodoPagoCreditoVariable: '',
             frecuenciaPago: new Date().getDate() > 15 ? '30' : '15',
+
+            mmonth: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+            year: [2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2020, 2021, 2022],
 
         }
 
@@ -449,7 +456,8 @@ class VentaProceso extends React.Component {
             inicial: '',
             idComprobanteCredito: '',
             idBancoCredito: '',
-            fechaPago: '',
+            monthPago: getCurrentMonth(),
+            yearPago: getCurrentYear(),
             metodoPagoCredito: '',
             letraMensual: '',
             frecuenciaPagoCredito: new Date().getDate() > 15 ? '30' : '15',
@@ -591,8 +599,8 @@ class VentaProceso extends React.Component {
                 this.refNumCutoas.current.focus();
             } else if (parseInt(this.state.numCuota) <= 0) {
                 this.refNumCutoas.current.focus();
-            } else if (this.state.fechaPago == "") {
-                this.refFechaPagoCredito.current.focus();
+                // monthPago: getCurrentMonth(),
+                // yearPago: getCurrentYear(),
             }
             else if (this.state.frecuenciaPagoCredito === "") {
                 this.refFrecuenciaPagoCredito.current.focus();
@@ -672,7 +680,7 @@ class VentaProceso extends React.Component {
                                     : selectTipoPago === 3 && this.state.inicialCreditoVariableCheck ? parseFloat(this.state.inicialCreditoVariable)
                                         : selectTipoPago === 3 && !this.state.inicialCreditoVariableCheck ? 0 : 0,
 
-                        "fechaPago": selectTipoPago === 2 ? this.state.fechaPago : '',
+                        "fechaPago": selectTipoPago === 2 ? [this.state.yearPago, this.state.monthPago] : '',
 
                         // "numCuota": this.state.selectTipoPago ? 0 : parseInt(this.state.numCuota),
                         "numCuota": selectTipoPago === 1 ? 0
@@ -1109,17 +1117,29 @@ class VentaProceso extends React.Component {
                                                         <div className="input-group-prepend">
                                                             <div className="input-group-text"><i className="bi bi-calendar"></i></div>
                                                         </div>
-                                                        <input
-                                                            title="Inicio de Pago"
-                                                            type="date"
+
+                                                        <select
+                                                            title="Mes"
                                                             className="form-control"
-                                                            placeholder='Inicio de Pago'
-                                                            ref={this.refFechaPagoCredito}
-                                                            value={this.state.fechaPago}
-                                                            onChange={async (event) => {
-                                                                await this.setStateAsync({ fechaPago: event.target.value })
-                                                            }}
-                                                        />
+                                                            value={this.state.monthPago}
+                                                            onChange={(event) => this.setState({ monthPago: event.target.value })}>
+                                                            {
+                                                                this.state.mmonth.map((item, index) => (
+                                                                    <option key={index} value={item}>{monthName(item)}</option>
+                                                                ))
+                                                            }
+                                                        </select>
+                                                        <select
+                                                            title="Año"
+                                                            className="form-control"
+                                                            value={this.state.yearPago}
+                                                            onChange={(event) => this.setState({ yearPago: event.target.value })}>
+                                                            {
+                                                                this.state.year.map((item, index) => (
+                                                                    <option key={index} value={item}>{item}</option>
+                                                                ))
+                                                            }
+                                                        </select>
                                                     </div>
                                                 </div>
 
