@@ -90,6 +90,15 @@ router.get('/listventasasociadas', async function (req, res) {
     }
 });
 
+router.get('/listcobrosasociados', async function (req, res) {
+    const result = await cliente.listcobrosasociados(req)
+    if (Array.isArray(result)) {
+        res.status(200).send(result);
+    } else {
+        res.status(500).send(result);
+    }
+});
+
 router.get('/repcliente', async function (req, res) {
     const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
     req.query.idSede = decryptedData.idSede;
@@ -232,18 +241,18 @@ router.get('/exceldeudas', async function (req, res) {
         res.status(500).send(sedeInfo);
         return;
     }
- 
+
     const detalle = await cliente.listadeudas(req)
 
     if (Array.isArray(detalle)) {
         const data = await generateExcelDeudas(req, sedeInfo, detalle);
 
         if (typeof data === 'string') {
-            res.status(500).send(data); 
+            res.status(500).send(data);
         } else {
             res.end(data);
         }
-    } else { 
+    } else {
         res.status(500).send(detalle);
     }
 });

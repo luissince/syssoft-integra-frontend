@@ -5,6 +5,7 @@ import {
     calculateTaxBruto,
     formatMoney,
     numberFormat,
+    timeForma24,
     keyNumberFloat,
     isNumeric,
     spinnerLoading,
@@ -52,7 +53,13 @@ class CobroProceso extends React.Component {
 
             loading: true,
             messageWarning: '',
-            msgLoading: 'Cargando datos...'
+            msgLoading: 'Cargando datos...',
+
+            // loading: false,
+            lista: [],
+            loadingCobros: false,
+            messageTable: "Cargando información...",
+
         }
         this.refComprobante = React.createRef();
         this.refConcepto = React.createRef();
@@ -135,7 +142,7 @@ class CobroProceso extends React.Component {
 
                 idMoneda: monedaFilter.length > 0 ? monedaFilter[0].idMoneda : '',
                 idComprobante: comprobanteFilter.length > 0 ? comprobanteFilter[0].idComprobante : '',
-                
+
                 medidas: medida.data,
                 impuestos: impuesto.data,
 
@@ -399,6 +406,7 @@ class CobroProceso extends React.Component {
             lotes: [],
 
             loading: true,
+            lista: [],
         });
 
         this.loadData();
@@ -491,6 +499,37 @@ class CobroProceso extends React.Component {
         }
     }
 
+    loadFillTable = async (idCliente, idConcepto) => {
+        try {
+            await this.setStateAsync({
+                loadingCobros: true,
+                lista: [],
+                messageTable: "Cargando información...",
+            });
+
+            const cobros = await axios.get("/api/cliente/listcobrosasociados", {
+                signal: this.abortControllerView.signal,
+                params: {
+                    "idCliente": idCliente,
+                    "idConcepto": idConcepto
+                }
+            });
+
+            await this.setStateAsync({
+                loadingCobros: false,
+                lista: cobros.data
+            });
+        } catch (error) {
+            if (error.message !== "canceled") {
+                await this.setStateAsync({
+                    loadingCobros: false,
+                    lista: [],
+                    messageTable: "Se produjo un error interno, intente nuevamente por favor.",
+                });
+            }
+        }
+    }
+
     onEventClearInput = async () => {
         await this.setStateAsync({ clientes: [], idCliente: '', cliente: "" });
         this.selectItem = false;
@@ -533,7 +572,10 @@ class CobroProceso extends React.Component {
             idCliente: value.idCliente
         });
         this.selectItem = true;
-        this.loadLoteCliente(this.state.idCliente);
+        // this.loadLoteCliente(this.state.idCliente);
+        if (this.state.idConcepto !== "") {
+            this.loadFillTable(this.state.idCliente, this.state.idConcepto);
+        }
     }
 
     render() {
@@ -583,6 +625,11 @@ class CobroProceso extends React.Component {
                                                             idConcepto: event.target.value,
                                                             monto: "1"
                                                         });
+
+                                                        if (this.state.idCliente !== "") {
+                                                            this.loadFillTable(this.state.idCliente, event.target.value);
+                                                        }
+
                                                         this.refMonto.current.focus()
                                                     }}>
                                                     <option value="">-- seleccione --</option>
@@ -723,7 +770,7 @@ class CobroProceso extends React.Component {
                                                                 <tr key={index}>
                                                                     <td>{++index}</td>
                                                                     <td>{item.concepto}</td>
-                                                                    <td>{formatMoney(item.cantidad)}{<br/>}{<small>{item.medida}</small>}</td>
+                                                                    <td>{formatMoney(item.cantidad)}{<br />}{<small>{item.medida}</small>}</td>
                                                                     <td>{item.impuesto}</td>
                                                                     {/* <td>
                                                                         <select className="form-control"
@@ -749,7 +796,6 @@ class CobroProceso extends React.Component {
                                                         )
                                                     }
                                                 </tbody>
-
                                             </table>
                                         </div>
                                     </div>
@@ -767,6 +813,50 @@ class CobroProceso extends React.Component {
                                             <button type="button" className="btn btn-outline-secondary" onClick={() => this.props.history.goBack()}>
                                                 <i className="fa fa-close"></i> Cerrar
                                             </button>
+                                        </div>
+                                    </div>
+
+                                    <div className="form-row">
+                                        <label>Historial de Pagos</label>
+                                        <div className="table-responsive">
+                                            <table className="table table-striped table-bordered rounded">
+                                                <thead>
+                                                    <tr>
+                                                        <th width="5%">#</th>
+                                                        <th width="10%">Fecha</th>
+                                                        <th width="20%">Comprobante</th>
+                                                        <th width="30%">Detalle</th>
+                                                        <th width="10%">Total</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {
+                                                        this.state.loadingCobros ?
+                                                            <tr>
+                                                                <td className="text-center" colSpan="5">
+                                                                    {spinnerLoading()}
+                                                                </td>
+                                                            </tr>
+                                                            :
+                                                            this.state.lista.length == 0 ?
+                                                                <tr>
+                                                                    <td className="text-center" colSpan="5">
+                                                                        No hay datos para mostrar
+                                                                    </td>
+                                                                </tr>
+                                                                :
+                                                                this.state.lista.map((value, index) => (
+                                                                    <tr key={index}>
+                                                                        <td className="text-center">{index + 1}</td>
+                                                                        <td className="text-center">{value.fecha}{<br />}{timeForma24(value.hora)}</td>
+                                                                        <td className="text-center">{value.comprobante}{<br />}{value.serie + "-" + value.numeracion}</td>
+                                                                        <td className="text-center">{value.concepto}</td>
+                                                                        <td className="text-center">{numberFormat(value.precio * value.cantidad, value.codiso)}</td>
+                                                                    </tr>
+                                                                ))
+                                                    }
+                                                </tbody>
+                                            </table>
                                         </div>
                                     </div>
                                 </div>

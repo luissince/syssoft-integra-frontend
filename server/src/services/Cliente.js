@@ -672,6 +672,39 @@ class Cliente {
         }
     }
 
+    async listcobrosasociados(req) {
+        try {
+            let detalle = await conec.query(`SELECT 
+            c.idCobro,
+            DATE_FORMAT(c.fecha,'%d/%m/%Y') as fecha, 
+            c.hora,
+            com.nombre as comprobante,
+            c.serie,
+            c.numeracion,
+
+            co.nombre as concepto,
+            m.codiso,
+            cd.precio,
+            cd.cantidad
+
+            FROM cobroDetalle AS cd 
+            INNER JOIN cobro AS c ON cd.idCobro = c.idCobro
+            INNER JOIN moneda AS m ON c.idMoneda = m.idMoneda
+            INNER JOIN comprobante as com on com.idComprobante = c.idComprobante
+            INNER JOIN cliente AS cl ON c.idCliente = cl.idCliente
+            INNER JOIN concepto AS co ON cd.idConcepto = co.idConcepto
+            WHERE cl.idCliente = ? AND co.idConcepto = ?
+            ORDER BY c.fecha DESC, c.hora DESC`, [
+                req.query.idCliente,
+                req.query.idConcepto,
+            ]);
+
+            return detalle;
+        } catch (error) {
+            return "Se produjo un error de servidor, intente nuevamente.";
+        }
+    }
+
 }
 
 
