@@ -4,6 +4,7 @@ import CryptoJS from 'crypto-js';
 import { connect } from 'react-redux';
 import FileDownloader from "./hooks/FileDownloader";
 import { spinnerLoading, currentDate } from '../tools/Tools';
+import SearchBarClient from "../tools/SearchBarClient";
 
 class RepClientes extends React.Component {
     constructor(props) {
@@ -15,7 +16,8 @@ class RepClientes extends React.Component {
 
             idCliente: '',
             clientes: [],
-            clienteCheck: true,
+            cliente: '',
+
             frecuenciaCheck: true,
 
             loading: true,
@@ -29,7 +31,9 @@ class RepClientes extends React.Component {
         this.refUseFile = React.createRef();
         this.refFrecuencia = React.createRef();
 
-        this.abortControllerView = new AbortController()
+        this.abortControllerView = new AbortController();
+
+        this.selectItem = false;
     }
 
     setStateAsync(state) {
@@ -49,12 +53,12 @@ class RepClientes extends React.Component {
     loadData = async () => {
         try {
 
-            const cliente = await axios.get("/api/cliente/listcombo", {
-                signal: this.abortControllerView.signal
-            });
+            // const cliente = await axios.get("/api/cliente/listcombo", {
+            //     signal: this.abortControllerView.signal
+            // });
 
             await this.setStateAsync({
-                clientes: cliente.data,
+                // clientes: cliente.data,
 
                 loading: false,
                 // cambiar
@@ -72,16 +76,55 @@ class RepClientes extends React.Component {
         }
     }
 
+
+    onEventClearInput = async () => {
+        await this.setStateAsync({ clientes: [], idCliente: '', cliente: "" });
+        this.selectItem = false;
+    }
+
+    handleFilter = async (event) => {
+
+        const searchWord = this.selectItem ? "" : event.target.value;
+        await this.setStateAsync({
+            idCliente: '',
+            cliente: searchWord,
+            idLote: '',
+            lotes: [],
+        });
+        this.selectItem = false;
+        if (searchWord.length === 0) {
+            await this.setStateAsync({ clientes: [] });
+            return;
+        }
+
+        if (this.state.filter) return;
+
+        try {
+            await this.setStateAsync({ filter: true });
+            let result = await axios.get("/api/cliente/listfiltrar", {
+                params: {
+                    filtrar: searchWord,
+                },
+            });
+            await this.setStateAsync({ filter: false, clientes: result.data });
+        } catch (error) {
+            await this.setStateAsync({ filter: false, clientes: [] });
+        }
+    }
+
+    onEventSelectItem = async (value) => {
+        await this.setStateAsync({
+            cliente: value.documento + " - " + value.informacion,
+            clientes: [],
+            idCliente: value.idCliente
+        });
+        this.selectItem = true;
+    }
+
     async onEventRepCobro() {
         if (this.state.fechaFin < this.state.fechaIni) {
             this.setState({ messageWarning: "La Fecha inicial no puede ser mayor a la fecha final." })
             this.refFechaIni.current.focus();
-            return;
-        }
-
-        if (!this.state.clienteCheck && this.state.idCliente == "") {
-            this.setState({ messageWarning: "Seleccione un cliente." })
-            this.refCliente.current.focus();
             return;
         }
 
@@ -90,7 +133,7 @@ class RepClientes extends React.Component {
             "fechaIni": this.state.fechaIni,
             "fechaFin": this.state.fechaFin,
             "idCliente": this.state.idCliente,
-            "cliente": this.refCliente.current.options[this.refCliente.current.options.selectedIndex].innerHTML
+            "cliente": this.state.cliente
         }
 
         let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
@@ -105,18 +148,12 @@ class RepClientes extends React.Component {
             return;
         }
 
-        if (!this.state.clienteCheck && this.state.idCliente == "") {
-            this.setState({ messageWarning: "Seleccione un cliente." })
-            this.refCliente.current.focus();
-            return;
-        }
-
         const data = {
             "idSede": "SD0001",
             "fechaIni": this.state.fechaIni,
             "fechaFin": this.state.fechaFin,
             "idCliente": this.state.idCliente,
-            "cliente": this.refCliente.current.options[this.refCliente.current.options.selectedIndex].innerHTML
+            "cliente": this.state.cliente
         }
 
         let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
@@ -130,7 +167,7 @@ class RepClientes extends React.Component {
     }
 
     async onEventRepDeudas() {
-        if(!this.state.frecuenciaCheck && this.state.cada == 0){
+        if (!this.state.frecuenciaCheck && this.state.cada == 0) {
             this.setState({ messageWarning: "Seleccione una frecuencia de pago" })
             this.refFrecuencia.current.focus();
             return;
@@ -147,7 +184,7 @@ class RepClientes extends React.Component {
     }
 
     async onEventExcelDeudas() {
-        if(!this.state.frecuenciaCheck && this.state.cada == 0){
+        if (!this.state.frecuenciaCheck && this.state.cada == 0) {
             this.setState({ messageWarning: "Seleccione una frecuencia de pago" })
             this.refFrecuencia.current.focus();
             return;
@@ -256,51 +293,22 @@ class RepClientes extends React.Component {
                                     </div>
 
                                     <div className="row">
-                                        <div className="col-lg-4 col-md-6 col-sm-12">
+                                        <div className="col">
                                             <div className="form-group">
-                                                <label>Cliente(s)</label>
-                                                <div className="input-group">
-                                                    <select
-                                                        title="Lista de clientes"
-                                                        className="form-control"
-                                                        ref={this.refCliente}
-                                                        value={this.state.idCliente}
-                                                        disabled={this.state.clienteCheck}
-                                                        onChange={async (event) => {
-                                                            await this.setStateAsync({ idCliente: event.target.value });
-                                                            if (this.state.idCliente === '') {
-                                                                await this.setStateAsync({ clienteCheck: true });
-                                                            }
-
-                                                        }}>
-                                                        <option value="">-- Todos --</option>
-                                                        {
-                                                            this.state.clientes.map((item, index) => (
-                                                                <option key={index} value={item.idCliente}>{item.informacion}</option>
-                                                            ))
-                                                        }
-                                                    </select>
-                                                    <div className="input-group-append">
-                                                        <div className="input-group-text">
-                                                            <div className="form-check form-check-inline m-0">
-                                                                <input
-                                                                    className="form-check-input"
-                                                                    type="checkbox"
-                                                                    checked={this.state.clienteCheck}
-                                                                    onChange={async (event) => {
-                                                                        await this.setStateAsync({ clienteCheck: event.target.checked });
-                                                                        if (this.state.clienteCheck) {
-                                                                            await this.setStateAsync({ idCliente: '' });
-                                                                        }
-                                                                    }} />
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                                <label>Cliente(s)</label>                                              
+                                                    <SearchBarClient
+                                                        placeholder="Filtrar clientes..."
+                                                        refCliente={this.refCliente}
+                                                        cliente={this.state.cliente}
+                                                        clientes={this.state.clientes}
+                                                        onEventClearInput={this.onEventClearInput}
+                                                        handleFilter={this.handleFilter}
+                                                        onEventSelectItem={this.onEventSelectItem}
+                                                    />                                               
                                             </div>
                                         </div>
-                                        <div className="col-lg-4 col-md-6 col-sm-12"></div>
-                                        <div className="col-lg-4 col-md-6 col-sm-12"></div>
+                                        <div className="col"></div>
+                                        <div className="col"></div>
                                     </div>
 
                                     <div className="row mt-3">
