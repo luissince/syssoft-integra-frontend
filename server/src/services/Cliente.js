@@ -114,8 +114,8 @@ class Cliente {
     async listsocios(req) {
         try {
             let lista = await conec.query(`SELECT 
-            c.idCliente ,
-            td.nombre as tipodocumento,
+            c.idCliente,
+            td.nombre AS tipodocumento,
             c.documento,
             c.informacion,
             c.celular,
@@ -125,41 +125,30 @@ class Cliente {
             FROM cliente AS c
             INNER JOIN tipoDocumento AS td ON td.idTipoDocumento = c.idTipoDocumento
             INNER JOIN venta AS v ON c.idCliente = v.idCliente AND v.estado = 1
-            INNER JOIN cobro AS cb On cb.idCliente = c.idCliente
-            WHERE 
-            ? = 0 and  cb.fecha BETWEEN ? AND ? AND cb.idProyecto = ?
-            OR
-            ? = 1 and c.documento like concat(?,'%')
-            OR
-            ? = 1 and c.informacion like concat(?,'%')
-            ORDER BY c.fecha ASC, c.hora ASC
             LIMIT ?,?`, [
-                parseInt(req.query.opcion),
-                req.query.fechaInicio,
-                req.query.fechaFin,
-                parseInt(req.query.idProyecto),
-
-                parseInt(req.query.opcion),
-                req.query.buscar,
-
-                parseInt(req.query.opcion),
-                req.query.buscar,
-
                 parseInt(req.query.posicionPagina),
                 parseInt(req.query.filasPorPagina)
-            ])
+            ]);
 
-            let newLista = []
+            let newLista = [];
 
-            for (let value of lista) {
-                let detalle = await conec.query(`select 
+            const seen = new Set();
+            const filteredArr = lista.filter(el => {
+                const duplicate = seen.has(el.id);
+                seen.add(el.id);
+                return !duplicate;
+            });
+            console.log(filteredArr)
+
+            for (let value of filteredArr) {
+                let detalle = await conec.query(`SELECT 
                     l.descripcion,
-                    m.nombre as manzana
-                    from venta as v
-                    inner join ventaDetalle as vd on vd.idVenta = v.idVenta
-                    inner join lote as l on l.idLote = vd.idLote
-                    inner join manzana as m on m.idManzana = l.idManzana
-                    where v.idCliente = ?`, [
+                    m.nombre AS manzana
+                    FROM venta AS v
+                    INNER JOIN ventaDetalle AS vd ON vd.idVenta = v.idVenta
+                    INNER JOIN lote AS l ON l.idLote = vd.idLote
+                    INNER JOIN manzana AS m ON m.idManzana = l.idManzana
+                    WHERE v.idCliente = ?`, [
                     value.idCliente
                 ]);
 
@@ -168,7 +157,23 @@ class Cliente {
                     detalle
                 });
             }
+            // for (let value of lista) {
+            //     let detalle = await conec.query(`SELECT 
+            //         l.descripcion,
+            //         m.nombre AS manzana
+            //         FROM venta AS v
+            //         INNER JOIN ventaDetalle AS vd ON vd.idVenta = v.idVenta
+            //         INNER JOIN lote AS l ON l.idLote = vd.idLote
+            //         INNER JOIN manzana AS m ON m.idManzana = l.idManzana
+            //         WHERE v.idCliente = ?`, [
+            //         value.idCliente
+            //     ]);
 
+            //     newLista.push({
+            //         ...value,
+            //         detalle
+            //     });
+            // }
 
             let resultLista = newLista.map(function (item, index) {
                 return {
@@ -180,25 +185,12 @@ class Cliente {
             let total = await conec.query(`SELECT COUNT(*) AS Total 
             FROM cliente AS c
             INNER JOIN tipoDocumento AS td ON td.idTipoDocumento = c.idTipoDocumento
-            INNER JOIN venta AS v ON c.idCliente = v.idCliente AND v.estado = 1
-            WHERE 
-            ? = 0
-            OR
-            ? = 1 and c.documento like concat(?,'%')
-            OR
-            ? = 1 and c.informacion like concat(?,'%')`, [
-
-                parseInt(req.query.opcion),
-
-                parseInt(req.query.opcion),
-                req.query.buscar,
-
-                parseInt(req.query.opcion),
-                req.query.buscar
+            INNER JOIN venta AS v ON c.idCliente = v.idCliente AND v.estado = 1`, [
             ]);
 
             return { "result": resultLista, "total": total[0].Total };
         } catch (error) {
+            console.error(error);
             return "Se produjo un error de servidor, intente nuevamente.";
         }
     }

@@ -27,6 +27,8 @@ class Socios extends React.Component {
             fechaInicio: currentDate(),
             fechaFinal: currentDate(),
 
+            idProyecto: this.props.token.project.idProyecto,
+
             view: statePrivilegio(this.props.token.userToken.menus[2].submenu[4].privilegio[0].estado),
 
             opcion: 0,
@@ -60,15 +62,15 @@ class Socios extends React.Component {
     }
 
     loadInit = async () => {
-        const concepto = await axios.get("/api/concepto/listcombo", {
-            signal: this.abortControllerView.signal,
-        });
+        // const concepto = await axios.get("/api/concepto/listcombo", {
+        //     signal: this.abortControllerView.signal,
+        // });
 
-        if (this.state.loading) return;
+        // if (this.state.loading) return;
 
-        await this.setStateAsync({
-            conceptos: concepto.data
-        })
+        // await this.setStateAsync({
+        //     conceptos: concepto.data
+        // })
 
         this.searchFecha();
     }
@@ -128,7 +130,7 @@ class Socios extends React.Component {
                     "filasPorPagina": this.state.filasPorPagina
                 }
             });
-
+            console.log(result)
             let totalPaginacion = parseInt(Math.ceil((parseFloat(result.data.total) / this.state.filasPorPagina)));
             let messagePaginacion = `Mostrando ${result.data.result.length} de ${totalPaginacion} Páginas`;
 
@@ -199,7 +201,7 @@ class Socios extends React.Component {
         return (
             <>
                 <div className='row'>
-                    <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
+                    <div className='col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12'>
                         <div className="form-group">
                             <h5>Socios <small className="text-secondary">LISTA</small></h5>
                         </div>
@@ -207,9 +209,19 @@ class Socios extends React.Component {
                 </div>
 
                 <div className="row">
-                    <div className='col-lg-2 col-md-3 col-sm-12 col-xs-12'>
+                    <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
                         <div className="form-group">
-                            <label>Fecha Inicio Cobro:</label>
+                            <button className="btn btn-outline-light" onClick={() => this.loadInit()}>
+                                <i className="bi bi-arrow-clockwise"></i> Recargar Vista
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="row">
+                    <div className='col-xl-3 col-lg-3 col-md-12 col-sm-12 col-12'>
+                        <div className="form-group">
+                            <label>Fecha Inicio:</label>
                             <input
                                 className="form-control"
                                 type="date"
@@ -220,9 +232,9 @@ class Socios extends React.Component {
                                 }} />
                         </div>
                     </div>
-                    <div className='col-lg-2 col-md-3 col-sm-12 col-xs-12'>
+                    <div className='col-xl-3 col-lg-3 col-md-12 col-sm-12 col-12'>
                         <div className="form-group">
-                            <label>Fecha Fin Cobro:</label>
+                            <label>Fecha Final:</label>
                             <input
                                 className="form-control"
                                 type="date"
@@ -233,7 +245,33 @@ class Socios extends React.Component {
                                 }} />
                         </div>
                     </div>
-                    <div className="col-md-4 col-sm-12">
+                    <div className="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
+                        <div className="form-group">
+                            <label>Concepto:</label>
+                            <select
+                                title="Lista de conceptos"
+                                className="form-control"
+                                ref={this.refConcepto}
+                                value={this.state.idConcepto}
+                                onChange={(event) => {
+                                    this.setState({
+                                        idConcepto: event.target.value
+                                    })
+                                }}
+                            >
+                                <option value="">- seleccione el Concepto -</option>
+                                {
+                                    this.state.conceptos.map((item, index) => (
+                                        <option key={index} value={item.idConcepto}>{item.nombre}</option>
+                                    ))
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="row">
+                    <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
                         <div className="form-group">
                             <label>Busqueda socio / asociado:</label>
                             <div className="input-group mb-2">
@@ -249,41 +287,10 @@ class Socios extends React.Component {
                             </div>
                         </div>
                     </div>
-                    <div className="col-md-3 col-sm-12">
-                        <label>Concepto:</label>
-                        <select
-                            title="Lista de conceptos"
-                            className="form-control"
-                            ref={this.refConcepto}
-                            value={this.state.idConcepto}
-                            onChange={(event) => {
-                                this.setState({
-                                    idConcepto: event.target.value
-                                })
-                            }}
-                        >
-                            <option value="">-- seleccione concepto --</option>
-                            {
-                                this.state.conceptos.map((item, index) => (
-                                    <option key={index} value={item.idConcepto}>{item.nombre}</option>
-                                ))
-                            }
-                        </select>
-                    </div>
-                    <div className="col-md-1 col-sm-12">
-                        <div className="form-group">
-                            <label>Rec.</label>
-                            <div className="form-group">
-                                <button className="btn btn-outline-secondary" onClick={() => this.loadInit()}>
-                                    <i className="bi bi-arrow-clockwise"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
                 <div className="row">
-                    <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                    <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
                         <div className="table-responsive">
                             <table className="table table-striped table-bordered rounded">
                                 <thead>
@@ -348,10 +355,10 @@ class Socios extends React.Component {
                 </div>
 
                 <div className="row">
-                    <div className="col-sm-12 col-md-5">
+                    <div className="col-xl-5 col-lg-5 col-md-5 col-sm-12 col-12">
                         <div className="dataTables_info mt-2" role="status" aria-live="polite">{this.state.messagePaginacion}</div>
                     </div>
-                    <div className="col-sm-12 col-md-7">
+                    <div className="col-xl-7 col-lg-7 col-md-7 col-sm-12 col-12">
                         <div className="dataTables_paginate paging_simple_numbers">
                             <nav aria-label="Page navigation example">
                                 <ul className="pagination justify-content-end">
