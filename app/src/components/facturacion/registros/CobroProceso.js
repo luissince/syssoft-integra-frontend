@@ -572,7 +572,7 @@ class CobroProceso extends React.Component {
             idCliente: value.idCliente
         });
         this.selectItem = true;
-        // this.loadLoteCliente(this.state.idCliente);
+        this.loadLoteCliente(this.state.idCliente);
         if (this.state.idConcepto !== "") {
             this.loadFillTable(this.state.idCliente, this.state.idConcepto);
         }
