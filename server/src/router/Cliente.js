@@ -204,6 +204,7 @@ router.get('/excelcliente', async function (req, res) {
 router.get('/repdeudas', async function (req, res) {
     const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
     req.query.idSede = decryptedData.idSede;
+    req.query.seleccionado = decryptedData.seleccionado;
     req.query.frecuencia = decryptedData.frecuencia;
 
     const sedeInfo = await sede.infoSedeReporte(req);
@@ -233,6 +234,7 @@ router.get('/repdeudas', async function (req, res) {
 router.get('/exceldeudas', async function (req, res) {
     const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
     req.query.idSede = decryptedData.idSede;
+    req.query.seleccionado = decryptedData.seleccionado;
     req.query.frecuencia = decryptedData.frecuencia;
 
     const sedeInfo = await sede.infoSedeReporte(req);

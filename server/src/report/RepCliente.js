@@ -295,6 +295,7 @@ class RepCliente {
         try {
             const doc = new PDFDocument({
                 font: 'Helvetica',
+                layout: 'landscape',
                 margins: {
                     top: 40,
                     bottom: 40,
@@ -308,7 +309,7 @@ class RepCliente {
             let orgX = doc.x;
             let orgY = doc.y;
             let cabeceraY = orgY + 70;
-            let titleX = orgX + 150;
+            let titleX = orgX + 230;
             let widthContent = doc.page.width - doc.options.margins.left - doc.options.margins.right;
 
             let h1 = 13;
@@ -351,34 +352,50 @@ class RepCliente {
                 }
             );
 
+            doc.fontSize(h3).text(
+                `${req.query.seleccionado ? "TODAS LA FECHAS" : req.query.frecuencia == 15 ? "FRECUENTA CADA 15 DEL MES" : "FRECUENTA CADA 30 DEL MES"}`,
+                orgX,
+                doc.y + 10,
+                {
+                    align: "left",
+                }
+            );
+          
             let content = data.map((item, index) => {
                 return [
                     ++index,
                     item.documento + "\n" + item.informacion,
-                    item.cuotasRetrasadas,
-                    item.cuotasPendientes,
-                    item.fechaPago,
-                    item.frecuencia == 15 ? 'Quincenal' : 'Mensual',
-                    numberFormat(item.montoPendiente, item.codiso),
-                    numberFormat(item.montoActual, item.codiso)
-                    
+                    item.lote,
+                    item.nombre + "\n" + item.serie + "-" + item.numeracion,
+                    item.numCuota == 1 ? item.numCuota + " COUTA" : item.numCuota + " COUTAS",
+                    dateFormat(item.fechaPago),
+                    numberFormat(item.total, item.codiso),
+                    numberFormat(item.cobrado, item.codiso),
+                    numberFormat(item.total - item.cobrado, item.codiso),
                 ];
             });
 
             const table = {
                 subtitle: "DETALLE",
-                headers: ["N°", "Cliente", "Cuotas Retrasadas", "Cuotas Pendientes", "Fecha de Cobro", "Frecuencia", "Monto Retrasado", "Cuota Actual"],
+                headers: ["N°", "Cliente", "Propiedad", "Comprobante", "Cuotas Pendientes", "Sig. Pago", "Total", "Cobrado", "Por Cobrar"],
                 rows: content
             };
 
             doc.table(table, {
                 prepareHeader: () => doc.font("Helvetica-Bold").fontSize(h3),
-                prepareRow: () => {
-                    doc.font("Helvetica").fontSize(h3);
+                prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) => {
+                    if (indexColumn === 8) {
+                        doc.font("Helvetica").fontSize(h3).fillColor("red");
+                    } else if (indexColumn === 7) {
+                        doc.font("Helvetica").fontSize(h3).fillColor("green");
+                    }
+                    else {
+                        doc.font("Helvetica").fontSize(h3).fillColor("black");
+                    }
                 },
                 padding: 5,
                 columnSpacing: 5,
-                columnsSize: [30, 100, 70, 70, 70, 62, 65, 65],
+                columnsSize: [30, 100, 80, 100, 80, 72, 75, 75, 100],//792-712
                 x: doc.x,
                 y: doc.y + 15,
                 width: doc.page.width - doc.options.margins.left - doc.options.margins.right

@@ -1,5 +1,5 @@
 const xl = require('excel4node');
-const { formatMoney, dateFormat } = require('../tools/Tools');
+const { formatMoney, dateFormat ,numberFormat } = require('../tools/Tools');
 
 async function generateExcelCliente(req, sedeInfo, data, condicion) {
     try {
@@ -187,7 +187,7 @@ async function generateExcelCliente(req, sedeInfo, data, condicion) {
                 ws.cell(rowY, 5).string(item.detalle).style(styleBody)
                 ws.cell(rowY, 6).number(parseFloat(formatMoney(item.monto))).style(styleBodyFloat)
             });
-
+ 
             return wb.writeToBuffer();
 
         }
@@ -284,25 +284,24 @@ async function generateExcelDeudas(req, sedeInfo, data) {
 
         ws.cell(6, 1, 6, 9, true).string(`LISTA DE DEUDAS POR CLIENTE`).style(styleTitle);
 
-        const header = ["N°", "N° de Documento", "Información", "Cuotas Retrasadas", "Cuotas Pendientes", "Fecha de Cobro", "Frecuencia", "Monto Retrasado", "Cuota Actual"];
+        const header = ["N°", "Cliente", "Propiedad", "Comprobante", "Cuotas Pendientes", "Sig. Pago", "Total", "Cobrado", "Por Cobrar"];
         header.map((item, index) => ws.cell(8, 1 + index).string(item).style(styleTableHeader));
 
         let rowY = 8;
+
         data.map((item, index) => {
             rowY = rowY + 1;
 
             ws.cell(rowY, 1).number(1 + index).style(styleBodyInteger)
-            ws.cell(rowY, 2).number(parseInt(item.documento)).style(styleBodyInteger)
-            ws.cell(rowY, 3).string(item.informacion).style(styleBody)
+            ws.cell(rowY, 2).string(item.documento + "\n" + item.informacion).style(styleBody)
+            ws.cell(rowY, 3).string(item.lote).style(styleBody)
+            ws.cell(rowY, 4).string(item.nombre + "\n" + item.serie + "-" + item.numeracion).style(styleBody)
+            ws.cell(rowY, 5).string(item.numCuota == 1 ? item.numCuota + " COUTA" : item.numCuota + " COUTAS").style(styleBody)
+            ws.cell(rowY, 6).string(dateFormat(item.fechaPago)).style(styleBody)
 
-            ws.cell(rowY, 4).number(item.cuotasRetrasadas).style(styleBodyFloat)
-            ws.cell(rowY, 5).number(item.cuotasPendientes).style(styleBodyFloat)
-            ws.cell(rowY, 6).string(item.fechaPago).style(styleBody)
-
-            ws.cell(rowY, 7).string(item.frecuencia == 15 ? 'Quincenal' : 'Mensual').style(styleBody)
-
-            ws.cell(rowY, 8).number(parseFloat(formatMoney(item.montoPendiente))).style(styleBodyFloat)
-            ws.cell(rowY, 9).number(parseFloat(formatMoney(item.montoActual))).style(styleBodyFloat)
+            ws.cell(rowY, 7).number(parseFloat(formatMoney(item.total))).style(styleBodyFloat)
+            ws.cell(rowY, 8).number(parseFloat(formatMoney(item.cobrado))).style(styleBodyFloat)
+            ws.cell(rowY, 9).number(parseFloat(formatMoney(item.total - item.cobrado))).style(styleBodyFloat)
         });
         rowY = rowY + 1;
 

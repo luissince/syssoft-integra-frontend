@@ -175,6 +175,7 @@ class RepClientes extends React.Component {
 
         const data = {
             "idSede": "SD0001",
+            "seleccionado": this.state.frecuenciaCheck,
             "frecuencia": this.state.cada
         }
 
@@ -192,6 +193,7 @@ class RepClientes extends React.Component {
 
         const data = {
             "idSede": "SD0001",
+            "seleccionado": this.state.frecuenciaCheck,
             "frecuencia": this.state.cada
         }
 
@@ -200,7 +202,7 @@ class RepClientes extends React.Component {
         this.refUseFile.current.download({
             "name": "Reporte Deudas",
             "file": "/api/cliente/exceldeudas",
-            "filename": "deudas.xlsx",
+            "filename": "Lista de Dudas por Cliente.xlsx",
             "params": ciphertext
         });
     }

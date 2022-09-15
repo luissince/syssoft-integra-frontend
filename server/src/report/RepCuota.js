@@ -1,7 +1,7 @@
 const path = require('path');
 const PDFDocument = require("pdfkit-table");
 const getStream = require('get-stream');
-const { numberFormat,isFile } = require('../tools/Tools');
+const { numberFormat, isFile } = require('../tools/Tools');
 
 class RepCuota {
 
@@ -121,6 +121,7 @@ class RepCuota {
                 },
                 padding: 5,
                 columnSpacing: 5,
+                columnsSize: [60, 162, 110, 100, 100], //532
                 width: (doc.page.width - doc.options.margins.left - doc.options.margins.right),
                 x: orgX,
                 y: doc.y + 15,
@@ -132,14 +133,14 @@ class RepCuota {
 
             let content = data.plazos.map((item, index) => {
                 credito = credito - item.monto
-                return [++index,"CUOTA "+item.cuota ,item.fecha, item.estado === 1 ? 'COBRADO' : 'POR COBRAR', numberFormat(credito), numberFormat(item.monto)]
+                return [++index, "CUOTA " + item.cuota, item.fecha, item.estado === 1 ? 'COBRADO' : 'POR COBRAR', numberFormat(credito), item.estado === 1 ? 0 : numberFormat(item.monto - item.cobros)]
             })
 
             content.unshift(arrayIni)
 
             const table1 = {
                 subtitle: "CRONOGRAMA DE PAGOS MENSUALES - VENTA AL CRÉDITO",
-                headers: ["#","CUOTA" ,"FECHA DE PAGO", "ESTADO", "MONTO RESTANTE", "CUOTA MENSUAL"],
+                headers: ["#", "CUOTA", "FECHA DE PAGO", "ESTADO", "MONTO RESTANTE", "CUOTA RESTANTE"],
                 rows: content
             };
 
@@ -149,6 +150,8 @@ class RepCuota {
                     if (indexColumn === 3) {
                         if (row[3] === "COBRADO") {
                             doc.font("Helvetica").fontSize(h3).fillColor("green");
+                        } else {
+                            doc.font("Helvetica").fontSize(h3).fillColor("red");
                         }
                     } else {
                         doc.font("Helvetica").fontSize(h3).fillColor("black");
@@ -157,6 +160,7 @@ class RepCuota {
                 },
                 padding: 5,
                 columnSpacing: 5,
+                columnsSize: [60, 102, 100, 90, 90, 90], //532
                 width: doc.page.width - doc.options.margins.left - doc.options.margins.right,
                 x: orgX,
                 y: doc.y + 10,

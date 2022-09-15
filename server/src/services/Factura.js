@@ -1390,18 +1390,10 @@ class Factura {
 
             for (let item of plazos) {
 
-                let newCobros = [];
+                let newCobros = 0;
                 for (let cobro of cobros) {
 
                     let cobroPlazo = await conec.query(`SELECT 
-                    cv.idPlazo,
-                    cp.nombre,
-                    c.serie,
-                    c.numeracion,
-                    DATE_FORMAT(c.fecha,'%d/%m/%Y') as fecha, 
-                    c.hora,
-                    bc.nombre as banco,
-                    mo.codiso,
                     cv.precio
                     FROM cobro AS c 
                     INNER JOIN banco AS bc ON bc.idBanco = c.idBanco
@@ -1414,10 +1406,13 @@ class Factura {
                         cobro.idCobro
                     ]);
 
-                    if (cobroPlazo.length > 0) {
-                        newCobros.push(cobroPlazo[0]);
-                    }
+                    // if (cobroPlazo.length > 0) {
+                    //     newCobros.push(cobroPlazo[0]);
+                    // }
+
+                    newCobros = cobroPlazo.reduce((previousValue, currentValue) => previousValue + currentValue.precio, 0);
                 }
+                // console.log(newCobros)
                 newPlazos.push({
                     ...item,
                     "cobros": newCobros
