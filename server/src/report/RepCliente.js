@@ -315,6 +315,7 @@ class RepCliente {
             let h1 = 13;
             let h2 = 11;
             let h3 = 9;
+            let h4 = 7;
 
             if (isFile(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo))) {
                 doc.image(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo), orgX, orgY, { width: 75 });
@@ -360,11 +361,20 @@ class RepCliente {
                     align: "left",
                 }
             );
-          
+
+            doc.fontSize(h3).text(
+                `PROYECTO: ${req.query.nombreProyecto}`,
+                orgX,
+                doc.y + 10,
+                {
+                    align: "left",
+                }
+            );
+
             let content = data.map((item, index) => {
                 return [
                     ++index,
-                    item.documento + "\n" + item.informacion,
+                    item.documento + " " + item.informacion,
                     item.lote,
                     item.nombre + "\n" + item.serie + "-" + item.numeracion,
                     item.numCuota == 1 ? item.numCuota + " COUTA" : item.numCuota + " COUTAS",
@@ -388,14 +398,14 @@ class RepCliente {
                         doc.font("Helvetica").fontSize(h3).fillColor("red");
                     } else if (indexColumn === 7) {
                         doc.font("Helvetica").fontSize(h3).fillColor("green");
-                    }
-                    else {
+                    } else {
                         doc.font("Helvetica").fontSize(h3).fillColor("black");
                     }
                 },
+                align: "center",
                 padding: 5,
                 columnSpacing: 5,
-                columnsSize: [30, 100, 80, 100, 80, 72, 75, 75, 100],//792-712
+                columnsSize: [30, 125, 80, 100, 80, 72, 75, 75, 75],//792-712
                 x: doc.x,
                 y: doc.y + 15,
                 width: doc.page.width - doc.options.margins.left - doc.options.margins.right

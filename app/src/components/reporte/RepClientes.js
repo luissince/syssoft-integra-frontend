@@ -10,6 +10,9 @@ class RepClientes extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            idProyecto: this.props.token.project.idProyecto,
+            nombreProyecto: this.props.token.project.nombre,
+
             fechaIni: '',
             fechaFin: '',
             isFechaActive: false,
@@ -175,6 +178,8 @@ class RepClientes extends React.Component {
 
         const data = {
             "idSede": "SD0001",
+            "idProyecto": this.state.idProyecto,
+            "nombreProyecto": this.state.nombreProyecto,
             "seleccionado": this.state.frecuenciaCheck,
             "frecuencia": this.state.cada
         }
@@ -193,6 +198,8 @@ class RepClientes extends React.Component {
 
         const data = {
             "idSede": "SD0001",
+            "idProyecto": this.state.idProyecto,
+            "nombreProyecto": this.state.nombreProyecto,
             "seleccionado": this.state.frecuenciaCheck,
             "frecuencia": this.state.cada
         }

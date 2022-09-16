@@ -1372,6 +1372,9 @@ class Factura {
             idPlazo,        
             cuota,
             DATE_FORMAT(fecha,'%d/%m/%Y') as fecha,
+            CASE 
+            WHEN YEAR(fecha) <= YEAR(CURRENT_DATE) AND MONTH(fecha) <= MONTH(CURRENT_DATE) then 1 
+            ELSE 0 end AS vencido,
             monto,
             estado
             FROM plazo WHERE idVenta = ?
@@ -1387,12 +1390,10 @@ class Factura {
             ]);
 
             let newPlazos = [];
-
             for (let item of plazos) {
 
                 let newCobros = 0;
                 for (let cobro of cobros) {
-
                     let cobroPlazo = await conec.query(`SELECT 
                     cv.precio
                     FROM cobro AS c 
@@ -1412,7 +1413,6 @@ class Factura {
 
                     newCobros = cobroPlazo.reduce((previousValue, currentValue) => previousValue + currentValue.precio, 0);
                 }
-                // console.log(newCobros)
                 newPlazos.push({
                     ...item,
                     "cobros": newCobros

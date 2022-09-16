@@ -499,16 +499,18 @@ class Cliente {
             INNER JOIN cliente AS cl ON v.idCliente = cl.idCliente 
             LEFT JOIN ventaDetalle AS vd ON vd.idVenta = v.idVenta 
             WHERE  
-            ? = 1 AND v.estado = 2
+            ? = 1 AND v.estado = 2 AND v.idProyecto = ?
             OR
-            ? = 0 AND v.estado = 2 AND v.frecuencia = ? 
+            ? = 0 AND v.estado = 2 AND v.frecuencia = ? AND v.idProyecto = ?
 
             GROUP BY v.idVenta
             ORDER BY cl.informacion ASC`, [
                 req.query.seleccionado,
+                req.query.idProyecto,
 
                 req.query.seleccionado,
-                req.query.frecuencia
+                req.query.frecuencia,
+                req.query.idProyecto
             ]);
 
             let newLista = []

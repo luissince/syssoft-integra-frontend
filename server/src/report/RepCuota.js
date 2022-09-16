@@ -133,7 +133,7 @@ class RepCuota {
 
             let content = data.plazos.map((item, index) => {
                 credito = credito - item.monto
-                return [++index, "CUOTA " + item.cuota, item.fecha, item.estado === 1 ? 'COBRADO' : 'POR COBRAR', numberFormat(credito), item.estado === 1 ? 0 : numberFormat(item.monto - item.cobros)]
+                return [++index, "CUOTA " + item.cuota, item.fecha, item.estado === 1 ? 'COBRADO' : item.vencido === 1 ? 'VENCIDO' : 'POR COBRAR', numberFormat(credito), item.estado === 1 ? 0 : numberFormat(item.monto - item.cobros)]
             })
 
             content.unshift(arrayIni)
@@ -150,13 +150,14 @@ class RepCuota {
                     if (indexColumn === 3) {
                         if (row[3] === "COBRADO") {
                             doc.font("Helvetica").fontSize(h3).fillColor("green");
-                        } else {
+                        } else if (row[3] === "VENCIDO") {
                             doc.font("Helvetica").fontSize(h3).fillColor("red");
+                        } else {
+                            doc.font("Helvetica").fontSize(h3).fillColor("black");
                         }
                     } else {
                         doc.font("Helvetica").fontSize(h3).fillColor("black");
                     }
-
                 },
                 padding: 5,
                 columnSpacing: 5,
