@@ -37,7 +37,7 @@ const swaggerDocument = {
             },
         ]
     },
-    apis: ['./src/router/*.js'],
+    apis: [`${__dirname}/src/router/*.js`],
 };
 
 /**
