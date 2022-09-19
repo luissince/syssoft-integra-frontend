@@ -240,11 +240,11 @@ class Login extends React.Component {
                                 }
                             }} />
 
-                        <div className="checkbox mb-3">
+                        {/* <div className="checkbox mb-3">
                             <label>
                                 <input type="checkbox" value="remember-me" /> Recuerdame
                             </label>
-                        </div>
+                        </div> */}
                         <button onClick={this.onEventForm} type="button" className="btn btn-lg btn-primary btn-block">Ingresar</button>
                         {/* <button onClick={this.onEventRecuperar} type="button" className="btn btn-lg btn-outline-primary btn-block">Recuperar</button> */}
                         <p className="mt-5 mb-3 text-muted">SysSoft Integra © {new Date().getFullYear()}</p>
