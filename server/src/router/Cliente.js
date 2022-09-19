@@ -263,6 +263,9 @@ router.get('/exceldeudas', async function (req, res) {
     }
 });
 
+/**
+ * 
+ */
 router.get("/updatealta", async function (req, res) {
     const result = await cliente.updatealta(req)
     if (result === "ok") {

@@ -4,6 +4,41 @@ const app = express();
 const path = require('path');
 const socket = require('socket.io');
 const cors = require('cors');
+const swaggerUi = require('swagger-ui-express');
+const swaggerJsdoc = require('swagger-jsdoc');
+
+const swaggerDocument = {
+    failOnErrors: false,
+    definition: {
+        openapi: '3.0.0',
+        info: {
+            title: 'Node Mysql Api Inmobiliario',
+            version: '1.0.0',
+            description:
+                'Esta API fue creada para la empresa GYMC INMOBILIARIA para sus procesos',
+
+            license: {
+                name: 'MIT',
+                url: 'https://spdx.org/licenses/MIT.html',
+            },
+            contact: {
+                name: 'Luis Lara',
+                url: 'https://www.facebook.com/luisal.laras/',
+            },
+        },
+        servers: [
+            {
+                url: "http://localhost:5000",
+                description: "EndPoint de desarrollo"
+            },
+            {
+                url: "https://www.inmobiliariagmyc.com",
+                description: "EndPoint de producción"
+            },
+        ]
+    },
+    apis: ['./src/router/*.js'],
+};
 
 /**
  * Carga de variable de entorno
@@ -18,18 +53,18 @@ const server = http.createServer(app);
 const io = socket(server, {
     cors: { origin: "*" }
 });
-global.io = io; 
+global.io = io;
 
 io.on('connection', (socket) => {
     console.log('a user connected');
 
     // socket.on('message', (message) => {
-        // console.log(message);
-        // io.emit('message', `${socket.id.substr(0, 2)} said ${message}`);
+    // console.log(message);
+    // io.emit('message', `${socket.id.substr(0, 2)} said ${message}`);
     // });
 
     socket.on("disconnect", () => {
-        console.log('desconnected '+socket.id)
+        console.log('desconnected ' + socket.id)
     });
 });
 
@@ -49,6 +84,7 @@ app.set('port', process.env.PORT || 5000);
 
 app.use(express.json({ limit: '1024mb' }));
 app.use(express.urlencoded({ limit: '1024mb', extended: false }));
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerJsdoc(swaggerDocument)));
 
 /**
  * Cargar la app estatica compilada
