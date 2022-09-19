@@ -8,7 +8,7 @@ class Cliente {
         try {
             let lista = await conec.query(`SELECT 
             c.idCliente ,
-            v.idProyecto,
+            a.idProyecto,
             td.nombre as tipodocumento,
             c.documento,
             c.informacion,
@@ -18,13 +18,13 @@ class Cliente {
             c.estado
             FROM cliente AS c
             INNER JOIN tipoDocumento AS td ON td.idTipoDocumento = c.idTipoDocumento
-            LEFT JOIN venta AS v ON v.idCliente = c.idCliente AND v.estado <> 3
+            INNER JOIN alta AS a ON a.idCliente = c.idCliente
             WHERE 
-            ? = 0 AND (v.idProyecto = ? AND ? = 'any' OR ? = 'all')
+            ? = 0 AND (a.idProyecto = ? AND ? = 'any' OR ? = 'all')
             OR
-            ? = 1 and c.documento like concat(?,'%') AND (v.idProyecto = ? AND ? = 'any' OR ? = 'all')
+            ? = 1 and c.documento like concat(?,'%') AND (a.idProyecto = ? AND ? = 'any' OR ? = 'all')
             OR
-            ? = 1 and c.informacion like concat(?,'%') AND (v.idProyecto = ? AND ? = 'any' OR ? = 'all')
+            ? = 1 and c.informacion like concat(?,'%') AND (a.idProyecto = ? AND ? = 'any' OR ? = 'all')
             ORDER BY c.fecha ASC, c.hora ASC
             LIMIT ?,?`, [
                 parseInt(req.query.opcion),
@@ -79,13 +79,13 @@ class Cliente {
             let total = await conec.query(`SELECT COUNT(*) AS Total 
             FROM cliente AS c
             INNER JOIN tipoDocumento AS td ON td.idTipoDocumento = c.idTipoDocumento
-            INNER JOIN venta AS v ON v.idCliente = c.idCliente AND v.estado <> 3
+            INNER JOIN alta AS a ON a.idCliente = c.idCliente
             WHERE 
-            ? = 0 AND (v.idProyecto = ? AND ? = 'any' OR ? = 'all')
+            ? = 0 AND (a.idProyecto = ? AND ? = 'any' OR ? = 'all')
             OR
-            ? = 1 and c.documento like concat(?,'%') AND (v.idProyecto = ? AND ? = 'any' OR ? = 'all')
+            ? = 1 and c.documento like concat(?,'%') AND (a.idProyecto = ? AND ? = 'any' OR ? = 'all')
             OR
-            ? = 1 and c.informacion like concat(?,'%') AND (v.idProyecto = ? AND ? = 'any' OR ? = 'all')`, [
+            ? = 1 and c.informacion like concat(?,'%') AND (a.idProyecto = ? AND ? = 'any' OR ? = 'all')`, [
 
                 parseInt(req.query.opcion),
                 req.query.idProyecto,
@@ -113,51 +113,29 @@ class Cliente {
 
     async listsocios(req) {
         try {
-            let lista = await conec.query(`SELECT 
-            c.idCliente,
-            td.nombre AS tipodocumento,
-            c.documento,
-            c.informacion,
-            c.celular,
-            c.telefono,
-            c.direccion,
-            c.estado
-            FROM cliente AS c
-            INNER JOIN tipoDocumento AS td ON td.idTipoDocumento = c.idTipoDocumento
-            INNER JOIN venta AS v ON c.idCliente = v.idCliente AND v.estado = 1
-            LIMIT ?,?`, [
+            let lista = await conec.procedure(`CALL Listar_Socios(?,?,?,?,?,?,?,?)`, [
+                parseInt(req.query.opcion),
+                req.query.buscar,
+                req.query.fechaInicio,
+                req.query.fechaFinal,
+                req.query.idConcepto,
+                req.query.idProyecto,
+
                 parseInt(req.query.posicionPagina),
                 parseInt(req.query.filasPorPagina)
             ]);
 
             let newLista = [];
 
-            const seen = new Set();
-            const filteredArr = lista.filter(el => {
-                const duplicate = seen.has(el.id);
-                seen.add(el.id);
-                return !duplicate;
-            });
-            console.log(filteredArr)
+            // const seen = new Set();
+            // const filteredArr = lista.filter(el => {
+            //     const duplicate = seen.has(el.id);
+            //     seen.add(el.id);
+            //     return !duplicate;
+            // });
+            // console.log(filteredArr)
 
-            for (let value of filteredArr) {
-                let detalle = await conec.query(`SELECT 
-                    l.descripcion,
-                    m.nombre AS manzana
-                    FROM venta AS v
-                    INNER JOIN ventaDetalle AS vd ON vd.idVenta = v.idVenta
-                    INNER JOIN lote AS l ON l.idLote = vd.idLote
-                    INNER JOIN manzana AS m ON m.idManzana = l.idManzana
-                    WHERE v.idCliente = ?`, [
-                    value.idCliente
-                ]);
-
-                newLista.push({
-                    ...value,
-                    detalle
-                });
-            }
-            // for (let value of lista) {
+            // for (let value of filteredArr) {
             //     let detalle = await conec.query(`SELECT 
             //         l.descripcion,
             //         m.nombre AS manzana
@@ -175,6 +153,24 @@ class Cliente {
             //     });
             // }
 
+            for (let value of lista) {
+                let detalle = await conec.query(`SELECT 
+                    l.descripcion,
+                    m.nombre AS manzana
+                    FROM venta AS v
+                    INNER JOIN ventaDetalle AS vd ON vd.idVenta = v.idVenta
+                    INNER JOIN lote AS l ON l.idLote = vd.idLote
+                    INNER JOIN manzana AS m ON m.idManzana = l.idManzana
+                    WHERE v.idVenta = ?`, [
+                    value.idVenta
+                ]);
+
+                newLista.push({
+                    ...value,
+                    detalle
+                });
+            }
+
             let resultLista = newLista.map(function (item, index) {
                 return {
                     ...item,
@@ -182,10 +178,13 @@ class Cliente {
                 }
             });
 
-            let total = await conec.query(`SELECT COUNT(*) AS Total 
-            FROM cliente AS c
-            INNER JOIN tipoDocumento AS td ON td.idTipoDocumento = c.idTipoDocumento
-            INNER JOIN venta AS v ON c.idCliente = v.idCliente AND v.estado = 1`, [
+            let total = await conec.procedure(`CALL Listar_Socios_Count(?,?,?,?,?,?)`, [
+                parseInt(req.query.opcion),
+                req.query.buscar,
+                req.query.fechaInicio,
+                req.query.fechaFinal,
+                req.query.idConcepto,
+                req.query.idProyecto
             ]);
 
             return { "result": resultLista, "total": total[0].Total };
@@ -706,6 +705,62 @@ class Cliente {
 
             return detalle;
         } catch (error) {
+            return "Se produjo un error de servidor, intente nuevamente.";
+        }
+    }
+
+    async updatealta(req) {
+        let connection = null;
+        try {
+            connection = await conec.beginTransaction();
+
+            const venta = await conec.execute(connection, `SELECT * FROM venta WHERE idProyecto = 'PR0005'`);
+            for (let value of venta) {
+                const alta = await conec.execute(connection, `SELECT * FROM alta WHERE idCliente = ? AND idProyecto = ?`, [
+                    value.idCliente,
+                    value.idProyecto
+                ]);
+                if (alta.length == 0) {
+                    let resultAlta = await conec.execute(connection, 'SELECT idAlta FROM alta');
+                    let idAlta = 0;
+                    if (resultAlta.length != 0) {
+                        let quitarValor = resultAlta.map(function (item) {
+                            return parseInt(item.idAlta);
+                        });
+
+                        let valorActual = Math.max(...quitarValor);
+                        let incremental = valorActual + 1;
+
+                        idAlta = incremental;
+                    } else {
+                        idAlta = 1;
+                    }
+
+                    await conec.execute(connection, `INSERT INTO alta(
+                        idAlta,
+                        idCliente,
+                        idProyecto,
+                        fecha,
+                        hora,
+                        idUsuario
+                    ) VALUES(?,?,?,?,?,?)`, [
+                        idAlta,
+                        value.idCliente,
+                        value.idProyecto,
+                        currentDate(),
+                        currentTime(),
+                        'US0001'
+                    ]);
+                }
+            }
+
+            await conec.commit(connection);
+            console.log("ok")
+            return "ok";
+        } catch (error) {
+            if (connection != null) {
+                await conec.rollback(connection);
+            }
             return "Se produjo un error de servidor, intente nuevamente.";
         }
     }

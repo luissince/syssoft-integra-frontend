@@ -574,7 +574,7 @@ class Factura {
                 let cuota = 0;
                 // while (inicioDate < ultimoDate) {                   
                 while (i < req.body.numCuota) {
- 
+
                     let now = new Date();
 
                     if (frecuenciaPago > 15) {
@@ -582,7 +582,7 @@ class Factura {
                     } else {
                         now = new Date(inicioDate.getFullYear(), inicioDate.getMonth(), 15);
                     }
-                    
+
                     i++;
                     cuota++;
 
@@ -739,6 +739,47 @@ class Factura {
                 }
             }
 
+            /**
+             * Procesao de registro para dar de alta al un proyecto
+             */
+
+            const alta = await conec.execute(connection, `SELECT idAlta FROM alta WHERE idCliente = ? AND idProyecto = ?`, [
+                req.body.idCliente,
+                req.body.idProyecto,
+            ]);
+
+            if (alta.length === 0) {
+                let resultAlta = await conec.execute(connection, 'SELECT idAlta FROM alta');
+                let idAlta = 0;
+                if (resultAlta.length != 0) {
+                    let quitarValor = resultAlta.map(function (item) {
+                        return parseInt(item.idAlta);
+                    });
+
+                    let valorActual = Math.max(...quitarValor);
+                    let incremental = valorActual + 1;
+
+                    idAlta = incremental;
+                } else {
+                    idAlta = 1;
+                }
+
+                await conec.execute(connection, `INSERT INTO alta(
+                    idAlta ,
+                    idCliente,
+                    idProyecto,
+                    fecha,
+                    hora,
+                    idUsuario
+                ) VALUES(?,?,?,?,?,?)`, [
+                    idAlta,
+                    req.body.idCliente,
+                    req.body.idProyecto,
+                    currentDate(),
+                    currentTime(),
+                    req.body.idUsuario,
+                ]);
+            }
 
             /**
             * Generar un código unico para la tabla auditoria. 
@@ -880,6 +921,9 @@ class Factura {
                     req.query.idVenta
                 ]);
 
+                /**
+                 * Proceso de registro de auditoria 
+                 */
                 let resultAuditoria = await conec.execute(connection, 'SELECT idAuditoria FROM auditoria');
                 let idAuditoria = 0;
                 if (resultAuditoria.length != 0) {

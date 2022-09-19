@@ -263,4 +263,9 @@ router.get('/exceldeudas', async function (req, res) {
     }
 });
 
+router.get("/updatealta",async function(req, res) {
+    await cliente.updatealta(req)
+    res.status(200).send("ok");
+});
+
 module.exports = router;

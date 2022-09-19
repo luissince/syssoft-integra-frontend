@@ -72,7 +72,12 @@ class Socios extends React.Component {
         //     conceptos: concepto.data
         // })
 
-        this.searchFecha();
+        // this.searchFecha();
+        if (this.state.loading) return;
+
+        await this.setStateAsync({ paginacion: 1, restart: true });
+        this.fillTable(0, "", "", "", "");
+        await this.setStateAsync({ opcion: 0 });
     }
 
     async searchFecha() {
@@ -82,8 +87,8 @@ class Socios extends React.Component {
         if (!validateDate(this.state.fechaFinal)) return;
 
         await this.setStateAsync({ paginacion: 1, restart: true });
-        this.fillTable(0, "", this.state.fechaInicio, this.state.fechaFinal, this.state.idConcepto);
-        await this.setStateAsync({ opcion: 0 });
+        this.fillTable(1, "", this.state.fechaInicio, this.state.fechaFinal, this.state.idConcepto);
+        await this.setStateAsync({ opcion: 1 });
     }
 
     async searchText(text) {
@@ -91,9 +96,9 @@ class Socios extends React.Component {
 
         if (text.trim().length === 0) return;
 
-        await this.setStateAsync({ paginacion: 1, restart: false });
-        this.fillTable(1, text.trim(), "", "", "");
-        await this.setStateAsync({ opcion: 1 });
+        await this.setStateAsync({ paginacion: 1, restart: true });
+        this.fillTable(2, text.trim(), "", "", "", "");
+        await this.setStateAsync({ opcion: 2 });
     }
 
     paginacionContext = async (listid) => {
@@ -104,12 +109,15 @@ class Socios extends React.Component {
     onEventPaginacion = () => {
         switch (this.state.opcion) {
             case 0:
-                this.fillTable(0, "");
+                this.fillTable(0, "", "", "", "");
                 break;
             case 1:
-                this.fillTable(1, this.refTxtSearch.current.value);
+                this.fillTable(1, "", this.state.fechaInicio, this.state.fechaFinal, this.state.idConcepto);
                 break;
-            default: this.fillTable(0, "");
+            case 2:
+                this.fillTable(2, this.refTxtSearch.current.value, "", "", "");
+                break;
+            default: this.fillTable(0, "", "", "", "");
         }
     }
 
@@ -130,7 +138,7 @@ class Socios extends React.Component {
                     "filasPorPagina": this.state.filasPorPagina
                 }
             });
-            console.log(result)
+            
             let totalPaginacion = parseInt(Math.ceil((parseFloat(result.data.total) / this.state.filasPorPagina)));
             let messagePaginacion = `Mostrando ${result.data.result.length} de ${totalPaginacion} Páginas`;
 
@@ -300,6 +308,7 @@ class Socios extends React.Component {
                                         <th width="20%">Cliente</th>
                                         <th width="15%">Cel. / Tel.</th>
                                         <th width="15%">Dirección</th>
+                                        <th width="15%">Comprobante</th>
                                         <th width="20%">Propiedad</th>
                                         <th width="5%" className="text-center">Detalle</th>
                                     </tr>
@@ -326,6 +335,7 @@ class Socios extends React.Component {
                                                         <td>{item.informacion}</td>
                                                         <td>{item.celular}{<br />}{item.telefono}</td>
                                                         <td>{item.direccion}</td>
+                                                        <td>{item.comprobante} {<br />}{item.serie + "-" + item.numeracion}</td>
                                                         <td>{
                                                             item.detalle.map((detalle, indexd) => (
                                                                 <div key={indexd}>
