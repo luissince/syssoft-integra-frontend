@@ -263,9 +263,13 @@ router.get('/exceldeudas', async function (req, res) {
     }
 });
 
-router.get("/updatealta",async function(req, res) {
-    await cliente.updatealta(req)
-    res.status(200).send("ok");
+router.get("/updatealta", async function (req, res) {
+    const result = await cliente.updatealta(req)
+    if (result === "ok") {
+        res.status(200).send("ok");
+    } else {
+        res.status(200).send(result);
+    }
 });
 
 module.exports = router;

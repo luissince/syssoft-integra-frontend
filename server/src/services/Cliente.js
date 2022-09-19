@@ -714,7 +714,9 @@ class Cliente {
         try {
             connection = await conec.beginTransaction();
 
-            const venta = await conec.execute(connection, `SELECT * FROM venta WHERE idProyecto = 'PR0005'`);
+            const venta = await conec.execute(connection, `SELECT * FROM venta WHERE idProyecto = ?`,[
+                req.query.idProyecto
+            ]);
             for (let value of venta) {
                 const alta = await conec.execute(connection, `SELECT * FROM alta WHERE idCliente = ? AND idProyecto = ?`, [
                     value.idCliente,
@@ -755,7 +757,6 @@ class Cliente {
             }
 
             await conec.commit(connection);
-            console.log("ok")
             return "ok";
         } catch (error) {
             if (connection != null) {
