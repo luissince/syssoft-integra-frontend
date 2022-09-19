@@ -2,6 +2,47 @@ const express = require('express');
 const router = express.Router();
 const proyecto = require('../services/Proyecto');
 
+
+/**
+ * @swagger
+ * /api/proyecto/list:
+ *  get:
+ *      summary: retorna la lista de proyectos
+ *      tags: [Login]
+ *      parameters:
+ *          -   in: query
+ *              name: usuario
+ *              schema:
+ *                  type: string
+ *              required: true
+ *              description: usuario para el inicio de sesión
+ *          -   in: query
+ *              name: password
+ *              schema:
+ *                  type: string
+ *              required: true
+ *              description: contraseña para el inicio de sesión
+ * 
+ *      responses:
+ *          200:
+ *              description: Creación del token
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                          type: object
+ *          400:
+ *              description: Datos incorrectos
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                          type: string
+ *          500:
+ *              description: Error del servidor
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                          type: string
+ */
 router.get('/list', async function (req, res) {
     return await proyecto.list(req, res);
 });
