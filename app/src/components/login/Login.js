@@ -247,7 +247,7 @@ class Login extends React.Component {
                         </div>
                         <button onClick={this.onEventForm} type="button" className="btn btn-lg btn-primary btn-block">Ingresar</button>
                         {/* <button onClick={this.onEventRecuperar} type="button" className="btn btn-lg btn-outline-primary btn-block">Recuperar</button> */}
-                        <p className="mt-5 mb-3 text-muted">© 2022</p>
+                        <p className="mt-5 mb-3 text-muted">SysSoft Integra © {new Date().getFullYear()}</p>
                     </form>
                 </div>
             </>
