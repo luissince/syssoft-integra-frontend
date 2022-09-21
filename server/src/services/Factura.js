@@ -1417,7 +1417,7 @@ class Factura {
             cuota,
             DATE_FORMAT(fecha,'%d/%m/%Y') as fecha,
             CASE 
-            WHEN YEAR(fecha) <= YEAR(CURRENT_DATE) AND MONTH(fecha) <= MONTH(CURRENT_DATE) then 1 
+            WHEN fecha <= CURRENT_DATE then 1 
             ELSE 0 end AS vencido,
             monto,
             estado
