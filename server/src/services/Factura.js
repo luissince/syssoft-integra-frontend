@@ -1418,6 +1418,8 @@ class Factura {
             DATE_FORMAT(p.fecha,'%d/%m/%Y') as fecha,
             CASE 
             WHEN p.fecha < CURRENT_DATE then 1 
+            WHEN YEAR(p.fecha) = YEAR(CURRENT_DATE) AND MONTH(p.fecha) = MONTH(CURRENT_DATE) AND v.frecuencia = 15 AND DAY(p.fecha) <= 15 then 1 
+            WHEN YEAR(p.fecha) = YEAR(CURRENT_DATE) AND MONTH(p.fecha) = MONTH(CURRENT_DATE) AND DAY(p.fecha) > 15 then 1 
             ELSE 0 end AS vencido,
             p.monto,
             p.estado
@@ -1452,10 +1454,6 @@ class Factura {
                         req.query.idVenta,
                         cobro.idCobro
                     ]);
-
-                    // if (cobroPlazo.length > 0) {
-                    //     newCobros.push(cobroPlazo[0]);
-                    // }
 
                     newCobros = cobroPlazo.reduce((previousValue, currentValue) => previousValue + currentValue.precio, 0);
                 }
