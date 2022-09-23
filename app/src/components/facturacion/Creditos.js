@@ -5,7 +5,8 @@ import {
     spinnerLoading,
     dateFormat,
     numberFormat,
-    statePrivilegio
+    statePrivilegio,
+    keyUpSearch
 } from '../tools/Tools';
 import { connect } from 'react-redux';
 import Paginacion from '../tools/Paginacion';
@@ -180,7 +181,8 @@ class Creditos extends React.Component {
                                     className="form-control"
                                     placeholder="Buscar..."
                                     ref={this.refTxtSearch}
-                                    onKeyUp={(event) => this.searchText(event.target.value)} />
+                                    onKeyUp={(event) => keyUpSearch(event, () => this.searchText(event.target.value))}
+                                />
                             </div>
                         </div>
                     </div>

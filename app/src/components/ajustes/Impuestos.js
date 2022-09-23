@@ -13,7 +13,8 @@ import {
     ModalAlertSuccess,
     ModalAlertWarning,
     spinnerLoading,
-    statePrivilegio
+    statePrivilegio,
+    keyUpSearch
 } from '../tools/Tools';
 import { connect } from 'react-redux';
 import Paginacion from '../tools/Paginacion';
@@ -100,7 +101,7 @@ class Impuestos extends React.Component {
     loadInit = async () => {
         if (this.state.loading) return;
 
-        await this.setStateAsync({ paginacion: 1, restart: true  });
+        await this.setStateAsync({ paginacion: 1, restart: true });
         this.fillTable(0, "");
         await this.setStateAsync({ opcion: 0 });
 
@@ -111,13 +112,13 @@ class Impuestos extends React.Component {
 
         if (text.trim().length === 0) return;
 
-        await this.setStateAsync({ paginacion: 1 , restart: false });
+        await this.setStateAsync({ paginacion: 1, restart: false });
         this.fillTable(1, text.trim());
         await this.setStateAsync({ opcion: 1 });
     }
 
     paginacionContext = async (listid) => {
-        await this.setStateAsync({ paginacion: listid , restart: false });
+        await this.setStateAsync({ paginacion: listid, restart: false });
         this.onEventPaginacion();
     }
 
@@ -381,7 +382,8 @@ class Impuestos extends React.Component {
                                     className="form-control"
                                     placeholder="Buscar..."
                                     ref={this.refTxtSearch}
-                                    onKeyUp={(event) => this.searchText(event.target.value)} />
+                                    onKeyUp={(event) => keyUpSearch(event, () => this.searchText(event.target.value))}
+                                />
                             </div>
                         </div>
                     </div>

@@ -18,6 +18,7 @@ import {
     ModalAlertWarning,
     ModalAlertError,
     statePrivilegio,
+    keyUpSearch
 } from '../tools/Tools';
 import sunat from '../../recursos/images/sunat.png';
 import reuse from '../../recursos/images/reuse.svg';
@@ -715,7 +716,7 @@ class CpeElectronicos extends React.Component {
                                     className="form-control"
                                     placeholder="Ingrese los datos requeridos..."
                                     ref={this.refTxtSearch}
-                                    onKeyUp={(event) => this.searchText(event.target.value)}
+                                    onKeyUp={(event) => keyUpSearch(event, () => this.searchText(event.target.value))}
                                 />
                             </div>
                         </div>

@@ -12,6 +12,7 @@ import {
     ModalAlertWarning,
     spinnerLoading,
     statePrivilegio,
+    keyUpSearch
 } from '../tools/Tools';
 import Paginacion from '../tools/Paginacion';
 
@@ -253,7 +254,8 @@ class Usuarios extends React.Component {
                                     className="form-control"
                                     placeholder="Buscar..."
                                     ref={this.refTxtSearch}
-                                    onKeyUp={(event) => this.searchText(event.target.value)} />
+                                    onKeyUp={(event) => keyUpSearch(event, () => this.searchText(event.target.value))}
+                                />
                             </div>
                         </div>
                     </div>

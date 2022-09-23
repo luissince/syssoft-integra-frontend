@@ -260,6 +260,22 @@ export function keyNumberPhone(event) {
   }
 }
 
+export function keyUpSearch(event, callback) {
+  if (event.key !== "Tab"
+    && event.key !== "Backspace"
+    && event.key !== "Control"
+    && event.key !== "AltRight"
+    && (event.key !== "Control" && event.key !== "AltRight")
+    && (event.key !== "Control" && event.key !== "c")
+    && event.key !== "Alt"
+    && event.key !== "ArrowRight"
+    && event.key !== "ArrowLeft"
+    && event.key !== "ArrowDown"
+    && event.key !== "ArrowUp") {
+    callback();
+  }
+}
+
 export function dateFormat(value) {
   var parts = value.split("-");
   let today = new Date(parts[0], parts[1] - 1, parts[2]);

@@ -9,7 +9,8 @@ import {
     ModalAlertDialog,
     statePrivilegio,
     currentDate,
-    validateDate
+    validateDate,
+    keyUpSearch
 } from '../tools/Tools';
 import Paginacion from '../tools/Paginacion';
 
@@ -62,17 +63,6 @@ class Socios extends React.Component {
     }
 
     loadInit = async () => {
-        // const concepto = await axios.get("/api/concepto/listcombo", {
-        //     signal: this.abortControllerView.signal,
-        // });
-
-        // if (this.state.loading) return;
-
-        // await this.setStateAsync({
-        //     conceptos: concepto.data
-        // })
-
-        // this.searchFecha();
         if (this.state.loading) return;
 
         await this.setStateAsync({ paginacion: 1, restart: true });
@@ -138,7 +128,7 @@ class Socios extends React.Component {
                     "filasPorPagina": this.state.filasPorPagina
                 }
             });
-            
+
             let totalPaginacion = parseInt(Math.ceil((parseFloat(result.data.total) / this.state.filasPorPagina)));
             let messagePaginacion = `Mostrando ${result.data.result.length} de ${totalPaginacion} Páginas`;
 
@@ -291,7 +281,8 @@ class Socios extends React.Component {
                                     className="form-control"
                                     placeholder="Buscar..."
                                     ref={this.refTxtSearch}
-                                    onKeyUp={(event) => this.searchText(event.target.value)} />
+                                    onKeyUp={(event) => keyUpSearch(event, () => this.searchText(event.target.value))}
+                                />
                             </div>
                         </div>
                     </div>

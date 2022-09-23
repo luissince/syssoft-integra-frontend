@@ -1,6 +1,6 @@
 import React from 'react';
 import axios from 'axios';
-import { 
+import {
     numberFormat,
     showModal,
     hideModal,
@@ -8,10 +8,11 @@ import {
     clearModal,
     ModalAlertDialog,
     ModalAlertInfo,
-    ModalAlertSuccess, 
+    ModalAlertSuccess,
     ModalAlertWarning,
     spinnerLoading,
-    statePrivilegio
+    statePrivilegio,
+    keyUpSearch
 } from '../tools/Tools';
 import { connect } from 'react-redux';
 import Paginacion from '../tools/Paginacion';
@@ -107,7 +108,7 @@ class Bancos extends React.Component {
     loadInit = async () => {
         if (this.state.loading) return;
 
-        await this.setStateAsync({ paginacion: 1,   restart: true });
+        await this.setStateAsync({ paginacion: 1, restart: true });
         this.fillTable(0, "");
         await this.setStateAsync({ opcion: 0 });
     }
@@ -117,13 +118,13 @@ class Bancos extends React.Component {
 
         if (text.trim().length === 0) return;
 
-        await this.setStateAsync({ paginacion: 1,   restart: false });
+        await this.setStateAsync({ paginacion: 1, restart: false });
         this.fillTable(1, text.trim());
         await this.setStateAsync({ opcion: 1 });
     }
 
     paginacionContext = async (listid) => {
-        await this.setStateAsync({ paginacion: listid,   restart: false  });
+        await this.setStateAsync({ paginacion: listid, restart: false });
         this.onEventPaginacion();
     }
 
@@ -434,7 +435,8 @@ class Bancos extends React.Component {
                                     className="form-control"
                                     placeholder="Buscar..."
                                     ref={this.refTxtSearch}
-                                    onKeyUp={(event) => this.searchText(event.target.value)} />
+                                    onKeyUp={(event) => keyUpSearch(event, () => this.searchText(event.target.value))}
+                                />
                             </div>
                         </div>
                     </div>
@@ -495,7 +497,7 @@ class Bancos extends React.Component {
                                                             <button className="btn btn-outline-info btn-sm" title="Detalle" onClick={() => {
                                                                 this.props.history.push({ pathname: `${this.props.location.pathname}/detalle`, search: "?idBanco=" + item.idBanco })
                                                             }}
-                                                            disabled={!this.state.view}>
+                                                                disabled={!this.state.view}>
                                                                 <i className="fa fa-eye"></i>
                                                             </button>
                                                         </td>
