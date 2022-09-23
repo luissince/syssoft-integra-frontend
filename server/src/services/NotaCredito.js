@@ -295,28 +295,45 @@ class NotaCredito {
         try {
             connection = await conec.beginTransaction();
 
+            /**
+             * Comprobar si el cobro se encuentra anulado
+             * 1 = activo
+             * 0 = anulado
+             */
             let anulado = await conec.execute(connection, `SELECT idCobro FROM cobro 
             WHERE idCobro = ? AND estado = 0`, [
                 req.body.idCobro,
             ]);
 
+            /**
+             * Retornar el resultado de la comprobación
+             */
             if (anulado.length > 0) {
                 await conec.rollback(connection);
                 return sendClient(res, "No se puede asignar una nota de crédito a un comprobante anulado.");
             }
 
+            /**
+             * Comprobar si el cobro ya tiene ligado una nota de crédito
+             */
             let validate = await conec.execute(connection, `SELECT c.idCobro 
-            FROM cobro AS c INNER JOIN notaCredito AS nc 
+            FROM cobro AS c INNER JOIN notaCredito AS nc
             ON c.idCobro = nc.idCobro
             WHERE c.idCobro = ?`, [
                 req.body.idCobro,
             ]);
 
+            /**
+             * Retornar el resultado de la comprobación
+             */
             if (validate.length > 0) {
                 await conec.rollback(connection);
                 return sendClient(res, "El comprobante ya tiene asociado una nota de crédito.");
             }
 
+            /**
+             * Creación de llave primaria de la nota de crédito que es autoincremental
+             */
             let result = await conec.execute(connection, 'SELECT idNotaCredito FROM notaCredito');
             let idNotaCredito = "";
             if (result.length != 0) {
@@ -343,6 +360,10 @@ class NotaCredito {
                 idNotaCredito = "NC0001";
             }
 
+            /**
+             * Obtener datos del comprobante {serie, numeración} que se va registrar
+             * 3 = El valor para nota de crédito
+             */
             let comprobante = await conec.execute(connection, `SELECT 
             serie,
             numeracion 
@@ -352,12 +373,22 @@ class NotaCredito {
                 req.body.idComprobante
             ]);
 
+            /**
+             * @numeracion el nuevo valor del comprobante a registrar
+             */
             let numeracion = 0;
 
+            /**
+             * Obtener las notas de crédito ligadas al comprobante seleccionado
+             */
             let notaCredito = await conec.execute(connection, 'SELECT numeracion FROM notaCredito WHERE idComprobante = ?', [
                 req.body.idComprobante
             ]);
 
+            /**
+             * Verifica si hay comprobantes ya registrados, en caso
+             * no exista utilizar la numeración del comprobante selecionado
+             */
             if (notaCredito.length > 0) {
                 let quitarValor = notaCredito.map(function (item) {
                     return parseInt(item.numeracion);
@@ -370,6 +401,9 @@ class NotaCredito {
                 numeracion = comprobante[0].numeracion;
             }
 
+            /**
+             * Registrar la nueva nota de crédito
+             */
             await conec.execute(connection, `INSERT INTO notaCredito(
                 idNotaCredito,
                 idCliente,
@@ -402,6 +436,9 @@ class NotaCredito {
                 currentTime()
             ]);
 
+            /**
+             * Registrar el detalle de la nota de crédito
+             */
             for (let item of req.body.detalle) {
                 await conec.execute(connection, `INSERT INTO notaCreditoDetalle(
                 idNotaCredito,
@@ -425,32 +462,62 @@ class NotaCredito {
             }
 
             /**
-             * eliminar cabros asociados
+             * Eliminar los registrados asociados
+             * Cobros
+             * Bancos
              */
-            let cobro = await conec.execute(connection, `SELECT idCobro,idProcedencia,serie,numeracion 
+
+            /**
+             * Obtener el cobro que va ser asociado a la nota de crédito
+             */
+            let cobro = await conec.execute(connection, `SELECT 
+                idCobro,
+                idProcedencia,
+                serie,numeracion 
                 FROM cobro 
                 WHERE idCobro = ?`, [
                 req.body.idCobro
             ]);
 
+            /**
+             * Obtener la venta ligada al cobro
+             */
             let venta = await conec.execute(connection, `SELECT idVenta,credito 
                 FROM venta 
                 WHERE idVenta  = ?`, [
                 cobro[0].idProcedencia
             ]);
 
+            /**
+             * Obtener el plazo ligado al cobro
+             */
             let cobroVenta = await conec.execute(connection, `SELECT idPlazo 
                 FROM cobroVenta 
                 WHERE idCobro = ?`, [
                 req.body.idCobro
             ]);
 
+            /**
+             * Actualizar y/o eliminar el plazo 
+             */
             if (venta.length > 0) {
+
+                /**
+                 * Verificar el tipo de venta 
+                 * Credito = 0 pago en plazos fijos
+                 * Credito = 1 pago en plazos variables
+                 */
                 if (venta[0].credito === 1) {
+                    /**
+                     * Eliminar el plazo ligado al cobro
+                     */
                     await conec.execute(connection, `DELETE FROM plazo WHERE idPlazo = ?`, [
                         cobroVenta[0].idPlazo
                     ]);
                 } else {
+                    /**
+                     * Obtiene la suma total de los cobros ligados a un plazo
+                     */
                     let suma = await conec.execute(connection, `SELECT
                     IFNULL(cv.precio,0) AS total 
                     FROM cobro AS c 
@@ -460,8 +527,14 @@ class NotaCredito {
                         cobroVenta[0].idPlazo
                     ]);
 
+                    /**
+                     * Realizar un reduce para sumar todos los registros
+                     */
                     let sumaTotal = suma.map(item => item.total).reduce((prev, current) => prev + current, 0)
 
+                    /**
+                     * Obtener el valor actual del cobro a eliminar
+                     */
                     let actual = await conec.execute(connection, `SELECT 
                         IFNULL(precio,0) AS total 
                         FROM cobroVenta 
@@ -469,6 +542,9 @@ class NotaCredito {
                         req.body.idCobro
                     ]);
 
+                    /**
+                     * Obtener la suma total de los plazos ligados a un cobro
+                     */
                     let plazoSuma = await conec.execute(connection, `SELECT 
                         IFNULL(monto,0) AS total 
                         FROM plazo 
@@ -476,6 +552,11 @@ class NotaCredito {
                         cobroVenta[0].idPlazo
                     ]);
 
+                    /**
+                     * Comprobar si los plazos cobrados es mayor que la suma total menos el actual
+                     * P > S - A
+                     * Verdadero = Actualizar el plazo a por cobrar
+                     */
                     if (plazoSuma[0].total > sumaTotal - actual[0].total) {
                         await conec.execute(connection, `UPDATE plazo SET estado = 0 
                         WHERE idPlazo = ?`, [
@@ -484,6 +565,9 @@ class NotaCredito {
                     }
                 }
 
+                /**
+                 * Obtener el monto total de la venta
+                 */
                 let total = await conec.execute(connection, `SELECT 
                     IFNULL(SUM(vd.precio*vd.cantidad),0) AS total 
                     FROM venta AS v
@@ -492,6 +576,9 @@ class NotaCredito {
                     venta[0].idVenta
                 ]);
 
+                /**
+                 * Obtener el monto total de los cobros ligados a una venta
+                 */
                 let cobrado = await conec.execute(connection, `SELECT 
                     IFNULL(SUM(cv.precio),0) AS total
                     FROM cobro AS c 
@@ -501,6 +588,9 @@ class NotaCredito {
                     venta[0].idVenta
                 ]);
 
+                /**
+                 * Obtener el valor actual del cobro a eliminar
+                 */
                 let actual = await conec.execute(connection, `SELECT 
                     IFNULL(SUM(cv.precio),0) AS total
                     FROM cobro AS c 
@@ -509,6 +599,11 @@ class NotaCredito {
                     req.body.idCobro
                 ]);
 
+                /**
+                 * Comprobar si monto total de la venta es mayor que la cobro total menos el actual
+                 * V > C - A
+                 * Verdadero = Actualizar la venta a credito
+                 */
                 let montoCobrado = cobrado[0].total - actual[0].total;
                 if (montoCobrado < total[0].total) {
                     await conec.execute(connection, `UPDATE venta SET estado = 2
@@ -518,15 +613,29 @@ class NotaCredito {
                 }
             }
 
+            /**
+             * Ingrese un comentario al cobro del motivo de su anulación
+             * 
+             */
             await conec.execute(connection, `UPDATE cobro SET observacion = ? WHERE idCobro = ?`, [
                 req.query.idCobro,
                 `ANULACIÓN CON NOTA DE CRÉDITO`
             ]);
 
+            /**
+             * Eliminar el cobro en el detalle banco
+             */
             await conec.execute(connection, `DELETE FROM bancoDetalle WHERE idProcedencia  = ?`, [
                 req.body.idCobro
             ]);
 
+            /**
+             * Registro de la tabla auditoria para saber quien realizo tal proceso
+             */
+
+            /**
+             * Creación de llave primaria que es autoincremental
+             */
             let resultAuditoria = await conec.execute(connection, 'SELECT idAuditoria FROM auditoria');
             let idAuditoria = 0;
             if (resultAuditoria.length != 0) {
@@ -542,6 +651,9 @@ class NotaCredito {
                 idAuditoria = 1;
             }
 
+            /**
+             * Registrar los datos en la tabla auditoria
+             */
             await conec.execute(connection, `INSERT INTO auditoria(
                         idAuditoria,
                         idProcedencia,
@@ -558,10 +670,19 @@ class NotaCredito {
                 req.body.idUsuario,
             ]);
 
+            /**
+             * Guardar los cambios
+             */
             await conec.commit(connection);
 
+            /**
+             * Responder al usuario que todo salio bien
+             */
             return sendSave(res, "Se registró correctamente la nota de crédito.");
         } catch (error) {
+            /**
+             * Response al usuario de un posible error
+             */
             if (connection != null) {
                 await conec.rollback(connection);
             }
@@ -584,7 +705,7 @@ class NotaCredito {
             /**
              * Validar si hay datos
              */
-            if(validate.length == 0){
+            if (validate.length == 0) {
                 await conec.rollback(connection);
                 return sendClient(res, "Datos no encontrados.");
             }
@@ -592,7 +713,7 @@ class NotaCredito {
             /**
              * Validar si la nota de crédito ya esta anulada
              */
-            if(validate[0].estado == 0){
+            if (validate[0].estado == 0) {
                 await conec.rollback(connection);
                 return sendClient(res, "La nota de crédito ya se encuentra anulada.");
             }
@@ -602,7 +723,7 @@ class NotaCredito {
              * 0 = anulado
              * 1 = activo
              */
-            await conec.execute(connection,`UPDATE notaCredito SET estado = 0 WHERE idNotaCredito = ?`,[
+            await conec.execute(connection, `UPDATE notaCredito SET estado = 0 WHERE idNotaCredito = ?`, [
                 req.query.idNotaCredito
             ]);
 
