@@ -23,6 +23,10 @@ router.post('/add', async function (req, res) {
     return notaCredito.add(req, res);
 });
 
+router.delete('/', async function (req, res){
+    return notaCredito.delete(req, res);
+});
+
 router.get('/email', async function (req, res) {
     try {
         const sedeInfo = await sede.infoSedeReporte(req)

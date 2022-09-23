@@ -261,7 +261,7 @@ class Comprobantes extends React.Component {
                     "impresion": this.state.impresion.trim(),
                     "estado": this.state.estado,
                     "preferida": this.state.preferida,
-                    "numeroCampo": this.state.numeroCampo,
+                    "numeroCampo": this.state.numeroCampo == "" ? 0 : this.state.numeroCampo,
                     "idUsuario": this.state.idUsuario,
                     "idComprobante": this.state.idComprobante,
                 });
@@ -279,7 +279,7 @@ class Comprobantes extends React.Component {
                     "codigo": this.state.codigo,
                     "estado": this.state.estado,
                     "preferida": this.state.preferida,
-                    "numeroCampo": this.state.numeroCampo,
+                    "numeroCampo": this.state.numeroCampo == "" ? 0 : this.state.numeroCampo,
                     "idUsuario": this.state.idUsuario
                 });
 

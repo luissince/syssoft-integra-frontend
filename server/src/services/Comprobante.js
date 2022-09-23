@@ -165,6 +165,7 @@ class Comprobante {
             await conec.commit(connection);
             return sendSuccess(res, "Se inserto correctamente el comprobante.")
         } catch (error) {
+            console.error(error)
             if (connection != null) {
                 await conec.rollback(connection);
             }

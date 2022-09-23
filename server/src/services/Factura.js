@@ -1413,15 +1413,17 @@ class Factura {
             ]);
 
             let plazos = await conec.query(`SELECT 
-            idPlazo,        
-            cuota,
-            DATE_FORMAT(fecha,'%d/%m/%Y') as fecha,
+            p.idPlazo,        
+            p.cuota,
+            DATE_FORMAT(p.fecha,'%d/%m/%Y') as fecha,
             CASE 
-            WHEN fecha <= CURRENT_DATE then 1 
+            WHEN p.fecha < CURRENT_DATE then 1 
             ELSE 0 end AS vencido,
-            monto,
-            estado
-            FROM plazo WHERE idVenta = ?
+            p.monto,
+            p.estado
+            FROM plazo AS p 
+            INNER JOIN venta AS v ON p.idVenta = v.idVenta
+            WHERE p.idVenta = ?
             `, [
                 req.query.idVenta
             ]);

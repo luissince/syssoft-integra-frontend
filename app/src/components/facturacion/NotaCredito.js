@@ -4,6 +4,11 @@ import {
     spinnerLoading,
     numberFormat,
     timeForma24,
+    ModalAlertDialog,
+    ModalAlertInfo,
+    ModalAlertSuccess,
+    ModalAlertWarning,
+    ModalAlertError,
     statePrivilegio
 } from '../tools/Tools';
 import { connect } from 'react-redux';
@@ -125,6 +130,32 @@ class NotaCredito extends React.Component {
         this.props.history.push(`${this.props.location.pathname}/proceso`);
     }
 
+    onEventAnularNotaCredito(idNotaCredito) {
+        ModalAlertDialog("Nota de Crédito", "¿Está seguro de que desea eliminar la nota de crédito? Esta operación no se puede deshacer.", async (value) => {
+            if (value) {
+                try {
+                    ModalAlertInfo("Nota de Crédito", "Procesando información...");
+                    let result = await axios.delete('/api/notacredito/', {
+                        params: {
+                            "idNotaCredito": idNotaCredito,
+                            "idUsuario": this.state.idUsuario
+                        }
+                    })
+                    ModalAlertSuccess("Nota de Crédito", result.data, () => {
+                        this.onEventPaginacion();
+                    })
+                } catch (error) {
+                    if (error.response) {
+                        ModalAlertWarning("Nota de Crédito", error.response.data)
+                    } else {
+                        ModalAlertError("Nota de Crédito", "Se genero un error interno, intente nuevamente.")
+                    }
+                }
+            }
+        })
+    }
+
+
     render() {
         return (
             <>
@@ -179,19 +210,20 @@ class NotaCredito extends React.Component {
                                         <th width="10%" className="text-center">Modificado</th>
                                         <th width="10%" className="text-center">Estado</th>
                                         <th width="5%" className="text-center">Detalle</th>
+                                        <th width="5%" className="text-center">Eliminar</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {
                                         this.state.loading ? (
                                             <tr>
-                                                <td className="text-center" colSpan="8">
+                                                <td className="text-center" colSpan="9">
                                                     {spinnerLoading()}
                                                 </td>
                                             </tr>
                                         ) : this.state.lista.length === 0 ? (
                                             <tr className="text-center">
-                                                <td colSpan="8">¡No hay datos registrados!</td>
+                                                <td colSpan="9">¡No hay datos registrados!</td>
                                             </tr>
                                         ) : (
                                             this.state.lista.map((item, index) => {
@@ -217,7 +249,15 @@ class NotaCredito extends React.Component {
                                                                 onClick={() => {
                                                                     this.props.history.push({ pathname: `${this.props.location.pathname}/detalle`, search: "?idNotaCredito=" + item.idNotaCredito })
                                                                 }}
-                                                                disabled={!this.state.view}><i className="fa fa-eye"></i></button>
+                                                                disabled={!this.state.view}><i className="fa fa-eye"></i>
+                                                            </button>
+                                                        </td>
+                                                        <td className="text-center">
+                                                            <button
+                                                                className="btn btn-outline-danger btn-sm"
+                                                                title="Ver detalle"
+                                                                onClick={() => { this.onEventAnularNotaCredito(item.idNotaCredito) }}><i className="fa fa-remove"></i>
+                                                            </button>
                                                         </td>
                                                     </tr>
                                                 )

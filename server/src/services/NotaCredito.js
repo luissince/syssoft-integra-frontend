@@ -118,7 +118,7 @@ class NotaCredito {
                 parseInt(req.query.opcion),
                 req.query.buscar,
                 req.query.idProyecto,
-                
+
                 parseInt(req.query.opcion),
                 req.query.buscar,
                 req.query.idProyecto,
@@ -208,7 +208,7 @@ class NotaCredito {
             } else {
                 return sendClient(res, "Datos no encontrados");
             }
-        } catch (error) {            
+        } catch (error) {
             return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
         }
     }
@@ -424,6 +424,9 @@ class NotaCredito {
                 ]);
             }
 
+            /**
+             * eliminar cabros asociados
+             */
             let cobro = await conec.execute(connection, `SELECT idCobro,idProcedencia,serie,numeracion 
                 FROM cobro 
                 WHERE idCobro = ?`, [
@@ -559,6 +562,105 @@ class NotaCredito {
 
             return sendSave(res, "Se registró correctamente la nota de crédito.");
         } catch (error) {
+            if (connection != null) {
+                await conec.rollback(connection);
+            }
+            return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
+        }
+    }
+
+    async delete(req, res) {
+        let connection = null;
+        try {
+            connection = await conec.beginTransaction();
+
+            /**
+             * Obtener datos de la nota de crédito
+             */
+            const validate = await conec.execute(connection, `SELECT serie,numeracion,estado FROM notaCredito WHERE idNotaCredito = ?`, [
+                req.query.idNotaCredito
+            ]);
+
+            /**
+             * Validar si hay datos
+             */
+            if(validate.length == 0){
+                await conec.rollback(connection);
+                return sendClient(res, "Datos no encontrados.");
+            }
+
+            /**
+             * Validar si la nota de crédito ya esta anulada
+             */
+            if(validate[0].estado == 0){
+                await conec.rollback(connection);
+                return sendClient(res, "La nota de crédito ya se encuentra anulada.");
+            }
+
+            /**
+             * Cambiar el estado a anulado 
+             * 0 = anulado
+             * 1 = activo
+             */
+            await conec.execute(connection,`UPDATE notaCredito SET estado = 0 WHERE idNotaCredito = ?`,[
+                req.query.idNotaCredito
+            ]);
+
+            /**
+             * Registro de la tabla auditoria para saber quien realizo tal proceso
+             */
+
+            /**
+             * Creación de llave primaria que es autoincremental
+             */
+            const resultAuditoria = await conec.execute(connection, 'SELECT idAuditoria FROM auditoria');
+            let idAuditoria = 0;
+            if (resultAuditoria.length != 0) {
+                let quitarValor = resultAuditoria.map(function (item) {
+                    return parseInt(item.idAuditoria);
+                });
+
+                let valorActual = Math.max(...quitarValor);
+                let incremental = valorActual + 1;
+
+                idAuditoria = incremental;
+            } else {
+                idAuditoria = 1;
+            }
+
+            /**
+             * Registrar los datos en la tabla auditoria
+             */
+            await conec.execute(connection, `INSERT INTO auditoria(
+                        idAuditoria,
+                        idProcedencia,
+                        descripcion,
+                        fecha,
+                        hora,
+                        idUsuario) 
+                        VALUES(?,?,?,?,?,?)`, [
+                idAuditoria,
+                req.query.idNotaCredito,
+                `ANULACIÓN DE LA NOTA DE CRÉDITO ${validate[0].serie}-${validate[0].numeracion}`,
+                currentDate(),
+                currentTime(),
+                req.query.idUsuario,
+            ]);
+
+            /**
+             * Guardar los cambios
+             */
+            await conec.commit(connection);
+
+            /**
+             * Responder al usuario que todo salio bien
+             */
+            return sendSave(res, "Se eliminó correctamente la nota de crédito.");
+        } catch (error) {
+            console.error(error)
+            /**
+             * Response al usuario de un posible error
+             */
             if (connection != null) {
                 await conec.rollback(connection);
             }

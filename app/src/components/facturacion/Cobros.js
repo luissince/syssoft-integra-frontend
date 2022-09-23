@@ -151,7 +151,7 @@ class Cobros extends React.Component {
                         this.loadInit();
                     })
                 } catch (error) {
-                    if (error.response !== undefined) {
+                    if (error.response) {
                         ModalAlertWarning("Cobro", error.response.data)
                     } else {
                         ModalAlertError("Cobro", "Se genero un error interno, intente nuevamente.")
@@ -241,7 +241,7 @@ class Cobros extends React.Component {
                                                         <td>{item.fecha}{<br />}{timeForma24(item.hora)}</td>
                                                         <td>{item.banco}</td>
                                                         <td>{item.detalle}<br /><small>{item.comprobanteRef}</small></td>
-                                                        <td>{item.estado == 1 && item.idNotaCredito == null ?
+                                                        <td>{item.estado === 1 && item.idNotaCredito === null ?
                                                             <span className="text-success">COBRADO</span> :
                                                             item.idNotaCredito != null ?
                                                                 <span className="text-warning">MODIFICADO</span> :
