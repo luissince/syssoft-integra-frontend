@@ -74,94 +74,94 @@ class RepCliente {
                 }
             );
 
-            doc.fontSize(h3).text(
-                `PERIODO: ${dateFormat(req.query.fechaIni)} al ${dateFormat(req.query.fechaFin)}`,
-                orgX,
-                doc.y + 5,
-                {
-                    width: 300,
-                    align: "left",
-                }
-            );
+            // doc.fontSize(h3).text(
+            //     `PERIODO: ${dateFormat(req.query.fechaIni)} al ${dateFormat(req.query.fechaFin)}`,
+            //     orgX,
+            //     doc.y + 5,
+            //     {
+            //         width: 300,
+            //         align: "left",
+            //     }
+            // );
 
-            if (req.query.idCliente !== "") {
-                let content = data.map((item, index) => {
-                    return [++index,
-                    item.fecha + "\n" + item.hora,
-                    item.comprobante + "\n" + item.serie + "-" + item.numeracion,
-                    item.detalle,
-                    numberFormat(item.monto)];
-                });
+            // if (req.query.idCliente !== "") {
+            //     let content = data.map((item, index) => {
+            //         return [++index,
+            //         item.fecha + "\n" + item.hora,
+            //         item.comprobante + "\n" + item.serie + "-" + item.numeracion,
+            //         item.detalle,
+            //         numberFormat(item.monto)];
+            //     });
 
-                const table = {
-                    subtitle: "DETALLE",
-                    headers: ["N°", "Fecha", "Comprobante", "Detalle", "Monto"],
-                    rows: content
-                };
+            //     const table = {
+            //         subtitle: "DETALLE",
+            //         headers: ["N°", "Fecha", "Comprobante", "Detalle", "Monto"],
+            //         rows: content
+            //     };
 
-                doc.table(table, {
-                    prepareHeader: () => doc.font("Helvetica-Bold").fontSize(h3),
-                    prepareRow: () => {
-                        doc.font("Helvetica").fontSize(h3);
-                    },
-                    padding: 5,
-                    columnSpacing: 5,
-                    columnsSize: [30, 90, 162, 160, 90],
-                    x: doc.x,
-                    y: doc.y + 15,
-                    width: doc.page.width - doc.options.margins.left - doc.options.margins.right
-                });
-            } else {
+            //     doc.table(table, {
+            //         prepareHeader: () => doc.font("Helvetica-Bold").fontSize(h3),
+            //         prepareRow: () => {
+            //             doc.font("Helvetica").fontSize(h3);
+            //         },
+            //         padding: 5,
+            //         columnSpacing: 5,
+            //         columnsSize: [30, 90, 162, 160, 90],
+            //         x: doc.x,
+            //         y: doc.y + 15,
+            //         width: doc.page.width - doc.options.margins.left - doc.options.margins.right
+            //     });
+            // } else {
 
-                let array = [];
-                for (let item of data) {
-                    if (array.filter(f => f.idCliente === item.idCliente).length === 0) {
-                        array.push({
-                            "idCliente": item.idCliente,
-                            "documento": item.documento,
-                            "informacion": item.informacion,
-                            "ingresos": item.ingresos,
-                            "ventas": item.ventas,
-                        });
-                    } else {
-                        for (let newItem of array) {
-                            if (newItem.idCliente === item.idCliente) {
-                                let currenteObject = newItem;
-                                currenteObject.ingresos += parseFloat(item.ingresos);
-                                currenteObject.ventas += parseFloat(item.ventas);
-                                break;
-                            }
-                        }
-                    }
-                }
+            //     let array = [];
+            //     for (let item of data) {
+            //         if (array.filter(f => f.idCliente === item.idCliente).length === 0) {
+            //             array.push({
+            //                 "idCliente": item.idCliente,
+            //                 "documento": item.documento,
+            //                 "informacion": item.informacion,
+            //                 "ingresos": item.ingresos,
+            //                 "ventas": item.ventas,
+            //             });
+            //         } else {
+            //             for (let newItem of array) {
+            //                 if (newItem.idCliente === item.idCliente) {
+            //                     let currenteObject = newItem;
+            //                     currenteObject.ingresos += parseFloat(item.ingresos);
+            //                     currenteObject.ventas += parseFloat(item.ventas);
+            //                     break;
+            //                 }
+            //             }
+            //         }
+            //     }
 
-                let total = 0;
-                let content = array.map((item, index) => {
-                    total += item.ingresos + item.ventas;
-                    return [++index, item.documento + "\n" + item.informacion, numberFormat(item.ingresos + item.ventas)];
-                });
+            //     let total = 0;
+            //     let content = array.map((item, index) => {
+            //         total += item.ingresos + item.ventas;
+            //         return [++index, item.documento + "\n" + item.informacion, numberFormat(item.ingresos + item.ventas)];
+            //     });
 
-                content.push(["", "SUMA TOTAL:", numberFormat(total)]);
+            //     content.push(["", "SUMA TOTAL:", numberFormat(total)]);
 
-                const table = {
-                    subtitle: "DETALLE",
-                    headers: ["N°", "Cliente", "Monto"],
-                    rows: content
-                };
+            //     const table = {
+            //         subtitle: "DETALLE",
+            //         headers: ["N°", "Cliente", "Monto"],
+            //         rows: content
+            //     };
 
-                doc.table(table, {
-                    prepareHeader: () => doc.font("Helvetica-Bold").fontSize(h3),
-                    prepareRow: () => {
-                        doc.font("Helvetica").fontSize(h3);
-                    },
-                    padding: 5,
-                    columnSpacing: 5,
-                    columnsSize: [30, 412, 90],
-                    x: doc.x,
-                    y: doc.y + 15,
-                    width: doc.page.width - doc.options.margins.left - doc.options.margins.right
-                });
-            }
+            //     doc.table(table, {
+            //         prepareHeader: () => doc.font("Helvetica-Bold").fontSize(h3),
+            //         prepareRow: () => {
+            //             doc.font("Helvetica").fontSize(h3);
+            //         },
+            //         padding: 5,
+            //         columnSpacing: 5,
+            //         columnsSize: [30, 412, 90],
+            //         x: doc.x,
+            //         y: doc.y + 15,
+            //         width: doc.page.width - doc.options.margins.left - doc.options.margins.right
+            //     });
+            // }
 
             doc.end();
             return getStream.buffer(doc);

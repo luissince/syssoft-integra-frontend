@@ -23,9 +23,15 @@ class Lote {
                 ? = 0 AND m.idProyecto = ?
                 OR
                 ? = 1 AND m.idProyecto = ? AND l.descripcion LIKE CONCAT(?,'%')    
+                OR
+                ? = 1 AND m.idProyecto = ? AND m.nombre LIKE CONCAT(?,'%')    
                 LIMIT ?,?`, [
                 parseInt(req.query.opcion),
                 req.query.idProyecto,
+
+                parseInt(req.query.opcion),
+                req.query.idProyecto,
+                req.query.buscar,
 
                 parseInt(req.query.opcion),
                 req.query.idProyecto,
@@ -48,10 +54,16 @@ class Lote {
                 WHERE
                 ? = 0 AND m.idProyecto = ?
                 OR
-                ? = 1 AND m.idProyecto = ? AND l.descripcion LIKE CONCAT(?,'%')`, [
+                ? = 1 AND m.idProyecto = ? AND l.descripcion LIKE CONCAT(?,'%')
+                OR
+                ? = 1 AND m.idProyecto = ? AND m.nombre LIKE CONCAT(?,'%')`, [
                 parseInt(req.query.opcion),
                 req.query.idProyecto,
 
+                parseInt(req.query.opcion),
+                req.query.idProyecto,
+                req.query.buscar,
+                
                 parseInt(req.query.opcion),
                 req.query.idProyecto,
                 req.query.buscar,
