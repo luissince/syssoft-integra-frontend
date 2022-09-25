@@ -68,16 +68,51 @@ class RepCliente {
             doc.fontSize(h3).text(
                 `CLIENTE: ${req.query.idCliente === "" ? "TODOS" : req.query.cliente}`,
                 orgX,
-                doc.y + 10,
+                doc.y + 50,
                 {
                     align: "left",
                 }
             );
 
+            doc.fontSize(h3).text(
+                `CLIENTE: ${req.query.idCliente === "" ? "TODOS" : req.query.cliente}`,
+                orgX,
+                doc.y + 50,
+                {
+                    align: "left",
+                }
+            );
+
+            doc.fontSize(h3).text(
+                `CLIENTE: ${req.query.idCliente === "" ? "TODOS" : req.query.cliente}`,
+                orgX,
+                doc.y + 50,
+                {
+                    align: "left",
+                }
+            );
+
+            doc.fontSize(h3).text(
+                `CLIENTE: ${req.query.idCliente === "" ? "TODOS" : req.query.cliente}`,
+                orgX,
+                doc.y + 50,
+                {
+                    align: "left",
+                }
+            );
+
+            doc.fontSize(h3).text(
+                `CLIENTE: ${req.query.idCliente === "" ? "TODOS" : req.query.cliente}`,
+                orgX,
+                doc.y + 50,
+                {
+                    align: "left",
+                }
+            );
             // doc.fontSize(h3).text(
             //     `PERIODO: ${dateFormat(req.query.fechaIni)} al ${dateFormat(req.query.fechaFin)}`,
             //     orgX,
-            //     doc.y + 5,
+            //     doc.y + 5, 
             //     {
             //         width: 300,
             //         align: "left",
@@ -166,6 +201,7 @@ class RepCliente {
             doc.end();
             return getStream.buffer(doc);
         } catch (error) {
+            console.error(error);
             return "Se genero un error al generar el reporte.";
         }
     }

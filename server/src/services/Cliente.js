@@ -544,14 +544,31 @@ class Cliente {
     async listapagos(req) {
         try {
 
-            const ventas = await conec.query(`SELECT * FROM venta WHERE idCliente = ?`,[
+            const ventas = await conec.query(`SELECT 
+            v.idVenta,
+            co.nombre AS comprobante,
+            v.serie,
+            v.numeracion,
+            DATE_FORMAT(v.fecha,'%d/%m/%Y') as fecha, 
+            v.hora
+            FROM venta AS v
+            INNER JOIN comprobante AS co ON co.idComprobante  = v.idComprobante 
+            WHERE v.idCliente = ? AND v.estado <> 3`,[
                 req.query.idCliente,
             ]);
 
             let newVentas = [];
 
             for (const venta of ventas){
-                const detalles = await conec.query(`SELECT * FROM ventaDetalle WHERE idVenta = ?`,[
+                const detalle = await conec.query(`SELECT 
+                l.descripcion AS lote,
+                m.nombre AS manzana,
+                vd.precio,
+                vd.cantidad
+                FROM ventaDetalle AS vd
+                INNER JOIN lote AS l ON vd.idLote = l.idLote
+                INNER JOIN manzana AS m ON m.idManzana = l.idManzana
+                WHERE vd.idVenta = ?`,[
                     venta.idVenta 
                 ]);
 
@@ -585,7 +602,7 @@ class Cliente {
 
                 newVentas.push({
                     ...venta,
-                    "detalle": detalles
+                    "detalle": detalle
                 });
             }
 
@@ -647,6 +664,7 @@ class Cliente {
             //     return lista;
             // }
         } catch (error) {
+            console.error(error);
             return "Se produjo un error de servidor, intente nuevamente.";
         }
     }
