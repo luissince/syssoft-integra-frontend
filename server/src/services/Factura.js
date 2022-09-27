@@ -1117,7 +1117,7 @@ class Factura {
             (
                 SELECT IFNULL(SUM(cv.precio),0) 
                 FROM cobro AS c 
-                LEFT JOIN notaCredito AS nc ON c.idCobro = nc.idCobro
+                LEFT JOIN notaCredito AS nc ON c.idCobro = nc.idCobro AND nc.estado = 1
                 LEFT JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro 
                 WHERE c.idProcedencia = v.idVenta AND c.estado = 1 AND nc.idNotaCredito IS NULL
             ) AS cobrado 
@@ -1167,7 +1167,7 @@ class Factura {
 
             let cobros = await conec.query(`SELECT c.idCobro 
             FROM cobro AS c 
-            LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro
+            LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro AND nc.estado = 1
             WHERE c.idProcedencia = ? AND c.estado = 1 AND nc.idNotaCredito IS NULL`, [
                 req.query.idVenta
             ]);
@@ -1375,7 +1375,7 @@ class Factura {
             (
                 SELECT IFNULL(SUM(cv.precio),0) 
                 FROM cobro AS c 
-                LEFT JOIN notaCredito AS nc ON c.idCobro = nc.idCobro
+                LEFT JOIN notaCredito AS nc ON c.idCobro = nc.idCobro AND nc.estado = 1
                 LEFT JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro 
                 WHERE c.idProcedencia = v.idVenta AND c.estado = 1 AND nc.idNotaCredito IS NULL
             ) AS cobrado 
@@ -1432,7 +1432,7 @@ class Factura {
 
             let cobros = await conec.query(`SELECT c.idCobro 
             FROM cobro AS c 
-            LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro
+            LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro AND nc.estado = 1
             WHERE c.idProcedencia = ? AND c.estado = 1 AND nc.idNotaCredito IS NULL`, [
                 req.query.idVenta
             ]);

@@ -25,6 +25,7 @@ class NotaCredito extends React.Component {
 
             add: statePrivilegio(this.props.token.userToken.menus[2].submenu[5].privilegio[0].estado),
             view: statePrivilegio(this.props.token.userToken.menus[2].submenu[5].privilegio[1].estado),
+            cancel: statePrivilegio(this.props.token.userToken.menus[2].submenu[5].privilegio[2].estado),
 
             idProyecto: this.props.token.project.idProyecto,
             idUsuario: this.props.token.userToken.idUsuario,
@@ -258,7 +259,8 @@ class NotaCredito extends React.Component {
                                                             <button
                                                                 className="btn btn-outline-danger btn-sm"
                                                                 title="Ver detalle"
-                                                                onClick={() => { this.onEventAnularNotaCredito(item.idNotaCredito) }}><i className="fa fa-remove"></i>
+                                                                onClick={() => { this.onEventAnularNotaCredito(item.idNotaCredito) }}
+                                                                disabled={!this.state.cancel}><i className="fa fa-remove"></i>
                                                             </button>
                                                         </td>
                                                     </tr>

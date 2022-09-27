@@ -24,6 +24,7 @@
   "license": "ISC",
   "dependencies": {
     "crypto-js": "^4.1.1",
+    "ip": "^1.1.8",
     "js-file-download": "^0.4.12",
     "mime": "^3.0.0",
     "moment": "^2.29.3",

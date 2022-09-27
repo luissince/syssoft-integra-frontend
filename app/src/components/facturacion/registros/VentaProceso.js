@@ -1397,27 +1397,23 @@ class VentaProceso extends React.Component {
                                                         title="Precio de venta"
                                                         type="text"
                                                         className="form-control"
-                                                        placeholder='0.00'
                                                         ref={this.refPrecioContado}
                                                         value={this.state.precioContado}
                                                         onChange={async (event) => {
-                                                            await this.setStateAsync({
-                                                                precioContado: event.target.value,
-                                                                messageWarning: '',
-                                                            });
-
-                                                            // if (event.target.value.trim().length > 0) {
-                                                            //     await this.setStateAsync({
-                                                            //         precioContado: event.target.value,
-                                                            //         messageWarning: '',
-                                                            //     });
-                                                            // } else {
-                                                            //     await this.setStateAsync({
-                                                            //         setStateAsync: event.target.value,
-                                                            //         messageWarning: 'Ingrese el precio de venta.',
-                                                            //     });
-                                                            // }
+                                                            if (event.target.value.trim().length > 0) {
+                                                                await this.setStateAsync({
+                                                                    precioContado: event.target.value,
+                                                                    messageWarning: '',
+                                                                });
+                                                            } else {
+                                                                await this.setStateAsync({
+                                                                    precioContado: event.target.value,
+                                                                    messageWarning: 'Ingrese el monto',
+                                                                });
+                                                            }
                                                         }}
+
+                                                        placeholder="Ingrese el monto"
                                                         onKeyPress={keyNumberFloat} />
                                                     <div className="input-group-append">
                                                         <button

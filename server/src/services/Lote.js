@@ -465,7 +465,7 @@ class Lote {
                 LEFT JOIN cobroVenta AS cv ON cv.idCobro = c.idCobro 
                 LEFT JOIN venta AS v ON cv.idVenta = v.idVenta 
                 LEFT JOIN comprobante AS cp ON v.idComprobante = cp.idComprobante
-                LEFT JOIN notaCredito AS nc ON c.idCobro = nc.idCobro
+                LEFT JOIN notaCredito AS nc ON c.idCobro = nc.idCobro AND nc.estado = 1
 
                 WHERE 
                 c.idProcedencia = ? AND c.estado = 1 AND nc.idNotaCredito IS NULL

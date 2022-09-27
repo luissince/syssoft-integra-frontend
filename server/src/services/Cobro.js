@@ -48,7 +48,7 @@ class Cobro {
             LEFT JOIN venta AS v ON cv.idVenta = v.idVenta 
             LEFT JOIN comprobante AS cp ON v.idComprobante = cp.idComprobante
 
-            LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro
+            LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro AND nc.estado = 1
             WHERE 
             ? = 0 AND c.idProyecto = ?
             OR
@@ -98,7 +98,7 @@ class Cobro {
             INNER JOIN cliente AS cl ON c.idCliente = cl.idCliente
             INNER JOIN banco AS b ON c.idBanco = b.idBanco
             INNER JOIN moneda AS m ON c.idMoneda = m.idMoneda 
-            LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro
+            LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro AND nc.estado = 1
             WHERE 
             ? = 0 AND c.idProyecto = ?
             OR
@@ -349,7 +349,7 @@ class Cobro {
             IFNULL(SUM(cv.precio),0) AS total
             FROM cobro AS c 
             INNER JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro
-            LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro
+            LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro AND nc.estado = 1
             WHERE c.idProcedencia = ? AND c.estado = 1 AND nc.idNotaCredito IS NULL`, [
                 req.body.idVenta,
             ]);
@@ -557,7 +557,7 @@ class Cobro {
             IFNULL(SUM(cv.precio),0) AS total
             FROM cobro AS c 
             INNER JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro
-            LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro
+            LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro AND nc.estado = 1
             WHERE c.idProcedencia = ? AND c.estado = 1 AND nc.idNotaCredito IS NULL`, [
                 req.body.idVenta,
             ]);
@@ -881,7 +881,7 @@ class Cobro {
             IFNULL(SUM(cv.precio),0) AS total
             FROM cobro AS c 
             INNER JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro
-            LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro
+            LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro AND nc.estado = 1
             WHERE cv.idPlazo  = ? AND c.estado = 1 AND nc.idNotaCredito IS NULL`, [
                 req.body.idPlazo
             ]);
@@ -904,7 +904,7 @@ class Cobro {
             IFNULL(SUM(cv.precio),0) AS total
             FROM cobro AS c 
             INNER JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro
-            LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro
+            LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro AND nc.estado = 1
             WHERE c.idProcedencia = ? AND c.estado = 1 AND nc.idNotaCredito IS NULL`, [
                 req.body.idVenta,
             ]);
@@ -1006,7 +1006,7 @@ class Cobro {
             LEFT JOIN venta AS vn ON vn.idVenta = c.idProcedencia
             LEFT JOIN comprobante AS cov ON vn.idComprobante = cov.idComprobante
 
-            LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro
+            LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro AND nc.estado = 1
             WHERE c.idCobro = ?
             GROUP BY  c.idCobro`, [
                 req.query.idCobro
@@ -1165,7 +1165,7 @@ class Cobro {
             }
 
             let notaCredito = await conec.execute(connection, `SELECT c.idCobro 
-                FROM cobro AS c INNER JOIN notaCredito AS nc ON nc.idCobro = c.idCobro
+                FROM cobro AS c INNER JOIN notaCredito AS nc ON nc.idCobro = c.idCobro AND nc.estado = 1
                 WHERE c.idCobro = ?`, [
                 req.query.idCobro
             ]);
@@ -1219,7 +1219,7 @@ class Cobro {
                             IFNULL(cv.precio,0) AS total 
                             FROM cobro AS c 
                             INNER JOIN cobroVenta cv ON c.idCobro = cv.idCobro 
-                            LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro
+                            LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro AND nc.estado = 1
                             WHERE cv.idPlazo = ? AND c.estado = 1 AND nc.idNotaCredito IS NULL`, [
                             cobroVenta[0].idPlazo
                         ]);
@@ -1261,7 +1261,7 @@ class Cobro {
                         IFNULL(SUM(cv.precio),0) AS total
                         FROM cobro AS c 
                         INNER JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro
-                        LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro
+                        LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro AND nc.estado = 1
                         WHERE c.idProcedencia = ? AND c.estado = 1 AND nc.idNotaCredito IS NULL`, [
                         venta[0].idVenta
                     ]);
@@ -1372,7 +1372,7 @@ class Cobro {
                                         IFNULL(cv.precio,0) AS total 
                                         FROM cobro AS c 
                                         INNER JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro 
-                                        LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro
+                                        LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro AND nc.estado = 1
                                         WHERE cv.idPlazo  = ? AND c.estado = 1 AND nc.idNotaCredito IS NULL`, [
                                         maxCobroVenta
                                     ]);
@@ -1412,7 +1412,7 @@ class Cobro {
                                     IFNULL(SUM(cv.precio),0) AS total
                                     FROM cobro AS c 
                                     INNER JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro
-                                    LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro
+                                    LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro AND nc.estado = 1
                                     WHERE c.idProcedencia = ? AND c.estado = 1 AND nc.idNotaCredito IS NULL`, [
                                     venta[0].idVenta
                                 ]);
@@ -1536,7 +1536,7 @@ class Cobro {
                     LEFT JOIN venta AS v ON cv.idVenta = v.idVenta 
                     LEFT JOIN comprobante AS cp ON v.idComprobante = cp.idComprobante
                     LEFT JOIN usuario AS u ON u.idUsuario = c.idUsuario
-                    LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro
+                    LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro AND nc.estado = 1
                     WHERE 
                     c.fecha BETWEEN ? AND ? AND ? = '' AND ? = ''
                     OR
@@ -1625,7 +1625,7 @@ class Cobro {
                     LEFT JOIN cobroDetalle AS cd ON c.idCobro = cd.idCobro
                     LEFT JOIN concepto AS co ON co.idConcepto = cd.idConcepto
                     LEFT JOIN cobroVenta AS cv ON cv.idCobro = c.idCobro
-                    LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro
+                    LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro AND nc.estado = 1
                     WHERE 
                     c.fecha BETWEEN ? AND ? AND c.estado = 1 AND nc.idNotaCredito IS NULL AND (
                         ? = '' AND ? = ''

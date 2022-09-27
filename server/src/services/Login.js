@@ -1,4 +1,5 @@
 const bcrypt = require('bcrypt');
+const IP = require('ip');
 const { createToken, verifyToken } = require('../services/Jwt');
 const { sendSuccess, sendError, sendClient, sendExpired } = require('../tools/Message');
 const Conexion = require('../database/Conexion');
@@ -7,6 +8,10 @@ const conec = new Conexion();
 class Login {
 
     async createsession(req, res) {
+        const ipAddress = req.header('x-forwarded-for') ||
+            req.socket.remoteAddress;
+        console.log(ipAddress);
+        console.log(IP.address())
         try {
             let validate = await conec.query(`SELECT idUsuario ,clave FROM usuario 
             WHERE usuario = ?`, [

@@ -317,8 +317,8 @@ class NotaCredito {
              * Comprobar si el cobro ya tiene ligado una nota de crédito
              */
             let validate = await conec.execute(connection, `SELECT c.idCobro 
-            FROM cobro AS c INNER JOIN notaCredito AS nc
-            ON c.idCobro = nc.idCobro
+            FROM cobro AS c INNER JOIN notaCredito AS nc 
+            ON c.idCobro = nc.idCobro AND nc.estado = 1
             WHERE c.idCobro = ?`, [
                 req.body.idCobro,
             ]);
@@ -461,214 +461,230 @@ class NotaCredito {
                 ]);
             }
 
-            /**
-             * Eliminar los registrados asociados
-             * Cobros
-             * Bancos
-             */
 
             /**
-             * Obtener el cobro que va ser asociado a la nota de crédito
+             * Comprobar si el cobro ya tiene ligado una nota de crédito con estado 0
+             * 0 = anulado
              */
-            let cobro = await conec.execute(connection, `SELECT 
+            let nota = await conec.execute(connection, `SELECT c.idCobro 
+             FROM cobro AS c INNER JOIN notaCredito AS nc 
+             ON c.idCobro = nc.idCobro AND nc.estado = 0
+             WHERE c.idCobro = ?`, [
+                req.body.idCobro,
+            ]);
+
+            if (nota.length == 0) {
+                /**
+                 * Eliminar los registrados asociados
+                 * Cobros
+                 * Bancos
+                 */
+
+
+                /**
+                 * Obtener el cobro que va ser asociado a la nota de crédito
+                 */
+                let cobro = await conec.execute(connection, `SELECT 
                 idCobro,
                 idProcedencia,
                 serie,numeracion 
                 FROM cobro 
                 WHERE idCobro = ?`, [
-                req.body.idCobro
-            ]);
-
-            /**
-             * Obtener la venta ligada al cobro
-             */
-            let venta = await conec.execute(connection, `SELECT idVenta,credito 
-                FROM venta 
-                WHERE idVenta  = ?`, [
-                cobro[0].idProcedencia
-            ]);
-
-            /**
-             * Obtener el plazo ligado al cobro
-             */
-            let cobroVenta = await conec.execute(connection, `SELECT idPlazo 
-                FROM cobroVenta 
-                WHERE idCobro = ?`, [
-                req.body.idCobro
-            ]);
-
-            /**
-             * Actualizar y/o eliminar el plazo 
-             */
-            if (venta.length > 0) {
+                    req.body.idCobro
+                ]);
 
                 /**
-                 * Verificar el tipo de venta 
-                 * Credito = 0 pago en plazos fijos
-                 * Credito = 1 pago en plazos variables
+                 * Obtener la venta ligada al cobro
                  */
-                if (venta[0].credito === 1) {
-                    /**
-                     * Eliminar el plazo ligado al cobro
-                     */
-                    await conec.execute(connection, `DELETE FROM plazo WHERE idPlazo = ?`, [
-                        cobroVenta[0].idPlazo
-                    ]);
-                } else {
-                    /**
-                     * Obtiene la suma total de los cobros ligados a un plazo
-                     */
-                    let suma = await conec.execute(connection, `SELECT
-                    IFNULL(cv.precio,0) AS total 
-                    FROM cobro AS c 
-                    INNER JOIN cobroVenta cv ON c.idCobro = cv.idCobro 
-                    LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro
-                    WHERE cv.idPlazo = ? AND c.estado = 1 AND nc.idNotaCredito IS NULL`, [
-                        cobroVenta[0].idPlazo
-                    ]);
+                let venta = await conec.execute(connection, `SELECT idVenta,credito 
+                FROM venta 
+                WHERE idVenta  = ?`, [
+                    cobro[0].idProcedencia
+                ]);
+
+                /**
+                 * Obtener el plazo ligado al cobro
+                 */
+                let cobroVenta = await conec.execute(connection, `SELECT idPlazo 
+                FROM cobroVenta 
+                WHERE idCobro = ?`, [
+                    req.body.idCobro
+                ]);
+
+                /**
+                 * Actualizar y/o eliminar el plazo 
+                 */
+                if (venta.length > 0) {
 
                     /**
-                     * Realizar un reduce para sumar todos los registros
+                     * Verificar el tipo de venta 
+                     * Credito = 0 pago en plazos fijos
+                     * Credito = 1 pago en plazos variables
                      */
-                    let sumaTotal = suma.map(item => item.total).reduce((prev, current) => prev + current, 0)
+                    if (venta[0].credito === 1) {
+                        /**
+                         * Eliminar el plazo ligado al cobro
+                         */
+                        await conec.execute(connection, `DELETE FROM plazo WHERE idPlazo = ?`, [
+                            cobroVenta[0].idPlazo
+                        ]);
+                    } else {
+                        /**
+                         * Obtiene la suma total de los cobros ligados a un plazo
+                         */
+                        let suma = await conec.execute(connection, `SELECT
+                        IFNULL(cv.precio,0) AS total 
+                        FROM cobro AS c 
+                        INNER JOIN cobroVenta cv ON c.idCobro = cv.idCobro 
+                        LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro
+                        WHERE cv.idPlazo = ? AND c.estado = 1 AND nc.idNotaCredito IS NULL`, [
+                            cobroVenta[0].idPlazo
+                        ]);
 
-                    /**
-                     * Obtener el valor actual del cobro a eliminar
-                     */
-                    let actual = await conec.execute(connection, `SELECT 
+                        /**
+                         * Realizar un reduce para sumar todos los registros
+                         */
+                        let sumaTotal = suma.map(item => item.total).reduce((prev, current) => prev + current, 0)
+
+                        /**
+                         * Obtener el valor actual del cobro a eliminar
+                         */
+                        let actual = await conec.execute(connection, `SELECT 
                         IFNULL(precio,0) AS total 
                         FROM cobroVenta 
                         WHERE idCobro = ?`, [
-                        req.body.idCobro
-                    ]);
+                            req.body.idCobro
+                        ]);
 
-                    /**
-                     * Obtener la suma total de los plazos ligados a un cobro
-                     */
-                    let plazoSuma = await conec.execute(connection, `SELECT 
+                        /**
+                         * Obtener la suma total de los plazos ligados a un cobro
+                         */
+                        let plazoSuma = await conec.execute(connection, `SELECT 
                         IFNULL(monto,0) AS total 
                         FROM plazo 
                         WHERE idPlazo = ?`, [
-                        cobroVenta[0].idPlazo
-                    ]);
-
-                    /**
-                     * Comprobar si los plazos cobrados es mayor que la suma total menos el actual
-                     * P > S - A
-                     * Verdadero = Actualizar el plazo a por cobrar
-                     */
-                    if (plazoSuma[0].total > sumaTotal - actual[0].total) {
-                        await conec.execute(connection, `UPDATE plazo SET estado = 0 
-                        WHERE idPlazo = ?`, [
                             cobroVenta[0].idPlazo
                         ]);
-                    }
-                }
 
-                /**
-                 * Obtener el monto total de la venta
-                 */
-                let total = await conec.execute(connection, `SELECT 
+                        /**
+                         * Comprobar si los plazos cobrados es mayor que la suma total menos el actual
+                         * P > S - A
+                         * Verdadero = Actualizar el plazo a por cobrar
+                         */
+                        if (plazoSuma[0].total > sumaTotal - actual[0].total) {
+                            await conec.execute(connection, `UPDATE plazo SET estado = 0 
+                            WHERE idPlazo = ?`, [
+                                cobroVenta[0].idPlazo
+                            ]);
+                        }
+                    }
+
+                    /**
+                     * Obtener el monto total de la venta
+                     */
+                    let total = await conec.execute(connection, `SELECT 
                     IFNULL(SUM(vd.precio*vd.cantidad),0) AS total 
                     FROM venta AS v
                     LEFT JOIN ventaDetalle AS vd ON v.idVenta  = vd.idVenta
                     WHERE v.idVenta  = ?`, [
-                    venta[0].idVenta
-                ]);
+                        venta[0].idVenta
+                    ]);
 
-                /**
-                 * Obtener el monto total de los cobros ligados a una venta
-                 */
-                let cobrado = await conec.execute(connection, `SELECT 
+                    /**
+                     * Obtener el monto total de los cobros ligados a una venta
+                     */
+                    let cobrado = await conec.execute(connection, `SELECT 
                     IFNULL(SUM(cv.precio),0) AS total
                     FROM cobro AS c 
                     INNER JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro
                     LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro
                     WHERE c.idProcedencia = ? AND c.estado = 1 AND nc.idNotaCredito IS NULL`, [
-                    venta[0].idVenta
-                ]);
+                        venta[0].idVenta
+                    ]);
 
-                /**
-                 * Obtener el valor actual del cobro a eliminar
-                 */
-                let actual = await conec.execute(connection, `SELECT 
+                    /**
+                     * Obtener el valor actual del cobro a eliminar
+                     */
+                    let actual = await conec.execute(connection, `SELECT 
                     IFNULL(SUM(cv.precio),0) AS total
                     FROM cobro AS c 
                     LEFT JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro
                     WHERE c.idCobro = ?`, [
+                        req.body.idCobro
+                    ]);
+
+                    /**
+                     * Comprobar si monto total de la venta es mayor que la cobro total menos el actual
+                     * V > C - A
+                     * Verdadero = Actualizar la venta a credito
+                     */
+                    let montoCobrado = cobrado[0].total - actual[0].total;
+                    if (montoCobrado < total[0].total) {
+                        await conec.execute(connection, `UPDATE venta SET estado = 2
+                        WHERE idVenta = ?`, [
+                            venta[0].idVenta
+                        ]);
+                    }
+                }
+
+                /**
+                 * Ingrese un comentario al cobro del motivo de su anulación
+                 * 
+                 */
+                await conec.execute(connection, `UPDATE cobro SET observacion = ? WHERE idCobro = ?`, [
+                    req.query.idCobro,
+                    `ANULACIÓN CON NOTA DE CRÉDITO`
+                ]);
+
+                /**
+                 * Eliminar el cobro en el detalle banco
+                 */
+                await conec.execute(connection, `DELETE FROM bancoDetalle WHERE idProcedencia  = ?`, [
                     req.body.idCobro
                 ]);
 
                 /**
-                 * Comprobar si monto total de la venta es mayor que la cobro total menos el actual
-                 * V > C - A
-                 * Verdadero = Actualizar la venta a credito
+                 * Registro de la tabla auditoria para saber quien realizo tal proceso
                  */
-                let montoCobrado = cobrado[0].total - actual[0].total;
-                if (montoCobrado < total[0].total) {
-                    await conec.execute(connection, `UPDATE venta SET estado = 2
-                    WHERE idVenta = ?`, [
-                        venta[0].idVenta
-                    ]);
+
+                /**
+                 * Creación de llave primaria que es autoincremental
+                 */
+                let resultAuditoria = await conec.execute(connection, 'SELECT idAuditoria FROM auditoria');
+                let idAuditoria = 0;
+                if (resultAuditoria.length != 0) {
+                    let quitarValor = resultAuditoria.map(function (item) {
+                        return parseInt(item.idAuditoria);
+                    });
+
+                    let valorActual = Math.max(...quitarValor);
+                    let incremental = valorActual + 1;
+
+                    idAuditoria = incremental;
+                } else {
+                    idAuditoria = 1;
                 }
+
+                /**
+                 * Registrar los datos en la tabla auditoria
+                 */
+                await conec.execute(connection, `INSERT INTO auditoria(
+                     idAuditoria,
+                     idProcedencia,
+                     descripcion,
+                     fecha,
+                     hora,
+                     idUsuario) 
+                     VALUES(?,?,?,?,?,?)`, [
+                    idAuditoria,
+                    cobro[0].idCobro,
+                    `ANULACIÓN CON NOTA DE CRÉDITO ${cobro[0].serie}-${cobro[0].numeracion}`,
+                    currentDate(),
+                    currentTime(),
+                    req.body.idUsuario,
+                ]);
             }
 
-            /**
-             * Ingrese un comentario al cobro del motivo de su anulación
-             * 
-             */
-            await conec.execute(connection, `UPDATE cobro SET observacion = ? WHERE idCobro = ?`, [
-                req.query.idCobro,
-                `ANULACIÓN CON NOTA DE CRÉDITO`
-            ]);
-
-            /**
-             * Eliminar el cobro en el detalle banco
-             */
-            await conec.execute(connection, `DELETE FROM bancoDetalle WHERE idProcedencia  = ?`, [
-                req.body.idCobro
-            ]);
-
-            /**
-             * Registro de la tabla auditoria para saber quien realizo tal proceso
-             */
-
-            /**
-             * Creación de llave primaria que es autoincremental
-             */
-            let resultAuditoria = await conec.execute(connection, 'SELECT idAuditoria FROM auditoria');
-            let idAuditoria = 0;
-            if (resultAuditoria.length != 0) {
-                let quitarValor = resultAuditoria.map(function (item) {
-                    return parseInt(item.idAuditoria);
-                });
-
-                let valorActual = Math.max(...quitarValor);
-                let incremental = valorActual + 1;
-
-                idAuditoria = incremental;
-            } else {
-                idAuditoria = 1;
-            }
-
-            /**
-             * Registrar los datos en la tabla auditoria
-             */
-            await conec.execute(connection, `INSERT INTO auditoria(
-                        idAuditoria,
-                        idProcedencia,
-                        descripcion,
-                        fecha,
-                        hora,
-                        idUsuario) 
-                        VALUES(?,?,?,?,?,?)`, [
-                idAuditoria,
-                cobro[0].idCobro,
-                `ANULACIÓN CON NOTA DE CRÉDITO ${cobro[0].serie}-${cobro[0].numeracion}`,
-                currentDate(),
-                currentTime(),
-                req.body.idUsuario,
-            ]);
 
             /**
              * Guardar los cambios
