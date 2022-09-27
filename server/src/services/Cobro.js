@@ -1752,9 +1752,8 @@ class Cobro {
             c.xmlGenerado 
             FROM cobro AS c 
             INNER JOIN comprobante AS co ON co.idComprobante = c.idComprobante 
-            WHERE c.idCobro  = ? AND c.xmlSunat = ?`, [
+            WHERE c.idCobro  = ?`, [
                 req.query.idCobro,
-                req.query.xmlSunat,
             ]);
 
             if (xml.length > 0) {

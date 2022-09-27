@@ -119,7 +119,6 @@ router.get('/email', async function (req, res) {
             return sendError(res, detalle);
         }
     } catch (error) {
-        console.log(error);
         return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
     }
 });

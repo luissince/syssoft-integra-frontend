@@ -373,7 +373,6 @@ class CpeElectronicos extends React.Component {
             const data = {
                 "idSede": "SD0001",
                 "idCobro": idCpeSunat,
-                "xmlSunat": "0"
             }
 
             let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
@@ -387,7 +386,6 @@ class CpeElectronicos extends React.Component {
             const data = {
                 "idSede": "SD0001",
                 "idNotaCredito": idCpeSunat,
-                "xmlSunat": "0"
             }
 
             let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
@@ -411,7 +409,6 @@ class CpeElectronicos extends React.Component {
                             params: {
                                 "idSede": "SD0001",
                                 "idCobro": idCpeSunat,
-                                "xmlSunat": "0"
                             }
                         });
 
@@ -435,7 +432,6 @@ class CpeElectronicos extends React.Component {
                             params: {
                                 "idSede": "SD0001",
                                 "idNotaCredito": idCpeSunat,
-                                "xmlSunat": "0"
                             }
                         });
 

@@ -814,9 +814,8 @@ class NotaCredito {
             nc.xmlGenerado 
             FROM notaCredito AS nc
             INNER JOIN comprobante AS co ON co.idComprobante = nc.idComprobante 
-            WHERE nc.idNotaCredito = ? AND nc.xmlSunat = ?`, [
+            WHERE nc.idNotaCredito = ?`, [
                 req.query.idNotaCredito,
-                req.query.xmlSunat,
             ]);
 
             if (xml.length > 0) {
