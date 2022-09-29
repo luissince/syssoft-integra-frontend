@@ -8,10 +8,10 @@ const conec = new Conexion();
 class Login {
 
     async createsession(req, res) {
-        const ipAddress = req.header('x-forwarded-for') ||
-            req.socket.remoteAddress;
-        console.log(ipAddress);
-        console.log(IP.address())
+        // const ipAddress = req.header('x-forwarded-for') ||
+        //     req.socket.remoteAddress;
+        // console.log(ipAddress);
+        // console.log(IP.address())
         try {
             let validate = await conec.query(`SELECT idUsuario ,clave FROM usuario 
             WHERE usuario = ?`, [

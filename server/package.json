@@ -18,19 +18,12 @@
     "express": "^4.17.3",
     "get-stream": "^6.0.1",
     "jsonwebtoken": "^8.5.1",
-    "ip": "^1.1.8",
     "mongoose": "^6.2.3",
-    "nodemailer": "^6.7.7",
-    "nodemailer-smtp-transport": "^2.7.4",
     "mssql": "^8.0.2",
     "mysql": "^2.18.1",
     "qrcode": "^1.5.0",
     "pdfkit": "^0.13.0",
-    "pdfkit-table": "^0.1.86",
-    "socket.io": "^4.5.1",
-    "swagger-jsdoc": "^6.2.5",
-    "swagger-ui-express": "^4.5.0",
-    "ws": "^8.8.1"
+    "pdfkit-table": "^0.1.86"
   },
   "devDependencies": {
     "nodemon": "^2.0.15"

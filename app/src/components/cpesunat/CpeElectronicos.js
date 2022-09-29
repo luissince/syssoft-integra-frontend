@@ -485,6 +485,42 @@ class CpeElectronicos extends React.Component {
                     }
                 }
             });
+        }else{
+            ModalAlertDialog("Facturación", "¿Está seguro de anular el comprobante electrónico?", async (value) => {
+                if (value) {
+                    try {
+                        ModalAlertInfo("Facturación", "Firmando xml y enviando a sunat.");
+
+                        // "http://localhost:8090/app/examples/resumen.php"
+                        // "http://apisunat.inmobiliariagmyc.com/app/examples/resumen.php"
+
+                        let result = await axios.get(`${process.env.REACT_APP_URL}/app/examples/resumen_nota_credito.php`, {
+                            params: {
+                                "idNotaCredito": idCpeSunat
+                            }
+                        });
+                        
+                        let object = result.data;
+                        if (object.state) {
+                            if (object.accept) {
+                                ModalAlertSuccess("Facturación", "Código " + object.code + " " + object.description, () => {
+                                    this.onEventPaginacion()
+                                });
+                            } else {
+                                ModalAlertWarning("Facturación", "Código " + object.code + " " + object.description);
+                            }
+                        } else {
+                            ModalAlertWarning("Facturación", "Código " + object.code + " " + object.description);
+                        }
+                    } catch (error) {
+                        if (error.response) {
+                            ModalAlertWarning("Facturación", error.response.data);
+                        } else {
+                            ModalAlertError("Facturación", "Se produjo un error interno, intente nuevamente por favor.");
+                        }
+                    }
+                }
+            });
         }
     }
 
@@ -768,7 +804,7 @@ class CpeElectronicos extends React.Component {
                                         ) : (
                                             this.state.lista.map((item, index) => {
 
-                                                const estadoSunat = item.estado === 3 ?
+                                                const estadoSunat = item.estado === 0 ?
                                                     <button className="btn btn-light btn-sm" onClick={() => this.onEventSendFactura(item.idCpeSunat, item.tipo)} disabled={!this.state.viewDeclarar}><img src={error} width="22" /></button>
                                                     : item.xmlSunat === "" ?
                                                         <button className="btn btn-light btn-sm" onClick={() => this.onEventSendFactura(item.idCpeSunat, item.tipo)} disabled={!this.state.viewDeclarar}><img src={reuse} width="22" /></button>

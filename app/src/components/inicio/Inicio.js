@@ -1,6 +1,6 @@
 import React from 'react';
 import axios from 'axios';
-import { io } from "socket.io-client";
+// import { io } from "socket.io-client";
 import { NotificationContainer, NotificationManager } from 'react-notifications';
 import { Switch, Route, Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
