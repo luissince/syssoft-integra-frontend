@@ -1789,6 +1789,87 @@ class Cobro {
         }
     }
 
+    async detalleNotificaciones(req) {
+        try {
+            const lista = await conec.query(`SELECT 
+            v.idCobro AS idCpeSunat, 
+            co.nombre as comprobante,
+            v.serie,
+            v.numeracion,
+            v.estado,
+            DATE_FORMAT(v.fecha,'%d/%m/%Y') as fecha, 
+            v.fecha as ordenFecha,
+            v.hora
+            FROM cobro AS v 
+            INNER JOIN comprobante AS co ON v.idComprobante = co.idComprobante
+
+            WHERE  
+            co.tipo = 1 AND IFNULL(v.xmlSunat,'') <> '0' AND IFNULL(v.xmlSunat,'') <> '1032'
+            OR
+            co.tipo = 1 AND IFNULL(v.xmlSunat,'') = '0' AND v.estado = 0
+            
+            UNION ALL
+
+            SELECT
+            nc.idNotaCredito AS idCpeSunat,  
+            co.nombre as comprobante,
+            nc.serie,
+            nc.numeracion,
+            nc.estado,
+            DATE_FORMAT(nc.fecha,'%d/%m/%Y') as fecha, 
+            nc.fecha as ordenFecha,
+            nc.hora
+            FROM notaCredito AS nc
+            INNER JOIN comprobante AS co ON co.idComprobante = nc.idComprobante
+
+            WHERE  
+            co.tipo = 3 AND IFNULL(nc.xmlSunat,'') <> '0' AND IFNULL(nc.xmlSunat,'') <> '1032'
+            OR
+            co.tipo = 3 AND IFNULL(nc.xmlSunat,'') = '0' AND nc.estado = 0
+            
+            ORDER BY ordenFecha DESC, hora DESC
+
+            LIMIT ?,?`, [
+                parseInt(req.query.posicionPagina),
+                parseInt(req.query.filasPorPagina)
+            ]);
+
+            let resultLista = lista.map(function (item, index) {
+                return {
+                    ...item,
+                    id: (index + 1) + parseInt(req.query.posicionPagina)
+                }
+            });
+
+            const total = await conec.query(`SELECT COUNT(*) AS Total 
+            FROM cobro AS v 
+            INNER JOIN cliente AS c ON v.idCliente = c.idCliente
+            INNER JOIN comprobante as co ON v.idComprobante = co.idComprobante
+            INNER JOIN moneda AS m ON v.idMoneda = m.idMoneda
+            WHERE 
+            co.tipo = 1 AND IFNULL(v.xmlSunat,'') <> '0' AND IFNULL(v.xmlSunat,'') <> '1032'
+            OR
+            co.tipo = 1 AND IFNULL(v.xmlSunat,'') = '0' AND v.estado = 0
+
+            UNION ALL
+
+            SELECT COUNT(*) AS Total 
+            FROM notaCredito AS nc 
+            INNER JOIN cliente AS c ON nc.idCliente = c.idCliente
+            INNER JOIN comprobante as co ON nc.idComprobante = co.idComprobante
+            INNER JOIN moneda AS m ON nc.idMoneda = m.idMoneda
+            WHERE 
+            co.tipo = 3 AND IFNULL(nc.xmlSunat,'') <> '0' AND IFNULL(nc.xmlSunat,'') <> '1032'
+            OR
+            co.tipo = 3 AND IFNULL(nc.xmlSunat,'') = '0' AND nc.estado = 0`);
+
+            return { "result": resultLista, "total": total[0].Total };
+        } catch (error) {
+            console.log(error);
+            return "Se produjo un error de servidor, intente nuevamente.";
+        }
+    }
+
     async searchComprobante(req) {
         try {
             let result = await conec.query(`SELECT

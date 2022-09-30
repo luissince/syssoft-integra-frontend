@@ -7,6 +7,7 @@ import { connect } from 'react-redux';
 import { signOut, closeProject } from '../../redux/actions';
 import Menu from '../layouts/menu/Menu';
 import Head from '../layouts/head/Head';
+import Notifications from '../layouts/head/Notifications';
 import Footer from '../layouts/footer/Footer';
 import Main from './Main';
 import Dashboard from '../dashboard/Dashboard';
@@ -156,7 +157,7 @@ class Inicio extends React.Component {
             sidebar.removeChild(overlaySidebar)
         }
     }
- 
+
     isChild = (child, parent) => {
         while ((child = child.parentNode) && child !== parent);
         return !!child;
@@ -237,6 +238,10 @@ class Inicio extends React.Component {
                                 <Route
                                     path={`${path}/dashboard`}
                                     render={(props) => <Dashboard {...props} />}
+                                />
+                                <Route
+                                    path={`${path}/notifications`}
+                                    render={(props) => <Notifications {...props} />}
                                 />
                                 <Route
                                     path={`${path}/perfiles`}

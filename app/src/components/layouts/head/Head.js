@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { signOut, closeProject } from '../../../redux/actions';
 import usuario from '../../../recursos/images/usuario.png';
@@ -39,8 +40,7 @@ class Menu extends React.Component {
                             <i className="fa fa-bell-o fa-sm  fa-sm"></i>
                             <span className="pl-1 pr-1 badge-warning rounded h7 icon-absolute ">{this.props.notificaciones.length}</span>
                         </a>
-                        <ul className="dropdown-menu settings-menu dropdown-menu-right">
-
+                        <ul className="app-notification dropdown-menu dropdown-menu-right">
                             <div className="app-notification__content">
                                 {
                                     this.props.notificaciones.length != 0 ?
@@ -67,7 +67,8 @@ class Menu extends React.Component {
                             {
                                 this.props.notificaciones.length == 0 ?
                                     <li className="app-notification__footer">No hay notificaciones para mostrar.</li>
-                                    : null
+                                    : 
+                                    <li className="app-notification__footer"><Link to="notifications"> Mostrar mas a detalle</Link></li>
                             }
                         </ul>
                     </div>
