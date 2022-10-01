@@ -239,7 +239,6 @@ router.get('/repcomprobante', async function (req, res) {
     const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
     req.query.idSede = decryptedData.idSede;
     req.query.idCobro = decryptedData.idCobro;
-    req.query.idComprobante = decryptedData.idComprobante;
 
     const sedeInfo = await sede.infoSedeReporte(req)
 
@@ -339,6 +338,7 @@ router.get('/excelcpesunat', async function (req, res) {
     req.query.idSede = decryptedData.idSede;
     req.query.fechaIni = decryptedData.fechaIni;
     req.query.fechaFin = decryptedData.fechaFin;
+    req.query.idComprobante = decryptedData.idComprobante;
 
     const sedeInfo = await sede.infoSedeReporte(req);
 

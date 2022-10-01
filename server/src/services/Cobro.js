@@ -1978,6 +1978,8 @@ class Cobro {
 
     async cpeSunat(req) {
         try {
+            console.log(req.query)
+            
             const result = await conec.query(`SELECT 
             v.idCobro AS idCpeSunat,
             tp.nombre AS tipoDocumento,
