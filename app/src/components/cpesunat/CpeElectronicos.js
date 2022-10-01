@@ -55,6 +55,7 @@ class CpeElectronicos extends React.Component {
             msgModal: 'Cargando datos...',
             fechaInicioModal: currentDate(),
             fechaFinalModal: currentDate(),
+            idComprobanteModal: '',
 
             idProyecto: this.props.token.project.idProyecto,
             fechaInicio: currentDate(),
@@ -485,7 +486,7 @@ class CpeElectronicos extends React.Component {
                     }
                 }
             });
-        }else{
+        } else {
             ModalAlertDialog("Facturación", "¿Está seguro de anular el comprobante electrónico?", async (value) => {
                 if (value) {
                     try {
@@ -499,7 +500,7 @@ class CpeElectronicos extends React.Component {
                                 "idNotaCredito": idCpeSunat
                             }
                         });
-                        
+
                         let object = result.data;
                         if (object.state) {
                             if (object.accept) {
@@ -598,6 +599,23 @@ class CpeElectronicos extends React.Component {
                                             value={this.state.fechaFinalModal}
                                             onChange={(event) => this.setState({ fechaFinalModal: event.target.value })}
                                         />
+                                    </div>
+                                </div>
+
+                                <div className="form-row">
+                                    <div className="form-group col-md-12">
+                                        <label htmlFor="manzana">Fecha Inicio <i className="fa fa-file-text text-danger small"></i></label>
+                                        <select
+                                            className="form-control"
+                                            value={this.state.idComprobanteModal}
+                                            onChange={(event) => this.setState({ idComprobanteModal: event.target.value })}>
+                                            <option value="">TODOS</option>
+                                            {
+                                                this.state.comprobantes.map((item, index) => (
+                                                    <option key={index} value={item.idComprobante}>{item.nombre + " (" + item.serie + ")"}</option>
+                                                ))
+                                            }
+                                        </select>
                                     </div>
                                 </div>
                             </div>

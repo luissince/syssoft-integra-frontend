@@ -2006,7 +2006,11 @@ class Cobro {
             INNER JOIN moneda AS m ON v.idMoneda = m.idMoneda
             LEFT JOIN cobroVenta AS vd ON vd.idCobro = v.idCobro
             LEFT JOIN impuesto AS im ON im.idImpuesto = vd.idImpuesto
-            WHERE co.tipo = 1 AND v.fecha BETWEEN ? AND ?
+            WHERE 
+            co.tipo = 1 AND v.fecha BETWEEN ? AND ? AND ? = ''
+            OR
+            co.tipo = 1 AND v.fecha BETWEEN ? AND ? AND v.idComprobante = ?
+
             GROUP BY v.idCobro
 
             UNION 
@@ -2038,15 +2042,29 @@ class Cobro {
             inNER JOIN moneda AS m ON m.idMoneda = nc.idMoneda
             LEFT JOIN notaCreditoDetalle AS ncd ON ncd.idNotaCredito = nc.idNotaCredito
             LEFT JOIN impuesto AS im ON im.idImpuesto = ncd.idImpuesto
-			WHERE co.tipo = 3 AND nc.fecha BETWEEN ? AND ?
+			WHERE 
+            co.tipo = 3 AND nc.fecha BETWEEN ? AND ? AND ? = ''
+            OR
+            co.tipo = 3 AND nc.fecha BETWEEN ? AND ? AND nc.idComprobante = ?
+
             GROUP BY nc.idNotaCredito             
 
             ORDER BY fecha DESC, hora DESC`, [
                 req.query.fechaIni,
                 req.query.fechaFin,
+                req.query.idComprobante,
 
                 req.query.fechaIni,
                 req.query.fechaFin,
+                req.query.idComprobante,
+
+                req.query.fechaIni,
+                req.query.fechaFin,
+                req.query.idComprobante,
+
+                req.query.fechaIni,
+                req.query.fechaFin,
+                req.query.idComprobante,
             ]);
 
             return result;
