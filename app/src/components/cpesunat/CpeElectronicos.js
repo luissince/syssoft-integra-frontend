@@ -532,7 +532,8 @@ class CpeElectronicos extends React.Component {
         const data = {
             "idSede": "SD0001",
             "fechaIni": this.state.fechaInicioModal,
-            "fechaFin": this.state.fechaFinalModal
+            "fechaFin": this.state.fechaFinalModal,
+            "idComprobante": this.state.idComprobanteModal
         }
 
         let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
