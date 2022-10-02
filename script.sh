@@ -1,4 +1,4 @@
-ID=0 npm run stop
+ID=3 npm run stop
 npm run save
 npm run pull
 npm install
