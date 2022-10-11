@@ -288,8 +288,8 @@ async function cpeSunat(req, sedeInfo, data) {
         ws.column(12).setWidth(15);//igv
         ws.column(13).setWidth(15);//monto
         ws.column(14).setWidth(15);//anulado
-        ws.column(15).setWidth(35);//sunat mensaje
-        ws.column(16).setWidth(35);//refencia
+        ws.column(15).setWidth(40);//sunat mensaje
+        ws.column(16).setWidth(20);//refencia
 
         ws.cell(1, 1, 1, 16, true).string(`${sedeInfo.nombreEmpresa}`).style(styleTitle);
         ws.cell(2, 1, 2, 16, true).string(`RUC: ${sedeInfo.ruc}`).style(styleTitle);
