@@ -393,7 +393,12 @@ class EmpresaProceso extends React.Component {
                         <div className="text-center mb-2 ">
                             <img src={this.state.logo} alt="" className="img-fluid border border-primary rounded" width={250} />
                         </div>
-                        <input type="file" id="fileLogo" accept="image/png, image/jpeg, image/gif, image/svg" className="display-none" ref={this.refFileLogo} />
+                        <input
+                            type="file"
+                            id="fileLogo"
+                            accept="image/png, image/jpeg, image/gif, image/svg"
+                            className="display-none"
+                            ref={this.refFileLogo} />
                         <label htmlFor="fileLogo" className="btn btn-outline-secondary m-0">
                             <div className="content-button">
                                 <i className="bi bi-image"></i>

@@ -289,16 +289,17 @@ async function cpeSunat(req, sedeInfo, data) {
         ws.column(13).setWidth(15);//monto
         ws.column(14).setWidth(15);//anulado
         ws.column(15).setWidth(35);//sunat mensaje
+        ws.column(16).setWidth(35);//refencia
 
-        ws.cell(1, 1, 1, 11, true).string(`${sedeInfo.nombreEmpresa}`).style(styleTitle);
-        ws.cell(2, 1, 2, 11, true).string(`RUC: ${sedeInfo.ruc}`).style(styleTitle);
-        ws.cell(3, 1, 3, 11, true).string(`${sedeInfo.direccion}`).style(styleTitle);
-        ws.cell(4, 1, 4, 11, true).string(`Celular: ${sedeInfo.celular} / Telefono: ${sedeInfo.telefono}`).style(styleTitle);
+        ws.cell(1, 1, 1, 16, true).string(`${sedeInfo.nombreEmpresa}`).style(styleTitle);
+        ws.cell(2, 1, 2, 16, true).string(`RUC: ${sedeInfo.ruc}`).style(styleTitle);
+        ws.cell(3, 1, 3, 16, true).string(`${sedeInfo.direccion}`).style(styleTitle);
+        ws.cell(4, 1, 4, 16, true).string(`Celular: ${sedeInfo.celular} / Telefono: ${sedeInfo.telefono}`).style(styleTitle);
 
-        ws.cell(6, 1, 6, 11, true).string(`REPORTE DE COMPROBANTES EMITIDOS A SUNAT`).style(styleTitle);
-        ws.cell(7, 1, 7, 11, true).string(`PERIODO: ${dateFormat(req.query.fechaIni)} al ${dateFormat(req.query.fechaFin)}`).style(styleTitle);
+        ws.cell(6, 1, 6, 16, true).string(`REPORTE DE COMPROBANTES EMITIDOS A SUNAT`).style(styleTitle);
+        ws.cell(7, 1, 7, 16, true).string(`PERIODO: ${dateFormat(req.query.fechaIni)} al ${dateFormat(req.query.fechaFin)}`).style(styleTitle);
 
-        const headerCon = ["#", "Tipo de Documento", "N° de Documento", "Cliente", "Tipo Comprobante", "Comprobante", "Serie", "Numeración", "Fecha", "Moneda", "Base", "Igv", "Monto", "Anulado", "Sunat Observación"];
+        const headerCon = ["#", "Tipo de Documento", "N° de Documento", "Cliente", "Tipo Comprobante", "Comprobante", "Serie", "Numeración", "Fecha", "Moneda", "Base", "Igv", "Monto", "Anulado", "Sunat Observación", "Referencia"];
         headerCon.map((item, index) => ws.cell(9, 1 + index).string(item).style(styleTableHeader));
 
         let rowY = 9;
@@ -308,8 +309,6 @@ async function cpeSunat(req, sedeInfo, data) {
             styleBodyInteger.font.color = item.xmlSunat !== "1032" || item.xmlSunat == "" ? '#000000' : '#ff0000';
             styleBody.font.color = item.xmlSunat !== "1032" || item.xmlSunat == "" ? '#000000' : '#ff0000';
             styleBodyFloat.font.color = item.xmlSunat !== "1032" || item.xmlSunat == "" ? '#000000' : '#ff0000';
-
-
 
             let monto = item.xmlSunat !== "1032" || item.xmlSunat == "" ? (item.Base + item.Igv) : 0;
             let anulado = item.xmlSunat !== "1032" || item.xmlSunat == "" ? 0 : (item.Base + item.Igv);
@@ -329,6 +328,7 @@ async function cpeSunat(req, sedeInfo, data) {
             ws.cell(rowY, 13).number(parseFloat(formatMoney(monto))).style(styleBodyFloat)
             ws.cell(rowY, 14).number(parseFloat(formatMoney(anulado))).style(styleBodyFloat)
             ws.cell(rowY, 15).string(item.xmlDescripcion).style(styleBody)
+            ws.cell(rowY, 16).string(item.referencia).style(styleBody)
         });
 
         return wb.writeToBuffer();

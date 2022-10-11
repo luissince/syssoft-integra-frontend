@@ -148,6 +148,7 @@ class Factura {
 
             /**
              * si el lote esta vendido cancelar la proceso.
+             * estado = 3 vendido
              */
             if (countLote > 0) {
                 await conec.rollback(connection);
