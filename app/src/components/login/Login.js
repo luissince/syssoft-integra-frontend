@@ -175,7 +175,7 @@ class Login extends React.Component {
         if (this.props.token.userToken != null) {
             return <Redirect to="/principal" />
         }
-        // console.log(this.props.token)
+     
         const { rutaImage } = this.props.token.empresa;
 
         return (
