@@ -1,11 +1,17 @@
 import React from "react";
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { signOut, closeProject } from '../../../redux/actions';
+import { signOut, closeProject, addNotification } from '../../../redux/actions';
 import usuario from '../../../recursos/images/usuario.png';
 
 class Menu extends React.Component {
 
+    constructor(props) {
+        super(props);
+        this.state = {
+
+        }
+    }
 
     onEventSignIn = async (event) => {
         try {
@@ -24,6 +30,16 @@ class Menu extends React.Component {
         this.props.close();
     }
 
+    componentDidMount() {
+        // this.intervalId = setInterval(() => {
+        //     this.props.addNotification({ "id": "100" });
+        // }, 5000);
+    }
+
+    componentWillUnmount() {
+        // clearInterval(this.intervalId);
+    }
+
     render() {
         return (
             <header className="app-header">
@@ -38,6 +54,7 @@ class Menu extends React.Component {
                             aria-label="Abrir Notificaciones"
                             aria-expanded="false">
                             <i className="fa fa-bell-o fa-sm  fa-sm"></i>
+                            {/* <span className="pl-1 pr-1 badge-warning rounded h7 icon-absolute ">{22}</span> */}
                             <span className="pl-1 pr-1 badge-warning rounded h7 icon-absolute ">{this.props.notificaciones.length}</span>
                         </a>
                         <ul className="app-notification dropdown-menu dropdown-menu-right">
@@ -67,7 +84,7 @@ class Menu extends React.Component {
                             {
                                 this.props.notificaciones.length == 0 ?
                                     <li className="app-notification__footer">No hay notificaciones para mostrar.</li>
-                                    : 
+                                    :
                                     <li className="app-notification__footer"><Link to="notifications"> Mostrar mas a detalle</Link></li>
                             }
                         </ul>
@@ -107,14 +124,16 @@ class Menu extends React.Component {
 
 const mapStateToProps = (state) => {
     return {
-        token: state.reducer
+        token: state.reducer,
+        notification : state.notiReducer
     }
 }
 
 const mapDispatchToProps = (dispatch) => {
     return {
         restore: () => dispatch(signOut()),
-        close: () => dispatch(closeProject())
+        close: () => dispatch(closeProject()),
+        addNotification: (value) => dispatch(addNotification(value))
     }
 }
 

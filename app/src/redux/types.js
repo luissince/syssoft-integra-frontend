@@ -6,3 +6,5 @@ export const PROJECT_CLOSE = 'PROJECT_CLOSE';
 export const CONFIG = 'CONFIG';
 export const CONFIG_SAVE = 'CONFIG_SAVE';
 
+export const ADD_NOTIFICATION = 'ADD_NOTIFICATION';
+

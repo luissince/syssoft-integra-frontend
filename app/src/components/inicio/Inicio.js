@@ -1,7 +1,7 @@
 import React from 'react';
 import axios from 'axios';
 // import { io } from "socket.io-client";
-import { NotificationContainer, NotificationManager } from 'react-notifications';
+// import { NotificationContainer, NotificationManager } from 'react-notifications';
 import { Switch, Route, Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { signOut, closeProject } from '../../redux/actions';
@@ -56,7 +56,7 @@ import RepClientes from '../reporte/RepClientes';
 import CpeConsultar from '../cpesunat/CpeConsultar';
 import CpeElectronicos from '../cpesunat/CpeElectronicos';
 import logoEmpresa from '../../recursos/images/INMOBILIARIA.png';
-import mixkit from '../../recursos/sound/mixkit.wav';
+// import mixkit from '../../recursos/sound/mixkit.wav';
 
 const Page404 = (props) => {
     return (
@@ -85,7 +85,7 @@ class Inicio extends React.Component {
         }
 
         // this.socket = io();
-        this.audio = new Audio(mixkit);
+        // this.audio = new Audio(mixkit);
     }
 
     async componentDidMount() {
@@ -455,10 +455,8 @@ class Inicio extends React.Component {
                     </div>
                     <Footer />
                 </main>
-                <NotificationContainer />
+                {/* <NotificationContainer /> */}
             </div>
-
-
         )
     }
 }

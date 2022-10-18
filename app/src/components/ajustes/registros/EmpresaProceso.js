@@ -81,6 +81,7 @@ class EmpresaProceso extends React.Component {
     }
 
     onEventFileLogo = async (event) => {
+        console.log(event.target.files)
         if (event.target.files.length !== 0) {
             await this.setStateAsync({
                 logo: URL.createObjectURL(event.target.files[0])

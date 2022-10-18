@@ -15,7 +15,7 @@ const initialState = {
     isConfig: true,
     userToken: null,
     project: null,
-    empresa: null
+    empresa: null,
 }
 
 const reducer = (state = initialState, action) => {
@@ -34,7 +34,7 @@ const reducer = (state = initialState, action) => {
             return {
                 ...state,
                 userToken: action.token,
-                project:  action.project,
+                project: action.project,
                 isSignout: false,
                 isVisible: true,
                 isConfig: false,
@@ -46,7 +46,7 @@ const reducer = (state = initialState, action) => {
                 isVisible: false,
                 isConfig: false,
                 userToken: null,
-                project: null
+                project: null,
             };
         case PROJECT_ACTIVE:
             return {

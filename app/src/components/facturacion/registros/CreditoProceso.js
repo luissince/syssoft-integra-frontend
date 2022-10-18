@@ -19,6 +19,8 @@ import {
 } from '../../tools/Tools';
 import { connect } from 'react-redux';
 
+import SearchBarLote from "../../tools/SearchBarLote";
+
 class CreditoProceso extends React.Component {
     constructor(props) {
         super(props);
@@ -29,6 +31,16 @@ class CreditoProceso extends React.Component {
             plazos: [],
             bancos: [],
             comprobantes: [],
+
+            lotes: [],
+            lote: '',
+            idLote: '',
+            filterLote: false,
+            manzana: '',
+
+            idLoteSeleccionado: '',
+            loteSeleccionado: '',
+            manzanaSeleccionado: '',
 
             impuestos: [],
             medidas: [],
@@ -69,6 +81,7 @@ class CreditoProceso extends React.Component {
             msgLoading: 'Cargando datos...',
         }
 
+        this.refLote = React.createRef();
         this.refImpuestoPlazo = React.createRef();
         this.refMedidaPlazo = React.createRef();
         this.refCollpsePlazo = React.createRef();
@@ -96,6 +109,8 @@ class CreditoProceso extends React.Component {
         this.refMontoAdelanto = React.createRef();
 
         this.abortControllerTable = new AbortController();
+
+        this.selectItemLote = false;
     }
 
     setStateAsync(state) {
@@ -187,6 +202,20 @@ class CreditoProceso extends React.Component {
                 idImpuestoAdelanto: impuestoFilter.length > 0 ? impuestoFilter[0].idImpuesto : '',
                 expandedOpcionesAdelanto: true,
             });
+        });
+
+        viewModal("modalCambiarLote", async () => {
+            this.refLote.current.focus();
+        });
+
+        clearModal("modalCambiarLote", async () => {
+            await this.setStateAsync({
+                lotes: [],
+                idLote: '',
+                lote: "",
+                manzana: "",
+            });
+            this.selectItemLote = false;
         });
     }
 
@@ -417,7 +446,7 @@ class CreditoProceso extends React.Component {
                     ModalAlertInfo("Cobro", "Procesando información...")
                     hideModal("modalCuota");
 
-                    let result = await axios.post("/api/cobro/cuota", {
+                    const result = await axios.post("/api/cobro/cuota", {
                         "idComprobante": this.state.idComprobanteCuota,
                         "idCliente": this.state.venta.idCliente,
                         "idUsuario": this.state.idUsuario,
@@ -671,6 +700,90 @@ class CreditoProceso extends React.Component {
         let params = new URLSearchParams({ "params": ciphertext });
         window.open("/api/cobro/repletramatricial?" + params, "_blank");
     }
+
+    /** */
+    onEventCambiarLote(item) {
+        this.setState({
+            idLoteSeleccionado: item.idLote,
+            loteSeleccionado: item.lote,
+            manzanaSeleccionado: item.manzana
+        });
+        showModal("modalCambiarLote")
+    }
+
+    onEventClearInputLote = async () => {
+        await this.setStateAsync({
+            lotes: [],
+            idLote: '',
+            lote: "",
+            manzana: ""
+        });
+        this.selectItemLote = false;
+    }
+
+    handleFilterLote = async (event) => {
+        const searchWord = this.selectItemLote ? "" : event.target.value;
+        await this.setStateAsync({ idLote: '', lote: searchWord });
+        this.selectItemLote = false;
+        if (searchWord.length === 0) {
+            await this.setStateAsync({ lotes: [] });
+            return;
+        }
+
+        if (this.state.filterLote) return;
+
+        try {
+            await this.setStateAsync({ filterLote: true });
+            let result = await axios.get("/api/lote/listfilter", {
+                params: {
+                    idProyecto: this.state.idProyecto,
+                    filtrar: searchWord,
+                },
+            });
+            await this.setStateAsync({ filterLote: false, lotes: result.data });
+        } catch (error) {
+            await this.setStateAsync({ filterLote: false, lotes: [] });
+        }
+    }
+
+    onEventSelectItemLote = async (value) => {
+        await this.setStateAsync({
+            lote: value.nombreLote + " / " + value.nombreManzana,
+            lotes: [],
+            idLote: value.idLote,
+            manzana: value.nombreManzana
+        });
+        this.selectItemLote = true;
+    }
+
+    async onEventCambiarLoto() {
+        if (this.state.idLote == "") {
+            this.refLote.current.focus();
+            return;
+        }
+
+        ModalAlertDialog("Cobro", "¿Estás seguro de continuar?", async (event) => {
+            if (event) {
+                try {
+                    ModalAlertInfo("Cobro", "Procesando cambio...")
+                    hideModal("modalCambiarLote");
+
+                    const result = await axios.put("/api/lote/cambiar", {
+                        "idLoteDestino": this.state.idLote,
+                        "idLoteOrigen":this.state.idLoteSeleccionado
+                    });
+
+                    ModalAlertSuccess("Cobro", result.data, () => {
+                        this.loadInit();
+                    });
+                } catch (error) {
+                    console.log(error.response);
+                    ModalAlertWarning("Cobro", "Se produjo un error un interno, intente nuevamente.");                 
+                }
+            }
+        });
+    }
+    /** */
 
     render() {
         const {
@@ -1219,6 +1332,53 @@ class CreditoProceso extends React.Component {
                 </div>
                 {/* fin modal */}
 
+                {/* Inicio modal */}
+                <div className="modal fade" id="modalCambiarLote" data-backdrop="static">
+                    <div className="modal-dialog modal-md">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h6 className="modal-title">Cambiar Lote</h6>
+                                <button type="button" className="close" data-bs-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div className="modal-body">
+
+                                <div className="row">
+                                    <div className="col-md-12 col-sm-12 col-12">
+                                        <div className="form-group">
+                                            <label>Lote Actual</label>
+                                            <h5>{this.state.loteSeleccionado}</h5>
+                                            <small>{this.state.manzanaSeleccionado}</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="row">
+                                    <div className="col-md-12 col-sm-12 col-12">
+                                        <label>Seleccione el lote</label>
+                                        <SearchBarLote
+                                            placeholder="Filtrar lotes..."
+                                            refLote={this.refLote}
+                                            lote={this.state.lote}
+                                            lotes={this.state.lotes}
+                                            onEventClearInput={this.onEventClearInputLote}
+                                            handleFilter={this.handleFilterLote}
+                                            onEventSelectItem={this.onEventSelectItemLote}
+                                        />
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-primary" onClick={() => this.onEventCambiarLoto()}>Guardar</button>
+                                <button type="button" className="btn btn-danger" data-bs-dismiss="modal">Cerrar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {/* fin modal */}
+
                 {
                     this.state.loading ?
                         <div className="clearfix absolute-all bg-white">
@@ -1291,6 +1451,7 @@ class CreditoProceso extends React.Component {
                                         <th width="20%">Detalle</th>
                                         <th width="15%" className="text-center">Unidad</th>
                                         <th width="10%" className="text-center">Cantidad</th>
+                                        <th width="5%" className="text-center">Cambiar</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -1301,6 +1462,15 @@ class CreditoProceso extends React.Component {
                                                 <td className="text-left">{item.lote}{<br />}{<small>{item.manzana}</small>}</td>
                                                 <td className="text-center">{item.medida}</td>
                                                 <td className="text-center">{item.cantidad}</td>
+                                                <td className="text-center">
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-light btn-sm"
+                                                        onClick={() => this.onEventCambiarLote(item)}
+                                                    >
+                                                        <i className="fa fa-random"></i>
+                                                    </button>
+                                                </td>
                                             </tr>
                                         ))
                                     }

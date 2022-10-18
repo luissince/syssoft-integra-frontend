@@ -1,4 +1,4 @@
-import { RESTORE_TOKEN, SIGN_IN, SIGN_OUT,PROJECT_ACTIVE,PROJECT_CLOSE, CONFIG, CONFIG_SAVE } from './types';
+import { RESTORE_TOKEN, SIGN_IN, SIGN_OUT, PROJECT_ACTIVE, PROJECT_CLOSE, CONFIG, CONFIG_SAVE, ADD_NOTIFICATION } from './types';
 
 export const restoreToken = (user, empresa) => (
     {
@@ -7,8 +7,8 @@ export const restoreToken = (user, empresa) => (
         empresa: empresa
     }
 )
- 
-export const signIn = (user , project = null) => (
+
+export const signIn = (user, project = null) => (
     {
         type: SIGN_IN,
         token: user,
@@ -47,4 +47,11 @@ export const configSave = () => (
         type: CONFIG_SAVE,
     }
 )
+
+export const addNotification = (value) => (
+    {
+        type: ADD_NOTIFICATION,
+        value: value
+    }
+);
 

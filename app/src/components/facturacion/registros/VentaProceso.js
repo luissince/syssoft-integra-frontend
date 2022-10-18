@@ -766,8 +766,8 @@ class VentaProceso extends React.Component {
         this.selectItemLote = true;
         this.refPrecioContado.current.focus();
     }
-
     /** */
+    
     onEventClearInputClient = async () => {
         await this.setStateAsync({ clientes: [], idCliente: '', cliente: "" });
         this.selectItemClient = false;

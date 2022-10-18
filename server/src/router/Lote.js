@@ -109,7 +109,16 @@ router.get('/lotecliente', async function (req, res) {
     } else {
         res.status(500).send(result)
     }
-})
+});
+
+router.put('/cambiar', async function (req, res){
+    const result = await lote.cambiar(req);
+    if(result == "update"){
+        res.status(200).send("Se actualizó correctamente el cambio del lote.");
+    }else{
+        res.status(500).send(result);
+    }
+});
 
 router.get('/replotedetalle', async function (req, res) {
     const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');

@@ -63,7 +63,7 @@ class Lote {
                 parseInt(req.query.opcion),
                 req.query.idProyecto,
                 req.query.buscar,
-                
+
                 parseInt(req.query.opcion),
                 req.query.idProyecto,
                 req.query.buscar,
@@ -79,7 +79,7 @@ class Lote {
         try {
             connection = await conec.beginTransaction();
 
-            if(req.body.estado === '3'){
+            if (req.body.estado === '3') {
                 await conec.rollback(connection);
                 return "No se puede usar el estado vendido al insertar un lote, cambie los datos e intente nuevamente.";
             }
@@ -166,7 +166,6 @@ class Lote {
             await conec.commit(connection);
             return "insert";
         } catch (error) {
-            console.log(error)
             if (connection != null) {
                 await conec.rollback(connection);
             }
@@ -559,11 +558,15 @@ class Lote {
     async listaEstadoLote(req) {
         try {
 
-            let proyecto = await conec.query(`SELECT nombre,ubicacion,area FROM proyecto WHERE idProyecto = ?`, [
+            const proyecto = await conec.query(`SELECT 
+            nombre,
+            ubicacion,
+            area 
+            FROM proyecto WHERE idProyecto = ?`, [
                 req.query.idProyecto,
             ]);
 
-            let lista = await conec.query(`SELECT 
+            const lista = await conec.query(`SELECT 
                 l.idLote,
                 l.descripcion AS lote,
                 m.nombre AS manzana,
@@ -591,6 +594,48 @@ class Lote {
 
             return { "proyecto": proyecto[0], "lista": lista };
         } catch (error) {
+            return "Se produjo un error de servidor, intente nuevamente.";
+        }
+    }
+
+    async cambiar(req) {
+        let connection = null;
+        try {
+            connection = await conec.beginTransaction();
+
+            await conec.execute(connection, `UPDATE ventaDetalle 
+            SET idLote = ?
+            WHERE idLote = ?`, [
+                req.body.idLoteDestino,
+                req.body.idLoteOrigen
+            ]);
+
+            await conec.execute(connection, `UPDATE cobro 
+            SET idProcedencia = ?
+            WHERE idProcedencia = ?`, [
+                req.body.idLoteDestino,
+                req.body.idLoteOrigen
+            ]);
+
+            await conec.execute(connection, `UPDATE lote
+            SET estado = 1
+            WHERE idLote = ?`, [
+                req.body.idLoteOrigen
+            ]);
+
+            await conec.execute(connection, `UPDATE lote
+            SET estado = 3
+            WHERE idLote = ?`, [
+                req.body.idLoteDestino
+            ]);
+
+            await conec.commit(connection);
+            return "update";
+        } catch (error) {
+            console.log(error)
+            if (connection != null) {
+                await conec.rollback(connection);
+            }
             return "Se produjo un error de servidor, intente nuevamente.";
         }
     }
