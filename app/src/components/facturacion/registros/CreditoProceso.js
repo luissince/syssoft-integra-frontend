@@ -322,7 +322,7 @@ class CreditoProceso extends React.Component {
             const impuestoFilter = impuesto.data.filter(item => item.preferida === 1);
 
             const medidaFilter = medida.data.filter(item => item.preferida === 1);
-            console.log(credito.data.inicial)
+          
             await this.setStateAsync({
                 inicial: credito.data.inicial,
                 venta: credito.data.venta,
@@ -1432,7 +1432,7 @@ class CreditoProceso extends React.Component {
                     <div className="col">
                         <p className="lead">Cobros</p>
                         <div className="form-group">
-                            {/* <div className="pt-1 pb-1">Inicial: <strong>{this.state.inicial.length === 0 ? "Sin Inicial" : numberFormat(this.state.inicial, codiso)}</strong></div> */}
+                            <div className="pt-1 pb-1">Inicial: <strong>{this.state.inicial.length === 0 ? "Sin Inicial" : numberFormat(this.state.inicial.reduce((previousValue, currentValue)=>previousValue + currentValue.monto,0), codiso)}</strong></div>
                             <div className="pt-1 pb-1">N° de Cuotas: <strong>{credito === 1 ? "Variable" : numCuota === 1 ? numCuota + " Cuota" : numCuota + " Cuotas"}</strong></div>
                             <div className="pt-1 pb-1">Monto Total: <strong>{numberFormat(total, codiso)}</strong></div>
                             <div className="pt-1 pb-1">Monto Cobrado: <span className="text-success">{numberFormat(cobrado, codiso)}</span></div>
