@@ -6,6 +6,7 @@ import {
     makeid,
     keyNumberFloat,
     isNumeric,
+    timeForma24,
     formatMoney,
     spinnerLoading,
     showModal,
@@ -25,7 +26,7 @@ class CreditoProceso extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            inicial: '',
+            inicial: [],
             venta: {},
             detalle: [],
             plazos: [],
@@ -276,7 +277,7 @@ class CreditoProceso extends React.Component {
                 msgLoading: 'Cargando datos...',
             })
 
-            let credito = await axios.get("/api/factura/credito/detalle", {
+            const credito = await axios.get("/api/factura/credito/detalle", {
                 signal: this.abortControllerTable.signal,
                 params: {
                     "idVenta": id
@@ -321,7 +322,7 @@ class CreditoProceso extends React.Component {
             const impuestoFilter = impuesto.data.filter(item => item.preferida === 1);
 
             const medidaFilter = medida.data.filter(item => item.preferida === 1);
-
+            console.log(credito.data.inicial)
             await this.setStateAsync({
                 inicial: credito.data.inicial,
                 venta: credito.data.venta,
@@ -770,7 +771,7 @@ class CreditoProceso extends React.Component {
 
                     const result = await axios.put("/api/lote/cambiar", {
                         "idLoteDestino": this.state.idLote,
-                        "idLoteOrigen":this.state.idLoteSeleccionado
+                        "idLoteOrigen": this.state.idLoteSeleccionado
                     });
 
                     ModalAlertSuccess("Cobro", result.data, () => {
@@ -778,7 +779,7 @@ class CreditoProceso extends React.Component {
                     });
                 } catch (error) {
                     console.log(error.response);
-                    ModalAlertWarning("Cobro", "Se produjo un error un interno, intente nuevamente.");                 
+                    ModalAlertWarning("Cobro", "Se produjo un error un interno, intente nuevamente.");
                 }
             }
         });
@@ -1431,7 +1432,7 @@ class CreditoProceso extends React.Component {
                     <div className="col">
                         <p className="lead">Cobros</p>
                         <div className="form-group">
-                            <div className="pt-1 pb-1">Inicial: <strong>{this.state.inicial === 0 ? "Sin Inicial" : numberFormat(this.state.inicial, codiso)}</strong></div>
+                            {/* <div className="pt-1 pb-1">Inicial: <strong>{this.state.inicial.length === 0 ? "Sin Inicial" : numberFormat(this.state.inicial, codiso)}</strong></div> */}
                             <div className="pt-1 pb-1">N° de Cuotas: <strong>{credito === 1 ? "Variable" : numCuota === 1 ? numCuota + " Cuota" : numCuota + " Cuotas"}</strong></div>
                             <div className="pt-1 pb-1">Monto Total: <strong>{numberFormat(total, codiso)}</strong></div>
                             <div className="pt-1 pb-1">Monto Cobrado: <span className="text-success">{numberFormat(cobrado, codiso)}</span></div>
@@ -1476,6 +1477,53 @@ class CreditoProceso extends React.Component {
                                     }
                                 </tbody>
                             </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="row">
+                    <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <p className="lead">Inicial</p>
+                        <div className="table-responsive">
+                            <table className="table table-light">
+                                <thead>
+                                    <tr className="table-active">
+                                        <th width="5%" className="text-center">N°</th>
+                                        <th width="15%">Comprobante</th>
+                                        <th width="15%">Banco</th>
+                                        <th width="10%">Fecha</th>
+                                        <th width="15%">Monto</th>
+                                        <th width="25%">Observación</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {
+                                        this.state.inicial.length == 0 ?
+                                            <tr>
+                                                <td colSpan ="6" className="text-center">No hay inicial</td>
+                                            </tr>
+                                            :
+                                            this.state.inicial.map((item, index) => (
+                                                <tr key={index}>
+                                                    <td className="text-center">{(index + 1)}</td>
+                                                    <td className="text-left">{item.comprobante}<br />{item.serie+"-"+item.numeracion}</td>
+                                                    <td className="text-left">{item.banco}</td>
+                                                    <td className="text-left">{item.fecha}<br />{timeForma24(item.hora)}</td>
+                                                    <td className="text-left">{numberFormat(item.monto,item.codiso)}</td>
+                                                    <td className="text-left">{item.observacion}</td>
+                                                </tr>
+                                            ))
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="row">
+                    <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <p className="lead">Agregados</p>
+                        <div className="table-responsive">
                         </div>
                     </div>
                 </div>
@@ -1563,6 +1611,7 @@ class CreditoProceso extends React.Component {
                                                         <td className="pb-0">Fecha</td>
                                                         <td className="pb-0">Cobrado</td>
                                                         <td className="pb-0">Restante</td>
+                                                        <td className="pb-0">Observación</td>
                                                     </tr>
                                                     {
 
@@ -1572,9 +1621,10 @@ class CreditoProceso extends React.Component {
                                                                 <td className="small text-center">{(index + 1)}</td>
                                                                 <td className="small">{cobro.nombre}{<br />}{cobro.serie + "-" + cobro.numeracion}</td>
                                                                 <td className="small">{cobro.banco}</td>
-                                                                <td className="small">{cobro.fecha}{<br />}{cobro.hora}</td>
+                                                                <td className="small">{cobro.fecha}{<br />}{timeForma24(cobro.hora)}</td>
                                                                 <td className="small">{numberFormat(cobro.precio, cobro.codiso)}</td>
                                                                 <td className="small">{numberFormat(montoActual, cobro.codiso)}</td>
+                                                                <td className="small">{cobro.observacion}</td>
                                                             </tr>
                                                         })
                                                     }

@@ -1092,7 +1092,7 @@ class Factura {
 
     async detalleCredito(req, res) {
         try {
-            let venta = await conec.query(`
+            const venta = await conec.query(`
             SELECT 
             v.idVenta, 
             cl.idCliente,
@@ -1134,7 +1134,7 @@ class Factura {
                 req.query.idVenta
             ]);
 
-            let detalle = await conec.query(`SELECT 
+            const detalle = await conec.query(`SELECT 
             l.idLote,
             l.descripcion AS lote,
             md.idMedida,
@@ -1156,7 +1156,7 @@ class Factura {
                 req.query.idVenta
             ]);
 
-            let plazos = await conec.query(`SELECT 
+            const plazos = await conec.query(`SELECT 
             idPlazo,      
             cuota,  
             DATE_FORMAT(fecha,'%d/%m/%Y') as fecha,
@@ -1167,7 +1167,7 @@ class Factura {
                 req.query.idVenta
             ]);
 
-            let cobros = await conec.query(`SELECT c.idCobro 
+            const cobros = await conec.query(`SELECT c.idCobro 
             FROM cobro AS c 
             LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro AND nc.estado = 1
             WHERE c.idProcedencia = ? AND c.estado = 1 AND nc.idNotaCredito IS NULL`, [
@@ -1176,18 +1176,19 @@ class Factura {
 
             let newPlazos = [];
 
-            for (let item of plazos) {
+            for (const item of plazos) {
 
                 let newCobros = [];
-                for (let cobro of cobros) {
+                for (const cobro of cobros) {
 
-                    let cobroPlazo = await conec.query(`SELECT 
+                    const cobroPlazo = await conec.query(`SELECT 
                     cv.idPlazo,
                     cp.nombre,
                     c.serie,
                     c.numeracion,
                     DATE_FORMAT(c.fecha,'%d/%m/%Y') as fecha, 
                     c.hora,
+                    c.observacion,
                     bc.nombre as banco,
                     mo.codiso,
                     cv.precio
@@ -1212,29 +1213,57 @@ class Factura {
                 });
             }
 
-            let lotes = await conec.query(`SELECT
-                l.descripcion AS lote,
-                l.precio, 
-                l.areaLote, 
-                m.nombre AS manzana
-                FROM venta AS v 
-                INNER JOIN ventaDetalle AS vd ON v.idVenta = vd.idVenta
-                INNER JOIN lote AS l ON vd.idLote = l.idLote
-                INNER JOIN manzana AS m ON l.idManzana = m.idManzana
-                WHERE v.idVenta = ?`, [
-                req.query.idVenta
-            ])
+            // let lotes = await conec.query(`SELECT
+            //     l.descripcion AS lote,
+            //     l.precio, 
+            //     l.areaLote, 
+            //     m.nombre AS manzana
+            //     FROM venta AS v 
+            //     INNER JOIN ventaDetalle AS vd ON v.idVenta = vd.idVenta
+            //     INNER JOIN lote AS l ON vd.idLote = l.idLote
+            //     INNER JOIN manzana AS m ON l.idManzana = m.idManzana
+            //     WHERE v.idVenta = ?`, [
+            //     req.query.idVenta
+            // ])
 
-            let inicial = await conec.query(`SELECT 
-                IFNULL( cv.precio, 0) AS inicial 
-                FROM venta AS v 
-                LEFT JOIN cobroVenta AS cv ON cv.idVenta = v.idVenta AND cv.idPlazo = 0
-                WHERE v.idVenta = ?
-                `, [
+            // let inicial = await conec.query(`SELECT 
+            //     IFNULL( cv.precio, 0) AS inicial 
+            //     FROM venta AS v 
+            //     LEFT JOIN cobroVenta AS cv ON cv.idVenta = v.idVenta AND cv.idPlazo = 0
+            //     WHERE v.idVenta = ?
+            //     `, [
+            //     req.query.idVenta
+            // ]);
+
+            const inicial = await conec.query(`
+            SELECT  
+            co.nombre AS comprobante,
+            c.serie,
+            c.numeracion,
+            bn.nombre AS banco,
+            DATE_FORMAT(c.fecha,'%d/%m/%Y') as fecha, 
+            c.hora,
+            c.observacion,
+            mo.codiso,
+            sum(cv.precio) AS monto
+            FROM cobro AS c          
+            INNER JOIN banco AS bn ON bn.idBanco = c.idBanco
+            INNER JOIN moneda AS mo ON mo.idMoneda = c.idMoneda
+            INNER JOIN comprobante AS co ON co.idComprobante = c.idComprobante
+            INNER JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro AND cv.idPlazo = 0
+            WHERE c.idProcedencia = ?
+            GROUP BY c.idCobro`, [
                 req.query.idVenta
             ]);
 
-            return sendSuccess(res, { "venta": venta[0], "detalle": detalle, "plazos": newPlazos, "lotes": lotes, "inicial": inicial[0].inicial });
+            return sendSuccess(res, {
+                "venta": venta[0],
+                "detalle": detalle,
+                "plazos": newPlazos,
+                // "lotes": lotes,
+                // "inicial": inicial[0].inicial
+                "inicial": inicial
+            });
 
         } catch (error) {
             return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
@@ -1420,8 +1449,11 @@ class Factura {
             DATE_FORMAT(p.fecha,'%d/%m/%Y') as fecha,
             CASE 
             WHEN p.fecha < CURRENT_DATE then 1 
-            WHEN YEAR(p.fecha) = YEAR(CURRENT_DATE) AND MONTH(p.fecha) = MONTH(CURRENT_DATE) AND v.frecuencia = 15 AND DAY(p.fecha) <= 15 then 1 
-            WHEN YEAR(p.fecha) = YEAR(CURRENT_DATE) AND MONTH(p.fecha) = MONTH(CURRENT_DATE) AND DAY(p.fecha) > 15 then 1 
+            WHEN YEAR(p.fecha) = YEAR(CURRENT_DATE) AND MONTH(p.fecha) = MONTH(CURRENT_DATE) AND v.frecuencia = 15 AND DAY(p.fecha) < 15 then 2
+            WHEN YEAR(p.fecha) = YEAR(CURRENT_DATE) AND MONTH(p.fecha) = MONTH(CURRENT_DATE) AND v.frecuencia = 15 AND DAY(p.fecha) >= 15 then 1
+
+            WHEN YEAR(p.fecha) = YEAR(CURRENT_DATE) AND MONTH(p.fecha) = MONTH(CURRENT_DATE) AND DAY(CURRENT_DATE) < DAY(p.fecha)   then 2
+            WHEN YEAR(p.fecha) = YEAR(CURRENT_DATE) AND MONTH(p.fecha) = MONTH(CURRENT_DATE) AND DAY(CURRENT_DATE) >= DAY(p.fecha)  then 1
             ELSE 0 end AS vencido,
             p.monto,
             p.estado

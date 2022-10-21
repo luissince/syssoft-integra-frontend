@@ -129,11 +129,17 @@ class RepCuota {
             });
 
             let credito = venta.total - data.inicial
-            let arrayIni = [0, '', '', numberFormat(credito), ''];
+            let arrayIni = [0, '', '', '', numberFormat(credito), ''];
 
             let content = data.plazos.map((item, index) => {
                 credito = credito - item.monto
-                return [++index, "CUOTA " + item.cuota, item.fecha, item.estado === 1 ? 'COBRADO' : item.vencido === 1 ? 'VENCIDO' : 'POR COBRAR', numberFormat(credito), item.estado === 1 ? 0 : numberFormat(item.monto - item.cobros)]
+                return [
+                    ++index,
+                    "CUOTA " + item.cuota,
+                    item.fecha,
+                    item.estado === 1 ? 'COBRADO' : item.vencido === 1 ? 'VENCIDO' : item.vencido === 2 ? 'POR VENCER' : 'POR COBRAR',
+                    numberFormat(credito),
+                    item.estado === 1 ? 0 : numberFormat(item.monto - item.cobros)]
             })
 
             content.unshift(arrayIni)
@@ -152,7 +158,10 @@ class RepCuota {
                             doc.font("Helvetica").fontSize(h3).fillColor("green");
                         } else if (row[3] === "VENCIDO") {
                             doc.font("Helvetica").fontSize(h3).fillColor("red");
-                        } else {
+                        } else if (row[3] === "POR VENCER") {
+                            doc.font("Helvetica").fontSize(h3).fillColor("orange");
+                        }
+                        else {
                             doc.font("Helvetica").fontSize(h3).fillColor("black");
                         }
                     } else {
