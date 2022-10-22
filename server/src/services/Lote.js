@@ -537,7 +537,7 @@ class Lote {
     async listarComboLoteCliente(req) {
         try {
             let result = await conec.query(`SELECT 
-                l.idLote, 
+                v.idVenta, 
                 l.descripcion AS lote, 
                 m.nombre AS manzana
                 FROM venta AS v

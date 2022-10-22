@@ -1,5 +1,4 @@
 import React from 'react';
-import axios from 'axios';
 import CryptoJS from 'crypto-js';
 import { connect } from 'react-redux';
 import { spinnerLoading } from '../tools/Tools';
@@ -35,13 +34,7 @@ class RepLotes extends React.Component {
 
     loadData = async () => {
         try {
-
-            // const comprobante = await axios.get("/api/comprobante/listcombo", {
-            //     signal: this.abortControllerView.signal
-            // });
-
             await this.setStateAsync({
-                // comprobantes: comprobante.data,
                 loading: false,
             });
 

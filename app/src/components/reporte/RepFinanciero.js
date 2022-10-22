@@ -2,6 +2,7 @@ import React from 'react';
 import CryptoJS from 'crypto-js';
 import axios from 'axios';
 import FileDownloader from "./hooks/FileDownloader";
+import { apiComprobanteListcombo } from '../../api';
 import { spinnerLoading, currentDate } from '../tools/Tools';
 import { connect } from 'react-redux';
 
@@ -69,20 +70,14 @@ class RepFinanciero extends React.Component {
                 signal: this.abortControllerView.signal
             });
 
-            const facturado = await axios.get("/api/comprobante/listcombo", {
-                signal: this.abortControllerView.signal,
-                params: {
-                    "tipo": "1",
-                    "estado": "all"
-                }
+            const facturado = await apiComprobanteListcombo(this.abortControllerView.signal, {
+                "tipo": "1",
+                "estado": "all"
             });
 
-            const comprobante = await axios.get("/api/comprobante/listcombo", {
-                signal: this.abortControllerView.signal,
-                params: {
-                    "tipo": "5",
-                    "estado": "all"
-                }
+            const comprobante = await apiComprobanteListcombo(this.abortControllerView.signal, {
+                "tipo": "5",
+                "estado": "all"
             });
 
             await this.setStateAsync({

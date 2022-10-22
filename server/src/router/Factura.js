@@ -35,6 +35,10 @@ router.get("/credito/detalle", async function (req, res) {
     return await factura.detalleCredito(req, res);
 });
 
+router.get("/venta/cobro", async function (req, res) {
+    return await factura.ventaCobro(req, res);
+});
+
 router.get("/cpesunat", async function (req, res) {
     return await factura.cpesunat(req, res);
 });

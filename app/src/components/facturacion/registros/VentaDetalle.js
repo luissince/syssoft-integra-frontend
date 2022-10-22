@@ -1,5 +1,4 @@
 import React from 'react';
-import axios from 'axios';
 import CryptoJS from 'crypto-js';
 import {
     formatMoney,
@@ -9,6 +8,7 @@ import {
     timeForma24,
     spinnerLoading,
 } from '../../tools/Tools';
+import { apiFacturaId, apiVentaCobro } from '../../../api';
 import { connect } from 'react-redux';
 
 class VentaDetalle extends React.Component {
@@ -28,6 +28,7 @@ class VentaDetalle extends React.Component {
             usuario: '',
 
             detalle: [],
+            cobros: [],
 
             loading: true,
             msgLoading: 'Cargando datos...',
@@ -58,14 +59,15 @@ class VentaDetalle extends React.Component {
 
     async loadDataId(id) {
         try {
-            const result = await axios.get("/api/factura/id", {
-                signal: this.abortControllerView.signal,
-                params: {
-                    idVenta: id
-                }
+            const responseFactura = await apiFacturaId(this.abortControllerView.signal, {
+                "idVenta": id
             });
 
-            let cabecera = result.data.cabecera;
+            const responseCobros = await apiVentaCobro(this.abortControllerView.signal, {
+                "idVenta": id
+            });
+
+            let cabecera = responseFactura.data.cabecera;
 
             await this.setStateAsync({
                 idVenta: id,
@@ -79,7 +81,9 @@ class VentaDetalle extends React.Component {
                 codiso: cabecera.codiso,
                 usuario: cabecera.usuario,
                 total: formatMoney(cabecera.monto),
-                detalle: result.data.detalle,
+                detalle: responseFactura.data.detalle,
+
+                cobros: responseCobros.data,
 
                 loading: false
             });
@@ -205,11 +209,11 @@ class VentaDetalle extends React.Component {
                                                     </tr>
                                                     <tr>
                                                         <th className="table-secondary w-25 p-1 font-weight-normal ">Estado</th>
-                                                        <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">{this.state.estado === 1 ? <span className="text-success font-weight-bold">Cobrado</span> : this.state.estado === 2 ? <span className="text-warning font-weight-bold">Por cobrar</span>:  <span className="text-danger font-weight-bold">Anulado</span>}</th>
+                                                        <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">{this.state.estado === 1 ? <span className="text-success font-weight-bold">Cobrado</span> : this.state.estado === 2 ? <span className="text-warning font-weight-bold">Por cobrar</span> : <span className="text-danger font-weight-bold">Anulado</span>}</th>
                                                     </tr>
                                                     <tr>
                                                         <th className="table-secondary w-25 p-1 font-weight-normal ">Usuario</th>
-                                                        <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">{this.state.usuario }</th>
+                                                        <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">{this.state.usuario}</th>
                                                     </tr>
                                                     <tr>
                                                         <th className="table-secondary w-25 p-1 font-weight-normal ">Total</th>
@@ -228,37 +232,36 @@ class VentaDetalle extends React.Component {
 
                             <div className="row">
                                 <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                                    <div className="form-group">
-                                        <div className="table-responsive">
-                                            <table className="table table-light table-striped">
-                                                <thead>
-                                                    <tr>
-                                                        <th>#</th>
-                                                        <th>Concepto</th>
-                                                        <th>Unidad</th>
-                                                        <th>Cantidad</th>
-                                                        <th>Impuesto</th>
-                                                        <th>Precio</th>
-                                                        <th>Monto</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {
-                                                        this.state.detalle.map((item, index) => (
-                                                            <tr key={index}>
-                                                                <td>{++index}</td>
-                                                                <td>{item.lote}{<br/>}{<small>{item.manzana}</small>}</td>
-                                                                <td>{item.medida}</td>
-                                                                <td className="text-right">{formatMoney(item.cantidad)}</td>
-                                                                <td className="text-right">{item.impuesto}</td>
-                                                                <td className="text-right">{numberFormat(item.precio, this.state.codiso)}</td>
-                                                                <td className="text-right">{numberFormat(item.cantidad * item.precio, this.state.codiso)}</td>
-                                                            </tr>
-                                                        ))
-                                                    }
-                                                </tbody>
-                                            </table>
-                                        </div>
+                                    <p className="lead">Detalle</p>
+                                    <div className="table-responsive">
+                                        <table className="table table-light table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Concepto</th>
+                                                    <th>Unidad</th>
+                                                    <th>Cantidad</th>
+                                                    <th>Impuesto</th>
+                                                    <th>Precio</th>
+                                                    <th>Monto</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {
+                                                    this.state.detalle.map((item, index) => (
+                                                        <tr key={index}>
+                                                            <td>{++index}</td>
+                                                            <td>{item.lote}{<br />}{<small>{item.manzana}</small>}</td>
+                                                            <td>{item.medida}</td>
+                                                            <td className="text-right">{formatMoney(item.cantidad)}</td>
+                                                            <td className="text-right">{item.impuesto}</td>
+                                                            <td className="text-right">{numberFormat(item.precio, this.state.codiso)}</td>
+                                                            <td className="text-right">{numberFormat(item.cantidad * item.precio, this.state.codiso)}</td>
+                                                        </tr>
+                                                    ))
+                                                }
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
                             </div>
@@ -272,6 +275,39 @@ class VentaDetalle extends React.Component {
                                             {this.renderTotal()}
                                         </thead>
                                     </table>
+                                </div>
+                            </div>
+
+                            <div className="row">
+                                <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                    <p className="lead">Cobros</p>
+                                    <div className="table-responsive">
+                                        <table className="table table-light table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Concepto</th>
+                                                    <th>Monto</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {
+                                                    this.state.cobros.length == 0 ?
+                                                        <tr>
+                                                            <td colSpan="3" className="text-center">No hay cobro</td>
+                                                        </tr>
+                                                        :
+                                                        this.state.cobros.map((item, index) => (
+                                                            <tr key={index}>
+                                                                <td>{++index}</td>
+                                                                <td>{item.concepto}</td>
+                                                                <td>{numberFormat(item.monto, item.codiso)}</td>
+                                                            </tr>
+                                                        ))
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
                         </>

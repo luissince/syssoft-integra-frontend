@@ -23,7 +23,6 @@ class RepCuota {
 
             let orgX = doc.x;
             let orgY = doc.y;
-            let cabeceraY = orgY + 70;
             let titleX = orgX + 150;
             let medioX = doc.page.width / 2;
 
@@ -48,9 +47,29 @@ class RepCuota {
             );
 
             doc.fontSize(h3).text(
-                `RUC: ${sedeInfo.ruc}\n${sedeInfo.direccion}\nCelular: ${sedeInfo.celular} / Telefono: ${sedeInfo.telefono}`,
+                `RUC: ${sedeInfo.ruc}`,
                 titleX,
-                orgY + 17,
+                doc.y,
+                {
+                    width: 250,
+                    align: "center",
+                }
+            );
+
+            doc.fontSize(h3).text(
+                sedeInfo.direccion,
+                titleX,
+                doc.y,
+                {
+                    width: 250,
+                    align: "center",
+                }
+            );
+
+            doc.fontSize(h3).text(
+                `Celular: ${sedeInfo.celular} / Telefono: ${sedeInfo.telefono}`,
+                titleX,
+                doc.y,
                 {
                     width: 250,
                     align: "center",
@@ -65,7 +84,7 @@ class RepCuota {
             doc.text(
                 title,
                 (doc.page.width - widthtext) / 2,
-                cabeceraY,
+                doc.y,
                 {
                     width: widthtext
                 }
@@ -86,29 +105,66 @@ class RepCuota {
             doc.lineGap(4);
             doc.opacity(1)
 
-            let filtroY = doc.y;
+            const filtroY = doc.y;
 
+            // ==============================================================================================
             doc.fontSize(h3).text(
-                `Cliente: ${venta.informacion}\nMonto Total: ${numberFormat(venta.total)}\nMonto Cobrado: ${numberFormat(venta.cobrado)}\nMonto Restante: ${numberFormat(venta.total - venta.cobrado)}`,
+                `Cliente: ${venta.informacion}`,
                 orgX,
                 filtroY + 10
             );
 
+            doc.fontSize(h3).text(
+                `Monto Total: ${numberFormat(venta.total)}`,
+                orgX,
+                doc.y
+            );
 
             doc.fontSize(h3).text(
-                `Dni/Ruc: ${venta.documento}\nMonto Inicial:  ${numberFormat(data.inicial)}\nN° Cuotas: ${venta.credito === 1 ? "Variable" : venta.numCuota}\nComprobante: ${venta.nombre} ${venta.serie} - ${venta.numeracion}`,
+                `Monto Cobrado: ${numberFormat(venta.cobrado)}`,
+                orgX,
+                doc.y
+            );
+
+            doc.fontSize(h3).text(
+                `Monto Restante: ${numberFormat(venta.total - venta.cobrado)}`,
+                orgX,
+                doc.y
+            );
+
+            // ==============================================================================================
+            doc.fontSize(h3).text(
+                `Dni/Ruc: ${venta.documento}`,
                 medioX,
                 filtroY + 10
             );
 
-            doc.lineGap(0);
+            doc.fontSize(h3).text(
+                `Monto Inicial:  ${data.inicial.length === 0 ? "Sin Inicial" : numberFormat(data.inicial.reduce((previousValue, currentValue) => previousValue + currentValue.monto, 0))}`,
+                medioX,
+                doc.y
+            );
 
-            let lotes = data.lotes.map((item, index) => {
+            doc.fontSize(h3).text(
+                `N° Cuotas: ${venta.credito === 1 ? "Variable" : venta.numCuota}`,
+                medioX,
+                doc.y
+            );
+
+            doc.fontSize(h3).text(
+                `Comprobante: ${venta.nombre} ${venta.serie} - ${venta.numeracion}`,
+                medioX,
+                doc.y
+            );
+
+
+            // ==============================================================================================
+
+            const lotes = data.lotes.map((item, index) => {
                 return [++index, item.lote, numberFormat(item.precio), item.areaLote, item.manzana]
             })
 
             const lotesTabla = {
-                // title: "CRONOGRAMA DE PAGOS MENSUALES VENTA AL CRÉDITO",
                 subtitle: `LISTA DE LOTES ASOCIADOS A LA VENTA`,
                 headers: ["N°", "LOTE", "PRECIO", "AREA m2", "MANZANA"],
                 rows: lotes
@@ -125,8 +181,60 @@ class RepCuota {
                 width: (doc.page.width - doc.options.margins.left - doc.options.margins.right),
                 x: orgX,
                 y: doc.y + 15,
+            });
+
+            // ==============================================================================================
+            const inicial = data.inicial.length === 0 ? [["", "SIN INICIAL", ""]] : data.inicial.map((item, index) => {
+                return [++index, item.comprobante, numberFormat(item.monto)]
+            });
+
+            const inicialTabla = {
+                subtitle: `INICIAL`,
+                headers: ["N°", "CONCEPTO", "MONTO"],
+                rows: inicial
+            };
+
+            doc.table(inicialTabla, {
+                prepareHeader: () => doc.font("Helvetica-Bold").fontSize(h3),
+                prepareRow: () => {
+                    doc.font("Helvetica").fontSize(h3);
+                },
+                padding: 5,
+                columnSpacing: 5,
+                columnsSize: [60, 162 + 100 + 100, 110], //532
+                width: (doc.page.width - doc.options.margins.left - doc.options.margins.right),
+                x: orgX,
+                y: doc.y + 15,
 
             });
+
+            // ==============================================================================================
+
+            const cobros = data.cobros.length == 0 ? [["", "NO HAY COBROS", ""]] : data.cobros.map((item, index) => {
+                return [++index, item.concepto, numberFormat(item.monto)];
+            });
+
+            const cobrosTabla = {
+                subtitle: `COBROS`,
+                headers: ["N°", "CONCEPTO", "MONTO"],
+                rows: cobros
+            };
+
+            doc.table(cobrosTabla, {
+                prepareHeader: () => doc.font("Helvetica-Bold").fontSize(h3),
+                prepareRow: () => {
+                    doc.font("Helvetica").fontSize(h3);
+                },
+                padding: 5,
+                columnSpacing: 5,
+                columnsSize: [60, 162 + 100 + 100, 110], //532
+                width: (doc.page.width - doc.options.margins.left - doc.options.margins.right),
+                x: orgX,
+                y: doc.y + 15,
+
+            });
+
+            // ==============================================================================================
 
             let credito = venta.total - data.inicial
             let arrayIni = [0, '', '', '', numberFormat(credito), ''];
@@ -175,6 +283,7 @@ class RepCuota {
                 x: orgX,
                 y: doc.y + 10,
             });
+            // ==============================================================================================
 
             doc.end();
             return getStream.buffer(doc);

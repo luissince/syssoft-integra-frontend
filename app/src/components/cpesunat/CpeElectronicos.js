@@ -28,6 +28,7 @@ import error from '../../recursos/images/error.svg';
 import pdf from '../../recursos/images/pdf.svg';
 import xml from '../../recursos/images/xml.png';
 import email from '../../recursos/images/email.svg';
+import { apiComprobanteListcombo } from '../../api';
 import { connect } from 'react-redux';
 import FileDownloader from "../reporte/hooks/FileDownloader";
 import Paginacion from '../tools/Paginacion';
@@ -104,19 +105,13 @@ class CpeElectronicos extends React.Component {
     }
 
     loadData = async () => {
-        try {
-            const facturas = await axios.get("/api/comprobante/listcombo", {
-                signal: this.abortControllerView.signal,
-                params: {
-                    "tipo": "1"
-                }
+        try {         
+            const facturas = await apiComprobanteListcombo(this.abortControllerView.signal, {
+                "tipo": "1"
             });
-
-            const notaCredito = await axios.get("/api/comprobante/listcombo", {
-                signal: this.abortControllerView.signal,
-                params: {
-                    "tipo": "3"
-                }
+           
+            const notaCredito = await apiComprobanteListcombo(this.abortControllerView.signal, {
+                "tipo": "3"
             });
 
             await this.setStateAsync({

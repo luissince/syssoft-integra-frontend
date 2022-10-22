@@ -22,6 +22,7 @@ import {
     ModalAlertWarning,
 } from '../../tools/Tools';
 import { connect } from 'react-redux';
+import { apiComprobanteListcombo } from '../../../api';
 import SearchBarClient from "../../tools/SearchBarClient";
 import SearchBarLote from "../../tools/SearchBarLote";
 
@@ -173,25 +174,17 @@ class VentaProceso extends React.Component {
 
     loadData = async () => {
         try {
-            const comprobanteLibre = await axios.get("/api/comprobante/listcombo", {
-                signal: this.abortControllerView.signal,
-                params: {
-                    "tipo": "2"
-                }
+        
+            const comprobanteLibre = await apiComprobanteListcombo(this.abortControllerView.signal,{
+                "tipo": "2"
             });
-
-            const facturadoCobro = await axios.get("/api/comprobante/listcombo", {
-                signal: this.abortControllerView.signal,
-                params: {
-                    "tipo": "1"
-                }
+          
+            const facturadoCobro = await apiComprobanteListcombo(this.abortControllerView.signal,{
+                "tipo": "1"
             });
-
-            const comprobanteCobro = await axios.get("/api/comprobante/listcombo", {
-                signal: this.abortControllerView.signal,
-                params: {
-                    "tipo": "5"
-                }
+           
+            const comprobanteCobro = await apiComprobanteListcombo(this.abortControllerView.signal,{
+                "tipo": "5"
             });
 
             let medida = await axios.get('/api/medida/listcombo', {
@@ -767,7 +760,7 @@ class VentaProceso extends React.Component {
         this.refPrecioContado.current.focus();
     }
     /** */
-    
+
     onEventClearInputClient = async () => {
         await this.setStateAsync({ clientes: [], idCliente: '', cliente: "" });
         this.selectItemClient = false;

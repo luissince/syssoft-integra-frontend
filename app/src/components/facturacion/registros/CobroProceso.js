@@ -14,6 +14,7 @@ import {
     ModalAlertSuccess,
     ModalAlertWarning,
 } from '../../tools/Tools';
+import { apiComprobanteListcombo } from '../../../api';
 import { connect } from 'react-redux';
 import SearchBarClient from "../../tools/SearchBarClient";
 
@@ -98,11 +99,8 @@ class CobroProceso extends React.Component {
 
     loadData = async () => {
         try {
-            const comprobante = await axios.get("/api/comprobante/listcombo", {
-                signal: this.abortControllerView.signal,
-                params: {
-                    "tipo": "5"
-                }
+            const comprobante = await apiComprobanteListcombo(this.abortControllerView.signal, {
+                "tipo": "5"
             });
 
             const concepto = await axios.get("/api/concepto/listcombo", {
@@ -1023,7 +1021,7 @@ class CobroProceso extends React.Component {
 
                                                 {
                                                     this.state.lotes.map((item, index) => (
-                                                        <option key={index} value={item.idLote}>{item.lote + " - " + item.manzana}</option>
+                                                        <option key={index} value={item.idVenta}>{item.lote + " - " + item.manzana}</option>
                                                     ))
                                                 }
 

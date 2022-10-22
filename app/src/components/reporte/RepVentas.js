@@ -2,6 +2,7 @@ import React from 'react';
 import axios from 'axios';
 import CryptoJS from 'crypto-js';
 import FileDownloader from "./hooks/FileDownloader";
+import { apiComprobanteListcombo } from '../../api';
 import { spinnerLoading, currentDate } from '../tools/Tools';
 import { connect } from 'react-redux';
 
@@ -10,7 +11,7 @@ class RepVentas extends React.Component {
         super(props);
         this.state = {
             idProyecto: this.props.token.project.idProyecto,
-            
+
             fechaIni: '',
             fechaFin: '',
             isFechaActive: false,
@@ -61,11 +62,8 @@ class RepVentas extends React.Component {
 
     loadData = async () => {
         try {
-            const comprobante = await axios.get("/api/comprobante/listcombo", {
-                signal: this.abortControllerView.signal,
-                params: {
-                    "tipo": "1"
-                }
+            const comprobante = await apiComprobanteListcombo(this.abortControllerView.signal, {
+                "tipo": "1"
             });
 
             const cliente = await axios.get("/api/cliente/listcombo", {
@@ -184,7 +182,7 @@ class RepVentas extends React.Component {
             "name": "Reporte de Ventas",
             "file": "/api/factura/excelgeneralventas",
             "filename": "ventas.xlsx",
-            "params":  ciphertext 
+            "params": ciphertext
         });
     }
 

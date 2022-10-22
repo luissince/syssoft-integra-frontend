@@ -19,7 +19,7 @@ import {
     ModalAlertDialog
 } from '../../tools/Tools';
 import { connect } from 'react-redux';
-
+import { apiComprobanteListcombo, apiFacturaCreditoDetalle, apiVentaCobro } from '../../../api';
 import SearchBarLote from "../../tools/SearchBarLote";
 
 class CreditoProceso extends React.Component {
@@ -32,6 +32,7 @@ class CreditoProceso extends React.Component {
             plazos: [],
             bancos: [],
             comprobantes: [],
+            cobros: [],
 
             lotes: [],
             lote: '',
@@ -275,27 +276,22 @@ class CreditoProceso extends React.Component {
                 loading: true,
                 messageWarning: '',
                 msgLoading: 'Cargando datos...',
-            })
-
-            const credito = await axios.get("/api/factura/credito/detalle", {
-                signal: this.abortControllerTable.signal,
-                params: {
-                    "idVenta": id
-                }
             });
 
-            const facturado = await axios.get("/api/comprobante/listcombo", {
-                signal: this.abortControllerTable.signal,
-                params: {
-                    "tipo": "1"
-                }
+            const credito = await apiFacturaCreditoDetalle(this.abortControllerTable.signal, {
+                "idVenta": id
             });
 
-            const comprobante = await axios.get("/api/comprobante/listcombo", {
-                signal: this.abortControllerTable.signal,
-                params: {
-                    "tipo": "5"
-                }
+            const cobros = await apiVentaCobro(this.abortControllerTable.signal, {
+                "idVenta": id
+            });
+
+            const facturado = await apiComprobanteListcombo(this.abortControllerTable.signal, {
+                "tipo": "1"
+            });
+
+            const comprobante = await apiComprobanteListcombo(this.abortControllerTable.signal, {
+                "tipo": "5"
             });
 
             const banco = await axios.get("/api/banco/listcombo", {
@@ -322,7 +318,7 @@ class CreditoProceso extends React.Component {
             const impuestoFilter = impuesto.data.filter(item => item.preferida === 1);
 
             const medidaFilter = medida.data.filter(item => item.preferida === 1);
-          
+
             await this.setStateAsync({
                 inicial: credito.data.inicial,
                 venta: credito.data.venta,
@@ -330,6 +326,8 @@ class CreditoProceso extends React.Component {
                 plazos: plazosSelected,
                 bancos: banco.data,
                 comprobantes: [...comprobante.data, ...facturado.data],
+                cobros: cobros.data,
+
                 medidas: medida.data,
                 impuestos: impuesto.data,
 
@@ -1430,9 +1428,9 @@ class CreditoProceso extends React.Component {
                         </div>
                     </div>
                     <div className="col">
-                        <p className="lead">Cobros</p>
+                        <p className="lead"></p>
                         <div className="form-group">
-                            <div className="pt-1 pb-1">Inicial: <strong>{this.state.inicial.length === 0 ? "Sin Inicial" : numberFormat(this.state.inicial.reduce((previousValue, currentValue)=>previousValue + currentValue.monto,0), codiso)}</strong></div>
+                            <div className="pt-1 pb-1">Inicial: <strong>{this.state.inicial.length === 0 ? "Sin Inicial" : numberFormat(this.state.inicial.reduce((previousValue, currentValue) => previousValue + currentValue.monto, 0), codiso)}</strong></div>
                             <div className="pt-1 pb-1">N° de Cuotas: <strong>{credito === 1 ? "Variable" : numCuota === 1 ? numCuota + " Cuota" : numCuota + " Cuotas"}</strong></div>
                             <div className="pt-1 pb-1">Monto Total: <strong>{numberFormat(total, codiso)}</strong></div>
                             <div className="pt-1 pb-1">Monto Cobrado: <span className="text-success">{numberFormat(cobrado, codiso)}</span></div>
@@ -1500,16 +1498,16 @@ class CreditoProceso extends React.Component {
                                     {
                                         this.state.inicial.length == 0 ?
                                             <tr>
-                                                <td colSpan ="6" className="text-center">No hay inicial</td>
+                                                <td colSpan="6" className="text-center">No hay inicial</td>
                                             </tr>
                                             :
                                             this.state.inicial.map((item, index) => (
                                                 <tr key={index}>
                                                     <td className="text-center">{(index + 1)}</td>
-                                                    <td className="text-left">{item.comprobante}<br />{item.serie+"-"+item.numeracion}</td>
+                                                    <td className="text-left">{item.comprobante}<br />{item.serie + "-" + item.numeracion}</td>
                                                     <td className="text-left">{item.banco}</td>
                                                     <td className="text-left">{item.fecha}<br />{timeForma24(item.hora)}</td>
-                                                    <td className="text-left">{numberFormat(item.monto,item.codiso)}</td>
+                                                    <td className="text-left">{numberFormat(item.monto, item.codiso)}</td>
                                                     <td className="text-left">{item.observacion}</td>
                                                 </tr>
                                             ))
@@ -1522,8 +1520,33 @@ class CreditoProceso extends React.Component {
 
                 <div className="row">
                     <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                        <p className="lead">Agregados</p>
+                        <p className="lead">Cobros</p>
                         <div className="table-responsive">
+                        <table className="table table-light">
+                                <thead>
+                                    <tr className="table-active">
+                                        <th>#</th>
+                                        <th>Concepto</th>
+                                        <th>Monto</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {
+                                        this.state.cobros.length == 0 ?
+                                            <tr>
+                                                <td colSpan="3" className="text-center">No hay cobro</td>
+                                            </tr>
+                                            :
+                                            this.state.cobros.map((item, index) => (
+                                                <tr key={index}>
+                                                    <td>{++index}</td>
+                                                    <td>{item.concepto}</td>
+                                                    <td>{numberFormat(item.monto, item.codiso)}</td>
+                                                </tr>
+                                            ))
+                                    }
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>

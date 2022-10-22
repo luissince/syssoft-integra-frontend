@@ -12,6 +12,7 @@ import {
     ModalAlertWarning,
     ModalAlertError,
 } from '../../tools/Tools';
+import { apiComprobanteListcombo } from '../../../api';
 import { connect } from 'react-redux';
 
 class NotaCreditoProceso extends React.Component {
@@ -68,11 +69,8 @@ class NotaCreditoProceso extends React.Component {
         try {
             await this.setStateAsync({ loading: true, msgLoading: 'Cargando datos...', });
 
-            const comprobante = await axios.get("/api/comprobante/listcombo", {
-                signal: this.abortControllerView.signal,
-                params: {
-                    "tipo": "3"
-                }
+            const comprobante = await apiComprobanteListcombo(this.abortControllerView.signal,{
+                "tipo": "3"
             });
 
             const moneda = await axios.get("/api/moneda/listcombo", {
@@ -175,7 +173,7 @@ class NotaCreditoProceso extends React.Component {
             if (event) {
                 try {
                     ModalAlertInfo("Nota de Crédito", "Procesando información...");
-                    
+
                     let result = await axios.post('/api/notacredito/add', {
                         idComprobante: this.state.idComprobante,
                         idMoneda: this.state.idMoneda,
@@ -373,7 +371,7 @@ class NotaCreditoProceso extends React.Component {
                                     ref={this.refBuscar}
                                     value={this.state.buscar}
                                     onChange={async (event) => {
-                                        if (event.target.value !== "") { 
+                                        if (event.target.value !== "") {
                                             await this.setStateAsync({ buscar: event.target.value, messageWarning: '' });
                                         } else {
                                             await this.setStateAsync({ buscar: event.target.value, messageWarning: 'Ingrese el comprobante a consultar.' });

@@ -1090,6 +1090,126 @@ class Factura {
         }
     }
 
+    async ventaCobro(req, res) {
+        try {
+            const result = await conec.procedure(`CALL Listar_Cobros_Detalle_ByIdVenta(?)`, [
+                req.query.idVenta
+            ]);
+
+            return sendSuccess(res, result);
+        } catch (error) {
+            return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
+        }
+    }
+
+    async cpesunat(req, res) {
+        try {
+            const lista = await conec.procedure(`CALL Listar_CpeSunat(?,?,?,?,?,?,?,?,?,?)`, [
+                parseInt(req.query.opcion),
+                req.query.idProyecto,
+                req.query.buscar,
+                req.query.fechaInicio,
+                req.query.fechaFinal,
+                req.query.idComprobante,
+                parseInt(req.query.idEstado),
+                req.query.fill,
+                parseInt(req.query.posicionPagina),
+                parseInt(req.query.filasPorPagina)
+            ]);
+
+            const resultLista = lista.map(function (item, index) {
+                return {
+                    ...item,
+                    id: (index + 1) + parseInt(req.query.posicionPagina)
+                }
+            });
+
+            const total = await conec.procedure(`CALL Listar_CpeSunat_Count(?,?,?,?,?,?,?,?)`, [
+                parseInt(req.query.opcion),
+                req.query.idProyecto,
+                req.query.buscar,
+                req.query.fechaInicio,
+                req.query.fechaFinal,
+                req.query.idComprobante,
+                parseInt(req.query.idEstado),
+                req.query.fill,
+            ]);
+
+            const resultTotal = await total.map(item => item.Total).reduce((previousValue, currentValue) => previousValue + currentValue, 0);
+
+            return sendSuccess(res, { "result": resultLista, "total": resultTotal });
+        } catch (error) {
+            return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
+        }
+    }
+
+    async idReport(req) {
+        try {
+
+            let result = await conec.query(`SELECT
+            v.idVenta, 
+            com.nombre AS comprobante,
+            com.codigo as codigoVenta,
+            v.serie,
+            v.numeracion,
+            
+            td.nombre AS tipoDoc,      
+            td.codigo AS codigoCliente,      
+            c.documento,
+            c.informacion,
+            c.direccion,
+    
+            DATE_FORMAT(v.fecha,'%d/%m/%Y') as fecha,
+            v.hora, 
+            v.tipo, 
+            v.estado, 
+            m.simbolo,
+            m.codiso,
+            m.nombre as moneda,
+
+            IFNULL(SUM(vd.precio*vd.cantidad),0) AS monto
+            FROM venta AS v 
+            INNER JOIN cliente AS c ON v.idCliente = c.idCliente
+            INNER JOIN tipoDocumento AS td ON td.idTipoDocumento = c.idTipoDocumento 
+            INNER JOIN comprobante AS com ON v.idComprobante = com.idComprobante
+            INNER JOIN moneda AS m ON m.idMoneda = v.idMoneda
+            LEFT JOIN ventaDetalle AS vd ON vd.idVenta = v.idVenta 
+            WHERE v.idVenta = ?
+            GROUP BY v.idVenta`, [
+                req.query.idVenta
+            ]);
+
+            if (result.length > 0) {
+
+                let detalle = await conec.query(`SELECT 
+                l.descripcion AS lote,
+                md.codigo AS medida, 
+                m.nombre AS manzana, 
+                p.nombre AS proyecto,
+                vd.precio,
+                vd.cantidad,
+                vd.idImpuesto,
+                imp.nombre as impuesto,
+                imp.porcentaje
+                FROM ventaDetalle AS vd 
+                INNER JOIN lote AS l ON vd.idLote = l.idLote 
+                INNER JOIN medida AS md ON md.idMedida = l.idMedida 
+                INNER JOIN manzana AS m ON l.idManzana = m.idManzana 
+                INNER JOIN proyecto AS p ON m.idProyecto = p.idProyecto
+                INNER JOIN impuesto AS imp ON vd.idImpuesto  = imp.idImpuesto 
+                WHERE vd.idVenta = ? `, [
+                    req.query.idVenta
+                ]);
+
+                return { "cabecera": result[0], "detalle": detalle };
+            } else {
+                return "Datos no encontrados";
+            }
+        } catch (error) {
+            return "Se produjo un error de servidor, intente nuevamente.";
+        }
+    }
+
     async detalleCredito(req, res) {
         try {
             const venta = await conec.query(`
@@ -1213,28 +1333,6 @@ class Factura {
                 });
             }
 
-            // let lotes = await conec.query(`SELECT
-            //     l.descripcion AS lote,
-            //     l.precio, 
-            //     l.areaLote, 
-            //     m.nombre AS manzana
-            //     FROM venta AS v 
-            //     INNER JOIN ventaDetalle AS vd ON v.idVenta = vd.idVenta
-            //     INNER JOIN lote AS l ON vd.idLote = l.idLote
-            //     INNER JOIN manzana AS m ON l.idManzana = m.idManzana
-            //     WHERE v.idVenta = ?`, [
-            //     req.query.idVenta
-            // ])
-
-            // let inicial = await conec.query(`SELECT 
-            //     IFNULL( cv.precio, 0) AS inicial 
-            //     FROM venta AS v 
-            //     LEFT JOIN cobroVenta AS cv ON cv.idVenta = v.idVenta AND cv.idPlazo = 0
-            //     WHERE v.idVenta = ?
-            //     `, [
-            //     req.query.idVenta
-            // ]);
-
             const inicial = await conec.query(`
             SELECT  
             co.nombre AS comprobante,
@@ -1260,8 +1358,6 @@ class Factura {
                 "venta": venta[0],
                 "detalle": detalle,
                 "plazos": newPlazos,
-                // "lotes": lotes,
-                // "inicial": inicial[0].inicial
                 "inicial": inicial
             });
 
@@ -1270,117 +1366,9 @@ class Factura {
         }
     }
 
-    async cpesunat(req, res) {
-        try {
-            let lista = await conec.procedure(`CALL Listar_CpeSunat(?,?,?,?,?,?,?,?,?,?)`, [
-                parseInt(req.query.opcion),
-                req.query.idProyecto,
-                req.query.buscar,
-                req.query.fechaInicio,
-                req.query.fechaFinal,
-                req.query.idComprobante,
-                parseInt(req.query.idEstado),
-                req.query.fill,
-                parseInt(req.query.posicionPagina),
-                parseInt(req.query.filasPorPagina)
-            ]);
-
-            let resultLista = lista.map(function (item, index) {
-                return {
-                    ...item,
-                    id: (index + 1) + parseInt(req.query.posicionPagina)
-                }
-            });
-
-            let total = await conec.procedure(`CALL Listar_CpeSunat_Count(?,?,?,?,?,?,?,?)`, [
-                parseInt(req.query.opcion),
-                req.query.idProyecto,
-                req.query.buscar,
-                req.query.fechaInicio,
-                req.query.fechaFinal,
-                req.query.idComprobante,
-                parseInt(req.query.idEstado),
-                req.query.fill,
-            ]);
-
-            let resultTotal = await total.map(item => item.Total).reduce((previousValue, currentValue) => previousValue + currentValue, 0);
-
-            return sendSuccess(res, { "result": resultLista, "total": resultTotal });
-        } catch (error) {
-            return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
-        }
-    }
-
-    async idReport(req) {
-        try {
-
-            let result = await conec.query(`SELECT
-            v.idVenta, 
-            com.nombre AS comprobante,
-            com.codigo as codigoVenta,
-            v.serie,
-            v.numeracion,
-            
-            td.nombre AS tipoDoc,      
-            td.codigo AS codigoCliente,      
-            c.documento,
-            c.informacion,
-            c.direccion,
-    
-            DATE_FORMAT(v.fecha,'%d/%m/%Y') as fecha,
-            v.hora, 
-            v.tipo, 
-            v.estado, 
-            m.simbolo,
-            m.codiso,
-            m.nombre as moneda,
-
-            IFNULL(SUM(vd.precio*vd.cantidad),0) AS monto
-            FROM venta AS v 
-            INNER JOIN cliente AS c ON v.idCliente = c.idCliente
-            INNER JOIN tipoDocumento AS td ON td.idTipoDocumento = c.idTipoDocumento 
-            INNER JOIN comprobante AS com ON v.idComprobante = com.idComprobante
-            INNER JOIN moneda AS m ON m.idMoneda = v.idMoneda
-            LEFT JOIN ventaDetalle AS vd ON vd.idVenta = v.idVenta 
-            WHERE v.idVenta = ?
-            GROUP BY v.idVenta`, [
-                req.query.idVenta
-            ]);
-
-            if (result.length > 0) {
-
-                let detalle = await conec.query(`SELECT 
-                l.descripcion AS lote,
-                md.codigo AS medida, 
-                m.nombre AS manzana, 
-                p.nombre AS proyecto,
-                vd.precio,
-                vd.cantidad,
-                vd.idImpuesto,
-                imp.nombre as impuesto,
-                imp.porcentaje
-                FROM ventaDetalle AS vd 
-                INNER JOIN lote AS l ON vd.idLote = l.idLote 
-                INNER JOIN medida AS md ON md.idMedida = l.idMedida 
-                INNER JOIN manzana AS m ON l.idManzana = m.idManzana 
-                INNER JOIN proyecto AS p ON m.idProyecto = p.idProyecto
-                INNER JOIN impuesto AS imp ON vd.idImpuesto  = imp.idImpuesto 
-                WHERE vd.idVenta = ? `, [
-                    req.query.idVenta
-                ]);
-
-                return { "cabecera": result[0], "detalle": detalle };
-            } else {
-                return "Datos no encontrados";
-            }
-        } catch (error) {
-            return "Se produjo un error de servidor, intente nuevamente.";
-        }
-    }
-
     async detalleCreditoReport(req, res) {
         try {
-            let venta = await conec.query(`
+            const venta = await conec.query(`
             SELECT 
             v.idVenta, 
             cl.idCliente,
@@ -1422,7 +1410,7 @@ class Factura {
                 req.query.idVenta
             ]);
 
-            let detalle = await conec.query(`SELECT 
+            const detalle = await conec.query(`SELECT 
             l.descripcion AS lote,
             md.idMedida,
             md.codigo AS medida, 
@@ -1443,7 +1431,7 @@ class Factura {
                 req.query.idVenta
             ]);
 
-            let plazos = await conec.query(`SELECT 
+            const plazos = await conec.query(`SELECT 
             p.idPlazo,        
             p.cuota,
             DATE_FORMAT(p.fecha,'%d/%m/%Y') as fecha,
@@ -1464,7 +1452,7 @@ class Factura {
                 req.query.idVenta
             ]);
 
-            let cobros = await conec.query(`SELECT c.idCobro 
+            const cobros = await conec.query(`SELECT c.idCobro 
             FROM cobro AS c 
             LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro AND nc.estado = 1
             WHERE c.idProcedencia = ? AND c.estado = 1 AND nc.idNotaCredito IS NULL`, [
@@ -1472,11 +1460,11 @@ class Factura {
             ]);
 
             let newPlazos = [];
-            for (let item of plazos) {
+            for (const item of plazos) {
 
                 let newCobros = 0;
-                for (let cobro of cobros) {
-                    let cobroPlazo = await conec.query(`SELECT 
+                for (const cobro of cobros) {
+                    const cobroPlazo = await conec.query(`SELECT 
                     cv.precio
                     FROM cobro AS c 
                     INNER JOIN banco AS bc ON bc.idBanco = c.idBanco
@@ -1497,7 +1485,7 @@ class Factura {
                 });
             }
 
-            let lotes = await conec.query(`SELECT
+            const lotes = await conec.query(`SELECT
                 l.descripcion AS lote,
                 l.precio, 
                 l.areaLote, 
@@ -1508,14 +1496,30 @@ class Factura {
                 INNER JOIN manzana AS m ON l.idManzana = m.idManzana
                 WHERE v.idVenta = ?`, [
                 req.query.idVenta
-            ])
+            ]);
 
-            let inicial = await conec.query(`SELECT 
-                IFNULL( cv.precio, 0) AS inicial 
-                FROM venta AS v 
-                LEFT JOIN cobroVenta AS cv ON cv.idVenta = v.idVenta AND cv.idPlazo = 0
-                WHERE v.idVenta = ?
-                `, [
+            const cobrosEchos = await conec.procedure(`CALL Listar_Cobros_Detalle_ByIdVenta(?)`, [
+                req.query.idVenta
+            ]);
+
+            const inicial = await conec.query(`
+            SELECT  
+            co.nombre AS comprobante,
+            c.serie,
+            c.numeracion,
+            bn.nombre AS banco,
+            DATE_FORMAT(c.fecha,'%d/%m/%Y') as fecha, 
+            c.hora,
+            c.observacion,
+            mo.codiso,
+            sum(cv.precio) AS monto
+            FROM cobro AS c          
+            INNER JOIN banco AS bn ON bn.idBanco = c.idBanco
+            INNER JOIN moneda AS mo ON mo.idMoneda = c.idMoneda
+            INNER JOIN comprobante AS co ON co.idComprobante = c.idComprobante
+            INNER JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro AND cv.idPlazo = 0
+            WHERE c.idProcedencia = ?
+            GROUP BY c.idCobro`, [
                 req.query.idVenta
             ]);
 
@@ -1524,7 +1528,8 @@ class Factura {
                 "detalle": detalle,
                 "plazos": newPlazos,
                 "lotes": lotes,
-                "inicial": inicial[0].inicial
+                "cobros": cobrosEchos,
+                "inicial": inicial
             };
 
         } catch (error) {

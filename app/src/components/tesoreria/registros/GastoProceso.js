@@ -14,6 +14,7 @@ import {
     ModalAlertWarning,
 } from '../../tools/Tools';
 import { connect } from 'react-redux';
+import { apiComprobanteListcombo } from '../../../api';
 import SearchBarClient from "../../tools/SearchBarClient";
 
 class GastoProceso extends React.Component {
@@ -86,12 +87,9 @@ class GastoProceso extends React.Component {
 
     loadData = async () => {
         try {
-            const comprobante = await axios.get("/api/comprobante/listcombo", {
-                signal: this.abortControllerView.signal,
-                params: {
-                    "tipo": "6"
-                }
-            });
+            const comprobante = await apiComprobanteListcombo(this.abortControllerView.signal,{
+                "tipo": "6"
+            })
 
             const concepto = await axios.get("/api/concepto/listcombogasto", {
                 signal: this.abortControllerView.signal,
@@ -674,7 +672,7 @@ class GastoProceso extends React.Component {
                                                                 <tr key={index}>
                                                                     <td>{++index}</td>
                                                                     <td>{item.concepto}</td>
-                                                                    <td>{formatMoney(item.cantidad)}{<br/>}{<small>{item.medida}</small>}</td>
+                                                                    <td>{formatMoney(item.cantidad)}{<br />}{<small>{item.medida}</small>}</td>
                                                                     <td>{item.impuesto}</td>
                                                                     {/* <td>
                                                                         <select className="form-control"
