@@ -1303,27 +1303,27 @@ class RepFactura {
             let yPos = 130;
             // 
 
-            doc.fontSize(10).text(`${data.cuota}`,
+            doc.fontSize(11).text(`${data.cuota}`,
                 doc.options.margins.left + 100,
                 yPos);
 
-            doc.fontSize(10).text("",
+            doc.fontSize(11).text("",
                 doc.options.margins.left + 170,
                 yPos);
 
-            doc.fontSize(10).text("",
+            doc.fontSize(11).text("",
                 doc.options.margins.left + 240,
                 yPos);
 
-            doc.fontSize(10).text(`${sedeInfo.departamento}`,
+            doc.fontSize(11).text(`${sedeInfo.departamento}`,
                 doc.options.margins.left + 320,
                 yPos);
 
-            doc.fontSize(10).text(`${data.fecha}`,
+            doc.fontSize(11).text(`${data.fecha}`,
                 doc.options.margins.left + 385,
                 yPos);
 
-            doc.fontSize(10).text(`${data.simbolo} ${data.monto}`,
+            doc.fontSize(11).text(`${data.simbolo} ${data.monto}`,
                 doc.options.margins.left + 470,
                 yPos);
 
@@ -1331,7 +1331,7 @@ class RepFactura {
 
             yPos = 171;
 
-            doc.fontSize(10).text(`${numberLleters.getResult(formatMoney(data.monto), data.moneda)}`,
+            doc.fontSize(11).text(`${numberLleters.getResult(formatMoney(data.monto), data.moneda)}`,
                 doc.options.margins.left + 150,
                 yPos);
 
@@ -1339,26 +1339,26 @@ class RepFactura {
 
             yPos = 205;
 
-            doc.fontSize(10).text(`${data.informacion}`,
+            doc.fontSize(11).text(`${data.informacion}`,
                 doc.options.margins.left + 140,
                 yPos);
             // 
 
             yPos = doc.y + 10;
 
-            doc.fontSize(10).text("",
+            doc.fontSize(11).text("",
                 doc.options.margins.left + 320,
                 yPos);
 
-            doc.fontSize(10).text("",
+            doc.fontSize(11).text("",
                 doc.options.margins.left + 370,
                 yPos);
 
-            doc.fontSize(10).text("",
+            doc.fontSize(11).text("",
                 doc.options.margins.left + 420,
                 yPos);
 
-            doc.fontSize(9).text("",
+            doc.fontSize(10).text("",
                 doc.options.margins.left + 500,
                 yPos);
 
@@ -1367,13 +1367,13 @@ class RepFactura {
             yPos = 235;
 
 
-            doc.fontSize(10).text(`${manzanaLote(data.descripcion, data.manzana)}`,
+            doc.fontSize(11).text(`${manzanaLote(data.descripcion, data.manzana)}`,
                 doc.options.margins.left + 140,
                 yPos);
 
             yPos = 251.56;
 
-            doc.fontSize(10).text(``,
+            doc.fontSize(11).text(``,
                 doc.options.margins.left + 230,
                 yPos);
 
@@ -1381,11 +1381,11 @@ class RepFactura {
 
             yPos = 263;
 
-            doc.fontSize(10).text("",
+            doc.fontSize(11).text("",
                 doc.options.margins.left + 140,
                 yPos);
 
-            doc.fontSize(10).text(``,
+            doc.fontSize(11).text(``,
                 doc.options.margins.left + 230,
                 yPos);
 
@@ -1393,7 +1393,7 @@ class RepFactura {
 
             yPos = 283;
 
-            doc.fontSize(10).text("",
+            doc.fontSize(11).text("",
                 doc.options.margins.left + 160,
                 yPos);
 
@@ -1401,7 +1401,7 @@ class RepFactura {
 
             yPos = 309;
 
-            doc.fontSize(10).text("",
+            doc.fontSize(11).text("",
                 doc.options.margins.left + 140,
                 yPos);
 
@@ -1409,11 +1409,11 @@ class RepFactura {
 
             yPos = 335;
 
-            doc.fontSize(10).text("",
+            doc.fontSize(11).text("",
                 doc.options.margins.left + 140,
                 yPos);
 
-            doc.fontSize(10).text("",
+            doc.fontSize(11).text("",
                 doc.options.margins.left + 235,
                 yPos);
 
@@ -1421,7 +1421,7 @@ class RepFactura {
 
             yPos = 351;
 
-            doc.fontSize(10).text("",
+            doc.fontSize(11).text("",
                 doc.options.margins.left + 120,
                 yPos);
 
@@ -1429,7 +1429,7 @@ class RepFactura {
 
             yPos = 358;
 
-            doc.fontSize(10).text("",
+            doc.fontSize(11).text("",
                 doc.options.margins.left + 345,
                 yPos);
 
