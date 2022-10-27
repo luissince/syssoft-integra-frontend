@@ -1313,7 +1313,7 @@ class RepFactura {
 
             doc.fontSize(10).text("",
                 doc.options.margins.left + 240,
-                yPos + 8);
+                yPos);
 
             doc.fontSize(10).text(`${sedeInfo.departamento}`,
                 doc.options.margins.left + 320,
@@ -1321,7 +1321,7 @@ class RepFactura {
 
             doc.fontSize(10).text(`${data.fecha}`,
                 doc.options.margins.left + 385,
-                yPos + 8);
+                yPos);
 
             doc.fontSize(10).text(`${data.simbolo} ${data.monto}`,
                 doc.options.margins.left + 470,
