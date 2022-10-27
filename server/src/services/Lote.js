@@ -610,12 +610,12 @@ class Lote {
                 req.body.idLoteOrigen
             ]);
 
-            await conec.execute(connection, `UPDATE cobro 
-            SET idProcedencia = ?
-            WHERE idProcedencia = ?`, [
-                req.body.idLoteDestino,
-                req.body.idLoteOrigen
-            ]);
+            // await conec.execute(connection, `UPDATE cobro 
+            // SET idProcedencia = ?
+            // WHERE idProcedencia = ?`, [
+            //     req.body.idLoteDestino,
+            //     req.body.idLoteOrigen
+            // ]);
 
             await conec.execute(connection, `UPDATE lote
             SET estado = 1

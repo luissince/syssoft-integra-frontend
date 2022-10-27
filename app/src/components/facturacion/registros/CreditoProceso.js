@@ -701,8 +701,8 @@ class CreditoProceso extends React.Component {
     }
 
     /** */
-    onEventCambiarLote(item) {
-        this.setState({
+    async onEventCambiarLote(item) {
+        await this.setStateAsync({
             idLoteSeleccionado: item.idLote,
             loteSeleccionado: item.lote,
             manzanaSeleccionado: item.manzana
