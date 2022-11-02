@@ -1194,11 +1194,9 @@ class RepFactura {
             //     yPos);
 
             data.lote.map((lote, index) => {
-
                 doc.fontSize(9).text(lote.lote + " - " + lote.manzana,
                     doc.options.margins.left + 400,
                     yPos);
-
             });
 
             let total = 0;
@@ -1225,6 +1223,7 @@ class RepFactura {
 
 
                     yPos += 10;
+                    total += item.precio;
                 });
             } else {
                 yPos = doc.y + 25;
