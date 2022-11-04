@@ -1331,18 +1331,18 @@ class RepFactura {
 
             // 
 
-            yPos = 171-5;
+            yPos = 171-7;
 
             doc.fontSize(h1).text(`${numberLleters.getResult(formatMoney(data.monto), data.moneda)}`,
-                doc.options.margins.left + 150 - 35,
+                doc.options.margins.left + 150 - 30,
                 yPos);
 
             // 
 
-            yPos = 205-5;
+            yPos = 205-7;
 
             doc.fontSize(h1).text(`${data.informacion}`,
-                doc.options.margins.left + 140 - 35,
+                doc.options.margins.left + 140 - 30,
                 yPos);
             // 
 
@@ -1366,11 +1366,11 @@ class RepFactura {
 
             // 
 
-            yPos = 235-5;
+            yPos = 235-7;
 
 
             doc.fontSize(h1).text(`${manzanaLote(data.descripcion, data.manzana)}`,
-                doc.options.margins.left + 140 - 35,
+                doc.options.margins.left + 140 - 30,
                 yPos);
 
             // yPos = 251.56;
