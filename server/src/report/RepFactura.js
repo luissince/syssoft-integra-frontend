@@ -1302,11 +1302,11 @@ class RepFactura {
             const h1 = 13;
             const h2 = 12;
 
-            let yPos = 130;
+            let yPos = 130-5;
             // 
 
             doc.fontSize(h1).text(`${data.cuota}`,
-                doc.options.margins.left + 100 - 20,
+                doc.options.margins.left + 100 - 10,
                 yPos);
 
             doc.fontSize(h1).text("",
@@ -1331,18 +1331,18 @@ class RepFactura {
 
             // 
 
-            yPos = 171;
+            yPos = 171-5;
 
             doc.fontSize(h1).text(`${numberLleters.getResult(formatMoney(data.monto), data.moneda)}`,
-                doc.options.margins.left + 150 - 40,
+                doc.options.margins.left + 150 - 35,
                 yPos);
 
             // 
 
-            yPos = 205;
+            yPos = 205-5;
 
             doc.fontSize(h1).text(`${data.informacion}`,
-                doc.options.margins.left + 140 - 40,
+                doc.options.margins.left + 140 - 35,
                 yPos);
             // 
 
@@ -1366,11 +1366,11 @@ class RepFactura {
 
             // 
 
-            yPos = 235;
+            yPos = 235-5;
 
 
             doc.fontSize(h1).text(`${manzanaLote(data.descripcion, data.manzana)}`,
-                doc.options.margins.left + 140 - 40,
+                doc.options.margins.left + 140 - 35,
                 yPos);
 
             // yPos = 251.56;
