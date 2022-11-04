@@ -1306,27 +1306,27 @@ class RepFactura {
             // 
 
             doc.fontSize(h1).text(`${data.cuota}`,
-                doc.options.margins.left + 100,
+                doc.options.margins.left + 100 - 20,
                 yPos);
 
             doc.fontSize(h1).text("",
-                doc.options.margins.left + 170,
+                doc.options.margins.left + 170 - 20,
                 yPos);
 
             doc.fontSize(h1).text("",
-                doc.options.margins.left + 240,
+                doc.options.margins.left + 240 - 20,
                 yPos);
 
             doc.fontSize(h1).text(`${sedeInfo.departamento}`,
-                doc.options.margins.left + 320,
+                doc.options.margins.left + 320 - 20,
                 yPos);
 
             doc.fontSize(h1).text(`${data.fecha}`,
-                doc.options.margins.left + 385,
+                doc.options.margins.left + 385 - 20,
                 yPos);
 
             doc.fontSize(h1).text(`${data.simbolo} ${data.monto}`,
-                doc.options.margins.left + 470,
+                doc.options.margins.left + 470 - 20,
                 yPos);
 
             // 
@@ -1334,7 +1334,7 @@ class RepFactura {
             yPos = 171;
 
             doc.fontSize(h1).text(`${numberLleters.getResult(formatMoney(data.monto), data.moneda)}`,
-                doc.options.margins.left + 150,
+                doc.options.margins.left + 150 - 40,
                 yPos);
 
             // 
@@ -1342,27 +1342,27 @@ class RepFactura {
             yPos = 205;
 
             doc.fontSize(h1).text(`${data.informacion}`,
-                doc.options.margins.left + 140,
+                doc.options.margins.left + 140 - 40,
                 yPos);
             // 
 
-            yPos = doc.y + 10;
+            // yPos = doc.y + 10;
 
-            doc.fontSize(h1).text("",
-                doc.options.margins.left + 320,
-                yPos);
+            // doc.fontSize(h1).text("",
+            //     doc.options.margins.left + 320,
+            //     yPos);
 
-            doc.fontSize(h1).text("",
-                doc.options.margins.left + 370,
-                yPos);
+            // doc.fontSize(h1).text("",
+            //     doc.options.margins.left + 370,
+            //     yPos);
 
-            doc.fontSize(h1).text("",
-                doc.options.margins.left + 420,
-                yPos);
+            // doc.fontSize(h1).text("",
+            //     doc.options.margins.left + 420,
+            //     yPos);
 
-            doc.fontSize(h2).text("",
-                doc.options.margins.left + 500,
-                yPos);
+            // doc.fontSize(h2).text("",
+            //     doc.options.margins.left + 500,
+            //     yPos);
 
             // 
 
@@ -1370,70 +1370,70 @@ class RepFactura {
 
 
             doc.fontSize(h1).text(`${manzanaLote(data.descripcion, data.manzana)}`,
-                doc.options.margins.left + 140,
+                doc.options.margins.left + 140 - 40,
                 yPos);
 
-            yPos = 251.56;
+            // yPos = 251.56;
 
-            doc.fontSize(h1).text(``,
-                doc.options.margins.left + 230,
-                yPos);
+            // doc.fontSize(h1).text(``,
+            //     doc.options.margins.left + 230,
+            //     yPos);
 
             // 
 
-            yPos = 263;
+            // yPos = 263;
 
-            doc.fontSize(h1).text("",
-                doc.options.margins.left + 140,
-                yPos);
+            // doc.fontSize(h1).text("",
+            //     doc.options.margins.left + 140,
+            //     yPos);
 
-            doc.fontSize(h1).text(``,
-                doc.options.margins.left + 230,
-                yPos);
-
-            // 
-
-            yPos = 283;
-
-            doc.fontSize(h1).text("",
-                doc.options.margins.left + 160,
-                yPos);
+            // doc.fontSize(h1).text(``,
+            //     doc.options.margins.left + 230,
+            //     yPos);
 
             // 
 
-            yPos = 309;
+            // yPos = 283;
 
-            doc.fontSize(h1).text("",
-                doc.options.margins.left + 140,
-                yPos);
-
-            // 
-
-            yPos = 335;
-
-            doc.fontSize(h1).text("",
-                doc.options.margins.left + 140,
-                yPos);
-
-            doc.fontSize(h1).text("",
-                doc.options.margins.left + 235,
-                yPos);
+            // doc.fontSize(h1).text("",
+            //     doc.options.margins.left + 160,
+            //     yPos);
 
             // 
 
-            yPos = 351;
+            // yPos = 309;
 
-            doc.fontSize(h1).text("",
-                doc.options.margins.left + 120,
-                yPos);
+            // doc.fontSize(h1).text("",
+            //     doc.options.margins.left + 140,
+            //     yPos);
 
             // 
 
-            yPos = 358;
+            // yPos = 335;
 
-            doc.fontSize(h1).text("",
-                doc.options.margins.left + 345,
-                yPos);
+            // doc.fontSize(h1).text("",
+            //     doc.options.margins.left + 140,
+            //     yPos);
+
+            // doc.fontSize(h1).text("",
+            //     doc.options.margins.left + 235,
+            //     yPos);
+
+            // 
+
+            // yPos = 351;
+
+            // doc.fontSize(h1).text("",
+            //     doc.options.margins.left + 120,
+            //     yPos);
+
+            // 
+
+            // yPos = 358;
+
+            // doc.fontSize(h1).text("",
+            //     doc.options.margins.left + 345,
+            //     yPos);
 
             doc.end();
             return getStream.buffer(doc);
