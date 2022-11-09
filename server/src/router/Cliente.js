@@ -301,7 +301,7 @@ router.get("/listarsociosporfecha", async function (req, res) {
         if (typeof data === 'string') {
             res.status(500).send(data);
         } else {
-            res.setHeader('Content-disposition', `inline; filename=LISTA DE DEUDAS.pdf`);
+            res.setHeader('Content-disposition', `inline; filename=REPORTE DE SOCIOS AGREGADOS POR FECHA.pdf`);
             res.contentType("application/pdf");
             res.send(data);
         }

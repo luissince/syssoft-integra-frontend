@@ -1,6 +1,7 @@
 module.exports = {
     apps: [
         {
+            instances: 1,
             name: "inmobilaria",
             script: "./server/index.js",
             watch: true,

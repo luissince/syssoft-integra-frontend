@@ -517,7 +517,7 @@ class RepCliente {
             );
 
             doc.fontSize(h3).text(
-                `PROYECTO: ${req.query.nombreProyecto}`,
+                req.query.porProyecto == "" ? "TODOS LOS PROYECTOS" : `PROYECTO: ${req.query.nombreProyecto}`,
                 orgX,
                 doc.y + 10,
                 {
@@ -571,7 +571,7 @@ class RepCliente {
             doc.table(table, {
                 prepareHeader: () => doc.font("Helvetica-Bold").fontSize(h3),
                 prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) => {
-                    
+
                     if (isNumber(row[0])) {
                         doc.font("Helvetica").fontSize(h3);
                         doc.addBackground(rectRow, 'blue', 0.05);
@@ -580,10 +580,12 @@ class RepCliente {
                             doc.font("Helvetica-Bold").fontSize(h4);
                             doc.addBackground(rectRow, 'black', 0.02);
                         }
-                        if (row[0] != "COMPROBANTE"){
+
+                        if (row[0] != "COMPROBANTE") {
                             doc.font("Helvetica").fontSize(h4);
                         }
                     }
+
                 },
                 align: "center",
                 padding: 5,
