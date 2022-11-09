@@ -478,6 +478,7 @@ class RepCliente {
             let h1 = 13;
             let h2 = 11;
             let h3 = 9;
+            let h4 = 8;
 
             if (isFile(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo))) {
                 doc.image(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo), orgX, orgY, { width: 75 });
@@ -544,7 +545,7 @@ class RepCliente {
                         "FECHA",
                         "LOTE",
                         "FRECUENCIA",
-                        "MONTO",
+                        "MONTO TOTAL",
                     ]
                 );
 
@@ -570,15 +571,18 @@ class RepCliente {
             doc.table(table, {
                 prepareHeader: () => doc.font("Helvetica-Bold").fontSize(h3),
                 prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) => {
-                    doc.font("Helvetica").fontSize(h3);
-                 
+                    
                     if (isNumber(row[0])) {
+                        doc.font("Helvetica").fontSize(h3);
                         doc.addBackground(rectRow, 'blue', 0.05);
-                    }
-
-                    if(row[0] == "COMPROBANTE"){
-                        doc.font("Helvetica-Bold").fontSize(h3);
-                        doc.addBackground(rectRow, 'black', 0.02);                        
+                    } else {
+                        if (row[0] == "COMPROBANTE") {
+                            doc.font("Helvetica-Bold").fontSize(h4);
+                            doc.addBackground(rectRow, 'black', 0.02);
+                        }
+                        if (row[0] != "COMPROBANTE"){
+                            doc.font("Helvetica").fontSize(h4);
+                        }
                     }
                 },
                 align: "center",

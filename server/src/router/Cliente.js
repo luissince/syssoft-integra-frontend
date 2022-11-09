@@ -284,6 +284,7 @@ router.get("/listarsociosporfecha", async function (req, res) {
     req.query.idProyecto = decryptedData.idProyecto;
     req.query.nombreProyecto = decryptedData.nombreProyecto;
     req.query.yearPago = decryptedData.yearPago;
+    req.query.porProyecto = decryptedData.porProyecto;
 
     const sedeInfo = await sede.infoSedeReporte(req);
 

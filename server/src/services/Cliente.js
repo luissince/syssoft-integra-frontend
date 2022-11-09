@@ -857,10 +857,17 @@ class Cliente {
                 INNER JOIN ventaDetalle AS vd ON vd.idVenta = v.idVenta
                 INNER JOIN lote AS lo ON vd.idLote = lo.idLote
                 INNER JOIN manzana AS ma ON ma.idManzana = lo.idManzana
-                WHERE YEAR(v.fecha) = ? AND v.idProyecto = ?
+                WHERE 
+                YEAR(v.fecha) = ? AND v.idProyecto = ? AND ? = 0
+                OR
+                YEAR(v.fecha) = ? AND ? = 1
                 GROUP BY v.idVenta`, [
                 parseInt(req.query.yearPago),
-                req.query.idProyecto
+                req.query.idProyecto,
+                parseInt(req.query.porProyecto),
+
+                parseInt(req.query.yearPago),
+                parseInt(req.query.porProyecto),
             ]);
 
             let newClientes = [];
