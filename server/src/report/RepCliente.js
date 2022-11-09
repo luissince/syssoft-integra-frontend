@@ -1,7 +1,7 @@
 const path = require('path');
 const PDFDocument = require("pdfkit-table");
 const getStream = require('get-stream');
-const { numberFormat, dateFormat, isFile } = require('../tools/Tools');
+const { numberFormat, dateFormat, isFile, isNumber } = require('../tools/Tools');
 
 class RepCliente {
 
@@ -442,6 +442,149 @@ class RepCliente {
                 padding: 5,
                 columnSpacing: 5,
                 columnsSize: [30, 125, 80, 100, 80, 72, 75, 75, 75],//792-712
+                x: doc.x,
+                y: doc.y + 15,
+                width: doc.page.width - doc.options.margins.left - doc.options.margins.right
+            });
+
+            doc.end();
+            return getStream.buffer(doc);
+        } catch (error) {
+            return "Se genero un error al generar el reporte.";
+        }
+    }
+
+    async repListarSociosPorFecha(req, sedeInfo, clientes) {
+        try {
+            const doc = new PDFDocument({
+                font: 'Helvetica',
+                layout: 'portrait',
+                margins: {
+                    top: 40,
+                    bottom: 40,
+                    left: 40,
+                    right: 40
+                }
+            });
+
+            doc.info["Title"] = "REPORTE DE SOCIOS AGREGADOS POR FECHA.pdf"
+
+            let orgX = doc.x;
+            let orgY = doc.y;
+            let cabeceraY = orgY + 70;
+            let titleX = orgX + 150;
+            let widthContent = doc.page.width - doc.options.margins.left - doc.options.margins.right;
+
+            let h1 = 13;
+            let h2 = 11;
+            let h3 = 9;
+
+            if (isFile(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo))) {
+                doc.image(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo), orgX, orgY, { width: 75 });
+            } else {
+                doc.image(path.join(__dirname, "..", "path/to/noimage.jpg"), orgX, orgY, { width: 75 });
+            }
+
+            doc.fontSize(h1).text(
+                `${sedeInfo.nombreEmpresa}`,
+                titleX,
+                orgY,
+                {
+                    width: 250,
+                    align: "center"
+                }
+            );
+
+            doc.fontSize(h3).text(
+                `RUC: ${sedeInfo.ruc}\n${sedeInfo.direccion}\nCelular: ${sedeInfo.celular} / Telefono: ${sedeInfo.telefono}`,
+                titleX,
+                orgY + 17,
+                {
+                    width: 250,
+                    align: "center",
+                }
+            );
+
+            doc.fontSize(h2).text(
+                "LISTA DE SOCIOS AGREGADOS POR FECHA",
+                doc.options.margins.left,
+                cabeceraY,
+                {
+                    width: widthContent,
+                    align: "center",
+                }
+            );
+
+            doc.fontSize(h3).text(
+                `PROYECTO: ${req.query.nombreProyecto}`,
+                orgX,
+                doc.y + 10,
+                {
+                    align: "left",
+                }
+            );
+
+            let content = [];
+            let index = 0;
+            for (const cliente of clientes) {
+                index++;
+                content.push(
+                    [
+                        index,
+                        cliente.documento,
+                        cliente.informacion,
+                        cliente.celular,
+                        cliente.telefono,
+                    ]
+                );
+
+                content.push(
+                    [
+                        "COMPROBANTE",
+                        "FECHA",
+                        "LOTE",
+                        "FRECUENCIA",
+                        "MONTO",
+                    ]
+                );
+
+                for (const venta of cliente.detalle) {
+                    content.push(
+                        [
+                            venta.serie + "-" + venta.numeracion,
+                            venta.fecha,
+                            venta.lote + " - " + venta.manzana,
+                            venta.frecuencia,
+                            numberFormat(venta.monto, venta.codiso),
+                        ]
+                    );
+                }
+            }
+
+            const table = {
+                subtitle: "DETALLE",
+                headers: ["N°", "Documento", "Socio", "Celular", "Telefono"],
+                rows: content
+            };
+
+            doc.table(table, {
+                prepareHeader: () => doc.font("Helvetica-Bold").fontSize(h3),
+                prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) => {
+                    doc.font("Helvetica").fontSize(h3);
+                 
+                    if (isNumber(row[0])) {
+                        doc.addBackground(rectRow, 'blue', 0.05);
+                    }
+
+                    if(row[0] == "COMPROBANTE"){
+                        doc.font("Helvetica-Bold").fontSize(h3);
+                        doc.addBackground(rectRow, 'black', 0.02);                        
+                    }
+                },
+                align: "center",
+                padding: 5,
+                columnSpacing: 5,
+                columnsSize: [90, 102, 160, 90, 90],//532
                 x: doc.x,
                 y: doc.y + 15,
                 width: doc.page.width - doc.options.margins.left - doc.options.margins.right

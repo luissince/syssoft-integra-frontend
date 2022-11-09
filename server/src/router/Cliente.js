@@ -275,4 +275,40 @@ router.get("/updatealta", async function (req, res) {
     }
 });
 
+/**
+ * 
+ */
+router.get("/listarsociosporfecha", async function (req, res) {
+    const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
+    req.query.idSede = decryptedData.idSede;
+    req.query.idProyecto = decryptedData.idProyecto;
+    req.query.nombreProyecto = decryptedData.nombreProyecto;
+    req.query.yearPago = decryptedData.yearPago;
+
+    const sedeInfo = await sede.infoSedeReporte(req);
+
+    if (typeof sedeInfo !== 'object') {
+        res.status(500).send(sedeInfo);
+        return;
+    }
+
+    const clientes = await cliente.listarsociosporfecha(req);
+
+    if (Array.isArray(clientes)) {
+        let data = await repCliente.repListarSociosPorFecha(req, sedeInfo, clientes);
+
+        if (typeof data === 'string') {
+            res.status(500).send(data);
+        } else {
+            res.setHeader('Content-disposition', `inline; filename=LISTA DE DEUDAS.pdf`);
+            res.contentType("application/pdf");
+            res.send(data);
+        }
+    } else {
+        res.status(500).send(clientes);
+    }
+    // const result = await cliente.listarsociosporfecha(req);
+    // res.status(200).send("ok");
+});
+
 module.exports = router;

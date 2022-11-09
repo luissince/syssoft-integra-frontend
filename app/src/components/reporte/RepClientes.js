@@ -3,7 +3,7 @@ import axios from 'axios';
 import CryptoJS from 'crypto-js';
 import { connect } from 'react-redux';
 import FileDownloader from "./hooks/FileDownloader";
-import { spinnerLoading, currentDate } from '../tools/Tools';
+import { spinnerLoading, currentDate, getCurrentYear } from '../tools/Tools';
 import SearchBarClient from "../tools/SearchBarClient";
 
 class RepClientes extends React.Component {
@@ -27,12 +27,17 @@ class RepClientes extends React.Component {
             messageWarning: '',
 
             cada: 0,
+
+            yearPago: getCurrentYear(),
+            year: [2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2020, 2021, 2022, 2023],
+            yearCheck: true,
         }
 
         this.refFechaIni = React.createRef();
         this.refCliente = React.createRef();
         this.refUseFile = React.createRef();
         this.refFrecuencia = React.createRef();
+        this.refYearPago = React.createRef();
 
         this.abortControllerView = new AbortController();
 
@@ -214,15 +219,39 @@ class RepClientes extends React.Component {
         });
     }
 
+    async onEventPdfRegistro(){
+        const data = {
+            "idSede": "SD0001",
+            "idProyecto": this.state.idProyecto,
+            "nombreProyecto": this.state.nombreProyecto,
+            "yearPago": this.state.yearPago
+        }
+
+        let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
+        let params = new URLSearchParams({ "params": ciphertext });
+        window.open("/api/cliente/listarsociosporfecha?" + params, "_blank");
+    }
+
+    async onEventExcelRegistro(){
+
+    }
+
     render() {
         return (
             <>
                 {
-                    this.state.loading ?
+                    this.state.loading
+                        ?
                         <div className="clearfix absolute-all bg-white">
                             {spinnerLoading(this.state.msgLoading)}
-                        </div> :
+                        </div>
+                        :
                         <>
+                            {/*
+                             *
+                             * Reporte de Cliente(s)
+                             *
+                            */}
                             <div className="card my-1">
                                 <h6 className="card-header">Reporte de Cliente(s)</h6>
                                 <div className="card-body">
@@ -286,6 +315,7 @@ class RepClientes extends React.Component {
                                                 </div>
                                             </div>
                                         </div>
+
                                         <div className="col">
                                             <div className="form-group">
                                                 <label>Fecha final <i className="fa fa-asterisk text-danger small"></i></label>
@@ -302,22 +332,22 @@ class RepClientes extends React.Component {
                                     </div>
 
                                     <div className="row">
-                                        <div className="col">
+                                        <div className="col-md-auto">
                                             <div className="form-group">
-                                                <label>Cliente(s)</label>                                              
-                                                    <SearchBarClient
-                                                        placeholder="Filtrar clientes..."
-                                                        refCliente={this.refCliente}
-                                                        cliente={this.state.cliente}
-                                                        clientes={this.state.clientes}
-                                                        onEventClearInput={this.onEventClearInput}
-                                                        handleFilter={this.handleFilter}
-                                                        onEventSelectItem={this.onEventSelectItem}
-                                                    />                                               
+                                                <label>Cliente(s)</label>
+                                                <SearchBarClient
+                                                    placeholder="Filtrar clientes..."
+                                                    refCliente={this.refCliente}
+                                                    cliente={this.state.cliente}
+                                                    clientes={this.state.clientes}
+                                                    onEventClearInput={this.onEventClearInput}
+                                                    handleFilter={this.handleFilter}
+                                                    onEventSelectItem={this.onEventSelectItem}
+                                                />
                                             </div>
                                         </div>
-                                        <div className="col"></div>
-                                        <div className="col"></div>
+                                        <div className="col-4" />
+                                        <div className="col-4" />
                                     </div>
 
                                     <div className="row mt-3">
@@ -334,50 +364,122 @@ class RepClientes extends React.Component {
                                 </div>
                             </div>
 
+                            {/*
+                             *
+                             * Lista de Deudas por Cliente
+                             *
+                            */}
                             <div className="card my-1">
                                 <h6 className="card-header">Lista de Deudas por Cliente</h6>
                                 <div className="card-body">
 
-                                    <div className="col-lg-4 col-md-6 col-sm-12">
-                                        <div className="form-group">
-                                            <label>Seleccione segun frecuencia de pago</label>
-                                            <div className="input-group">
-                                                <select
-                                                    title="frecuencia de deuda"
-                                                    className="form-control"
-                                                    ref={this.refFrecuencia}
-                                                    value={this.state.cada}
-                                                    disabled={this.state.frecuenciaCheck}
-                                                    onChange={async (event) => {
-                                                        await this.setStateAsync({ cada: event.target.value });
-                                                        if (this.state.cada === 0) {
-                                                            await this.setStateAsync({ frecuenciaCheck: true });
-                                                        }
+                                    <div className="row">
+                                        <div className="col-md-auto">
+                                            <div className="form-group">
+                                                <label>Seleccione segun frecuencia de pago</label>
+                                                <div className="input-group">
+                                                    <select
+                                                        title="frecuencia de deuda"
+                                                        className="form-control"
+                                                        ref={this.refFrecuencia}
+                                                        value={this.state.cada}
+                                                        disabled={this.state.frecuenciaCheck}
+                                                        onChange={async (event) => {
+                                                            await this.setStateAsync({ cada: event.target.value });
+                                                            if (this.state.cada === 0) {
+                                                                await this.setStateAsync({ frecuenciaCheck: true });
+                                                            }
 
-                                                    }}>
-                                                    <option value="0">
-                                                        - Seleccione
-                                                    </option>
-                                                    <option value="15">
-                                                        Listar Ventas de cada 15
-                                                    </option>
-                                                    <option value="30">
-                                                        Listar Ventas de cada 30
-                                                    </option>
-                                                </select>
-                                                <div className="input-group-append">
-                                                    <div className="input-group-text">
-                                                        <div className="form-check form-check-inline m-0">
-                                                            <input
-                                                                className="form-check-input"
-                                                                type="checkbox"
-                                                                checked={this.state.frecuenciaCheck}
-                                                                onChange={async (event) => {
-                                                                    await this.setStateAsync({ frecuenciaCheck: event.target.checked });
-                                                                    if (this.state.frecuenciaCheck) {
-                                                                        await this.setStateAsync({ cada: '' });
-                                                                    }
-                                                                }} />
+                                                        }}>
+                                                        <option value="0">
+                                                            - Seleccione
+                                                        </option>
+                                                        <option value="15">
+                                                            Listar Ventas de cada 15
+                                                        </option>
+                                                        <option value="30">
+                                                            Listar Ventas de cada 30
+                                                        </option>
+                                                    </select>
+                                                    <div className="input-group-append">
+                                                        <div className="input-group-text">
+                                                            <div className="form-check form-check-inline m-0">
+                                                                <input
+                                                                    className="form-check-input"
+                                                                    type="checkbox"
+                                                                    checked={this.state.frecuenciaCheck}
+                                                                    onChange={async (event) => {
+                                                                        await this.setStateAsync({ frecuenciaCheck: event.target.checked });
+                                                                        if (this.state.frecuenciaCheck) {
+                                                                            await this.setStateAsync({ cada: '' });
+                                                                        }
+                                                                    }} />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="col-4" />
+                                        <div className="col-4" />
+                                    </div>
+
+                                    <div className="row mt-3">
+                                        <div className="col"></div>
+                                        <div className="col">
+                                            <button className="btn btn-outline-warning btn-sm" onClick={() => this.onEventRepDeudas()}><i className="bi bi-file-earmark-pdf-fill"></i> Reporte Pdf</button>
+                                        </div>
+                                        <div className="col">
+                                            <button className="btn btn-outline-success btn-sm" onClick={() => this.onEventExcelDeudas()}><i className="bi bi-file-earmark-excel-fill"></i> Reporte Excel</button>
+                                        </div>
+                                        <div className="col"></div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            {/*
+                             *
+                             * Lista de Clientes por Fecha
+                             *
+                            */}
+                            <div className="card my-1">
+                                <h6 className="card-header">Listar de Clientes Registrados por Fecha</h6>
+                                <div className="card-body">
+
+                                    <div className="row">
+                                        <div className="col-md-6 col-sm-6 col-12">
+                                            <div className="form-group">
+                                                <label>Año de inicio<i className="fa fa-asterisk text-danger small"></i></label>
+                                                <div className="input-group">
+                                                    <select
+                                                        title="Año"
+                                                        className="form-control"
+                                                        disabled={this.state.yearCheck}
+                                                        ref={this.refYearPago}
+                                                        value={this.state.yearPago}
+                                                        onChange={(event) => this.setState({ yearPago: event.target.value })}>
+                                                        {
+                                                            this.state.year.map((item, index) => (
+                                                                <option key={index} value={item}>{item}</option>
+                                                            ))
+                                                        }
+                                                    </select>
+                                                    <div className="input-group-append">
+                                                        <div className="input-group-text">
+                                                            <div className="form-check form-check-inline m-0">
+                                                                <input
+                                                                    className="form-check-input"
+                                                                    type="checkbox"
+                                                                    checked={this.state.yearCheck}
+                                                                    onChange={async (event) => {
+                                                                        await this.setStateAsync({ yearCheck: event.target.checked });
+                                                                        if (this.state.yearCheck) {
+                                                                            await this.setStateAsync({ yearPago: getCurrentYear() });
+                                                                        }
+                                                                    }} />
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -388,10 +490,10 @@ class RepClientes extends React.Component {
                                     <div className="row mt-3">
                                         <div className="col"></div>
                                         <div className="col">
-                                            <button className="btn btn-outline-warning btn-sm" onClick={() => this.onEventRepDeudas()}><i className="bi bi-file-earmark-pdf-fill"></i> Reporte Pdf</button>
+                                            <button className="btn btn-outline-warning btn-sm" onClick={() => this.onEventPdfRegistro()}><i className="bi bi-file-earmark-pdf-fill"></i> Reporte Pdf</button>
                                         </div>
                                         <div className="col">
-                                            <button className="btn btn-outline-success btn-sm" onClick={() => this.onEventExcelDeudas()}><i className="bi bi-file-earmark-excel-fill"></i> Reporte Excel</button>
+                                            <button className="btn btn-outline-success btn-sm" onClick={() => this.onEventExcelRegistro()}><i className="bi bi-file-earmark-excel-fill"></i> Reporte Excel</button>
                                         </div>
                                         <div className="col"></div>
                                     </div>

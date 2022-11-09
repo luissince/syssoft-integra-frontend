@@ -1,5 +1,10 @@
 const fs = require("fs");
 
+function isNumber(value) {
+    return typeof value === 'number';
+}
+
+
 function isEmail(value) {
     const validRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
     return value.match(validRegex) != null ? true : false;
@@ -189,6 +194,7 @@ function manzanaLote(lot, manz) {
 }
 
 module.exports = {
+    isNumber,
     currentDate,
     currentTime,
     dateFormat,

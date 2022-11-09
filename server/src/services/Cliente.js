@@ -553,13 +553,13 @@ class Cliente {
             v.hora
             FROM venta AS v
             INNER JOIN comprobante AS co ON co.idComprobante  = v.idComprobante 
-            WHERE v.idCliente = ? AND v.estado <> 3`,[
+            WHERE v.idCliente = ? AND v.estado <> 3`, [
                 req.query.idCliente,
             ]);
 
             let newVentas = [];
 
-            for (const venta of ventas){
+            for (const venta of ventas) {
                 const detalle = await conec.query(`SELECT 
                 l.descripcion AS lote,
                 m.nombre AS manzana,
@@ -568,8 +568,8 @@ class Cliente {
                 FROM ventaDetalle AS vd
                 INNER JOIN lote AS l ON vd.idLote = l.idLote
                 INNER JOIN manzana AS m ON m.idManzana = l.idManzana
-                WHERE vd.idVenta = ?`,[
-                    venta.idVenta 
+                WHERE vd.idVenta = ?`, [
+                    venta.idVenta
                 ]);
 
                 // for(const detalle of detalles){
@@ -780,7 +780,7 @@ class Cliente {
         try {
             connection = await conec.beginTransaction();
 
-            const venta = await conec.execute(connection, `SELECT * FROM venta WHERE idProyecto = ?`,[
+            const venta = await conec.execute(connection, `SELECT * FROM venta WHERE idProyecto = ?`, [
                 req.query.idProyecto
             ]);
             for (let value of venta) {
@@ -830,6 +830,90 @@ class Cliente {
             }
             return "Se produjo un error de servidor, intente nuevamente.";
         }
+    }
+
+    async listarsociosporfecha(req) {
+        try {
+
+            const clientes = await conec.query(`SELECT 
+                cl.idCliente,
+                cl.documento,
+                cl.informacion,
+                cl.celular,
+                cl.telefono,
+                cl.email,
+                v.serie,
+                v.numeracion,
+                DATE_FORMAT(v.fecha,'%d/%m/%Y') AS fecha,
+                CASE WHEN v.frecuencia = 30 THEN 'CADA FIN DE MES'
+                ELSE 'CADA QUINCENA DE CADA MES' END AS frecuencia, 
+                lo.descripcion AS lote,
+                ma.nombre AS manzana,
+                mo.codiso,
+                SUM(vd.cantidad * vd.precio) AS monto
+                FROM venta AS v 
+                INNER JOIN cliente AS cl ON cl.idCliente = v.idCliente
+                INNER JOIN moneda AS mo ON mo.idMoneda = v.idMoneda
+                INNER JOIN ventaDetalle AS vd ON vd.idVenta = v.idVenta
+                INNER JOIN lote AS lo ON vd.idLote = lo.idLote
+                INNER JOIN manzana AS ma ON ma.idManzana = lo.idManzana
+                WHERE YEAR(v.fecha) = ? AND v.idProyecto = ?
+                GROUP BY v.idVenta`, [
+                parseInt(req.query.yearPago),
+                req.query.idProyecto
+            ]);
+
+            let newClientes = [];
+
+            for (const cliente of clientes) {
+                if (!this.duplicate(newClientes, cliente.idCliente)) {
+                    newClientes.push({
+                        "idCliente": cliente.idCliente,
+                        "documento": cliente.documento,
+                        "informacion": cliente.informacion,
+                        "celular": cliente.celular,
+                        "telefono": cliente.telefono,
+                        "email": cliente.email,
+                        "detalle": []
+                    });
+                }
+            }
+
+            for (const cliente of newClientes) {
+                let count = 0;
+                for (const venta of clientes) {
+                    if (venta.idCliente == cliente.idCliente) {
+                        count++;
+                        cliente.detalle.push({
+                            "id": count,
+                            "serie": venta.serie,
+                            "numeracion": venta.numeracion,
+                            "fecha": venta.fecha,
+                            "frecuencia": venta.frecuencia,
+                            "lote": venta.lote,
+                            "manzana": venta.manzana,
+                            "codiso": venta.codiso,
+                            "monto": venta.monto,
+                        });
+                    }
+                }
+            }
+
+            return newClientes;
+        } catch (error) {
+            return "Se produjo un error de servidor, intente nuevamente.";
+        }
+    }
+
+    duplicate(clientes, idCliente) {
+        let value = false;
+        for (const item of clientes) {
+            if (item.idCliente == idCliente) {
+                value = true;
+                break;
+            }
+        }
+        return value;
     }
 
 }
