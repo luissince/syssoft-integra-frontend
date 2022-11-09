@@ -1,7 +1,6 @@
 module.exports = {
     apps: [
         {
-            instances: 1,
             name: "inmobilaria",
             script: "./server/index.js",
             watch: true,
@@ -10,6 +9,7 @@ module.exports = {
                 "NODE_ENV": "development"
             },
             env_production: {
+                "ID": 1,
                 "PORT": 8000,
                 "HOST": "127.0.0.1",
                 "USER": "root",
