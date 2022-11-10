@@ -517,7 +517,7 @@ class RepCliente {
             );
 
             doc.fontSize(h3).text(
-                req.query.porProyecto == "" ? "TODOS LOS PROYECTOS" : `PROYECTO: ${req.query.nombreProyecto}`,
+                req.query.porProyecto == "0" ? "TODOS LOS PROYECTOS" : `PROYECTO: ${req.query.nombreProyecto}`,
                 orgX,
                 doc.y + 10,
                 {
