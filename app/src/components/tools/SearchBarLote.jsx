@@ -8,11 +8,11 @@ class SearchBarLote extends React.Component {
   }
 
   componentDidMount() {
-    window.addEventListener("click", this.onEventWindowClick, true);
+    window.addEventListener("click", this.onEventWindowClick);
   }
 
   componentWillUnmount() {
-    window.removeEventListener("click", this.onEventWindowClick, true);
+    window.removeEventListener("click", this.onEventWindowClick);
   }
 
   onEventWindowClick = (event) => {
