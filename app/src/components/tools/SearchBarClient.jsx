@@ -8,11 +8,11 @@ class SearchBarClient extends React.Component {
   }
 
   componentDidMount() {
-    window.addEventListener("click", this.onEventWindowClick, false);
+    window.addEventListener("click", this.onEventWindowClick, true);
   }
 
   componentWillUnmount() {
-    window.removeEventListener("click", this.onEventWindowClick, false);
+    window.removeEventListener("click", this.onEventWindowClick, true);
   }
 
   onEventWindowClick = (event) => {
