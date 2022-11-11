@@ -232,11 +232,25 @@ class RepClientes extends React.Component {
         }
         let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
         let params = new URLSearchParams({ "params": ciphertext });
-        window.open("/api/cliente/listarsociosporfecha?" + params, "_blank");
+        window.open("/api/cliente/replistarsociosporfecha?" + params, "_blank");
     }
 
     async onEventExcelRegistro() {
+        const data = {
+            "idSede": "SD0001",
+            "idProyecto": this.state.idProyecto,
+            "nombreProyecto": this.state.nombreProyecto,
+            "yearPago": this.state.yearPago,
+            "porProyecto": this.state.porProyecto
+        }
+        let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
 
+        this.refUseFile.current.download({
+            "name": "Listar de Cliente Por Fecha",
+            "file": "/api/cliente/exacellistarsociosporfecha",
+            "filename": "Listar de Cliente Por Fecha.xlsx",
+            "params": ciphertext
+        });
     }
 
     render() {

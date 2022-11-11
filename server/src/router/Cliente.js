@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { decrypt } = require('../tools/CryptoJS');
-const { generateExcelCliente, generateExcelDeudas } = require('../excel/FileClientes')
+const { generateExcelCliente, generateExcelDeudas, generarSociosPorFecha } = require('../excel/FileClientes')
 const sede = require('../services/Sede');
 const Cliente = require('../services/Cliente');
 const RepCliente = require('../report/RepCliente');
@@ -278,7 +278,7 @@ router.get("/updatealta", async function (req, res) {
 /**
  * 
  */
-router.get("/listarsociosporfecha", async function (req, res) {
+router.get("/replistarsociosporfecha", async function (req, res) {
     const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
     req.query.idSede = decryptedData.idSede;
     req.query.idProyecto = decryptedData.idProyecto;
@@ -296,7 +296,7 @@ router.get("/listarsociosporfecha", async function (req, res) {
     const clientes = await cliente.listarsociosporfecha(req);
 
     if (Array.isArray(clientes)) {
-        let data = await repCliente.repListarSociosPorFecha(req, sedeInfo, clientes);
+        const data = await repCliente.repListarSociosPorFecha(req, sedeInfo, clientes);
 
         if (typeof data === 'string') {
             res.status(500).send(data);
@@ -308,8 +308,40 @@ router.get("/listarsociosporfecha", async function (req, res) {
     } else {
         res.status(500).send(clientes);
     }
-    // const result = await cliente.listarsociosporfecha(req);
-    // res.status(200).send("ok");
 });
+
+/**
+ * 
+ */
+router.get("/exacellistarsociosporfecha", async function (req, res) {
+    const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
+    req.query.idSede = decryptedData.idSede;
+    req.query.idProyecto = decryptedData.idProyecto;
+    req.query.nombreProyecto = decryptedData.nombreProyecto;
+    req.query.yearPago = decryptedData.yearPago;
+    req.query.porProyecto = decryptedData.porProyecto;
+
+    const sedeInfo = await sede.infoSedeReporte(req);
+
+    if (typeof sedeInfo !== 'object') {
+        res.status(500).send(sedeInfo);
+        return;
+    }
+
+    const clientes = await cliente.listarsociosporfecha(req);
+
+    if (Array.isArray(clientes)) {
+        const data = await generarSociosPorFecha(req, sedeInfo, clientes);
+
+        if (typeof data === 'string') {
+            res.status(500).send(data);
+        } else {
+            res.end(data);
+        }
+    } else {
+        res.status(500).send(clientes);
+    }
+});
+
 
 module.exports = router;

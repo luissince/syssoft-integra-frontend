@@ -1,5 +1,5 @@
 const xl = require('excel4node');
-const { formatMoney, dateFormat ,numberFormat } = require('../tools/Tools');
+const { formatMoney, dateFormat, numberFormat } = require('../tools/Tools');
 
 async function generateExcelCliente(req, sedeInfo, data, condicion) {
     try {
@@ -187,7 +187,7 @@ async function generateExcelCliente(req, sedeInfo, data, condicion) {
                 ws.cell(rowY, 5).string(item.detalle).style(styleBody)
                 ws.cell(rowY, 6).number(parseFloat(formatMoney(item.monto))).style(styleBodyFloat)
             });
- 
+
             return wb.writeToBuffer();
 
         }
@@ -311,4 +311,151 @@ async function generateExcelDeudas(req, sedeInfo, data) {
     }
 }
 
-module.exports = { generateExcelCliente, generateExcelDeudas }
+async function generarSociosPorFecha(req, sedeInfo, data) {
+    try {
+        const wb = new xl.Workbook();
+
+        let ws = wb.addWorksheet('Hoja 1');
+
+        const styleTitle = wb.createStyle({
+            alignment: {
+                horizontal: 'center'
+            },
+            font: {
+                color: '#000000',
+                size: 12,
+            },
+        });
+
+        const styleSubTitle = wb.createStyle({
+            alignment: {
+                horizontal: 'left'
+            },
+            font: {
+                color: '#000000',
+                size: 10,
+            },
+        });
+
+        const styleTableHeader = wb.createStyle({
+            alignment: {
+                horizontal: 'left'
+            },
+            font: {
+                bold: true,
+                color: '#000000',
+                size: 12,
+            },
+
+        });
+
+        const styleBody = wb.createStyle({
+            alignment: {
+                horizontal: 'left'
+            },
+            font: {
+                color: '#000000',
+                size: 12,
+            }
+        });
+
+        const styleBodyInteger = wb.createStyle({
+            alignment: {
+                horizontal: 'left'
+            },
+            font: {
+                color: '#000000',
+                size: 12,
+            }
+        });
+
+        const styleBodyFloat = wb.createStyle({
+            alignment: {
+                horizontal: 'left'
+            },
+            font: {
+                color: '#000000',
+                size: 12,
+            },
+            numberFormat: '#,##0.00; (#,##0.00); 0',
+        });
+
+        const fillSocio = {
+            fill: {
+                type: 'pattern',
+                patternType: 'solid',
+                fgColor: '#c7c7ff',
+            }
+        }
+
+        const fillVenta = {
+            font: {
+                bold: true,
+            },
+            fill: {
+                type: 'pattern',
+                patternType: 'solid',
+                fgColor: '#e6e6e6',
+            }
+        }
+
+        const textSize = {
+            font: {
+                size: 10
+            },
+        }
+
+        ws.column(1).setWidth(20);
+        ws.column(2).setWidth(20);
+        ws.column(3).setWidth(30);
+        ws.column(4).setWidth(40);
+        ws.column(5).setWidth(20);
+
+        ws.cell(1, 1, 1, 5, true).string(`${sedeInfo.nombreEmpresa}`).style(styleTitle);
+        ws.cell(2, 1, 2, 5, true).string(`RUC: ${sedeInfo.ruc}`).style(styleTitle);
+        ws.cell(3, 1, 3, 5, true).string(`${sedeInfo.direccion}`).style(styleTitle);
+        ws.cell(4, 1, 4, 5, true).string(`Celular: ${sedeInfo.celular} / Telefono: ${sedeInfo.telefono}`).style(styleTitle);
+
+        ws.cell(6, 1, 6, 5, true).string(`LISTA DE SOCIOS AGREGADOS POR FECHA`).style(styleTitle);
+        ws.cell(7, 1, 7, 5, true).string(req.query.porProyecto == "1" ? "TODOS LOS PROYECTOS" : `PROYECTO: ${req.query.nombreProyecto}`).style(styleTitle);
+
+        const header = ["N°", "Documento", "Socio", "Celular", "Teléfono"];
+        header.map((item, index) => ws.cell(9, 1 + index).string(item).style(styleTableHeader).style(fillVenta));
+
+        let rowY = 9;
+        data.map((item, index) => {
+            rowY = rowY + 1;
+
+            ws.cell(rowY, 1).number(1 + index).style(styleBodyInteger).style(fillSocio);
+            ws.cell(rowY, 2).string(item.documento).style(styleBody).style(fillSocio);
+            ws.cell(rowY, 3).string(item.informacion).style(styleBody).style(fillSocio);
+            ws.cell(rowY, 4).string(item.celular).style(styleBody).style(fillSocio);
+            ws.cell(rowY, 5).string(item.telefono).style(styleBody).style(fillSocio);
+
+            rowY = rowY + 1;
+            ws.cell(rowY, 1).string("COMPROBANTE").style(styleSubTitle).style(fillVenta);
+            ws.cell(rowY, 2).string("FECHA").style(styleSubTitle).style(fillVenta);
+            ws.cell(rowY, 3).string("LOTE").style(styleSubTitle).style(fillVenta);
+            ws.cell(rowY, 4).string("FRECUENCIA").style(styleSubTitle).style(fillVenta);
+            ws.cell(rowY, 5).string("MONTO TOTAL").style(styleSubTitle).style(fillVenta);
+
+            for (const venta of item.detalle) {
+                rowY = rowY + 1;
+                ws.cell(rowY, 1).string(venta.serie + "-" + venta.numeracion).style(styleBody).style(textSize);
+                ws.cell(rowY, 2).string(venta.fecha).style(styleBody).style(textSize);
+                ws.cell(rowY, 3).string(venta.lote + " - " + venta.manzana).style(styleBody).style(textSize);
+                ws.cell(rowY, 4).string(venta.frecuencia).style(styleBody).style(textSize);
+                ws.cell(rowY, 5).number(parseFloat(formatMoney(venta.monto))).style(styleBodyFloat).style(textSize)
+            }
+        });
+        rowY = rowY + 1;
+
+        return wb.writeToBuffer();
+    } catch (error) {
+        console.log(error);
+        return "Error en generar el excel.";
+    }
+}
+
+
+module.exports = { generateExcelCliente, generateExcelDeudas, generarSociosPorFecha }
