@@ -16,6 +16,7 @@ import {
     ModalAlertInfo,
     ModalAlertSuccess,
     ModalAlertWarning,
+    ModalAlertError,
     ModalAlertDialog
 } from '../../tools/Tools';
 import { connect } from 'react-redux';
@@ -626,8 +627,11 @@ class CreditoProceso extends React.Component {
                         this.loadInit();
                     });
                 } catch (error) {
-                    ModalAlertWarning("Cobro", "Se produjo un error un interno, intente nuevamente.");
-
+                    if (error.response) {
+                        ModalAlertWarning("Cobro", error.response.data);
+                    } else {
+                        ModalAlertError("Cobro", "Se produjo un error un interno, intente nuevamente.");
+                    }
                 }
             }
         });
@@ -1522,7 +1526,7 @@ class CreditoProceso extends React.Component {
                     <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                         <p className="lead">Cobros</p>
                         <div className="table-responsive">
-                        <table className="table table-light">
+                            <table className="table table-light">
                                 <thead>
                                     <tr className="table-active">
                                         <th>#</th>

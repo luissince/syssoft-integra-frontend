@@ -54,8 +54,10 @@ router.post('/adelanto', async function (req, res) {
     const result = await cobro.adelanto(req)
     if (result === 'insert') {
         res.status(201).send("Se registró correctamente el cobro.");
+    } else if (result === 'server') {
+        res.status(500).send("Se produjo un error de servidor, intente nuevamente.");
     } else {
-        res.status(500).send(result);
+        res.status(400).send(result);
     }
 });
 

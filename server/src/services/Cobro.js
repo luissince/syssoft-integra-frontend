@@ -1,4 +1,4 @@
-const { currentDate, currentTime } = require('../tools/Tools');
+const { currentDate, currentTime, numberFormat } = require('../tools/Tools');
 const Conexion = require('../database/Conexion');
 const conec = new Conexion();
 
@@ -886,7 +886,12 @@ class Cobro {
                 req.body.idPlazo
             ]);
 
-            if (cobradoPlazo[0].total >= totalPlazo[0].monto) {
+            if (cobradoPlazo[0].total > totalPlazo[0].monto) {
+                await conec.rollback(connection);
+                return `El monto a ingresar supera al total con un diferencia de ${numberFormat(cobradoPlazo[0].total - totalPlazo[0].monto)}`;
+            }
+
+            if (cobradoPlazo[0].total == totalPlazo[0].monto) {
                 await conec.execute(connection, `UPDATE plazo SET estado = 1 WHERE idPlazo = ?`, [
                     req.body.idPlazo,
                 ]);
@@ -954,7 +959,7 @@ class Cobro {
             if (connection != null) {
                 await conec.rollback(connection);
             }
-            return "Se produjo un error de servidor, intente nuevamente.";
+            return "server";
         }
     }
 
@@ -1979,7 +1984,7 @@ class Cobro {
     async cpeSunat(req) {
         try {
             console.log(req.query)
-            
+
             const result = await conec.procedure(`CALL Listar_CpeExcel(?,?,?)`, [
                 req.query.fechaIni,
                 req.query.fechaFin,
