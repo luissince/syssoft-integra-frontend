@@ -108,7 +108,7 @@ class Principal extends React.Component {
         const { documento, razonSocial, nombreEmpresa, rutaImage } = this.props.token.empresa
         return (
             <>
-                <div className='container'>
+                <div className='container pt-5'>
                     {
                         this.state.loadModal ?
                             <div className="clearfix fixed-all bg-white">
@@ -125,10 +125,11 @@ class Principal extends React.Component {
                                         </div>
                                     </div>
 
-                                    <div className='col-md-6 col-12' >
+                                    <div className='col-md-6 col-12'>
                                         <div className='d-flex h-100 flex-column justify-content-center align-items-center'>
                                             <div className="form-group text-center">
-                                                <h3 className="text-dark">{nombreEmpresa == "" ? razonSocial : nombreEmpresa}</h3>
+                                                <h4 className="text-dark">{razonSocial}</h4>
+                                                <h5 className="text-dark">{nombreEmpresa}</h5>
                                                 <h5 className="text-secondary">Ruc: {documento}</h5>
                                             </div>
                                         </div>

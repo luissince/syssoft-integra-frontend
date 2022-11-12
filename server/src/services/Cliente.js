@@ -858,9 +858,9 @@ class Cliente {
                 INNER JOIN lote AS lo ON vd.idLote = lo.idLote
                 INNER JOIN manzana AS ma ON ma.idManzana = lo.idManzana
                 WHERE 
-                YEAR(v.fecha) = ? AND v.idProyecto = ? AND ? = 0
+                YEAR(v.fecha) = ? AND v.idProyecto = ? AND ? = 0 AND v.estado <> 3
                 OR
-                YEAR(v.fecha) = ? AND ? = 1
+                YEAR(v.fecha) = ? AND ? = 1 AND v.estado <> 3
                 GROUP BY v.idVenta`, [
                 parseInt(req.query.yearPago),
                 req.query.idProyecto,
