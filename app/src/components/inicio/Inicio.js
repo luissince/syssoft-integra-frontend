@@ -219,11 +219,11 @@ class Inicio extends React.Component {
             <div className='app'>
                 <Menu  {...this.props} url={url} />
 
-                <main className="position-relative">
+                <main>
                     <Head {...this.props} openAndClose={this.openAndClose} notificaciones={this.state.notificaciones} />
 
                     <div className="container-fluid mt-3">
-                        <div className="bg-white p-3 border border-light-purple rounded">
+                        <div className="bg-white p-3 border border-light-purple rounded position-relative">
 
                             <Switch>
                                 <Route

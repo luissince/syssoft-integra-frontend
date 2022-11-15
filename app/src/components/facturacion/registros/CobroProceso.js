@@ -342,7 +342,7 @@ class CobroProceso extends React.Component {
             if (event) {
                 try {
                     ModalAlertInfo("Cobro", "Procesando información...");
-                    let result = await axios.post('/api/cobro/add', {
+                    const result = await axios.post('/api/cobro/add', {
                         "idComprobante": this.state.idComprobante,
                         "idCliente": this.state.idCliente,
                         "idUsuario": this.state.idUsuario,

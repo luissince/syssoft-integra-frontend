@@ -34,6 +34,7 @@ class CreditoProceso extends React.Component {
             bancos: [],
             comprobantes: [],
             cobros: [],
+            conceptos: [],
 
             lotes: [],
             lote: '',
@@ -76,6 +77,16 @@ class CreditoProceso extends React.Component {
             montoAdelanto: '',
             idPlazo: '',
 
+            idImpuestoCobro: '',
+            idMedidaCobro: '',
+            expandedOpcionesCobro: true,
+            idBancoCobro: '',
+            idConceptoCobro: '',
+            idComprobanteCobro: '',
+            metodoPagoCobro: '',
+            observacionCobro: '',
+            montoCobro: '',
+
             idUsuario: this.props.token.userToken.idUsuario,
             idProyecto: this.props.token.project.idProyecto,
 
@@ -110,6 +121,16 @@ class CreditoProceso extends React.Component {
         this.refBancoAdelanto = React.createRef();
         this.refMetodoPagoAdelanto = React.createRef();
         this.refMontoAdelanto = React.createRef();
+
+        this.refImpuestoCobro = React.createRef();
+        this.refMedidaCobro = React.createRef();
+        this.refCollpseCobro = React.createRef();
+        this.refCollpseContentCobro = React.createRef();
+        this.refConceptoCobro = React.createRef();
+        this.refComprobanteCobro = React.createRef();
+        this.refBancoCobro = React.createRef();
+        this.refMetodoPagoCobro = React.createRef();
+        this.refMontoCobro = React.createRef();
 
         this.abortControllerTable = new AbortController();
 
@@ -220,6 +241,34 @@ class CreditoProceso extends React.Component {
             });
             this.selectItemLote = false;
         });
+
+        viewModal("modalCobro", async () => {
+            this.refConceptoCobro.current.focus();
+        });
+
+        clearModal("modalCobro", async () => {
+            const impuestoFilter = this.state.impuestos.filter(item => item.preferida === 1);
+
+            const medidaFilter = this.state.medidas.filter(item => item.preferida === 1);
+
+            if (this.refCollpseContentCobro.current.classList.contains("show")) {
+                this.refCollpseCobro.current.classList.add("collapsed");
+                this.refCollpseContentCobro.current.classList.remove("show");
+                this.refCollpseCobro.current.attributes["aria-expanded"].value = false;
+            }
+
+            await this.setStateAsync({
+                idConceptoCobro: '',
+                idBancoCobro: '',
+                idComprobanteCobro: '',
+                metodoPagoCobro: '',
+                observacionCobro: '',
+                montoCobro: '',
+                idMedidaCobro: medidaFilter.length > 0 ? medidaFilter[0].idMedida : '',
+                idImpuestoCobro: impuestoFilter.length > 0 ? impuestoFilter[0].idImpuesto : '',
+                expandedOpcionesCobro: true,
+            });
+        });
     }
 
     componentWillUnmount() {
@@ -246,6 +295,7 @@ class CreditoProceso extends React.Component {
                 comprobantes: [],
                 impuestos: [],
                 medidas: [],
+                conceptos: [],
 
                 idImpuestoPlazo: '',
                 idMedidaPlazo: '',
@@ -307,6 +357,10 @@ class CreditoProceso extends React.Component {
                 signal: this.abortControllerTable.signal,
             });
 
+            const concepto = await axios.get("/api/concepto/listcombo", {
+                signal: this.abortControllerTable.signal,
+            });
+
             const plazosSelected = credito.data.plazos.map((item) => {
                 return {
                     ...item,
@@ -328,6 +382,7 @@ class CreditoProceso extends React.Component {
                 bancos: banco.data,
                 comprobantes: [...comprobante.data, ...facturado.data],
                 cobros: cobros.data,
+                conceptos: concepto.data,
 
                 medidas: medida.data,
                 impuestos: impuesto.data,
@@ -704,7 +759,9 @@ class CreditoProceso extends React.Component {
         window.open("/api/cobro/repletramatricial?" + params, "_blank");
     }
 
-    /** */
+    /**
+     * Funciones para el filtro del lote
+     */
     async onEventCambiarLote(item) {
         await this.setStateAsync({
             idLoteSeleccionado: item.idLote,
@@ -786,8 +843,117 @@ class CreditoProceso extends React.Component {
             }
         });
     }
-    /** */
 
+    /**
+     * Funciones para el registro de cobros
+     */
+    async onEventOpenModelCobro() {
+        showModal("modalCobro")
+    }
+
+    async onEventRegistrarLote() {
+        if (this.state.idConceptoCobro == "") {
+            this.refConceptoCobro.current.focus();
+            return;
+        }
+
+        if (this.state.idComprobanteCobro == "") {
+            this.refComprobanteCobro.current.focus();
+            return;
+        }
+
+        if (this.state.idImpuestoCobro === "") {
+            if (!this.refCollpseContentCobro.current.classList.contains("show")) {
+                this.refCollpseCobro.current.classList.remove("collapsed");
+                this.refCollpseContentCobro.current.classList.add("show");
+                this.refCollpseCobro.current.attributes["aria-expanded"].value = true;
+                await this.setStateAsync({
+                    expandedOpcionesCobro: !(this.refCollpseCobro.current.attributes["aria-expanded"].value.toLowerCase() === 'true')
+                });
+            }
+
+            this.refImpuestoCobro.current.focus();
+            return;
+        }
+
+        if (this.state.idMedidaCobro === "") {
+            if (!this.refCollpseContentCobro.current.classList.contains("show")) {
+                this.refCollpseCobro.current.classList.remove("collapsed");
+                this.refCollpseContentCobro.current.classList.add("show");
+                this.refCollpseCobro.current.attributes["aria-expanded"].value = true;
+                await this.setStateAsync({
+                    expandedOpcionesCobro: !(this.refCollpseCobro.current.attributes["aria-expanded"].value.toLowerCase() === 'true')
+                });
+            }
+
+            this.refMedidaCobro.current.focus();
+            return;
+        }
+
+        if (this.state.idBancoCobro === '') {
+            this.refBancoCuota.current.focus();
+            return;
+        }
+
+        if (this.state.metodoPagoCobro === '') {
+            this.refMetodoPagoCobro.current.focus();
+            return;
+        }
+
+        if (!isNumeric(this.state.montoCobro)) {
+            this.refMontoCobro.current.focus();
+            return;
+        }
+
+        ModalAlertDialog("Cobro", "¿Estás seguro de continuar?", async (event) => {
+            if (event) {
+
+                try {
+                    ModalAlertInfo("Cobro", "Procesando información...")
+                    hideModal("modalCobro");
+
+                    const result = await axios.post('/api/cobro/add', {
+                        "idComprobante": this.state.idComprobanteCobro,
+                        "idCliente": this.state.venta.idCliente,
+                        "idUsuario": this.state.idUsuario,
+                        'idMoneda': this.state.venta.idMoneda,
+                        "idBanco": this.state.idBancoCobro,
+                        "idProcedencia": this.state.venta.idVenta,
+                        "idMedida": this.state.idMedidaCobro,
+                        "idImpuesto": this.state.idImpuestoCobro,
+                        "metodoPago": this.state.metodoPagoCobro,
+                        "estado": 1,
+                        "observacion": this.state.observacionCobro.trim().toUpperCase(),
+                        "idProyecto": this.state.idProyecto,
+                        "cobroDetalle": [{
+                            "idConcepto": this.state.idConceptoCobro,
+                            "concepto": this.refConceptoCobro.current.children[this.refConceptoCobro.current.selectedIndex].innerText,
+                            "cantidad": 1,
+                            "idImpuesto": this.state.idImpuestoCobro,
+                            "impuesto": this.refImpuestoCobro.current.children[this.refImpuestoCobro.current.selectedIndex].innerText,
+                            "idMedida": this.state.idMedidaCobro,
+                            "medida": this.refMedidaCobro.current.children[this.refMedidaCobro.current.selectedIndex].innerText,
+                            "monto": this.state.montoCobro
+                        }]
+                    });
+
+                    ModalAlertSuccess("Cobro", result.data, () => {
+                        this.loadInit();
+                    });
+                } catch (error) {
+                    if (error.response) {
+                        ModalAlertWarning("Cobro", error.response.data);
+                    } else {
+                        ModalAlertError("Cobro", "Se produjo un error un interno, intente nuevamente.");
+                    }
+                }
+            }
+        });
+    }
+
+    /** 
+     * Metodo para renderizar la vista de react js 
+     */
     render() {
         const {
             documento,
@@ -1038,7 +1204,7 @@ class CreditoProceso extends React.Component {
                                     <div className="form-row">
                                         <div className="form-group col-md-6">
                                             <select
-                                                title="Lista de lotes"
+                                                title="Impuestos"
                                                 className="form-control"
                                                 value={this.state.idImpuestoCuota}
                                                 ref={this.refImpuestoCuota}
@@ -1055,7 +1221,7 @@ class CreditoProceso extends React.Component {
 
                                         <div className="form-group col-md-6">
                                             <select
-                                                title="Lista de lotes"
+                                                title="Unidad"
                                                 className="form-control"
                                                 value={this.state.idMedidaCuota}
                                                 ref={this.refMedidaCuota}
@@ -1216,7 +1382,7 @@ class CreditoProceso extends React.Component {
                                     <div className="form-row">
                                         <div className="form-group col-md-6">
                                             <select
-                                                title="Lista de lotes"
+                                                title="Impuestos"
                                                 className="form-control"
                                                 value={this.state.idImpuestoAdelanto}
                                                 ref={this.refImpuestoAdelanto}
@@ -1233,7 +1399,7 @@ class CreditoProceso extends React.Component {
 
                                         <div className="form-group col-md-6">
                                             <select
-                                                title="Lista de lotes"
+                                                title="Unidad"
                                                 className="form-control"
                                                 value={this.state.idMedidaAdelanto}
                                                 ref={this.refMedidaAdelanto}
@@ -1375,6 +1541,209 @@ class CreditoProceso extends React.Component {
                             </div>
                             <div className="modal-footer">
                                 <button type="button" className="btn btn-primary" onClick={() => this.onEventCambiarLoto()}>Guardar</button>
+                                <button type="button" className="btn btn-danger" data-bs-dismiss="modal">Cerrar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {/* fin modal */}
+
+                {/* Inicio modal */}
+                <div className="modal fade" id="modalCobro" data-backdrop="static">
+                    <div className="modal-dialog modal-md">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h6 className="modal-title">Registrar cobro</h6>
+                                <button type="button" className="close" data-bs-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div className="modal-body">
+
+                                <div className="form-row">
+                                    <div className="form-group col-md-12">
+                                        <div className="input-group">
+                                            <div className="input-group-prepend">
+                                                <div className="input-group-text"><i className="bi bi-cart4"></i></div>
+                                            </div>
+                                            <select
+                                                title="Conceptos"
+                                                className="form-control"
+                                                ref={this.refConceptoCobro}
+                                                value={this.state.idConceptoCobro}
+                                                onChange={(event) => {
+                                                    this.setState({ idConceptoCobro: event.target.value })
+                                                }}>
+                                                <option value="">-- seleccione --</option>
+                                                {
+                                                    this.state.conceptos.map((item, index) => (
+                                                        <option key={index} value={item.idConcepto}>{item.nombre}</option>
+                                                    ))
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="form-row">
+                                    <div className="form-group col-md-12">
+                                        <div className="input-group">
+                                            <div className="input-group-prepend">
+                                                <div className="input-group-text"><i className="bi bi-receipt"></i></div>
+                                            </div>
+                                            <select
+                                                title="Lista de Comprobantes"
+                                                className="form-control"
+                                                ref={this.refComprobanteCobro}
+                                                value={this.state.idComprobanteCobro}
+                                                onChange={(event) => {
+                                                    this.setState({ idComprobanteCobro: event.target.value })
+                                                }}>
+                                                <option value="">-- Comprobantes --</option>
+                                                {
+                                                    this.state.comprobantes.map((item, index) => (
+                                                        <option key={index} value={item.idComprobante}>{item.nombre}</option>
+                                                    ))
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="form-row">
+                                    <div className="form-group col-md-12">
+                                        <a
+                                            onClick={async () => await this.setStateAsync({
+                                                expandedOpcionesCobro: !(this.refCollpseCobro.current.attributes["aria-expanded"].value.toLowerCase() === 'true')
+                                            })}
+                                            ref={this.refCollpseCobro}
+                                            className="icon-link collapsed"
+                                            data-bs-toggle="collapse"
+                                            href="#collapseOpcionesCobro"
+                                            role="button"
+                                            aria-expanded="false"
+                                            aria-controls="collapseOpcionesCobro">
+                                            Opciones {this.state.expandedOpcionesCobro ? <i className="fa fa-plus-square"></i> : <i className="fa fa-minus-square"></i>}
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <div ref={this.refCollpseContentCobro} className="collapse" id="collapseOpcionesCobro">
+                                    <div className="form-row">
+                                        <div className="form-group col-md-6">
+                                            <select
+                                                title="Impuestos"
+                                                className="form-control"
+                                                value={this.state.idImpuestoCobro}
+                                                ref={this.refImpuestoCobro}
+                                                onChange={(event) => this.setState({ idImpuestoCobro: event.target.value })}
+                                            >
+                                                <option value="">-- Impuesto --</option>
+                                                {
+                                                    this.state.impuestos.map((item, index) => (
+                                                        <option key={index} value={item.idImpuesto}>{item.nombre}</option>
+                                                    ))
+                                                }
+                                            </select>
+                                        </div>
+
+                                        <div className="form-group col-md-6">
+                                            <select
+                                                title="Unidad"
+                                                className="form-control"
+                                                value={this.state.idMedidaCobro}
+                                                ref={this.refMedidaCobro}
+                                                onChange={(event) => this.setState({ idMedidaCobro: event.target.value })}
+                                            >
+                                                <option value="">-- Unidad --</option>
+                                                {
+                                                    this.state.medidas.map((item, index) => (
+                                                        <option key={index} value={item.idMedida}>{item.nombre}</option>
+                                                    ))
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="form-row">
+                                    <div className="form-group col-md-6">
+                                        <label>Cuenta bancaria <i className="fa fa-asterisk text-danger small"></i></label>
+                                        <div className="input-group">
+                                            <select
+                                                className="form-control"
+                                                ref={this.refBancoCuota}
+                                                value={this.state.idBancoCobro}
+                                                onChange={(event) =>
+                                                    this.setState({
+                                                        idBancoCobro: event.target.value
+                                                    })
+                                                }>
+                                                <option value="">- Seleccione -</option>
+                                                {
+                                                    this.state.bancos.map((item, index) => (
+                                                        <option key={index} value={item.idBanco}>{item.nombre}</option>
+                                                    ))
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div className="form-group col-md-6">
+                                        <label>Metodo de pago <i className="fa fa-asterisk text-danger small"></i></label>
+                                        <select
+                                            className="form-control"
+                                            ref={this.refMetodoPagoCobro}
+                                            value={this.state.metodoPagoCobro}
+                                            onChange={(event) =>
+                                                this.setState({
+                                                    metodoPagoCobro: event.target.value,
+                                                })}>
+                                            <option value="">- Seleccione -</option>
+                                            <option value="1">Efectivo</option>
+                                            <option value="2">Consignación</option>
+                                            <option value="3">Transferencia</option>
+                                            <option value="4">Cheque</option>
+                                            <option value="5">Tarjeta crédito</option>
+                                            <option value="6">Tarjeta débito</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div className="form-row">
+                                    <div className="form-group col-md-12">
+                                        <label>Observación</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            placeholder="Ingrese alguna observación..."
+                                            value={this.state.observacionCobro}
+                                            onChange={(event) =>
+                                                this.setState({ observacionCobro: event.target.value })
+                                            } />
+                                    </div>
+                                </div>
+
+                                <div className="form-row">
+                                    <div className="form-group col-md-3">
+                                        <label>Valor a cobrar:</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            placeholder="0.00"
+                                            ref={this.refMontoCobro}
+                                            value={this.state.montoCobro}
+                                            onChange={(event) =>
+                                                this.setState({ montoCobro: event.target.value })
+                                            }
+                                            onKeyPress={keyNumberFloat}
+                                        />
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-primary" onClick={() => this.onEventRegistrarLote()}>Guardar</button>
                                 <button type="button" className="btn btn-danger" data-bs-dismiss="modal">Cerrar</button>
                             </div>
                         </div>
@@ -1524,14 +1893,15 @@ class CreditoProceso extends React.Component {
 
                 <div className="row">
                     <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                        <p className="lead">Cobros</p>
+                        <p className="lead">Cobros <button className="btn btn-primary btn-sm" onClick={() => this.onEventOpenModelCobro()}><i className="fa fa-plus"></i></button></p>
                         <div className="table-responsive">
                             <table className="table table-light">
                                 <thead>
                                     <tr className="table-active">
-                                        <th>#</th>
+                                        <th className="text-center">#</th>
                                         <th>Concepto</th>
                                         <th>Monto</th>
+                                        <th className="text-center">Agregar</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -1543,9 +1913,14 @@ class CreditoProceso extends React.Component {
                                             :
                                             this.state.cobros.map((item, index) => (
                                                 <tr key={index}>
-                                                    <td>{++index}</td>
+                                                    <td className="text-center">{++index}</td>
                                                     <td>{item.concepto}</td>
                                                     <td>{numberFormat(item.monto, item.codiso)}</td>
+                                                    <td className="text-center">
+                                                        <button className="btn btn-primary btn-sm">
+                                                            <i className="fa fa-plus-circle"></i>
+                                                        </button>
+                                                    </td>
                                                 </tr>
                                             ))
                                     }
