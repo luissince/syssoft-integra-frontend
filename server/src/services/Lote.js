@@ -640,6 +640,59 @@ class Lote {
         }
     }
 
+    async listardeudaslote(req) {
+        try {
+            const result = await conec.query(`SELECT 
+            v.idVenta, 
+            cl.idCliente,
+            cl.documento, 
+            cl.informacion, 
+            lo.descripcion AS lote,
+            ma.nombre AS manzana,
+            cm.nombre AS comprobante, 
+            v.serie, 
+            v.numeracion, 
+            (SELECT IFNULL(COUNT(*), 0) FROM plazo AS p WHERE p.estado = 0 AND p.idVenta = v.idVenta) AS numCuota, 
+            CASE 
+            WHEN v.credito = 1 THEN DATE_ADD(v.fecha,interval v.frecuencia day)
+            ELSE (SELECT IFNULL(MIN(p.fecha),'') FROM plazo AS p WHERE p.estado = 0 AND p.idVenta = v.idVenta) END AS fechaPago,
+            v.fecha, 
+            v.hora, 
+            v.estado,
+            v.credito,
+            v.frecuencia,
+            m.idMoneda,
+            m.simbolo,
+            IFNULL(SUM(vd.precio*vd.cantidad),0) AS total,
+            (
+             SELECT IFNULL(SUM(cv.precio),0) 
+             FROM cobro AS c 
+             LEFT JOIN notaCredito AS nc ON c.idCobro = nc.idCobro AND nc.estado = 1
+             LEFT JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro 
+             WHERE c.idProcedencia = v.idVenta AND c.estado = 1 AND nc.idNotaCredito IS NULL
+            ) AS cobrado 
+            FROM venta AS v 
+            INNER JOIN moneda AS m ON m.idMoneda = v.idMoneda
+            INNER JOIN comprobante AS cm ON v.idComprobante = cm.idComprobante 
+            INNER JOIN cliente AS cl ON v.idCliente = cl.idCliente 
+            INNER JOIN ventaDetalle AS vd ON vd.idVenta = v.idVenta 
+            INNER JOIN lote AS lo ON vd.idLote = lo.idLote 
+            INNER JOIN manzana AS ma ON lo.idManzana = ma.idManzana 
+            WHERE  
+            v.estado = 2 AND v.idProyecto = ? 
+            
+            GROUP BY v.idVenta
+            ORDER BY v.fecha DESC, v.hora DESC`, [
+                req.query.idProyecto
+            ]);
+
+            return result;
+        } catch (error) {
+            console.error(error);
+            return "Se produjo un error de servidor, intente nuevamente.";
+        }
+    }
+
 }
 
 module.exports = Lote;

@@ -3,6 +3,7 @@ const router = express.Router();
 const Lote = require('../services/Lote');
 const sede = require('../services/Sede');
 const RepLote = require('../report/RepLote');
+const { generateLoteDeuda } = require('../excel/FileLote');
 const { decrypt } = require('../tools/CryptoJS');
 const { currentDate } = require('../tools/Tools')
 
@@ -111,11 +112,11 @@ router.get('/lotecliente', async function (req, res) {
     }
 });
 
-router.put('/cambiar', async function (req, res){
+router.put('/cambiar', async function (req, res) {
     const result = await lote.cambiar(req);
-    if(result == "update"){
+    if (result == "update") {
         res.status(200).send("Se actualizó correctamente el cambio del lote.");
-    }else{
+    } else {
         res.status(500).send(result);
     }
 });
@@ -169,7 +170,7 @@ router.get('/reptipolotes', async function (req, res) {
     if (typeof detalle === 'object') {
 
         let data = await repLote.repTipoLote(req, sedeInfo, detalle)
-        
+
         if (typeof data === 'string') {
             res.status(500).send(data)
         } else {
@@ -177,8 +178,69 @@ router.get('/reptipolotes', async function (req, res) {
             res.contentType("application/pdf");
             res.send(data);
         }
-    }else{
-        res.status(500).send(detalle);        
+    } else {
+        res.status(500).send(detalle);
+    }
+})
+
+router.get('/replistardeudaslote', async function (req, res) {
+    const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
+    req.query.idSede = decryptedData.idSede;
+    req.query.idProyecto = decryptedData.idProyecto;
+    req.query.nombreProyecto = decryptedData.nombreProyecto;
+    req.query.porProyecto = decryptedData.porProyecto;
+
+    const sedeInfo = await sede.infoSedeReporte(req)
+
+    if (typeof sedeInfo !== 'object') {
+        res.status(500).send(sedeInfo)
+        return;
+    }
+
+    const detalle = await lote.listardeudaslote(req)
+
+    if (typeof detalle === 'object') {
+
+        let data = await repLote.repLoteDeuda(req, sedeInfo, detalle)
+
+        if (typeof data === 'string') {
+            res.status(500).send(data)
+        } else {
+            res.setHeader('Content-disposition', 'inline; filename=Lista de Lotes con Deuda.pdf');
+            res.contentType("application/pdf");
+            res.send(data);
+        }
+    } else {
+        res.status(500).send(detalle)
+    }
+})
+
+router.get('/exacellistardeudaslote', async function (req, res) {
+    const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
+    req.query.idSede = decryptedData.idSede;
+    req.query.idProyecto = decryptedData.idProyecto;
+    req.query.nombreProyecto = decryptedData.nombreProyecto;
+    req.query.porProyecto = decryptedData.porProyecto;
+
+    const sedeInfo = await sede.infoSedeReporte(req);
+
+    if (typeof sedeInfo !== 'object') {
+        return sendError(res, sedeInfo);
+    }
+
+    const detalle = await lote.listardeudaslote(req);
+
+    if (Array.isArray(detalle)) {
+
+        const data = await generateLoteDeuda(req, sedeInfo, detalle);
+
+        if (typeof data === 'string') {
+            return sendError(res, data);
+        } else {
+            res.end(data);
+        }
+    } else {
+        return sendError(res, detalle);
     }
 })
 

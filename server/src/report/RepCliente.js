@@ -407,7 +407,7 @@ class RepCliente {
                 }
             );
 
-            let content = data.map((item, index) => {
+            const content = data.map((item, index) => {
                 return [
                     ++index,
                     item.documento + " " + item.informacion,

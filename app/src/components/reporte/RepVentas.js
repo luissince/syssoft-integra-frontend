@@ -43,7 +43,7 @@ class RepVentas extends React.Component {
         this.refTipoVenta = React.createRef();
         this.refUseFile = React.createRef();
 
-        this.abortControllerView = new AbortController()
+        this.abortControllerView = new AbortController();
     }
 
     setStateAsync(state) {

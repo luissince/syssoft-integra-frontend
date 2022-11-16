@@ -951,6 +951,11 @@ class CreditoProceso extends React.Component {
         });
     }
 
+    /**
+     * Funciones para el registro de cobros por datalle
+     */
+
+
     /** 
      * Metodo para renderizar la vista de react js 
      */
@@ -1917,9 +1922,16 @@ class CreditoProceso extends React.Component {
                                                     <td>{item.concepto}</td>
                                                     <td>{numberFormat(item.monto, item.codiso)}</td>
                                                     <td className="text-center">
-                                                        <button className="btn btn-primary btn-sm">
-                                                            <i className="fa fa-plus-circle"></i>
-                                                        </button>
+                                                        {
+                                                            item.idConcepto == "" ?
+                                                                <button className="btn btn-light btn-sm" disabled>
+                                                                    <i className="fa fa-minus"></i>
+                                                                </button>
+                                                                :
+                                                                <button className="btn btn-info btn-sm">
+                                                                    <i className="fa fa-plus-circle"></i>
+                                                                </button>
+                                                        }
                                                     </td>
                                                 </tr>
                                             ))

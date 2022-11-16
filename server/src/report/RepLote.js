@@ -1,7 +1,7 @@
 const path = require('path');
 const PDFDocument = require("pdfkit-table");
 const getStream = require('get-stream');
-const { numberFormat, currentDate ,isFile} = require('../tools/Tools');
+const { numberFormat, currentDate, isFile } = require('../tools/Tools');
 
 class RepLote {
 
@@ -34,7 +34,7 @@ class RepLote {
             let h3 = 9;
 
             if (isFile(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo))) {
-                doc.image(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo), doc.x,  doc.y, { width: 75 });
+                doc.image(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo), doc.x, doc.y, { width: 75 });
             } else {
                 doc.image(path.join(__dirname, "..", "path/to/noimage.jpg"), doc.x, doc.y, { width: 75 });
             }
@@ -237,7 +237,7 @@ class RepLote {
             let h3 = 9;
 
             if (isFile(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo))) {
-                doc.image(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo), doc.x,  doc.y, { width: 75 });
+                doc.image(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo), doc.x, doc.y, { width: 75 });
             } else {
                 doc.image(path.join(__dirname, "..", "path/to/noimage.jpg"), doc.x, doc.y, { width: 75 });
             }
@@ -271,8 +271,6 @@ class RepLote {
                     align: "left"
                 }
             );
-
-            console.log(data.proyecto)
 
             doc.fontSize(h3).text(
                 `PROYECTO: ${data.proyecto.nombre}`,
@@ -345,6 +343,121 @@ class RepLote {
                 width: doc.page.width - doc.options.margins.left - doc.options.margins.right,
                 x: orgX,
                 y: doc.y + 10,
+            });
+
+            doc.end();
+
+            return getStream.buffer(doc);
+
+        } catch (error) {
+            return "Se genero un error al generar el reporte.";
+        }
+    }
+
+    async repLoteDeuda(req, sedeInfo, data) {
+        try {
+
+            const doc = new PDFDocument({
+                font: 'Helvetica',
+                layout: 'landscape',
+                margins: {
+                    top: 40,
+                    bottom: 40,
+                    left: 40,
+                    right: 40
+                }
+            });
+
+            doc.info["Title"] = `Lista de Lotes con Deuda.pdf`
+
+            let orgX = doc.x;
+            let orgY = doc.y;
+            let cabeceraY = orgY + 70;
+            let titleX = orgX + 230;
+            let widthContent = doc.page.width - doc.options.margins.left - doc.options.margins.right;
+
+            let h1 = 13;
+            let h2 = 11;
+            let h3 = 9;
+            let h4 = 8;
+
+            if (isFile(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo))) {
+                doc.image(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo), orgX, orgY, { width: 75 });
+            } else {
+                doc.image(path.join(__dirname, "..", "path/to/noimage.jpg"), orgX, orgY, { width: 75 });
+            }
+
+            doc.fontSize(h1).text(
+                `${sedeInfo.nombreEmpresa}`,
+                titleX,
+                orgY,
+                {
+                    width: 250,
+                    align: "center"
+                }
+            );
+
+            doc.fontSize(h3).text(
+                `RUC: ${sedeInfo.ruc}\n${sedeInfo.direccion}\nCelular: ${sedeInfo.celular} / Telefono: ${sedeInfo.telefono}`,
+                titleX,
+                orgY + 17,
+                {
+                    width: 250,
+                    align: "center",
+                }
+            );
+
+            doc.fontSize(h2).text(
+                "LISTA DE LOTES CON DEUDA",
+                doc.options.margins.left,
+                cabeceraY,
+                {
+                    width: widthContent,
+                    align: "center",
+                }
+            );
+
+            doc.fontSize(h3).text(
+                `${req.query.porProyecto == "0" ? "PROYECTO: " + req.query.nombreProyecto : "TODOS LOS PROYECTOS"}`,
+                orgX,
+                doc.y + 25,
+                {
+                    width: 300,
+                    align: "left",
+                }
+            );
+
+            const content = data.map((item, index) => {
+                return [
+                    ++index,
+                    item.documento + " " + item.informacion,
+                    item.lote + " - " + item.manzana,
+                    item.comprobante + " " + item.serie + "-" + item.numeracion,
+                    item.credito === 1 ? item.frecuencia : item.numCuota === 1 ? item.numCuota + " Cuota" : item.numCuota + " Cuotas",
+                    numberFormat(item.total),
+                    numberFormat(item.cobrado),
+                    numberFormat(item.total - item.cobrado)
+                ];
+            });
+
+            const table = {
+                subtitle: `Detalle`,
+                headers: ["N°", "Cliente", "Propiedad", "Comprobante", "Ctas Pendiente", "Total", "Cobrado", "Por Cobrar"],
+                rows: content
+            };
+
+            doc.table(table, {
+                prepareHeader: () => doc.font("Helvetica-Bold").fontSize(h3),
+                prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) => {
+                    doc.font("Helvetica").fontSize(h4).fillColor("black");
+                },
+                align: "center",
+                padding: 5,
+                columnSpacing: 5,
+                columnsSize: [30, 135, 105, 110, 80, 82, 85, 85],//712
+                x: doc.x,
+                y: doc.y + 15,
+                width: doc.page.width - doc.options.margins.left - doc.options.margins.right
             });
 
             doc.end();

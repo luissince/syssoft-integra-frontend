@@ -1,5 +1,6 @@
 import React from 'react';
 import CryptoJS from 'crypto-js';
+import FileDownloader from "./hooks/FileDownloader";
 import { connect } from 'react-redux';
 import { spinnerLoading } from '../tools/Tools';
 
@@ -8,14 +9,20 @@ class RepLotes extends React.Component {
         super(props);
         this.state = {
             idProyecto: this.props.token.project.idProyecto,
+            nombreProyecto: this.props.token.project.nombre,
 
             lote: '',
             loteCheck: true,
 
             loading: true,
-        }
+            msgLoading: '',
 
-        this.abortControllerView = new AbortController()
+            porProyecto: "0",
+            proyectoCkeck: true,
+        }
+        this.refUseFile = React.createRef();
+
+        this.abortControllerView = new AbortController();
     }
 
     setStateAsync(state) {
@@ -48,7 +55,7 @@ class RepLotes extends React.Component {
     }
 
     async onEventImprimir() {
-        
+
         const data = {
             // "idLote": this.state.idLote,
             "idProyecto": this.state.idProyecto,
@@ -81,6 +88,35 @@ class RepLotes extends React.Component {
         // } catch (error) {
         //     console.log(error)
         // }
+    }
+
+    async onEventPdfLoteCobrar() {
+        const data = {
+            "idSede": "SD0001",
+            "idProyecto": this.state.idProyecto,
+            "nombreProyecto": this.state.nombreProyecto,
+            "porProyecto": this.state.porProyecto
+        }
+        let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
+        let params = new URLSearchParams({ "params": ciphertext });
+        window.open("/api/lote/replistardeudaslote?" + params, "_blank");
+    }
+
+    async onEventExcelLoteCobrar() {
+        const data = {
+            "idSede": "SD0001",
+            "idProyecto": this.state.idProyecto,
+            "nombreProyecto": this.state.nombreProyecto,
+            "porProyecto": this.state.porProyecto
+        }
+        let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
+
+        this.refUseFile.current.download({
+            "name": "Listar de Lotes con Deuda",
+            "file": "/api/lote/exacellistardeudaslote",
+            "filename": "Listar de Lotes con Deuda.xlsx",
+            "params": ciphertext
+        });
     }
 
     render() {
@@ -119,6 +155,7 @@ class RepLotes extends React.Component {
                                                         <option value="3">LOTES VENDIDOS</option>
                                                         <option value="4">LOTES INACTIVOS</option>
                                                     </select>
+
                                                     <div className="input-group-append">
                                                         <div className="input-group-text">
                                                             <div className="form-check form-check-inline m-0">
@@ -141,16 +178,60 @@ class RepLotes extends React.Component {
                                         </div>
 
                                         <div className="col text-center">
-                                            <button className="btn btn-outline-warning btn-sm" onClick={ () => this.onEventImprimir() }><i className="bi bi-file-earmark-pdf-fill"></i> Reporte Pdf</button>
+                                            <button className="btn btn-outline-warning btn-sm" onClick={() => this.onEventImprimir()}><i className="bi bi-file-earmark-pdf-fill"></i> Reporte Pdf</button>
                                         </div>
-
-                                        {/* <div className="col text-center">
-                                            <button className="btn btn-outline-success btn-sm"><i className="bi bi-file-earmark-excel-fill"></i> Reporte Excel</button>
-                                        </div> */}
-
                                     </div>
                                 </div>
                             </div>
+
+                            <div className="card my-1">
+                                <h6 className="card-header">Reporte de Lotes por Cobrar</h6>
+                                <div className="card-body">
+                                    <div className="row">
+                                        <div className="col">
+                                            <div className="form-group">
+                                                <label>Proyecto<i className="fa fa-asterisk text-danger small"></i></label>
+                                                <div className="input-group">
+                                                    <select
+                                                        title="Año"
+                                                        className="form-control"
+                                                        disabled={this.state.proyectoCkeck}
+                                                        value={this.state.porProyecto}
+                                                        onChange={(event) => this.setState({ porProyecto: event.target.value })}>
+                                                        <option value={"0"}>{"Por proyecto"}</option>
+                                                        <option value={"1"}>{"Todos"}</option>
+                                                    </select>
+                                                    <div className="input-group-append">
+                                                        <div className="input-group-text">
+                                                            <div className="form-check form-check-inline m-0">
+                                                                <input
+                                                                    className="form-check-input"
+                                                                    type="checkbox"
+                                                                    checked={this.state.proyectoCkeck}
+                                                                    onChange={async (event) => await this.setStateAsync({ proyectoCkeck: event.target.checked })} />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="col"></div>
+                                    </div>
+
+                                    <div className="row">
+                                        <div className="col"></div>
+                                        <div className="col">
+                                            <button className="btn btn-outline-warning btn-sm" onClick={() => this.onEventPdfLoteCobrar()}><i className="bi bi-file-earmark-pdf-fill"></i> Reporte Pdf</button>
+                                        </div>
+                                        <div className="col">
+                                            <button className="btn btn-outline-success btn-sm" onClick={() => this.onEventExcelLoteCobrar()}><i className="bi bi-file-earmark-excel-fill"></i> Reporte Excel</button>
+                                        </div>
+                                        <div className="col"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <FileDownloader ref={this.refUseFile} />
                         </>
                 }
             </>
