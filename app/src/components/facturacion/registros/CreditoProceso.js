@@ -87,6 +87,16 @@ class CreditoProceso extends React.Component {
             observacionCobro: '',
             montoCobro: '',
 
+            idImpuestoIndividual: '',
+            idMedidaIndividual: '',
+            expandedOpcionesIndividual: true,
+            idBancoIndividual: '',
+            idConceptoIndividual: '',
+            idComprobanteIndividual: '',
+            metodoPagoIndividual: '',
+            observacionIndividual: '',
+            montoIndividual: '',
+
             idUsuario: this.props.token.userToken.idUsuario,
             idProyecto: this.props.token.project.idProyecto,
 
@@ -131,6 +141,16 @@ class CreditoProceso extends React.Component {
         this.refBancoCobro = React.createRef();
         this.refMetodoPagoCobro = React.createRef();
         this.refMontoCobro = React.createRef();
+
+        this.refImpuestoIndividual = React.createRef();
+        this.refMedidaIndividual = React.createRef();
+        this.refCollpseIndividual = React.createRef();
+        this.refCollpseContentIndividual = React.createRef();
+        this.refConceptoIndivudual = React.createRef();
+        this.refComprobanteIndividual = React.createRef();
+        this.refBancoIndividual = React.createRef();
+        this.refMetodoPagoIndividual = React.createRef();
+        this.refMontoIndividual = React.createRef();
 
         this.abortControllerTable = new AbortController();
 
@@ -269,6 +289,34 @@ class CreditoProceso extends React.Component {
                 expandedOpcionesCobro: true,
             });
         });
+
+        viewModal("modalIndividual", async () => {
+            this.refComprobanteIndividual.current.focus();
+        });
+
+        clearModal("modalIndividual", async () => {
+            const impuestoFilter = this.state.impuestos.filter(item => item.preferida === 1);
+
+            const medidaFilter = this.state.medidas.filter(item => item.preferida === 1);
+
+            if (this.refCollpseContentIndividual.current.classList.contains("show")) {
+                this.refCollpseIndividual.current.classList.add("collapsed");
+                this.refCollpseContentIndividual.current.classList.remove("show");
+                this.refCollpseIndividual.current.attributes["aria-expanded"].value = false;
+            }
+
+            await this.setStateAsync({
+                idConceptoIndividual: '',
+                idBancoIndividual: '',
+                idComprobanteIndividual: '',
+                metodoPagoIndividual: '',
+                observacionIndividual: '',
+                montoIndividual: '',
+                idMedidaIndividual: medidaFilter.length > 0 ? medidaFilter[0].idMedida : '',
+                idImpuestoIndividual: impuestoFilter.length > 0 ? impuestoFilter[0].idImpuesto : '',
+                expandedOpcionesIndividual: true,
+            });
+        });
     }
 
     componentWillUnmount() {
@@ -395,6 +443,12 @@ class CreditoProceso extends React.Component {
 
                 idMedidaAdelanto: medidaFilter.length > 0 ? medidaFilter[0].idMedida : '',
                 idImpuestoAdelanto: impuestoFilter.length > 0 ? impuestoFilter[0].idImpuesto : '',
+
+                idMedidaCobro: medidaFilter.length > 0 ? medidaFilter[0].idMedida : '',
+                idImpuestoCobro: impuestoFilter.length > 0 ? impuestoFilter[0].idImpuesto : '',
+
+                idMedidaIndividual: medidaFilter.length > 0 ? medidaFilter[0].idMedida : '',
+                idImpuestoIndividual: impuestoFilter.length > 0 ? impuestoFilter[0].idImpuesto : '',
 
                 idComprobantePlazo: comprobanteFilter.length === 1 ? comprobanteFilter[0].idComprobante : '',
                 idComprobanteCuota: comprobanteFilter.length === 1 ? comprobanteFilter[0].idComprobante : '',
@@ -656,7 +710,6 @@ class CreditoProceso extends React.Component {
 
         ModalAlertDialog("Cobro", "¿Estás seguro de continuar?", async (event) => {
             if (event) {
-
                 try {
                     ModalAlertInfo("Cobro", "Procesando información...")
                     hideModal("modalAdelanto");
@@ -851,7 +904,7 @@ class CreditoProceso extends React.Component {
         showModal("modalCobro")
     }
 
-    async onEventRegistrarLote() {
+    async onEventRegistrarCobro() {
         if (this.state.idConceptoCobro == "") {
             this.refConceptoCobro.current.focus();
             return;
@@ -954,6 +1007,120 @@ class CreditoProceso extends React.Component {
     /**
      * Funciones para el registro de cobros por datalle
      */
+
+    async onEventOpenModelIndividual(idConcepto) {
+        await this.setStateAsync({ idConceptoIndividual: idConcepto });
+
+        showModal("modalIndividual");
+    }
+
+    async onEventRegistrarIndividual() {
+        if (this.state.idConceptoIndividual == "") {
+            this.refConceptoIndivudual.current.focus();
+            return;
+        }
+
+        if (this.state.idComprobanteIndividual == "") {
+            this.refComprobanteIndividual.current.focus();
+            return;
+        }
+
+        if (this.state.idImpuestoIndividual === "") {
+            if (!this.refCollpseContentIndividual.current.classList.contains("show")) {
+                this.refCollpseIndividual.current.classList.remove("collapsed");
+                this.refCollpseContentIndividual.current.classList.add("show");
+                this.refCollpseIndividual.current.attributes["aria-expanded"].value = true;
+                await this.setStateAsync({
+                    expandedOpcionesIndividual: !(this.refCollpseIndividual.current.attributes["aria-expanded"].value.toLowerCase() === 'true')
+                });
+            }
+
+            this.refImpuestoIndividual.current.focus();
+            return;
+        }
+
+        if (this.state.idMedidaIndividual === "") {
+            if (!this.refCollpseContentIndividual.current.classList.contains("show")) {
+                this.refCollpseIndividual.current.classList.remove("collapsed");
+                this.refCollpseContentIndividual.current.classList.add("show");
+                this.refCollpseIndividual.current.attributes["aria-expanded"].value = true;
+                await this.setStateAsync({
+                    expandedOpcionesIndividual: !(this.refCollpseIndividual.current.attributes["aria-expanded"].value.toLowerCase() === 'true')
+                });
+            }
+
+            this.refMedidaIndividual.current.focus();
+            return;
+        }
+
+        if (this.state.idBancoIndividual === '') {
+            this.refBancoIndividual.current.focus();
+            return;
+        }
+
+        if (this.state.metodoPagoIndividual === '') {
+            this.refMetodoPagoIndividual.current.focus();
+            return;
+        }
+
+        if (!isNumeric(this.state.montoIndividual)) {
+            this.refMontoIndividual.current.focus();
+            return;
+        }
+
+        ModalAlertDialog("Cobro", "¿Estás seguro de continuar?", async (event) => {
+            if (event) {
+
+                try {
+                    ModalAlertInfo("Cobro", "Procesando información...")
+                    hideModal("modalIndividual");
+
+                    const result = await axios.post('/api/cobro/add', {
+                        "idComprobante": this.state.idComprobanteIndividual,
+                        "idCliente": this.state.venta.idCliente,
+                        "idUsuario": this.state.idUsuario,
+                        'idMoneda': this.state.venta.idMoneda,
+                        "idBanco": this.state.idBancoIndividual,
+                        "idProcedencia": this.state.venta.idVenta,
+                        "idMedida": this.state.idMedidaIndividual,
+                        "idImpuesto": this.state.idImpuestoIndividual,
+                        "metodoPago": this.state.metodoPagoIndividual,
+                        "estado": 1,
+                        "observacion": this.state.observacionIndividual.trim().toUpperCase(),
+                        "idProyecto": this.state.idProyecto,
+                        "cobroDetalle": [{
+                            "idConcepto": this.state.idConceptoIndividual,
+                            "concepto": this.refConceptoIndivudual.current.children[this.refConceptoIndivudual.current.selectedIndex].innerText,
+                            "cantidad": 1,
+                            "idImpuesto": this.state.idImpuestoIndividual,
+                            "impuesto": this.refImpuestoIndividual.current.children[this.refImpuestoIndividual.current.selectedIndex].innerText,
+                            "idMedida": this.state.idMedidaIndividual,
+                            "medida": this.refMedidaIndividual.current.children[this.refMedidaIndividual.current.selectedIndex].innerText,
+                            "monto": this.state.montoIndividual
+                        }]
+                    });
+
+                    ModalAlertSuccess("Cobro", result.data, () => {
+                        this.loadInit();
+                    });
+                } catch (error) {
+                    if (error.response) {
+                        ModalAlertWarning("Cobro", error.response.data);
+                    } else {
+                        ModalAlertError("Cobro", "Se produjo un error un interno, intente nuevamente.");
+                    }
+                }
+            }
+        });
+    }
+
+    /**
+     * Funciones para el registro de inicial
+     */
+
+    async onEventOpenModelInicial() {
+        showModal("modalInicial");
+    }
 
 
     /** 
@@ -1748,7 +1915,231 @@ class CreditoProceso extends React.Component {
 
                             </div>
                             <div className="modal-footer">
-                                <button type="button" className="btn btn-primary" onClick={() => this.onEventRegistrarLote()}>Guardar</button>
+                                <button type="button" className="btn btn-primary" onClick={() => this.onEventRegistrarCobro()}>Guardar</button>
+                                <button type="button" className="btn btn-danger" data-bs-dismiss="modal">Cerrar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {/* fin modal */}
+
+                {/* Inicio modal */}
+                <div className="modal fade" id="modalIndividual" data-backdrop="static">
+                    <div className="modal-dialog modal-md">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h6 className="modal-title">Registrar concepto</h6>
+                                <button type="button" className="close" data-bs-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div className="modal-body">
+                                <div className="form-row">
+                                    <div className="form-group col-md-12">
+                                        <div className="input-group">
+                                            <div className="input-group-prepend">
+                                                <div className="input-group-text"><i className="bi bi-cart4"></i></div>
+                                            </div>
+                                            <select
+                                                title="Conceptos"
+                                                className="form-control"
+                                                ref={this.refConceptoIndivudual}
+                                                value={this.state.idConceptoIndividual}
+                                                onChange={(event) => {
+                                                    this.setState({ idConceptoIndividual: event.target.value })
+                                                }}
+                                                disabled>
+                                                <option value="">-- seleccione --</option>
+                                                {
+                                                    this.state.conceptos.map((item, index) => (
+                                                        <option key={index} value={item.idConcepto}>{item.nombre}</option>
+                                                    ))
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="form-row">
+                                    <div className="form-group col-md-12">
+                                        <div className="input-group">
+                                            <div className="input-group-prepend">
+                                                <div className="input-group-text"><i className="bi bi-receipt"></i></div>
+                                            </div>
+                                            <select
+                                                title="Lista de Comprobantes"
+                                                className="form-control"
+                                                ref={this.refComprobanteIndividual}
+                                                value={this.state.idComprobanteIndividual}
+                                                onChange={(event) => {
+                                                    this.setState({ idComprobanteIndividual: event.target.value })
+                                                }}>
+                                                <option value="">-- Comprobantes --</option>
+                                                {
+                                                    this.state.comprobantes.map((item, index) => (
+                                                        <option key={index} value={item.idComprobante}>{item.nombre}</option>
+                                                    ))
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="form-row">
+                                    <div className="form-group col-md-12">
+                                        <a
+                                            onClick={async () => await this.setStateAsync({
+                                                expandedOpcionesIndividual: !(this.refCollpseIndividual.current.attributes["aria-expanded"].value.toLowerCase() === 'true')
+                                            })}
+                                            ref={this.refCollpseIndividual}
+                                            className="icon-link collapsed"
+                                            data-bs-toggle="collapse"
+                                            href="#collapseOpcionesIndividual"
+                                            role="button"
+                                            aria-expanded="false"
+                                            aria-controls="collapseOpcionesIndividual">
+                                            Opciones {this.state.expandedOpcionesIndividual ? <i className="fa fa-plus-square"></i> : <i className="fa fa-minus-square"></i>}
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <div ref={this.refCollpseContentIndividual} className="collapse" id="collapseOpcionesIndividual">
+                                    <div className="form-row">
+                                        <div className="form-group col-md-6">
+                                            <select
+                                                title="Impuestos"
+                                                className="form-control"
+                                                value={this.state.idImpuestoIndividual}
+                                                ref={this.refImpuestoIndividual}
+                                                onChange={(event) => this.setState({ idImpuestoIndividual: event.target.value })}
+                                            >
+                                                <option value="">-- Impuesto --</option>
+                                                {
+                                                    this.state.impuestos.map((item, index) => (
+                                                        <option key={index} value={item.idImpuesto}>{item.nombre}</option>
+                                                    ))
+                                                }
+                                            </select>
+                                        </div>
+
+                                        <div className="form-group col-md-6">
+                                            <select
+                                                title="Unidad"
+                                                className="form-control"
+                                                value={this.state.idMedidaIndividual}
+                                                ref={this.refMedidaIndividual}
+                                                onChange={(event) => this.setState({ idMedidaIndividual: event.target.value })}
+                                            >
+                                                <option value="">-- Unidad --</option>
+                                                {
+                                                    this.state.medidas.map((item, index) => (
+                                                        <option key={index} value={item.idMedida}>{item.nombre}</option>
+                                                    ))
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="form-row">
+                                    <div className="form-group col-md-6">
+                                        <label>Cuenta bancaria <i className="fa fa-asterisk text-danger small"></i></label>
+                                        <div className="input-group">
+                                            <select
+                                                className="form-control"
+                                                ref={this.refBancoIndividual}
+                                                value={this.state.idBancoIndividual}
+                                                onChange={(event) =>
+                                                    this.setState({
+                                                        idBancoIndividual: event.target.value
+                                                    })
+                                                }>
+                                                <option value="">- Seleccione -</option>
+                                                {
+                                                    this.state.bancos.map((item, index) => (
+                                                        <option key={index} value={item.idBanco}>{item.nombre}</option>
+                                                    ))
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div className="form-group col-md-6">
+                                        <label>Metodo de pago <i className="fa fa-asterisk text-danger small"></i></label>
+                                        <select
+                                            className="form-control"
+                                            ref={this.refMetodoPagoIndividual}
+                                            value={this.state.metodoPagoIndividual}
+                                            onChange={(event) =>
+                                                this.setState({
+                                                    metodoPagoIndividual: event.target.value,
+                                                })}>
+                                            <option value="">- Seleccione -</option>
+                                            <option value="1">Efectivo</option>
+                                            <option value="2">Consignación</option>
+                                            <option value="3">Transferencia</option>
+                                            <option value="4">Cheque</option>
+                                            <option value="5">Tarjeta crédito</option>
+                                            <option value="6">Tarjeta débito</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div className="form-row">
+                                    <div className="form-group col-md-12">
+                                        <label>Observación</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            placeholder="Ingrese alguna observación..."
+                                            value={this.state.observacionIndividual}
+                                            onChange={(event) =>
+                                                this.setState({ observacionIndividual: event.target.value })
+                                            } />
+                                    </div>
+                                </div>
+
+                                <div className="form-row">
+                                    <div className="form-group col-md-3">
+                                        <label>Valor a cobrar:</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            placeholder="0.00"
+                                            ref={this.refMontoIndividual}
+                                            value={this.state.montoIndividual}
+                                            onChange={(event) =>
+                                                this.setState({ montoIndividual: event.target.value })
+                                            }
+                                            onKeyPress={keyNumberFloat}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-primary" onClick={() => this.onEventRegistrarIndividual()}>Guardar</button>
+                                <button type="button" className="btn btn-danger" data-bs-dismiss="modal">Cerrar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {/* fin modal */}
+
+                {/* Inicio modal */}
+                <div className="modal fade" id="modalInicial" data-backdrop="static">
+                    <div className="modal-dialog modal-md">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h6 className="modal-title">Registrar inicial</h6>
+                                <button type="button" className="close" data-bs-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div className="modal-body">
+
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-primary" onClick={() => { }}>Guardar</button>
                                 <button type="button" className="btn btn-danger" data-bs-dismiss="modal">Cerrar</button>
                             </div>
                         </div>
@@ -1859,7 +2250,7 @@ class CreditoProceso extends React.Component {
 
                 <div className="row">
                     <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                        <p className="lead">Inicial</p>
+                        <p className="lead">Inicial <button className="btn btn-primary btn-sm" onClick={() => this.onEventOpenModelInicial()}><i className="fa fa-plus"></i></button></p>
                         <div className="table-responsive">
                             <table className="table table-light">
                                 <thead>
@@ -1928,7 +2319,7 @@ class CreditoProceso extends React.Component {
                                                                     <i className="fa fa-minus"></i>
                                                                 </button>
                                                                 :
-                                                                <button className="btn btn-info btn-sm">
+                                                                <button className="btn btn-info btn-sm" onClick={() => this.onEventOpenModelIndividual(item.idConcepto)}>
                                                                     <i className="fa fa-plus-circle"></i>
                                                                 </button>
                                                         }

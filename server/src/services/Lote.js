@@ -679,16 +679,19 @@ class Lote {
             INNER JOIN lote AS lo ON vd.idLote = lo.idLote 
             INNER JOIN manzana AS ma ON lo.idManzana = ma.idManzana 
             WHERE  
-            v.estado = 2 AND v.idProyecto = ? 
-            
+            ? = 0 AND v.estado = 2 AND v.idProyecto = ? 
+            OR
+            ? = 1 AND v.estado = 2            
             GROUP BY v.idVenta
             ORDER BY v.fecha DESC, v.hora DESC`, [
-                req.query.idProyecto
+                parseInt(req.query.porProyecto),
+                req.query.idProyecto,
+
+                parseInt(req.query.porProyecto),
             ]);
 
             return result;
         } catch (error) {
-            console.error(error);
             return "Se produjo un error de servidor, intente nuevamente.";
         }
     }
