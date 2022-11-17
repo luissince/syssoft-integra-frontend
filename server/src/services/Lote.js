@@ -652,6 +652,7 @@ class Lote {
             cm.nombre AS comprobante, 
             v.serie, 
             v.numeracion, 
+            (SELECT IFNULL(COUNT(*), 0) FROM plazo AS p WHERE p.idVenta = v.idVenta) AS cuoTotal,
             (SELECT IFNULL(COUNT(*), 0) FROM plazo AS p WHERE p.estado = 0 AND p.idVenta = v.idVenta) AS numCuota, 
             CASE 
             WHEN v.credito = 1 THEN DATE_ADD(v.fecha,interval v.frecuencia day)
