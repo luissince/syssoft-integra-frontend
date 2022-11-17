@@ -434,6 +434,7 @@ class RepLote {
                     item.documento + " " + item.informacion,
                     item.lote + " - " + item.manzana,
                     item.comprobante + " " + item.serie + "-" + item.numeracion,
+                    numberFormat(item.cuotaMensual),
                     item.credito === 1 ? item.frecuencia : item.cuoTotal === 1 ? item.cuoTotal + " Cuota" : item.cuoTotal + " Cuotas",
                     item.credito === 1 ? "-" : cuotaPagada === 1 ? cuotaPagada + " Cuota" : cuotaPagada + " Cuotas",
                     item.credito === 1 ? "-" : item.numCuota === 1 ? item.numCuota + " Cuota" : item.numCuota + " Cuotas",
@@ -445,7 +446,7 @@ class RepLote {
 
             const table = {
                 subtitle: `Detalle`,
-                headers: ["N°", "Cliente", "Propiedad", "Comprobante", "Cta Total", "Ctas Pagadas", "Ctas Pendientes", "Total", "Cobrado", "Por Cobrar"],
+                headers: ["N°", "Cliente", "Propiedad", "Comprobante", "Cta Mensual", "Cta Total", "Ctas Pagadas", "Ctas Pendientes", "Total", "Cobrado", "Por Cobrar"],
                 rows: content
             };
 
@@ -457,7 +458,7 @@ class RepLote {
                 align: "center",
                 padding: 5,
                 columnSpacing: 5,
-                columnsSize: [30, 115, 105, 100, 60, 60, 60, 62, 60, 60],//712
+                columnsSize: [30, 115, 105, 100, 60, 50, 50, 50, 52, 50, 50],//712
                 x: doc.x,
                 y: doc.y + 15,
                 width: doc.page.width - doc.options.margins.left - doc.options.margins.right
