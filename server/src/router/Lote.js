@@ -5,7 +5,8 @@ const sede = require('../services/Sede');
 const RepLote = require('../report/RepLote');
 const { generateLoteDeuda } = require('../excel/FileLote');
 const { decrypt } = require('../tools/CryptoJS');
-const { currentDate } = require('../tools/Tools')
+const { currentDate } = require('../tools/Tools');
+const { sendError } = require('../tools/Message');
 
 const lote = new Lote();
 

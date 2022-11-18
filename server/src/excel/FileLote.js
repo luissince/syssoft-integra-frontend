@@ -74,23 +74,25 @@ async function generateLoteDeuda(req, sedeInfo, data) {
         ws.column(2).setWidth(20);
         ws.column(3).setWidth(25);
         ws.column(4).setWidth(25);
-        ws.column(5).setWidth(20);
+        ws.column(5).setWidth(25);
         ws.column(6).setWidth(20);
         ws.column(7).setWidth(20);
         ws.column(8).setWidth(20);
-        ws.column(9).setWidth(15);
-        ws.column(10).setWidth(15);
-        ws.column(11).setWidth(18);
+        ws.column(9).setWidth(20);
+        ws.column(10).setWidth(20);
+        ws.column(11).setWidth(15);
+        ws.column(12).setWidth(15);
+        ws.column(13).setWidth(18);
 
-        ws.cell(1, 1, 1, 11, true).string(`${sedeInfo.nombreEmpresa}`).style(styleTitle);
-        ws.cell(2, 1, 2, 11, true).string(`RUC: ${sedeInfo.ruc}`).style(styleTitle);
-        ws.cell(3, 1, 3, 11, true).string(`${sedeInfo.direccion}`).style(styleTitle);
-        ws.cell(4, 1, 4, 11, true).string(`Celular: ${sedeInfo.celular} / Telefono: ${sedeInfo.telefono}`).style(styleTitle);
+        ws.cell(1, 1, 1, 13, true).string(`${sedeInfo.nombreEmpresa}`).style(styleTitle);
+        ws.cell(2, 1, 2, 13, true).string(`RUC: ${sedeInfo.ruc}`).style(styleTitle);
+        ws.cell(3, 1, 3, 13, true).string(`${sedeInfo.direccion}`).style(styleTitle);
+        ws.cell(4, 1, 4, 13, true).string(`Celular: ${sedeInfo.celular} / Telefono: ${sedeInfo.telefono}`).style(styleTitle);
 
-        ws.cell(6, 1, 6, 11, true).string(`REPORTE GENERAL DE VENTAS`).style(styleTitle);
-        ws.cell(7, 1, 7, 11, true).string(`${req.query.porProyecto == "0" ? "PROYECTO: " + req.query.nombreProyecto : "TODOS LOS PROYECTOS"}`).style(styleTitle);
+        ws.cell(6, 1, 6, 13, true).string(`REPORTE GENERAL DE VENTAS`).style(styleTitle);
+        ws.cell(7, 1, 7, 13, true).string(`${req.query.porProyecto == "0" ? "PROYECTO: " + req.query.nombreProyecto : "TODOS LOS PROYECTOS"}`).style(styleTitle);
 
-        const header = ["N°", "Cliente", "Propiedad", "Comprobante", "Cta Mensual", "Cta Total", "Ctas Pagadas", "Ctas Pendiente", "Total", "Cobrado", "Por Cobrar"];
+        const header = ["N°", "Cliente", "Propiedad", "Comprobante", "1° Pago", "Cta Mensual", "Cta Total", "Ctas Pagadas", "Ctas Pendiente", "Frecuencia", "Total", "Cobrado", "Por Cobrar"];
 
         header.map((item, index) => ws.cell(9, 1 + index).string(item).style(styleTableHeader));
 
@@ -103,13 +105,15 @@ async function generateLoteDeuda(req, sedeInfo, data) {
             ws.cell(rowY, 2).string(item.documento + "\n" + item.informacion).style(styleBody)
             ws.cell(rowY, 3).string(item.lote + "\n " + item.manzana).style(styleBody)
             ws.cell(rowY, 4).string(item.comprobante + "\n" + item.serie + "-" + item.numeracion).style(styleBody)
-            ws.cell(rowY, 5).number(parseFloat(formatMoney(item.cuotaMensual))).style(styleBodyFloat)
-            ws.cell(rowY, 6).string(item.credito === 1 ? item.frecuencia : item.cuoTotal === 1 ? item.cuoTotal + " Cuota" : item.cuoTotal + " Cuotas").style(styleBody)
-            ws.cell(rowY, 7).string(item.credito === 1 ? "-" : cuotaPagada === 1 ? cuotaPagada + " Cuota" : cuotaPagada + " Cuotas").style(styleBody)
-            ws.cell(rowY, 8).string(item.credito === 1 ? item.frecuencia : item.numCuota === 1 ? item.numCuota + " Cuota" : item.numCuota + " Cuotas").style(styleBody)
-            ws.cell(rowY, 9).number(parseFloat(formatMoney(item.total))).style(styleBodyFloat)
-            ws.cell(rowY, 10).number(parseFloat(formatMoney(item.cobrado))).style(styleBodyFloat)
-            ws.cell(rowY, 11).number(parseFloat(formatMoney(item.total - item.cobrado))).style(styleBodyFloat)
+            ws.cell(rowY, 5).string(item.primerPago).style(styleBody)
+            ws.cell(rowY, 6).number(parseFloat(formatMoney(item.cuotaMensual))).style(styleBodyFloat)
+            ws.cell(rowY, 7).string(item.credito === 1 ? item.frecuencia : item.cuoTotal === 1 ? item.cuoTotal + " Cuota" : item.cuoTotal + " Cuotas").style(styleBody)
+            ws.cell(rowY, 8).string(item.credito === 1 ? "-" : cuotaPagada === 1 ? cuotaPagada + " Cuota" : cuotaPagada + " Cuotas").style(styleBody)
+            ws.cell(rowY, 9).string(item.credito === 1 ? item.frecuencia : item.numCuota === 1 ? item.numCuota + " Cuota" : item.numCuota + " Cuotas").style(styleBody)
+            ws.cell(rowY, 10).string(item.frecuenciaName).style(styleBody)
+            ws.cell(rowY, 11).number(parseFloat(formatMoney(item.total))).style(styleBodyFloat)
+            ws.cell(rowY, 12).number(parseFloat(formatMoney(item.cobrado))).style(styleBodyFloat)
+            ws.cell(rowY, 13).number(parseFloat(formatMoney(item.total - item.cobrado))).style(styleBodyFloat)
         });
 
         return wb.writeToBuffer();
