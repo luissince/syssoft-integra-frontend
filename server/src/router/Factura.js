@@ -132,7 +132,7 @@ router.get("/repgeneralventas", async function (req, res) {
         if (typeof data === 'string') {
             return sendError(res, data);
         } else {
-            res.setHeader('Content-disposition', `inline; filename=REPORTE DE VENTAS DEL.pdf`);
+            res.setHeader('Content-disposition', `inline; filename=REPORTE DE VENTAS.pdf`);
             res.contentType("application/pdf");
             res.send(data);
         }

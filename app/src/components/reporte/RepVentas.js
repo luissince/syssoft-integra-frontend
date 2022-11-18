@@ -33,6 +33,7 @@ class RepVentas extends React.Component {
 
             loading: true,
             messageWarning: '',
+            msgLoading: ''
         }
 
         this.refFechaIni = React.createRef();
@@ -181,7 +182,7 @@ class RepVentas extends React.Component {
         this.refUseFile.current.download({
             "name": "Reporte de Ventas",
             "file": "/api/factura/excelgeneralventas",
-            "filename": "ventas.xlsx",
+            "filename": "Reporte de Ventas.xlsx",
             "params": ciphertext
         });
     }
@@ -195,309 +196,301 @@ class RepVentas extends React.Component {
                         <div className="clearfix absolute-all bg-white">
                             {spinnerLoading(this.state.msgLoading)}
                         </div>
-                        : <>
-                            <div className="card my-1">
-                                <h6 className="card-header">Filtros Generales</h6>
-                                <div className="card-body">
-                                    <div className="row">
-                                        <div className="col">
-                                            <div className="form-group">
-                                                <label>Filtro por fechas</label>
-                                                <div className="custom-control custom-switch">
-                                                    <input
-                                                        type="checkbox"
-                                                        className="custom-control-input"
-                                                        id="customSwitch1"
-                                                        checked={this.state.isFechaActive}
-                                                        onChange={(event) => {
-                                                            this.setState({ isFechaActive: event.target.checked, fechaIni: currentDate(), fechaFin: currentDate(), messageWarning: '' })
-                                                        }}
-                                                    >
-                                                    </input>
-                                                    <label className="custom-control-label" htmlFor="customSwitch1">{this.state.isFechaActive ? 'Activo' : 'Inactivo'}</label>
-                                                </div>
-                                            </div>
+                        : null
+                }
 
-                                        </div>
-                                        <div className="col">
-                                            <div className="form-group">
-                                                <label>Fecha inicial <i className="fa fa-asterisk text-danger small"></i></label>
-                                                <div className="input-group">
+                {
+                    this.state.messageWarning === ''
+                        ? null
+                        :
+                        <div className="alert alert-warning" role="alert">
+                            <i className="bi bi-exclamation-diamond-fill"></i> {this.state.messageWarning}
+                        </div>
+                }
 
-                                                    <input
-                                                        type="date"
-                                                        className="form-control"
-                                                        disabled={!this.state.isFechaActive}
-                                                        ref={this.refFechaIni}
-                                                        value={this.state.fechaIni}
-                                                        onChange={(event) => {
-                                                            if (event.target.value <= this.state.fechaIni) {
-                                                                this.setState({
-                                                                    fechaIni: event.target.value,
-                                                                    messageWarning: '',
-                                                                });
-                                                            } else {
-                                                                this.setState({
-                                                                    fechaIni: event.target.value,
-                                                                    messageWarning: 'La Fecha inicial no puede ser mayor a la fecha final.',
-                                                                });
-                                                            }
-                                                        }} />
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="col">
-                                            <div className="form-group">
-                                                <label>Fecha final <i className="fa fa-asterisk text-danger small"></i></label>
-                                                <div className="input-group">
-                                                    <input
-                                                        type="date"
-                                                        className="form-control"
-                                                        disabled={!this.state.isFechaActive}
-                                                        ref={this.refFechaFin}
-                                                        value={this.state.fechaFin}
-                                                        onChange={(event) => {
-                                                            if (event.target.value <= this.state.fechaFin) {
-                                                                this.setState({
-                                                                    fechaFin: event.target.value,
-                                                                    messageWarning: '',
-                                                                });
-                                                            } else {
-                                                                this.setState({
-                                                                    fechaFin: event.target.value,
-                                                                    messageWarning: 'La Fecha fin no puede ser mayor a la fecha final.',
-                                                                });
-                                                            }
-                                                        }} />
-                                                </div>
-                                            </div>
-                                        </div>
+                <div className="card my-1">
+                    <h6 className="card-header">Filtros Generales</h6>
+                    <div className="card-body">
+                        <div className="row">
+                            <div className="col">
+                                <div className="form-group">
+                                    <label>Filtro por fechas</label>
+                                    <div className="custom-control custom-switch">
+                                        <input
+                                            type="checkbox"
+                                            className="custom-control-input"
+                                            id="customSwitch1"
+                                            checked={this.state.isFechaActive}
+                                            onChange={(event) => {
+                                                this.setState({ isFechaActive: event.target.checked, fechaIni: currentDate(), fechaFin: currentDate(), messageWarning: '' })
+                                            }}
+                                        >
+                                        </input>
+                                        <label className="custom-control-label" htmlFor="customSwitch1">{this.state.isFechaActive ? 'Activo' : 'Inactivo'}</label>
                                     </div>
+                                </div>
 
+                            </div>
+                            <div className="col">
+                                <div className="form-group">
+                                    <label>Fecha inicial <i className="fa fa-asterisk text-danger small"></i></label>
+                                    <div className="input-group">
+
+                                        <input
+                                            type="date"
+                                            className="form-control"
+                                            disabled={!this.state.isFechaActive}
+                                            ref={this.refFechaIni}
+                                            value={this.state.fechaIni}
+                                            onChange={(event) => {
+                                                if (event.target.value <= this.state.fechaIni) {
+                                                    this.setState({
+                                                        fechaIni: event.target.value,
+                                                        messageWarning: '',
+                                                    });
+                                                } else {
+                                                    this.setState({
+                                                        fechaIni: event.target.value,
+                                                        messageWarning: 'La Fecha inicial no puede ser mayor a la fecha final.',
+                                                    });
+                                                }
+                                            }} />
+                                    </div>
                                 </div>
                             </div>
-
-                            {
-                                this.state.messageWarning === ''
-                                    ? null
-                                    :
-                                    <div className="alert alert-warning" role="alert">
-                                        <i className="bi bi-exclamation-diamond-fill"></i> {this.state.messageWarning}
+                            <div className="col">
+                                <div className="form-group">
+                                    <label>Fecha final <i className="fa fa-asterisk text-danger small"></i></label>
+                                    <div className="input-group">
+                                        <input
+                                            type="date"
+                                            className="form-control"
+                                            disabled={!this.state.isFechaActive}
+                                            ref={this.refFechaFin}
+                                            value={this.state.fechaFin}
+                                            onChange={(event) => {
+                                                if (event.target.value <= this.state.fechaFin) {
+                                                    this.setState({
+                                                        fechaFin: event.target.value,
+                                                        messageWarning: '',
+                                                    });
+                                                } else {
+                                                    this.setState({
+                                                        fechaFin: event.target.value,
+                                                        messageWarning: 'La Fecha fin no puede ser mayor a la fecha final.',
+                                                    });
+                                                }
+                                            }} />
                                     </div>
-                            }
+                                </div>
+                            </div>
+                        </div>
 
-                            <div className="card my-1">
-                                <h6 className="card-header">Reporte de Ventas</h6>
-                                <div className="card-body">
+                        <div className="row">
 
-                                    <div className="row">
+                            <div className="col">
+                                <div className="form-group">
+                                    <label>Comprobante(s)</label>
+                                    <div className="input-group">
+                                        <select
+                                            title="Lista de comprobantes"
+                                            className="form-control"
+                                            ref={this.refComprobante}
+                                            value={this.state.idComprobante}
+                                            disabled={this.state.comprobanteCheck}
+                                            onChange={async (event) => {
+                                                await this.setStateAsync({ idComprobante: event.target.value });
+                                                if (this.state.idComprobante === '') {
+                                                    await this.setStateAsync({ comprobanteCheck: true });
+                                                }
 
-                                        <div className="col">
-                                            <div className="form-group">
-                                                <label>Comprobante(s)</label>
-                                                <div className="input-group">
-                                                    <select
-                                                        title="Lista de comprobantes"
-                                                        className="form-control"
-                                                        ref={this.refComprobante}
-                                                        value={this.state.idComprobante}
-                                                        disabled={this.state.comprobanteCheck}
+                                            }}
+                                        >
+                                            <option value="">-- Todos --</option>
+                                            {
+                                                this.state.comprobantes.map((item, index) => (
+                                                    <option key={index} value={item.idComprobante}>{item.nombre + " (" + item.serie + ")"}</option>
+                                                ))
+                                            }
+                                        </select>
+                                        <div className="input-group-append">
+                                            <div className="input-group-text">
+                                                <div className="form-check form-check-inline m-0">
+                                                    <input
+                                                        className="form-check-input"
+                                                        type="checkbox"
+                                                        checked={this.state.comprobanteCheck}
                                                         onChange={async (event) => {
-                                                            await this.setStateAsync({ idComprobante: event.target.value });
-                                                            if (this.state.idComprobante === '') {
-                                                                await this.setStateAsync({ comprobanteCheck: true });
+                                                            await this.setStateAsync({ comprobanteCheck: event.target.checked });
+                                                            if (this.state.comprobanteCheck) {
+                                                                await this.setStateAsync({ idComprobante: '' });
                                                             }
-
                                                         }}
-                                                    >
-                                                        <option value="">-- Todos --</option>
-                                                        {
-                                                            this.state.comprobantes.map((item, index) => (
-                                                                <option key={index} value={item.idComprobante}>{item.nombre + " (" + item.serie + ")"}</option>
-                                                            ))
-                                                        }
-                                                    </select>
-                                                    <div className="input-group-append">
-                                                        <div className="input-group-text">
-                                                            <div className="form-check form-check-inline m-0">
-                                                                <input
-                                                                    className="form-check-input"
-                                                                    type="checkbox"
-                                                                    checked={this.state.comprobanteCheck}
-                                                                    onChange={async (event) => {
-                                                                        await this.setStateAsync({ comprobanteCheck: event.target.checked });
-                                                                        if (this.state.comprobanteCheck) {
-                                                                            await this.setStateAsync({ idComprobante: '' });
-                                                                        }
-                                                                    }}
-                                                                />
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
+                                                    />
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="col">
-                                            <div className="form-group">
-                                                <label>Cliente(s)</label>
-                                                <div className="input-group">
-                                                    {/* <div className="input-group-prepend">
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="col">
+                                <div className="form-group">
+                                    <label>Cliente(s)</label>
+                                    <div className="input-group">
+                                        {/* <div className="input-group-prepend">
                                                         <div className="input-group-text"><i className="bi bi-people-fill"></i></div>
                                                     </div> */}
-                                                    <select
-                                                        title="Lista de clientes"
-                                                        className="form-control"
-                                                        ref={this.refCliente}
-                                                        value={this.state.idCliente}
-                                                        disabled={this.state.clienteCheck}
-                                                        onChange={async (event) => {
-                                                            await this.setStateAsync({ idCliente: event.target.value });
-                                                            if (this.state.idCliente === '') {
-                                                                await this.setStateAsync({ clienteCheck: true });
-                                                            }
+                                        <select
+                                            title="Lista de clientes"
+                                            className="form-control"
+                                            ref={this.refCliente}
+                                            value={this.state.idCliente}
+                                            disabled={this.state.clienteCheck}
+                                            onChange={async (event) => {
+                                                await this.setStateAsync({ idCliente: event.target.value });
+                                                if (this.state.idCliente === '') {
+                                                    await this.setStateAsync({ clienteCheck: true });
+                                                }
 
-                                                        }}
-                                                    >
-                                                        <option value="">-- Todos --</option>
-                                                        {
-                                                            this.state.clientes.map((item, index) => (
-                                                                <option key={index} value={item.idCliente}>{item.informacion}</option>
-                                                            ))
-                                                        }
-                                                    </select>
-                                                    <div className="input-group-append">
-                                                        <div className="input-group-text">
-                                                            <div className="form-check form-check-inline m-0">
-                                                                <input
-                                                                    className="form-check-input"
-                                                                    type="checkbox"
-                                                                    // value={this.state.clienteCheck}
-                                                                    checked={this.state.clienteCheck}
-                                                                    onChange={async (event) => {
-                                                                        await this.setStateAsync({ clienteCheck: event.target.checked });
-                                                                        if (this.state.clienteCheck) {
-                                                                            await this.setStateAsync({ idCliente: '' });
-                                                                        }
-                                                                    }}
-                                                                />
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="col">
-                                            <div className="form-group">
-                                                <label>Usuario(s)</label>
-                                                <div className="input-group">
-                                                    <select
-                                                        title="Lista de usuarios"
-                                                        className="form-control"
-                                                        ref={this.refUsuario}
-                                                        value={this.state.idUsuario}
-                                                        disabled={this.state.usuarioCheck}
+                                            }}
+                                        >
+                                            <option value="">-- Todos --</option>
+                                            {
+                                                this.state.clientes.map((item, index) => (
+                                                    <option key={index} value={item.idCliente}>{item.informacion}</option>
+                                                ))
+                                            }
+                                        </select>
+                                        <div className="input-group-append">
+                                            <div className="input-group-text">
+                                                <div className="form-check form-check-inline m-0">
+                                                    <input
+                                                        className="form-check-input"
+                                                        type="checkbox"
+                                                        // value={this.state.clienteCheck}
+                                                        checked={this.state.clienteCheck}
                                                         onChange={async (event) => {
-                                                            await this.setStateAsync({ idUsuario: event.target.value });
-                                                            if (this.state.idUsuario === '') {
-                                                                await this.setStateAsync({ usuarioCheck: true });
+                                                            await this.setStateAsync({ clienteCheck: event.target.checked });
+                                                            if (this.state.clienteCheck) {
+                                                                await this.setStateAsync({ idCliente: '' });
                                                             }
                                                         }}
-                                                    >
-                                                        <option value="">-- Todos --</option>
-                                                        {
-                                                            this.state.usuarios.map((item, index) => (
-                                                                <option key={index} value={item.idUsuario}>{item.nombres + ' ' + item.apellidos}</option>
-                                                            ))
-                                                        }
-                                                    </select>
-                                                    <div className="input-group-append">
-                                                        <div className="input-group-text">
-                                                            <div className="form-check form-check-inline m-0">
-                                                                <input
-                                                                    className="form-check-input"
-                                                                    type="checkbox"
-                                                                    checked={this.state.usuarioCheck}
-                                                                    onChange={async (event) => {
-                                                                        await this.setStateAsync({ usuarioCheck: event.target.checked })
-                                                                        if (this.state.usuarioCheck) {
-                                                                            await this.setStateAsync({ idUsuario: '' });
-                                                                        }
-                                                                    }}
-                                                                />
-                                                            </div>
-                                                        </div>
-                                                    </div>
+                                                    />
                                                 </div>
                                             </div>
                                         </div>
 
                                     </div>
-
-                                    <div className="row">
-                                        <div className="col">
-                                            <div className="form-group">
-                                                <label>Tipo de venta(s)</label>
-                                                <div className="input-group">
-                                                    <select
-                                                        title="Lista tipos de venta"
-                                                        className="form-control"
-                                                        ref={this.refTipoVenta}
-                                                        value={this.state.tipoVenta}
-                                                        disabled={this.state.tipoVentaCheck}
+                                </div>
+                            </div>
+                            <div className="col">
+                                <div className="form-group">
+                                    <label>Usuario(s)</label>
+                                    <div className="input-group">
+                                        <select
+                                            title="Lista de usuarios"
+                                            className="form-control"
+                                            ref={this.refUsuario}
+                                            value={this.state.idUsuario}
+                                            disabled={this.state.usuarioCheck}
+                                            onChange={async (event) => {
+                                                await this.setStateAsync({ idUsuario: event.target.value });
+                                                if (this.state.idUsuario === '') {
+                                                    await this.setStateAsync({ usuarioCheck: true });
+                                                }
+                                            }}
+                                        >
+                                            <option value="">-- Todos --</option>
+                                            {
+                                                this.state.usuarios.map((item, index) => (
+                                                    <option key={index} value={item.idUsuario}>{item.nombres + ' ' + item.apellidos}</option>
+                                                ))
+                                            }
+                                        </select>
+                                        <div className="input-group-append">
+                                            <div className="input-group-text">
+                                                <div className="form-check form-check-inline m-0">
+                                                    <input
+                                                        className="form-check-input"
+                                                        type="checkbox"
+                                                        checked={this.state.usuarioCheck}
                                                         onChange={async (event) => {
-                                                            await this.setStateAsync({ tipoVenta: event.target.value });
-                                                            if (this.state.tipoVenta === '') {
-                                                                await this.setStateAsync({ tipoVentaCheck: true });
+                                                            await this.setStateAsync({ usuarioCheck: event.target.checked })
+                                                            if (this.state.usuarioCheck) {
+                                                                await this.setStateAsync({ idUsuario: '' });
                                                             }
                                                         }}
-                                                    >
-                                                        <option value="">-- Todos --</option>
-                                                        <option value="1">AL CONTADO</option>
-                                                        <option value="2">AL CREDITO</option>
-                                                    </select>
-                                                    <div className="input-group-append">
-                                                        <div className="input-group-text">
-                                                            <div className="form-check form-check-inline m-0">
-                                                                <input
-                                                                    className="form-check-input"
-                                                                    type="checkbox"
-                                                                    checked={this.state.tipoVentaCheck}
-                                                                    onChange={async (event) => {
-                                                                        await this.setStateAsync({ tipoVentaCheck: event.target.checked })
-                                                                        if (this.state.tipoVentaCheck) {
-                                                                            await this.setStateAsync({ tipoVenta: '' });
-                                                                        }
-                                                                    }}
-                                                                />
-                                                            </div>
-                                                        </div>
-                                                    </div>
+                                                    />
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="col"></div>
-                                        <div className="col"></div>
                                     </div>
-
-                                    <div className="row">
-                                        <div className="col"></div>
-                                        <div className="col">
-                                            <button className="btn btn-outline-warning btn-sm" onClick={() => this.onEventImprimir()}><i className="bi bi-file-earmark-pdf-fill"></i> Reporte Pdf</button>
-                                        </div>
-                                        <div className="col">
-                                            <button className="btn btn-outline-success btn-sm" onClick={() => this.onEventExcel()}><i className="bi bi-file-earmark-excel-fill"></i> Reporte Excel</button>
-                                        </div>
-                                        <div className="col"></div>
-                                    </div>
-
                                 </div>
                             </div>
 
-                            <FileDownloader ref={this.refUseFile} />
-                        </>
-                }
+                        </div>
+
+                        <div className="row">
+                            <div className="col">
+                                <div className="form-group">
+                                    <label>Tipo de venta(s)</label>
+                                    <div className="input-group">
+                                        <select
+                                            title="Lista tipos de venta"
+                                            className="form-control"
+                                            ref={this.refTipoVenta}
+                                            value={this.state.tipoVenta}
+                                            disabled={this.state.tipoVentaCheck}
+                                            onChange={async (event) => {
+                                                await this.setStateAsync({ tipoVenta: event.target.value });
+                                                if (this.state.tipoVenta === '') {
+                                                    await this.setStateAsync({ tipoVentaCheck: true });
+                                                }
+                                            }}
+                                        >
+                                            <option value="">-- Todos --</option>
+                                            <option value="1">AL CONTADO</option>
+                                            <option value="2">AL CREDITO</option>
+                                        </select>
+                                        <div className="input-group-append">
+                                            <div className="input-group-text">
+                                                <div className="form-check form-check-inline m-0">
+                                                    <input
+                                                        className="form-check-input"
+                                                        type="checkbox"
+                                                        checked={this.state.tipoVentaCheck}
+                                                        onChange={async (event) => {
+                                                            await this.setStateAsync({ tipoVentaCheck: event.target.checked })
+                                                            if (this.state.tipoVentaCheck) {
+                                                                await this.setStateAsync({ tipoVenta: '' });
+                                                            }
+                                                        }}
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="col" />
+                            <div className="col" />
+                        </div>
+
+                        <div className="row">
+                            <div className="col"></div>
+                            <div className="col">
+                                <button className="btn btn-outline-warning btn-sm" onClick={() => this.onEventImprimir()}><i className="bi bi-file-earmark-pdf-fill"></i> Reporte Pdf</button>
+                            </div>
+                            <div className="col">
+                                <button className="btn btn-outline-success btn-sm" onClick={() => this.onEventExcel()}><i className="bi bi-file-earmark-excel-fill"></i> Reporte Excel</button>
+                            </div>
+                            <div className="col"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <FileDownloader ref={this.refUseFile} />
             </>
         )
     }

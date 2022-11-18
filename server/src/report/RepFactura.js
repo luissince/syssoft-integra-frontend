@@ -1302,7 +1302,7 @@ class RepFactura {
             const h1 = 13;
             const h2 = 12;
 
-            let yPos = 130-5;
+            let yPos = 130 - 5;
             // 
 
             doc.fontSize(h1).text(`${data.cuota}`,
@@ -1331,7 +1331,7 @@ class RepFactura {
 
             // 
 
-            yPos = 171-7;
+            yPos = 171 - 7;
 
             doc.fontSize(h1).text(`${numberLleters.getResult(formatMoney(data.monto), data.moneda)}`,
                 doc.options.margins.left + 150 - 30,
@@ -1339,7 +1339,7 @@ class RepFactura {
 
             // 
 
-            yPos = 205-7;
+            yPos = 205 - 7;
 
             doc.fontSize(h1).text(`${data.informacion}`,
                 doc.options.margins.left + 140 - 30,
@@ -1366,7 +1366,7 @@ class RepFactura {
 
             // 
 
-            yPos = 235-7;
+            yPos = 235 - 7;
 
 
             doc.fontSize(h1).text(`${manzanaLote(data.descripcion, data.manzana)}`,
@@ -1489,6 +1489,7 @@ class RepFactura {
             let h1 = 13;
             let h2 = 11;
             let h3 = 9;
+            let h4 = 8;
 
             if (isFile(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo))) {
                 doc.image(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo), doc.x, doc.y, { width: 75 });
@@ -1567,9 +1568,11 @@ class RepFactura {
                 creditoCount += item.tipo === "CRÉDITO" && item.estado !== "ANULADO" ? item.total : 0;
                 contadoCount += item.tipo === "CONTADO" && item.estado !== "ANULADO" ? item.total : 0;
                 return [
+                    ++index,
                     item.fecha,
-                    item.documento + "\n" + item.informacion,
-                    item.comprobante + "\n" + item.serie + "-" + item.numeracion,
+                    item.documento + " " + item.informacion,
+                    item.comprobante + " " + item.serie + "-" + item.numeracion,
+                    item.lote + " - " + item.manzana,
                     item.tipo,
                     item.estado,
                     numberFormat(item.total, item.codiso)]
@@ -1577,18 +1580,18 @@ class RepFactura {
 
             const table = {
                 subtitle: "DETALLE",
-                headers: ["Fecha", "Cliente", "Comprobante", "Tipo", "Estado", "Importe"],
+                headers: ["N°", "Fecha", "Cliente", "Comprobante", "Propiedad", "Tipo", "Estado", "Importe"],
                 rows: content.length == 0 ? [["No hay datos para mostrar"]] : content
             };
 
             doc.table(table, {
                 prepareHeader: () => doc.font("Helvetica-Bold").fontSize(h3),
                 prepareRow: () => {
-                    doc.font("Helvetica").fontSize(h3);
+                    doc.font("Helvetica").fontSize(h4);
                 },
                 padding: 5,
                 columnSpacing: 5,
-                columnsSize: [60, 102, 100, 90, 90, 90],
+                columnsSize: [30, 60, 102, 80, 80, 60, 60, 60],
                 x: orgX,
                 y: bodY,
                 width: doc.page.width - doc.options.margins.left - doc.options.margins.right
