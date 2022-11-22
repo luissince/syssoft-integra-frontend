@@ -61,6 +61,17 @@ router.post('/adelanto', async function (req, res) {
     }
 });
 
+router.post('/inicial', async function (req, res) {
+    const result = await cobro.inicial(req)
+    if (result === 'insert') {
+        res.status(201).send("Se registró correctamente el inicial.");
+    } else if (result === 'server') {
+        res.status(500).send("Se produjo un error de servidor, intente nuevamente.");
+    } else {
+        res.status(400).send(result);
+    }
+});
+
 router.get('/id', async function (req, res) {
     const result = await cobro.id(req)
     if (typeof result === 'object') {

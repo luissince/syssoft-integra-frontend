@@ -969,71 +969,139 @@ class Cobro {
     }
 
     async inicial(req) {
-        // let connection = null;
-        // try {
-        //     connection = await conec.beginTransaction();
+        let connection = null;
+        try {
+            connection = await conec.beginTransaction();
 
-        //     let cobro = await conec.execute(connection, 'SELECT idCobro FROM cobro');
-        //     let idCobro = "";
-        //     if (cobro.length != 0) {
+            let cobro = await conec.execute(connection, 'SELECT idCobro FROM cobro');
+            let idCobro = "";
+            if (cobro.length != 0) {
 
-        //         let quitarValor = cobro.map(function (item) {
-        //             return parseInt(item.idCobro.replace("CB", ''));
-        //         });
+                let quitarValor = cobro.map(function (item) {
+                    return parseInt(item.idCobro.replace("CB", ''));
+                });
 
-        //         let valorActual = Math.max(...quitarValor);
-        //         let incremental = valorActual + 1;
-        //         let codigoGenerado = "";
-        //         if (incremental <= 9) {
-        //             codigoGenerado = 'CB000' + incremental;
-        //         } else if (incremental >= 10 && incremental <= 99) {
-        //             codigoGenerado = 'CB00' + incremental;
-        //         } else if (incremental >= 100 && incremental <= 999) {
-        //             codigoGenerado = 'CB0' + incremental;
-        //         } else {
-        //             codigoGenerado = 'CB' + incremental;
-        //         }
+                let valorActual = Math.max(...quitarValor);
+                let incremental = valorActual + 1;
+                let codigoGenerado = "";
+                if (incremental <= 9) {
+                    codigoGenerado = 'CB000' + incremental;
+                } else if (incremental >= 10 && incremental <= 99) {
+                    codigoGenerado = 'CB00' + incremental;
+                } else if (incremental >= 100 && incremental <= 999) {
+                    codigoGenerado = 'CB0' + incremental;
+                } else {
+                    codigoGenerado = 'CB' + incremental;
+                }
 
-        //         idCobro = codigoGenerado;
-        //     } else {
-        //         idCobro = "CB0001";
-        //     }
+                idCobro = codigoGenerado;
+            } else {
+                idCobro = "CB0001";
+            }
 
-        //     let comprobanteCobro = await conec.execute(connection, `SELECT 
-        //             serie,
-        //             numeracion 
-        //             FROM comprobante 
-        //             WHERE idComprobante  = ?
-        //             `, [
-        //         req.body.idComprobanteCobro
-        //     ]);
+            let comprobanteCobro = await conec.execute(connection, `SELECT 
+                    serie,
+                    numeracion 
+                    FROM comprobante 
+                    WHERE idComprobante  = ?
+                    `, [
+                req.body.idComprobanteCobro
+            ]);
 
-        //     let numeracionCobro = 0;
+            let numeracionCobro = 0;
 
-        //     let cobros = await conec.execute(connection, 'SELECT numeracion  FROM cobro WHERE idComprobante = ?', [
-        //         req.body.idComprobanteCobro
-        //     ]);
+            let cobros = await conec.execute(connection, 'SELECT numeracion  FROM cobro WHERE idComprobante = ?', [
+                req.body.idComprobanteCobro
+            ]);
 
-        //     if (cobros.length > 0) {
-        //         let quitarValor = cobros.map(function (item) {
-        //             return parseInt(item.numeracion);
-        //         });
+            if (cobros.length > 0) {
+                let quitarValor = cobros.map(function (item) {
+                    return parseInt(item.numeracion);
+                });
 
-        //         let valorActual = Math.max(...quitarValor);
-        //         let incremental = valorActual + 1;
-        //         numeracionCobro = incremental;
-        //     } else {
-        //         numeracionCobro = comprobanteCobro[0].numeracion;
-        //     }
+                let valorActual = Math.max(...quitarValor);
+                let incremental = valorActual + 1;
+                numeracionCobro = incremental;
+            } else {
+                numeracionCobro = comprobanteCobro[0].numeracion;
+            }
 
-        //     await conec.commit(connection);
-        //     return "insert";
-        // } catch (error) {
-        //     if (connection != null) {
-        //         await conec.rollback(connection);
-        //     }
-        //     return "server";
-        // }
+            await conec.execute(connection, `INSERT INTO cobro(
+                idCobro, 
+                idCliente, 
+                idUsuario, 
+                idMoneda, 
+                idBanco, 
+                idProcedencia,
+                idProyecto,
+                idComprobante,
+                serie,
+                numeracion,
+                metodoPago, 
+                estado, 
+                observacion, 
+                fecha, 
+                hora) 
+                VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, [
+                idCobro,
+                req.body.idCliente,
+                req.body.idUsuario,
+                req.body.idMoneda,
+                req.body.idBanco,
+                idVenta,
+                req.body.idProyecto,
+                req.body.idComprobanteCobro,
+                comprobanteCobro[0].serie,
+                numeracionCobro,
+                req.body.metodoPago,
+                1,
+                'INICIAL',
+                currentDate(),
+                currentTime()
+            ]);
+
+            await conec.execute(connection, `INSERT INTO cobroVenta(
+                idCobro,
+                idVenta,
+                idPlazo,
+                precio,
+                idImpuesto,
+                idMedida) 
+                VALUES (?,?,?,?,?,?)`, [
+                idCobro,
+                idVenta,
+                0,
+                req.body.inicial,
+                req.body.idImpuesto,
+                req.body.idMedida
+            ]);
+
+            await conec.execute(connection, `INSERT INTO bancoDetalle(
+                idBanco,
+                idProcedencia,
+                tipo,
+                monto,
+                fecha,
+                hora,
+                idUsuario)
+                VALUES(?,?,?,?,?,?,?)`, [
+                req.body.idBanco,
+                idCobro,
+                1,
+                req.body.inicial,
+                currentDate(),
+                currentTime(),
+                req.body.idUsuario,
+            ]);
+
+            await conec.commit(connection);
+            return "insert";
+        } catch (error) {
+            if (connection != null) {
+                await conec.rollback(connection);
+            }
+            return "server";
+        }
     }
 
     async id(req) {
