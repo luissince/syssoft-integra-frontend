@@ -448,7 +448,7 @@ class RepFactura {
                     return [
                         ++index,
                         item.medida,
-                        item.concepto + "\n" + item.comprobante + " " + item.serie + "-" + item.numeracion,
+                        item.concepto + "\n" + (data.lote.length == 0 ? "" : data.lote[0].lote + " - " + data.lote[0].manzana),
                         item.cantidad,
                         item.impuesto,
                         numberFormat(item.precio, cabecera.codiso),
@@ -1233,7 +1233,7 @@ class RepFactura {
                         doc.options.margins.left + 10,
                         yPos);
 
-                    let concepto = item.concepto + " - F.V: " + item.fecha;
+                    let concepto = item.concepto;
 
                     // data.lote.map((lote, index) => {
                     //     concepto += "\n" + lote.lote + " - " + lote.manzana;

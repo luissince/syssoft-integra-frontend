@@ -242,7 +242,12 @@ class Cobros extends React.Component {
                                                         <td>{item.comprobante}{<br />}{item.serie + "-" + item.numeracion}</td>
                                                         <td>{item.fecha}{<br />}{timeForma24(item.hora)}</td>
                                                         <td>{item.banco}</td>
-                                                        <td>{item.detalle}<br /><small>{item.comprobanteRef}</small></td>
+                                                        <td>{item.detalle}
+                                                            <br />
+                                                            <small>{item.comprobanteRef}</small>
+                                                            <br />
+                                                            <small>{item.loteRef}</small>
+                                                        </td>
                                                         <td>{item.estado === 1 && item.idNotaCredito === null ?
                                                             <span className="text-success">COBRADO</span> :
                                                             item.idNotaCredito != null ?

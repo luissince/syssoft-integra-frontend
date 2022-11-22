@@ -214,6 +214,7 @@ class Inicio extends React.Component {
         }
 
         const { path, url } = this.props.match;
+
         return (
 
             <div className='app'>

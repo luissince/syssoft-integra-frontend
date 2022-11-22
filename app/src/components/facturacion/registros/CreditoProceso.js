@@ -2255,29 +2255,29 @@ class CreditoProceso extends React.Component {
                             <table className="table table-light">
                                 <thead>
                                     <tr className="table-active">
-                                        <th width="5%" className="text-center">N°</th>
-                                        <th width="15%">Comprobante</th>
-                                        <th width="15%">Banco</th>
-                                        <th width="10%">Fecha</th>
-                                        <th width="15%">Monto</th>
-                                        <th width="25%">Observación</th>
+                                        <th className="text-center">N°</th>
+                                        <th>Concepto</th>
+                                        <th>Monto</th>
+                                        <th className="text-center">Agregar</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {
                                         this.state.inicial.length == 0 ?
                                             <tr>
-                                                <td colSpan="6" className="text-center">No hay inicial</td>
+                                                <td colSpan="4" className="text-center">No hay inicial</td>
                                             </tr>
                                             :
                                             this.state.inicial.map((item, index) => (
                                                 <tr key={index}>
                                                     <td className="text-center">{(index + 1)}</td>
-                                                    <td className="text-left">{item.comprobante}<br />{item.serie + "-" + item.numeracion}</td>
-                                                    <td className="text-left">{item.banco}</td>
-                                                    <td className="text-left">{item.fecha}<br />{timeForma24(item.hora)}</td>
+                                                    <td className="text-left">INICIAL</td>
                                                     <td className="text-left">{numberFormat(item.monto, item.codiso)}</td>
-                                                    <td className="text-left">{item.observacion}</td>
+                                                    <td className="text-left">
+                                                        <button className="btn btn-info btn-sm" onClick={() => { }}>
+                                                            <i className="fa fa-plus-circle"></i>
+                                                        </button>
+                                                    </td>
                                                 </tr>
                                             ))
                                     }
@@ -2304,7 +2304,7 @@ class CreditoProceso extends React.Component {
                                     {
                                         this.state.cobros.length == 0 ?
                                             <tr>
-                                                <td colSpan="3" className="text-center">No hay cobro</td>
+                                                <td colSpan="4" className="text-center">No hay cobro</td>
                                             </tr>
                                             :
                                             this.state.cobros.map((item, index) => (

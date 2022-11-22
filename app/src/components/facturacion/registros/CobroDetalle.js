@@ -28,6 +28,7 @@ class CobroDetalle extends React.Component {
             total: '',
             codiso: '',
             simbolo: '',
+            lote: '',
 
             cobro: true,
             detalle: [],
@@ -61,14 +62,14 @@ class CobroDetalle extends React.Component {
 
     async loadDataId(id) {
         try {
-            let result = await axios.get('/api/cobro/id', {
+            const result = await axios.get('/api/cobro/id', {
                 signal: this.abortControllerView.signal,
                 params: {
                     idCobro: id
                 }
             });
 
-            let cabecera = result.data.cabecera;
+            const cabecera = result.data.cabecera;
 
             await this.setStateAsync({
                 idCobro: id,
@@ -87,6 +88,7 @@ class CobroDetalle extends React.Component {
                 total: cabecera.monto,
                 simbolo: cabecera.simbolo,
                 codiso: cabecera.codiso,
+                lote: result.data.lote.length == 0 ? "" : result.data.lote[0].lote + " - " + result.data.lote[0].manzana,
 
                 usuario: cabecera.usuario,
                 idNotaCredito: cabecera.idNotaCredito,
@@ -265,6 +267,10 @@ class CobroDetalle extends React.Component {
                                                     <tr>
                                                         <th className="table-secondary w-25 p-1 font-weight-normal ">Total</th>
                                                         <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">{numberFormat(this.state.total, this.state.codiso)}</th>
+                                                    </tr>
+                                                    <tr> 
+                                                        <th className="table-secondary w-25 p-1 font-weight-normal ">Lote - Manzana</th>
+                                                        <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">{this.state.lote}</th>
                                                     </tr>
                                                 </thead>
                                             </table>

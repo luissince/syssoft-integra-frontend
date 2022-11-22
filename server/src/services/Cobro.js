@@ -24,6 +24,7 @@ class Cobro {
             END AS detalle,
 
             IFNULL(CONCAT(cp.nombre,' ',v.serie,'-',v.numeracion),'') AS comprobanteRef,
+            IFNULL(CONCAT(lo.descripcion,' - ',ma.nombre),'') AS loteRef, 
             m.simbolo,
             m.codiso,
             b.nombre as banco,  
@@ -47,6 +48,9 @@ class Cobro {
 
             LEFT JOIN venta AS v ON cv.idVenta = v.idVenta 
             LEFT JOIN comprobante AS cp ON v.idComprobante = cp.idComprobante
+            LEFT JOIN ventaDetalle AS vd ON vd.idVenta = v.idVenta 
+            LEFT JOIN lote AS lo ON lo.idLote = vd.idLote
+            LEFT JOIN manzana AS ma ON ma.idManzana = lo.idManzana 
 
             LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro AND nc.estado = 1
             WHERE 
@@ -966,7 +970,7 @@ class Cobro {
 
     async id(req) {
         try {
-            let result = await conec.query(`SELECT
+            const result = await conec.query(`SELECT
             c.idCobro,
             co.nombre as comprobante,
             c.serie,
@@ -1020,7 +1024,7 @@ class Cobro {
 
             if (result.length > 0) {
 
-                let detalle = await conec.query(`SELECT 
+                const detalle = await conec.query(`SELECT 
                 co.nombre as concepto,
                 cd.precio,
                 cd.cantidad,
@@ -1041,7 +1045,7 @@ class Cobro {
                 ]);
 
 
-                let venta = await conec.query(`SELECT  
+                const venta = await conec.query(`SELECT  
                 v.idVenta,
                 cp.nombre AS comprobante,
                 v.serie,
