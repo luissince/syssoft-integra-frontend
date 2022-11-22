@@ -1233,7 +1233,7 @@ class RepFactura {
                         doc.options.margins.left + 10,
                         yPos);
 
-                    let concepto = item.concepto;
+                    let concepto = item.concepto  + "- F.V: "+item.fecha;
 
                     // data.lote.map((lote, index) => {
                     //     concepto += "\n" + lote.lote + " - " + lote.manzana;

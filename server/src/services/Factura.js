@@ -1353,7 +1353,7 @@ class Factura {
             GROUP BY c.idCobro`, [
                 req.query.idVenta
             ]);
-            console.log({ venta: venta[0], detalle, newPlazos, inicial })
+            // console.log({ venta: venta[0], detalle, newPlazos, inicial })
 
             return sendSuccess(res, {
                 "venta": venta[0],

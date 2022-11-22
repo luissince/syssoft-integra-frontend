@@ -297,7 +297,7 @@ class Cobro {
                 `REGSITRO DEL COBRO ${comprobante[0].serie}-${numeracion}`,
                 currentDate(),
                 currentTime(),
-                req.body.idUsuario  
+                req.body.idUsuario
             ]);
 
             await conec.commit(connection);
@@ -966,6 +966,74 @@ class Cobro {
             }
             return "server";
         }
+    }
+
+    async inicial(req) {
+        // let connection = null;
+        // try {
+        //     connection = await conec.beginTransaction();
+
+        //     let cobro = await conec.execute(connection, 'SELECT idCobro FROM cobro');
+        //     let idCobro = "";
+        //     if (cobro.length != 0) {
+
+        //         let quitarValor = cobro.map(function (item) {
+        //             return parseInt(item.idCobro.replace("CB", ''));
+        //         });
+
+        //         let valorActual = Math.max(...quitarValor);
+        //         let incremental = valorActual + 1;
+        //         let codigoGenerado = "";
+        //         if (incremental <= 9) {
+        //             codigoGenerado = 'CB000' + incremental;
+        //         } else if (incremental >= 10 && incremental <= 99) {
+        //             codigoGenerado = 'CB00' + incremental;
+        //         } else if (incremental >= 100 && incremental <= 999) {
+        //             codigoGenerado = 'CB0' + incremental;
+        //         } else {
+        //             codigoGenerado = 'CB' + incremental;
+        //         }
+
+        //         idCobro = codigoGenerado;
+        //     } else {
+        //         idCobro = "CB0001";
+        //     }
+
+        //     let comprobanteCobro = await conec.execute(connection, `SELECT 
+        //             serie,
+        //             numeracion 
+        //             FROM comprobante 
+        //             WHERE idComprobante  = ?
+        //             `, [
+        //         req.body.idComprobanteCobro
+        //     ]);
+
+        //     let numeracionCobro = 0;
+
+        //     let cobros = await conec.execute(connection, 'SELECT numeracion  FROM cobro WHERE idComprobante = ?', [
+        //         req.body.idComprobanteCobro
+        //     ]);
+
+        //     if (cobros.length > 0) {
+        //         let quitarValor = cobros.map(function (item) {
+        //             return parseInt(item.numeracion);
+        //         });
+
+        //         let valorActual = Math.max(...quitarValor);
+        //         let incremental = valorActual + 1;
+        //         numeracionCobro = incremental;
+        //     } else {
+        //         numeracionCobro = comprobanteCobro[0].numeracion;
+        //     }
+
+        //     await conec.commit(connection);
+        //     return "insert";
+        // } catch (error) {
+        //     if (connection != null) {
+        //         await conec.rollback(connection);
+        //     }
+        //     return "server";
+        // }
     }
 
     async id(req) {
