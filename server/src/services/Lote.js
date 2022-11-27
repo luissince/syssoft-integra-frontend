@@ -386,7 +386,7 @@ class Lote {
         }
     }
 
-    async detalleLote(req) {
+    async detalle(req) {
         try {
             let cabecera = await conec.query(`SELECT 
             l.idLote,
@@ -407,11 +407,11 @@ class Lote {
             l.areaLote,
             l.numeroPartida,
 
-            l.limiteFrontal,
-            l.limiteDerecho,
-            l.limiteIzquierdo,
-            l.limitePosterior,
-            l.ubicacionLote
+            IFNULL(l.limiteFrontal,'') AS limiteFrontal,
+            IFNULL(l.limiteDerecho,'') AS limiteDerecho,
+            IFNULL(l.limiteIzquierdo,'') AS limiteIzquierdo,
+            IFNULL(l.limitePosterior,'') AS limitePosterior,
+            IFNULL(l.ubicacionLote,'') AS ubicacionLote
     
             FROM lote AS l
             INNER JOIN manzana AS m  ON l.idManzana = m.idManzana

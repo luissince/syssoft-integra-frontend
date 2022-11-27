@@ -6,7 +6,7 @@ class Cliente {
 
     async list(req) {
         try {
-            let lista = await conec.query(`SELECT 
+            const lista = await conec.query(`SELECT 
             c.idCliente ,
             a.idProyecto,
             td.nombre as tipodocumento,
@@ -50,8 +50,8 @@ class Cliente {
 
             let newLista = []
 
-            for (let value of lista) {
-                let detalle = await conec.query(`select 
+            for (const value of lista) {
+                const detalle = await conec.query(`select 
                     l.descripcion,
                     m.nombre as manzana
                     from venta as v
@@ -171,14 +171,14 @@ class Cliente {
                 });
             }
 
-            let resultLista = newLista.map(function (item, index) {
+            const resultLista = newLista.map(function (item, index) {
                 return {
                     ...item,
                     id: (index + 1) + parseInt(req.query.posicionPagina)
                 }
             });
 
-            let total = await conec.procedure(`CALL Listar_Socios_Count(?,?,?,?,?,?)`, [
+            const total = await conec.procedure(`CALL Listar_Socios_Count(?,?,?,?,?,?)`, [
                 parseInt(req.query.opcion),
                 req.query.buscar,
                 req.query.fechaInicio,

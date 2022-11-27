@@ -78,7 +78,7 @@ router.delete('/socio', async function (req, res) {
 })
 
 router.get('/detalle', async function (req, res) {
-    const result = await lote.detalleLote(req)
+    const result = await lote.detalle(req)
     if (typeof result === 'object') {
         res.status(200).send(result)
     } else {
@@ -134,7 +134,7 @@ router.get('/replotedetalle', async function (req, res) {
         return;
     }
 
-    const detalle = await lote.detalleLote(req)
+    const detalle = await lote.detalle(req)
 
     if (typeof detalle === 'object') {
 

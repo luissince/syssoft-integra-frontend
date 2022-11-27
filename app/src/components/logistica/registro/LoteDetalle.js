@@ -115,7 +115,7 @@ class LoteDetalle extends React.Component {
         try {
             await this.setStateAsync({ loading: true });
 
-            let result = await axios.get("/api/lote/detalle", {
+            const result = await axios.get("/api/lote/detalle", {
                 signal: this.abortControllerTable.signal,
                 params: {
                     "idLote": id
@@ -281,192 +281,190 @@ class LoteDetalle extends React.Component {
                     this.state.loading ?
                         <div className="clearfix absolute-all bg-white">
                             {spinnerLoading(this.state.msgLoading)}
-                        </div> :
-                        <>
-                            <div className='row'>
-                                <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
-                                    <div className="form-group">
-                                        <h5>
-                                            <span role="button" onClick={() => this.props.history.goBack()}><i className="bi bi-arrow-left-short"></i></span> Lote
-                                            <small className="text-secondary"> Detalle</small>
-                                        </h5>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="row">
-                                <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                                    <div className="form-group">
-                                        <button type="button" className="btn btn-light" onClick={() => this.onEventImprimir()}><i className="fa fa-print"></i> Imprimir</button>
-                                        {" "}
-                                        <button type="button" className="btn btn-light"><i className="fa fa-file-archive-o"></i> Adjuntar</button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="row">
-                                <div className="col-lg-4 col-md-4 col-sm-12 col-xs-12">
-                                    <p className="lead">Descripcion</p>
-                                    <div className="table-responsive">
-                                        <table className="table table-borderless">
-                                            <thead>
-                                                <tr>
-                                                    <th className="w-35 font-weight-normal p-0">Manzana:</th>
-                                                    <th className="w-65 font-weight-bold p-0">{this.state.lote.manzana}</th>
-                                                </tr>
-                                                <tr>
-                                                    <th className="w-35 font-weight-normal p-0">Lote:</th>
-                                                    <th className="w-65 font-weight-bold p-0">{this.state.lote.lote}</th>
-                                                </tr>
-                                                <tr>
-                                                    <th className="w-35 font-weight-normal p-0">Estado:</th>
-                                                    <th className="w-65 font-weight-bold p-0"> {this.state.lote.lotestado}</th>
-                                                </tr>
-                                            </thead>
-                                        </table>
-                                    </div>
-                                </div>
-
-                                <div className="col-lg-4 col-md-4 col-sm-12 col-xs-12">
-                                    <p className="lead">Medidas</p>
-                                    <div className="table-responsive">
-                                        <table className="table table-borderless">
-                                            <thead>
-                                                <tr>
-                                                    <th className="w-35 font-weight-normal p-0">Medida Frontal (ML):</th>
-                                                    <th className="w-65 font-weight-bold p-0">{this.state.lote.medidaFrontal}</th>
-                                                </tr>
-                                                <tr>
-                                                    <th className="w-35 font-weight-normal p-0">Costado Derecho (ML):</th>
-                                                    <th className="w-65 font-weight-bold p-0">{this.state.lote.costadoDerecho}</th>
-                                                </tr>
-                                                <tr>
-                                                    <th className="w-35 font-weight-normal p-0">Costado Izquierdo (ML):</th>
-                                                    <th className="w-65 font-weight-bold p-0">{this.state.lote.costadoIzquierdo}</th>
-                                                </tr>
-                                                <tr>
-                                                    <th className="w-35 font-weight-normal p-0"> Medida Fondo (ML):</th>
-                                                    <th className="w-65 font-weight-bold p-0">{this.state.lote.medidaFondo}</th>
-                                                </tr>
-                                                <tr>
-                                                    <th className="w-35 font-weight-normal p-0"> Area Lote (ML):</th>
-                                                    <th className="w-65 font-weight-bold p-0"> {this.state.lote.areaLote}</th>
-                                                </tr>
-                                                <tr>
-                                                    <th className="w-35 font-weight-normal p-0"> N° Partida:</th>
-                                                    <th className="w-65 font-weight-bold p-0"> {this.state.lote.numeroPartida}</th>
-                                                </tr>
-                                            </thead>
-                                        </table>
-                                    </div>
-                                </div>
-
-                                <div className="col-lg-4 col-md-4 col-sm-12 col-xs-12">
-                                    <p className="lead">Límites</p>
-                                    <div className="table-responsive">
-                                        <table className="table table-borderless">
-                                            <thead>
-                                                <tr>
-                                                    <th className="w-35 font-weight-normal p-0">Limite, Frontal / Norte / Noroeste:</th>
-                                                    <th className="w-65 font-weight-bold p-0">{this.state.lote.limiteFrontal}</th>
-                                                </tr>
-                                                <tr>
-                                                    <th className="w-35 font-weight-normal p-0">Límite, Derecho / Este / Sureste:</th>
-                                                    <th className="w-65 font-weight-bold p-0">{this.state.lote.limiteDerecho}</th>
-                                                </tr>
-                                                <tr>
-                                                    <th className="w-35 font-weight-normal p-0">Límite, Iquierdo / Sur / Sureste:</th>
-                                                    <th className="w-65 font-weight-bold p-0">{this.state.lote.limiteIzquierdo}</th>
-                                                </tr>
-                                                <tr>
-                                                    <th className="w-35 font-weight-normal p-0">Límite, Posterior / Oeste / Noroeste:</th>
-                                                    <th className="w-65 font-weight-bold p-0">{this.state.lote.limitePosterior}</th>
-                                                </tr>
-                                                <tr>
-                                                    <th className="w-35 font-weight-normal p-0">Ubicación del Lote:</th>
-                                                    <th className="w-65 font-weight-bold p-0"> {this.state.lote.ubicacionLote}</th>
-                                                </tr>
-                                            </thead>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-
-
-                            <div className="row">
-                                <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                                    <p className="lead">Socios <button className="btn btn-success btn-sm" onClick={() => this.openModalSocio()}><i className="fa fa-plus"></i></button></p>
-                                    <div className="table-responsive">
-                                        <table className="table table-light table-striped">
-                                            <thead>
-                                                <tr>
-                                                    <th width="5%" className="text-center">#</th>
-                                                    <th width="25%">N° Documento</th>
-                                                    <th width="45%">Información</th>
-                                                    <th width="20%">Estado</th>
-                                                    <th width="5%" className="text-center">Anular</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {
-                                                    this.state.socios.map((item, index) => (
-                                                        <tr key={index}>
-                                                            <td className="text-center">{++index}</td>
-                                                            <td>{item.documento}</td>
-                                                            <td>{item.informacion}</td>
-                                                            <td className={`${item.estado === 1 ? "text-success" : "text-danger"}`}>{item.estado === 1 ? "ACTIVO" : "ANULADO"}</td>
-                                                            <td className="text-center"><button className="btn btn-danger btn-sm" onClick={() => this.onEventAnular(item.idCliente)}><i className="fa fa-ban"></i></button></td>
-                                                        </tr>
-                                                    ))
-                                                }
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="row">
-                                <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                                    <p className="lead">Cobros Asociados</p>
-                                    <div className="table-responsive">
-                                        <table className="table table-light table-striped">
-                                            <thead>
-                                                <tr>
-                                                    <th width="5%" className="text-center">#</th>
-                                                    <th width="15%">Socio</th>
-                                                    <th width="20%">Concepto</th>
-                                                    <th width="10%">Fecha</th>
-                                                    <th width="20%">Comprobante</th>
-                                                    <th width="15%">Banco</th>
-                                                    <th width="15%">Monto</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {
-                                                    this.state.detalle.length === 0 ?
-                                                        <tr><td colSpan="7" className="text-center">No hay cobros asociados.</td></tr>
-                                                        :
-                                                        this.state.detalle.map((item, index) => {
-                                                            return (
-                                                                <tr key={index}>
-                                                                    <td className="text-center">{++index}</td>
-                                                                    <td>{item.informacion}</td>
-                                                                    <td>{item.detalle}{<br />}<small>{item.comprobanteRef}</small></td>
-                                                                    <td>{item.fecha}{<br />}{timeForma24(item.hora)} </td>
-                                                                    <td>{item.comprobante}{<br />}{item.serie + "-" + item.numeracion}</td>
-                                                                    <td>{item.banco} </td>
-                                                                    <td>{numberFormat(item.monto, item.codiso)}</td>
-                                                                </tr>
-                                                            )
-                                                        })
-                                                }
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        </>
+                        </div> : null
                 }
+
+                <div className='row'>
+                    <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
+                        <div className="form-group">
+                            <h5>
+                                <span role="button" onClick={() => this.props.history.goBack()}><i className="bi bi-arrow-left-short"></i></span> Lote
+                                <small className="text-secondary"> Detalle</small>
+                            </h5>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="row">
+                    <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <div className="form-group">
+                            <button type="button" className="btn btn-light" onClick={() => this.onEventImprimir()}><i className="fa fa-print"></i> Imprimir</button>
+                            {" "}
+                            <button type="button" className="btn btn-light"><i className="fa fa-file-archive-o"></i> Adjuntar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="row">
+                    <div className="col-lg-4 col-md-4 col-sm-12 col-xs-12">
+                        <p className="lead">Descripcion</p>
+                        <div className="table-responsive">
+                            <table className="table table-borderless">
+                                <thead>
+                                    <tr>
+                                        <th className="w-35 font-weight-normal p-0">Manzana:</th>
+                                        <th className="w-65 font-weight-bold p-0">{!this.state.loading && this.state.lote.manzana}</th>
+                                    </tr>
+                                    <tr>
+                                        <th className="w-35 font-weight-normal p-0">Lote:</th>
+                                        <th className="w-65 font-weight-bold p-0">{!this.state.loading && this.state.lote.lote}</th>
+                                    </tr>
+                                    <tr>
+                                        <th className="w-35 font-weight-normal p-0">Estado:</th>
+                                        <th className="w-65 font-weight-bold p-0"> {!this.state.loading && this.state.lote.lotestado}</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div className="col-lg-4 col-md-4 col-sm-12 col-xs-12">
+                        <p className="lead">Medidas</p>
+                        <div className="table-responsive">
+                            <table className="table table-borderless">
+                                <thead>
+                                    <tr>
+                                        <th className="w-35 font-weight-normal p-0">Medida Frontal (ML):</th>
+                                        <th className="w-65 font-weight-bold p-0">{!this.state.loading && this.state.lote.medidaFrontal}</th>
+                                    </tr>
+                                    <tr>
+                                        <th className="w-35 font-weight-normal p-0">Costado Derecho (ML):</th>
+                                        <th className="w-65 font-weight-bold p-0">{!this.state.loading && this.state.lote.costadoDerecho}</th>
+                                    </tr>
+                                    <tr>
+                                        <th className="w-35 font-weight-normal p-0">Costado Izquierdo (ML):</th>
+                                        <th className="w-65 font-weight-bold p-0">{!this.state.loading && this.state.lote.costadoIzquierdo}</th>
+                                    </tr>
+                                    <tr>
+                                        <th className="w-35 font-weight-normal p-0"> Medida Fondo (ML):</th>
+                                        <th className="w-65 font-weight-bold p-0">{!this.state.loading && this.state.lote.medidaFondo}</th>
+                                    </tr>
+                                    <tr>
+                                        <th className="w-35 font-weight-normal p-0"> Area Lote (ML):</th>
+                                        <th className="w-65 font-weight-bold p-0"> {!this.state.loading && this.state.lote.areaLote}</th>
+                                    </tr>
+                                    <tr>
+                                        <th className="w-35 font-weight-normal p-0"> N° Partida:</th>
+                                        <th className="w-65 font-weight-bold p-0"> {!this.state.loading && this.state.lote.numeroPartida}</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div className="col-lg-4 col-md-4 col-sm-12 col-xs-12">
+                        <p className="lead">Límites</p>
+                        <div className="table-responsive">
+                            <table className="table table-borderless">
+                                <thead>
+                                    <tr>
+                                        <th className="w-35 font-weight-normal p-0">Limite, Frontal / Norte / Noroeste:</th>
+                                        <th className="w-65 font-weight-bold p-0">{!this.state.loading && this.state.lote.limiteFrontal}</th>
+                                    </tr>
+                                    <tr>
+                                        <th className="w-35 font-weight-normal p-0">Límite, Derecho / Este / Sureste:</th>
+                                        <th className="w-65 font-weight-bold p-0">{!this.state.loading && this.state.lote.limiteDerecho}</th>
+                                    </tr>
+                                    <tr>
+                                        <th className="w-35 font-weight-normal p-0">Límite, Iquierdo / Sur / Sureste:</th>
+                                        <th className="w-65 font-weight-bold p-0">{!this.state.loading && this.state.lote.limiteIzquierdo}</th>
+                                    </tr>
+                                    <tr>
+                                        <th className="w-35 font-weight-normal p-0">Límite, Posterior / Oeste / Noroeste:</th>
+                                        <th className="w-65 font-weight-bold p-0">{!this.state.loading && this.state.lote.limitePosterior}</th>
+                                    </tr>
+                                    <tr>
+                                        <th className="w-35 font-weight-normal p-0">Ubicación del Lote:</th>
+                                        <th className="w-65 font-weight-bold p-0"> {!this.state.loading && this.state.lote.ubicacionLote}</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="row">
+                    <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <p className="lead">Socios <button className="btn btn-success btn-sm" onClick={() => this.openModalSocio()}><i className="fa fa-plus"></i></button></p>
+                        <div className="table-responsive">
+                            <table className="table table-light table-striped">
+                                <thead>
+                                    <tr>
+                                        <th width="5%" className="text-center">#</th>
+                                        <th width="25%">N° Documento</th>
+                                        <th width="45%">Información</th>
+                                        <th width="20%">Estado</th>
+                                        <th width="5%" className="text-center">Anular</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {
+                                        this.state.socios.map((item, index) => (
+                                            <tr key={index}>
+                                                <td className="text-center">{++index}</td>
+                                                <td>{item.documento}</td>
+                                                <td>{item.informacion}</td>
+                                                <td className={`${item.estado === 1 ? "text-success" : "text-danger"}`}>{item.estado === 1 ? "ACTIVO" : "ANULADO"}</td>
+                                                <td className="text-center"><button className="btn btn-danger btn-sm" onClick={() => this.onEventAnular(item.idCliente)}><i className="fa fa-ban"></i></button></td>
+                                            </tr>
+                                        ))
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="row">
+                    <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <p className="lead">Cobros Asociados</p>
+                        <div className="table-responsive">
+                            <table className="table table-light table-striped">
+                                <thead>
+                                    <tr>
+                                        <th width="5%" className="text-center">#</th>
+                                        <th width="15%">Socio</th>
+                                        <th width="20%">Concepto</th>
+                                        <th width="10%">Fecha</th>
+                                        <th width="20%">Comprobante</th>
+                                        <th width="15%">Banco</th>
+                                        <th width="15%">Monto</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {
+                                        this.state.detalle.length === 0 ?
+                                            <tr><td colSpan="7" className="text-center">No hay cobros asociados.</td></tr>
+                                            :
+                                            this.state.detalle.map((item, index) => {
+                                                return (
+                                                    <tr key={index}>
+                                                        <td className="text-center">{++index}</td>
+                                                        <td>{item.informacion}</td>
+                                                        <td>{item.detalle}{<br />}<small>{item.comprobanteRef}</small></td>
+                                                        <td>{item.fecha}{<br />}{timeForma24(item.hora)} </td>
+                                                        <td>{item.comprobante}{<br />}{item.serie + "-" + item.numeracion}</td>
+                                                        <td>{item.banco} </td>
+                                                        <td>{numberFormat(item.monto, item.codiso)}</td>
+                                                    </tr>
+                                                )
+                                            })
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </>
         );
     }

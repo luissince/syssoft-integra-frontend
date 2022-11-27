@@ -283,6 +283,7 @@ class Lotes extends React.Component {
                     "idLote": id
                 }
             });
+            
             await this.setStateAsync({
                 idLote: result.data.idLote,
                 idManzana: result.data.idManzana,

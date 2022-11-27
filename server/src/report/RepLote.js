@@ -32,6 +32,7 @@ class RepLote {
             let h1 = 13;
             let h2 = 11;
             let h3 = 9;
+            let h4 = 8;
 
             if (isFile(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo))) {
                 doc.image(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo), doc.x, doc.y, { width: 75 });
@@ -156,7 +157,6 @@ class RepLote {
 
             colY = doc.y + 10;
 
-            console.log(data.detalle)
             const contentCobros = data.detalle.map((item, index) => {
                 return [++index, item.informacion, item.detalle, item.fecha + "\n" + item.hora, item.comprobante + "\n" + item.serie + "-" + item.numeracion, item.banco, numberFormat(item.monto, item.codiso)];
             });
@@ -170,11 +170,11 @@ class RepLote {
             doc.table(cobros, {
                 prepareHeader: () => doc.font("Helvetica-Bold").fontSize(h3),
                 prepareRow: () => {
-                    doc.font("Helvetica").fontSize(h3);
+                    doc.font("Helvetica").fontSize(h4);
                 },
                 padding: 5,
                 columnSpacing: 5,
-                columnsSize: [40, 62, 130, 70, 90, 70, 70],//532
+                columnsSize: [40, 92, 100, 70, 90, 70, 70],//532
                 width: doc.page.width - doc.options.margins.left - doc.options.margins.right,
                 x: orgX,
                 y: colY,
