@@ -9,6 +9,10 @@ const RepCliente = require('../report/RepCliente');
 const cliente = new Cliente();
 const repCliente = new RepCliente();
 
+/**
+ * Api usado en los modulos
+ * [facturación: clientes]
+ */
 router.get('/list', async function (req, res) {
     const result = await cliente.list(req)
     if (typeof result === 'object') {
@@ -81,6 +85,10 @@ router.get('/listfiltrar', async function (req, res) {
     }
 });
 
+/**
+ * Api usado en los modulos
+ * [facturación: clientes/detalle]
+ */
 router.get('/listventasasociadas', async function (req, res) {
     const result = await cliente.listventasasociadas(req);
     if (typeof result === 'object') {

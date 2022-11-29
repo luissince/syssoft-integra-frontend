@@ -4,29 +4,34 @@ const conec = new Conexion();
 
 class Cliente {
 
+    /**
+     * Metodo usado en el modulo facturación/clientes.
+     * @param {*} req 
+     * @returns object | string
+     */
     async list(req) {
         try {
             const lista = await conec.query(`SELECT 
-            c.idCliente ,
-            a.idProyecto,
-            td.nombre as tipodocumento,
-            c.documento,
-            c.informacion,
-            c.celular,
-            c.telefono,
-            c.direccion,
-            c.estado
-            FROM cliente AS c
-            INNER JOIN tipoDocumento AS td ON td.idTipoDocumento = c.idTipoDocumento
-            INNER JOIN alta AS a ON a.idCliente = c.idCliente
-            WHERE 
-            ? = 0 AND (a.idProyecto = ? AND ? = 'any' OR ? = 'all')
-            OR
-            ? = 1 and c.documento like concat(?,'%') AND (a.idProyecto = ? AND ? = 'any' OR ? = 'all')
-            OR
-            ? = 1 and c.informacion like concat(?,'%') AND (a.idProyecto = ? AND ? = 'any' OR ? = 'all')
-            ORDER BY c.fecha ASC, c.hora ASC
-            LIMIT ?,?`, [
+                c.idCliente ,
+                a.idProyecto,
+                td.nombre as tipodocumento,
+                c.documento,
+                c.informacion,
+                c.celular,
+                c.telefono,
+                c.direccion,
+                c.estado
+                FROM cliente AS c
+                INNER JOIN tipoDocumento AS td ON td.idTipoDocumento = c.idTipoDocumento
+                INNER JOIN alta AS a ON a.idCliente = c.idCliente
+                WHERE 
+                ? = 0 AND (a.idProyecto = ? AND ? = 'any' OR ? = 'all')
+                OR
+                ? = 1 and c.documento like concat(?,'%') AND (a.idProyecto = ? AND ? = 'any' OR ? = 'all')
+                OR
+                ? = 1 and c.informacion like concat(?,'%') AND (a.idProyecto = ? AND ? = 'any' OR ? = 'all')
+                ORDER BY c.fecha ASC, c.hora ASC
+                LIMIT ?,?`, [
                 parseInt(req.query.opcion),
                 req.query.idProyecto,
                 req.query.fill,
@@ -76,17 +81,16 @@ class Cliente {
                 }
             });
 
-            let total = await conec.query(`SELECT COUNT(*) AS Total 
-            FROM cliente AS c
-            INNER JOIN tipoDocumento AS td ON td.idTipoDocumento = c.idTipoDocumento
-            INNER JOIN alta AS a ON a.idCliente = c.idCliente
-            WHERE 
-            ? = 0 AND (a.idProyecto = ? AND ? = 'any' OR ? = 'all')
-            OR
-            ? = 1 and c.documento like concat(?,'%') AND (a.idProyecto = ? AND ? = 'any' OR ? = 'all')
-            OR
-            ? = 1 and c.informacion like concat(?,'%') AND (a.idProyecto = ? AND ? = 'any' OR ? = 'all')`, [
-
+            const total = await conec.query(`SELECT COUNT(*) AS Total 
+                FROM cliente AS c
+                INNER JOIN tipoDocumento AS td ON td.idTipoDocumento = c.idTipoDocumento
+                INNER JOIN alta AS a ON a.idCliente = c.idCliente
+                WHERE 
+                ? = 0 AND (a.idProyecto = ? AND ? = 'any' OR ? = 'all')
+                OR
+                ? = 1 and c.documento like concat(?,'%') AND (a.idProyecto = ? AND ? = 'any' OR ? = 'all')
+                OR
+                ? = 1 and c.informacion like concat(?,'%') AND (a.idProyecto = ? AND ? = 'any' OR ? = 'all')`, [
                 parseInt(req.query.opcion),
                 req.query.idProyecto,
                 req.query.fill,
@@ -126,32 +130,6 @@ class Cliente {
             ]);
 
             let newLista = [];
-
-            // const seen = new Set();
-            // const filteredArr = lista.filter(el => {
-            //     const duplicate = seen.has(el.id);
-            //     seen.add(el.id);
-            //     return !duplicate;
-            // });
-            // console.log(filteredArr)
-
-            // for (let value of filteredArr) {
-            //     let detalle = await conec.query(`SELECT 
-            //         l.descripcion,
-            //         m.nombre AS manzana
-            //         FROM venta AS v
-            //         INNER JOIN ventaDetalle AS vd ON vd.idVenta = v.idVenta
-            //         INNER JOIN lote AS l ON l.idLote = vd.idLote
-            //         INNER JOIN manzana AS m ON m.idManzana = l.idManzana
-            //         WHERE v.idCliente = ?`, [
-            //         value.idCliente
-            //     ]);
-
-            //     newLista.push({
-            //         ...value,
-            //         detalle
-            //     });
-            // }
 
             for (let value of lista) {
                 let detalle = await conec.query(`SELECT 
@@ -669,61 +647,63 @@ class Cliente {
         }
     }
 
+    /**
+     * Metodo usado en el modulo facturación/clientes/detalle.
+     * @param {*} req 
+     * @returns object | string
+     */
     async listventasasociadas(req) {
         try {
-
-            let cliente = await conec.query(`select
-            tp.nombre as tipoDocumento,
-            c.documento,
-            c.informacion,
-            c.celular,
-            c.telefono,
-            c.email,
-            c.direccion
-            from 
-            cliente as c 
-            inner join tipoDocumento as tp on tp.idTipoDocumento = c.idTipoDocumento
-            where c.idCliente = ?`, [
+            const cliente = await conec.query(`select
+                tp.nombre as tipoDocumento,
+                c.documento,
+                c.informacion,
+                c.celular,
+                c.telefono,
+                c.email,
+                c.direccion
+                from 
+                cliente as c 
+                inner join tipoDocumento as tp on tp.idTipoDocumento = c.idTipoDocumento
+                where c.idCliente = ?`, [
                 req.query.idCliente,
             ]);
 
             if (cliente.length > 0) {
-
-                let ventas = await conec.query(`select 
-                v.idVenta,
-                co.nombre as comprobante,
-                v.serie,
-                v.numeracion,
-                DATE_FORMAT(v.fecha,'%d/%m/%Y') as fecha, 
-                v.hora,
-                sum(vd.cantidad * vd.precio) as total
-                from venta as v
-                inner join ventaDetalle as vd on vd.idVenta = v.idVenta
-                inner join comprobante as co on co.idComprobante = v.idComprobante
-                where v.idCliente = ? and v.estado <> 3
-                group by v.idVenta
-                order by v.fecha desc, v.hora desc`, [
+                const ventas = await conec.query(`select 
+                    v.idVenta,
+                    co.nombre as comprobante,
+                    v.serie,
+                    v.numeracion,
+                    DATE_FORMAT(v.fecha,'%d/%m/%Y') as fecha, 
+                    v.hora,
+                    sum(vd.cantidad * vd.precio) as total
+                    from venta as v
+                    inner join ventaDetalle as vd on vd.idVenta = v.idVenta
+                    inner join comprobante as co on co.idComprobante = v.idComprobante
+                    where v.idCliente = ? and v.estado <> 3
+                    group by v.idVenta
+                    order by v.fecha desc, v.hora desc`, [
                     req.query.idCliente,
                 ]);
 
                 let newVentas = [];
 
-                for (let venta of ventas) {
-
-                    let detalle = await conec.query(`select 
-                    l.descripcion,
-                    m.nombre as manzana,
-                    p.nombre as proyecto,
-                    im.porcentaje,
-                    im.nombre as impuesto,
-                    vd.cantidad,
-                    vd.precio
-                    from ventaDetalle as vd
-                    inner join impuesto as im on im.idImpuesto = vd.idImpuesto
-                    inner join lote as l on l.idLote = vd.idLote
-                    inner join manzana as m on m.idManzana = l.idManzana
-                    inner join proyecto as p on p.idProyecto = m.idProyecto
-                    where vd.idVenta = ?`, [
+                for (const venta of ventas) {
+                    const detalle = await conec.query(`select 
+                        l.descripcion,
+                        m.nombre as manzana,
+                        p.nombre as proyecto,
+                        im.porcentaje,
+                        im.nombre as impuesto,
+                        vd.cantidad,
+                        vd.precio
+                        from ventaDetalle as vd
+                        inner join impuesto as im on im.idImpuesto = vd.idImpuesto
+                        inner join lote as l on l.idLote = vd.idLote
+                        inner join manzana as m on m.idManzana = l.idManzana
+                        inner join proyecto as p on p.idProyecto = m.idProyecto
+                        where vd.idVenta = ?`, [
                         venta.idVenta
                     ]);
 

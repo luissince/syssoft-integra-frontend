@@ -11,6 +11,10 @@ const { sendError } = require('../tools/Message');
 const repCuota = new RepCuota();
 const repFactura = new RepFactura();
 
+/**
+ * Api usado en los modulos
+ * [facturación: ventas]
+ */
 router.get("/list", async function (req, res) {
     return await factura.list(req, res);
 });
@@ -23,6 +27,10 @@ router.delete("/anular", async function (req, res) {
     return await factura.anular(req, res);
 });
 
+/**
+ * Api usado en los modulos
+ * [facturación: ventas/detalle]
+ */
 router.get("/id", async function (req, res) {
     return await factura.id(req, res);
 });
@@ -35,6 +43,10 @@ router.get("/credito/detalle", async function (req, res) {
     return await factura.detalleCredito(req, res);
 });
 
+/**
+ * Api usado en los modulos
+ * [facturación: ventas/detalle]
+ */
 router.get("/venta/cobro", async function (req, res) {
     return await factura.ventaCobro(req, res);
 });

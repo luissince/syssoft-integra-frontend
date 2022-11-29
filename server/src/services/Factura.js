@@ -5,6 +5,11 @@ const conec = new Conexion();
 
 class Factura {
 
+    /**
+     * Metodo usado en el modulo facturación/ventas.
+     * @param {*} req 
+     * @returns object | string
+     */
     async list(req, res) {
         try {
             let lista = await conec.query(`SELECT 
@@ -967,6 +972,11 @@ class Factura {
         }
     }
 
+    /**
+     * Metodo usado en el modulo facturación/ventas/detalle.
+     * @param {*} req 
+     * @returns object | string
+     */
     async id(req, res) {
         try {
 
@@ -1090,6 +1100,11 @@ class Factura {
         }
     }
 
+    /**
+    * Metodo usado en el modulo facturación/ventas/detalle.
+    * @param {*} req 
+    * @returns object | string
+    */
     async ventaCobro(req, res) {
         try {
             const result = await conec.procedure(`CALL Listar_Cobros_Detalle_ByIdVenta(?)`, [
