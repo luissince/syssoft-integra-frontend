@@ -13,6 +13,7 @@ import {
     ModalAlertInfo,
     ModalAlertSuccess,
     ModalAlertWarning,
+    ModalAlertError
 } from '../../tools/Tools';
 import { connect } from 'react-redux';
 
@@ -22,11 +23,13 @@ class LoteDetalle extends React.Component {
         this.state = {
             idLote: '',
             idVenta: '',
+            idClienteOld: '',
             lote: {},
             socios: [],
             detalle: [],
 
             idUsuario: this.props.token.userToken.idUsuario,
+            idProyecto: this.props.token.project.idProyecto,
 
             loading: true,
             messageWarning: '',
@@ -36,7 +39,7 @@ class LoteDetalle extends React.Component {
             clientes: [],
 
             loadModal: false,
-            nameModal: 'Nuevo Socio',
+            nameModal: 'Nuevo Traspaso',
             msgModal: 'Cargando datos...',
         }
 
@@ -71,7 +74,7 @@ class LoteDetalle extends React.Component {
                 idCliente: '',
                 clientes: [],
                 loadModal: false,
-                nameModal: 'Nuevo Socio',
+                nameModal: 'Nuevo Traspaso',
                 msgModal: 'Cargando datos...',
             });
         });
@@ -128,7 +131,8 @@ class LoteDetalle extends React.Component {
                 detalle: result.data.detalle,
                 idLote: id,
                 idVenta: result.data.venta.idVenta,
-                loading: false,
+                idClienteOld: result.data.venta.idCliente
+                , loading: false,
             });
         } catch (error) {
             if (error.message !== "canceled") {
@@ -148,7 +152,7 @@ class LoteDetalle extends React.Component {
             return;
         }
 
-        ModalAlertDialog("Lote", "¿Está de registrar el asociado?", async (value) => {
+        ModalAlertDialog("Lote", "¿Está seguro de registrar el asociado?. El lote va pasar a nombre del nuevo socio.", async (value) => {
             if (value) {
                 try {
                     ModalAlertInfo("Lote", "Procesando información...");
@@ -158,46 +162,50 @@ class LoteDetalle extends React.Component {
                         "idLote": this.state.idLote,
                         "idVenta": this.state.idVenta,
                         "idCliente": this.state.idCliente,
-                        "idUsuario": this.state.idUsuario
-                    });
-
-                    ModalAlertSuccess("Lote", result.data, () => {
-                        this.loadDataId(this.state.idLote);
-                    });
-
-                } catch (error) {
-                    ModalAlertWarning("Lote",
-                        "Se produjo un error un interno, intente nuevamente.");
-
-                }
-            }
-        })
-    }
-
-    async onEventAnular(idCliente) {
-        ModalAlertDialog("Lote", "¿Está seguro de anular al socio, la operación no es reversible?", async (value) => {
-            if (value) {
-                try {
-                    ModalAlertInfo("Lote", "Procesando información...");
-                    hideModal("modalSocio");
-
-                    let result = await axios.delete("/api/lote/socio", {
-                        params: {
-                            "idVenta": this.state.idVenta,
-                            "idCliente": idCliente
-                        }
+                        "idClienteOld": this.state.idClienteOld,
+                        "idUsuario": this.state.idUsuario,
+                        "idProyecto": this.state.idProyecto,
                     });
 
                     ModalAlertSuccess("Lote", result.data, () => {
                         this.loadDataId(this.state.idLote);
                     });
                 } catch (error) {
-                    ModalAlertWarning("Lote",
-                        "Se produjo un error un interno, intente nuevamente.");
+                    if (error.response) {
+                        ModalAlertWarning("Lote", error.response.data);
+                    } else {
+                        ModalAlertError("Lote",
+                            "Se produjo un error un interno, intente nuevamente.");
+                    }
                 }
             }
         })
     }
+
+    // async onEventAnular(idCliente) {
+    //     ModalAlertDialog("Lote", "¿Está seguro de anular al socio, la operación no es reversible?", async (value) => {
+    //         if (value) {
+    //             try {
+    //                 ModalAlertInfo("Lote", "Procesando información...");
+    //                 hideModal("modalSocio");
+
+    //                 let result = await axios.delete("/api/lote/socio", {
+    //                     params: {
+    //                         "idVenta": this.state.idVenta,
+    //                         "idCliente": idCliente
+    //                     }
+    //                 });
+
+    //                 ModalAlertSuccess("Lote", result.data, () => {
+    //                     this.loadDataId(this.state.idLote);
+    //                 });
+    //             } catch (error) {
+    //                 ModalAlertWarning("Lote",
+    //                     "Se produjo un error un interno, intente nuevamente.");
+    //             }
+    //         }
+    //     })
+    // }
 
     async onEventImprimir() {
         const data = {
@@ -404,7 +412,6 @@ class LoteDetalle extends React.Component {
                                         <th width="25%">N° Documento</th>
                                         <th width="45%">Información</th>
                                         <th width="20%">Estado</th>
-                                        <th width="5%" className="text-center">Anular</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -415,7 +422,6 @@ class LoteDetalle extends React.Component {
                                                 <td>{item.documento}</td>
                                                 <td>{item.informacion}</td>
                                                 <td className={`${item.estado === 1 ? "text-success" : "text-danger"}`}>{item.estado === 1 ? "ACTIVO" : "ANULADO"}</td>
-                                                <td className="text-center"><button className="btn btn-danger btn-sm" onClick={() => this.onEventAnular(item.idCliente)}><i className="fa fa-ban"></i></button></td>
                                             </tr>
                                         ))
                                     }

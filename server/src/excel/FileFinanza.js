@@ -282,24 +282,26 @@ async function cpeSunat(req, sedeInfo, data) {
         ws.column(6).setWidth(20);//comprobante
         ws.column(7).setWidth(15);//serie
         ws.column(8).setWidth(15);//numeracion
-        ws.column(9).setWidth(15);//fecha
-        ws.column(10).setWidth(15);//monedda
-        ws.column(11).setWidth(15);//base
-        ws.column(12).setWidth(15);//igv
-        ws.column(13).setWidth(15);//monto
-        ws.column(14).setWidth(15);//anulado
-        ws.column(15).setWidth(40);//sunat mensaje
-        ws.column(16).setWidth(20);//refencia
+        ws.column(9).setWidth(15);//banco
+        ws.column(10).setWidth(15);//metodo
+        ws.column(11).setWidth(15);//fecha
+        ws.column(12).setWidth(15);//monedda
+        ws.column(13).setWidth(15);//base
+        ws.column(14).setWidth(15);//igv
+        ws.column(15).setWidth(15);//monto
+        ws.column(16).setWidth(15);//anulado
+        ws.column(17).setWidth(40);//sunat mensaje
+        ws.column(18).setWidth(20);//refencia
 
-        ws.cell(1, 1, 1, 16, true).string(`${sedeInfo.nombreEmpresa}`).style(styleTitle);
-        ws.cell(2, 1, 2, 16, true).string(`RUC: ${sedeInfo.ruc}`).style(styleTitle);
-        ws.cell(3, 1, 3, 16, true).string(`${sedeInfo.direccion}`).style(styleTitle);
-        ws.cell(4, 1, 4, 16, true).string(`Celular: ${sedeInfo.celular} / Telefono: ${sedeInfo.telefono}`).style(styleTitle);
+        ws.cell(1, 1, 1, 18, true).string(`${sedeInfo.nombreEmpresa}`).style(styleTitle);
+        ws.cell(2, 1, 2, 18, true).string(`RUC: ${sedeInfo.ruc}`).style(styleTitle);
+        ws.cell(3, 1, 3, 18, true).string(`${sedeInfo.direccion}`).style(styleTitle);
+        ws.cell(4, 1, 4, 18, true).string(`Celular: ${sedeInfo.celular} / Telefono: ${sedeInfo.telefono}`).style(styleTitle);
 
-        ws.cell(6, 1, 6, 16, true).string(`REPORTE DE COMPROBANTES EMITIDOS A SUNAT`).style(styleTitle);
-        ws.cell(7, 1, 7, 16, true).string(`PERIODO: ${dateFormat(req.query.fechaIni)} al ${dateFormat(req.query.fechaFin)}`).style(styleTitle);
+        ws.cell(6, 1, 6, 18, true).string(`REPORTE DE COMPROBANTES EMITIDOS A SUNAT`).style(styleTitle);
+        ws.cell(7, 1, 7, 18, true).string(`PERIODO: ${dateFormat(req.query.fechaIni)} al ${dateFormat(req.query.fechaFin)}`).style(styleTitle);
 
-        const headerCon = ["#", "Tipo de Documento", "N° de Documento", "Cliente", "Tipo Comprobante", "Comprobante", "Serie", "Numeración", "Fecha", "Moneda", "Base", "Igv", "Monto", "Anulado", "Sunat Observación", "Referencia"];
+        const headerCon = ["#", "Tipo de Documento", "N° de Documento", "Cliente", "Tipo Comprobante", "Comprobante", "Serie", "Numeración", "Banco", "Metodo", "Fecha", "Moneda", "Base", "Igv", "Monto", "Anulado", "Sunat Observación", "Referencia"];
         headerCon.map((item, index) => ws.cell(9, 1 + index).string(item).style(styleTableHeader));
 
         let rowY = 9;
@@ -321,14 +323,18 @@ async function cpeSunat(req, sedeInfo, data) {
             ws.cell(rowY, 6).string(item.comprobante).style(styleBody)
             ws.cell(rowY, 7).string(item.serie).style(styleBody)
             ws.cell(rowY, 8).number(item.numeracion).style(styleBodyInteger)
-            ws.cell(rowY, 9).string(item.fecha).style(styleBody)
-            ws.cell(rowY, 10).string(item.codiso).style(styleBody)
-            ws.cell(rowY, 11).number(parseFloat(formatMoney(item.Base))).style(styleBodyFloat)
-            ws.cell(rowY, 12).number(parseFloat(formatMoney(item.Igv))).style(styleBodyFloat)
-            ws.cell(rowY, 13).number(parseFloat(formatMoney(monto))).style(styleBodyFloat)
-            ws.cell(rowY, 14).number(parseFloat(formatMoney(anulado))).style(styleBodyFloat)
-            ws.cell(rowY, 15).string(item.xmlDescripcion).style(styleBody)
-            ws.cell(rowY, 16).string(item.referencia).style(styleBody)
+
+            ws.cell(rowY, 9).string(item.banco).style(styleBody)
+            ws.cell(rowY, 10).string(item.metodoPago).style(styleBody)
+
+            ws.cell(rowY, 11).string(item.fecha).style(styleBody)
+            ws.cell(rowY, 12).string(item.codiso).style(styleBody)
+            ws.cell(rowY, 13).number(parseFloat(formatMoney(item.Base))).style(styleBodyFloat)
+            ws.cell(rowY, 14).number(parseFloat(formatMoney(item.Igv))).style(styleBodyFloat)
+            ws.cell(rowY, 15).number(parseFloat(formatMoney(monto))).style(styleBodyFloat)
+            ws.cell(rowY, 16).number(parseFloat(formatMoney(anulado))).style(styleBodyFloat)
+            ws.cell(rowY, 17).string(item.xmlDescripcion).style(styleBody)
+            ws.cell(rowY, 18).string(item.referencia).style(styleBody)
         });
 
         return wb.writeToBuffer();

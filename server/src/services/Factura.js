@@ -8,6 +8,7 @@ class Factura {
     /**
      * Metodo usado en el modulo facturación/ventas.
      * @param {*} req 
+     * @param {*} res 
      * @returns object | string
      */
     async list(req, res) {
@@ -125,7 +126,6 @@ class Factura {
             ]);
 
             return sendSuccess(res, { "result": resultLista, "total": total[0].Total });
-
         } catch (error) {
             return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
         }
@@ -971,10 +971,11 @@ class Factura {
             return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
         }
     }
-
+    
     /**
      * Metodo usado en el modulo facturación/ventas/detalle.
      * @param {*} req 
+     * @param {*} res 
      * @returns object | string
      */
     async id(req, res) {
@@ -1046,6 +1047,12 @@ class Factura {
         }
     }
 
+    /**
+     * Metodo usado en el modulo facturación/créditos.
+     * @param {*} req 
+     * @param {*} res 
+     * @returns object | string
+     */
     async credito(req, res) {
         try {
             let lista = await conec.procedure(`CALL Listar_Creditos(?,?,?,?,?,?,?)`, [
@@ -1225,6 +1232,12 @@ class Factura {
         }
     }
 
+    /**
+     * Metodo usado en el modulo facturación/créditos/proceso.
+     * @param {*} req 
+     * @param {*} res 
+     * @returns object | string
+     */
     async detalleCredito(req, res) {
         try {
             const venta = await conec.query(`
@@ -1368,7 +1381,6 @@ class Factura {
             GROUP BY c.idCobro`, [
                 req.query.idVenta
             ]);
-            // console.log({ venta: venta[0], detalle, newPlazos, inicial })
 
             return sendSuccess(res, {
                 "venta": venta[0],

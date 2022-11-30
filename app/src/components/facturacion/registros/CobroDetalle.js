@@ -83,7 +83,7 @@ class CobroDetalle extends React.Component {
                     : cabecera.metodoPago === 2 ? "Consignación"
                         : cabecera.metodoPago === 3 ? "Transferencia"
                             : cabecera.metodoPago === 4 ? "Cheque"
-                                : cabecera.metodoPago === 5 ? "arjeta crédito"
+                                : cabecera.metodoPago === 5 ? "Tarjeta crédito"
                                     : "Tarjeta débito",
                 total: cabecera.monto,
                 simbolo: cabecera.simbolo,

@@ -2124,8 +2124,6 @@ class Cobro {
 
     async cpeSunat(req) {
         try {
-            console.log(req.query)
-
             const result = await conec.procedure(`CALL Listar_CpeExcel(?,?,?)`, [
                 req.query.fechaIni,
                 req.query.fechaFin,

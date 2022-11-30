@@ -105,7 +105,7 @@ class Ventas extends React.Component {
                     "filasPorPagina": this.state.filasPorPagina
                 }
             });
-
+            
             let totalPaginacion = parseInt(Math.ceil((parseFloat(result.data.total) / this.state.filasPorPagina)));
             let messagePaginacion = `Mostrando ${result.data.result.length} de ${totalPaginacion} Páginas`;
 

@@ -34,6 +34,8 @@ router.post('/socio', async function (req, res) {
     const result = await lote.socio(req)
     if (result === "insert") {
         res.status(200).send("Datos registrados correctamente.")
+    } else if (result === "cliente") {
+        res.status(400).send("El cliente ya está registrado como asociado.")
     } else {
         res.status(500).send(result)
     }
@@ -67,15 +69,6 @@ router.delete('/', async function (req, res) {
         res.status(500).send(result)
     }
 });
-
-router.delete('/socio', async function (req, res) {
-    const result = await lote.deleteSocio(req);
-    if (result === "delete") {
-        res.status(200).send("Se anulo el socio correctamente.");
-    } else {
-        res.status(500).send(result)
-    }
-})
 
 router.get('/detalle', async function (req, res) {
     const result = await lote.detalle(req)

@@ -35,10 +35,18 @@ router.get("/id", async function (req, res) {
     return await factura.id(req, res);
 });
 
+/**
+ * Api usado en los modulos
+ * [facturación: créditos]
+ */
 router.get("/credito", async function (req, res) {
     return await factura.credito(req, res);
 });
 
+/**
+ * Api usado en los modulos
+ * [facturación: créditos/proceso]
+ */
 router.get("/credito/detalle", async function (req, res) {
     return await factura.detalleCredito(req, res);
 });

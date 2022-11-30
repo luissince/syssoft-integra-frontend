@@ -3,7 +3,6 @@ const Conexion = require('../database/Conexion');
 const conec = new Conexion();
 
 class Cliente {
-
     /**
      * Metodo usado en el modulo facturación/clientes.
      * @param {*} req 

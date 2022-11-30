@@ -8,7 +8,6 @@ const RepCliente = require('../report/RepCliente');
 
 const cliente = new Cliente();
 const repCliente = new RepCliente();
-
 /**
  * Api usado en los modulos
  * [facturación: clientes]
@@ -84,7 +83,6 @@ router.get('/listfiltrar', async function (req, res) {
         res.status(500).send(result);
     }
 });
-
 /**
  * Api usado en los modulos
  * [facturación: clientes/detalle]
