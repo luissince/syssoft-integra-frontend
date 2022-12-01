@@ -1566,7 +1566,12 @@ class Factura {
         }
     }
 
-    async detalleVenta(req, res) {
+    /**
+     * Metodo usado para generar el pdf [services: factura]/repgeneralventas
+     * @param {*} req 
+     * @returns object | string
+     */
+    async detalleVenta(req) {
         try {
             let ventas = await conec.procedure(`CALL Listar_Ventas(?,?,?,?,?,?)`, [
                 req.query.fechaIni,

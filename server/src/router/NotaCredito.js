@@ -11,6 +11,10 @@ const { isEmail } = require('../tools/Tools');
 
 const repNotaCredito = new RepNotaCredito();
 
+/**
+ * Api usado en los modulos
+ * [facturación: nota de crédito]
+ */
 router.get('/list', async function (req, res) {
     return notaCredito.list(req, res);
 });
@@ -19,11 +23,15 @@ router.get('/id', async function (req, res) {
     return notaCredito.id(req, res);
 });
 
+/**
+ * Api usado en los modulos
+ * [facturación: nota de crédito/preceso]
+ */
 router.post('/add', async function (req, res) {
     return notaCredito.add(req, res);
 });
 
-router.delete('/', async function (req, res){
+router.delete('/', async function (req, res) {
     return notaCredito.delete(req, res);
 });
 
@@ -50,8 +58,8 @@ router.get('/email', async function (req, res) {
                 if (typeof xml === 'string') {
                     return sendError(res, xml);
                 } else {
-                    if (!isEmail(sedeInfo.usuarioEmail) &&  sedeInfo.claveEmail == "") {
-                        return sendClient(res,"Las credenciales del correo para el envío no pueden ser vacios.");
+                    if (!isEmail(sedeInfo.usuarioEmail) && sedeInfo.claveEmail == "") {
+                        return sendClient(res, "Las credenciales del correo para el envío no pueden ser vacios.");
                     } else {
                         if (!isEmail(detalle.cabecera.email)) {
                             return sendClient(res, "El correo del cliente no es valido.")

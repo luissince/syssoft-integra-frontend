@@ -5,6 +5,12 @@ const conec = new Conexion();
 
 class NotaCredito {
 
+    /**
+     * Metodo usado en el modulo facturación/nota de crédito.
+     * @param {*} req 
+     * @param {*} res 
+     * @returns object | string
+     */
     async list(req, res) {
         try {
             let lista = await conec.query(`SELECT 
@@ -290,6 +296,12 @@ class NotaCredito {
         }
     }
 
+    /**
+     * Metodo usado en el modulo facturación/nota de crédito/proceso.
+     * @param {*} req 
+     * @param {*} res 
+     * @returns object | string
+     */
     async add(req, res) {
         let connection = null;
         try {

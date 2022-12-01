@@ -4,6 +4,11 @@ const conec = new Conexion();
 
 class Cobro {
 
+    /**
+     * Metodo usado en el modulo facturación/cobros.
+     * @param {*} req 
+     * @returns object | string
+     */
     async list(req) {
         try {
             let lista = await conec.query(`SELECT 
@@ -1104,6 +1109,12 @@ class Cobro {
         }
     }
 
+    /**
+     * Metodo usado en el modulo facturación/cobros/detalle.
+     * Metodo usado para generar el pdf [services: cobro]/repcomprobante
+     * @param {*} req 
+     * @returns object | string
+     */
     async id(req) {
         try {
             const result = await conec.query(`SELECT
@@ -1644,11 +1655,16 @@ class Cobro {
         }
     }
 
+    /**
+     * Metodo usado para generar el pdf [services: cobro]/repgeneralcobros
+     * @param {*} req 
+     * @returns object | string
+     */
     async cobroGeneral(req) {
         try {
             if (req.query.isDetallado) {
 
-                let cobros = await conec.query(`SELECT 
+                const cobros = await conec.query(`SELECT 
                     c.idCobro, 
                     co.nombre as comprobante,
                     c.serie,
@@ -1715,7 +1731,7 @@ class Cobro {
                     req.query.idUsuario,
                 ]);
 
-                let gastos = await conec.query(`SELECT 
+                const gastos = await conec.query(`SELECT 
                     g.idGasto,
                     co.nombre as comprobante,
                     g.serie,
@@ -1755,7 +1771,7 @@ class Cobro {
 
                 return { "cobros": cobros, "gastos": gastos };
             } else {
-                let cobros = await conec.query(`SELECT
+                const cobros = await conec.query(`SELECT
                     IFNULL(co.idConcepto,'CV01') AS idConcepto,
                     IFNULL(co.nombre,'POR VENTA') AS concepto,
                     'INGRESO' AS tipo,
@@ -1800,7 +1816,7 @@ class Cobro {
                         req.query.idUsuario,
                     ]);
 
-                let gastos = await conec.query(`
+                const gastos = await conec.query(`
                     SELECT
                     co.idConcepto,
                     co.nombre AS concepto,
@@ -1834,7 +1850,7 @@ class Cobro {
                 let lista = [...cobros, ...gastos];
                 let conceptos = [];
 
-                for (let item of lista) {
+                for (const item of lista) {
                     if (conceptos.filter(f => f.idConcepto === item.idConcepto).length === 0) {
                         conceptos.push({
                             "idConcepto": item.idConcepto,
@@ -1847,7 +1863,7 @@ class Cobro {
                             "monto": item.monto
                         })
                     } else {
-                        for (let newItem of conceptos) {
+                        for (const newItem of conceptos) {
                             if (newItem.idConcepto === item.idConcepto) {
                                 let currenteObject = newItem;
                                 currenteObject.cantidad += 1;
@@ -1860,7 +1876,7 @@ class Cobro {
 
                 let bancos = [];
 
-                for (let item of lista) {
+                for (const item of lista) {
                     if (bancos.filter(f => f.idBanco === item.idBanco).length === 0) {
                         bancos.push({
                             "idConcepto": item.idConcepto,
@@ -1872,7 +1888,7 @@ class Cobro {
                             "monto": item.tipo === "INGRESO" ? item.monto : -item.monto
                         })
                     } else {
-                        for (let newItem of bancos) {
+                        for (const newItem of bancos) {
                             if (newItem.idBanco === item.idBanco) {
                                 let currenteObject = newItem;
                                 currenteObject.monto += item.tipo === "INGRESO" ? parseFloat(item.monto) : -parseFloat(item.monto);

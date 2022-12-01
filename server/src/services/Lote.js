@@ -210,7 +210,7 @@ class Lote {
                 req.body.idUsuario
             ]);
 
-            
+
             // await conec.execute(connection, `DELETE FROM asociado WHERE idVenta = ? AND idCliente = ?`, [
             //     req.query.idVenta,
             //     req.query.idClienteOld,
@@ -279,7 +279,7 @@ class Lote {
                 } else {
                     idAlta = 1;
                 }
-                
+
                 await conec.execute(connection, `INSERT INTO alta(
                     idAlta ,
                     idCliente,
@@ -302,6 +302,37 @@ class Lote {
                 WHERE idVenta = ?`, [
                 req.body.idCliente,
                 req.body.idVenta
+            ]);
+
+            let resultAuditoria = await conec.execute(connection, 'SELECT idAuditoria FROM auditoria');
+            let idAuditoria = 0;
+            if (resultAuditoria.length != 0) {
+                let quitarValor = resultAuditoria.map(function (item) {
+                    return parseInt(item.idAuditoria);
+                });
+
+                let valorActual = Math.max(...quitarValor);
+                let incremental = valorActual + 1;
+
+                idAuditoria = incremental;
+            } else {
+                idAuditoria = 1;
+            }
+
+            await conec.execute(connection, `INSERT INTO auditoria(
+                idAuditoria,
+                idProcedencia,
+                descripcion,
+                fecha,
+                hora,
+                idUsuario) 
+                VALUES(?,?,?,?,?,?)`, [
+                idAuditoria,
+                req.body.idVenta,
+                `TRASPASO `,
+                currentDate(),
+                currentTime(),
+                req.body.idUsuario
             ]);
 
             await conec.commit(connection);

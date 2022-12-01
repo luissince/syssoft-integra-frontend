@@ -1174,18 +1174,22 @@ class RepFactura {
 
             let yPos = 101.00;
 
-            doc.fontSize(10).text(`${cabecera.fecha}`,
+            const h1 = 12;
+            const h2 = 11;
+            const h3 = 10;
+
+            doc.fontSize(h2).text(`${cabecera.fecha}`,
                 doc.options.margins.left + 22,
                 yPos + 14);
 
-            doc.fontSize(10).text(`${zfill(cabecera.numeracion)}`,
+            doc.fontSize(h2).text(`${zfill(cabecera.numeracion)}`,
                 doc.options.margins.left + 400,
                 yPos + 14);
 
 
             yPos = doc.y + 3;
 
-            doc.fontSize(10).text(`${cabecera.informacion}  ${cabecera.documento}`,
+            doc.fontSize(h2).text(`${cabecera.informacion}  ${cabecera.documento}`,
                 doc.options.margins.left + 22,
                 yPos);
 
@@ -1194,7 +1198,7 @@ class RepFactura {
             //     yPos);
 
             data.lote.map((lote, index) => {
-                doc.fontSize(9).text(lote.lote + " - " + lote.manzana,
+                doc.fontSize(h2).text(lote.lote + " - " + lote.manzana,
                     doc.options.margins.left + 400,
                     yPos);
             });
@@ -1205,11 +1209,11 @@ class RepFactura {
                 yPos = doc.y + 25;
 
                 data.detalle.map((item, index) => {
-                    doc.fontSize(11).text((index + 1),
+                    doc.fontSize(h1).text((index + 1),
                         doc.options.margins.left + 10,
                         yPos);
 
-                    doc.fontSize(10).text(item.concepto,
+                    doc.fontSize(h1).text(item.concepto,
                         doc.options.margins.left + 80,
                         yPos);
 
@@ -1217,7 +1221,7 @@ class RepFactura {
                     // doc.options.margins.left + 400,
                     // yPos);
 
-                    doc.fontSize(9).text(numberFormat(item.precio, cabecera.codiso),
+                    doc.fontSize(h3).text(numberFormat(item.precio, cabecera.codiso),
                         doc.options.margins.left + 460,
                         yPos);
 
@@ -1229,17 +1233,17 @@ class RepFactura {
                 yPos = doc.y + 25;
 
                 data.venta.map((item, index) => {
-                    doc.fontSize(11).text((index + 1),
+                    doc.fontSize(h1).text((index + 1),
                         doc.options.margins.left + 10,
                         yPos);
 
-                    let concepto = item.concepto  + "- F.V: "+item.fecha;
+                    let concepto = item.concepto + "- F.V: " + item.fecha;
 
                     // data.lote.map((lote, index) => {
                     //     concepto += "\n" + lote.lote + " - " + lote.manzana;
                     // });
 
-                    doc.fontSize(10).text(concepto,
+                    doc.fontSize(h2).text(concepto,
                         doc.options.margins.left + 80,
                         yPos);
 
@@ -1247,7 +1251,7 @@ class RepFactura {
                     // doc.options.margins.left + 400,
                     // yPos);
 
-                    doc.fontSize(9).text(numberFormat(item.precio, cabecera.codiso),
+                    doc.fontSize(h3).text(numberFormat(item.precio, cabecera.codiso),
                         doc.options.margins.left + 460,
                         yPos);
 
@@ -1259,11 +1263,11 @@ class RepFactura {
 
             yPos = 323;
 
-            doc.fontSize(10).text(`SON: ${numberLleters.getResult(formatMoney(total), cabecera.moneda)}`,
+            doc.fontSize(h2).text(`SON: ${numberLleters.getResult(formatMoney(total), cabecera.moneda)}`,
                 doc.options.margins.left + 10,
                 yPos);
 
-            doc.fontSize(9).text(`${numberFormat(total, cabecera.codiso)}`,
+            doc.fontSize(h3).text(`${numberFormat(total, cabecera.codiso)}`,
                 doc.options.margins.left + 460,
                 yPos);
 
@@ -1580,7 +1584,7 @@ class RepFactura {
 
             const table = {
                 subtitle: "DETALLE",
-                headers: ["N°", "Fecha", "Cliente", "Comprobante", "Propiedad", "Tipo", "Estado", "Importe"],
+                headers: content.length == 0 ? ["Ventas"] : ["N°", "Fecha", "Cliente", "Comprobante", "Propiedad", "Tipo", "Estado", "Importe"],
                 rows: content.length == 0 ? [["No hay datos para mostrar"]] : content
             };
 
@@ -1591,7 +1595,7 @@ class RepFactura {
                 },
                 padding: 5,
                 columnSpacing: 5,
-                columnsSize: [30, 60, 102, 80, 80, 60, 60, 60],
+                columnsSize: content.length == 0 ? [532] : [30, 60, 102, 80, 80, 60, 60, 60],
                 x: orgX,
                 y: bodY,
                 width: doc.page.width - doc.options.margins.left - doc.options.margins.right

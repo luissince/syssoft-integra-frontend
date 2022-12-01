@@ -14,6 +14,10 @@ const cobro = new Cobro();
 const repFinanciero = new RepFinanciero();
 const repFactura = new RepFactura();
 
+/**
+ * Api usado en los modulos
+ * [facturación: cobros]
+ */
 router.get('/list', async function (req, res) {
     const result = await cobro.list(req)
     if (typeof result === 'object') {
@@ -72,6 +76,10 @@ router.post('/inicial', async function (req, res) {
     }
 });
 
+/**
+ * Api usado en los modulos
+ * [facturación: cobros/detalle]
+ */
 router.get('/id', async function (req, res) {
     const result = await cobro.id(req)
     if (typeof result === 'object') {
@@ -218,6 +226,10 @@ router.get('/repletramatricial', async function (req, res) {
     }
 });
 
+/**
+ * Api usado en los modulos
+ * [facturación: cobros/detalle]
+ */
 router.get('/repcomprobantematricial', async function (req, res) {
     const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
     req.query.idSede = decryptedData.idSede;
@@ -248,6 +260,10 @@ router.get('/repcomprobantematricial', async function (req, res) {
     }
 });
 
+/**
+ * Api usado en la creación del pdf
+ * [facturación: cobros]
+ */
 router.get('/repcomprobante', async function (req, res) {
     const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
     req.query.idSede = decryptedData.idSede;
@@ -278,6 +294,10 @@ router.get('/repcomprobante', async function (req, res) {
     }
 });
 
+/**
+ * Api usado en la creación del pdf
+ * [reportes: R.Financiero]
+ */
 router.get('/repgeneralcobros', async function (req, res) {
     const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
 

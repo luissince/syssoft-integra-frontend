@@ -155,7 +155,7 @@ class Sede {
         }
     }
 
-    async update(req,res) {
+    async update(req, res) {
         let connection = null;
         try {
 
@@ -199,15 +199,21 @@ class Sede {
         }
     }
 
-    async listarCombo(req,res) {
+    async listarCombo(req, res) {
         try {
             let result = await conec.query('SELECT idSede,nombreSede FROM sede');
-            return sendSuccess(res,result);
+            return sendSuccess(res, result);
         } catch (error) {
             return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
         }
     }
 
+    /**
+     * Metodo usado para generar el pdf [services: cobro]/repcomprobantematricial
+     * Metodo usado para generar el pdf [services: cobro]/repcomprobante
+     * @param {*} req 
+     * @returns object | string
+     */
     async infoSedeReporte(req) {
         try {
             let sede = await conec.query(`SELECT 
