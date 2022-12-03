@@ -177,7 +177,6 @@ class Lote {
         let connection = null;
         try {
             connection = await conec.beginTransaction();
-            console.log(req.body)
             const asociados = await conec.query(`SELECT * FROM asociado 
                 WHERE idCliente = ?`, [
                 req.body.idCliente
@@ -199,8 +198,7 @@ class Lote {
                 estado,
                 fecha,
                 hora,
-                idUsuario
-                ) 
+                idUsuario) 
                 VALUES(?,?,?,?,?,?)`, [
                 req.body.idVenta,
                 req.body.idCliente,
@@ -328,8 +326,8 @@ class Lote {
                 idUsuario) 
                 VALUES(?,?,?,?,?,?)`, [
                 idAuditoria,
-                req.body.idVenta,
-                `TRASPASO `,
+                idTraspado,
+                `TRASPASO`,
                 currentDate(),
                 currentTime(),
                 req.body.idUsuario
@@ -338,7 +336,115 @@ class Lote {
             await conec.commit(connection);
             return "insert";
         } catch (error) {
-            console.log(error);
+            if (connection != null) {
+                await conec.rollback(connection);
+            }
+            return "Se produjo un error de servidor, intente nuevamente.";
+        }
+    }
+
+    async restablecer(req) {
+        let connection = null;
+        try {
+            connection = await conec.beginTransaction();
+      
+            await conec.execute(connection, `UPDATE asociado SET estado = 0 
+            WHERE idVenta = ?`, [
+                req.body.idVenta
+            ]);
+
+            await conec.execute(connection, `UPDATE asociado 
+            SET estado = 1 
+            WHERE idVenta = ? AND idCliente = ?`, [
+                req.body.idVenta,
+                req.body.idCliente,
+            ]);
+
+            let result = await conec.execute(connection, 'SELECT idTraspado FROM traspaso');
+            let idTraspado = "";
+            if (result.length != 0) {
+                let quitarValor = result.map(function (item) {
+                    return parseInt(item.idTraspado.replace("TR", ''));
+                });
+
+                let valorActual = Math.max(...quitarValor);
+                let incremental = valorActual + 1;
+                let codigoGenerado = "";
+                if (incremental <= 9) {
+                    codigoGenerado = 'TR000' + incremental;
+                } else if (incremental >= 10 && incremental <= 99) {
+                    codigoGenerado = 'TR00' + incremental;
+                } else if (incremental >= 100 && incremental <= 999) {
+                    codigoGenerado = 'TR0' + incremental;
+                } else {
+                    codigoGenerado = 'TR' + incremental;
+                }
+
+                idTraspado = codigoGenerado;
+            } else {
+                idTraspado = "TR0001";
+            }
+
+            await conec.execute(connection, `INSERT INTO traspaso(
+                idTraspado,
+                idVenta,
+                idClienteNuevo,
+                idClienteAntiguo,
+                fecha,
+                hora,
+                idUsuario) 
+                VALUES(?,?,?,?,?,?,?)`, [
+                idTraspado,
+                req.body.idVenta,
+                req.body.idCliente,
+                req.body.idCliente,
+                currentDate(),
+                currentTime(),
+                req.body.idUsuario
+            ]);
+
+            await conec.execute(connection, `UPDATE venta 
+            SET idCliente = ?
+            WHERE idVenta = ?`, [
+                req.body.idCliente,
+                req.body.idVenta
+            ]);
+
+            let resultAuditoria = await conec.execute(connection, 'SELECT idAuditoria FROM auditoria');
+            let idAuditoria = 0;
+            if (resultAuditoria.length != 0) {
+                let quitarValor = resultAuditoria.map(function (item) {
+                    return parseInt(item.idAuditoria);
+                });
+
+                let valorActual = Math.max(...quitarValor);
+                let incremental = valorActual + 1;
+
+                idAuditoria = incremental;
+            } else {
+                idAuditoria = 1;
+            }
+
+            await conec.execute(connection, `INSERT INTO auditoria(
+                idAuditoria,
+                idProcedencia,
+                descripcion,
+                fecha,
+                hora,
+                idUsuario) 
+                VALUES(?,?,?,?,?,?)`, [
+                idAuditoria,
+                idTraspado,
+                `RESTABLECER TRASPADO`,
+                currentDate(),
+                currentTime(),
+                req.body.idUsuario
+            ]);
+
+            await conec.commit(connection);
+            return "insert";
+        } catch (ex) {
+            console.log(ex)
             if (connection != null) {
                 await conec.rollback(connection);
             }

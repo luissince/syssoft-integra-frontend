@@ -182,30 +182,28 @@ class LoteDetalle extends React.Component {
         })
     }
 
-    // async onEventAnular(idCliente) {
-    //     ModalAlertDialog("Lote", "¿Está seguro de anular al socio, la operación no es reversible?", async (value) => {
-    //         if (value) {
-    //             try {
-    //                 ModalAlertInfo("Lote", "Procesando información...");
-    //                 hideModal("modalSocio");
+    async onEventRestablecer(idCliente) {
+        ModalAlertDialog("Lote", "¿Está seguro de restablecer al socio, la operación no es reversible?", async (value) => {
+            if (value) {
+                try {
+                    ModalAlertInfo("Lote", "Procesando información...");
 
-    //                 let result = await axios.delete("/api/lote/socio", {
-    //                     params: {
-    //                         "idVenta": this.state.idVenta,
-    //                         "idCliente": idCliente
-    //                     }
-    //                 });
+                    let result = await axios.post("/api/lote/restablecer", {
+                        "idVenta": this.state.idVenta,
+                        "idCliente": idCliente,
+                        "idUsuario": this.state.idUsuario
+                    });
 
-    //                 ModalAlertSuccess("Lote", result.data, () => {
-    //                     this.loadDataId(this.state.idLote);
-    //                 });
-    //             } catch (error) {
-    //                 ModalAlertWarning("Lote",
-    //                     "Se produjo un error un interno, intente nuevamente.");
-    //             }
-    //         }
-    //     })
-    // }
+                    ModalAlertSuccess("Lote", result.data, () => {
+                        this.loadDataId(this.state.idLote);
+                    });
+                } catch (error) {
+                    ModalAlertWarning("Lote",
+                        "Se produjo un error un interno, intente nuevamente.");
+                }
+            }
+        })
+    }
 
     async onEventImprimir() {
         const data = {
@@ -412,6 +410,7 @@ class LoteDetalle extends React.Component {
                                         <th width="25%">N° Documento</th>
                                         <th width="45%">Información</th>
                                         <th width="20%">Estado</th>
+                                        <th width="5%">Restablecer</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -422,6 +421,18 @@ class LoteDetalle extends React.Component {
                                                 <td>{item.documento}</td>
                                                 <td>{item.informacion}</td>
                                                 <td className={`${item.estado === 1 ? "text-success" : "text-danger"}`}>{item.estado === 1 ? "ACTIVO" : "ANULADO"}</td>
+                                                <td className="text-center">
+                                                    {
+                                                        item.estado === 0 ?
+                                                            <button
+                                                                type="button"
+                                                                className="btn btn-warning btn-sm"
+                                                                onClick={() => this.onEventRestablecer(item.idCliente)}>
+                                                                <i className="fa fa-level-up"></i>
+                                                            </button>
+                                                            : null
+                                                    }
+                                                </td>
                                             </tr>
                                         ))
                                     }
