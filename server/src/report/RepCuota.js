@@ -235,12 +235,13 @@ class RepCuota {
             });
 
             // ==============================================================================================
-
-            let credito = venta.total - data.inicial
-            let arrayIni = [0, '', '', '', numberFormat(credito), ''];
+           
+            let credito = venta.total - data.inicial.reduce((previousValue, currentValue) => previousValue + currentValue.monto, 0)
+            let arrayIni = [0, '', '', '', numberFormat(credito), ''];            
 
             let content = data.plazos.map((item, index) => {
-                credito = credito - item.monto
+                credito = credito - item.monto;
+
                 return [
                     ++index,
                     "CUOTA " + item.cuota,
