@@ -93,7 +93,7 @@ class VentaProceso extends React.Component {
             frecuenciaPago: new Date().getDate() > 15 ? '30' : '15',
 
             mmonth: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-            year: [2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2020, 2021, 2022],
+            year: [2015, 2016, 2017, 2018, 2019, 2020, 2020, 2021, 2022, 2023, 2024, 2025, 2026, 2027, 2028, 2029, 2030],
 
         }
 
@@ -174,16 +174,16 @@ class VentaProceso extends React.Component {
 
     loadData = async () => {
         try {
-        
-            const comprobanteLibre = await apiComprobanteListcombo(this.abortControllerView.signal,{
+
+            const comprobanteLibre = await apiComprobanteListcombo(this.abortControllerView.signal, {
                 "tipo": "2"
             });
-          
-            const facturadoCobro = await apiComprobanteListcombo(this.abortControllerView.signal,{
+
+            const facturadoCobro = await apiComprobanteListcombo(this.abortControllerView.signal, {
                 "tipo": "1"
             });
-           
-            const comprobanteCobro = await apiComprobanteListcombo(this.abortControllerView.signal,{
+
+            const comprobanteCobro = await apiComprobanteListcombo(this.abortControllerView.signal, {
                 "tipo": "5"
             });
 
