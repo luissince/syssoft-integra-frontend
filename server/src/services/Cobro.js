@@ -51,7 +51,7 @@ class Cobro {
             LEFT JOIN cobroVenta AS cv ON cv.idCobro = c.idCobro 
             LEFT JOIN plazo AS pl ON pl.idPlazo = cv.idPlazo
 
-            LEFT JOIN venta AS v ON cv.idVenta = v.idVenta 
+            LEFT JOIN venta AS v ON c.idProcedencia = v.idVenta 
             LEFT JOIN comprobante AS cp ON v.idComprobante = cp.idComprobante
             LEFT JOIN ventaDetalle AS vd ON vd.idVenta = v.idVenta 
             LEFT JOIN lote AS lo ON lo.idLote = vd.idLote
@@ -1117,8 +1117,9 @@ class Cobro {
      */
     async id(req) {
         try {
-            const result = await conec.query(`SELECT
+            const cobro = await conec.query(`SELECT
             c.idCobro,
+            c.idProcedencia,
             co.nombre as comprobante,
             c.serie,
             c.numeracion,
@@ -1169,7 +1170,7 @@ class Cobro {
                 req.query.idCobro
             ]);
 
-            if (result.length > 0) {
+            if (cobro.length > 0) {
 
                 const detalle = await conec.query(`SELECT 
                 co.nombre as concepto,
@@ -1186,8 +1187,7 @@ class Cobro {
                 INNER JOIN concepto AS co ON cd.idConcepto = co.idConcepto
                 INNER JOIN impuesto AS imp ON cd.idImpuesto  = imp.idImpuesto
                 INNER JOIN medida AS md ON md.idMedida = cd.idMedida 
-                WHERE cd.idCobro = ?
-                `, [
+                WHERE cd.idCobro = ?`, [
                     req.query.idCobro
                 ]);
 
@@ -1226,24 +1226,21 @@ class Cobro {
                     req.query.idCobro
                 ]);
 
-                let lote = null;
-                if (venta.length > 0) {
-                    lote = await conec.query(`SELECT 
+                const lote = await conec.query(`SELECT 
                     l.descripcion as lote,
                     m.nombre as manzana 
                     FROM ventaDetalle AS vd
                     INNER JOIN lote AS l on l.idLote = vd.idLote
                     INNER JOIN manzana as m ON m.idManzana = l.idManzana
                     WHERE vd.idVenta = ?`, [
-                        venta[0].idVenta
-                    ]);
-                }
+                    cobro[0].idProcedencia
+                ]);
 
                 return {
-                    "cabecera": result[0],
+                    "cabecera": cobro[0],
                     "detalle": detalle,
                     "venta": venta,
-                    "lote": lote == null ? [] : lote
+                    "lote": lote
                 };
             } else {
                 return "Datos no encontrados";

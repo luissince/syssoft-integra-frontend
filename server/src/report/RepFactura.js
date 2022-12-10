@@ -416,7 +416,7 @@ class RepFactura {
             let topCebecera = doc.y + 5;
 
             doc.fontSize(h3).text(
-                `Tipo de documento: ${cabecera.tipoDoc} \nN° de documento: ${cabecera.documento} \nNombre/Razón Social: ${cabecera.informacion}\nDirección: ${cabecera.direccion}`,
+                `Tipo de documento: ${cabecera.tipoDoc} \nN° de documento: ${cabecera.documento} \nNombre/Razón Social: ${cabecera.informacion}\nDirección: ${cabecera.direccion}\nLote: ${data.lote.length == 0 ? "" : data.lote[0].lote + " - " + data.lote[0].manzana}`,
                 doc.options.margins.left,
                 topCebecera
             );
@@ -431,7 +431,7 @@ class RepFactura {
 
             doc.x = doc.options.margins.left;
 
-            let detalle = data.detalle.length > 0 ?
+            const detalle = data.detalle.length > 0 ?
                 data.detalle.map((item, index) => {
                     return [
                         ++index,
@@ -448,7 +448,7 @@ class RepFactura {
                     return [
                         ++index,
                         item.medida,
-                        item.concepto + "\n" + (data.lote.length == 0 ? "" : data.lote[0].lote + " - " + data.lote[0].manzana),
+                        item.concepto,
                         item.cantidad,
                         item.impuesto,
                         numberFormat(item.precio, cabecera.codiso),
@@ -458,9 +458,7 @@ class RepFactura {
 
             const table = {
                 subtitle: "DETALLE",
-                headers: data.detalle.length > 0
-                    ? ["Ítem", "Medida", "Concepto", "Cantidad", "Impuesto", "Valor", "Monto"]
-                    : ["Ítem", "Medida", "Concepto", "Cantidad", "Impuesto", "Valor", "Monto"],
+                headers: ["Ítem", "Medida", "Concepto", "Cantidad", "Impuesto", "Valor", "Monto"],
                 rows: detalle,
             };
 
@@ -473,7 +471,7 @@ class RepFactura {
                 columnSpacing: 5,
                 columnsSize: [30, 70, 132, 60, 80, 80, 80],
                 x: doc.x,
-                y: doc.y + 20,
+                y: doc.y + 30,
                 width: doc.page.width - doc.options.margins.left - doc.options.margins.right
             });
 
