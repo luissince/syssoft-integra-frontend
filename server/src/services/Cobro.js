@@ -1,4 +1,4 @@
-const { currentDate, currentTime, numberFormat } = require('../tools/Tools');
+const { currentDate, currentTime, numberFormat,formatMoney } = require('../tools/Tools');
 const Conexion = require('../database/Conexion');
 const conec = new Conexion();
 
@@ -888,20 +888,22 @@ class Cobro {
             ]);
 
             let cobradoPlazo = await conec.execute(connection, `SELECT 
-            IFNULL(SUM(cv.precio),0) AS total
+            FORMAT(IFNULL(SUM(cv.precio),0),2) AS total
             FROM cobro AS c 
             INNER JOIN cobroVenta AS cv ON c.idCobro = cv.idCobro
             LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro AND nc.estado = 1
-            WHERE cv.idPlazo  = ? AND c.estado = 1 AND nc.idNotaCredito IS NULL`, [
+            WHERE cv.idPlazo = ? AND c.estado = 1 AND nc.idNotaCredito IS NULL`, [
                 req.body.idPlazo
             ]);
 
-            if (cobradoPlazo[0].total > totalPlazo[0].monto) {
+            const cobroTotal = Number(formatMoney(cobradoPlazo[0].total));
+
+            if (cobroTotal > totalPlazo[0].monto) {
                 await conec.rollback(connection);
                 return `El monto a ingresar supera al total con un diferencia de ${numberFormat(cobradoPlazo[0].total - totalPlazo[0].monto)}`;
             }
 
-            if (cobradoPlazo[0].total == totalPlazo[0].monto) {
+            if (cobroTotal == totalPlazo[0].monto) {
                 await conec.execute(connection, `UPDATE plazo SET estado = 1 WHERE idPlazo = ?`, [
                     req.body.idPlazo,
                 ]);

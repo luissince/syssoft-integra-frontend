@@ -82,6 +82,9 @@ class Paginacion extends React.Component {
     if (this.props.restart) {
       this.upperPageBound = 3;
       this.lowerPageBound = 0;
+      this.isPrevBtnActive = "disabled";
+      this.isNextBtnActive = "";
+      this.pageBound = 3;
     }
 
     const pageNumbers = [];
