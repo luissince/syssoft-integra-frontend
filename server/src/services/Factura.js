@@ -13,7 +13,7 @@ class Factura {
      */
     async list(req, res) {
         try {
-            let lista = await conec.query(`SELECT 
+            const lista = await conec.query(`SELECT 
                 v.idVenta,
                 c.idCliente,
                 c.documento, 
@@ -77,14 +77,14 @@ class Factura {
                 parseInt(req.query.filasPorPagina)
             ])
 
-            let resultLista = lista.map(function (item, index) {
+            const resultLista = lista.map(function (item, index) {
                 return {
                     ...item,
                     id: (index + 1) + parseInt(req.query.posicionPagina)
                 }
             });
 
-            let total = await conec.query(`SELECT COUNT(*) AS Total 
+            const total = await conec.query(`SELECT COUNT(*) AS Total 
                 FROM venta AS v 
                 INNER JOIN cliente AS c ON v.idCliente = c.idCliente
                 INNER JOIN comprobante as co ON v.idComprobante = co.idComprobante
@@ -131,6 +131,12 @@ class Factura {
         }
     }
 
+    /**
+     * 
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     async add(req, res) {
         let connection = null;
         try {
@@ -141,8 +147,8 @@ class Factura {
             /**
              * Validar si un lote esta vendido.
              */
-            for (let item of req.body.detalleVenta) {
-                let lote = await conec.execute(connection, `SELECT idLote FROM lote 
+            for (const item of req.body.detalleVenta) {
+                const lote = await conec.execute(connection, `SELECT idLote FROM lote 
                     WHERE idLote = ? AND estado = 3`, [
                     item.idDetalle
                 ]);

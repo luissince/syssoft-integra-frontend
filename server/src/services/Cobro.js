@@ -11,7 +11,7 @@ class Cobro {
      */
     async list(req) {
         try {
-            let lista = await conec.query(`SELECT 
+            const lista = await conec.query(`SELECT 
             c.idCobro, 
             co.nombre as comprobante,
             c.serie,
@@ -28,8 +28,10 @@ class Cobro {
                 END 
             END AS detalle,
 
+            IFNULL(v.idVenta,'') AS idVentaRef,
             IFNULL(CONCAT(cp.nombre,' ',v.serie,'-',v.numeracion),'') AS comprobanteRef,
             IFNULL(CONCAT(lo.descripcion,' - ',ma.nombre),'') AS loteRef, 
+            IFNULL(v.estado,0) AS estadoRef,
             m.simbolo,
             m.codiso,
             b.nombre as banco,  
@@ -95,14 +97,14 @@ class Cobro {
                 parseInt(req.query.filasPorPagina)
             ]);
 
-            let resultLista = lista.map(function (item, index) {
+            const resultLista = lista.map(function (item, index) {
                 return {
                     ...item,
                     id: (index + 1) + parseInt(req.query.posicionPagina)
                 }
             });
 
-            let total = await conec.query(`SELECT COUNT(*) AS Total        
+            const total = await conec.query(`SELECT COUNT(*) AS Total        
             FROM cobro AS c
             INNER JOIN cliente AS cl ON c.idCliente = cl.idCliente
             INNER JOIN banco AS b ON c.idBanco = b.idBanco

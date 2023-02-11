@@ -1,4 +1,5 @@
 const Conexion = require('../database/Conexion');
+const { sendSuccess, sendError, sendClient, sendSave } = require('../tools/Message');
 const { currentDate, currentTime } = require('../tools/Tools');
 const conec = new Conexion();
 
@@ -6,7 +7,7 @@ class Lote {
 
     async list(req) {
         try {
-            let lista = await conec.query(`SELECT 
+            const lista = await conec.query(`SELECT 
                 l.idLote,
                 l.descripcion,
                 m.nombre as manzana,
@@ -41,14 +42,14 @@ class Lote {
                 parseInt(req.query.filasPorPagina)
             ])
 
-            let resultLista = lista.map(function (item, index) {
+            const resultLista = lista.map(function (item, index) {
                 return {
                     ...item,
                     id: (index + 1) + parseInt(req.query.posicionPagina)
                 }
             });
 
-            let total = await conec.query(`SELECT COUNT(*) AS Total 
+            const total = await conec.query(`SELECT COUNT(*) AS Total 
                 FROM lote AS l INNER JOIN manzana AS m 
                 ON l.idManzana = m.idManzana 
                 WHERE
@@ -343,11 +344,17 @@ class Lote {
         }
     }
 
-    async restablecer(req) {
+    /**
+     * 
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
+    async restablecer(req, res) {
         let connection = null;
         try {
             connection = await conec.beginTransaction();
-      
+
             await conec.execute(connection, `UPDATE asociado SET estado = 0 
             WHERE idVenta = ?`, [
                 req.body.idVenta
@@ -449,6 +456,32 @@ class Lote {
                 await conec.rollback(connection);
             }
             return "Se produjo un error de servidor, intente nuevamente.";
+        }
+    }
+
+
+    async liberar(req, res) {
+        let connection = null;
+        try {
+            connection = await conec.beginTransaction();
+
+            await conec.execute(connection, `UPDATE lote SET estado = 1 
+            WHERE idLote = ?`, [
+                req.body.idLote
+            ]);
+
+            await conec.execute(connection, `UPDATE venta SET estado = 4 
+            WHERE idVenta = ?`, [
+                req.body.idVenta
+            ]);
+
+            await conec.commit(connection);
+            return sendSuccess(res, "El proceso se liberación del lote se completo correctamente.");
+        } catch (error) {
+            if (connection != null) {
+                await conec.rollback(connection);
+            }
+            return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
         }
     }
 
@@ -615,6 +648,7 @@ class Lote {
 
     async detalle(req) {
         try {
+
             const cabecera = await conec.query(`SELECT 
                 l.idLote,
                 m.nombre as manzana,
@@ -651,7 +685,7 @@ class Lote {
             v.idCliente
             FROM venta AS v 
             INNER JOIN ventaDetalle AS vd ON v.idVenta = vd.idVenta
-            WHERE vd.idLote = ?`, [
+            WHERE vd.idLote = ? AND v.estado IN (1,2)`, [
                 req.query.idLote,
             ])
 

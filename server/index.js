@@ -5,41 +5,7 @@ const path = require('path');
 const socket = require('socket.io');
 const cors = require('cors');
 const swaggerUi = require('swagger-ui-express');
-const swaggerJsdoc = require('swagger-jsdoc');
-
-const swaggerDocument = {
-    failOnErrors: false,
-    definition: {
-        openapi: '3.0.0',
-        info: {
-            title: 'Node Mysql Api Inmobiliario',
-            version: '1.0.0',
-            description:
-                'Esta API fue creada para la empresa GYMC INMOBILIARIA para sus procesos',
-
-            license: {
-                name: 'MIT',
-                url: 'https://spdx.org/licenses/MIT.html',
-            },
-            contact: {
-                name: 'Luis Lara',
-                url: 'https://www.facebook.com/luisal.laras/',
-            },
-        },
-        servers: [
-            {
-                url: "http://localhost:5000",
-                description: "EndPoint de desarrollo"
-            },
-            {
-                url: "https://www.inmobiliariagmyc.com",
-                description: "EndPoint de producción"
-            },
-        ]
-    },
-    apis: [`${__dirname}/src/router/*.js`],
-};
-
+const swagger = require('./src/swagger');
 /**
  * Carga de variable de entorno
  */
@@ -85,7 +51,7 @@ app.set('port', process.env.PORT || 5000);
 
 app.use(express.json({ limit: '1024mb' }));
 app.use(express.urlencoded({ limit: '1024mb', extended: false }));
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerJsdoc(swaggerDocument)));
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swagger));
 
 /**
  * Cargar la app estatica compilada

@@ -12,6 +12,7 @@ import {
     statePrivilegio,
     keyUpSearch
 } from '../tools/Tools';
+import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import Paginacion from '../tools/Paginacion';
 
@@ -244,9 +245,26 @@ class Cobros extends React.Component {
                                                         <td>{item.banco}</td>
                                                         <td>{item.detalle}
                                                             <br />
-                                                            <small>{item.comprobanteRef}</small>
+                                                            <small>
+                                                                {
+                                                                    item.comprobanteRef !== "" ?
+                                                                        <Link className='btn-link' to={`/inicio/ventas/detalle?idVenta=${item.idVentaRef}`}>
+                                                                            {item.comprobanteRef} <i className='fa fa-external-link-square'></i>
+                                                                        </Link>
+                                                                        : null
+                                                                }
+                                                            </small>
                                                             <br />
                                                             <small>{item.loteRef}</small>
+                                                            {
+                                                                item.estadoRef === 4 ?
+                                                                    <>
+                                                                        <br />
+                                                                        <small className="text-danger">MODIFICADO</small>
+                                                                    </>
+                                                                    :
+                                                                    null
+                                                            }
                                                         </td>
                                                         <td>{item.estado === 1 && item.idNotaCredito === null ?
                                                             <span className="text-success">COBRADO</span> :

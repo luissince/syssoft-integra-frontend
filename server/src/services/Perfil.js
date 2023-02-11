@@ -116,7 +116,7 @@ class Perfil {
                     0
                 ]);
 
-                let submenus = await conec.execute(connection, `SELECT idSubMenu  FROM subMenu WHERE idMenu = ?`, [
+                let submenus = await conec.execute(connection, `SELECT idSubMenu FROM subMenu WHERE idMenu = ?`, [
                     menu.idMenu
                 ]);
 

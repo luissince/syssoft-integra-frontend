@@ -13,7 +13,7 @@ import './recursos/css/footerbar.css';
 import './recursos/js/bootstrap.js';
 import '../../node_modules/bootstrap-icons/font/bootstrap-icons.css';
 import '../../node_modules/react-notifications/lib/notifications.css';
-import './recursos/js/sweetalert.js';
+import './network/api/axios';
 
 ReactDOM.render(
     <Provider store={store}>

@@ -20,7 +20,7 @@ import {
     ModalAlertDialog
 } from '../../tools/Tools';
 import { connect } from 'react-redux';
-import { apiComprobanteListcombo, apiFacturaCreditoDetalle, apiVentaCobro } from '../../../api';
+import { apiComprobanteListcombo, apiFacturaCreditoDetalle, apiVentaCobro } from '../../../network/api';
 import SearchBarLote from "../../tools/SearchBarLote";
 
 class CreditoProceso extends React.Component {

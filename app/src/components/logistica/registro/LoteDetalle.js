@@ -1,5 +1,4 @@
 import React from 'react';
-import axios from 'axios';
 import CryptoJS from 'crypto-js';
 import {
     showModal,
@@ -15,7 +14,11 @@ import {
     ModalAlertWarning,
     ModalAlertError
 } from '../../tools/Tools';
+import { liberarTerreno, listarComboCliente, loteDetalle, loteRestablecer, loteSocio } from '../../../network/api/axios';
 import { connect } from 'react-redux';
+
+import Response from '../../../network/api/response';
+import { CANCELED, ERROR } from '../../../network/exception/types';
 
 class LoteDetalle extends React.Component {
     constructor(props) {
@@ -44,6 +47,8 @@ class LoteDetalle extends React.Component {
         }
 
         this.abortControllerTable = new AbortController();
+
+        this.abortControllerLiberar = new AbortController();
 
         this.refCliente = React.createRef();
     }
@@ -82,17 +87,16 @@ class LoteDetalle extends React.Component {
 
     componentWillUnmount() {
         this.abortControllerTable.abort();
+        this.abortControllerLiberar.abort();
     }
 
     async loadData() {
-        try {
-            let cliente = await axios.get("/api/cliente/listcombo", {
-                signal: this.abortControllerModal.signal,
-            });
+        const response = await listarComboCliente(this.abortControllerModal.signal);
 
+        if (response instanceof Response) {
             let newLista = [];
 
-            for (let cli of cliente.data) {
+            for (let cli of response.data) {
                 for (let soc of this.state.socios) {
                     if (cli.idCliente !== soc.idCliente) {
                         newLista.push({ ...cli });
@@ -105,39 +109,42 @@ class LoteDetalle extends React.Component {
                 clientes: newLista,
                 loadModal: false
             })
-        } catch (error) {
-            if (error.message !== "canceled") {
-                await this.setStateAsync({
-                    msgModal: "Se produjo un error interno, intente nuevamente."
-                });
-            }
+            return;
         }
+
+        if (response instanceof Object) {
+            if (response.type === CANCELED) return;
+
+            await this.setStateAsync({
+                msgModal: response.message
+            });
+        }
+
     }
 
     async loadDataId(id) {
-        try {
-            await this.setStateAsync({ loading: true });
+        const data = {
+            "idLote": id
+        }
+        const response = await loteDetalle(data, this.abortControllerTable.signal);
 
-            const result = await axios.get("/api/lote/detalle", {
-                signal: this.abortControllerTable.signal,
-                params: {
-                    "idLote": id
-                }
-            });
-
+        if (response instanceof Response) {
             await this.setStateAsync({
-                lote: result.data.lote,
-                socios: result.data.socios,
-                detalle: result.data.detalle,
+                lote: response.data.lote,
+                socios: response.data.socios,
+                detalle: response.data.detalle,
                 idLote: id,
-                idVenta: result.data.venta.idVenta,
-                idClienteOld: result.data.venta.idCliente
-                , loading: false,
+                idVenta: response.data.venta.idVenta,
+                idClienteOld: response.data.venta.idCliente,
+                loading: false,
             });
-        } catch (error) {
-            if (error.message !== "canceled") {
-                this.props.history.goBack();
-            }
+            return;
+        }
+
+        if (response instanceof Object) {
+            if (response.type === CANCELED) return;
+
+            this.props.history.goBack();
         }
     }
 
@@ -154,28 +161,32 @@ class LoteDetalle extends React.Component {
 
         ModalAlertDialog("Lote", "¿Está seguro de registrar el asociado?. El lote va pasar a nombre del nuevo socio.", async (value) => {
             if (value) {
-                try {
-                    ModalAlertInfo("Lote", "Procesando información...");
-                    hideModal("modalSocio");
+                ModalAlertInfo("Lote", "Procesando información...");
+                hideModal("modalSocio");
 
-                    let result = await axios.post("/api/lote/socio", {
-                        "idLote": this.state.idLote,
-                        "idVenta": this.state.idVenta,
-                        "idCliente": this.state.idCliente,
-                        "idClienteOld": this.state.idClienteOld,
-                        "idUsuario": this.state.idUsuario,
-                        "idProyecto": this.state.idProyecto,
-                    });
+                const data = {
+                    "idLote": this.state.idLote,
+                    "idVenta": this.state.idVenta,
+                    "idCliente": this.state.idCliente,
+                    "idClienteOld": this.state.idClienteOld,
+                    "idUsuario": this.state.idUsuario,
+                    "idProyecto": this.state.idProyecto,
+                }
 
-                    ModalAlertSuccess("Lote", result.data, () => {
-                        this.loadDataId(this.state.idLote);
-                    });
-                } catch (error) {
-                    if (error.response) {
-                        ModalAlertWarning("Lote", error.response.data);
+                const response = await loteSocio(data);
+
+                if (response instanceof Response) {
+                    ModalAlertSuccess("Lote", response.data, () => this.loadDataId(this.state.idLote));
+                    return;
+                }
+
+                if (response instanceof Object) {
+                    if (response.type === CANCELED) return;
+
+                    if (response.type === ERROR) {
+                        ModalAlertError("Lote", response.message);
                     } else {
-                        ModalAlertError("Lote",
-                            "Se produjo un error un interno, intente nuevamente.");
+                        ModalAlertWarning("Lote", response.message);
                     }
                 }
             }
@@ -185,21 +196,30 @@ class LoteDetalle extends React.Component {
     async onEventRestablecer(idCliente) {
         ModalAlertDialog("Lote", "¿Está seguro de restablecer al socio, la operación no es reversible?", async (value) => {
             if (value) {
-                try {
-                    ModalAlertInfo("Lote", "Procesando información...");
+                ModalAlertInfo("Lote", "Procesando información...");
 
-                    let result = await axios.post("/api/lote/restablecer", {
-                        "idVenta": this.state.idVenta,
-                        "idCliente": idCliente,
-                        "idUsuario": this.state.idUsuario
-                    });
+                const data = {
+                    "idVenta": this.state.idVenta,
+                    "idCliente": idCliente,
+                    "idUsuario": this.state.idUsuario
+                }
 
-                    ModalAlertSuccess("Lote", result.data, () => {
-                        this.loadDataId(this.state.idLote);
-                    });
-                } catch (error) {
-                    ModalAlertWarning("Lote",
-                        "Se produjo un error un interno, intente nuevamente.");
+                const response = await loteRestablecer(data);
+
+                if (response instanceof Response) {
+
+                    ModalAlertSuccess("Lote", response.data, () => this.loadDataId(this.state.idLote));
+                    return;
+                }
+
+                if (response instanceof Object) {
+                    if (response.type === CANCELED) return;
+
+                    if (response.type === ERROR) {
+                        ModalAlertError("Lote", response.message);
+                    } else {
+                        ModalAlertWarning("Lote", response.message);
+                    }
                 }
             }
         })
@@ -236,6 +256,31 @@ class LoteDetalle extends React.Component {
         // } catch (error) {
         //     console.log(error)
         // }
+    }
+    async onEventLiberar() {
+        ModalAlertDialog("Lote", "¿Está seguro de liberar el lote?. Los cambios no son irreversibles.", async (value) => {
+            if (value) {
+                ModalAlertInfo("Lote", "Procesando liberación...");
+
+                const data = {
+                    "idLote": this.state.idLote,
+                    "idVenta": this.state.idVenta,
+                }
+
+                const response = await liberarTerreno(data, this.abortControllerLiberar.signal);
+                if (response instanceof Response) {
+                    ModalAlertSuccess("Lote", response.data, () => this.props.history.goBack());
+                    return;
+                }
+
+                if (response instanceof Object) {
+                    if (response.type === CANCELED) return;
+
+                    ModalAlertWarning("Lote", response.message);
+                    return;
+                }
+            }
+        });
     }
 
     render() {
@@ -307,6 +352,8 @@ class LoteDetalle extends React.Component {
                             <button type="button" className="btn btn-light" onClick={() => this.onEventImprimir()}><i className="fa fa-print"></i> Imprimir</button>
                             {" "}
                             <button type="button" className="btn btn-light"><i className="fa fa-file-archive-o"></i> Adjuntar</button>
+                            {" "}
+                            <button type="button" className="btn btn-danger" onClick={() => this.onEventLiberar()}><i className="fa fa-ban"></i> Liberar</button>
                         </div>
                     </div>
                 </div>

@@ -28,7 +28,7 @@ import error from '../../recursos/images/error.svg';
 import pdf from '../../recursos/images/pdf.svg';
 import xml from '../../recursos/images/xml.png';
 import email from '../../recursos/images/email.svg';
-import { apiComprobanteListcombo } from '../../api';
+import { apiComprobanteListcombo } from '../../network/api';
 import { connect } from 'react-redux';
 import FileDownloader from "../reporte/hooks/FileDownloader";
 import Paginacion from '../tools/Paginacion';

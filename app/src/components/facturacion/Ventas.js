@@ -105,7 +105,7 @@ class Ventas extends React.Component {
                     "filasPorPagina": this.state.filasPorPagina
                 }
             });
-            
+
             let totalPaginacion = parseInt(Math.ceil((parseFloat(result.data.total) / this.state.filasPorPagina)));
             let messagePaginacion = `Mostrando ${result.data.result.length} de ${totalPaginacion} Páginas`;
 
@@ -232,23 +232,86 @@ class Ventas extends React.Component {
                                             this.state.lista.map((item, index) => {
                                                 return (
                                                     <tr key={index}>
-                                                        <td className="text-center">{item.id}</td>
-                                                        <td>{item.documento}{<br />}{item.informacion}</td>
-                                                        <td>{item.comprobante}{<br />}{item.serie + "-" + item.numeracion}</td>
-                                                        <td>{<span>{item.fecha}</span>}{<br></br>}{<span>{timeForma24(item.hora)}</span>}</td>
+                                                        <td className={`text-center`}>{
+                                                            item.estado === 4
+                                                                ?
+                                                                <del>{item.id}</del>
+                                                                :
+                                                                item.id
+                                                        }</td>
+                                                        <td>{
+                                                            item.estado === 4
+                                                                ?
+                                                                <>
+                                                                    <del>{item.documento}</del>
+                                                                    <br />
+                                                                    <del> {item.informacion}</del>
+                                                                </>
+                                                                : <>
+                                                                    {item.documento}{<br />}{item.informacion}
+                                                                </>
+                                                        }</td>
+                                                        <td>{
+                                                            item.estado === 4
+                                                                ?
+                                                                <>
+                                                                    <del>{item.comprobante}</del>
+                                                                    <br />
+                                                                    <del>{item.serie + "-" + item.numeracion}</del>
+                                                                </>
+                                                                : <>
+                                                                    {item.comprobante}{<br />}{item.serie + "-" + item.numeracion}
+                                                                </>
+
+                                                        }</td>
+                                                        <td>{
+                                                            item.estado === 4
+                                                                ? <>
+                                                                    <del><span>{item.fecha}</span></del>
+                                                                    <br />
+                                                                    <del><span>{timeForma24(item.hora)}</span></del>
+                                                                </>
+                                                                :
+                                                                <>
+                                                                    <span>{item.fecha}</span>
+                                                                    <br />
+                                                                    <span>{timeForma24(item.hora)}</span>
+                                                                </>
+                                                        }</td>
                                                         <td>
-                                                            {item.tipo === 1
-                                                                ? <span>Contado</span>
-                                                                : <span>Crédito</span>}
+                                                            {
+                                                                item.estado === 4 ?
+                                                                    <>
+                                                                        {
+                                                                            item.tipo === 1
+                                                                                ? <del><span>Contado</span></del>
+                                                                                : <del><span>Crédito</span></del>
+                                                                        }
+                                                                    </>
+
+                                                                    : <>
+                                                                        {
+                                                                            item.tipo === 1
+                                                                                ? <span>Contado</span>
+                                                                                : <span>Crédito</span>
+                                                                        }
+                                                                    </>
+                                                            }
                                                         </td>
-                                                        <td>{numberFormat(item.total)}</td>
+                                                        <td>{
+                                                            item.estado === 4 ?
+                                                                <del>{numberFormat(item.total)}</del>
+                                                                : numberFormat(item.total)
+                                                        }</td>
                                                         <td className="text-center">
                                                             {
                                                                 item.estado === 1
                                                                     ? <span className="text-success">Cobrado</span>
                                                                     : item.estado === 2 ?
                                                                         <span className="text-warning">Por Cobrar</span>
-                                                                        : <span className="text-danger">Anulado</span>
+                                                                        : item.estado === 3 ?
+                                                                            <span className="text-danger">Anulado</span>
+                                                                            : <span className="text-secondary">Liberado</span>
                                                             }
                                                         </td>
                                                         <td className="text-center">
@@ -256,7 +319,10 @@ class Ventas extends React.Component {
                                                                 className="btn btn-outline-primary btn-sm"
                                                                 title="Ver detalle"
                                                                 onClick={() => {
-                                                                    this.props.history.push({ pathname: `${this.props.location.pathname}/detalle`, search: "?idVenta=" + item.idVenta })
+                                                                    this.props.history.push({
+                                                                        pathname: `${this.props.location.pathname}/detalle`,
+                                                                        search: "?idVenta=" + item.idVenta
+                                                                    })
                                                                 }}
                                                                 disabled={!this.state.view}><i className="fa fa-eye"></i></button>
                                                         </td>

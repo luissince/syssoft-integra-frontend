@@ -62,15 +62,15 @@ class Cliente {
                     inner join ventaDetalle as vd on vd.idVenta = v.idVenta
                     inner join lote as l on l.idLote = vd.idLote
                     inner join manzana as m on m.idManzana = l.idManzana
-                    where v.idCliente = ? and v.idProyecto = ? AND v.estado <> 3`, [
+                    where v.idCliente = ? and v.idProyecto = ? AND v.estado in(1,2)`, [
                     value.idCliente,
                     value.idProyecto
                 ]);
-
+ 
                 newLista.push({
                     ...value,
                     detalle
-                });
+                }); 
             }
 
             let resultLista = newLista.map(function (item, index) {
@@ -680,7 +680,7 @@ class Cliente {
                     from venta as v
                     inner join ventaDetalle as vd on vd.idVenta = v.idVenta
                     inner join comprobante as co on co.idComprobante = v.idComprobante
-                    where v.idCliente = ? and v.estado <> 3
+                    where v.idCliente = ? and v.estado in (1,2)
                     group by v.idVenta
                     order by v.fecha desc, v.hora desc`, [
                     req.query.idCliente,
@@ -837,9 +837,9 @@ class Cliente {
                 INNER JOIN lote AS lo ON vd.idLote = lo.idLote
                 INNER JOIN manzana AS ma ON ma.idManzana = lo.idManzana
                 WHERE 
-                YEAR(v.fecha) = ? AND v.idProyecto = ? AND ? = 0 AND v.estado <> 3
+                YEAR(v.fecha) = ? AND v.idProyecto = ? AND ? = 0 AND v.estado IN (1,2)
                 OR
-                YEAR(v.fecha) = ? AND ? = 1 AND v.estado <> 3
+                YEAR(v.fecha) = ? AND ? = 1 AND v.estado IN (1,2)
                 GROUP BY v.idVenta`, [
                 parseInt(req.query.yearPago),
                 req.query.idProyecto,

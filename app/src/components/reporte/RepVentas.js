@@ -2,7 +2,7 @@ import React from 'react';
 import axios from 'axios';
 import CryptoJS from 'crypto-js';
 import FileDownloader from "./hooks/FileDownloader";
-import { apiComprobanteListcombo } from '../../api';
+import { apiComprobanteListcombo } from '../../network/api';
 import { spinnerLoading, currentDate } from '../tools/Tools';
 import { connect } from 'react-redux';
 

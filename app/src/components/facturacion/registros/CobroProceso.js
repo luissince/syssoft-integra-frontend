@@ -14,7 +14,7 @@ import {
     ModalAlertSuccess,
     ModalAlertWarning,
 } from '../../tools/Tools';
-import { apiComprobanteListcombo } from '../../../api';
+import { apiComprobanteListcombo } from '../../../network/api';
 import { connect } from 'react-redux';
 import SearchBarClient from "../../tools/SearchBarClient";
 

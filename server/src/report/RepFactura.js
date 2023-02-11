@@ -318,10 +318,10 @@ class RepFactura {
 
             doc.image(qrResult, doc.options.margins.left, doc.y, { width: 100, });
 
-            if (cabecera.estado === 3) {
+            if (cabecera.estado === 3 || cabecera.estado === 4) {
                 doc.save();
                 doc.rotate(-45, { origin: [200, 450] });
-                doc.fontSize(100).fillColor("#cccccc").opacity(0.5).text('ANULADO', (doc.page.width - 500) / 2, 450, {
+                doc.fontSize(100).fillColor("#cccccc").opacity(0.5).text(cabecera.estado === 3 ? 'ANULADO' : 'TRANSFERIDO', (doc.page.width - 500) / 2, 450, {
                     textAlign: 'center',
                 });
                 doc.rotate(-45 * (-1), { origin: [200, 450] });
@@ -1588,8 +1588,23 @@ class RepFactura {
 
             doc.table(table, {
                 prepareHeader: () => doc.font("Helvetica-Bold").fontSize(h3),
-                prepareRow: () => {
+                prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) => {
                     doc.font("Helvetica").fontSize(h4);
+                    if (indexColumn === 6) {
+                        if (row[6] === "COBRADO") {
+                            doc.fillColor("green");
+                        } else if (row[6] === "POR COBRAR") {
+                            doc.fillColor("yellow");
+                        } else if (row[6] === "ANULADO") {
+                            doc.fillColor("red");
+                        } else if (row[6] === "LIBERADO") {
+                            doc.fillColor("gray");
+                        } else {
+                            doc.fillColor("black");
+                        }
+                    }else{
+                        doc.fillColor("black");
+                    }
                 },
                 padding: 5,
                 columnSpacing: 5,

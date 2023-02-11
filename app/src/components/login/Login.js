@@ -112,7 +112,7 @@ class Login extends React.Component {
                     submenu
                 }
             });
-
+       
             let user = {
                 "apellidos": result.data.apellidos,
                 "estado": result.data.estado,
@@ -128,7 +128,6 @@ class Login extends React.Component {
             this.props.history.push("principal");
 
             // document.cookie = `token=12312; max-age=${(1 * 60 * 3600)}; path=/; samesite=strict`;
-
         } catch (error) {
             if (error.response !== undefined) {
                 await this.setStateAsync({ loading: false, message: error.response.data });
@@ -175,7 +174,7 @@ class Login extends React.Component {
         if (this.props.token.userToken != null) {
             return <Redirect to="/principal" />
         }
-     
+
         const { rutaImage } = this.props.token.empresa;
 
         return (

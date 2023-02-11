@@ -12,7 +12,7 @@ import {
     ModalAlertWarning,
     ModalAlertError,
 } from '../../tools/Tools';
-import { apiComprobanteListcombo } from '../../../api';
+import { apiComprobanteListcombo } from '../../../network/api';
 import { connect } from 'react-redux';
 
 class NotaCreditoProceso extends React.Component {

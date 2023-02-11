@@ -7,6 +7,7 @@ import { spinnerLoading, currentDate, getCurrentYear } from '../tools/Tools';
 import SearchBarClient from "../tools/SearchBarClient";
 
 class RepClientes extends React.Component {
+
     constructor(props) {
         super(props);
         this.state = {
@@ -42,8 +43,6 @@ class RepClientes extends React.Component {
         this.refFrecuencia = React.createRef();
         this.refYearPago = React.createRef();
 
-        this.abortControllerView = new AbortController();
-
         this.selectItem = false;
     }
 
@@ -58,35 +57,19 @@ class RepClientes extends React.Component {
     }
 
     componentWillUnmount() {
-        this.abortControllerView.abort();
+
     }
 
     loadData = async () => {
-        try {
-
-            // const cliente = await axios.get("/api/cliente/listcombo", {
-            //     signal: this.abortControllerView.signal
-            // });
-
-            await this.setStateAsync({
-                // clientes: cliente.data,
-
-                loading: false,
-                // cambiar
-                // fechaIni: '2022-07-19',
-                fechaIni: currentDate(),
-                fechaFin: currentDate()
-            });
-
-        } catch (error) {
-            if (error.message !== "canceled") {
-                await this.setStateAsync({
-                    msgLoading: "Se produjo un error interno, intente nuevamente."
-                });
-            }
-        }
+        await this.setStateAsync({
+            // clientes: cliente.data,
+            loading: false,
+            // cambiar
+            // fechaIni: '2022-07-19',
+            fechaIni: currentDate(),
+            fechaFin: currentDate()
+        });
     }
-
 
     onEventClearInput = async () => {
         await this.setStateAsync({ clientes: [], idCliente: '', cliente: "" });
@@ -94,7 +77,6 @@ class RepClientes extends React.Component {
     }
 
     handleFilter = async (event) => {
-
         const searchWord = this.selectItem ? "" : event.target.value;
         await this.setStateAsync({
             idCliente: '',

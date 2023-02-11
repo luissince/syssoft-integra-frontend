@@ -50,6 +50,10 @@ router.post('/restablecer', async function (req, res) {
     }
 });
 
+router.post("/liberar",async function (req, res) {
+    return await lote.liberar(req,res);
+});
+
 router.get('/id', async function (req, res) {
     const result = await lote.id(req)
     if (typeof result === "object") {
