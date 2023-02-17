@@ -870,7 +870,7 @@ class CreditoProceso extends React.Component {
     }
 
     async onEventCambiarLoto() {
-        if (this.state.idLote == "") {
+        if (this.state.idLote === "") {
             this.refLote.current.focus();
             return;
         }
@@ -905,12 +905,12 @@ class CreditoProceso extends React.Component {
     }
 
     async onEventRegistrarCobro() {
-        if (this.state.idConceptoCobro == "") {
+        if (this.state.idConceptoCobro === "") {
             this.refConceptoCobro.current.focus();
             return;
         }
 
-        if (this.state.idComprobanteCobro == "") {
+        if (this.state.idComprobanteCobro === "") {
             this.refComprobanteCobro.current.focus();
             return;
         }
@@ -1015,12 +1015,12 @@ class CreditoProceso extends React.Component {
     }
 
     async onEventRegistrarIndividual() {
-        if (this.state.idConceptoIndividual == "") {
+        if (this.state.idConceptoIndividual === "") {
             this.refConceptoIndivudual.current.focus();
             return;
         }
 
-        if (this.state.idComprobanteIndividual == "") {
+        if (this.state.idComprobanteIndividual === "") {
             this.refComprobanteIndividual.current.focus();
             return;
         }
@@ -2136,7 +2136,7 @@ class CreditoProceso extends React.Component {
                                 </button>
                             </div>
                             <div className="modal-body">
-
+                                            
                             </div>
                             <div className="modal-footer">
                                 <button type="button" className="btn btn-primary" onClick={() => { }}>Guardar</button>
@@ -2263,7 +2263,7 @@ class CreditoProceso extends React.Component {
                                 </thead>
                                 <tbody>
                                     {
-                                        this.state.inicial.length == 0 ?
+                                        this.state.inicial.length === 0 ?
                                             <tr>
                                                 <td colSpan="4" className="text-center">No hay inicial</td>
                                             </tr>
@@ -2302,7 +2302,7 @@ class CreditoProceso extends React.Component {
                                 </thead>
                                 <tbody>
                                     {
-                                        this.state.cobros.length == 0 ?
+                                        this.state.cobros.length === 0 ?
                                             <tr>
                                                 <td colSpan="4" className="text-center">No hay cobro</td>
                                             </tr>
@@ -2314,7 +2314,7 @@ class CreditoProceso extends React.Component {
                                                     <td>{numberFormat(item.monto, item.codiso)}</td>
                                                     <td className="text-center">
                                                         {
-                                                            item.idConcepto == "" ?
+                                                            item.idConcepto === "" ?
                                                                 <button className="btn btn-light btn-sm" disabled>
                                                                     <i className="fa fa-minus"></i>
                                                                 </button>
