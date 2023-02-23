@@ -5,7 +5,7 @@ import {
     ModalAlertInfo,
     ModalAlertSuccess,
     ModalAlertWarning,
-    ModalAlertError, 
+    ModalAlertError,
     spinnerLoading
 } from '../tools/Tools';
 import { connect } from 'react-redux';
@@ -33,7 +33,7 @@ class CpeElectronicos extends React.Component {
             descarga: '',
             file: ''
         }
-       
+
         this.refTipo = React.createRef();
         this.refSerie = React.createRef();
         this.refCorrelativo = React.createRef();
@@ -261,191 +261,192 @@ class CpeElectronicos extends React.Component {
     render() {
         return (
             <>
-                {this.state.msgLoading ?
-                    <div className="clearfix absolute-all bg-white">
-                        {spinnerLoading(this.state.msgMessage)}
-                    </div>
-                    : <>
-                        <div className='row'>
-                            <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
-                                <div className="form-group">
-                                    <h5>Consultar Comprobantes <small className="text-secondary">LISTA</small></h5>
-                                </div>
-                            </div>
+                {
+                    this.state.msgLoading ?
+                        <div className="clearfix absolute-all bg-white">
+                            {spinnerLoading(this.state.msgMessage)}
                         </div>
-
-                        {
-                            this.state.messageWarning === '' ? null :
-                                <div className="alert alert-warning" role="alert">
-                                    <i className="bi bi-exclamation-diamond-fill"></i> {this.state.messageWarning}
-                                </div>
-                        }
-
-                        <div className="row">
-                            <div className="col-md-6 col-sm-12">
-                                <div className="form-group">
-                                    <h6>Credenciales </h6>
-                                </div>
-                            </div>
-
-                            <div className="col-md-6 col-sm-12">
-                                <div className="form-group">
-                                    <h6>Datos del Comprobante </h6>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="row">
-                            <div className="col-md-6 col-sm-12">
-                                <label>Ruc: </label>
-                                <div className="form-group">
-                                    <input
-                                        className="form-control"
-                                        type="text"
-                                        placeholder="Ingrese su RUC"
-                                        value={this.state.ruc}
-                                        onChange={(value) => this.setState({ ruc: value.target.value })} />
-                                </div>
-                            </div>
-                            <div className="col-md-6 col-sm-12">
-                                <label>Ruc Emisor: </label>
-                                <div className="form-group">
-                                    <input
-                                        className="form-control"
-                                        type="text"
-                                        placeholder="Ingrese RUC"
-                                        value={this.state.rucEmisor}
-                                        onChange={(value) => this.setState({ rucEmisor: value.target.value })} />
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className='row'>
-                            <div className="col-md-6 col-sm-12">
-                                <label>usuario: </label>
-                                <div className="form-group">
-                                    <input
-                                        className="form-control"
-                                        type="text"
-                                        placeholder="Ingrese su Usuario"
-                                        value={this.state.usuario}
-                                        onChange={(value) => this.setState({ usuario: value.target.value })} />
-                                </div>
-                            </div>
-                            <div className="col-md-6 col-sm-12">
-                                <label>Tipo: </label>
-                                <div className="form-group">
-                                    <select
-                                        ref={this.refTipo}
-                                        className="form-control"
-                                        value={this.state.tipo}
-                                        onChange={(value) => this.setState({ tipo: value.target.value })}
-                                    >
-                                        <option value=""> -- Seleccione -- </option>
-                                        <option value="01">01 - Factura</option>
-                                        <option value="03">03 - Boleta De Venta</option>
-                                        <option value="07">07 - Nota de Crédito</option>
-                                        <option value="08">08 - Nota de Débito</option>
-                                        <option value="R1">R1 - Recibo por Honorarios</option>
-                                        <option value="R7">R7 - Nota Crédito Recibo por Honorarios </option>
-                                        <option value="04">04 - Liquidación de Compra</option>
-                                        <option value="23">23 - Póliza de Adjudicación Electrónica</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="row">
-                            <div className="col-md-6 col-sm-12">
-                                <label>Contraseña: </label>
-                                <div className="form-group">
-                                    <input
-                                        className="form-control"
-                                        type="password"
-                                        placeholder="Ingrese Contraseña"
-                                        value={this.state.clave}
-                                        onChange={(value) => this.setState({ clave: value.target.value })}
-                                    />
-                                </div>
-                            </div>
-                            <div className="col-md-6 col-sm-12">
-                                <label>Serie: </label>
-                                <div className="form-group">
-                                    <input
-                                        ref={this.refSerie}
-                                        className="form-control"
-                                        type="text"
-                                        placeholder="F001 / B001 / etc"
-                                        maxLength="4"
-                                        value={this.state.serie}
-                                        onChange={(value) => this.setState({ serie: value.target.value })} />
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="row">
-                            <div className="col-md-6 col-sm-12">
-
-                            </div>
-                            <div className="col-md-6 col-sm-12">
-                                <label>Correlativo: </label>
-                                <div className="form-group">
-                                    <input
-                                        ref={this.refCorrelativo}
-                                        className="form-control"
-                                        type="number"
-                                        placeholder="ingrese correlativo (1,2,3...)"
-                                        value={this.state.correlativo}
-                                        onChange={(value) => this.setState({ correlativo: value.target.value })} />
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="row">
-                            <div className="col-md-6 col-sm-12">
-                                <div className="form-group">
-                                    <button className="btn btn-success"
-                                        onClick={() => this.onEventConsultarEstado()}>Consultar Estado </button>
-                                    {" "}
-                                    <button className="btn btn-primary"
-                                        onClick={() => this.onEventConsultarCdr()}>Consultar CDR </button>
-                                    {" "}
-                                    <button className="btn btn-danger"
-                                        onClick={() => this.onEventLimpiar()}>Limpiar </button>
-                                </div>
-                            </div>
-                            <div className="col-md-6 col-sm-12">
-
-                            </div>
-                        </div>
-
-                        <div className="row">
-                            <div className="col-sm-12">
-                                <div className="form-group">
-                                    <h6>Resultado</h6>
-                                </div>
-                            </div>
-                            <div className="col-sm-12">
-                                <label>Codigo: </label>
-                                <label>{this.state.codigo}</label>
-                            </div>
-                            <div className="col-sm-12">
-                                <label>Respuesta: </label>
-                                <label>{this.state.respuesta}</label>
-                            </div>
-                            <div className="col-sm-12">
-                                <label>Ruta de descarga: </label>
-                                {" "}
-                                <span>
-                                    {this.state.descarga !== "" ?
-                                        <a onClick={() => { this.onEventDownload() }} type="button"> {this.state.file}</a>
-                                        : null
-                                    }
-                                </span>
-                            </div>
-                        </div>
-                    </>
+                        : null
                 }
+
+                <div className='row'>
+                    <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
+                        <div className="form-group">
+                            <h5>Consultar Comprobantes <small className="text-secondary">LISTA</small></h5>
+                        </div>
+                    </div>
+                </div>
+
+                {
+                    this.state.messageWarning === '' ? null :
+                        <div className="alert alert-warning" role="alert">
+                            <i className="bi bi-exclamation-diamond-fill"></i> {this.state.messageWarning}
+                        </div>
+                }
+
+                <div className="row">
+                    <div className="col-md-6 col-sm-12">
+                        <div className="form-group">
+                            <h6>Credenciales </h6>
+                        </div>
+                    </div>
+
+                    <div className="col-md-6 col-sm-12">
+                        <div className="form-group">
+                            <h6>Datos del Comprobante </h6>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="row">
+                    <div className="col-md-6 col-sm-12">
+                        <label>Ruc: </label>
+                        <div className="form-group">
+                            <input
+                                className="form-control"
+                                type="text"
+                                placeholder="Ingrese su RUC"
+                                value={this.state.ruc}
+                                onChange={(value) => this.setState({ ruc: value.target.value })} />
+                        </div>
+                    </div>
+                    <div className="col-md-6 col-sm-12">
+                        <label>Ruc Emisor: </label>
+                        <div className="form-group">
+                            <input
+                                className="form-control"
+                                type="text"
+                                placeholder="Ingrese RUC"
+                                value={this.state.rucEmisor}
+                                onChange={(value) => this.setState({ rucEmisor: value.target.value })} />
+                        </div>
+                    </div>
+                </div>
+
+                <div className='row'>
+                    <div className="col-md-6 col-sm-12">
+                        <label>usuario: </label>
+                        <div className="form-group">
+                            <input
+                                className="form-control"
+                                type="text"
+                                placeholder="Ingrese su Usuario"
+                                value={this.state.usuario}
+                                onChange={(value) => this.setState({ usuario: value.target.value })} />
+                        </div>
+                    </div>
+                    <div className="col-md-6 col-sm-12">
+                        <label>Tipo: </label>
+                        <div className="form-group">
+                            <select
+                                ref={this.refTipo}
+                                className="form-control"
+                                value={this.state.tipo}
+                                onChange={(value) => this.setState({ tipo: value.target.value })}
+                            >
+                                <option value=""> -- Seleccione -- </option>
+                                <option value="01">01 - Factura</option>
+                                <option value="03">03 - Boleta De Venta</option>
+                                <option value="07">07 - Nota de Crédito</option>
+                                <option value="08">08 - Nota de Débito</option>
+                                <option value="R1">R1 - Recibo por Honorarios</option>
+                                <option value="R7">R7 - Nota Crédito Recibo por Honorarios </option>
+                                <option value="04">04 - Liquidación de Compra</option>
+                                <option value="23">23 - Póliza de Adjudicación Electrónica</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="row">
+                    <div className="col-md-6 col-sm-12">
+                        <label>Contraseña: </label>
+                        <div className="form-group">
+                            <input
+                                className="form-control"
+                                type="password"
+                                placeholder="Ingrese Contraseña"
+                                value={this.state.clave}
+                                onChange={(value) => this.setState({ clave: value.target.value })}
+                            />
+                        </div>
+                    </div>
+                    <div className="col-md-6 col-sm-12">
+                        <label>Serie: </label>
+                        <div className="form-group">
+                            <input
+                                ref={this.refSerie}
+                                className="form-control"
+                                type="text"
+                                placeholder="F001 / B001 / etc"
+                                maxLength="4"
+                                value={this.state.serie}
+                                onChange={(value) => this.setState({ serie: value.target.value })} />
+                        </div>
+                    </div>
+                </div>
+
+                <div className="row">
+                    <div className="col-md-6 col-sm-12">
+
+                    </div>
+                    <div className="col-md-6 col-sm-12">
+                        <label>Correlativo: </label>
+                        <div className="form-group">
+                            <input
+                                ref={this.refCorrelativo}
+                                className="form-control"
+                                type="number"
+                                placeholder="ingrese correlativo (1,2,3...)"
+                                value={this.state.correlativo}
+                                onChange={(value) => this.setState({ correlativo: value.target.value })} />
+                        </div>
+                    </div>
+                </div>
+
+                <div className="row">
+                    <div className="col-md-6 col-sm-12">
+                        <div className="form-group">
+                            <button className="btn btn-success"
+                                onClick={() => this.onEventConsultarEstado()}>Consultar Estado </button>
+                            {" "}
+                            <button className="btn btn-primary"
+                                onClick={() => this.onEventConsultarCdr()}>Consultar CDR </button>
+                            {" "}
+                            <button className="btn btn-danger"
+                                onClick={() => this.onEventLimpiar()}>Limpiar </button>
+                        </div>
+                    </div>
+                    <div className="col-md-6 col-sm-12">
+
+                    </div>
+                </div>
+
+                <div className="row">
+                    <div className="col-sm-12">
+                        <div className="form-group">
+                            <h6>Resultado</h6>
+                        </div>
+                    </div>
+                    <div className="col-sm-12">
+                        <label>Codigo: </label>
+                        <label>{this.state.codigo}</label>
+                    </div>
+                    <div className="col-sm-12">
+                        <label>Respuesta: </label>
+                        <label>{this.state.respuesta}</label>
+                    </div>
+                    <div className="col-sm-12">
+                        <label>Ruta de descarga: </label>
+                        {" "}
+                        <span>
+                            {this.state.descarga !== "" ?
+                                <a onClick={() => { this.onEventDownload() }} type="button"> {this.state.file}</a>
+                                : null
+                            }
+                        </span>
+                    </div>
+                </div>
             </>
         );
     }

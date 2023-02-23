@@ -1130,6 +1130,9 @@ class Factura {
         }
     }
 
+    /**
+     * 
+     */
     async cpesunat(req, res) {
         try {
             const lista = await conec.procedure(`CALL Listar_CpeSunat(?,?,?,?,?,?,?,?,?,?)`, [
@@ -1167,6 +1170,7 @@ class Factura {
 
             return sendSuccess(res, { "result": resultLista, "total": resultTotal });
         } catch (error) {
+            console.log(error)
             return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
         }
     }

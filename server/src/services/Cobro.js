@@ -1346,8 +1346,9 @@ class Cobro {
 
             if (facturado.length > 0) {
 
-                const fecha = await conec.execute(connection, `SELECT fecha FROM cobro WHERE 
-                idCobro = ? AND fecha BETWEEN DATE_ADD(CURRENT_DATE, INTERVAL -4 DAY) AND CURRENT_DATE`, [
+                const fecha = await conec.execute(connection, `SELECT fecha 
+                    FROM cobro 
+                    WHERE idCobro = ? AND fecha BETWEEN DATE_ADD(CURRENT_DATE, INTERVAL -4 DAY) AND CURRENT_DATE`, [
                     req.query.idCobro
                 ]);
 
@@ -1360,21 +1361,35 @@ class Cobro {
                  * 
                  */
 
-                const cobro = await conec.execute(connection, `SELECT idCobro,idProcedencia,serie,numeracion FROM cobro WHERE idCobro = ?`, [
+                const cobro = await conec.execute(connection, `SELECT 
+                    idCobro,
+                    idProcedencia,
+                    serie,
+                    numeracion 
+                    FROM cobro 
+                    WHERE idCobro = ?`, [
                     req.query.idCobro
                 ]);
 
-                const venta = await conec.execute(connection, `SELECT idVenta,credito FROM venta WHERE idVenta  = ?`, [
+                const venta = await conec.execute(connection, `SELECT 
+                    idVenta,
+                    credito 
+                    FROM venta 
+                    WHERE idVenta  = ?`, [
                     cobro[0].idProcedencia
                 ]);
 
-                const cobroVenta = await conec.execute(connection, `SELECT idPlazo FROM cobroVenta WHERE idCobro = ?`, [
+                const cobroVenta = await conec.execute(connection, `SELECT 
+                    idPlazo 
+                    FROM cobroVenta 
+                    WHERE idCobro = ?`, [
                     req.query.idCobro
                 ]);
 
                 if (venta.length > 0) {
                     if (venta[0].credito === 1) {
-                        await conec.execute(connection, `DELETE FROM plazo WHERE idPlazo = ?`, [
+                        await conec.execute(connection, `DELETE FROM plazo 
+                            WHERE idPlazo = ?`, [
                             cobroVenta[0].idPlazo
                         ]);
                     } else {
