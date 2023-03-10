@@ -3,30 +3,11 @@ import { NavLink } from 'react-router-dom';
 import icono from '../../../recursos/images/inmobiliarianav.png';
 
 const Menu = ({ url, token: { project, userToken }, location: { pathname } }) => {
-    // console.log(url)
 
-
-    // const sidebarList = document.getElementById("sidebar");
-    // if (sidebarList != null) {
-    // const listMenus = sidebarList.children[0].children[0].children[1];
-    //     console.log(listMenus)
-    //     // const a = [].filter.call(listMenus.querySelectorAll('li'), function (elem) {
-    //     //     return elem.querySelector('a')
-    //     // });
-
-    //     console.log(listMenus.querySelector('li'))
-    //     console.log("")
-    //     console.log(listMenus.children)
-    //     // for (const menu of listMenus.children) {
-    //     //     console.log(menu);
-    //     // }
-
-    //     // const ul = [].filter.call(listMenus.querySelectorAll('li'), function (elem) {
-    //     //     return elem.querySelector('ul')
-    //     // });
-
-    //     // console.log(ul)
-    // }
+    const onEventOverlay =()=>{
+        const sidebar = document.getElementById("sidebar");
+        sidebar.classList.remove("toggled");
+    }
 
     return (
         <nav id="sidebar">
@@ -123,6 +104,15 @@ const Menu = ({ url, token: { project, userToken }, location: { pathname } }) =>
                         </li>
                     </ul>
                 </div>
+            </div>
+            <div
+            id="overlay-sidebar"
+            role="button"
+            tabIndex={0}
+            aria-label="overlay"
+            className="overlay"
+            onClick={onEventOverlay}>
+
             </div>
         </nav>
     );

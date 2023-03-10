@@ -55,25 +55,8 @@ import RepLotes from '../reporte/RepLotes';
 import RepClientes from '../reporte/RepClientes';
 import CpeConsultar from '../cpesunat/CpeConsultar';
 import CpeElectronicos from '../cpesunat/CpeElectronicos';
-import logoEmpresa from '../../recursos/images/INMOBILIARIA.png';
+import NotFound from '../../view/pages/NotFound';
 // import mixkit from '../../recursos/sound/mixkit.wav';
-
-const Page404 = (props) => {
-    return (
-        <div className="px-4 py-5 my-5 text-center">
-            <img className="d-block mx-auto mb-4" src={logoEmpresa} alt="Logo" width="150" />
-            <h1 className="display-5 fw-bold">Error 404 página no encontrada</h1>
-            <div className="col-lg-6 mx-auto">
-                <p className="lead mb-4">No se encuentra la página que ha solicitado.</p>
-                <div className="d-grid gap-2 d-sm-flex justify-content-sm-center">
-                    <button type="button" onClick={() => props.history.goBack()} className="btn btn-outline-secondary btn-lg px-4">
-                        <i className="bi bi-arrow-left"></i> Regresar
-                    </button>
-                </div>
-            </div>
-        </div>
-    )
-}
 
 class Inicio extends React.Component {
 
@@ -91,7 +74,6 @@ class Inicio extends React.Component {
     async componentDidMount() {
         window.addEventListener('focus', this.onEventFocused);
         window.addEventListener('resize', this.onEventResize);
-        window.addEventListener('click', this.onEventClick);
         this.onEventSideBar();
         this.loadNotifications();
 
@@ -104,7 +86,6 @@ class Inicio extends React.Component {
     componentWillUnmount() {
         window.removeEventListener('focus', this.onEventFocused);
         window.removeEventListener('resize', this.onEventResize);
-        window.removeEventListener('click', this.onEventClick);
 
         // this.socket.disconnect();
     }
@@ -141,43 +122,15 @@ class Inicio extends React.Component {
     onEventResize(event) {
         if (event.target.innerWidth <= 768 && document.getElementById("sidebar").classList.contains("active")) {
             document.getElementById("sidebar").classList.remove("active");
-            // document.getElementById("fotterbar").classList.remove("active");
         }
-
-        // if(event.target.innerWidth > 768 && document.getElementById("fotterbar").classList.contains("active")){
-        //     document.getElementById("fotterbar").classList.remove("active");
-        // }
-    }
-
-    onEventClick = (event) => {
-        let sidebar = document.getElementById("sidebar");
-        let overlaySidebar = document.getElementById("overlay-sidebar");
-        if (!(event.target !== overlaySidebar && !this.isChild(event.target, overlaySidebar))) {
-            sidebar.classList.remove("toggled");
-            sidebar.removeChild(overlaySidebar)
-        }
-    }
-
-    isChild = (child, parent) => {
-        while ((child = child.parentNode) && child !== parent);
-        return !!child;
     }
 
     openAndClose = () => {
         let windowWidth = window.innerWidth;
         if (windowWidth <= 768) {
             document.getElementById("sidebar").classList.add("toggled");
-
-            let overlay = document.createElement("div");
-            overlay.setAttribute("id", "overlay-sidebar")
-            overlay.setAttribute("role", "button");
-            overlay.setAttribute("tabindex", "0");
-            overlay.setAttribute("aria-label", "overlay");
-            overlay.classList.add("overlay");
-            document.getElementById("sidebar").appendChild(overlay);
         } else {
             document.getElementById("sidebar").classList.toggle("active");
-            // document.getElementById("fotterbar").classList.toggle("active");
         }
     }
 
@@ -450,7 +403,7 @@ class Inicio extends React.Component {
                                     path={`${path}/cpeconsultar`}
                                     render={(props) => <CpeConsultar {...props} />}
                                 />
-                                <Route component={Page404} />
+                                <Route component={NotFound} />
                             </Switch>
                         </div>
                     </div>

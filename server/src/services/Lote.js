@@ -811,7 +811,7 @@ class Lote {
                 INNER JOIN ventaDetalle AS vd ON v.idVenta = vd.idVenta
                 INNER JOIN lote AS l ON l.idLote = vd.idLote
                 INNER JOIN manzana AS m ON m.idManzana = l.idManzana
-                WHERE c.idCliente = ? AND v.estado <> 3`, [
+                WHERE c.idCliente = ? AND v.estado IN(1,2)`, [
                 req.query.idCliente
             ]);
             return result;
