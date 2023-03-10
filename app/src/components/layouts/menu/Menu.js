@@ -4,7 +4,7 @@ import icono from '../../../recursos/images/inmobiliarianav.png';
 
 const Menu = ({ url, token: { project, userToken }, location: { pathname } }) => {
 
-    const onEventOverlay =()=>{
+    const onEventOverlay = () => {
         const sidebar = document.getElementById("sidebar");
         sidebar.classList.remove("toggled");
     }
@@ -106,13 +106,12 @@ const Menu = ({ url, token: { project, userToken }, location: { pathname } }) =>
                 </div>
             </div>
             <div
-            id="overlay-sidebar"
-            role="button"
-            tabIndex={0}
-            aria-label="overlay"
-            className="overlay"
-            onClick={onEventOverlay}>
-
+                id="overlay-sidebar"
+                role="button"
+                tabIndex={0}
+                aria-label="overlay"
+                className="overlay"
+                onClick={onEventOverlay}>
             </div>
         </nav>
     );
