@@ -2,7 +2,7 @@ import React from 'react';
 import CryptoJS from 'crypto-js';
 import FileDownloader from "./hooks/FileDownloader";
 import { connect } from 'react-redux';
-import { spinnerLoading } from '../tools/Tools';
+import { spinnerLoading } from '../../helper/Tools';
 
 class RepLotes extends React.Component {
     constructor(props) {

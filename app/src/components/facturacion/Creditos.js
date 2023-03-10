@@ -7,9 +7,9 @@ import {
     numberFormat,
     statePrivilegio,
     keyUpSearch
-} from '../tools/Tools';
+} from '../../helper/Tools';
 import { connect } from 'react-redux';
-import Paginacion from '../tools/Paginacion';
+import Paginacion from '../../helper/Paginacion';
 
 class Creditos extends React.Component {
     constructor(props) {

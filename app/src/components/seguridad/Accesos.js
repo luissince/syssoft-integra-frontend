@@ -8,7 +8,7 @@ import {
   ModalAlertWarning,
   spinnerLoading,
   statePrivilegio
-} from '../tools/Tools';
+} from '../../helper/Tools.jsx';
 
 class Accesos extends React.Component {
   constructor(props) {

@@ -8,7 +8,7 @@ import {
     calculateTax,
     timeForma24,
     spinnerLoading,
-} from '../../tools/Tools';
+} from '../../../helper/Tools';
 import { connect } from 'react-redux';
 
 class NotaCreditoDetalle extends React.Component {

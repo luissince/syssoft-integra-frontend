@@ -4,10 +4,10 @@ import {
     spinnerLoading,
     statePrivilegio,
     keyUpSearch
-} from '../tools/Tools';
+} from '../../helper/Tools';
 import { connect } from 'react-redux';
 import noImage from '../../recursos/images/noimage.jpg';
-import Paginacion from '../tools/Paginacion';
+import Paginacion from '../../helper/Paginacion';
 
 class Sedes extends React.Component {
     constructor(props) {

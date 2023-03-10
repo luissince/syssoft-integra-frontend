@@ -7,7 +7,7 @@ import {
     calculateTax,
     timeForma24,
     spinnerLoading,
-} from '../../tools/Tools';
+} from '../../../helper/Tools';
 import { apiFacturaId, apiVentaCobro } from '../../../network/api';
 import { connect } from 'react-redux';
 

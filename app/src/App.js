@@ -1,7 +1,7 @@
 import React from 'react';
-import Loader from './Loader';
-import Configurar from './components/empresa/Configurar';
-import Login from './components/login/Login';
+import Loader from './view/loader/Loader';
+import Configurar from './view/empresa/Configurar';
+import Login from './view/login/Login';
 import Inicio from './components/inicio/Inicio';
 import Principal from './components/principal/Principal';
 import NotFound from './components/error/NotFound';
@@ -16,7 +16,7 @@ class App extends React.Component {
         super(props);
         this.menuRef = React.createRef();
     }
-
+ 
     async componentDidMount() {
       
     }

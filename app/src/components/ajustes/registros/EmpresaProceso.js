@@ -10,7 +10,7 @@ import {
     keyNumberInteger,
     imageBase64,
     readDataURL
-} from '../../tools/Tools';
+} from '../../../helper/Tools';
 import { connect } from 'react-redux';
 import sunat from '../../../recursos/images/sunat.png';
 import noImage from '../../../recursos/images/noimage.jpg'

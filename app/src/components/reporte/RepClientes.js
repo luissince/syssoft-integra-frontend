@@ -3,8 +3,8 @@ import axios from 'axios';
 import CryptoJS from 'crypto-js';
 import { connect } from 'react-redux';
 import FileDownloader from "./hooks/FileDownloader";
-import { spinnerLoading, currentDate, getCurrentYear } from '../tools/Tools';
-import SearchBarClient from "../tools/SearchBarClient";
+import { spinnerLoading, currentDate, getCurrentYear } from '../../helper/Tools';
+import SearchBarClient from "../../helper/SearchBarClient";
 
 class RepClientes extends React.Component {
 

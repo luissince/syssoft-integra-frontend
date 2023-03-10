@@ -13,7 +13,7 @@ import {
     ModalAlertSuccess,
     ModalAlertWarning,
     ModalAlertError
-} from '../../tools/Tools';
+} from '../../../helper/Tools';
 import { liberarTerreno, listarComboCliente, loteDetalle, loteRestablecer, loteSocio } from '../../../network/api/axios';
 import { connect } from 'react-redux';
 

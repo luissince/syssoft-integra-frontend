@@ -12,10 +12,10 @@ import {
     ModalAlertInfo,
     ModalAlertSuccess,
     ModalAlertWarning,
-} from '../../tools/Tools';
+} from '../../../helper/Tools';
 import { connect } from 'react-redux';
 import { apiComprobanteListcombo } from '../../../network/api';
-import SearchBarClient from "../../tools/SearchBarClient";
+import SearchBarClient from "../../../helper/SearchBarClient";
 
 class GastoProceso extends React.Component {
     constructor(props) {

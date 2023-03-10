@@ -9,8 +9,8 @@ import {
     ModalAlertDialog,
     statePrivilegio,
     keyUpSearch
-} from '../tools/Tools';
-import Paginacion from '../tools/Paginacion';
+} from '../../helper/Tools';
+import Paginacion from '../../helper/Paginacion';
 
 class Clientes extends React.Component {
     constructor(props) {

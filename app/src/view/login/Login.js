@@ -69,6 +69,8 @@ class Login extends React.Component {
 
         try {
 
+            document.activeElement.blur();
+            
             await this.setStateAsync({ loading: true });
 
             let result = await axios.get('/api/login/createsession', {
@@ -127,7 +129,6 @@ class Login extends React.Component {
             this.props.restore(JSON.parse(window.localStorage.getItem('login')));
             this.props.history.push("principal");
 
-            // document.cookie = `token=12312; max-age=${(1 * 60 * 3600)}; path=/; samesite=strict`;
         } catch (error) {
             if (error.response !== undefined) {
                 await this.setStateAsync({ loading: false, message: error.response.data });

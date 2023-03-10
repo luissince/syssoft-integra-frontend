@@ -13,8 +13,8 @@ import {
     spinnerLoading,
     statePrivilegio,
     keyUpSearch
-} from '../tools/Tools';
-import Paginacion from '../tools/Paginacion';
+} from '../../helper/Tools';
+import Paginacion from '../../helper/Paginacion';
 
 class Usuarios extends React.Component {
     constructor(props) {

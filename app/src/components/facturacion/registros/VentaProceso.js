@@ -20,11 +20,11 @@ import {
     ModalAlertInfo,
     ModalAlertSuccess,
     ModalAlertWarning,
-} from '../../tools/Tools';
+} from '../../../helper/Tools';
 import { connect } from 'react-redux';
 import { apiComprobanteListcombo } from '../../../network/api';
-import SearchBarClient from "../../tools/SearchBarClient";
-import SearchBarLote from "../../tools/SearchBarLote";
+import SearchBarClient from "../../../helper/SearchBarClient";
+import SearchBarLote from "../../../helper/SearchBarLote";
 
 class VentaProceso extends React.Component {
 

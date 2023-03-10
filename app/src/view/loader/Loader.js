@@ -1,8 +1,8 @@
 import React from 'react';
 import axios from 'axios';
-import './recursos/css/loader.css';
+import '../../recursos/css/loader.css';
 import { connect } from 'react-redux';
-import { config, restoreToken } from './redux/actions';
+import { config, restoreToken } from '../../redux/actions';
 
 class Loader extends React.Component {
 

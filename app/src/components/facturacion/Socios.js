@@ -11,8 +11,8 @@ import {
     currentDate,
     validateDate,
     keyUpSearch
-} from '../tools/Tools';
-import Paginacion from '../tools/Paginacion';
+} from '../../helper/Tools';
+import Paginacion from '../../helper/Paginacion';
 
 class Socios extends React.Component {
     constructor(props) {

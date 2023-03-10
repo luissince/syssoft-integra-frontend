@@ -8,7 +8,7 @@ import {
     ModalAlertSuccess,
     ModalAlertWarning,
     spinnerLoading
-} from '../../tools/Tools';
+} from '../../../helper/Tools';
 import { connect } from 'react-redux';
 
 class UsuarioProceso extends React.Component {

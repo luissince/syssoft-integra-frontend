@@ -5,7 +5,7 @@ import {
     formatMoney,
     numberFormat,
     spinnerLoading,
-} from '../../tools/Tools';
+} from '../../../helper/Tools';
 
 class BancoDetalle extends React.Component {
     constructor(props) {

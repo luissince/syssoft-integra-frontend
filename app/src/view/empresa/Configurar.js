@@ -10,7 +10,7 @@ import {
     ModalAlertInfo,
     ModalAlertSuccess,
     ModalAlertWarning,
-} from '../tools/Tools';
+} from '../../helper/Tools';
 import { connect } from 'react-redux';
 import { configSave } from '../../redux/actions';
 import sunat from '../../recursos/images/sunat.png';

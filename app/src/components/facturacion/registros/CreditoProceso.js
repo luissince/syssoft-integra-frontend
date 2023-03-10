@@ -18,10 +18,10 @@ import {
     ModalAlertWarning,
     ModalAlertError,
     ModalAlertDialog
-} from '../../tools/Tools';
+} from '../../../helper/Tools';
 import { connect } from 'react-redux';
 import { apiComprobanteListcombo, apiFacturaCreditoDetalle, apiVentaCobro } from '../../../network/api';
-import SearchBarLote from "../../tools/SearchBarLote";
+import SearchBarLote from "../../../helper/SearchBarLote";
 
 class CreditoProceso extends React.Component {
     constructor(props) {

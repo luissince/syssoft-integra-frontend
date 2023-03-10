@@ -7,7 +7,7 @@ import {
     ModalAlertWarning,
     ModalAlertError,
     spinnerLoading
-} from '../tools/Tools';
+} from '../../helper/Tools';
 import { connect } from 'react-redux';
 
 class CpeElectronicos extends React.Component {

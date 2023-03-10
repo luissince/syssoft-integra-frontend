@@ -19,7 +19,7 @@ import {
     ModalAlertError,
     statePrivilegio,
     keyUpSearch
-} from '../tools/Tools';
+} from '../../helper/Tools';
 import sunat from '../../recursos/images/sunat.png';
 import reuse from '../../recursos/images/reuse.svg';
 import accept from '../../recursos/images/accept.svg';
@@ -31,7 +31,7 @@ import email from '../../recursos/images/email.svg';
 import { apiComprobanteListcombo } from '../../network/api';
 import { connect } from 'react-redux';
 import FileDownloader from "../reporte/hooks/FileDownloader";
-import Paginacion from '../tools/Paginacion';
+import Paginacion from '../../helper/Paginacion';
 
 class CpeElectronicos extends React.Component {
 

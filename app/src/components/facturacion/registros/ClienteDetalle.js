@@ -7,7 +7,7 @@ import {
     formatMoney,
     timeForma24,
     spinnerLoading,
-} from '../../tools/Tools';
+} from '../../../helper/Tools';
 import { connect } from 'react-redux';
 
 class ClienteDetalle extends React.Component {

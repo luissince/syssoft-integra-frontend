@@ -1,6 +1,6 @@
 import React from "react";
 import "./index.css";
-import { readDataBlob } from '../../tools/Tools';
+import { readDataBlob } from '../../../helper/Tools';
 import Axios from "axios";
 
 const Downloader = ({ files = [], remove }) => {

@@ -3,8 +3,8 @@ import axios from 'axios';
 import {
     spinnerLoading,
     timeForma24,
-} from '../../tools/Tools';
-import Paginacion from '../../tools/Paginacion';
+} from '../../../helper/Tools';
+import Paginacion from '../../../helper/Paginacion';
 
 class Notications extends React.Component {
 

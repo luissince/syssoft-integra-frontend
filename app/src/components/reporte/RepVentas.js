@@ -3,7 +3,7 @@ import axios from 'axios';
 import CryptoJS from 'crypto-js';
 import FileDownloader from "./hooks/FileDownloader";
 import { apiComprobanteListcombo } from '../../network/api';
-import { spinnerLoading, currentDate } from '../tools/Tools';
+import { spinnerLoading, currentDate } from '../../helper/Tools';
 import { connect } from 'react-redux';
 
 class RepVentas extends React.Component {

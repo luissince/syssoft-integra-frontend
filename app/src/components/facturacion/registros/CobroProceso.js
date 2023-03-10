@@ -13,10 +13,10 @@ import {
     ModalAlertInfo,
     ModalAlertSuccess,
     ModalAlertWarning,
-} from '../../tools/Tools';
+} from '../../../helper/Tools';
 import { apiComprobanteListcombo } from '../../../network/api';
 import { connect } from 'react-redux';
-import SearchBarClient from "../../tools/SearchBarClient";
+import SearchBarClient from "../../../helper/SearchBarClient";
 
 class CobroProceso extends React.Component {
     constructor(props) {

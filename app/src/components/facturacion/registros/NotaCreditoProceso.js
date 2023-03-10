@@ -11,7 +11,7 @@ import {
     ModalAlertSuccess,
     ModalAlertWarning,
     ModalAlertError,
-} from '../../tools/Tools';
+} from '../../../helper/Tools';
 import { apiComprobanteListcombo } from '../../../network/api';
 import { connect } from 'react-redux';
 

@@ -9,9 +9,9 @@ import {
     getExtension,
     readDataURL,
     imageSizeData
-} from '../../tools/Tools';
+} from '../../../helper/Tools';
 import { connect } from 'react-redux';
-import SearchBar from "../../tools/SearchBar";
+import SearchBar from "../../../helper/SearchBar";
 
 class SedeProceso extends React.Component {
     constructor(props) {

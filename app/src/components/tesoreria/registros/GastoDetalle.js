@@ -8,7 +8,7 @@ import {
     calculateTaxBruto,
     calculateTax,
     spinnerLoading
-} from '../../tools/Tools';
+} from '../../../helper/Tools';
 import { connect } from 'react-redux';
 
 class GastoDetalle extends React.Component {

@@ -9,11 +9,11 @@ import {
     ModalAlertInfo,
     ModalAlertSuccess,
     ModalAlertWarning,
-} from '../../tools/Tools';
+} from '../../../helper/Tools';
 import { connect } from 'react-redux';
 import reniec from '../../../recursos/images/reniec.png';
 import sunat from '../../../recursos/images/sunat.png';
-import SearchBar from "../../tools/SearchBar";
+import SearchBar from "../../../helper/SearchBar";
 
 class ClienteProceso extends React.Component {
     constructor(props) {

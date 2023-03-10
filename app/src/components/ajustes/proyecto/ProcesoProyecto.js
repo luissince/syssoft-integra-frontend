@@ -9,10 +9,10 @@ import {
     ModalAlertSuccess,
     ModalAlertWarning,
     spinnerLoading
-} from '../../tools/Tools';
+} from '../../../helper/Tools';
 import { connect } from 'react-redux';
 import noImage from '../../../recursos/images/noimage.jpg';
-import SearchBar from "../../tools/SearchBar";
+import SearchBar from "../../../helper/SearchBar";
 
 class ProcesoProyecto extends React.Component {
 

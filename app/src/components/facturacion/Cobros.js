@@ -11,10 +11,10 @@ import {
     ModalAlertError,
     statePrivilegio,
     keyUpSearch
-} from '../tools/Tools';
+} from '../../helper/Tools';
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
-import Paginacion from '../tools/Paginacion';
+import Paginacion from '../../helper/Paginacion';
 
 class Cobros extends React.Component {
     constructor(props) {
