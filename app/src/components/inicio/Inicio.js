@@ -74,7 +74,7 @@ class Inicio extends React.Component {
     async componentDidMount() {
         window.addEventListener('focus', this.onEventFocused);
         window.addEventListener('resize', this.onEventResize);
-        this.onEventSideBar();
+        this.loadSideBar();
         this.loadNotifications();
 
         // this.socket.on('message', text => {
@@ -134,11 +134,11 @@ class Inicio extends React.Component {
         }
     }
 
-    onEventSideBar() {
-        let value = document.querySelectorAll('#sidebar ul li .pro-inner-item[data-bs-toggle="collapse"]');
-        value.forEach(element => {
+    loadSideBar() {
+        const value = document.querySelectorAll('#sidebar ul li .pro-inner-item[data-bs-toggle="collapse"]');
+        value.forEach(element => {         
             element.parentNode.querySelector('ul').addEventListener('shown.bs.collapse', function (event) {
-                value.forEach(item => {
+                value.forEach(item => {                 
                     if (event.target.getAttribute('id') !== item.parentNode.querySelector('ul').getAttribute('id')) {
                         item.setAttribute("aria-expanded", "false");
                         item.parentNode.querySelector('ul').classList.remove("show");

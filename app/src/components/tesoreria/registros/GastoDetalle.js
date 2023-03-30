@@ -27,7 +27,6 @@ class GastoDetalle extends React.Component {
             total: '',
             codiso: '',
             simbolo: '',
-            usuario: '',
 
             gasto: true,
             detalle: [],
@@ -74,7 +73,7 @@ class GastoDetalle extends React.Component {
                 comprobante: cabecera.comprobante + "  " + cabecera.serie + "-" + cabecera.numeracion,
                 estado: cabecera.estado,
                 cliente: cabecera.documento + " - " + cabecera.informacion,
-                usuario: cabecera.apellidoUse + " " + cabecera.nombreUse,
+                // usuario: cabecera.apellidoUse + " " + cabecera.nombreUse,
                 fecha: cabecera.fecha + " " + timeForma24(cabecera.hora),
                 cuentaBancaria: cabecera.nombreBanco,
                 observacion: cabecera.observacion === "" ? "" : cabecera.observacion,

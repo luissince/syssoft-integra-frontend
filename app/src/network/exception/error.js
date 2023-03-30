@@ -1,12 +1,12 @@
 import { RESPOSE, REQUEST, ERROR, CANCELED } from './types';
 
-class AxiosException {
+class ErrorResponse {
 
-    static type = '';
-    static message = '';
-    static status = 400;
+    type = '';
+    message = '';
+    status = 400;
 
-    static fromAxiosError(error) {
+    constructor(error) {
         if (error.response) {
             this.type = RESPOSE;
             this.status = error.response.status;
@@ -23,20 +23,19 @@ class AxiosException {
                 this.message = error.message ? error.message : "Algo salió mal, intente en un par de minutos.";
             }
         }
-        return AxiosException;
     }
 
-    static getMessage() {
+    getMessage() {
         return this.message;
     }
 
-    static getType() {
+    getType() {
         return this.type;
     }
 
-    static getStatus() {
+    getStatus() {
         return this.status;
     }
 }
 
-export default AxiosException;
+export default ErrorResponse;

@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const { token } = require('../services/Jwt');
 const perfil = require('../services/Perfil');
 
 router.get('/list', async function (req, res) {

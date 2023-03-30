@@ -1,47 +1,53 @@
 import React from 'react';
-import axios from 'axios';
 import '../../recursos/css/loader.css';
 import { connect } from 'react-redux';
 import { config, restoreToken } from '../../redux/actions';
+import { empresaConfig, validToken } from '../../network/api/axios';
+import SuccessReponse from '../../network/api/response';
+import ErrorResponse from '../../network/exception/error';
+import { CANCELED } from '../../network/exception/types';
 
 class Loader extends React.Component {
 
-    async componentDidMount() {      
-        let empresa = null;
-        try {
-            // 
-            let config = await axios.get("/api/empresa/config");
-            empresa = config.data;
-            // 
-            let userToken = window.localStorage.getItem('login');
-            let user = JSON.parse(userToken);
-            await axios.get("/api/login/validtoken", {
-                headers: {
-                    Authorization: "Bearer " + user.token
+    async componentDidMount() {
+        const empresa = await empresaConfig();
+
+        if (empresa instanceof SuccessReponse) {
+
+            const valid = await validToken();
+
+            if (valid instanceof SuccessReponse) {
+                const userToken = window.localStorage.getItem('login');
+                const login = JSON.parse(userToken);
+
+                const project = JSON.parse(window.localStorage.getItem('project'));
+
+                const user = {
+                    ...login,
+                    project: project
                 }
-            });
 
-            let project = JSON.parse(window.localStorage.getItem('project'));
-
-            user = {
-                ...user,
-                project: project
+                this.props.restore(user, empresa.data);
             }
 
-            this.props.restore(user, config.data);
-        } catch (error) {
-            if (error.response) {
-                if (error.response.status === 401) {
-                    this.props.config();
-                } else {
-                    window.localStorage.removeItem('login');
-                    window.localStorage.removeItem('project');
-                    this.props.restore(null, empresa);
-                }
+            if (valid instanceof ErrorResponse) {
+                if (empresa.type === CANCELED) return;
+
+                window.localStorage.removeItem('login');
+                window.localStorage.removeItem('project');
+                this.props.restore(null, empresa.data);
+            }
+        }
+
+        if (empresa instanceof ErrorResponse) {
+            if (empresa.type === CANCELED) return;
+
+            if (empresa.status === 400) {
+                this.props.config();
             } else {
                 window.localStorage.removeItem('login');
                 window.localStorage.removeItem('project');
-                this.props.restore(null, empresa);
+                this.props.restore(null, null);
             }
         }
     }

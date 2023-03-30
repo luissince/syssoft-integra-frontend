@@ -1,6 +1,6 @@
 import axios from 'axios';
-import AxiosException from '../exception';
-import Response from './response';
+import SuccessReponse from './response';
+import ErrorResponse from '../exception/error';
 
 const instance = axios.create({
     baseURL: process.env.REACT_APP_END_POINT,
@@ -13,7 +13,7 @@ const instance = axios.create({
 
 instance.interceptors.request.use((config) => {
     const data = JSON.parse(window.localStorage.getItem('login'));
-    if (data !== null) {
+    if (data !== null) {       
         config.headers.Authorization = 'Bearer ' + data.token;
     }
     return config;
@@ -23,7 +23,7 @@ instance.interceptors.request.use((config) => {
  * @method POST
  * @param {{}} params 
  * @param {AbortController} signal 
- * @returns Response | Object
+ * @returns SuccessReponse | Object
  */
 export async function liberarTerreno(params, signal = null) {
     try {
@@ -32,33 +32,25 @@ export async function liberarTerreno(params, signal = null) {
             signal: signal
         }
         );
-        return new Response(response);
+        return new SuccessReponse(response);
     } catch (ex) {
-        return {
-            "type": AxiosException.fromAxiosError(ex).getType(),
-            "status": AxiosException.fromAxiosError(ex).getStatus(),
-            "message": AxiosException.fromAxiosError(ex).getMessage(),
-        }
+        return new SuccessReponse(ex);
     }
 }
 
 /**
  * @method GET
  * @param {AbortController} signal 
- * @returns Response | Object
+ * @returns SuccessReponse | Object
  */
 export async function listarComboCliente(signal = null) {
     try {
         const response = await instance.get("/api/cliente/listcombo", {
             signal: signal,
         });
-        return new Response(response);
+        return new SuccessReponse(response);
     } catch (ex) {
-        return {
-            "type": AxiosException.fromAxiosError(ex).getType(),
-            "status": AxiosException.fromAxiosError(ex).getStatus(),
-            "message": AxiosException.fromAxiosError(ex).getMessage()
-        }
+        return new ErrorResponse(ex);
     }
 }
 
@@ -66,7 +58,7 @@ export async function listarComboCliente(signal = null) {
  * @method GET
  * @param {{}} params 
  * @param {AbortController} signal 
- * @returns Response | Object
+ * @returns SuccessReponse | Object
  */
 export async function loteDetalle(params, signal = null) {
     try {
@@ -74,48 +66,65 @@ export async function loteDetalle(params, signal = null) {
             signal: signal,
             params: params
         });
-        return new Response(response);
+        return new SuccessReponse(response);
     } catch (ex) {
-        return {
-            "type": AxiosException.fromAxiosError(ex).getType(),
-            "status": AxiosException.fromAxiosError(ex).getStatus(),
-            "message": AxiosException.fromAxiosError(ex).getMessage()
-        }
+        return new ErrorResponse(ex);
     }
 }
 
 /**
  * @method POST
  * @param {{}} params 
- * @returns Response | Object
+ * @returns SuccessReponse | Object
  */
 export async function loteSocio(params) {
     try {
         const response = await instance.post("/api/lote/socio", params);
-        return new Response(response);
+        return new SuccessReponse(response);
     } catch (ex) {
-        return {
-            "type": AxiosException.fromAxiosError(ex).getType(),
-            "status": AxiosException.fromAxiosError(ex).getStatus(),
-            "message": AxiosException.fromAxiosError(ex).getMessage()
-        }
+        return new ErrorResponse(ex);
     }
 }
 
 /**
  * @method POST
  * @param {{}} params 
- * @returns Response | Object
+ * @returns SuccessReponse | Object
  */
 export async function loteRestablecer(params) {
     try {
         const response = await instance.post("/api/lote/restablecer", params);
-        return new Response(response);
+        return new SuccessReponse(response);
     } catch (ex) {
-        return {
-            "type": AxiosException.fromAxiosError(ex).getType(),
-            "status": AxiosException.fromAxiosError(ex).getStatus(),
-            "message": AxiosException.fromAxiosError(ex).getMessage()
-        }
+        return new ErrorResponse(ex);
+    }
+}
+
+
+/**
+ * @method GET
+ * @param {{}} SuccessReponse 
+ * @returns SuccesReponse | Object
+ */
+export async function empresaConfig() {
+    try {
+        const response = await instance.get("/api/empresa/config");
+        return new SuccessReponse(response);
+    } catch (ex) {
+        return new ErrorResponse(ex);
+    }
+}
+
+/**
+ * @method GET
+ * @param {{}} SuccessReponse 
+ * @returns SuccesReponse | Object
+ */
+export async function validToken() {
+    try {
+        const response = await instance.get("/api/login/validtoken");
+        return new SuccessReponse(response);
+    } catch (ex) {
+        return new ErrorResponse(ex);
     }
 }

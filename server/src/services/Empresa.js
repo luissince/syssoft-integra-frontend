@@ -119,7 +119,7 @@ class Empresa {
             let rutaImage = "";
             if (req.body.image !== "") {
                 removeFile(path.join(file, empresa[0].rutaImage));
-
+ 
                 let nameImage = `${Date.now() + req.body.idEmpresa}.${req.body.extimage}`;
                 writeFile(path.join(file, nameImage), req.body.image);
 
@@ -199,10 +199,10 @@ class Empresa {
             if (result.length > 0) {
                 return sendSuccess(res, result[0]);
             } else {
-                return sendNoAutorizado(res, "Iniciar configuración.");
+                return sendClient(res, "Iniciar configuración.");
             }
         } catch (error) {
-            return sendNoAutorizado(res, "Iniciar configuración.");
+            return sendClient(res, "Iniciar configuración.");
         }
     }
 

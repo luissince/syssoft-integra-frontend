@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 
-function createToken(user, key, expiresIn = '10h') {
+function create(user, key, expiresIn = '10h') {
     return new Promise((resolve, reject) => {
         jwt.sign(user, key, { expiresIn: expiresIn }, (error, token) => {
             if (error) {
@@ -12,16 +12,13 @@ function createToken(user, key, expiresIn = '10h') {
     });
 }
 
-function verifyToken(token, key) {
-    return new Promise((resolve, reject) => {
-        jwt.verify(token, key, (error, authorization) => {
-            if (error) {
-                reject("expired");
-            } else {
-                resolve(authorization);
-            }
-        });
-    });
+function verify(req, res, next) {
+    try {
+        jwt.verify(req.token, 'userkeylogin');
+        next();
+    } catch (err) {
+        res.sendStatus(403);
+    }
 }
 
 function token(req, res, next) {
@@ -32,8 +29,8 @@ function token(req, res, next) {
         req.token = token;
         next();
     } else {
-        res.sendStatus(403);
+        res.sendStatus(401);
     }
 }
 
-module.exports = { createToken, verifyToken, token }
+module.exports = { create, verify, token }

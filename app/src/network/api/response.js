@@ -1,4 +1,4 @@
-class Reponse{
+class SuccessReponse{
 
     data = "";
 
@@ -16,4 +16,4 @@ class Reponse{
     }
 }
 
-export default Reponse;
+export default SuccessReponse;

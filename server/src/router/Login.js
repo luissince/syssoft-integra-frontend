@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const { token } = require('../services/Jwt');
 const login = require('../services/Login');
+const { token, verify } = require('../tools/Jwt');
 
 /**
  * @swagger
@@ -22,7 +22,7 @@ const login = require('../services/Login');
  *          example:
  *              usuario: admin
  *              password: admin
- */     
+ */
 
 /**
  * @swagger
@@ -108,7 +108,7 @@ router.get('/createsession', async function (req, res) {
  *                      schema:
  *                          type: string
  */
-router.get('/validtoken', token, async function (req, res) {
+router.get('/validtoken', token, verify,async function (req, res) {
     return await login.validtoken(req, res);
 });
 
