@@ -6,6 +6,7 @@ import {
     numberFormat,
     spinnerLoading,
 } from '../../../helper/Tools';
+import Paginacion from '../../../helper/Paginacion';
 
 class BancoDetalle extends React.Component {
     constructor(props) {
@@ -23,7 +24,7 @@ class BancoDetalle extends React.Component {
             initial: true,
 
             loading: false,
-            lista: [],            
+            lista: [],
             restart: false,
 
             opcion: 0,
@@ -35,6 +36,7 @@ class BancoDetalle extends React.Component {
             messageLoading: 'Cargando datos...',
         }
         this.abortControllerView = new AbortController();
+        this.abortControllerTable = new AbortController();
     }
 
     setStateAsync(state) {
@@ -55,6 +57,7 @@ class BancoDetalle extends React.Component {
 
     componentWillUnmount() {
         this.abortControllerView.abort();
+        this.abortControllerTable.abort();
     }
 
     async loadDataId(id) {
@@ -84,7 +87,7 @@ class BancoDetalle extends React.Component {
                 initial: false
             });
 
-
+            this.loadInit();
         } catch (error) {
             if (error.message !== "canceled") {
                 this.props.history.goBack();
@@ -92,26 +95,42 @@ class BancoDetalle extends React.Component {
         }
     }
 
-    fillTable = async (opcion, buscar) => {
+    loadInit = async () => {
+        if (this.state.loading) return;
+
+        await this.setStateAsync({ paginacion: 1, restart: true });
+        this.fillTable();
+        await this.setStateAsync({ opcion: 0 });
+    }
+
+    paginacionContext = async (listid) => {
+        await this.setStateAsync({ paginacion: listid, restart: false });
+        this.onEventPaginacion();
+    }
+
+    onEventPaginacion = () => {
+        this.fillTable();
+    }
+
+    fillTable = async () => {
         try {
             await this.setStateAsync({ loading: true, lista: [], messageTable: "Cargando información...", messagePaginacion: "Mostranto 0 de 0 Páginas" });
 
-            const result = await axios.get('/api/banco/list', {
+            const result = await axios.get('/api/banco/detalle', {
                 signal: this.abortControllerTable.signal,
                 params: {
-                    "opcion": opcion,
-                    "buscar": buscar.trim().toUpperCase(),
+                    "idBanco": this.state.idBanco,
                     "posicionPagina": ((this.state.paginacion - 1) * this.state.filasPorPagina),
                     "filasPorPagina": this.state.filasPorPagina
                 }
             });
 
             let totalPaginacion = parseInt(Math.ceil((parseFloat(result.data.total) / this.state.filasPorPagina)));
-            let messagePaginacion = `Mostrando ${result.data.result.length} de ${totalPaginacion} Páginas`;
+            let messagePaginacion = `Mostrando ${result.data.lista.length} de ${totalPaginacion} Páginas`;
 
             await this.setStateAsync({
                 loading: false,
-                lista: result.data.result,
+                lista: result.data.lista,
                 totalPaginacion: totalPaginacion,
                 messagePaginacion: messagePaginacion
             });
@@ -163,7 +182,7 @@ class BancoDetalle extends React.Component {
                             <div className="row">
                                 <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                                     <div className="form-group">
-                                        <button type="button" className="btn btn-light" onClick={ () => this.onEventImprimir() }><i className="fa fa-print"></i> Imprimir</button>
+                                        <button type="button" className="btn btn-light" onClick={() => this.onEventImprimir()}><i className="fa fa-print"></i> Imprimir</button>
                                         {" "}
                                         <button type="button" className="btn btn-light"><i className="fa fa-plus"></i> Agregar dinero</button>
                                         {" "}
@@ -196,7 +215,7 @@ class BancoDetalle extends React.Component {
                                                     </tr>
                                                     <tr>
                                                         <th className="table-secondary w-25 p-1 font-weight-normal "><span>Saldo</span></th>
-                                                        <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal"><strong className={ this.state.saldo <= 0 ? 'text-danger' : 'text-success' }>{numberFormat(this.state.saldo, this.state.codiso )}</strong></th>
+                                                        <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal"><strong className={this.state.saldo <= 0 ? 'text-danger' : 'text-success'}>{numberFormat(this.state.saldo, this.state.codiso)}</strong></th>
                                                     </tr>
                                                 </thead>
                                             </table>
@@ -222,23 +241,32 @@ class BancoDetalle extends React.Component {
                                                 </thead>
                                                 <tbody>
                                                     {
-                                                        this.state.lista.length === 0 ?
+                                                        this.state.loading ?
                                                             (
-                                                                <tr className="text-center">
-                                                                    <td colSpan="6">¡No hay datos registrados!</td>
+                                                                <tr>
+                                                                    <td className="text-center" colSpan="6">
+                                                                        {spinnerLoading()}
+                                                                    </td>
                                                                 </tr>
                                                             )
                                                             :
-                                                            this.state.lista.map((item, index) => (
-                                                                <tr key={index}>
-                                                                    <td>{++index}</td>
-                                                                    <td>{item.fecha}</td>
-                                                                    <td>{item.proveedor}</td>
-                                                                    <td className="text-left">{item.cuenta}</td>
-                                                                    <td className="text-left text-danger">{item.salida <= 0 ? '' : `- ${formatMoney(item.salida)}`}</td>
-                                                                    <td className="text-right text-success">{item.ingreso <= 0 ? '' : `+ ${formatMoney(item.ingreso)}`}</td>
-                                                                </tr>
-                                                            ))
+                                                            this.state.lista.length === 0 ?
+                                                                (
+                                                                    <tr className="text-center">
+                                                                        <td colSpan="6">¡No hay datos registrados!</td>
+                                                                    </tr>
+                                                                )
+                                                                :
+                                                                this.state.lista.map((item, index) => (
+                                                                    <tr key={index}>
+                                                                        <td>{++index}</td>
+                                                                        <td>{item.fecha}</td>
+                                                                        <td>{item.proveedor}</td>
+                                                                        <td className="text-left">{item.cuenta}</td>
+                                                                        <td className="text-left text-danger">{item.salida <= 0 ? '' : `- ${formatMoney(item.salida)}`}</td>
+                                                                        <td className="text-right text-success">{item.ingreso <= 0 ? '' : `+ ${formatMoney(item.ingreso)}`}</td>
+                                                                    </tr>
+                                                                ))
                                                     }
                                                 </tbody>
                                             </table>
@@ -247,6 +275,26 @@ class BancoDetalle extends React.Component {
                                 </div>
                             </div>
 
+                            <div className="row">
+                                <div className="col-sm-12 col-md-5">
+                                    <div className="dataTables_info mt-2" role="status" aria-live="polite">{this.state.messagePaginacion}</div>
+                                </div>
+                                <div className="col-sm-12 col-md-7">
+                                    <div className="dataTables_paginate paging_simple_numbers">
+                                        <nav aria-label="Page navigation example">
+                                            <ul className="pagination justify-content-end">
+                                                <Paginacion
+                                                    loading={this.state.loading}
+                                                    totalPaginacion={this.state.totalPaginacion}
+                                                    paginacion={this.state.paginacion}
+                                                    fillTable={this.paginacionContext}
+                                                    restart={this.state.restart}
+                                                />
+                                            </ul>
+                                        </nav>
+                                    </div>
+                                </div>
+                            </div>
                         </>
 
                 }

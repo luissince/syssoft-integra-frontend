@@ -254,7 +254,7 @@ class Banco {
     }
 
     async detalleBanco(req) {
-        try {
+        try {         
             const lista = await conec.query(`SELECT 
             DATE_FORMAT(bd.fecha,'%d/%m/%Y') as fecha, 
             bd.hora,
