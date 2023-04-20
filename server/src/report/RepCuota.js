@@ -235,10 +235,9 @@ class RepCuota {
             });
 
             // ==============================================================================================
-           
             let credito = venta.total - data.inicial.reduce((previousValue, currentValue) => previousValue + currentValue.monto, 0)
-            let arrayIni = [0, '', '', '', numberFormat(credito), ''];            
-
+            let arrayIni = [0, '', '', '', numberFormat(credito), ''];
+            
             let content = data.plazos.map((item, index) => {
                 credito = credito - item.monto;
 
@@ -248,7 +247,8 @@ class RepCuota {
                     item.fecha,
                     item.estado === 1 ? 'COBRADO' : item.vencido === 1 ? 'VENCIDO' : item.vencido === 2 ? 'POR VENCER' : 'POR COBRAR',
                     numberFormat(credito),
-                    item.estado === 1 ? 0 : numberFormat(item.monto - item.cobros)]
+                    //                                       480    - 
+                    item.estado === 1 ? 0 : numberFormat(item.monto - item.cobrado)]
             })
 
             content.unshift(arrayIni)
