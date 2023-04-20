@@ -1471,58 +1471,35 @@ class Factura {
             ]);
 
             const plazos = await conec.query(`SELECT 
-            p.idPlazo,        
-            p.cuota,
-            DATE_FORMAT(p.fecha,'%d/%m/%Y') as fecha,
-            CASE 
-            WHEN p.fecha < CURRENT_DATE then 1 
-            WHEN YEAR(p.fecha) = YEAR(CURRENT_DATE) AND MONTH(p.fecha) = MONTH(CURRENT_DATE) AND v.frecuencia = 15 AND DAY(p.fecha) < 15 then 2
-            WHEN YEAR(p.fecha) = YEAR(CURRENT_DATE) AND MONTH(p.fecha) = MONTH(CURRENT_DATE) AND v.frecuencia = 15 AND DAY(p.fecha) >= 15 then 1
-
-            WHEN YEAR(p.fecha) = YEAR(CURRENT_DATE) AND MONTH(p.fecha) = MONTH(CURRENT_DATE) AND DAY(CURRENT_DATE) < DAY(p.fecha)   then 2
-            WHEN YEAR(p.fecha) = YEAR(CURRENT_DATE) AND MONTH(p.fecha) = MONTH(CURRENT_DATE) AND DAY(CURRENT_DATE) >= DAY(p.fecha)  then 1
-            ELSE 0 end AS vencido,
-            p.monto,
-            p.estado
-            FROM plazo AS p 
-            INNER JOIN venta AS v ON p.idVenta = v.idVenta
-            WHERE p.idVenta = ?
-            `, [
-                req.query.idVenta
-            ]);
-
-            const cobros = await conec.query(`SELECT c.idCobro 
-            FROM cobro AS c 
-            LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro AND nc.estado = 1
-            WHERE c.idProcedencia = ? AND c.estado = 1 AND nc.idNotaCredito IS NULL`, [
-                req.query.idVenta
-            ]);
-
-            let newPlazos = [];
-            for (const item of plazos) {
-
-                let newCobros = 0;
-                for (const cobro of cobros) {
-                    const cobroPlazo = await conec.query(`SELECT 
-                    cv.precio
-                    FROM cobro AS c 
-                    INNER JOIN banco AS bc ON bc.idBanco = c.idBanco
-                    INNER JOIN moneda AS mo ON mo.idMoneda = c.idMoneda
-                    INNER JOIN comprobante AS cp ON cp.idComprobante = c.idComprobante
-                    INNER JOIN cobroVenta AS cv ON cv.idCobro = c.idCobro
-                    WHERE cv.idPlazo = ? AND cv.idVenta = ? AND c.idCobro = ?`, [
-                        parseInt(item.idPlazo),
-                        req.query.idVenta,
-                        cobro.idCobro
-                    ]);
-
-                    newCobros = cobroPlazo.reduce((previousValue, currentValue) => previousValue + currentValue.precio, 0);
-                }
-                newPlazos.push({
-                    ...item,
-                    "cobros": newCobros
-                });
-            }
+                p.idPlazo,        
+                p.cuota,
+                DATE_FORMAT(p.fecha,'%d/%m/%Y') as fecha,
+                CASE 
+                WHEN p.fecha < CURRENT_DATE then 1 
+                WHEN YEAR(p.fecha) = YEAR(CURRENT_DATE) AND MONTH(p.fecha) = MONTH(CURRENT_DATE) AND v.frecuencia = 15 AND DAY(p.fecha) < 15 then 2
+                WHEN YEAR(p.fecha) = YEAR(CURRENT_DATE) AND MONTH(p.fecha) = MONTH(CURRENT_DATE) AND v.frecuencia = 15 AND DAY(p.fecha) >= 15 then 1
+    
+                WHEN YEAR(p.fecha) = YEAR(CURRENT_DATE) AND MONTH(p.fecha) = MONTH(CURRENT_DATE) AND DAY(CURRENT_DATE) < DAY(p.fecha)   then 2
+                WHEN YEAR(p.fecha) = YEAR(CURRENT_DATE) AND MONTH(p.fecha) = MONTH(CURRENT_DATE) AND DAY(CURRENT_DATE) >= DAY(p.fecha)  then 1
+                ELSE 0 end AS vencido,
+                p.monto,
+                COALESCE(cv.precio,0) AS cobrado,
+                p.estado
+                FROM plazo AS p 
+                INNER JOIN venta AS v ON p.idVenta = v.idVenta
+                LEFT JOIN (
+                    SELECT 
+                        SUM(cv.precio) AS precio, c.idCobro, cv.idPlazo
+                        FROM cobro AS c
+                        LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro AND nc.estado = 1
+                        INNER JOIN cobroVenta AS cv ON cv.idCobro = c.idCobro                    
+                        AND c.estado = 1 AND nc.idNotaCredito IS NULL
+                        GROUP BY cv.idPlazo
+                ) AS cv ON cv.idPlazo = p.idPlazo  
+                WHERE p.idVenta = ?`, [
+                    req.query.idVenta
+                ]
+                );
 
             const lotes = await conec.query(`SELECT
                 l.descripcion AS lote,
@@ -1565,7 +1542,7 @@ class Factura {
             return {
                 "venta": venta[0],
                 "detalle": detalle,
-                "plazos": newPlazos,
+                "plazos": plazos,
                 "lotes": lotes,
                 "cobros": cobrosEchos,
                 "inicial": inicial
