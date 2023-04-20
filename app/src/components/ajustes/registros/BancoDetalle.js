@@ -20,9 +20,19 @@ class BancoDetalle extends React.Component {
             saldo: '',
             codiso: '',
 
-            lista: [],
-            loading: true,
-            msgLoading: 'Cargando datos...',
+            initial: true,
+
+            loading: false,
+            lista: [],            
+            restart: false,
+
+            opcion: 0,
+            paginacion: 0,
+            totalPaginacion: 0,
+            filasPorPagina: 10,
+            messageTable: 'Cargando información...',
+            messagePaginacion: 'Mostranto 0 de 0 Páginas',
+            messageLoading: 'Cargando datos...',
         }
         this.abortControllerView = new AbortController();
     }
@@ -50,10 +60,12 @@ class BancoDetalle extends React.Component {
     async loadDataId(id) {
         try {
 
-            const detalle = await axios.get("/api/banco/detalle", {
+            const detalle = await axios.get("/api/banco/iddetalle", {
                 signal: this.abortControllerView.signal,
                 params: {
-                    "idBanco": id
+                    "idBanco": id,
+                    // "posicionPagina": ((this.state.paginacion - 1) * this.state.filasPorPagina),
+                    // "filasPorPagina": this.state.filasPorPagina
                 }
             });
 
@@ -68,14 +80,50 @@ class BancoDetalle extends React.Component {
                 saldo: cabecera.saldo,
                 codiso: cabecera.codiso,
 
-                lista : detalle.data.lista,
-                loading: false
+                // lista : detalle.data.lista,
+                initial: false
             });
 
 
         } catch (error) {
             if (error.message !== "canceled") {
                 this.props.history.goBack();
+            }
+        }
+    }
+
+    fillTable = async (opcion, buscar) => {
+        try {
+            await this.setStateAsync({ loading: true, lista: [], messageTable: "Cargando información...", messagePaginacion: "Mostranto 0 de 0 Páginas" });
+
+            const result = await axios.get('/api/banco/list', {
+                signal: this.abortControllerTable.signal,
+                params: {
+                    "opcion": opcion,
+                    "buscar": buscar.trim().toUpperCase(),
+                    "posicionPagina": ((this.state.paginacion - 1) * this.state.filasPorPagina),
+                    "filasPorPagina": this.state.filasPorPagina
+                }
+            });
+
+            let totalPaginacion = parseInt(Math.ceil((parseFloat(result.data.total) / this.state.filasPorPagina)));
+            let messagePaginacion = `Mostrando ${result.data.result.length} de ${totalPaginacion} Páginas`;
+
+            await this.setStateAsync({
+                loading: false,
+                lista: result.data.result,
+                totalPaginacion: totalPaginacion,
+                messagePaginacion: messagePaginacion
+            });
+        } catch (error) {
+            if (error.message !== "canceled") {
+                await this.setStateAsync({
+                    loading: false,
+                    lista: [],
+                    totalPaginacion: 0,
+                    messageTable: "Se produjo un error interno, intente nuevamente por favor.",
+                    messagePaginacion: "Mostranto 0 de 0 Páginas",
+                });
             }
         }
     }
@@ -96,9 +144,9 @@ class BancoDetalle extends React.Component {
         return (
             <>
                 {
-                    this.state.loading ?
+                    this.state.initial ?
                         <div className="clearfix absolute-all bg-white">
-                            {spinnerLoading(this.state.msgLoading)}
+                            {spinnerLoading(this.state.messageLoading)}
                         </div> :
                         <>
                             <div className='row'>

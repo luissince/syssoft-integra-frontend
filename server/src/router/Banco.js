@@ -64,6 +64,16 @@ router.get('/listcombo', async function (req, res) {
     }
 });
 
+router.get('/iddetalle', async function (req, res) {
+    const result = await banco.idDetalle(req)
+    if (typeof result === 'object') {
+        res.status(200).send(result)
+    } else {
+        res.status(500).send(result)
+    }
+});
+
+
 router.get('/detalle', async function (req, res) {
     const result = await banco.detalleBanco(req)
     if (typeof result === 'object') {
