@@ -136,9 +136,9 @@ class Inicio extends React.Component {
 
     loadSideBar() {
         const value = document.querySelectorAll('#sidebar ul li .pro-inner-item[data-bs-toggle="collapse"]');
-        value.forEach(element => {         
+        value.forEach(element => {
             element.parentNode.querySelector('ul').addEventListener('shown.bs.collapse', function (event) {
-                value.forEach(item => {                 
+                value.forEach(item => {
                     if (event.target.getAttribute('id') !== item.parentNode.querySelector('ul').getAttribute('id')) {
                         item.setAttribute("aria-expanded", "false");
                         item.parentNode.querySelector('ul').classList.remove("show");
@@ -152,6 +152,35 @@ class Inicio extends React.Component {
         try {
             let result = await axios.get("/api/cobro/notificaciones");
             this.setState({ notificaciones: result.data });
+
+            this.setState({
+                notificaciones: [{
+                    "cantidad": 10,
+                    "nombre": "boletas",
+                    "estado": "pendiente"
+                },
+                {
+                    "cantidad": 10,
+                    "nombre": "boletas",
+                    "estado": "pendiente"
+                },
+                {
+                    "cantidad": 10,
+                    "nombre": "boletas",
+                    "estado": "pendiente"
+                },
+                {
+                    "cantidad": 10,
+                    "nombre": "boletas",
+                    "estado": "pendiente"
+                },
+                {
+                    "cantidad": 10,
+                    "nombre": "boletas",
+                    "estado": "pendiente"
+                }]
+
+            })
         } catch (error) {
             this.setState({ notificaciones: [] });
         }

@@ -846,7 +846,7 @@ class Factura {
         try {
             connection = await conec.beginTransaction();
 
-            let venta = await conec.execute(connection, `SELECT 
+            const validar = await conec.execute(connection, `SELECT 
             idVenta,
             serie,
             numeracion 
@@ -854,105 +854,107 @@ class Factura {
             WHERE idVenta = ? AND estado = 3`, [
                 req.query.idVenta
             ]);
-            if (venta.length !== 0) {
+            if (validar.length !== 0) {
                 await conec.rollback(connection);
                 return sendClient(res, "La venta ya se encuentra anulada.");
-            } else {
-                let plazos = await conec.execute(connection, `SELECT * FROM
+            }
+
+
+            const plazos = await conec.execute(connection, `SELECT * FROM
                     cobroVenta WHERE idVenta = ?`, [
-                    req.query.idVenta
-                ]);
+                req.query.idVenta
+            ]);
 
-                let validate = 0;
+            let validate = 0;
 
-                for (let item of plazos) {
-                    if (item.idPlazo !== 0) {
-                        validate++;
-                    }
+            for (const item of plazos) {
+                if (item.idPlazo !== 0) {
+                    validate++;
                 }
+            }
 
-                if (validate > 0) {
-                    await conec.rollback(connection);
-                    return sendClient(res, "No se puede eliminar la venta porque tiene cuotas asociadas.");
-                }
+            if (validate > 0) {
+                await conec.rollback(connection);
+                return sendClient(res, "No se puede eliminar la venta porque tiene cuotas asociadas.");
+            }
 
-                await conec.execute(connection, `UPDATE venta SET estado = 3 
+            await conec.execute(connection, `UPDATE venta SET estado = 3 
                     WHERE idVenta = ?`, [
-                    req.query.idVenta
+                req.query.idVenta
+            ]);
+
+            const cobro = await conec.execute(connection, `SELECT idCobro FROM cobro WHERE idProcedencia = ?`, [
+                req.query.idVenta
+            ])
+
+            if (cobro.length > 0) {
+                await conec.execute(connection, `DELETE FROM cobro WHERE idCobro = ?`, [
+                    cobro[0].idCobro
                 ]);
 
-                let cobro = await conec.execute(connection, `SELECT idCobro FROM cobro WHERE idProcedencia = ?`, [
-                    req.query.idVenta
-                ])
+                await conec.execute(connection, `DELETE FROM cobroDetalle WHERE idCobro = ?`, [
+                    cobro[0].idCobro
+                ]);
 
-                if (cobro.length > 0) {
-                    await conec.execute(connection, `DELETE FROM cobro WHERE idCobro = ?`, [
-                        cobro[0].idCobro
-                    ]);
+                await conec.execute(connection, `DELETE FROM cobroVenta WHERE idCobro = ?`, [
+                    cobro[0].idCobro
+                ]);
 
-                    await conec.execute(connection, `DELETE FROM cobroDetalle WHERE idCobro = ?`, [
-                        cobro[0].idCobro
-                    ]);
+                await conec.execute(connection, `DELETE FROM bancoDetalle WHERE idProcedencia  = ?`, [
+                    cobro[0].idCobro
+                ]);
+            }
 
-                    await conec.execute(connection, `DELETE FROM cobroVenta WHERE idCobro = ?`, [
-                        cobro[0].idCobro
-                    ]);
-
-                    await conec.execute(connection, `DELETE FROM bancoDetalle WHERE idProcedencia  = ?`, [
-                        cobro[0].idCobro
-                    ]);
-                }
-
-                let lote = await conec.execute(connection, `SELECT vd.idLote FROM
+            const lote = await conec.execute(connection, `SELECT vd.idLote FROM
                     venta AS v 
                     INNER JOIN ventaDetalle AS vd ON v.idVenta = vd.idVenta
                     WHERE v.idVenta  = ?`, [
-                    req.query.idVenta
-                ]);
+                req.query.idVenta
+            ]);
 
-                for (let item of lote) {
-                    await conec.execute(connection, `UPDATE lote SET estado = 1 
+            for (const item of lote) {
+                await conec.execute(connection, `UPDATE lote SET estado = 1 
                         WHERE idLote = ?`, [
-                        item.idLote
-                    ]);
-                }
-
-                await conec.execute(connection, `DELETE FROM plazo WHERE idVenta = ?`, [
-                    req.query.idVenta
+                    item.idLote
                 ]);
+            }
 
-                await conec.execute(connection, `DELETE FROM asociado WHERE idVenta = ?`, [
-                    req.query.idVenta
-                ]);
+            await conec.execute(connection, `DELETE FROM plazo WHERE idVenta = ?`, [
+                req.query.idVenta
+            ]);
 
-                let venta = await conec.execute(connection, `SELECT 
+            await conec.execute(connection, `DELETE FROM asociado WHERE idVenta = ?`, [
+                req.query.idVenta
+            ]);
+
+            const venta = await conec.execute(connection, `SELECT 
                 idVenta,
                 serie,
                 numeracion 
                 FROM venta 
                 WHERE idVenta = ?`, [
-                    req.query.idVenta
-                ]);
+                req.query.idVenta
+            ]);
 
-                /**
-                 * Proceso de registro de auditoria 
-                 */
-                let resultAuditoria = await conec.execute(connection, 'SELECT idAuditoria FROM auditoria');
-                let idAuditoria = 0;
-                if (resultAuditoria.length != 0) {
-                    let quitarValor = resultAuditoria.map(function (item) {
-                        return parseInt(item.idAuditoria);
-                    });
+            /**
+             * Proceso de registro de auditoria 
+             */
+            const resultAuditoria = await conec.execute(connection, 'SELECT idAuditoria FROM auditoria');
+            let idAuditoria = 0;
+            if (resultAuditoria.length != 0) {
+                let quitarValor = resultAuditoria.map(function (item) {
+                    return parseInt(item.idAuditoria);
+                });
 
-                    let valorActual = Math.max(...quitarValor);
-                    let incremental = valorActual + 1;
+                let valorActual = Math.max(...quitarValor);
+                let incremental = valorActual + 1;
 
-                    idAuditoria = incremental;
-                } else {
-                    idAuditoria = 1;
-                }
+                idAuditoria = incremental;
+            } else {
+                idAuditoria = 1;
+            }
 
-                await conec.execute(connection, `INSERT INTO auditoria(
+            await conec.execute(connection, `INSERT INTO auditoria(
                     idAuditoria,
                     idProcedencia,
                     descripcion,
@@ -960,17 +962,17 @@ class Factura {
                     hora,
                     idUsuario) 
                     VALUES(?,?,?,?,?,?)`, [
-                    idAuditoria,
-                    req.query.idVenta,
-                    `ANULACIÓN DEL COMPROBANTE ${venta[0].serie}-${venta[0].numeracion}`,
-                    currentDate(),
-                    currentTime(),
-                    req.query.idUsuario
-                ]);
+                idAuditoria,
+                req.query.idVenta,
+                `ANULACIÓN DEL COMPROBANTE ${venta[0].serie}-${venta[0].numeracion}`,
+                currentDate(),
+                currentTime(),
+                req.query.idUsuario
+            ]);
 
-                await conec.commit(connection);
-                return sendSave(res, "Se anuló correctamente la venta.");
-            }
+            await conec.commit(connection);
+            return sendSave(res, "Se anuló correctamente la venta.");
+
         } catch (error) {
             if (connection != null) {
                 await conec.rollback(connection);
@@ -978,7 +980,7 @@ class Factura {
             return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
         }
     }
-    
+
     /**
      * Metodo usado en el modulo facturación/ventas/detalle.
      * @param {*} req 
@@ -1497,9 +1499,9 @@ class Factura {
                         GROUP BY cv.idPlazo
                 ) AS cv ON cv.idPlazo = p.idPlazo  
                 WHERE p.idVenta = ?`, [
-                    req.query.idVenta
-                ]
-                );
+                req.query.idVenta
+            ]
+            );
 
             const lotes = await conec.query(`SELECT
                 l.descripcion AS lote,
