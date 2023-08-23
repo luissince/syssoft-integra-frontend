@@ -153,34 +153,34 @@ class Inicio extends React.Component {
             let result = await axios.get("/api/cobro/notificaciones");
             this.setState({ notificaciones: result.data });
 
-            this.setState({
-                notificaciones: [{
-                    "cantidad": 10,
-                    "nombre": "boletas",
-                    "estado": "pendiente"
-                },
-                {
-                    "cantidad": 10,
-                    "nombre": "boletas",
-                    "estado": "pendiente"
-                },
-                {
-                    "cantidad": 10,
-                    "nombre": "boletas",
-                    "estado": "pendiente"
-                },
-                {
-                    "cantidad": 10,
-                    "nombre": "boletas",
-                    "estado": "pendiente"
-                },
-                {
-                    "cantidad": 10,
-                    "nombre": "boletas",
-                    "estado": "pendiente"
-                }]
+            // this.setState({
+            //     notificaciones: [{
+            //         "cantidad": 10,
+            //         "nombre": "boletas",
+            //         "estado": "pendiente"
+            //     },
+            //     {
+            //         "cantidad": 10,
+            //         "nombre": "boletas",
+            //         "estado": "pendiente"
+            //     },
+            //     {
+            //         "cantidad": 10,
+            //         "nombre": "boletas",
+            //         "estado": "pendiente"
+            //     },
+            //     {
+            //         "cantidad": 10,
+            //         "nombre": "boletas",
+            //         "estado": "pendiente"
+            //     },
+            //     {
+            //         "cantidad": 10,
+            //         "nombre": "boletas",
+            //         "estado": "pendiente"
+            //     }]
 
-            })
+            // })
         } catch (error) {
             this.setState({ notificaciones: [] });
         }

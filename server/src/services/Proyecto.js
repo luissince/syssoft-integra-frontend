@@ -16,7 +16,7 @@ class Proyecto {
 
     async list(req, res) {
         try {
-            let lista = await conec.query(`SELECT  
+            const lista = await conec.query(`SELECT  
             p.idProyecto,
             p.nombre,
             p.ubicacion,
@@ -41,14 +41,14 @@ class Proyecto {
                 parseInt(req.query.filasPorPagina)
             ])
 
-            let resultLista = lista.map(function (item, index) {
+            const resultLista = lista.map(function (item, index) {
                 return {
                     ...item,
                     id: (index + 1) + parseInt(req.query.posicionPagina)
                 }
             });
 
-            let total = await conec.query(`SELECT COUNT(*) AS Total 
+            const total = await conec.query(`SELECT COUNT(*) AS Total 
             FROM proyecto AS p INNER JOIN moneda AS m
             ON m.idMoneda = p.idMoneda 
             WHERE 
@@ -397,7 +397,7 @@ class Proyecto {
 
     async inicio(req, res) {
         try {
-            let result = await conec.query(`SELECT 
+            const result = await conec.query(`SELECT 
             p.idProyecto,
             p.nombre,
             p.ubicacion,
@@ -411,8 +411,8 @@ class Proyecto {
             INNER JOIN moneda AS m ON m.idMoneda = p.idMoneda
             `);
 
-            let proyectos = await Promise.all(result.map(async (proyecto) => {
-                let lotes = await conec.query(`SELECT estado FROM 
+            const proyectos = await Promise.all(result.map(async (proyecto) => {
+                const lotes = await conec.query(`SELECT estado FROM 
                 lote AS l INNER JOIN manzana AS m
                 ON l.idManzana = m.idManzana
                 WHERE m.idProyecto = ?`, [
@@ -426,6 +426,15 @@ class Proyecto {
 
             return sendSuccess(res, proyectos);
         } catch (error) {
+            return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
+        }
+    }
+
+    async combo(req, res){
+        try{
+            const proyectos = await conec.query(`SELECT idProyecto,nombre FROM proyecto`)
+            return sendSuccess(res, proyectos);
+        }catch(error){
             return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
         }
     }

@@ -13,7 +13,7 @@ import './recursos/css/footerbar.css';
 import './recursos/js/bootstrap.js';
 import '../../node_modules/bootstrap-icons/font/bootstrap-icons.css';
 import '../../node_modules/react-notifications/lib/notifications.css';
-import './network/api/axios';
+import './network/rest/principal.network';
 
 ReactDOM.render(
     <Provider store={store}>
@@ -23,42 +23,3 @@ ReactDOM.render(
     </Provider>,
     document.getElementById('root')
 );
-
-
-// import { createStore } from 'redux'
-
-
-// const reducer = (state = 0, action) => {
-//     switch (action.type) {
-//         case '+': return state + 1
-//         case '-': return state - 1
-//         case '=': return 0
-//         default: return state;
-//     }
-// }
-
-
-// const actionIncremented = {
-//     type: "+",
-
-// }
-// const actionDecremented = {
-//     type: "-",
-
-// }
-// const actionReset = {
-//     type: "=",
-
-// }
-
-// const store = createStore(reducer);
-
-
-
-// store.subscribe(() => {
-//     console.log(store.getState());
-// });
-
-// store.dispatch(actionIncremented);
-// store.dispatch(actionDecremented);
-// store.dispatch(actionReset);

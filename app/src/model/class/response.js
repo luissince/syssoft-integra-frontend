@@ -1,4 +1,5 @@
-class SuccessReponse{
+
+class SuccessReponse {
 
     data = "";
 
@@ -14,6 +15,7 @@ class SuccessReponse{
         this.status = response.status;
         this.statusText = response.statusText
     }
+
 }
 
 export default SuccessReponse;

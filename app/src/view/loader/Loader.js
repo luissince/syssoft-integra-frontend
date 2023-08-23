@@ -2,10 +2,11 @@ import React from 'react';
 import '../../recursos/css/loader.css';
 import { connect } from 'react-redux';
 import { config, restoreToken } from '../../redux/actions';
-import { empresaConfig, validToken } from '../../network/api/axios';
-import SuccessReponse from '../../network/api/response';
-import ErrorResponse from '../../network/exception/error';
-import { CANCELED } from '../../network/exception/types';
+import { empresaConfig, validToken } from '../../network/rest/principal.network';
+
+import { CANCELED } from '../../model/types/types';
+import ErrorResponse from '../../model/class/error';
+import SuccessReponse from '../../model/class/response';
 
 class Loader extends React.Component {
 

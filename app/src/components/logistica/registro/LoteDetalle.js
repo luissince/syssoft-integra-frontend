@@ -14,11 +14,12 @@ import {
     ModalAlertWarning,
     ModalAlertError
 } from '../../../helper/Tools';
-import { liberarTerreno, listarComboCliente, loteDetalle, loteRestablecer, loteSocio } from '../../../network/api/axios';
+import { liberarTerreno, listarComboCliente, loteDetalle, loteRestablecer, loteSocio } from '../../../network/rest/principal.network';
 import { connect } from 'react-redux';
+import { CANCELED, ERROR } from '../../../model/types/types';
+import SuccessReponse from '../../../model/class/response';
+import ErrorResponse from '../../../model/class/error';
 
-import Response from '../../../network/api/response';
-import { CANCELED, ERROR } from '../../../network/exception/types';
 
 class LoteDetalle extends React.Component {
     constructor(props) {
@@ -128,7 +129,7 @@ class LoteDetalle extends React.Component {
         }
         const response = await loteDetalle(data, this.abortControllerTable.signal);
 
-        if (response instanceof Response) {
+        if (response instanceof SuccessReponse) {
             await this.setStateAsync({
                 lote: response.data.lote,
                 socios: response.data.socios,
@@ -141,7 +142,7 @@ class LoteDetalle extends React.Component {
             return;
         }
 
-        if (response instanceof Object) {
+        if (response instanceof ErrorResponse) {
             if (response.type === CANCELED) return;
 
             this.props.history.goBack();

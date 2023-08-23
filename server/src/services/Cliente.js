@@ -353,7 +353,7 @@ class Cliente {
                 req.body.idCliente
             ]);
 
-            global.io.emit('message', `Cliente actualizado :D`);
+            // global.io.emit('message', `Cliente actualizado :D`);
 
             await conec.commit(connection)
             return "update";

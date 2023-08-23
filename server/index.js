@@ -2,7 +2,7 @@ const http = require('http');
 const express = require('express');
 const app = express();
 const path = require('path');
-const socket = require('socket.io');
+// const socket = require('socket.io');
 const cors = require('cors');
 const swaggerUi = require('swagger-ui-express');
 const swagger = require('./src/swagger');
@@ -15,25 +15,25 @@ require('dotenv').config();
  * Inicializando el constructor
  */
 
-const server = http.createServer(app);
-const io = socket(server, {
-    cors: { origin: "*" }
-});
+// const server = http.createServer(app);
+// const io = socket(server, {
+//     cors: { origin: "*" }
+// });
 
-global.io = io;
+// global.io = io;
 
-io.on('connection', (socket) => {
-    console.log('a user connected');
+// io.on('connection', (socket) => {
+//     console.log('a user connected');
 
-    socket.on('message', (message) => {
-        console.log(message);
-        io.emit('message', `${socket.id.substr(0, 2)} said ${message}`);
-    });
+//     socket.on('message', (message) => {
+//         console.log(message);
+//         io.emit('message', `${socket.id.substr(0, 2)} said ${message}`);
+//     });
 
-    socket.on("disconnect", () => {
-        console.log('desconnected ' + socket.id)
-    });
-});
+//     socket.on("disconnect", () => {
+//         console.log('desconnected ' + socket.id)
+//     });
+// });
 
 
 /**
@@ -164,6 +164,9 @@ app.use((req, res, next) => {
 /**
  * 
  */
-server.listen(app.get("port"), () => {
+// server.listen(app.get("port"), "192.168.101.2",() => {
+//     console.log(`El servidor está corriendo en el puerto ${app.get("port")}`);
+// });
+app.listen(app.get("port"),()=>{
     console.log(`El servidor está corriendo en el puerto ${app.get("port")}`);
 });

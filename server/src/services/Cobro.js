@@ -513,7 +513,7 @@ class Cobro {
                 req.body.idUsuario
             ]);
 
-            global.io.emit('message', `Cobro registrado :D`);
+            // global.io.emit('message', `Cobro registrado :D`);
 
             await conec.commit(connection);
             return "insert";
@@ -746,7 +746,7 @@ class Cobro {
                 req.body.idUsuario
             ]);
 
-            global.io.emit('message', `Cobro registrado :D`);
+            // global.io.emit('message', `Cobro registrado :D`);
 
             await conec.commit(connection);
             return "insert";
@@ -964,11 +964,12 @@ class Cobro {
                 req.body.idUsuario
             ]);
 
-            global.io.emit('message', `Cobro registrado :D`);
+            // global.io.emit('message', `Cobro registrado :D`);
 
             await conec.commit(connection);
             return "insert";
         } catch (error) {
+            console.log(error)
             if (connection != null) {
                 await conec.rollback(connection);
             }

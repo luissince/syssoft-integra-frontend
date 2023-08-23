@@ -147,7 +147,7 @@ class NotaCredito {
     async id(req, res) {
         try {
 
-            let result = await conec.query(`SELECT 
+            const result = await conec.query(`SELECT 
             nc.idNotaCredito,
             mt.nombre AS motivo,
             co.nombre AS comprobante,
@@ -191,7 +191,7 @@ class NotaCredito {
 
             if (result.length > 0) {
 
-                let detalle = await conec.query(`SELECT 
+                const detalle = await conec.query(`SELECT 
                 CASE 
                 WHEN nc.tipo = 0 THEN CONCAT('CUOTA',' ',pl.cuota)
                 ELSE co.nombre END AS concepto,

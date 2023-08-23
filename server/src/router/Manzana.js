@@ -2,6 +2,10 @@ const express = require('express');
 const router = express.Router();
 const Manzana = require('../services/Manzana');
 
+/**
+ *  endpoint
+ *  [/api/manzana/*]
+ */
 const manzana = new Manzana();
 
 router.get("/list", async function (req, res) {
@@ -57,6 +61,15 @@ router.get('/listcombo', async function (req, res) {
         res.status(500).send(result);
     }
 });
+
+router.get('/traslado', async function(req, res){
+    const result = await manzana.trasladar(req);
+    if(result === "update"){
+        res.status(200).send("Se completo el proceso de trasladar correctamente.");
+    }else{
+        res.status(500).send(result);
+    }
+})
 
 
 module.exports = router;

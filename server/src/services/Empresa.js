@@ -202,6 +202,7 @@ class Empresa {
                 return sendClient(res, "Iniciar configuración.");
             }
         } catch (error) {
+            console.log(error)
             return sendClient(res, "Iniciar configuración.");
         }
     }

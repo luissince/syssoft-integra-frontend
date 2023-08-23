@@ -15,7 +15,7 @@ class Sedes extends React.Component {
         this.state = {
 
             empresa: [],
-
+            
             edit: statePrivilegio(this.props.token.userToken.menus[5].submenu[3].privilegio[0].estado),
 
             loading: false,

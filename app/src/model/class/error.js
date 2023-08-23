@@ -1,4 +1,4 @@
-import { RESPOSE, REQUEST, ERROR, CANCELED } from './types';
+import { RESPOSE, REQUEST, ERROR, CANCELED } from '../types/types';
 
 class ErrorResponse {
 
