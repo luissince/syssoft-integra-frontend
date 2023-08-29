@@ -94,7 +94,7 @@ class LoteDetalle extends React.Component {
     async loadData() {
         const response = await listarComboCliente(this.abortControllerModal.signal);
 
-        if (response instanceof Response) {
+        if (response instanceof SuccessReponse) {
             let newLista = [];
 
             for (let cli of response.data) {
@@ -113,7 +113,7 @@ class LoteDetalle extends React.Component {
             return;
         }
 
-        if (response instanceof Object) {
+        if (response instanceof ErrorResponse) {
             if (response.type === CANCELED) return;
 
             await this.setStateAsync({
@@ -176,12 +176,12 @@ class LoteDetalle extends React.Component {
 
                 const response = await loteSocio(data);
 
-                if (response instanceof Response) {
+                if (response instanceof SuccessReponse) {
                     ModalAlertSuccess("Lote", response.data, () => this.loadDataId(this.state.idLote));
                     return;
                 }
 
-                if (response instanceof Object) {
+                if (response instanceof ErrorResponse) {
                     if (response.type === CANCELED) return;
 
                     if (response.type === ERROR) {
@@ -207,13 +207,13 @@ class LoteDetalle extends React.Component {
 
                 const response = await loteRestablecer(data);
 
-                if (response instanceof Response) {
+                if (response instanceof SuccessReponse) {
 
                     ModalAlertSuccess("Lote", response.data, () => this.loadDataId(this.state.idLote));
                     return;
                 }
 
-                if (response instanceof Object) {
+                if (response instanceof ErrorResponse) {
                     if (response.type === CANCELED) return;
 
                     if (response.type === ERROR) {
@@ -269,12 +269,12 @@ class LoteDetalle extends React.Component {
                 }
 
                 const response = await liberarTerreno(data, this.abortControllerLiberar.signal);
-                if (response instanceof Response) {
+                if (response instanceof SuccessReponse) {
                     ModalAlertSuccess("Lote", response.data, () => this.props.history.goBack());
                     return;
                 }
 
-                if (response instanceof Object) {
+                if (response instanceof ErrorResponse) {
                     if (response.type === CANCELED) return;
 
                     ModalAlertWarning("Lote", response.message);

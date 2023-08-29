@@ -478,6 +478,7 @@ class Lote {
             await conec.commit(connection);
             return sendSuccess(res, "El proceso se liberación del lote se completo correctamente.");
         } catch (error) {
+            console.log(error)
             if (connection != null) {
                 await conec.rollback(connection);
             }

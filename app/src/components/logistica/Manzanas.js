@@ -378,29 +378,33 @@ class Manzanas extends React.Component {
       return;
     }
 
-    const params = {
-      idManzana: this.state.idManzana,
-      idProyecto: this.state.idProyecto,
-      idProyectoTrasladar: this.state.idProyectoTrasladar,
-      idUsuario: this.state.idUsuario,
-    };
+    ModalAlertDialog("Manzana", "¿Está seguro de continuar?", async (value) => {
+      if (value) {
+        const params = {
+          idManzana: this.state.idManzana,
+          idProyecto: this.state.idProyecto,
+          idProyectoTrasladar: this.state.idProyectoTrasladar,
+          idUsuario: this.state.idUsuario,
+        };
 
-    hideModal("modalManzanaTraslado");
+        ModalAlertInfo("Moneda", "Procesando información...");
+        hideModal("modalManzanaTraslado");
+        
+        const response = await trasladarManzana(params);
 
-    ModalAlertInfo("Moneda", "Procesando información...");
-    const response = await trasladarManzana(params);
+        if (response instanceof SuccessReponse) {
+          console.log(response.data);
 
-    if (response instanceof SuccessReponse) {
-      console.log(response.data);
+          ModalAlertSuccess("Manzana", response.data, () => {
+            this.loadInit();
+          });
+        }
 
-      ModalAlertSuccess("Manzana", response.data, () => {
-        this.loadInit();
-      });
-    }
-
-    if (response instanceof ErrorResponse) {
-      ModalAlertWarning("Manzana", response.getMessage());
-    }
+        if (response instanceof ErrorResponse) {
+          ModalAlertWarning("Manzana", response.getMessage());
+        }
+      }
+    });
   };
 
   render() {
