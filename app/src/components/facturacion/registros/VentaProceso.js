@@ -14,6 +14,8 @@ import {
     showModal,
     hideModal,
     viewModal,
+    currentDate,
+    validateDate,
     clearModal,
     spinnerLoading,
     ModalAlertDialog,
@@ -51,6 +53,8 @@ class VentaProceso extends React.Component {
             clientes: [],
             cliente: '',
             filterCliente: false,
+
+            fechaInicio: currentDate(),
 
             idImpuesto: '',
             impuestos: [],
@@ -1346,191 +1350,27 @@ class VentaProceso extends React.Component {
                         null
                 }
 
-                <div className='row pb-3'>
-                    <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
-                        <section className="content-header">
-                            <h5>
-                                <span role="button" onClick={() => this.props.history.goBack()}><i className="bi bi-arrow-left-short"></i></span> Registrar Venta
-                                <small className="text-secondary"> nueva</small>
-                            </h5>
-                        </section>
-                    </div>
-                </div>
-
-                {
-                    this.state.messageWarning === '' ? null :
-                        <div className="alert alert-warning" role="alert">
-                            <i className="bi bi-exclamation-diamond-fill"></i> {this.state.messageWarning}
-                        </div>
-                }
-
                 <div className="row">
-                    <div className="col-xl-8 col-lg-8 col-md-8 col-sm-12 col-12">
+                    <div className="col-xl-6 col-lg-6 col-md-3 col-sm-12 col-12 border-right">
 
-                        <div className="row">
-                            <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
-                                <SearchBarLote
-                                    placeholder="Filtrar lotes..."
-                                    refLote={this.refLote}
-                                    lote={this.state.lote}
-                                    lotes={this.state.lotes}
-                                    onEventClearInput={this.onEventClearInputLote}
-                                    handleFilter={this.handleFilterLote}
-                                    onEventSelectItem={this.onEventSelectItemLote}
-                                />
-                            </div>
-
-                            <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
-                                <div className="form-group">
-                                    <div className="input-group">
-                                        <div className="input-group-prepend">
-                                            <div className="input-group-text">
-                                                <i className="bi bi-cash-coin"></i>
-                                            </div>
-                                        </div>
-                                        <input
-                                            title="Precio de venta"
-                                            type="text"
-                                            className="form-control"
-                                            ref={this.refPrecioContado}
-                                            value={this.state.precioContado}
-                                            onChange={async (event) => {
-                                                if (event.target.value.trim().length > 0) {
-                                                    await this.setStateAsync({
-                                                        precioContado: event.target.value,
-                                                        messageWarning: '',
-                                                    });
-                                                } else {
-                                                    await this.setStateAsync({
-                                                        precioContado: event.target.value,
-                                                        messageWarning: 'Ingrese el monto',
-                                                    });
-                                                }
-                                            }}
-
-                                            placeholder="Ingrese el monto"
-                                            onKeyPress={keyNumberFloat} />
-                                        <div className="input-group-append">
-                                            <button
-                                                className="btn btn-outline-secondary"
-                                                type="button"
-                                                title="Agregar"
-                                                onClick={() => this.addObjectTable()}>
-                                                <i className="bi bi-plus-circle"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
+                        <div className='row pb-3'>
+                            {/* <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'> */}
+                            <div className='col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12'>
+                                <section className="content-header">
+                                    <h5>
+                                        <span role="button" onClick={() => this.props.history.goBack()}><i className="bi bi-arrow-left-short"></i></span> Registrar Venta
+                                        <small className="text-secondary"> nueva</small>
+                                    </h5>
+                                </section>
                             </div>
                         </div>
 
-                        <div className="row">
-                            <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
-                                <div className="form-group">
-                                    <a
-                                        onClick={async () => await this.setStateAsync({
-                                            expandedOpciones: !(this.refCollpse.current.attributes["aria-expanded"].value.toLowerCase() === 'true')
-                                        })}
-                                        ref={this.refCollpse}
-                                        className="icon-link collapsed"
-                                        data-bs-toggle="collapse"
-                                        href="#collapseOpciones"
-                                        role="button"
-                                        aria-expanded="false"
-                                        aria-controls="collapseOpciones">
-                                        Opciones {this.state.expandedOpciones ? <i className="fa fa-plus-square"></i> : <i className="fa fa-minus-square"></i>}
-                                    </a>
+                        {
+                            this.state.messageWarning === '' ? null :
+                                <div className="alert alert-warning" role="alert">
+                                    <i className="bi bi-exclamation-diamond-fill"></i> {this.state.messageWarning}
                                 </div>
-                            </div>
-                        </div>
-
-                        <div ref={this.refCollpseContent} className="collapse" id="collapseOpciones">
-                            <div className="row">
-                                <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
-                                    <div className="form-group">
-                                        <select
-                                            title="Lista de lotes"
-                                            className="form-control"
-                                            value={this.state.idImpuesto}
-                                            ref={this.refImpuesto}
-                                            onChange={(event) => this.setState({ idImpuesto: event.target.value })}
-                                        >
-                                            <option value="">-- Impuesto --</option>
-                                            {
-                                                this.state.impuestos.map((item, index) => (
-                                                    <option key={index} value={item.idImpuesto}>{item.nombre}</option>
-                                                ))
-                                            }
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
-                                    <div className="form-group">
-                                        <select
-                                            title="Lista de lotes"
-                                            className="form-control"
-                                            value={this.state.idMedida}
-                                            ref={this.refMedida}
-                                            onChange={(event) => this.setState({ idMedida: event.target.value })}
-                                        >
-                                            <option value="">-- Unidad --</option>
-                                            {
-                                                this.state.medidas.map((item, index) => (
-                                                    <option key={index} value={item.idMedida}>{item.nombre}</option>
-                                                ))
-                                            }
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="row">
-                            <div className=" col-md-12 col-sm-12 col-12">
-                                <div className="table-responsive">
-                                    <table className="table table-striped table-bordered rounded">
-                                        <thead>
-                                            <tr>
-                                                <th width="10%" className="text-center">#</th>
-                                                <th width="30%">Descripción</th>
-                                                <th width="10%">Cantidad </th>
-                                                <th width="20%">Impuesto</th>
-                                                <th width="10%">Precio </th>
-                                                <th width="10%">Importe </th>
-                                                <th width="5%">Quitar</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {
-                                                this.state.detalleVenta.length === 0 ? (
-                                                    <tr className="text-center">
-                                                        <td colSpan="7"> Agregar datos a la tabla </td>
-                                                    </tr>
-                                                ) : (
-                                                    this.state.detalleVenta.map((item, index) => (
-                                                        <tr key={index}>
-                                                            <td className="text-center">{++index}</td>
-                                                            <td>{item.nombreLote}{<br />}{<small>{item.nombreManzana}</small>}</td>
-                                                            <td>{item.cantidad}{<br />}{<small>{item.medida}</small>}</td>
-                                                            <td>{item.impuesto}</td>
-                                                            <td>{formatMoney(item.precioContado)}</td>
-                                                            <td>{formatMoney(item.precioContado * item.cantidad)}</td>
-                                                            <td>
-                                                                <button className="btn btn-outline-danger btn-sm" title="Eliminar" onClick={() => this.removeObjectTable(item.idDetalle)}><i className="bi bi-trash"></i></button>
-                                                            </td>
-                                                        </tr>
-                                                    ))
-                                                )
-                                            }
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12">
+                        }
 
                         <div className="form-group">
                             <div className="input-group">
@@ -1552,35 +1392,6 @@ class VentaProceso extends React.Component {
                                 </select>
                             </div>
                         </div>
-
-
-                        <div className="form-group ">
-
-                            <SearchBarClient
-                                placeholder="Filtrar clientes..."
-                                refCliente={this.refCliente}
-                                cliente={this.state.cliente}
-                                clientes={this.state.clientes}
-                                onEventClearInput={this.onEventClearInputClient}
-                                handleFilter={this.handleFilterClient}
-                                onEventSelectItem={this.onEventSelectItemClient}
-                            />
-                            {/* <select
-                                                title="Lista de clientes"
-                                                className="form-control"
-                                                ref={this.refCliente}
-                                                value={this.state.idCliente}
-                                                onChange={(event) => this.setState({ idCliente: event.target.value })}>
-                                                <option value="">-- Clientes --</option>
-                                                {
-                                                    this.state.clientes.map((item, index) => (
-                                                        <option key={index} value={item.idCliente}>{item.informacion}</option>
-                                                    ))
-                                                }
-                                            </select> */}
-
-                        </div>
-
 
                         <div className="form-group">
                             <div className="input-group">
@@ -1624,6 +1435,166 @@ class VentaProceso extends React.Component {
                         </div>
 
                     </div>
+
+                    <div className="col-xl-6 col-lg-6 col-md-9 col-sm-12 col-12">
+                        <ul className="nav nav-pills mb-3 d-grid gap-2" id="pills-tab" role="tablist">
+                            <li className="nav-item col-xl-6 col-lg-6 col-md-9 col-sm-12 col-12 p-0">
+                                <button className="nav-link active btn btn-lg w-100 h6" style={{ outline: "none" }} id="pills-home-tab" data-bs-toggle="pill" data-bs-target="#pills-home" type="button" role="tab" aria-controls="pills-home" aria-selected="true">Productos</button>
+                            </li>
+                            <li className="nav-item col-xl-6 col-lg-6 col-md-9 col-sm-12 col-12 p-0" role="presentation">
+                                <button className="nav-link btn btn-lg w-100" id="pills-profile-tab" data-bs-toggle="pill" data-bs-target="#pills-profile" type="button" role="tab" aria-controls="pills-profile" aria-selected="false">Pagos</button>
+                            </li>
+                        </ul>
+                        <div className="tab-content" id="pills-tabContent">
+                            <div className="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
+                                <div className="row">
+                                    <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                                        <div className="container">
+                                            <div className="row flex-nowrap overflow-auto">
+                                                <div className="btn btn-success pt-3 pb-3 pl-5 pr-5 m-2" style={{ borderRadius: "20px" }}>Todo</div>
+                                                <div className="btn btn-light pt-3 pb-3 pl-5 pr-5 m-2" style={{ borderRadius: "20px" }}>Bebidas</div>
+                                                <div className="btn btn-light pt-3 pb-3 pl-5 pr-5 m-2" style={{ borderRadius: "20px" }}>Combos</div>
+                                                <div className="btn btn-light pt-3 pb-3 pl-5 pr-5 m-2" style={{ borderRadius: "20px" }}>Complementos</div>
+                                                <div className="btn btn-light pt-3 pb-3 pl-5 pr-5 m-2" style={{ borderRadius: "20px" }}>Cremas</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="row">
+                                    <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 pt-2">
+                                        <div className="input-group input-group-sm" >
+                                            <input type="text" className="form-control bg-gray border-0" style={{ borderTopLeftRadius: "10px", borderBottomLeftRadius: "10px", height: "40px" }} placeholder="Buscar producto" />
+                                            <span className="input-group-append">
+                                                <button type="button" className="btn btn-info btn-flat bg-secondary">
+                                                    <i className="bi bi-list-task"></i>
+                                                </button>
+                                                <button type="button" className="btn btn-success btn-flat bg-gray text-dark" style={{ borderTopRightRadius: "10px", borderBottomRightRadius: "10px" }}>
+                                                    <i className="bi bi-grid-3x3-gap"></i>
+                                                </button>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="row">
+                                    <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                                        <div data-spy="scroll" data-target="#navbar-example2" data-offset="0">
+                                            <div className="container">
+                                                <div className="row mt-3" style={{ height: "30px" }}>
+                                                    <div className="col-xl-1 col-lg-1 col-md-1 col-sm-1 col-1 bg-gray " style={{ borderRadius: "15px", paddingTop: "4px" }}>
+                                                        <i class="bi bi-fire text-center"></i>
+                                                    </div>
+                                                    <div className="col-xl-7 col-lg-7 col-md-7 col-sm-7 col-7" style={{ paddingTop: "4px" }}>
+                                                        Alita Broaster + papas
+                                                    </div>
+                                                    <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2" style={{ paddingTop: "4px" }}>
+                                                        ABCPF
+                                                    </div>
+                                                    <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-right" style={{ paddingTop: "4px" }}>
+                                                        S/ 20.00
+                                                    </div>
+                                                </div>
+
+                                                <div className="row mt-3" style={{ height: "30px" }}>
+                                                    <div className="col-xl-1 col-lg-1 col-md-1 col-sm-1 col-1 bg-gray" style={{ borderRadius: "15px", paddingTop: "4px" }}>
+                                                        <i class="bi bi-fire text-center"></i>
+                                                    </div>
+                                                    <div className="col-xl-7 col-lg-7 col-md-7 col-sm-7 col-7" style={{ paddingTop: "4px" }}>
+                                                        Alita Broaster + papas
+                                                    </div>
+                                                    <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2" style={{ paddingTop: "4px" }}>
+                                                        ABCPF
+                                                    </div>
+                                                    <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-right" style={{ paddingTop: "4px" }}>
+                                                        S/ 20.00
+                                                    </div>
+                                                </div>
+
+                                                <div className="row mt-3" style={{ height: "30px" }}>
+                                                    <div className="col-xl-1 col-lg-1 col-md-1 col-sm-1 col-1 bg-gray" style={{ borderRadius: "15px", paddingTop: "4px" }}>
+                                                        <i class="bi bi-fire text-center"></i>
+                                                    </div>
+                                                    <div className="col-xl-7 col-lg-7 col-md-7 col-sm-7 col-7" style={{ paddingTop: "4px" }}>
+                                                        Alita Broaster + papas
+                                                    </div>
+                                                    <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2" style={{ paddingTop: "4px" }}>
+                                                        ABCPF
+                                                    </div>
+                                                    <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-right" style={{ paddingTop: "4px" }}>
+                                                        S/ 20.00
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab">
+                                <div className="row">
+                                    <div className="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">
+                                        <button className="btn-lg w-100 bg-gray text-dark p-2 border-0" style={{ borderRadius: "15px" }}>
+                                            Boleta
+                                        </button>
+                                    </div>
+
+                                    <div className="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">
+                                        <button className="btn-lg w-100 bg-gray text-dark p-2 border-0" style={{ borderRadius: "15px" }}>
+                                            factura
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="row pt-3">
+                                    <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                                        <div className="btn-group mr-2" role="group" aria-label="First group">
+                                            <button type="button" className="btn btn-outline-success" style={{ borderRadius: "10px 0 0 10px" }}>Pagado</button>
+                                            <select className="custom-select border-0 rounded-0 bg-gray" id="exampleSelectRounded0">
+                                                <option>Efectivo</option>
+                                                <option>Visa</option>
+                                                <option>Rappi</option>
+                                            </select>
+                                            <input
+                                                className="form-control bg-gray border-top-0 border-bottom-0 rounded-0 border-left border-right border-gray"
+                                                type="date"
+                                                value={this.state.fechaInicio}
+                                                onChange={async (event) => {
+                                                    await this.setStateAsync({ fechaInicio: event.target.value })
+                                                    this.searchFecha();
+                                                }} />
+                                            <div className="input-group border-right border-gray">
+                                                <div className="input-group-prepend">
+                                                    <div className="input-group-text border-0 rounded-0 bg-gray" id="btnGroupAddon">S/</div>
+                                                </div>
+                                                <input type="text" className="form-control rounded-0 bg-gray border-top-0 border-bottom-0 border-left border-right border-gray" placeholder="0.00" aria-label="Input group example" aria-describedby="btnGroupAddon" />
+                                            </div>
+                                            <button type="button" className="btn bg-gray" style={{ borderRadius: "0 10px 10px 0" }}>
+                                                <i className="bi bi-chat-left-quote"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="row pt-3">
+                                    <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                                        <div className="form-group ">
+                                            <SearchBarClient
+                                                placeholder="Filtrar clientes..."
+                                                refCliente={this.refCliente}
+                                                cliente={this.state.cliente}
+                                                clientes={this.state.clientes}
+                                                onEventClearInput={this.onEventClearInputClient}
+                                                handleFilter={this.handleFilterClient}
+                                                onEventSelectItem={this.onEventSelectItemClient}
+                                            />
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
 
                 <div className="row">

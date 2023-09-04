@@ -3273,7 +3273,7 @@ textarea.form-control.is-invalid {
 .btn:focus,
 .btn.focus {
   outline: 0;
-  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  /* box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); */
 }
 
 .btn.disabled,
@@ -5142,8 +5142,10 @@ input[type="button"].btn-block {
 
 .nav-pills .nav-link.active,
 .nav-pills .show>.nav-link {
-  color: #fff;
-  background-color: #007bff;
+  color: #000000;
+  outline: none;
+  border-bottom: 2px solid #28a745;
+  /* background-color: #007bff; */
 }
 
 .nav-fill>.nav-link,
@@ -11959,6 +11961,15 @@ a.text-dark:focus {
     color: inherit;
     border-color: #dee2e6;
   }
+}
+
+/*Estilos propios*/
+.bg-gray {
+  background-color: #F2F2F2;
+}
+
+.border-gray {
+  border-color: #D3D3D3;
 }
 
 /*# sourceMappingURL=bootstrap.css.map */
