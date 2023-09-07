@@ -10,11 +10,11 @@ a:focus {
     position: relative;
     min-width: 270px;
     width: 270px;
-    height: 100%;
+    /* height: 100%; */
     background: #7386D5;
     color: #fff;
     transition: all 0.3s;
-    z-index: 1009;
+    z-index: 1000;
 
 }
 
@@ -191,14 +191,22 @@ a:focus {
 @media (max-width: 768px) {
     #sidebar {
         position: fixed;
-        left: -270px;
+        height: 100%;
+        margin-left: -270px;
+        /* left: -270px; */
     }
 
     #sidebar.toggled {
-        left: 0;
+        /* left: 0; */
+        margin-left: 0px;
     }
 
     #sidebar.toggled .overlay {
         display: block;
+    }
+
+    header.app-header .app-sidebar__title{
+        width: 0;
+        min-width: 0;
     }
 }

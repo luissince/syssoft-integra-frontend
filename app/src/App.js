@@ -3,11 +3,11 @@ import Loader from './view/loader/Loader';
 import Configurar from './view/empresa/Configurar';
 import Login from './view/login/Login';
 import Inicio from './components/inicio/Inicio';
-import Principal from './components/principal/Principal';
 import NotFound from './components/error/NotFound';
 import { connect } from 'react-redux';
 import { config, restoreToken } from './redux/actions';
 import { BrowserRouter, Switch, Route, Redirect } from 'react-router-dom';
+import Principal from './view/principal/Principal';
 
 
 class App extends React.Component {
@@ -16,7 +16,7 @@ class App extends React.Component {
         super(props);
         this.menuRef = React.createRef();
     }
- 
+  
     async componentDidMount() {
       
     }

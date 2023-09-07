@@ -121,14 +121,19 @@ class Inicio extends React.Component {
 
     onEventResize(event) {
         if (event.target.innerWidth <= 768 && document.getElementById("sidebar").classList.contains("active")) {
-            document.getElementById("sidebar").classList.remove("active");
+            document.getElementById("sidebar").classList.remove("active");           
         }
     }
 
-    openAndClose = () => {
+    openAndClose = () => {      
         let windowWidth = window.innerWidth;
         if (windowWidth <= 768) {
-            document.getElementById("sidebar").classList.add("toggled");
+            const sidebar = document.getElementById("sidebar");
+            if(sidebar.classList.contains("toggled")){
+                sidebar.classList.remove("toggled")
+            }else{
+                sidebar.classList.add("toggled")
+            }
         } else {
             document.getElementById("sidebar").classList.toggle("active");
         }
@@ -202,9 +207,9 @@ class Inicio extends React.Component {
             <div className='app'>
                 <Menu  {...this.props} url={url} />
 
-                <main>
-                    <Head {...this.props} openAndClose={this.openAndClose} notificaciones={this.state.notificaciones} />
-
+                <Head {...this.props} openAndClose={this.openAndClose} notificaciones={this.state.notificaciones} />
+                <main style={{"marginTop": "55px"}}>
+                    
                     <div className="container-fluid mt-3">
                         <div className="bg-white p-3 border border-light-purple rounded position-relative">
 

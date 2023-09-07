@@ -2,8 +2,7 @@ import React from "react";
 import { Redirect } from "react-router-dom";
 import { connect } from "react-redux";
 import { signIn } from "../../redux/actions";
-import noimage from "../../recursos/images/noimage.jpg";
-import "./Login.css";
+import icono from "../../recursos/images/INMOBILIARIA.png";
 import { loginApi } from "../../network/rest/principal.network";
 import SuccessReponse from "../../model/class/response";
 import ErrorResponse from "../../model/class/error";
@@ -54,7 +53,9 @@ class Login extends React.Component {
     }
   };
 
-  onEventForm = async () => {
+  onEventForm = async (event) => {
+    event.preventDefault();
+
     if (this.state.loading) return;
 
     if (this.state.usuario === "") {
@@ -192,119 +193,123 @@ class Login extends React.Component {
       return <Redirect to="/principal" />;
     }
 
-    const { rutaImage } = this.props.token.empresa;
+    // const { rutaImage } = this.props.token.empresa;
 
     return (
-      <>
-        <style>{"html,body,#root{height:100%;}"}</style>
-
-        <div className="form-content text-center bg-white">
-          <form className="form-signin">
-            <img
-              className="mb-4"
-              src={`${rutaImage !== "" ? "/" + rutaImage : noimage}`}
-              alt="Logo"
-              width="150"
-            />
-            <h5 className="mb-3 font-weight-normal">Ingrese los datos</h5>
-            {message !== "" ? (
-              <div
-                className="alert alert-warning d-flex align-items-center"
-                role="alert"
-              >
-                <i className="bi bi-exclamation-diamond-fill m-1"></i>
-                <div className=" m-1">{message}</div>
-              </div>
-            ) : null}
-
-            {this.state.loading ? (
-              <div className="m-3">
-                <div
-                  className="spinner-border text-success"
-                  role="status"
-                ></div>
-              </div>
-            ) : null}
-
-            <label htmlFor="inputUsuario" className="sr-only">
-              Usuario
-            </label>
-            <div className="form-group mb-3">
-              <input
-                ref={this.usuarioInput}
-                onChange={this.handleChangeUsuario}
-                value={usuario}
-                type="text"
-                id="inputUsuario"
-                className="form-control"
-                placeholder="Ingrese su usuario"
-                required=""
-                autoFocus=""
-                onKeyUp={(event) => {
-                  if (event.key === "Enter") {
-                    this.onEventForm();
-                    event.preventDefault();
-                  }
-                }}
-              />
+      <div
+        className="vh-100 px-4 py-5 px-md-5 text-center text-lg-start d-flex align-items-center"
+        style={{ backgroundColor: "hsl(0, 0%, 96%)" }}
+      >
+        <div className="container">
+          <div className="row gx-lg-5 align-items-center">
+            <div className="col-lg-6 mb-5 mb-lg-0 d-none d-md-block">
+              <h1 className="my-5 display-4 fw-bold ls-tight">
+                La mejor opción
+                <br />
+                <span className="text-primary">para tu negocio</span>
+              </h1>
+              <p style={{ color: " hsl(217, 10%, 50.8%)" }}>
+                Entra a un mundo de posibilidades con nuestro software de
+                gestión y ventas para restaurantes. Simplifica tus operaciones,
+                aumenta tus ventas y supera las expectativas de tus clientes.
+                Descubre una nueva era de éxito en la industria gastronómica,
+                donde la eficiencia se combina con la satisfacción del cliente.
+                ¡Únete a nosotros y haz que tu restaurante alcance su máximo
+                potencial!
+              </p>
             </div>
 
-            <label htmlFor="inputPassword" className="sr-only">
-              Password
-            </label>
+            <div className="col-lg-6 mb-5 mb-lg-0">
+              <div className="card">
+                <div className="card-body py-5 px-md-5">
+                  <form onSubmit={this.onEventForm}>
+                    <img
+                      className="mb-4"
+                      // src={`${rutaImage !== "" ? "/" + rutaImage : noimage}`}
+                      src={icono}
+                      alt="Logo"
+                      width="160"
+                    />
 
-            <div className="form-group">
-              <div className="input-group">
-                <input
-                  ref={this.passwordInput}
-                  onChange={this.handleChangePassword}
-                  value={password}
-                  required=""
-                  id="inputPassword"
-                  type={this.state.lookPassword ? "text" : "password"}
-                  className="form-control"
-                  placeholder="Ingrese su contraseña"
-                  onKeyUp={(event) => {
-                    if (event.key === "Enter") {
-                      this.onEventForm();
-                      event.preventDefault();
-                    }
-                  }}
-                />
-                <div className="input-group-append">
-                  <button
-                    className="btn btn-outline-secondary"
-                    type="button"
-                    title="Mostrar"
-                    onClick={this.handleViewPassword}
-                  >
-                    <i
-                      className={
-                        this.state.lookPassword
-                          ? "fa fa-eye"
-                          : "fa fa-eye-slash"
-                      }
-                    ></i>
-                  </button>
+                    {message !== "" ? (
+                      <div
+                        className="alert alert-warning d-flex align-items-center justify-content-center"
+                        role="alert"
+                      >
+                        <i className="bi bi-exclamation-diamond-fill m-1"></i>
+                        <div className="m-1">{message}</div>
+                      </div>
+                    ) : null}
+
+                    {this.state.loading ? (
+                      <div className="m-3">
+                        <div
+                          className="spinner-border text-success"
+                          role="status"
+                        ></div>
+                      </div>
+                    ) : null}
+
+                    <div className="form-outline mb-4">
+                      <input
+                        ref={this.usuarioInput}
+                        onChange={this.handleChangeUsuario}
+                        value={usuario}
+                        type="text"
+                        id="inputUsuario"
+                        placeholder="Ingrese su usuario"
+                        autoFocus
+                        className="form-control"
+                      />
+                    </div>
+
+                    <div className="form-outline mb-4">
+                      <div className="input-group">
+                        <input
+                          ref={this.passwordInput}
+                          onChange={this.handleChangePassword}
+                          value={password}
+                          id="inputPassword"
+                          type={this.state.lookPassword ? "text" : "password"}
+                          className="form-control"
+                          placeholder="Ingrese su contraseña"
+                        />
+                        <div className="input-group-append">
+                          <button
+                            className="btn btn-outline-secondary"
+                            type="button"
+                            title="Mostrar"
+                            onClick={this.handleViewPassword}
+                          >
+                            <i
+                              className={
+                                this.state.lookPassword
+                                  ? "fa fa-eye"
+                                  : "fa fa-eye-slash"
+                              }
+                            ></i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <button
+                      type="submit"
+                      className="btn btn-primary btn-block mb-4"
+                    >
+                      Ingresar <i className="fa fa-arrow-right"></i>
+                    </button>
+
+                    <div className="text-center">
+                      <p>SysSoft Integra © {new Date().getFullYear()}</p>
+                    </div>
+                  </form>
                 </div>
               </div>
             </div>
-
-            <button
-              onClick={this.onEventForm}
-              type="button"
-              className="btn btn-primary btn-block"
-            >
-              Ingresar <i className="fa fa-arrow-right"></i>
-            </button>
-
-            {/* <button onClick={this.onEventRecuperar} type="button" className="btn btn-lg btn-outline-primary btn-block">Recuperar</button> */}
-            <p className="mt-5 mb-3 text-muted">
-              SysSoft Integra © {new Date().getFullYear()}
-            </p>
-          </form>
+          </div>
         </div>
-      </>
+      </div>
     );
   }
 }

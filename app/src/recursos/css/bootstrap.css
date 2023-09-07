@@ -159,7 +159,7 @@
   --breakpoint-md: 768px;
   --breakpoint-lg: 992px;
   --breakpoint-xl: 1200px;
-  --font-family-sans-serif: -apple-system, BlinkMacSystemFont, "Fira Sans",
+  --font-family-sans-serif:  "Fira Sans",
     "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas,
@@ -251,6 +251,26 @@ header.app-header {
   box-shadow: rgb(64 64 64 / 40%) 0px 1px 10px -5px;
 }
 
+header.app-header .app-sidebar__title{
+  min-width: 270px;
+  width: 270px; 
+  background-color : #6d7fcc;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.3s;
+}
+
+header.app-header .app-sidebar__title img{
+  margin: 0px 5px;
+}
+
+header.app-header .app-sidebar__title p{
+  margin: 0;
+  color: #ffffff;
+  font-size: 1.0rem;
+}
+
 header.app-header .app-sidebar__toggle {
   display: flex;
   align-items: center;
@@ -269,8 +289,8 @@ header.app-header .app-sidebar__toggle::before {
 }
 
 header.app-header .app-sidebar__toggle:hover {
-  color: #fff;
-  background: #6d7fcc;
+  color: #6172c0;
+  background: #d9e0fc;
   cursor: pointer;
 }
 
@@ -3239,6 +3259,7 @@ textarea.form-control.is-invalid {
 
 .btn {
   display: inline-block;
+  
   font-weight: 400;
   color: #212529;
   text-align: center;

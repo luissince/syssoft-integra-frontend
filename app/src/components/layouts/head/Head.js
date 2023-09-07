@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { signOut, closeProject, addNotification } from '../../../redux/actions';
 import usuario from '../../../recursos/images/usuario.png';
+import icono from '../../../recursos/images/icon.png';
 
 class Menu extends React.Component {
 
@@ -42,7 +43,11 @@ class Menu extends React.Component {
 
     render() {
         return (
-            <header className="app-header">
+            <header className="app-header" style={{"position": "fixed", "zIndex": "1000", "backgroundColor": "white"}}>
+                <div className="app-sidebar__title">
+                    <img src={icono} />
+                    <p>SYSSOFT INTEGRA</p>
+                </div>
                 <span className="app-sidebar__toggle" onClick={this.props.openAndClose}>
                 </span>
 
