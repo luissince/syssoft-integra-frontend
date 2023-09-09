@@ -26,7 +26,7 @@ Algunos recursos para iniciar con este proyecto puedes ver en:
 
 Siga los pasos para iniciar el desarrollo:
 
-1.  Clona el proyecto o agrague el ssh al repositorio para contribuir en nuevos cambios [Git Hub - Formulario](https://github.com/luissince/SoftwareRestaurante)
+1.  Clona el proyecto o agrague el ssh al repositorio para contribuir en nuevos cambios [Git Hub - Software Restaurante](https://github.com/luissince/SoftwareRestaurante)
 
     1.1. Agregue por ssh para la integración
 
@@ -103,7 +103,6 @@ Siga los pasos para iniciar el desarrollo:
             REACT_APP_END_POINT=http://localhost:3002
 
             <!-- ruta para en envió de las facturas electrónicas -->
-
             REACT_APP_URL=http://localhost:3002
 
             <!-- ruta para las peticiones http -->
@@ -140,20 +139,26 @@ Siga los pasos para iniciar el desarrollo:
         <!-- Configuración de la zona horaria del servidor -->
         TZ="America/Lima"
 
-8.  Ejecute **npm run dev:app** para iniciar el front-end
+8. Agregar la propiedad **"proxy": "http://localhost:3002"** el package.json de la carpeta app/package.json con la url del back-end, ese propiedad es solo para desarrollo
 
-    #Code
+    #code 
+
+         "proxy": "http://localhost:5000"
+
+9.  Ejecute **npm run dev:app** para iniciar el front-end
+
+    #code
 
         npm run dev:app
 
-9.  Ejecute **npm run dev:server** para iniciar el backend-end
+10. Ejecute **npm run dev:server** para iniciar el backend-end
 
-    #Code
+    #code
 
         npm run dev:server
 
-10. Ejecute **npm run build** para construir le proyecto
+11. Ejecute **npm run build** para construir le proyecto
 
-    #Code
+    #code
 
         npm run build
