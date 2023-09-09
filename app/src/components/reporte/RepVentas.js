@@ -5,6 +5,7 @@ import FileDownloader from "./hooks/FileDownloader";
 import { apiComprobanteListcombo } from '../../network/api';
 import { spinnerLoading, currentDate } from '../../helper/Tools';
 import { connect } from 'react-redux';
+import ContainerWrapper from '../container';
 
 class RepVentas extends React.Component {
     constructor(props) {
@@ -190,7 +191,7 @@ class RepVentas extends React.Component {
     render() {
 
         return (
-            <>
+            <ContainerWrapper>
                 {
                     this.state.loading ?
                         <div className="clearfix absolute-all bg-white">
@@ -491,7 +492,7 @@ class RepVentas extends React.Component {
                 </div>
 
                 <FileDownloader ref={this.refUseFile} />
-            </>
+            </ContainerWrapper>
         )
     }
 }

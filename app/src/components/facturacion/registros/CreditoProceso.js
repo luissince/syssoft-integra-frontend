@@ -22,6 +22,7 @@ import {
 import { connect } from 'react-redux';
 import { apiComprobanteListcombo, apiFacturaCreditoDetalle, apiVentaCobro } from '../../../network/api';
 import SearchBarLote from "../../../helper/SearchBarLote";
+import ContainerWrapper from '../../container';
 
 class CreditoProceso extends React.Component {
     constructor(props) {
@@ -1145,7 +1146,7 @@ class CreditoProceso extends React.Component {
         } = this.state.venta;
 
         return (
-            <>
+            <ContainerWrapper>
                 {/* Inicio modal */}
                 <div className="modal fade" id="modalPlazo" data-backdrop="static">
                     <div className="modal-dialog modal-md">
@@ -2446,7 +2447,7 @@ class CreditoProceso extends React.Component {
                         </div>
                     </div>
                 </div>
-            </>
+            </ContainerWrapper>
         )
     }
 }

@@ -17,6 +17,7 @@ import {
 } from '../../helper/Tools';
 import { connect } from 'react-redux';
 import Paginacion from '../../helper/Paginacion';
+import ContainerWrapper from '../container';
 
 class Lotes extends React.Component {
     constructor(props) {
@@ -471,7 +472,7 @@ class Lotes extends React.Component {
 
     render() {
         return (
-            <>
+            <ContainerWrapper>
                 {/* Inicio modal nuevo cliente*/}
                 <div className="modal fade" id="modalLote" tabIndex="-1" aria-labelledby="modalLoteLabel" aria-hidden="true">
                     <div className="modal-dialog">
@@ -976,7 +977,7 @@ class Lotes extends React.Component {
                         </div>
                     </div>
                 </div>
-            </>
+            </ContainerWrapper>
         );
     }
 }

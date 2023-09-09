@@ -12,6 +12,7 @@ import {
 } from '../../../helper/Tools';
 import { connect } from 'react-redux';
 import SearchBar from "../../../helper/SearchBar";
+import ContainerWrapper from '../../container';
 
 class SedeProceso extends React.Component {
     constructor(props) {
@@ -213,7 +214,7 @@ class SedeProceso extends React.Component {
 
     render() {
         return (
-            <>
+            <ContainerWrapper>
                 {
                     this.state.loading ?
                         <div className="clearfix absolute-all bg-white">
@@ -345,7 +346,7 @@ class SedeProceso extends React.Component {
                     </div>
                 </div>
 
-            </>
+            </ContainerWrapper>
         );
     }
 }

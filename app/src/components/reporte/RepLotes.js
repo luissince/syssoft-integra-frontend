@@ -3,6 +3,7 @@ import CryptoJS from 'crypto-js';
 import FileDownloader from "./hooks/FileDownloader";
 import { connect } from 'react-redux';
 import { spinnerLoading } from '../../helper/Tools';
+import ContainerWrapper from '../container';
 
 class RepLotes extends React.Component {
     constructor(props) {
@@ -121,7 +122,7 @@ class RepLotes extends React.Component {
 
     render() {
         return (
-            <>
+            <ContainerWrapper>
                 {
                     this.state.loading ?
                         <div className="clearfix absolute-all bg-white">
@@ -234,7 +235,7 @@ class RepLotes extends React.Component {
                             <FileDownloader ref={this.refUseFile} />
                         </>
                 }
-            </>
+            </ContainerWrapper>
         )
     }
 }

@@ -43,7 +43,7 @@ class Menu extends React.Component {
 
     render() {
         return (
-            <header className="app-header" style={{"position": "fixed", "zIndex": "1000", "backgroundColor": "white"}}>
+            <header className="app-header">
                 <div className="app-sidebar__title">
                     <img src={icono} />
                     <p>SYSSOFT INTEGRA</p>
@@ -130,7 +130,7 @@ class Menu extends React.Component {
 const mapStateToProps = (state) => {
     return {
         token: state.reducer,
-        notification : state.notiReducer
+        notification: state.notiReducer
     }
 }
 

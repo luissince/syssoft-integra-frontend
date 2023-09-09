@@ -10,6 +10,7 @@ import {
 } from '../../../helper/Tools';
 import { apiFacturaId, apiVentaCobro } from '../../../network/api';
 import { connect } from 'react-redux';
+import ContainerWrapper from '../../container';
 
 class VentaDetalle extends React.Component {
     constructor(props) {
@@ -149,7 +150,7 @@ class VentaDetalle extends React.Component {
 
     render() {
         return (
-            <>
+            <ContainerWrapper>
                 {
                     this.state.loading ?
                         <div className="clearfix absolute-all bg-white">
@@ -319,7 +320,7 @@ class VentaDetalle extends React.Component {
                         </div>
                     </div>
                 </div>
-            </>
+            </ContainerWrapper>
         )
     }
 }

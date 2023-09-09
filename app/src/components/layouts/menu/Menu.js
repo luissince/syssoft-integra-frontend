@@ -10,7 +10,7 @@ const Menu = ({ url, token: { project, userToken }, location: { pathname } }) =>
     }
 
     return (
-        <nav id="sidebar" style={{"marginTop":"55px"}}>
+        <nav id="sidebar">
             <div className='pro-sidebar-inner'>
                 <div className='pro-sidebar-layout'>
                     <div className="sidebar-header">

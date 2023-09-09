@@ -9,6 +9,7 @@ import {
     spinnerLoading
 } from '../../helper/Tools';
 import { connect } from 'react-redux';
+import ContainerWrapper from '../container';
 
 class CpeElectronicos extends React.Component {
 
@@ -260,7 +261,7 @@ class CpeElectronicos extends React.Component {
 
     render() {
         return (
-            <>
+            <ContainerWrapper>
                 {
                     this.state.msgLoading ?
                         <div className="clearfix absolute-all bg-white">
@@ -447,7 +448,7 @@ class CpeElectronicos extends React.Component {
                         </span>
                     </div>
                 </div>
-            </>
+            </ContainerWrapper>
         );
     }
 

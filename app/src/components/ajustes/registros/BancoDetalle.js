@@ -7,6 +7,7 @@ import {
     spinnerLoading,
 } from '../../../helper/Tools';
 import Paginacion from '../../../helper/Paginacion';
+import ContainerWrapper from '../../container';
 
 class BancoDetalle extends React.Component {
     constructor(props) {
@@ -161,7 +162,7 @@ class BancoDetalle extends React.Component {
 
     render() {
         return (
-            <>
+            <ContainerWrapper>
                 {
                     this.state.initial ?
                         <div className="clearfix absolute-all bg-white">
@@ -298,7 +299,7 @@ class BancoDetalle extends React.Component {
                         </>
 
                 }
-            </>
+            </ContainerWrapper>
         )
     }
 }

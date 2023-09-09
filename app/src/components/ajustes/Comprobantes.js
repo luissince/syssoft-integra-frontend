@@ -17,6 +17,7 @@ import {
 } from '../../helper/Tools';
 import { connect } from 'react-redux';
 import Paginacion from '../../helper/Paginacion';
+import ContainerWrapper from '../container';
 
 class Comprobantes extends React.Component {
 
@@ -323,7 +324,7 @@ class Comprobantes extends React.Component {
 
     render() {
         return (
-            <>
+            <ContainerWrapper>
                 {/* inicio modal */}
                 <div className="modal fade" id="modalComprobante" data-bs-keyboard="false" data-bs-backdrop="static">
                     <div className="modal-dialog">
@@ -613,7 +614,7 @@ class Comprobantes extends React.Component {
                         </div>
                     </div>
                 </div>
-            </>
+            </ContainerWrapper>
         );
     }
 

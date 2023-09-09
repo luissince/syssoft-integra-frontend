@@ -18,6 +18,7 @@ import {
 } from '../../helper/Tools';
 import { connect } from 'react-redux';
 import Paginacion from '../../helper/Paginacion';
+import ContainerWrapper from '../container';
 
 class Impuestos extends React.Component {
 
@@ -277,7 +278,7 @@ class Impuestos extends React.Component {
 
     render() {
         return (
-            <>
+            <ContainerWrapper>
                 {/* inicio modal */}
                 <div className="modal fade" id="modalImpuesto" data-bs-keyboard="false" data-bs-backdrop="static">
                     <div className="modal-dialog">
@@ -484,7 +485,7 @@ class Impuestos extends React.Component {
                         </div>
                     </div>
                 </div>
-            </>
+            </ContainerWrapper>
         );
     }
 

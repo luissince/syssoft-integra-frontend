@@ -23,6 +23,7 @@ import {
 import SuccessReponse from "../../model/class/response";
 import ErrorResponse from "../../model/class/error";
 import { CANCELED } from "../../model/types/types";
+import ContainerWrapper from "../container";
 
 class Manzanas extends React.Component {
   constructor(props) {
@@ -409,7 +410,7 @@ class Manzanas extends React.Component {
 
   render() {
     return (
-      <>
+      <ContainerWrapper>
         {/* Inicio modal nuevo cliente*/}
         <div
           className="modal fade"
@@ -728,7 +729,7 @@ class Manzanas extends React.Component {
             </div>
           </div>
         </div>
-      </>
+      </ContainerWrapper>
     );
   }
 }

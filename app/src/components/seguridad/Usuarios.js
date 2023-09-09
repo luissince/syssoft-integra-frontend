@@ -15,6 +15,7 @@ import {
     keyUpSearch
 } from '../../helper/Tools';
 import Paginacion from '../../helper/Paginacion';
+import ContainerWrapper from '../container';
 
 class Usuarios extends React.Component {
     constructor(props) {
@@ -197,7 +198,7 @@ class Usuarios extends React.Component {
 
     render() {
         return (
-            <>
+            <ContainerWrapper>
 
                 {/* Inicio resetear */}
                 <div className="modal fade" id="modalClave" data-bs-keyboard="false" data-bs-backdrop="static">
@@ -374,7 +375,7 @@ class Usuarios extends React.Component {
                         </div>
                     </div>
                 </div>
-            </>
+            </ContainerWrapper>
         );
     }
 }

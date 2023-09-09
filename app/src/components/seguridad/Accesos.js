@@ -9,6 +9,7 @@ import {
   spinnerLoading,
   statePrivilegio
 } from '../../helper/Tools.jsx';
+import ContainerWrapper from '../container.jsx';
 
 class Accesos extends React.Component {
   constructor(props) {
@@ -226,7 +227,7 @@ class Accesos extends React.Component {
 
   render() {
     return (
-      <>
+      <ContainerWrapper>
         {
           this.state.loading ?
             <div className="clearfix absolute-all bg-white">
@@ -299,7 +300,7 @@ class Accesos extends React.Component {
             </button>
           </div>
         </div>
-      </>
+      </ContainerWrapper>
     )
   }
 }

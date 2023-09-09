@@ -14,6 +14,7 @@ import { connect } from 'react-redux';
 import reniec from '../../../recursos/images/reniec.png';
 import sunat from '../../../recursos/images/sunat.png';
 import SearchBar from "../../../helper/SearchBar";
+import ContainerWrapper from '../../container';
 
 class ClienteProceso extends React.Component {
     constructor(props) {
@@ -345,7 +346,7 @@ class ClienteProceso extends React.Component {
 
     render() {
         return (
-            <>
+            <ContainerWrapper>
                 {
                     this.state.loading ?
                         <div className="clearfix absolute-all bg-white">
@@ -636,7 +637,7 @@ class ClienteProceso extends React.Component {
                         </>
                 }
 
-            </>
+            </ContainerWrapper>
         );
     }
 }

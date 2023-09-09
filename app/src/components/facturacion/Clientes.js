@@ -11,6 +11,7 @@ import {
     keyUpSearch
 } from '../../helper/Tools';
 import Paginacion from '../../helper/Paginacion';
+import ContainerWrapper from '../container';
 
 class Clientes extends React.Component {
     constructor(props) {
@@ -174,7 +175,7 @@ class Clientes extends React.Component {
 
     render() {
         return (
-            <>
+            <ContainerWrapper>
                 <div className='row'>
                     <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
                         <div className="form-group">
@@ -348,7 +349,7 @@ class Clientes extends React.Component {
                         </div>
                     </div>
                 </div>
-            </>
+            </ContainerWrapper>
         );
     }
 }

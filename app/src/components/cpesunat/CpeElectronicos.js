@@ -32,6 +32,7 @@ import { apiComprobanteListcombo } from '../../network/api';
 import { connect } from 'react-redux';
 import FileDownloader from "../reporte/hooks/FileDownloader";
 import Paginacion from '../../helper/Paginacion';
+import ContainerWrapper from '../container';
 
 class CpeElectronicos extends React.Component {
 
@@ -545,7 +546,7 @@ class CpeElectronicos extends React.Component {
 
     render() {
         return (
-            <>
+            <ContainerWrapper>
                 {
                     this.state.msgLoading ?
                         <div className="clearfix absolute-all bg-white">
@@ -901,7 +902,7 @@ class CpeElectronicos extends React.Component {
                     </div>
                 </div>
                 <FileDownloader ref={this.refUseFileXml} />
-            </>
+            </ContainerWrapper>
         );
     }
 }

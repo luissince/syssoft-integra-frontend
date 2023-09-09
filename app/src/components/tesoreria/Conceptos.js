@@ -16,6 +16,7 @@ import {
 } from '../../helper/Tools';
 import { connect } from 'react-redux';
 import Paginacion from '../../helper/Paginacion';
+import ContainerWrapper from '../container';
 
 class Conceptos extends React.Component {
     constructor(props) {
@@ -264,7 +265,7 @@ class Conceptos extends React.Component {
 
     render() {
         return (
-            <>
+            <ContainerWrapper>
                 {/* Inicio modal */}
                 <div className="modal fade" id="modalConcepto" data-backdrop="static">
                     <div className="modal-dialog">
@@ -486,7 +487,7 @@ class Conceptos extends React.Component {
                         </div>
                     </div>
                 </div>
-            </>
+            </ContainerWrapper>
         )
     }
 }

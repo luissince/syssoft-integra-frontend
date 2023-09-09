@@ -17,6 +17,7 @@ import {
 import { apiComprobanteListcombo } from '../../../network/api';
 import { connect } from 'react-redux';
 import SearchBarClient from "../../../helper/SearchBarClient";
+import ContainerWrapper from '../../container';
 
 class CobroProceso extends React.Component {
     constructor(props) {
@@ -578,7 +579,7 @@ class CobroProceso extends React.Component {
 
     render() {
         return (
-            <>
+            <ContainerWrapper>
                 {
                     this.state.loading ?
                         <div className="clearfix absolute-all bg-white">
@@ -1058,7 +1059,7 @@ class CobroProceso extends React.Component {
 
                     </div>
                 </div>
-            </>
+            </ContainerWrapper>
         )
     }
 }

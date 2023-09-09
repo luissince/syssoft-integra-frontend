@@ -9,6 +9,7 @@ import {
     spinnerLoading,
 } from '../../../helper/Tools';
 import { connect } from 'react-redux';
+import ContainerWrapper from '../../container';
 
 class ClienteDetalle extends React.Component {
     constructor(props) {
@@ -97,7 +98,7 @@ class ClienteDetalle extends React.Component {
 
     render() {
         return (
-            <>
+            <ContainerWrapper>
                 {
                     this.state.loading ?
                         <div className="clearfix absolute-all bg-white">
@@ -223,7 +224,7 @@ class ClienteDetalle extends React.Component {
                     </div>
                 </div>
 
-            </>
+            </ContainerWrapper>
         )
     }
 }

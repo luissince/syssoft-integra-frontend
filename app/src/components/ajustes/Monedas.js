@@ -15,6 +15,7 @@ import {
 } from '../../helper/Tools';
 import { connect } from 'react-redux';
 import Paginacion from '../../helper/Paginacion';
+import ContainerWrapper from '../container';
 
 class Monedas extends React.Component {
     constructor(props) {
@@ -288,7 +289,7 @@ class Monedas extends React.Component {
 
     render() {
         return (
-            <>
+            <ContainerWrapper>
                 {/* Inicio modal nuevo cliente*/}
                 <div className="modal fade" id="modalMoneda" data-backdrop="static">
                     <div className="modal-dialog modal-md">
@@ -489,7 +490,7 @@ class Monedas extends React.Component {
                         </div>
                     </div>
                 </div>
-            </>
+            </ContainerWrapper>
         );
     }
 }

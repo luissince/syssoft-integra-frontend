@@ -14,6 +14,7 @@ import {
 } from '../../../helper/Tools';
 import { apiComprobanteListcombo } from '../../../network/api';
 import { connect } from 'react-redux';
+import ContainerWrapper from '../../container';
 
 class NotaCreditoProceso extends React.Component {
     constructor(props) {
@@ -264,7 +265,7 @@ class NotaCreditoProceso extends React.Component {
 
     render() {
         return (
-            <>
+            <ContainerWrapper>
 
                 {
                     this.state.loading ?
@@ -479,7 +480,7 @@ class NotaCreditoProceso extends React.Component {
                     </div>
                 </div>
 
-            </>
+            </ContainerWrapper>
         );
     }
 }

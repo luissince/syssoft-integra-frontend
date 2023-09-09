@@ -10,6 +10,7 @@ import {
     spinnerLoading
 } from '../../../helper/Tools';
 import { connect } from 'react-redux';
+import ContainerWrapper from '../../container';
 
 class UsuarioProceso extends React.Component {
 
@@ -288,7 +289,7 @@ class UsuarioProceso extends React.Component {
 
     render() {
         return (
-            <>
+            <ContainerWrapper>
                 {
                     this.state.loading ?
                         <div className="clearfix absolute-all bg-white">
@@ -671,7 +672,7 @@ class UsuarioProceso extends React.Component {
                     <button type="button" className="btn btn-primary" onClick={() => this.onEventGuardar()}>Aceptar</button>
                     <button type="button" className="btn btn-danger" onClick={() => this.props.history.goBack()}>Cerrar</button>
                 </div>
-            </>
+            </ContainerWrapper>
         );
     }
 }

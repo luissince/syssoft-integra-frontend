@@ -27,6 +27,19 @@ import { connect } from 'react-redux';
 import { apiComprobanteListcombo } from '../../../network/api';
 import SearchBarClient from "../../../helper/SearchBarClient";
 import SearchBarLote from "../../../helper/SearchBarLote";
+import { PosContainerWrapper } from '../../container';
+
+import sale from '../../../recursos/images/sale.svg';
+import start from '../../../recursos/images/start.svg';
+import codbar from '../../../recursos/images/codbar.svg';
+import search from '../../../recursos/images/search.svg';
+import add from '../../../recursos/images/add.svg';
+import print from '../../../recursos/images/print.svg';
+import cash from '../../../recursos/images/cash.svg';
+import options from '../../../recursos/images/options.svg';
+import addclient from '../../../recursos/images/addclient.svg';
+import basket from '../../../recursos/images/basket.svg';
+
 
 class VentaProceso extends React.Component {
 
@@ -142,33 +155,31 @@ class VentaProceso extends React.Component {
     }
 
     async componentDidMount() {
-        this.loadData();
+        // viewModal("modalVentaProceso", () => {
+        //     this.refBancoContado.current.focus();
+        // });
 
-        viewModal("modalVentaProceso", () => {
-            this.refBancoContado.current.focus();
-        });
+        // clearModal("modalVentaProceso", async () => {
+        //     await this.setStateAsync({
+        //         selectTipoPago: 1,
+        //         idBancoContado: '',
+        //         metodoPagoContado: '',
+        //         montoInicialCheck: false,
+        //         inicial: '',
+        //         idBancoCredito: '',
+        //         metodoPagoCredito: '',
+        //         letraMensual: '',
+        //         frecuenciaPagoCredito: new Date().getDate() > 15 ? '30' : '15',
+        //         numCuota: '',
 
-        clearModal("modalVentaProceso", async () => {
-            await this.setStateAsync({
-                selectTipoPago: 1,
-                idBancoContado: '',
-                metodoPagoContado: '',
-                montoInicialCheck: false,
-                inicial: '',
-                idBancoCredito: '',
-                metodoPagoCredito: '',
-                letraMensual: '',
-                frecuenciaPagoCredito: new Date().getDate() > 15 ? '30' : '15',
-                numCuota: '',
-
-                inicialCreditoVariableCheck: false,
-                inicialCreditoVariable: '',
-                // idComprobanteCreditoVariable: '',
-                idBancoCreditoVariable: '',
-                metodoPagoCreditoVariable: '',
-                frecuenciaPago: new Date().getDate() > 15 ? '30' : '15',
-            });
-        })
+        //         inicialCreditoVariableCheck: false,
+        //         inicialCreditoVariable: '',
+        //         // idComprobanteCreditoVariable: '',
+        //         idBancoCreditoVariable: '',
+        //         metodoPagoCreditoVariable: '',
+        //         frecuenciaPago: new Date().getDate() > 15 ? '30' : '15',
+        //     });
+        // })
     }
 
     componentWillUnmount() {
@@ -803,821 +814,178 @@ class VentaProceso extends React.Component {
         this.selectItemClient = true;
     }
 
+    itemProducto() {
+        return (
+            <div style={{ flex: "0 0 22rem", cursor: "pointer", maxWidth: "16rem", borderRadius: "8px", margin: "0 2rem 2rem", boxShadow: "1px 2px 5px rgba(0,0,0,.1)", position: "relative", backgroundColor: "white", display: "flex", flexDirection: "column" }}>
+                <button className='btn px-1 py-0 position-absolute' style={{
+                    right: "1rem",
+                    top: -"2px",
+                    outline: "none",
+                    boxShadow: "none",
+                    height: "36px",
+                    width: "36px",
+                    zIndex: "1",
+                    background: "#00b19d",
+                    borderRadius: "0 0 8px 8px",
+                    boxShadow: "1px 2px 5px rgba(0,0,0,.1)"
+                }}>
+                    <img src={start} />
+                </button>
+                <div style={{ flex: "0 0 12rem", width: "100%", borderRadius: "8px", position: "relative", overflow: "hidden" }}>
+                    <p className='position-absolute' style={{
+                        color: "#00b19d",
+                        background: "#fafafa",
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        marginLeft: "auto",
+                        marginRight: "auto",
+                        fontSize: "12px",
+                        padding: "0 0.5rem",
+                        borderRadius: "8px",
+                        width: "-webkit-fit-content",
+                        width: "-moz-fit-content",
+                        width: "fit-content",
+                        maxWidth: "100%",
+                        overflow: "hidden",
+                        whiteSpace: "nowrap",
+                        textOverflow: "ellipsis",
+                        boxShadow: " 0 0 2px rgba(0,0,0,.1)"
+                    }}>Inv 100</p>
+                    <div style={{ top: "0", height: "100%", width: "100%", position: "absolute", alignItems: "center", justifyContent: "center", display: "flex" }}>
+                        <img src={sale} width={96} height={96} />
+                    </div>
+                </div>
+                <span className='lead text-center d-block my-1'><strong>cable usb lg</strong></span>
+                <span className='text-center d-block ml-1 mr-1 mt-1 mb-3 text-xl '>S/8.26</span>
+            </div>
+        );
+    }
+
     render() {
         return (
-            <>
-                {/* Inicio modal */}
-                <div className="modal fade" id="modalVentaProceso" data-bs-keyboard="false" data-bs-backdrop="static">
-                    <div className="modal-dialog modal-md">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h6 className="modal-title">Completar Venta</h6>
-                                <button type="button" className="close" data-bs-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-                            <div className="modal-body">
-
-                                <div className="row">
-                                    <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
-                                        <div className="text-center">
-                                            <h5>TOTAL A PAGAR: <span>{formatMoney(this.state.importeTotal)}</span></h5>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="row">
-                                    <div className="col-md-4 col-sm-4">
-                                        <hr />
-                                    </div>
-                                    <div className="col-md-4 col-sm-4 d-flex align-items-center justify-content-center">
-                                        <h6 className="mb-0">Tipos de pagos</h6>
-                                    </div>
-                                    <div className="col-md-4 col-sm-4">
-                                        <hr />
-                                    </div>
-                                </div>
-
-                                <div className="row">
-                                    <div className="col-md-4 col-sm-4">
-                                        <button className={`btn ${this.state.selectTipoPago === 1 ? "btn-primary" : "btn-light"} btn-block`}
-                                            type="button"
-                                            title="Pago al contado"
-                                            onClick={() => this.setState({ selectTipoPago: 1 })}>
-                                            <div className="row">
-                                                <div className="col-md-12">
-                                                    <i className="bi bi-cash-coin fa-2x"></i>
-                                                </div>
-                                            </div>
-                                            <div className="text-center">
-                                                <label>Contado</label>
-                                            </div>
+            <PosContainerWrapper>
+                <section style={{ flex: "1 1 100%", position: "relative" }}>
+                    <div className='h-100 d-flex flex-column' style={{ backgroundColor: "#f1f5f9" }}>
+                        <div className='d-flex align-items-center  justify-content-between' style={{ padding: "1.5rem" }}>
+                            <div className='w-100 mr-2'>
+                                <div className="input-group">
+                                    <div className='input-group-prepend'>
+                                        <button className="btn btn-success" type="button">
+                                            <img src={codbar} />
+                                        </button>
+                                        <button className="btn btn-success" type="button">
+                                            <img src={search} />
                                         </button>
                                     </div>
-
-                                    <div className="col-md-4 col-sm-4">
-                                        <button className={`btn ${this.state.selectTipoPago === 2 ? "btn-primary" : "btn-light"} btn-block`}
-                                            type="button"
-                                            title="Pago al credito"
-                                            onClick={() => this.setState({ selectTipoPago: 2 })}>
-                                            <div className="row">
-                                                <div className="col-md-12">
-                                                    <i className="bi bi-boxes fa-2x"></i>
-                                                </div>
-                                            </div>
-                                            <div className="text-center">
-                                                <label>Crédito fijo</label>
-                                            </div>
-                                        </button>
-                                    </div>
-
-                                    <div className="col-md-4 col-sm-4">
-                                        <button className={`btn ${this.state.selectTipoPago === 3 ? "btn-primary" : "btn-light"} btn-block`}
-                                            type="button"
-                                            title="Pago al credito"
-                                            onClick={() => this.setState({ selectTipoPago: 3 })}>
-                                            <div className="row">
-                                                <div className="col-md-12">
-                                                    <i className="bi bi-columns-gap fa-2x"></i>
-                                                </div>
-                                            </div>
-                                            <div className="text-center">
-                                                <label>Crédito variable</label>
-                                            </div>
-                                        </button>
-                                    </div>
-
+                                    <input type="text" className="form-control border border-success" placeholder="" aria-label="Example text with two button addons" />
                                 </div>
-
-                                <br />
-                                {/* contado detalle */}
-                                {
-                                    this.state.selectTipoPago === 1 ?
-                                        <div className="row">
-                                            <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
-                                                <div className="form-row">
-                                                    <div className="form-group col-md-12">
-                                                        <div className="input-group">
-                                                            <div className="input-group-prepend">
-                                                                <div className="input-group-text"><i className="bi bi-receipt"></i></div>
-                                                            </div>
-                                                            <select
-                                                                title="Lista de caja o banco a depositar"
-                                                                className="form-control"
-                                                                ref={this.refComprobanteContado}
-                                                                value={this.state.idComprobanteContado}
-                                                                onChange={(event) => this.setState({ idComprobanteContado: event.target.value })}>
-                                                                <option value="">-- Comprobante --</option>
-                                                                {
-                                                                    this.state.comprobantesCobro.map((item, index) => (
-                                                                        <option key={index} value={item.idComprobante}>{item.nombre + " (" + item.serie + ")"}</option>
-                                                                    ))
-                                                                }
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <div className="form-row">
-                                                    <div className="form-group col-md-12">
-                                                        <div className="input-group">
-                                                            <div className="input-group-prepend">
-                                                                <div className="input-group-text"><i className="bi bi-bank"></i></div>
-                                                            </div>
-                                                            <select
-                                                                title="Lista de caja o banco a depositar"
-                                                                className="form-control"
-                                                                ref={this.refBancoContado}
-                                                                value={this.state.idBancoContado}
-                                                                onChange={(event) => this.setState({ idBancoContado: event.target.value })}>
-                                                                <option value="">-- Cuenta bancaria --</option>
-                                                                {
-                                                                    this.state.bancos.map((item, index) => (
-                                                                        <option key={index} value={item.idBanco}>{item.nombre}</option>
-                                                                    ))
-                                                                }
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <div className="form-row">
-                                                    <div className="form-group col-md-12">
-                                                        <div className="input-group">
-                                                            <div className="input-group-prepend">
-                                                                <div className="input-group-text"><i className="bi bi-credit-card-2-back"></i></div>
-                                                            </div>
-                                                            <select
-                                                                title="Lista metodo de pago"
-                                                                className="form-control"
-                                                                ref={this.refMetodoContado}
-                                                                value={this.state.metodoPagoContado}
-                                                                onChange={(event) => this.setState({ metodoPagoContado: event.target.value })}>
-                                                                <option value="">-- Metodo de pago --</option>
-                                                                <option value="1">Efectivo</option>
-                                                                <option value="2">Consignación</option>
-                                                                <option value="3">Transferencia</option>
-                                                                <option value="4">Cheque</option>
-                                                                <option value="5">Tarjeta crédito</option>
-                                                                <option value="6">Tarjeta débito</option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        : null
-                                }
-
-                                {/* crédito fijo */}
-                                {
-                                    this.state.selectTipoPago === 2 ?
-                                        <div className={`row`}>
-                                            <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
-
-                                                <div className="form-group">
-                                                    <div className="input-group">
-                                                        <div className="input-group-prepend">
-                                                            <div className="input-group-text"><i className="bi bi-tag-fill"></i></div>
-                                                        </div>
-                                                        <input
-                                                            title="Monto inicial"
-                                                            type="text"
-                                                            className="form-control"
-                                                            ref={this.refMontoInicial}
-                                                            disabled={!this.state.montoInicialCheck}
-                                                            placeholder='Monto inicial'
-                                                            value={this.state.inicial}
-                                                            onChange={async (event) => {
-                                                                await this.setStateAsync({ inicial: event.target.value })
-                                                                this.calcularLetraMensual()
-                                                            }}
-                                                            onKeyPress={keyNumberFloat} />
-                                                        <div className="input-group-append">
-                                                            <div className="input-group-text">
-                                                                <div className="form-check form-check-inline m-0">
-                                                                    <input
-                                                                        className="form-check-input"
-                                                                        type="checkbox"
-                                                                        checked={this.state.montoInicialCheck}
-                                                                        onChange={async (event) => {
-                                                                            await this.setStateAsync({ montoInicialCheck: event.target.checked })
-                                                                            this.refMontoInicial.current.focus();
-                                                                        }}
-                                                                    />
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                {
-                                                    this.state.montoInicialCheck ?
-                                                        <div className="form-row">
-                                                            <div className="form-group col-md-12">
-                                                                <div className="input-group">
-                                                                    <div className="input-group-prepend">
-                                                                        <div className="input-group-text"><i className="bi bi-receipt"></i></div>
-                                                                    </div>
-                                                                    <select
-                                                                        title="Lista de caja o banco a depositar"
-                                                                        className="form-control"
-                                                                        ref={this.refComprobanteCredito}
-                                                                        value={this.state.idComprobanteCredito}
-                                                                        onChange={(event) => this.setState({ idComprobanteCredito: event.target.value })}>
-                                                                        <option value="">-- Comprobante --</option>
-                                                                        {
-                                                                            this.state.comprobantesCobro.map((item, index) => (
-                                                                                <option key={index} value={item.idComprobante}>{item.nombre}</option>
-                                                                            ))
-                                                                        }
-                                                                    </select>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        : null
-                                                }
-
-                                                {
-                                                    this.state.montoInicialCheck ?
-                                                        <div className="form-group">
-                                                            <div className="input-group">
-                                                                <div className="input-group-prepend">
-                                                                    <div className="input-group-text"><i className="bi bi-bank"></i></div>
-                                                                </div>
-                                                                <select
-                                                                    title="Lista de caja o banco a depositar"
-                                                                    className="form-control"
-                                                                    ref={this.refBancoCredito}
-                                                                    value={this.state.idBancoCredito}
-                                                                    onChange={(event) => this.setState({ idBancoCredito: event.target.value })}>
-                                                                    <option value="">-- Cuenta bancaria --</option>
-                                                                    {
-                                                                        this.state.bancos.map((item, index) => (
-                                                                            <option key={index} value={item.idBanco}>{item.nombre}</option>
-                                                                        ))
-                                                                    }
-                                                                </select>
-                                                            </div>
-                                                        </div>
-                                                        : null
-                                                }
-
-                                                {
-                                                    this.state.montoInicialCheck ?
-                                                        <div className="form-group">
-                                                            <div className="input-group">
-                                                                <div className="input-group-prepend">
-                                                                    <div className="input-group-text"><i className="bi bi-credit-card-2-back"></i></div>
-                                                                </div>
-                                                                <select
-                                                                    title="Lista metodo de pago"
-                                                                    className="form-control"
-                                                                    ref={this.refMetodoCredito}
-                                                                    value={this.state.metodoPagoCredito}
-                                                                    onChange={(event) => this.setState({ metodoPagoCredito: event.target.value })}>
-                                                                    <option value="">-- Metodo de pago --</option>
-                                                                    <option value="1">Efectivo</option>
-                                                                    <option value="2">Consignación</option>
-                                                                    <option value="3">Transferencia</option>
-                                                                    <option value="4">Cheque</option>
-                                                                    <option value="5">Tarjeta crédito</option>
-                                                                    <option value="6">Tarjeta débito</option>
-                                                                </select>
-                                                            </div>
-                                                        </div>
-                                                        : null
-                                                }
-
-                                                <div className="form-group">
-                                                    <div className="input-group">
-                                                        <div className="input-group-prepend">
-                                                            <div className="input-group-text"><i className="bi bi-hourglass-split"></i></div>
-                                                        </div>
-                                                        <input
-                                                            title="Número de cuotas"
-                                                            type="text"
-                                                            className="form-control"
-                                                            placeholder='Número de cuotas'
-                                                            ref={this.refNumCutoas}
-                                                            value={this.state.numCuota}
-                                                            onChange={async (event) => {
-                                                                await this.setStateAsync({ numCuota: event.target.value })
-                                                                this.calcularLetraMensual()
-                                                            }}
-                                                            onKeyPress={keyNumberInteger} />
-                                                    </div>
-                                                </div>
-
-                                                <div className="form-group">
-                                                    <div className="input-group">
-                                                        <div className="input-group-prepend">
-                                                            <div className="input-group-text"><i className="bi bi-calendar"></i></div>
-                                                        </div>
-
-                                                        <select
-                                                            title="Mes"
-                                                            className="form-control"
-                                                            value={this.state.monthPago}
-                                                            onChange={(event) => this.setState({ monthPago: event.target.value })}>
-                                                            {
-                                                                this.state.mmonth.map((item, index) => (
-                                                                    <option key={index} value={item}>{monthName(item)}</option>
-                                                                ))
-                                                            }
-                                                        </select>
-                                                        <select
-                                                            title="Año"
-                                                            className="form-control"
-                                                            value={this.state.yearPago}
-                                                            onChange={(event) => this.setState({ yearPago: event.target.value })}>
-                                                            {
-                                                                this.state.year.map((item, index) => (
-                                                                    <option key={index} value={item}>{item}</option>
-                                                                ))
-                                                            }
-                                                        </select>
-                                                    </div>
-                                                </div>
-
-                                                <div className="form-group">
-                                                    <div className="input-group">
-                                                        <div className="input-group-prepend">
-                                                            <div className="input-group-text"><i className="bi bi-credit-card-2-back"></i></div>
-                                                        </div>
-                                                        <select
-                                                            title="Lista frecuencia de pago"
-                                                            className="form-control"
-                                                            ref={this.refFrecuenciaPagoCredito}
-                                                            value={this.state.frecuenciaPagoCredito}
-                                                            onChange={(event) => this.setState({ frecuenciaPagoCredito: event.target.value })}
-                                                        >
-                                                            <option value="">-- Frecuencia de pago --</option>
-                                                            <option value="15">Quinsenal</option>
-                                                            <option value="30">Mensual</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-
-                                                <div className="form-group">
-                                                    <div className="input-group">
-                                                        <div className="input-group-prepend">
-                                                            <div className="input-group-text"><i className="bi bi-coin"></i></div>
-                                                        </div>
-                                                        <input
-                                                            title="Letra mensual"
-                                                            type="text"
-                                                            className="form-control"
-                                                            placeholder='0.00'
-                                                            value={this.state.letraMensual}
-                                                            disabled={true} />
-                                                    </div>
-                                                </div>
-
-                                            </div>
-                                        </div>
-                                        : null
-                                }
-
-                                {/* crédito variable */}
-                                {
-                                    this.state.selectTipoPago === 3 ?
-                                        <div className={`row`}>
-                                            <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
-
-                                                <div className="form-group">
-                                                    <div className="input-group">
-                                                        <div className="input-group-prepend">
-                                                            <div className="input-group-text"><i className="bi bi-tag-fill"></i></div>
-                                                        </div>
-                                                        <input
-                                                            title="Monto inicial"
-                                                            type="text"
-                                                            className="form-control"
-                                                            ref={this.refInicialCreditoVariable}
-                                                            disabled={!this.state.inicialCreditoVariableCheck}
-                                                            placeholder='Monto inicial'
-                                                            value={this.state.inicialCreditoVariable}
-                                                            onChange={async (event) => {
-                                                                await this.setStateAsync({ inicialCreditoVariable: event.target.value })
-
-                                                            }}
-                                                            onKeyPress={keyNumberFloat} />
-                                                        <div className="input-group-append">
-                                                            <div className="input-group-text">
-                                                                <div className="form-check form-check-inline m-0">
-                                                                    <input
-                                                                        className="form-check-input"
-                                                                        type="checkbox"
-                                                                        checked={this.state.inicialCreditoVariableCheck}
-                                                                        onChange={async (event) => {
-                                                                            await this.setStateAsync({ inicialCreditoVariableCheck: event.target.checked })
-                                                                            this.refInicialCreditoVariable.current.focus();
-                                                                        }}
-                                                                    />
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                {
-                                                    this.state.inicialCreditoVariableCheck ?
-                                                        <>
-                                                            <div className="form-row">
-                                                                <div className="form-group col-md-12">
-                                                                    <div className="input-group">
-                                                                        <div className="input-group-prepend">
-                                                                            <div className="input-group-text"><i className="bi bi-receipt"></i></div>
-                                                                        </div>
-                                                                        <select
-                                                                            title="Lista de caja o banco a depositar"
-                                                                            className="form-control"
-                                                                            ref={this.refComprobanteCreditoVariable}
-                                                                            value={this.state.idComprobanteCreditoVariable}
-                                                                            onChange={(event) => this.setState({ idComprobanteCreditoVariable: event.target.value })}>
-                                                                            <option value="">-- Comprobante --</option>
-                                                                            {
-                                                                                this.state.comprobantesCobro.map((item, index) => (
-                                                                                    <option key={index} value={item.idComprobante}>{item.nombre}</option>
-                                                                                ))
-                                                                            }
-                                                                        </select>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div className="form-group">
-                                                                <div className="input-group">
-                                                                    <div className="input-group-prepend">
-                                                                        <div className="input-group-text"><i className="bi bi-bank"></i></div>
-                                                                    </div>
-                                                                    <select
-                                                                        title="Lista de caja o banco a depositar"
-                                                                        className="form-control"
-                                                                        ref={this.refBancoCreditoVariable}
-                                                                        value={this.state.idBancoCreditoVariable}
-                                                                        onChange={(event) => this.setState({ idBancoCreditoVariable: event.target.value })}>
-                                                                        <option value="">-- Cuenta bancaria --</option>
-                                                                        {
-                                                                            this.state.bancos.map((item, index) => (
-                                                                                <option key={index} value={item.idBanco}>{item.nombre}</option>
-                                                                            ))
-                                                                        }
-                                                                    </select>
-                                                                </div>
-                                                            </div>
-                                                            <div className="form-group">
-                                                                <div className="input-group">
-                                                                    <div className="input-group-prepend">
-                                                                        <div className="input-group-text"><i className="bi bi-credit-card-2-back"></i></div>
-                                                                    </div>
-                                                                    <select
-                                                                        title="Lista metodo de pago"
-                                                                        className="form-control"
-                                                                        ref={this.refMetodoCreditoVariable}
-                                                                        value={this.state.metodoPagoCreditoVariable}
-                                                                        onChange={(event) => this.setState({ metodoPagoCreditoVariable: event.target.value })}>
-                                                                        <option value="">-- Metodo de pago --</option>
-                                                                        <option value="1">Efectivo</option>
-                                                                        <option value="2">Consignación</option>
-                                                                        <option value="3">Transferencia</option>
-                                                                        <option value="4">Cheque</option>
-                                                                        <option value="5">Tarjeta crédito</option>
-                                                                        <option value="6">Tarjeta débito</option>
-                                                                    </select>
-                                                                </div>
-                                                            </div>
-                                                        </>
-
-                                                        : null
-                                                }
-
-                                                <div className="form-group">
-                                                    <div className="input-group">
-                                                        <div className="input-group-prepend">
-                                                            <div className="input-group-text"><i className="bi bi-credit-card-2-back"></i></div>
-                                                        </div>
-                                                        <select
-                                                            title="Lista frecuencia de pago"
-                                                            className="form-control"
-                                                            ref={this.refFrecuenciaPago}
-                                                            value={this.state.frecuenciaPago}
-                                                            onChange={(event) => this.setState({ frecuenciaPago: event.target.value })}
-                                                        >
-                                                            <option value="">-- Frecuencia de pago --</option>
-                                                            <option value="15">Quinsenal</option>
-                                                            <option value="30">Mensual</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-
-                                                <div className="form-group">
-                                                    <div className="input-group">
-                                                        <div className="input-group-prepend">
-                                                            <div className="input-group-text"><i className="bi bi-piggy-bank-fill"></i></div>
-                                                        </div>
-                                                        <input
-                                                            title="Deuda restante"
-                                                            type="text"
-                                                            className="form-control"
-                                                            placeholder='0.00'
-                                                            value={formatMoney(this.state.importeTotal - this.state.inicialCreditoVariable)}
-                                                            disabled={true} />
-                                                    </div>
-                                                </div>
-
-                                            </div>
-                                        </div>
-                                        : null
-                                }
-
                             </div>
-
-                            <div className="modal-footer">
-                                <button type="button" className="btn btn-primary" onClick={() => this.onEventGuardar()}>Completar venta</button>
-                                <button type="button" className="btn btn-danger" data-bs-dismiss="modal">Cerrar</button>
+                            <button className='btn btn-outline-success d-flex align-items-center justify-content-center' style={{ minWidth: "10rem" }}>
+                                <div className='mr-2'>Nuevo producto</div>
+                                <img src={add} />
+                            </button>
+                        </div>
+                        <div className='p-2 w-100 h-100 d-flex d-flex align-items-center justify-content-center' style={{}}>
+                            <p>no hay productos que satisfacen la búsqueda</p>
+                        </div>
+                        {/* <div style={{ overflow: "hidden" }}>
+                            <div style={{ height: "100%", maxHeight: "100%", marginTop: "12px", overflow: "hidden", overflowY: "auto", display: "flex", flexWrap: "wrap", alignContent: "flex-start", justifyContent: "space-around" }}>
+                                {this.itemProducto()}
+                                {this.itemProducto()}
+                                {this.itemProducto()}
+                                {this.itemProducto()}
+                                {this.itemProducto()}
+                                {this.itemProducto()}
+                                {this.itemProducto()}
+                                {this.itemProducto()}
                             </div>
+                        </div> */}
+                    </div>
+                </section>
+                <section style={{ flex: "0 0 40%", display: "flex", flexDirection: "column", width: "550px", maxWidth: "550px", backgroundColor: "white", borderLeft: "1px solid #cbd5e1", position: "relative" }}>
+                    <div className='d-flex pl-3 align-items-center justify-content-between' style={{ borderBottom: "1px solid #e2e8f0" }}>
+                        <div className='py-3'>
+                            <p className='h5 m-0'>Boleta de venta</p>
+                        </div>
+                        <div className="d-flex">
+                            <span><button className='btn btn-link rounded-circle'>
+                                <img src={print} />
+                            </button></span>
+                            <span><button className='btn btn-link rounded-circle'>
+                                <img src={cash} />
+                            </button></span>
+                            <span><button className='btn btn-link rounded-circle'>
+                                <img src={options} />
+                            </button></span>
                         </div>
                     </div>
-                </div>
-                {/* fin modal */}
-
-                {
-                    this.state.loading ?
-                        <div className="clearfix absolute-all bg-white">
-                            {spinnerLoading(this.state.msgLoading)}
-                        </div> :
-                        null
-                }
-
-                <div className="row">
-                    <div className="col-xl-6 col-lg-6 col-md-3 col-sm-12 col-12 border-right">
-
-                        <div className='row pb-3'>
-                            {/* <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'> */}
-                            <div className='col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12'>
-                                <section className="content-header">
-                                    <h5>
-                                        <span role="button" onClick={() => this.props.history.goBack()}><i className="bi bi-arrow-left-short"></i></span> Registrar Venta
-                                        <small className="text-secondary"> nueva</small>
-                                    </h5>
-                                </section>
+                    <div style={{ borderBottom: "1px solid #e2e8f0" }}>
+                        <div className='pt-1 pb-1 d-flex align-items-center'>
+                            <div className='col-6 pl-3'>
+                                <p className=''>Lista de precio</p>
+                                <select className='form-control'>
+                                    <option>- Precios -</option>
+                                </select>
                             </div>
-                        </div>
-
-                        {
-                            this.state.messageWarning === '' ? null :
-                                <div className="alert alert-warning" role="alert">
-                                    <i className="bi bi-exclamation-diamond-fill"></i> {this.state.messageWarning}
-                                </div>
-                        }
-
-                        <div className="form-group">
-                            <div className="input-group">
-                                <div className="input-group-prepend">
-                                    <div className="input-group-text"><i className="bi bi-receipt"></i></div>
-                                </div>
-                                <select
-                                    title="Comprobantes de venta"
-                                    className="form-control"
-                                    ref={this.refComprobante}
-                                    value={this.state.idComprobante}
-                                    onChange={(event) => this.setState({ idComprobante: event.target.value })}>
-                                    <option value="">-- Comprobantes --</option>
-                                    {
-                                        this.state.comprobantes.map((item, index) => (
-                                            <option key={index} value={item.idComprobante}>{item.nombre}</option>
-                                        ))
-                                    }
+                            <div className='col-6'>
+                                <p className=''>Lista de precio</p>
+                                <select className='form-control'>
+                                    <option>- Comprobantes -</option>
                                 </select>
                             </div>
                         </div>
-
-                        <div className="form-group">
-                            <div className="input-group">
-                                <div className="input-group-prepend">
-                                    <div className="input-group-text"><i className="bi bi-cash"></i></div>
-                                </div>
-                                <select
-                                    title="Lista metodo de pago"
-                                    className="form-control"
-                                    ref={this.refMoneda}
-                                    value={this.state.idMoneda}
-                                    onChange={(event) => {
-                                        if (event.target.value.length > 0) {
-                                            this.setState({
-                                                idMoneda: event.target.value,
-                                                messageWarning: '',
-                                            });
-                                        } else {
-                                            this.setState({
-                                                idMoneda: event.target.value,
-                                                messageWarning: "Seleccione un moneda.",
-                                            });
-                                        }
-                                    }}>
-                                    <option value="">-- Moneda --</option>
-                                    {
-                                        this.state.monedas.map((item, index) => (
-                                            <option key={index} value={item.idMoneda}>{item.nombre}</option>
-                                        ))
-                                    }
-                                </select>
-                            </div>
+                        <div className='py-3 w-100 d-flex align-items-center' style={{}}>
+                            <p className='m-auto pl-3 pr-2'>Cliente:</p>
+                            <select className='form-control pl-2'>
+                                <option>- Clientes -</option>
+                            </select>
+                            <button className='btn btn-outline-success d-flex ml-3 mr-3'>
+                                <img src={addclient} />
+                                <div className='ml-2'>Nuevo</div>
+                            </button>
                         </div>
-
-                        <div className="form-group">
-                            <table width="100%">
-                                <tbody>
-                                    {this.renderTotal()}
-                                </tbody>
-                            </table>
-                        </div>
-
                     </div>
-
-                    <div className="col-xl-6 col-lg-6 col-md-9 col-sm-12 col-12">
-                        <ul className="nav nav-pills mb-3 d-grid gap-2" id="pills-tab" role="tablist">
-                            <li className="nav-item col-xl-6 col-lg-6 col-md-9 col-sm-12 col-12 p-0">
-                                <button className="nav-link active btn btn-lg w-100 h6" style={{ outline: "none" }} id="pills-home-tab" data-bs-toggle="pill" data-bs-target="#pills-home" type="button" role="tab" aria-controls="pills-home" aria-selected="true">Productos</button>
-                            </li>
-                            <li className="nav-item col-xl-6 col-lg-6 col-md-9 col-sm-12 col-12 p-0" role="presentation">
-                                <button className="nav-link btn btn-lg w-100" id="pills-profile-tab" data-bs-toggle="pill" data-bs-target="#pills-profile" type="button" role="tab" aria-controls="pills-profile" aria-selected="false">Pagos</button>
-                            </li>
-                        </ul>
-                        <div className="tab-content" id="pills-tabContent">
-                            <div className="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
-                                <div className="row">
-                                    <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
-                                        <div className="container">
-                                            <div className="row flex-nowrap overflow-auto">
-                                                <div className="btn btn-success pt-3 pb-3 pl-5 pr-5 m-2" style={{ borderRadius: "20px" }}>Todo</div>
-                                                <div className="btn btn-light pt-3 pb-3 pl-5 pr-5 m-2" style={{ borderRadius: "20px" }}>Bebidas</div>
-                                                <div className="btn btn-light pt-3 pb-3 pl-5 pr-5 m-2" style={{ borderRadius: "20px" }}>Combos</div>
-                                                <div className="btn btn-light pt-3 pb-3 pl-5 pr-5 m-2" style={{ borderRadius: "20px" }}>Complementos</div>
-                                                <div className="btn btn-light pt-3 pb-3 pl-5 pr-5 m-2" style={{ borderRadius: "20px" }}>Cremas</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="row">
-                                    <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 pt-2">
-                                        <div className="input-group input-group-sm" >
-                                            <input type="text" className="form-control bg-gray border-0" style={{ borderTopLeftRadius: "10px", borderBottomLeftRadius: "10px", height: "40px" }} placeholder="Buscar producto" />
-                                            <span className="input-group-append">
-                                                <button type="button" className="btn btn-info btn-flat bg-secondary">
-                                                    <i className="bi bi-list-task"></i>
-                                                </button>
-                                                <button type="button" className="btn btn-success btn-flat bg-gray text-dark" style={{ borderTopRightRadius: "10px", borderBottomRightRadius: "10px" }}>
-                                                    <i className="bi bi-grid-3x3-gap"></i>
-                                                </button>
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="row">
-                                    <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
-                                        <div data-spy="scroll" data-target="#navbar-example2" data-offset="0">
-                                            <div className="container">
-                                                <div className="row mt-3" style={{ height: "30px" }}>
-                                                    <div className="col-xl-1 col-lg-1 col-md-1 col-sm-1 col-1 bg-gray " style={{ borderRadius: "15px", paddingTop: "4px" }}>
-                                                        <i class="bi bi-fire text-center"></i>
-                                                    </div>
-                                                    <div className="col-xl-7 col-lg-7 col-md-7 col-sm-7 col-7" style={{ paddingTop: "4px" }}>
-                                                        Alita Broaster + papas
-                                                    </div>
-                                                    <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2" style={{ paddingTop: "4px" }}>
-                                                        ABCPF
-                                                    </div>
-                                                    <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-right" style={{ paddingTop: "4px" }}>
-                                                        S/ 20.00
-                                                    </div>
-                                                </div>
-
-                                                <div className="row mt-3" style={{ height: "30px" }}>
-                                                    <div className="col-xl-1 col-lg-1 col-md-1 col-sm-1 col-1 bg-gray" style={{ borderRadius: "15px", paddingTop: "4px" }}>
-                                                        <i class="bi bi-fire text-center"></i>
-                                                    </div>
-                                                    <div className="col-xl-7 col-lg-7 col-md-7 col-sm-7 col-7" style={{ paddingTop: "4px" }}>
-                                                        Alita Broaster + papas
-                                                    </div>
-                                                    <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2" style={{ paddingTop: "4px" }}>
-                                                        ABCPF
-                                                    </div>
-                                                    <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-right" style={{ paddingTop: "4px" }}>
-                                                        S/ 20.00
-                                                    </div>
-                                                </div>
-
-                                                <div className="row mt-3" style={{ height: "30px" }}>
-                                                    <div className="col-xl-1 col-lg-1 col-md-1 col-sm-1 col-1 bg-gray" style={{ borderRadius: "15px", paddingTop: "4px" }}>
-                                                        <i class="bi bi-fire text-center"></i>
-                                                    </div>
-                                                    <div className="col-xl-7 col-lg-7 col-md-7 col-sm-7 col-7" style={{ paddingTop: "4px" }}>
-                                                        Alita Broaster + papas
-                                                    </div>
-                                                    <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2" style={{ paddingTop: "4px" }}>
-                                                        ABCPF
-                                                    </div>
-                                                    <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 text-right" style={{ paddingTop: "4px" }}>
-                                                        S/ 20.00
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab">
-                                <div className="row">
-                                    <div className="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">
-                                        <button className="btn-lg w-100 bg-gray text-dark p-2 border-0" style={{ borderRadius: "15px" }}>
-                                            Boleta
-                                        </button>
-                                    </div>
-
-                                    <div className="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">
-                                        <button className="btn-lg w-100 bg-gray text-dark p-2 border-0" style={{ borderRadius: "15px" }}>
-                                            factura
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div className="row pt-3">
-                                    <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
-                                        <div className="btn-group mr-2" role="group" aria-label="First group">
-                                            <button type="button" className="btn btn-outline-success" style={{ borderRadius: "10px 0 0 10px" }}>Pagado</button>
-                                            <select className="custom-select border-0 rounded-0 bg-gray" id="exampleSelectRounded0">
-                                                <option>Efectivo</option>
-                                                <option>Visa</option>
-                                                <option>Rappi</option>
-                                            </select>
-                                            <input
-                                                className="form-control bg-gray border-top-0 border-bottom-0 rounded-0 border-left border-right border-gray"
-                                                type="date"
-                                                value={this.state.fechaInicio}
-                                                onChange={async (event) => {
-                                                    await this.setStateAsync({ fechaInicio: event.target.value })
-                                                    this.searchFecha();
-                                                }} />
-                                            <div className="input-group border-right border-gray">
-                                                <div className="input-group-prepend">
-                                                    <div className="input-group-text border-0 rounded-0 bg-gray" id="btnGroupAddon">S/</div>
-                                                </div>
-                                                <input type="text" className="form-control rounded-0 bg-gray border-top-0 border-bottom-0 border-left border-right border-gray" placeholder="0.00" aria-label="Input group example" aria-describedby="btnGroupAddon" />
-                                            </div>
-                                            <button type="button" className="btn bg-gray" style={{ borderRadius: "0 10px 10px 0" }}>
-                                                <i className="bi bi-chat-left-quote"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="row pt-3">
-                                    <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
-                                        <div className="form-group ">
-                                            <SearchBarClient
-                                                placeholder="Filtrar clientes..."
-                                                refCliente={this.refCliente}
-                                                cliente={this.state.cliente}
-                                                clientes={this.state.clientes}
-                                                onEventClearInput={this.onEventClearInputClient}
-                                                handleFilter={this.handleFilterClient}
-                                                onEventSelectItem={this.onEventSelectItemClient}
-                                            />
-                                        </div>
-                                    </div>
-
+                    <div style={{ height: "100%", overflow: "auto", backgroundColor: "#f8fafc" }}>
+                        <div className='h-100'>
+                            <div className='p-2 h-100 w-100 d-flex flex-column align-items-center justify-content-center' style={{ backgroundColor: "#f8fafc", color: "#6c757d!important", textAlign: "center", }}>
+                                <img src={basket} />
+                                <div className="w-50">
+                                    <span style={{ color: "#64748b" }}>Aquí verás los productos que elijas en tu próxima venta</span>
                                 </div>
                             </div>
                         </div>
                     </div>
-
-                </div>
-
-                <div className="row">
-                    <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
-                        <div className="form-row">
-                            <div className="form-group col-md-12">
-                                <button type="button" className="btn btn-success" onClick={() => this.onEventOpenModal()}>
-                                    <i className="fa fa-save"></i> Guardar
-                                </button>
-                                {" "}
-                                <button type="button" className="btn btn-outline-info" onClick={() => this.onEventLimpiar()}>
-                                    <i className="fa fa-trash"></i> Limpiar
-                                </button>
-                                {" "}
-                                <button type="button" className="btn btn-outline-secondary" onClick={() => this.props.history.goBack()}>
-                                    <i className="fa fa-close"></i> Cerrar
-                                </button>
-
+                    <div style={{ borderTop: "1px solid #e1e7ee", backgroundColor: "#fff", filter: "drop-shadow(0 -4px 20px rgba(199,203,207,.5))", WebkitFilter: "drop-shadow(0 -4px 20px rgba(199,203,207,.5))", WebkitAnimation: "fadeIn .2s ease" }}>
+                        <div className='px-3 mb-2' style={{ backgroundColor: "#f8fafc", color: "#8996a7", marginBottom: "1.5rem" }}>
+                            <div className='d-flex align-items-center justify-content-between py-2' style={{ borderBottom: "1px dashed #ccc", color: "#474747" }}>
+                                <div>Sub Total</div>
+                                <div>S/ 0.00</div>
+                            </div>
+                            <div className='d-flex align-items-center justify-content-between py-2' style={{ color: "#474747" }}>
+                                <div>IGV (18%)</div>
+                                <div>S/ 0.00</div>
+                            </div>
+                        </div>
+                        <div className='px-3 mb-2'>
+                            <div>
+                                <div>
+                                    <button className='btn btn-success btn-lg w-100 d-flex align-items-center  justify-content-between'>
+                                        <div>Vender</div>
+                                        <div>S/ 23.60</div>
+                                    </button>
+                                </div>
+                                <div>
+                                    <button className='btn btn-link w-100 d-flex align-items-center justify-content-between px-0'>
+                                        <div className='text-dark'>1 Producto</div>
+                                        <div className='text-success'>Cancelar</div>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </>
+                </section>
+            </PosContainerWrapper>
         );
     }
 }

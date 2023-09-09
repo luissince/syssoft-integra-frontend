@@ -20,6 +20,7 @@ import { listarBancos } from "../../network/rest/principal.network";
 import ErrorResponse from "../../model/class/error";
 import SuccessReponse from "../../model/class/response";
 import { CANCELED } from "../../model/types/types";
+import ContainerWrapper from "../container";
 
 class Bancos extends React.Component {
   constructor(props) {
@@ -347,7 +348,7 @@ class Bancos extends React.Component {
 
   render() {
     return (
-      <>
+      <ContainerWrapper>
         {/* Inicio modal */}
         <div className="modal fade" id="modalBanco" data-backdrop="static">
           <div className="modal-dialog modal-md">
@@ -661,7 +662,7 @@ class Bancos extends React.Component {
             </div>
           </div>
         </div>
-      </>
+      </ContainerWrapper>
     );
   }
 }

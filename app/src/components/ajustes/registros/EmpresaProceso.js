@@ -14,6 +14,7 @@ import {
 import { connect } from "react-redux";
 import sunat from "../../../recursos/images/sunat.png";
 import noImage from "../../../recursos/images/noimage.jpg";
+import ContainerWrapper from "../../container";
 
 class EmpresaProceso extends React.Component {
   constructor(props) {
@@ -287,7 +288,7 @@ class EmpresaProceso extends React.Component {
 
   render() {
     return (
-      <>
+      <ContainerWrapper>
         {this.state.loading ? (
           <div className="clearfix absolute-all bg-white">
             {spinnerLoading(this.state.msgLoading)}
@@ -581,7 +582,7 @@ class EmpresaProceso extends React.Component {
             </button>
           </div>
         </div>
-      </>
+      </ContainerWrapper>
     );
   }
 }

@@ -15,6 +15,7 @@ import {
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import Paginacion from '../../helper/Paginacion';
+import ContainerWrapper from '../container';
 
 class Cobros extends React.Component {
     constructor(props) {
@@ -165,7 +166,7 @@ class Cobros extends React.Component {
 
     render() {
         return (
-            <>
+            <ContainerWrapper>
                 <div className='row'>
                     <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
                         <div className="form-group">
@@ -324,7 +325,7 @@ class Cobros extends React.Component {
                         </div>
                     </div>
                 </div>
-            </>
+            </ContainerWrapper>
         );
     }
 }

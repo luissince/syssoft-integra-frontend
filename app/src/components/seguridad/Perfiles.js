@@ -16,6 +16,7 @@ import {
 } from '../../helper/Tools';
 import { connect } from 'react-redux';
 import Paginacion from '../../helper/Paginacion';
+import ContainerWrapper from '../container';
 
 class Perfiles extends React.Component {
     constructor(props) {
@@ -290,7 +291,7 @@ class Perfiles extends React.Component {
 
     render() {
         return (
-            <>
+            <ContainerWrapper>
                 {/* Inicio modal */}
                 <div className="modal fade" id="modalPerfil" data-bs-keyboard="false" data-bs-backdrop="static">
                     <div className="modal-dialog">
@@ -460,7 +461,7 @@ class Perfiles extends React.Component {
                         </div>
                     </div>
                 </div>
-            </>
+            </ContainerWrapper>
         );
     }
 }

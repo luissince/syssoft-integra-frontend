@@ -1,4 +1,5 @@
 import React from 'react';
+import ContainerWrapper from '../container';
 
 class Reservas extends React.Component {
     constructor(props) {
@@ -7,7 +8,7 @@ class Reservas extends React.Component {
 
     render() {
         return (
-            <>
+            <ContainerWrapper>
                 {/* Inicio modal nuevo cliente*/}
                 <div className="modal fade" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                     <div className="modal-dialog">
@@ -150,7 +151,7 @@ class Reservas extends React.Component {
 
                     </div>
                 </div>
-            </>
+            </ContainerWrapper>
         );
     }
 }

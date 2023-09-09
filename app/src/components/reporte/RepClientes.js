@@ -5,6 +5,7 @@ import { connect } from 'react-redux';
 import FileDownloader from "./hooks/FileDownloader";
 import { spinnerLoading, currentDate, getCurrentYear } from '../../helper/Tools';
 import SearchBarClient from "../../helper/SearchBarClient";
+import ContainerWrapper from '../container';
 
 class RepClientes extends React.Component {
 
@@ -237,7 +238,7 @@ class RepClientes extends React.Component {
 
     render() {
         return (
-            <>
+            <ContainerWrapper>
                 {
                     this.state.loading
                         ?
@@ -526,7 +527,7 @@ class RepClientes extends React.Component {
                             <FileDownloader ref={this.refUseFile} />
                         </>
                 }
-            </>
+            </ContainerWrapper>
         )
     }
 }

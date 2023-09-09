@@ -13,6 +13,7 @@ import {
 import { connect } from 'react-redux';
 import noImage from '../../../recursos/images/noimage.jpg';
 import SearchBar from "../../../helper/SearchBar";
+import ContainerWrapper from '../../container';
 
 class ProcesoProyecto extends React.Component {
 
@@ -400,7 +401,7 @@ class ProcesoProyecto extends React.Component {
 
     render() {
         return (
-            <>
+            <ContainerWrapper>
                 {
                     this.state.loading ?
                         <div className="clearfix absolute-all bg-white">
@@ -702,7 +703,7 @@ class ProcesoProyecto extends React.Component {
                     </div>
                 </div>
 
-            </>
+            </ContainerWrapper>
         )
     }
 }

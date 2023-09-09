@@ -16,6 +16,7 @@ import {
 import { connect } from 'react-redux';
 import { apiComprobanteListcombo } from '../../../network/api';
 import SearchBarClient from "../../../helper/SearchBarClient";
+import ContainerWrapper from '../../container';
 
 class GastoProceso extends React.Component {
     constructor(props) {
@@ -488,7 +489,7 @@ class GastoProceso extends React.Component {
 
     render() {
         return (
-            <>
+            <ContainerWrapper>
                 {
                     this.state.loading ?
                         <div className="clearfix absolute-all bg-white">
@@ -884,7 +885,7 @@ class GastoProceso extends React.Component {
 
                     </div>
                 </div>
-            </>
+            </ContainerWrapper>
 
         )
     }

@@ -19,6 +19,7 @@ import { connect } from 'react-redux';
 import { CANCELED, ERROR } from '../../../model/types/types';
 import SuccessReponse from '../../../model/class/response';
 import ErrorResponse from '../../../model/class/error';
+import ContainerWrapper from '../../container';
 
 
 class LoteDetalle extends React.Component {
@@ -286,7 +287,7 @@ class LoteDetalle extends React.Component {
 
     render() {
         return (
-            <>
+            <ContainerWrapper>
                 {/* Inicio modal */}
                 <div className="modal fade" id="modalSocio" data-bs-keyboard="false" data-bs-backdrop="static">
                     <div className="modal-dialog">
@@ -530,7 +531,7 @@ class LoteDetalle extends React.Component {
                         </div>
                     </div>
                 </div>
-            </>
+            </ContainerWrapper>
         );
     }
 }

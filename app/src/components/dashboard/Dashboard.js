@@ -6,6 +6,7 @@ import {
 } from '../../helper/Tools';
 import { connect } from 'react-redux';
 import noImage from '../../recursos/images/noimage.jpg';
+import ContainerWrapper from '../container';
 
 class Dashboard extends React.Component {
 
@@ -76,7 +77,7 @@ class Dashboard extends React.Component {
 
     render() {
         return (
-            <>
+            <ContainerWrapper>
                 {
                     this.state.loading ?
                         <div className="clearfix absolute-all bg-white">
@@ -195,7 +196,7 @@ class Dashboard extends React.Component {
                         </div>
                     </div>
                 </div>
-            </>
+            </ContainerWrapper>
         );
     }
 }

@@ -1,70 +1,159 @@
-# Getting Started with Create React App
+# SOFTWARE DE RESTAURANTE
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+<!-- ![IMAGES DE GO LANG](images/ladder.svg) -->
+<img src="app/src/recursos/images/syssoftintegra.png" alt="Imagen go" width="200" />
 
-## Available Scripts
+<font size="5" face="Qwitcher Grypen">
+Aplicación para el control de restaurantes.
+</font>
 
-In the project directory, you can run:
+## Iniciar
 
-### `npm start`
+Esta proyecto esta echo en react js con tailwind css.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Algunos recursos para iniciar con este proyecto puedes ver en:
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- [Node Js](https://nodejs.org/es/) Entorno de desarrollo para aplicación web o movil usando JavaScript.
+- [React Js](https://reactjs.org/) Biblioteca para diseñar interfeces de usuario usando JavaScript.
+- [Visual Studio](https://code.visualstudio.com/) Editor de código para todos tipos de lenguaje de programación.
+- [Tailwindcss](https://tailwindcss.com/) Framework css para la parte visual.
+- [TypeScript](https://www.typescriptlang.org/) Lenguaje de programación de tipado fuerte.
+- [JavaScript](https://developer.mozilla.org/es/docs/Web/JavaScript) Lenguaje de programación interpretado.
+- [Git](https://git-scm.com/) Software de control de versiones.
+- [Git Hub](https://github.com/) Plataforma de alojamiento de proyecto de todo ámbito.
 
-### `npm test`
+## Instalación
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Siga los pasos para iniciar el desarrollo:
 
-### `npm run build`
+1.  Clona el proyecto o agrague el ssh al repositorio para contribuir en nuevos cambios [Git Hub - Formulario](https://github.com/luissince/SoftwareRestaurante)
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+    1.1. Agregue por ssh para la integración
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+    #Code
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+        /**
+        ** Para el proceso de integración **
+        **/
 
-### `npm run eject`
+        // ejecute en su consola cmd, bash, git los siguientes comandos
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+        // Generar tu clave ssh para poder contribuir al proyecto
+        ssh-keygen -t rsa -b 4096 -C "tu email"
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+        // Configuración global del nombre
+        git config --global user.name "John Doe"
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+        // Configuración global del email
+        git config --global user.email johndoe@example.com
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+        // crea una carpeta
+        mkdir SoftwareRestaurante
 
-## Learn More
+        // moverse a la carpeta
+        cd SoftwareRestaurante
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+        // comando que inicia git
+        git init
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+        // comando que agrega la referencia de la rama
+        git remote add origin git@github.com:luissince/SoftwareRestaurante.git
 
-### Code Splitting
+        // comando que descarga los archivos al working directory
+        git fetch origin master
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+        // comando que une los cambios al staging area
+        git merge origin/master
 
-### Analyzing the Bundle Size
+    2.2 Clonar
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+        #code
 
-### Making a Progressive Web App
+        /**
+        ** Para el proceso de clonación **
+        **/
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+        // Clonar al proyecto
+        git clone https://github.com/luissince/SoftwareRestaurante.git
 
-### Advanced Configuration
+2.  Instale typescript si su proyecto lo usa
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+    #Code
 
-### Deployment
+        npm install -g typescript
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+3.  Ejecute en la carpeta la clonada **npm install** para descargar las dependencias del proyecto
 
-### `npm run build` fails to minify
+    #Code
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+        npm install
+
+4.  Copiar el arhivo de la ruta del EndPoint en app/.env.env.development.example
+
+    #code
+
+        <!-- copie el archivo .env.development.example a .env.development  -->
+        cp .env.development.example .env.development
+
+5.  Configuración de la variables de entorno del front-end
+
+        #code
+
+            <!-- ruta para las peticiones del back-end princial -->
+            REACT_APP_END_POINT=http://localhost:3002
+
+            <!-- ruta para en envió de las facturas electrónicas -->
+
+            REACT_APP_URL=http://localhost:3002
+
+            <!-- ruta para las peticiones http -->
+            REACT_APP_IMAGE=http://localhost:3002
+
+6.  Copiar el arhivo de la configuración del servidor en server/.env
+
+    #code
+
+        <!-- copie el archivo .env.development.example a .env.development  -->
+        cp .env.example .env
+
+7.  Configuración de la variables de entorno del back-end
+
+    #code
+
+         <!-- puerto del servidor -->
+        PORT=5000
+
+        <!-- ip o nombre del servidor de la base datos -->
+        DB_HOST=
+        //nombre de usuario del servidor de la base de datos
+        DB_USER=
+
+        <!-- contraseña del usuario del servidor de la base de datos -->
+        DB_PASSWORD=
+
+        <!-- nombre del servidor de la base de la base de datos -->
+        DB_NAME=
+
+        <!-- puerto del servidor de base de datos -->
+        DB_PORT=3306
+
+        <!-- Configuración de la zona horaria del servidor -->
+        TZ="America/Lima"
+
+8.  Ejecute **npm run dev:app** para iniciar el front-end
+
+    #Code
+
+        npm run dev:app
+
+9.  Ejecute **npm run dev:server** para iniciar el backend-end
+
+    #Code
+
+        npm run dev:server
+
+10. Ejecute **npm run build** para construir le proyecto
+
+    #Code
+
+        npm run build
