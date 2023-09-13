@@ -2,10 +2,10 @@ import React from "react";
 import { Redirect } from "react-router-dom";
 import { connect } from "react-redux";
 import { signIn } from "../../redux/actions";
-import icono from "../../recursos/images/INMOBILIARIA.png";
 import { loginApi } from "../../network/rest/principal.network";
 import SuccessReponse from "../../model/class/response";
 import ErrorResponse from "../../model/class/error";
+import { images } from "../../helper";
 
 class Login extends React.Component {
   constructor(props) {
@@ -226,7 +226,7 @@ class Login extends React.Component {
                     <img
                       className="mb-4"
                       // src={`${rutaImage !== "" ? "/" + rutaImage : noimage}`}
-                      src={icono}
+                      src={images.icono}
                       alt="Logo"
                       width="160"
                     />

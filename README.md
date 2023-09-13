@@ -1,7 +1,7 @@
 # SOFTWARE DE RESTAURANTE
 
 <!-- ![IMAGES DE GO LANG](images/ladder.svg) -->
-<img src="app/src/recursos/images/syssoftintegra.png" alt="Imagen go" width="200" />
+<img src="app/src/recursos/images/syssoftintegra.png" alt="Imagen SysSoft Integra" width="200" />
 
 <font size="5" face="Qwitcher Grypen">
 Aplicación para el control de restaurantes.

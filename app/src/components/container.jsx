@@ -1,5 +1,5 @@
 import React from 'react';
-import Footer from './layouts/footer/Footer';
+import Footer from './footer/Footer';
 
 const ContainerWrapper = ({ children }) => {
   return (
@@ -17,7 +17,7 @@ const ContainerWrapper = ({ children }) => {
 
 export const PosContainerWrapper = ({ children }) => {
   return (
-    <main>
+    <main className='main-pos'>
       <div className="h-100">
         <div className="d-flex border border-light-purple rounded position-relative h-100">
           {children}

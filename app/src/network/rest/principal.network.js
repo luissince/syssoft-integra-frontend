@@ -21,13 +21,13 @@ instance.interceptors.request.use((config) => {
 });
 
 /**
- * @author Luis Alexander Lara Serna <https://github.com/luissince/>
- * @param {Object} Login - Objecto que almacen un usuario, password.
- * @param {AbortSignal} AbortSignal - Objeto que anula la petición de la consulta
- * @returns {SuccessReponse | ErrorResponse} SuccessReponse | ErrorResponse
+ * 
+ * @param {*} params 
+ * @param {*} signal 
+ * @returns 
  */
 export async function loginApi(params, signal = null) {
-  return Resolve.create(
+  return await Resolve.create(
     instance.get("/api/login/createsession", {
       params: params,
       signal: signal,
@@ -191,5 +191,106 @@ export async function comboProyectos(signal = null) {
     instance.get("/api/proyecto/combo", {
       signal: signal,
     })
+  );
+}
+
+
+/**
+ * 
+ * @param {*} idProyecto 
+ * @returns 
+ */
+export async function borrarProyecto(idProyecto) {
+  return await Resolve.create(
+    instance.delete('/api/proyecto', {
+      params: {
+        "idProyecto": idProyecto
+      }
+    })
+  );
+}
+
+/**
+ * 
+ * @returns 
+ */
+export async function loadEmpresa(signal = null) {
+  return await Resolve.create(
+    instance.get("/api/empresa/load", {
+      signal: signal,
+      params: {
+        "idSede": "SD0001",
+      }
+    })
+  );
+}
+
+export async function listSede(params, signal = null) {
+  return await Resolve.create(
+    instance.get('/api/sede/list', {
+      signal: signal,
+      params: params
+    })
+  );
+}
+
+export async function getIdManzana(params, signal = null) {
+  return await Resolve.create(
+    instance.get("/api/manzana/id", {
+      signal: signal,
+      params: params,
+    })
+  );
+}
+
+export async function addManzana(data) {
+  return await Resolve.create(
+    await instance.post("/api/manzana/", data)
+  );
+}
+
+export async function updateManzana(data) {
+  return await Resolve.create(
+    await instance.put("/api/manzana", data)
+  );
+}
+
+export async function removeManzana(params) {
+  return await Resolve.create(
+    instance.delete("/api/manzana", {
+      params: params,
+    })
+  );
+}
+
+
+export async function listCpeSunat(params, signal) {
+  return await Resolve.create(
+    instance.get('/api/factura/cpesunat', {
+      signal: signal,
+      params: params
+    })
+  );
+}
+
+export async function sendEmailBoleta(params) {
+  return await Resolve.create(
+    instance.get("/api/cobro/email", {
+      params: params
+    })
+  );
+}
+
+export async function sendEmailNotaCredito(params) {
+  return await Resolve.create(
+    instance.get("/api/notacredito/email", {
+      params: params
+    })
+  );
+}
+
+export async function getNotifications() {
+  return await Resolve.create(
+    instance.get("/api/cobro/notificaciones")
   );
 }

@@ -3,10 +3,8 @@ import axios from "axios";
 import { Redirect } from "react-router-dom";
 import { connect } from "react-redux";
 import { signOut, selectProject } from "../../redux/actions";
-import { spinnerLoading } from "../../helper/Tools";
-import icono from "../../recursos/images/INMOBILIARIA.png";
-
-import noImage from "../../recursos/images/noimage.jpg";
+import { spinnerLoading } from "../../helper/utils.helper";
+import { images } from "../../helper";
 
 class Principal extends React.Component {
   constructor(props) {
@@ -123,7 +121,7 @@ class Principal extends React.Component {
                       <img
                         className="img-fluid"
                         // src={`${rutaImage !== "" ? "/" + rutaImage : noImage}`}
-                        src={icono}
+                        src={images.icono}
                         alt="logo"
                         width="140"
                       />
@@ -189,7 +187,7 @@ class Principal extends React.Component {
                     <div className="form-group">
                       <div className="card">
                         <img
-                          src={item.ruta === "" ? noImage : "/" + item.ruta}
+                          src={item.ruta === "" ? images.noImage : "/" + item.ruta}
                           alt=""
                           className="card-img-top"
                         />

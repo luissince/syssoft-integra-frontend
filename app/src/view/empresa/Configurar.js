@@ -10,11 +10,10 @@ import {
     ModalAlertInfo,
     ModalAlertSuccess,
     ModalAlertWarning,
-} from '../../helper/Tools';
+} from '../../helper/utils.helper';
 import { connect } from 'react-redux';
 import { configSave } from '../../redux/actions';
-import sunat from '../../recursos/images/sunat.png';
-import noImage from '../../recursos/images/noimage.jpg'
+import { images } from '../../helper';
 
 class Configurar extends React.Component {
 
@@ -29,8 +28,8 @@ class Configurar extends React.Component {
             email: '',
             web: '',
             direccion: '',
-            logo: noImage,
-            image: noImage,
+            logo: images.noImage,
+            image: images.noImage,
 
             loading: false,
             messageWarning: '',
@@ -70,7 +69,7 @@ class Configurar extends React.Component {
             });
         } else {
             await this.setStateAsync({
-                logo: noImage
+                logo: images.noImage
             });
             this.refFileLogo.current.value = "";
         }
@@ -83,7 +82,7 @@ class Configurar extends React.Component {
             });
         } else {
             await this.setStateAsync({
-                image: noImage
+                image: images.noImage
             });
             this.refFileImagen.current.value = "";
         }
@@ -91,14 +90,14 @@ class Configurar extends React.Component {
 
     async clearLogo() {
         await this.setStateAsync({
-            logo: noImage
+            logo: images.noImage
         })
         this.refFileLogo.current.value = "";
     }
 
     async clearImage() {
         await this.setStateAsync({
-            image: noImage
+            image: images.noImage
         })
         this.refFileImagen.current.value = "";
     }
@@ -241,7 +240,7 @@ class Configurar extends React.Component {
                                             type="button"
                                             title="Sunat"
                                             onClick={() => this.onEventGetApiSunat()}>
-                                            <img src={sunat} alt="Sunat" width="12" />
+                                            <img src={images.sunat} alt="Sunat" width="12" />
                                         </button>
                                     </div>
                                 </div>
