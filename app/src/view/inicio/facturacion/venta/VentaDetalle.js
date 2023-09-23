@@ -8,9 +8,12 @@ import {
     timeForma24,
     spinnerLoading,
 } from '../../../../helper/utils.helper';
-import { apiFacturaId, apiVentaCobro } from '../../../../network/api';
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../../components/Container';
+import { getCobroVentaId, getFacturaId } from '../../../../network/rest/principal.network';
+import SuccessReponse from '../../../../model/class/response';
+import ErrorResponse from '../../../../model/class/error';
+import { CANCELED } from '../../../../model/types/types';
 
 class VentaDetalle extends React.Component {
     constructor(props) {
@@ -38,17 +41,15 @@ class VentaDetalle extends React.Component {
         this.abortControllerView = new AbortController();
     }
 
-    setStateAsync(state) {
-        return new Promise((resolve) => {
-            this.setState(state, resolve)
-        });
-    }
+    /**
+  * Método de cliclo de vida
+  */
 
     async componentDidMount() {
         const url = this.props.location.search;
         const idResult = new URLSearchParams(url).get("idVenta");
         if (idResult !== null) {
-            this.loadDataId(idResult);
+            this.loadingData(idResult);
         } else {
             this.props.history.goBack();
         }
@@ -58,47 +59,103 @@ class VentaDetalle extends React.Component {
         this.abortControllerView.abort();
     }
 
-    async loadDataId(id) {
-        try {
-            const responseFactura = await apiFacturaId(this.abortControllerView.signal, {
-                "idVenta": id
-            });
+    /**
+    * 
+    * Métodos de acción
+    */
 
-            const responseCobros = await apiVentaCobro(this.abortControllerView.signal, {
-                "idVenta": id
-            });
 
-            let cabecera = responseFactura.data.cabecera;
+    async loadingData(id) {
+        const [factura, cobros] = await Promise.all([
+            await this.fetchFacturaId(id),
+            await this.fetchCobroVentaId(id)
+        ]);
+
+        if (!factura || !cobros) {
+            this.props.history.goBack();
+        } else {
+            const {
+                comprobante,
+                serie,
+                numeracion,
+                documento,
+                informacion,
+                fecha,
+                hora,
+                tipo,
+                estado,
+                simbolo,
+                codiso,
+                usuario,
+                monto
+            } = factura.cabecera;       
 
             await this.setStateAsync({
                 idVenta: id,
-                comprobante: cabecera.comprobante + "  " + cabecera.serie + "-" + cabecera.numeracion,
-                cliente: cabecera.documento + " - " + cabecera.informacion,
-                fecha: cabecera.fecha + " " + timeForma24(cabecera.hora),
+                comprobante: comprobante + "  " + serie + "-" + numeracion,
+                cliente: documento + " - " + informacion,
+                fecha: fecha + " " + timeForma24(hora),
                 notas: '',
-                formaVenta: cabecera.tipo === 1 ? "Contado" : "Crédito",
-                estado: cabecera.estado,
-                simbolo: cabecera.simbolo,
-                codiso: cabecera.codiso,
-                usuario: cabecera.usuario,
-                total: formatMoney(cabecera.monto),
-                detalle: responseFactura.data.detalle,
+                formaVenta: tipo === 1 ? "Contado" : "Crédito",
+                estado: estado,
+                simbolo: simbolo,
+                codiso: codiso,
+                usuario: usuario,
+                total: formatMoney(monto),
+                detalle: factura.detalle,
 
-                cobros: responseCobros.data,
+                cobros: cobros,
 
                 loading: false
             });
-
-        } catch (error) {
-            if (error.message !== "canceled") {
-                this.props.history.goBack();
-            }
         }
     }
 
+    async fetchFacturaId(id) {
+        const params = {
+            "idVenta": id
+        }
+
+        const response = await getFacturaId(params, this.abortControllerView.signal);
+
+        if (response instanceof SuccessReponse) {
+            return response.data;
+        }
+
+        if (response instanceof ErrorResponse) {
+            if (response.getType() === CANCELED) return;
+
+            return false;
+        }
+    }
+
+    async fetchCobroVentaId(id) {
+        const params = {
+            "idVenta": id
+        }
+
+        const response = await getCobroVentaId(params, this.abortControllerView.signal);
+
+        if (response instanceof SuccessReponse) {
+            return response.data;
+        }
+
+        if (response instanceof ErrorResponse) {
+            if (response.getType() === CANCELED) return;
+
+            return false;
+        }
+    }
+
+    setStateAsync(state) {
+        return new Promise((resolve) => {
+            this.setState(state, resolve)
+        });
+    }
+
+
     renderTotal() {
         let subTotal = 0;
-        let impuestoTotal = 0;
         let total = 0;
 
         for (let item of this.state.detalle) {
@@ -113,24 +170,55 @@ class VentaDetalle extends React.Component {
             let valorNeto = valorSubNeto + valorImpuesto;
 
             subTotal += valorSubNeto;
-            impuestoTotal += valorImpuesto;
             total += valorNeto;
+        }
+
+        const impuestosGenerado = () => {
+            const resultado = this.state.detalle.reduce((acc, item) => {               
+                const total = item.cantidad * item.precio;
+                const subTotal = calculateTaxBruto(item.porcentaje, total);
+                const impuestoTotal = calculateTax(item.porcentaje, subTotal);
+
+                const existingImpuesto = acc.find(imp => imp.idImpuesto === item.idImpuesto);
+
+                if (existingImpuesto) {
+                    existingImpuesto.valor += impuestoTotal;
+                } else {
+                    acc.push({
+                        idImpuesto: item.idImpuesto,
+                        nombre: item.impuesto,
+                        valor: impuestoTotal,
+                    });
+                }
+
+
+                return acc;
+            }, []);
+
+            return (
+                resultado.map((impuesto, index) => {
+
+                    return (
+                        <tr key={index}>
+                            <th className="text-right">{impuesto.nombre} :</th>
+                            <th className="text-right">{numberFormat(impuesto.valor, this.state.codiso)}</th>
+                        </tr>
+                    );
+                })
+            );
         }
 
         return (
             <>
                 <tr>
-                    <th className="text-right">Sub Total:</th>
+                    <th className="text-right">SUB TOTAL :</th>
                     <th className="text-right">{numberFormat(subTotal, this.state.codiso)}</th>
                 </tr>
-                <tr>
-                    <th className="text-right">Impuesto:</th>
-                    <th className="text-right">{numberFormat(impuestoTotal, this.state.codiso)}</th>
-                </tr>
+                {impuestosGenerado()}
                 <tr className="border-bottom">
                 </tr>
                 <tr>
-                    <th className="text-right h5">Total:</th>
+                    <th className="text-right h5">TOTAL :</th>
                     <th className="text-right h5">{numberFormat(total, this.state.codiso)}</th>
                 </tr>
             </>

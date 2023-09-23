@@ -7,10 +7,10 @@ import {
     hideModal,
     viewModal,
     clearModal,
-    ModalAlertDialog,
-    ModalAlertInfo,
-    ModalAlertSuccess,
-    ModalAlertWarning,
+    alertDialog,
+    alertInfo,
+    alertSuccess,
+    alertWarning,
     spinnerLoading,
     statePrivilegio,
     keyUpSearch
@@ -365,7 +365,7 @@ class Lotes extends React.Component {
         }
 
         try {
-            ModalAlertInfo("Lote", "Procesando información...");
+            alertInfo("Lote", "Procesando información...");
             hideModal("modalLote");
             if (this.state.idLote !== '') {
                 let result = await axios.put("/api/lote", {
@@ -391,7 +391,7 @@ class Lotes extends React.Component {
                     "idUsuario": this.state.idUsuario
                 });
 
-                ModalAlertSuccess("Lote", result.data, () => {
+                alertSuccess("Lote", result.data, () => {
                     this.onEventPaginacion();
                 });
             } else {
@@ -417,12 +417,12 @@ class Lotes extends React.Component {
                     "idUsuario": this.state.idUsuario
                 });
 
-                ModalAlertSuccess("Lote", result.data, () => {
+                alertSuccess("Lote", result.data, () => {
                     this.loadInit();
                 });
             }
         } catch (error) {
-            ModalAlertWarning("Lote", "Se produjo un error un interno, intente nuevamente.");
+            alertWarning("Lote", "Se produjo un error un interno, intente nuevamente.");
         }
     }
 
@@ -447,23 +447,23 @@ class Lotes extends React.Component {
     }
 
     onEventDelete(idLote) {
-        ModalAlertDialog("Lote", "¿Estás seguro de eliminar el lote?", async (event) => {
+        alertDialog("Lote", "¿Estás seguro de eliminar el lote?", async (event) => {
             if (event) {
                 try {
-                    ModalAlertInfo("Lote", "Procesando información...")
+                    alertInfo("Lote", "Procesando información...")
                     let result = await axios.delete('/api/lote', {
                         params: {
                             "idLote": idLote
                         }
                     })
-                    ModalAlertSuccess("Lote", result.data, () => {
+                    alertSuccess("Lote", result.data, () => {
                         this.loadInit();
                     })
                 } catch (error) {
                     if (error.response !== undefined) {
-                        ModalAlertWarning("Lote", error.response.data)
+                        alertWarning("Lote", error.response.data)
                     } else {
-                        ModalAlertWarning("Lote", "Se genero un error interno, intente nuevamente.")
+                        alertWarning("Lote", "Se genero un error interno, intente nuevamente.")
                     }
                 }
             }

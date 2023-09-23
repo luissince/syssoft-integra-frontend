@@ -13,16 +13,19 @@ import {
     hideModal,
     viewModal,
     clearModal,
-    ModalAlertInfo,
-    ModalAlertSuccess,
-    ModalAlertWarning,
-    ModalAlertError,
-    ModalAlertDialog
+    alertInfo,
+    alertSuccess,
+    alertWarning,
+    alertError,
+    alertDialog
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import { apiComprobanteListcombo, apiFacturaCreditoDetalle, apiVentaCobro } from '../../../../network/api';
 import SearchBarLote from "../../../../components/SearchBarLote";
 import ContainerWrapper from '../../../../components/Container';
+import { listarLotesFilter } from '../../../../network/rest/principal.network';
+import SuccessReponse from '../../../../model/class/response';
+import ErrorResponse from '../../../../model/class/error';
 
 class CreditoProceso extends React.Component {
     constructor(props) {
@@ -550,10 +553,10 @@ class CreditoProceso extends React.Component {
             return;
         }
 
-        ModalAlertDialog("Cobro", "¿Estás seguro de continuar?", async (event) => {
+        alertDialog("Cobro", "¿Estás seguro de continuar?", async (event) => {
             if (event) {
                 try {
-                    ModalAlertInfo("Cobro", "Procesando información...")
+                    alertInfo("Cobro", "Procesando información...")
                     hideModal("modalCuota");
 
                     const result = await axios.post("/api/cobro/cuota", {
@@ -572,11 +575,11 @@ class CreditoProceso extends React.Component {
                         "idMedida": this.state.idMedidaCuota
                     })
 
-                    ModalAlertSuccess("Cobro", result.data, () => {
+                    alertSuccess("Cobro", result.data, () => {
                         this.loadInit();
                     });
                 } catch (error) {
-                    ModalAlertWarning("Cobro", "Se produjo un error un interno, intente nuevamente.");
+                    alertWarning("Cobro", "Se produjo un error un interno, intente nuevamente.");
                 }
             }
         });
@@ -627,10 +630,10 @@ class CreditoProceso extends React.Component {
         }
 
 
-        ModalAlertDialog("Cobro", "¿Estás seguro de continuar?", async (event) => {
+        alertDialog("Cobro", "¿Estás seguro de continuar?", async (event) => {
             if (event) {
                 try {
-                    ModalAlertInfo("Cobro", "Procesando información...")
+                    alertInfo("Cobro", "Procesando información...")
                     hideModal("modalPlazo");
                     let result = await axios.post("/api/cobro/plazo", {
                         "idComprobante": this.state.idComprobantePlazo,
@@ -649,11 +652,11 @@ class CreditoProceso extends React.Component {
                         "idMedida": this.state.idMedidaPlazo
                     })
 
-                    ModalAlertSuccess("Cobro", result.data, () => {
+                    alertSuccess("Cobro", result.data, () => {
                         this.loadInit();
                     });
                 } catch (error) {
-                    ModalAlertWarning("Cobro", "Se produjo un error un interno, intente nuevamente.")
+                    alertWarning("Cobro", "Se produjo un error un interno, intente nuevamente.")
                 }
             }
         });
@@ -709,10 +712,10 @@ class CreditoProceso extends React.Component {
         }
 
 
-        ModalAlertDialog("Cobro", "¿Estás seguro de continuar?", async (event) => {
+        alertDialog("Cobro", "¿Estás seguro de continuar?", async (event) => {
             if (event) {
                 try {
-                    ModalAlertInfo("Cobro", "Procesando información...")
+                    alertInfo("Cobro", "Procesando información...")
                     hideModal("modalAdelanto");
 
                     let result = await axios.post("/api/cobro/adelanto", {
@@ -732,14 +735,14 @@ class CreditoProceso extends React.Component {
                         "idMedida": this.state.idMedidaAdelanto
                     })
 
-                    ModalAlertSuccess("Cobro", result.data, () => {
+                    alertSuccess("Cobro", result.data, () => {
                         this.loadInit();
                     });
                 } catch (error) {
                     if (error.response) {
-                        ModalAlertWarning("Cobro", error.response.data);
+                        alertWarning("Cobro", error.response.data);
                     } else {
-                        ModalAlertError("Cobro", "Se produjo un error un interno, intente nuevamente.");
+                        alertError("Cobro", "Se produjo un error un interno, intente nuevamente.");
                     }
                 }
             }
@@ -846,16 +849,18 @@ class CreditoProceso extends React.Component {
 
         if (this.state.filterLote) return;
 
-        try {
-            await this.setStateAsync({ filterLote: true });
-            let result = await axios.get("/api/lote/listfilter", {
-                params: {
-                    idProyecto: this.state.idProyecto,
-                    filtrar: searchWord,
-                },
-            });
-            await this.setStateAsync({ filterLote: false, lotes: result.data });
-        } catch (error) {
+        const params = {
+            idProyecto: this.state.idProyecto,
+            filtrar: searchWord,
+        }
+
+        const response = await listarLotesFilter(params);
+
+        if(response instanceof SuccessReponse){
+            await this.setStateAsync({ filterLote: false, lotes: response.data });
+        }
+
+        if(response instanceof ErrorResponse){
             await this.setStateAsync({ filterLote: false, lotes: [] });
         }
     }
@@ -876,10 +881,10 @@ class CreditoProceso extends React.Component {
             return;
         }
 
-        ModalAlertDialog("Cobro", "¿Estás seguro de continuar?", async (event) => {
+        alertDialog("Cobro", "¿Estás seguro de continuar?", async (event) => {
             if (event) {
                 try {
-                    ModalAlertInfo("Cobro", "Procesando cambio...")
+                    alertInfo("Cobro", "Procesando cambio...")
                     hideModal("modalCambiarLote");
 
                     const result = await axios.put("/api/lote/cambiar", {
@@ -887,12 +892,12 @@ class CreditoProceso extends React.Component {
                         "idLoteOrigen": this.state.idLoteSeleccionado
                     });
 
-                    ModalAlertSuccess("Cobro", result.data, () => {
+                    alertSuccess("Cobro", result.data, () => {
                         this.loadInit();
                     });
                 } catch (error) {
                     console.log(error.response);
-                    ModalAlertWarning("Cobro", "Se produjo un error un interno, intente nuevamente.");
+                    alertWarning("Cobro", "Se produjo un error un interno, intente nuevamente.");
                 }
             }
         });
@@ -959,11 +964,11 @@ class CreditoProceso extends React.Component {
             return;
         }
 
-        ModalAlertDialog("Cobro", "¿Estás seguro de continuar?", async (event) => {
+        alertDialog("Cobro", "¿Estás seguro de continuar?", async (event) => {
             if (event) {
 
                 try {
-                    ModalAlertInfo("Cobro", "Procesando información...")
+                    alertInfo("Cobro", "Procesando información...")
                     hideModal("modalCobro");
 
                     const result = await axios.post('/api/cobro/add', {
@@ -991,14 +996,14 @@ class CreditoProceso extends React.Component {
                         }]
                     });
 
-                    ModalAlertSuccess("Cobro", result.data, () => {
+                    alertSuccess("Cobro", result.data, () => {
                         this.loadInit();
                     });
                 } catch (error) {
                     if (error.response) {
-                        ModalAlertWarning("Cobro", error.response.data);
+                        alertWarning("Cobro", error.response.data);
                     } else {
-                        ModalAlertError("Cobro", "Se produjo un error un interno, intente nuevamente.");
+                        alertError("Cobro", "Se produjo un error un interno, intente nuevamente.");
                     }
                 }
             }
@@ -1069,11 +1074,11 @@ class CreditoProceso extends React.Component {
             return;
         }
 
-        ModalAlertDialog("Cobro", "¿Estás seguro de continuar?", async (event) => {
+        alertDialog("Cobro", "¿Estás seguro de continuar?", async (event) => {
             if (event) {
 
                 try {
-                    ModalAlertInfo("Cobro", "Procesando información...")
+                    alertInfo("Cobro", "Procesando información...")
                     hideModal("modalIndividual");
 
                     const result = await axios.post('/api/cobro/add', {
@@ -1101,14 +1106,14 @@ class CreditoProceso extends React.Component {
                         }]
                     });
 
-                    ModalAlertSuccess("Cobro", result.data, () => {
+                    alertSuccess("Cobro", result.data, () => {
                         this.loadInit();
                     });
                 } catch (error) {
                     if (error.response) {
-                        ModalAlertWarning("Cobro", error.response.data);
+                        alertWarning("Cobro", error.response.data);
                     } else {
-                        ModalAlertError("Cobro", "Se produjo un error un interno, intente nuevamente.");
+                        alertError("Cobro", "Se produjo un error un interno, intente nuevamente.");
                     }
                 }
             }

@@ -294,3 +294,95 @@ export async function getNotifications() {
     instance.get("/api/cobro/notificaciones")
   );
 }
+
+export async function listarLotesFilter(params) {
+  return await Resolve.create(
+    instance.get("/api/lote/listfilter", {
+      params: params,
+    })
+  );
+}
+
+export async function listarClientesFilter(params) {
+  return await Resolve.create(
+    instance.get("/api/cliente/listfiltrar", {
+      params: params,
+    })
+  );
+}
+
+export async function createFactura(data) {
+  return await Resolve.create(
+    instance.post('/api/factura/add', data),
+  );
+}
+
+export async function listMonedaCombo(signal) {
+  return await Resolve.create(
+    instance.get("/api/moneda/listcombo", {
+      signal: signal
+    })
+  );
+}
+
+export async function listImpuestCombo(signal) {
+  return await Resolve.create(
+    instance.get("/api/impuesto/listcombo", {
+      signal: signal,
+    })
+  );
+}
+
+export async function listBancoCombo(signal) {
+  return await Resolve.create(
+    instance.get("/api/banco/listcombo", {
+      signal: signal,
+    })
+  );
+}
+
+export async function listComprobanteCombo(params, signal) {
+  return await Resolve.create(
+    instance.get("/api/comprobante/listcombo", {
+      signal: signal,
+      params: params
+    })
+  );
+}
+
+export async function getFacturaId(params, signal) {
+  return await Resolve.create(
+    instance.get("/api/factura/id", {
+      signal: signal,
+      params: params
+    })
+  );
+}
+
+
+export async function getCobroVentaId(params, signal) {
+  return await Resolve.create(
+    instance.get("/api/factura/venta/cobro", {
+      signal: signal,
+      params: params
+    })
+  );
+}
+
+export async function listConceptos(params, signal) {
+  return await Resolve.create(
+    instance.get('/api/concepto/list', {
+      signal: signal,
+      params: params
+    })
+  );
+}
+
+export async function getCobroId(params, signal) {
+  return await Resolve.create(
+    instance.get('/api/cobro/id', {
+      signal: signal,
+      params: params
+    })
+  );
+}

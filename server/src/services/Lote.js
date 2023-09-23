@@ -776,26 +776,14 @@ class Lote {
 
     async listarFilter(req) {
         try {
-            let result = await conec.query(`SELECT 
-            l.idLote, 
-            l.descripcion AS nombreLote, 
-            l.precio,
-            m.nombre AS nombreManzana 
-            FROM lote AS l INNER JOIN manzana AS m 
-            ON l.idManzana = m.idManzana
-            WHERE 
-            m.idProyecto = ? AND l.estado = 1 AND l.descripcion LIKE CONCAT(?,'%')
-            OR
-            m.idProyecto = ? AND l.estado = 1 AND m.nombre LIKE CONCAT(?,'%')`, [
+            const result = await conec.procedure("CALL Filtrar_Lotes_Para_Venta(?,?)",[
                 req.query.idProyecto,
                 req.query.filtrar,
-
-                req.query.idProyecto,
-                req.query.filtrar,
-            ]);
+            ])
             return result
 
         } catch (error) {
+            console.log(error)
             return "Se produjo un error de servidor, intente nuevamente.";
         }
     }

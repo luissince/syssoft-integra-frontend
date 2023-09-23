@@ -1,38 +1,34 @@
 import React from 'react';
 import axios from 'axios';
 import {
-    numberFormat,
-    timeForma24,
     spinnerLoading,
-    ModalAlertDialog,
-    ModalAlertInfo,
-    ModalAlertSuccess,
-    ModalAlertWarning,
-    ModalAlertError,
+    formatMoney,
+    timeForma24,
+    alertDialog,
+    alertInfo,
+    alertSuccess,
+    alertWarning,
+    alertError,
     statePrivilegio,
     keyUpSearch
-} from '../../../helper/utils.helper';
-import { Link } from 'react-router-dom';
+} from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
-import Paginacion from '../../../components/Paginacion';
-import ContainerWrapper from '../../../components/Container';
+import Paginacion from '../../../../components/Paginacion';
+import ContainerWrapper from '../../../../components/Container';
 
-class Cobros extends React.Component {
+class Gastos extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            idCobro: '',
-
-            idProyecto: this.props.token.project.idProyecto,
-            idUsuario: this.props.token.userToken.idUsuario,
-
-            add: statePrivilegio(this.props.token.userToken.menus[2].submenu[3].privilegio[0].estado),
-            view: statePrivilegio(this.props.token.userToken.menus[2].submenu[3].privilegio[1].estado),
-            remove: statePrivilegio(this.props.token.userToken.menus[2].submenu[3].privilegio[2].estado),
-
             loading: false,
             lista: [],
             restart: false,
+
+            idProyecto: this.props.token.project.idProyecto,
+
+            add: statePrivilegio(this.props.token.userToken.menus[4].submenu[1].privilegio[0].estado),
+            view: statePrivilegio(this.props.token.userToken.menus[4].submenu[1].privilegio[1].estado),
+            remove: statePrivilegio(this.props.token.userToken.menus[4].submenu[1].privilegio[2].estado),
 
             opcion: 0,
             paginacion: 0,
@@ -100,7 +96,7 @@ class Cobros extends React.Component {
         try {
             await this.setStateAsync({ loading: true, lista: [], messageTable: "Cargando información...", messagePaginacion: "Mostranto 0 de 0 Páginas" });
 
-            const result = await axios.get('/api/cobro/list', {
+            const result = await axios.get('/api/gasto/list', {
                 signal: this.abortControllerTable.signal,
                 params: {
                     "opcion": opcion,
@@ -121,6 +117,7 @@ class Cobros extends React.Component {
                 messagePaginacion: messagePaginacion
             });
         } catch (error) {
+            console.log(error.response)
             if (error.message !== "canceled") {
                 await this.setStateAsync({
                     loading: false,
@@ -133,31 +130,30 @@ class Cobros extends React.Component {
         }
     }
 
-    onEventNuevoCobro() {
+    onEventNuevoGasto() {
         this.props.history.push({
             pathname: `${this.props.location.pathname}/proceso`,
         })
     }
 
-    onEventAnularCobro(idCobro) {
-        ModalAlertDialog("Cobro", "¿Está seguro de que desea eliminar la transacción? Esta operación no se puede deshacer.", async (value) => {
+    onEventAnularGasto(idGasto) {
+        alertDialog("Gasto", "¿Está seguro de que desea eliminar la transacción? Esta operación no se puede deshacer.", async (value) => {
             if (value) {
                 try {
-                    ModalAlertInfo("Cobro", "Procesando información...");
-                    let result = await axios.delete('/api/cobro/anular', {
+                    alertInfo("Gasto", "Procesando información...");
+                    let result = await axios.delete('/api/gasto/anular', {
                         params: {
-                            "idCobro": idCobro,
-                            "idUsuario": this.state.idUsuario
+                            "idGasto": idGasto,
                         }
                     })
-                    ModalAlertSuccess("Cobro", result.data, () => {
-                        this.loadInit();
+                    alertSuccess("Gasto", result.data, () => {
+                        this.fillTable(0, 1, "");
                     })
                 } catch (error) {
-                    if (error.response) {
-                        ModalAlertWarning("Cobro", error.response.data)
+                    if (error.response !== undefined) {
+                        alertWarning("Gasto", error.response.data)
                     } else {
-                        ModalAlertError("Cobro", "Se genero un error interno, intente nuevamente.")
+                        alertError("Gasto", "Se genero un error interno, intente nuevamente.")
                     }
                 }
             }
@@ -170,7 +166,7 @@ class Cobros extends React.Component {
                 <div className='row'>
                     <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
                         <div className="form-group">
-                            <h5>Cobros o Ingresos <small className="text-secondary">LISTA</small></h5>
+                            <h5>Gastos o Salidas <small className="text-secondary">LISTA</small></h5>
                         </div>
                     </div>
                 </div>
@@ -194,7 +190,7 @@ class Cobros extends React.Component {
                     </div>
                     <div className="col-md-6 col-sm-12">
                         <div className="form-group">
-                            <button className="btn btn-outline-info" onClick={() => this.onEventNuevoCobro()} disabled={!this.state.add}>
+                            <button className="btn btn-outline-info" onClick={() => this.onEventNuevoGasto()} disabled={!this.state.add}>
                                 <i className="bi bi-file-plus"></i> Nuevo Registro
                             </button>
                             {" "}
@@ -217,7 +213,6 @@ class Cobros extends React.Component {
                                         <th width="10%">Creación</th>
                                         <th width="10%">Cuenta</th>
                                         <th width="15%">Observación</th>
-                                        <th width="10%">Estado</th>
                                         <th width="10%">Monto</th>
                                         <th width="5%" className="text-center">Detalle</th>
                                         <th width="5%" className="text-center">Eliminar</th>
@@ -227,13 +222,13 @@ class Cobros extends React.Component {
                                     {
                                         this.state.loading ? (
                                             <tr>
-                                                <td className="text-center" colSpan="10">
+                                                <td className="text-center" colSpan="9">
                                                     {spinnerLoading()}
                                                 </td>
                                             </tr>
                                         ) : this.state.lista.length === 0 ? (
                                             <tr className="text-center">
-                                                <td colSpan="10">¡No hay datos registrados!</td>
+                                                <td colSpan="9">¡No hay datos registrados!</td>
                                             </tr>
                                         ) : (
                                             this.state.lista.map((item, index) => {
@@ -244,42 +239,14 @@ class Cobros extends React.Component {
                                                         <td>{item.comprobante}{<br />}{item.serie + "-" + item.numeracion}</td>
                                                         <td>{item.fecha}{<br />}{timeForma24(item.hora)}</td>
                                                         <td>{item.banco}</td>
-                                                        <td>{item.detalle}
-                                                            <br />
-                                                            <small>
-                                                                {
-                                                                    item.comprobanteRef !== "" ?
-                                                                        <Link className='btn-link' to={`/inicio/ventas/detalle?idVenta=${item.idVentaRef}`}>
-                                                                            {item.comprobanteRef} <i className='fa fa-external-link-square'></i>
-                                                                        </Link>
-                                                                        : null
-                                                                }
-                                                            </small>
-                                                            <br />
-                                                            <small>{item.loteRef}</small>
-                                                            {
-                                                                item.estadoRef === 4 ?
-                                                                    <>
-                                                                        <br />
-                                                                        <small className="text-danger">MODIFICADO</small>
-                                                                    </>
-                                                                    :
-                                                                    null
-                                                            }
-                                                        </td>
-                                                        <td>{item.estado === 1 && item.idNotaCredito === null ?
-                                                            <span className="text-success">COBRADO</span> :
-                                                            item.idNotaCredito != null ?
-                                                                <span className="text-warning">MODIFICADO</span> :
-                                                                <span className="text-danger">ANULADO</span>}
-                                                        </td>
-                                                        <td>{numberFormat(item.monto)}</td>
+                                                        <td>{item.detalle}</td>
+                                                        <td>{item.simbolo + " " + formatMoney(item.monto)}</td>
                                                         <td className="text-center">
                                                             <button
                                                                 className="btn btn-outline-info btn-sm"
                                                                 title="Detalle"
                                                                 onClick={() => {
-                                                                    this.props.history.push({ pathname: `${this.props.location.pathname}/detalle`, search: "?idCobro=" + item.idCobro })
+                                                                    this.props.history.push({ pathname: `${this.props.location.pathname}/detalle`, search: "?idGasto=" + item.idGasto })
                                                                 }}
                                                                 disabled={!this.state.view}>
                                                                 <i className="fa fa-eye"></i>
@@ -289,7 +256,7 @@ class Cobros extends React.Component {
                                                             <button
                                                                 className="btn btn-outline-danger btn-sm"
                                                                 title="Eliminar"
-                                                                onClick={() => this.onEventAnularCobro(item.idCobro)}
+                                                                onClick={() => this.onEventAnularGasto(item.idGasto)}
                                                                 disabled={!this.state.remove}>
                                                                 <i className="fa fa-remove"></i>
                                                             </button>
@@ -300,6 +267,7 @@ class Cobros extends React.Component {
                                         )
                                     }
                                 </tbody>
+
                             </table>
                         </div>
                     </div>
@@ -326,8 +294,9 @@ class Cobros extends React.Component {
                     </div>
                 </div>
             </ContainerWrapper>
-        );
+        )
     }
+
 }
 
 const mapStateToProps = (state) => {
@@ -337,4 +306,4 @@ const mapStateToProps = (state) => {
 }
 
 
-export default connect(mapStateToProps, null)(Cobros);
+export default connect(mapStateToProps, null)(Gastos);

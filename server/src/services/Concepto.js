@@ -11,6 +11,7 @@ class Concepto {
                 idConcepto,
                 nombre,
                 tipo,
+                sistema,
                 DATE_FORMAT(fecha,'%d/%m/%Y') as fecha,
                 hora 
                 FROM concepto
@@ -89,16 +90,18 @@ class Concepto {
                 nombre, 
                 tipo,
                 codigo,
+                sistema,
                 fecha, 
                 hora,
                 fupdate,
                 hupdate,
                 idUsuario) 
-                VALUES(?,?,?,?,?,?,?,?,?)`, [
+                VALUES(?,?,?,?,?,?,?,?,?,?)`, [
                 idConcepto,
                 req.body.nombre,
                 req.body.tipo,
                 req.body.codigo,
+                0,
                 currentDate(),
                 currentTime(),
                 currentDate(),

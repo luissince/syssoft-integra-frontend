@@ -3,17 +3,17 @@ import axios from 'axios';
 import { connect } from 'react-redux';
 import {
     spinnerLoading,
-    ModalAlertInfo,
-    ModalAlertSuccess,
-    ModalAlertWarning,
-    ModalAlertDialog,
+    alertInfo,
+    alertSuccess,
+    alertWarning,
+    alertDialog,
     statePrivilegio,
     currentDate,
     validateDate,
     keyUpSearch
-} from '../../../helper/utils.helper';
-import Paginacion from '../../../components/Paginacion';
-import ContainerWrapper from '../../../components/Container';
+} from '../../../../helper/utils.helper';
+import Paginacion from '../../../../components/Paginacion';
+import ContainerWrapper from '../../../../components/Container';
 
 class Socios extends React.Component {
     constructor(props) {
@@ -173,23 +173,23 @@ class Socios extends React.Component {
     }
 
     onEventDelete(idCliente) {
-        ModalAlertDialog("Eliminar cliente", "¿Está seguro de que desea eliminar el contacto? Esta operación no se puede deshacer.", async (value) => {
+        alertDialog("Eliminar cliente", "¿Está seguro de que desea eliminar el contacto? Esta operación no se puede deshacer.", async (value) => {
             if (value) {
                 try {
-                    ModalAlertInfo("Cliente", "Procesando información...")
+                    alertInfo("Cliente", "Procesando información...")
                     let result = await axios.delete('/api/cliente', {
                         params: {
                             "idCliente": idCliente
                         }
                     })
-                    ModalAlertSuccess("Cliente", result.data, () => {
+                    alertSuccess("Cliente", result.data, () => {
                         this.loadInit();
                     })
                 } catch (error) {
                     if (error.response !== undefined) {
-                        ModalAlertWarning("Cliente", error.response.data)
+                        alertWarning("Cliente", error.response.data)
                     } else {
-                        ModalAlertWarning("Cliente", "Se genero un error interno, intente nuevamente.")
+                        alertWarning("Cliente", "Se genero un error interno, intente nuevamente.")
                     }
                 }
             }

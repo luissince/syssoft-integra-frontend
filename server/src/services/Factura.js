@@ -132,13 +132,325 @@ class Factura {
         }
     }
 
+    async add(req, res) {
+        let connection = null;
+        try {
+            connection = await conec.beginTransaction();
+
+            const {
+                idComprobante,
+                idCliente,
+                idUsuario,
+                idProyecto,
+                idMoneda,
+                tipo,
+                selectTipoPago,
+                numCuota,
+                estado,
+                frecuenciaPago,
+
+                idComprobanteContado,
+                idBancoContado,
+                metodoPagoContado,
+
+                detalleVenta
+
+            } = req.body;
+            // console.log(req.body)
+
+            /**
+             * Generar un código unico para la venta. 
+             */
+            const result = await conec.execute(connection, 'SELECT idVenta  FROM venta');
+            let idVenta = "";
+            if (result.length != 0) {
+                const quitarValor = result.map(function (item) {
+                    return parseInt(item.idVenta.replace("VT", ''));
+                });
+
+                const valorActual = Math.max(...quitarValor);
+                const incremental = valorActual + 1;
+                let codigoGenerado = "";
+                if (incremental <= 9) {
+                    codigoGenerado = 'VT000' + incremental;
+                } else if (incremental >= 10 && incremental <= 99) {
+                    codigoGenerado = 'VT00' + incremental;
+                } else if (incremental >= 100 && incremental <= 999) {
+                    codigoGenerado = 'VT0' + incremental;
+                } else {
+                    codigoGenerado = 'VT' + incremental;
+                }
+
+                idVenta = codigoGenerado;
+            } else {
+                idVenta = "VT0001";
+            }
+
+            /**
+             * Obtener la serie y numeración del comprobante.
+             */
+            const comprobante = await conec.execute(connection, `SELECT 
+                serie,
+                numeracion 
+                FROM comprobante 
+                WHERE idComprobante  = ?
+                `, [
+                idComprobante
+            ]);
+
+            let numeracion = 0;
+
+            const ventas = await conec.execute(connection, 'SELECT numeracion  FROM venta WHERE idComprobante = ?', [
+                idComprobante
+            ]);
+
+            if (ventas.length > 0) {
+                const quitarValor = ventas.map(function (item) {
+                    return parseInt(item.numeracion);
+                });
+                numeracion = Math.max(...quitarValor) + 1;
+            } else {
+                numeracion = comprobante[0].numeracion;
+            }
+
+            // /**
+            //  * Proceso para ingresar una venta.
+            //  */
+            await conec.execute(connection, `INSERT INTO venta(
+                idVenta, 
+                idCliente, 
+                idUsuario, 
+                idComprobante, 
+                idProyecto,
+                serie,
+                numeracion,
+                idMoneda,
+                tipo, 
+                numCuota,
+                credito,
+                frecuencia,
+                estado, 
+                fecha, 
+                hora)
+                VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                `, [
+                idVenta,
+                idCliente,
+                idUsuario,
+                idComprobante,
+                idProyecto,
+                comprobante[0].serie,
+                numeracion,
+                idMoneda,
+                tipo,
+                numCuota,
+                selectTipoPago == 3 ? 1 : 0,
+                frecuenciaPago,
+                estado,
+                currentDate(),
+                currentTime()
+            ]);
+
+            /**
+             * Proceso para ingresar el detalle de la venta.
+             */
+            let montoTotal = 0;
+
+            for (const item of detalleVenta) {
+                await conec.execute(connection, `INSERT INTO ventaDetalle(
+                    idVenta, 
+                    idLote, 
+                    precio, 
+                    cantidad, 
+                    idImpuesto,
+                    idMedida)
+                    VALUES(?,?,?,?,?,?)`, [
+                    idVenta,
+                    item.idDetalle,
+                    parseFloat(item.precio),
+                    item.cantidad,
+                    item.idImpuesto,
+                    item.idMedida
+                ]);
+
+                montoTotal += parseFloat(item.precio) * item.cantidad;
+            }
+
+            /**
+             * Proceso para registra el cobro
+             */
+            if (req.body.selectTipoPago === 1) {
+                const cobro = await conec.execute(connection, 'SELECT idCobro FROM cobro');
+                let idCobro = "";
+                if (cobro.length != 0) {
+                    const quitarValor = cobro.map(function (item) {
+                        return parseInt(item.idCobro.replace("CB", ''));
+                    });
+
+                    const valorActual = Math.max(...quitarValor);
+                    const incremental = valorActual + 1;
+                    let codigoGenerado = "";
+                    if (incremental <= 9) {
+                        codigoGenerado = 'CB000' + incremental;
+                    } else if (incremental >= 10 && incremental <= 99) {
+                        codigoGenerado = 'CB00' + incremental;
+                    } else if (incremental >= 100 && incremental <= 999) {
+                        codigoGenerado = 'CB0' + incremental;
+                    } else {
+                        codigoGenerado = 'CB' + incremental;
+                    }
+
+                    idCobro = codigoGenerado;
+                } else {
+                    idCobro = "CB0001";
+                }
+
+                const comprobanteCobro = await conec.execute(connection, `SELECT 
+                    serie,
+                    numeracion 
+                    FROM comprobante 
+                    WHERE idComprobante  = ?
+                `, [
+                    idComprobanteContado
+                ]);
+
+                let numeracionCobro = 0;
+
+                const cobros = await conec.execute(connection, 'SELECT numeracion  FROM cobro WHERE idComprobante = ?', [
+                    idComprobanteContado
+                ]);
+
+                if (cobros.length > 0) {
+                    const quitarValor = cobros.map(function (item) {
+                        return parseInt(item.numeracion);
+                    });
+
+                    numeracionCobro = Math.max(...quitarValor) + 1;;
+                } else {
+                    numeracionCobro = comprobanteCobro[0].numeracion;
+                }
+
+                await conec.execute(connection, `INSERT INTO cobro(
+                    idCobro, 
+                    idCliente, 
+                    idUsuario, 
+                    idMoneda, 
+                    idBanco, 
+                    idProcedencia,
+                    idProyecto,
+                    idComprobante,
+                    serie,
+                    numeracion,
+                    metodoPago, 
+                    estado, 
+                    observacion, 
+                    fecha, 
+                    hora) 
+                    VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, [
+                    idCobro,
+                    idCliente,
+                    idUsuario,
+                    idMoneda,
+                    idBancoContado,
+                    idVenta,
+                    idProyecto,
+                    idComprobanteContado,
+                    comprobanteCobro[0].serie,
+                    numeracionCobro,
+                    metodoPagoContado,
+                    1,
+                    'COBRO AL CONTADO',
+                    currentDate(),
+                    currentTime()
+                ]);
+
+                await conec.execute(connection, `INSERT INTO cobroVenta(
+                    idCobro,
+                    idConcepto,
+                    idPlazo,
+                    precio,
+                    idImpuesto,
+                    idMedida) 
+                    VALUES (?,?,?,?,?,?)`, [
+                    idCobro,
+                    'CP0001',
+                    0,
+                    montoTotal,
+                    '',
+                    ''
+                ]);
+
+                await conec.execute(connection, `INSERT INTO bancoDetalle(
+                    idBanco,
+                    idProcedencia,
+                    tipo,
+                    monto,
+                    fecha,
+                    hora,
+                    idUsuario)
+                    VALUES(?,?,?,?,?,?,?)`, [
+                    idBancoContado,
+                    idCobro,
+                    1,
+                    montoTotal,
+                    currentDate(),
+                    currentTime(),
+                    idUsuario,
+                ]);
+            }
+
+            /**
+             * Proceso de registrar datos en la tabla auditoria para tener un control de los movimientos echos.
+             */
+
+            // Generar el Id único
+            const resultAuditoria = await conec.execute(connection, 'SELECT idAuditoria FROM auditoria');
+            let idAuditoria = 0;
+            if (resultAuditoria.length != 0) {
+                const quitarValor = resultAuditoria.map(function (item) {
+                    return parseInt(item.idAuditoria);
+                });
+
+                idAuditoria = Math.max(...quitarValor) + 1;
+            } else {
+                idAuditoria = 1;
+            }
+
+            // Proceso de registro            
+            await conec.execute(connection, `INSERT INTO auditoria(
+                idAuditoria,
+                idProcedencia,
+                descripcion,
+                fecha,
+                hora,
+                idUsuario) 
+                VALUES(?,?,?,?,?,?)`, [
+                idAuditoria,
+                idVenta,
+                `REGISTRO DEL COMPROBANTE ${comprobante[0].serie}-${numeracion}`,
+                currentDate(),
+                currentTime(),
+                idUsuario
+            ]);
+
+
+            await conec.commit(connection);
+            return sendSave(res, "Se completo el proceso correctamente.");
+        } catch (error) {
+            if (connection != null) {
+                await conec.rollback(connection);
+            }
+            return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
+        }
+    }
+
     /**
      * 
      * @param {*} req 
      * @param {*} res 
      * @returns 
      */
-    async add(req, res) {
+    async _add(req, res) {
         let connection = null;
         try {
             connection = await conec.beginTransaction();

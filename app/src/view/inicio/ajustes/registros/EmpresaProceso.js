@@ -2,10 +2,10 @@ import React from "react";
 import axios from "axios";
 import {
   convertNullText,
-  ModalAlertDialog,
-  ModalAlertInfo,
-  ModalAlertSuccess,
-  ModalAlertWarning,
+  alertDialog,
+  alertInfo,
+  alertSuccess,
+  alertWarning,
   spinnerLoading,
   keyNumberInteger,
   imageBase64,
@@ -222,9 +222,9 @@ class EmpresaProceso extends React.Component {
       this.refRazonSocial.current.focus();
       return;
     }
-    ModalAlertDialog("Empresa", "¿Está seguro de continuar?", async () => {
+    alertDialog("Empresa", "¿Está seguro de continuar?", async () => {
       try {
-        ModalAlertInfo("Empresa", "Procesando información...");
+        alertInfo("Empresa", "Procesando información...");
 
         let logoSend = await imageBase64(this.refFileLogo);
         let baseLogo = logoSend ? logoSend.base64String : "";
@@ -254,14 +254,14 @@ class EmpresaProceso extends React.Component {
           idEmpresa: this.state.idEmpresa,
         });
 
-        ModalAlertSuccess("Empresa", result.data, () => {
+        alertSuccess("Empresa", result.data, () => {
           this.props.history.goBack();
         });
       } catch (error) {
         if (error.response) {
-          ModalAlertWarning("Empresa", error.response.data);
+          alertWarning("Empresa", error.response.data);
         } else {
-          ModalAlertWarning(
+          alertWarning(
             "Empresa",
             "Se produjo un error un interno, intente nuevamente."
           );

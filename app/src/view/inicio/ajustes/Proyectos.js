@@ -2,9 +2,9 @@ import React from 'react';
 import axios from 'axios';
 import {
     spinnerLoading,
-    ModalAlertSuccess,
-    ModalAlertWarning,
-    ModalAlertDialog,
+    alertSuccess,
+    alertWarning,
+    alertDialog,
     statePrivilegio,
     keyUpSearch
 } from '../../../helper/utils.helper';
@@ -127,18 +127,18 @@ class Proyectos extends React.Component {
     }
 
     onEventDelete(idProyecto) {
-        ModalAlertDialog("Proyecto", "¿Estás seguro de eliminar el proyecto?", async (value) => {
+        alertDialog("Proyecto", "¿Estás seguro de eliminar el proyecto?", async (value) => {
             if (value) {
                 const response = await borrarProyecto(idProyecto);
 
                 if (response instanceof SuccessReponse) {
-                    ModalAlertSuccess("Proyecto", response.data, () => {
+                    alertSuccess("Proyecto", response.data, () => {
                         this.loadInit();
                     })
                 }
 
                 if (response instanceof ErrorResponse) {
-                    ModalAlertWarning("Proyecto", response.getMessage())
+                    alertWarning("Proyecto", response.getMessage())
                 }
             }
         })

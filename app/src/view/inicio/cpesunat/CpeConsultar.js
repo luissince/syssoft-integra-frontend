@@ -1,8 +1,8 @@
 import React from 'react';
 import {
-    ModalAlertDialog,
-    ModalAlertSuccess,
-    ModalAlertWarning,
+    alertDialog,
+    alertSuccess,
+    alertWarning,
     spinnerLoading
 } from '../../../helper/utils.helper';
 import { connect } from 'react-redux';
@@ -104,7 +104,7 @@ class CpeElectronicos extends React.Component {
             return;
         }
 
-        ModalAlertDialog("Consulta", "¿Está seguro de continuar?", async (value) => {
+        alertDialog("Consulta", "¿Está seguro de continuar?", async (value) => {
             if (value) {
                 const data = {
                     rucSol: this.state.ruc,
@@ -124,20 +124,20 @@ class CpeElectronicos extends React.Component {
 
                     if (result.state === true) {
                         if (result.accepted === true) {
-                            ModalAlertSuccess("Consultar Comprobante", "Resultado: Código " + result.code + " " + result.message);
+                            alertSuccess("Consultar Comprobante", "Resultado: Código " + result.code + " " + result.message);
                             // if (cdr != "") {
                             //     // $("#lblRutaDescarga").append('<a onclick="descargarCdr(\'' + result.file + '\')"" style="cursor:pointer">' + result.file + '</a>');
                             // }
                         } else {
-                            ModalAlertWarning("Consultar Comprobante", "Resultado: Código " + result.code + " " + result.message);
+                            alertWarning("Consultar Comprobante", "Resultado: Código " + result.code + " " + result.message);
                         }
                     } else {
-                        ModalAlertWarning("Consultar Comprobante", "Resultado: Código " + result.code + " " + result.message);
+                        alertWarning("Consultar Comprobante", "Resultado: Código " + result.code + " " + result.message);
                     }
                 }
 
                 if (response instanceof ErrorResponse) {
-                    ModalAlertWarning("Consultar Comprobante", response.getMessage());
+                    alertWarning("Consultar Comprobante", response.getMessage());
                 }
             }
         });
@@ -179,7 +179,7 @@ class CpeElectronicos extends React.Component {
             return;
         }
 
-        ModalAlertDialog("Consulta", "¿Está seguro de continuar?", async (value) => {
+        alertDialog("Consulta", "¿Está seguro de continuar?", async (value) => {
             if (value) {
                 const data = {
                     rucSol: this.state.ruc,
@@ -199,20 +199,20 @@ class CpeElectronicos extends React.Component {
 
                     if (result.state === true) {
                         if (result.accepted === true) {
-                            ModalAlertSuccess("Consultar Comprobante", "Resultado: Código " + result.code + " " + result.message);
+                            alertSuccess("Consultar Comprobante", "Resultado: Código " + result.code + " " + result.message);
                             // if (cdr != "") {
                             //     // $("#lblRutaDescarga").append('<a onclick="descargarCdr(\'' + result.file + '\')"" style="cursor:pointer">' + result.file + '</a>');
                             // }
                         } else {
-                            ModalAlertWarning("Consultar Comprobante", "Resultado: Código " + result.code + " " + result.message);
+                            alertWarning("Consultar Comprobante", "Resultado: Código " + result.code + " " + result.message);
                         }
                     } else {
-                        ModalAlertWarning("Consultar Comprobante", "Resultado: Código " + result.code + " " + result.message);
+                        alertWarning("Consultar Comprobante", "Resultado: Código " + result.code + " " + result.message);
                     }
                 }
 
                 if (response instanceof ErrorResponse) {
-                    ModalAlertWarning("Consultar Comprobante", response.getMessage());
+                    alertWarning("Consultar Comprobante", response.getMessage());
                 }
             }
         });

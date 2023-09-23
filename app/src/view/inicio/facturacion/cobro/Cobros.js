@@ -1,35 +1,38 @@
 import React from 'react';
 import axios from 'axios';
 import {
-    spinnerLoading,
     numberFormat,
     timeForma24,
-    ModalAlertInfo,
-    ModalAlertDialog,
-    ModalAlertSuccess,
-    ModalAlertWarning,
-    ModalAlertError,
+    spinnerLoading,
+    alertDialog,
+    alertInfo,
+    alertSuccess,
+    alertWarning,
+    alertError,
     statePrivilegio,
     keyUpSearch
-} from '../../../helper/utils.helper';
+} from '../../../../helper/utils.helper';
+import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
-import Paginacion from '../../../components/Paginacion';
-import ContainerWrapper from '../../../components/Container';
+import Paginacion from '../../../../components/Paginacion';
+import ContainerWrapper from '../../../../components/Container';
 
-class Ventas extends React.Component {
+class Cobros extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            loading: false,
-            lista: [],
-            restart: false,
-
-            add: statePrivilegio(this.props.token.userToken.menus[2].submenu[1].privilegio[0].estado),
-            view: statePrivilegio(this.props.token.userToken.menus[2].submenu[1].privilegio[1].estado),
-            remove: statePrivilegio(this.props.token.userToken.menus[2].submenu[1].privilegio[2].estado),
+            idCobro: '',
 
             idProyecto: this.props.token.project.idProyecto,
             idUsuario: this.props.token.userToken.idUsuario,
+
+            add: statePrivilegio(this.props.token.userToken.menus[2].submenu[3].privilegio[0].estado),
+            view: statePrivilegio(this.props.token.userToken.menus[2].submenu[3].privilegio[1].estado),
+            remove: statePrivilegio(this.props.token.userToken.menus[2].submenu[3].privilegio[2].estado),
+
+            loading: false,
+            lista: [],
+            restart: false,
 
             opcion: 0,
             paginacion: 0,
@@ -40,6 +43,7 @@ class Ventas extends React.Component {
         }
         this.refTxtSearch = React.createRef();
 
+        this.idCodigo = "";
         this.abortControllerTable = new AbortController();
     }
 
@@ -96,7 +100,7 @@ class Ventas extends React.Component {
         try {
             await this.setStateAsync({ loading: true, lista: [], messageTable: "Cargando información...", messagePaginacion: "Mostranto 0 de 0 Páginas" });
 
-            const result = await axios.get('/api/factura/list', {
+            const result = await axios.get('/api/cobro/list', {
                 signal: this.abortControllerTable.signal,
                 params: {
                     "opcion": opcion,
@@ -129,29 +133,31 @@ class Ventas extends React.Component {
         }
     }
 
-    onEventNuevaVenta = () => {
-        this.props.history.push(`${this.props.location.pathname}/proceso`);
+    onEventNuevoCobro() {
+        this.props.history.push({
+            pathname: `${this.props.location.pathname}/proceso`,
+        })
     }
 
-    onEventAnularVenta(idVenta) {
-        ModalAlertDialog("Venta", "¿Está seguro de que desea eliminar la venta? Esta operación no se puede deshacer.", async (value) => {
+    onEventAnularCobro(idCobro) {
+        alertDialog("Cobro", "¿Está seguro de que desea eliminar la transacción? Esta operación no se puede deshacer.", async (value) => {
             if (value) {
                 try {
-                    ModalAlertInfo("Venta", "Procesando información...");
-                    let result = await axios.delete('/api/factura/anular', {
+                    alertInfo("Cobro", "Procesando información...");
+                    let result = await axios.delete('/api/cobro/anular', {
                         params: {
-                            "idVenta": idVenta,
+                            "idCobro": idCobro,
                             "idUsuario": this.state.idUsuario
                         }
                     })
-                    ModalAlertSuccess("Venta", result.data, () => {
+                    alertSuccess("Cobro", result.data, () => {
                         this.loadInit();
                     })
                 } catch (error) {
-                    if (error.response !== undefined) {
-                        ModalAlertWarning("Venta", error.response.data)
+                    if (error.response) {
+                        alertWarning("Cobro", error.response.data)
                     } else {
-                        ModalAlertError("Venta", "Se genero un error interno, intente nuevamente.")
+                        alertError("Cobro", "Se genero un error interno, intente nuevamente.")
                     }
                 }
             }
@@ -164,7 +170,7 @@ class Ventas extends React.Component {
                 <div className='row'>
                     <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
                         <div className="form-group">
-                            <h5>Ventas <small className="text-secondary">LISTA</small></h5>
+                            <h5>Cobros o Ingresos <small className="text-secondary">LISTA</small></h5>
                         </div>
                     </div>
                 </div>
@@ -188,7 +194,7 @@ class Ventas extends React.Component {
                     </div>
                     <div className="col-md-6 col-sm-12">
                         <div className="form-group">
-                            <button className="btn btn-outline-info" onClick={this.onEventNuevaVenta} disabled={!this.state.add}>
+                            <button className="btn btn-outline-info" onClick={() => this.onEventNuevoCobro()} disabled={!this.state.add}>
                                 <i className="bi bi-file-plus"></i> Nuevo Registro
                             </button>
                             {" "}
@@ -207,14 +213,14 @@ class Ventas extends React.Component {
                                     <tr>
                                         <th width="5%" className="text-center">#</th>
                                         <th width="10%">Cliente</th>
-                                        <th width="10%">Comprobante</th>
-                                        <th width="10%">Fecha</th>
-                                        <th width="10%">Tipo</th>
-                                        <th width="10%">Total</th>
-                                        <th width="10%" className="text-center">Estado</th>
+                                        <th width="10%">Correlativo</th>
+                                        <th width="10%">Creación</th>
+                                        <th width="10%">Cuenta</th>
+                                        <th width="15%">Observación</th>
+                                        <th width="10%">Estado</th>
+                                        <th width="10%">Monto</th>
                                         <th width="5%" className="text-center">Detalle</th>
-                                        {/* <th width="5%" className="text-center">Editar</th> */}
-                                        <th width="5%" className="text-center">Anular</th>
+                                        <th width="5%" className="text-center">Eliminar</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -233,105 +239,57 @@ class Ventas extends React.Component {
                                             this.state.lista.map((item, index) => {
                                                 return (
                                                     <tr key={index}>
-                                                        <td className={`text-center`}>{
-                                                            item.estado === 4
-                                                                ?
-                                                                <del>{item.id}</del>
-                                                                :
-                                                                item.id
-                                                        }</td>
-                                                        <td>{
-                                                            item.estado === 4
-                                                                ?
-                                                                <>
-                                                                    <del>{item.documento}</del>
-                                                                    <br />
-                                                                    <del> {item.informacion}</del>
-                                                                </>
-                                                                : <>
-                                                                    {item.documento}{<br />}{item.informacion}
-                                                                </>
-                                                        }</td>
-                                                        <td>{
-                                                            item.estado === 4
-                                                                ?
-                                                                <>
-                                                                    <del>{item.comprobante}</del>
-                                                                    <br />
-                                                                    <del>{item.serie + "-" + item.numeracion}</del>
-                                                                </>
-                                                                : <>
-                                                                    {item.comprobante}{<br />}{item.serie + "-" + item.numeracion}
-                                                                </>
-
-                                                        }</td>
-                                                        <td>{
-                                                            item.estado === 4
-                                                                ? <>
-                                                                    <del><span>{item.fecha}</span></del>
-                                                                    <br />
-                                                                    <del><span>{timeForma24(item.hora)}</span></del>
-                                                                </>
-                                                                :
-                                                                <>
-                                                                    <span>{item.fecha}</span>
-                                                                    <br />
-                                                                    <span>{timeForma24(item.hora)}</span>
-                                                                </>
-                                                        }</td>
-                                                        <td>
+                                                        <td className="text-center">{item.id}</td>
+                                                        <td>{item.documento}{<br />}{item.informacion}</td>
+                                                        <td>{item.comprobante}{<br />}{item.serie + "-" + item.numeracion}</td>
+                                                        <td>{item.fecha}{<br />}{timeForma24(item.hora)}</td>
+                                                        <td>{item.banco}</td>
+                                                        <td>{item.detalle}
+                                                            <br />
+                                                            <small>
+                                                                {
+                                                                    item.comprobanteRef !== "" ?
+                                                                        <Link className='btn-link' to={`/inicio/ventas/detalle?idVenta=${item.idVentaRef}`}>
+                                                                            {item.comprobanteRef} <i className='fa fa-external-link-square'></i>
+                                                                        </Link>
+                                                                        : null
+                                                                }
+                                                            </small>
+                                                            <br />
+                                                            <small>{item.loteRef}</small>
                                                             {
-                                                                item.estado === 4 ?
+                                                                item.estadoRef === 4 ?
                                                                     <>
-                                                                        {
-                                                                            item.tipo === 1
-                                                                                ? <del><span>Contado</span></del>
-                                                                                : <del><span>Crédito</span></del>
-                                                                        }
+                                                                        <br />
+                                                                        <small className="text-danger">MODIFICADO</small>
                                                                     </>
-
-                                                                    : <>
-                                                                        {
-                                                                            item.tipo === 1
-                                                                                ? <span>Contado</span>
-                                                                                : <span>Crédito</span>
-                                                                        }
-                                                                    </>
+                                                                    :
+                                                                    null
                                                             }
                                                         </td>
-                                                        <td>{
-                                                            item.estado === 4 ?
-                                                                <del>{numberFormat(item.total)}</del>
-                                                                : numberFormat(item.total)
-                                                        }</td>
-                                                        <td className="text-center">
-                                                            {
-                                                                item.estado === 1
-                                                                    ? <span className="text-success">Cobrado</span>
-                                                                    : item.estado === 2 ?
-                                                                        <span className="text-warning">Por Cobrar</span>
-                                                                        : item.estado === 3 ?
-                                                                            <span className="text-danger">Anulado</span>
-                                                                            : <span className="text-secondary">Liberado</span>
-                                                            }
+                                                        <td>{item.estado === 1 && item.idNotaCredito === null ?
+                                                            <span className="text-success">COBRADO</span> :
+                                                            item.idNotaCredito != null ?
+                                                                <span className="text-warning">MODIFICADO</span> :
+                                                                <span className="text-danger">ANULADO</span>}
                                                         </td>
+                                                        <td>{numberFormat(item.monto)}</td>
                                                         <td className="text-center">
                                                             <button
-                                                                className="btn btn-outline-primary btn-sm"
-                                                                title="Ver detalle"
+                                                                className="btn btn-outline-info btn-sm"
+                                                                title="Detalle"
                                                                 onClick={() => {
-                                                                    this.props.history.push({
-                                                                        pathname: `${this.props.location.pathname}/detalle`,
-                                                                        search: "?idVenta=" + item.idVenta
-                                                                    })
+                                                                    this.props.history.push({ pathname: `${this.props.location.pathname}/detalle`, search: "?idCobro=" + item.idCobro })
                                                                 }}
-                                                                disabled={!this.state.view}><i className="fa fa-eye"></i></button>
+                                                                disabled={!this.state.view}>
+                                                                <i className="fa fa-eye"></i>
+                                                            </button>
                                                         </td>
                                                         <td className="text-center">
                                                             <button
                                                                 className="btn btn-outline-danger btn-sm"
-                                                                title="Anular"
-                                                                onClick={() => this.onEventAnularVenta(item.idVenta)}
+                                                                title="Eliminar"
+                                                                onClick={() => this.onEventAnularCobro(item.idCobro)}
                                                                 disabled={!this.state.remove}>
                                                                 <i className="fa fa-remove"></i>
                                                             </button>
@@ -342,7 +300,6 @@ class Ventas extends React.Component {
                                         )
                                     }
                                 </tbody>
-
                             </table>
                         </div>
                     </div>
@@ -379,4 +336,5 @@ const mapStateToProps = (state) => {
     }
 }
 
-export default connect(mapStateToProps, null)(Ventas);
+
+export default connect(mapStateToProps, null)(Cobros);

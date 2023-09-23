@@ -11,10 +11,10 @@ import {
     hideModal,
     viewModal,
     clearModal,
-    ModalAlertInfo,
-    ModalAlertDialog,
-    ModalAlertSuccess,
-    ModalAlertWarning,
+    alertInfo,
+    alertDialog,
+    alertSuccess,
+    alertWarning,
     statePrivilegio,
     keyUpSearch
 } from '../../../helper/utils.helper';
@@ -265,7 +265,7 @@ class CpeElectronicos extends React.Component {
 
     onEventSendFactura = (idCpeSunat, tipo) => {
         if (tipo === "f") {
-            ModalAlertDialog("Facturación", "¿Está seguro de enviar el comprobante electrónico?", async (value) => {
+            alertDialog("Facturación", "¿Está seguro de enviar el comprobante electrónico?", async (value) => {
                 if (value) {
                     // "http://localhost:8090/app/examples/boleta.php"
                     // "http://apisunat.inmobiliariagmyc.com/app/examples/boleta.php"
@@ -276,24 +276,24 @@ class CpeElectronicos extends React.Component {
 
                         if (object.state) {
                             if (object.accept) {
-                                ModalAlertSuccess("Facturación", "Código " + object.code + " " + object.description, () => {
+                                alertSuccess("Facturación", "Código " + object.code + " " + object.description, () => {
                                     this.onEventPaginacion()
                                 });
                             } else {
-                                ModalAlertWarning("Facturación", "Código " + object.code + " " + object.description);
+                                alertWarning("Facturación", "Código " + object.code + " " + object.description);
                             }
                         } else {
-                            ModalAlertWarning("Facturación", "Código " + object.code + " " + object.description);
+                            alertWarning("Facturación", "Código " + object.code + " " + object.description);
                         }
                     }
 
                     if (response instanceof ErrorResponse) {
-                        ModalAlertWarning("Facturación", response.getMessage());
+                        alertWarning("Facturación", response.getMessage());
                     }
                 }
             });
         } else {
-            ModalAlertDialog("Facturación", "¿Está seguro de enviar el comprobante electrónico?", async (value) => {
+            alertDialog("Facturación", "¿Está seguro de enviar el comprobante electrónico?", async (value) => {
                 if (value) {
                     // "http://localhost:8090/app/examples/boleta.php"
                     // "http://apisunat.inmobiliariagmyc.com/app/examples/boleta.php"
@@ -304,19 +304,19 @@ class CpeElectronicos extends React.Component {
 
                         if (object.state) {
                             if (object.accept) {
-                                ModalAlertSuccess("Facturación", "Código " + object.code + " " + object.description, () => {
+                                alertSuccess("Facturación", "Código " + object.code + " " + object.description, () => {
                                     this.onEventPaginacion()
                                 });
                             } else {
-                                ModalAlertWarning("Facturación", "Código " + object.code + " " + object.description);
+                                alertWarning("Facturación", "Código " + object.code + " " + object.description);
                             }
                         } else {
-                            ModalAlertWarning("Facturación", "Código " + object.code + " " + object.description);
+                            alertWarning("Facturación", "Código " + object.code + " " + object.description);
                         }
                     }
 
                     if (response instanceof ErrorResponse) {
-                        ModalAlertWarning("Facturación", response.getMessage());
+                        alertWarning("Facturación", response.getMessage());
                     }
                 }
             });
@@ -377,9 +377,9 @@ class CpeElectronicos extends React.Component {
 
     onEventSendEmail(idCpeSunat, tipo) {
         if (tipo === "f") {
-            ModalAlertDialog("Email", "¿Está seguro de envíar el email?", async (value) => {
+            alertDialog("Email", "¿Está seguro de envíar el email?", async (value) => {
                 if (value) {
-                    ModalAlertInfo("Email", "Envíando Correo.");
+                    alertInfo("Email", "Envíando Correo.");
 
                     const params = {
                         "idSede": "SD0001",
@@ -388,19 +388,19 @@ class CpeElectronicos extends React.Component {
                     const response = await sendEmailBoleta(params);
 
                     if (response instanceof SuccessReponse) {
-                        ModalAlertSuccess("Email", response.data);
+                        alertSuccess("Email", response.data);
                     }
 
                     if (response instanceof ErrorResponse) {
-                        ModalAlertWarning("Email", response.getMessage());
+                        alertWarning("Email", response.getMessage());
                     }
                 }
             });
         } else {
-            ModalAlertDialog("Email", "¿Está seguro de envíar el email?", async (value) => {
+            alertDialog("Email", "¿Está seguro de envíar el email?", async (value) => {
                 if (value) {
 
-                    ModalAlertInfo("Email", "Envíando Correo.");
+                    alertInfo("Email", "Envíando Correo.");
 
                     const params = {
                         "idSede": "SD0001",
@@ -409,11 +409,11 @@ class CpeElectronicos extends React.Component {
                     const response = await sendEmailNotaCredito(params);
 
                     if (response instanceof SuccessReponse) {
-                        ModalAlertSuccess("Email", response.data);
+                        alertSuccess("Email", response.data);
                     }
 
                     if (response instanceof ErrorResponse) {
-                        ModalAlertWarning("Email", response.getMessage());
+                        alertWarning("Email", response.getMessage());
                     }
                 }
             });
@@ -422,9 +422,9 @@ class CpeElectronicos extends React.Component {
 
     onEventSendAnular = (idCpeSunat, tipo) => {
         if (tipo === "f") {
-            ModalAlertDialog("Facturación", "¿Está seguro de anular el comprobante electrónico?", async (value) => {
+            alertDialog("Facturación", "¿Está seguro de anular el comprobante electrónico?", async (value) => {
                 if (value) {
-                    ModalAlertInfo("Facturación", "Firmando xml y enviando a sunat.");
+                    alertInfo("Facturación", "Firmando xml y enviando a sunat.");
 
                     const response = await sendResumen(idCpeSunat);
 
@@ -432,27 +432,27 @@ class CpeElectronicos extends React.Component {
                         const object = response.data;
                         if (object.state) {
                             if (object.accept) {
-                                ModalAlertSuccess("Facturación", "Código " + object.code + " " + object.description, () => {
+                                alertSuccess("Facturación", "Código " + object.code + " " + object.description, () => {
                                     this.onEventPaginacion()
                                 });
                             } else {
-                                ModalAlertWarning("Facturación", "Código " + object.code + " " + object.description);
+                                alertWarning("Facturación", "Código " + object.code + " " + object.description);
                             }
                         } else {
-                            ModalAlertWarning("Facturación", "Código " + object.code + " " + object.description);
+                            alertWarning("Facturación", "Código " + object.code + " " + object.description);
                         }
                     }
 
                     if (response instanceof ErrorResponse) {
-                        ModalAlertWarning("Facturación", response.getMessage());
+                        alertWarning("Facturación", response.getMessage());
                     }
                 }
             });
         } else {
-            ModalAlertDialog("Facturación", "¿Está seguro de anular el comprobante electrónico?", async (value) => {
+            alertDialog("Facturación", "¿Está seguro de anular el comprobante electrónico?", async (value) => {
                 if (value) {
 
-                    ModalAlertInfo("Facturación", "Firmando xml y enviando a sunat.");
+                    alertInfo("Facturación", "Firmando xml y enviando a sunat.");
 
                     const response = await sendResumenNotaCredito(idCpeSunat);
 
@@ -460,19 +460,19 @@ class CpeElectronicos extends React.Component {
                         const object = response.data;
                         if (object.state) {
                             if (object.accept) {
-                                ModalAlertSuccess("Facturación", "Código " + object.code + " " + object.description, () => {
+                                alertSuccess("Facturación", "Código " + object.code + " " + object.description, () => {
                                     this.onEventPaginacion()
                                 });
                             } else {
-                                ModalAlertWarning("Facturación", "Código " + object.code + " " + object.description);
+                                alertWarning("Facturación", "Código " + object.code + " " + object.description);
                             }
                         } else {
-                            ModalAlertWarning("Facturación", "Código " + object.code + " " + object.description);
+                            alertWarning("Facturación", "Código " + object.code + " " + object.description);
                         }
                     }
 
                     if (response instanceof ErrorResponse) {
-                        ModalAlertWarning("Facturación", response.getMessage());
+                        alertWarning("Facturación", response.getMessage());
                     }
                 }
             });

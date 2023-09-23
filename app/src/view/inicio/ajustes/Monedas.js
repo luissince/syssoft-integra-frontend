@@ -6,10 +6,10 @@ import {
     hideModal,
     viewModal,
     clearModal,
-    ModalAlertDialog,
-    ModalAlertInfo,
-    ModalAlertSuccess,
-    ModalAlertWarning,
+    alertDialog,
+    alertInfo,
+    alertSuccess,
+    alertWarning,
     statePrivilegio,
     keyUpSearch
 } from '../../../helper/utils.helper';
@@ -221,10 +221,10 @@ class Monedas extends React.Component {
             return;
         }
 
-        ModalAlertDialog("Moneda", "¿Está seguro de continuar?", async (value) => {
+        alertDialog("Moneda", "¿Está seguro de continuar?", async (value) => {
             if (value) {
                 try {
-                    ModalAlertInfo("Moneda", "Procesando información...");
+                    alertInfo("Moneda", "Procesando información...");
                     hideModal("modalMoneda");
 
                     if (this.state.idMoneda !== '') {
@@ -236,7 +236,7 @@ class Monedas extends React.Component {
                             "idUsuario": this.state.idUsuario,
                             "idMoneda": this.state.idMoneda
                         })
-                        ModalAlertSuccess("Moneda", result.data, () => {
+                        alertSuccess("Moneda", result.data, () => {
                             this.onEventPaginacion();
                         });
 
@@ -248,15 +248,15 @@ class Monedas extends React.Component {
                             "estado": this.state.estado,
                             "idUsuario": this.state.idUsuario
                         });
-                        ModalAlertSuccess("Moneda", result.data, () => {
+                        alertSuccess("Moneda", result.data, () => {
                             this.loadInit();
                         });
                     }
                 } catch (error) {
                     if (error.response) {
-                        ModalAlertWarning("Moneda", error.response.data)
+                        alertWarning("Moneda", error.response.data)
                     } else {
-                        ModalAlertWarning("Moneda", "Se genero un error interno, intente nuevamente.")
+                        alertWarning("Moneda", "Se genero un error interno, intente nuevamente.")
                     }
                 }
             }
@@ -264,23 +264,23 @@ class Monedas extends React.Component {
     }
 
     onEventDelete(idMoneda) {
-        ModalAlertDialog("Moneda", "¿Estás seguro de eliminar la moneda?", async (event) => {
+        alertDialog("Moneda", "¿Estás seguro de eliminar la moneda?", async (event) => {
             if (event) {
                 try {
-                    ModalAlertInfo("Moneda", "Procesando información...")
+                    alertInfo("Moneda", "Procesando información...")
                     let result = await axios.delete('/api/moneda', {
                         params: {
                             "idMoneda": idMoneda
                         }
                     })
-                    ModalAlertSuccess("Moneda", result.data, () => {
+                    alertSuccess("Moneda", result.data, () => {
                         this.loadInit();
                     })
                 } catch (error) {
                     if (error.response !== undefined) {
-                        ModalAlertWarning("Moneda", error.response.data)
+                        alertWarning("Moneda", error.response.data)
                     } else {
-                        ModalAlertWarning("Moneda", "Se genero un error interno, intente nuevamente.")
+                        alertWarning("Moneda", "Se genero un error interno, intente nuevamente.")
                     }
                 }
             }

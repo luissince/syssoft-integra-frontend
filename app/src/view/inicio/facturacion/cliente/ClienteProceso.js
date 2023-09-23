@@ -6,9 +6,9 @@ import {
     keyNumberInteger,
     spinnerLoading,
     convertNullText,
-    ModalAlertInfo,
-    ModalAlertSuccess,
-    ModalAlertWarning,
+    alertInfo,
+    alertSuccess,
+    alertWarning,
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import SearchBar from "../../../../components/SearchBar";
@@ -187,7 +187,7 @@ class ClienteProceso extends React.Component {
         }
 
         try {
-            ModalAlertInfo("Cliente", "Procesando información...");
+            alertInfo("Cliente", "Procesando información...");
             if (this.state.idCliente !== '') {
                 const cliente = await axios.post('/api/cliente/update', {
                     "idTipoDocumento": this.state.idTipoDocumento,
@@ -207,7 +207,7 @@ class ClienteProceso extends React.Component {
                     //idCliente
                     "idCliente": this.state.idCliente
                 })
-                ModalAlertSuccess("Cliente", cliente.data, () => {
+                alertSuccess("Cliente", cliente.data, () => {
                     this.props.history.goBack();
                 });
             } else {
@@ -227,15 +227,15 @@ class ClienteProceso extends React.Component {
                     "observacion": this.state.observacion.trim().toUpperCase(),
                     "idUsuario": this.state.idUsuario
                 });
-                ModalAlertSuccess("Cliente", cliente.data, () => {
+                alertSuccess("Cliente", cliente.data, () => {
                     this.props.history.goBack();
                 });
             }
         } catch (error) {
             if (error.response) {
-                ModalAlertWarning("Cliente", error.response.data)
+                alertWarning("Cliente", error.response.data)
             } else {
-                ModalAlertWarning("Cliente", "Se genero un error interno, intente nuevamente.")
+                alertWarning("Cliente", "Se genero un error interno, intente nuevamente.")
             }
         }
     }

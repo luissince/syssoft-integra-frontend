@@ -9,13 +9,24 @@ import Head from '../../components/head/Head';
 
 import Notifications from './notificacion/Notifications';
 import Dashboard from './dashboard/Dashboard';
-import Clientes from './facturacion/Clientes';
-import Ventas from './facturacion/Ventas';
-import Cobros from './facturacion/Cobros';
-import Creditos from './facturacion/Creditos';
-import Cotizaciones from './facturacion/Cotizaciones';
-import Reservas from './facturacion/Reservas';
-import Socios from './facturacion/Socios';
+
+import Ventas from './facturacion/venta/Ventas';
+import VentaProceso from './facturacion/venta/VentaProceso';
+import VentaDetalle from './facturacion/venta/VentaDetalle';
+
+import Cobros from './facturacion/cobro/Cobros';
+import CobroProceso from './facturacion/cobro/CobroProceso';
+import CobroDetalle from './facturacion/cobro/CobroDetalle';
+
+import Creditos from './facturacion/credito/Creditos';
+import CreditoProceso from './facturacion/credito/CreditoProceso';
+
+import Cotizaciones from './facturacion/cotizacion/Cotizaciones';
+
+import Reservas from './facturacion/reserva/Reservas';
+
+import Socios from './facturacion/socio/Socios';
+
 import Monedas from './ajustes/Monedas';
 import Comprobantes from './ajustes/Comprobantes';
 import Impuestos from './ajustes/Impuestos';
@@ -29,24 +40,28 @@ import ProcesoProyecto from './ajustes/proyecto/ProcesoProyecto';
 import Manzanas from './logistica/Manzanas';
 import Lotes from './logistica/Lotes';
 import LoteDetalle from './logistica/registro/LoteDetalle';
-import VentaProceso from './facturacion/registros/VentaProceso';
-import VentaDetalle from './facturacion/registros/VentaDetalle';
-import ClienteProceso from './facturacion/registros/ClienteProceso';
-import ClienteDetalle from './facturacion/registros/ClienteDetalle';
-import CobroProceso from './facturacion/registros/CobroProceso';
-import CobroDetalle from './facturacion/registros/CobroDetalle';
-import NotaCredito from './facturacion/NotaCredito';
-import NotaCreditoProceso from './facturacion/registros/NotaCreditoProceso';
-import NotaCreditoDetalle from './facturacion/registros/NotaCreditoDetalle';
-import GastoProceso from './tesoreria/registros/GastoProceso';
-import GastoDetalle from './tesoreria/registros/GastoDetalle';
-import CreditoProceso from './facturacion/registros/CreditoProceso';
+
+import Clientes from './facturacion/cliente/Clientes';
+import ClienteProceso from './facturacion/cliente/ClienteProceso';
+import ClienteDetalle from './facturacion/cliente/ClienteDetalle';
+
+import NotaCredito from './facturacion/notacredito/NotaCredito';
+import NotaCreditoProceso from './facturacion/notacredito/NotaCreditoProceso';
+import NotaCreditoDetalle from './facturacion/notacredito/NotaCreditoDetalle';
+
+import Conceptos from './tesoreria/concepto/Conceptos';
+
+import Gastos from './tesoreria/gasto/Gastos';
+import GastoProceso from './tesoreria/gasto/GastoProceso';
+import GastoDetalle from './tesoreria/gasto/GastoDetalle';
+
+
 import Perfiles from './seguridad/Perfiles';
 import Usuarios from './seguridad/Usuarios';
 import Accesos from './seguridad/Accesos';
 import UsuarioProceso from './seguridad/registros/UsuarioProceso';
-import Conceptos from './tesoreria/Conceptos';
-import Gastos from './tesoreria/Gastos';
+
+
 import RepVentas from './reporte/RepVentas';
 import RepFinanciero from './reporte/RepFinanciero';
 import RepLotes from './reporte/RepLotes';

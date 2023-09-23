@@ -76,8 +76,7 @@ class SearchBarLote extends React.Component {
   }
 
   render() {
-    return (
-      <div className="search">
+    return (   
         <div className="form-group position-relative">
           <div className="input-group">
             <div className="input-group-prepend">
@@ -129,8 +128,7 @@ class SearchBarLote extends React.Component {
               ))}
             </div>
           )}
-        </div>
-      </div>
+        </div>  
     );
   }
 }

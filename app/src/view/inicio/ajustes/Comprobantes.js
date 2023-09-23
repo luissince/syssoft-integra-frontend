@@ -7,10 +7,10 @@ import {
     hideModal,
     viewModal,
     clearModal,
-    ModalAlertDialog,
-    ModalAlertInfo,
-    ModalAlertSuccess,
-    ModalAlertWarning,
+    alertDialog,
+    alertInfo,
+    alertSuccess,
+    alertWarning,
     spinnerLoading,
     statePrivilegio,
     keyUpSearch
@@ -251,7 +251,7 @@ class Comprobantes extends React.Component {
         }
 
         try {
-            ModalAlertInfo("Comprobante", "Procesando información...");
+            alertInfo("Comprobante", "Procesando información...");
             hideModal("modalComprobante");
             if (this.state.idComprobante !== "") {
                 const result = await axios.post('/api/comprobante/edit', {
@@ -268,7 +268,7 @@ class Comprobantes extends React.Component {
                     "idComprobante": this.state.idComprobante,
                 });
 
-                ModalAlertSuccess("Comprobante", result.data, () => {
+                alertSuccess("Comprobante", result.data, () => {
                     this.onEventPaginacion();
                 });
             } else {
@@ -285,37 +285,37 @@ class Comprobantes extends React.Component {
                     "idUsuario": this.state.idUsuario
                 });
 
-                ModalAlertSuccess("Comprobante", result.data, () => {
+                alertSuccess("Comprobante", result.data, () => {
                     this.loadInit();
                 });
             }
         } catch (error) {
             if (error.response !== undefined) {
-                ModalAlertWarning("Comprobante", error.response.data)
+                alertWarning("Comprobante", error.response.data)
             } else {
-                ModalAlertWarning("Comprobante", "Se genero un error interno, intente nuevamente.")
+                alertWarning("Comprobante", "Se genero un error interno, intente nuevamente.")
             }
         }
     }
 
     onEventDelete(idComprobante) {
-        ModalAlertDialog("Comprobante", "¿Estás seguro de eliminar el comprobante?", async (event) => {
+        alertDialog("Comprobante", "¿Estás seguro de eliminar el comprobante?", async (event) => {
             if (event) {
                 try {
-                    ModalAlertInfo("Comprobante", "Procesando información...")
+                    alertInfo("Comprobante", "Procesando información...")
                     let result = await axios.delete('/api/comprobante', {
                         params: {
                             "idComprobante": idComprobante
                         }
                     })
-                    ModalAlertSuccess("Comprobante", result.data, () => {
+                    alertSuccess("Comprobante", result.data, () => {
                         this.loadInit();
                     })
                 } catch (error) {
                     if (error.response) {
-                        ModalAlertWarning("Comprobante", error.response.data)
+                        alertWarning("Comprobante", error.response.data)
                     } else {
-                        ModalAlertWarning("Comprobante", "Se genero un error interno, intente nuevamente.")
+                        alertWarning("Comprobante", "Se genero un error interno, intente nuevamente.")
                     }
                 }
             }

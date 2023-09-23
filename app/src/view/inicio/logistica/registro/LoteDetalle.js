@@ -8,11 +8,11 @@ import {
     numberFormat,
     spinnerLoading,
     timeForma24,
-    ModalAlertDialog,
-    ModalAlertInfo,
-    ModalAlertSuccess,
-    ModalAlertWarning,
-    ModalAlertError
+    alertDialog,
+    alertInfo,
+    alertSuccess,
+    alertWarning,
+    alertError
 } from '../../../../helper/utils.helper';
 import { liberarTerreno, listarComboCliente, loteDetalle, loteRestablecer, loteSocio } from '../../../../network/rest/principal.network';
 import { connect } from 'react-redux';
@@ -161,9 +161,9 @@ class LoteDetalle extends React.Component {
             return;
         }
 
-        ModalAlertDialog("Lote", "¿Está seguro de registrar el asociado?. El lote va pasar a nombre del nuevo socio.", async (value) => {
+        alertDialog("Lote", "¿Está seguro de registrar el asociado?. El lote va pasar a nombre del nuevo socio.", async (value) => {
             if (value) {
-                ModalAlertInfo("Lote", "Procesando información...");
+                alertInfo("Lote", "Procesando información...");
                 hideModal("modalSocio");
 
                 const data = {
@@ -178,7 +178,7 @@ class LoteDetalle extends React.Component {
                 const response = await loteSocio(data);
 
                 if (response instanceof SuccessReponse) {
-                    ModalAlertSuccess("Lote", response.data, () => this.loadDataId(this.state.idLote));
+                    alertSuccess("Lote", response.data, () => this.loadDataId(this.state.idLote));
                     return;
                 }
 
@@ -186,9 +186,9 @@ class LoteDetalle extends React.Component {
                     if (response.type === CANCELED) return;
 
                     if (response.type === ERROR) {
-                        ModalAlertError("Lote", response.message);
+                        alertError("Lote", response.message);
                     } else {
-                        ModalAlertWarning("Lote", response.message);
+                        alertWarning("Lote", response.message);
                     }
                 }
             }
@@ -196,9 +196,9 @@ class LoteDetalle extends React.Component {
     }
 
     async onEventRestablecer(idCliente) {
-        ModalAlertDialog("Lote", "¿Está seguro de restablecer al socio, la operación no es reversible?", async (value) => {
+        alertDialog("Lote", "¿Está seguro de restablecer al socio, la operación no es reversible?", async (value) => {
             if (value) {
-                ModalAlertInfo("Lote", "Procesando información...");
+                alertInfo("Lote", "Procesando información...");
 
                 const data = {
                     "idVenta": this.state.idVenta,
@@ -210,7 +210,7 @@ class LoteDetalle extends React.Component {
 
                 if (response instanceof SuccessReponse) {
 
-                    ModalAlertSuccess("Lote", response.data, () => this.loadDataId(this.state.idLote));
+                    alertSuccess("Lote", response.data, () => this.loadDataId(this.state.idLote));
                     return;
                 }
 
@@ -218,9 +218,9 @@ class LoteDetalle extends React.Component {
                     if (response.type === CANCELED) return;
 
                     if (response.type === ERROR) {
-                        ModalAlertError("Lote", response.message);
+                        alertError("Lote", response.message);
                     } else {
-                        ModalAlertWarning("Lote", response.message);
+                        alertWarning("Lote", response.message);
                     }
                 }
             }
@@ -260,9 +260,9 @@ class LoteDetalle extends React.Component {
         // }
     }
     async onEventLiberar() {
-        ModalAlertDialog("Lote", "¿Está seguro de liberar el lote?. Los cambios no son irreversibles.", async (value) => {
+        alertDialog("Lote", "¿Está seguro de liberar el lote?. Los cambios no son irreversibles.", async (value) => {
             if (value) {
-                ModalAlertInfo("Lote", "Procesando liberación...");
+                alertInfo("Lote", "Procesando liberación...");
 
                 const data = {
                     "idLote": this.state.idLote,
@@ -271,14 +271,14 @@ class LoteDetalle extends React.Component {
 
                 const response = await liberarTerreno(data, this.abortControllerLiberar.signal);
                 if (response instanceof SuccessReponse) {
-                    ModalAlertSuccess("Lote", response.data, () => this.props.history.goBack());
+                    alertSuccess("Lote", response.data, () => this.props.history.goBack());
                     return;
                 }
 
                 if (response instanceof ErrorResponse) {
                     if (response.type === CANCELED) return;
 
-                    ModalAlertWarning("Lote", response.message);
+                    alertWarning("Lote", response.message);
                     return;
                 }
             }

@@ -1051,6 +1051,68 @@ pre code {
   overflow-y: scroll;
 }
 
+.loader-one {
+  color: #6c757d;
+  font-size: 10px;
+  width: 1em;
+  height: 1em;
+  border-radius: 50%;
+  position: relative;
+  text-indent: -9999em;
+  animation: mulShdSpin 1.3s infinite linear;
+  transform: translateZ(0);
+}
+
+@keyframes mulShdSpin {
+  0%,
+  100% {
+    box-shadow: 0 -3em 0 0.2em, 
+    2em -2em 0 0em, 3em 0 0 -1em, 
+    2em 2em 0 -1em, 0 3em 0 -1em, 
+    -2em 2em 0 -1em, -3em 0 0 -1em, 
+    -2em -2em 0 0;
+  }
+  12.5% {
+    box-shadow: 0 -3em 0 0, 2em -2em 0 0.2em, 
+    3em 0 0 0, 2em 2em 0 -1em, 0 3em 0 -1em, 
+    -2em 2em 0 -1em, -3em 0 0 -1em, 
+    -2em -2em 0 -1em;
+  }
+  25% {
+    box-shadow: 0 -3em 0 -0.5em, 
+    2em -2em 0 0, 3em 0 0 0.2em, 
+    2em 2em 0 0, 0 3em 0 -1em, 
+    -2em 2em 0 -1em, -3em 0 0 -1em, 
+    -2em -2em 0 -1em;
+  }
+  37.5% {
+    box-shadow: 0 -3em 0 -1em, 2em -2em 0 -1em,
+     3em 0em 0 0, 2em 2em 0 0.2em, 0 3em 0 0em, 
+     -2em 2em 0 -1em, -3em 0em 0 -1em, -2em -2em 0 -1em;
+  }
+  50% {
+    box-shadow: 0 -3em 0 -1em, 2em -2em 0 -1em,
+     3em 0 0 -1em, 2em 2em 0 0em, 0 3em 0 0.2em, 
+     -2em 2em 0 0, -3em 0em 0 -1em, -2em -2em 0 -1em;
+  }
+  62.5% {
+    box-shadow: 0 -3em 0 -1em, 2em -2em 0 -1em,
+     3em 0 0 -1em, 2em 2em 0 -1em, 0 3em 0 0, 
+     -2em 2em 0 0.2em, -3em 0 0 0, -2em -2em 0 -1em;
+  }
+  75% {
+    box-shadow: 0em -3em 0 -1em, 2em -2em 0 -1em, 
+    3em 0em 0 -1em, 2em 2em 0 -1em, 0 3em 0 -1em, 
+    -2em 2em 0 0, -3em 0em 0 0.2em, -2em -2em 0 0;
+  }
+  87.5% {
+    box-shadow: 0em -3em 0 0, 2em -2em 0 -1em, 
+    3em 0 0 -1em, 2em 2em 0 -1em, 0 3em 0 -1em, 
+    -2em 2em 0 0, -3em 0em 0 0, -2em -2em 0 0.2em;
+  }
+}
+  
+
 .container,
 .container-fluid,
 .container-sm,
@@ -6958,7 +7020,7 @@ a.badge-dark.focus {
 
 .close {
   float: right;
-  font-size: 1.5rem;
+  font-size: 2.0rem;
   font-weight: 700;
   line-height: 1;
   color: #000;
@@ -7176,11 +7238,12 @@ a.close.disabled {
 .modal-header {
   display: -ms-flexbox;
   display: flex;
-  -ms-flex-align: start;
-  align-items: flex-start;
+  -ms-flex-align: center;
+  align-items: center;
   -ms-flex-pack: justify;
   justify-content: space-between;
-  padding: 1rem 1rem;
+  padding: 0.5rem 1rem;
+  background-color: rgba(0, 0, 0, 0.07);
   border-bottom: 1px solid #dee2e6;
   border-top-left-radius: calc(0.3rem - 1px);
   border-top-right-radius: calc(0.3rem - 1px);
@@ -12147,6 +12210,8 @@ a.text-dark:focus {
   background-color: white;
   display: flex;
   flex-direction: column;
+  outline: none;
+  border: none;
 }
 
 .main-pos .invoice-left .items .item-view .item-view_favorite {
@@ -12191,7 +12256,7 @@ a.text-dark:focus {
   box-shadow: 0 0 2px rgba(0, 0, 0, .1);
 }
 
-.main-pos .invoice-left .items .item-view .item-view_describe-image{
+.main-pos .invoice-left .items .item-view .item-view_describe-image {
   position: absolute;
   top: 0;
   height: 100%;
@@ -12216,7 +12281,11 @@ a.text-dark:focus {
   border-bottom: 1px solid #e2e8f0;
 }
 
-.main-pos .invoice-right .invoice-list-prices {
+.main-pos .invoice-right .invoice-voucher {
+  border-bottom: none;
+}
+
+.main-pos .invoice-right .invoice-client {
   border-bottom: 1px solid #e2e8f0;
 }
 
@@ -12256,12 +12325,14 @@ a.text-dark:focus {
   visibility: hidden;
   display: flex;
   justify-content: right;
-  top: 1.2rem;
-  right: 0px;
-  /* width: 140px !important; */
-  height: 35px;
+  align-items: center;
+  top: 0;
+  right: 0;
+  width: 25%;
+  height: 100%;
   background: #f8fafc;
   margin-right: 1rem;
+  border-bottom: 1.7px solid #e2e8f0;
 }
 
 .main-pos .invoice-right .invoice-item_add-item:hover .invoice-item_add-item-options {
@@ -12288,7 +12359,7 @@ a.text-dark:focus {
 }
 
 .main-pos .invoice-right .invoice-item_add-item .invoice-item_add-item-describe {
-  flex: 1 1 50%;
+  width: 40%;
   padding: 0 5px 0 0;
 }
 
@@ -12300,7 +12371,6 @@ a.text-dark:focus {
   overflow: hidden;
   font-weight: normal;
   color: #474747;
-
 }
 
 .main-pos .invoice-right .invoice-item_add-item .invoice-item_add-item-describe-price {
@@ -12309,10 +12379,8 @@ a.text-dark:focus {
 }
 
 .main-pos .invoice-right .invoice-item_add-item .invoice-item_add-item-quantity-container {
-  position: absolute;
+  width: 30%;
   height: auto;
-  left: 50%;
-  top: 1.0rem;
   border-radius: 2rem;
 }
 
@@ -12321,14 +12389,13 @@ a.text-dark:focus {
   color: #334155;
   font-weight: 500;
   margin: 0 0.5rem;
-  width: 38px;
 }
 
-.main-pos .invoice-right .invoice-item_add-item .invoice-item_add-item-quantity-container .item_total {
+.main-pos .invoice-right .invoice-item_add-item .invoice-item_add-item-total {
+  width: 30%;
   color: #474747;
-  flex: 1 1 25%;
   padding: 0 5px;
-  height: 100%;
+  /* height: 100%; */
 }
 
 .main-pos .invoice-right .invoice-detail {
@@ -12352,6 +12419,45 @@ a.text-dark:focus {
 
 .main-pos .invoice-right .invoice-detail .sub-total-content .tax {
   color: #474747;
+}
+
+.side-modal{
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, .3);
+  z-index: 1006;
+  display: none;
+}
+
+.side-modal.toggled{
+  display: block;
+}
+
+.side-modal .side-modal_wrapper{
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 550px;
+  max-width: 550px;
+  background-color: #ffffff;
+  height: 100%;
+}
+
+.side-modal .side-modal_wrapper button.close{
+  position: absolute;
+  right: 0;
+  font-size: 2.0rem;
+  margin: 0.5rem 1.1rem;
+}
+
+.side-modal .side-modal_wrapper .side-modal_bottom{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0.5rem 1rem;
 }
 
 @media (max-width: 576px) {}

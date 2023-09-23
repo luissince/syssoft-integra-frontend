@@ -4,10 +4,10 @@ import {
   hideModal,
   viewModal,
   clearModal,
-  ModalAlertDialog,
-  ModalAlertInfo,
-  ModalAlertSuccess,
-  ModalAlertWarning,
+  alertDialog,
+  alertInfo,
+  alertSuccess,
+  alertWarning,
   spinnerLoading,
   statePrivilegio,
   keyUpSearch,
@@ -313,13 +313,13 @@ class Manzanas extends React.Component {
 
     const response = await addManzana(data);
     if (response instanceof SuccessReponse) {
-      ModalAlertSuccess("Manzana", response.data, () => {
+      alertSuccess("Manzana", response.data, () => {
         this.loadInit();
       });
     }
 
     if (response instanceof ErrorResponse) {
-      ModalAlertWarning("Manzana", response.getMessage());
+      alertWarning("Manzana", response.getMessage());
     }
   }
 
@@ -333,13 +333,13 @@ class Manzanas extends React.Component {
 
     const response = await updateManzana(data);
     if (response instanceof SuccessReponse) {
-      ModalAlertSuccess("Manzana", response.data, () => {
+      alertSuccess("Manzana", response.data, () => {
         this.onEventPaginacion();
       });
     }
 
     if (response instanceof ErrorResponse) {
-      ModalAlertWarning("Manzana", response.getMessage());
+      alertWarning("Manzana", response.getMessage());
     }
   }
 
@@ -350,7 +350,7 @@ class Manzanas extends React.Component {
     }
 
 
-    ModalAlertInfo("Manzana", "Procesando información...");
+    alertInfo("Manzana", "Procesando información...");
     hideModal("modalManzana");
 
     if (this.state.idManzana === "") {
@@ -361,7 +361,7 @@ class Manzanas extends React.Component {
   };
 
   onEventDelete = (idManzana) => {
-    ModalAlertDialog("Manzana", "¿Estás seguro de eliminar la Manzana?", async (event) => {
+    alertDialog("Manzana", "¿Estás seguro de eliminar la Manzana?", async (event) => {
       if (event) {
 
         const params = {
@@ -371,13 +371,13 @@ class Manzanas extends React.Component {
         const response = await removeManzana(params);
 
         if (response instanceof SuccessReponse) {
-          ModalAlertSuccess("Manzana", response.data, () => {
+          alertSuccess("Manzana", response.data, () => {
             this.loadInit();
           });
         }
 
         if (response instanceof ErrorResponse) {
-          ModalAlertWarning("Manzana", response.getMessage());
+          alertWarning("Manzana", response.getMessage());
         }
       }
     }
@@ -392,7 +392,7 @@ class Manzanas extends React.Component {
       return;
     }
 
-    ModalAlertDialog("Manzana", "¿Está seguro de continuar?", async (value) => {
+    alertDialog("Manzana", "¿Está seguro de continuar?", async (value) => {
       if (value) {
         const params = {
           idManzana: this.state.idManzana,
@@ -401,7 +401,7 @@ class Manzanas extends React.Component {
           idUsuario: this.state.idUsuario,
         };
 
-        ModalAlertInfo("Moneda", "Procesando información...");
+        alertInfo("Moneda", "Procesando información...");
         hideModal("modalManzanaTraslado");
 
         const response = await trasladarManzana(params);
@@ -409,13 +409,13 @@ class Manzanas extends React.Component {
         if (response instanceof SuccessReponse) {
           console.log(response.data);
 
-          ModalAlertSuccess("Manzana", response.data, () => {
+          alertSuccess("Manzana", response.data, () => {
             this.loadInit();
           });
         }
 
         if (response instanceof ErrorResponse) {
-          ModalAlertWarning("Manzana", response.getMessage());
+          alertWarning("Manzana", response.getMessage());
         }
       }
     });

@@ -8,12 +8,6 @@ export function apiComprobanteListcombo(signal, params) {
     });
 }
 
-export function apiFacturaId(signal, params) {
-    return axios.get("/api/factura/id", {
-        signal: signal,
-        params: params
-    });
-}
 
 export function apiVentaCobro(signal, params) {
     return axios.get("/api/factura/venta/cobro", {

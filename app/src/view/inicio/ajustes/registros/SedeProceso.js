@@ -1,9 +1,9 @@
 import React from 'react';
 import axios from 'axios';
 import {
-    ModalAlertInfo,
-    ModalAlertSuccess,
-    ModalAlertWarning,
+    alertInfo,
+    alertSuccess,
+    alertWarning,
     spinnerLoading,
     keyNumberInteger} from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
@@ -118,7 +118,7 @@ class SedeProceso extends React.Component {
         } else {
             try {
 
-                ModalAlertInfo("Sede", "Procesando información...");
+                alertInfo("Sede", "Procesando información...");
 
                 if (this.state.idSede !== '') {
                     let result = await axios.post('/api/sede/update', {                    
@@ -137,7 +137,7 @@ class SedeProceso extends React.Component {
                         "idSede": this.state.idSede
                     })
 
-                    ModalAlertSuccess("Sede", result.data, () => {
+                    alertSuccess("Sede", result.data, () => {
                         this.props.history.goBack();
                     });
                 } else {
@@ -154,16 +154,16 @@ class SedeProceso extends React.Component {
                         "descripcion": this.state.descripcion.trim().toUpperCase()
                     });
 
-                    ModalAlertSuccess("Sede", result.data, () => {
+                    alertSuccess("Sede", result.data, () => {
                         this.props.history.goBack();
                     });
                 }
 
             } catch (error) {
                 if (error.response) {
-                    ModalAlertWarning("Sede", error.response.data);
+                    alertWarning("Sede", error.response.data);
                 } else {
-                    ModalAlertWarning("Sede", "Se produjo un error un interno, intente nuevamente.");
+                    alertWarning("Sede", "Se produjo un error un interno, intente nuevamente.");
                 }
             }
         }

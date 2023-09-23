@@ -6,10 +6,10 @@ import {
     hideModal,
     viewModal,
     clearModal,
-    ModalAlertDialog,
-    ModalAlertInfo,
-    ModalAlertSuccess,
-    ModalAlertWarning,
+    alertDialog,
+    alertInfo,
+    alertSuccess,
+    alertWarning,
     spinnerLoading,
     statePrivilegio,
     keyUpSearch
@@ -220,10 +220,10 @@ class Perfiles extends React.Component {
             return;
         }
 
-        ModalAlertDialog("Perfil", "¿Estás seguro de continuar?", async (event) => {
+        alertDialog("Perfil", "¿Estás seguro de continuar?", async (event) => {
             if (event) {
                 try {
-                    ModalAlertInfo("Perfil", "Procesando información...");
+                    alertInfo("Perfil", "Procesando información...");
                     hideModal("modalPerfil");
                     if (this.state.idPerfil !== '') {
                         let result = await axios.post('/api/perfil/update', {
@@ -237,7 +237,7 @@ class Perfiles extends React.Component {
                             },
                         });
 
-                        ModalAlertSuccess("Perfil", result.data, () => {
+                        alertSuccess("Perfil", result.data, () => {
                             this.onEventPaginacion();
                         });
                     } else {
@@ -251,22 +251,22 @@ class Perfiles extends React.Component {
                             },
                         });
 
-                        ModalAlertSuccess("Comprobante", result.data, () => {
+                        alertSuccess("Comprobante", result.data, () => {
                             this.loadInit();
                         });
                     }
                 } catch (error) {
-                    ModalAlertWarning("Comprobante", "Se produjo un error un interno, intente nuevamente.");
+                    alertWarning("Comprobante", "Se produjo un error un interno, intente nuevamente.");
                 }
             }
         });
     }
 
     onEventDelete(idPerfil) {
-        ModalAlertDialog("Perfil", "¿Estás seguro de eliminar el perfil?", async (event) => {
+        alertDialog("Perfil", "¿Estás seguro de eliminar el perfil?", async (event) => {
             if (event) {
                 try {
-                    ModalAlertInfo("Perfil", "Procesando información...")
+                    alertInfo("Perfil", "Procesando información...")
                     let result = await axios.delete('/api/perfil', {
                         headers: {
                             Authorization: "Bearer " + this.state.token
@@ -275,14 +275,14 @@ class Perfiles extends React.Component {
                             "idPerfil": idPerfil
                         }
                     })
-                    ModalAlertSuccess("Perfil", result.data, () => {
+                    alertSuccess("Perfil", result.data, () => {
                         this.loadInit();
                     })
                 } catch (error) {
                     if (error.response !== undefined) {
-                        ModalAlertWarning("Perfil", error.response.data)
+                        alertWarning("Perfil", error.response.data)
                     } else {
-                        ModalAlertWarning("Perfil", "Se genero un error interno, intente nuevamente.")
+                        alertWarning("Perfil", "Se genero un error interno, intente nuevamente.")
                     }
                 }
             }

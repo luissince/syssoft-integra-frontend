@@ -3,9 +3,9 @@ import axios from 'axios';
 import { connect } from 'react-redux';
 import Tree from '../../../recursos/js/treeone.js';
 import {
-  ModalAlertInfo,
-  ModalAlertSuccess,
-  ModalAlertWarning,
+  alertInfo,
+  alertSuccess,
+  alertWarning,
   spinnerLoading,
   statePrivilegio
 } from '../../../helper/utils.helper';
@@ -178,14 +178,14 @@ class Accesos extends React.Component {
     }
     try {
 
-      ModalAlertInfo("Acceso", "Procesando información...");
+      alertInfo("Acceso", "Procesando información...");
 
       let result = await axios.post('/api/acceso/save', {
         "idPerfil": this.state.idPerfil,
         "menu": this.state.menu
       });
 
-      ModalAlertSuccess("Acceso", result.data, async () => {
+      alertSuccess("Acceso", result.data, async () => {
         await this.setStateAsync({
           idPerfil: "",
           menu: [],
@@ -193,7 +193,7 @@ class Accesos extends React.Component {
       });
 
     } catch (error) {
-      ModalAlertWarning("Acceso",
+      alertWarning("Acceso",
         "Se produjo un error un interno, intente nuevamente.");
     }
   }
@@ -205,14 +205,14 @@ class Accesos extends React.Component {
     }
     try {
 
-      ModalAlertInfo("Acceso", "Procesando información...");
+      alertInfo("Acceso", "Procesando información...");
 
       let result = await axios.post('/api/acceso/updatedata', {
         "idPerfil": this.state.idPerfil,
         "menu": this.state.menu
       });
 
-      ModalAlertSuccess("Acceso", result.data, async () => {
+      alertSuccess("Acceso", result.data, async () => {
         await this.setStateAsync({
           idPerfil: "",
           menu: [],
@@ -220,7 +220,7 @@ class Accesos extends React.Component {
       });
 
     } catch (error) {
-      ModalAlertWarning("Acceso",
+      alertWarning("Acceso",
         "Se produjo un error un interno, intente nuevamente.");
     }
   }

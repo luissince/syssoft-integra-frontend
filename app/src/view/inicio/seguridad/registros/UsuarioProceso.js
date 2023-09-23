@@ -3,10 +3,10 @@ import axios from 'axios';
 import {
     keyNumberPhone,
     keyNumberInteger,
-    ModalAlertDialog,
-    ModalAlertInfo,
-    ModalAlertSuccess,
-    ModalAlertWarning,
+    alertDialog,
+    alertInfo,
+    alertSuccess,
+    alertWarning,
     spinnerLoading
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
@@ -210,10 +210,10 @@ class UsuarioProceso extends React.Component {
             return;
         }
 
-        ModalAlertDialog("Usuario", "¿Está seguro de continuar?", async (value) => {
+        alertDialog("Usuario", "¿Está seguro de continuar?", async (value) => {
             if (value) {
                 try {
-                    ModalAlertInfo("Usuario", "Procesando información...");
+                    alertInfo("Usuario", "Procesando información...");
 
                     if (this.state.idUsuario !== '') {
                         let result = await axios.put('/api/usuario/', {
@@ -236,7 +236,7 @@ class UsuarioProceso extends React.Component {
                             //idUsuario
                             "idUsuario": this.state.idUsuario
                         })
-                        ModalAlertSuccess("Usuario", result.data, () => {
+                        alertSuccess("Usuario", result.data, () => {
                             this.props.history.goBack();
                         });
                     } else {
@@ -258,15 +258,15 @@ class UsuarioProceso extends React.Component {
                             "clave": this.state.clave.trim().toUpperCase(),
                         });
 
-                        ModalAlertSuccess("Usuario", result.data, () => {
+                        alertSuccess("Usuario", result.data, () => {
                             this.props.history.goBack();
                         });
                     }
                 } catch (error) {
                     if (error.response) {
-                        ModalAlertWarning("Usuario", error.response.data);
+                        alertWarning("Usuario", error.response.data);
                     } else {
-                        ModalAlertWarning("Usuario", "Se produjo un error un interno, intente nuevamente.");
+                        alertWarning("Usuario", "Se produjo un error un interno, intente nuevamente.");
                     }
                 }
             }

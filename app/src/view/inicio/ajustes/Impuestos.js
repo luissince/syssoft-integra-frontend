@@ -7,10 +7,10 @@ import {
     hideModal,
     viewModal,
     clearModal,
-    ModalAlertDialog,
-    ModalAlertInfo,
-    ModalAlertSuccess,
-    ModalAlertWarning,
+    alertDialog,
+    alertInfo,
+    alertSuccess,
+    alertWarning,
     spinnerLoading,
     statePrivilegio,
     keyUpSearch
@@ -217,7 +217,7 @@ class Impuestos extends React.Component {
             this.refPorcentaje.current.focus();
         } else {
             try {
-                ModalAlertInfo("Impuesto", "Procesando información...");
+                alertInfo("Impuesto", "Procesando información...");
                 hideModal("modalImpuesto");
                 if (this.state.idImpuesto !== "") {
                     const result = await axios.post('/api/impuesto/edit', {
@@ -229,7 +229,7 @@ class Impuestos extends React.Component {
                         "idUsuario": this.state.idUsuario,
                     });
 
-                    ModalAlertSuccess("Impuesto", result.data, () => {
+                    alertSuccess("Impuesto", result.data, () => {
                         this.onEventPaginacion();
                     });
                 } else {
@@ -241,34 +241,34 @@ class Impuestos extends React.Component {
                         "idUsuario": this.state.idUsuario,
                     });
 
-                    ModalAlertSuccess("Impuesto", result.data, () => {
+                    alertSuccess("Impuesto", result.data, () => {
                         this.loadInit();
                     });
                 }
             } catch (err) {
-                ModalAlertWarning("Impuesto", "Se produjo un error un interno, intente nuevamente.");
+                alertWarning("Impuesto", "Se produjo un error un interno, intente nuevamente.");
             }
         }
     }
 
     onEventDelete(idImpuesto) {
-        ModalAlertDialog("Impuesto", "¿Estás seguro de eliminar la moneda?", async (event) => {
+        alertDialog("Impuesto", "¿Estás seguro de eliminar la moneda?", async (event) => {
             if (event) {
                 try {
-                    ModalAlertInfo("Impuesto", "Procesando información...")
+                    alertInfo("Impuesto", "Procesando información...")
                     let result = await axios.delete('/api/impuesto', {
                         params: {
                             "idImpuesto": idImpuesto
                         }
                     })
-                    ModalAlertSuccess("Impuesto", result.data, () => {
+                    alertSuccess("Impuesto", result.data, () => {
                         this.loadInit();
                     })
                 } catch (error) {
                     if (error.response !== undefined) {
-                        ModalAlertWarning("Impuesto", error.response.data)
+                        alertWarning("Impuesto", error.response.data)
                     } else {
-                        ModalAlertWarning("Impuesto", "Se genero un error interno, intente nuevamente.")
+                        alertWarning("Impuesto", "Se genero un error interno, intente nuevamente.")
                     }
                 }
             }

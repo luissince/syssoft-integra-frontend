@@ -1,5 +1,4 @@
 import React from 'react';
-import axios from 'axios';
 import CryptoJS from 'crypto-js';
 import {
     formatMoney,
@@ -11,6 +10,10 @@ import {
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../../components/Container';
+import { getCobroId } from '../../../../network/rest/principal.network';
+import SuccessReponse from '../../../../model/class/response';
+import ErrorResponse from '../../../../model/class/error';
+import { CANCELED } from '../../../../model/types/types';
 
 class CobroDetalle extends React.Component {
     constructor(props) {
@@ -62,47 +65,49 @@ class CobroDetalle extends React.Component {
     }
 
     async loadDataId(id) {
-        try {
-            const result = await axios.get('/api/cobro/id', {
-                signal: this.abortControllerView.signal,
-                params: {
-                    idCobro: id
-                }
-            });
 
-            const cabecera = result.data.cabecera;
+        const params = {
+            idCobro: id
+        }
+
+        const response = await getCobroId(params, this.abortControllerView.signal);
+
+        if (response instanceof SuccessReponse) {
+            const { cabecera, lote, detalle, venta } = response.data;
+            const { comprobante, serie, numeracion, estado, documento, informacion, fecha, hora, banco, observacion, metodoPago, monto, simbolo, codiso, usuario, idNotaCredito } = cabecera;
 
             await this.setStateAsync({
                 idCobro: id,
-                comprobante: cabecera.comprobante + " " + cabecera.serie + "-" + cabecera.numeracion,
-                estado: cabecera.estado.toString(),
-                cliente: cabecera.documento + " - " + cabecera.informacion,
-                fecha: cabecera.fecha + " " + timeForma24(cabecera.hora),
-                cuentaBancaria: cabecera.banco,
-                notas: cabecera.observacion,
-                metodoPago: cabecera.metodoPago === 1 ? "Efectivo"
-                    : cabecera.metodoPago === 2 ? "Consignación"
-                        : cabecera.metodoPago === 3 ? "Transferencia"
-                            : cabecera.metodoPago === 4 ? "Cheque"
-                                : cabecera.metodoPago === 5 ? "Tarjeta crédito"
+                comprobante: `${comprobante} ${serie}-${numeracion}`,
+                estado: estado.toString(),
+                cliente: `${documento} - ${informacion}`,
+                fecha: `${fecha} ${timeForma24(hora)}`,
+                cuentaBancaria: banco,
+                notas: observacion,
+                metodoPago: metodoPago === 1 ? "Efectivo"
+                    : metodoPago === 2 ? "Consignación"
+                        : metodoPago === 3 ? "Transferencia"
+                            : metodoPago === 4 ? "Cheque"
+                                : metodoPago === 5 ? "Tarjeta crédito"
                                     : "Tarjeta débito",
-                total: cabecera.monto,
-                simbolo: cabecera.simbolo,
-                codiso: cabecera.codiso,
-                lote: result.data.lote.length == 0 ? "" : result.data.lote[0].lote + " - " + result.data.lote[0].manzana,
-
-                usuario: cabecera.usuario,
-                idNotaCredito: cabecera.idNotaCredito,
-
-                cobro: result.data.detalle.length !== 0 ? true : false,
-                detalle: result.data.detalle.length !== 0 ? result.data.detalle : result.data.venta,
-
+                total: monto,
+                simbolo,
+                codiso,
+                lote: lote.length === 0 ? "" : `${lote[0].lote} - ${lote[0].manzana}`,
+                usuario,
+                idNotaCredito,
+                cobro: detalle.length !== 0,
+                detalle: detalle.length !== 0 ? detalle : venta,
                 loading: false
             });
-        } catch (error) {
-            if (error.message !== "canceled") {
-                this.props.history.goBack();
-            }
+        }
+
+        if (response instanceof ErrorResponse) {
+            if (response.getType() === CANCELED) return;
+
+            console.log(response.getMessage())
+
+            this.props.history.goBack();
         }
     }
 

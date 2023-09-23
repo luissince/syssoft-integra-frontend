@@ -6,6 +6,9 @@ import FileDownloader from "../../../components/FileDownloader";
 import { spinnerLoading, currentDate, getCurrentYear } from '../../../helper/utils.helper';
 import SearchBarClient from "../../../components/SearchBarClient";
 import ContainerWrapper from '../../../components/Container';
+import { listarClientesFilter } from '../../../network/rest/principal.network';
+import SuccessReponse from '../../../model/class/response';
+import ErrorResponse from '../../../model/class/error';
 
 class RepClientes extends React.Component {
 
@@ -93,15 +96,19 @@ class RepClientes extends React.Component {
 
         if (this.state.filter) return;
 
-        try {
-            await this.setStateAsync({ filter: true });
-            let result = await axios.get("/api/cliente/listfiltrar", {
-                params: {
-                    filtrar: searchWord,
-                },
-            });
-            await this.setStateAsync({ filter: false, clientes: result.data });
-        } catch (error) {
+        await this.setStateAsync({ filter: true });
+
+        const params = {
+            filtrar: searchWord,
+        }
+
+        const response = await listarClientesFilter(params);
+
+        if (response instanceof SuccessReponse) {
+            await this.setStateAsync({ filter: false, clientes: response.data });
+        }
+
+        if (response instanceof ErrorResponse) {
             await this.setStateAsync({ filter: false, clientes: [] });
         }
     }
@@ -336,6 +343,7 @@ class RepClientes extends React.Component {
                                             <div className="form-group">
                                                 <label>Cliente(s)</label>
                                                 <SearchBarClient
+                                                    desing={false}
                                                     placeholder="Filtrar clientes..."
                                                     refCliente={this.refCliente}
                                                     cliente={this.state.cliente}

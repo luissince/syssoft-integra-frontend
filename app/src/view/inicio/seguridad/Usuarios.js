@@ -6,10 +6,10 @@ import {
     showModal,
     hideModal,
     clearModal,
-    ModalAlertDialog,
-    ModalAlertInfo,
-    ModalAlertSuccess,
-    ModalAlertWarning,
+    alertDialog,
+    alertInfo,
+    alertSuccess,
+    alertWarning,
     spinnerLoading,
     statePrivilegio,
     keyUpSearch
@@ -144,23 +144,23 @@ class Usuarios extends React.Component {
     }
 
     onEventDelete(idUsuario) {
-        ModalAlertDialog("Eliminar Usuario", "¿Está seguro de que desea eliminar el usuario? Esta operación no se puede deshacer.", async (value) => {
+        alertDialog("Eliminar Usuario", "¿Está seguro de que desea eliminar el usuario? Esta operación no se puede deshacer.", async (value) => {
             if (value) {
                 try {
-                    ModalAlertInfo("Usuario", "Procesando información...")
+                    alertInfo("Usuario", "Procesando información...")
                     let result = await axios.delete('/api/usuario', {
                         params: {
                             "idUsuario": idUsuario
                         }
                     })
-                    ModalAlertSuccess("Usuario", result.data, () => {
+                    alertSuccess("Usuario", result.data, () => {
                         this.loadInit();
                     })
                 } catch (error) {
                     if (error.response !== undefined) {
-                        ModalAlertWarning("Usuario", error.response.data)
+                        alertWarning("Usuario", error.response.data)
                     } else {
-                        ModalAlertWarning("Usuario", "Se genero un error interno, intente nuevamente.")
+                        alertWarning("Usuario", "Se genero un error interno, intente nuevamente.")
                     }
                 }
             }
@@ -179,19 +179,19 @@ class Usuarios extends React.Component {
         }
 
         try {
-            ModalAlertInfo("Usuario", "Procesando información...");
+            alertInfo("Usuario", "Procesando información...");
             hideModal("modalClave");
             let result = await axios.post("/api/usuario/reset", {
                 "clave": this.state.resetClave,
                 "idUsuario": this.state.idUsuario
             });
 
-            ModalAlertSuccess("Usuario", result.data);
+            alertSuccess("Usuario", result.data);
         } catch (error) {
             if (error.response) {
-                ModalAlertWarning("Usuario", error.response.data);
+                alertWarning("Usuario", error.response.data);
             } else {
-                ModalAlertWarning("Usuario", "Se produjo un error un interno, intente nuevamente.");
+                alertWarning("Usuario", "Se produjo un error un interno, intente nuevamente.");
             }
         }
     }

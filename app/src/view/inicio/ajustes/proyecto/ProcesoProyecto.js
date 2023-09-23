@@ -4,10 +4,10 @@ import {
     imageBase64,
     isNumeric,
     keyNumberFloat,
-    ModalAlertDialog,
-    ModalAlertInfo,
-    ModalAlertSuccess,
-    ModalAlertWarning,
+    alertDialog,
+    alertInfo,
+    alertSuccess,
+    alertWarning,
     spinnerLoading
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
@@ -248,33 +248,33 @@ class ProcesoProyecto extends React.Component {
             return;
         }
 
-        ModalAlertDialog("Proyecto", "¿Está seguro de continuar?", async (event) => {
+        alertDialog("Proyecto", "¿Está seguro de continuar?", async (event) => {
             if (event) {
                 try {
-                    ModalAlertInfo("Proyecto", "Procesando información...");
+                    alertInfo("Proyecto", "Procesando información...");
 
                     const imageSend = await imageBase64(this.refFileImagen)
                     if (imageSend) {
                         const { base64String, extension, width, height } = imageSend;
                         if (width === 1024 && height === 629) {
                             let result = await this.saveProject(base64String, extension);
-                            ModalAlertSuccess("Proyecto", result.data, () => {
+                            alertSuccess("Proyecto", result.data, () => {
                                 this.props.history.goBack();
                             });
                         } else {
-                            ModalAlertWarning("Proyecto", "La imagen a subir no tiene el tamaño establecido.");
+                            alertWarning("Proyecto", "La imagen a subir no tiene el tamaño establecido.");
                         }
                     } else {
                         let result = await this.saveProject("", "");
-                        ModalAlertSuccess("Proyecto", result.data, () => {
+                        alertSuccess("Proyecto", result.data, () => {
                             this.props.history.goBack();
                         });
                     }
                 } catch (error) {
                     if (error.response) {
-                        ModalAlertWarning("Proyecto", error.response.data)
+                        alertWarning("Proyecto", error.response.data)
                     } else {
-                        ModalAlertWarning("Proyecto", "Se genero un error interno, intente nuevamente.")
+                        alertWarning("Proyecto", "Se genero un error interno, intente nuevamente.")
                     }
                 }
             }

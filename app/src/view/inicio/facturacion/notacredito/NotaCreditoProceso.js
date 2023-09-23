@@ -6,11 +6,11 @@ import {
     currentDate,
     calculateTaxBruto,
     calculateTax,
-    ModalAlertInfo,
-    ModalAlertDialog,
-    ModalAlertSuccess,
-    ModalAlertWarning,
-    ModalAlertError,
+    alertInfo,
+    alertDialog,
+    alertSuccess,
+    alertWarning,
+    alertError,
 } from '../../../../helper/utils.helper';
 import { apiComprobanteListcombo } from '../../../../network/api';
 import { connect } from 'react-redux';
@@ -140,9 +140,9 @@ class NotaCreditoProceso extends React.Component {
             });
         } catch (error) {
             if (error.response) {
-                ModalAlertWarning("Nota de Crédito", error.response.data)
+                alertWarning("Nota de Crédito", error.response.data)
             } else {
-                ModalAlertError("Nota de Crédito", "Se genero un error interno, intente nuevamente.")
+                alertError("Nota de Crédito", "Se genero un error interno, intente nuevamente.")
             }
 
             await this.setStateAsync({
@@ -170,10 +170,10 @@ class NotaCreditoProceso extends React.Component {
             return;
         }
 
-        ModalAlertDialog("Nota de Crédito", "¿Estás seguro de continuar?", async (event) => {
+        alertDialog("Nota de Crédito", "¿Estás seguro de continuar?", async (event) => {
             if (event) {
                 try {
-                    ModalAlertInfo("Nota de Crédito", "Procesando información...");
+                    alertInfo("Nota de Crédito", "Procesando información...");
 
                     let result = await axios.post('/api/notacredito/add', {
                         idComprobante: this.state.idComprobante,
@@ -187,15 +187,15 @@ class NotaCreditoProceso extends React.Component {
                         detalle: this.state.detalle
                     });
 
-                    ModalAlertSuccess("Nota de Crédito", result.data, () => {
+                    alertSuccess("Nota de Crédito", result.data, () => {
                         this.onEventLimpiar()
                     });
                 }
                 catch (error) {
                     if (error.response) {
-                        ModalAlertWarning("Nota de Crédito", error.response.data)
+                        alertWarning("Nota de Crédito", error.response.data)
                     } else {
-                        ModalAlertWarning("Nota de Crédito", "Se genero un error interno, intente nuevamente.")
+                        alertWarning("Nota de Crédito", "Se genero un error interno, intente nuevamente.")
                     }
                 }
             }

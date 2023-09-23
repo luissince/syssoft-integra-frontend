@@ -4,17 +4,17 @@ import {
     spinnerLoading,
     numberFormat,
     timeForma24,
-    ModalAlertDialog,
-    ModalAlertInfo,
-    ModalAlertSuccess,
-    ModalAlertWarning,
-    ModalAlertError,
+    alertDialog,
+    alertInfo,
+    alertSuccess,
+    alertWarning,
+    alertError,
     statePrivilegio,
     keyUpSearch
-} from '../../../helper/utils.helper';
+} from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
-import Paginacion from '../../../components/Paginacion';
-import ContainerWrapper from '../../../components/Container';
+import Paginacion from '../../../../components/Paginacion';
+import ContainerWrapper from '../../../../components/Container';
 
 class NotaCredito extends React.Component {
     constructor(props) {
@@ -134,24 +134,24 @@ class NotaCredito extends React.Component {
     }
 
     onEventAnularNotaCredito(idNotaCredito) {
-        ModalAlertDialog("Nota de Crédito", "¿Está seguro de que desea eliminar la nota de crédito? Esta operación no se puede deshacer.", async (value) => {
+        alertDialog("Nota de Crédito", "¿Está seguro de que desea eliminar la nota de crédito? Esta operación no se puede deshacer.", async (value) => {
             if (value) {
                 try {
-                    ModalAlertInfo("Nota de Crédito", "Procesando información...");
+                    alertInfo("Nota de Crédito", "Procesando información...");
                     let result = await axios.delete('/api/notacredito/', {
                         params: {
                             "idNotaCredito": idNotaCredito,
                             "idUsuario": this.state.idUsuario
                         }
                     })
-                    ModalAlertSuccess("Nota de Crédito", result.data, () => {
+                    alertSuccess("Nota de Crédito", result.data, () => {
                         this.onEventPaginacion();
                     })
                 } catch (error) {
                     if (error.response) {
-                        ModalAlertWarning("Nota de Crédito", error.response.data)
+                        alertWarning("Nota de Crédito", error.response.data)
                     } else {
-                        ModalAlertError("Nota de Crédito", "Se genero un error interno, intente nuevamente.")
+                        alertError("Nota de Crédito", "Se genero un error interno, intente nuevamente.")
                     }
                 }
             }

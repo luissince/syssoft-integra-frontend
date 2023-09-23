@@ -6,10 +6,10 @@ import {
   hideModal,
   viewModal,
   clearModal,
-  ModalAlertDialog,
-  ModalAlertInfo,
-  ModalAlertSuccess,
-  ModalAlertWarning,
+  alertDialog,
+  alertInfo,
+  alertSuccess,
+  alertWarning,
   spinnerLoading,
   statePrivilegio,
   keyUpSearch,
@@ -272,7 +272,7 @@ class Bancos extends React.Component {
       this.refTxtMoneda.current.focus();
     } else {
       try {
-        ModalAlertInfo("Banco", "Procesando información...");
+        alertInfo("Banco", "Procesando información...");
         hideModal("modalBanco");
         if (this.state.idBanco !== "") {
           const result = await axios.put("/api/banco/", {
@@ -285,7 +285,7 @@ class Bancos extends React.Component {
             idBanco: this.state.idBanco,
           });
 
-          ModalAlertSuccess("Banco", result.data, () => {
+          alertSuccess("Banco", result.data, () => {
             this.onEventPaginacion();
           });
         } else {
@@ -298,15 +298,15 @@ class Bancos extends React.Component {
             idUsuario: this.state.idUsuario,
           });
 
-          ModalAlertSuccess("Banco", result.data, () => {
+          alertSuccess("Banco", result.data, () => {
             this.loadInit();
           });
         }
       } catch (error) {
         if (error.response !== undefined) {
-          ModalAlertWarning("Banco", error.response.data);
+          alertWarning("Banco", error.response.data);
         } else {
-          ModalAlertWarning(
+          alertWarning(
             "Banco",
             "Se genero un error interno, intente nuevamente."
           );
@@ -316,26 +316,26 @@ class Bancos extends React.Component {
   }
 
   onEventDelete(idBanco) {
-    ModalAlertDialog(
+    alertDialog(
       "Banco",
       "¿Estás seguro de eliminar el banco?",
       async (event) => {
         if (event) {
           try {
-            ModalAlertInfo("Banco", "Procesando información...");
+            alertInfo("Banco", "Procesando información...");
             let result = await axios.delete("/api/banco", {
               params: {
                 idBanco: idBanco,
               },
             });
-            ModalAlertSuccess("Banco", result.data, () => {
+            alertSuccess("Banco", result.data, () => {
               this.loadInit();
             });
           } catch (error) {
             if (error.response !== undefined) {
-              ModalAlertWarning("Banco", error.response.data);
+              alertWarning("Banco", error.response.data);
             } else {
-              ModalAlertWarning(
+              alertWarning(
                 "Banco",
                 "Se genero un error interno, intente nuevamente."
               );

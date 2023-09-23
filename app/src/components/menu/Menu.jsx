@@ -2,7 +2,7 @@ import React from "react";
 import { NavLink } from 'react-router-dom';
 import { images } from "../../helper";
 
-const Menu = ({ url, token: { project, userToken }, location: { pathname } }) => {
+const Menu = ({ url, token: { project, userToken }}) => {
 
     const onEventOverlay = () => {
         const sidebar = document.getElementById("sidebar");

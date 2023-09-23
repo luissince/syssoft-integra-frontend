@@ -6,17 +6,21 @@ import {
     hideModal,
     viewModal,
     clearModal,
-    ModalAlertDialog,
-    ModalAlertInfo,
-    ModalAlertSuccess,
-    ModalAlertWarning,
+    alertDialog,
+    alertInfo,
+    alertSuccess,
+    alertWarning,
     spinnerLoading,
     statePrivilegio,
     keyUpSearch
-} from '../../../helper/utils.helper';
+} from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
-import Paginacion from '../../../components/Paginacion';
-import ContainerWrapper from '../../../components/Container';
+import Paginacion from '../../../../components/Paginacion';
+import ContainerWrapper from '../../../../components/Container';
+import { listConceptos } from '../../../../network/rest/principal.network';
+import SuccessReponse from '../../../../model/class/response';
+import ErrorResponse from '../../../../model/class/error';
+import { CANCELED } from '../../../../model/types/types';
 
 class Conceptos extends React.Component {
     constructor(props) {
@@ -128,38 +132,40 @@ class Conceptos extends React.Component {
     }
 
     fillTable = async (opcion, buscar) => {
-        try {
-            await this.setStateAsync({ loading: true, lista: [], messageTable: "Cargando información...", messagePaginacion: "Mostranto 0 de 0 Páginas" });
 
-            const result = await axios.get('/api/concepto/list', {
-                signal: this.abortControllerTable.signal,
-                params: {
-                    "opcion": opcion,
-                    "buscar": buscar.trim().toUpperCase(),
-                    "posicionPagina": ((this.state.paginacion - 1) * this.state.filasPorPagina),
-                    "filasPorPagina": this.state.filasPorPagina
-                }
-            });
+        await this.setStateAsync({ loading: true, lista: [], messageTable: "Cargando información...", messagePaginacion: "Mostranto 0 de 0 Páginas" });
 
-            let totalPaginacion = parseInt(Math.ceil((parseFloat(result.data.total) / this.state.filasPorPagina)));
-            let messagePaginacion = `Mostrando ${result.data.result.length} de ${totalPaginacion} Páginas`;
+        const params = {
+            "opcion": opcion,
+            "buscar": buscar.trim().toUpperCase(),
+            "posicionPagina": ((this.state.paginacion - 1) * this.state.filasPorPagina),
+            "filasPorPagina": this.state.filasPorPagina
+        }
+
+        const response = await listConceptos(params, this.abortControllerTable.signal);
+
+        if (response instanceof SuccessReponse) {
+            const totalPaginacion = parseInt(Math.ceil((parseFloat(response.data.total) / this.state.filasPorPagina)));
+            const messagePaginacion = `Mostrando ${response.data.result.length} de ${totalPaginacion} Páginas`;
 
             await this.setStateAsync({
                 loading: false,
-                lista: result.data.result,
+                lista: response.data.result,
                 totalPaginacion: totalPaginacion,
                 messagePaginacion: messagePaginacion
             });
-        } catch (error) {
-            if (error.message !== "canceled") {
-                await this.setStateAsync({
-                    loading: false,
-                    lista: [],
-                    totalPaginacion: 0,
-                    messageTable: "Se produjo un error interno, intente nuevamente por favor.",
-                    messagePaginacion: "Mostranto 0 de 0 Páginas",
-                });
-            }
+        }
+
+        if (response instanceof ErrorResponse) {
+            if (response.getType() === CANCELED) return;
+
+            await this.setStateAsync({
+                loading: false,
+                lista: [],
+                totalPaginacion: 0,
+                messageTable: "Se produjo un error interno, intente nuevamente por favor.",
+                messagePaginacion: "Mostranto 0 de 0 Páginas",
+            });
         }
     }
 
@@ -207,7 +213,7 @@ class Conceptos extends React.Component {
             this.tipo.current.focus();
         } else {
             try {
-                ModalAlertInfo("Concepto", "Procesando información...");
+                alertInfo("Concepto", "Procesando información...");
                 hideModal("modalConcepto");
                 if (this.state.idConcepto !== '') {
                     const result = await axios.post('/api/concepto/update', {
@@ -218,7 +224,7 @@ class Conceptos extends React.Component {
                         "idConcepto": this.state.idConcepto
                     })
 
-                    ModalAlertSuccess("Concepto", result.data, () => {
+                    alertSuccess("Concepto", result.data, () => {
                         this.onEventPaginacion();
                     });
                 } else {
@@ -229,34 +235,34 @@ class Conceptos extends React.Component {
                         "idUsuario": this.state.idUsuario,
                     });
 
-                    ModalAlertSuccess("Concepto", result.data, () => {
+                    alertSuccess("Concepto", result.data, () => {
                         this.loadInit();
                     });
                 }
             } catch (error) {
-                ModalAlertWarning("Concepto", "Se produjo un error un interno, intente nuevamente.");
+                alertWarning("Concepto", "Se produjo un error un interno, intente nuevamente.");
             }
         }
     }
 
     onEventDelete(idConcepto) {
-        ModalAlertDialog("Concepto", "¿Estás seguro de eliminar el concepto?", async (event) => {
+        alertDialog("Concepto", "¿Estás seguro de eliminar el concepto?", async (event) => {
             if (event) {
                 try {
-                    ModalAlertInfo("Moneda", "Procesando información...")
+                    alertInfo("Moneda", "Procesando información...")
                     let result = await axios.delete('/api/concepto', {
                         params: {
                             "idConcepto": idConcepto
                         }
                     })
-                    ModalAlertSuccess("Concepto", result.data, () => {
+                    alertSuccess("Concepto", result.data, () => {
                         this.loadInit();
                     })
                 } catch (error) {
                     if (error.response !== undefined) {
-                        ModalAlertWarning("Concepto", error.response.data)
+                        alertWarning("Concepto", error.response.data)
                     } else {
-                        ModalAlertWarning("Concepto", "Se genero un error interno, intente nuevamente.")
+                        alertWarning("Concepto", "Se genero un error interno, intente nuevamente.")
                     }
                 }
             }
@@ -413,6 +419,7 @@ class Conceptos extends React.Component {
                                         <th width="5%" className="text-center">#</th>
                                         <th width="25%">Concepto</th>
                                         <th width="20%">Tipo Concepto</th>
+                                        <th width="10%">Sistema</th>
                                         <th width="10%">Creacion</th>
                                         <th width="5%" className="text-center">Editar</th>
                                         <th width="5%" className="text-center">Eliminar</th>
@@ -422,13 +429,13 @@ class Conceptos extends React.Component {
                                     {
                                         this.state.loading ? (
                                             <tr>
-                                                <td className="text-center" colSpan="6">
+                                                <td className="text-center" colSpan="7">
                                                     {spinnerLoading()}
                                                 </td>
                                             </tr>
                                         ) : this.state.lista.length === 0 ? (
                                             <tr className="text-center">
-                                                <td colSpan="6">¡No hay datos registrados!</td>
+                                                <td colSpan="7">¡No hay datos registrados!</td>
                                             </tr>
                                         ) : (
                                             this.state.lista.map((item, index) => {
@@ -437,6 +444,7 @@ class Conceptos extends React.Component {
                                                         <td className="text-center">{item.id}</td>
                                                         <td>{item.nombre}</td>
                                                         <td>{item.tipo === 1 ? 'CONCEPTO DE GASTO' : 'CONCEPTO DE COBRO'}</td>
+                                                        <td>{item.sistema === 1 ? 'SISTEMA' : 'LIBRE'}</td>
                                                         <td>{item.fecha}{<br />}{timeForma24(item.hora)}</td>
                                                         <td className="text-center">
                                                             <button

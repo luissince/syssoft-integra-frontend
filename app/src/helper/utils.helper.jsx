@@ -412,17 +412,7 @@ export function imageSizeData(data) {
   });
 }
 
-export function ModalAlertClear() {
-  Swal({
-    type: "info",
-    showConfirmButton: false,
-    allowOutsideClick: false,
-    allowEscapeKey: false,
-    clearModal: true,
-  });
-}
-
-export function ModalAlertInfo(title, message) {
+export function alertInfo(title, message) {
   Swal({
     title: title,
     text: message,
@@ -433,41 +423,44 @@ export function ModalAlertInfo(title, message) {
   });
 }
 
-export function ModalAlertSuccess(title, message, callback = function () { }) {
+export function alertSuccess(title, message, callback = function () { }) {
   Swal({
     title: title,
     text: message,
     type: "success",
     showConfirmButton: true,
     allowOutsideClick: false,
+    showCloseButton: true
   }).then((event) => {
     callback();
   });
 }
 
-export function ModalAlertWarning(title, message, callback = function () { }) {
+export function alertWarning(title, message, callback = function () { }) {
   Swal({
     title: title,
     text: message,
     type: "warning",
     showConfirmButton: true,
     allowOutsideClick: false,
+    showCloseButton: true
   }).then((event) => {
     callback();
   });
 }
 
-export function ModalAlertError(title, message) {
+export function alertError(title, message) {
   Swal({
     title: title,
     text: message,
     type: "error",
     showConfirmButton: true,
     allowOutsideClick: false,
+    showCloseButton: true
   });
 }
 
-export function ModalAlertDialog(title, mensaje, callback) {
+export function alertDialog(title, mensaje, callback) {
   Swal({
     title: title,
     text: mensaje,
@@ -476,6 +469,7 @@ export function ModalAlertDialog(title, mensaje, callback) {
     confirmButtonText: "Si",
     cancelButtonText: "No",
     allowOutsideClick: false,
+    showCloseButton: true
   }).then((isConfirm) => {
     if (isConfirm.value === undefined) {
       return false;

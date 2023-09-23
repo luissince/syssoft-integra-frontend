@@ -6,10 +6,10 @@ import {
     keyNumberInteger,
     keyNumberPhone,
     spinnerLoading,
-    ModalAlertDialog,
-    ModalAlertInfo,
-    ModalAlertSuccess,
-    ModalAlertWarning,
+    alertDialog,
+    alertInfo,
+    alertSuccess,
+    alertWarning,
 } from '../../helper/utils.helper';
 import { connect } from 'react-redux';
 import { configSave } from '../../redux/actions';
@@ -147,7 +147,7 @@ class Configurar extends React.Component {
         }
 
 
-        ModalAlertDialog("Mi Empresa", "¿Está seguro de continuar?", async (event) => {
+        alertDialog("Mi Empresa", "¿Está seguro de continuar?", async (event) => {
             if (event) {
                 try {
                     let logoSend = await imageBase64(this.refFileLogo);
@@ -158,7 +158,7 @@ class Configurar extends React.Component {
                     let baseImage = imageSend ? imageSend.base64String : "";
                     let extImage = imageSend ? imageSend.extension : "";
 
-                    ModalAlertInfo("Mi Empresa", "Procesando información...");
+                    alertInfo("Mi Empresa", "Procesando información...");
 
                     let result = await axios.post('/api/empresa/save', {
                         documento: this.state.documento.trim(),
@@ -175,15 +175,15 @@ class Configurar extends React.Component {
                         extimage: extImage
                     });
 
-                    ModalAlertSuccess("Mi Empresa", result.data, () => {
+                    alertSuccess("Mi Empresa", result.data, () => {
                         this.props.configSave();
                         window.location.href = "/";
                     });
                 } catch (error) {
                     if (error.response) {
-                        ModalAlertWarning("Mi Empresa", error.response.data);
+                        alertWarning("Mi Empresa", error.response.data);
                     } else {
-                        ModalAlertWarning("Mi Empresa", "Se produjo un error un interno, intente nuevamente.");
+                        alertWarning("Mi Empresa", "Se produjo un error un interno, intente nuevamente.");
                     }
                 }
             }
