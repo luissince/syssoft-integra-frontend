@@ -386,3 +386,20 @@ export async function getCobroId(params, signal) {
     })
   );
 }
+
+export async function listClientes(params, signal) {
+  return await Resolve.create(
+    instance.get('/api/cliente/list', {
+      signal: signal,
+      params: params
+    })
+  );
+}
+
+export async function deleteCliente(params, signal) {
+  return await Resolve.create(
+    instance.delete('/api/cliente', {
+      params: params
+    })
+  );
+}

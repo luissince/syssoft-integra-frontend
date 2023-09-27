@@ -32,10 +32,9 @@ class CobroDetalle extends React.Component {
             total: '',
             codiso: '',
             simbolo: '',
-            lote: '',
 
-            cobro: true,
-            detalle: [],
+            cobroVenta: [],
+            cobroDetalle: [],
 
             loading: true,
             msgLoading: 'Cargando datos...',
@@ -72,9 +71,37 @@ class CobroDetalle extends React.Component {
 
         const response = await getCobroId(params, this.abortControllerView.signal);
 
-        if (response instanceof SuccessReponse) {
-            const { cabecera, lote, detalle, venta } = response.data;
+        if (response instanceof SuccessReponse) {            
+            const {
+                cabecera,
+                cobroVenta,
+                cobroDetalle             
+            } = response.data;
             const { comprobante, serie, numeracion, estado, documento, informacion, fecha, hora, banco, observacion, metodoPago, monto, simbolo, codiso, usuario, idNotaCredito } = cabecera;
+
+            const metodoPago_ = function(){
+                if(metodoPago === 1){
+                    return "Efectivo";
+                } 
+
+                if(metodoPago === 2){
+                    return "Consignación";
+                } 
+
+                if(metodoPago === 3){
+                    return "Transferencia";
+                } 
+
+                if(metodoPago === 4){
+                    return  "Cheque";
+                } 
+
+                if(metodoPago === 5){
+                    return "Tarjeta crédito";
+                } 
+
+                return "Tarjeta débito";
+            }
 
             await this.setStateAsync({
                 idCobro: id,
@@ -84,20 +111,14 @@ class CobroDetalle extends React.Component {
                 fecha: `${fecha} ${timeForma24(hora)}`,
                 cuentaBancaria: banco,
                 notas: observacion,
-                metodoPago: metodoPago === 1 ? "Efectivo"
-                    : metodoPago === 2 ? "Consignación"
-                        : metodoPago === 3 ? "Transferencia"
-                            : metodoPago === 4 ? "Cheque"
-                                : metodoPago === 5 ? "Tarjeta crédito"
-                                    : "Tarjeta débito",
+                metodoPago: metodoPago_(),
                 total: monto,
                 simbolo,
-                codiso,
-                lote: lote.length === 0 ? "" : `${lote[0].lote} - ${lote[0].manzana}`,
+                codiso,            
                 usuario,
                 idNotaCredito,
-                cobro: detalle.length !== 0,
-                detalle: detalle.length !== 0 ? detalle : venta,
+                cobroVenta: cobroVenta,
+                cobroDetalle: cobroDetalle,
                 loading: false
             });
         }
@@ -109,65 +130,6 @@ class CobroDetalle extends React.Component {
 
             this.props.history.goBack();
         }
-    }
-
-
-    renderTotal() {
-        let subTotal = 0;
-        let impuestoTotal = 0;
-        let total = 0;
-
-        if (this.state.cobro) {
-            for (let item of this.state.detalle) {
-                let cantidad = item.cantidad;
-                let valor = item.precio;
-
-                let impuesto = item.porcentaje;
-
-                let valorActual = cantidad * valor;
-                let valorSubNeto = calculateTaxBruto(impuesto, valorActual);
-                let valorImpuesto = calculateTax(impuesto, valorSubNeto);
-                let valorNeto = valorSubNeto + valorImpuesto;
-
-                subTotal += valorSubNeto;
-                impuestoTotal += valorImpuesto;
-                total += valorNeto;
-            }
-        } else {
-            for (let item of this.state.detalle) {
-                total += item.precio;
-            }
-        }
-
-        return (
-            <>
-                {
-                    this.state.cobro ?
-                        <>
-                            <tr>
-                                <th className="text-right">Sub Total:</th>
-                                <th className="text-right">{numberFormat(subTotal, this.state.codiso)}</th>
-                            </tr>
-                            <tr>
-                                <th className="text-right">Impuesto:</th>
-                                <th className="text-right">{numberFormat(impuestoTotal, this.state.codiso)}</th>
-                            </tr>
-                            <tr className="border-bottom">
-                            </tr>
-                            <tr>
-                                <th className="text-right h5">Total:</th>
-                                <th className="text-right h5">{numberFormat(total, this.state.codiso)}</th>
-                            </tr>
-                        </> :
-                        <>
-                            <tr>
-                                <th className="text-right h5">Total:</th>
-                                <th className="text-right h5">{numberFormat(total, this.state.codiso)}</th>
-                            </tr>
-                        </>
-                }
-            </>
-        )
     }
 
     onEventImprimir() {
@@ -190,6 +152,88 @@ class CobroDetalle extends React.Component {
         let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
         let params = new URLSearchParams({ "params": ciphertext });
         window.open("/api/cobro/repcomprobantematricial?" + params, "_blank");
+    }
+
+    renderTotal() {
+        if (this.state.cobroDetalle.length !== 0) {
+            let subTotal = 0;
+            let total = 0;
+
+            for (let item of this.state.cobroDetalle) {
+                let cantidad = item.cantidad;
+                let valor = item.precio;
+
+                let impuesto = item.porcentaje;
+
+                let valorActual = cantidad * valor;
+                let valorSubNeto = calculateTaxBruto(impuesto, valorActual);
+                let valorImpuesto = calculateTax(impuesto, valorSubNeto);
+                let valorNeto = valorSubNeto + valorImpuesto;
+
+                subTotal += valorSubNeto;
+                total += valorNeto;
+            }
+
+            const impuestosGenerado = () => {
+                const resultado = this.state.cobroDetalle.reduce((acc, item) => {
+                    const total = item.cantidad * item.precio;
+                    const subTotal = calculateTaxBruto(item.porcentaje, total);
+                    const impuestoTotal = calculateTax(item.porcentaje, subTotal);
+
+                    const existingImpuesto = acc.find(imp => imp.idImpuesto === item.idImpuesto);
+
+                    if (existingImpuesto) {
+                        existingImpuesto.valor += impuestoTotal;
+                    } else {
+                        acc.push({
+                            idImpuesto: item.idImpuesto,
+                            nombre: item.impuesto,
+                            valor: impuestoTotal,
+                        });
+                    }
+
+
+                    return acc;
+                }, []);
+
+                return (
+                    resultado.map((item, index) => (
+                        <tr key={index}>
+                            <th className="text-right">{item.nombre} :</th>
+                            <th className="text-right">{numberFormat(item.valor, this.state.codiso)}</th>
+                        </tr>
+                    ))
+                );
+            }
+
+            return (
+                <>
+                    <tr>
+                        <th className="text-right">SUB TOTAL :</th>
+                        <th className="text-right">{numberFormat(subTotal, this.state.codiso)}</th>
+                    </tr>
+                    {impuestosGenerado()}
+                    <tr className="border-bottom">
+                    </tr>
+                    <tr>
+                        <th className="text-right h5">TOTAL :</th>
+                        <th className="text-right h5">{numberFormat(total, this.state.codiso)}</th>
+                    </tr>
+                </>
+            );
+        } else {
+
+            const total = this.state.cobroVenta.reduce((acumulador, item) => {
+                return acumulador + (item.precio * item.cantidad);
+            }, 0);
+
+            return (
+                <tr>
+                    <th className="text-right h5">Total:</th>
+                    <th className="text-right h5">{numberFormat(total, this.state.codiso)}</th>
+                </tr>
+            );
+        }
     }
 
     render() {
@@ -264,7 +308,7 @@ class CobroDetalle extends React.Component {
                                         </tr>
                                         <tr>
                                             <th className="table-secondary w-25 p-1 font-weight-normal ">Estado</th>
-                                            <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">{this.state.estado == 1 && this.state.idNotaCredito == null ? <span className="text-success">COBRADO</span> : this.state.idNotaCredito != null ? <span className="text-warning">MODIFICADO</span> : <span className="text-danger">ANULADO</span>}</th>
+                                            <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">{this.state.estado && this.state.idNotaCredito == null ? <span className="text-success">COBRADO</span> : this.state.idNotaCredito != null ? <span className="text-warning">MODIFICADO</span> : <span className="text-danger">ANULADO</span>}</th>
                                         </tr>
                                         <tr>
                                             <th className="table-secondary w-25 p-1 font-weight-normal ">Archivos adjuntos</th>
@@ -273,11 +317,7 @@ class CobroDetalle extends React.Component {
                                         <tr>
                                             <th className="table-secondary w-25 p-1 font-weight-normal ">Total</th>
                                             <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">{numberFormat(this.state.total, this.state.codiso)}</th>
-                                        </tr>
-                                        <tr>
-                                            <th className="table-secondary w-25 p-1 font-weight-normal ">Lote - Manzana</th>
-                                            <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">{this.state.lote}</th>
-                                        </tr>
+                                        </tr>                                     
                                     </thead>
                                 </table>
                             </div>
@@ -292,12 +332,11 @@ class CobroDetalle extends React.Component {
                                 <table className="table table-light table-striped">
                                     <thead>
                                         {
-                                            this.state.cobro ?
+                                            this.state.cobroVenta.length !== 0 ?
                                                 <tr>
                                                     <th>#</th>
                                                     <th>Concepto</th>
                                                     <th>Cantidad</th>
-                                                    <th>Impuesto</th>
                                                     <th>Valor</th>
                                                     <th>Monto</th>
                                                 </tr>
@@ -306,35 +345,43 @@ class CobroDetalle extends React.Component {
                                                     <th>#</th>
                                                     <th>Concepto</th>
                                                     <th>Cantidad</th>
-                                                    <th>Valor</th>
-                                                    <th>Monto</th>
+                                                    <th>Medida</th>
+                                                    <th>Impuesto</th>
+                                                    <th>Precio</th>
+                                                    <th>Total</th>
                                                 </tr>
                                         }
-
                                     </thead>
                                     <tbody>
                                         {
-                                            this.state.cobro ?
-                                                this.state.detalle.map((item, index) => (
-                                                    <tr key={index}>
-                                                        <td>{++index}</td>
-                                                        <td>{item.concepto}</td>
-                                                        <td className="text-right">{formatMoney(item.cantidad)}</td>
-                                                        <td className="text-right">{item.impuesto}</td>
-                                                        <td className="text-right">{numberFormat(item.precio, this.state.codiso)}</td>
-                                                        <td className="text-right">{numberFormat(item.cantidad * item.precio, this.state.codiso)}</td>
-                                                    </tr>
-                                                ))
+                                            this.state.cobroVenta.length !== 0 ?
+                                                this.state.cobroVenta.map((item, index) => {
+
+                                                    return (
+                                                        <tr key={index}>
+                                                            <td>{++index}</td>
+                                                            <td>{item.nombre}</td>
+                                                            <td>{formatMoney(item.cantidad)}</td>
+                                                            <td>{numberFormat(item.precio, this.state.codiso)}</td>
+                                                            <td>{numberFormat(item.cantidad * item.precio, this.state.codiso)}</td>
+                                                        </tr>
+                                                    );
+                                                })
                                                 :
-                                                this.state.detalle.map((item, index) => (
-                                                    <tr key={index}>
-                                                        <td>{++index}</td>
-                                                        <td>{item.concepto}<br /><small>{item.comprobante + " " + item.serie + "-" + item.numeracion}</small></td>
-                                                        <td className="text-right">{1}</td>
-                                                        <td className="text-right">{numberFormat(item.precio, this.state.codiso)}</td>
-                                                        <td className="text-right">{numberFormat(item.precio, this.state.codiso)}</td>
-                                                    </tr>
-                                                ))
+                                                this.state.cobroDetalle.map((item, index) => {
+
+                                                    return (
+                                                        <tr key={index}>
+                                                            <td>{++index}</td>
+                                                            <td>{item.nombre}</td>
+                                                            <td>{formatMoney(item.cantidad)}</td>
+                                                            <td>{item.medida}</td>
+                                                            <td>{item.impuesto}</td>
+                                                            <td>{numberFormat(item.precio, this.state.codiso)}</td>
+                                                            <td>{numberFormat(item.cantidad * item.precio, this.state.codiso)}</td>
+                                                        </tr>
+                                                    );
+                                                })
                                         }
                                     </tbody>
                                 </table>

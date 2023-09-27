@@ -350,7 +350,9 @@ class ClienteProceso extends React.Component {
                     this.state.loading ?
                         <div className="clearfix absolute-all bg-white">
                             {spinnerLoading(this.state.msgLoading)}
-                        </div> :
+                        </div> :null
+
+                }
                         <>
 
                             <div className='row'>
@@ -634,8 +636,6 @@ class ClienteProceso extends React.Component {
                                 </div>
                             </div>
                         </>
-                }
-
             </ContainerWrapper>
         );
     }

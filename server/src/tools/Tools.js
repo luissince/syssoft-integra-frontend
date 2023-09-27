@@ -80,29 +80,26 @@ function dateFormat(value) {
 
 function formatMoney(amount, decimalCount = 2, decimal = ".", thousands = "") {
     try {
-        decimalCount = Math.abs(decimalCount);
-        decimalCount = isNaN(decimalCount) ? 2 : decimalCount;
+        // Asegurarse de que decimalCount sea un número positivo
+        decimalCount = Math.max(0, decimalCount);
 
-        const negativeSign = amount < 0 ? "-" : "";
+        // Convertir el amount a un número con la cantidad de decimales especificada
+        const numericAmount = Number(amount) || 0;
+        const formattedAmount = numericAmount.toFixed(decimalCount);
 
-        let i = parseInt(
-            (amount = Math.abs(Number(amount) || 0).toFixed(decimalCount))
-        ).toString();
-        let j = i.length > 3 ? i.length % 3 : 0;
+        // Separar la parte entera de la decimal
+        const [integerPart, decimalPart] = formattedAmount.split(".");
 
-        return (
-            negativeSign +
-            (j ? i.substr(0, j) + thousands : "") +
-            i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + thousands) +
-            (decimalCount
-                ? decimal +
-                Math.abs(amount - i)
-                    .toFixed(decimalCount)
-                    .slice(2)
-                : "")
-        );
+        // Agregar separadores de miles
+        let integerFormatted = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, thousands);
+
+        // Combinar la parte entera y la decimal con el punto decimal
+        const result = decimalPart ? `${integerFormatted}${decimal}${decimalPart}` : integerFormatted;
+
+        // Manejar números negativos
+        return numericAmount < 0 ? `-${result}` : result;
     } catch (e) {
-        return 0;
+        return "0"; // Manejar errores devolviendo "0"
     }
 }
 

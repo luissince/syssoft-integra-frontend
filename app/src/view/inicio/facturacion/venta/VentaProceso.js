@@ -440,6 +440,14 @@ class VentaProceso extends React.Component {
     }
 
     handleClearSale = () => {
+        this.refLote.current.focus();
+
+        this.setState({
+            lote: '',
+            lotes:[],
+            sarchLote: false,
+            filterLote: false,
+        })
 
     }
 

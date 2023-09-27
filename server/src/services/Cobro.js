@@ -1125,6 +1125,7 @@ class Cobro {
             c.idCobro,
             c.idProcedencia,
             co.nombre as comprobante,
+            co.codigo as tipoComprobante,
             c.serie,
             c.numeracion,
             c.metodoPago,
@@ -1138,6 +1139,7 @@ class Cobro {
             ELSE '' END AS compRelacion,
             
             td.nombre AS tipoDoc,  
+            td.codigo AS codigoDoc,
             cl.documento,
             cl.informacion,
             cl.direccion,
@@ -1176,75 +1178,38 @@ class Cobro {
 
             if (cobro.length > 0) {
 
-                const detalle = await conec.query(`SELECT 
-                co.nombre as concepto,
-                cd.precio,
-                cd.cantidad,
-
-                md.codigo as medida,
-
-                imp.idImpuesto,
-                imp.nombre as impuesto,
-                imp.porcentaje
-
-                FROM cobroDetalle AS cd 
-                INNER JOIN concepto AS co ON cd.idConcepto = co.idConcepto
-                INNER JOIN impuesto AS imp ON cd.idImpuesto  = imp.idImpuesto
-                INNER JOIN medida AS md ON md.idMedida = cd.idMedida 
-                WHERE cd.idCobro = ?`, [
-                    req.query.idCobro
-                ]);
-
-
-                const venta = await conec.query(`SELECT  
-                v.idVenta,
-                cp.nombre AS comprobante,
-                v.serie,
-                v.numeracion,
-                1 AS cantidad,
-
-                md.codigo as medida,
-
-                imp.idImpuesto,
-                imp.nombre as impuesto,
-                imp.porcentaje,
-
-                CASE 
-                    WHEN cv.idPlazo = 0 THEN 'CUOTA INICIAL'
-                    WHEN pl.cuota IS NOT NULL THEN CONCAT('CUOTA',' ',pl.cuota)
-                    ELSE '-' 
-                END AS concepto,
-
-                DATE_FORMAT(pl.fecha,'%d/%m/%Y') as fecha,                
-
-                (SELECT IFNULL(SUM(vd.precio*vd.cantidad),0) FROM ventaDetalle AS vd WHERE vd.idVenta = v.idVenta ) AS total,
-                (SELECT IFNULL(SUM(cv.precio),0) FROM cobroVenta AS cv WHERE cv.idVenta = v.idVenta ) AS cobrado,
+                const cobroVenta= await conec.query(`SELECT 
+                cv.idCobro,
+                cp.nombre,
+                1 as cantidad,
                 cv.precio
-                FROM cobroVenta AS cv
-                LEFT JOIN plazo AS pl ON pl.idPlazo = cv.idPlazo 
-                INNER JOIN impuesto AS imp ON cv.idImpuesto  = imp.idImpuesto
-                INNER JOIN medida AS md ON cv.idMedida = md.idMedida 
-                INNER JOIN venta AS v ON cv.idVenta = v.idVenta 
-                INNER JOIN comprobante AS cp ON v.idComprobante = cp.idComprobante
+                from cobroVenta as cv 
+                INNER JOIN concepto as cp ON cp.idConcepto = cv.idConcepto
                 WHERE cv.idCobro = ?`, [
                     req.query.idCobro
                 ]);
 
-                const lote = await conec.query(`SELECT 
-                    l.descripcion as lote,
-                    m.nombre as manzana 
-                    FROM ventaDetalle AS vd
-                    INNER JOIN lote AS l on l.idLote = vd.idLote
-                    INNER JOIN manzana as m ON m.idManzana = l.idManzana
-                    WHERE vd.idVenta = ?`, [
-                    cobro[0].idProcedencia
+                const cobroDetalle = await conec.query(`SELECT 
+                cd.idCobro,
+                cc.nombre,
+                cd.cantidad,
+                cd.precio,
+                me.nombre as medida,
+                im.idImpuesto,
+                im.porcentaje,
+                im.nombre as impuesto
+                from cobroDetalle as cd  
+                INNER JOIN concepto as cc on cd.idConcepto = cc.idConcepto
+                INNER JOIN medida as me on me.idMedida = cd.idMedida
+                INNER JOIN impuesto as im on im.idImpuesto = cd.idImpuesto
+                WHERE cd.idCobro = ?`, [
+                    req.query.idCobro
                 ]);
 
                 return {
                     "cabecera": cobro[0],
-                    "detalle": detalle,
-                    "venta": venta,
-                    "lote": lote
+                    "cobroVenta": cobroVenta,
+                    "cobroDetalle": cobroDetalle              
                 };
             } else {
                 return "Datos no encontrados";

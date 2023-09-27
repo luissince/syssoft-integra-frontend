@@ -213,9 +213,9 @@ class Factura {
                 numeracion = comprobante[0].numeracion;
             }
 
-            // /**
-            //  * Proceso para ingresar una venta.
-            //  */
+            /**
+             * Proceso para ingresar una venta.
+             */
             await conec.execute(connection, `INSERT INTO venta(
                 idVenta, 
                 idCliente, 
@@ -261,16 +261,12 @@ class Factura {
                     idVenta, 
                     idLote, 
                     precio, 
-                    cantidad, 
-                    idImpuesto,
-                    idMedida)
-                    VALUES(?,?,?,?,?,?)`, [
+                    cantidad)
+                    VALUES(?,?,?,?)`, [
                     idVenta,
                     item.idDetalle,
                     parseFloat(item.precio),
                     item.cantidad,
-                    item.idImpuesto,
-                    item.idMedida
                 ]);
 
                 montoTotal += parseFloat(item.precio) * item.cantidad;
@@ -376,7 +372,7 @@ class Factura {
                     'CP0001',
                     0,
                     montoTotal,
-                    '',
+                    idImpuesto,
                     ''
                 ]);
 
@@ -1534,9 +1530,9 @@ class Factura {
                 m.nombre AS manzana, 
                 p.nombre AS proyecto,
                 vd.precio,
-                vd.cantidad,
-                vd.idImpuesto,
-                imp.nombre as impuesto,
+                vd.cantidad,                
+                imp.idImpuesto,
+                imp.nombre as impuesto,                
                 imp.porcentaje
                 FROM ventaDetalle AS vd 
                 INNER JOIN lote AS l ON vd.idLote = l.idLote 

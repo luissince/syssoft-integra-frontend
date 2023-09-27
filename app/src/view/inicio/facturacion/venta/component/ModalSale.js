@@ -1,4 +1,4 @@
-import { alertDialog, alertWarning, formatMoney, keyNumberFloat, keyNumberInteger, monthName, spinnerLoading } from "../../../../../helper/utils.helper";
+import { alertDialog, alertSuccess, alertWarning, formatMoney, keyNumberFloat, keyNumberInteger, monthName, spinnerLoading } from "../../../../../helper/utils.helper";
 import ErrorResponse from "../../../../../model/class/error";
 import SuccessReponse from "../../../../../model/class/response";
 import { createFactura } from "../../../../../network/rest/principal.network";
@@ -138,10 +138,16 @@ const ModalSale = (props) => {
 
                 if (response instanceof SuccessReponse) {
                     console.log(response.data)
+                    alertSuccess("Venta", response.data,()=>{
+
+                    });
                 }
 
                 if (response instanceof ErrorResponse) {
                     console.log(response.getMessage())
+                    alertWarning("Venta", response.getMessage(),()=>{
+                        
+                    });
                 }
             }
         });

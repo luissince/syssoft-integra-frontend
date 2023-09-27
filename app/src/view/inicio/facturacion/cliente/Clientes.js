@@ -1,5 +1,4 @@
 import React from 'react';
-import axios from 'axios';
 import { connect } from 'react-redux';
 import {
     spinnerLoading,
@@ -12,6 +11,10 @@ import {
 } from '../../../../helper/utils.helper';
 import Paginacion from '../../../../components/Paginacion';
 import ContainerWrapper from '../../../../components/Container';
+import { deleteCliente, listClientes } from '../../../../network/rest/principal.network';
+import SuccessReponse from '../../../../model/class/response';
+import ErrorResponse from '../../../../model/class/error';
+import { CANCELED } from '../../../../model/types/types';
 
 class Clientes extends React.Component {
     constructor(props) {
@@ -30,7 +33,6 @@ class Clientes extends React.Component {
 
             opcion: 0,
             paginacion: 0,
-            fill: 'any',
             totalPaginacion: 0,
             filasPorPagina: 10,
             messageTable: 'Cargando información...',
@@ -92,40 +94,44 @@ class Clientes extends React.Component {
     }
 
     fillTable = async (opcion, buscar) => {
-        try {
-            await this.setStateAsync({ loading: true, lista: [], messageTable: "Cargando información...", messagePaginacion: "Mostranto 0 de 0 Páginas" });
+        await this.setStateAsync({
+            loading: true,
+            lista: [],
+            messageTable: "Cargando información...",
+            messagePaginacion: "Mostranto 0 de 0 Páginas"
+        });
 
-            const result = await axios.get('/api/cliente/list', {
-                signal: this.abortControllerTable.signal,
-                params: {
-                    "opcion": opcion,
-                    "buscar": buscar,
-                    "idProyecto": this.state.idProyecto,
-                    "fill": this.state.fill,
-                    "posicionPagina": ((this.state.paginacion - 1) * this.state.filasPorPagina),
-                    "filasPorPagina": this.state.filasPorPagina
-                }
-            });
-           
-            let totalPaginacion = parseInt(Math.ceil((parseFloat(result.data.total) / this.state.filasPorPagina)));
-            let messagePaginacion = `Mostrando ${result.data.result.length} de ${totalPaginacion} Páginas`;
+        const params = {
+            "opcion": opcion,
+            "buscar": buscar,
+            "posicionPagina": ((this.state.paginacion - 1) * this.state.filasPorPagina),
+            "filasPorPagina": this.state.filasPorPagina
+        }
+
+        const response = await listClientes(params, this.abortControllerTable.signal);
+
+        if (response instanceof SuccessReponse) {
+            let totalPaginacion = parseInt(Math.ceil((parseFloat(response.data.total) / this.state.filasPorPagina)));
+            let messagePaginacion = `Mostrando ${response.data.result.length} de ${totalPaginacion} Páginas`;
 
             await this.setStateAsync({
                 loading: false,
-                lista: result.data.result,
+                lista: response.data.result,
                 totalPaginacion: totalPaginacion,
                 messagePaginacion: messagePaginacion
             });
-        } catch (error) {
-            if (error.message !== "canceled") {
-                await this.setStateAsync({
-                    loading: false,
-                    lista: [],
-                    totalPaginacion: 0,
-                    messageTable: "Se produjo un error interno, intente nuevamente por favor.",
-                    messagePaginacion: "Mostranto 0 de 0 Páginas",
-                });
-            }
+        }
+
+        if (response instanceof ErrorResponse) {
+            if (response.getType() === CANCELED) return;
+
+            await this.setStateAsync({
+                loading: false,
+                lista: [],
+                totalPaginacion: 0,
+                messageTable: response.getMessage(),
+                messagePaginacion: "Mostranto 0 de 0 Páginas",
+            });
         }
     }
 
@@ -152,22 +158,22 @@ class Clientes extends React.Component {
     onEventDelete(idCliente) {
         alertDialog("Eliminar cliente", "¿Está seguro de que desea eliminar el contacto? Esta operación no se puede deshacer.", async (value) => {
             if (value) {
-                try {
-                    alertInfo("Cliente", "Procesando información...")
-                    let result = await axios.delete('/api/cliente', {
-                        params: {
-                            "idCliente": idCliente
-                        }
-                    })
-                    alertSuccess("Cliente", result.data, () => {
+                alertInfo("Cliente", "Procesando información...")
+
+                const params = {
+                    "idCliente": idCliente
+                }
+
+                const response = await deleteCliente(params);
+
+                if (response instanceof SuccessReponse) {
+                    alertSuccess("Cliente", response.data, () => {
                         this.loadInit();
                     })
-                } catch (error) {
-                    if (error.response !== undefined) {
-                        alertWarning("Cliente", error.response.data)
-                    } else {
-                        alertWarning("Cliente", "Se genero un error interno, intente nuevamente.")
-                    }
+                }
+
+                if (response instanceof ErrorResponse) {
+                    alertWarning("Cliente", response.getMessage())
                 }
             }
         })
@@ -185,21 +191,7 @@ class Clientes extends React.Component {
                 </div>
 
                 <div className="row">
-                    <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                        <div className="form-group">
-                            <button className="btn btn-outline-info" onClick={() => this.onEventAdd()} disabled={!this.state.add}>
-                                <i className="bi bi-file-plus"></i> Nuevo Registro
-                            </button>
-                            {" "}
-                            <button className="btn btn-outline-secondary" onClick={() => this.loadInit()}>
-                                <i className="bi bi-arrow-clockwise"></i> Recargar Vista
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="row">
-                    <div className="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                    <div className="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">
                         <div className="form-group">
                             <div className="input-group mb-2">
                                 <div className="input-group-prepend">
@@ -218,21 +210,15 @@ class Clientes extends React.Component {
                         </div>
                     </div>
 
-                    <div className="col-lg-4 col-md-6 col-sm-12 col-xs-12">
+                    <div className="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">
                         <div className="form-group">
-                            <select className="form-control"
-                                value={this.state.fill}
-                                onChange={async (value) => {
-                                    await this.setStateAsync({ fill: value.target.value })
-                                    this.loadInit();
-                                }}>
-                                <option value="any">
-                                    Listar clientes por proyecto
-                                </option>
-                                <option value="all">
-                                    Listar todos los clientes
-                                </option>
-                            </select>
+                            <button className="btn btn-outline-info" onClick={() => this.onEventAdd()} disabled={!this.state.add}>
+                                <i className="bi bi-file-plus"></i> Nuevo Registro
+                            </button>
+                            {" "}
+                            <button className="btn btn-outline-secondary" onClick={() => this.loadInit()}>
+                                <i className="bi bi-arrow-clockwise"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -248,7 +234,6 @@ class Clientes extends React.Component {
                                         <th width="20%">Cliente</th>
                                         <th width="10%">Cel. / Tel.</th>
                                         <th width="15%">Dirección</th>
-                                        <th width="15%">Propiedad</th>
                                         <th width="7%">Estado</th>
                                         <th width="5%" className="text-center">Detalle</th>
                                         <th width="5%" className="text-center">Editar</th>
@@ -260,13 +245,13 @@ class Clientes extends React.Component {
                                         this.state.loading ? (
 
                                             <tr>
-                                                <td className="text-center" colSpan="10">
+                                                <td className="text-center" colSpan="9">
                                                     {spinnerLoading()}
                                                 </td>
                                             </tr>
                                         ) : this.state.lista.length === 0 ? (
                                             <tr className="text-center">
-                                                <td colSpan="10">¡No hay datos registrados!</td>
+                                                <td colSpan="9">¡No hay datos registrados!</td>
                                             </tr>
                                         ) : (
                                             this.state.lista.map((item, index) => {
@@ -277,15 +262,6 @@ class Clientes extends React.Component {
                                                         <td>{item.informacion}</td>
                                                         <td>{item.celular}{<br />}{item.telefono}</td>
                                                         <td>{item.direccion}</td>
-                                                        <td>{
-                                                            item.detalle.map((detalle, indexd) => (
-                                                                <div key={indexd}>
-                                                                    <span>{detalle.descripcion}{<br />}{<small>{detalle.manzana}</small>}</span>
-                                                                    <br />
-                                                                    {indexd == item.detalle.length - 1 ? null : <hr />}
-                                                                </div>
-                                                            ))
-                                                        }</td>
                                                         <td className="text-center">
                                                             <div className={`badge ${item.estado === 1 ? "badge-info" : "badge-danger"}`}>
                                                                 {item.estado === 1 ? "ACTIVO" : "INACTIVO"}

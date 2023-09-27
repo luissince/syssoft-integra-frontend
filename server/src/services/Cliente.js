@@ -11,8 +11,7 @@ class Cliente {
     async list(req) {
         try {
             const lista = await conec.query(`SELECT 
-                c.idCliente ,
-                a.idProyecto,
+                c.idCliente ,             
                 td.nombre as tipodocumento,
                 c.documento,
                 c.informacion,
@@ -21,59 +20,31 @@ class Cliente {
                 c.direccion,
                 c.estado
                 FROM cliente AS c
-                INNER JOIN tipoDocumento AS td ON td.idTipoDocumento = c.idTipoDocumento
-                INNER JOIN alta AS a ON a.idCliente = c.idCliente
+                INNER JOIN tipoDocumento AS td ON td.idTipoDocumento = c.idTipoDocumento                
                 WHERE 
-                ? = 0 AND (a.idProyecto = ? AND ? = 'any' OR ? = 'all')
+                ? = 0 
                 OR
-                ? = 1 and c.documento like concat(?,'%') AND (a.idProyecto = ? AND ? = 'any' OR ? = 'all')
+                ? = 1 and c.documento like concat(?,'%') 
                 OR
-                ? = 1 and c.informacion like concat(?,'%') AND (a.idProyecto = ? AND ? = 'any' OR ? = 'all')
+                ? = 1 and c.informacion like concat('%',?,'%')
+                
                 ORDER BY c.fecha ASC, c.hora ASC
                 LIMIT ?,?`, [
                 parseInt(req.query.opcion),
-                req.query.idProyecto,
-                req.query.fill,
-                req.query.fill,
 
                 parseInt(req.query.opcion),
                 req.query.buscar,
-                req.query.idProyecto,
-                req.query.fill,
-                req.query.fill,
+
 
                 parseInt(req.query.opcion),
                 req.query.buscar,
-                req.query.idProyecto,
-                req.query.fill,
-                req.query.fill,
 
                 parseInt(req.query.posicionPagina),
                 parseInt(req.query.filasPorPagina)
             ])
 
-            let newLista = []
 
-            for (const value of lista) {
-                const detalle = await conec.query(`select 
-                    l.descripcion,
-                    m.nombre as manzana
-                    from venta as v
-                    inner join ventaDetalle as vd on vd.idVenta = v.idVenta
-                    inner join lote as l on l.idLote = vd.idLote
-                    inner join manzana as m on m.idManzana = l.idManzana
-                    where v.idCliente = ? and v.idProyecto = ? AND v.estado in(1,2)`, [
-                    value.idCliente,
-                    value.idProyecto
-                ]);
- 
-                newLista.push({
-                    ...value,
-                    detalle
-                }); 
-            }
-
-            let resultLista = newLista.map(function (item, index) {
+            const resultLista = lista.map(function (item, index) {
                 return {
                     ...item,
                     id: (index + 1) + parseInt(req.query.posicionPagina)
@@ -82,34 +53,25 @@ class Cliente {
 
             const total = await conec.query(`SELECT COUNT(*) AS Total 
                 FROM cliente AS c
-                INNER JOIN tipoDocumento AS td ON td.idTipoDocumento = c.idTipoDocumento
-                INNER JOIN alta AS a ON a.idCliente = c.idCliente
+                INNER JOIN tipoDocumento AS td ON td.idTipoDocumento = c.idTipoDocumento               
                 WHERE 
-                ? = 0 AND (a.idProyecto = ? AND ? = 'any' OR ? = 'all')
+                ? = 0 
                 OR
-                ? = 1 and c.documento like concat(?,'%') AND (a.idProyecto = ? AND ? = 'any' OR ? = 'all')
+                ? = 1 and c.documento like concat(?,'%') 
                 OR
-                ? = 1 and c.informacion like concat(?,'%') AND (a.idProyecto = ? AND ? = 'any' OR ? = 'all')`, [
+                ? = 1 and c.informacion like concat('%',?,'%')`, [
                 parseInt(req.query.opcion),
-                req.query.idProyecto,
-                req.query.fill,
-                req.query.fill,
 
                 parseInt(req.query.opcion),
                 req.query.buscar,
-                req.query.idProyecto,
-                req.query.fill,
-                req.query.fill,
 
                 parseInt(req.query.opcion),
                 req.query.buscar,
-                req.query.idProyecto,
-                req.query.fill,
-                req.query.fill,
             ]);
 
             return { "result": resultLista, "total": total[0].Total };
         } catch (error) {
+            console.log(error)
             return "Se produjo un error de servidor, intente nuevamente.";
         }
     }
