@@ -13,6 +13,8 @@ import './recursos/css/footerbar.css';
 import './recursos/js/bootstrap.js';
 import '../../node_modules/bootstrap-icons/font/bootstrap-icons.css';
 import '../../node_modules/react-notifications/lib/notifications.css';
+import './network/rest/apisperu.network';
+import './network/rest/cpesunat.network';
 import './network/rest/principal.network';
 
 ReactDOM.render(

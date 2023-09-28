@@ -1,4 +1,3 @@
-import { images } from "../../../../../helper";
 
 const InvoiceListPrices = (props) => {
 

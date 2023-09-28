@@ -18,7 +18,7 @@ import { liberarTerreno, listarComboCliente, loteDetalle, loteRestablecer, loteS
 import { connect } from 'react-redux';
 import { CANCELED, ERROR } from '../../../../model/types/types';
 import SuccessReponse from '../../../../model/class/response';
-import ErrorResponse from '../../../../model/class/error';
+import ErrorResponse from '../../../../model/class/error-response';
 import ContainerWrapper from '../../../../components/Container';
 
 

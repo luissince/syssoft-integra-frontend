@@ -83,6 +83,17 @@ router.get('/listfiltrar', async function (req, res) {
         res.status(500).send(result);
     }
 });
+
+router.get('/getpredeterminado', async function (req, res) {
+    const result = await cliente.getPredeterminado(req)
+    if (typeof result === 'object') {
+        res.status(200).send(result);
+    } else if (result === "") {
+        res.status(200).send("");
+    } else {
+        res.status(500).send(result);
+    }
+});
 /**
  * Api usado en los modulos
  * [facturación: clientes/detalle]

@@ -1,7 +1,6 @@
 import { images } from "../../../../../helper";
 import { numberFormat } from "../../../../../helper/utils.helper";
 
-
 const ItemAdd = (props) => {
 
     const { idDetalle, nombre, precio, cantidad, codiso, detalleVenta, setStateAsync } = props;

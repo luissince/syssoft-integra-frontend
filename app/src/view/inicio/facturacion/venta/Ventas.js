@@ -15,8 +15,9 @@ import {
 import { connect } from 'react-redux';
 import Paginacion from '../../../../components/Paginacion';
 import ContainerWrapper from '../../../../components/Container';
+import CustomComponent from '../../../../model/class/custom-component';
 
-class Ventas extends React.Component {
+class Ventas extends CustomComponent {
     constructor(props) {
         super(props);
         this.state = {
@@ -41,12 +42,6 @@ class Ventas extends React.Component {
         this.refTxtSearch = React.createRef();
 
         this.abortControllerTable = new AbortController();
-    }
-
-    setStateAsync(state) {
-        return new Promise((resolve) => {
-            this.setState(state, resolve)
-        });
     }
 
     componentDidMount() {

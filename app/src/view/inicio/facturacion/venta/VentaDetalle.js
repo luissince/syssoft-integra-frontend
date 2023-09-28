@@ -12,10 +12,11 @@ import { connect } from 'react-redux';
 import ContainerWrapper from '../../../../components/Container';
 import { getCobroVentaId, getFacturaId } from '../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../model/class/response';
-import ErrorResponse from '../../../../model/class/error';
+import ErrorResponse from '../../../../model/class/error-response';
 import { CANCELED } from '../../../../model/types/types';
+import CustomComponent from '../../../../model/class/custom-component';
 
-class VentaDetalle extends React.Component {
+class VentaDetalle extends CustomComponent {
     constructor(props) {
         super(props);
         this.state = {
@@ -73,42 +74,43 @@ class VentaDetalle extends React.Component {
 
         if (!factura || !cobros) {
             this.props.history.goBack();
-        } else {
-            const {
-                comprobante,
-                serie,
-                numeracion,
-                documento,
-                informacion,
-                fecha,
-                hora,
-                tipo,
-                estado,
-                simbolo,
-                codiso,
-                usuario,
-                monto
-            } = factura.cabecera;       
-
-            await this.setStateAsync({
-                idVenta: id,
-                comprobante: comprobante + "  " + serie + "-" + numeracion,
-                cliente: documento + " - " + informacion,
-                fecha: fecha + " " + timeForma24(hora),
-                notas: '',
-                formaVenta: tipo === 1 ? "Contado" : "Crédito",
-                estado: estado,
-                simbolo: simbolo,
-                codiso: codiso,
-                usuario: usuario,
-                total: formatMoney(monto),
-                detalle: factura.detalle,
-
-                cobros: cobros,
-
-                loading: false
-            });
+            return;
         }
+
+        const {
+            comprobante,
+            serie,
+            numeracion,
+            documento,
+            informacion,
+            fecha,
+            hora,
+            tipo,
+            estado,
+            simbolo,
+            codiso,
+            usuario,
+            monto
+        } = factura.cabecera;
+
+        await this.setStateAsync({
+            idVenta: id,
+            comprobante: comprobante + "  " + serie + "-" + numeracion,
+            cliente: documento + " - " + informacion,
+            fecha: fecha + " " + timeForma24(hora),
+            notas: '',
+            formaVenta: tipo === 1 ? "Contado" : "Crédito",
+            estado: estado,
+            simbolo: simbolo,
+            codiso: codiso,
+            usuario: usuario,
+            total: formatMoney(monto),
+            detalle: factura.detalle,
+
+            cobros: cobros,
+
+            loading: false
+        });
     }
 
     async fetchFacturaId(id) {
@@ -147,13 +149,6 @@ class VentaDetalle extends React.Component {
         }
     }
 
-    setStateAsync(state) {
-        return new Promise((resolve) => {
-            this.setState(state, resolve)
-        });
-    }
-
-
     renderTotal() {
         let subTotal = 0;
         let total = 0;
@@ -174,7 +169,7 @@ class VentaDetalle extends React.Component {
         }
 
         const impuestosGenerado = () => {
-            const resultado = this.state.detalle.reduce((acc, item) => {               
+            const resultado = this.state.detalle.reduce((acc, item) => {
                 const total = item.cantidad * item.precio;
                 const subTotal = calculateTaxBruto(item.porcentaje, total);
                 const impuestoTotal = calculateTax(item.porcentaje, subTotal);

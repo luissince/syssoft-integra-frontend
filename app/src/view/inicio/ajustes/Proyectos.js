@@ -13,7 +13,7 @@ import Paginacion from '../../../components/Paginacion';
 import ContainerWrapper from '../../../components/Container';
 import { borrarProyecto } from '../../../network/rest/principal.network';
 import SuccessReponse from '../../../model/class/response';
-import ErrorResponse from '../../../model/class/error';
+import ErrorResponse from '../../../model/class/error-response';
 
 class Proyectos extends React.Component {
     constructor(props) {

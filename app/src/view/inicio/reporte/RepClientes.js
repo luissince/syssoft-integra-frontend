@@ -1,5 +1,4 @@
 import React from 'react';
-import axios from 'axios';
 import CryptoJS from 'crypto-js';
 import { connect } from 'react-redux';
 import FileDownloader from "../../../components/FileDownloader";
@@ -8,7 +7,7 @@ import SearchBarClient from "../../../components/SearchBarClient";
 import ContainerWrapper from '../../../components/Container';
 import { listarClientesFilter } from '../../../network/rest/principal.network';
 import SuccessReponse from '../../../model/class/response';
-import ErrorResponse from '../../../model/class/error';
+import ErrorResponse from '../../../model/class/error-response';
 
 class RepClientes extends React.Component {
 

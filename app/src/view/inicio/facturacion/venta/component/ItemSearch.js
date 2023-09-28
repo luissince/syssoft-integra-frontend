@@ -1,5 +1,5 @@
 import { images } from "../../../../../helper";
-import ErrorResponse from "../../../../../model/class/error";
+import ErrorResponse from "../../../../../model/class/error-response";
 import SuccessReponse from "../../../../../model/class/response";
 import { listarLotesFilter } from "../../../../../network/rest/principal.network";
 

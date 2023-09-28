@@ -6,11 +6,11 @@ class ErrorResponse {
     message = '';
     status = 400;
 
-    constructor(error) {
+    constructor(error) {       
         if (error.response) {
             this.type = RESPOSE;
             this.status = error.response.status;
-            this.message = error.response.data;
+            this.message = error.response.data.message || error.response.data;
         } else if (error.request) {
             this.type = REQUEST;
             this.message = "No se pudo obtener la respuesta del servidor.";

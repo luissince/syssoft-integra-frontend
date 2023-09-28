@@ -14,6 +14,9 @@ import { connect } from 'react-redux';
 import SearchBar from "../../../../components/SearchBar";
 import ContainerWrapper from '../../../../components/Container';
 import { images } from '../../../../helper';
+import { getUbigeo } from '../../../../network/rest/principal.network';
+import SuccessReponse from '../../../../model/class/response';
+import ErrorResponse from '../../../../model/class/error-response';
 
 class ProcesoProyecto extends React.Component {
 
@@ -359,15 +362,17 @@ class ProcesoProyecto extends React.Component {
 
         if (this.state.filter) return;
 
-        try {
-            await this.setStateAsync({ filter: true });
-            let result = await axios.get("/api/ubigeo/", {
-                params: {
-                    filtrar: searchWord,
-                },
-            });
-            await this.setStateAsync({ filter: false, filteredData: result.data });
-        } catch (error) {
+        const params = {
+            filtrar: searchWord,
+        }
+
+        const response = await getUbigeo(params);
+
+        if (response instanceof SuccessReponse) {
+            await this.setStateAsync({ filter: false, filteredData: response.data });
+        }
+
+        if (response instanceof ErrorResponse) {
             await this.setStateAsync({ filter: false, filteredData: [] });
         }
     }

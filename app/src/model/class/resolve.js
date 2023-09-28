@@ -1,5 +1,5 @@
 import SuccessReponse from "../../model/class/response";
-import ErrorResponse from "../../model/class/error";
+import ErrorResponse from "./error-response";
 
 class Resolve {
   static async create(value) {

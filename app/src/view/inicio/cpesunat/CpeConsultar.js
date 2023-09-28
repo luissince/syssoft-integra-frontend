@@ -7,9 +7,9 @@ import {
 } from '../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../components/Container';
-import { cdrStatus } from '../../../network/rest/cpe.network';
+import { cdrStatus } from '../../../network/rest/cpesunat.network';
 import SuccessReponse from '../../../model/class/response';
-import ErrorResponse from '../../../model/class/error';
+import ErrorResponse from '../../../model/class/error-response';
 import { loadEmpresa } from '../../../network/rest/principal.network';
 
 class CpeElectronicos extends React.Component {

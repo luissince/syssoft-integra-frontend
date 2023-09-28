@@ -20,7 +20,7 @@ import {
   trasladarManzana,
 } from "../../../network/rest/principal.network";
 import SuccessReponse from "../../../model/class/response";
-import ErrorResponse from "../../../model/class/error";
+import ErrorResponse from "../../../model/class/error-response";
 import { CANCELED } from "../../../model/types/types";
 import ContainerWrapper from "../../../components/Container";
 import { addManzana, getIdManzana, removeManzana, updateManzana } from "../../../network/rest/principal.network";

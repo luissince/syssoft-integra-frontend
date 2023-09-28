@@ -17,7 +17,7 @@ import {
 import { connect } from "react-redux";
 import Paginacion from "../../../components/Paginacion";
 import { listarBancos } from "../../../network/rest/principal.network";
-import ErrorResponse from "../../../model/class/error";
+import ErrorResponse from "../../../model/class/error-response";
 import SuccessReponse from "../../../model/class/response";
 import { CANCELED } from "../../../model/types/types";
 import ContainerWrapper from "../../../components/Container";

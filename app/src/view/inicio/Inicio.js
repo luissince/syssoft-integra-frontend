@@ -72,7 +72,7 @@ import Bienvenido from './bienvenido/Bienvenido';
 import NotFoundMain from '../../components/errors/NotFoundMain';
 import { getNotifications } from '../../network/rest/principal.network';
 import SuccessReponse from '../../model/class/response';
-import ErrorResponse from '../../model/class/error';
+import ErrorResponse from '../../model/class/error-response';
 
 class Inicio extends React.Component {
 

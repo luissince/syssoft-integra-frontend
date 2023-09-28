@@ -19,7 +19,7 @@ import Paginacion from '../../../../components/Paginacion';
 import ContainerWrapper from '../../../../components/Container';
 import { listConceptos } from '../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../model/class/response';
-import ErrorResponse from '../../../../model/class/error';
+import ErrorResponse from '../../../../model/class/error-response';
 import { CANCELED } from '../../../../model/types/types';
 
 class Conceptos extends React.Component {

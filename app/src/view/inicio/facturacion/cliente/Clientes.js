@@ -13,10 +13,11 @@ import Paginacion from '../../../../components/Paginacion';
 import ContainerWrapper from '../../../../components/Container';
 import { deleteCliente, listClientes } from '../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../model/class/response';
-import ErrorResponse from '../../../../model/class/error';
+import ErrorResponse from '../../../../model/class/error-response';
 import { CANCELED } from '../../../../model/types/types';
+import CustomComponent from '../../../../model/class/custom-component';
 
-class Clientes extends React.Component {
+class Clientes extends CustomComponent {
     constructor(props) {
         super(props);
         this.state = {
@@ -42,12 +43,6 @@ class Clientes extends React.Component {
 
         this.idCodigo = "";
         this.abortControllerTable = new AbortController();
-    }
-
-    setStateAsync(state) {
-        return new Promise((resolve) => {
-            this.setState(state, resolve)
-        });
     }
 
     async componentDidMount() {
@@ -234,6 +229,7 @@ class Clientes extends React.Component {
                                         <th width="20%">Cliente</th>
                                         <th width="10%">Cel. / Tel.</th>
                                         <th width="15%">Dirección</th>
+                                        <th width="7%">Predeterminado</th>
                                         <th width="7%">Estado</th>
                                         <th width="5%" className="text-center">Detalle</th>
                                         <th width="5%" className="text-center">Editar</th>
@@ -245,13 +241,13 @@ class Clientes extends React.Component {
                                         this.state.loading ? (
 
                                             <tr>
-                                                <td className="text-center" colSpan="9">
+                                                <td className="text-center" colSpan="10">
                                                     {spinnerLoading()}
                                                 </td>
                                             </tr>
                                         ) : this.state.lista.length === 0 ? (
                                             <tr className="text-center">
-                                                <td colSpan="9">¡No hay datos registrados!</td>
+                                                <td colSpan="10">¡No hay datos registrados!</td>
                                             </tr>
                                         ) : (
                                             this.state.lista.map((item, index) => {
@@ -262,6 +258,11 @@ class Clientes extends React.Component {
                                                         <td>{item.informacion}</td>
                                                         <td>{item.celular}{<br />}{item.telefono}</td>
                                                         <td>{item.direccion}</td>
+                                                        <td className="text-center">
+                                                            <div className={`badge ${item.predeterminado === 1 ? "badge-success" : "badge-warning"}`}>
+                                                                {item.predeterminado === 1 ? "SI" : "NO"}
+                                                            </div>
+                                                        </td>
                                                         <td className="text-center">
                                                             <div className={`badge ${item.estado === 1 ? "badge-info" : "badge-danger"}`}>
                                                                 {item.estado === 1 ? "ACTIVO" : "INACTIVO"}

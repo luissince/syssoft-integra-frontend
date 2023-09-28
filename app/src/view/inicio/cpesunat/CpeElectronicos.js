@@ -25,9 +25,9 @@ import FileDownloader from "../../../components/FileDownloader";
 import Paginacion from '../../../components/Paginacion';
 import ContainerWrapper from '../../../components/Container';
 import { images } from '../../../helper';
-import { sendBoleta, sendNotaCredito, sendResumen, sendResumenNotaCredito } from '../../../network/rest/cpe.network';
+import { sendBoleta, sendNotaCredito, sendResumen, sendResumenNotaCredito } from '../../../network/rest/cpesunat.network';
 import SuccessReponse from '../../../model/class/response';
-import ErrorResponse from '../../../model/class/error';
+import ErrorResponse from '../../../model/class/error-response';
 import { listCpeSunat, sendEmailBoleta, sendEmailNotaCredito } from '../../../network/rest/principal.network';
 import { CANCELED } from '../../../model/types/types';
 

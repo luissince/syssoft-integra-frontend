@@ -1,7 +1,7 @@
 import axios from "axios";
 import Resolve from "../../model/class/resolve";
 
-const instance = axios.create({
+const instanceCpeSunat = axios.create({
     baseURL: process.env.REACT_APP_URL,
     timeout: 10000,
     headers: {
@@ -20,7 +20,7 @@ const instance = axios.create({
 
 export async function cdrStatus(data) {
     return await Resolve.create(
-        instance.get('/app/examples/pages/cdrStatus.php', {
+        instanceCpeSunat.get('/app/examples/pages/cdrStatus.php', {
             params: data
         })
     );
@@ -28,7 +28,7 @@ export async function cdrStatus(data) {
 
 export async function sendBoleta(idCpeSunat) {
     return await Resolve.create(
-        instance.get(`/app/examples/boleta.php`, {
+        instanceCpeSunat.get(`/app/examples/boleta.php`, {
             params: {
                 "idCobro": idCpeSunat
             }
@@ -38,7 +38,7 @@ export async function sendBoleta(idCpeSunat) {
 
 export async function sendNotaCredito(idCpeSunat) {
     return await Resolve.create(
-        instance.get(`/app/examples/notacredito.php`, {
+        instanceCpeSunat.get(`/app/examples/notacredito.php`, {
             params: {
                 "idNotaCredito": idCpeSunat
             }
@@ -48,7 +48,7 @@ export async function sendNotaCredito(idCpeSunat) {
 
 export async function sendResumen(idCpeSunat) {
     return await Resolve.create(
-        instance.get(`/app/examples/resumen.php`, {
+        instanceCpeSunat.get(`/app/examples/resumen.php`, {
             params: {
                 "idCobro": idCpeSunat
             }
@@ -58,7 +58,7 @@ export async function sendResumen(idCpeSunat) {
 
 export async function sendResumenNotaCredito(idCpeSunat) {
     return await Resolve.create(
-        instance.get(`/app/examples/resumen_nota_credito.php`, {
+        instanceCpeSunat.get(`/app/examples/resumen_nota_credito.php`, {
             params: {
                 "idNotaCredito": idCpeSunat
             }

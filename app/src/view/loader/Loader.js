@@ -5,7 +5,7 @@ import { config, restoreToken } from '../../redux/actions';
 import { empresaConfig, validToken } from '../../network/rest/principal.network';
 
 import { CANCELED } from '../../model/types/types';
-import ErrorResponse from '../../model/class/error';
+import ErrorResponse from '../../model/class/error-response';
 import SuccessReponse from '../../model/class/response';
 
 class Loader extends React.Component {

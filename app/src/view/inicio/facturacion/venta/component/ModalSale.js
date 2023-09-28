@@ -1,5 +1,5 @@
 import { alertDialog, alertSuccess, alertWarning, formatMoney, keyNumberFloat, keyNumberInteger, monthName, spinnerLoading } from "../../../../../helper/utils.helper";
-import ErrorResponse from "../../../../../model/class/error";
+import ErrorResponse from "../../../../../model/class/error-response";
 import SuccessReponse from "../../../../../model/class/response";
 import { createFactura } from "../../../../../network/rest/principal.network";
 
@@ -89,6 +89,8 @@ const ModalSale = (props) => {
         handleSelectFrecuenciaPago,
 
         importeTotal,
+
+        handleClearSale
     } = props;
 
     const handleSaveProcess = () => {
@@ -136,10 +138,9 @@ const ModalSale = (props) => {
 
                 const response = await createFactura(data);
 
-                if (response instanceof SuccessReponse) {
-                    console.log(response.data)
+                if (response instanceof SuccessReponse) {                   
                     alertSuccess("Venta", response.data,()=>{
-
+                        handleClearSale();
                     });
                 }
 

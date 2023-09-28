@@ -12,7 +12,7 @@ import { connect } from 'react-redux';
 import ContainerWrapper from '../../../../components/Container';
 import { getCobroId } from '../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../model/class/response';
-import ErrorResponse from '../../../../model/class/error';
+import ErrorResponse from '../../../../model/class/error-response';
 import { CANCELED } from '../../../../model/types/types';
 
 class CobroDetalle extends React.Component {

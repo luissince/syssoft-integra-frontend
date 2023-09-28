@@ -10,8 +10,9 @@ import {
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../../components/Container';
+import CustomComponent from '../../../../model/class/custom-component';
 
-class ClienteDetalle extends React.Component {
+class ClienteDetalle extends CustomComponent {
     constructor(props) {
         super(props);
         this.state = {
@@ -31,12 +32,6 @@ class ClienteDetalle extends React.Component {
         }
 
         this.abortControllerView = new AbortController();
-    }
-
-    setStateAsync(state) {
-        return new Promise((resolve) => {
-            this.setState(state, resolve)
-        });
     }
 
     async componentDidMount() {

@@ -11,9 +11,9 @@ import {
 import { connect } from 'react-redux';
 import { PosContainerWrapper } from '../../../../components/Container';
 import InvoiceTicket from './component/InvoiceTicket';
-import { listBancoCombo, listComprobanteCombo, listImpuestCombo, listMonedaCombo, listarClientesFilter } from '../../../../network/rest/principal.network';
+import { getPredeterminado, listBancoCombo, listComprobanteCombo, listImpuestCombo, listMonedaCombo, listarClientesFilter } from '../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../model/class/response';
-import ErrorResponse from '../../../../model/class/error';
+import ErrorResponse from '../../../../model/class/error-response';
 import { CANCELED } from '../../../../model/types/types';
 import InvoiceDetail from './component/InvoiceDetail';
 import InvoiceClient from './component/InvoiceClient';
@@ -22,8 +22,9 @@ import InvoiceFooter from './component/InvoiceFooter';
 import ModalConfiguration from './component/ModalConfiguration';
 import InvoiceView from './component/InvoiceView';
 import ModalSale from './component/ModalSale';
+import CustomComponent from '../../../../model/class/custom-component';
 
-class VentaProceso extends React.Component {
+class VentaProceso extends CustomComponent {
 
     /**
      * 
@@ -186,13 +187,14 @@ class VentaProceso extends React.Component {
      */
 
     loadingData = async () => {
-        const [libre, facturado, cobro, monedas, impuestos, bancos] = await Promise.all([
+        const [libre, facturado, cobro, monedas, impuestos, bancos, predeterminado] = await Promise.all([
             await this.fetchComprobante("2"),
             await this.fetchComprobante("1"),
             await this.fetchComprobante("5"),
             await this.fetchMoneda(),
             await this.fetchImpuesto(),
             await this.fetchBanco(),
+            await this.fetchClientePredeterminado()
         ]);
 
         const comprobantes = [...facturado, ...libre];
@@ -200,6 +202,10 @@ class VentaProceso extends React.Component {
         const impuestoFilter = impuestos.find((item) => item.preferida === 1);
         const comprobanteFilter = comprobantes.find((item) => item.preferida === 1);
         const comprobanteCobroFilter = cobro.find((item) => item.preferida === 1);
+
+        if(typeof predeterminado === 'object'){
+            this.handleSelectItemClient(predeterminado);
+        }
 
         await this.setStateAsync({
             comprobantes,
@@ -280,10 +286,18 @@ class VentaProceso extends React.Component {
         }
     }
 
-    setStateAsync = (state) => {
-        return new Promise((resolve) => {
-            this.setState(state, resolve)
-        });
+    async fetchClientePredeterminado() {
+        const response = await getPredeterminado();
+
+        if (response instanceof SuccessReponse) {
+            return response.data
+        }
+
+        if (response instanceof ErrorResponse) {
+            if (response.getType() === CANCELED) return;
+
+            return [];
+        }
     }
 
     calcularLetraMensual = () => {
@@ -443,10 +457,68 @@ class VentaProceso extends React.Component {
         this.refLote.current.focus();
 
         this.setState({
+            loading: true,
+            msgLoading: 'Cargando datos...',
+
+            idComprobante: '',
+            comprobantes: [],
+
+            idMoneda: '',
+            monedas: [],
+            codiso: "PEN",
+
             lote: '',
-            lotes:[],
+            lotes: [],
             sarchLote: false,
             filterLote: false,
+
+            idCliente: '',
+            clientes: [],
+            cliente: '',
+            filterCliente: false,
+
+            idImpuesto: '',
+            impuestos: [],
+
+            detalleVenta: [],
+
+            selectTipoPago: 1,
+
+            idComprobanteContado: '',
+            comprobantesCobro: [],
+
+            metodoPagoContado: '',
+
+            idBancoContado: '',
+            bancos: [],
+
+            montoInicialCheck: false,
+            inicial: '',
+            idComprobanteCredito: '',
+
+            idBancoCredito: '',
+            metodoPagoCredito: '',
+
+            monthPago: getCurrentMonth(),
+            yearPago: getCurrentYear(),
+
+            numCuota: '',
+            letraMensual: '',
+
+            frecuenciaPagoCredito: new Date().getDate() > 15 ? '30' : '15',
+
+            inicialCreditoVariableCheck: false,
+            inicialCreditoVariable: '',
+
+            frecuenciaPago: new Date().getDate() > 15 ? '30' : '15',
+            idComprobanteCreditoVariable: '',
+
+            idBancoCreditoVariable: '',
+            metodoPagoCreditoVariable: '',
+
+            importeTotal: 0.0
+        }, () => {
+            this.loadingData();
         })
 
     }
@@ -632,6 +704,8 @@ class VentaProceso extends React.Component {
                     handleSelectFrecuenciaPago={this.handleSelectFrecuenciaPago}
 
                     importeTotal={this.state.importeTotal}
+
+                    handleClearSale={this.handleClearSale}
                 />
 
                 {

@@ -17,51 +17,45 @@ class App extends React.Component {
     }
 
     render() {
+        if (this.props.token.isLoading) {
+            return <Loader />;
+        }
+
+        if (this.props.token.isConfig) {
+            return <Configurar />;
+        }
+
         return (
-            <>
-                {
-                    this.props.token.isLoading ? (
-                        <Loader />
-                    ) :
-                        this.props.token.isConfig ?
-                            (
-                                <Configurar />
-                            )
-                            :
-                            (
-                                <BrowserRouter>
-                                    <Switch>
+            <BrowserRouter>
+                <Switch>
 
-                                        <Route
-                                            path="/"
-                                            exact={true}>
-                                            <Redirect to={"/login"} />
-                                        </Route>
+                    <Route
+                        path="/"
+                        exact={true}>
+                        <Redirect to={"/login"} />
+                    </Route>
 
-                                        <Route
-                                            path="/login"
-                                            exact={true}
-                                            render={(props) => <Login {...props} />}
-                                        />
+                    <Route
+                        path="/login"
+                        exact={true}
+                        render={(props) => <Login {...props} />}
+                    />
 
-                                        <Route
-                                            path="/principal"
-                                            exact={true}
-                                            render={(props) => <Principal {...props} />}
-                                        />
+                    <Route
+                        path="/principal"
+                        exact={true}
+                        render={(props) => <Principal {...props} />}
+                    />
 
-                                        <Route
-                                            path="/inicio"
-                                            render={(props) => <Inicio {...props} />}
-                                        />
+                    <Route
+                        path="/inicio"
+                        render={(props) => <Inicio {...props} />}
+                    />
 
-                                        <Route component={NotFoundInitial} />
-                                    </Switch>
+                    <Route component={NotFoundInitial} />
+                </Switch>
 
-                                </BrowserRouter>
-                            )
-                }
-            </>
+            </BrowserRouter>
         );
     }
 }

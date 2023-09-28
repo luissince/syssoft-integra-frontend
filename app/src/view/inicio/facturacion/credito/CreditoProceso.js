@@ -25,7 +25,7 @@ import SearchBarLote from "../../../../components/SearchBarLote";
 import ContainerWrapper from '../../../../components/Container';
 import { listarLotesFilter } from '../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../model/class/response';
-import ErrorResponse from '../../../../model/class/error';
+import ErrorResponse from '../../../../model/class/error-response';
 
 class CreditoProceso extends React.Component {
     constructor(props) {

@@ -4,10 +4,12 @@ import { connect } from "react-redux";
 import { signIn } from "../../redux/actions";
 import { loginApi } from "../../network/rest/principal.network";
 import SuccessReponse from "../../model/class/response";
-import ErrorResponse from "../../model/class/error";
-import { images } from "../../helper";
+import ErrorResponse from "../../model/class/error-response";
+import CustomComponent from "../../model/class/custom-component";
+import Title from "./component/Title";
+import Form from "./component/Form";
 
-class Login extends React.Component {
+class Login extends CustomComponent {
   constructor(props) {
     super(props);
 
@@ -21,12 +23,6 @@ class Login extends React.Component {
 
     this.usuarioInput = React.createRef();
     this.passwordInput = React.createRef();
-  }
-
-  setStateAsync(state) {
-    return new Promise((resolve) => {
-      this.setState(state, resolve);
-    });
   }
 
   componentDidMount() {
@@ -188,7 +184,6 @@ class Login extends React.Component {
   };
 
   render() {
-    const { usuario, password, message } = this.state;
     if (this.props.token.userToken != null) {
       return <Redirect to="/principal" />;
     }
@@ -202,111 +197,21 @@ class Login extends React.Component {
       >
         <div className="container">
           <div className="row gx-lg-5 align-items-center">
-            <div className="col-lg-6 mb-5 mb-lg-0 d-none d-md-block">
-              <h1 className="my-5 display-4 fw-bold ls-tight">
-                La mejor opción
-                <br />
-                <span className="text-primary">para tu negocio</span>
-              </h1>
-              <p style={{ color: " hsl(217, 10%, 50.8%)" }}>
-                Entra a un mundo de posibilidades con nuestro software de
-                gestión y ventas para restaurantes. Simplifica tus operaciones,
-                aumenta tus ventas y supera las expectativas de tus clientes.
-                Descubre una nueva era de éxito en la industria gastronómica,
-                donde la eficiencia se combina con la satisfacción del cliente.
-                ¡Únete a nosotros y haz que tu restaurante alcance su máximo
-                potencial!
-              </p>
-            </div>
+            <Title />
 
-            <div className="col-lg-6 mb-5 mb-lg-0">
-              <div className="card">
-                <div className="card-body py-5 px-md-5">
-                  <form onSubmit={this.onEventForm}>
-                    <img
-                      className="mb-4"
-                      // src={`${rutaImage !== "" ? "/" + rutaImage : noimage}`}
-                      src={images.icono}
-                      alt="Logo"
-                      width="160"
-                    />
-
-                    {message !== "" ? (
-                      <div
-                        className="alert alert-warning d-flex align-items-center justify-content-center"
-                        role="alert"
-                      >
-                        <i className="bi bi-exclamation-diamond-fill m-1"></i>
-                        <div className="m-1">{message}</div>
-                      </div>
-                    ) : null}
-
-                    {this.state.loading ? (
-                      <div className="m-3">
-                        <div
-                          className="spinner-border text-success"
-                          role="status"
-                        ></div>
-                      </div>
-                    ) : null}
-
-                    <div className="form-outline mb-4">
-                      <input
-                        ref={this.usuarioInput}
-                        onChange={this.handleChangeUsuario}
-                        value={usuario}
-                        type="text"
-                        id="inputUsuario"
-                        placeholder="Ingrese su usuario"
-                        autoFocus
-                        className="form-control"
-                      />
-                    </div>
-
-                    <div className="form-outline mb-4">
-                      <div className="input-group">
-                        <input
-                          ref={this.passwordInput}
-                          onChange={this.handleChangePassword}
-                          value={password}
-                          id="inputPassword"
-                          type={this.state.lookPassword ? "text" : "password"}
-                          className="form-control"
-                          placeholder="Ingrese su contraseña"
-                        />
-                        <div className="input-group-append">
-                          <button
-                            className="btn btn-outline-secondary"
-                            type="button"
-                            title="Mostrar"
-                            onClick={this.handleViewPassword}
-                          >
-                            <i
-                              className={
-                                this.state.lookPassword
-                                  ? "fa fa-eye"
-                                  : "fa fa-eye-slash"
-                              }
-                            ></i>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-
-                    <button
-                      type="submit"
-                      className="btn btn-primary btn-block mb-4"
-                    >
-                      Ingresar <i className="fa fa-arrow-right"></i>
-                    </button>
-
-                    <div className="text-center">
-                      <p>SysSoft Integra © {new Date().getFullYear()}</p>
-                    </div>
-                  </form>
-                </div>
-              </div>
-            </div>
+            <Form
+              message={this.state.message}
+              usuario={this.state.usuario}
+              password={this.state.password}
+              loading={this.state.loading}
+              usuarioInput={this.usuarioInput}
+              handleChangeUsuario={this.handleChangeUsuario}
+              passwordInput={this.passwordInput}
+              handleChangePassword={this.handleChangePassword}
+              lookPassword={this.state.lookPassword}
+              handleViewPassword={this.handleViewPassword}
+              onEventForm={this.onEventForm}
+            />
           </div>
         </div>
       </div>

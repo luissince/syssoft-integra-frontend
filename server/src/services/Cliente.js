@@ -18,6 +18,7 @@ class Cliente {
                 c.celular,
                 c.telefono,
                 c.direccion,
+                c.predeterminado,
                 c.estado
                 FROM cliente AS c
                 INNER JOIN tipoDocumento AS td ON td.idTipoDocumento = c.idTipoDocumento                
@@ -34,7 +35,6 @@ class Cliente {
 
                 parseInt(req.query.opcion),
                 req.query.buscar,
-
 
                 parseInt(req.query.opcion),
                 req.query.buscar,
@@ -138,7 +138,7 @@ class Cliente {
         try {
             connection = await conec.beginTransaction();
 
-            let validate = await conec.execute(connection, `SELECT * FROM cliente WHERE documento = ?`, [
+            const validate = await conec.execute(connection, `SELECT * FROM cliente WHERE documento = ?`, [
                 req.body.documento,
             ]);
 
@@ -147,16 +147,14 @@ class Cliente {
                 return `El número de documento a ingresar ya se encuentre registrado con los datos de ${validate[0].informacion}`;
             }
 
-            let result = await conec.execute(connection, 'SELECT idCliente FROM cliente');
+            const result = await conec.execute(connection, 'SELECT idCliente FROM cliente');
             let idCliente = "";
             if (result.length != 0) {
-
-                let quitarValor = result.map(function (item) {
+                const quitarValor = result.map(function (item) {
                     return parseInt(item.idCliente.replace("CL", ''));
                 });
 
-                let valorActual = Math.max(...quitarValor);
-                let incremental = valorActual + 1;
+                const incremental = Math.max(...quitarValor) + 1;
                 let codigoGenerado = "";
                 if (incremental <= 9) {
                     codigoGenerado = 'CL000' + incremental;
@@ -173,6 +171,10 @@ class Cliente {
                 idCliente = "CL0001";
             }
 
+            if (req.body.predeterminado) {
+                await conec.execute(connection, `UPDATE cliente SET predeterminado = 0`);
+            }
+
             await conec.execute(connection, `INSERT INTO cliente(
             idCliente, 
             idTipoDocumento,
@@ -186,6 +188,7 @@ class Cliente {
             direccion,
             idUbigeo, 
             estadoCivil,
+            predeterminado,
             estado, 
             observacion,
             fecha,
@@ -193,7 +196,7 @@ class Cliente {
             fupdate,
             hupdate,
             idUsuario)
-            VALUES(?, ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, [
+            VALUES(?, ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, [
                 idCliente,
                 req.body.idTipoDocumento,
                 req.body.documento,
@@ -206,6 +209,7 @@ class Cliente {
                 req.body.direccion,
                 req.body.idUbigeo,
                 req.body.estadoCivil,
+                req.body.predeterminado,
                 req.body.estado,
                 req.body.observacion,
                 currentDate(),
@@ -227,7 +231,7 @@ class Cliente {
 
     async id(req) {
         try {
-            let result = await conec.query(`SELECT 
+            const result = await conec.query(`SELECT 
             cl.idCliente,
             cl.idTipoDocumento,
             cl.documento,
@@ -244,6 +248,7 @@ class Cliente {
             IFNULL(u.provincia, '') AS provincia,
             IFNULL(u.distrito, '') AS distrito,
             cl.estadoCivil,
+            cl.predeterminado,
             cl.estado, 
             cl.observacion
             FROM cliente AS cl 
@@ -268,7 +273,7 @@ class Cliente {
         try {
             connection = await conec.beginTransaction();
 
-            let validate = await conec.execute(connection, `SELECT * FROM cliente WHERE idCliente <> ? AND documento = ?`, [
+            const validate = await conec.execute(connection, `SELECT * FROM cliente WHERE idCliente <> ? AND documento = ?`, [
                 req.body.idCliente,
                 req.body.documento,
             ]);
@@ -276,6 +281,10 @@ class Cliente {
             if (validate.length > 0) {
                 await conec.rollback(connection);
                 return `El número de documento a ingresar ya se encuentre registrado con los datos de ${validate[0].informacion}`;
+            }
+
+            if (req.body.predeterminado) {
+                await conec.execute(connection, `UPDATE cliente SET predeterminado = 0`);
             }
 
             await conec.execute(connection, `UPDATE cliente SET
@@ -290,6 +299,7 @@ class Cliente {
                 direccion=?, 
                 idUbigeo=?,
                 estadoCivil=?, 
+                predeterminado=?,
                 estado=?,
                 observacion=?,
                 fupdate=?,
@@ -307,6 +317,7 @@ class Cliente {
                 req.body.direccion,
                 req.body.idUbigeo,
                 req.body.estadoCivil,
+                req.body.predeterminado,
                 req.body.estado,
                 req.body.observacion,
                 currentDate(),
@@ -320,6 +331,7 @@ class Cliente {
             await conec.commit(connection)
             return "update";
         } catch (error) {
+            console.log(error)
             if (connection != null) {
                 await conec.rollback(connection);
             }
@@ -332,7 +344,7 @@ class Cliente {
         try {
             connection = await conec.beginTransaction();
 
-            let cobro = await conec.execute(connection, `SELECT * FROM cobro WHERE idCliente = ?`, [
+            const cobro = await conec.execute(connection, `SELECT * FROM cobro WHERE idCliente = ?`, [
                 req.query.idCliente
             ]);
 
@@ -341,7 +353,7 @@ class Cliente {
                 return 'No se puede eliminar el cliente ya que esta ligada a un cobro.';
             }
 
-            let gasto = await conec.execute(connection, `SELECT * FROM gasto WHERE idCliente = ?`, [
+            const gasto = await conec.execute(connection, `SELECT * FROM gasto WHERE idCliente = ?`, [
                 req.query.idCliente
             ]);
 
@@ -350,7 +362,7 @@ class Cliente {
                 return 'No se puede eliminar el cliente ya que esta ligada a un gasto.';
             }
 
-            let venta = await conec.execute(connection, `SELECT * FROM venta WHERE idCliente = ?`, [
+            const venta = await conec.execute(connection, `SELECT * FROM venta WHERE idCliente = ?`, [
                 req.query.idCliente
             ]);
 
@@ -375,7 +387,7 @@ class Cliente {
 
     async listcombo(req) {
         try {
-            let result = await conec.query('SELECT idCliente, documento, informacion FROM cliente');
+            const result = await conec.query('SELECT idCliente, documento, informacion FROM cliente');
             return result;
         } catch (error) {
             return "Se produjo un error de servidor, intente nuevamente.";
@@ -384,11 +396,15 @@ class Cliente {
 
     async listsearch(req) {
         try {
-            let result = await conec.query(`
+            /* El código anterior es un fragmento de código JavaScript. Comienza con la declaración de
+            una variable constante usando la palabra clave `const`. Sin embargo, el fragmento de
+            código está incompleto y no proporciona más información sobre para qué se asigna o se
+            utiliza la variable constante. */
+            const result = await conec.query(`
             SELECT 
             idCliente, 
             documento, 
-            informacion 
+            informacion
             FROM cliente
             WHERE 
             documento LIKE CONCAT('%',?,'%')
@@ -398,6 +414,25 @@ class Cliente {
                 req.query.filtrar,
             ]);
             return result;
+        } catch (error) {
+            return "Se produjo un error de servidor, intente nuevamente.";
+        }
+    }
+
+    async getPredeterminado(req) {
+        try {
+            const result = await conec.query(`
+            SELECT 
+            idCliente, 
+            documento, 
+            informacion
+            FROM cliente
+            WHERE predeterminado = 1`);
+            if (result.length !== 0) {
+                return result[0];
+            }
+
+            return "";
         } catch (error) {
             return "Se produjo un error de servidor, intente nuevamente.";
         }

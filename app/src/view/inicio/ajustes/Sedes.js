@@ -10,7 +10,7 @@ import ContainerWrapper from '../../../components/Container';
 import { images } from '../../../helper';
 import { listSede, loadEmpresa } from '../../../network/rest/principal.network';
 import SuccessReponse from '../../../model/class/response';
-import ErrorResponse from '../../../model/class/error';
+import ErrorResponse from '../../../model/class/error-response';
 import { CANCELED } from '../../../model/types/types';
 
 class Sedes extends React.Component {
