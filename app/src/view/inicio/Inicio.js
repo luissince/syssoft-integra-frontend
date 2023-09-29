@@ -29,7 +29,9 @@ import Socios from './facturacion/socio/Socios';
 
 import Monedas from './ajustes/Monedas';
 import Comprobantes from './ajustes/Comprobantes';
-import Impuestos from './ajustes/Impuestos';
+
+import Impuestos from './ajustes/impuesto/Impuestos';
+
 import Bancos from './ajustes/Bancos';
 import BancoDetalle from './ajustes/registros/BancoDetalle';
 import Sedes from './ajustes/Sedes';

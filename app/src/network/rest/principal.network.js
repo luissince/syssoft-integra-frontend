@@ -561,3 +561,41 @@ export async function getPredeterminado(signal) {
     })
   );
 }
+
+export async function listImpuesto(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/impuesto/list', {
+      signal: signal,
+      params: params
+    })
+  );
+}
+
+export async function getImpuestoId(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.get("/api/impuesto/id", {
+      signal: signal,
+      params: params
+    })
+  );
+}
+
+export async function addImpuesto(data) {
+  return await Resolve.create(
+    instancePrincipal.post('/api/impuesto/add', data)
+  );
+}
+
+export async function editImpuesto(data) {
+  return await Resolve.create(
+    instancePrincipal.post('/api/impuesto/edit', data)
+  );
+}
+
+export async function deleteImpuesto(params) {
+  return await Resolve.create(
+    instancePrincipal.delete('/api/impuesto', {
+      params: params
+    })
+  );
+}

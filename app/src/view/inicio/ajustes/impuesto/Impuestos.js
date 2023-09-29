@@ -1,5 +1,4 @@
 import React from 'react';
-import axios from 'axios';
 import {
     isNumeric,
     keyNumberInteger,
@@ -14,12 +13,17 @@ import {
     spinnerLoading,
     statePrivilegio,
     keyUpSearch
-} from '../../../helper/utils.helper';
+} from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
-import Paginacion from '../../../components/Paginacion';
-import ContainerWrapper from '../../../components/Container';
+import Paginacion from '../../../../components/Paginacion';
+import ContainerWrapper from '../../../../components/Container';
+import CustomComponent from '../../../../model/class/custom-component';
+import { addImpuesto, deleteImpuesto, editImpuesto, getImpuestoId, listImpuesto } from '../../../../network/rest/principal.network';
+import SuccessReponse from '../../../../model/class/response';
+import ErrorResponse from '../../../../model/class/error-response';
+import { CANCELED } from '../../../../model/types/types';
 
-class Impuestos extends React.Component {
+class Impuestos extends CustomComponent {
 
     constructor(props) {
         super(props);
@@ -28,6 +32,7 @@ class Impuestos extends React.Component {
             nombre: '',
             porcentaje: '',
             codigo: '',
+            preferida: false,
             estado: true,
             idUsuario: this.props.token.userToken.idUsuario,
 
@@ -59,12 +64,6 @@ class Impuestos extends React.Component {
 
         this.idCodigo = "";
         this.abortControllerTable = new AbortController();
-    }
-
-    setStateAsync(state) {
-        return new Promise((resolve) => {
-            this.setState(state, resolve)
-        });
     }
 
     async componentDidMount() {
@@ -135,38 +134,43 @@ class Impuestos extends React.Component {
     }
 
     fillTable = async (opcion, buscar) => {
-        try {
-            await this.setStateAsync({ loading: true, lista: [], messageTable: "Cargando información...", messagePaginacion: "Mostranto 0 de 0 Páginas" });
+        await this.setStateAsync({
+            loading: true,
+            lista: [],
+            messageTable: "Cargando información...",
+            messagePaginacion: "Mostranto 0 de 0 Páginas"
+        });
 
-            const result = await axios.get('/api/impuesto/list', {
-                signal: this.abortControllerTable.signal,
-                params: {
-                    "opcion": opcion,
-                    "buscar": buscar,
-                    "posicionPagina": ((this.state.paginacion - 1) * this.state.filasPorPagina),
-                    "filasPorPagina": this.state.filasPorPagina
-                }
-            });
+        const params = {
+            "opcion": opcion,
+            "buscar": buscar,
+            "posicionPagina": ((this.state.paginacion - 1) * this.state.filasPorPagina),
+            "filasPorPagina": this.state.filasPorPagina
+        }
 
-            let totalPaginacion = parseInt(Math.ceil((parseFloat(result.data.total) / this.state.filasPorPagina)));
-            let messagePaginacion = `Mostrando ${result.data.result.length} de ${totalPaginacion} Páginas`;
+        const response = await listImpuesto(params, this.abortControllerTable.signal);
+        if (response instanceof SuccessReponse) {
+            const totalPaginacion = parseInt(Math.ceil((parseFloat(response.data.total) / this.state.filasPorPagina)));
+            const messagePaginacion = `Mostrando ${response.data.result.length} de ${totalPaginacion} Páginas`;
 
             await this.setStateAsync({
                 loading: false,
-                lista: result.data.result,
+                lista: response.data.result,
                 totalPaginacion: totalPaginacion,
                 messagePaginacion: messagePaginacion
             });
-        } catch (error) {
-            if (error.message !== "canceled") {
-                await this.setStateAsync({
-                    loading: false,
-                    lista: [],
-                    totalPaginacion: 0,
-                    messageTable: "Se produjo un error interno, intente nuevamente por favor.",
-                    messagePaginacion: "Mostranto 0 de 0 Páginas",
-                });
-            }
+        }
+
+        if (response instanceof ErrorResponse) {
+            if (response.getType() === CANCELED) return;
+
+            await this.setStateAsync({
+                loading: false,
+                lista: [],
+                totalPaginacion: 0,
+                messageTable: "Se produjo un error interno, intente nuevamente por favor.",
+                messagePaginacion: "Mostranto 0 de 0 Páginas",
+            });
         }
     }
 
@@ -182,94 +186,119 @@ class Impuestos extends React.Component {
     }
 
     loadDataId = async (id) => {
-        try {
-            const result = await axios.get("/api/impuesto/id", {
-                signal: this.abortControllerModal.signal,
-                params: {
-                    idImpuesto: id
-                }
-            });
+        const params = {
+            idImpuesto: id
+        }
+        const response = await getImpuestoId(params, this.abortControllerModal.signal);
 
+        if (response instanceof SuccessReponse) {
             await this.setStateAsync({
-                idImpuesto: result.data.idImpuesto,
-                nombre: result.data.nombre,
-                porcentaje: result.data.porcentaje.toString(),
-                codigo: result.data.codigo,
-                estado: result.data.estado === 1 ? true : false,
+                idImpuesto: response.data.idImpuesto,
+                nombre: response.data.nombre,
+                porcentaje: response.data.porcentaje.toString(),
+                codigo: response.data.codigo,
+                preferida: response.data.preferida,
+                estado: response.data.estado,
                 loadModal: false
             });
+        }
 
-        } catch (error) {
-            if (error.message !== "canceled") {
-                await this.setStateAsync({
-                    msgModal: "Se produjo un error interno, intente nuevamente"
-                });
-            }
+        if (response instanceof ErrorResponse) {
+            if (response.getType() === CANCELED) return;
+
+            await this.setStateAsync({
+                msgModal: "Se produjo un error interno, intente nuevamente"
+            });
         }
     }
 
-    async onEventGuardar() {
+    async handleUpdate() {
+        const data = {
+            "idImpuesto": this.state.idImpuesto,
+            "nombre": this.state.nombre,
+            "porcentaje": this.state.porcentaje,
+            "codigo": this.state.codigo,
+            "estado": this.state.estado,
+            "preferida": this.state.preferida,
+            "idUsuario": this.state.idUsuario,
+        }
+
+        const response = await editImpuesto(data);
+        if (response instanceof SuccessReponse) {
+            alertSuccess("Impuesto", response.data, () => {
+                this.onEventPaginacion();
+            });
+        }
+
+        if (response instanceof ErrorResponse) {
+            alertWarning("Impuesto", response.getMessage());
+        }
+    }
+
+    async handleAdd() {
+        const data = {
+            "nombre": this.state.nombre,
+            "porcentaje": this.state.porcentaje,
+            "codigo": this.state.codigo,
+            "estado": this.state.estado,
+            "preferida": this.state.preferida,
+            "idUsuario": this.state.idUsuario,
+        }
+
+        const response = await addImpuesto(data);
+        if (response instanceof SuccessReponse) {
+            alertSuccess("Impuesto", response.data, () => {
+                this.loadInit();
+            });
+        }
+
+        if (response instanceof ErrorResponse) {
+            alertWarning("Impuesto", response.getMessage());
+        }
+    }
+
+    async handleSave() {
         if (this.state.nombre === "") {
             await this.setStateAsync({ messageWarning: "Ingrese el nombre." });
             this.refNombre.current.focus();
-        } else if (!isNumeric(this.state.porcentaje)) {
+            return;
+        }
+
+        if (!isNumeric(this.state.porcentaje)) {
             await this.setStateAsync({ messageWarning: "Ingrese el porcentaje." });
             this.refPorcentaje.current.focus();
+            return;
+        }
+
+        alertInfo("Impuesto", "Procesando información...");
+        hideModal("modalImpuesto");
+
+        if (this.state.idImpuesto !== "") {
+            this.handleUpdate();
         } else {
-            try {
-                alertInfo("Impuesto", "Procesando información...");
-                hideModal("modalImpuesto");
-                if (this.state.idImpuesto !== "") {
-                    const result = await axios.post('/api/impuesto/edit', {
-                        "idImpuesto": this.state.idImpuesto,
-                        "nombre": this.state.nombre,
-                        "porcentaje": this.state.porcentaje,
-                        "codigo": this.state.codigo,
-                        "estado": this.state.estado,
-                        "idUsuario": this.state.idUsuario,
-                    });
-
-                    alertSuccess("Impuesto", result.data, () => {
-                        this.onEventPaginacion();
-                    });
-                } else {
-                    const result = await axios.post('/api/impuesto/add', {
-                        "nombre": this.state.nombre,
-                        "porcentaje": this.state.porcentaje,
-                        "codigo": this.state.codigo,
-                        "estado": this.state.estado,
-                        "idUsuario": this.state.idUsuario,
-                    });
-
-                    alertSuccess("Impuesto", result.data, () => {
-                        this.loadInit();
-                    });
-                }
-            } catch (err) {
-                alertWarning("Impuesto", "Se produjo un error un interno, intente nuevamente.");
-            }
+            this.handleAdd();
         }
     }
 
     onEventDelete(idImpuesto) {
         alertDialog("Impuesto", "¿Estás seguro de eliminar la moneda?", async (event) => {
             if (event) {
-                try {
-                    alertInfo("Impuesto", "Procesando información...")
-                    let result = await axios.delete('/api/impuesto', {
-                        params: {
-                            "idImpuesto": idImpuesto
-                        }
-                    })
-                    alertSuccess("Impuesto", result.data, () => {
+                alertInfo("Impuesto", "Procesando información...")
+
+                const params = {
+                    "idImpuesto": idImpuesto
+                }
+
+                const response = await deleteImpuesto(params);
+                if (response instanceof SuccessReponse) {
+                    alertSuccess("Impuesto", response.data, () => {
                         this.loadInit();
                     })
-                } catch (error) {
-                    if (error.response !== undefined) {
-                        alertWarning("Impuesto", error.response.data)
-                    } else {
-                        alertWarning("Impuesto", "Se genero un error interno, intente nuevamente.")
-                    }
+                }
+
+                if (response instanceof ErrorResponse) {
+                    alertWarning("Impuesto", response.getMessage())
+
                 }
             }
         })
@@ -289,11 +318,14 @@ class Impuestos extends React.Component {
                                 </button>
                             </div>
                             <div className="modal-body">
-                                {this.state.loadModal ?
+
+                                {
+                                    this.state.loadModal
+                                    &&
                                     <div className="clearfix absolute-all bg-white">
                                         {spinnerLoading(this.state.msgModal)}
                                     </div>
-                                    : null}
+                                }
 
                                 {
                                     this.state.messageWarning === '' ? null :
@@ -325,7 +357,7 @@ class Impuestos extends React.Component {
                                             ref={this.refPorcentaje}
                                             value={this.state.porcentaje}
                                             onChange={(event) => this.setState({ porcentaje: event.target.value })}
-                                            onKeyPress={keyNumberInteger} />
+                                            onKeyDown={keyNumberInteger} />
                                     </div>
                                     <div className="form-group col-md-6">
                                         <label htmlFor="numeracion">Código:</label>
@@ -341,20 +373,34 @@ class Impuestos extends React.Component {
                                     </div>
                                 </div>
 
-                                <div className="form-group">
-                                    <div className="custom-control custom-switch">
-                                        <input
-                                            type="checkbox"
-                                            className="custom-control-input"
-                                            id="switch1"
-                                            checked={this.state.estado}
-                                            onChange={(value) => this.setState({ estado: value.target.checked })} />
-                                        <label className="custom-control-label" htmlFor="switch1">Activo o Inactivo</label>
+                                <div className="form-row">
+                                    <div className="form-group col-md-6">
+                                        <div className="custom-control custom-switch">
+                                            <input
+                                                type="checkbox"
+                                                className="custom-control-input"
+                                                id="switch1"
+                                                checked={this.state.estado}
+                                                onChange={(value) => this.setState({ estado: value.target.checked })} />
+                                            <label className="custom-control-label" htmlFor="switch1">{this.state.estado ? "Activo" : "Inactivo"}</label>
+                                        </div>
+                                    </div>
+
+                                    <div className="form-group col-md-6">
+                                        <div className="custom-control custom-switch">
+                                            <input
+                                                type="checkbox"
+                                                className="custom-control-input"
+                                                id="switch2"
+                                                checked={this.state.preferida}
+                                                onChange={(value) => this.setState({ preferida: value.target.checked })} />
+                                            <label className="custom-control-label" htmlFor="switch2">{this.state.preferida ? "Si" : "No"}</label>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                             <div className="modal-footer">
-                                <button type="button" className="btn btn-primary" onClick={() => this.onEventGuardar()}>Guardar</button>
+                                <button type="button" className="btn btn-primary" onClick={() => this.handleSave()}>Guardar</button>
                                 <button type="button" className="btn btn-danger" data-bs-dismiss="modal">Cerrar</button>
                             </div>
                         </div>
@@ -410,6 +456,7 @@ class Impuestos extends React.Component {
                                         <th width="40%" >Nombre</th>
                                         <th width="15%" >Porcentaje</th>
                                         <th width="15%" >Código</th>
+                                        <th width="15%" >Preferida</th>
                                         <th width="15%" >Estado</th>
                                         <th width="5%" className="text-center">Editar</th>
                                         <th width="5%" className="text-center">Anular</th>
@@ -419,13 +466,13 @@ class Impuestos extends React.Component {
                                     {
                                         this.state.loading ? (
                                             <tr>
-                                                <td className="text-center" colSpan="8">
+                                                <td className="text-center" colSpan="9">
                                                     {spinnerLoading()}
                                                 </td>
                                             </tr>
                                         ) : this.state.lista.length === 0 ? (
                                             <tr>
-                                                <td className="text-center" colSpan="8">¡No hay comprobantes registrados!</td>
+                                                <td className="text-center" colSpan="9">¡No hay comprobantes registrados!</td>
                                             </tr>
                                         ) :
                                             this.state.lista.map((item, index) => {
@@ -435,7 +482,16 @@ class Impuestos extends React.Component {
                                                         <td>{item.nombre}</td>
                                                         <td>{item.porcentaje + "%"}</td>
                                                         <td>{item.codigo}</td>
-                                                        <td className="text-center"><div className={`badge ${item.estado === 1 ? "badge-info" : "badge-danger"}`}>{item.estado === 1 ? "ACTIVO" : "INACTIVO"}</div></td>
+                                                        <td className="text-center">
+                                                            <div className={`badge ${item.preferida ? "badge-success" : "badge-warning"}`}>
+                                                                {item.preferida ? "SI" : "NO"}
+                                                            </div>
+                                                        </td>
+                                                        <td className="text-center">
+                                                            <div className={`badge ${item.estado ? "badge-info" : "badge-danger"}`}>
+                                                                {item.estado ? "ACTIVO" : "INACTIVO"}
+                                                            </div>
+                                                        </td>
                                                         <td className="text-center">
                                                             <button
                                                                 className="btn btn-outline-warning btn-sm"

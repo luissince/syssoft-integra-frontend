@@ -1,18 +1,19 @@
 const Conexion = require('../database/Conexion');
 const { currentDate, currentTime } = require('../tools/Tools');
-const { sendSuccess, sendClient, sendError } = require('../tools/Message');
+const { sendSuccess, sendClient, sendError, sendSave } = require('../tools/Message');
 const conec = new Conexion();
 
 class Impuesto {
 
     async list(req, res) {
         try {
-            let lista = await conec.query(`SELECT 
+            const lista = await conec.query(`SELECT 
             idImpuesto,
             nombre,
             porcentaje,
             codigo,
             estado,
+            preferida,
             DATE_FORMAT(fecha,'%d/%m/%Y') as fecha, 
             hora
             FROM impuesto
@@ -30,14 +31,15 @@ class Impuesto {
                 parseInt(req.query.filasPorPagina)
             ])
 
-            let resultLista = lista.map(function (item, index) {
+            const resultLista = lista.map(function (item, index) {
                 return {
                     ...item,
                     id: (index + 1) + parseInt(req.query.posicionPagina)
                 }
             });
 
-            let total = await conec.query(`SELECT COUNT(*) AS Total FROM impuesto
+            const total = await conec.query(`SELECT COUNT(*) AS Total 
+            FROM impuesto
             WHERE 
             ? = 0
             OR
@@ -50,6 +52,7 @@ class Impuesto {
 
             return sendSuccess(res, { "result": resultLista, "total": total[0].Total });
         } catch (error) {
+            console.log(error)
             return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
         }
     }
@@ -86,23 +89,29 @@ class Impuesto {
                 idImpuesto = "IM0001";
             }
 
+            if (req.body.preferida) {
+                await conec.execute(connection, `UPDATE impuesto SET preferida = 0`);
+            }
+
             await conec.execute(connection, `INSERT INTO impuesto(
                 idImpuesto, 
                 nombre,
                 porcentaje,
                 codigo,
                 estado,
+                preferida,
                 fecha,
                 hora,
                 fupdate,
                 hupdate,
                 idUsuario) 
-                VALUES(?,?,?,?,?,?,?,?,?,?)`, [
+                VALUES(?,?,?,?,?,?,?,?,?,?,?)`, [
                 idImpuesto,
                 req.body.nombre,
                 req.body.porcentaje,
                 req.body.codigo,
                 req.body.estado,
+                req.body.preferida,
                 currentDate(),
                 currentTime(),
                 currentDate(),
@@ -142,18 +151,24 @@ class Impuesto {
         try {
             connection = await conec.beginTransaction();
 
+            if (req.body.preferida) {
+                await conec.execute(connection, `UPDATE impuesto SET preferida = 0`);
+            }
+
             await conec.execute(connection, `UPDATE impuesto 
             SET 
             nombre=?,
             porcentaje=?,
             codigo=?,
             estado=?,
+            preferida=?,
             idUsuario=?
             WHERE idImpuesto=?`, [
                 req.body.nombre,
                 req.body.porcentaje,
                 req.body.codigo,
                 req.body.estado,
+                req.body.preferida,
                 req.body.idUsuario,
                 req.body.idImpuesto
             ])
@@ -161,19 +176,20 @@ class Impuesto {
             await conec.commit(connection)
             return sendSave(res, 'Los datos se actualizarón correctamente.');
         } catch (error) {
+            console.log(error)
             if (connection != null) {
                 await conec.rollback(connection);
             }
-            return sendError(error, "Se produjo un error de servidor, intente nuevamente.");
+            return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
         }
-    }
+    } 
 
-    async delete(req, res) {
-        let connection = null;
+    async delete(req, res) { 
+        let connection = null; 
         try {
-            connection = await conec.beginTransaction();
+            connection = await conec.beginTransaction(); 
 
-            let cobroDetalle = await conec.execute(connection, `SELECT * FROM cobroDetalle WHERE idImpuesto = ?`, [
+            const cobroDetalle = await conec.execute(connection, `SELECT * FROM cobroDetalle WHERE idImpuesto = ?`, [
                 req.query.idImpuesto
             ]);
 
@@ -182,7 +198,7 @@ class Impuesto {
                 return sendClient(res, 'No se puede eliminar el impuesto ya que esta ligada a un detalle de cobro.');
             }
 
-            let gastoDetalle = await conec.execute(connection, `SELECT * FROM gastoDetalle WHERE idImpuesto = ?`, [
+            const gastoDetalle = await conec.execute(connection, `SELECT * FROM gastoDetalle WHERE idImpuesto = ?`, [
                 req.query.idImpuesto
             ]);
 
@@ -191,7 +207,7 @@ class Impuesto {
                 return sendClient(res, 'No se puede eliminar el impuesto ya que esta ligada a un detalle de gasto.');
             }
 
-            let ventaDetalle = await conec.execute(connection, `SELECT * FROM ventaDetalle WHERE idImpuesto = ?`, [
+            const ventaDetalle = await conec.execute(connection, `SELECT * FROM ventaDetalle WHERE idImpuesto = ?`, [
                 req.query.idImpuesto
             ]);
 
@@ -200,10 +216,17 @@ class Impuesto {
                 return sendClient(res, 'No se puede eliminar el impuesto ya que esta ligada a un detalle de venta.');
             }
 
+            const preferida = await conec.execute(connection, `SELECT * FROM impuesto WHERE preferida = 1`);
+
+            if (preferida.length > 0) {
+                await conec.rollback(connection);
+                return sendClient(res, 'El impuesto tiene el estado preferida, cambie el valor para poder eliminar.');
+            }
+
             await conec.execute(connection, `DELETE FROM impuesto WHERE idImpuesto   = ?`, [
                 req.query.idImpuesto
             ]);
-
+ 
             await conec.commit(connection)
             return sendSave(res, 'Se eliminó correctamente el impuesto.');
         } catch (error) {
