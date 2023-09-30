@@ -11,19 +11,19 @@ import {
   spinnerLoading,
   statePrivilegio,
   keyUpSearch,
-} from "../../../helper/utils.helper";
+} from "../../../../helper/utils.helper";
 import { connect } from "react-redux";
-import Paginacion from "../../../components/Paginacion";
+import Paginacion from "../../../../components/Paginacion";
 import {
   comboProyectos,
   listarCategoria,
   trasladarCategoria,
-} from "../../../network/rest/principal.network";
-import SuccessReponse from "../../../model/class/response";
-import ErrorResponse from "../../../model/class/error-response";
-import { CANCELED } from "../../../model/types/types";
-import ContainerWrapper from "../../../components/Container";
-import { addCategoria, getIdCategoria, removeCategoria, updateCategoria } from "../../../network/rest/principal.network";
+} from "../../../../network/rest/principal.network";
+import SuccessReponse from "../../../../model/class/response";
+import ErrorResponse from "../../../../model/class/error-response";
+import { CANCELED } from "../../../../model/types/types";
+import ContainerWrapper from "../../../../components/Container";
+import { addCategoria, getIdCategoria, removeCategoria, updateCategoria } from "../../../../network/rest/principal.network";
 
 class Categorias extends React.Component {
   constructor(props) {
@@ -431,8 +431,9 @@ class Categorias extends React.Component {
           tabIndex="-1"
           aria-labelledby="modalCategoriaLabel"
           aria-hidden={true}
+          data-bs-backdrop="static"
         >
-          <div className="modal-dialog">
+          <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title">{this.state.nameModal}</h5>

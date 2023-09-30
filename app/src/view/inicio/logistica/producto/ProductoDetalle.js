@@ -20,9 +20,9 @@ import { CANCELED, ERROR } from '../../../../model/types/types';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
 import ContainerWrapper from '../../../../components/Container';
+import CustomComponent from '../../../../model/class/custom-component';
 
-
-class ProductoDetalle extends React.Component {
+class ProductoDetalle extends CustomComponent{
     constructor(props) {
         super(props);
         this.state = {
@@ -53,12 +53,6 @@ class ProductoDetalle extends React.Component {
         this.abortControllerLiberar = new AbortController();
 
         this.refCliente = React.createRef();
-    }
-
-    setStateAsync(state) {
-        return new Promise((resolve) => {
-            this.setState(state, resolve)
-        });
     }
 
     async componentDidMount() {

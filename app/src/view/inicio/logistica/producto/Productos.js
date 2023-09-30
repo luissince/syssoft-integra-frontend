@@ -14,12 +14,13 @@ import {
     spinnerLoading,
     statePrivilegio,
     keyUpSearch
-} from '../../../helper/utils.helper';
+} from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
-import Paginacion from '../../../components/Paginacion';
-import ContainerWrapper from '../../../components/Container';
+import Paginacion from '../../../../components/Paginacion';
+import ContainerWrapper from '../../../../components/Container';
+import CustomComponent from '../../../../model/class/custom-component';
 
-class Productos extends React.Component {
+class Productos extends CustomComponent {
     constructor(props) {
         super(props);
         this.state = {
@@ -87,21 +88,16 @@ class Productos extends React.Component {
         this.refTxtSearch = React.createRef();
 
         this.idCodigo = "";
+        this.idModal = "modalProducto";
+        this.completo = false;
         this.abortControllerTable = new AbortController();
-    }
-
-    setStateAsync(state) {
-        return new Promise((resolve) => {
-            this.setState(state, resolve)
-        });
     }
 
     async componentDidMount() {
         this.loadInit();
 
-        viewModal("modalProducto", () => {
+        viewModal(this.idModal, () => {
             this.abortControllerModal = new AbortController();
-
             if (this.idCodigo !== "") {
                 this.loadDataId(this.idCodigo);
             } else {
@@ -109,8 +105,16 @@ class Productos extends React.Component {
             }
         });
 
-        clearModal("modalProducto", async () => {
+        clearModal(this.idModal, async () => {
             this.abortControllerModal.abort();
+            
+            if (this.completo) {
+                this.props.history.push({
+                    pathname: `${this.props.location.pathname}/agregar`
+                })
+                return;
+            }
+          
             await this.setStateAsync({
                 idProducto: '',
                 idCategoria: '',
@@ -139,7 +143,7 @@ class Productos extends React.Component {
                 nameModal: 'Nuevo Comprobante',
                 msgModal: 'Cargando datos...',
             });
-            this.onFocusTab("info-tab", "info");
+            this.handleFocusTab("info-tab", "info");
             this.idCodigo = "";
         });
     }
@@ -215,17 +219,6 @@ class Productos extends React.Component {
                     messagePaginacion: "Mostranto 0 de 0 Páginas",
                 });
             }
-        }
-    }
-
-    async openModal(id) {
-        if (id === "") {
-            showModal('modalProducto');
-            await this.setStateAsync({ nameModal: "Nuevo Producto", loadModal: true });
-        } else {
-            showModal('modalProducto');
-            this.idCodigo = id;
-            await this.setStateAsync({ idProducto: id, nameModal: "Editar Producto", loadModal: true });
         }
     }
 
@@ -321,52 +314,142 @@ class Productos extends React.Component {
         }
     }
 
-    async onEventGuardar() {
+    handleOpenModal = async () => {
+        showModal('modalProducto');
+        await this.setStateAsync({ nameModal: "Nuevo Producto", loadModal: true });
+    }
+
+    handleCompleto = async () => {
+        hideModal(this.idModal);
+        this.completo = true;
+    }
+
+    /**
+     * Esta es una función se encarga de navegar a la vista para editar el producto
+     *
+     * @param {string} idProducto - Id de producto
+     * @returns {void}
+     *
+     * @example
+     * handleEditar('LT0001');
+     */
+    handleEditar(idProducto) {
+        this.props.history.push({
+            pathname: `${this.props.location.pathname}/editar`,
+            search: "?idProducto=" + idProducto
+        })
+        // if (id === "") {
+        //     showModal('modalProducto');
+        //     await this.setStateAsync({ nameModal: "Nuevo Producto", loadModal: true });
+        // } else {
+        //     showModal('modalProducto');
+        //     this.idCodigo = id;
+        //     await this.setStateAsync({ idProducto: id, nameModal: "Editar Producto", loadModal: true });
+        // }
+    }
+
+
+    /**
+     * Esta es una función se encarga de activar un tab automáticamente al llamar la función
+     *
+     * @param {string} idTab - Id del tab
+     * @param {string} idContent - Id del contendor
+     * @returns {void}
+     *
+     * @example
+     * handleFocusTab("info-tab", "info");
+     */
+    handleFocusTab(idTab, idContent) {
+        if (!document.getElementById(idTab).classList.contains('active')) {
+            for (let child of document.getElementById('myTab').childNodes) {
+                child.childNodes[0].classList.remove('active')
+            }
+            for (let child of document.getElementById('myTabContent').childNodes) {
+                child.classList.remove('show', 'active')
+            }
+            document.getElementById(idTab).classList.add('active');
+            document.getElementById(idContent).classList.add('show', 'active');
+        }
+    }
+
+    handleMostrar = (idProducto) => {
+        this.props.history.push({
+            pathname: `${this.props.location.pathname}/detalle`,
+            search: "?idProducto=" + idProducto
+        })
+    }
+
+
+    handleBorrar = (idProducto) => {
+        alertDialog("Producto", "¿Estás seguro de eliminar el producto?", async (event) => {
+            if (event) {
+                try {
+                    alertInfo("Producto", "Procesando información...")
+                    let result = await axios.delete('/api/producto', {
+                        params: {
+                            "idProducto": idProducto
+                        }
+                    })
+                    alertSuccess("Producto", result.data, () => {
+                        this.loadInit();
+                    })
+                } catch (error) {
+                    if (error.response !== undefined) {
+                        alertWarning("Producto", error.response.data)
+                    } else {
+                        alertWarning("Producto", "Se genero un error interno, intente nuevamente.")
+                    }
+                }
+            }
+        })
+    }
+
+    handletGuardar = async () => {
         if (this.state.idCategoria === "") {
-            this.onFocusTab("info-tab", "info");
+            this.handleFocusTab("info-tab", "info");
             this.refCategoria.current.focus();
             return;
         }
 
         if (this.state.idConcepto === "") {
-            this.onFocusTab("info-tab", "info");
+            this.handleFocusTab("info-tab", "info");
             this.refConcepto.current.focus();
             return;
         }
 
         if (this.state.descripcion === "") {
-            this.onFocusTab("info-tab", "info");
+            this.handleFocusTab("info-tab", "info");
             this.refDescripcion.current.focus();
             return;
         }
 
         if (!isNumeric(this.state.costo)) {
-            this.onFocusTab("info-tab", "info");
+            this.handleFocusTab("info-tab", "info");
             this.refCosto.current.focus();
             return;
         }
 
         if (!isNumeric(this.state.precio)) {
-            this.onFocusTab("info-tab", "info");
+            this.handleFocusTab("info-tab", "info");
             this.refPrecio.current.focus();
             return;
         }
 
         if (this.state.idMedida === "") {
-            this.onFocusTab("info-tab", "info");
+            this.handleFocusTab("info-tab", "info");
             this.refMedida.current.focus();
             return;
         }
 
         if (this.state.estado === "") {
-            this.onFocusTab("info-tab", "info");
+            this.handleFocusTab("info-tab", "info");
             this.refEstado.current.focus();
             return;
         }
 
         try {
             alertInfo("Producto", "Procesando información...");
-            hideModal("modalProducto");
+            hideModal(this.idModal);
             if (this.state.idProducto !== '') {
                 let result = await axios.put("/api/producto", {
                     "idProducto": this.state.idProducto,
@@ -426,55 +509,11 @@ class Productos extends React.Component {
         }
     }
 
-    onFocusTab(idTab, idContent) {
-        if (!document.getElementById(idTab).classList.contains('active')) {
-            for (let child of document.getElementById('myTab').childNodes) {
-                child.childNodes[0].classList.remove('active')
-            }
-            for (let child of document.getElementById('myTabContent').childNodes) {
-                child.classList.remove('show', 'active')
-            }
-            document.getElementById(idTab).classList.add('active');
-            document.getElementById(idContent).classList.add('show', 'active');
-        }
-    }
-
-    onEventMostrar(idProducto) {
-        this.props.history.push({
-            pathname: `${this.props.location.pathname}/detalle`,
-            search: "?idProducto=" + idProducto
-        })
-    }
-
-    onEventDelete(idProducto) {
-        alertDialog("Producto", "¿Estás seguro de eliminar el producto?", async (event) => {
-            if (event) {
-                try {
-                    alertInfo("Producto", "Procesando información...")
-                    let result = await axios.delete('/api/producto', {
-                        params: {
-                            "idProducto": idProducto
-                        }
-                    })
-                    alertSuccess("Producto", result.data, () => {
-                        this.loadInit();
-                    })
-                } catch (error) {
-                    if (error.response !== undefined) {
-                        alertWarning("Producto", error.response.data)
-                    } else {
-                        alertWarning("Producto", "Se genero un error interno, intente nuevamente.")
-                    }
-                }
-            }
-        })
-    }
-
     render() {
         return (
             <ContainerWrapper>
                 {/* Inicio modal nuevo cliente*/}
-                {/* <div className="modal fade" id="modalProducto" tabIndex="-1" aria-labelledby="modalProductoLabel" aria-hidden={true}>
+                {/* <div className="modal fade" id= this.idModal  tabIndex="-1" aria-labelledby="modalProductoLabel" aria-hidden={true}>
                     <div className="modal-dialog">
                         <div className="modal-content">
                             <div className="modal-header">
@@ -520,7 +559,7 @@ class Productos extends React.Component {
                                         <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
                                             <div className="form-group">
                                                 <a>
-                                                    <i class="fa fa-question-circle-o" aria-hidden="true" ></i> Crea los bienes y mercancías que vendes e indica si deseas tener el control de tu inventario.
+                                                    <i className="fa fa-question-circle-o" aria-hidden="true" ></i> Crea los bienes y mercancías que vendes e indica si deseas tener el control de tu inventario.
                                                 </a>
                                             </div>
 
@@ -855,8 +894,8 @@ class Productos extends React.Component {
                         </div>
                     </div>
                 </div> */}
-                <div className="modal fade" id="modalProducto" tabIndex="-1" aria-labelledby="modalProductoLabel" aria-hidden={true}>
-                    <div className="modal-dialog">
+                <div className="modal fade" data-bs-backdrop="static" id={this.idModal} tabIndex="-1" aria-labelledby="modalProductoLabel" aria-hidden={true}>
+                    <div className="modal-dialog modal-dialog-centered">
                         <div className="modal-content">
                             <div className="modal-header">
                                 <h5 className="modal-title">{this.state.nameModal}</h5>
@@ -900,9 +939,9 @@ class Productos extends React.Component {
                                     <div className="tab-pane fade active show" id="info" role="tabpanel" aria-labelledby="info-tab">
                                         <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
                                             <div className="form-group">
-                                                <a>
-                                                    <i class="fa fa-question-circle-o" aria-hidden="true" ></i> Crea los bienes y mercancías que vendes e indica si deseas tener el control de tu inventario.
-                                                </a>
+                                                <label>
+                                                    <i className="fa fa-question-circle-o" aria-hidden="true" ></i> Crea los bienes y mercancías que vendes e indica si deseas tener el control de tu inventario.
+                                                </label>
                                             </div>
 
                                             <div className="form-row">
@@ -1021,7 +1060,7 @@ class Productos extends React.Component {
                                                         onChange={(event) => {
                                                             this.setState({ costo: event.target.value })
                                                         }}
-                                                        onKeyPress={keyNumberFloat}
+                                                        onKeyDown={keyNumberFloat}
                                                     />
                                                 </div>
 
@@ -1037,7 +1076,7 @@ class Productos extends React.Component {
                                                         onChange={(event) => {
                                                             this.setState({ precio: event.target.value })
                                                         }}
-                                                        onKeyPress={keyNumberFloat}
+                                                        onKeyDown={keyNumberFloat}
                                                     />
                                                 </div>
                                             </div>
@@ -1048,9 +1087,9 @@ class Productos extends React.Component {
                                     <div className="tab-pane fade" id="medida" role="tabpanel" aria-labelledby="medida-tab">
                                         <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
                                             <div className="form-group">
-                                                <a>
-                                                    <i class="fa fa-question-circle-o" aria-hidden="true" ></i> Crea las actividades comerciales o de consultoría que ofreces a tus clientes.
-                                                </a>
+                                                <label>
+                                                    <i className="fa fa-question-circle-o" aria-hidden="true" ></i> Crea las actividades comerciales o de consultoría que ofreces a tus clientes.
+                                                </label>
                                             </div>
 
                                             <div className="form-row">
@@ -1116,9 +1155,9 @@ class Productos extends React.Component {
                                     <div className="tab-pane fade" id="limite" role="tabpanel" aria-labelledby="limite-tab">
                                         <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
                                             <div className="form-group">
-                                                <a>
-                                                    <i class="fa fa-question-circle-o" aria-hidden="true" ></i> Agrupa en un solo ítem un conjunto de productos, servicios o una combinación entre ambos.
-                                                </a>
+                                                <label>
+                                                    <i className="fa fa-question-circle-o" aria-hidden="true" ></i> Agrupa en un solo ítem un conjunto de productos, servicios o una combinación entre ambos.
+                                                </label>
                                             </div>
                                             <div className="form-row">
                                                 <div className="form-group col-md-6">
@@ -1181,7 +1220,8 @@ class Productos extends React.Component {
                                 </div>
                             </div>
                             <div className="modal-footer">
-                                <button type="button" className="btn btn-primary" onClick={() => this.onEventGuardar()}>Aceptar</button>
+                                <button type="button" className="btn btn-success" onClick={this.handleCompleto}>Formulario completo</button>
+                                <button type="button" className="btn btn-primary" onClick={this.handletGuardar}>Aceptar</button>
                                 <button type="button" className="btn btn-danger" data-bs-dismiss="modal">Cerrar</button>
                             </div>
                         </div>
@@ -1216,7 +1256,7 @@ class Productos extends React.Component {
                     </div>
                     <div className="col-md-6 col-sm-12">
                         <div className="form-group">
-                            <button className="btn btn-outline-info" onClick={() => this.openModal('')} disabled={!this.state.add}>
+                            <button className="btn btn-outline-info" onClick={this.handleOpenModal} disabled={!this.state.add}>
                                 <i className="bi bi-file-plus"></i> Nuevo Registro
                             </button>
                             {" "}
@@ -1279,7 +1319,7 @@ class Productos extends React.Component {
                                                             <button
                                                                 className="btn btn-outline-info btn-sm"
                                                                 title="Detalle"
-                                                                onClick={() => this.onEventMostrar(item.idProducto)}
+                                                                onClick={() => this.handleMostrar(item.idProducto)}
                                                                 disabled={!this.state.view}>
                                                                 <i className="bi bi-eye"></i>
                                                             </button>
@@ -1288,7 +1328,7 @@ class Productos extends React.Component {
                                                             <button
                                                                 className="btn btn-outline-warning btn-sm"
                                                                 title="Editar"
-                                                                onClick={() => this.openModal(item.idProducto)}
+                                                                onClick={() => this.handleEditar(item.idProducto)}
                                                                 disabled={!this.state.edit}>
                                                                 <i className="bi bi-pencil"></i>
                                                             </button>
@@ -1297,7 +1337,7 @@ class Productos extends React.Component {
                                                             <button
                                                                 className="btn btn-outline-danger btn-sm"
                                                                 title="Anular"
-                                                                onClick={() => this.onEventDelete(item.idProducto)}
+                                                                onClick={() => this.handleBorrar(item.idProducto)}
                                                                 disabled={!this.state.remove}>
                                                                 <i className="bi bi-trash"></i>
                                                             </button>

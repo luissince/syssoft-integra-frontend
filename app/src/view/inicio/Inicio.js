@@ -39,9 +39,13 @@ import SedeProceso from './ajustes/registros/SedeProceso';
 import EmpresaProceso from './ajustes/registros/EmpresaProceso';
 import Proyectos from './ajustes/Proyectos';
 import ProcesoProyecto from './ajustes/proyecto/ProcesoProyecto';
-import Categorias from './logistica/Categorias';
-import Productos from './logistica/Productos';
-import ProductoDetalle from './logistica/registro/ProductoDetalle';
+
+import Categorias from './logistica/categoria/Categorias';
+
+import Productos from './logistica/producto/Productos';
+import ProductoAgregar from './logistica/producto/ProductoAgregar';
+import ProductoEditar from './logistica/producto/ProductoEditar';
+import ProductoDetalle from './logistica/producto/ProductoDetalle';
 
 import Clientes from './facturacion/cliente/Clientes';
 import ClienteProceso from './facturacion/cliente/ClienteProceso';
@@ -378,6 +382,16 @@ class Inicio extends React.Component {
                         path={`${path}/productos/detalle`}
                         exact={true}
                         render={(props) => <ProductoDetalle {...props} />}
+                    />
+                    <Route
+                        path={`${path}/productos/agregar`}
+                        exact={true}
+                        render={(props) => <ProductoAgregar {...props} />}
+                    />
+                    <Route
+                        path={`${path}/productos/editar`}
+                        exact={true}
+                        render={(props) => <ProductoEditar {...props} />}
                     />
                     <Route
                         path={`${path}/conceptos`}
