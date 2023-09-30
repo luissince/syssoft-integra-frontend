@@ -109,14 +109,14 @@ class Productos extends CustomComponent {
         clearModal(this.idModal, async () => {
             console.log("close") 
             this.abortControllerModal.abort();
-            
+
             if (this.completo) {
                 this.props.history.push({
                     pathname: `${this.props.location.pathname}/agregar`
                 })
                 return;
             }
-          
+
             await this.setStateAsync({
                 idProducto: '',
                 idCategoria: '',
