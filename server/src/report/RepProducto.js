@@ -3,11 +3,11 @@ const PDFDocument = require("pdfkit-table");
 const getStream = require('get-stream');
 const { numberFormat, currentDate, isFile } = require('../tools/Tools');
 
-class RepLote {
+class RepProducto {
 
-    async repDetalleLote(sedeInfo, data) {
+    async repDetalleProducto(sedeInfo, data) {
 
-        const lote = data.lote
+        const producto = data.producto
 
         try {
             const doc = new PDFDocument({
@@ -21,7 +21,7 @@ class RepLote {
             });
 
 
-            doc.info["Title"] = "Detalle del Lote.pdf"
+            doc.info["Title"] = "Detalle del Producto.pdf"
 
             let orgX = doc.x;
             let orgY = doc.y;
@@ -61,7 +61,7 @@ class RepLote {
             );
 
             doc.fontSize(h2).text(
-                "RESUMEN DE LOTE",
+                "RESUMEN DE PRODUCTO",
                 medioX,
                 cabeceraY,
                 {
@@ -85,7 +85,7 @@ class RepLote {
             doc.opacity(1);
 
             doc.fontSize(h3).text(
-                `Manzana: ${lote.manzana}\nLote: ${lote.lote}\nEstado: ${lote.lotestado}`,
+                `Categoria: ${productocategoria}\nProducto: ${productoproducto}\nEstado: ${productoproductostado}`,
                 orgX,
                 doc.y + 5
             );
@@ -104,7 +104,7 @@ class RepLote {
             doc.opacity(1);
 
             doc.fontSize(h3).text(
-                `Medida Frontal: ${lote.medidaFrontal}\nCoste Derecho: ${lote.costadoDerecho}\nCoste Izquierdo: ${lote.costadoIzquierdo}\nMedida Fondo: ${lote.medidaFondo}\nArea Lote: ${lote.areaLote}\nN° Partida: ${lote.numeroPartida}`,
+                `Medida Frontal: ${productomedidaFrontal}\nCoste Derecho: ${productocostadoDerecho}\nCoste Izquierdo: ${productocostadoIzquierdo}\nMedida Fondo: ${productomedidaFondo}\nArea Producto: ${productoareaProducto}\nN° Partida: ${productonumeroPartida}`,
                 orgX + 170,
                 doc.y + 5
             );
@@ -123,7 +123,7 @@ class RepLote {
             doc.opacity(1);
 
             doc.fontSize(h3).text(
-                `Limite, Frontal / Norte / Noroeste: ${lote.limiteFrontal === '' ? '-' : lote.limiteFrontal}\nLímite, Derecho / Este / Sureste: ${lote.limiteDerecho === '' ? '-' : lote.limiteDerecho}\nLímite, Iquierdo / Sur / Sureste: ${lote.limiteIzquierdo === '' ? '-' : lote.limiteIzquierdo}\nLímite, Posterior / Oeste / Noroeste: ${lote.limitePosterior === '' ? '-' : lote.limitePosterior}\nUbicación del Lote: ${lote.ubicacionLote === '' ? '-' : lote.ubicacionLote}`,
+                `Limite, Frontal / Norte / Noroeste: ${productolimiteFrontal === '' ? '-' : producto.limiteFrontal}\nLímite, Derecho / Este / Sureste: ${productolimiteDerecho === '' ? '-' : producto.limiteDerecho}\nLímite, Iquierdo / Sur / Sureste: ${productolimiteIzquierdo === '' ? '-' : producto.limiteIzquierdo}\nLímite, Posterior / Oeste / Noroeste: ${productolimitePosterior === '' ? '-' : producto.limitePosterior}\nUbicación del Producto: ${productoubicacionProducto === '' ? '-' : producto.ubicacionProducto}`,
                 orgX + 340,
                 doc.y + 5
             );
@@ -211,7 +211,7 @@ class RepLote {
         }
     }
 
-    async repTipoLote(req, sedeInfo, data) {
+    async repTipoProducto(req, sedeInfo, data) {
         try {
 
             const doc = new PDFDocument({
@@ -224,7 +224,7 @@ class RepLote {
                 }
             });
 
-            doc.info["Title"] = `DETALLE DE LOTES AL ${currentDate()}.pdf`
+            doc.info["Title"] = `DETALLE DE PRODUCTOS AL ${currentDate()}.pdf`
 
             let orgX = doc.x;
             let orgY = doc.y;
@@ -263,7 +263,7 @@ class RepLote {
             );
 
             doc.fontSize(h2).text(
-                "REPORTE DE LOTES",
+                "REPORTE DE PRODUCTOS",
                 medioX,
                 cabeceraY,
                 {
@@ -303,10 +303,10 @@ class RepLote {
             );
 
 
-            const estadoLote = req.query.estadoLote == 0 ? 'TODOS LOS LOTES'
-                : req.query.estadoLote == 1 ? 'LOTES DISPONIBLES'
-                    : req.query.estadoLote == 2 ? 'LOTES RESERVADOS'
-                        : req.query.estadoLote == 3 ? 'LOTES VENDIDOS' : 'LOTES INACTIVOS';
+            const estadoProducto = req.query.estadoProducto == 0 ? 'TODOS LOS PRODUCTOS'
+                : req.query.estadoProducto == 1 ? 'PRODUCTOS DISPONIBLES'
+                    : req.query.estadoProducto == 2 ? 'PRODUCTOS RESERVADOS'
+                        : req.query.estadoProducto== 3 ? 'PRODUCTOS VENDIDOS' : 'PRODUCTOS INACTIVOS';
 
             let totalCosto = 0;
             let totalPrecio = 0;
@@ -321,14 +321,14 @@ class RepLote {
                 totalPrecio = totalPrecio + item.precio;
                 totalUtilidad = totalUtilidad + (item.precio + item.costo);
 
-                return [++index, item.manzana + '\n' + item.lote, item.areaLote, estado, numberFormat(item.costo), numberFormat(item.precio), numberFormat(item.precio - item.costo)]
+                return [++index, item.categoria + '\n' + item.producto, item.areaProducto, estado, numberFormat(item.costo), numberFormat(item.precio), numberFormat(item.precio - item.costo)]
             })
 
             content.push(["", "", "", "TOTAL", numberFormat(totalCosto), numberFormat(totalPrecio), numberFormat(totalUtilidad)])
 
             const table1 = {
-                subtitle: `RESUMEN ASOCIADOS AL FILTRO: ${estadoLote} AL ${currentDate()}`,
-                headers: ["N°", "Lotes", "Area m²", "Estado", "Costo", "Venta", "Utilidad"],
+                subtitle: `RESUMEN ASOCIADOS AL FILTRO: ${estadoProducto} AL ${currentDate()}`,
+                headers: ["N°", "Productos", "Area m²", "Estado", "Costo", "Venta", "Utilidad"],
                 rows: content
             };
 
@@ -354,7 +354,7 @@ class RepLote {
         }
     }
 
-    async repLoteDeuda(req, sedeInfo, data) {
+    async repProductoDeuda(req, sedeInfo, data) {
         try {
 
             const doc = new PDFDocument({
@@ -368,7 +368,7 @@ class RepLote {
                 }
             });
 
-            doc.info["Title"] = `Lista de Lotes con Deuda.pdf`
+            doc.info["Title"] = `Lista de Productos con Deuda.pdf`
 
             let orgX = doc.x;
             let orgY = doc.y;
@@ -408,7 +408,7 @@ class RepLote {
             );
 
             doc.fontSize(h2).text(
-                "LISTA DE LOTES CON DEUDA",
+                "LISTA DE PRODUCTOS CON DEUDA",
                 doc.options.margins.left,
                 cabeceraY,
                 {
@@ -432,7 +432,7 @@ class RepLote {
                 return [
                     ++index,
                     item.documento + " " + item.informacion,
-                    item.lote + " - " + item.manzana,
+                    item.producto + " - " + item.categoria,
                     item.comprobante + " " + item.serie + "-" + item.numeracion,
                     item.primerPago,
                     numberFormat(item.cuotaMensual),
@@ -476,4 +476,4 @@ class RepLote {
     }
 }
 
-module.exports = RepLote;
+module.exports = RepProducto;

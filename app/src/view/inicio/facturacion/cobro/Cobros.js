@@ -256,7 +256,7 @@ class Cobros extends React.Component {
                                                                 }
                                                             </small>
                                                             <br />
-                                                            <small>{item.loteRef}</small>
+                                                            <small>{item.productoRef}</small>
                                                             {
                                                                 item.estadoRef === 4 ?
                                                                     <>

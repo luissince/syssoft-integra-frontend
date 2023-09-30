@@ -3,23 +3,23 @@ const { sendSuccess, sendError, sendClient, sendSave } = require('../tools/Messa
 const { currentDate, currentTime } = require('../tools/Tools');
 const conec = new Conexion();
 
-class Lote {
+class Producto {
 
     async list(req) {
         try {
             const lista = await conec.query(`SELECT 
-                l.idLote,
+                l.idProducto,
                 l.descripcion,
-                m.nombre as manzana,
+                m.nombre as categoria,
                 l.precio,
                 l.estado,
                 l.medidaFrontal,
                 l.costadoDerecho,
                 l.costadoIzquierdo,
                 l.medidaFondo,
-                l.areaLote
-                FROM lote AS l INNER JOIN manzana AS m 
-                ON l.idManzana = m.idManzana 
+                l.areaProducto
+                FROM producto AS l INNER JOIN categoria AS m 
+                ON l.idCategoria = m.idCategoria 
                 WHERE
                 ? = 0 AND m.idProyecto = ?
                 OR
@@ -50,8 +50,8 @@ class Lote {
             });
 
             const total = await conec.query(`SELECT COUNT(*) AS Total 
-                FROM lote AS l INNER JOIN manzana AS m 
-                ON l.idManzana = m.idManzana 
+                FROM producto AS l INNER JOIN categoria AS m 
+                ON l.idCategoria = m.idCategoria 
                 WHERE
                 ? = 0 AND m.idProyecto = ?
                 OR
@@ -82,15 +82,15 @@ class Lote {
 
             if (req.body.estado === '3') {
                 await conec.rollback(connection);
-                return "No se puede usar el estado vendido al insertar un lote, cambie los datos e intente nuevamente.";
+                return "No se puede usar el estado vendido al insertar un producto, cambie los datos e intente nuevamente.";
             }
 
-            let result = await conec.execute(connection, 'SELECT idLote FROM lote');
-            let idLote = "";
+            let result = await conec.execute(connection, 'SELECT idProducto FROM producto');
+            let idProducto = "";
             if (result.length != 0) {
 
                 let quitarValor = result.map(function (item) {
-                    return parseInt(item.idLote.replace("LT", ''));
+                    return parseInt(item.idProducto.replace("LT", ''));
                 });
 
                 let valorActual = Math.max(...quitarValor);
@@ -106,14 +106,14 @@ class Lote {
                     codigoGenerado = 'LT' + incremental;
                 }
 
-                idLote = codigoGenerado;
+                idProducto = codigoGenerado;
             } else {
-                idLote = "LT0001";
+                idProducto = "LT0001";
             }
 
-            await conec.execute(connection, `INSERT INTO lote(
-                idLote, 
-                idManzana,
+            await conec.execute(connection, `INSERT INTO producto(
+                idProducto, 
+                idCategoria,
                 idConcepto,
                 descripcion,
                 costo,
@@ -124,13 +124,13 @@ class Lote {
                 costadoDerecho,
                 costadoIzquierdo,
                 medidaFondo,
-                areaLote,
+                areaProducto,
                 numeroPartida,
                 limiteFrontal,
                 limiteDerecho,
                 limiteIzquierdo,
                 limitePosterior,
-                ubicacionLote,
+                ubicacionProducto,
                 fecha,
                 hora,
                 fupdate,
@@ -138,8 +138,8 @@ class Lote {
                 idUsuario
                 ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)        
                 `, [
-                idLote,
-                req.body.idManzana,
+                idProducto,
+                req.body.idCategoria,
                 req.body.idConcepto,
                 req.body.descripcion,
                 req.body.costo,
@@ -150,13 +150,13 @@ class Lote {
                 req.body.costadoDerecho,
                 req.body.costadoIzquierdo,
                 req.body.medidaFondo,
-                req.body.areaLote,
+                req.body.areaProducto,
                 req.body.numeroPartida,
                 req.body.limiteFrontal,
                 req.body.limiteDerecho,
                 req.body.limiteIzquierdo,
                 req.body.limitePosterior,
-                req.body.ubicacionLote,
+                req.body.ubicacionProducto,
                 currentDate(),
                 currentTime(),
                 currentDate(),
@@ -465,9 +465,9 @@ class Lote {
         try {
             connection = await conec.beginTransaction();
 
-            await conec.execute(connection, `UPDATE lote SET estado = 1 
-            WHERE idLote = ?`, [
-                req.body.idLote
+            await conec.execute(connection, `UPDATE producto SET estado = 1 
+            WHERE idProducto = ?`, [
+                req.body.idProducto
             ]);
 
             await conec.execute(connection, `UPDATE venta SET estado = 4 
@@ -476,7 +476,7 @@ class Lote {
             ]);
 
             await conec.commit(connection);
-            return sendSuccess(res, "El proceso se liberación del lote se completo correctamente.");
+            return sendSuccess(res, "El proceso se liberación del producto se completo correctamente.");
         } catch (error) {
             console.log(error)
             if (connection != null) {
@@ -488,8 +488,8 @@ class Lote {
 
     async id(req) {
         try {
-            let result = await conec.query('SELECT * FROM lote WHERE idLote = ?', [
-                req.query.idLote,
+            let result = await conec.query('SELECT * FROM producto WHERE idProducto = ?', [
+                req.query.idProducto,
             ]);
 
             if (result.length > 0) {
@@ -508,35 +508,35 @@ class Lote {
         try {
             connection = await conec.beginTransaction();
 
-            let lote = await conec.execute(connection, `SELECT estado FROM lote
-            WHERE idLote = ? `, [
-                req.body.idLote
+            let producto = await conec.execute(connection, `SELECT estado FROM producto
+            WHERE idProducto = ? `, [
+                req.body.idProducto
             ]);
 
-            if (lote.length === 0) {
+            if (producto.length === 0) {
                 await conec.rollback(connection);
                 return "noid";
             }
 
-            if (lote[0].estado === 3) {
-                await conec.execute(connection, `UPDATE lote SET        
+            if (producto[0].estado === 3) {
+                await conec.execute(connection, `UPDATE producto SET        
                     descripcion = ?,
                     idMedida = ?,
                     medidaFrontal =?,
                     costadoDerecho = ?,
                     costadoIzquierdo = ?,
                     medidaFondo = ?,
-                    areaLote = ?,
+                    areaProducto = ?,
                     numeroPartida = ?,
                     limiteFrontal = ?,
                     limiteDerecho = ?,
                     limiteIzquierdo = ?,
                     limitePosterior = ?,
-                    ubicacionLote = ?,
+                    ubicacionProducto = ?,
                     fupdate = ?,
                     hupdate = ?,
                     idUsuario = ?
-                    WHERE idLote = ?
+                    WHERE idProducto = ?
                     `, [
                     req.body.descripcion,
                     req.body.idMedida,
@@ -544,24 +544,24 @@ class Lote {
                     req.body.costadoDerecho,
                     req.body.costadoIzquierdo,
                     req.body.medidaFondo,
-                    req.body.areaLote,
+                    req.body.areaProducto,
                     req.body.numeroPartida,
                     req.body.limiteFrontal,
                     req.body.limiteDerecho,
                     req.body.limiteIzquierdo,
                     req.body.limitePosterior,
-                    req.body.ubicacionLote,
+                    req.body.ubicacionProducto,
                     currentDate(),
                     currentTime(),
                     req.body.idUsuario,
-                    req.body.idLote
+                    req.body.idProducto
                 ]);
 
                 await conec.commit(connection);
                 return "update";
             } else {
-                await conec.execute(connection, `UPDATE lote SET        
-                    idManzana = ?,
+                await conec.execute(connection, `UPDATE producto SET        
+                    idCategoria = ?,
                     idConcepto = ?,
                     descripcion = ?,
                     costo = ?,
@@ -572,19 +572,19 @@ class Lote {
                     costadoDerecho = ?,
                     costadoIzquierdo = ?,
                     medidaFondo = ?,
-                    areaLote = ?,
+                    areaProducto = ?,
                     numeroPartida = ?,
                     limiteFrontal = ?,
                     limiteDerecho = ?,
                     limiteIzquierdo = ?,
                     limitePosterior = ?,
-                    ubicacionLote = ?,
+                    ubicacionProducto = ?,
                     fupdate = ?,
                     hupdate = ?,
                     idUsuario = ?
-                    WHERE idLote = ?
+                    WHERE idProducto = ?
                     `, [
-                    req.body.idManzana,
+                    req.body.idCategoria,
                     req.body.idConcepto,
                     req.body.descripcion,
                     req.body.costo,
@@ -595,17 +595,17 @@ class Lote {
                     req.body.costadoDerecho,
                     req.body.costadoIzquierdo,
                     req.body.medidaFondo,
-                    req.body.areaLote,
+                    req.body.areaProducto,
                     req.body.numeroPartida,
                     req.body.limiteFrontal,
                     req.body.limiteDerecho,
                     req.body.limiteIzquierdo,
                     req.body.limitePosterior,
-                    req.body.ubicacionLote,
+                    req.body.ubicacionProducto,
                     currentDate(),
                     currentTime(),
                     req.body.idUsuario,
-                    req.body.idLote,
+                    req.body.idProducto,
                 ])
 
                 await conec.commit(connection);
@@ -624,17 +624,17 @@ class Lote {
         try {
             connection = await conec.beginTransaction();
 
-            let lote = await conec.execute(connection, `SELECT * FROM ventaDetalle WHERE idLote  = ?`, [
-                req.query.idLote
+            let producto = await conec.execute(connection, `SELECT * FROM ventaDetalle WHERE idProducto  = ?`, [
+                req.query.idProducto
             ]);
 
-            if (lote.length > 0) {
+            if (producto.length > 0) {
                 await conec.rollback(connection);
-                return "No se puede eliminar el lote ya que esta ligado a una venta.";
+                return "No se puede eliminar el producto ya que esta ligado a una venta.";
             }
 
-            await conec.execute(connection, `DELETE FROM lote WHERE idLote  = ?`, [
-                req.query.idLote
+            await conec.execute(connection, `DELETE FROM producto WHERE idProducto  = ?`, [
+                req.query.idProducto
             ]);
 
             await conec.commit(connection)
@@ -651,34 +651,34 @@ class Lote {
         try {
 
             const cabecera = await conec.query(`SELECT 
-                l.idLote,
-                m.nombre as manzana,
-                l.descripcion as lote,
+                l.idProducto,
+                m.nombre as categoria,
+                l.descripcion as producto,
                 l.costo,
                 l.precio,
                 CASE
                 WHEN l.estado = 1 THEN 'Disponible'
                 WHEN l.estado = 2 THEN 'Reservado'
                 WHEN l.estado = 3 THEN 'Vendido'
-                ELSE 'Inactivo' END AS lotestado,
+                ELSE 'Inactivo' END AS productostado,
 
                 l.medidaFrontal,
                 l.costadoDerecho,
                 l.costadoIzquierdo,
                 l.medidaFondo,
-                l.areaLote,
+                l.areaProducto,
                 l.numeroPartida,
 
                 IFNULL(l.limiteFrontal,'') AS limiteFrontal,
                 IFNULL(l.limiteDerecho,'') AS limiteDerecho,
                 IFNULL(l.limiteIzquierdo,'') AS limiteIzquierdo,
                 IFNULL(l.limitePosterior,'') AS limitePosterior,
-                IFNULL(l.ubicacionLote,'') AS ubicacionLote
+                IFNULL(l.ubicacionProducto,'') AS ubicacionProducto
 
-                FROM lote AS l
-                INNER JOIN manzana AS m  ON l.idManzana = m.idManzana
-                WHERE l.idLote = ?`, [
-                req.query.idLote,
+                FROM producto AS l
+                INNER JOIN categoria AS m  ON l.idCategoria = m.idCategoria
+                WHERE l.idProducto = ?`, [
+                req.query.idProducto,
             ]);
 
             const venta = await conec.query(`SELECT 
@@ -686,8 +686,8 @@ class Lote {
             v.idCliente
             FROM venta AS v 
             INNER JOIN ventaDetalle AS vd ON v.idVenta = vd.idVenta
-            WHERE vd.idLote = ? AND v.estado IN (1,2)`, [
-                req.query.idLote,
+            WHERE vd.idProducto = ? AND v.estado IN (1,2)`, [
+                req.query.idProducto,
             ])
 
             if (venta.length > 0) {
@@ -738,11 +738,11 @@ class Lote {
                     c.idProcedencia = ? AND c.estado = 1 AND nc.idNotaCredito IS NULL
                     GROUP BY c.idCobro`, [
                     venta[0].idVenta,
-                    req.query.idLote,
+                    req.query.idProducto,
                 ]);
 
                 return {
-                    "lote": cabecera[0],
+                    "producto": cabecera[0],
                     "venta": venta[0],
                     "socios": socios,
                     "detalle": detalle
@@ -758,12 +758,12 @@ class Lote {
     async listarCombo(req) {
         try {
             let result = await conec.query(`SELECT 
-            l.idLote, 
-            l.descripcion AS nombreLote, 
+            l.idProducto, 
+            l.descripcion AS nombreoProducto, 
             l.precio,
-            m.nombre AS nombreManzana 
-            FROM lote AS l INNER JOIN manzana AS m 
-            ON l.idManzana = m.idManzana
+            m.nombre AS nombreCategoria 
+            FROM producto AS l INNER JOIN categoria AS m 
+            ON l.idCategoria = m.idCategoria
             WHERE m.idProyecto = ? AND l.estado = 1`, [
                 req.query.idProyecto
             ]);
@@ -776,7 +776,7 @@ class Lote {
 
     async listarFilter(req) {
         try {
-            const result = await conec.procedure("CALL Filtrar_Lotes_Para_Venta(?,?)",[
+            const result = await conec.procedure("CALL Filtrar_Productos_Para_Venta(?,?)",[
                 req.query.idProyecto,
                 req.query.filtrar,
             ])
@@ -788,18 +788,18 @@ class Lote {
         }
     }
 
-    async listarComboLoteCliente(req) {
+    async listarComboProductoCliente(req) {
         try {
             let result = await conec.query(`SELECT 
                 v.idVenta, 
-                l.descripcion AS lote, 
-                m.nombre AS manzana
+                l.descripcion AS producto, 
+                m.nombre AS categoria
                 FROM venta AS v
                 INNER JOIN asociado AS a ON a.idVenta = v.idVenta
                 INNER JOIN cliente AS c ON a.idCliente = c.idCliente
                 INNER JOIN ventaDetalle AS vd ON v.idVenta = vd.idVenta
-                INNER JOIN lote AS l ON l.idLote = vd.idLote
-                INNER JOIN manzana AS m ON m.idManzana = l.idManzana
+                INNER JOIN producto AS l ON l.idProducto = vd.idProducto
+                INNER JOIN categoria AS m ON m.idCategoria = l.idCategoria
                 WHERE c.idCliente = ? AND v.estado IN(1,2)`, [
                 req.query.idCliente
             ]);
@@ -809,7 +809,7 @@ class Lote {
         }
     }
 
-    async listaEstadoLote(req) {
+    async listaEstadoProducto(req) {
         try {
 
             const proyecto = await conec.query(`SELECT 
@@ -821,9 +821,9 @@ class Lote {
             ]);
 
             const lista = await conec.query(`SELECT 
-                l.idLote,
-                l.descripcion AS lote,
-                m.nombre AS manzana,
+                l.idProducto,
+                l.descripcion AS producto,
+                m.nombre AS categoria,
                 l.costo,
                 l.precio,
                 l.estado,
@@ -831,18 +831,18 @@ class Lote {
                 l.costadoDerecho,
                 l.costadoIzquierdo,
                 l.medidaFondo,
-                l.areaLote
-                FROM lote AS l INNER JOIN manzana AS m 
-                ON l.idManzana = m.idManzana 
+                l.areaProducto
+                FROM producto AS l INNER JOIN categoria AS m 
+                ON l.idCategoria = m.idCategoria 
                 WHERE
                 ? = 0 AND m.idProyecto = ?
                 OR
                 (? <> 0 AND l.estado = ? AND m.idProyecto = ?)`, [
-                req.query.estadoLote,
+                req.query.estadoProducto,
                 req.query.idProyecto,
 
-                req.query.estadoLote,
-                req.query.estadoLote,
+                req.query.estadoProducto,
+                req.query.estadoProducto,
                 req.query.idProyecto,
             ])
 
@@ -858,29 +858,29 @@ class Lote {
             connection = await conec.beginTransaction();
 
             await conec.execute(connection, `UPDATE ventaDetalle 
-            SET idLote = ?
-            WHERE idLote = ?`, [
-                req.body.idLoteDestino,
-                req.body.idLoteOrigen
+            SET idProducto = ?
+            WHERE idProducto = ?`, [
+                req.body.idProductoDestino,
+                req.body.idProductoOrigen
             ]);
 
             // await conec.execute(connection, `UPDATE cobro 
             // SET idProcedencia = ?
             // WHERE idProcedencia = ?`, [
-            //     req.body.idLoteDestino,
-            //     req.body.idLoteOrigen
+            //     req.body.idProductoDestino,
+            //     req.body.idProductoOrigen
             // ]);
 
-            await conec.execute(connection, `UPDATE lote
+            await conec.execute(connection, `UPDATE producto
             SET estado = 1
-            WHERE idLote = ?`, [
-                req.body.idLoteOrigen
+            WHERE idProducto = ?`, [
+                req.body.idProductoOrigen
             ]);
 
-            await conec.execute(connection, `UPDATE lote
+            await conec.execute(connection, `UPDATE producto
             SET estado = 3
-            WHERE idLote = ?`, [
-                req.body.idLoteDestino
+            WHERE idProducto = ?`, [
+                req.body.idProductoDestino
             ]);
 
             await conec.commit(connection);
@@ -894,15 +894,15 @@ class Lote {
         }
     }
 
-    async listardeudaslote(req) {
+    async listardeudasProducto(req) {
         try {
             const result = await conec.query(`SELECT 
             v.idVenta, 
             cl.idCliente,
             cl.documento, 
             cl.informacion, 
-            lo.descripcion AS lote,
-            ma.nombre AS manzana,
+            lo.descripcion AS producto,
+            ma.nombre AS categoria,
             cm.nombre AS comprobante, 
             v.serie, 
             v.numeracion, 
@@ -934,8 +934,8 @@ class Lote {
             INNER JOIN comprobante AS cm ON v.idComprobante = cm.idComprobante 
             INNER JOIN cliente AS cl ON v.idCliente = cl.idCliente 
             INNER JOIN ventaDetalle AS vd ON vd.idVenta = v.idVenta 
-            INNER JOIN lote AS lo ON vd.idLote = lo.idLote 
-            INNER JOIN manzana AS ma ON lo.idManzana = ma.idManzana 
+            INNER JOIN producto AS lo ON vd.idProducto = lo.idProducto 
+            INNER JOIN categoria AS ma ON lo.idCategoria = ma.idCategoria 
             WHERE  
             ? = 0 AND v.estado = 2 AND v.idProyecto = ? 
             OR
@@ -956,4 +956,4 @@ class Lote {
 
 }
 
-module.exports = Lote;
+module.exports = Producto;

@@ -289,22 +289,22 @@ class Usuario {
                 return sendClient(res, 'No se puede eliminar el usuario ya que esta ligada a una moneda.');
             }
 
-            let manzana = await conec.execute(connection, `SELECT * FROM manzana WHERE idUsuario = ?`, [
+            let categoria = await conec.execute(connection, `SELECT * FROM categoria WHERE idUsuario = ?`, [
                 req.query.idUsuario
             ]);
 
-            if (manzana.length > 0) {
+            if (categoria.length > 0) {
                 await conec.rollback(connection);
-                return sendClient(res, 'No se puede eliminar el usuario ya que esta ligada a una manzana.');
+                return sendClient(res, 'No se puede eliminar el usuario ya que esta ligada a una categoria.');
             }
 
-            let lote = await conec.execute(connection, `SELECT * FROM lote WHERE idUsuario = ?`, [
+            let producto = await conec.execute(connection, `SELECT * FROM producto WHERE idUsuario = ?`, [
                 req.query.idUsuario
             ]);
 
-            if (lote.length > 0) {
+            if (producto.length > 0) {
                 await conec.rollback(connection);
-                return sendClient(res, 'No se puede eliminar el usuario ya que esta ligado a un lote.');
+                return sendClient(res, 'No se puede eliminar el usuario ya que esta ligado a un producto.');
             }
 
             let impuesto = await conec.execute(connection, `SELECT * FROM impuesto WHERE idUsuario = ?`, [

@@ -1,7 +1,7 @@
 const xl = require('excel4node');
 const { formatMoney, dateFormat } = require('../tools/Tools');
 
-async function generateLoteDeuda(req, sedeInfo, data) {
+async function generateProductoDeuda(req, sedeInfo, data) {
     try {
         const wb = new xl.Workbook();
 
@@ -103,7 +103,7 @@ async function generateLoteDeuda(req, sedeInfo, data) {
 
             ws.cell(rowY, 1).number(1 + index).style(styleBodyInteger)
             ws.cell(rowY, 2).string(item.documento + "\n" + item.informacion).style(styleBody)
-            ws.cell(rowY, 3).string(item.lote + "\n " + item.manzana).style(styleBody)
+            ws.cell(rowY, 3).string(item.producto + "\n " + item.categoria).style(styleBody)
             ws.cell(rowY, 4).string(item.comprobante + "\n" + item.serie + "-" + item.numeracion).style(styleBody)
             ws.cell(rowY, 5).string(item.primerPago).style(styleBody)
             ws.cell(rowY, 6).number(parseFloat(formatMoney(item.cuotaMensual))).style(styleBodyFloat)
@@ -122,4 +122,4 @@ async function generateLoteDeuda(req, sedeInfo, data) {
     }
 }
 
-module.exports = { generateLoteDeuda }
+module.exports = { generateProductoDeuda }

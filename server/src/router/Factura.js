@@ -92,7 +92,7 @@ router.get('/repcomprobante', async function (req, res) {
     }
 });
 
-router.get("/repcreditolote", async function (req, res) {
+router.get("/repcreditoproducto", async function (req, res) {
     const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
     req.query.idSede = decryptedData.idSede;
     req.query.idVenta = decryptedData.idVenta;

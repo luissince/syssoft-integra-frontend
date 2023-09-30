@@ -129,7 +129,7 @@ class Proyecto {
                 idMoneda,
                 tea, 
                 preciometro, 
-                costoxlote,
+                costoxproducto,
                 numContratoCorrelativo, 
                 numRecibocCorrelativo, 
                 imagen,
@@ -159,7 +159,7 @@ class Proyecto {
                 req.body.idMoneda,
                 req.body.tea,
                 req.body.preciometro,
-                req.body.costoxlote,
+                req.body.costoxproducto,
                 req.body.numContratoCorrelativo,
                 req.body.numRecibocCorrelativo,
                 //imagen
@@ -206,7 +206,7 @@ class Proyecto {
             p.idMoneda,
             p.tea,
             p.preciometro,
-            p.costoxlote,
+            p.costoxproducto,
             p.numContratoCorrelativo,
             p.numRecibocCorrelativo,
             p.ruta
@@ -278,7 +278,7 @@ class Proyecto {
                 idMoneda=?,
                 tea=?, 
                 preciometro=?,
-                costoxlote=?, 
+                costoxproducto=?, 
                 numContratoCorrelativo=?, 
                 numRecibocCorrelativo=?,
                 imagen=?,
@@ -305,7 +305,7 @@ class Proyecto {
                 req.body.idMoneda,
                 req.body.tea,
                 req.body.preciometro,
-                req.body.costoxlote,
+                req.body.costoxproducto,
                 req.body.numContratoCorrelativo,
                 req.body.numRecibocCorrelativo,
                 //imagen
@@ -342,13 +342,13 @@ class Proyecto {
                 return sendClient(res, "El proyecto a eliminar no existe, recargue su pantalla.");
             }
 
-            let manzana = await conec.execute(connection, `SELECT * FROM manzana WHERE idProyecto = ?`, [
+            let categoria = await conec.execute(connection, `SELECT * FROM categoria WHERE idProyecto = ?`, [
                 req.query.idProyecto
             ]);
 
-            if (manzana.length > 0) {
+            if (categoria.length > 0) {
                 await conec.rollback(connection);
-                return sendClient(res, 'No se puede eliminar el proyecto ya que esta ligada a una manzana.');
+                return sendClient(res, 'No se puede eliminar el proyecto ya que esta ligada a una categoria.');
             }
 
             let cobro = await conec.execute(connection, `SELECT idCobro FROM cobro WHERE idProyecto = ?`, [
@@ -412,20 +412,21 @@ class Proyecto {
             `);
 
             const proyectos = await Promise.all(result.map(async (proyecto) => {
-                const lotes = await conec.query(`SELECT estado FROM 
-                lote AS l INNER JOIN manzana AS m
-                ON l.idManzana = m.idManzana
+                const productos = await conec.query(`SELECT estado FROM 
+                producto AS l INNER JOIN categoria AS m
+                ON l.idCategoria = m.idCategoria
                 WHERE m.idProyecto = ?`, [
                     proyecto.idProyecto
                 ]);
                 return await {
                     ...proyecto,
-                    lotes
+                    productos
                 }
             }))
 
             return sendSuccess(res, proyectos);
         } catch (error) {
+            console.log(error)
             return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
         }
     }

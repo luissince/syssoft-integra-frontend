@@ -201,7 +201,7 @@ class ClienteDetalle extends CustomComponent {
                                                         venta.detalle.map((detalle, index) => (
                                                             <tr key={index}>
                                                                 <td>{index + 1}</td>
-                                                                <td>{detalle.descripcion}{<br />}{<small>{detalle.manzana}</small>}{<br />}{<small>{detalle.proyecto}</small>}</td>
+                                                                <td>{detalle.descripcion}{<br />}{<small>{detalle.categoria}</small>}{<br />}{<small>{detalle.proyecto}</small>}</td>
                                                                 <td>{formatMoney(detalle.cantidad)}</td>
                                                                 <td>{detalle.impuesto}</td>
                                                                 <td>{numberFormat(detalle.precio, venta.codiso)}</td>

@@ -1,15 +1,15 @@
 const express = require('express');
 const router = express.Router();
-const Manzana = require('../services/Manzana');
+const Categoria = require('../services/Categoria');
 
 /**
  *  endpoint
- *  [/api/manzana/*]
+ *  [/api/categoria/*]
  */
-const manzana = new Manzana();
+const categoria = new Categoria();
 
 router.get("/list", async function (req, res) {
-    const result = await manzana.list(req)
+    const result = await categoria.list(req)
     if (typeof result === 'object') {
         res.status(200).send(result)
     } else {
@@ -18,7 +18,7 @@ router.get("/list", async function (req, res) {
 });
 
 router.get('/id', async function (req, res) {
-    const result = await manzana.id(req);
+    const result = await categoria.id(req);
     if (typeof result === 'object') {
         res.status(200).send(result)
     } else {
@@ -27,34 +27,34 @@ router.get('/id', async function (req, res) {
 })
 
 router.post("/", async function (req, res) {
-    const result = await manzana.add(req);
+    const result = await categoria.add(req);
     if (result === 'insert') {
-        res.status(200).send("Se registró correctamente la manzana.");
+        res.status(200).send("Se registró correctamente la categoria.");
     } else {
         res.status(500).send(result);
     }
 });
 
 router.put("/", async function (req, res) {
-    const result = await manzana.edit(req);
+    const result = await categoria.edit(req);
     if (result === 'update') {
-        res.status(200).send("Se actualizó correctamente la manzana.");
+        res.status(200).send("Se actualizó correctamente la categoria.");
     } else {
         res.status(500).send(result);
     }
 });
 
 router.delete('/', async function (req, res) {
-    const result = await manzana.delete(req);
+    const result = await categoria.delete(req);
     if (result === 'delete') {
-        res.status(200).send("Se eliminó correctamente la manzana.");
+        res.status(200).send("Se eliminó correctamente la categoria.");
     } else {
         res.status(500).send(result);
     }
 });
 
 router.get('/listcombo', async function (req, res) {
-    const result = await manzana.listcombo(req);
+    const result = await categoria.listcombo(req);
     if (Array.isArray(result)) {
         res.status(200).send(result);
     } else {
@@ -63,7 +63,7 @@ router.get('/listcombo', async function (req, res) {
 });
 
 router.get('/traslado', async function(req, res){
-    const result = await manzana.trasladar(req);
+    const result = await categoria.trasladar(req);
     if(result === "update"){
         res.status(200).send("Se completo el proceso de trasladar correctamente.");
     }else{

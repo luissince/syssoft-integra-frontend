@@ -95,11 +95,11 @@ class Cliente {
             for (let value of lista) {
                 let detalle = await conec.query(`SELECT 
                     l.descripcion,
-                    m.nombre AS manzana
+                    m.nombre AS categoria
                     FROM venta AS v
                     INNER JOIN ventaDetalle AS vd ON vd.idVenta = v.idVenta
-                    INNER JOIN lote AS l ON l.idLote = vd.idLote
-                    INNER JOIN manzana AS m ON m.idManzana = l.idManzana
+                    INNER JOIN producto AS l ON l.idProducto = vd.idProducto
+                    INNER JOIN categoria AS m ON m.idCategoria = l.idCategoria
                     WHERE v.idVenta = ?`, [
                     value.idVenta
                 ]);
@@ -490,22 +490,22 @@ class Cliente {
 
             for (let value of lista) {
                 let detalle = await conec.query(`SELECT 
-                l.descripcion AS lote,
-                m.nombre AS manzana
+                l.descripcion AS producto,
+                m.nombre AS categoria
                 FROM ventaDetalle AS vd 
-                INNER JOIN lote AS l ON vd.idLote = l.idLote 
-                INNER JOIN manzana AS m ON l.idManzana = m.idManzana 
+                INNER JOIN producto AS l ON vd.idProducto = l.idProducto 
+                INNER JOIN categoria AS m ON l.idCategoria = m.idCategoria
                 WHERE vd.idVenta = ? `, [
                     value.idVenta
                 ]);
 
-                const lote = detalle.map(item => {
-                    return item.lote + "\n" + item.manzana
+                const producto = detalle.map(item => {
+                    return item.producto + "\n" + item.categoria
                 });
 
                 newLista.push({
                     ...value,
-                    lote: lote.join(", ")
+                    producto: producto.join(", ")
                 });
             }
 
@@ -535,13 +535,13 @@ class Cliente {
 
             for (const venta of ventas) {
                 const detalle = await conec.query(`SELECT 
-                l.descripcion AS lote,
-                m.nombre AS manzana,
+                l.descripcion AS producto,
+                m.nombre AS categoria,
                 vd.precio,
                 vd.cantidad
                 FROM ventaDetalle AS vd
-                INNER JOIN lote AS l ON vd.idLote = l.idLote
-                INNER JOIN manzana AS m ON m.idManzana = l.idManzana
+                INNER JOIN producto AS l ON vd.idProducto = l.idProducto
+                INNER JOIN categoria AS m ON m.idCategoria = l.idCategoria
                 WHERE vd.idVenta = ?`, [
                     venta.idVenta
                 ]);
@@ -549,7 +549,7 @@ class Cliente {
                 // for(const detalle of detalles){
                 //     const cobros = await conec.query(`SELECT
                 //     IFNULL(co.idConcepto,'CV01') AS idConcepto,
-                //     IFNULL(co.nombre,'LOTE') AS concepto,
+                //     IFNULL(co.nombre,'PRODUCTO') AS concepto,
                 //     'INGRESO' AS tipo,
                 //     b.idBanco,
                 //     b.nombre,
@@ -570,7 +570,7 @@ class Cliente {
                 //     c.idProcedencia = ? AND c.estado = 1 AND nc.idNotaCredito IS NULL
                 //     GROUP BY c.idCobro`,[
                 //         venta.idVenta,
-                //         detalle.idLote 
+                //         detalle.idProducto 
                 //     ]);
                 // }
 
@@ -688,7 +688,7 @@ class Cliente {
                 for (const venta of ventas) {
                     const detalle = await conec.query(`select 
                         l.descripcion,
-                        m.nombre as manzana,
+                        m.nombre as categoria,
                         p.nombre as proyecto,
                         im.porcentaje,
                         im.nombre as impuesto,
@@ -696,8 +696,8 @@ class Cliente {
                         vd.precio
                         from ventaDetalle as vd
                         inner join impuesto as im on im.idImpuesto = vd.idImpuesto
-                        inner join lote as l on l.idLote = vd.idLote
-                        inner join manzana as m on m.idManzana = l.idManzana
+                        inner join producto as l on l.idProducto = vd.idProducto
+                        inner join categoria as m on m.idCategoria = l.idCategoria
                         inner join proyecto as p on p.idProyecto = m.idProyecto
                         where vd.idVenta = ?`, [
                         venta.idVenta
@@ -823,16 +823,16 @@ class Cliente {
                 DATE_FORMAT(v.fecha,'%d/%m/%Y') AS fecha,
                 CASE WHEN v.frecuencia = 30 THEN 'CADA FIN DE MES'
                 ELSE 'CADA QUINCENA DE CADA MES' END AS frecuencia, 
-                lo.descripcion AS lote,
-                ma.nombre AS manzana,
+                lo.descripcion AS producto,
+                ma.nombre AS categoria,
                 mo.codiso,
                 SUM(vd.cantidad * vd.precio) AS monto
                 FROM venta AS v 
                 INNER JOIN cliente AS cl ON cl.idCliente = v.idCliente
                 INNER JOIN moneda AS mo ON mo.idMoneda = v.idMoneda
                 INNER JOIN ventaDetalle AS vd ON vd.idVenta = v.idVenta
-                INNER JOIN lote AS lo ON vd.idLote = lo.idLote
-                INNER JOIN manzana AS ma ON ma.idManzana = lo.idManzana
+                INNER JOIN producto AS lo ON vd.idProducto = lo.idProducto
+                INNER JOIN categoria AS ma ON ma.idCategoria = lo.idCategoria
                 WHERE 
                 YEAR(v.fecha) = ? AND v.idProyecto = ? AND ? = 0 AND v.estado IN (1,2)
                 OR
@@ -873,8 +873,8 @@ class Cliente {
                             "numeracion": venta.numeracion,
                             "fecha": venta.fecha,
                             "frecuencia": venta.frecuencia,
-                            "lote": venta.lote,
-                            "manzana": venta.manzana,
+                            "producto": venta.producto,
+                            "categoria": venta.categoria,
                             "codiso": venta.codiso,
                             "monto": venta.monto,
                         });

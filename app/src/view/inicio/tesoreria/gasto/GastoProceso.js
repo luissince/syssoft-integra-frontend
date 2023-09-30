@@ -619,7 +619,7 @@ class GastoProceso extends React.Component {
                                 <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
                                     <div className="form-group">
                                         <select
-                                            title="Lista de lotes"
+                                            title="Lista de productos"
                                             className="form-control"
                                             value={this.state.idImpuesto}
                                             ref={this.refImpuesto}
@@ -638,7 +638,7 @@ class GastoProceso extends React.Component {
                                 <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
                                     <div className="form-group">
                                         <select
-                                            title="Lista de lotes"
+                                            title="Lista de productos"
                                             className="form-control"
                                             value={this.state.idMedida}
                                             ref={this.refMedida}

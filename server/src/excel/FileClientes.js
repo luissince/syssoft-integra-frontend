@@ -294,7 +294,7 @@ async function generateExcelDeudas(req, sedeInfo, data) {
 
             ws.cell(rowY, 1).number(1 + index).style(styleBodyInteger)
             ws.cell(rowY, 2).string(item.documento + "\n" + item.informacion).style(styleBody)
-            ws.cell(rowY, 3).string(item.lote).style(styleBody)
+            ws.cell(rowY, 3).string(item.producto).style(styleBody)
             ws.cell(rowY, 4).string(item.nombre + "\n" + item.serie + "-" + item.numeracion).style(styleBody)
             ws.cell(rowY, 5).string(item.numCuota == 1 ? item.numCuota + " COUTA" : item.numCuota + " COUTAS").style(styleBody)
             ws.cell(rowY, 6).string(dateFormat(item.fechaPago)).style(styleBody)
@@ -435,7 +435,7 @@ async function generarSociosPorFecha(req, sedeInfo, data) {
             rowY = rowY + 1;
             ws.cell(rowY, 1).string("COMPROBANTE").style(styleSubTitle).style(fillVenta);
             ws.cell(rowY, 2).string("FECHA").style(styleSubTitle).style(fillVenta);
-            ws.cell(rowY, 3).string("LOTE").style(styleSubTitle).style(fillVenta);
+            ws.cell(rowY, 3).string("PRODUCTO").style(styleSubTitle).style(fillVenta);
             ws.cell(rowY, 4).string("FRECUENCIA").style(styleSubTitle).style(fillVenta);
             ws.cell(rowY, 5).string("MONTO TOTAL").style(styleSubTitle).style(fillVenta);
 
@@ -443,7 +443,7 @@ async function generarSociosPorFecha(req, sedeInfo, data) {
                 rowY = rowY + 1;
                 ws.cell(rowY, 1).string(venta.serie + "-" + venta.numeracion).style(styleBody).style(textSize);
                 ws.cell(rowY, 2).string(venta.fecha).style(styleBody).style(textSize);
-                ws.cell(rowY, 3).string(venta.lote + " - " + venta.manzana).style(styleBody).style(textSize);
+                ws.cell(rowY, 3).string(venta.producto + " - " + venta.categoria).style(styleBody).style(textSize);
                 ws.cell(rowY, 4).string(venta.frecuencia).style(styleBody).style(textSize);
                 ws.cell(rowY, 5).number(parseFloat(formatMoney(venta.monto))).style(styleBodyFloat).style(textSize)
             }

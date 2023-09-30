@@ -1,7 +1,7 @@
 import React from "react";
 import "../recursos/css/searchbar.css";
 
-class SearchBarLote extends React.Component {
+class SearchBarProducto extends React.Component {
   constructor(props) {
     super(props);
     this.index = -1;
@@ -16,7 +16,7 @@ class SearchBarLote extends React.Component {
   }
 
   onEventWindowClick = (event) => {
-    let parent = document.getElementById("idDataResultLote");
+    let parent = document.getElementById("idDataResultProducto");
     let click = event.target.parentElement.parentElement;
 
     if (parent == null) return;
@@ -33,9 +33,9 @@ class SearchBarLote extends React.Component {
 
   onEventKeyUp(event) {
     if (event.keyCode === 40 || event.which === 40) {
-      if (this.props.lotes.length === 0) return;
+      if (this.props.productos.length === 0) return;
 
-      const dataResult = document.getElementById("idDataResultLote");
+      const dataResult = document.getElementById("idDataResultProducto");
       dataResult.focus();
       let children = dataResult.children;
       if (children.length > 0) {
@@ -43,9 +43,9 @@ class SearchBarLote extends React.Component {
         children[this.index].focus();
       }
     } else if (event.keyCode === 13) {
-      if (this.props.lotes.length === 0) return;
+      if (this.props.productos.length === 0) return;
 
-      const dataResult = document.getElementById("idDataResultLote");
+      const dataResult = document.getElementById("idDataResultProducto");
       dataResult.focus();
       let children = dataResult.children;
       if (children.length > 0) {
@@ -57,7 +57,7 @@ class SearchBarLote extends React.Component {
 
   onEventKeyDown(event) {
     if (event.keyCode === 38) {
-      let children = document.getElementById("idDataResultLote").children;
+      let children = document.getElementById("idDataResultProducto").children;
 
       if (this.index !== 0) {
         if (this.index > 0) {
@@ -66,7 +66,7 @@ class SearchBarLote extends React.Component {
         }
       }
     } else if (event.keyCode === 40) {
-      let children = document.getElementById("idDataResultLote").children;
+      let children = document.getElementById("idDataResultProducto").children;
 
       if (this.index < children.length - 1) {
         this.index++;
@@ -86,8 +86,8 @@ class SearchBarLote extends React.Component {
               type="text"
               className="form-control"
               placeholder={this.props.placeholder}
-              ref={this.props.refLote}
-              value={this.props.lote}
+              ref={this.props.refProducto}
+              value={this.props.producto}
               onChange={this.props.handleFilter}
               onKeyUp={(event) => this.onEventKeyUp(event)}
             />
@@ -97,7 +97,7 @@ class SearchBarLote extends React.Component {
                 type="button"
                 onClick={() => {
                   this.props.onEventClearInput();
-                  this.props.refLote.current.focus();
+                  this.props.refProducto.current.focus();
                   this.index = -1;
                 }}
               >
@@ -106,24 +106,24 @@ class SearchBarLote extends React.Component {
             </div>
           </div>
 
-          {this.props.lotes.length !== 0 && (
+          {this.props.productos.length !== 0 && (
             <div
               className="dataResult"
-              id="idDataResultLote"
+              id="idDataResultProducto"
               tabIndex="-1"
               onKeyDown={(event) => this.onEventKeyDown(event)}
             >
-              {this.props.lotes.map((value, index) => (
+              {this.props.productos.map((value, index) => (
                 <button
                   key={index}
                   className="list-group-item list-group-item-action"
                   onClick={() => {
                     this.props.onEventSelectItem(value);
-                    this.props.refLote.current.focus();
+                    this.props.refProducto.current.focus();
                     this.index = -1;
                   }}
                 >
-                  {value.nombreLote}{"/"}{<small>{value.nombreManzana}</small>}
+                  {value.nombreProducto}{"/"}{<small>{value.nombreCategoria}</small>}
                 </button>
               ))}
             </div>
@@ -133,4 +133,4 @@ class SearchBarLote extends React.Component {
   }
 }
 
-export default SearchBarLote;
+export default SearchBarProducto;

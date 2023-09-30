@@ -190,13 +190,13 @@ class Concepto {
                 return sendClient(res, 'No se puede eliminar el concepto ya que esta ligada a un detalle de gasto.');
             }
 
-            let lote = await conec.execute(connection, `SELECT * FROM lote WHERE idConcepto = ?`, [
+            let producto = await conec.execute(connection, `SELECT * FROM producto WHERE idConcepto = ?`, [
                 req.query.idConcepto
             ]);
 
-            if (lote.length > 0) {
+            if (producto.length > 0) {
                 await conec.rollback(connection);
-                return sendClient(res, 'No se puede eliminar el concepto ya que esta ligada a un lote.');
+                return sendClient(res, 'No se puede eliminar el concepto ya que esta ligada a un producto.');
             }
 
             await conec.execute(connection, `DELETE FROM concepto WHERE idConcepto = ?`, [

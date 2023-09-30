@@ -29,7 +29,7 @@ const InvoiceDetail = (props) => {
                             <ItemAdd
                                 key={index}
                                 idDetalle={item.idDetalle}
-                                nombre={item.nombreLote}
+                                nombre={item.nombreProducto}
                                 precio={item.precio}
                                 cantidad={item.cantidad}
                                 codiso={codiso}

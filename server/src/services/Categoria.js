@@ -2,17 +2,17 @@ const Conexion = require("../database/Conexion");
 const { currentDate, currentTime } = require("../tools/Tools");
 const conec = new Conexion();
 
-class Manzana {
+class Categoria {
   async list(req) {
     try {
       let lista = await conec.query(
         `SELECT 
-            m.idManzana,
+            m.idCategoria,
             m.nombre,
             p.nombre as proyecto,
             DATE_FORMAT(m.fecha,'%d/%m/%Y') as fecha,
             m.hora
-            FROM manzana AS m INNER JOIN proyecto AS p
+            FROM categoria AS m INNER JOIN proyecto AS p
             ON m.idProyecto = p.idProyecto
             WHERE
             ? = 0 AND p.idProyecto = ?
@@ -41,7 +41,7 @@ class Manzana {
 
       let total = await conec.query(
         `SELECT COUNT(*) AS Total     
-            FROM manzana AS m INNER JOIN proyecto AS p
+            FROM categoria AS m INNER JOIN proyecto AS p
             ON m.idProyecto = p.idProyecto
             WHERE
             ? = 0 AND p.idProyecto = ?
@@ -66,8 +66,8 @@ class Manzana {
   async id(req) {
     try {
       let result = await conec.query(
-        "SELECT * FROM manzana WHERE idManzana = ?",
-        [req.query.idManzana]
+        "SELECT * FROM categoria WHERE idCategoria = ?",
+        [req.query.idCategoria]
       );
 
       if (result.length > 0) {
@@ -87,12 +87,12 @@ class Manzana {
 
       let result = await conec.execute(
         connection,
-        "SELECT idManzana FROM manzana"
+        "SELECT idCategoria FROM categoria"
       );
-      let idManzana = "";
+      let idCategoria = "";
       if (result.length != 0) {
         let quitarValor = result.map(function (item) {
-          return parseInt(item.idManzana.replace("MZ", ""));
+          return parseInt(item.idCategoria.replace("MZ", ""));
         });
 
         let valorActual = Math.max(...quitarValor);
@@ -108,15 +108,15 @@ class Manzana {
           codigoGenerado = "MZ" + incremental;
         }
 
-        idManzana = codigoGenerado;
+        idCategoria = codigoGenerado;
       } else {
-        idManzana = "MZ0001";
+        idCategoria = "MZ0001";
       }
 
       await conec.execute(
         connection,
-        `INSERT INTO manzana(
-            idManzana,
+        `INSERT INTO categoria(
+            idCategoria,
             nombre,
             idProyecto,
             fecha,
@@ -126,7 +126,7 @@ class Manzana {
             idUsuario) 
             VALUES(?,?,?,?,?,?,?,?)`,
         [
-          idManzana,
+          idCategoria,
           req.body.nombre,
           req.body.idProyecto,
           currentDate(),
@@ -154,20 +154,20 @@ class Manzana {
 
       await conec.execute(
         connection,
-        `UPDATE manzana SET
+        `UPDATE categoria SET
             nombre = ?,
             idProyecto = ?,
             fupdate = ?,
             hupdate = ?,
             idUsuario = ?
-            WHERE idManzana  = ?`,
+            WHERE idCategoria  = ?`,
         [
           req.body.nombre,
           req.body.idProyecto,
           currentDate(),
           currentTime(),
           req.body.idUsuario,
-          req.body.idManzana,
+          req.body.idCategoria,
         ]
       );
 
@@ -186,21 +186,21 @@ class Manzana {
     try {
       connection = await conec.beginTransaction();
 
-      let lote = await conec.execute(
+      let producto = await conec.execute(
         connection,
-        `SELECT * FROM lote WHERE idManzana = ?`,
-        [req.query.idManzana]
+        `SELECT * FROM producto WHERE idCategoria = ?`,
+        [req.query.idCategoria]
       );
 
-      if (lote.length > 0) {
+      if (producto.length > 0) {
         await conec.rollback(connection);
-        return "No se puede eliminar la manzana ya que esta ligada a un lote.";
+        return "No se puede eliminar la categoria ya que esta ligada a un producto.";
       }
 
       await conec.execute(
         connection,
-        `DELETE FROM manzana WHERE idManzana  = ?`,
-        [req.query.idManzana]
+        `DELETE FROM categoria WHERE idCategoria  = ?`,
+        [req.query.idCategoria]
       );
 
       await conec.commit(connection);
@@ -216,7 +216,7 @@ class Manzana {
   async listcombo(req) {
     try {
       const result = await conec.query(
-        "SELECT idManzana,nombre FROM manzana WHERE idProyecto = ?",
+        "SELECT idCategoria,nombre FROM categoria WHERE idProyecto = ?",
         [req.query.idProyecto]
       );
       return result;
@@ -230,28 +230,28 @@ class Manzana {
     try {
       connection = await conec.beginTransaction();
 
-      const manzana = await conec.execute(connection,"SELECT * FROM manzana WHERE  idManzana = ? and idProyecto = ?",[
-        req.query.idManzana,
+      const categoria = await conec.execute(connection,"SELECT * FROM categoria WHERE  idCategoria = ? and idProyecto = ?",[
+        req.query.idCategoria,
         req.query.idProyecto
       ])
 
-      await  conec.execute(connection, 'update manzana set idProyecto = ? where idManzana = ?',[
+      await  conec.execute(connection, 'update categoria set idProyecto = ? where idCategoria = ?',[
         req.query.idProyectoTrasladar,
-        req.query.idManzana,
+        req.query.idCategoria,
       ])
 
-      const lotes = await conec.execute(connection,"select * from lote where idManzana = ?",[
-        manzana[0].idManzana
+      const productos = await conec.execute(connection,"select * from producto where idCategoria = ?",[
+        categoria[0].idCategoria
       ])
       
 
-      for(const lote of lotes){
+      for(const producto of productos){
 
         const venta = await conec.execute(connection, `select * from venta as v 
         inner join ventaDetalle as vd 
         on vd.idVenta = v.idVenta 
-        where vd.idLote = ?`,[
-            lote.idLote
+        where vd.idProducto = ?`,[
+            producto.idProducto
         ])
 
         if(venta.length != 0){
@@ -302,4 +302,4 @@ class Manzana {
   }
 }
 
-module.exports = Manzana;
+module.exports = Categoria;

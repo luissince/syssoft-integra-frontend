@@ -259,7 +259,7 @@ class Factura {
             for (const item of detalleVenta) {
                 await conec.execute(connection, `INSERT INTO ventaDetalle(
                     idVenta, 
-                    idLote, 
+                    idProducto, 
                     precio, 
                     cantidad)
                     VALUES(?,?,?,?)`, [
@@ -451,28 +451,28 @@ class Factura {
         try {
             connection = await conec.beginTransaction();
 
-            let countLote = 0;
+            let countProducto = 0;
 
             /**
-             * Validar si un lote esta vendido.
+             * Validar si un producto esta vendido.
              */
             for (const item of req.body.detalleVenta) {
-                const lote = await conec.execute(connection, `SELECT idLote FROM lote 
-                    WHERE idLote = ? AND estado = 3`, [
+                const producto = await conec.execute(connection, `SELECT idProducto FROM producto 
+                    WHERE idProducto = ? AND estado = 3`, [
                     item.idDetalle
                 ]);
-                if (lote.length > 0) {
-                    countLote++;
+                if (producto.length > 0) {
+                    countProducto++;
                 }
             }
 
             /**
-             * si el lote esta vendido cancelar la proceso.
+             * si el producto esta vendido cancelar la proceso.
              * estado = 3 vendido
              */
-            if (countLote > 0) {
+            if (countProducto > 0) {
                 await conec.rollback(connection);
-                return sendClient(res, "Hay un lote que se esta tratando de vender, no se puede continuar ya que está asociado a una factura.");
+                return sendClient(res, "Hay un producto que se esta tratando de vender, no se puede continuar ya que está asociado a una factura.");
             }
 
 
@@ -582,7 +582,7 @@ class Factura {
             for (let item of req.body.detalleVenta) {
                 await conec.execute(connection, `INSERT INTO ventaDetalle(
                     idVenta, 
-                    idLote, 
+                    idProducto, 
                     precio, 
                     cantidad, 
                     idImpuesto,
@@ -596,7 +596,7 @@ class Factura {
                     item.idMedida
                 ]);
 
-                await conec.execute(connection, `UPDATE lote SET estado = 3 WHERE idLote = ?`, [
+                await conec.execute(connection, `UPDATE producto SET estado = 3 WHERE idProducto = ?`, [
                     item.idDetalle,
                 ]);
 
@@ -1213,17 +1213,17 @@ class Factura {
                 ]);
             }
 
-            const lote = await conec.execute(connection, `SELECT vd.idLote FROM
+            const producto = await conec.execute(connection, `SELECT vd.idProducto FROM
                     venta AS v 
                     INNER JOIN ventaDetalle AS vd ON v.idVenta = vd.idVenta
                     WHERE v.idVenta  = ?`, [
                 req.query.idVenta
             ]);
 
-            for (const item of lote) {
-                await conec.execute(connection, `UPDATE lote SET estado = 1 
-                        WHERE idLote = ?`, [
-                    item.idLote
+            for (const item of producto) {
+                await conec.execute(connection, `UPDATE producto SET estado = 1 
+                        WHERE idProducto = ?`, [
+                    item.idProducto
                 ]);
             }
 
@@ -1336,9 +1336,9 @@ class Factura {
             if (result.length > 0) {
 
                 let detalle = await conec.query(`SELECT 
-                l.descripcion AS lote,
+                l.descripcion AS producto,
                 md.codigo AS medida, 
-                m.nombre AS manzana, 
+                m.nombre AS categoria, 
                 p.nombre AS proyecto,
                 vd.precio,
                 vd.cantidad,
@@ -1346,9 +1346,9 @@ class Factura {
                 imp.nombre AS impuesto,
                 imp.porcentaje
                 FROM ventaDetalle AS vd 
-                INNER JOIN lote AS l ON vd.idLote = l.idLote 
+                INNER JOIN producto AS l ON vd.idProducto = l.idProducto 
                 INNER JOIN medida AS md ON md.idMedida = l.idMedida 
-                INNER JOIN manzana AS m ON l.idManzana = m.idManzana 
+                INNER JOIN categoria AS m ON l.idCategoria = m.idCategoria 
                 INNER JOIN proyecto AS p ON m.idProyecto = p.idProyecto
                 INNER JOIN impuesto AS imp ON vd.idImpuesto  = imp.idImpuesto 
                 WHERE vd.idVenta = ? `, [
@@ -1386,11 +1386,11 @@ class Factura {
 
             for (let value of lista) {
                 let detalle = await conec.query(`SELECT 
-                l.descripcion AS lote,
-                m.nombre AS manzana
+                l.descripcion AS producto,
+                m.nombre AS categoria
                 FROM ventaDetalle AS vd 
-                INNER JOIN lote AS l ON vd.idLote = l.idLote 
-                INNER JOIN manzana AS m ON l.idManzana = m.idManzana 
+                INNER JOIN producto AS l ON vd.idProducto = l.idProducto 
+                INNER JOIN categoria AS m ON l.idCategoria = m.idCategoria
                 WHERE vd.idVenta = ? `, [
                     value.idVenta
                 ]);
@@ -1525,9 +1525,9 @@ class Factura {
             if (result.length > 0) {
 
                 let detalle = await conec.query(`SELECT 
-                l.descripcion AS lote,
+                l.descripcion AS producto,
                 md.codigo AS medida, 
-                m.nombre AS manzana, 
+                m.nombre AS categoria, 
                 p.nombre AS proyecto,
                 vd.precio,
                 vd.cantidad,                
@@ -1535,9 +1535,9 @@ class Factura {
                 imp.nombre as impuesto,                
                 imp.porcentaje
                 FROM ventaDetalle AS vd 
-                INNER JOIN lote AS l ON vd.idLote = l.idLote 
+                INNER JOIN producto AS l ON vd.idProducto = l.idProducto 
                 INNER JOIN medida AS md ON md.idMedida = l.idMedida 
-                INNER JOIN manzana AS m ON l.idManzana = m.idManzana 
+                INNER JOIN categoria AS m ON l.idCategoria = m.idCategoria 
                 INNER JOIN proyecto AS p ON m.idProyecto = p.idProyecto
                 INNER JOIN impuesto AS imp ON vd.idImpuesto  = imp.idImpuesto 
                 WHERE vd.idVenta = ? `, [
@@ -1604,11 +1604,11 @@ class Factura {
             ]);
 
             const detalle = await conec.query(`SELECT 
-            l.idLote,
-            l.descripcion AS lote,
+            l.idProducto,
+            l.descripcion AS producto,
             md.idMedida,
             md.codigo AS medida, 
-            m.nombre AS manzana, 
+            m.nombre AS categoria, 
             p.nombre AS proyecto,
             vd.precio,
             vd.cantidad,
@@ -1616,9 +1616,9 @@ class Factura {
             imp.nombre as impuesto,
             imp.porcentaje
             FROM ventaDetalle AS vd 
-            INNER JOIN lote AS l ON vd.idLote = l.idLote 
+            INNER JOIN producto AS l ON vd.idProducto = l.idProducto 
             INNER JOIN medida AS md ON md.idMedida = l.idMedida 
-            INNER JOIN manzana AS m ON l.idManzana = m.idManzana 
+            INNER JOIN categoria AS m ON l.idCategoria = m.idCategoria 
             INNER JOIN proyecto AS p ON m.idProyecto = p.idProyecto
             INNER JOIN impuesto AS imp ON vd.idImpuesto  = imp.idImpuesto 
             WHERE vd.idVenta = ? `, [
@@ -1760,10 +1760,10 @@ class Factura {
             ]);
 
             const detalle = await conec.query(`SELECT 
-            l.descripcion AS lote,
+            l.descripcion AS producto,
             md.idMedida,
             md.codigo AS medida, 
-            m.nombre AS manzana, 
+            m.nombre AS categoria, 
             p.nombre AS proyecto,
             vd.precio,
             vd.cantidad,
@@ -1771,9 +1771,9 @@ class Factura {
             imp.nombre as impuesto,
             imp.porcentaje
             FROM ventaDetalle AS vd 
-            INNER JOIN lote AS l ON vd.idLote = l.idLote 
+            INNER JOIN producto AS l ON vd.idProducto = l.idProducto 
             INNER JOIN medida AS md ON md.idMedida = l.idMedida 
-            INNER JOIN manzana AS m ON l.idManzana = m.idManzana 
+            INNER JOIN categoria AS m ON l.idCategoria = m.idCategoria 
             INNER JOIN proyecto AS p ON m.idProyecto = p.idProyecto
             INNER JOIN impuesto AS imp ON vd.idImpuesto  = imp.idImpuesto 
             WHERE vd.idVenta = ? `, [
@@ -1811,15 +1811,15 @@ class Factura {
             ]
             );
 
-            const lotes = await conec.query(`SELECT
-                l.descripcion AS lote,
+            const productos = await conec.query(`SELECT
+                l.descripcion AS producto,
                 l.precio, 
-                l.areaLote, 
-                m.nombre AS manzana
+                l.areaProducto, 
+                m.nombre AS categoria
                 FROM venta AS v 
                 INNER JOIN ventaDetalle AS vd ON v.idVenta = vd.idVenta
-                INNER JOIN lote AS l ON vd.idLote = l.idLote
-                INNER JOIN manzana AS m ON l.idManzana = m.idManzana
+                INNER JOIN producto AS l ON vd.idProducto = l.idProducto
+                INNER JOIN categoria AS m ON l.idCategoria = m.idCategoria
                 WHERE v.idVenta = ?`, [
                 req.query.idVenta
             ]);
@@ -1853,7 +1853,7 @@ class Factura {
                 "venta": venta[0],
                 "detalle": detalle,
                 "plazos": plazos,
-                "lotes": lotes,
+                "productos": productos,
                 "cobros": cobrosEchos,
                 "inicial": inicial
             };

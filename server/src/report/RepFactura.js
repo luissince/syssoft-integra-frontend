@@ -3,7 +3,7 @@ const PDFDocument = require("pdfkit-table");
 const getStream = require('get-stream');
 const qr = require("qrcode");
 const NumberLleters = require('../tools/NumberLleters');
-const { formatMoney, numberFormat, calculateTaxBruto, calculateTax, dateFormat, zfill, isFile, manzanaLote } = require('../tools/Tools');
+const { formatMoney, numberFormat, calculateTaxBruto, calculateTax, dateFormat, zfill, isFile, categoriaProducto } = require('../tools/Tools');
 
 
 const numberLleters = new NumberLleters();
@@ -144,7 +144,7 @@ class RepFactura {
                     ++index,
                     item.medida,
                     item.cantidad,
-                    manzanaLote(item.lote, item.manzana),
+                    categoriaProducto(item.producto, item.categoria),
                     numberFormat(item.precio, cabecera.codiso),
                     numberFormat((item.precio * item.cantidad), cabecera.codiso)
                 ];
@@ -1223,8 +1223,8 @@ class RepFactura {
             //     doc.options.margins.left + 400,
             //     yPos);
 
-            data.lote.map((lote, index) => {
-                doc.fontSize(h2).text(lote.lote + " - " + lote.manzana,
+            data.producto.map((producto, index) => {
+                doc.fontSize(h2).text(producto.producto + " - " + producto.categoria,
                     doc.options.margins.left + 400,
                     yPos);
             });
@@ -1265,8 +1265,8 @@ class RepFactura {
 
                     let concepto = item.concepto + "- F.V: " + item.fecha;
 
-                    // data.lote.map((lote, index) => {
-                    //     concepto += "\n" + lote.lote + " - " + lote.manzana;
+                    // data.producto.map((producto, index) => {
+                    //     concepto += "\n" + producto.producto + " - " + producto.categoria;
                     // });
 
                     doc.fontSize(h2).text(concepto,
@@ -1379,7 +1379,7 @@ class RepFactura {
 
             yPos = 235 - 7;
 
-            doc.fontSize(h1).text(`${manzanaLote(data.descripcion, data.manzana)}`,
+            doc.fontSize(h1).text(`${categoriaProducto(data.descripcion, data.categoria)}`,
                 doc.options.margins.left + 140 - 30,
                 yPos);
 
@@ -1520,7 +1520,7 @@ class RepFactura {
                     item.fecha,
                     item.documento + " " + item.informacion,
                     item.comprobante + " " + item.serie + "-" + item.numeracion,
-                    item.lote + " - " + item.manzana,
+                    item.producto + " - " + item.categoria,
                     item.tipo,
                     item.estado,
                     numberFormat(item.total, item.codiso)]

@@ -50,7 +50,7 @@ class CpeElectronicos extends React.Component {
             viewDeclarar: statePrivilegio(this.props.token.userToken.menus[7].submenu[0].privilegio[4].estado),
 
             loadModal: false,
-            nameModal: 'Nuevo Manzana',
+            nameModal: 'Nuevo Categoria',
             msgModal: 'Cargando datos...',
             fechaInicioModal: currentDate(),
             fechaFinalModal: currentDate(),
@@ -535,7 +535,7 @@ class CpeElectronicos extends React.Component {
 
                                 <div className="form-row">
                                     <div className="form-group col-md-6">
-                                        <label htmlFor="manzana">Fecha Inicio <i className="fa fa-calendar text-danger small"></i></label>
+                                        <label htmlFor="categoria">Fecha Inicio <i className="fa fa-calendar text-danger small"></i></label>
                                         <input
                                             type="date"
                                             className="form-control"
@@ -546,7 +546,7 @@ class CpeElectronicos extends React.Component {
                                     </div>
 
                                     <div className="form-group col-md-6">
-                                        <label htmlFor="manzana">Fecha Final <i className="fa fa-calendar text-danger small"></i></label>
+                                        <label htmlFor="categoria">Fecha Final <i className="fa fa-calendar text-danger small"></i></label>
                                         <input
                                             type="date"
                                             className="form-control"
@@ -559,7 +559,7 @@ class CpeElectronicos extends React.Component {
 
                                 <div className="form-row">
                                     <div className="form-group col-md-12">
-                                        <label htmlFor="manzana">Fecha Inicio <i className="fa fa-file-text text-danger small"></i></label>
+                                        <label htmlFor="categoria">Fecha Inicio <i className="fa fa-file-text text-danger small"></i></label>
                                         <select
                                             className="form-control"
                                             value={this.state.idComprobanteModal}

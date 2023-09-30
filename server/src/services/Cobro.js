@@ -30,7 +30,7 @@ class Cobro {
 
             IFNULL(v.idVenta,'') AS idVentaRef,
             IFNULL(CONCAT(cp.nombre,' ',v.serie,'-',v.numeracion),'') AS comprobanteRef,
-            IFNULL(CONCAT(lo.descripcion,' - ',ma.nombre),'') AS loteRef, 
+            IFNULL(CONCAT(lo.descripcion,' - ',ma.nombre),'') AS productoRef, 
             IFNULL(v.estado,0) AS estadoRef,
             m.simbolo,
             m.codiso,
@@ -56,8 +56,8 @@ class Cobro {
             LEFT JOIN venta AS v ON c.idProcedencia = v.idVenta 
             LEFT JOIN comprobante AS cp ON v.idComprobante = cp.idComprobante
             LEFT JOIN ventaDetalle AS vd ON vd.idVenta = v.idVenta 
-            LEFT JOIN lote AS lo ON lo.idLote = vd.idLote
-            LEFT JOIN manzana AS ma ON ma.idManzana = lo.idManzana 
+            LEFT JOIN producto AS lo ON lo.idProducto = vd.idProducto
+            LEFT JOIN categoria AS ma ON ma.idCategoria = lo.idCategoria 
 
             LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro AND nc.estado = 1
             WHERE 
@@ -1223,10 +1223,10 @@ class Cobro {
 
     async idPlazo(req) {
         try {
-            let loteManzana = await conec.query(`SELECT l.descripcion, m.nombre AS manzana
+            let productoCategoria = await conec.query(`SELECT l.descripcion, m.nombre AS categoria
             FROM ventaDetalle AS v 
-            INNER JOIN lote AS l ON l.idLote = v.idLote
-            INNER JOIN manzana AS m ON m.idManzana = l.idManzana
+            INNER JOIN producto AS l ON l.idProducto = v.idProducto
+            INNER JOIN categoria AS m ON m.idCategoria = l.idCategoria
             WHERE v.idVenta = ?`, [
                 req.query.idVenta
             ]);
@@ -1260,9 +1260,9 @@ class Cobro {
             ]);
 
 
-            if (loteManzana.length > 0 && venta.length > 0 && plazo.length > 0 && monto.length > 0) {
+            if (productoCategoria.length > 0 && venta.length > 0 && plazo.length > 0 && monto.length > 0) {
                 return {
-                    ...loteManzana[0],
+                    ...productoCategoria[0],
                     ...venta[0],
                     ...plazo[0],
                     ...monto[0],

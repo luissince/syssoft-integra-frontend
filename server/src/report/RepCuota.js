@@ -160,17 +160,17 @@ class RepCuota {
 
             // ==============================================================================================
 
-            const lotes = data.lotes.map((item, index) => {
-                return [++index, item.lote, numberFormat(item.precio), item.areaLote, item.manzana]
+            const productos = data.productos.map((item, index) => {
+                return [++index, item.producto, numberFormat(item.precio), item.areProducto, item.categoria]
             })
 
-            const lotesTabla = {
-                subtitle: `LISTA DE LOTES ASOCIADOS A LA VENTA`,
-                headers: ["N°", "LOTE", "PRECIO", "AREA m2", "MANZANA"],
-                rows: lotes
+            const productosTabla = {
+                subtitle: `LISTA DE PRODUCTOS ASOCIADOS A LA VENTA`,
+                headers: ["N°", "PRODUCTO", "PRECIO", "AREA m2", "CATEGORIA"],
+                rows: productos
             };
 
-            doc.table(lotesTabla, {
+            doc.table(productosTabla, {
                 prepareHeader: () => doc.font("Helvetica-Bold").fontSize(h3),
                 prepareRow: () => {
                     doc.font("Helvetica").fontSize(h3);

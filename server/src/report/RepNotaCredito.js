@@ -3,7 +3,7 @@ const PDFDocument = require("pdfkit-table");
 const getStream = require('get-stream');
 const qr = require("qrcode");
 const NumberLleters = require('../tools/NumberLleters');
-const { formatMoney, numberFormat, calculateTaxBruto, calculateTax, dateFormat, zfill, isFile, manzanaLote } = require('../tools/Tools');
+const { formatMoney, numberFormat, calculateTaxBruto, calculateTax, dateFormat, zfill, isFile, categoriaProducto } = require('../tools/Tools');
 
 
 const numberLleters = new NumberLleters();

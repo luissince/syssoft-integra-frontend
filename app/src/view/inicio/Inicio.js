@@ -39,9 +39,9 @@ import SedeProceso from './ajustes/registros/SedeProceso';
 import EmpresaProceso from './ajustes/registros/EmpresaProceso';
 import Proyectos from './ajustes/Proyectos';
 import ProcesoProyecto from './ajustes/proyecto/ProcesoProyecto';
-import Manzanas from './logistica/Manzanas';
-import Lotes from './logistica/Lotes';
-import LoteDetalle from './logistica/registro/LoteDetalle';
+import Categorias from './logistica/Categorias';
+import Productos from './logistica/Productos';
+import ProductoDetalle from './logistica/registro/ProductoDetalle';
 
 import Clientes from './facturacion/cliente/Clientes';
 import ClienteProceso from './facturacion/cliente/ClienteProceso';
@@ -66,7 +66,7 @@ import UsuarioProceso from './seguridad/registros/UsuarioProceso';
 
 import RepVentas from './reporte/RepVentas';
 import RepFinanciero from './reporte/RepFinanciero';
-import RepLotes from './reporte/RepLotes';
+import RepProductos from './reporte/RepProductos';
 import RepClientes from './reporte/RepClientes';
 import CpeConsultar from './cpesunat/CpeConsultar';
 import CpeElectronicos from './cpesunat/CpeElectronicos';
@@ -366,18 +366,18 @@ class Inicio extends React.Component {
                         render={(props) => <Impuestos {...props} />}
                     />
                     <Route
-                        path={`${path}/manzanas`}
-                        render={(props) => <Manzanas {...props} />}
+                        path={`${path}/categorias`}
+                        render={(props) => <Categorias {...props} />}
                     />
                     <Route
-                        path={`${path}/lotes`}
+                        path={`${path}/productos`}
                         exact={true}
-                        render={(props) => <Lotes {...props} />}
+                        render={(props) => <Productos {...props} />}
                     />
                     <Route
-                        path={`${path}/lotes/detalle`}
+                        path={`${path}/productos/detalle`}
                         exact={true}
-                        render={(props) => <LoteDetalle {...props} />}
+                        render={(props) => <ProductoDetalle {...props} />}
                     />
                     <Route
                         path={`${path}/conceptos`}
@@ -407,8 +407,8 @@ class Inicio extends React.Component {
                         render={(props) => <RepFinanciero {...props} />}
                     />
                     <Route
-                        path={`${path}/replotes`}
-                        render={(props) => <RepLotes {...props} />}
+                        path={`${path}/repproductos`}
+                        render={(props) => <RepProductos {...props} />}
                     />
                     <Route
                         path={`${path}/repclientes`}

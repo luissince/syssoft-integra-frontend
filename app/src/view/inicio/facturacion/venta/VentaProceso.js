@@ -43,10 +43,10 @@ class VentaProceso extends CustomComponent {
             monedas: [],
             codiso: "PEN",
 
-            lote: '',
-            lotes: [],
-            sarchLote: false,
-            filterLote: false,
+            producto: '',
+            productos: [],
+            sarchProducto: false,
+            filterProducto: false,
 
             idCliente: '',
             clientes: [],
@@ -105,7 +105,7 @@ class VentaProceso extends CustomComponent {
             importeTotal: 0.0
         }
 
-        this.refLote = React.createRef();
+        this.refProducto = React.createRef();
 
         this.refComprobante = React.createRef();
         this.refImpuesto = React.createRef();
@@ -315,7 +315,7 @@ class VentaProceso extends CustomComponent {
      * Método de eventos
      */
 
-    handleAddItem = async (lote) => {
+    handleAddItem = async (producto) => {
         if (this.state.idImpuesto === "") {
             alertWarning("Venta", "Seleccione un impuesto.");
             this.handleModalOptions();
@@ -323,23 +323,23 @@ class VentaProceso extends CustomComponent {
             return;
         }
 
-        if (lote.precio <= 0) {
+        if (producto.precio <= 0) {
             alertWarning("Venta", "¡El precio no puede tener un valor de 0!");
             return;
         }
 
         const detalleVenta = [...this.state.detalleVenta];
-        const existingItem = detalleVenta.find(item => item.idDetalle === lote.idLote);
+        const existingItem = detalleVenta.find(item => item.idDetalle === producto.idProducto);
 
         if (!existingItem) {
             detalleVenta.push({
-                idDetalle: lote.idLote,
-                nombreLote: lote.nombreLote,
-                nombreManzana: lote.nombreManzana,
+                idDetalle: producto.idProducto,
+                nombreProducto: producto.nombreProducto,
+                nombreCategoria: producto.nombreCategoria,
                 cantidad: 1,
                 idImpuesto: this.state.idImpuesto,
-                idMedida: lote.idMedida,
-                precio: lote.precio
+                idMedida: producto.idMedida,
+                precio: producto.precio
             });
         } else {
             existingItem.cantidad += 1;
@@ -433,7 +433,7 @@ class VentaProceso extends CustomComponent {
     handleOpenSale = async () => {
         if (this.state.detalleVenta.length === 0) {
             alertWarning("Venta", "La lista de productos esta vacía.");
-            this.refLote.current.focus();
+            this.refProducto.current.focus();
             return;
         }
 
@@ -454,7 +454,7 @@ class VentaProceso extends CustomComponent {
     }
 
     handleClearSale = () => {
-        this.refLote.current.focus();
+        this.refProducto.current.focus();
 
         this.setState({
             loading: true,
@@ -467,10 +467,10 @@ class VentaProceso extends CustomComponent {
             monedas: [],
             codiso: "PEN",
 
-            lote: '',
-            lotes: [],
-            sarchLote: false,
-            filterLote: false,
+            producto: '',
+            productos: [],
+            sarchProducto: false,
+            filterProducto: false,
 
             idCliente: '',
             clientes: [],
@@ -718,14 +718,14 @@ class VentaProceso extends CustomComponent {
 
                 <section className='invoice-left'>
                     <InvoiceView
-                        lote={this.state.lote}
+                        producto={this.state.producto}
                         idProyecto={this.state.idProyecto}
-                        filterLote={this.state.filterLote}
+                        filterProducto={this.state.filterProducto}
                         setStateAsync={this.setStateAsync}
 
-                        sarchLote={this.state.sarchLote}
-                        lotes={this.state.lotes}
-                        refLote={this.refLote}
+                        sarchProducto={this.state.sarchProducto}
+                        productos={this.state.productos}
+                        refProducto={this.refProducto}
                         handleAddItem={this.handleAddItem}
                     />
                 </section>

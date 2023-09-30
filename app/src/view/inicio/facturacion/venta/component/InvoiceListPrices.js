@@ -30,14 +30,14 @@ const InvoiceListPrices = (props) => {
                                 <option>- Buscar Item -</option>
                             </select>
 
-                            <SearchBarLote
-                                        placeholder="Filtrar lotes..."
-                                        refLote={this.refLote}
-                                        lote={this.state.lote}
-                                        lotes={this.state.lotes}
-                                        onEventClearInput={this.onEventClearInputLote}
-                                        handleFilter={this.handleFilterLote}
-                                        onEventSelectItem={this.onEventSelectItemLote}
+                            <SearchBarProducto
+                                        placeholder="Filtrar productos..."
+                                        refProducto={this.refProducto}
+                                        producto={this.state.pProducto}
+                                        productos={this.state.productos}
+                                        onEventClearInput={this.onEventClearInputProducto}
+                                        handleFilter={this.handleFilterProducto}
+                                        onEventSelectItem={this.onEventSelectItemProducto}
                                     /> 
 
                             <button className='btn btn-success d-flex ml-3 mr-3' style={{ width: "150px" }}>

@@ -84,8 +84,8 @@ class RepClientes extends React.Component {
         await this.setStateAsync({
             idCliente: '',
             cliente: searchWord,
-            idLote: '',
-            lotes: [],
+            idProducto: '',
+            productos: [],
         });
         this.selectItem = false;
         if (searchWord.length === 0) {

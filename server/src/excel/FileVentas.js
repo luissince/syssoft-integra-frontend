@@ -114,7 +114,7 @@ async function generateExcel(req, sedeInfo, data) {
             ws.cell(14 + index, 4).string(item.informacion).style(styleBody)
             ws.cell(14 + index, 5).string(item.comprobante).style(styleBody)
             ws.cell(14 + index, 6).string(item.serie + "-" + item.numeracion).style(styleBody)
-            ws.cell(14 + index, 7).string(item.lote + " - " + item.manzana).style(styleBody)
+            ws.cell(14 + index, 7).string(item.producto + " - " + item.categoria).style(styleBody)
             ws.cell(14 + index, 8).string(item.tipo).style(styleBody)
             ws.cell(14 + index, 9).string(item.estado).style(styleBody)
             if (item.estado === "ANULADO") {

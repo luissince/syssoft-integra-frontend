@@ -1,19 +1,19 @@
 const express = require('express');
 const router = express.Router();
-const Lote = require('../services/Lote');
+const Producto = require('../services/Producto');
 const sede = require('../services/Sede');
-const RepLote = require('../report/RepLote');
-const { generateLoteDeuda } = require('../excel/FileLote');
+const RepProducto = require('../report/RepProducto');
+const { generateProductoDeuda } = require('../excel/FileProducto');
 const { decrypt } = require('../tools/CryptoJS');
 const { currentDate } = require('../tools/Tools');
 const { sendError } = require('../tools/Message');
 
-const lote = new Lote();
+const producto = new Producto();
 
-const repLote = new RepLote();
+const repProducto = new RepProducto();
 
 router.get('/list', async function (req, res) {
-    const result = await lote.list(req)
+    const result = await producto.list(req)
     if (typeof result === 'object') {
         res.status(200).send(result)
     } else {
@@ -22,7 +22,7 @@ router.get('/list', async function (req, res) {
 })
 
 router.post('/', async function (req, res) {
-    const result = await lote.add(req)
+    const result = await producto.add(req)
     if (result === "insert") {
         res.status(200).send("Datos registrados correctamente.")
     } else {
@@ -31,7 +31,7 @@ router.post('/', async function (req, res) {
 });
 
 router.post('/socio', async function (req, res) {
-    const result = await lote.socio(req)
+    const result = await producto.socio(req)
     if (result === "insert") {
         res.status(201).send("Datos registrados correctamente.")
     } else if (result === "cliente") {
@@ -42,7 +42,7 @@ router.post('/socio', async function (req, res) {
 });
 
 router.post('/restablecer', async function (req, res) {
-    const result = await lote.restablecer(req)
+    const result = await producto.restablecer(req)
     if (result === "insert") {
         res.status(201).send("Socio restablecido.")
     } else {
@@ -51,11 +51,11 @@ router.post('/restablecer', async function (req, res) {
 });
 
 router.post("/liberar",async function (req, res) {
-    return await lote.liberar(req,res);
+    return await producto.liberar(req,res);
 });
 
 router.get('/id', async function (req, res) {
-    const result = await lote.id(req)
+    const result = await producto.id(req)
     if (typeof result === "object") {
         res.status(200).send(result)
     } else {
@@ -64,7 +64,7 @@ router.get('/id', async function (req, res) {
 });
 
 router.put('/', async function (req, res) {
-    const result = await lote.update(req)
+    const result = await producto.update(req)
     if (result === "update") {
         res.status(200).send("Los datos se actualizarón correctamente.");
     } else if (result === "noid") {
@@ -75,16 +75,16 @@ router.put('/', async function (req, res) {
 });
 
 router.delete('/', async function (req, res) {
-    const result = await lote.delete(req);
+    const result = await producto.delete(req);
     if (result === "delete") {
-        res.status(200).send("Se eliminó correctamente el lote.");
+        res.status(200).send("Se eliminó correctamente el producto.");
     } else {
         res.status(500).send(result)
     }
 });
 
 router.get('/detalle', async function (req, res) {
-    const result = await lote.detalle(req)
+    const result = await producto.detalle(req)
     if (typeof result === 'object') {
         res.status(200).send(result)
     } else {
@@ -93,7 +93,7 @@ router.get('/detalle', async function (req, res) {
 });
 
 router.get('/listcombo', async function (req, res) {
-    const result = await lote.listarCombo(req)
+    const result = await producto.listarCombo(req)
     if (Array.isArray(result)) {
         res.status(200).send(result)
     } else {
@@ -102,7 +102,7 @@ router.get('/listcombo', async function (req, res) {
 });
 
 router.get('/listfilter', async function (req, res) {
-    const result = await lote.listarFilter(req)
+    const result = await producto.listarFilter(req)
     if (Array.isArray(result)) {
         res.status(200).send(result)
     } else {
@@ -110,8 +110,8 @@ router.get('/listfilter', async function (req, res) {
     }
 });
 
-router.get('/lotecliente', async function (req, res) {
-    const result = await lote.listarComboLoteCliente(req)
+router.get('/productocliente', async function (req, res) {
+    const result = await producto.listarComboProductoCliente(req)
     if (Array.isArray(result)) {
         res.status(200).send(result)
     } else {
@@ -120,17 +120,18 @@ router.get('/lotecliente', async function (req, res) {
 });
 
 router.put('/cambiar', async function (req, res) {
-    const result = await lote.cambiar(req);
+    const result = await producto.cambiar(req);
+    
     if (result == "update") {
-        res.status(200).send("Se actualizó correctamente el cambio del lote.");
+        res.status(200).send("Se actualizó correctamente el cambio del producto.");
     } else {
         res.status(500).send(result);
     }
 });
 
-router.get('/replotedetalle', async function (req, res) {
+router.get('/repproductodetalle', async function (req, res) {
     const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
-    req.query.idLote = decryptedData.idLote;
+    req.query.idProducto = decryptedData.idProducto;
     req.query.idSede = decryptedData.idSede;
 
     const sedeInfo = await sede.infoSedeReporte(req)
@@ -140,16 +141,16 @@ router.get('/replotedetalle', async function (req, res) {
         return;
     }
 
-    const detalle = await lote.detalle(req)
+    const detalle = await producto.detalle(req)
 
     if (typeof detalle === 'object') {
 
-        let data = await repLote.repDetalleLote(sedeInfo, detalle)
+        let data = await repProducto.repDetalleProducto(sedeInfo, detalle)
 
         if (typeof data === 'string') {
             res.status(500).send(data)
         } else {
-            res.setHeader('Content-disposition', 'inline; filename=Detalle del Lote.pdf');
+            res.setHeader('Content-disposition', 'inline; filename=Detalle del Producto.pdf');
             res.contentType("application/pdf");
             res.send(data);
         }
@@ -158,10 +159,10 @@ router.get('/replotedetalle', async function (req, res) {
     }
 })
 
-router.get('/reptipolotes', async function (req, res) {
+router.get('/reptipoProductos', async function (req, res) {
     const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
-    // req.query.idLote = decryptedData.idLote;
-    req.query.estadoLote = decryptedData.estadoLote;
+    // req.query.idProducto = decryptedData.idProducto;
+    req.query.estadoProducto = decryptedData.estadoProducto;
     req.query.idSede = decryptedData.idSede;
     req.query.idProyecto = decryptedData.idProyecto;
 
@@ -172,16 +173,16 @@ router.get('/reptipolotes', async function (req, res) {
         return;
     }
 
-    const detalle = await lote.listaEstadoLote(req)
+    const detalle = await producto.listaEstadoProducto(req)
 
     if (typeof detalle === 'object') {
 
-        let data = await repLote.repTipoLote(req, sedeInfo, detalle)
+        let data = await repProducto.repTipoProducto(req, sedeInfo, detalle)
 
         if (typeof data === 'string') {
             res.status(500).send(data)
         } else {
-            res.setHeader('Content-disposition', `inline; filename=DETALLE DE LOTES AL ${currentDate()}.pdf`);
+            res.setHeader('Content-disposition', `inline; filename=DETALLE DE PRODUCTOS AL ${currentDate()}.pdf`);
             res.contentType("application/pdf");
             res.send(data);
         }
@@ -190,7 +191,7 @@ router.get('/reptipolotes', async function (req, res) {
     }
 })
 
-router.get('/replistardeudaslote', async function (req, res) {
+router.get('/replistardeudasProducto', async function (req, res) {
     const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
     req.query.idSede = decryptedData.idSede;
     req.query.idProyecto = decryptedData.idProyecto;
@@ -204,16 +205,16 @@ router.get('/replistardeudaslote', async function (req, res) {
         return;
     }
 
-    const detalle = await lote.listardeudaslote(req)
+    const detalle = await producto.listardeudasProducto(req)
 
     if (typeof detalle === 'object') {
 
-        let data = await repLote.repLoteDeuda(req, sedeInfo, detalle)
+        let data = await repProducto.repProductoDeuda(req, sedeInfo, detalle)
 
         if (typeof data === 'string') {
             res.status(500).send(data)
         } else {
-            res.setHeader('Content-disposition', 'inline; filename=Lista de Lotes con Deuda.pdf');
+            res.setHeader('Content-disposition', 'inline; filename=Lista de Productos con Deuda.pdf');
             res.contentType("application/pdf");
             res.send(data);
         }
@@ -222,7 +223,7 @@ router.get('/replistardeudaslote', async function (req, res) {
     }
 })
 
-router.get('/exacellistardeudaslote', async function (req, res) {
+router.get('/exacellistardeudasProducto', async function (req, res) {
     const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
     req.query.idSede = decryptedData.idSede;
     req.query.idProyecto = decryptedData.idProyecto;
@@ -235,11 +236,11 @@ router.get('/exacellistardeudaslote', async function (req, res) {
         return sendError(res, sedeInfo);
     }
 
-    const detalle = await lote.listardeudaslote(req);
+    const detalle = await producto.listardeudasProducto(req);
 
     if (Array.isArray(detalle)) {
 
-        const data = await generateLoteDeuda(req, sedeInfo, detalle);
+        const data = await generateProductoDeuda(req, sedeInfo, detalle);
 
         if (typeof data === 'string') {
             return sendError(res, data);

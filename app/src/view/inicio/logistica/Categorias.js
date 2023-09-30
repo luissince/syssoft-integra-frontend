@@ -16,20 +16,20 @@ import { connect } from "react-redux";
 import Paginacion from "../../../components/Paginacion";
 import {
   comboProyectos,
-  listarManzana,
-  trasladarManzana,
+  listarCategoria,
+  trasladarCategoria,
 } from "../../../network/rest/principal.network";
 import SuccessReponse from "../../../model/class/response";
 import ErrorResponse from "../../../model/class/error-response";
 import { CANCELED } from "../../../model/types/types";
 import ContainerWrapper from "../../../components/Container";
-import { addManzana, getIdManzana, removeManzana, updateManzana } from "../../../network/rest/principal.network";
+import { addCategoria, getIdCategoria, removeCategoria, updateCategoria } from "../../../network/rest/principal.network";
 
-class Manzanas extends React.Component {
+class Categorias extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      idManzana: "",
+      idCategoria: "",
       nombre: "",
       idProyecto: this.props.token.project.idProyecto,
       idUsuario: this.props.token.userToken.idUsuario,
@@ -48,11 +48,11 @@ class Manzanas extends React.Component {
       ),
 
       loadModal: false,
-      nameModal: "Nuevo Manzana",
+      nameModal: "Nuevo Categoria",
       msgModal: "Cargando datos...",
 
       loadModalTraslado: false,
-      nameModalTraslado: "Nuevo Manzana",
+      nameModalTraslado: "Nuevo Categoria",
       msgModalTraslado: "Cargando datos...",
 
       idProyectoTrasladar: "",
@@ -88,34 +88,34 @@ class Manzanas extends React.Component {
   async componentDidMount() {
     this.loadInit();
 
-    viewModal("modalManzana", () => {
+    viewModal("modalCategoria", () => {
       this.abortControllerModal = new AbortController();
 
       if (this.idCodigo !== "") this.loadDataId(this.idCodigo);
     });
 
-    clearModal("modalManzana", async () => {
+    clearModal("modalCategoria", async () => {
       this.abortControllerModal.abort();
       await this.setStateAsync({
-        idManzana: "",
+        idCategoria: "",
         nombre: "",
 
         loadModal: false,
-        nameModal: "Nueva Manzana",
+        nameModal: "Nueva Categoria",
         msgModal: "Cargando datos...",
       });
       this.idCodigo = "";
     });
 
-    viewModal("modalManzanaTraslado", () => {
+    viewModal("modalCategoriaTraslado", () => {
       this.abortControllerModalTraslado = new AbortController();
       this.loadComboProyecto();
     });
 
-    clearModal("modalManzanaTraslado", async () => {
+    clearModal("modalCategoriaTraslado", async () => {
       this.abortControllerModalTraslado.abort();
       await this.setStateAsync({
-        idManzana: "",
+        idCategoria: "",
         idProyectoTrasladar: "",
         messageWarning: "",
         proyectos: [],
@@ -193,7 +193,7 @@ class Manzanas extends React.Component {
     /**
      * Peticion http
      */
-    const response = await listarManzana(
+    const response = await listarCategoria(
       params,
       this.abortControllerTable.signal
     );
@@ -235,14 +235,14 @@ class Manzanas extends React.Component {
 
   async openModal(id) {
     if (id === "") {
-      showModal("modalManzana");
-      await this.setStateAsync({ nameModal: "Nueva Manzana" });
+      showModal("modalCategoria");
+      await this.setStateAsync({ nameModal: "Nueva Categoria" });
     } else {
-      showModal("modalManzana");
+      showModal("modalCategoria");
       this.idCodigo = id;
       await this.setStateAsync({
-        idManzana: id,
-        nameModal: "Editar Manzana",
+        idCategoria: id,
+        nameModal: "Editar Categoria",
         loadModal: true,
       });
     }
@@ -250,14 +250,14 @@ class Manzanas extends React.Component {
 
   async loadDataId(id) {
     const params = {
-      idManzana: id,
+      idCategoria: id,
     }
 
-    const response = await getIdManzana(params, this.abortControllerModal.signal);
+    const response = await getIdCategoria(params, this.abortControllerModal.signal);
 
     if (response instanceof SuccessReponse) {
       await this.setStateAsync({
-        idManzana: response.data.idManzana,
+        idCategoria: response.data.idCategoria,
         nombre: response.data.nombre,
         loadModal: false,
       });
@@ -273,9 +273,9 @@ class Manzanas extends React.Component {
   }
 
   async openModalTraslado(id) {
-    showModal("modalManzanaTraslado");
+    showModal("modalCategoriaTraslado");
     await this.setStateAsync({
-      idManzana: id,
+      idCategoria: id,
       nameModalTraslado: "Trasladar",
       loadModalTraslado: true,
     });
@@ -304,42 +304,42 @@ class Manzanas extends React.Component {
     }
   }
 
-  async handleAgregarManzana() {
+  async handleAgregarCategoria() {
     const data = {
       nombre: this.state.nombre,
       idProyecto: this.state.idProyecto,
       idUsuario: this.state.idUsuario,
     }
 
-    const response = await addManzana(data);
+    const response = await addCategoria(data);
     if (response instanceof SuccessReponse) {
-      alertSuccess("Manzana", response.data, () => {
+      alertSuccess("Categoria", response.data, () => {
         this.loadInit();
       });
     }
 
     if (response instanceof ErrorResponse) {
-      alertWarning("Manzana", response.getMessage());
+      alertWarning("Categoria", response.getMessage());
     }
   }
 
-  async handleEditarManzana() {
+  async handleEditarCategoria() {
     const data = {
-      idManzana: this.state.idManzana,
+      idCategoria: this.state.idCategoria,
       nombre: this.state.nombre,
       idProyecto: this.state.idProyecto,
       idUsuario: this.state.idUsuario,
     }
 
-    const response = await updateManzana(data);
+    const response = await updateCategoria(data);
     if (response instanceof SuccessReponse) {
-      alertSuccess("Manzana", response.data, () => {
+      alertSuccess("Categoria", response.data, () => {
         this.onEventPaginacion();
       });
     }
 
     if (response instanceof ErrorResponse) {
-      alertWarning("Manzana", response.getMessage());
+      alertWarning("Categoria", response.getMessage());
     }
   }
 
@@ -350,34 +350,34 @@ class Manzanas extends React.Component {
     }
 
 
-    alertInfo("Manzana", "Procesando información...");
-    hideModal("modalManzana");
+    alertInfo("Categoria", "Procesando información...");
+    hideModal("modalCategoria");
 
-    if (this.state.idManzana === "") {
-      this.handleAgregarManzana();
+    if (this.state.idCategoria === "") {
+      this.handleAgregarCategoria();
     } else {
-      this.handleEditarManzana();
+      this.handleEditarCategoria();
     }
   };
 
-  onEventDelete = (idManzana) => {
-    alertDialog("Manzana", "¿Estás seguro de eliminar la Manzana?", async (event) => {
+  onEventDelete = (idCategoria) => {
+    alertDialog("Categoria", "¿Estás seguro de eliminar la Categoria?", async (event) => {
       if (event) {
 
         const params = {
-          idManzana: idManzana,
+          idCategoria: idCategoria,
         }
 
-        const response = await removeManzana(params);
+        const response = await removeCategoria(params);
 
         if (response instanceof SuccessReponse) {
-          alertSuccess("Manzana", response.data, () => {
+          alertSuccess("Categoria", response.data, () => {
             this.loadInit();
           });
         }
 
         if (response instanceof ErrorResponse) {
-          alertWarning("Manzana", response.getMessage());
+          alertWarning("Categoria", response.getMessage());
         }
       }
     }
@@ -392,30 +392,30 @@ class Manzanas extends React.Component {
       return;
     }
 
-    alertDialog("Manzana", "¿Está seguro de continuar?", async (value) => {
+    alertDialog("Categoria", "¿Está seguro de continuar?", async (value) => {
       if (value) {
         const params = {
-          idManzana: this.state.idManzana,
+          idCategoria: this.state.idCategoria,
           idProyecto: this.state.idProyecto,
           idProyectoTrasladar: this.state.idProyectoTrasladar,
           idUsuario: this.state.idUsuario,
         };
 
         alertInfo("Moneda", "Procesando información...");
-        hideModal("modalManzanaTraslado");
+        hideModal("modalCategoriaTraslado");
 
-        const response = await trasladarManzana(params);
+        const response = await trasladarCategoria(params);
 
         if (response instanceof SuccessReponse) {
           console.log(response.data);
 
-          alertSuccess("Manzana", response.data, () => {
+          alertSuccess("Categoria", response.data, () => {
             this.loadInit();
           });
         }
 
         if (response instanceof ErrorResponse) {
-          alertWarning("Manzana", response.getMessage());
+          alertWarning("Categoria", response.getMessage());
         }
       }
     });
@@ -427,9 +427,9 @@ class Manzanas extends React.Component {
         {/* Inicio modal nuevo cliente*/}
         <div
           className="modal fade"
-          id="modalManzana"
+          id="modalCategoria"
           tabIndex="-1"
-          aria-labelledby="modalManzanaLabel"
+          aria-labelledby="modalCategoriaLabel"
           aria-hidden={true}
         >
           <div className="modal-dialog">
@@ -453,14 +453,14 @@ class Manzanas extends React.Component {
                 ) : null}
 
                 <div className="form-group">
-                  <label htmlFor="manzana">
-                    Nombre Manzana{" "}
+                  <label htmlFor="categoria">
+                    Nombre Categoria{" "}
                     <i className="fa fa-asterisk text-danger small"></i>
                   </label>
                   <input
                     type="text"
                     className="form-control"
-                    placeholder="Ingrese el nombre de la manzana"
+                    placeholder="Ingrese el nombre de la categoria"
                     ref={this.refNombre}
                     value={this.state.nombre}
                     onChange={(event) =>
@@ -494,9 +494,9 @@ class Manzanas extends React.Component {
         {/* Inicio modal nuevo cliente*/}
         <div
           className="modal fade"
-          id="modalManzanaTraslado"
+          id="modalCategoriaTraslado"
           tabIndex="-1"
-          aria-labelledby="modalManzanaLabel"
+          aria-labelledby="modalCategoriaLabel"
           aria-hidden={true}
         >
           <div className="modal-dialog">
@@ -589,7 +589,7 @@ class Manzanas extends React.Component {
           <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
             <div className="form-group">
               <h5>
-                Manzanas <small className="text-secondary">LISTA</small>
+                Categorias <small className="text-secondary">LISTA</small>
               </h5>
             </div>
           </div>
@@ -646,7 +646,7 @@ class Manzanas extends React.Component {
                     <th width="5%" className="text-center">
                       #
                     </th>
-                    <th width="15%">Manzana</th>
+                    <th width="15%">Categoria</th>
                     <th width="25%">Proyecto</th>
                     <th width="5%" className="text-center">
                       Trasladar
@@ -682,7 +682,7 @@ class Manzanas extends React.Component {
                               className="btn btn-outline-info btn-sm"
                               title="Editar"
                               onClick={() =>
-                                this.openModalTraslado(item.idManzana)
+                                this.openModalTraslado(item.idCategoria)
                               }
                               disabled={!this.state.move}
                             >
@@ -693,7 +693,7 @@ class Manzanas extends React.Component {
                             <button
                               className="btn btn-outline-warning btn-sm"
                               title="Editar"
-                              onClick={() => this.openModal(item.idManzana)}
+                              onClick={() => this.openModal(item.idCategoria)}
                               disabled={!this.state.edit}
                             >
                               <i className="bi bi-pencil"></i>
@@ -703,7 +703,7 @@ class Manzanas extends React.Component {
                             <button
                               className="btn btn-outline-danger btn-sm"
                               title="Anular"
-                              onClick={() => this.onEventDelete(item.idManzana)}
+                              onClick={() => this.onEventDelete(item.idCategoria)}
                               disabled={!this.state.remove}
                             >
                               <i className="bi bi-trash"></i>
@@ -756,4 +756,4 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(Manzanas);
+export default connect(mapStateToProps, null)(Categorias);

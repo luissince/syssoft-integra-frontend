@@ -331,7 +331,7 @@ class Socios extends React.Component {
                                                         <td>{
                                                             item.detalle.map((detalle, indexd) => (
                                                                 <div key={indexd}>
-                                                                    <span>{detalle.descripcion}{<br />}{<small>{detalle.manzana}</small>}</span>
+                                                                    <span>{detalle.descripcion}{<br />}{<small>{detalle.categoria}</small>}</span>
                                                                     <br />
                                                                     {indexd == item.detalle.length - 1 ? null : <hr />}
                                                                 </div>

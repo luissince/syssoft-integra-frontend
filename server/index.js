@@ -78,8 +78,8 @@ app.use('/api/sede', require('./src/router/Sede'));
 app.use('/api/impuesto', require('./src/router/Impuesto'));
 
 app.use('/api/proyecto', require('./src/router/Proyecto'));
-app.use('/api/manzana', require('./src/router/Manzana'));
-app.use('/api/lote', require('./src/router/Lote'));
+app.use('/api/categoria', require('./src/router/Categoria'));
+app.use('/api/producto', require('./src/router/Producto'));
 
 app.use('/api/cliente', require('./src/router/Cliente'));
 app.use('/api/factura', require('./src/router/Factura'));

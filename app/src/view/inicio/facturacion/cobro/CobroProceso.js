@@ -53,8 +53,8 @@ class CobroProceso extends React.Component {
 
             expandedOpciones: true,
 
-            idLote: '',
-            lotes: [],
+            idProducto: '',
+            productos: [],
 
             loading: true,
             messageWarning: '',
@@ -75,7 +75,7 @@ class CobroProceso extends React.Component {
         this.refMoneda = React.createRef();
         this.refMetodoPago = React.createRef();
         this.refObservacion = React.createRef();
-        this.refLote = React.createRef();
+        this.refProducto = React.createRef();
         this.refImpuesto = React.createRef();
         this.refMedida = React.createRef();
         this.refCollpse = React.createRef();
@@ -352,7 +352,7 @@ class CobroProceso extends React.Component {
                         "idUsuario": this.state.idUsuario,
                         'idMoneda': this.state.idMoneda,
                         "idBanco": this.state.idBanco,
-                        "idProcedencia": this.state.idLote,
+                        "idProcedencia": this.state.idProducto,
                         "idMedida": this.state.idMedida,
                         "idImpuesto": this.state.idImpuesto,
                         "metodoPago": this.state.metodoPago,
@@ -404,8 +404,8 @@ class CobroProceso extends React.Component {
 
             expandedOpciones: true,
 
-            idLote: '',
-            lotes: [],
+            idProducto: '',
+            productos: [],
 
             loading: true,
             lista: [],
@@ -476,11 +476,11 @@ class CobroProceso extends React.Component {
     //     await this.setStateAsync({ detalleConcepto: updatedList })
     // }
 
-    loadLoteCliente = async (id) => {
+    loadProductoCliente = async (id) => {
         try {
-            await this.setStateAsync({ loading: true, lotes: [], idLote: '' })
+            await this.setStateAsync({ loading: true, productos: [], idProducto: '' })
 
-            const lote = await axios.get("/api/lote/lotecliente", {
+            const producto = await axios.get("/api/producto/productocliente", {
                 signal: this.abortControllerView.signal,
                 params: {
                     "idCliente": id
@@ -488,7 +488,7 @@ class CobroProceso extends React.Component {
             });
 
             await this.setStateAsync({
-                lotes: lote.data,
+                productos: producto.data,
                 loading: false
             });
         } catch (error) {
@@ -543,8 +543,8 @@ class CobroProceso extends React.Component {
         await this.setStateAsync({
             idCliente: '',
             cliente: searchWord,
-            idLote: '',
-            lotes: [],
+            idProducto: '',
+            productos: [],
         });
         this.selectItem = false;
         if (searchWord.length === 0) {
@@ -579,7 +579,7 @@ class CobroProceso extends React.Component {
             idCliente: value.idCliente
         });
         this.selectItem = true;
-        this.loadLoteCliente(this.state.idCliente);
+        this.loadProductoCliente(this.state.idCliente);
         if (this.state.idConcepto !== "") {
             this.loadFillTable(this.state.idCliente, this.state.idConcepto);
         }
@@ -716,7 +716,7 @@ class CobroProceso extends React.Component {
                                 <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
                                     <div className="form-group">
                                         <select
-                                            title="Lista de lotes"
+                                            title="Lista de productos"
                                             className="form-control"
                                             value={this.state.idImpuesto}
                                             ref={this.refImpuesto}
@@ -735,7 +735,7 @@ class CobroProceso extends React.Component {
                                 <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
                                     <div className="form-group">
                                         <select
-                                            title="Lista de lotes"
+                                            title="Lista de productos"
                                             className="form-control"
                                             value={this.state.idMedida}
                                             ref={this.refMedida}
@@ -1012,28 +1012,28 @@ class CobroProceso extends React.Component {
                                     <div className="input-group-text"><i className="bi bi-box"></i></div>
                                 </div>
                                 <select
-                                    title="Lista de lotes del cliente"
+                                    title="Lista de productos del cliente"
                                     className="form-control"
-                                    ref={this.refLote}
-                                    value={this.state.idLote}
+                                    ref={this.refProducto}
+                                    value={this.state.idProducto}
                                     onChange={async (event) => {
                                         if (event.target.value.trim().length > 0) {
                                             await this.setStateAsync({
-                                                idLote: event.target.value,
+                                                idProducto: event.target.value,
                                                 messageWarning: '',
                                             });
                                         } else {
                                             await this.setStateAsync({
-                                                idLote: event.target.value,
-                                                messageWarning: "Seleccione un lote del cliente.",
+                                                idProducto: event.target.value,
+                                                messageWarning: "Seleccione un producto del cliente.",
                                             });
                                         }
                                     }}>
-                                    <option value="">-- Lotes del cliente --</option>
+                                    <option value="">-- Productos del cliente --</option>
 
                                     {
-                                        this.state.lotes.map((item, index) => (
-                                            <option key={index} value={item.idVenta}>{item.lote + " - " + item.manzana}</option>
+                                        this.state.productos.map((item, index) => (
+                                            <option key={index} value={item.idVenta}>{item.producto + " - " + item.categoria}</option>
                                         ))
                                     }
 

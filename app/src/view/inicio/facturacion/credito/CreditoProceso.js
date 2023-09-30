@@ -21,9 +21,9 @@ import {
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import { apiComprobanteListcombo, apiFacturaCreditoDetalle, apiVentaCobro } from '../../../../network/api';
-import SearchBarLote from "../../../../components/SearchBarLote";
+import SearchBarProducto from "../../../../components/SearchBarProducto";
 import ContainerWrapper from '../../../../components/Container';
-import { listarLotesFilter } from '../../../../network/rest/principal.network';
+import { listarProductosFilter } from '../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
 
@@ -40,15 +40,15 @@ class CreditoProceso extends React.Component {
             cobros: [],
             conceptos: [],
 
-            lotes: [],
-            lote: '',
-            idLote: '',
-            filterLote: false,
-            manzana: '',
+            productos: [],
+            producto: '',
+            idProducto: '',
+            filterProducto: false,
+            categoria: '',
 
-            idLoteSeleccionado: '',
-            loteSeleccionado: '',
-            manzanaSeleccionado: '',
+            idProductoSeleccionado: '',
+            productoSeleccionado: '',
+            categoriaSeleccionado: '',
 
             impuestos: [],
             medidas: [],
@@ -109,7 +109,7 @@ class CreditoProceso extends React.Component {
             msgLoading: 'Cargando datos...',
         }
 
-        this.refLote = React.createRef();
+        this.refProducto = React.createRef();
         this.refImpuestoPlazo = React.createRef();
         this.refMedidaPlazo = React.createRef();
         this.refCollpsePlazo = React.createRef();
@@ -158,7 +158,7 @@ class CreditoProceso extends React.Component {
 
         this.abortControllerTable = new AbortController();
 
-        this.selectItemLote = false;
+        this.selectItemProducto = false;
     }
 
     setStateAsync(state) {
@@ -252,18 +252,18 @@ class CreditoProceso extends React.Component {
             });
         });
 
-        viewModal("modalCambiarLote", async () => {
-            this.refLote.current.focus();
+        viewModal("modalCambiarProducto", async () => {
+            this.refProducto.current.focus();
         });
 
-        clearModal("modalCambiarLote", async () => {
+        clearModal("modalCambiarProducto", async () => {
             await this.setStateAsync({
-                lotes: [],
-                idLote: '',
-                lote: "",
-                manzana: "",
+                productos: [],
+                idProducto: '',
+                producto: "",
+                categoria: "",
             });
-            this.selectItemLote = false;
+            this.selectItemProducto = false;
         });
 
         viewModal("modalCobro", async () => {
@@ -801,7 +801,7 @@ class CreditoProceso extends React.Component {
 
         let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
         let params = new URLSearchParams({ "params": ciphertext });
-        window.open("/api/factura/repcreditolote?" + params, "_blank");
+        window.open("/api/factura/repcreditoProducto?" + params, "_blank");
     }
 
     async onEventImprimirLetra(idPlazo) {
@@ -817,67 +817,67 @@ class CreditoProceso extends React.Component {
     }
 
     /**
-     * Funciones para el filtro del lote
+     * Funciones para el filtro del producto
      */
-    async onEventCambiarLote(item) {
+    async onEventCambiarProducto(item) {
         await this.setStateAsync({
-            idLoteSeleccionado: item.idLote,
-            loteSeleccionado: item.lote,
-            manzanaSeleccionado: item.manzana
+            idProductoSeleccionado: item.idProducto,
+            productoSeleccionado: item.producto,
+            categoriaSeleccionado: item.categoria
         });
-        showModal("modalCambiarLote")
+        showModal("modalCambiarProducto")
     }
 
-    onEventClearInputLote = async () => {
+    onEventClearInputProducto = async () => {
         await this.setStateAsync({
-            lotes: [],
-            idLote: '',
-            lote: "",
-            manzana: ""
+            productos: [],
+            idProducto: '',
+            producto: "",
+            categoria: ""
         });
-        this.selectItemLote = false;
+        this.selectItemProducto = false;
     }
 
-    handleFilterLote = async (event) => {
-        const searchWord = this.selectItemLote ? "" : event.target.value;
-        await this.setStateAsync({ idLote: '', lote: searchWord });
-        this.selectItemLote = false;
+    handleFilterProducto = async (event) => {
+        const searchWord = this.selectItemProducto ? "" : event.target.value;
+        await this.setStateAsync({ idProducto: '', producto: searchWord });
+        this.selectItemProducto = false;
         if (searchWord.length === 0) {
-            await this.setStateAsync({ lotes: [] });
+            await this.setStateAsync({ productos: [] });
             return;
         }
 
-        if (this.state.filterLote) return;
+        if (this.state.filterProducto) return;
 
         const params = {
             idProyecto: this.state.idProyecto,
             filtrar: searchWord,
         }
 
-        const response = await listarLotesFilter(params);
+        const response = await listarProductosFilter(params);
 
         if(response instanceof SuccessReponse){
-            await this.setStateAsync({ filterLote: false, lotes: response.data });
+            await this.setStateAsync({ filterProducto: false, productos: response.data });
         }
 
         if(response instanceof ErrorResponse){
-            await this.setStateAsync({ filterLote: false, lotes: [] });
+            await this.setStateAsync({ filterProducto: false, productos: [] });
         }
     }
 
-    onEventSelectItemLote = async (value) => {
+    onEventSelectItemProducto = async (value) => {
         await this.setStateAsync({
-            lote: value.nombreLote + " / " + value.nombreManzana,
-            lotes: [],
-            idLote: value.idLote,
-            manzana: value.nombreManzana
+            producto: value.nombreProducto + " / " + value.nombreCategoria,
+            productos: [],
+            idProducto: value.idProducto,
+            categoria: value.nombreCategoria
         });
-        this.selectItemLote = true;
+        this.selectItemProducto = true;
     }
 
     async onEventCambiarLoto() {
-        if (this.state.idLote === "") {
-            this.refLote.current.focus();
+        if (this.state.idProducto === "") {
+            this.refProducto.current.focus();
             return;
         }
 
@@ -885,11 +885,11 @@ class CreditoProceso extends React.Component {
             if (event) {
                 try {
                     alertInfo("Cobro", "Procesando cambio...")
-                    hideModal("modalCambiarLote");
+                    hideModal("modalCambiarProducto");
 
-                    const result = await axios.put("/api/lote/cambiar", {
-                        "idLoteDestino": this.state.idLote,
-                        "idLoteOrigen": this.state.idLoteSeleccionado
+                    const result = await axios.put("/api/producto/cambiar", {
+                        "idProductoDestino": this.state.idProducto,
+                        "idProductoOrigen": this.state.idProductoSeleccionado
                     });
 
                     alertSuccess("Cobro", result.data, () => {
@@ -1209,7 +1209,7 @@ class CreditoProceso extends React.Component {
                                     <div className="form-row">
                                         <div className="form-group col-md-6">
                                             <select
-                                                title="Lista de lotes"
+                                                title="Lista de productos"
                                                 className="form-control"
                                                 value={this.state.idImpuestoPlazo}
                                                 ref={this.refImpuestoPlazo}
@@ -1226,7 +1226,7 @@ class CreditoProceso extends React.Component {
 
                                         <div className="form-group col-md-6">
                                             <select
-                                                title="Lista de lotes"
+                                                title="Lista de productos"
                                                 className="form-control"
                                                 value={this.state.idMedidaPlazo}
                                                 ref={this.refMedidaPlazo}
@@ -1680,11 +1680,11 @@ class CreditoProceso extends React.Component {
                 {/* fin modal */}
 
                 {/* Inicio modal */}
-                <div className="modal fade" id="modalCambiarLote" data-backdrop="static">
+                <div className="modal fade" id="modalCambiarProducto" data-backdrop="static">
                     <div className="modal-dialog modal-md">
                         <div className="modal-content">
                             <div className="modal-header">
-                                <h6 className="modal-title">Cambiar Lote</h6>
+                                <h6 className="modal-title">Cambiar producto</h6>
                                 <button type="button" className="close" data-bs-dismiss="modal" aria-label="Close">
                                     <span aria-hidden={true}>&times;</span>
                                 </button>
@@ -1694,24 +1694,24 @@ class CreditoProceso extends React.Component {
                                 <div className="row">
                                     <div className="col-md-12 col-sm-12 col-12">
                                         <div className="form-group">
-                                            <label>Lote Actual</label>
-                                            <h5>{this.state.loteSeleccionado}</h5>
-                                            <small>{this.state.manzanaSeleccionado}</small>
+                                            <label>Producto Actual</label>
+                                            <h5>{this.state.productoSeleccionado}</h5>
+                                            <small>{this.state.categoriaSeleccionado}</small>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div className="row">
                                     <div className="col-md-12 col-sm-12 col-12">
-                                        <label>Seleccione el lote</label>
-                                        <SearchBarLote
-                                            placeholder="Filtrar lotes..."
-                                            refLote={this.refLote}
-                                            lote={this.state.lote}
-                                            lotes={this.state.lotes}
-                                            onEventClearInput={this.onEventClearInputLote}
-                                            handleFilter={this.handleFilterLote}
-                                            onEventSelectItem={this.onEventSelectItemLote}
+                                        <label>Seleccione el producto</label>
+                                        <SearchBarProducto
+                                            placeholder="Filtrar productos..."
+                                            refProducto={this.refProducto}
+                                            producto={this.state.producto}
+                                            productos={this.state.productos}
+                                            onEventClearInput={this.onEventClearInputProducto}
+                                            handleFilter={this.handleFilterProducto}
+                                            onEventSelectItem={this.onEventSelectItemProducto}
                                         />
                                     </div>
                                 </div>
@@ -2233,14 +2233,14 @@ class CreditoProceso extends React.Component {
                                         this.state.detalle.map((item, index) => (
                                             <tr key={index}>
                                                 <td className="text-center">{(index + 1)}</td>
-                                                <td className="text-left">{item.lote}{<br />}{<small>{item.manzana}</small>}</td>
+                                                <td className="text-left">{item.producto}{<br />}{<small>{item.categoria}</small>}</td>
                                                 <td className="text-center">{item.medida}</td>
                                                 <td className="text-center">{item.cantidad}</td>
                                                 <td className="text-center">
                                                     <button
                                                         type="button"
                                                         className="btn btn-light btn-sm"
-                                                        onClick={() => this.onEventCambiarLote(item)}
+                                                        onClick={() => this.onEventCambiarProducto(item)}
                                                     >
                                                         <i className="fa fa-random"></i>
                                                     </button>

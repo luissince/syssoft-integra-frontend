@@ -42,7 +42,7 @@ class ProcesoProyecto extends React.Component {
             monedas: [],
             tea: '',
             preciometro: '',
-            costoxlote: '',
+            costoxproducto: '',
             numContratoCorrelativo: '',
             numRecibocCorrelativo: '',
 
@@ -176,7 +176,7 @@ class ProcesoProyecto extends React.Component {
                 idMoneda: data.idMoneda,
                 tea: data.tea.toString(),
                 preciometro: data.preciometro.toString(),
-                costoxlote: data.costoxlote.toString(),
+                costoxproducto: data.costoxproducto.toString(),
                 numContratoCorrelativo: data.numContratoCorrelativo,
                 numRecibocCorrelativo: data.numRecibocCorrelativo,
 
@@ -304,7 +304,7 @@ class ProcesoProyecto extends React.Component {
                 "idMoneda": this.state.idMoneda,
                 "tea": isNumeric(this.state.tea) ? this.state.tea : 0,
                 "preciometro": isNumeric(this.state.preciometro) ? this.state.preciometro : 0,
-                "costoxlote": isNumeric(this.state.costoxlote) ? this.state.costoxlote : 0,
+                "costoxproducto": isNumeric(this.state.costoxproducto) ? this.state.costoxproducto : 0,
                 "numContratoCorrelativo": this.state.numContratoCorrelativo.trim().toUpperCase(),
                 "numRecibocCorrelativo": this.state.numRecibocCorrelativo.trim().toUpperCase(),
                 //imagen
@@ -331,7 +331,7 @@ class ProcesoProyecto extends React.Component {
                 "idMoneda": this.state.idMoneda,
                 "tea": this.state.tea.toString().trim().toUpperCase(),
                 "preciometro": this.state.preciometro.toString().trim().toUpperCase(),
-                "costoxlote": this.state.costoxlote.toString().trim().toUpperCase(),
+                "costoxproducto": this.state.costoxproducto.toString().trim().toUpperCase(),
                 "numContratoCorrelativo": this.state.numContratoCorrelativo.trim().toUpperCase(),
                 "numRecibocCorrelativo": this.state.numRecibocCorrelativo.trim().toUpperCase(),
                 //imagen
@@ -629,12 +629,12 @@ class ProcesoProyecto extends React.Component {
                                             placeholder="Dijite ..." />
                                     </div>
                                     <div className="form-group col-md-6">
-                                        <label>Coste Aproximado x Lote:</label>
+                                        <label>Coste Aproximado x Producto:</label>
                                         <input
                                             type="text"
                                             className="form-control"
-                                            value={this.state.costoxlote}
-                                            onChange={(event) => this.setState({ costoxlote: event.target.value })}
+                                            value={this.state.costoxproducto}
+                                            onChange={(event) => this.setState({ costoxproducto: event.target.value })}
                                             placeholder="Dijite ..." />
                                     </div>
                                 </div>

@@ -41,7 +41,7 @@ export async function loginApi(params, signal = null) {
  */
 export async function liberarTerreno(params, signal = null) {
   return await Resolve.create(
-    instancePrincipal.post("/api/lote/liberar", params, {
+    instancePrincipal.post("/api/producto/liberar", params, {
       signal: signal,
     })
   );
@@ -66,9 +66,9 @@ export async function listarComboCliente(signal = null) {
  * @param {*} signal 
  * @returns SuccessReponse | ErrorResponse
  */
-export async function loteDetalle(params, signal = null) {
+export async function productoDetalle(params, signal = null) {
   return await Resolve.create(
-    instancePrincipal.get("/api/lote/detalle", {
+    instancePrincipal.get("/api/producto/detalle", {
       signal: signal,
       params: params,
     })
@@ -80,9 +80,9 @@ export async function loteDetalle(params, signal = null) {
  * @param {{}} params
  * @returns SuccessReponse | ErrorResponse
  */
-export async function loteSocio(params) {
+export async function productoSocio(params) {
   return await Resolve.create(
-    instancePrincipal.post("/api/lote/socio", params)
+    instancePrincipal.post("/api/producto/socio", params)
   );
 }
 
@@ -91,9 +91,9 @@ export async function loteSocio(params) {
  * @param {{}} params
  * @returns SuccessReponse | Object
  */
-export async function loteRestablecer(params) {
+export async function productoRestablecer(params) {
   return await Resolve.create(
-    instancePrincipal.post("/api/lote/restablecer", params)
+    instancePrincipal.post("/api/producto/restablecer", params)
   );
 }
 
@@ -140,9 +140,9 @@ export async function listarBancos(params, signal = null) {
  * @param {*} signal 
  * @returns SuccessReponse | ErrorResponse 
  */
-export async function listarManzana(params, signal = null) {
+export async function listarCategoria(params, signal = null) {
   return await Resolve.create(
-    instancePrincipal.get("/api/manzana/list", {
+    instancePrincipal.get("/api/categoria/list", {
       signal: signal,
       params: params,
     })
@@ -155,9 +155,9 @@ export async function listarManzana(params, signal = null) {
  * @param {*} signal 
  * @returns SuccessReponse | ErrorResponse
  */
-export async function trasladarManzana(params, signal = null) {
+export async function trasladarCategoria(params, signal = null) {
   return await Resolve.create(
-    instancePrincipal.get("/api/manzana/traslado", {
+    instancePrincipal.get("/api/categoria/traslado", {
       signal: signal,
       params: params,
     })
@@ -229,9 +229,9 @@ export async function listSede(params, signal = null) {
  * @param {*} signal 
  * @returns SuccessReponse | ErrorResponse 
  */
-export async function getIdManzana(params, signal = null) {
+export async function getIdCategoria(params, signal = null) {
   return await Resolve.create(
-    instancePrincipal.get("/api/manzana/id", {
+    instancePrincipal.get("/api/categoria/id", {
       signal: signal,
       params: params,
     })
@@ -243,9 +243,9 @@ export async function getIdManzana(params, signal = null) {
  * @param {*} data 
  * @returns SuccessReponse | ErrorResponse 
  */
-export async function addManzana(data) {
+export async function addCategoria(data) {
   return await Resolve.create(
-    await instancePrincipal.post("/api/manzana/", data)
+    await instancePrincipal.post("/api/categoria/", data)
   );
 }
 
@@ -254,9 +254,9 @@ export async function addManzana(data) {
  * @param {*} data 
  * @returns SuccessReponse | ErrorResponse 
  */
-export async function updateManzana(data) {
+export async function updateCategoria(data) {
   return await Resolve.create(
-    await instancePrincipal.put("/api/manzana", data)
+    await instancePrincipal.put("/api/categoria", data)
   );
 }
 
@@ -265,9 +265,9 @@ export async function updateManzana(data) {
  * @param {*} params 
  * @returns SuccessReponse | ErrorResponse 
  */
-export async function removeManzana(params) {
+export async function removeCategoria(params) {
   return await Resolve.create(
-    instancePrincipal.delete("/api/manzana", {
+    instancePrincipal.delete("/api/categoria", {
       params: params,
     })
   );
@@ -329,9 +329,9 @@ export async function getNotifications() {
  * @param {*} params 
  * @returns SuccessReponse | ErrorResponse 
  */
-export async function listarLotesFilter(params) {
+export async function listarProductosFilter(params) {
   return await Resolve.create(
-    instancePrincipal.get("/api/lote/listfilter", {
+    instancePrincipal.get("/api/producto/listfilter", {
       params: params,
     })
   );

@@ -4,10 +4,10 @@ import ItemView from "./ItemView";
 
 const InvoiceView = (props) => {
 
-    const { refLote,lote, lotes, sarchLote, idProyecto, filterLote, setStateAsync, handleAddItem } = props;
+    const { refProducto,producto, productos, sarchProducto, idProyecto, filterProducto, setStateAsync, handleAddItem } = props;
 
     const _componentSearchItems = () => {
-        if (sarchLote) {
+        if (sarchProducto) {
             return (
                 <div className='p-2 w-100 h-100 d-flex flex-column align-items-center justify-content-center'>
                     <span className="loader-one"></span>
@@ -16,7 +16,7 @@ const InvoiceView = (props) => {
             );
         }
 
-        if (lotes.length === 0) {
+        if (productos.length === 0) {
             return (
                 <div className='p-2 w-100 h-100 d-flex flex-column align-items-center justify-content-center'>
                     <img className='mb-1' src={images.basket} alt='Canasta' />
@@ -29,11 +29,11 @@ const InvoiceView = (props) => {
             <div className='overflow-hidden'>
                 <div className='d-flex h-100 align-items-start justify-content-around flex-wrap mh-100 overflow-hidden overflow-y-auto my-2'>
                     {
-                        lotes.map((item, index) => {
+                        productos.map((item, index) => {
                             return (
                                 <ItemView
                                     key={index}
-                                    name={item.nombreLote}
+                                    name={item.nombreProducto}
                                     price={item.precio}
                                     inventory={0}
                                     handleAddItem={() => handleAddItem(item)} />
@@ -48,10 +48,10 @@ const InvoiceView = (props) => {
     return (
         <div className='h-100 d-flex flex-column items'>
             <ItemSearch
-                refLote={refLote}
-                lote={lote}
+                refProducto={refProducto}
+                producto={producto}
                 idProyecto={idProyecto}
-                filterLote={filterLote}
+                filterProducto={filterProducto}
                 setStateAsync={setStateAsync}
             />
             {

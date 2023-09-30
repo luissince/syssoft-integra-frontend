@@ -7,18 +7,18 @@ class Dashboard {
     async totales(req, res) {
         try {
 
-            let totalManzanas = await conec.query(`SELECT
+            let totalCategorias = await conec.query(`SELECT
                 IFNULL(COUNT(*), 0) AS total
-                FROM manzana AS m
+                FROM categoria AS m
                 INNER JOIN proyecto as p ON m.idProyecto=p.idProyecto
                 WHERE p.idProyecto=?`, [
                 req.query.idProyecto,
             ])
 
-            let totalLotes = await conec.query(`SELECT
+            let totalProductos = await conec.query(`SELECT
                 IFNULL(COUNT(*), 0) AS total
-                FROM lote AS l
-                INNER JOIN manzana AS m ON l.idManzana=m.idManzana
+                FROM producto AS l
+                INNER JOIN categoria AS m ON l.idCategoria=m.idCategoria
                 INNER JOIN proyecto as p ON m.idProyecto=p.idProyecto
                 WHERE p.idProyecto=?`, [
                 req.query.idProyecto,
@@ -37,7 +37,7 @@ class Dashboard {
                 req.query.idProyecto,
             ])
 
-            return sendSuccess(res, { "totalManzanas": totalManzanas[0].total, "totalLotes": totalLotes[0].total, "totalClientes": totalClientes[0].total, "totalVentas": totalVentas[0].total });
+            return sendSuccess(res, { "totalCategorias": totalCategorias[0].total, "totalProductos": totalProductos[0].total, "totalClientes": totalClientes[0].total, "totalVentas": totalVentas[0].total });
         } catch (error) {
             return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
         }

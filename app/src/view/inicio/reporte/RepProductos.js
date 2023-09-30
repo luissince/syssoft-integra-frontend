@@ -5,15 +5,15 @@ import { connect } from 'react-redux';
 import { spinnerLoading } from '../../../helper/utils.helper';
 import ContainerWrapper from '../../../components/Container';
 
-class RepLotes extends React.Component {
+class RepProductos extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             idProyecto: this.props.token.project.idProyecto,
             nombreProyecto: this.props.token.project.nombre,
 
-            lote: '',
-            loteCheck: true,
+            producto: '',
+            productoCheck: true,
 
             loading: true,
             msgLoading: '',
@@ -58,26 +58,26 @@ class RepLotes extends React.Component {
     async onEventImprimir() {
 
         const data = {
-            // "idLote": this.state.idLote,
+            // "idProducto": this.state.idProducto,
             "idProyecto": this.state.idProyecto,
-            "estadoLote": this.state.lote === '' ? 0 : this.state.lote,
+            "estadoProducto": this.state.producto === '' ? 0 : this.state.producto,
             "idSede": "SD0001"
         }
 
         let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
         let params = new URLSearchParams({ "params": ciphertext });
-        window.open("/api/lote/reptipolotes?" + params, "_blank");
+        window.open("/api/producto/reptipoProductos?" + params, "_blank");
 
         //Despliegue 
-        // window.open("/api/lote/replotedetalle?idLote=" + this.state.idLote + "&idSede=SD0001", "_blank");
+        // window.open("/api/producto/repproductodetalle?idProducto=" + this.state.idProducto + "&idSede=SD0001", "_blank");
 
         //Desarrollo
         // try {
 
-        //     let result = await axios.get("/api/lote/replotedetalle", {
+        //     let result = await axios.get("/api/producto/repproductodetalle", {
         //         responseType: "blob",
         //         params: {
-        //             "idLote": this.state.idLote,
+        //             "idProducto": this.state.idProducto,
         //             "idSede": 'SD0001'
         //         }
         //     });
@@ -91,7 +91,7 @@ class RepLotes extends React.Component {
         // }
     }
 
-    async onEventPdfLoteCobrar() {
+    async onEventPdfProductoCobrar() {
         const data = {
             "idSede": "SD0001",
             "idProyecto": this.state.idProyecto,
@@ -100,10 +100,10 @@ class RepLotes extends React.Component {
         }
         let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
         let params = new URLSearchParams({ "params": ciphertext });
-        window.open("/api/lote/replistardeudaslote?" + params, "_blank");
+        window.open("/api/producto/replistardeudasproducto?" + params, "_blank");
     }
 
-    async onEventExcelLoteCobrar() {
+    async onEventExcelProductoCobrar() {
         const data = {
             "idSede": "SD0001",
             "idProyecto": this.state.idProyecto,
@@ -113,9 +113,9 @@ class RepLotes extends React.Component {
         let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
 
         this.refUseFile.current.download({
-            "name": "Listar de Lotes con Deuda",
-            "file": "/api/lote/exacellistardeudaslote",
-            "filename": "Listar de Lotes con Deuda.xlsx",
+            "name": "Listar de Productos con Deuda",
+            "file": "/api/producto/exacellistardeudasproducto",
+            "filename": "Listar de Productos con Deuda.xlsx",
             "params": ciphertext
         });
     }
@@ -130,7 +130,7 @@ class RepLotes extends React.Component {
                         </div> :
                         <>
                             <div className="card my-1">
-                                <h6 className="card-header">Reporte de Lotes</h6>
+                                <h6 className="card-header">Reporte de Productos</h6>
                                 <div className="card-body">
                                     <div className="row">
 
@@ -139,22 +139,22 @@ class RepLotes extends React.Component {
                                                 {/* <label>Metodo de pago(s)</label> */}
                                                 <div className="input-group">
                                                     <select
-                                                        title="Lista de lotes"
+                                                        title="Lista de productos"
                                                         className="form-control"
-                                                        value={this.state.lote}
-                                                        disabled={this.state.loteCheck}
+                                                        value={this.state.producto}
+                                                        disabled={this.state.productoCheck}
                                                         onChange={async (event) => {
-                                                            await this.setStateAsync({ lote: event.target.value });
-                                                            if (this.state.lote === '') {
-                                                                await this.setStateAsync({ loteCheck: true });
+                                                            await this.setStateAsync({ producto: event.target.value });
+                                                            if (this.state.producto === '') {
+                                                                await this.setStateAsync({ productoCheck: true });
                                                             }
                                                         }}
                                                     >
-                                                        <option value="">Todos los Lotes</option>
-                                                        <option value="1">LOTES DISPONIBLES</option>
-                                                        <option value="2">LOTES RESERVADOS</option>
-                                                        <option value="3">LOTES VENDIDOS</option>
-                                                        <option value="4">LOTES INACTIVOS</option>
+                                                        <option value="">Todos los Productos</option>
+                                                        <option value="1">PRODUCTOS DISPONIBLES</option>
+                                                        <option value="2">PRODUCTOS RESERVADOS</option>
+                                                        <option value="3">PRODUCTOS VENDIDOS</option>
+                                                        <option value="4">PRODUCTOS INACTIVOS</option>
                                                     </select>
 
                                                     <div className="input-group-append">
@@ -163,11 +163,11 @@ class RepLotes extends React.Component {
                                                                 <input
                                                                     className="form-check-input"
                                                                     type="checkbox"
-                                                                    checked={this.state.loteCheck}
+                                                                    checked={this.state.productoCheck}
                                                                     onChange={async (event) => {
-                                                                        await this.setStateAsync({ loteCheck: event.target.checked })
-                                                                        if (this.state.loteCheck) {
-                                                                            await this.setStateAsync({ lote: '' });
+                                                                        await this.setStateAsync({ productoCheck: event.target.checked })
+                                                                        if (this.state.productoCheck) {
+                                                                            await this.setStateAsync({ producto: '' });
                                                                         }
                                                                     }}
                                                                 />
@@ -186,7 +186,7 @@ class RepLotes extends React.Component {
                             </div>
 
                             <div className="card my-1">
-                                <h6 className="card-header">Reporte de Lotes por Cobrar</h6>
+                                <h6 className="card-header">Reporte de Productos por Cobrar</h6>
                                 <div className="card-body">
                                     <div className="row">
                                         <div className="col">
@@ -222,10 +222,10 @@ class RepLotes extends React.Component {
                                     <div className="row">
                                         <div className="col"></div>
                                         <div className="col">
-                                            <button className="btn btn-outline-warning btn-sm" onClick={() => this.onEventPdfLoteCobrar()}><i className="bi bi-file-earmark-pdf-fill"></i> Reporte Pdf</button>
+                                            <button className="btn btn-outline-warning btn-sm" onClick={() => this.onEventPdfProductoCobrar()}><i className="bi bi-file-earmark-pdf-fill"></i> Reporte Pdf</button>
                                         </div>
                                         <div className="col">
-                                            <button className="btn btn-outline-success btn-sm" onClick={() => this.onEventExcelLoteCobrar()}><i className="bi bi-file-earmark-excel-fill"></i> Reporte Excel</button>
+                                            <button className="btn btn-outline-success btn-sm" onClick={() => this.onEventExcelProductoCobrar()}><i className="bi bi-file-earmark-excel-fill"></i> Reporte Excel</button>
                                         </div>
                                         <div className="col"></div>
                                     </div>
@@ -246,4 +246,4 @@ const mapStateToProps = (state) => {
     }
 }
 
-export default connect(mapStateToProps, null)(RepLotes);
+export default connect(mapStateToProps, null)(RepProductos);

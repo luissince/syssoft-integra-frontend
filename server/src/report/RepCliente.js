@@ -411,7 +411,7 @@ class RepCliente {
                 return [
                     ++index,
                     item.documento + " " + item.informacion,
-                    item.lote,
+                    item.producto,
                     item.nombre + "\n" + item.serie + "-" + item.numeracion,
                     item.numCuota == 1 ? item.numCuota + " COUTA" : item.numCuota + " COUTAS",
                     dateFormat(item.fechaPago),
@@ -543,7 +543,7 @@ class RepCliente {
                     [
                         "COMPROBANTE",
                         "FECHA",
-                        "LOTE",
+                        "PRODUCTO",
                         "FRECUENCIA",
                         "MONTO TOTAL",
                     ]
@@ -554,7 +554,7 @@ class RepCliente {
                         [
                             venta.serie + "-" + venta.numeracion,
                             venta.fecha,
-                            venta.lote + " - " + venta.manzana,
+                            venta.producto + " - " + venta.categoria,
                             venta.frecuencia,
                             numberFormat(venta.monto, venta.codiso),
                         ]

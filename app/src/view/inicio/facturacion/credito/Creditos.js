@@ -135,7 +135,7 @@ class Creditos extends React.Component {
 
         let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
         let params = new URLSearchParams({ "params": ciphertext });
-        window.open("/api/factura/repcreditolote?" + params, "_blank");
+        window.open("/api/factura/repcreditoProducto?" + params, "_blank");
     }
 
     onEventCobros = (item) => {
@@ -267,7 +267,7 @@ class Creditos extends React.Component {
                                                         <td>{
                                                             item.detalle.map((detalle, indexd) => (
                                                                 <div key={indexd}>
-                                                                    <span>{detalle.lote}{<br />}{<small>{detalle.manzana}</small>}</span>
+                                                                    <span>{detalle.producto}{<br />}{<small>{detalle.categoria}</small>}</span>
                                                                     <br />
                                                                 </div>
                                                             ))

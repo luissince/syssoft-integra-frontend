@@ -19,13 +19,13 @@ import { connect } from 'react-redux';
 import Paginacion from '../../../components/Paginacion';
 import ContainerWrapper from '../../../components/Container';
 
-class Lotes extends React.Component {
+class Productos extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            idLote: '',
-            idManzana: '',
-            manzanas: [],
+            idProducto: '',
+            idCategoria: '',
+            categorias: [],
             idConcepto: '',
             conceptos: [],
             descripcion: '',
@@ -38,13 +38,13 @@ class Lotes extends React.Component {
             costadoDerecho: '',
             costadoIzquierdo: '',
             medidaFondo: '',
-            areaLote: '',
+            areaProducto: '',
             numeroPartida: '',
             limiteFrontal: '',
             limiteDerecho: '',
             limiteIzquierdo: '',
             limitePosterior: '',
-            ubicacionLote: '',
+            ubicacionProducto: '',
             idProyecto: this.props.token.project.idProyecto,
             idUsuario: this.props.token.userToken.idUsuario,
 
@@ -54,7 +54,7 @@ class Lotes extends React.Component {
             remove: statePrivilegio(this.props.token.userToken.menus[3].submenu[1].privilegio[3].estado),
 
             loadModal: false,
-            nameModal: 'Nuevo Lote',
+            nameModal: 'Nuevo Producto',
             messageWarning: '',
             msgModal: 'Cargando datos...',
 
@@ -69,7 +69,7 @@ class Lotes extends React.Component {
             messageTable: 'Cargando información...',
             messagePaginacion: 'Mostranto 0 de 0 Páginas'
         }
-        this.refManzana = React.createRef();
+        this.refCategoria = React.createRef();
         this.refConcepto = React.createRef();
         this.refDescripcion = React.createRef();
         this.refCosto = React.createRef();
@@ -81,7 +81,7 @@ class Lotes extends React.Component {
         this.refCostadoDerecho = React.createRef();
         this.refCostadoIzquiero = React.createRef();
         this.refMedidaFondo = React.createRef();
-        this.refAreaLote = React.createRef();
+        this.refAreaProducto = React.createRef();
         this.refNumeroPartida = React.createRef();
 
         this.refTxtSearch = React.createRef();
@@ -99,7 +99,7 @@ class Lotes extends React.Component {
     async componentDidMount() {
         this.loadInit();
 
-        viewModal("modalLote", () => {
+        viewModal("modalProducto", () => {
             this.abortControllerModal = new AbortController();
 
             if (this.idCodigo !== "") {
@@ -109,12 +109,12 @@ class Lotes extends React.Component {
             }
         });
 
-        clearModal("modalLote", async () => {
+        clearModal("modalProducto", async () => {
             this.abortControllerModal.abort();
             await this.setStateAsync({
-                idLote: '',
-                idManzana: '',
-                manzanas: [],
+                idProducto: '',
+                idCategoria: '',
+                categorias: [],
                 idConcepto: '',
                 conceptos: [],
                 descripcion: '',
@@ -127,13 +127,13 @@ class Lotes extends React.Component {
                 costadoDerecho: '',
                 costadoIzquierdo: '',
                 medidaFondo: '',
-                areaLote: '',
+                areaProducto: '',
                 numeroPartida: '',
                 limiteFrontal: '',
                 limiteDerecho: '',
                 limiteIzquierdo: '',
                 limitePosterior: '',
-                ubicacionLote: '',
+                ubicacionProducto: '',
 
                 loadModal: false,
                 nameModal: 'Nuevo Comprobante',
@@ -187,7 +187,7 @@ class Lotes extends React.Component {
         try {
             await this.setStateAsync({ loading: true, lista: [], messageTable: "Cargando información...", messagePaginacion: "Mostranto 0 de 0 Páginas" });
 
-            const result = await axios.get('/api/lote/list', {
+            const result = await axios.get('/api/producto/list', {
                 params: {
                     "idProyecto": this.state.idProyecto,
                     "opcion": opcion,
@@ -220,18 +220,18 @@ class Lotes extends React.Component {
 
     async openModal(id) {
         if (id === "") {
-            showModal('modalLote');
-            await this.setStateAsync({ nameModal: "Nuevo Lote", loadModal: true });
+            showModal('modalProducto');
+            await this.setStateAsync({ nameModal: "Nuevo Producto", loadModal: true });
         } else {
-            showModal('modalLote');
+            showModal('modalProducto');
             this.idCodigo = id;
-            await this.setStateAsync({ idLote: id, nameModal: "Editar Lote", loadModal: true });
+            await this.setStateAsync({ idProducto: id, nameModal: "Editar Producto", loadModal: true });
         }
     }
 
     async loadData() {
         try {
-            let manzana = await axios.get('/api/manzana/listcombo', {
+            let categoria = await axios.get('/api/categoria/listcombo', {
                 signal: this.abortControllerModal.signal,
                 params: {
                     "idProyecto": this.state.idProyecto,
@@ -247,7 +247,7 @@ class Lotes extends React.Component {
             });
 
             await this.setStateAsync({
-                manzanas: manzana.data,
+                categorias: categoria.data,
                 medidas: medida.data,
                 conceptos: concepto.data,
                 loadModal: false
@@ -263,7 +263,7 @@ class Lotes extends React.Component {
 
     async loadDataId(id) {
         try {
-            let manzana = await axios.get('/api/manzana/listcombo', {
+            let categoria = await axios.get('/api/categoria/listcombo', {
                 signal: this.abortControllerModal.signal,
                 params: {
                     "idProyecto": this.state.idProyecto,
@@ -278,16 +278,16 @@ class Lotes extends React.Component {
                 signal: this.abortControllerModal.signal,
             });
 
-            let result = await axios.get('/api/lote/id', {
+            let result = await axios.get('/api/producto/id', {
                 signal: this.abortControllerModal.signal,
                 params: {
-                    "idLote": id
+                    "idProducto": id
                 }
             });
-            
+
             await this.setStateAsync({
-                idLote: result.data.idLote,
-                idManzana: result.data.idManzana,
+                idProducto: result.data.idProducto,
+                idCategoria: result.data.idCategoria,
                 idConcepto: result.data.idConcepto,
                 descripcion: result.data.descripcion,
                 costo: result.data.costo.toString(),
@@ -298,15 +298,15 @@ class Lotes extends React.Component {
                 costadoDerecho: result.data.costadoDerecho,
                 costadoIzquierdo: result.data.costadoIzquierdo,
                 medidaFondo: result.data.medidaFondo,
-                areaLote: result.data.areaLote,
+                areaProducto: result.data.areaProducto,
                 numeroPartida: result.data.numeroPartida,
                 limiteFrontal: result.data.limiteFrontal,
                 limiteDerecho: result.data.limiteDerecho,
                 limiteIzquierdo: result.data.limiteIzquierdo,
                 limitePosterior: result.data.limitePosterior,
-                ubicacionLote: result.data.ubicacionLote,
+                ubicacionProducto: result.data.ubicacionProducto,
 
-                manzanas: manzana.data,
+                categorias: categoria.data,
                 medidas: medida.data,
                 conceptos: concepto.data,
 
@@ -322,9 +322,9 @@ class Lotes extends React.Component {
     }
 
     async onEventGuardar() {
-        if (this.state.idManzana === "") {
+        if (this.state.idCategoria === "") {
             this.onFocusTab("info-tab", "info");
-            this.refManzana.current.focus();
+            this.refCategoria.current.focus();
             return;
         }
 
@@ -365,12 +365,12 @@ class Lotes extends React.Component {
         }
 
         try {
-            alertInfo("Lote", "Procesando información...");
-            hideModal("modalLote");
-            if (this.state.idLote !== '') {
-                let result = await axios.put("/api/lote", {
-                    "idLote": this.state.idLote,
-                    "idManzana": this.state.idManzana,
+            alertInfo("Producto", "Procesando información...");
+            hideModal("modalProducto");
+            if (this.state.idProducto !== '') {
+                let result = await axios.put("/api/producto", {
+                    "idProducto": this.state.idProducto,
+                    "idCategoria": this.state.idCategoria,
                     "idConcepto": this.state.idConcepto,
                     "descripcion": this.state.descripcion.trim().toUpperCase(),
                     "costo": this.state.costo,
@@ -381,22 +381,22 @@ class Lotes extends React.Component {
                     "costadoDerecho": isNumeric(this.state.costadoDerecho) ? this.state.costadoDerecho : 0,
                     "costadoIzquierdo": isNumeric(this.state.costadoIzquierdo) ? this.state.costadoIzquierdo : 0,
                     "medidaFondo": isNumeric(this.state.medidaFondo) ? this.state.medidaFondo : 0,
-                    "areaLote": isNumeric(this.state.areaLote) ? this.state.areaLote : 0,
+                    "areaProducto": isNumeric(this.state.areaProducto) ? this.state.areaProducto : 0,
                     "numeroPartida": isNumeric(this.state.numeroPartida) ? this.state.numeroPartida : 0,
                     "limiteFrontal": this.state.limiteFrontal,
                     "limiteDerecho": this.state.limiteDerecho,
                     "limiteIzquierdo": this.state.limiteIzquierdo,
                     "limitePosterior": this.state.limitePosterior,
-                    "ubicacionLote": this.state.ubicacionLote,
+                    "ubicacionProducto": this.state.ubicacionProducto,
                     "idUsuario": this.state.idUsuario
                 });
 
-                alertSuccess("Lote", result.data, () => {
+                alertSuccess("Producto", result.data, () => {
                     this.onEventPaginacion();
                 });
             } else {
-                let result = await axios.post("/api/lote", {
-                    "idManzana": this.state.idManzana,
+                let result = await axios.post("/api/producto", {
+                    "idCategoria": this.state.idCategoria,
                     "idConcepto": this.state.idConcepto,
                     "descripcion": this.state.descripcion.trim().toUpperCase(),
                     "costo": this.state.costo,
@@ -407,22 +407,22 @@ class Lotes extends React.Component {
                     "costadoDerecho": isNumeric(this.state.costadoDerecho) ? this.state.costadoDerecho : 0,
                     "costadoIzquierdo": isNumeric(this.state.costadoIzquierdo) ? this.state.costadoIzquierdo : 0,
                     "medidaFondo": isNumeric(this.state.medidaFondo) ? this.state.medidaFondo : 0,
-                    "areaLote": isNumeric(this.state.areaLote) ? this.state.areaLote : 0,
+                    "areaProducto": isNumeric(this.state.areaProducto) ? this.state.areaProducto : 0,
                     "numeroPartida": isNumeric(this.state.numeroPartida) ? this.state.numeroPartida : 0,
                     "limiteFrontal": this.state.limiteFrontal,
                     "limiteDerecho": this.state.limiteDerecho,
                     "limiteIzquierdo": this.state.limiteIzquierdo,
                     "limitePosterior": this.state.limitePosterior,
-                    "ubicacionLote": this.state.ubicacionLote,
+                    "ubicacionProducto": this.state.ubicacionProducto,
                     "idUsuario": this.state.idUsuario
                 });
 
-                alertSuccess("Lote", result.data, () => {
+                alertSuccess("Producto", result.data, () => {
                     this.loadInit();
                 });
             }
         } catch (error) {
-            alertWarning("Lote", "Se produjo un error un interno, intente nuevamente.");
+            alertWarning("Producto", "Se produjo un error un interno, intente nuevamente.");
         }
     }
 
@@ -439,31 +439,31 @@ class Lotes extends React.Component {
         }
     }
 
-    onEventMostrar(idLote) {
+    onEventMostrar(idProducto) {
         this.props.history.push({
             pathname: `${this.props.location.pathname}/detalle`,
-            search: "?idLote=" + idLote
+            search: "?idProducto=" + idProducto
         })
     }
 
-    onEventDelete(idLote) {
-        alertDialog("Lote", "¿Estás seguro de eliminar el lote?", async (event) => {
+    onEventDelete(idProducto) {
+        alertDialog("Producto", "¿Estás seguro de eliminar el producto?", async (event) => {
             if (event) {
                 try {
-                    alertInfo("Lote", "Procesando información...")
-                    let result = await axios.delete('/api/lote', {
+                    alertInfo("Producto", "Procesando información...")
+                    let result = await axios.delete('/api/producto', {
                         params: {
-                            "idLote": idLote
+                            "idProducto": idProducto
                         }
                     })
-                    alertSuccess("Lote", result.data, () => {
+                    alertSuccess("Producto", result.data, () => {
                         this.loadInit();
                     })
                 } catch (error) {
                     if (error.response !== undefined) {
-                        alertWarning("Lote", error.response.data)
+                        alertWarning("Producto", error.response.data)
                     } else {
-                        alertWarning("Lote", "Se genero un error interno, intente nuevamente.")
+                        alertWarning("Producto", "Se genero un error interno, intente nuevamente.")
                     }
                 }
             }
@@ -474,7 +474,7 @@ class Lotes extends React.Component {
         return (
             <ContainerWrapper>
                 {/* Inicio modal nuevo cliente*/}
-                <div className="modal fade" id="modalLote" tabIndex="-1" aria-labelledby="modalLoteLabel" aria-hidden={true}>
+                {/* <div className="modal fade" id="modalProducto" tabIndex="-1" aria-labelledby="modalProductoLabel" aria-hidden={true}>
                     <div className="modal-dialog">
                         <div className="modal-content">
                             <div className="modal-header">
@@ -501,17 +501,17 @@ class Lotes extends React.Component {
                                 <ul className="nav nav-tabs" id="myTab" role="tablist">
                                     <li className="nav-item" role="presentation">
                                         <a className="nav-link active" id="info-tab" data-bs-toggle="tab" href="#info" role="tab" aria-controls="info" aria-selected={true}>
-                                            <i className="bi bi-info-circle"></i> Descripcion
+                                            <i className="bi bi-info-circle"></i> Producto
                                         </a>
                                     </li>
                                     <li className="nav-item" role="presentation">
                                         <a className="nav-link" id="medida-tab" data-bs-toggle="tab" href="#medida" role="tab" aria-controls="medida" aria-selected={false}>
-                                            <i className="bi bi-aspect-ratio"></i> Medidas
+                                            <i className="bi bi-aspect-ratio"></i> Servicio
                                         </a>
                                     </li>
                                     <li className="nav-item" role="presentation">
                                         <a className="nav-link" id="limite-tab" data-bs-toggle="tab" href="#limite" role="tab" aria-controls="limite" aria-selected={false}>
-                                            <i className="bi bi-pip"></i> Limite
+                                            <i className="bi bi-pip"></i> Combo
                                         </a>
                                     </li>
                                 </ul>
@@ -519,97 +519,28 @@ class Lotes extends React.Component {
                                     <div className="tab-pane fade active show" id="info" role="tabpanel" aria-labelledby="info-tab">
                                         <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
                                             <div className="form-group">
-                                                <label htmlFor="manzana">Manzana <i className="fa fa-asterisk text-danger small"></i></label>
-                                                <select
-                                                    className="form-control"
-                                                    id="manzana"
-                                                    ref={this.refManzana}
-                                                    value={this.state.idManzana}
-                                                    onChange={(event) => {
-                                                        this.setState({ idManzana: event.target.value })
-                                                    }}
-                                                >
-                                                    <option value="">- Seleccione -</option>
-                                                    {
-                                                        this.state.manzanas.map((item, index) => (
-                                                            <option key={index} value={item.idManzana}>{item.nombre}</option>
-                                                        ))
-                                                    }
-                                                </select>
-                                            </div>
-
-                                            <div className="form-group">
-                                                <label htmlFor="manzana">Concepto <i className="fa fa-asterisk text-danger small"></i></label>
-                                                <select
-                                                    className="form-control"
-                                                    id="manzana"
-                                                    ref={this.refConcepto}
-                                                    value={this.state.idConcepto}
-                                                    onChange={(event) => {
-                                                        this.setState({ idConcepto: event.target.value })
-                                                    }}
-                                                >
-                                                    <option value="">- Seleccione -</option>
-                                                    {
-                                                        this.state.conceptos.map((item, index) => (
-                                                            <option key={index} value={item.idConcepto}>{item.nombre}</option>
-                                                        ))
-                                                    }
-                                                </select>
-                                            </div>
-
-                                            <div className="form-group">
-                                                <label htmlFor="descripción">Descripción del Lote <i className="fa fa-asterisk text-danger small"></i></label>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    id="descripcion"
-                                                    placeholder='ej. Lote 07'
-                                                    ref={this.refDescripcion}
-                                                    value={this.state.descripcion}
-                                                    onChange={(event) => {
-                                                        this.setState({ descripcion: event.target.value })
-                                                    }}
-                                                />
+                                                <a>
+                                                    <i class="fa fa-question-circle-o" aria-hidden="true" ></i> Crea los bienes y mercancías que vendes e indica si deseas tener el control de tu inventario.
+                                                </a>
                                             </div>
 
                                             <div className="form-row">
                                                 <div className="form-group col-md-6">
-                                                    <label htmlFor="cAproximado">Costo Aproximado <i className="fa fa-asterisk text-danger small"></i></label>
+                                                    <label htmlFor="descripción">Nombre <i className="fa fa-asterisk text-danger small"></i></label>
                                                     <input
                                                         type="text"
                                                         className="form-control"
-                                                        id="cAproximado"
-                                                        placeholder='0.00'
-                                                        ref={this.refCosto}
-                                                        value={this.state.costo}
+                                                        id="descripcion"
+                                                        placeholder='ej. Producto 07'
+                                                        ref={this.refDescripcion}
+                                                        value={this.state.descripcion}
                                                         onChange={(event) => {
-                                                            this.setState({ costo: event.target.value })
+                                                            this.setState({ descripcion: event.target.value })
                                                         }}
-                                                        onKeyPress={keyNumberFloat}
                                                     />
                                                 </div>
-
                                                 <div className="form-group col-md-6">
-                                                    <label htmlFor="pvContado">Precio Venta Contado <i className="fa fa-asterisk text-danger small"></i></label>
-                                                    <input
-                                                        type="text"
-                                                        className="form-control"
-                                                        id="pvContado"
-                                                        placeholder='0.00'
-                                                        ref={this.refPrecio}
-                                                        value={this.state.precio}
-                                                        onChange={(event) => {
-                                                            this.setState({ precio: event.target.value })
-                                                        }}
-                                                        onKeyPress={keyNumberFloat}
-                                                    />
-                                                </div>
-                                            </div>
-
-                                            <div className="form-row">
-                                                <div className="form-group col-md-6">
-                                                    <label htmlFor="medidaSunat">Tipo de Medida(Sunat) <i className="fa fa-asterisk text-danger small"></i></label>
+                                                    <label htmlFor="medidaSunat">Unidad de Medida(Sunat) <i className="fa fa-asterisk text-danger small"></i></label>
                                                     <select
                                                         className="form-control"
                                                         id="medidaSunat"
@@ -626,7 +557,43 @@ class Lotes extends React.Component {
                                                         }
                                                     </select>
                                                 </div>
+                                            </div>
+
+                                            <div className="form-row">
                                                 <div className="form-group col-md-6">
+                                                    <label htmlFor="categoria">Categoria <i className="fa fa-asterisk text-danger small"></i></label>
+                                                    <select
+                                                        className="form-control"
+                                                        id="categoria"
+                                                        ref={this.refCategoria}
+                                                        value={this.state.idCategoria}
+                                                        onChange={(event) => {
+                                                            this.setState({ idCategoria: event.target.value })
+                                                        }}
+                                                    >
+                                                        <option value="">- Seleccione -</option>
+                                                        {
+                                                            this.state.categorias.map((item, index) => (
+                                                                <option key={index} value={item.idCategoria}>{item.nombre}</option>
+                                                            ))
+                                                        }
+                                                    </select>
+                                                </div>
+                                                <div className="form-group col-md-3">
+                                                    <label htmlFor="descripción">Cantidad <i className="fa fa-asterisk text-danger small"></i></label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        id="descripcion"
+                                                        placeholder='ej. 123'
+                                                        ref={this.refDescripcion}
+                                                        value={this.state.descripcion}
+                                                        onChange={(event) => {
+                                                            this.setState({ descripcion: event.target.value })
+                                                        }}
+                                                    />
+                                                </div>
+                                                <div className="form-group col-md-3">
                                                     <label htmlFor="estado">Estado <i className="fa fa-asterisk text-danger small"></i></label>
                                                     <select
                                                         className="form-control"
@@ -645,6 +612,64 @@ class Lotes extends React.Component {
                                                     </select>
                                                 </div>
                                             </div>
+
+
+
+
+
+                                            <div className="form-row">
+                                                <div className="form-group col-md-4">
+                                                    <label htmlFor="categoria">Concepto <i className="fa fa-asterisk text-danger small"></i></label>
+                                                    <select
+                                                        className="form-control"
+                                                        id="categoria"
+                                                        ref={this.refConcepto}
+                                                        value={this.state.idConcepto}
+                                                        onChange={(event) => {
+                                                            this.setState({ idConcepto: event.target.value })
+                                                        }}
+                                                    >
+                                                        <option value="">- Seleccione -</option>
+                                                        {
+                                                            this.state.conceptos.map((item, index) => (
+                                                                <option key={index} value={item.idConcepto}>{item.nombre}</option>
+                                                            ))
+                                                        }
+                                                    </select>
+                                                </div>
+                                                <div className="form-group col-md-4">
+                                                    <label htmlFor="cAproximado">Costo Aprox. <i className="fa fa-asterisk text-danger small"></i></label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        id="cAproximado"
+                                                        placeholder='0.00'
+                                                        ref={this.refCosto}
+                                                        value={this.state.costo}
+                                                        onChange={(event) => {
+                                                            this.setState({ costo: event.target.value })
+                                                        }}
+                                                        onKeyPress={keyNumberFloat}
+                                                    />
+                                                </div>
+
+                                                <div className="form-group col-md-4">
+                                                    <label htmlFor="pvContado">Prec. Contado <i className="fa fa-asterisk text-danger small"></i></label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        id="pvContado"
+                                                        placeholder='0.00'
+                                                        ref={this.refPrecio}
+                                                        value={this.state.precio}
+                                                        onChange={(event) => {
+                                                            this.setState({ precio: event.target.value })
+                                                        }}
+                                                        onKeyPress={keyNumberFloat}
+                                                    />
+                                                </div>
+                                            </div>
+
                                         </div>
                                     </div>
 
@@ -718,16 +743,16 @@ class Lotes extends React.Component {
                                                 </div>
 
                                                 <div className="form-group col-md-6">
-                                                    <label htmlFor="aLote">Area Lote (M2)</label>
+                                                    <label htmlFor="aProducto">Area Producto (M2)</label>
                                                     <input
                                                         type="text"
                                                         className="form-control"
-                                                        id="aLote"
+                                                        id="aProducto"
                                                         placeholder='0'
-                                                        ref={this.refAreaLote}
-                                                        value={this.state.areaLote}
+                                                        ref={this.refAreaProducto}
+                                                        value={this.state.areaProducto}
                                                         onChange={(event) => {
-                                                            this.setState({ areaLote: event.target.value })
+                                                            this.setState({ areaProducto: event.target.value })
                                                         }}
                                                         onKeyPress={keyNumberFloat}
                                                     />
@@ -807,17 +832,349 @@ class Lotes extends React.Component {
                                                 />
                                             </div>
                                             <div className="form-group">
-                                                <label htmlFor="ubicacionLote">Ubicación del Lote</label>
+                                                <label htmlFor="ubicacionProducto">Ubicación del Producto</label>
                                                 <input
                                                     type="text"
                                                     className="form-control"
-                                                    id="ubicacionLote"
+                                                    id="ubicacionProducto"
                                                     placeholder='ej. Frente al parque'
-                                                    value={this.state.ubicacionLote}
+                                                    value={this.state.ubicacionProducto}
                                                     onChange={(event) => {
-                                                        this.setState({ ubicacionLote: event.target.value })
+                                                        this.setState({ ubicacionProducto: event.target.value })
                                                     }}
                                                 />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-primary" onClick={() => this.onEventGuardar()}>Aceptar</button>
+                                <button type="button" className="btn btn-danger" data-bs-dismiss="modal">Cerrar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div> */}
+                <div className="modal fade" id="modalProducto" tabIndex="-1" aria-labelledby="modalProductoLabel" aria-hidden={true}>
+                    <div className="modal-dialog">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">{this.state.nameModal}</h5>
+                                <button type="button" className="close" data-bs-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden={true}>&times;</span>
+                                </button>
+                            </div>
+                            <div className="modal-body">
+                                {this.state.loadModal ?
+                                    <div className="clearfix absolute-all bg-white">
+                                        {spinnerLoading(this.state.msgModal)}
+                                    </div>
+                                    : null
+                                }
+
+                                {
+                                    this.state.messageWarning === '' ? null :
+                                        <div className="alert alert-warning" role="alert">
+                                            <i className="bi bi-exclamation-diamond-fill"></i> {this.state.messageWarning}
+                                        </div>
+                                }
+
+                                <ul className="nav nav-tabs" id="myTab" role="tablist">
+                                    <li className="nav-item" role="presentation">
+                                        <a className="nav-link active" id="info-tab" data-bs-toggle="tab" href="#info" role="tab" aria-controls="info" aria-selected={true}>
+                                            <i className="bi bi-info-circle"></i> Producto
+                                        </a>
+                                    </li>
+                                    <li className="nav-item" role="presentation">
+                                        <a className="nav-link" id="medida-tab" data-bs-toggle="tab" href="#medida" role="tab" aria-controls="medida" aria-selected={false}>
+                                            <i className="bi bi-aspect-ratio"></i> Servicio
+                                        </a>
+                                    </li>
+                                    <li className="nav-item" role="presentation">
+                                        <a className="nav-link" id="limite-tab" data-bs-toggle="tab" href="#limite" role="tab" aria-controls="limite" aria-selected={false}>
+                                            <i className="bi bi-pip"></i> Combo
+                                        </a>
+                                    </li>
+                                </ul>
+                                <div className="tab-content pt-2" id="myTabContent">
+                                    <div className="tab-pane fade active show" id="info" role="tabpanel" aria-labelledby="info-tab">
+                                        <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
+                                            <div className="form-group">
+                                                <a>
+                                                    <i class="fa fa-question-circle-o" aria-hidden="true" ></i> Crea los bienes y mercancías que vendes e indica si deseas tener el control de tu inventario.
+                                                </a>
+                                            </div>
+
+                                            <div className="form-row">
+                                                <div className="form-group col-md-6">
+                                                    <label htmlFor="descripción">Nombre <i className="fa fa-asterisk text-danger small"></i></label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        id=""
+                                                        placeholder='ej. Producto 07'
+                                                    />
+                                                </div>
+                                                <div className="form-group col-md-6">
+                                                    <label htmlFor="medidaSunat">Unidad de Medida <i className="fa fa-asterisk text-danger small"></i></label>
+                                                    <select
+                                                        className="form-control"
+                                                        id="medidaSunat"
+                                                        ref={this.refMedida}
+                                                        value={this.state.idMedida}
+                                                        onChange={(event) => {
+                                                            this.setState({ idMedida: event.target.value })
+                                                        }}>
+                                                        <option value="">- Seleccione -</option>
+                                                        {
+                                                            this.state.medidas.map((item, index) => (
+                                                                <option key={index} value={item.idMedida}>{item.nombre}</option>
+                                                            ))
+                                                        }
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div className="form-row">
+                                                <div className="form-group col-md-6">
+                                                    <label htmlFor="categoria">Categoria <i className="fa fa-asterisk text-danger small"></i></label>
+                                                    <select
+                                                        className="form-control"
+                                                        id="categoria"
+                                                        ref={this.refCategoria}
+                                                        value={this.state.idCategoria}
+                                                        onChange={(event) => {
+                                                            this.setState({ idCategoria: event.target.value })
+                                                        }}
+                                                    >
+                                                        <option value="">- Seleccione -</option>
+                                                        {
+                                                            this.state.categorias.map((item, index) => (
+                                                                <option key={index} value={item.idCategoria}>{item.nombre}</option>
+                                                            ))
+                                                        }
+                                                    </select>
+                                                </div>
+                                                <div className="form-group col-md-3">
+                                                    <label htmlFor="descripción">Cantidad <i className="fa fa-asterisk text-danger small"></i></label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        id="descripcion"
+                                                        placeholder='ej. 123'
+                                                        ref={this.refDescripcion}
+                                                        value={this.state.descripcion}
+                                                        onChange={(event) => {
+                                                            this.setState({ descripcion: event.target.value })
+                                                        }}
+                                                    />
+                                                </div>
+                                                <div className="form-group col-md-3">
+                                                    <label htmlFor="estado">Estado <i className="fa fa-asterisk text-danger small"></i></label>
+                                                    <select
+                                                        className="form-control"
+                                                        id="estado"
+                                                        ref={this.refEstado}
+                                                        value={this.state.estado}
+                                                        onChange={(event) => {
+                                                            this.setState({ estado: event.target.value })
+                                                        }}
+                                                    >
+                                                        <option value="">- Seleccione -</option>
+                                                        <option value="1">Disponible</option>
+                                                        <option value="2">Reservado</option>
+                                                        <option value="3">Vendido</option>
+                                                        <option value="4">Inactivo</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div className="form-row">
+                                                <div className="form-group col-md-4">
+                                                    <label htmlFor="categoria">Concepto <i className="fa fa-asterisk text-danger small"></i></label>
+                                                    <select
+                                                        className="form-control"
+                                                        id="categoria"
+                                                        ref={this.refConcepto}
+                                                        value={this.state.idConcepto}
+                                                        onChange={(event) => {
+                                                            this.setState({ idConcepto: event.target.value })
+                                                        }}
+                                                    >
+                                                        <option value="">- Seleccione -</option>
+                                                        {
+                                                            this.state.conceptos.map((item, index) => (
+                                                                <option key={index} value={item.idConcepto}>{item.nombre}</option>
+                                                            ))
+                                                        }
+                                                    </select>
+                                                </div>
+                                                <div className="form-group col-md-4">
+                                                    <label htmlFor="cAproximado">Costo Aprox. <i className="fa fa-asterisk text-danger small"></i></label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        id="cAproximado"
+                                                        placeholder='0.00'
+                                                        ref={this.refCosto}
+                                                        value={this.state.costo}
+                                                        onChange={(event) => {
+                                                            this.setState({ costo: event.target.value })
+                                                        }}
+                                                        onKeyPress={keyNumberFloat}
+                                                    />
+                                                </div>
+
+                                                <div className="form-group col-md-4">
+                                                    <label htmlFor="pvContado">Precio Contado <i className="fa fa-asterisk text-danger small"></i></label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        id="pvContado"
+                                                        placeholder='0.00'
+                                                        ref={this.refPrecio}
+                                                        value={this.state.precio}
+                                                        onChange={(event) => {
+                                                            this.setState({ precio: event.target.value })
+                                                        }}
+                                                        onKeyPress={keyNumberFloat}
+                                                    />
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+
+                                    <div className="tab-pane fade" id="medida" role="tabpanel" aria-labelledby="medida-tab">
+                                        <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
+                                            <div className="form-group">
+                                                <a>
+                                                    <i class="fa fa-question-circle-o" aria-hidden="true" ></i> Crea las actividades comerciales o de consultoría que ofreces a tus clientes.
+                                                </a>
+                                            </div>
+
+                                            <div className="form-row">
+                                                <div className="form-group col-md-6">
+                                                    <label htmlFor="coDerecho">Nombre</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        id=""
+                                                        placeholder='ej. servicio 1'
+                                                    />
+                                                </div>
+                                                <div className="form-group col-md-6">
+                                                    <label htmlFor="mFrontal">Unidad de medida</label>
+                                                    <select
+                                                        className="form-control"
+                                                        id=""
+                                                    >
+                                                        <option value="">- Seleccione -</option>
+                                                        <option value="1">Disponible</option>
+                                                        <option value="2">Reservado</option>
+                                                        <option value="3">Vendido</option>
+                                                        <option value="4">Inactivo</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div className="form-row">
+                                                <div className="form-group col-md-4">
+                                                    <label htmlFor="coDerecho">Precio base</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        id=""
+                                                        placeholder='S/ 0.00'
+                                                    />
+                                                </div>
+                                                <div className="form-group col-md-4">
+                                                    <label htmlFor="mFrontal">Impuesto</label>
+                                                    <select
+                                                        className="form-control"
+                                                        id=""
+                                                    >
+                                                        <option value="">- Seleccione -</option>
+                                                        <option value="1">ninguno (0%)</option>
+                                                        <option value="2">IGV - (18.00%)</option>
+                                                        <option value="3">Exonerado - (0.00%)</option>
+                                                    </select>
+                                                </div>
+                                                <div className="form-group col-md-4">
+                                                    <label htmlFor="mFrontal">Precio Total</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        id=""
+                                                        placeholder=''
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="tab-pane fade" id="limite" role="tabpanel" aria-labelledby="limite-tab">
+                                        <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
+                                            <div className="form-group">
+                                                <a>
+                                                    <i class="fa fa-question-circle-o" aria-hidden="true" ></i> Agrupa en un solo ítem un conjunto de productos, servicios o una combinación entre ambos.
+                                                </a>
+                                            </div>
+                                            <div className="form-row">
+                                                <div className="form-group col-md-6">
+                                                    <label htmlFor="coDerecho">Nombre</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        id=""
+                                                        placeholder='ej. servicio 1'
+                                                    />
+                                                </div>
+                                                <div className="form-group col-md-6">
+                                                    <label htmlFor="mFrontal">Unidad de medida</label>
+                                                    <select
+                                                        className="form-control"
+                                                        id=""
+                                                    >
+                                                        <option value="">- Seleccione -</option>
+                                                        <option value="1">Disponible</option>
+                                                        <option value="2">Reservado</option>
+                                                        <option value="3">Vendido</option>
+                                                        <option value="4">Inactivo</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div className="form-row">
+                                                <div className="form-group col-md-4">
+                                                    <label htmlFor="coDerecho">Precio base</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        id=""
+                                                        placeholder='S/ 0.00'
+                                                    />
+                                                </div>
+                                                <div className="form-group col-md-4">
+                                                    <label htmlFor="mFrontal">Impuesto</label>
+                                                    <select
+                                                        className="form-control"
+                                                        id=""
+                                                    >
+                                                        <option value="">- Seleccione -</option>
+                                                        <option value="1">ninguno (0%)</option>
+                                                        <option value="2">IGV - (18.00%)</option>
+                                                        <option value="3">Exonerado - (0.00%)</option>
+                                                    </select>
+                                                </div>
+                                                <div className="form-group col-md-4">
+                                                    <label htmlFor="mFrontal">Precio Total</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        id=""
+                                                        placeholder=''
+                                                    />
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -835,7 +1192,7 @@ class Lotes extends React.Component {
                 <div className='row'>
                     <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
                         <div className="form-group">
-                            <h5>Lotes de Terreno <small className="text-secondary">LISTA</small></h5>
+                            <h5>Productos <small className="text-secondary">LISTA</small></h5>
                         </div>
                     </div>
                 </div>
@@ -905,11 +1262,11 @@ class Lotes extends React.Component {
                                                 return (
                                                     <tr key={index}>
                                                         <td className="text-center">{item.id}</td>
-                                                        <td>{item.descripcion}{<br />}{<small>{item.manzana}</small>}</td>
+                                                        <td>{item.descripcion}{<br />}{<small>{item.categoria}</small>}</td>
                                                         <td>{item.precio}</td>
                                                         <td>{item.medidaFondo}</td>
                                                         <td>{item.medidaFrontal}</td>
-                                                        <td>{item.areaLote}</td>
+                                                        <td>{item.areaProducto}</td>
                                                         <td>
                                                             {
                                                                 item.estado === 1 ? <span className="badge badge-warning">Disponible</span>
@@ -922,7 +1279,7 @@ class Lotes extends React.Component {
                                                             <button
                                                                 className="btn btn-outline-info btn-sm"
                                                                 title="Detalle"
-                                                                onClick={() => this.onEventMostrar(item.idLote)}
+                                                                onClick={() => this.onEventMostrar(item.idProducto)}
                                                                 disabled={!this.state.view}>
                                                                 <i className="bi bi-eye"></i>
                                                             </button>
@@ -931,7 +1288,7 @@ class Lotes extends React.Component {
                                                             <button
                                                                 className="btn btn-outline-warning btn-sm"
                                                                 title="Editar"
-                                                                onClick={() => this.openModal(item.idLote)}
+                                                                onClick={() => this.openModal(item.idProducto)}
                                                                 disabled={!this.state.edit}>
                                                                 <i className="bi bi-pencil"></i>
                                                             </button>
@@ -940,7 +1297,7 @@ class Lotes extends React.Component {
                                                             <button
                                                                 className="btn btn-outline-danger btn-sm"
                                                                 title="Anular"
-                                                                onClick={() => this.onEventDelete(item.idLote)}
+                                                                onClick={() => this.onEventDelete(item.idProducto)}
                                                                 disabled={!this.state.remove}>
                                                                 <i className="bi bi-trash"></i>
                                                             </button>
@@ -989,4 +1346,4 @@ const mapStateToProps = (state) => {
     }
 }
 
-export default connect(mapStateToProps, null)(Lotes);
+export default connect(mapStateToProps, null)(Productos);

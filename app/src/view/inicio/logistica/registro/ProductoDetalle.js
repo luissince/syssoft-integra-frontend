@@ -14,7 +14,7 @@ import {
     alertWarning,
     alertError
 } from '../../../../helper/utils.helper';
-import { liberarTerreno, listarComboCliente, loteDetalle, loteRestablecer, loteSocio } from '../../../../network/rest/principal.network';
+import { liberarTerreno, listarComboCliente, productoDetalle, productoRestablecer, productoSocio } from '../../../../network/rest/principal.network';
 import { connect } from 'react-redux';
 import { CANCELED, ERROR } from '../../../../model/types/types';
 import SuccessReponse from '../../../../model/class/response';
@@ -22,14 +22,14 @@ import ErrorResponse from '../../../../model/class/error-response';
 import ContainerWrapper from '../../../../components/Container';
 
 
-class LoteDetalle extends React.Component {
+class ProductoDetalle extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            idLote: '',
+            idProducto: '',
             idVenta: '',
             idClienteOld: '',
-            lote: {},
+            producto: {},
             socios: [],
             detalle: [],
 
@@ -63,9 +63,9 @@ class LoteDetalle extends React.Component {
 
     async componentDidMount() {
         const url = this.props.location.search;
-        const idLote = new URLSearchParams(url).get("idLote");
-        if (idLote !== null) {
-            this.loadDataId(idLote)
+        const idProducto = new URLSearchParams(url).get("idProducto");
+        if (idProducto !== null) {
+            this.loadDataId(idProducto)
         } else {
             this.props.history.goBack();
         }
@@ -126,16 +126,16 @@ class LoteDetalle extends React.Component {
 
     async loadDataId(id) {
         const data = {
-            "idLote": id
+            "idProducto": id
         }
-        const response = await loteDetalle(data, this.abortControllerTable.signal);
+        const response = await productoDetalle(data, this.abortControllerTable.signal);
 
         if (response instanceof SuccessReponse) {
             await this.setStateAsync({
-                lote: response.data.lote,
+                producto: response.data.producto,
                 socios: response.data.socios,
                 detalle: response.data.detalle,
-                idLote: id,
+                idProducto: id,
                 idVenta: response.data.venta.idVenta,
                 idClienteOld: response.data.venta.idCliente,
                 loading: false,
@@ -161,13 +161,13 @@ class LoteDetalle extends React.Component {
             return;
         }
 
-        alertDialog("Lote", "¿Está seguro de registrar el asociado?. El lote va pasar a nombre del nuevo socio.", async (value) => {
+        alertDialog("Producto", "¿Está seguro de registrar el asociado?. El producto va pasar a nombre del nuevo socio.", async (value) => {
             if (value) {
-                alertInfo("Lote", "Procesando información...");
+                alertInfo("Producto", "Procesando información...");
                 hideModal("modalSocio");
 
                 const data = {
-                    "idLote": this.state.idLote,
+                    "idProducto": this.state.idProducto,
                     "idVenta": this.state.idVenta,
                     "idCliente": this.state.idCliente,
                     "idClienteOld": this.state.idClienteOld,
@@ -175,10 +175,10 @@ class LoteDetalle extends React.Component {
                     "idProyecto": this.state.idProyecto,
                 }
 
-                const response = await loteSocio(data);
+                const response = await productoSocio(data);
 
                 if (response instanceof SuccessReponse) {
-                    alertSuccess("Lote", response.data, () => this.loadDataId(this.state.idLote));
+                    alertSuccess("Producto", response.data, () => this.loadDataId(this.state.idProducto));
                     return;
                 }
 
@@ -186,9 +186,9 @@ class LoteDetalle extends React.Component {
                     if (response.type === CANCELED) return;
 
                     if (response.type === ERROR) {
-                        alertError("Lote", response.message);
+                        alertError("Producto", response.message);
                     } else {
-                        alertWarning("Lote", response.message);
+                        alertWarning("Producto", response.message);
                     }
                 }
             }
@@ -196,9 +196,9 @@ class LoteDetalle extends React.Component {
     }
 
     async onEventRestablecer(idCliente) {
-        alertDialog("Lote", "¿Está seguro de restablecer al socio, la operación no es reversible?", async (value) => {
+        alertDialog("Producto", "¿Está seguro de restablecer al socio, la operación no es reversible?", async (value) => {
             if (value) {
-                alertInfo("Lote", "Procesando información...");
+                alertInfo("Producto", "Procesando información...");
 
                 const data = {
                     "idVenta": this.state.idVenta,
@@ -206,11 +206,11 @@ class LoteDetalle extends React.Component {
                     "idUsuario": this.state.idUsuario
                 }
 
-                const response = await loteRestablecer(data);
+                const response = await productoRestablecer(data);
 
                 if (response instanceof SuccessReponse) {
 
-                    alertSuccess("Lote", response.data, () => this.loadDataId(this.state.idLote));
+                    alertSuccess("Producto", response.data, () => this.loadDataId(this.state.idProducto));
                     return;
                 }
 
@@ -218,9 +218,9 @@ class LoteDetalle extends React.Component {
                     if (response.type === CANCELED) return;
 
                     if (response.type === ERROR) {
-                        alertError("Lote", response.message);
+                        alertError("Producto", response.message);
                     } else {
-                        alertWarning("Lote", response.message);
+                        alertWarning("Producto", response.message);
                     }
                 }
             }
@@ -229,24 +229,24 @@ class LoteDetalle extends React.Component {
 
     async onEventImprimir() {
         const data = {
-            "idLote": this.state.idLote,
+            "idProducto": this.state.idProducto,
             "idSede": "SD0001"
         }
 
         let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
         let params = new URLSearchParams({ "params": ciphertext });
-        window.open("/api/lote/replotedetalle?" + params, "_blank");
+        window.open("/api/producto/repproductodetalle?" + params, "_blank");
 
         //Despliegue 
-        // window.open("/api/lote/replotedetalle?idLote=" + this.state.idLote + "&idSede=SD0001", "_blank");
+        // window.open("/api/producto/repproductodetalle?idProducto=" + this.state.idProducto + "&idSede=SD0001", "_blank");
 
         //Desarrollo
         // try {
 
-        //     let result = await axios.get("/api/lote/replotedetalle", {
+        //     let result = await axios.get("/api/producto/repproductodetalle", {
         //         responseType: "blob",
         //         params: {
-        //             "idLote": this.state.idLote,
+        //             "idProducto": this.state.idProducto,
         //             "idSede": 'SD0001'
         //         }
         //     });
@@ -260,25 +260,25 @@ class LoteDetalle extends React.Component {
         // }
     }
     async onEventLiberar() {
-        alertDialog("Lote", "¿Está seguro de liberar el lote?. Los cambios no son irreversibles.", async (value) => {
+        alertDialog("Producto", "¿Está seguro de liberar el producto?. Los cambios no son irreversibles.", async (value) => {
             if (value) {
-                alertInfo("Lote", "Procesando liberación...");
+                alertInfo("Producto", "Procesando liberación...");
 
                 const data = {
-                    "idLote": this.state.idLote,
+                    "idProducto": this.state.idProducto,
                     "idVenta": this.state.idVenta,
                 }
 
                 const response = await liberarTerreno(data, this.abortControllerLiberar.signal);
                 if (response instanceof SuccessReponse) {
-                    alertSuccess("Lote", response.data, () => this.props.history.goBack());
+                    alertSuccess("Producto", response.data, () => this.props.history.goBack());
                     return;
                 }
 
                 if (response instanceof ErrorResponse) {
                     if (response.type === CANCELED) return;
 
-                    alertWarning("Lote", response.message);
+                    alertWarning("Producto", response.message);
                     return;
                 }
             }
@@ -341,7 +341,7 @@ class LoteDetalle extends React.Component {
                     <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
                         <div className="form-group">
                             <h5>
-                                <span role="button" onClick={() => this.props.history.goBack()}><i className="bi bi-arrow-left-short"></i></span> Lote
+                                <span role="button" onClick={() => this.props.history.goBack()}><i className="bi bi-arrow-left-short"></i></span> Producto
                                 <small className="text-secondary"> Detalle</small>
                             </h5>
                         </div>
@@ -367,16 +367,16 @@ class LoteDetalle extends React.Component {
                             <table className="table table-borderless">
                                 <thead>
                                     <tr>
-                                        <th className="w-35 font-weight-normal p-0">Manzana:</th>
-                                        <th className="w-65 font-weight-bold p-0">{!this.state.loading && this.state.lote.manzana}</th>
+                                        <th className="w-35 font-weight-normal p-0">Categoria:</th>
+                                        <th className="w-65 font-weight-bold p-0">{!this.state.loading && this.state.producto.categoria}</th>
                                     </tr>
                                     <tr>
-                                        <th className="w-35 font-weight-normal p-0">Lote:</th>
-                                        <th className="w-65 font-weight-bold p-0">{!this.state.loading && this.state.lote.lote}</th>
+                                        <th className="w-35 font-weight-normal p-0">Producto:</th>
+                                        <th className="w-65 font-weight-bold p-0">{!this.state.loading && this.state.producto.producto}</th>
                                     </tr>
                                     <tr>
                                         <th className="w-35 font-weight-normal p-0">Estado:</th>
-                                        <th className="w-65 font-weight-bold p-0"> {!this.state.loading && this.state.lote.lotestado}</th>
+                                        <th className="w-65 font-weight-bold p-0"> {!this.state.loading && this.state.producto.productostado}</th>
                                     </tr>
                                 </thead>
                             </table>
@@ -390,27 +390,27 @@ class LoteDetalle extends React.Component {
                                 <thead>
                                     <tr>
                                         <th className="w-35 font-weight-normal p-0">Medida Frontal (ML):</th>
-                                        <th className="w-65 font-weight-bold p-0">{!this.state.loading && this.state.lote.medidaFrontal}</th>
+                                        <th className="w-65 font-weight-bold p-0">{!this.state.loading && this.state.producto.medidaFrontal}</th>
                                     </tr>
                                     <tr>
                                         <th className="w-35 font-weight-normal p-0">Costado Derecho (ML):</th>
-                                        <th className="w-65 font-weight-bold p-0">{!this.state.loading && this.state.lote.costadoDerecho}</th>
+                                        <th className="w-65 font-weight-bold p-0">{!this.state.loading && this.state.producto.costadoDerecho}</th>
                                     </tr>
                                     <tr>
                                         <th className="w-35 font-weight-normal p-0">Costado Izquierdo (ML):</th>
-                                        <th className="w-65 font-weight-bold p-0">{!this.state.loading && this.state.lote.costadoIzquierdo}</th>
+                                        <th className="w-65 font-weight-bold p-0">{!this.state.loading && this.state.producto.costadoIzquierdo}</th>
                                     </tr>
                                     <tr>
                                         <th className="w-35 font-weight-normal p-0"> Medida Fondo (ML):</th>
-                                        <th className="w-65 font-weight-bold p-0">{!this.state.loading && this.state.lote.medidaFondo}</th>
+                                        <th className="w-65 font-weight-bold p-0">{!this.state.loading && this.state.producto.medidaFondo}</th>
                                     </tr>
                                     <tr>
-                                        <th className="w-35 font-weight-normal p-0"> Area Lote (ML):</th>
-                                        <th className="w-65 font-weight-bold p-0"> {!this.state.loading && this.state.lote.areaLote}</th>
+                                        <th className="w-35 font-weight-normal p-0"> Area Producto (ML):</th>
+                                        <th className="w-65 font-weight-bold p-0"> {!this.state.loading && this.state.producto.areaProducto}</th>
                                     </tr>
                                     <tr>
                                         <th className="w-35 font-weight-normal p-0"> N° Partida:</th>
-                                        <th className="w-65 font-weight-bold p-0"> {!this.state.loading && this.state.lote.numeroPartida}</th>
+                                        <th className="w-65 font-weight-bold p-0"> {!this.state.loading && this.state.producto.numeroPartida}</th>
                                     </tr>
                                 </thead>
                             </table>
@@ -424,23 +424,23 @@ class LoteDetalle extends React.Component {
                                 <thead>
                                     <tr>
                                         <th className="w-35 font-weight-normal p-0">Limite, Frontal / Norte / Noroeste:</th>
-                                        <th className="w-65 font-weight-bold p-0">{!this.state.loading && this.state.lote.limiteFrontal}</th>
+                                        <th className="w-65 font-weight-bold p-0">{!this.state.loading && this.state.producto.limiteFrontal}</th>
                                     </tr>
                                     <tr>
                                         <th className="w-35 font-weight-normal p-0">Límite, Derecho / Este / Sureste:</th>
-                                        <th className="w-65 font-weight-bold p-0">{!this.state.loading && this.state.lote.limiteDerecho}</th>
+                                        <th className="w-65 font-weight-bold p-0">{!this.state.loading && this.state.producto.limiteDerecho}</th>
                                     </tr>
                                     <tr>
                                         <th className="w-35 font-weight-normal p-0">Límite, Iquierdo / Sur / Sureste:</th>
-                                        <th className="w-65 font-weight-bold p-0">{!this.state.loading && this.state.lote.limiteIzquierdo}</th>
+                                        <th className="w-65 font-weight-bold p-0">{!this.state.loading && this.state.producto.limiteIzquierdo}</th>
                                     </tr>
                                     <tr>
                                         <th className="w-35 font-weight-normal p-0">Límite, Posterior / Oeste / Noroeste:</th>
-                                        <th className="w-65 font-weight-bold p-0">{!this.state.loading && this.state.lote.limitePosterior}</th>
+                                        <th className="w-65 font-weight-bold p-0">{!this.state.loading && this.state.producto.limitePosterior}</th>
                                     </tr>
                                     <tr>
-                                        <th className="w-35 font-weight-normal p-0">Ubicación del Lote:</th>
-                                        <th className="w-65 font-weight-bold p-0"> {!this.state.loading && this.state.lote.ubicacionLote}</th>
+                                        <th className="w-35 font-weight-normal p-0">Ubicación del Producto:</th>
+                                        <th className="w-65 font-weight-bold p-0"> {!this.state.loading && this.state.producto.ubicacionProducto}</th>
                                     </tr>
                                 </thead>
                             </table>
@@ -542,4 +542,4 @@ const mapStateToProps = (state) => {
     }
 }
 
-export default connect(mapStateToProps, null)(LoteDetalle);
+export default connect(mapStateToProps, null)(ProductoDetalle);

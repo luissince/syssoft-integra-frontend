@@ -213,14 +213,14 @@ class Principal extends React.Component {
                               {item.moneda}({item.simbolo})
                             </li>
                             <li className="list-group-item border-0 px-0">
-                              <i className="bi bi-geo-fill"></i> Total de lotes{" "}
-                              {item.lotes.length}
+                              <i className="bi bi-geo-fill"></i> Total de productos{" "}
+                              {item.productos.length}
                             </li>
                             <li className="list-group-item border-0 px-0">
-                              <i className="bi bi-geo-fill"></i> Lotes
+                              <i className="bi bi-geo-fill"></i> Productos
                               disponibles{" "}
                               {
-                                item.lotes.filter((lote) => lote.estado === 1)
+                                item.productos.filter((producto) => producto.estado === 1)
                                   .length
                               }
                             </li>

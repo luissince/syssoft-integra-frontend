@@ -182,11 +182,11 @@ function zfill(number, width = 6) {
     }
 }
 
-function manzanaLote(lot, manz) {
-    let manzana = manz;
-    let lote = lot;
+function categoriaProducto(lot, manz) {
+    let categoria = manz;
+    let producto = lot;
 
-    return lote + " - " + manzana;
+    return producto + " - " + categoria;
 
 }
 
@@ -207,6 +207,6 @@ module.exports = {
     writeFile,
     mkdir,
     chmod,
-    manzanaLote,
+    categoriaProducto,
     isEmail
 };

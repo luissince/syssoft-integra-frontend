@@ -97,8 +97,8 @@ class Dashboard extends React.Component {
                                             <i className="bi bi-boxes"></i>
                                         </div>
                                         <div className="text-right pt-1">
-                                            <p className="text-sm mb-0">Total de Manzanas</p>
-                                            <h4 className="mb-0">{this.state.totales.totalManzanas}</h4>
+                                            <p className="text-sm mb-0">Total de Categorias</p>
+                                            <h4 className="mb-0">{this.state.totales.totalCategorias}</h4>
                                         </div>
                                     </div>
                                     {/* <hr className="dark horizontal my-0" />
@@ -114,8 +114,8 @@ class Dashboard extends React.Component {
                                             <i className="bi bi-bounding-box-circles"></i>
                                         </div>
                                         <div className="text-right pt-1">
-                                            <p className="text-sm mb-0">Total de Lotes</p>
-                                            <h4 className="mb-0">{this.state.totales.totalLotes}</h4>
+                                            <p className="text-sm mb-0">Total de Productos</p>
+                                            <h4 className="mb-0">{this.state.totales.totalProductos}</h4>
                                         </div>
                                     </div>
                                 </div>

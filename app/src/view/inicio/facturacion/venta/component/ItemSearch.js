@@ -1,42 +1,42 @@
 import { images } from "../../../../../helper";
 import ErrorResponse from "../../../../../model/class/error-response";
 import SuccessReponse from "../../../../../model/class/response";
-import { listarLotesFilter } from "../../../../../network/rest/principal.network";
+import { listarProductosFilter } from "../../../../../network/rest/principal.network";
 
 const ItemSearch = (props) => {
 
-    const { refLote, lote, idProyecto, filterLote, setStateAsync } = props;
+    const { refProducto, producto, idProyecto, filterProducto, setStateAsync } = props;
 
-    const handleFilterLote = async (event) => {
+    const handleFilterProducto = async (event) => {
 
         const searchWord = event.target.value;
-        await setStateAsync({ lote: searchWord });
+        await setStateAsync({ producto: searchWord });
 
         if (searchWord.length === 0) {
-            await setStateAsync({ lotes: [] });
+            await setStateAsync({ productos: [] });
             return;
         }
 
         if (searchWord.length <= 2) return;
 
-        if (filterLote) return;
+        if (filterProducto) return;
 
 
-        await setStateAsync({ filterLote: true, sarchLote: true });
+        await setStateAsync({ filterProducto: true, sarchProducto: true });
 
         const params = {
             idProyecto: idProyecto,
             filtrar: searchWord,
         }
 
-        const response = await listarLotesFilter(params);
+        const response = await listarProductosFilter(params);
 
         if (response instanceof SuccessReponse) {
-            await setStateAsync({ filterLote: false, lotes: response.data, sarchLote: false });
+            await setStateAsync({ filterProducto: false, productos: response.data, sarchProducto: false });
         }
 
         if (response instanceof ErrorResponse) {
-            await setStateAsync({ filterLote: false, lotes: [], sarchLote: false });
+            await setStateAsync({ filterProducto: false, productos: [], sarchProducto: false });
         }
     }
 
@@ -56,9 +56,9 @@ const ItemSearch = (props) => {
                         type="text"
                         className="form-control border border-success"
                         placeholder="Buscar productos"
-                        value={lote}
-                        ref={refLote}
-                        onChange={handleFilterLote}
+                        value={producto}
+                        ref={refProducto}
+                        onChange={handleFilterProducto}
                         autoFocus
                     />
                 </div>
