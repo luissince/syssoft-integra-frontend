@@ -97,6 +97,7 @@ class Productos extends CustomComponent {
         this.loadInit();
 
         viewModal(this.idModal, () => {
+            console.log("open")
             this.abortControllerModal = new AbortController();
             if (this.idCodigo !== "") {
                 this.loadDataId(this.idCodigo);
@@ -106,6 +107,7 @@ class Productos extends CustomComponent {
         });
 
         clearModal(this.idModal, async () => {
+            console.log("close") 
             this.abortControllerModal.abort();
             
             if (this.completo) {
@@ -315,11 +317,11 @@ class Productos extends CustomComponent {
     }
 
     handleOpenModal = async () => {
-        showModal('modalProducto');
+        showModal(this.idModal);
         await this.setStateAsync({ nameModal: "Nuevo Producto", loadModal: true });
     }
 
-    handleCompleto = async () => {
+    handleCompleto = () => {
         hideModal(this.idModal);
         this.completo = true;
     }

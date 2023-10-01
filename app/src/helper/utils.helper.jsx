@@ -350,12 +350,12 @@ export function hideModal(id) {
 }
 
 export function viewModal(id, callback = function () { }) {
-  let myModalEl = document.getElementById(id);
+  const myModalEl = document.getElementById(id);
   myModalEl.addEventListener("shown.bs.modal", callback);
 }
 
 export function clearModal(id, callback = function () { }) {
-  let myModalEl = document.getElementById(id);
+  const myModalEl = document.getElementById(id);
   myModalEl.addEventListener("hidden.bs.modal", callback);
 }
 

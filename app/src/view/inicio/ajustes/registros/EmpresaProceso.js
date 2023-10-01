@@ -409,7 +409,7 @@ class EmpresaProceso extends React.Component {
             <label>
               Contraseña Email (<small>Para el envío del correo</small>):{" "}
             </label>
-            <div class="input-group">
+            <div className="input-group">
               <input
                 ref={this.refPasswordEmail}
                 type={this.state.lookPasswordEmail ? "text" : "password"}
@@ -420,9 +420,9 @@ class EmpresaProceso extends React.Component {
                 }
                 placeholder="********"
               />
-              <div class="input-group-append">
+              <div className="input-group-append">
                 <button
-                  class="btn btn-outline-secondary"
+                  className="btn btn-outline-secondary"
                   type="button"
                   title="Email"
                   onClick={this.handleLookPasswordEmail}
@@ -460,7 +460,7 @@ class EmpresaProceso extends React.Component {
             <label>
               Clave Sol(<small>Para el envío a Sunat</small>):{" "}
             </label>
-            <div class="input-group">
+            <div className="input-group">
               <input
                 ref={this.refPasswordSol}
                 type={this.state.lookPasswordSol ? "text" : "password"}
@@ -471,9 +471,9 @@ class EmpresaProceso extends React.Component {
                 }
                 placeholder="********"
               />
-              <div class="input-group-append">
+              <div className="input-group-append">
                 <button
-                  class="btn btn-outline-secondary"
+                  className="btn btn-outline-secondary"
                   type="button"
                   title="Sunat"
                   onClick={this.handleLookPasswordSol}
