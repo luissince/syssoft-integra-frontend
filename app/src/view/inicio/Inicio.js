@@ -47,6 +47,10 @@ import ProductoAgregar from './logistica/producto/ProductoAgregar';
 import ProductoEditar from './logistica/producto/ProductoEditar';
 import ProductoDetalle from './logistica/producto/ProductoDetalle';
 
+import Almacenes from './logistica/almacen/Almacenes';
+import AlmacenAgregar from './logistica/almacen/AlmacenAgregar';
+import AlmacenEditar from './logistica/almacen/AlmacenEditar';
+
 import Clientes from './facturacion/cliente/Clientes';
 import ClienteProceso from './facturacion/cliente/ClienteProceso';
 import ClienteDetalle from './facturacion/cliente/ClienteDetalle';
@@ -61,12 +65,10 @@ import Gastos from './tesoreria/gasto/Gastos';
 import GastoProceso from './tesoreria/gasto/GastoProceso';
 import GastoDetalle from './tesoreria/gasto/GastoDetalle';
 
-
 import Perfiles from './seguridad/Perfiles';
 import Usuarios from './seguridad/Usuarios';
 import Accesos from './seguridad/Accesos';
 import UsuarioProceso from './seguridad/registros/UsuarioProceso';
-
 
 import RepVentas from './reporte/RepVentas';
 import RepFinanciero from './reporte/RepFinanciero';
@@ -393,6 +395,23 @@ class Inicio extends React.Component {
                         exact={true}
                         render={(props) => <ProductoEditar {...props} />}
                     />
+
+                    <Route
+                        path={`${path}/almacenes`}
+                        exact={true}
+                        render={(props) => <Almacenes {...props} />}
+                    />
+                    <Route
+                        path={`${path}/almacenes/agregar`}
+                        exact={true}
+                        render={(props) => <AlmacenAgregar {...props} />}
+                    />
+                    <Route
+                        path={`${path}/almacenes/editar`}
+                        exact={true}
+                        render={(props) => <AlmacenEditar {...props} />}
+                    />
+
                     <Route
                         path={`${path}/conceptos`}
                         render={(props) => <Conceptos {...props} />}

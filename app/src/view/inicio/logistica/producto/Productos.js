@@ -1301,6 +1301,23 @@ class Productos extends CustomComponent {
                                             </tr>
                                         ) : (
                                             this.state.lista.map((item, index) => {
+
+                                                const estado = function(){
+                                                    if(item.estado === 1){
+                                                        return <span className="badge badge-warning">Disponible</span>;
+                                                    }
+
+                                                    if(item.estado === 2){
+                                                        return <span className="badge badge-info">Reservado</span>;
+                                                    }
+
+                                                    if(item.estado === 3){
+                                                        return <span className="badge badge-success">Vendido</span>;
+                                                    }
+
+                                                    return  <span className="badge badge-warnin">Inactivo</span>;
+                                                }
+
                                                 return (
                                                     <tr key={index}>
                                                         <td className="text-center">{item.id}</td>
@@ -1309,14 +1326,7 @@ class Productos extends CustomComponent {
                                                         <td>{item.medidaFondo}</td>
                                                         <td>{item.medidaFrontal}</td>
                                                         <td>{item.areaProducto}</td>
-                                                        <td>
-                                                            {
-                                                                item.estado === 1 ? <span className="badge badge-warning">Disponible</span>
-                                                                    : item.estado === 2 ? <span className="badge badge-info">Reservado</span>
-                                                                        : item.estado === 3 ? <span className="badge badge-success">Vendido</span>
-                                                                            : <span className="badge badge-warnin">Inactivo</span>
-                                                            }
-                                                        </td>
+                                                        <td>{estado()}</td>
                                                         <td className="text-center">
                                                             <button
                                                                 className="btn btn-outline-info btn-sm"
