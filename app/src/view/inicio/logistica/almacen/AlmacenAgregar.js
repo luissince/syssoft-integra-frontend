@@ -1,21 +1,122 @@
+import React from 'react';
+import {alertInfo,
+    alertSuccess,
+    alertWarning,
+    alertError
+} from '../../../../helper/utils.helper';
+import { connect } from 'react-redux';
 import ContainerWrapper from "../../../../components/Container";
 import CustomComponent from "../../../../model/class/custom-component";
+import axios from 'axios';
 
 class AlmaceneAgregar extends CustomComponent {
 
     constructor(props) {
         super(props);
+        this.state = {
+            idAlmacen: '',
+            nombreAlmacen: '',
+            direccion: '',
+            distrito: '',
+            codigoSunat: '',
+            observacion: '',
+            idUsuario: this.props.token.userToken.idUsuario,
+
+            messageWarning: '',
+
+            loading: true,
+        }
+
+        this.abortControllerTable = new AbortController();
+
+        this.refNombreAlmacen = React.createRef();
+        this.refDireccion = React.createRef();
+        this.refDistrito = React.createRef();
+        this.refCodigoSunat = React.createRef();
+        this.refObservacion = React.createRef();
     }
 
-
-    componentDidMount() {
-
+    async componentDidMount() {
+        this.loadingData();
     }
 
     componentWillUnmount() {
 
     }
 
+    loadingData = async () => {
+        this.setState({
+            loading: false,
+            nombreAlmacen: '',
+            direccion: '',
+            distrito: '',
+            codigoSunat: '',
+            observacion: '',
+        })
+    }
+
+    handleSave() {
+        if (this.state.nombreAlmacen === "") {
+            this.setState({ messageWarning: "ingrese un nombre para el almacén." });
+            this.refNombreAlmacen.current.focus();
+            return;
+        }
+
+        if (this.state.direccion === "") {
+            this.setState({ messageWarning: "ingrese una dirección para el almacén." });
+            this.refDireccion.current.focus();
+            return;
+        }
+
+        if (this.state.distrito === "") {
+            this.setState({ messageWarning: "ingrese un distrito para el almacén." });
+            this.refDistrito.current.focus();
+            return;
+        }
+
+        if (this.state.codigoSunat === "") {
+            this.setState({ messageWarning: "ingrese un codigoSunat para el almacén." });
+            this.refCodigoSunat.current.focus();
+            return;
+        }
+
+        alertInfo("Almacen", "Procesando información...");
+
+
+        this.handleAdd();
+    }
+
+    async handleAdd() {
+
+        const response = await axios.post('/api/almacen/addalmacenes', {
+            nombreAlmacen: this.state.nombreAlmacen.toString().trim().toUpperCase(),
+            direccion: this.state.direccion.trim().toUpperCase(),
+            distrito: this.state.distrito.toString().trim().toUpperCase(),
+            codigoSunat: this.state.codigoSunat.toString().trim().toUpperCase(),
+            observacion: this.state.observacion,
+            idUsuario: this.state.idUsuario
+        }).then((response) => {
+            alertSuccess("Almacen", response.data, () => {
+                this.loadingData();
+            });
+        }).catch((error) => {
+            if (error.response.data.includes("Duplicate entry")) {
+                const duplicateValue = error.response.data.match(/'([^']+)'/)[1];
+                const errorMessage = `El valor '${duplicateValue}' ya existe en la base de datos y no se permite duplicar.`;
+
+                alertWarning("Almacen", errorMessage, () => {
+                    this.refNombreAlmacen.current.focus();
+                });
+            } else {
+                const messageError = `Se produjo un error de servidor, intente nuevamente \n error: '${error.response.data}'`
+                alertError("Almacen", messageError, () => {
+                    this.loadingData();
+                });
+            }
+
+
+        });
+    }
 
     render() {
         return (
@@ -34,6 +135,13 @@ class AlmaceneAgregar extends CustomComponent {
                     </div>
                 </div>
 
+                {
+                    this.state.messageWarning === '' ? null :
+                        <div className="alert alert-warning" role="alert">
+                            <i className="bi bi-exclamation-diamond-fill"></i> {this.state.messageWarning}
+                        </div>
+                }
+
                 <div className="dropdown-divider"></div>
 
                 <div className="form-group pb-2">
@@ -50,9 +158,21 @@ class AlmaceneAgregar extends CustomComponent {
                                 <input
                                     type="text"
                                     className="form-control"
-                                    ref=""
-                                    value=""
-                                    onChange=""
+                                    ref={this.refNombreAlmacen}
+                                    value={this.state.nombreAlmacen}
+                                    onChange={(event) => {
+                                        if (event.target.value.trim().length > 0) {
+                                            this.setState({
+                                                nombreAlmacen: event.target.value,
+                                                messageWarning: '',
+                                            });
+                                        } else {
+                                            this.setState({
+                                                nombreAlmacen: event.target.value,
+                                                messageWarning: 'Ingrese un nombre para el almacén',
+                                            });
+                                        }
+                                    }}
                                     placeholder="Ingrese el nombre del almacen" />
                             </div>
                             <div className="form-group col-md-12">
@@ -60,9 +180,21 @@ class AlmaceneAgregar extends CustomComponent {
                                 <input
                                     type="text"
                                     className="form-control"
-                                    ref=""
-                                    value=""
-                                    onChange=""
+                                    ref={this.refDireccion}
+                                    value={this.state.direccion}
+                                    onChange={(event) => {
+                                        if (event.target.value.trim().length > 0) {
+                                            this.setState({
+                                                direccion: event.target.value,
+                                                messageWarning: '',
+                                            });
+                                        } else {
+                                            this.setState({
+                                                direccion: event.target.value,
+                                                messageWarning: 'Ingrese una dirección para el almacén',
+                                            });
+                                        }
+                                    }}
                                     placeholder="Ingrese una dirección" />
                             </div>
                             <div className="form-group col-md-12">
@@ -70,9 +202,21 @@ class AlmaceneAgregar extends CustomComponent {
                                 <input
                                     type="text"
                                     className="form-control"
-                                    ref=""
-                                    value=""
-                                    onChange=""
+                                    ref={this.refDistrito}
+                                    value={this.state.distrito}
+                                    onChange={(event) => {
+                                        if (event.target.value.trim().length > 0) {
+                                            this.setState({
+                                                distrito: event.target.value,
+                                                messageWarning: '',
+                                            });
+                                        } else {
+                                            this.setState({
+                                                distrito: event.target.value,
+                                                messageWarning: 'Ingrese una dirección para el almacén',
+                                            });
+                                        }
+                                    }}
                                     placeholder="Ingrese un distrito" />
                             </div>
                             <div className="form-group col-md-12">
@@ -80,9 +224,21 @@ class AlmaceneAgregar extends CustomComponent {
                                 <input
                                     type="text"
                                     className="form-control"
-                                    ref=""
-                                    value=""
-                                    onChange=""
+                                    ref={this.refCodigoSunat}
+                                    value={this.state.codigoSunat}
+                                    onChange={(event) => {
+                                        if (event.target.value.trim().length > 0) {
+                                            this.setState({
+                                                codigoSunat: event.target.value,
+                                                messageWarning: '',
+                                            });
+                                        } else {
+                                            this.setState({
+                                                codigoSunat: event.target.value,
+                                                messageWarning: 'Ingrese una dirección para el almacén',
+                                            });
+                                        }
+                                    }}
                                     placeholder="" />
                             </div>
                             <div className="form-group col-md-12">
@@ -95,17 +251,25 @@ class AlmaceneAgregar extends CustomComponent {
                         <div className="form-row h-100">
                             <div className="form-group col-md-12">
                                 <label>Observaciones: </label>
-                                <textarea className="form-control " id="exampleFormControlTextarea1" rows="13"></textarea>
+                                <textarea className="form-control "
+                                    id="exampleFormControlTextarea1"
+                                    rows="13"
+                                    ref={this.refObservacion}
+                                    value={this.state.observacion}
+                                    onChange={(event) => this.setState({
+                                        observacion: event.target.value
+                                    })}
+                                ></textarea>
                             </div>
                             <div className="form-group col-md-12">
                                 <div className="form-row">
                                     <div className="form-group col-md-6">
-                                        <button type="button" className="btn btn-primary btn-block" >
+                                        <button type="button" className="btn btn-primary btn-block" onClick={() => this.handleSave()}>
                                             Guardar
                                         </button>
                                     </div>
                                     <div className="form-group col-md-6">
-                                        <button type="button" className="btn btn-secondary btn-block ml-2" >
+                                        <button type="button" className="btn btn-secondary btn-block ml-2" onClick={() => this.props.history.goBack()}>
                                             Cerrar
                                         </button>
                                     </div>
@@ -123,4 +287,10 @@ class AlmaceneAgregar extends CustomComponent {
 
 }
 
-export default AlmaceneAgregar;
+const mapStateToProps = (state) => {
+    return {
+        token: state.reducer
+    }
+}
+
+export default connect(mapStateToProps, null)(AlmaceneAgregar);

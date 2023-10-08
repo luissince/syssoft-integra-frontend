@@ -1,23 +1,135 @@
+import axios from 'axios';
+import React from 'react';
+import {
+    spinnerLoading,
+    alertDialog,
+    alertInfo,
+    alertSuccess,
+    alertWarning
+} from '../../../../helper/utils.helper';
 import ContainerWrapper from "../../../../components/Container";
 import Paginacion from "../../../../components/Paginacion";
 import { keyUpSearch } from "../../../../helper/utils.helper";
 import CustomComponent from "../../../../model/class/custom-component";
+import SuccessReponse from '../../../../model/class/response';
+import ErrorResponse from '../../../../model/class/error-response';
 
 class Almacenes extends CustomComponent {
 
     constructor(props) {
         super(props);
+        this.state = {
+            loading: false,
+            lista: [],
+            restart: false,
+
+            // idProyecto: this.props.token.project.idProyecto,
+
+            // view: statePrivilegio(this.props.token.userToken.menus[2].submenu[4].privilegio[0].estado),
+
+            opcion: 0,
+            paginacion: 0,
+            totalPaginacion: 0,
+            filasPorPagina: 10,
+            messageTable: 'Cargando información...',
+            messagePaginacion: 'Mostranto 0 de 0 Páginas'
+        }
+
+        this.abortControllerTable = new AbortController();
+        this.refTxtSearch = React.createRef();
     }
 
+    setStateAsync(state) {
+        return new Promise((resolve) => {
+            this.setState(state, resolve)
+        });
+    }
 
-    componentDidMount() {
-
+    async componentDidMount() {
+        this.loadInit();
     }
 
     componentWillUnmount() {
-
+        this.abortControllerTable.abort();
     }
 
+    loadInit = async () => {
+        if (this.state.loading) return;
+
+        await this.setStateAsync({ paginacion: 1, restart: true });
+        this.fillTable(0, "");
+        await this.setStateAsync({ opcion: 0 });
+    }
+
+    paginacionContext = async (listid) => {
+        await this.setStateAsync({ paginacion: listid, restart: false });
+        this.onEventPaginacion();
+    }
+
+    onEventPaginacion = () => {
+        switch (this.state.opcion) {
+            case 0:
+                this.fillTable(0, "");
+                break;
+            case 1:
+                this.fillTable(1, this.refTxtSearch.current.value);
+                break;
+            default: this.fillTable(0, "");
+        }
+    }
+
+    fillTable = async (opcion, buscar) => {
+        try {
+            await this.setStateAsync({
+                loading: true,
+                lista: [],
+                messageTable: "Cargando información...",
+                messagePaginacion: "Mostranto 0 de 0 Páginas"
+            });
+
+            const result = await axios.get('/api/almacen/listalmacenes', {
+                signal: this.abortControllerTable.signal,
+                params: {
+                    "opcion": opcion,
+                    "buscar": buscar,
+                    // "idProyecto": this.state.idProyecto,
+                    "posicionPagina": ((this.state.paginacion - 1) * this.state.filasPorPagina),
+                    "filasPorPagina": this.state.filasPorPagina
+                }
+            });
+
+            let total = result.data.total
+            let totalPaginacion = parseInt(Math.ceil((parseFloat(total) / this.state.filasPorPagina)));
+            let messagePaginacion = `Mostrando ${result.data.result.length} de ${totalPaginacion} Páginas`;
+
+            await this.setStateAsync({
+                loading: false,
+                lista: result.data.result,
+                totalPaginacion: totalPaginacion,
+                messagePaginacion: messagePaginacion
+            });
+        } catch (error) {
+            if (error.message !== "canceled") {
+                await this.setStateAsync({
+                    loading: false,
+                    lista: [],
+                    totalPaginacion: 0,
+                    messageTable: "Se produjo un error interno, intente nuevamente por favor.",
+                    messagePaginacion: "Mostranto 0 de 0 Páginas",
+                });
+            }
+        }
+    }
+
+    async searchText(text) {
+        if (this.state.loading) return;
+
+        if (text.trim().length === 0) return;
+
+        await this.setStateAsync({ paginacion: 1, restart: false });
+        this.fillTable(1, text.trim());
+        await this.setStateAsync({ opcion: 1 });
+    }
 
     /**
      * Esta es una función se encarga de navegar a la vista para agregar un almacen
@@ -59,7 +171,25 @@ class Almacenes extends CustomComponent {
      * handleEliminar('AL0001');
      */
     handleEliminar = (idAlmacen) => {
+        alertDialog("Eliminar almacen", "¿Está seguro de que desea eliminar el almacen? Esta operación no se puede deshacer.", async (value) => {
+            if (value) {
+                alertInfo("Almacén", "Procesando información...")
 
+                const params = {
+                    id: idAlmacen
+                }
+
+                const response = await axios.delete('/api/almacen/deletealmacen',{
+                    data: params
+                }).then((response) =>{
+                    alertSuccess("Almacen", response.data, () => {
+                        this.loadInit();
+                    })
+                }).catch((error) => {
+                    alertWarning("Almacen", error.response.data)
+                });
+            }
+        })
     }
 
     render() {
@@ -84,9 +214,9 @@ class Almacenes extends CustomComponent {
                                 <input
                                     type="text"
                                     className="form-control"
-                                    placeholder="Buscar..."
+                                    placeholder="Buscar por nombre o distrito..."
                                     ref={this.refTxtSearch}
-                                    onKeyUp={(event) => keyUpSearch(event, () => { })}
+                                    onKeyUp={(event) => keyUpSearch(event, () => this.searchText(event.target.value))}
                                 />
                             </div>
                         </div>
@@ -98,7 +228,7 @@ class Almacenes extends CustomComponent {
                                 <i className="bi bi-file-plus"></i> Nuevo Registro
                             </button>
                             {" "}
-                            <button className="btn btn-outline-secondary">
+                            <button className="btn btn-outline-secondary" onClick={() => this.loadInit()}>
                                 <i className="bi bi-arrow-clockwise"></i>
                             </button>
                         </div>
@@ -121,31 +251,49 @@ class Almacenes extends CustomComponent {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr >
-                                        <td className="text-center"></td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td className="text-center">
-                                            <button
-                                                className="btn btn-outline-warning btn-sm"
-                                                title="Editar"
-                                                onClick={() => this.handleEditar("")}
-                                            >
-                                                <i className="bi bi-pencil"></i>
-                                            </button>
-                                        </td>
-                                        <td className="text-center">
-                                            <button
-                                                className="btn btn-outline-danger btn-sm"
-                                                title="Anular"
-                                                onClick={() => this.handleEliminar("")}
-                                            >
-                                                <i className="bi bi-trash"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
+                                    {
+                                        this.state.loading ? (
+                                            <tr>
+                                                <td className="text-center" colSpan="7">
+                                                    {spinnerLoading()}
+                                                </td>
+                                            </tr>
+                                        ) : this.state.lista.length === 0 ? (
+                                            <tr className="text-center">
+                                                <td colSpan="7">¡No hay datos registrados!</td>
+                                            </tr>
+                                        ) : (
+                                            this.state.lista.map((item, index) => {
+                                                return (
+                                                    <tr key={index}>
+                                                        <td className="text-center">{item.id}</td>
+                                                        <td>{item.nombre}</td>
+                                                        <td>{item.direccion}</td>
+                                                        <td>{item.distrito}</td>
+                                                        <td>{item.codigoSunat}</td>
+                                                        <td className="text-center">
+                                                            <button
+                                                                className="btn btn-outline-warning btn-sm"
+                                                                title="Editar"
+                                                                onClick={() => this.handleEditar(item.idAlmacen)}
+                                                            >
+                                                                <i className="bi bi-pencil"></i>
+                                                            </button>
+                                                        </td>
+                                                        <td className="text-center">
+                                                            <button
+                                                                className="btn btn-outline-danger btn-sm"
+                                                                title="Anular"
+                                                                onClick={() => this.handleEliminar(item.idAlmacen)}
+                                                            >
+                                                                <i className="bi bi-trash"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                )
+                                            })
+                                        )
+                                    }
                                 </tbody>
 
                             </table>
@@ -168,6 +316,26 @@ class Almacenes extends CustomComponent {
                     </div>
                 </div>
 
+                <div className="row">
+                    <div className="col-sm-12 col-md-5">
+                        <div className="dataTables_info mt-2" role="status" aria-live="polite">{this.state.messagePaginacion}</div>
+                    </div>
+                    <div className="col-sm-12 col-md-7">
+                        <div className="dataTables_paginate paging_simple_numbers">
+                            <nav aria-label="Page navigation example">
+                                <ul className="pagination justify-content-end">
+                                    <Paginacion
+                                        loading={this.state.loading}
+                                        totalPaginacion={this.state.totalPaginacion}
+                                        paginacion={this.state.paginacion}
+                                        fillTable={this.paginacionContext}
+                                        restart={this.state.restart}
+                                    />
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
             </ContainerWrapper>
         );
     }
