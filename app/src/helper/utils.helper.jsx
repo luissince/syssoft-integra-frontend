@@ -231,7 +231,7 @@ export function keyNumberInteger(event) {
 
 export function keyNumberFloat(event) {
   var key = window.Event ? event.which : event.keyCode;
-  var c = String.fromCharCode(key);
+  var c = String.fromCharCode(key);  
   if ((c < "0" || c > "9") && c !== "\b" && c !== ".") {
     event.preventDefault();
   }

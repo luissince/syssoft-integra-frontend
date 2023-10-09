@@ -318,9 +318,11 @@ export async function sendEmailNotaCredito(params) {
  * 
  * @returns SuccessReponse | ErrorResponse 
  */
-export async function getNotifications() {
+export async function getNotifications(signal) {
   return await Resolve.create(
-    instancePrincipal.get("/api/cobro/notificaciones")
+    instancePrincipal.get("/api/cobro/notificaciones", {
+      signal: signal
+    })
   );
 }
 
@@ -599,3 +601,26 @@ export async function deleteImpuesto(params) {
     })
   );
 }
+
+export async function listProducto(params) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/producto/list', {
+      params: params
+    })
+  );
+}
+
+export async function addProducto(data) {
+  return await Resolve.create(
+    axios.post("/api/producto", data)
+  );
+}
+
+export async function deleteProducto(params) {
+  return await Resolve.create(
+    instancePrincipal.delete('/api/producto', {
+      params: params
+    })
+  );
+}
+

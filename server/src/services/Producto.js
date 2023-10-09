@@ -80,89 +80,86 @@ class Producto {
         try {
             connection = await conec.beginTransaction();
 
-            if (req.body.estado === '3') {
-                await conec.rollback(connection);
-                return "No se puede usar el estado vendido al insertar un producto, cambie los datos e intente nuevamente.";
-            }
-
             let result = await conec.execute(connection, 'SELECT idProducto FROM producto');
             let idProducto = "";
             if (result.length != 0) {
 
                 let quitarValor = result.map(function (item) {
-                    return parseInt(item.idProducto.replace("LT", ''));
+                    return parseInt(item.idProducto.replace("PD", ''));
                 });
 
                 let valorActual = Math.max(...quitarValor);
                 let incremental = valorActual + 1;
                 let codigoGenerado = "";
                 if (incremental <= 9) {
-                    codigoGenerado = 'LT000' + incremental;
+                    codigoGenerado = 'PD000' + incremental;
                 } else if (incremental >= 10 && incremental <= 99) {
-                    codigoGenerado = 'LT00' + incremental;
+                    codigoGenerado = 'PD00' + incremental;
                 } else if (incremental >= 100 && incremental <= 999) {
-                    codigoGenerado = 'LT0' + incremental;
+                    codigoGenerado = 'PD0' + incremental;
                 } else {
-                    codigoGenerado = 'LT' + incremental;
+                    codigoGenerado = 'PD' + incremental;
                 }
 
                 idProducto = codigoGenerado;
             } else {
-                idProducto = "LT0001";
+                idProducto = "PD0001";
             }
 
-            await conec.execute(connection, `INSERT INTO producto(
-                idProducto, 
-                idCategoria,
-                idConcepto,
-                descripcion,
-                costo,
-                precio,
-                idMedida,
-                estado,
-                medidaFrontal,
-                costadoDerecho,
-                costadoIzquierdo,
-                medidaFondo,
-                areaProducto,
-                numeroPartida,
-                limiteFrontal,
-                limiteDerecho,
-                limiteIzquierdo,
-                limitePosterior,
-                ubicacionProducto,
-                fecha,
-                hora,
-                fupdate,
-                hupdate,
-                idUsuario
-                ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)        
-                `, [
-                idProducto,
-                req.body.idCategoria,
-                req.body.idConcepto,
-                req.body.descripcion,
-                req.body.costo,
-                req.body.precio,
-                req.body.idMedida,
-                req.body.estado,
-                req.body.medidaFrontal,
-                req.body.costadoDerecho,
-                req.body.costadoIzquierdo,
-                req.body.medidaFondo,
-                req.body.areaProducto,
-                req.body.numeroPartida,
-                req.body.limiteFrontal,
-                req.body.limiteDerecho,
-                req.body.limiteIzquierdo,
-                req.body.limitePosterior,
-                req.body.ubicacionProducto,
-                currentDate(),
-                currentTime(),
-                currentDate(),
-                currentTime(),
-                req.body.idUsuario,
-            ])
+            console.log(req.body)
+
+            // await conec.execute(connection, `INSERT INTO producto(
+            //     idProducto, 
+            //     idCategoria,
+            //     idConcepto,
+            //     descripcion,
+            //     costo,
+            //     precio,
+            //     idMedida,
+            //     estado,
+            //     medidaFrontal,
+            //     costadoDerecho,
+            //     costadoIzquierdo,
+            //     medidaFondo,
+            //     areaProducto,
+            //     numeroPartida,
+            //     limiteFrontal,
+            //     limiteDerecho,
+            //     limiteIzquierdo,
+            //     limitePosterior,
+            //     ubicacionProducto,
+            //     fecha,
+            //     hora,
+            //     fupdate,
+            //     hupdate,
+            //     idUsuario
+            //     ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)        
+            //     `, [
+            //     idProducto,
+            //     req.body.idCategoria,
+            //     req.body.idConcepto,
+            //     req.body.descripcion,
+            //     req.body.costo,
+            //     req.body.precio,
+            //     req.body.idMedida,
+            //     req.body.estado,
+            //     req.body.medidaFrontal,
+            //     req.body.costadoDerecho,
+            //     req.body.costadoIzquierdo,
+            //     req.body.medidaFondo,
+            //     req.body.areaProducto,
+            //     req.body.numeroPartida,
+            //     req.body.limiteFrontal,
+            //     req.body.limiteDerecho,
+            //     req.body.limiteIzquierdo,
+            //     req.body.limitePosterior,
+            //     req.body.ubicacionProducto,
+            //     currentDate(),
+            //     currentTime(),
+            //     currentDate(),
+            //     currentTime(),
+            //     req.body.idUsuario,
+            // ])
 
             await conec.commit(connection);
             return "insert";
