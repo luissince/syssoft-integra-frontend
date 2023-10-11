@@ -3,7 +3,7 @@ import axios from 'axios';
 import {
     spinnerLoading,
     numberFormat,
-    timeForma24,
+    formatTime,
     alertInfo,
     alertDialog,
     alertSuccess,
@@ -265,13 +265,13 @@ class Ventas extends CustomComponent {
                                                                 ? <>
                                                                     <del><span>{item.fecha}</span></del>
                                                                     <br />
-                                                                    <del><span>{timeForma24(item.hora)}</span></del>
+                                                                    <del><span>{formatTime(item.hora)}</span></del>
                                                                 </>
                                                                 :
                                                                 <>
                                                                     <span>{item.fecha}</span>
                                                                     <br />
-                                                                    <span>{timeForma24(item.hora)}</span>
+                                                                    <span>{formatTime(item.hora)}</span>
                                                                 </>
                                                         }</td>
                                                         <td>

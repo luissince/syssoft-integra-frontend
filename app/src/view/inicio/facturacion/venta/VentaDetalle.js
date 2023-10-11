@@ -5,7 +5,7 @@ import {
     numberFormat,
     calculateTaxBruto,
     calculateTax,
-    timeForma24,
+    formatTime,
     spinnerLoading,
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
@@ -97,7 +97,7 @@ class VentaDetalle extends CustomComponent {
             idVenta: id,
             comprobante: comprobante + "  " + serie + "-" + numeracion,
             cliente: documento + " - " + informacion,
-            fecha: fecha + " " + timeForma24(hora),
+            fecha: fecha + " " + formatTime(hora),
             notas: '',
             formaVenta: tipo === 1 ? "Contado" : "Crédito",
             estado: estado,

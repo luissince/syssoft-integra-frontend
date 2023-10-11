@@ -7,7 +7,7 @@ import {
     clearModal,
     numberFormat,
     spinnerLoading,
-    timeForma24,
+    formatTime,
     alertDialog,
     alertInfo,
     alertSuccess,
@@ -512,7 +512,7 @@ class ProductoDetalle extends CustomComponent{
                                                         <td className="text-center">{++index}</td>
                                                         <td>{item.informacion}</td>
                                                         <td>{item.detalle}{<br />}<small>{item.comprobanteRef}</small></td>
-                                                        <td>{item.fecha}{<br />}{timeForma24(item.hora)} </td>
+                                                        <td>{item.fecha}{<br />}{formatTime(item.hora)} </td>
                                                         <td>{item.comprobante}{<br />}{item.serie + "-" + item.numeracion}</td>
                                                         <td>{item.banco} </td>
                                                         <td>{numberFormat(item.monto, item.codiso)}</td>

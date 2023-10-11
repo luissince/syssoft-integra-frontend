@@ -5,7 +5,7 @@ import {
     makeid,
     numberFormat,
     formatMoney,
-    timeForma24,
+    formatTime,
     spinnerLoading,
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
@@ -184,7 +184,7 @@ class ClienteDetalle extends CustomComponent {
                                                 return <React.Fragment key={makeid((index + 1))}>
                                                     <tr className="table-success">
                                                         <td>{(index + 1)}</td>
-                                                        <td colSpan="2">{venta.fecha}{<br />}{timeForma24(venta.hora)}</td>
+                                                        <td colSpan="2">{venta.fecha}{<br />}{formatTime(venta.hora)}</td>
                                                         <td colSpan="2">{venta.comprobante}{<br />}{venta.serie + "-" + venta.numeracion}</td>
                                                         <td>{numberFormat(venta.total, venta.codiso)}</td>
                                                     </tr>

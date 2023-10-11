@@ -159,7 +159,9 @@ class ProductoAgregar extends CustomComponent {
                     codigoSunat: this.state.codigoSunat,
                     idMedida: this.state.idMedida,
                     idCategoria: this.state.idCategoria,
-                    descripcion: this.state.descripcion
+                    descripcion: this.state.descripcion,
+                    precio: this.state.precio,
+                    costo: this.state.costo
                 }
 
                 const response = await addProducto(data);
@@ -233,6 +235,7 @@ class ProductoAgregar extends CustomComponent {
                                         </a>
                                     </li>
                                 </ul>
+
                                 <div className="tab-content pt-2" id="myTabContent">
 
                                     <div className="tab-pane fade show active show" id="addproducto" role="tabpanel" aria-labelledby="addproducto-tab">
@@ -418,7 +421,8 @@ class ProductoAgregar extends CustomComponent {
                                                             type="text"
                                                             className="form-control"
                                                             placeholder="S/ 0.00"
-                                                            disabled />
+                                                            disabled
+                                                            value={precio - costo} />
                                                     </div>
                                                 </div>
                                             </div>

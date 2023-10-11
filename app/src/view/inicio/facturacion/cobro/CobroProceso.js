@@ -5,7 +5,7 @@ import {
     calculateTaxBruto,
     formatMoney,
     numberFormat,
-    timeForma24,
+    formatTime,
     keyNumberFloat,
     isNumeric,
     spinnerLoading,
@@ -857,7 +857,7 @@ class CobroProceso extends React.Component {
                                                     this.state.lista.map((value, index) => (
                                                         <tr key={index}>
                                                             <td className="text-center">{index + 1}</td>
-                                                            <td className="text-center">{value.fecha}{<br />}{timeForma24(value.hora)}</td>
+                                                            <td className="text-center">{value.fecha}{<br />}{formatTime(value.hora)}</td>
                                                             <td className="text-center">{value.comprobante}{<br />}{value.serie + "-" + value.numeracion}</td>
                                                             <td className="text-center">{value.concepto}</td>
                                                             <td className="text-center">{numberFormat(value.precio * value.cantidad, value.codiso)}</td>

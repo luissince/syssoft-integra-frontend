@@ -6,7 +6,7 @@ import {
     makeid,
     keyNumberFloat,
     isNumeric,
-    timeForma24,
+    formatTime,
     formatMoney,
     spinnerLoading,
     showModal,
@@ -2432,7 +2432,7 @@ class CreditoProceso extends React.Component {
                                                                 <td className="small text-center">{(index + 1)}</td>
                                                                 <td className="small">{cobro.nombre}{<br />}{cobro.serie + "-" + cobro.numeracion}</td>
                                                                 <td className="small">{cobro.banco}</td>
-                                                                <td className="small">{cobro.fecha}{<br />}{timeForma24(cobro.hora)}</td>
+                                                                <td className="small">{cobro.fecha}{<br />}{formatTime(cobro.hora)}</td>
                                                                 <td className="small">{numberFormat(cobro.precio, cobro.codiso)}</td>
                                                                 <td className="small">{numberFormat(montoActual, cobro.codiso)}</td>
                                                                 <td className="small">{cobro.observacion}</td>

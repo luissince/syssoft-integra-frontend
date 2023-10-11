@@ -4,7 +4,7 @@ import Swal from "../recursos/js/sweetalert";
 /**
  * 
  * @param {Number} time Tiempo de espera del time out
- * @returns 
+ * @returns {Promise<void>}
  */
 export function sleep(time) {
   return new Promise((resolve) => setTimeout(resolve, time));
@@ -33,27 +33,35 @@ export async function imageBase64(ref) {
     let extension = getExtension(files[0].name);
     let { width, height } = await imageSizeData(read);
     return { base64String, extension, width, height }
-  } else {
-    return false;
   }
+
+  return false;
 }
 
-export function formatMoney(
-  amount,
-  decimalCount = 2,
-  decimal = ".",
-  thousands = ""
-) {
+/**
+ * Formatea un número como una cantidad de dinero con opciones personalizables.
+ *
+ * @param {number} amount - La cantidad numérica que se va a formatear como dinero.
+ * @param {number} [decimalCount=2] - El número de decimales a mostrar.
+ * @param {string} [decimal="."] - El separador decimal.
+ * @param {string} [thousands=","] - El separador de miles.
+ * @returns {string} La cantidad formateada como dinero.
+ */
+export function formatMoney(amount, decimalCount = 2, decimal = ".", thousands = ",") {
   try {
+    // Validamos si es un número
+    const isNumber = /^-?\d*\.?\d+$/.test(amount);
+    if (!isNumber) throw new Error("0");
+
     decimalCount = Math.abs(decimalCount);
     decimalCount = isNaN(decimalCount) ? 2 : decimalCount;
 
     const negativeSign = amount < 0 ? "-" : "";
 
-    let i = parseInt(
+    const i = parseInt(
       (amount = Math.abs(Number(amount) || 0).toFixed(decimalCount))
     ).toString();
-    let j = i.length > 3 ? i.length % 3 : 0;
+    const j = i.length > 3 ? i.length % 3 : 0;
 
     return (
       negativeSign +
@@ -67,12 +75,20 @@ export function formatMoney(
         : "")
     );
   } catch (e) {
-    return 0;
+    return "0";
   }
 }
 
+/**
+ * Formatea un número como una cantidad de dinero en la moneda especificada.
+ *
+ * @param {number} value - El valor numérico que se va a formatear como dinero.
+ * @param {string} [currency="PEN"] - El código de moneda (por ejemplo, "PEN" para soles peruanos).
+ * @returns {string} La cantidad formateada como dinero en la moneda especificada.
+ */
 export const numberFormat = (value, currency = "PEN") => {
-  let formats = [
+  // Definir formatos para diferentes monedas
+  const formats = [
     {
       locales: "es-PE",
       options: {
@@ -99,49 +115,53 @@ export const numberFormat = (value, currency = "PEN") => {
     },
   ];
 
-  let newFormat = formats.filter((item) => currency === item.options.currency);
-  if (newFormat.length > 0) {
-    var formatter = new Intl.NumberFormat(newFormat[0].locales, {
-      style: newFormat[0].options.style,
-      currency: newFormat[0].options.currency,
+  // Buscar el formato correspondiente a la moneda especificada
+  const newFormat = formats.find((item) => currency === item.options.currency);
+
+  if (newFormat) {
+    // Crear un formateador de números con el formato encontrado
+    const formatter = new Intl.NumberFormat(newFormat.locales, {
+      style: newFormat.options.style,
+      currency: newFormat.options.currency,
     });
-    return formatter.format(value);
+
+    // Formatear el valor y devolverlo
+    const formattedValue = formatter.format(value);
+
+    // Elimina todos los espacios en blanco
+    return formattedValue.replace(/\s/g, '');
+
   } else {
-    return 0;
+    // Si no se encuentra un formato válido, devolver "0"
+    return "0";
   }
-};
+}
 
 export function currentDate() {
-  let date = new Date();
-  let formatted_date =
-    date.getFullYear() +
-    "-" +
-    (date.getMonth() + 1 > 9
-      ? date.getMonth() + 1
-      : "0" + (date.getMonth() + 1)) +
-    "-" +
-    (date.getDate() > 9 ? date.getDate() : "0" + date.getDate());
+  const date = new Date();
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1 > 9 ? date.getMonth() + 1 : "0" + (date.getMonth() + 1));
+  const day = (date.getDate() > 9 ? date.getDate() : "0" + date.getDate());
+  const formatted_date = `${year}-${month}-${day}`;
   return formatted_date;
 }
 
 export function currentTime() {
-  let time = new Date();
-  let formatted_time =
-    (time.getHours() > 9 ? time.getHours() : "0" + time.getHours()) +
-    ":" +
-    (time.getMinutes() > 9 ? time.getMinutes() : "0" + time.getMinutes()) +
-    ":" +
-    (time.getSeconds() > 9 ? time.getSeconds() : "0" + time.getSeconds());
+  const time = new Date();
+  const hours = (time.getHours() > 9 ? time.getHours() : "0" + time.getHours());
+  const minutes = (time.getMinutes() > 9 ? time.getMinutes() : "0" + time.getMinutes());
+  const seconds = (time.getSeconds() > 9 ? time.getSeconds() : "0" + time.getSeconds());
+  const formatted_time = `${hours}:${minutes}:${seconds}`;
   return formatted_time;
 }
 
 export function getCurrentMonth() {
-  let today = new Date();
+  const today = new Date();
   return (today.getMonth() + 1);
 }
 
 export function getCurrentYear() {
-  let today = new Date();
+  const today = new Date();
   return today.getFullYear();
 }
 
@@ -165,9 +185,10 @@ export function monthName(month) {
 }
 
 export function validateDate(date) {
-  var regex = new RegExp(
+  const regex = new RegExp(
     "([0-9]{4}[-](0[1-9]|1[0-2])[-]([0-2]{1}[0-9]{1}|3[0-1]{1})|([0-2]{1}[0-9]{1}|3[0-1]{1})[-](0[1-9]|1[0-2])[-][0-9]{4})"
   );
+
   return regex.test(date);
 }
 
@@ -175,87 +196,86 @@ export function validateComboBox(comboBox) {
   if (comboBox.children("option").length === 0) {
     return true;
   }
+
   if (comboBox.children("option").length > 0 && comboBox.val() === "") {
     return true;
-  } else {
-    return false;
   }
+
+  return false;
 }
 
-export function validateEmail(value) {
-  var validRegex =
-    /^(([^<>()\\[\]\\.,;:\s@"]+(\.[^<>()\\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-  if (value.match(validRegex)) {
-    return true;
-  } else {
-    return false;
-  }
+/**
+ * Valida una dirección de correo electrónico.
+ *
+ * @param {string} email - La dirección de correo electrónico que se va a validar.
+ * @returns {boolean} `true` si la dirección de correo electrónico es válida, de lo contrario, `false`.
+ */
+export function validateEmail(email) {
+  // Expresión regular para validar direcciones de correo electrónico
+  const emailRegex =
+    /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
+  // Comprueba si el valor coincide con la expresión regular
+  const isValid = emailRegex.test(email);
+
+  // Devuelve el resultado de la validación
+  return isValid;
 }
 
 export function isNumeric(value) {
-  try {
-    if (value.trim().length === 0 || value === "undefined") return false;
+  if (value.trim().length === 0 || value === "undefined") return false;
 
-    if (isNaN(value.trim())) {
-      return false;
-    }
-    return true;
-  } catch (error) {
-    return false;
-  }
+  return isNaN(value.trim());
 }
 
 export function isText(value) {
-  try {
-    if (
-      value.trim() === "" ||
-      value.trim().length === 0 ||
-      value === "undefined" ||
-      value === null
-    ) {
-      return false;
-    }
-    return true;
-  } catch (error) {
+  if (
+    value.trim() === "" ||
+    value.trim().length === 0 ||
+    value === "undefined" ||
+    value === null
+  ) {
     return false;
   }
+
+  return true;
 }
 
 export function keyNumberInteger(event) {
-  var key = window.Event ? event.which : event.keyCode;
-  var c = String.fromCharCode(key);
-  if ((c < "0" || c > "9") && c !== "\b") {
+  const key = event.key;
+  const isDigit = /\d/.test(key);
+
+  if (!(isDigit || key === "Backspace" || key === "Delete" || key === "ArrowLeft" || key === "ArrowRight" || key === "Tab")) {
     event.preventDefault();
   }
 }
 
 export function keyNumberFloat(event) {
-  var key = window.Event ? event.which : event.keyCode;
-  var c = String.fromCharCode(key);  
-  if ((c < "0" || c > "9") && c !== "\b" && c !== ".") {
+  const key = event.key;
+  const isDigit = /\d/.test(key);
+  const isDot = key === ".";
+  const hasDot = event.target.value.includes(".");
+
+  if (!(isDigit || isDot || key === "Backspace" || key === "Delete" || key === "ArrowLeft" || key === "ArrowRight" || key === "Tab")) {
     event.preventDefault();
   }
-  if (c === "." && event.target.value.includes(".")) {
+
+  if (isDot && hasDot) {
     event.preventDefault();
   }
 }
 
 export function keyNumberPhone(event) {
-  var key = window.Event ? event.which : event.keyCode;
-  var c = String.fromCharCode(key);
-  if ((c < "0" || c > "9") && c !== "\b" && c !== "-" && c !== "+" && c !== "(" && c !== ")") {
-    event.preventDefault();
-  }
-  if (c === "-" && event.target.value.includes("-")) {
-    event.preventDefault();
-  }
-  if (c === "(" && event.target.value.includes("(")) {
-    event.preventDefault();
-  }
-  if (c === ")" && event.target.value.includes(")")) {
-    event.preventDefault();
-  }
-  if (c === "+" && event.target.value.includes("+")) {
+  const key = event.key;
+  const inputValue = event.target.value;
+
+  // Verifica si la tecla presionada es un dígito o uno de los caracteres permitidos
+  const isDigitOrAllowedChar = /^[0-9+()-]$/.test(key);
+
+  // Verifica si el carácter ya existe en el valor actual del campo
+  const charAlreadyExists = inputValue.includes(key);
+
+  if (!isDigitOrAllowedChar || (key === "-" && charAlreadyExists)) {
     event.preventDefault();
   }
 }
@@ -276,26 +296,45 @@ export function keyUpSearch(event, callback) {
   }
 }
 
-export function dateFormat(value) {
-  var parts = value.split("-");
-  let today = new Date(parts[0], parts[1] - 1, parts[2]);
-  return (
-    (today.getDate() > 9 ? today.getDate() : "0" + today.getDate()) +
-    "/" +
-    (today.getMonth() + 1 > 9
-      ? today.getMonth() + 1
-      : "0" + (today.getMonth() + 1)) +
-    "/" +
-    today.getFullYear()
-  );
+export function dateFormat(date) {
+  const parts = date.split("-");
+  const today = new Date(parts[0], parts[1] - 1, parts[2]);
+  const day = (today.getDate() > 9 ? today.getDate() : "0" + today.getDate());
+  const month = (today.getMonth() + 1 > 9 ? today.getMonth() + 1 : "0" + (today.getMonth() + 1));
+  const year = today.getFullYear();
+  return `${day}/${month}/${year}`;
 }
 
-export function timeForma24(value) {
-  var hourEnd = value.indexOf(":");
-  var H = +value.substr(0, hourEnd);
-  var h = H % 12 || 12;
-  var ampm = H < 12 || H === 24 ? "AM" : "PM";
-  return h + value.substr(hourEnd, 3) + ":" + value.substr(6, 2) + " " + ampm;
+/**
+ * Formatea una cadena de tiempo en un formato de 12 horas (por defecto) o de 24 horas.
+ *
+ * @param {string} time - La cadena de tiempo en formato "HH:mm" o "HH:mm:ss".
+ * @param {boolean} [addSeconds=false] - Indica si se deben incluir los segundos en la salida.
+ * @returns {string} La cadena de tiempo formateada.
+ */
+export function formatTime(time, addSeconds = false) {
+  const timeRegex = /^(0\d|1\d|2[0-4]):((0[0-9])|([1-5][0-9])|59)(?::([0-5][0-9]))?$/;
+  const match = time.match(timeRegex);
+
+  if (!match) {
+    return "Invalid Time";
+  }
+
+  const parts = time.split(":");
+
+  const HH = parts[0];
+  const mm = parts[1];
+  const ss = parts[2] === undefined ? "00" : parts[2];
+
+  const thf = HH % 12 || 12;
+  const ampm = HH < 12 || HH === 24 ? "AM" : "PM";
+  const formattedHour = thf < 10 ? "0" + thf : thf;
+
+  if (addSeconds) {
+    return `${formattedHour}:${mm}:${ss} ${ampm}`;
+  }
+
+  return `${formattedHour}:${mm} ${ampm}`;
 }
 
 export function getExtension(filename) {

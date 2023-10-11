@@ -1,7 +1,7 @@
 import React from 'react';
 import axios from 'axios';
 import {
-    timeForma24,
+    formatTime,
     showModal,
     hideModal,
     viewModal,
@@ -410,7 +410,7 @@ class Perfiles extends React.Component {
                                                         <td className="text-center">{item.id}</td>
                                                         <td>{item.descripcion}</td>
                                                         <td>{item.empresa}</td>
-                                                        <td>{<span>{item.fecha}</span>}{<br></br>}{<span>{timeForma24(item.hora)}</span>}</td>
+                                                        <td>{<span>{item.fecha}</span>}{<br></br>}{<span>{formatTime(item.hora)}</span>}</td>
                                                         <td className="text-center">
                                                             <button
                                                                 className="btn btn-outline-warning btn-sm"

@@ -5,7 +5,7 @@ import {
     numberFormat,
     calculateTaxBruto,
     calculateTax,
-    timeForma24,
+    formatTime,
     spinnerLoading,
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
@@ -108,7 +108,7 @@ class CobroDetalle extends React.Component {
                 comprobante: `${comprobante} ${serie}-${numeracion}`,
                 estado: estado.toString(),
                 cliente: `${documento} - ${informacion}`,
-                fecha: `${fecha} ${timeForma24(hora)}`,
+                fecha: `${fecha} ${formatTime(hora)}`,
                 cuentaBancaria: banco,
                 notas: observacion,
                 metodoPago: metodoPago_(),

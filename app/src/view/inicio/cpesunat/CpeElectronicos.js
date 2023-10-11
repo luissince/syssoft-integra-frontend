@@ -4,7 +4,7 @@ import {
     validateDate,
     spinnerLoading,
     numberFormat,
-    timeForma24,
+    formatTime,
     currentDate,
     limitarCadena,
     showModal,
@@ -812,7 +812,7 @@ class CpeElectronicos extends React.Component {
                                                                 </ul>
                                                             </div>
                                                         </td>
-                                                        <td>{<span>{item.fecha}</span>}{<br></br>}{<span>{timeForma24(item.hora)}</span>}</td>
+                                                        <td>{<span>{item.fecha}</span>}{<br></br>}{<span>{formatTime(item.hora)}</span>}</td>
                                                         <td>{item.comprobante}{<br />}{item.serie + "-" + item.numeracion}</td>
                                                         <td>{item.documento}{<br />}{item.informacion}</td>
 
