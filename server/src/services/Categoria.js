@@ -85,32 +85,30 @@ class Categoria {
     try {
       connection = await conec.beginTransaction();
 
-      let result = await conec.execute(
+      const result = await conec.execute(
         connection,
         "SELECT idCategoria FROM categoria"
       );
       let idCategoria = "";
       if (result.length != 0) {
-        let quitarValor = result.map(function (item) {
-          return parseInt(item.idCategoria.replace("MZ", ""));
-        });
+        const quitarValor = result.map((item) => parseInt(item.idCategoria.replace("CT", "")));
 
-        let valorActual = Math.max(...quitarValor);
-        let incremental = valorActual + 1;
+        const incremental =  Math.max(...quitarValor) + 1;
+
         let codigoGenerado = "";
         if (incremental <= 9) {
-          codigoGenerado = "MZ000" + incremental;
+          codigoGenerado = "CT000" + incremental;
         } else if (incremental >= 10 && incremental <= 99) {
-          codigoGenerado = "MZ00" + incremental;
+          codigoGenerado = "CT00" + incremental;
         } else if (incremental >= 100 && incremental <= 999) {
-          codigoGenerado = "MZ0" + incremental;
+          codigoGenerado = "CT0" + incremental;
         } else {
-          codigoGenerado = "MZ" + incremental;
+          codigoGenerado = "CT" + incremental;
         }
 
         idCategoria = codigoGenerado;
       } else {
-        idCategoria = "MZ0001";
+        idCategoria = "CT0001";
       }
 
       await conec.execute(
@@ -216,8 +214,7 @@ class Categoria {
   async listcombo(req) {
     try {
       const result = await conec.query(
-        "SELECT idCategoria,nombre FROM categoria WHERE idProyecto = ?",
-        [req.query.idProyecto]
+        "SELECT idCategoria,nombre FROM categoria",
       );
       return result;
     } catch (error) {
@@ -230,62 +227,62 @@ class Categoria {
     try {
       connection = await conec.beginTransaction();
 
-      const categoria = await conec.execute(connection,"SELECT * FROM categoria WHERE  idCategoria = ? and idProyecto = ?",[
+      const categoria = await conec.execute(connection, "SELECT * FROM categoria WHERE  idCategoria = ? and idProyecto = ?", [
         req.query.idCategoria,
         req.query.idProyecto
       ])
 
-      await  conec.execute(connection, 'update categoria set idProyecto = ? where idCategoria = ?',[
+      await conec.execute(connection, 'update categoria set idProyecto = ? where idCategoria = ?', [
         req.query.idProyectoTrasladar,
         req.query.idCategoria,
       ])
 
-      const productos = await conec.execute(connection,"select * from producto where idCategoria = ?",[
+      const productos = await conec.execute(connection, "select * from producto where idCategoria = ?", [
         categoria[0].idCategoria
       ])
-      
 
-      for(const producto of productos){
+
+      for (const producto of productos) {
 
         const venta = await conec.execute(connection, `select * from venta as v 
         inner join ventaDetalle as vd 
         on vd.idVenta = v.idVenta 
-        where vd.idProducto = ?`,[
-            producto.idProducto
+        where vd.idProducto = ?`, [
+          producto.idProducto
         ])
 
-        if(venta.length != 0){
+        if (venta.length != 0) {
 
-            await conec.execute(connection,`update venta set idProyecto = ? where idVenta = ?`,[
-                req.query.idProyectoTrasladar,
-                venta[0].idVenta
-            ])
+          await conec.execute(connection, `update venta set idProyecto = ? where idVenta = ?`, [
+            req.query.idProyectoTrasladar,
+            venta[0].idVenta
+          ])
 
-            // const alta = await conec.execute(connection,`select * from alta where idCliente = ?`,[
-            //     venta[0].idCliente,
-            // ])
+          // const alta = await conec.execute(connection,`select * from alta where idCliente = ?`,[
+          //     venta[0].idCliente,
+          // ])
 
-            await conec.execute(connection,`update alta set idProyecto = ? where idCliente = ?`,[
-                req.query.idProyectoTrasladar,
-                venta[0].idCliente,
+          await conec.execute(connection, `update alta set idProyecto = ? where idCliente = ?`, [
+            req.query.idProyectoTrasladar,
+            venta[0].idCliente,
+          ])
+
+          const cobros = await conec.execute(connection, `select * from cobro where idProcedencia = ?`, [
+            venta[0].idVenta
+          ])
+
+
+          await conec.execute(connection, `update cobro set idProyecto = ? where idProcedencia = ?`, [
+            req.query.idProyectoTrasladar,
+            venta[0].idVenta
+          ])
+
+          for (const cobro of cobros) {
+            await conec.execute(connection, `update notaCredito set idProyecto = ?  where idCobro = ?`, [
+              req.query.idProyectoTrasladar,
+              cobro.idCobro
             ])
-    
-            const cobros = await conec.execute(connection, `select * from cobro where idProcedencia = ?`,[
-                venta[0].idVenta
-            ])
-            
-    
-            await conec.execute(connection, `update cobro set idProyecto = ? where idProcedencia = ?`,[
-                req.query.idProyectoTrasladar,
-                venta[0].idVenta
-            ])
-    
-            for(const cobro of cobros){
-                await conec.execute(connection, `update notaCredito set idProyecto = ?  where idCobro = ?`,[
-                    req.query.idProyectoTrasladar,
-                    cobro.idCobro
-                ])
-            }
+          }
         }
 
       }
@@ -293,7 +290,6 @@ class Categoria {
       await conec.commit(connection);
       return "update";
     } catch (error) {
-        console.log(error)
       if (connection != null) {
         await conec.rollback(connection);
       }

@@ -222,10 +222,8 @@ export function validateEmail(email) {
   return isValid;
 }
 
-export function isNumeric(value) {
-  if (value.trim().length === 0 || value === "undefined") return false;
-
-  return isNaN(value.trim());
+export function isNumeric(valor) {
+  return !isNaN(valor) && !isNaN(parseFloat(valor));
 }
 
 export function isText(value) {
@@ -342,7 +340,7 @@ export function getExtension(filename) {
 }
 
 export function convertNullText(value) {
-  let text = value === undefined ? null : value;
+  const text = value === undefined ? null : value;
   return text === null ? "" : text;
 }
 
@@ -374,12 +372,13 @@ export function calculateTaxBruto(impuesto, monto) {
 }
 
 export function calculateTax(porcentaje, valor) {
-  let igv = parseFloat(porcentaje) / 100.0;
+  const igv = parseFloat(porcentaje) / 100.0;
   return valor * igv;
 }
 
 export function showModal(id) {
-  let myModal = new bootstrap.Modal(document.getElementById(id));
+  const myModalEl = document.getElementById(id);
+  const myModal = new bootstrap.Modal(myModalEl);
   myModal.show();
 }
 
@@ -396,6 +395,10 @@ export function viewModal(id, callback = function () { }) {
 export function clearModal(id, callback = function () { }) {
   const myModalEl = document.getElementById(id);
   myModalEl.addEventListener("hidden.bs.modal", callback);
+}
+
+export function getInstanceModal(id){
+  return bootstrap.Modal.getInstance(document.getElementById(id));
 }
 
 export function spinnerLoading(message = "Cargando datos...") {

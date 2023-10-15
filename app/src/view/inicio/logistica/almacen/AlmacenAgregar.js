@@ -1,13 +1,15 @@
 import React from 'react';
-import {alertInfo,
+import {
+    alertInfo,
     alertSuccess,
     alertWarning,
-    alertError
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import ContainerWrapper from "../../../../components/Container";
 import CustomComponent from "../../../../model/class/custom-component";
-import axios from 'axios';
+import { addAlmacen } from '../../../../network/rest/principal.network';
+import SuccessReponse from '../../../../model/class/response';
+import ErrorResponse from '../../../../model/class/error-response';
 
 class AlmaceneAgregar extends CustomComponent {
 
@@ -87,35 +89,27 @@ class AlmaceneAgregar extends CustomComponent {
     }
 
     async handleAdd() {
-
-        const response = await axios.post('/api/almacen/addalmacenes', {
+        const data = {
             nombreAlmacen: this.state.nombreAlmacen.toString().trim().toUpperCase(),
             direccion: this.state.direccion.trim().toUpperCase(),
             distrito: this.state.distrito.toString().trim().toUpperCase(),
             codigoSunat: this.state.codigoSunat.toString().trim().toUpperCase(),
             observacion: this.state.observacion,
             idUsuario: this.state.idUsuario
-        }).then((response) => {
+        }
+
+        const response = await addAlmacen(data);
+        if (response instanceof SuccessReponse) {
             alertSuccess("Almacen", response.data, () => {
                 this.loadingData();
             });
-        }).catch((error) => {
-            if (error.response.data.includes("Duplicate entry")) {
-                const duplicateValue = error.response.data.match(/'([^']+)'/)[1];
-                const errorMessage = `El valor '${duplicateValue}' ya existe en la base de datos y no se permite duplicar.`;
+        }
 
-                alertWarning("Almacen", errorMessage, () => {
-                    this.refNombreAlmacen.current.focus();
-                });
-            } else {
-                const messageError = `Se produjo un error de servidor, intente nuevamente \n error: '${error.response.data}'`
-                alertError("Almacen", messageError, () => {
-                    this.loadingData();
-                });
-            }
-
-
-        });
+        if (response instanceof ErrorResponse) {
+            alertWarning("Almacen", response.getMessage(), () => {
+                this.loadingData();
+            });
+        }
     }
 
     render() {

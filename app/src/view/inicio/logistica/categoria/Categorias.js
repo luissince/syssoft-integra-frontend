@@ -447,11 +447,12 @@ class Categorias extends React.Component {
                 </button>
               </div>
               <div className="modal-body">
-                {this.state.loadModal ? (
+                {
+                  this.state.loadModal &&
                   <div className="clearfix absolute-all bg-white">
                     {spinnerLoading(this.state.msgModal)}
                   </div>
-                ) : null}
+                }
 
                 <div className="form-group">
                   <label htmlFor="categoria">
