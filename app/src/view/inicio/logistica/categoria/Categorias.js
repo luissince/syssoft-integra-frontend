@@ -15,7 +15,7 @@ import {
 import { connect } from "react-redux";
 import Paginacion from "../../../../components/Paginacion";
 import {
-  comboProyectos,
+  comboSucursales,
   listarCategoria,
   trasladarCategoria,
 } from "../../../../network/rest/principal.network";
@@ -31,7 +31,7 @@ class Categorias extends React.Component {
     this.state = {
       idCategoria: "",
       nombre: "",
-      idProyecto: this.props.token.project.idProyecto,
+      idSucursal: this.props.token.project.idSucursal,
       idUsuario: this.props.token.userToken.idUsuario,
 
       add: statePrivilegio(
@@ -55,8 +55,8 @@ class Categorias extends React.Component {
       nameModalTraslado: "Nuevo Categoria",
       msgModalTraslado: "Cargando datos...",
 
-      idProyectoTrasladar: "",
-      proyectos: [],
+      idSucursalTrasladar: "",
+      sucursales: [],
       messageWarning: "",
 
       loading: false,
@@ -109,16 +109,16 @@ class Categorias extends React.Component {
 
     viewModal("modalCategoriaTraslado", () => {
       this.abortControllerModalTraslado = new AbortController();
-      this.loadComboProyecto();
+      this.loadComboSucursal();
     });
 
     clearModal("modalCategoriaTraslado", async () => {
       this.abortControllerModalTraslado.abort();
       await this.setStateAsync({
         idCategoria: "",
-        idProyectoTrasladar: "",
+        idSucursalTrasladar: "",
         messageWarning: "",
-        proyectos: [],
+        sucursales: [],
 
         loadModalTraslado: false,
         nameModalTraslado: "Trasladar",
@@ -183,7 +183,7 @@ class Categorias extends React.Component {
      * Parametros para iniciar la consulta
      */
     const params = {
-      idProyecto: this.state.idProyecto,
+      idSucursal: this.state.idSucursal,
       opcion: opcion,
       buscar: buscar.trim().toUpperCase(),
       posicionPagina: (this.state.paginacion - 1) * this.state.filasPorPagina,
@@ -281,15 +281,15 @@ class Categorias extends React.Component {
     });
   }
 
-  async loadComboProyecto() {
-    const response = await comboProyectos(
+  async loadComboSucursal() {
+    const response = await comboSucursales(
       this.abortControllerModalTraslado.signal
     );
 
     if (response instanceof SuccessReponse) {
       await this.setStateAsync({
-        proyectos: response.data.filter(
-          (item) => item.idProyecto !== this.state.idProyecto
+        sucursales: response.data.filter(
+          (item) => item.idSucursal !== this.state.idSucursal
         ),
         loadModalTraslado: false,
       });
@@ -307,7 +307,7 @@ class Categorias extends React.Component {
   async handleAgregarCategoria() {
     const data = {
       nombre: this.state.nombre,
-      idProyecto: this.state.idProyecto,
+      idSucursal: this.state.idSucursal,
       idUsuario: this.state.idUsuario,
     }
 
@@ -327,7 +327,7 @@ class Categorias extends React.Component {
     const data = {
       idCategoria: this.state.idCategoria,
       nombre: this.state.nombre,
-      idProyecto: this.state.idProyecto,
+      idSucursal: this.state.idSucursal,
       idUsuario: this.state.idUsuario,
     }
 
@@ -385,9 +385,9 @@ class Categorias extends React.Component {
   };
 
   onEventTrasladar = async () => {
-    if (this.state.idProyectoTrasladar === "") {
+    if (this.state.idSucursalTrasladar === "") {
       this.setState({
-        messageWarning: "Seleccione el proyecto a donde trasladar.",
+        messageWarning: "Seleccione el sucursal a donde trasladar.",
       });
       return;
     }
@@ -396,8 +396,8 @@ class Categorias extends React.Component {
       if (value) {
         const params = {
           idCategoria: this.state.idCategoria,
-          idProyecto: this.state.idProyecto,
-          idProyectoTrasladar: this.state.idProyectoTrasladar,
+          idSucursal: this.state.idSucursal,
+          idSucursalTrasladar: this.state.idSucursalTrasladar,
           idUsuario: this.state.idUsuario,
         };
 
@@ -528,30 +528,30 @@ class Categorias extends React.Component {
                 )}
 
                 <div className="form-group">
-                  <label htmlFor="proyecto">
-                    Proyectos{" "}
+                  <label htmlFor="sucursal">
+                    Sucursales{" "}
                     <i className="fa fa-asterisk text-danger small"></i>
                   </label>
                   <select
                     className="form-control"
-                    id="proyecto"
-                    value={this.state.idProyectoTrasladar}
+                    id="sucursal"
+                    value={this.state.idSucursalTrasladar}
                     onChange={(event) => {
-                      const message = event.target.value || "Seleccione el proyecto a donde trasladar.";
+                      const message = event.target.value || "Seleccione el sucursal a donde trasladar.";
 
                       // const message = event.target.value === ""
-                      //   ? "Seleccione el proyecto a donde trasladar."
+                      //   ? "Seleccione el sucursal a donde trasladar."
                       //   : "";
 
                       this.setState({
-                        idProyectoTrasladar: event.target.value,
+                        idSucursalTrasladar: event.target.value,
                         messageWarning: message
                       });
                     }}
                   >
                     <option value="">- Seleccione -</option>
-                    {this.state.proyectos.map((item, index) => (
-                      <option key={index} value={item.idProyecto}>
+                    {this.state.sucursales.map((item, index) => (
+                      <option key={index} value={item.idSucursal}>
                         {item.nombre}
                       </option>
                     ))}
@@ -560,7 +560,7 @@ class Categorias extends React.Component {
 
                 <div className="form-group">
                   <label>
-                    Seleccione un proyecto para que puedas continuar.
+                    Seleccione un sucursal para que puedas continuar.
                   </label>
                 </div>
               </div>
@@ -648,7 +648,7 @@ class Categorias extends React.Component {
                       #
                     </th>
                     <th width="15%">Categoria</th>
-                    <th width="25%">Proyecto</th>
+                    <th width="25%">Sucursal</th>
                     <th width="5%" className="text-center">
                       Trasladar
                     </th>
@@ -677,7 +677,7 @@ class Categorias extends React.Component {
                         <tr key={index}>
                           <td className="text-center">{item.id}</td>
                           <td>{item.nombre}</td>
-                          <td>{item.proyecto}</td>
+                          <td>{item.sucursal}</td>
                           <td className="text-center">
                             <button
                               className="btn btn-outline-info btn-sm"

@@ -43,44 +43,44 @@ class NotaCredito {
             LEFT JOIN notaCreditoDetalle AS ncd ON ncd.idNotaCredito = nc.idNotaCredito 
 
             WHERE 
-            ? = 0 AND nc.idProyecto = ?
+            ? = 0 AND nc.idSucursal = ?
             OR
-            ? = 1 and cl.documento = ? AND nc.idProyecto = ?
+            ? = 1 and cl.documento = ? AND nc.idSucursal = ?
             OR
-            ? = 1 and cl.informacion like concat(?,'%') AND nc.idProyecto = ?
+            ? = 1 and cl.informacion like concat(?,'%') AND nc.idSucursal = ?
 
             OR
-            ? = 1 and nc.serie = ? AND nc.idProyecto = ?
+            ? = 1 and nc.serie = ? AND nc.idSucursal = ?
             OR
-            ? = 1 and nc.numeracion = ? AND nc.idProyecto = ?
+            ? = 1 and nc.numeracion = ? AND nc.idSucursal = ?
             OR
-            ? = 1 and concat(nc.serie,'-',nc.numeracion) = ? AND nc.idProyecto = ?
+            ? = 1 and concat(nc.serie,'-',nc.numeracion) = ? AND nc.idSucursal = ?
 
             GROUP BY nc.idNotaCredito
             ORDER BY nc.fecha DESC, nc.hora DESC
             LIMIT ?,?`, [
                 parseInt(req.query.opcion),
-                req.query.idProyecto,
+                req.query.idSucursal,
 
                 parseInt(req.query.opcion),
                 req.query.buscar,
-                req.query.idProyecto,
+                req.query.idSucursal,
 
                 parseInt(req.query.opcion),
                 req.query.buscar,
-                req.query.idProyecto,
+                req.query.idSucursal,
 
                 parseInt(req.query.opcion),
                 req.query.buscar,
-                req.query.idProyecto,
+                req.query.idSucursal,
 
                 parseInt(req.query.opcion),
                 req.query.buscar,
-                req.query.idProyecto,
+                req.query.idSucursal,
 
                 parseInt(req.query.opcion),
                 req.query.buscar,
-                req.query.idProyecto,
+                req.query.idSucursal,
 
                 parseInt(req.query.posicionPagina),
                 parseInt(req.query.filasPorPagina)
@@ -102,40 +102,40 @@ class NotaCredito {
             INNER JOIN cobro AS c ON nc.idCobro = c.idCobro
             INNER JOIN comprobante AS coc ON coc.idComprobante = c.idComprobante 
             WHERE 
-            ? = 0 AND nc.idProyecto = ?
+            ? = 0 AND nc.idSucursal = ?
             OR
-            ? = 1 and cl.documento = ? AND nc.idProyecto = ?
+            ? = 1 and cl.documento = ? AND nc.idSucursal = ?
             OR
-            ? = 1 and cl.informacion like concat(?,'%') AND nc.idProyecto = ?
+            ? = 1 and cl.informacion like concat(?,'%') AND nc.idSucursal = ?
             
             OR
-            ? = 1 and nc.serie = ? AND nc.idProyecto = ?
+            ? = 1 and nc.serie = ? AND nc.idSucursal = ?
             OR
-            ? = 1 and nc.numeracion = ? AND nc.idProyecto = ?
+            ? = 1 and nc.numeracion = ? AND nc.idSucursal = ?
             OR
-            ? = 1 and concat(nc.serie,'-',nc.numeracion) = ? AND nc.idProyecto = ?`, [
+            ? = 1 and concat(nc.serie,'-',nc.numeracion) = ? AND nc.idSucursal = ?`, [
                 parseInt(req.query.opcion),
-                req.query.idProyecto,
+                req.query.idSucursal,
 
                 parseInt(req.query.opcion),
                 req.query.buscar,
-                req.query.idProyecto,
+                req.query.idSucursal,
 
                 parseInt(req.query.opcion),
                 req.query.buscar,
-                req.query.idProyecto,
+                req.query.idSucursal,
 
                 parseInt(req.query.opcion),
                 req.query.buscar,
-                req.query.idProyecto,
+                req.query.idSucursal,
 
                 parseInt(req.query.opcion),
                 req.query.buscar,
-                req.query.idProyecto,
+                req.query.idSucursal,
 
                 parseInt(req.query.opcion),
                 req.query.buscar,
-                req.query.idProyecto,
+                req.query.idSucursal,
             ]);
 
             return sendSuccess(res, { "result": resultLista, "total": total[0].Total });
@@ -422,7 +422,7 @@ class NotaCredito {
                 idUsuario,
                 idMoneda,
                 idCobro,
-                idProyecto,
+                idSucursal,
                 idComprobante,
                 idMotivo,
                 serie,
@@ -437,7 +437,7 @@ class NotaCredito {
                 req.body.idUsuario,
                 req.body.idMoneda,
                 req.body.idCobro,
-                req.body.idProyecto,
+                req.body.idSucursal,
                 req.body.idComprobante,
                 req.body.idMotivo,
                 comprobante[0].serie,

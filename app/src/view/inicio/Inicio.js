@@ -34,11 +34,10 @@ import Impuestos from './ajustes/impuesto/Impuestos';
 
 import Bancos from './ajustes/Bancos';
 import BancoDetalle from './ajustes/registros/BancoDetalle';
-import Sedes from './ajustes/Sedes';
-import SedeProceso from './ajustes/registros/SedeProceso';
+import Empresa from './ajustes/Empresa';
 import EmpresaProceso from './ajustes/registros/EmpresaProceso';
-import Proyectos from './ajustes/Proyectos';
-import ProcesoProyecto from './ajustes/proyecto/ProcesoProyecto';
+import Sucursales from './ajustes/Sucursales';
+import ProcesoSucursal from './ajustes/sucursal/ProcesoSucursal';
 
 import Categorias from './logistica/categoria/Categorias';
 
@@ -343,29 +342,24 @@ class Inicio extends React.Component {
                         render={(props) => <BancoDetalle {...props} />}
                     />
                     <Route
-                        path={`${path}/sedes`}
+                        path={`${path}/empresa`}
                         exact={true}
-                        render={(props) => <Sedes {...props} />}
+                        render={(props) => <Empresa {...props} />}
                     />
                     <Route
-                        path={`${path}/sedes/proceso`}
-                        exact={true}
-                        render={(props) => <SedeProceso {...props} />}
-                    />
-                    <Route
-                        path={`${path}/sedes/empresa`}
+                        path={`${path}/empresa/proceso`}
                         exact={true}
                         render={(props) => <EmpresaProceso {...props} />}
                     />
                     <Route
-                        path={`${path}/proyectos`}
+                        path={`${path}/sucursales`}
                         exact={true}
-                        render={(props) => <Proyectos {...props} />}
+                        render={(props) => <Sucursales {...props} />}
                     />
                     <Route
-                        path={`${path}/proyectos/proceso`}
+                        path={`${path}/sucursales/proceso`}
                         exact={true}
-                        render={(props) => <ProcesoProyecto {...props} />}
+                        render={(props) => <ProcesoSucursal {...props} />}
                     />
                     <Route
                         path={`${path}/impuestos`}

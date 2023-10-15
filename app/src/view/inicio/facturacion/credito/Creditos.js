@@ -23,7 +23,7 @@ class Creditos extends React.Component {
             view: statePrivilegio(this.props.token.userToken.menus[2].submenu[2].privilegio[0].estado),
             pay: statePrivilegio(this.props.token.userToken.menus[2].submenu[2].privilegio[1].estado),
 
-            idProyecto: this.props.token.project.idProyecto,
+            idSucursal: this.props.token.project.idSucursal,
 
             opcion: 0,
             todos: 0,
@@ -99,7 +99,7 @@ class Creditos extends React.Component {
                     "buscar": buscar,
                     "todos": this.state.todos,
                     "cada": this.state.cada,
-                    "idProyecto": this.state.idProyecto,
+                    "idSucursal": this.state.idSucursal,
                     "posicionPagina": ((this.state.paginacion - 1) * this.state.filasPorPagina),
                     "filasPorPagina": this.state.filasPorPagina
                 }
@@ -128,9 +128,9 @@ class Creditos extends React.Component {
 
     onEventCronograma = async (item) => {
         const data = {
-            "idSede": "SD0001",
+            "idEmpresa": "EM0001",
             "idVenta": item.idVenta,
-            "proyecto": this.props.token.project.nombre,
+            "sucursal": this.props.token.project.nombre,
         }
 
         let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();

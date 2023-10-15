@@ -5,7 +5,7 @@ const { numberFormat, currentDate, isFile } = require('../tools/Tools');
 
 class RepProducto {
 
-    async repDetalleProducto(sedeInfo, data) {
+    async repDetalleProducto(empresaInfo, data) {
 
         const producto = data.producto
 
@@ -34,14 +34,14 @@ class RepProducto {
             let h3 = 9;
             let h4 = 8;
 
-            if (isFile(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo))) {
-                doc.image(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo), doc.x, doc.y, { width: 75 });
+            if (isFile(path.join(__dirname, "..", "path/company/" + empresaInfo.rutaLogo))) {
+                doc.image(path.join(__dirname, "..", "path/company/" + empresaInfo.rutaLogo), doc.x, doc.y, { width: 75 });
             } else {
                 doc.image(path.join(__dirname, "..", "path/to/noimage.jpg"), doc.x, doc.y, { width: 75 });
             }
 
             doc.fontSize(h1).text(
-                `${sedeInfo.nombreEmpresa}`,
+                `${empresaInfo.nombreEmpresa}`,
                 titleX,
                 orgY,
                 {
@@ -51,7 +51,7 @@ class RepProducto {
             );
 
             doc.fontSize(h3).text(
-                `RUC: ${sedeInfo.ruc}\n${sedeInfo.direccion}\nCelular: ${sedeInfo.celular} / Telefono: ${sedeInfo.telefono}`,
+                `RUC: ${empresaInfo.ruc}\n${empresaInfo.direccion}\nCelular: ${empresaInfo.celular} / Telefono: ${empresaInfo.telefono}`,
                 titleX,
                 orgY + 17,
                 {
@@ -211,7 +211,7 @@ class RepProducto {
         }
     }
 
-    async repTipoProducto(req, sedeInfo, data) {
+    async repTipoProducto(req, empresaInfo, data) {
         try {
 
             const doc = new PDFDocument({
@@ -236,14 +236,14 @@ class RepProducto {
             let h2 = 11;
             let h3 = 9;
 
-            if (isFile(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo))) {
-                doc.image(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo), doc.x, doc.y, { width: 75 });
+            if (isFile(path.join(__dirname, "..", "path/company/" + empresaInfo.rutaLogo))) {
+                doc.image(path.join(__dirname, "..", "path/company/" + empresaInfo.rutaLogo), doc.x, doc.y, { width: 75 });
             } else {
                 doc.image(path.join(__dirname, "..", "path/to/noimage.jpg"), doc.x, doc.y, { width: 75 });
             }
 
             doc.fontSize(h1).text(
-                `${sedeInfo.nombreEmpresa}`,
+                `${empresaInfo.nombreEmpresa}`,
                 titleX,
                 orgY,
                 {
@@ -253,7 +253,7 @@ class RepProducto {
             );
 
             doc.fontSize(h3).text(
-                `RUC: ${sedeInfo.ruc}\n${sedeInfo.direccion}\nCelular: ${sedeInfo.celular} / Telefono: ${sedeInfo.telefono}`,
+                `RUC: ${empresaInfo.ruc}\n${empresaInfo.direccion}\nCelular: ${empresaInfo.celular} / Telefono: ${empresaInfo.telefono}`,
                 titleX,
                 orgY + 17,
                 {
@@ -273,7 +273,7 @@ class RepProducto {
             );
 
             doc.fontSize(h3).text(
-                `PROYECTO: ${data.proyecto.nombre}`,
+                `SUCURSAL: ${data.sucursal.nombre}`,
                 orgX,
                 doc.y + 25,
                 {
@@ -283,7 +283,7 @@ class RepProducto {
             );
 
             doc.fontSize(h3).text(
-                `UBICACIÓN: ${data.proyecto.ubicacion}`,
+                `UBICACIÓN: ${data.sucursal.ubicacion}`,
                 orgX,
                 doc.y + 5,
                 {
@@ -293,7 +293,7 @@ class RepProducto {
             );
 
             doc.fontSize(h3).text(
-                `ÁREA: ${data.proyecto.area}  m²`,
+                `ÁREA: ${data.sucursal.area}  m²`,
                 orgX,
                 doc.y + 5,
                 {
@@ -354,7 +354,7 @@ class RepProducto {
         }
     }
 
-    async repProductoDeuda(req, sedeInfo, data) {
+    async repProductoDeuda(req, empresaInfo, data) {
         try {
 
             const doc = new PDFDocument({
@@ -381,14 +381,14 @@ class RepProducto {
             let h3 = 9;
             let h4 = 8;
 
-            if (isFile(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo))) {
-                doc.image(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo), orgX, orgY, { width: 75 });
+            if (isFile(path.join(__dirname, "..", "path/company/" + empresaInfo.rutaLogo))) {
+                doc.image(path.join(__dirname, "..", "path/company/" + empresaInfo.rutaLogo), orgX, orgY, { width: 75 });
             } else {
                 doc.image(path.join(__dirname, "..", "path/to/noimage.jpg"), orgX, orgY, { width: 75 });
             }
 
             doc.fontSize(h1).text(
-                `${sedeInfo.nombreEmpresa}`,
+                `${empresaInfo.nombreEmpresa}`,
                 titleX,
                 orgY,
                 {
@@ -398,7 +398,7 @@ class RepProducto {
             );
 
             doc.fontSize(h3).text(
-                `RUC: ${sedeInfo.ruc}\n${sedeInfo.direccion}\nCelular: ${sedeInfo.celular} / Telefono: ${sedeInfo.telefono}`,
+                `RUC: ${empresaInfo.ruc}\n${empresaInfo.direccion}\nCelular: ${empresaInfo.celular} / Telefono: ${empresaInfo.telefono}`,
                 titleX,
                 orgY + 17,
                 {
@@ -418,7 +418,7 @@ class RepProducto {
             );
 
             doc.fontSize(h3).text(
-                `${req.query.porProyecto == "0" ? "PROYECTO: " + req.query.nombreProyecto : "TODOS LOS PROYECTOS"}`,
+                `${req.query.porSucursal == "0" ? "SUCURSAL: " + req.query.nombreSucursal : "TODOS LOS SUCURSALES"}`,
                 orgX,
                 doc.y + 25,
                 {

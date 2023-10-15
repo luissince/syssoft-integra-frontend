@@ -151,7 +151,7 @@ class BancoDetalle extends React.Component {
     async onEventImprimir() {
         const data = {
             "idBanco": this.state.idBanco,
-            "idSede": "SD0001"
+            "idEmpresa": "EM0001"
         }
 
         let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();

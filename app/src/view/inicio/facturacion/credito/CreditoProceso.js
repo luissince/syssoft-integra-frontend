@@ -102,7 +102,7 @@ class CreditoProceso extends React.Component {
             montoIndividual: '',
 
             idUsuario: this.props.token.userToken.idUsuario,
-            idProyecto: this.props.token.project.idProyecto,
+            idSucursal: this.props.token.project.idSucursal,
 
             loading: true,
             messageWarning: '',
@@ -566,7 +566,7 @@ class CreditoProceso extends React.Component {
                         'idMoneda': this.state.venta.idMoneda,
                         "idBanco": this.state.idBancoCuota,
                         "idVenta": this.state.venta.idVenta,
-                        "idProyecto": this.state.idProyecto,
+                        "idSucursal": this.state.idSucursal,
                         "metodoPago": this.state.metodoPagoCuota,
                         "estado": 1,
                         "observacion": this.state.observacionCuota.trim().toUpperCase(),
@@ -642,7 +642,7 @@ class CreditoProceso extends React.Component {
                         'idMoneda': this.state.venta.idMoneda,
                         "idBanco": this.state.idBancoPlazo,
                         "idVenta": this.state.venta.idVenta,
-                        "idProyecto": this.state.idProyecto,
+                        "idSucursal": this.state.idSucursal,
                         "metodoPago": this.state.metodoPagoPlazo,
                         "estado": 1,
                         "observacion": this.state.observacionPlazo.trim().toUpperCase(),
@@ -725,7 +725,7 @@ class CreditoProceso extends React.Component {
                         'idMoneda': this.state.venta.idMoneda,
                         "idBanco": this.state.idBancoAdelanto,
                         "idVenta": this.state.venta.idVenta,
-                        "idProyecto": this.state.idProyecto,
+                        "idSucursal": this.state.idSucursal,
                         "metodoPago": this.state.metodoPagoAdelanto,
                         "estado": 1,
                         "observacion": this.state.observacionAdelanto.trim().toUpperCase(),
@@ -794,9 +794,9 @@ class CreditoProceso extends React.Component {
 
     async onEventImprimir() {
         const data = {
-            "idSede": "SD0001",
+            "idEmpresa": "EM0001",
             "idVenta": this.state.venta.idVenta,
-            "proyecto": this.props.token.project.nombre,
+            "sucursal": this.props.token.project.nombre,
         }
 
         let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
@@ -806,7 +806,7 @@ class CreditoProceso extends React.Component {
 
     async onEventImprimirLetra(idPlazo) {
         const data = {
-            "idSede": "SD0001",
+            "idEmpresa": "EM0001",
             "idVenta": this.state.venta.idVenta,
             "idPlazo": idPlazo,
         }
@@ -850,7 +850,7 @@ class CreditoProceso extends React.Component {
         if (this.state.filterProducto) return;
 
         const params = {
-            idProyecto: this.state.idProyecto,
+            idSucursal: this.state.idSucursal,
             filtrar: searchWord,
         }
 
@@ -983,7 +983,7 @@ class CreditoProceso extends React.Component {
                         "metodoPago": this.state.metodoPagoCobro,
                         "estado": 1,
                         "observacion": this.state.observacionCobro.trim().toUpperCase(),
-                        "idProyecto": this.state.idProyecto,
+                        "idSucursal": this.state.idSucursal,
                         "cobroDetalle": [{
                             "idConcepto": this.state.idConceptoCobro,
                             "concepto": this.refConceptoCobro.current.children[this.refConceptoCobro.current.selectedIndex].innerText,
@@ -1093,7 +1093,7 @@ class CreditoProceso extends React.Component {
                         "metodoPago": this.state.metodoPagoIndividual,
                         "estado": 1,
                         "observacion": this.state.observacionIndividual.trim().toUpperCase(),
-                        "idProyecto": this.state.idProyecto,
+                        "idSucursal": this.state.idSucursal,
                         "cobroDetalle": [{
                             "idConcepto": this.state.idConceptoIndividual,
                             "concepto": this.refConceptoIndivudual.current.children[this.refConceptoIndivudual.current.selectedIndex].innerText,

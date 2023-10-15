@@ -28,18 +28,18 @@ class Gasto {
                 LEFT JOIN gastoDetalle AS gd ON g.idGasto = gd.idGasto
                 LEFT JOIN concepto AS cn ON gd.idConcepto = cn.idConcepto 
                 WHERE 
-                ? = 0 AND g.idProyecto = ?
+                ? = 0 AND g.idSucursal = ?
                 OR
-                ? = 1 AND IFNULL(cl.informacion,'') LIKE CONCAT(?,'%') AND g.idProyecto = ?
+                ? = 1 AND IFNULL(cl.informacion,'') LIKE CONCAT(?,'%') AND g.idSucursal = ?
                 GROUP BY g.idGasto
                 ORDER BY g.fecha DESC, g.hora DESC
                 LIMIT ?,?`, [
                 parseInt(req.query.opcion),
-                req.query.idProyecto,
+                req.query.idSucursal,
 
                 parseInt(req.query.opcion),
                 req.query.buscar,
-                req.query.idProyecto,
+                req.query.idSucursal,
 
                 parseInt(req.query.posicionPagina),
                 parseInt(req.query.filasPorPagina)
@@ -58,15 +58,15 @@ class Gasto {
                 INNER JOIN banco AS b ON g.idBanco = b.idBanco
                 INNER JOIN moneda AS m ON g.idMoneda = m.idMoneda 
                 WHERE 
-                ? = 0 AND g.idProyecto = ?
+                ? = 0 AND g.idSucursal = ?
                 OR
-                ? = 1 AND IFNULL(cl.informacion,'') LIKE CONCAT(?,'%') AND g.idProyecto = ?`, [
+                ? = 1 AND IFNULL(cl.informacion,'') LIKE CONCAT(?,'%') AND g.idSucursal = ?`, [
                 parseInt(req.query.opcion),
-                req.query.idProyecto,
+                req.query.idSucursal,
 
                 parseInt(req.query.opcion),
                 req.query.buscar,
-                req.query.idProyecto,
+                req.query.idSucursal,
             ]);
 
             return { "result": resultLista, "total": total[0].Total };
@@ -140,7 +140,7 @@ class Gasto {
                 idMoneda, 
                 idBanco,
                 idProcedencia,
-                idProyecto,
+                idSucursal,
                 idComprobante,
                 serie,
                 numeracion,
@@ -156,7 +156,7 @@ class Gasto {
                 req.body.idMoneda,
                 req.body.idBanco,
                 '',
-                req.body.idProyecto,
+                req.body.idSucursal,
                 req.body.idComprobante,
                 comprobante[0].serie,
                 numeracion,
@@ -246,8 +246,8 @@ class Gasto {
             IFNULL(SUM(gd.precio*gd.cantidad), 0) AS monto
     
             FROM gasto AS g
-            INNER JOIN cliente AS cl ON g.idCliente = cl.idCliente
-            INNER JOIN tipoDocumento AS td ON td.idTipoDocumento = cl.idTipoDocumento
+            LEFT JOIN cliente AS cl ON g.idCliente = cl.idCliente
+            LEFT JOIN tipoDocumento AS td ON td.idTipoDocumento = cl.idTipoDocumento
             INNER JOIN usuario AS us ON g.idUsuario = us.idUsuario
             INNER JOIN moneda AS m ON g.idMoneda = m.idMoneda
             INNER JOIN banco AS b ON g.idBanco = b.idBanco

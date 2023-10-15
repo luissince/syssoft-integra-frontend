@@ -59,7 +59,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swagger));
 app.use(express.static(path.join(__dirname, "..", "app/build")));
 
 /**
- * Mostar estaticanmente las imagenes del proyecto
+ * Mostar estaticanmente las imagenes del sucursal
  */
 app.use(express.static(path.join(__dirname, "src/path/proyect")));
 
@@ -74,10 +74,9 @@ app.use(express.static(path.join(__dirname, "src/path/company")));
 app.use('/api/comprobante', require('./src/router/Comprobante'));
 app.use('/api/moneda', require('./src/router/Moneda'));
 app.use('/api/banco', require('./src/router/Banco'));
-app.use('/api/sede', require('./src/router/Sede'));
 app.use('/api/impuesto', require('./src/router/Impuesto'));
 
-app.use('/api/proyecto', require('./src/router/Proyecto'));
+app.use('/api/sucursal', require('./src/router/Sucursal'));
 app.use('/api/categoria', require('./src/router/Categoria'));
 app.use('/api/producto', require('./src/router/Producto'));
 app.use('/api/almacen', require('./src/router/Almacen'));

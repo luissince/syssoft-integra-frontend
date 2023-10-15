@@ -19,6 +19,52 @@ const conec = new Conexion();
 
 class Empresa {
 
+    async infoEmpresaReporte(req) {
+        try {
+
+            let empresa = await conec.query(`SELECT 
+                e.idEmpresa,
+                e.nombreEmpresa,
+                e.celular,
+                e.telefono,
+                e.email,
+                e.web,
+                e.documento as ruc,
+                e.razonSocial as nombreEmpresa,
+                u.departamento,
+                u.distrito,
+                e.direccion,
+                e.rutaLogo,
+                e.rutaImage,
+                e.usuarioEmail,
+                e.claveEmail
+                FROM empresa AS e
+                LEFT JOIN ubigeo AS u ON e.idUbigeo  = u.idUbigeo 
+                LIMIT 1`);
+
+            let sucursal = await conec.query(`SELECT 
+                idSucursal,
+                nombre AS nombreSucursal
+                FROM sucursal
+                WHERE idSucursal = ?`, [
+                req.query.idSucursal,
+            ]);
+            
+            let result = [...empresa, ...sucursal];
+
+            if (result.length >= 1) {
+                return {
+                    ...result[0],
+                    ...result[1],
+                }
+            } else {
+                return "Datos no encontrados";
+            }
+        } catch (error) {
+            return 'Error interno de conexión, intente nuevamente.';
+        }
+    }
+
     async load(req, res) {
         try {
             let empresa = await conec.query(`SELECT
@@ -119,7 +165,7 @@ class Empresa {
             let rutaImage = "";
             if (req.body.image !== "") {
                 removeFile(path.join(file, empresa[0].rutaImage));
- 
+
                 let nameImage = `${Date.now() + req.body.idEmpresa}.${req.body.extimage}`;
                 writeFile(path.join(file, nameImage), req.body.image);
 
@@ -131,7 +177,7 @@ class Empresa {
                 extImage = empresa[0].extimage;
                 rutaImage = empresa[0].rutaImage;
             }
-
+            console.log(req.body.nombreEmpresa)
             await conec.execute(connection, `UPDATE empresa SET 
             documento = ?,
             razonSocial = ?,
@@ -208,7 +254,7 @@ class Empresa {
         }
     }
 
-    async save(req, res) {       
+    async save(req, res) {
         let connection = null;
         try {
             connection = await conec.beginTransaction();
@@ -326,10 +372,19 @@ class Empresa {
 
             await conec.commit(connection);
             return sendSuccess(res, "Se registró correctamente la empresa.");
-        } catch (error) {            
+        } catch (error) {
             if (connection != null) {
                 await conec.rollback(connection);
             }
+            return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
+        }
+    }
+
+    async listarCombo(req, res) {
+        try {
+            let result = await conec.query('SELECT idEmpresa, nombreEmpresa FROM empresa');
+            return sendSuccess(res, result);
+        } catch (error) {
             return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
         }
     }

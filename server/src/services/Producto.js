@@ -18,24 +18,24 @@ class Producto {
                 l.costadoIzquierdo,
                 l.medidaFondo,
                 l.areaProducto
-                FROM producto AS l INNER JOIN categoria AS m 
-                ON l.idCategoria = m.idCategoria 
+                FROM producto AS l 
+                INNER JOIN categoria AS m ON l.idCategoria = m.idCategoria 
                 WHERE
-                ? = 0 AND m.idProyecto = ?
+                ? = 0 AND m.idSucursal = ?
                 OR
-                ? = 1 AND m.idProyecto = ? AND l.descripcion LIKE CONCAT(?,'%')    
+                ? = 1 AND m.idSucursal = ? AND l.descripcion LIKE CONCAT(?,'%')    
                 OR
-                ? = 1 AND m.idProyecto = ? AND m.nombre LIKE CONCAT(?,'%')    
+                ? = 1 AND m.idSucursal = ? AND m.nombre LIKE CONCAT(?,'%')    
                 LIMIT ?,?`, [
                 parseInt(req.query.opcion),
-                req.query.idProyecto,
+                req.query.idSucursal,
 
                 parseInt(req.query.opcion),
-                req.query.idProyecto,
+                req.query.idSucursal,
                 req.query.buscar,
 
                 parseInt(req.query.opcion),
-                req.query.idProyecto,
+                req.query.idSucursal,
                 req.query.buscar,
 
                 parseInt(req.query.posicionPagina),
@@ -53,20 +53,20 @@ class Producto {
                 FROM producto AS l INNER JOIN categoria AS m 
                 ON l.idCategoria = m.idCategoria 
                 WHERE
-                ? = 0 AND m.idProyecto = ?
+                ? = 0 AND m.idSucursal = ?
                 OR
-                ? = 1 AND m.idProyecto = ? AND l.descripcion LIKE CONCAT(?,'%')
+                ? = 1 AND m.idSucursal = ? AND l.descripcion LIKE CONCAT(?,'%')
                 OR
-                ? = 1 AND m.idProyecto = ? AND m.nombre LIKE CONCAT(?,'%')`, [
+                ? = 1 AND m.idSucursal = ? AND m.nombre LIKE CONCAT(?,'%')`, [
                 parseInt(req.query.opcion),
-                req.query.idProyecto,
+                req.query.idSucursal,
 
                 parseInt(req.query.opcion),
-                req.query.idProyecto,
+                req.query.idSucursal,
                 req.query.buscar,
 
                 parseInt(req.query.opcion),
-                req.query.idProyecto,
+                req.query.idSucursal,
                 req.query.buscar,
             ]);
             return { "result": resultLista, "total": total[0].Total }
@@ -282,14 +282,14 @@ class Producto {
                 await conec.execute(connection, `INSERT INTO alta(
                     idAlta ,
                     idCliente,
-                    idProyecto,
+                    idSucursal,
                     fecha,
                     hora,
                     idUsuario
                 ) VALUES(?,?,?,?,?,?)`, [
                     idAlta,
                     req.body.idCliente,
-                    req.body.idProyecto,
+                    req.body.idSucursal,
                     currentDate(),
                     currentTime(),
                     req.body.idUsuario,
@@ -764,8 +764,8 @@ class Producto {
             m.nombre AS nombreCategoria 
             FROM producto AS l INNER JOIN categoria AS m 
             ON l.idCategoria = m.idCategoria
-            WHERE m.idProyecto = ? AND l.estado = 1`, [
-                req.query.idProyecto
+            WHERE m.idSucursal = ? AND l.estado = 1`, [
+                req.query.idSucursal
             ]);
             return result
 
@@ -777,7 +777,7 @@ class Producto {
     async listarFilter(req) {
         try {
             const result = await conec.procedure("CALL Filtrar_Productos_Para_Venta(?,?)",[
-                req.query.idProyecto,
+                req.query.idSucursal,
                 req.query.filtrar,
             ])
             return result
@@ -812,12 +812,12 @@ class Producto {
     async listaEstadoProducto(req) {
         try {
 
-            const proyecto = await conec.query(`SELECT 
+            const sucursal = await conec.query(`SELECT 
             nombre,
             ubicacion,
             area 
-            FROM proyecto WHERE idProyecto = ?`, [
-                req.query.idProyecto,
+            FROM sucursal WHERE idSucursal = ?`, [
+                req.query.idSucursal,
             ]);
 
             const lista = await conec.query(`SELECT 
@@ -835,18 +835,18 @@ class Producto {
                 FROM producto AS l INNER JOIN categoria AS m 
                 ON l.idCategoria = m.idCategoria 
                 WHERE
-                ? = 0 AND m.idProyecto = ?
+                ? = 0 AND m.idSucursal = ?
                 OR
-                (? <> 0 AND l.estado = ? AND m.idProyecto = ?)`, [
+                (? <> 0 AND l.estado = ? AND m.idSucursal = ?)`, [
                 req.query.estadoProducto,
-                req.query.idProyecto,
+                req.query.idSucursal,
 
                 req.query.estadoProducto,
                 req.query.estadoProducto,
-                req.query.idProyecto,
+                req.query.idSucursal,
             ])
 
-            return { "proyecto": proyecto[0], "lista": lista };
+            return { "sucursal": sucursal[0], "lista": lista };
         } catch (error) {
             return "Se produjo un error de servidor, intente nuevamente.";
         }
@@ -937,15 +937,15 @@ class Producto {
             INNER JOIN producto AS lo ON vd.idProducto = lo.idProducto 
             INNER JOIN categoria AS ma ON lo.idCategoria = ma.idCategoria 
             WHERE  
-            ? = 0 AND v.estado = 2 AND v.idProyecto = ? 
+            ? = 0 AND v.estado = 2 AND v.idSucursal = ? 
             OR
             ? = 1 AND v.estado = 2            
             GROUP BY v.idVenta
             ORDER BY v.fecha DESC, v.hora DESC`, [
-                parseInt(req.query.porProyecto),
-                req.query.idProyecto,
+                parseInt(req.query.porSucursal),
+                req.query.idSucursal,
 
-                parseInt(req.query.porProyecto),
+                parseInt(req.query.porSucursal),
             ]);
 
             return result;

@@ -4,7 +4,7 @@ const { currentDate } = require('../tools/Tools');
 const { decrypt } = require('../tools/CryptoJS');
 
 const Banco = require('../services/Banco');
-const sede = require('../services/Sede');
+const empresa = require('../services/Empresa');
 const RepFinanciero = require('../report/RepFinanciero');
 
 const banco = new Banco();
@@ -85,22 +85,21 @@ router.get('/detalle', async function (req, res) {
 
 router.get('/repdetallebanco', async function (req, res) {
     const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
-
+    
     req.query.idBanco = decryptedData.idBanco;
-    req.query.idSede = decryptedData.idSede;
+    req.query.idEmpresa = decryptedData.idEmpresa;
 
-    const sedeInfo = await sede.infoSedeReporte(req)
-
-    if (typeof sedeInfo !== 'object') {
-        res.status(500).send(sedeInfo)
+    const empresaInfo = await empresa.infoEmpresaReporte(req)
+    
+    if (typeof empresaInfo !== 'object') {
+        res.status(500).send(empresaInfo)
         return;
     }
-
-    const detalle = await banco.detalleBanco(req)
-
+    
+    const detalle = await banco.detalleBancoReporte(req)
     if (typeof detalle === 'object') {
 
-        let data = await repFinanciero.repDetalleBanco(sedeInfo, detalle);
+        let data = await repFinanciero.repDetalleBanco(empresaInfo, detalle);
 
         if (typeof data === 'string') {
             res.status(500).send(data);

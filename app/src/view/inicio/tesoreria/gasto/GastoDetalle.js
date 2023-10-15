@@ -66,7 +66,7 @@ class GastoDetalle extends React.Component {
                     "idGasto": id
                 }
             });
-
+            
             let cabecera = result.data.cabecera;
 
             await this.setStateAsync({
@@ -144,7 +144,7 @@ class GastoDetalle extends React.Component {
 
     onEventImprimir(){
         const data = {
-            "idSede": "SD0001",
+            "idEmpresa": "EM0001",
             "idGasto": this.state.idGasto,
         }
 

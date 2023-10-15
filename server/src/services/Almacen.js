@@ -13,7 +13,7 @@ class Almacen {
             let lista = await conec.procedure(`CALL Listar_Almacenes(?,?,?,?)`, [
                 parseInt(req.query.opcion),
                 req.query.buscar,
-                // req.query.idProyecto,
+                // req.query.idSucursal,
 
                 parseInt(req.query.posicionPagina),
                 parseInt(req.query.filasPorPagina)

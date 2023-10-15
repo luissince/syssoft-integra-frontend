@@ -5,7 +5,7 @@ const { numberFormat, isFile } = require('../tools/Tools');
 
 class RepCuota {
 
-    async repDetalleCuota(req, sedeInfo, data) {
+    async repDetalleCuota(req, empresaInfo, data) {
         const venta = data.venta;
         try {
 
@@ -30,14 +30,14 @@ class RepCuota {
             let h2 = 11;
             let h3 = 9;
 
-            if (isFile(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo))) {
-                doc.image(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo), orgX, orgY, { width: 75 });
+            if (isFile(path.join(__dirname, "..", "path/company/" + empresaInfo.rutaLogo))) {
+                doc.image(path.join(__dirname, "..", "path/company/" + empresaInfo.rutaLogo), orgX, orgY, { width: 75 });
             } else {
                 doc.image(path.join(__dirname, "..", "path/to/noimage.jpg"), orgX, orgY, { width: 75 });
             }
 
             doc.fontSize(h1).text(
-                `${sedeInfo.nombreEmpresa}`,
+                `${empresaInfo.nombreEmpresa}`,
                 titleX,
                 orgY,
                 {
@@ -47,7 +47,7 @@ class RepCuota {
             );
 
             doc.fontSize(h3).text(
-                `RUC: ${sedeInfo.ruc}`,
+                `RUC: ${empresaInfo.ruc}`,
                 titleX,
                 doc.y,
                 {
@@ -57,7 +57,7 @@ class RepCuota {
             );
 
             doc.fontSize(h3).text(
-                sedeInfo.direccion,
+                empresaInfo.direccion,
                 titleX,
                 doc.y,
                 {
@@ -67,7 +67,7 @@ class RepCuota {
             );
 
             doc.fontSize(h3).text(
-                `Celular: ${sedeInfo.celular} / Telefono: ${sedeInfo.telefono}`,
+                `Celular: ${empresaInfo.celular} / Telefono: ${empresaInfo.telefono}`,
                 titleX,
                 doc.y,
                 {
@@ -92,7 +92,7 @@ class RepCuota {
 
             doc.opacity(0.7)
             doc.fontSize(h3).text(
-                `${req.query.proyecto}`,
+                `${req.query.sucursal}`,
                 orgX,
                 doc.y + 10,
                 {

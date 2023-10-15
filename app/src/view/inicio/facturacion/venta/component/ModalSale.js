@@ -121,7 +121,7 @@ const ModalSale = (props) => {
                     idComprobante: informacion.idComprobante,
                     idCliente: informacion.idCliente,
                     idUsuario: informacion.idUsuario,
-                    idProyecto: informacion.idProyecto,
+                    idSucursal: informacion.idSucursal,
                     idMoneda: informacion.idMoneda,
                     tipo: selectTipoPago === 1 ? 1 : 2,
                     selectTipoPago: selectTipoPago,

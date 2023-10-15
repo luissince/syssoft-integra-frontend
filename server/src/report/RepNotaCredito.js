@@ -10,7 +10,7 @@ const numberLleters = new NumberLleters();
 
 class RepNotaCredito {
 
-    async repComprobante(req, sedeInfo, data) {
+    async repComprobante(req, empresaInfo, data) {
         const cabecera = data.cabecera;
         try {
             const doc = new PDFDocument({
@@ -34,8 +34,8 @@ class RepNotaCredito {
             let h2 = 11;
             let h3 = 9;
 
-            if (isFile(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo))) {
-                doc.image(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo), orgX, orgY, { width: 75 });
+            if (isFile(path.join(__dirname, "..", "path/company/" + empresaInfo.rutaLogo))) {
+                doc.image(path.join(__dirname, "..", "path/company/" + empresaInfo.rutaLogo), orgX, orgY, { width: 75 });
             } else {
                 doc.image(path.join(__dirname, "..", "path/to/noimage.jpg"), orgX, orgY, { width: 75 });
             }
@@ -43,7 +43,7 @@ class RepNotaCredito {
             let center = doc.page.width - doc.options.margins.left - doc.options.margins.right - 150 - 150;
 
             doc.fontSize(h1).text(
-                `${sedeInfo.nombreEmpresa}`,
+                `${empresaInfo.nombreEmpresa}`,
                 doc.options.margins.left + 150,
                 orgY + 10,
                 {
@@ -53,7 +53,7 @@ class RepNotaCredito {
             );
 
             doc.fontSize(h3).text(
-                `${sedeInfo.direccion}\nCelular: ${sedeInfo.celular} / Telefono: ${sedeInfo.telefono}\n${sedeInfo.email}`,
+                `${empresaInfo.direccion}\nCelular: ${empresaInfo.celular} / Telefono: ${empresaInfo.telefono}\n${empresaInfo.email}`,
                 doc.options.margins.left + 150,
                 doc.y,
                 {
@@ -63,7 +63,7 @@ class RepNotaCredito {
             );
 
             doc.fontSize(h2).text(
-                `RUC: ${sedeInfo.ruc}\n${cabecera.comprobante}\n${cabecera.serie + "-" + cabecera.numeracion}`,
+                `RUC: ${empresaInfo.ruc}\n${cabecera.comprobante}\n${cabecera.serie + "-" + cabecera.numeracion}`,
                 doc.page.width - 150 - doc.options.margins.right,
                 orgY + 20,
                 {
@@ -306,7 +306,7 @@ class RepNotaCredito {
                 doc.y + 5);
 
             let qrResult = await this.qrGenerate(`|
-            ${sedeInfo.ruc}|
+            ${empresaInfo.ruc}|
             ${cabecera.codigoVenta}|
             ${cabecera.serie}|
             ${cabecera.numeracion}|

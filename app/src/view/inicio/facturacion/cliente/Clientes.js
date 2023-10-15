@@ -21,7 +21,7 @@ class Clientes extends CustomComponent {
     constructor(props) {
         super(props);
         this.state = {
-            idProyecto: this.props.token.project.idProyecto,
+            idSucursal: this.props.token.project.idSucursal,
 
             loading: false,
             lista: [],

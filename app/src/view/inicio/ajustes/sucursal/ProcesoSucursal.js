@@ -18,15 +18,15 @@ import { getUbigeo } from '../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
 
-class ProcesoProyecto extends React.Component {
+class ProcesoSucursal extends React.Component {
 
     constructor(props) {
         super(props);
         this.state = {
-            idProyecto: '',
+            idSucursal: '',
             nombre: '',
-            idSede: '',
-            sedes: [],
+            idEmpresa: '',
+            empresas: [],
             area: '',
             estado: '1',
 
@@ -42,7 +42,6 @@ class ProcesoProyecto extends React.Component {
             monedas: [],
             tea: '',
             preciometro: '',
-            costoxproducto: '',
             numContratoCorrelativo: '',
             numRecibocCorrelativo: '',
 
@@ -61,7 +60,7 @@ class ProcesoProyecto extends React.Component {
         }
 
         this.refTxtNombre = React.createRef();
-        this.refTxtSede = React.createRef();
+        this.refTxtEmpresa = React.createRef();
         this.refTxtArea = React.createRef();
         this.refTxtUbicacion = React.createRef();
         this.refTxtUbigeo = React.createRef();
@@ -85,7 +84,7 @@ class ProcesoProyecto extends React.Component {
         this.refFileImagen.current.addEventListener("change", this.onEventFileImage);
 
         const url = this.props.location.search;
-        const idResult = new URLSearchParams(url).get("idProyecto");
+        const idResult = new URLSearchParams(url).get("idSucursal");
         if (idResult !== null) {
             this.loadDataId(idResult)
         } else {
@@ -114,7 +113,7 @@ class ProcesoProyecto extends React.Component {
     async loadData() {
         try {
 
-            const sede = await axios.get("/api/sede/listcombo", {
+            const empresa = await axios.get("/api/empresa/listcombo", {
                 signal: this.abortController.signal,
             });
 
@@ -123,7 +122,7 @@ class ProcesoProyecto extends React.Component {
             });
 
             await this.setStateAsync({
-                sedes: sede.data,
+                empresas: empresa.data,
                 monedas: moneda.data,
 
                 loading: false,
@@ -140,7 +139,7 @@ class ProcesoProyecto extends React.Component {
     async loadDataId(id) {
         try {
 
-            const sede = await axios.get("/api/sede/listcombo", {
+            const empresa = await axios.get("/api/empresa/listcombo", {
                 signal: this.abortController.signal,
             });
 
@@ -148,21 +147,22 @@ class ProcesoProyecto extends React.Component {
                 signal: this.abortController.signal,
             });
 
-            const result = await axios.get("/api/proyecto/id", {
+            const result = await axios.get("/api/sucursal/id", {
                 signal: this.abortController.signal,
                 params: {
-                    idProyecto: id
+                    idSucursal: id
                 }
             });
 
             const data = result.data;
 
             await this.setStateAsync({
-                idProyecto: id,
+                idSucursal: id,
                 nombre: data.nombre,
-                idSede: data.idSede,
+                idEmpresa: data.idEmpresa,
                 area: data.area,
                 estado: data.estado,
+                empresas: empresa.data,
 
                 ubicacion: data.ubicacion,
                 idUbigeo: data.idUbigeo.toString(),
@@ -176,20 +176,19 @@ class ProcesoProyecto extends React.Component {
                 idMoneda: data.idMoneda,
                 tea: data.tea.toString(),
                 preciometro: data.preciometro.toString(),
-                costoxproducto: data.costoxproducto.toString(),
                 numContratoCorrelativo: data.numContratoCorrelativo,
                 numRecibocCorrelativo: data.numRecibocCorrelativo,
 
                 // imagen: data.imagen !== "" ? `data:image/${data.extensionimagen};base64,${data.imagen}` : images.noImage,
                 imagen: data.ruta !== "" ? "/" + data.ruta : images.noImage,
 
-                sedes: sede.data,
+                empresas: empresa.data,
                 monedas: moneda.data,
 
                 loading: false,
             });
             this.selectItem = true;
-        } catch (error) {           
+        } catch (error) {
             if (error.message !== "canceled") {
                 await this.setStateAsync({
                     msgLoading: "Se produjo un error un interno, intente nuevamente."
@@ -200,18 +199,18 @@ class ProcesoProyecto extends React.Component {
 
     async onEventGuardar() {
         if (this.state.nombre === "") {
-            await this.setStateAsync({ messageWarning: "Ingrese el nombre del proyecto." });
+            await this.setStateAsync({ messageWarning: "Ingrese el nombre del sucursal." });
             this.onFocusTab("datos-tab", "datos");
             this.refTxtNombre.current.focus();
             return;
         }
 
-        if (this.state.idSede === "") {
+        if (this.state.idEmpresa === "") {
             await this.setStateAsync({
-                messageWarning: "Seleccione la sede."
+                messageWarning: "Seleccione la Empresa."
             });
             this.onFocusTab("datos-tab", "datos");
-            this.refTxtSede.current.focus();
+            this.refTxtEmpresa.current.focus();
             return;
         }
 
@@ -226,7 +225,7 @@ class ProcesoProyecto extends React.Component {
 
         if (this.state.ubicacion === "") {
             await this.setStateAsync({
-                messageWarning: "Ingrese la ubicación del proyecto."
+                messageWarning: "Ingrese la ubicación del sucursal."
             });
             this.onFocusTab("ubicacion-tab", "ubicacion");
             this.refTxtUbicacion.current.focus();
@@ -251,33 +250,33 @@ class ProcesoProyecto extends React.Component {
             return;
         }
 
-        alertDialog("Proyecto", "¿Está seguro de continuar?", async (event) => {
+        alertDialog("Sucursal", "¿Está seguro de continuar?", async (event) => {
             if (event) {
                 try {
-                    alertInfo("Proyecto", "Procesando información...");
+                    alertInfo("Sucursal", "Procesando información...");
 
                     const imageSend = await imageBase64(this.refFileImagen)
                     if (imageSend) {
                         const { base64String, extension, width, height } = imageSend;
                         if (width === 1024 && height === 629) {
                             let result = await this.saveProject(base64String, extension);
-                            alertSuccess("Proyecto", result.data, () => {
+                            alertSuccess("Sucursal", result.data, () => {
                                 this.props.history.goBack();
                             });
                         } else {
-                            alertWarning("Proyecto", "La imagen a subir no tiene el tamaño establecido.");
+                            alertWarning("Sucursal", "La imagen a subir no tiene el tamaño establecido.");
                         }
                     } else {
                         let result = await this.saveProject("", "");
-                        alertSuccess("Proyecto", result.data, () => {
+                        alertSuccess("Sucursal", result.data, () => {
                             this.props.history.goBack();
                         });
                     }
                 } catch (error) {
                     if (error.response) {
-                        alertWarning("Proyecto", error.response.data)
+                        alertWarning("Sucursal", error.response.data)
                     } else {
-                        alertWarning("Proyecto", "Se genero un error interno, intente nuevamente.")
+                        alertWarning("Sucursal", "Se genero un error interno, intente nuevamente.")
                     }
                 }
             }
@@ -285,11 +284,11 @@ class ProcesoProyecto extends React.Component {
     }
 
     async saveProject(image, extension) {
-        if (this.state.idProyecto === "") {
-            return await axios.post('/api/proyecto', {
+        if (this.state.idSucursal === "") {
+            return await axios.post('/api/sucursal', {
                 //datos
                 "nombre": this.state.nombre.trim().toUpperCase(),
-                "idSede": this.state.idSede.trim().toUpperCase(),
+                "idEmpresa": this.state.idEmpresa.trim().toUpperCase(),
                 "area": this.state.area.trim(),
                 "estado": this.state.estado,
                 //ubicacion
@@ -304,7 +303,6 @@ class ProcesoProyecto extends React.Component {
                 "idMoneda": this.state.idMoneda,
                 "tea": isNumeric(this.state.tea) ? this.state.tea : 0,
                 "preciometro": isNumeric(this.state.preciometro) ? this.state.preciometro : 0,
-                "costoxproducto": isNumeric(this.state.costoxproducto) ? this.state.costoxproducto : 0,
                 "numContratoCorrelativo": this.state.numContratoCorrelativo.trim().toUpperCase(),
                 "numRecibocCorrelativo": this.state.numRecibocCorrelativo.trim().toUpperCase(),
                 //imagen
@@ -313,10 +311,10 @@ class ProcesoProyecto extends React.Component {
                 "idUsuario": this.state.idUsuario,
             });
         } else {
-            return await axios.put('/api/proyecto', {
+            return await axios.put('/api/sucursal', {
                 //datos
                 "nombre": this.state.nombre.trim().toUpperCase(),
-                "idSede": this.state.idSede.trim().toUpperCase(),
+                "idEmpresa": this.state.idEmpresa.trim().toUpperCase(),
                 "area": this.state.area.trim(),
                 "estado": this.state.estado,
                 //ubicacion
@@ -331,14 +329,13 @@ class ProcesoProyecto extends React.Component {
                 "idMoneda": this.state.idMoneda,
                 "tea": this.state.tea.toString().trim().toUpperCase(),
                 "preciometro": this.state.preciometro.toString().trim().toUpperCase(),
-                "costoxproducto": this.state.costoxproducto.toString().trim().toUpperCase(),
                 "numContratoCorrelativo": this.state.numContratoCorrelativo.trim().toUpperCase(),
                 "numRecibocCorrelativo": this.state.numRecibocCorrelativo.trim().toUpperCase(),
                 //imagen
                 "imagen": image === "" ? "" : image,
                 "extension": extension === "" ? "" : extension,
                 "idUsuario": this.state.idUsuario,
-                "idProyecto": this.state.idProyecto,
+                "idSucursal": this.state.idSucursal,
             });
         }
     }
@@ -419,7 +416,7 @@ class ProcesoProyecto extends React.Component {
                         <div className="form-group">
                             <div className="form-group">
                                 <h5>
-                                    <span role="button" onClick={() => this.props.history.goBack()}><i className="bi bi-arrow-left-short"></i></span> Proyectos
+                                    <span role="button" onClick={() => this.props.history.goBack()}><i className="bi bi-arrow-left-short"></i></span> Sucursales
                                     <small className="text-secondary"> PROCESO</small>
                                 </h5>
                             </div>
@@ -458,7 +455,7 @@ class ProcesoProyecto extends React.Component {
                             <div className="tab-pane fade show active" id="datos" role="tabpanel" aria-labelledby="datos-tab">
                                 <div className="form-row">
                                     <div className="form-group col-md-6">
-                                        <label>Nombre de Proyecto: <i className="fa fa-asterisk text-danger small"></i></label>
+                                        <label>Nombre de Sucursal: <i className="fa fa-asterisk text-danger small"></i></label>
                                         <input
                                             type="text"
                                             className="form-control"
@@ -468,17 +465,17 @@ class ProcesoProyecto extends React.Component {
                                             placeholder="Dijite ..." />
                                     </div>
                                     <div className="form-group col-md-6">
-                                        <label>Sede: <i className="fa fa-asterisk text-danger small"></i></label>
+                                        <label>Empresa: <i className="fa fa-asterisk text-danger small"></i></label>
                                         <select
                                             className="form-control"
-                                            ref={this.refTxtSede}
-                                            value={this.state.idSede}
-                                            onChange={(event) => this.setState({ idSede: event.target.value })}
+                                            ref={this.refTxtEmpresa}
+                                            value={this.state.idEmpresa}
+                                            onChange={(event) => this.setState({ idEmpresa: event.target.value })}
                                         >
                                             <option value="">- Seleccione -</option>
                                             {
-                                                this.state.sedes.map((item, index) => (
-                                                    <option key={index} value={item.idSede}>{item.nombreSede}</option>
+                                                this.state.empresas.map((item, index) => (
+                                                    <option key={index} value={item.idEmpresa}>{item.nombreEmpresa}</option>
                                                 ))
                                             }
                                         </select>
@@ -516,7 +513,7 @@ class ProcesoProyecto extends React.Component {
                             <div className="tab-pane fade" id="ubicacion" role="tabpanel" aria-labelledby="ubicacion-tab">
                                 <div className="form-row">
                                     <div className="form-group col-md-12">
-                                        <label>Ubicacion del Proyecto: <i className="fa fa-asterisk text-danger small"></i></label>
+                                        <label>Ubicacion del Sucursal: <i className="fa fa-asterisk text-danger small"></i></label>
                                         <input
                                             type="text"
                                             className="form-control"
@@ -619,7 +616,7 @@ class ProcesoProyecto extends React.Component {
                                 </div>
 
                                 <div className="form-row">
-                                    <div className="form-group col-md-6">
+                                    <div className="form-group col-md-4">
                                         <label>Precio Metro Cuadrado:</label>
                                         <input
                                             type="text"
@@ -628,19 +625,7 @@ class ProcesoProyecto extends React.Component {
                                             onChange={(event) => this.setState({ preciometro: event.target.value })}
                                             placeholder="Dijite ..." />
                                     </div>
-                                    <div className="form-group col-md-6">
-                                        <label>Coste Aproximado x Producto:</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            value={this.state.costoxproducto}
-                                            onChange={(event) => this.setState({ costoxproducto: event.target.value })}
-                                            placeholder="Dijite ..." />
-                                    </div>
-                                </div>
-
-                                <div className="form-row">
-                                    <div className="form-group col-md-6">
+                                    <div className="form-group col-md-4">
                                         <label>Número Contrato Correlativo:</label>
                                         <input
                                             type="text"
@@ -649,7 +634,7 @@ class ProcesoProyecto extends React.Component {
                                             onChange={(event) => this.setState({ numContratoCorrelativo: event.target.value })}
                                             placeholder="Dijite ..." />
                                     </div>
-                                    <div className="form-group col-md-6">
+                                    <div className="form-group col-md-4">
                                         <label>Número Recibo Correlativo:</label>
                                         <input
                                             type="text"
@@ -719,4 +704,4 @@ const mapStateToProps = (state) => {
     }
 }
 
-export default connect(mapStateToProps, null)(ProcesoProyecto);
+export default connect(mapStateToProps, null)(ProcesoSucursal);

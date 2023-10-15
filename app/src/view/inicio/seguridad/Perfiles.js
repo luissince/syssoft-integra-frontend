@@ -228,7 +228,7 @@ class Perfiles extends React.Component {
                     if (this.state.idPerfil !== '') {
                         let result = await axios.post('/api/perfil/update', {
                             "descripcion": this.state.descripcion.trim().toUpperCase(),
-                            "idSede": "SD0001",
+                            "idEmpresa": "EM0001",
                             "idUsuario": this.state.idUsuario,
                             "idPerfil": this.state.idPerfil
                         }, {
@@ -243,7 +243,7 @@ class Perfiles extends React.Component {
                     } else {
                         let result = await axios.post('/api/perfil/add', {
                             "descripcion": this.state.descripcion.trim().toUpperCase(),
-                            "idSede": "SD0001",
+                            "idEmpresa": "EM0001",
                             "idUsuario": this.state.idUsuario,
                         }, {
                             headers: {

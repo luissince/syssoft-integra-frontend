@@ -34,7 +34,7 @@ class NotaCreditoProceso extends React.Component {
             cabecera: {},
             detalle: [],
 
-            idProyecto: this.props.token.project.idProyecto,
+            idSucursal: this.props.token.project.idSucursal,
             idUsuario: this.props.token.userToken.idUsuario,
 
             loading: true,
@@ -182,7 +182,7 @@ class NotaCreditoProceso extends React.Component {
                         idMotivo: this.state.idMotivo,
                         idCliente: this.state.cabecera.idCliente,
                         idCobro: this.state.cabecera.idCobro,
-                        idProyecto: this.state.idProyecto,
+                        idSucursal: this.state.idSucursal,
                         idUsuario: this.state.idUsuario,
                         detalle: this.state.detalle
                     });

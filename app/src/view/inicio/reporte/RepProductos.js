@@ -9,8 +9,8 @@ class RepProductos extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            idProyecto: this.props.token.project.idProyecto,
-            nombreProyecto: this.props.token.project.nombre,
+            idSucursal: this.props.token.project.idSucursal,
+            nombreSucursal: this.props.token.project.nombre,
 
             producto: '',
             productoCheck: true,
@@ -18,8 +18,8 @@ class RepProductos extends React.Component {
             loading: true,
             msgLoading: '',
 
-            porProyecto: "0",
-            proyectoCkeck: true,
+            porSucursal: "0",
+            sucursalCkeck: true,
         }
         this.refUseFile = React.createRef();
 
@@ -59,9 +59,9 @@ class RepProductos extends React.Component {
 
         const data = {
             // "idProducto": this.state.idProducto,
-            "idProyecto": this.state.idProyecto,
+            "idSucursal": this.state.idSucursal,
             "estadoProducto": this.state.producto === '' ? 0 : this.state.producto,
-            "idSede": "SD0001"
+            "idEmpresa": "EM0001"
         }
 
         let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
@@ -69,7 +69,7 @@ class RepProductos extends React.Component {
         window.open("/api/producto/reptipoProductos?" + params, "_blank");
 
         //Despliegue 
-        // window.open("/api/producto/repproductodetalle?idProducto=" + this.state.idProducto + "&idSede=SD0001", "_blank");
+        // window.open("/api/producto/repproductodetalle?idProducto=" + this.state.idProducto + "&idEmpresa=EM0001", "_blank");
 
         //Desarrollo
         // try {
@@ -78,7 +78,7 @@ class RepProductos extends React.Component {
         //         responseType: "blob",
         //         params: {
         //             "idProducto": this.state.idProducto,
-        //             "idSede": 'SD0001'
+        //             "idEmpresa": 'EM0001'
         //         }
         //     });
 
@@ -93,10 +93,10 @@ class RepProductos extends React.Component {
 
     async onEventPdfProductoCobrar() {
         const data = {
-            "idSede": "SD0001",
-            "idProyecto": this.state.idProyecto,
-            "nombreProyecto": this.state.nombreProyecto,
-            "porProyecto": this.state.porProyecto
+            "idEmpresa": "EM0001",
+            "idSucursal": this.state.idSucursal,
+            "nombreSucursal": this.state.nombreSucursal,
+            "porSucursal": this.state.porSucursal
         }
         let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
         let params = new URLSearchParams({ "params": ciphertext });
@@ -105,10 +105,10 @@ class RepProductos extends React.Component {
 
     async onEventExcelProductoCobrar() {
         const data = {
-            "idSede": "SD0001",
-            "idProyecto": this.state.idProyecto,
-            "nombreProyecto": this.state.nombreProyecto,
-            "porProyecto": this.state.porProyecto
+            "idEmpresa": "EM0001",
+            "idSucursal": this.state.idSucursal,
+            "nombreSucursal": this.state.nombreSucursal,
+            "porSucursal": this.state.porSucursal
         }
         let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
 
@@ -191,15 +191,15 @@ class RepProductos extends React.Component {
                                     <div className="row">
                                         <div className="col">
                                             <div className="form-group">
-                                                <label>Proyecto<i className="fa fa-asterisk text-danger small"></i></label>
+                                                <label>Sucursal<i className="fa fa-asterisk text-danger small"></i></label>
                                                 <div className="input-group">
                                                     <select
                                                         title="Año"
                                                         className="form-control"
-                                                        disabled={this.state.proyectoCkeck}
-                                                        value={this.state.porProyecto}
-                                                        onChange={(event) => this.setState({ porProyecto: event.target.value })}>
-                                                        <option value={"0"}>{"Por proyecto"}</option>
+                                                        disabled={this.state.sucursalCkeck}
+                                                        value={this.state.porSucursal}
+                                                        onChange={(event) => this.setState({ porSucursal: event.target.value })}>
+                                                        <option value={"0"}>{"Por sucursal"}</option>
                                                         <option value={"1"}>{"Todos"}</option>
                                                     </select>
                                                     <div className="input-group-append">
@@ -208,8 +208,8 @@ class RepProductos extends React.Component {
                                                                 <input
                                                                     className="form-check-input"
                                                                     type="checkbox"
-                                                                    checked={this.state.proyectoCkeck}
-                                                                    onChange={async (event) => await this.setStateAsync({ proyectoCkeck: event.target.checked })} />
+                                                                    checked={this.state.sucursalCkeck}
+                                                                    onChange={async (event) => await this.setStateAsync({ sucursalCkeck: event.target.checked })} />
                                                             </div>
                                                         </div>
                                                     </div>

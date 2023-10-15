@@ -11,7 +11,7 @@ class RepFinanciero extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            idProyecto: this.props.token.project.idProyecto,
+            idSucursal: this.props.token.project.idSucursal,
 
             fechaIni: '',
             fechaFin: '',
@@ -25,12 +25,15 @@ class RepFinanciero extends React.Component {
             idBanco: '',
             bancos: [],
 
+            idSucursal: '',
             idComprobante: '',
             comprobantes: [],
             comprobanteCheck: true,
+            sucursalCheck: true,
 
             idUsuario: '',
             usuarios: [],
+            sucursales: [],
             usuarioCheck: true,
 
             loading: true,
@@ -42,6 +45,7 @@ class RepFinanciero extends React.Component {
         this.refCliente = React.createRef();
         this.refBanco = React.createRef();
 
+        this.refSucursal = React.createRef();
         this.refComprobante = React.createRef();
         this.refUsuario = React.createRef();
         this.refBancoGasto = React.createRef();
@@ -71,6 +75,10 @@ class RepFinanciero extends React.Component {
                 signal: this.abortControllerView.signal
             });
 
+            const sucursal = await axios.get("/api/sucursal/combo", {
+                signal: this.abortControllerView.signal
+            });
+
             const facturado = await apiComprobanteListcombo(this.abortControllerView.signal, {
                 "tipo": "1",
                 "estado": "all"
@@ -86,6 +94,7 @@ class RepFinanciero extends React.Component {
                 fechaFin: currentDate(),
                 usuarios: usuario.data,
                 comprobantes: [...comprobante.data, ...facturado.data],
+                sucursales: sucursal.data,
 
                 loading: false
             });
@@ -107,12 +116,13 @@ class RepFinanciero extends React.Component {
         }
 
         const data = {
-            "idSede": "SD0001",
+            "idEmpresa": "EM0001",
             "fechaIni": this.state.fechaIni,
             "fechaFin": this.state.fechaFin,
             "isDetallado": this.state.isDetallado,
             "idComprobante": this.state.idComprobante,
             "idUsuario": this.state.idUsuario,
+            "idSucursal": this.state.idSucursal,
         }
 
         let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
@@ -128,12 +138,13 @@ class RepFinanciero extends React.Component {
         }
 
         const data = {
-            "idSede": "SD0001",
+            "idEmpresa": "EM0001",
             "fechaIni": this.state.fechaIni,
             "fechaFin": this.state.fechaFin,
             "isDetallado": this.state.isDetallado,
             "idComprobante": this.state.idComprobante,
             "idUsuario": this.state.idUsuario,
+            "idSucursal": this.state.idSucursal,
         }
 
         let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
@@ -249,6 +260,51 @@ class RepFinanciero extends React.Component {
                                         >
                                         </input>
                                         <label className="custom-control-label" htmlFor="customSwitch2">{this.state.isDetallado ? 'Si' : 'No'}</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="col">
+                                <div className="form-group">
+                                    <label>Sucursal</label>
+                                    <div className="input-group">
+                                        <select
+                                            title="Lista de Sucursales"
+                                            className="form-control"
+                                            ref={this.refSucursal}
+                                            value={this.state.idSucursal}
+                                            disabled={this.state.sucursalCheck}
+                                            onChange={async (event) => {
+                                                await this.setStateAsync({ idSucursal: event.target.value });
+                                                if (this.state.idSucursal === '') {
+                                                    await this.setStateAsync({ sucursalCheck: true });
+                                                }
+                                            }}
+                                        >
+                                            <option value="">-- Todos --</option>
+                                            {
+                                                this.state.sucursales.map((item, index) => (
+                                                    <option key={index} value={item.idSucursal}>{(index+1) + '.- ' +item.nombre }</option>
+                                                ))
+                                            }
+                                        </select>
+                                        <div className="input-group-append">
+                                            <div className="input-group-text">
+                                                <div className="form-check form-check-inline m-0">
+                                                    <input
+                                                        className="form-check-input"
+                                                        type="checkbox"
+                                                        checked={this.state.sucursalCheck}
+                                                        onChange={async (event) => {
+                                                            await this.setStateAsync({ sucursalCheck: event.target.checked })
+                                                            if (this.state.sucursalCheck) {
+                                                                await this.setStateAsync({ idSucursal: '' });
+                                                            }
+                                                        }}
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

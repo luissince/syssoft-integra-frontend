@@ -61,37 +61,37 @@ class Cobro {
 
             LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro AND nc.estado = 1
             WHERE 
-            ? = 0 AND c.idProyecto = ?
+            ? = 0 AND c.idSucursal = ?
             OR
-            ? = 1 AND cl.informacion LIKE CONCAT(?,'%') AND c.idProyecto = ?
+            ? = 1 AND cl.informacion LIKE CONCAT(?,'%') AND c.idSucursal = ?
             OR
-            ? = 1 AND c.serie = ? AND c.idProyecto = ?
+            ? = 1 AND c.serie = ? AND c.idSucursal = ?
             OR
-            ? = 1 AND c.numeracion = ? AND c.idProyecto = ?
+            ? = 1 AND c.numeracion = ? AND c.idSucursal = ?
             OR
-            ? = 1 AND CONCAT(c.serie,'-',c.numeracion) = ? AND c.idProyecto = ?
+            ? = 1 AND CONCAT(c.serie,'-',c.numeracion) = ? AND c.idSucursal = ?
 
             GROUP BY c.idCobro
             ORDER BY c.fecha DESC,c.hora DESC
             LIMIT ?,?`, [
                 parseInt(req.query.opcion),
-                req.query.idProyecto,
+                req.query.idSucursal,
 
                 parseInt(req.query.opcion),
                 req.query.buscar,
-                req.query.idProyecto,
+                req.query.idSucursal,
 
                 parseInt(req.query.opcion),
                 req.query.buscar,
-                req.query.idProyecto,
+                req.query.idSucursal,
 
                 parseInt(req.query.opcion),
                 req.query.buscar,
-                req.query.idProyecto,
+                req.query.idSucursal,
 
                 parseInt(req.query.opcion),
                 req.query.buscar,
-                req.query.idProyecto,
+                req.query.idSucursal,
 
                 parseInt(req.query.posicionPagina),
                 parseInt(req.query.filasPorPagina)
@@ -111,33 +111,33 @@ class Cobro {
             INNER JOIN moneda AS m ON c.idMoneda = m.idMoneda 
             LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro AND nc.estado = 1
             WHERE 
-            ? = 0 AND c.idProyecto = ?
+            ? = 0 AND c.idSucursal = ?
             OR
-            ? = 1 AND cl.informacion LIKE CONCAT(?,'%') AND c.idProyecto = ?
+            ? = 1 AND cl.informacion LIKE CONCAT(?,'%') AND c.idSucursal = ?
             OR
-            ? = 1 AND c.serie = ? AND c.idProyecto = ?
+            ? = 1 AND c.serie = ? AND c.idSucursal = ?
             OR
-            ? = 1 AND c.numeracion = ? AND c.idProyecto = ?
+            ? = 1 AND c.numeracion = ? AND c.idSucursal = ?
             OR
-            ? = 1 AND CONCAT(c.serie,'-',c.numeracion) = ? AND c.idProyecto = ?`, [
+            ? = 1 AND CONCAT(c.serie,'-',c.numeracion) = ? AND c.idSucursal = ?`, [
                 parseInt(req.query.opcion),
-                req.query.idProyecto,
+                req.query.idSucursal,
 
                 parseInt(req.query.opcion),
                 req.query.buscar,
-                req.query.idProyecto,
+                req.query.idSucursal,
 
                 parseInt(req.query.opcion),
                 req.query.buscar,
-                req.query.idProyecto,
+                req.query.idSucursal,
 
                 parseInt(req.query.opcion),
                 req.query.buscar,
-                req.query.idProyecto,
+                req.query.idSucursal,
 
                 parseInt(req.query.opcion),
                 req.query.buscar,
-                req.query.idProyecto,
+                req.query.idSucursal,
             ]);
 
             return { "result": resultLista, "total": total[0].Total };
@@ -211,7 +211,7 @@ class Cobro {
             idMoneda, 
             idBanco, 
             idProcedencia,
-            idProyecto,
+            idSucursal,
             idComprobante,
             serie,
             numeracion,
@@ -227,7 +227,7 @@ class Cobro {
                 req.body.idMoneda,
                 req.body.idBanco,
                 req.body.idProcedencia,
-                req.body.idProyecto,
+                req.body.idSucursal,
                 req.body.idComprobante,
                 comprobante[0].serie,
                 numeracion,
@@ -399,7 +399,7 @@ class Cobro {
             idMoneda, 
             idBanco, 
             idProcedencia,
-            idProyecto,
+            idSucursal,
             idComprobante,
             serie,
             numeracion,
@@ -415,7 +415,7 @@ class Cobro {
                 req.body.idMoneda,
                 req.body.idBanco,
                 req.body.idVenta,
-                req.body.idProyecto,
+                req.body.idSucursal,
                 req.body.idComprobante,
                 comprobante[0].serie,
                 numeracion,
@@ -607,7 +607,7 @@ class Cobro {
             idMoneda, 
             idBanco, 
             idProcedencia,
-            idProyecto,
+            idSucursal,
             idComprobante,
             serie,
             numeracion,
@@ -623,7 +623,7 @@ class Cobro {
                 req.body.idMoneda,
                 req.body.idBanco,
                 req.body.idVenta,
-                req.body.idProyecto,
+                req.body.idSucursal,
                 req.body.idComprobante,
                 comprobante[0].serie,
                 numeracion,
@@ -823,7 +823,7 @@ class Cobro {
             idMoneda, 
             idBanco, 
             idProcedencia,
-            idProyecto,
+            idSucursal,
             idComprobante,
             serie,
             numeracion,
@@ -839,7 +839,7 @@ class Cobro {
                 req.body.idMoneda,
                 req.body.idBanco,
                 req.body.idVenta,
-                req.body.idProyecto,
+                req.body.idSucursal,
                 req.body.idComprobante,
                 comprobante[0].serie,
                 numeracion,
@@ -1042,7 +1042,7 @@ class Cobro {
                 idMoneda, 
                 idBanco, 
                 idProcedencia,
-                idProyecto,
+                idSucursal,
                 idComprobante,
                 serie,
                 numeracion,
@@ -1058,7 +1058,7 @@ class Cobro {
                 req.body.idMoneda,
                 req.body.idBanco,
                 idVenta,
-                req.body.idProyecto,
+                req.body.idSucursal,
                 req.body.idComprobanteCobro,
                 comprobanteCobro[0].serie,
                 numeracionCobro,
@@ -1689,7 +1689,8 @@ class Cobro {
                     c.estado,
                     IFNULL(SUM(cd.precio*cd.cantidad),SUM(cv.precio)) AS monto,
                     u.nombres,
-                    u.apellidos
+                    u.apellidos,
+                    s.nombre AS nombreSucursal
                     FROM cobro AS c
                     INNER JOIN cliente AS cl ON c.idCliente = cl.idCliente
                     INNER JOIN banco AS b ON c.idBanco = b.idBanco
@@ -1702,15 +1703,24 @@ class Cobro {
                     LEFT JOIN venta AS v ON cv.idVenta = v.idVenta 
                     LEFT JOIN comprobante AS cp ON v.idComprobante = cp.idComprobante
                     LEFT JOIN usuario AS u ON u.idUsuario = c.idUsuario
+                    LEFT JOIN sucursal AS s ON s.idSucursal = c.idSucursal
                     LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro AND nc.estado = 1
                     WHERE 
-                    c.fecha BETWEEN ? AND ? AND ? = '' AND ? = ''
+                    c.fecha BETWEEN ? AND ? AND ? = '' AND ? = '' AND ? = ''
                     OR
-                    c.fecha BETWEEN ? AND ? AND ? = '' AND u.idUsuario = ?
+                    c.fecha BETWEEN ? AND ? AND ? = '' AND u.idUsuario = ? AND ? = ''
                     OR
-                    c.fecha BETWEEN ? AND ? AND co.idComprobante = ? AND ? = ''
+                    c.fecha BETWEEN ? AND ? AND co.idComprobante = ? AND ? = '' AND ? = ''
                     OR
-                    c.fecha BETWEEN ? AND ? AND co.idComprobante = ? AND u.idUsuario = ?
+                    c.fecha BETWEEN ? AND ? AND ? = '' AND ? = '' AND c.idSucursal = ?
+                    OR
+                    c.fecha BETWEEN ? AND ? AND co.idComprobante = ? AND u.idUsuario = ? AND ? = ''
+                    OR
+                    c.fecha BETWEEN ? AND ? AND ? = '' AND u.idUsuario = ? AND c.idSucursal = ?
+                    OR
+                    c.fecha BETWEEN ? AND ? AND co.idComprobante = ? AND ? = '' AND c.idSucursal = ?
+                    OR
+                    c.fecha BETWEEN ? AND ? AND co.idComprobante = ? AND u.idUsuario = ? AND c.idSucursal = ?
                     GROUP BY c.idCobro
                     ORDER BY c.fecha DESC,c.hora DESC
                     `, [
@@ -1718,21 +1728,49 @@ class Cobro {
                     req.query.fechaFin,
                     req.query.idComprobante,
                     req.query.idUsuario,
+                    req.query.idSucursal,
 
                     req.query.fechaIni,
                     req.query.fechaFin,
                     req.query.idComprobante,
                     req.query.idUsuario,
+                    req.query.idSucursal,
 
                     req.query.fechaIni,
                     req.query.fechaFin,
                     req.query.idComprobante,
                     req.query.idUsuario,
+                    req.query.idSucursal,
 
                     req.query.fechaIni,
                     req.query.fechaFin,
                     req.query.idComprobante,
                     req.query.idUsuario,
+                    req.query.idSucursal,
+
+                    req.query.fechaIni,
+                    req.query.fechaFin,
+                    req.query.idComprobante,
+                    req.query.idUsuario,
+                    req.query.idSucursal,
+
+                    req.query.fechaIni,
+                    req.query.fechaFin,
+                    req.query.idComprobante,
+                    req.query.idUsuario,
+                    req.query.idSucursal,
+
+                    req.query.fechaIni,
+                    req.query.fechaFin,
+                    req.query.idComprobante,
+                    req.query.idUsuario,
+                    req.query.idSucursal,
+
+                    req.query.fechaIni,
+                    req.query.fechaFin,
+                    req.query.idComprobante,
+                    req.query.idUsuario,
+                    req.query.idSucursal,
                 ]);
 
                 const gastos = await conec.query(`SELECT 
@@ -1748,7 +1786,8 @@ class Cobro {
                     g.observacion, 
                     DATE_FORMAT(g.fecha,'%d/%m/%Y') as fecha, 
                     g.hora,
-                    IFNULL(SUM(gd.precio*gd.cantidad),0) AS monto
+                    IFNULL(SUM(gd.precio*gd.cantidad),0) AS monto,
+                    s.nombre AS nombreSucursal
                     FROM gasto AS g          
                     INNER JOIN cliente AS cl ON g.idCliente = cl.idCliente 
                     INNER JOIN banco AS b ON g.idBanco = b.idBanco
@@ -1757,20 +1796,37 @@ class Cobro {
                     LEFT JOIN usuario AS u ON u.idUsuario = g.idUsuario    
                     LEFT JOIN gastoDetalle AS gd ON g.idGasto = gd.idGasto
                     LEFT JOIN concepto AS cn ON gd.idConcepto = cn.idConcepto 
+                    LEFT JOIN sucursal AS s ON s.idSucursal = g.idSucursal
                     WHERE 
-                    g.fecha BETWEEN ? AND ? AND ? = ''
+                    g.fecha BETWEEN ? AND ? AND ? = '' AND ? = ''
                     OR
-                    g.fecha BETWEEN ? AND ? AND u.idUsuario = ?
+                    g.fecha BETWEEN ? AND ? AND u.idUsuario = ? AND ? = ''
+                    OR 
+                    g.fecha BETWEEN ? AND ? AND ? = '' AND g.idSucursal = ?
+                    OR
+                    g.fecha BETWEEN ? AND ? AND u.idUsuario = ? AND g.idSucursal = ?
                     GROUP BY g.idGasto
                     ORDER BY g.fecha DESC, g.hora DESC
                     `, [
                     req.query.fechaIni,
                     req.query.fechaFin,
                     req.query.idUsuario,
+                    req.query.idSucursal,
 
                     req.query.fechaIni,
                     req.query.fechaFin,
                     req.query.idUsuario,
+                    req.query.idSucursal,
+
+                    req.query.fechaIni,
+                    req.query.fechaFin,
+                    req.query.idUsuario,
+                    req.query.idSucursal,
+
+                    req.query.fechaIni,
+                    req.query.fechaFin,
+                    req.query.idUsuario,
+                    req.query.idSucursal,
                 ]);
 
                 return { "cobros": cobros, "gastos": gastos };
@@ -1785,22 +1841,32 @@ class Cobro {
                     WHEN b.tipoCuenta = 1 THEN 'Banco'
                     WHEN b.tipoCuenta = 2 THEN 'Tarjeta'
                     ELSE 'Efectivo' END AS 'tipoCuenta',
-                    IFNULL(SUM(cd.precio*cd.cantidad),SUM(cv.precio)) AS monto
+                    IFNULL(SUM(cd.precio*cd.cantidad),SUM(cv.precio)) AS monto,
+                    s.nombre AS nombreSucursal
                     FROM cobro as c
                     LEFT JOIN banco AS b ON c.idBanco = b.idBanco
                     LEFT JOIN cobroDetalle AS cd ON c.idCobro = cd.idCobro
                     LEFT JOIN concepto AS co ON co.idConcepto = cd.idConcepto
                     LEFT JOIN cobroVenta AS cv ON cv.idCobro = c.idCobro
+                    LEFT JOIN sucursal AS s ON s.idSucursal = c.idSucursal
                     LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro AND nc.estado = 1
                     WHERE 
                     c.fecha BETWEEN ? AND ? AND c.estado = 1 AND nc.idNotaCredito IS NULL AND (
-                        ? = '' AND ? = ''
+                        ? = '' AND ? = '' AND ? = ''
                         OR
-                        ? = '' AND c.idUsuario = ?
+                        ? = '' AND c.idUsuario = ? AND ? = ''
                         OR
-                        c.idComprobante = ? AND ? = ''
+                        c.idComprobante = ? AND ? = '' AND ? = ''
                         OR
-                        c.idComprobante = ? AND c.idUsuario = ?
+                        ? = '' AND ? = '' AND c.idSucursal = ?
+                        OR
+                        c.idComprobante = ? AND c.idUsuario = ? AND ? = ''
+                        OR
+                        ? = '' AND c.idUsuario = ? AND c.idSucursal = ?
+                        OR
+                        c.idComprobante = ? AND ? = '' AND c.idSucursal = ?
+                        OR
+                        c.idComprobante = ? AND c.idUsuario = ? AND c.idSucursal = ?
                     )
                     GROUP BY c.idCobro`,
                     [
@@ -1809,15 +1875,35 @@ class Cobro {
 
                         req.query.idComprobante,
                         req.query.idUsuario,
+                        req.query.idSucursal,
 
                         req.query.idComprobante,
                         req.query.idUsuario,
+                        req.query.idSucursal,
 
                         req.query.idComprobante,
                         req.query.idUsuario,
+                        req.query.idSucursal,
 
                         req.query.idComprobante,
                         req.query.idUsuario,
+                        req.query.idSucursal,
+
+                        req.query.idComprobante,
+                        req.query.idUsuario,
+                        req.query.idSucursal,
+
+                        req.query.idComprobante,
+                        req.query.idUsuario,
+                        req.query.idSucursal,
+
+                        req.query.idComprobante,
+                        req.query.idUsuario,
+                        req.query.idSucursal,
+
+                        req.query.idComprobante,
+                        req.query.idUsuario,
+                        req.query.idSucursal,
                     ]);
 
                 const gastos = await conec.query(`
@@ -1831,15 +1917,21 @@ class Cobro {
                     WHEN b.tipoCuenta = 1 THEN 'Banco'
                     WHEN b.tipoCuenta = 2 THEN 'Tarjeta'
                     ELSE 'Efectivo' END AS 'tipoCuenta',
-                    SUM(gd.precio*gd.cantidad) AS monto
+                    SUM(gd.precio*gd.cantidad) AS monto,
+                    s.nombre AS nombreSucursal
                     FROM gasto as g
                     LEFT JOIN banco AS b ON g.idBanco = b.idBanco
                     LEFT JOIN gastoDetalle AS gd ON g.idGasto = gd.idGasto
                     LEFT JOIN concepto AS co ON co.idConcepto = gd.idConcepto
+                    LEFT JOIN sucursal AS s ON s.idSucursal = g.idSucursal
                     WHERE g.fecha BETWEEN ? AND ? AND (
-                        ? = ''
+                        ? = '' AND ? = ''
                         OR
-                        g.idUsuario = ?
+                        g.idUsuario = ? AND ? = ''
+                        OR
+                        ? = '' AND g.idSucursal = ?
+                        OR
+                        g.idUsuario = ? AND g.idSucursal = ?
                     )
                     GROUP BY g.idGasto`,
                     [
@@ -1847,8 +1939,16 @@ class Cobro {
                         req.query.fechaFin,
 
                         req.query.idUsuario,
+                        req.query.idSucursal,
 
                         req.query.idUsuario,
+                        req.query.idSucursal,
+
+                        req.query.idUsuario,
+                        req.query.idSucursal,
+
+                        req.query.idUsuario,
+                        req.query.idSucursal,
                     ]);
 
                 let lista = [...cobros, ...gastos];

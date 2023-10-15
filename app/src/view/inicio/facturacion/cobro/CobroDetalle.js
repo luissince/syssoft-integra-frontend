@@ -134,7 +134,7 @@ class CobroDetalle extends React.Component {
 
     onEventImprimir() {
         const data = {
-            "idSede": "SD0001",
+            "idEmpresa": "EM0001",
             "idCobro": this.state.idCobro,
         }
 
@@ -145,7 +145,7 @@ class CobroDetalle extends React.Component {
 
     onEventMatricial() {
         const data = {
-            "idSede": "SD0001",
+            "idEmpresa": "EM0001",
             "idCobro": this.state.idCobro,
         }
 

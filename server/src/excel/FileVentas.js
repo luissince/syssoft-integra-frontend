@@ -1,7 +1,7 @@
 const xl = require('excel4node');
 const { formatMoney, dateFormat } = require('../tools/Tools');
 
-async function generateExcel(req, sedeInfo, data) {
+async function generateExcel(req, empresaInfo, data) {
     try {
         const wb = new xl.Workbook();
 
@@ -82,10 +82,10 @@ async function generateExcel(req, sedeInfo, data) {
         ws.column(10).setWidth(18);
         ws.column(11).setWidth(18);
 
-        ws.cell(1, 1, 1, 11, true).string(`${sedeInfo.nombreEmpresa}`).style(styleTitle);
-        ws.cell(2, 1, 2, 11, true).string(`RUC: ${sedeInfo.ruc}`).style(styleTitle);
-        ws.cell(3, 1, 3, 11, true).string(`${sedeInfo.direccion}`).style(styleTitle);
-        ws.cell(4, 1, 4, 11, true).string(`Celular: ${sedeInfo.celular} / Telefono: ${sedeInfo.telefono}`).style(styleTitle);
+        ws.cell(1, 1, 1, 11, true).string(`${empresaInfo.nombreEmpresa}`).style(styleTitle);
+        ws.cell(2, 1, 2, 11, true).string(`RUC: ${empresaInfo.ruc}`).style(styleTitle);
+        ws.cell(3, 1, 3, 11, true).string(`${empresaInfo.direccion}`).style(styleTitle);
+        ws.cell(4, 1, 4, 11, true).string(`Celular: ${empresaInfo.celular} / Telefono: ${empresaInfo.telefono}`).style(styleTitle);
 
         ws.cell(6, 1, 6, 11, true).string(`REPORTE GENERAL DE VENTAS`).style(styleTitle);
         ws.cell(7, 1, 7, 11, true).string(`PERIODO: ${dateFormat(req.query.fechaIni)} al ${dateFormat(req.query.fechaFin)}`).style(styleTitle);

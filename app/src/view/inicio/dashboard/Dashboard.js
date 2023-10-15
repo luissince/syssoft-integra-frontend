@@ -16,7 +16,7 @@ class Dashboard extends React.Component {
             token: this.props.token.userToken.token,
 
             totales: {},
-            proyectos: [],
+            sucursales: [],
 
             codiso: '',
             msgLoading: 'Cargando datos...',
@@ -49,19 +49,19 @@ class Dashboard extends React.Component {
                     Authorization: "Bearer " + this.state.token
                 },
                 params: {
-                    "idProyecto": this.props.token.project.idProyecto
+                    "idSucursal": this.props.token.project.idSucursal
                 },
             });
 
-            const proyecto = await axios.get("/api/proyecto/inicio", {
+            const sucursal = await axios.get("/api/sucursal/inicio", {
                 signal: this.abortControllerView.signal
             });
 
-            const actual = proyecto.data.filter((proy) => proy.idProyecto === this.props.token.project.idProyecto);
+            const actual = sucursal.data.filter((proy) => proy.idSucursal === this.props.token.project.idSucursal);
 
             await this.setStateAsync({
                 totales: total.data,
-                proyectos: proyecto.data,
+                sucursales: sucursal.data,
                 codiso: actual[0].codiso,
                 loading: false
             });
@@ -150,20 +150,20 @@ class Dashboard extends React.Component {
 
                         <div className="row mt-4">
                             {
-                                this.state.proyectos.length === 0 ?
+                                this.state.sucursales.length === 0 ?
                                     (
                                         <div className="col-lg-12 col-md-12 mt-4 mb-12">
                                             <div className="text-center">
-                                                <span>¡No hay proyectos registrados!</span>
+                                                <span>¡No hay sucursales registrados!</span>
                                             </div>
                                         </div>
                                     )
                                     :
                                     (
-                                        this.state.proyectos.map((item, index) => {
+                                        this.state.sucursales.map((item, index) => {
                                             return (
                                                 <div className="col-lg-4 col-md-6 mt-4 mb-4" key={index}>
-                                                    <div className={`card z-index-2 border ${item.idProyecto === this.props.token.project.idProyecto ? 'border-primary' : ''}`} style={{ borderRadius: 10, boxShadow: '0 7px 10px -5px rgba(64,64,64,.4)' }}>
+                                                    <div className={`card z-index-2 border ${item.idSucursal === this.props.token.project.idSucursal ? 'border-primary' : ''}`} style={{ borderRadius: 10, boxShadow: '0 7px 10px -5px rgba(64,64,64,.4)' }}>
                                                         <div className="card-header p-0 position-relative mt-n4 mx-3 z-index-2 bg-light" style={{ borderRadius: 10 }}>
                                                             <div className="shadow-primary py-1 px-1  pe-1" style={{ borderRadius: 10, boxShadow: '0 7px 10px -5px rgba(153,153,153,.4)', border: '1px solid #999' }}>
                                                                 <div className="chart">
@@ -184,7 +184,7 @@ class Dashboard extends React.Component {
                                                                 </div>
                                                             </div>
                                                             <div className="col text-center mt-2">
-                                                                {item.idProyecto === this.props.token.project.idProyecto ? <span className="text-primary fs-1">Actual</span> : ''}
+                                                                {item.idSucursal === this.props.token.project.idSucursal ? <span className="text-primary fs-1">Actual</span> : ''}
                                                             </div>
                                                         </div>
                                                     </div>

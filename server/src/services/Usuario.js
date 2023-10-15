@@ -253,22 +253,22 @@ class Usuario {
                 return sendClient(res, 'No se puede eliminar el usuario ya que esta ligada a una venta.');
             }
 
-            let sede = await conec.execute(connection, `SELECT * FROM sede WHERE idUsuario = ?`, [
+            let empresa = await conec.execute(connection, `SELECT * FROM empresa WHERE idUsuario = ?`, [
                 req.query.idUsuario
             ]);
 
-            if (sede.length > 0) {
+            if (empresa.length > 0) {
                 await conec.rollback(connection);
-                return sendClient(res, 'No se puede eliminar el usuario ya que esta ligada a una sede.');
+                return sendClient(res, 'No se puede eliminar el usuario ya que esta ligada a una empresa.');
             }
 
-            let proyecto = await conec.execute(connection, `SELECT * FROM proyecto WHERE idUsuario = ?`, [
+            let sucursal = await conec.execute(connection, `SELECT * FROM sucursal WHERE idUsuario = ?`, [
                 req.query.idUsuario
             ]);
 
-            if (proyecto.length > 0) {
+            if (sucursal.length > 0) {
                 await conec.rollback(connection);
-                return sendClient(res, 'No se puede eliminar el usuario ya que esta ligado a un proyecto.');
+                return sendClient(res, 'No se puede eliminar el usuario ya que esta ligado a un sucursal.');
             }
 
             let perfil = await conec.execute(connection, `SELECT * FROM perfil WHERE idUsuario = ?`, [

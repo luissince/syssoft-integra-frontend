@@ -1,7 +1,7 @@
 const xl = require('excel4node');
 const { formatMoney, dateFormat } = require('../tools/Tools');
 
-async function generateExcel(req, sedeInfo, data) {
+async function generateExcel(req, empresaInfo, data) {
     try {
         const wb = new xl.Workbook();
 
@@ -10,6 +10,16 @@ async function generateExcel(req, sedeInfo, data) {
         const styleTitle = wb.createStyle({
             alignment: {
                 horizontal: 'center'
+            },
+            font: {
+                color: '#000000',
+                size: 12,
+            },
+        });
+
+        const styleNameSucursal = wb.createStyle({
+            alignment: {
+                horizontal: 'left'
             },
             font: {
                 color: '#000000',
@@ -83,13 +93,18 @@ async function generateExcel(req, sedeInfo, data) {
             ws.column(10).setWidth(15);
             ws.column(11).setWidth(15);
 
-            ws.cell(1, 1, 1, 11, true).string(`${sedeInfo.nombreEmpresa}`).style(styleTitle);
-            ws.cell(2, 1, 2, 11, true).string(`RUC: ${sedeInfo.ruc}`).style(styleTitle);
-            ws.cell(3, 1, 3, 11, true).string(`${sedeInfo.direccion}`).style(styleTitle);
-            ws.cell(4, 1, 4, 11, true).string(`Celular: ${sedeInfo.celular} / Telefono: ${sedeInfo.telefono}`).style(styleTitle);
+            ws.cell(1, 1, 1, 11, true).string(`${empresaInfo.nombreEmpresa}`).style(styleTitle);
+            ws.cell(2, 1, 2, 11, true).string(`RUC: ${empresaInfo.ruc}`).style(styleTitle);
+            ws.cell(3, 1, 3, 11, true).string(`${empresaInfo.direccion}`).style(styleTitle);
+            ws.cell(4, 1, 4, 11, true).string(`Celular: ${empresaInfo.celular} / Telefono: ${empresaInfo.telefono}`).style(styleTitle);
 
             ws.cell(6, 1, 6, 11, true).string(`REPORTE DE COBROS Y GASTOS`).style(styleTitle);
-            ws.cell(7, 1, 7, 11, true).string(`PERIODO: ${dateFormat(req.query.fechaIni)} al ${dateFormat(req.query.fechaFin)}`).style(styleTitle);
+            if (empresaInfo.nombreSucursal) {
+                ws.cell(7, 1, 7, 7, true).string(`SUCURSAL: ${empresaInfo.nombreSucursal}`).style(styleNameSucursal);
+                ws.cell(7, 8, 7, 11, true).string(`PERIODO: ${dateFormat(req.query.fechaIni)} al ${dateFormat(req.query.fechaFin)}`).style(styleTitle);
+            } else {
+                ws.cell(7, 1, 7, 11, true).string(`PERIODO: ${dateFormat(req.query.fechaIni)} al ${dateFormat(req.query.fechaFin)}`).style(styleTitle);
+            }
 
             const headerCon = ["#", "Comprobante", "Correlativo", "Documento", "Cliente", "Detalle", "Banco", "Fecha", "Usuario", "Monto", "Anulado"];
             headerCon.map((item, index) => ws.cell(9, 1 + index).string(item).style(styleTableHeader));
@@ -136,22 +151,34 @@ async function generateExcel(req, sedeInfo, data) {
             ws.column(5).setWidth(15);
             ws.column(6).setWidth(15);
 
-            ws.cell(1, 1, 1, 6, true).string(`${sedeInfo.nombreEmpresa}`).style(styleTitle);
-            ws.cell(2, 1, 2, 6, true).string(`RUC: ${sedeInfo.ruc}`).style(styleTitle);
-            ws.cell(3, 1, 3, 6, true).string(`${sedeInfo.direccion}`).style(styleTitle);
-            ws.cell(4, 1, 4, 6, true).string(`Celular: ${sedeInfo.celular} / Telefono: ${sedeInfo.telefono}`).style(styleTitle);
+            ws.cell(1, 1, 1, 6, true).string(`${empresaInfo.nombreEmpresa}`).style(styleTitle);
+            ws.cell(2, 1, 2, 6, true).string(`RUC: ${empresaInfo.ruc}`).style(styleTitle);
+            ws.cell(3, 1, 3, 6, true).string(`${empresaInfo.direccion}`).style(styleTitle);
+            ws.cell(4, 1, 4, 6, true).string(`Celular: ${empresaInfo.celular} / Telefono: ${empresaInfo.telefono}`).style(styleTitle);
 
             ws.cell(6, 1, 6, 6, true).string(`REPORTE DE COBROS Y GASTOS`).style(styleTitle);
-            ws.cell(7, 1, 7, 6, true).string(`PERIODO: ${dateFormat(req.query.fechaIni)} al ${dateFormat(req.query.fechaFin)}`).style(styleTitle);
 
-            ws.cell(9, 1, 9, 2, true).string(`RESUMEN DE CONCEPTOS`).style(styleHeader);
+            let rowY = 10;
+            if (empresaInfo.nombreSucursal) {
+                ws.cell(7, 1, 7, 6, true).string(`PERIODO: ${dateFormat(req.query.fechaIni)} al ${dateFormat(req.query.fechaFin)}`).style(styleTitle);
+                ws.cell(9, 1, 9, 6, true).string(`SUCURSAL: ${empresaInfo.nombreSucursal}`).style(styleNameSucursal);
+
+
+                ws.cell(11, 1, 11, 2, true).string(`RESUMEN DE CONCEPTOS`).style(styleHeader);
+
+                rowY = 12;
+            } else {
+                ws.cell(7, 1, 7, 6, true).string(`PERIODO: ${dateFormat(req.query.fechaIni)} al ${dateFormat(req.query.fechaFin)}`).style(styleTitle);
+
+                ws.cell(9, 1, 9, 2, true).string(`RESUMEN DE CONCEPTOS`).style(styleHeader);
+            }
 
             const headerCon = ["#", "Concepto", "Cantidad", "Ingreso", "salida", "Total"];
-            headerCon.map((item, index) => ws.cell(10, 1 + index).string(item).style(styleTableHeader));
+            headerCon.map((item, index) => ws.cell(rowY, 1 + index).string(item).style(styleTableHeader));
 
             let sumaIngreso = 0;
             let sumaEgreso = 0;
-            let rowY = 10;
+
             data.conceptos.map((item, index) => {
                 rowY = rowY + 1;
 
@@ -205,7 +232,7 @@ async function generateExcel(req, sedeInfo, data) {
     }
 }
 
-async function cpeSunat(req, sedeInfo, data) {
+async function cpeSunat(req, empresaInfo, data) {
     try {
         const wb = new xl.Workbook();
 
@@ -293,10 +320,10 @@ async function cpeSunat(req, sedeInfo, data) {
         ws.column(17).setWidth(40);//sunat mensaje
         ws.column(18).setWidth(20);//refencia
 
-        ws.cell(1, 1, 1, 18, true).string(`${sedeInfo.nombreEmpresa}`).style(styleTitle);
-        ws.cell(2, 1, 2, 18, true).string(`RUC: ${sedeInfo.ruc}`).style(styleTitle);
-        ws.cell(3, 1, 3, 18, true).string(`${sedeInfo.direccion}`).style(styleTitle);
-        ws.cell(4, 1, 4, 18, true).string(`Celular: ${sedeInfo.celular} / Telefono: ${sedeInfo.telefono}`).style(styleTitle);
+        ws.cell(1, 1, 1, 18, true).string(`${empresaInfo.nombreEmpresa}`).style(styleTitle);
+        ws.cell(2, 1, 2, 18, true).string(`RUC: ${empresaInfo.ruc}`).style(styleTitle);
+        ws.cell(3, 1, 3, 18, true).string(`${empresaInfo.direccion}`).style(styleTitle);
+        ws.cell(4, 1, 4, 18, true).string(`Celular: ${empresaInfo.celular} / Telefono: ${empresaInfo.telefono}`).style(styleTitle);
 
         ws.cell(6, 1, 6, 18, true).string(`REPORTE DE COMPROBANTES EMITIDOS A SUNAT`).style(styleTitle);
         ws.cell(7, 1, 7, 18, true).string(`PERIODO: ${dateFormat(req.query.fechaIni)} al ${dateFormat(req.query.fechaFin)}`).style(styleTitle);

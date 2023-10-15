@@ -28,7 +28,7 @@ class NotaCredito extends React.Component {
             view: statePrivilegio(this.props.token.userToken.menus[2].submenu[5].privilegio[1].estado),
             cancel: statePrivilegio(this.props.token.userToken.menus[2].submenu[5].privilegio[2].estado),
 
-            idProyecto: this.props.token.project.idProyecto,
+            idSucursal: this.props.token.project.idSucursal,
             idUsuario: this.props.token.userToken.idUsuario,
 
             opcion: 0,
@@ -101,7 +101,7 @@ class NotaCredito extends React.Component {
                 params: {
                     "opcion": opcion,
                     "buscar": buscar,
-                    "idProyecto": this.state.idProyecto,
+                    "idSucursal": this.state.idSucursal,
                     "posicionPagina": ((this.state.paginacion - 1) * this.state.filasPorPagina),
                     "filasPorPagina": this.state.filasPorPagina
                 }

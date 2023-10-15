@@ -10,7 +10,7 @@ const numberLleters = new NumberLleters();
 
 class RepFactura {
 
-    async repComprobante(req, sedeInfo, data) {
+    async repComprobante(req, empresaInfo, data) {
         const cabecera = data.cabecera;
         try {
             /**
@@ -49,8 +49,8 @@ class RepFactura {
              * Logo
              * ==========================================================================================
              */
-            if (isFile(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo))) {
-                doc.image(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo), orgX, orgY, { width: 75 });
+            if (isFile(path.join(__dirname, "..", "path/company/" + empresaInfo.rutaLogo))) {
+                doc.image(path.join(__dirname, "..", "path/company/" + empresaInfo.rutaLogo), orgX, orgY, { width: 75 });
             } else {
                 doc.image(path.join(__dirname, "..", "path/to/noimage.jpg"), orgX, orgY, { width: 75 });
             }
@@ -64,7 +64,7 @@ class RepFactura {
             let center = doc.page.width - doc.options.margins.left - doc.options.margins.right - 150 - 150;
 
             doc.fontSize(h1).text(
-                `${sedeInfo.nombreEmpresa}`,
+                `${empresaInfo.nombreEmpresa}`,
                 doc.options.margins.left + 150,
                 orgY + 10,
                 {
@@ -74,7 +74,7 @@ class RepFactura {
             );
 
             doc.fontSize(h3).text(
-                `${sedeInfo.direccion}\nCelular: ${sedeInfo.celular} / Telefono: ${sedeInfo.telefono}\n${sedeInfo.email}`,
+                `${empresaInfo.direccion}\nCelular: ${empresaInfo.celular} / Telefono: ${empresaInfo.telefono}\n${empresaInfo.email}`,
                 doc.options.margins.left + 150,
                 doc.y,
                 {
@@ -84,7 +84,7 @@ class RepFactura {
             );
 
             doc.fontSize(h2).text(
-                `RUC: ${sedeInfo.ruc}\n${cabecera.comprobante}\n${cabecera.serie + "-" + cabecera.numeracion}`,
+                `RUC: ${empresaInfo.ruc}\n${cabecera.comprobante}\n${cabecera.serie + "-" + cabecera.numeracion}`,
                 doc.page.width - 150 - doc.options.margins.right,
                 orgY + 20,
                 {
@@ -386,7 +386,7 @@ class RepFactura {
              */
 
             let qrResult = await this.qrGenerate(`|
-                        ${sedeInfo.ruc}|
+                        ${empresaInfo.ruc}|
                         ${cabecera.codigoVenta}|
                         ${cabecera.serie}|
                         ${cabecera.numeracion}|
@@ -439,7 +439,7 @@ class RepFactura {
         }
     }
 
-    async repCobro(req, sedeInfo, data) {
+    async repCobro(req, empresaInfo, data) {
         const cabecera = data.cabecera;
         try {
             /**
@@ -479,8 +479,8 @@ class RepFactura {
              * ==========================================================================================
              */
 
-            if (isFile(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo))) {
-                doc.image(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo), orgX, orgY, { width: 75 });
+            if (isFile(path.join(__dirname, "..", "path/company/" + empresaInfo.rutaLogo))) {
+                doc.image(path.join(__dirname, "..", "path/company/" + empresaInfo.rutaLogo), orgX, orgY, { width: 75 });
             } else {
                 doc.image(path.join(__dirname, "..", "path/to/noimage.jpg"), orgX, orgY, { width: 75 });
             }
@@ -494,7 +494,7 @@ class RepFactura {
             let center = doc.page.width - doc.options.margins.left - doc.options.margins.right - 150 - 150;
 
             doc.fontSize(h1).text(
-                `${sedeInfo.nombreEmpresa}`,
+                `${empresaInfo.nombreEmpresa}`,
                 doc.options.margins.left + 150,
                 orgY + 10,
                 {
@@ -504,7 +504,7 @@ class RepFactura {
             );
 
             doc.fontSize(h3).text(
-                `${sedeInfo.direccion}\nCelular: ${sedeInfo.celular} / Telefono: ${sedeInfo.telefono}\n${sedeInfo.email}`,
+                `${empresaInfo.direccion}\nCelular: ${empresaInfo.celular} / Telefono: ${empresaInfo.telefono}\n${empresaInfo.email}`,
                 doc.options.margins.left + 150,
                 doc.y,
                 {
@@ -514,7 +514,7 @@ class RepFactura {
             );
 
             doc.fontSize(h2).text(
-                `RUC: ${sedeInfo.ruc}\n${cabecera.comprobante}\n${cabecera.serie + "-" + cabecera.numeracion}`,
+                `RUC: ${empresaInfo.ruc}\n${cabecera.comprobante}\n${cabecera.serie + "-" + cabecera.numeracion}`,
                 doc.page.width - 150 - doc.options.margins.right,
                 orgY + 20,
                 {
@@ -803,7 +803,7 @@ class RepFactura {
                 }, 0);
 
                 const qrResult = await this.qrGenerate(`|
-                ${sedeInfo.ruc}|
+                ${empresaInfo.ruc}|
                 ${cabecera.tipoComprobante}|
                 ${cabecera.serie}|
                 ${cabecera.numeracion}|
@@ -878,7 +878,7 @@ class RepFactura {
                  */
 
                 const qrResult = await this.qrGenerate(`|
-                ${sedeInfo.ruc}|
+                ${empresaInfo.ruc}|
                 ${cabecera.tipoComprobante}|
                 ${cabecera.serie}|
                 ${cabecera.numeracion}|
@@ -930,7 +930,7 @@ class RepFactura {
         }
     }
 
-    async repGasto(req, sedeInfo, data) {
+    async repGasto(req, empresaInfo, data) {
         const cabecera = data.cabecera;
         try {
             const doc = new PDFDocument({
@@ -954,8 +954,8 @@ class RepFactura {
             let h2 = 11;
             let h3 = 9;
 
-            if (isFile(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo))) {
-                doc.image(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo), orgX, orgY, { width: 75 });
+            if (isFile(path.join(__dirname, "..", "path/company/" + empresaInfo.rutaLogo))) {
+                doc.image(path.join(__dirname, "..", "path/company/" + empresaInfo.rutaLogo), orgX, orgY, { width: 75 });
             } else {
                 doc.image(path.join(__dirname, "..", "path/to/noimage.jpg"), orgX, orgY, { width: 75 });
             }
@@ -963,7 +963,7 @@ class RepFactura {
             let center = doc.page.width - doc.options.margins.left - doc.options.margins.right - 150 - 150;
 
             doc.fontSize(h1).text(
-                `${sedeInfo.nombreEmpresa}`,
+                `${empresaInfo.nombreEmpresa}`,
                 doc.options.margins.left + 150,
                 orgY + 10,
                 {
@@ -973,7 +973,7 @@ class RepFactura {
             );
 
             doc.fontSize(h3).text(
-                `${sedeInfo.direccion}\nCelular: ${sedeInfo.celular} / Telefono: ${sedeInfo.telefono}\n${sedeInfo.email}`,
+                `${empresaInfo.direccion}\nCelular: ${empresaInfo.celular} / Telefono: ${empresaInfo.telefono}\n${empresaInfo.email}`,
                 doc.options.margins.left + 150,
                 doc.y,
                 {
@@ -983,7 +983,7 @@ class RepFactura {
             );
 
             doc.fontSize(h2).text(
-                `RUC: ${sedeInfo.ruc}\n${cabecera.comprobante}\n${cabecera.serie + "-" + cabecera.numeracion}`,
+                `RUC: ${empresaInfo.ruc}\n${cabecera.comprobante}\n${cabecera.serie + "-" + cabecera.numeracion}`,
                 doc.page.width - 150 - doc.options.margins.right,
                 orgY + 20,
                 {
@@ -1183,7 +1183,7 @@ class RepFactura {
         }
     }
 
-    async repCobroA5(req, sedeInfo, data) {
+    async repCobroA5(req, empresaInfo, data) {
         const cabecera = data.cabecera;
         try {
             const doc = new PDFDocument({
@@ -1317,7 +1317,7 @@ class RepFactura {
         }
     }
 
-    async repLetraA5(req, sedeInfo, data) {
+    async repLetraA5(req, empresaInfo, data) {
         try {
             const doc = new PDFDocument({
                 size: 'A4',
@@ -1347,7 +1347,7 @@ class RepFactura {
                 doc.options.margins.left + 240 - 20,
                 yPos);
 
-            doc.fontSize(h1).text(`${sedeInfo.departamento}`,
+            doc.fontSize(h1).text(`${empresaInfo.departamento}`,
                 doc.options.margins.left + 320 - 20,
                 yPos);
 
@@ -1412,7 +1412,7 @@ class RepFactura {
         })
     }
 
-    async repVentas(req, sedeInfo, data) {
+    async repVentas(req, empresaInfo, data) {
         try {
             const doc = new PDFDocument({
                 margins: {
@@ -1439,14 +1439,14 @@ class RepFactura {
             let h3 = 9;
             let h4 = 8;
 
-            if (isFile(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo))) {
-                doc.image(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo), doc.x, doc.y, { width: 75 });
+            if (isFile(path.join(__dirname, "..", "path/company/" + empresaInfo.rutaLogo))) {
+                doc.image(path.join(__dirname, "..", "path/company/" + empresaInfo.rutaLogo), doc.x, doc.y, { width: 75 });
             } else {
                 doc.image(path.join(__dirname, "..", "path/to/noimage.jpg"), doc.x, doc.y, { width: 75 });
             }
 
             doc.fontSize(h1).text(
-                `${sedeInfo.nombreEmpresa}`,
+                `${empresaInfo.nombreEmpresa}`,
                 titleX,
                 orgY,
                 {
@@ -1456,7 +1456,7 @@ class RepFactura {
             );
 
             doc.fontSize(h3).text(
-                `RUC: ${sedeInfo.ruc}\n${sedeInfo.direccion}\nCelular: ${sedeInfo.celular} / Telefono: ${sedeInfo.telefono}`,
+                `RUC: ${empresaInfo.ruc}\n${empresaInfo.direccion}\nCelular: ${empresaInfo.celular} / Telefono: ${empresaInfo.telefono}`,
                 titleX,
                 orgY + 17,
                 {

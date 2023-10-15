@@ -15,7 +15,7 @@ class Accesos extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      idSede: "",
+      idEmpresa: "",
       idPerfil: "",
       perfiles: [],
       menu: [],

@@ -35,43 +35,43 @@ class Factura {
                 INNER JOIN moneda AS m ON v.idMoneda = m.idMoneda
                 LEFT JOIN ventaDetalle AS vd ON vd.idVenta = v.idVenta
                 WHERE 
-                ? = 0 AND v.idProyecto = ?
+                ? = 0 AND v.idSucursal = ?
                 OR
-                ? = 1 and c.informacion like concat(?,'%') AND v.idProyecto = ?
+                ? = 1 and c.informacion like concat(?,'%') AND v.idSucursal = ?
                 OR
-                ? = 1 and c.documento like concat(?,'%') AND v.idProyecto = ?
+                ? = 1 and c.documento like concat(?,'%') AND v.idSucursal = ?
                 OR
-                ? = 1 and v.serie = ? AND v.idProyecto = ?
+                ? = 1 and v.serie = ? AND v.idSucursal = ?
                 OR
-                ? = 1 and v.numeracion = ? AND v.idProyecto = ?
+                ? = 1 and v.numeracion = ? AND v.idSucursal = ?
                 OR
-                ? = 1 and concat(v.serie,'-',v.numeracion) = ? AND v.idProyecto = ?
+                ? = 1 and concat(v.serie,'-',v.numeracion) = ? AND v.idSucursal = ?
 
                 GROUP BY v.idVenta
                 ORDER BY v.fecha DESC, v.hora DESC
                 LIMIT ?,?`, [
                 parseInt(req.query.opcion),
-                req.query.idProyecto,
+                req.query.idSucursal,
 
                 parseInt(req.query.opcion),
                 req.query.buscar,
-                req.query.idProyecto,
+                req.query.idSucursal,
 
                 parseInt(req.query.opcion),
                 req.query.buscar,
-                req.query.idProyecto,
+                req.query.idSucursal,
 
                 parseInt(req.query.opcion),
                 req.query.buscar,
-                req.query.idProyecto,
+                req.query.idSucursal,
 
                 parseInt(req.query.opcion),
                 req.query.buscar,
-                req.query.idProyecto,
+                req.query.idSucursal,
 
                 parseInt(req.query.opcion),
                 req.query.buscar,
-                req.query.idProyecto,
+                req.query.idSucursal,
 
                 parseInt(req.query.posicionPagina),
                 parseInt(req.query.filasPorPagina)
@@ -90,39 +90,39 @@ class Factura {
                 INNER JOIN comprobante as co ON v.idComprobante = co.idComprobante
                 INNER JOIN moneda AS m ON v.idMoneda = m.idMoneda
                 WHERE 
-                ? = 0 AND v.idProyecto = ?
+                ? = 0 AND v.idSucursal = ?
                 OR
-                ? = 1 and c.informacion like concat(?,'%') AND v.idProyecto = ?
+                ? = 1 and c.informacion like concat(?,'%') AND v.idSucursal = ?
                 OR
-                ? = 1 and c.documento like concat(?,'%') AND v.idProyecto = ?
+                ? = 1 and c.documento like concat(?,'%') AND v.idSucursal = ?
                 OR
-                ? = 1 and v.serie = ? AND v.idProyecto = ?
+                ? = 1 and v.serie = ? AND v.idSucursal = ?
                 OR
-                ? = 1 and v.numeracion = ? AND v.idProyecto = ?
+                ? = 1 and v.numeracion = ? AND v.idSucursal = ?
                 OR
-                ? = 1 and concat(v.serie,'-',v.numeracion) = ? AND v.idProyecto = ?`, [
+                ? = 1 and concat(v.serie,'-',v.numeracion) = ? AND v.idSucursal = ?`, [
                 parseInt(req.query.opcion),
-                req.query.idProyecto,
+                req.query.idSucursal,
 
                 parseInt(req.query.opcion),
                 req.query.buscar,
-                req.query.idProyecto,
+                req.query.idSucursal,
 
                 parseInt(req.query.opcion),
                 req.query.buscar,
-                req.query.idProyecto,
+                req.query.idSucursal,
 
                 parseInt(req.query.opcion),
                 req.query.buscar,
-                req.query.idProyecto,
+                req.query.idSucursal,
 
                 parseInt(req.query.opcion),
                 req.query.buscar,
-                req.query.idProyecto,
+                req.query.idSucursal,
 
                 parseInt(req.query.opcion),
                 req.query.buscar,
-                req.query.idProyecto,
+                req.query.idSucursal,
             ]);
 
             return sendSuccess(res, { "result": resultLista, "total": total[0].Total });
@@ -141,7 +141,7 @@ class Factura {
                 idComprobante,
                 idCliente,
                 idUsuario,
-                idProyecto,
+                idSucursal,
                 idMoneda,
                 tipo,
                 selectTipoPago,
@@ -221,7 +221,7 @@ class Factura {
                 idCliente, 
                 idUsuario, 
                 idComprobante, 
-                idProyecto,
+                idSucursal,
                 serie,
                 numeracion,
                 idMoneda,
@@ -238,7 +238,7 @@ class Factura {
                 idCliente,
                 idUsuario,
                 idComprobante,
-                idProyecto,
+                idSucursal,
                 comprobante[0].serie,
                 numeracion,
                 idMoneda,
@@ -333,7 +333,7 @@ class Factura {
                     idMoneda, 
                     idBanco, 
                     idProcedencia,
-                    idProyecto,
+                    idSucursal,
                     idComprobante,
                     serie,
                     numeracion,
@@ -349,7 +349,7 @@ class Factura {
                     idMoneda,
                     idBancoContado,
                     idVenta,
-                    idProyecto,
+                    idSucursal,
                     idComprobanteContado,
                     comprobanteCobro[0].serie,
                     numeracionCobro,
@@ -544,7 +544,7 @@ class Factura {
                 idCliente, 
                 idUsuario, 
                 idComprobante, 
-                idProyecto,
+                idSucursal,
                 serie,
                 numeracion,
                 idMoneda,
@@ -561,7 +561,7 @@ class Factura {
                 req.body.idCliente,
                 req.body.idUsuario,
                 req.body.idComprobante,
-                req.body.idProyecto,
+                req.body.idSucursal,
                 comprobante[0].serie,
                 numeracion,
                 req.body.idMoneda,
@@ -679,7 +679,7 @@ class Factura {
                 idMoneda, 
                 idBanco, 
                 idProcedencia,
-                idProyecto,
+                idSucursal,
                 idComprobante,
                 serie,
                 numeracion,
@@ -695,7 +695,7 @@ class Factura {
                     req.body.idMoneda,
                     req.body.idBanco,
                     idVenta,
-                    req.body.idProyecto,
+                    req.body.idSucursal,
                     req.body.idComprobanteCobro,
                     comprobanteCobro[0].serie,
                     numeracionCobro,
@@ -809,7 +809,7 @@ class Factura {
                         idMoneda, 
                         idBanco, 
                         idProcedencia,
-                        idProyecto,
+                        idSucursal,
                         idComprobante,
                         serie,
                         numeracion,
@@ -825,7 +825,7 @@ class Factura {
                         req.body.idMoneda,
                         req.body.idBanco,
                         idVenta,
-                        req.body.idProyecto,
+                        req.body.idSucursal,
                         req.body.idComprobanteCobro,
                         comprobanteCobro[0].serie,
                         numeracionCobro,
@@ -997,7 +997,7 @@ class Factura {
                         idMoneda, 
                         idBanco, 
                         idProcedencia,
-                        idProyecto,
+                        idSucursal,
                         idComprobante,
                         serie,
                         numeracion,
@@ -1013,7 +1013,7 @@ class Factura {
                         req.body.idMoneda,
                         req.body.idBanco,
                         idVenta,
-                        req.body.idProyecto,
+                        req.body.idSucursal,
                         req.body.idComprobanteCobro,
                         comprobanteCobro[0].serie,
                         numeracionCobro,
@@ -1061,12 +1061,12 @@ class Factura {
             }
 
             /**
-             * Procesao de registro para dar de alta al un proyecto
+             * Procesao de registro para dar de alta al un sucursal
              */
 
-            const alta = await conec.execute(connection, `SELECT idAlta FROM alta WHERE idCliente = ? AND idProyecto = ?`, [
+            const alta = await conec.execute(connection, `SELECT idAlta FROM alta WHERE idCliente = ? AND idSucursal = ?`, [
                 req.body.idCliente,
-                req.body.idProyecto,
+                req.body.idSucursal,
             ]);
 
             if (alta.length === 0) {
@@ -1088,14 +1088,14 @@ class Factura {
                 await conec.execute(connection, `INSERT INTO alta(
                     idAlta ,
                     idCliente,
-                    idProyecto,
+                    idSucursal,
                     fecha,
                     hora,
                     idUsuario
                 ) VALUES(?,?,?,?,?,?)`, [
                     idAlta,
                     req.body.idCliente,
-                    req.body.idProyecto,
+                    req.body.idSucursal,
                     currentDate(),
                     currentTime(),
                     req.body.idUsuario,
@@ -1339,7 +1339,7 @@ class Factura {
                 l.descripcion AS producto,
                 md.codigo AS medida, 
                 m.nombre AS categoria, 
-                p.nombre AS proyecto,
+                p.nombre AS sucursal,
                 vd.precio,
                 vd.cantidad,
                 vd.idImpuesto,
@@ -1349,7 +1349,7 @@ class Factura {
                 INNER JOIN producto AS l ON vd.idProducto = l.idProducto 
                 INNER JOIN medida AS md ON md.idMedida = l.idMedida 
                 INNER JOIN categoria AS m ON l.idCategoria = m.idCategoria 
-                INNER JOIN proyecto AS p ON m.idProyecto = p.idProyecto
+                INNER JOIN sucursal AS p ON m.idSucursal = p.idSucursal
                 INNER JOIN impuesto AS imp ON vd.idImpuesto  = imp.idImpuesto 
                 WHERE vd.idVenta = ? `, [
                     req.query.idVenta
@@ -1374,7 +1374,7 @@ class Factura {
         try {
             let lista = await conec.procedure(`CALL Listar_Creditos(?,?,?,?,?,?,?)`, [
                 parseInt(req.query.opcion),
-                req.query.idProyecto,
+                req.query.idSucursal,
                 req.query.buscar,
                 parseInt(req.query.todos),
                 parseInt(req.query.cada),
@@ -1411,7 +1411,7 @@ class Factura {
 
             let total = await conec.procedure(`CALL Listar_Creditos_Count(?,?,?,?,?)`, [
                 parseInt(req.query.opcion),
-                req.query.idProyecto,
+                req.query.idSucursal,
                 req.query.buscar,
                 parseInt(req.query.todos),
                 parseInt(req.query.cada),
@@ -1448,7 +1448,7 @@ class Factura {
         try {
             const lista = await conec.procedure(`CALL Listar_CpeSunat(?,?,?,?,?,?,?,?,?,?)`, [
                 parseInt(req.query.opcion),
-                req.query.idProyecto,
+                req.query.idSucursal,
                 req.query.buscar,
                 req.query.fechaInicio,
                 req.query.fechaFinal,
@@ -1468,7 +1468,7 @@ class Factura {
 
             const total = await conec.procedure(`CALL Listar_CpeSunat_Count(?,?,?,?,?,?,?,?)`, [
                 parseInt(req.query.opcion),
-                req.query.idProyecto,
+                req.query.idSucursal,
                 req.query.buscar,
                 req.query.fechaInicio,
                 req.query.fechaFinal,
@@ -1528,7 +1528,7 @@ class Factura {
                 l.descripcion AS producto,
                 md.codigo AS medida, 
                 m.nombre AS categoria, 
-                p.nombre AS proyecto,
+                p.nombre AS sucursal,
                 vd.precio,
                 vd.cantidad,                
                 imp.idImpuesto,
@@ -1538,7 +1538,7 @@ class Factura {
                 INNER JOIN producto AS l ON vd.idProducto = l.idProducto 
                 INNER JOIN medida AS md ON md.idMedida = l.idMedida 
                 INNER JOIN categoria AS m ON l.idCategoria = m.idCategoria 
-                INNER JOIN proyecto AS p ON m.idProyecto = p.idProyecto
+                INNER JOIN sucursal AS p ON m.idSucursal = p.idSucursal
                 INNER JOIN impuesto AS imp ON vd.idImpuesto  = imp.idImpuesto 
                 WHERE vd.idVenta = ? `, [
                     req.query.idVenta
@@ -1609,7 +1609,7 @@ class Factura {
             md.idMedida,
             md.codigo AS medida, 
             m.nombre AS categoria, 
-            p.nombre AS proyecto,
+            p.nombre AS sucursal,
             vd.precio,
             vd.cantidad,
             vd.idImpuesto,
@@ -1619,7 +1619,7 @@ class Factura {
             INNER JOIN producto AS l ON vd.idProducto = l.idProducto 
             INNER JOIN medida AS md ON md.idMedida = l.idMedida 
             INNER JOIN categoria AS m ON l.idCategoria = m.idCategoria 
-            INNER JOIN proyecto AS p ON m.idProyecto = p.idProyecto
+            INNER JOIN sucursal AS p ON m.idSucursal = p.idSucursal
             INNER JOIN impuesto AS imp ON vd.idImpuesto  = imp.idImpuesto 
             WHERE vd.idVenta = ? `, [
                 req.query.idVenta
@@ -1764,7 +1764,7 @@ class Factura {
             md.idMedida,
             md.codigo AS medida, 
             m.nombre AS categoria, 
-            p.nombre AS proyecto,
+            p.nombre AS sucursal,
             vd.precio,
             vd.cantidad,
             vd.idImpuesto,
@@ -1774,7 +1774,7 @@ class Factura {
             INNER JOIN producto AS l ON vd.idProducto = l.idProducto 
             INNER JOIN medida AS md ON md.idMedida = l.idMedida 
             INNER JOIN categoria AS m ON l.idCategoria = m.idCategoria 
-            INNER JOIN proyecto AS p ON m.idProyecto = p.idProyecto
+            INNER JOIN sucursal AS p ON m.idSucursal = p.idSucursal
             INNER JOIN impuesto AS imp ON vd.idImpuesto  = imp.idImpuesto 
             WHERE vd.idVenta = ? `, [
                 req.query.idVenta

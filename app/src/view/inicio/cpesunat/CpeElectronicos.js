@@ -56,7 +56,7 @@ class CpeElectronicos extends React.Component {
             fechaFinalModal: currentDate(),
             idComprobanteModal: '',
 
-            idProyecto: this.props.token.project.idProyecto,
+            idSucursal: this.props.token.project.idSucursal,
             fechaInicio: currentDate(),
             fechaFinal: currentDate(),
             idComprobante: '',
@@ -227,7 +227,7 @@ class CpeElectronicos extends React.Component {
             "fechaFinal": fechaFinal,
             "idComprobante": idComprobante,
             "idEstado": idEstado,
-            "idProyecto": this.state.idProyecto,
+            "idSucursal": this.state.idSucursal,
             "fill": this.state.fill,
             "posicionPagina": ((this.state.paginacion - 1) * this.state.filasPorPagina),
             "filasPorPagina": this.state.filasPorPagina
@@ -326,7 +326,7 @@ class CpeElectronicos extends React.Component {
     onEventImprimir = async (idCpeSunat, tipo) => {
         if (tipo === "f") {
             const data = {
-                "idSede": "SD0001",
+                "idEmpresa": "EM0001",
                 "idCobro": idCpeSunat,
             }
 
@@ -335,7 +335,7 @@ class CpeElectronicos extends React.Component {
             window.open("/api/cobro/repcomprobante?" + params, "_blank");
         } else {
             const data = {
-                "idSede": "SD0001",
+                "idEmpresa": "EM0001",
                 "idNotaCredito": idCpeSunat
             }
 
@@ -348,7 +348,7 @@ class CpeElectronicos extends React.Component {
     onEventXmlSunat = async (idCpeSunat, tipo) => {
         if (tipo === "f") {
             const data = {
-                "idSede": "SD0001",
+                "idEmpresa": "EM0001",
                 "idCobro": idCpeSunat,
             }
 
@@ -361,7 +361,7 @@ class CpeElectronicos extends React.Component {
             });
         } else {
             const data = {
-                "idSede": "SD0001",
+                "idEmpresa": "EM0001",
                 "idNotaCredito": idCpeSunat,
             }
 
@@ -382,7 +382,7 @@ class CpeElectronicos extends React.Component {
                     alertInfo("Email", "Envíando Correo.");
 
                     const params = {
-                        "idSede": "SD0001",
+                        "idEmpresa": "EM0001",
                         "idCobro": idCpeSunat,
                     }
                     const response = await sendEmailBoleta(params);
@@ -403,7 +403,7 @@ class CpeElectronicos extends React.Component {
                     alertInfo("Email", "Envíando Correo.");
 
                     const params = {
-                        "idSede": "SD0001",
+                        "idEmpresa": "EM0001",
                         "idNotaCredito": idCpeSunat,
                     }
                     const response = await sendEmailNotaCredito(params);
@@ -484,7 +484,7 @@ class CpeElectronicos extends React.Component {
         if (!validateDate(this.state.fechaFinalModal)) return;
 
         const data = {
-            "idSede": "SD0001",
+            "idEmpresa": "EM0001",
             "fechaIni": this.state.fechaInicioModal,
             "fechaFin": this.state.fechaFinalModal,
             "idComprobante": this.state.idComprobanteModal
@@ -735,7 +735,7 @@ class CpeElectronicos extends React.Component {
                                     this.loadInit();
                                 }}>
                                 <option value="any">
-                                    Por proyecto
+                                    Por sucursal
                                 </option>
                                 <option value="all">
                                     Todos

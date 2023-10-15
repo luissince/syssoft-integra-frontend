@@ -11,15 +11,15 @@ import {
 import { connect } from 'react-redux';
 import Paginacion from '../../../components/Paginacion';
 import ContainerWrapper from '../../../components/Container';
-import { borrarProyecto } from '../../../network/rest/principal.network';
+import { borrarSucursal } from '../../../network/rest/principal.network';
 import SuccessReponse from '../../../model/class/response';
 import ErrorResponse from '../../../model/class/error-response';
 
-class Proyectos extends React.Component {
+class Sucursales extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            idProyecto: '',
+            idSucursal: '',
 
             add: statePrivilegio(this.props.token.userToken.menus[5].submenu[4].privilegio[0].estado),
             edit: statePrivilegio(this.props.token.userToken.menus[5].submenu[4].privilegio[1].estado),
@@ -94,7 +94,7 @@ class Proyectos extends React.Component {
         try {
             await this.setStateAsync({ loading: true, lista: [], messageTable: "Cargando información...", messagePaginacion: "Mostranto 0 de 0 Páginas" });
 
-            const result = await axios.get('/api/proyecto/list', {
+            const result = await axios.get('/api/sucursal/list', {
                 signal: this.abortControllerTable.signal,
                 params: {
                     "opcion": opcion,
@@ -126,19 +126,19 @@ class Proyectos extends React.Component {
         }
     }
 
-    onEventDelete(idProyecto) {
-        alertDialog("Proyecto", "¿Estás seguro de eliminar el proyecto?", async (value) => {
+    onEventDelete(idSucursal) {
+        alertDialog("Sucursal", "¿Estás seguro de eliminar el sucursal?", async (value) => {
             if (value) {
-                const response = await borrarProyecto(idProyecto);
+                const response = await borrarSucursal(idSucursal);
 
                 if (response instanceof SuccessReponse) {
-                    alertSuccess("Proyecto", response.data, () => {
+                    alertSuccess("Sucursal", response.data, () => {
                         this.loadInit();
                     })
                 }
 
                 if (response instanceof ErrorResponse) {
-                    alertWarning("Proyecto", response.getMessage())
+                    alertWarning("Sucursal", response.getMessage())
                 }
             }
         })
@@ -150,7 +150,7 @@ class Proyectos extends React.Component {
                 <div className='row'>
                     <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
                         <div className="form-group">
-                            <h5>Proyectos <small className="text-secondary">LISTA</small></h5>
+                            <h5>Sucursales <small className="text-secondary">LISTA</small></h5>
                         </div>
                     </div>
                 </div>
@@ -191,7 +191,7 @@ class Proyectos extends React.Component {
                                 <thead>
                                     <tr>
                                         <th width="5%" className="text-center">#</th>
-                                        <th width="20%">Proyecto</th>
+                                        <th width="20%">Sucursal</th>
                                         <th width="10%">Área Total(m²)</th>
                                         <th width="30%">Ubicación</th>
                                         <th width="10%">Precio X m2</th>
@@ -227,7 +227,7 @@ class Proyectos extends React.Component {
                                                                 className="btn btn-outline-warning btn-sm"
                                                                 title="Editar"
                                                                 onClick={() => {
-                                                                    this.props.history.push({ pathname: `${this.props.location.pathname}/proceso`, search: "?idProyecto=" + item.idProyecto })
+                                                                    this.props.history.push({ pathname: `${this.props.location.pathname}/proceso`, search: "?idSucursal=" + item.idSucursal })
                                                                 }}
                                                                 disabled={!this.state.edit}>
                                                                 <i className="bi bi-pencil"></i>
@@ -237,7 +237,7 @@ class Proyectos extends React.Component {
                                                             <button
                                                                 className="btn btn-outline-danger btn-sm"
                                                                 title="Eliminar"
-                                                                onClick={() => this.onEventDelete(item.idProyecto)}
+                                                                onClick={() => this.onEventDelete(item.idSucursal)}
                                                                 disabled={!this.state.remove}>
                                                                 <i className="bi bi-trash"></i>
                                                             </button>
@@ -285,4 +285,4 @@ const mapStateToProps = (state) => {
     }
 }
 
-export default connect(mapStateToProps, null)(Proyectos);
+export default connect(mapStateToProps, null)(Sucursales);

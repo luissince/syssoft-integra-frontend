@@ -13,7 +13,7 @@ class Principal extends React.Component {
       data: [],
       filter: [],
       loadModal: true,
-      msgModal: "Cargando proyectos...",
+      msgModal: "Cargando sucursales...",
     };
     this.refTxtSearch = React.createRef();
 
@@ -28,7 +28,7 @@ class Principal extends React.Component {
 
   async componentDidMount() {
     try {
-      let result = await axios.get("/api/proyecto/inicio", {
+      let result = await axios.get("/api/sucursal/inicio", {
         signal: this.abortControllerTable.signal,
       });
 
@@ -86,7 +86,7 @@ class Principal extends React.Component {
 
   onEventIngresar(item) {
     const proyect = {
-      idProyecto: item.idProyecto,
+      idSucursal: item.idSucursal,
       nombre: item.nombre,
       ubicacion: item.ubicacion,
     };
@@ -161,7 +161,7 @@ class Principal extends React.Component {
                       <input
                         className="form-control bg-transparent"
                         type="search"
-                        placeholder="filtar por proyecto o nombre del proyecto"
+                        placeholder="filtar por sucursal o nombre del sucursal"
                         aria-label="Search"
                         ref={this.refTxtSearch}
                         onKeyUp={(event) =>
@@ -262,7 +262,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
   return {
     restore: () => dispatch(signOut()),
-    project: (idProyecto) => dispatch(selectProject(idProyecto)),
+    project: (idSucursal) => dispatch(selectProject(idSucursal)),
   };
 };
 

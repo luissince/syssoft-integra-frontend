@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Producto = require('../services/Producto');
-const sede = require('../services/Sede');
+const empresa = require('../services/Empresa');
 const RepProducto = require('../report/RepProducto');
 const { generateProductoDeuda } = require('../excel/FileProducto');
 const { decrypt } = require('../tools/CryptoJS');
@@ -132,12 +132,12 @@ router.put('/cambiar', async function (req, res) {
 router.get('/repproductodetalle', async function (req, res) {
     const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
     req.query.idProducto = decryptedData.idProducto;
-    req.query.idSede = decryptedData.idSede;
+    req.query.idEmpresa = decryptedData.idEmpresa;
 
-    const sedeInfo = await sede.infoSedeReporte(req)
+    const empresaInfo = await empresa.infoEmpresaReporte(req)
 
-    if (typeof sedeInfo !== 'object') {
-        res.status(500).send(sedeInfo)
+    if (typeof empresaInfo !== 'object') {
+        res.status(500).send(empresaInfo)
         return;
     }
 
@@ -145,7 +145,7 @@ router.get('/repproductodetalle', async function (req, res) {
 
     if (typeof detalle === 'object') {
 
-        let data = await repProducto.repDetalleProducto(sedeInfo, detalle)
+        let data = await repProducto.repDetalleProducto(empresaInfo, detalle)
 
         if (typeof data === 'string') {
             res.status(500).send(data)
@@ -163,13 +163,13 @@ router.get('/reptipoProductos', async function (req, res) {
     const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
     // req.query.idProducto = decryptedData.idProducto;
     req.query.estadoProducto = decryptedData.estadoProducto;
-    req.query.idSede = decryptedData.idSede;
-    req.query.idProyecto = decryptedData.idProyecto;
+    req.query.idEmpresa = decryptedData.idEmpresa;
+    req.query.idSucursal = decryptedData.idSucursal;
 
-    const sedeInfo = await sede.infoSedeReporte(req)
+    const empresaInfo = await empresa.infoEmpresaReporte(req)
 
-    if (typeof sedeInfo !== 'object') {
-        res.status(500).send(sedeInfo)
+    if (typeof empresaInfo !== 'object') {
+        res.status(500).send(empresaInfo)
         return;
     }
 
@@ -177,7 +177,7 @@ router.get('/reptipoProductos', async function (req, res) {
 
     if (typeof detalle === 'object') {
 
-        let data = await repProducto.repTipoProducto(req, sedeInfo, detalle)
+        let data = await repProducto.repTipoProducto(req, empresaInfo, detalle)
 
         if (typeof data === 'string') {
             res.status(500).send(data)
@@ -193,15 +193,15 @@ router.get('/reptipoProductos', async function (req, res) {
 
 router.get('/replistardeudasProducto', async function (req, res) {
     const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
-    req.query.idSede = decryptedData.idSede;
-    req.query.idProyecto = decryptedData.idProyecto;
-    req.query.nombreProyecto = decryptedData.nombreProyecto;
-    req.query.porProyecto = decryptedData.porProyecto;
+    req.query.idEmpresa = decryptedData.idEmpresa;
+    req.query.idSucursal = decryptedData.idSucursal;
+    req.query.nombreSucursal = decryptedData.nombreSucursal;
+    req.query.porSucursal = decryptedData.porSucursal;
 
-    const sedeInfo = await sede.infoSedeReporte(req)
+    const empresaInfo = await empresa.infoEmpresaReporte(req)
 
-    if (typeof sedeInfo !== 'object') {
-        res.status(500).send(sedeInfo)
+    if (typeof empresaInfo !== 'object') {
+        res.status(500).send(empresaInfo)
         return;
     }
 
@@ -209,7 +209,7 @@ router.get('/replistardeudasProducto', async function (req, res) {
 
     if (typeof detalle === 'object') {
 
-        let data = await repProducto.repProductoDeuda(req, sedeInfo, detalle)
+        let data = await repProducto.repProductoDeuda(req, empresaInfo, detalle)
 
         if (typeof data === 'string') {
             res.status(500).send(data)
@@ -225,22 +225,22 @@ router.get('/replistardeudasProducto', async function (req, res) {
 
 router.get('/exacellistardeudasProducto', async function (req, res) {
     const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
-    req.query.idSede = decryptedData.idSede;
-    req.query.idProyecto = decryptedData.idProyecto;
-    req.query.nombreProyecto = decryptedData.nombreProyecto;
-    req.query.porProyecto = decryptedData.porProyecto;
+    req.query.idEmpresa = decryptedData.idEmpresa;
+    req.query.idSucursal = decryptedData.idSucursal;
+    req.query.nombreSucursal = decryptedData.nombreSucursal;
+    req.query.porSucursal = decryptedData.porSucursal;
 
-    const sedeInfo = await sede.infoSedeReporte(req);
+    const empresaInfo = await empresa.infoEmpresaReporte(req);
 
-    if (typeof sedeInfo !== 'object') {
-        return sendError(res, sedeInfo);
+    if (typeof empresaInfo !== 'object') {
+        return sendError(res, empresaInfo);
     }
 
     const detalle = await producto.listardeudasProducto(req);
 
     if (Array.isArray(detalle)) {
 
-        const data = await generateProductoDeuda(req, sedeInfo, detalle);
+        const data = await generateProductoDeuda(req, empresaInfo, detalle);
 
         if (typeof data === 'string') {
             return sendError(res, data);

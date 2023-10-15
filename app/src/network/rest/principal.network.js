@@ -169,9 +169,9 @@ export async function trasladarCategoria(params, signal = null) {
  * @param {*} signal 
  * @returns SuccessReponse | ErrorResponse 
  */
-export async function comboProyectos(signal = null) {
+export async function comboSucursales(signal = null) {
   return await Resolve.create(
-    instancePrincipal.get("/api/proyecto/combo", {
+    instancePrincipal.get("/api/sucursal/combo", {
       signal: signal,
     })
   );
@@ -179,14 +179,14 @@ export async function comboProyectos(signal = null) {
 
 /**
  * 
- * @param {*} idProyecto 
+ * @param {*} idSucursal 
  * @returns SuccessReponse | ErrorResponse 
  */
-export async function borrarProyecto(idProyecto) {
+export async function borrarSucursal(idSucursal) {
   return await Resolve.create(
-    instancePrincipal.delete('/api/proyecto', {
+    instancePrincipal.delete('/api/sucursal', {
       params: {
-        "idProyecto": idProyecto
+        "idSucursal": idSucursal
       }
     })
   );
@@ -199,27 +199,7 @@ export async function borrarProyecto(idProyecto) {
  */
 export async function loadEmpresa(signal = null) {
   return await Resolve.create(
-    instancePrincipal.get("/api/empresa/load", {
-      signal: signal,
-      params: {
-        "idSede": "SD0001",
-      }
-    })
-  );
-}
-
-/**
- * 
- * @param {*} params 
- * @param {*} signal 
- * @returns SuccessReponse | ErrorResponse 
- */
-export async function listSede(params, signal = null) {
-  return await Resolve.create(
-    instancePrincipal.get('/api/sede/list', {
-      signal: signal,
-      params: params
-    })
+    instancePrincipal.get("/api/empresa/load")
   );
 }
 

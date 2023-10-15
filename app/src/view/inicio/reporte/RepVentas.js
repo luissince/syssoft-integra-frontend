@@ -11,7 +11,7 @@ class RepVentas extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            idProyecto: this.props.token.project.idProyecto,
+            idSucursal: this.props.token.project.idSucursal,
 
             fechaIni: '',
             fechaFin: '',
@@ -121,7 +121,7 @@ class RepVentas extends React.Component {
         }
 
         const data = {
-            "idSede": "SD0001",
+            "idEmpresa": "EM0001",
             "fechaIni": this.state.fechaIni,
             "fechaFin": this.state.fechaFin,
             "idComprobante": this.state.idComprobante === '' ? '' : this.state.idComprobante,
@@ -165,7 +165,7 @@ class RepVentas extends React.Component {
         }
 
         const data = {
-            "idSede": "SD0001",
+            "idEmpresa": "EM0001",
             "fechaIni": this.state.fechaIni,
             "fechaFin": this.state.fechaFin,
             "idComprobante": this.state.idComprobante === '' ? '' : this.state.idComprobante,

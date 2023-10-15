@@ -29,7 +29,7 @@ class Socios extends React.Component {
             fechaInicio: currentDate(),
             fechaFinal: currentDate(),
 
-            idProyecto: this.props.token.project.idProyecto,
+            idSucursal: this.props.token.project.idSucursal,
 
             view: statePrivilegio(this.props.token.userToken.menus[2].submenu[4].privilegio[0].estado),
 
@@ -124,7 +124,7 @@ class Socios extends React.Component {
                     "fechaInicio": fechaInicio,
                     "fechaFinal": fechaFinal,
                     "idConcepto": idConcepto,
-                    "idProyecto": this.state.idProyecto,
+                    "idSucursal": this.state.idSucursal,
                     "posicionPagina": ((this.state.paginacion - 1) * this.state.filasPorPagina),
                     "filasPorPagina": this.state.filasPorPagina
                 }

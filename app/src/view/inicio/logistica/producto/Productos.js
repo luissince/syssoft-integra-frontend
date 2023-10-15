@@ -46,7 +46,7 @@ class Productos extends CustomComponent {
             limiteIzquierdo: '',
             limitePosterior: '',
             ubicacionProducto: '',
-            idProyecto: this.props.token.project.idProyecto,
+            idSucursal: this.props.token.project.idSucursal,
             idUsuario: this.props.token.userToken.idUsuario,
 
             add: statePrivilegio(this.props.token.userToken.menus[3].submenu[1].privilegio[0].estado),
@@ -195,7 +195,7 @@ class Productos extends CustomComponent {
 
             const result = await axios.get('/api/producto/list', {
                 params: {
-                    "idProyecto": this.state.idProyecto,
+                    "idSucursal": this.state.idSucursal,
                     "opcion": opcion,
                     "buscar": buscar.trim(),
                     "posicionPagina": ((this.state.paginacion - 1) * this.state.filasPorPagina),
@@ -229,7 +229,7 @@ class Productos extends CustomComponent {
             let categoria = await axios.get('/api/categoria/listcombo', {
                 signal: this.abortControllerModal.signal,
                 params: {
-                    "idProyecto": this.state.idProyecto,
+                    "idSucursal": this.state.idSucursal,
                 }
             });
 
@@ -261,7 +261,7 @@ class Productos extends CustomComponent {
             let categoria = await axios.get('/api/categoria/listcombo', {
                 signal: this.abortControllerModal.signal,
                 params: {
-                    "idProyecto": this.state.idProyecto,
+                    "idSucursal": this.state.idSucursal,
                 }
             });
 

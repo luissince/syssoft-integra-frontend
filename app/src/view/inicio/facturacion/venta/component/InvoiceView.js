@@ -4,7 +4,7 @@ import ItemView from "./ItemView";
 
 const InvoiceView = (props) => {
 
-    const { refProducto,producto, productos, sarchProducto, idProyecto, filterProducto, setStateAsync, handleAddItem } = props;
+    const { refProducto,producto, productos, sarchProducto, idSucursal, filterProducto, setStateAsync, handleAddItem } = props;
 
     const _componentSearchItems = () => {
         if (sarchProducto) {
@@ -50,7 +50,7 @@ const InvoiceView = (props) => {
             <ItemSearch
                 refProducto={refProducto}
                 producto={producto}
-                idProyecto={idProyecto}
+                idSucursal={idSucursal}
                 filterProducto={filterProducto}
                 setStateAsync={setStateAsync}
             />

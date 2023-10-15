@@ -50,7 +50,7 @@ class GastoProceso extends React.Component {
             observacion: '',
             idUsuario: this.props.token.userToken.idUsuario,
 
-            idProyecto: this.props.token.project.idProyecto,
+            idSucursal: this.props.token.project.idSucursal,
 
             detalleConcepto: [],
 
@@ -337,7 +337,7 @@ class GastoProceso extends React.Component {
                         "metodoPago": this.state.metodoPago,
                         "estado": 1,
                         "observacion": this.state.observacion.trim().toUpperCase(),
-                        "idProyecto": this.state.idProyecto,
+                        "idSucursal": this.state.idSucursal,
                         "gastoDetalle": this.state.detalleConcepto
                     });
 

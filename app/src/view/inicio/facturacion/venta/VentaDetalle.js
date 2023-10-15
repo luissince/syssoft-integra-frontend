@@ -222,7 +222,7 @@ class VentaDetalle extends CustomComponent {
 
     async onEventImprimir() {
         const data = {
-            "idSede": "SD0001",
+            "idEmpresa": "EM0001",
             "idVenta": this.state.idVenta,
         }
 

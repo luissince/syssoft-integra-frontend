@@ -5,7 +5,7 @@ const smtpTransport = require('nodemailer-smtp-transport');
 const { decrypt } = require('../tools/CryptoJS');
 const { generateExcel, cpeSunat } = require('../excel/FileFinanza')
 const Cobro = require('../services/Cobro');
-const sede = require('../services/Sede');
+const empresa = require('../services/Empresa');
 const RepFinanciero = require('../report/RepFinanciero');
 const RepFactura = require('../report/RepFactura');
 const { isEmail } = require('../tools/Tools');
@@ -101,10 +101,10 @@ router.delete('/anular', async function (req, res) {
 router.get('/email', async function (req, res) {
     try {
 
-        const sedeInfo = await sede.infoSedeReporte(req)
+        const empresaInfo = await empresa.infoEmpresaReporte(req)
 
-        if (typeof sedeInfo !== 'object') {
-            res.status(500).send(sedeInfo)
+        if (typeof empresaInfo !== 'object') {
+            res.status(500).send(empresaInfo)
             return;
         }
 
@@ -112,7 +112,7 @@ router.get('/email', async function (req, res) {
 
         if (typeof detalle === 'object') {
 
-            let pdf = await repFactura.repCobro(req, sedeInfo, detalle);
+            let pdf = await repFactura.repCobro(req, empresaInfo, detalle);
 
             if (typeof pdf === 'string') {
                 res.status(500).send(pdf);
@@ -123,7 +123,7 @@ router.get('/email', async function (req, res) {
                 if (typeof xml === 'string') {
                     res.status(500).send(xml);
                 } else {
-                    if (!isEmail(sedeInfo.usuarioEmail) && sedeInfo.claveEmail == "") {
+                    if (!isEmail(empresaInfo.usuarioEmail) && empresaInfo.claveEmail == "") {
                         res.status(400).send("Las credenciales del correo para el envío no pueden ser vacios.");
                     } else {
                         if (!isEmail(detalle.cabecera.email)) {
@@ -135,14 +135,14 @@ router.get('/email', async function (req, res) {
                                 // port: 587,
                                 service: 'gmail',
                                 auth: {
-                                    user: sedeInfo.usuarioEmail, // generated ethereal user
-                                    pass: sedeInfo.claveEmail, // generated ethereal password
+                                    user: empresaInfo.usuarioEmail, // generated ethereal user
+                                    pass: empresaInfo.claveEmail, // generated ethereal password
                                 }
                             }));
                             // send mail with defined transport object
                             // Message object
                             let message = {
-                                from: `"${sedeInfo.nombreEmpresa} 👻" ${sedeInfo.usuarioEmail}`,
+                                from: `"${empresaInfo.nombreEmpresa} 👻" ${empresaInfo.usuarioEmail}`,
 
                                 // Comma separated list of recipients
                                 to: detalle.cabecera.email,
@@ -152,7 +152,7 @@ router.get('/email', async function (req, res) {
                                 subject: 'Comprobante Electrónico ✔',
 
                                 // plaintext body
-                                text: sedeInfo.ruc,
+                                text: empresaInfo.ruc,
 
                                 // HTML body
                                 html:
@@ -161,7 +161,7 @@ router.get('/email', async function (req, res) {
                                     <span>Tipo de Documento: <b>${detalle.cabecera.comprobante}</b></span><br/>
                                     <span>Número de Serie: <b>${detalle.cabecera.serie}</b></span><br/>
                                     <span>Número de Documento: <b>${detalle.cabecera.numeracion}</b></span><br/>
-                                    <span>N° RUC del Emisor: <b>${sedeInfo.ruc}</b></span><br/>
+                                    <span>N° RUC del Emisor: <b>${empresaInfo.ruc}</b></span><br/>
                                     <span>N° RUC/DNI del Cliente: <b>${detalle.cabecera.documento}</b></span><br/>
                                     <span>Fecha de Emisión: <b>${detalle.cabecera.fecha}</b></span><br/>
                                     <p>Atentamente ,</p>`,
@@ -169,13 +169,13 @@ router.get('/email', async function (req, res) {
                                 // An array of attachments
                                 attachments: [
                                     {
-                                        filename: `${sedeInfo.nombreEmpresa} ${detalle.cabecera.comprobante} ${detalle.cabecera.serie}-${detalle.cabecera.numeracion}.xml`,
+                                        filename: `${empresaInfo.nombreEmpresa} ${detalle.cabecera.comprobante} ${detalle.cabecera.serie}-${detalle.cabecera.numeracion}.xml`,
                                         content: xml.xmlGenerado,
                                         contentType: 'text/plain'
                                     },
 
                                     {
-                                        filename: `${sedeInfo.nombreEmpresa} ${detalle.cabecera.comprobante} ${detalle.cabecera.serie}-${detalle.cabecera.numeracion}.pdf`,
+                                        filename: `${empresaInfo.nombreEmpresa} ${detalle.cabecera.comprobante} ${detalle.cabecera.serie}-${detalle.cabecera.numeracion}.pdf`,
                                         content: pdf,
                                         contentType: 'application/pdf'
                                     },
@@ -198,14 +198,14 @@ router.get('/email', async function (req, res) {
 
 router.get('/repletramatricial', async function (req, res) {
     const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
-    req.query.idSede = decryptedData.idSede;
+    req.query.idEmpresa = decryptedData.idEmpresa;
     req.query.idVenta = decryptedData.idVenta;
     req.query.idPlazo = decryptedData.idPlazo;
 
-    const sedeInfo = await sede.infoSedeReporte(req)
+    const empresaInfo = await empresa.infoEmpresaReporte(req)
 
-    if (typeof sedeInfo !== 'object') {
-        res.status(500).send(sedeInfo)
+    if (typeof empresaInfo !== 'object') {
+        res.status(500).send(empresaInfo)
         return;
     }
 
@@ -213,7 +213,7 @@ router.get('/repletramatricial', async function (req, res) {
 
     if (typeof detalle === 'object') {
 
-        let data = await repFactura.repLetraA5(req, sedeInfo, detalle);
+        let data = await repFactura.repLetraA5(req, empresaInfo, detalle);
         if (typeof data === 'string') {
             res.status(500).send(data);
         } else {
@@ -232,14 +232,14 @@ router.get('/repletramatricial', async function (req, res) {
  */
 router.get('/repcomprobantematricial', async function (req, res) {
     const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
-    req.query.idSede = decryptedData.idSede;
+    req.query.idEmpresa = decryptedData.idEmpresa;
     req.query.idCobro = decryptedData.idCobro;
 
 
-    const sedeInfo = await sede.infoSedeReporte(req)
+    const empresaInfo = await empresa.infoEmpresaReporte(req)
 
-    if (typeof sedeInfo !== 'object') {
-        res.status(500).send(sedeInfo)
+    if (typeof empresaInfo !== 'object') {
+        res.status(500).send(empresaInfo)
         return;
     }
 
@@ -247,7 +247,7 @@ router.get('/repcomprobantematricial', async function (req, res) {
 
     if (typeof detalle === 'object') {
 
-        let data = await repFactura.repCobroA5(req, sedeInfo, detalle);
+        let data = await repFactura.repCobroA5(req, empresaInfo, detalle);
         if (typeof data === 'string') {
             res.status(500).send(data);
         } else {
@@ -266,13 +266,13 @@ router.get('/repcomprobantematricial', async function (req, res) {
  */
 router.get('/repcomprobante', async function (req, res) {
     const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
-    req.query.idSede = decryptedData.idSede;
+    req.query.idEmpresa = decryptedData.idEmpresa;
     req.query.idCobro = decryptedData.idCobro;
 
-    const sedeInfo = await sede.infoSedeReporte(req)
+    const empresaInfo = await empresa.infoEmpresaReporte(req)
 
-    if (typeof sedeInfo !== 'object') {
-        res.status(500).send(sedeInfo)
+    if (typeof empresaInfo !== 'object') {
+        res.status(500).send(empresaInfo)
         return;
     }
 
@@ -280,7 +280,7 @@ router.get('/repcomprobante', async function (req, res) {
 
     if (typeof detalle === 'object') {
 
-        let data = await repFactura.repCobro(req, sedeInfo, detalle);
+        let data = await repFactura.repCobro(req, empresaInfo, detalle);
 
         if (typeof data === 'string') {
             res.status(500).send(data);
@@ -301,24 +301,25 @@ router.get('/repcomprobante', async function (req, res) {
 router.get('/repgeneralcobros', async function (req, res) {
     const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
 
-    req.query.idSede = decryptedData.idSede;
+    req.query.idEmpresa = decryptedData.idEmpresa;
     req.query.fechaIni = decryptedData.fechaIni;
     req.query.fechaFin = decryptedData.fechaFin;
     req.query.isDetallado = decryptedData.isDetallado;
     req.query.idComprobante = decryptedData.idComprobante;
     req.query.idUsuario = decryptedData.idUsuario;
+    req.query.idSucursal = decryptedData.idSucursal;
 
-    const sedeInfo = await sede.infoSedeReporte(req);
-
-    if (typeof sedeInfo !== 'object') {
-        res.status(500).send(sedeInfo);
+    const empresaInfo = await empresa.infoEmpresaReporte(req);
+    
+    if (typeof empresaInfo !== 'object') {
+        res.status(500).send(empresaInfo);
         return;
     }
-
+    
     const detalle = await cobro.cobroGeneral(req);
 
     if (typeof detalle === 'object') {
-        let data = req.query.isDetallado ? await repFinanciero.repFiltroCobrosDetallados(req, sedeInfo, detalle) : await repFinanciero.repFiltroCobros(req, sedeInfo, detalle);
+        let data = req.query.isDetallado ? await repFinanciero.repFiltroCobrosDetallados(req, empresaInfo, detalle) : await repFinanciero.repFiltroCobros(req, empresaInfo, detalle);
 
         if (typeof data === 'string') {
             res.status(500).send(data);
@@ -335,17 +336,18 @@ router.get('/repgeneralcobros', async function (req, res) {
 router.get('/excelgeneralcobros', async function (req, res) {
     const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
 
-    req.query.idSede = decryptedData.idSede;
+    req.query.idEmpresa = decryptedData.idEmpresa;
     req.query.fechaIni = decryptedData.fechaIni;
     req.query.fechaFin = decryptedData.fechaFin;
     req.query.isDetallado = decryptedData.isDetallado;
     req.query.idComprobante = decryptedData.idComprobante;
     req.query.idUsuario = decryptedData.idUsuario;
+    req.query.idSucursal = decryptedData.idSucursal;
 
-    const sedeInfo = await sede.infoSedeReporte(req);
+    const empresaInfo = await empresa.infoEmpresaReporte(req);
 
-    if (typeof sedeInfo !== 'object') {
-        res.status(500).send(sedeInfo);
+    if (typeof empresaInfo !== 'object') {
+        res.status(500).send(empresaInfo);
         return;
     }
 
@@ -353,7 +355,7 @@ router.get('/excelgeneralcobros', async function (req, res) {
 
     if (typeof detalle === 'object') {
 
-        const data = await generateExcel(req, sedeInfo, detalle);
+        const data = await generateExcel(req, empresaInfo, detalle);
 
         if (typeof data === 'string') {
             res.status(500).send(data);
@@ -368,15 +370,15 @@ router.get('/excelgeneralcobros', async function (req, res) {
 router.get('/excelcpesunat', async function (req, res) {
     const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
 
-    req.query.idSede = decryptedData.idSede;
+    req.query.idEmpresa = decryptedData.idEmpresa;
     req.query.fechaIni = decryptedData.fechaIni;
     req.query.fechaFin = decryptedData.fechaFin;
     req.query.idComprobante = decryptedData.idComprobante;
 
-    const sedeInfo = await sede.infoSedeReporte(req);
+    const empresaInfo = await empresa.infoEmpresaReporte(req);
 
-    if (typeof sedeInfo !== 'object') {
-        res.status(500).send(sedeInfo);
+    if (typeof empresaInfo !== 'object') {
+        res.status(500).send(empresaInfo);
         return;
     }
 
@@ -384,7 +386,7 @@ router.get('/excelcpesunat', async function (req, res) {
 
     if (Array.isArray(detalle)) {
 
-        const data = await cpeSunat(req, sedeInfo, detalle);
+        const data = await cpeSunat(req, empresaInfo, detalle);
 
         if (typeof data === 'string') {
             res.status(500).send(data);
@@ -398,14 +400,14 @@ router.get('/excelcpesunat', async function (req, res) {
 
 router.get('/xmlsunat', async function (req, res) {
     const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
-    req.query.idSede = decryptedData.idSede;
+    req.query.idEmpresa = decryptedData.idEmpresa;
     req.query.idCobro = decryptedData.idCobro;
     req.query.xmlSunat = decryptedData.xmlSunat;
 
-    const sedeInfo = await sede.infoSedeReporte(req);
+    const empresaInfo = await empresa.infoEmpresaReporte(req);
 
-    if (typeof sedeInfo !== 'object') {
-        res.status(500).send(sedeInfo);
+    if (typeof empresaInfo !== 'object') {
+        res.status(500).send(empresaInfo);
         return;
     }
 
@@ -413,7 +415,7 @@ router.get('/xmlsunat', async function (req, res) {
 
     if (typeof detalle === 'object') {
         const object = {
-            "name": `${sedeInfo.nombreEmpresa} ${detalle.comprobante} ${detalle.serie}-${detalle.numeracion}.xml`,
+            "name": `${empresaInfo.nombreEmpresa} ${detalle.comprobante} ${detalle.serie}-${detalle.numeracion}.xml`,
             "data": detalle.xmlGenerado
         };
         const buffXmlSunat = Buffer.from(JSON.stringify(object), "utf-8");

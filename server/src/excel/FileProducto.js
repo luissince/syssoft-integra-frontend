@@ -1,7 +1,7 @@
 const xl = require('excel4node');
 const { formatMoney, dateFormat } = require('../tools/Tools');
 
-async function generateProductoDeuda(req, sedeInfo, data) {
+async function generateProductoDeuda(req, empresaInfo, data) {
     try {
         const wb = new xl.Workbook();
 
@@ -84,13 +84,13 @@ async function generateProductoDeuda(req, sedeInfo, data) {
         ws.column(12).setWidth(15);
         ws.column(13).setWidth(18);
 
-        ws.cell(1, 1, 1, 13, true).string(`${sedeInfo.nombreEmpresa}`).style(styleTitle);
-        ws.cell(2, 1, 2, 13, true).string(`RUC: ${sedeInfo.ruc}`).style(styleTitle);
-        ws.cell(3, 1, 3, 13, true).string(`${sedeInfo.direccion}`).style(styleTitle);
-        ws.cell(4, 1, 4, 13, true).string(`Celular: ${sedeInfo.celular} / Telefono: ${sedeInfo.telefono}`).style(styleTitle);
+        ws.cell(1, 1, 1, 13, true).string(`${empresaInfo.nombreEmpresa}`).style(styleTitle);
+        ws.cell(2, 1, 2, 13, true).string(`RUC: ${empresaInfo.ruc}`).style(styleTitle);
+        ws.cell(3, 1, 3, 13, true).string(`${empresaInfo.direccion}`).style(styleTitle);
+        ws.cell(4, 1, 4, 13, true).string(`Celular: ${empresaInfo.celular} / Telefono: ${empresaInfo.telefono}`).style(styleTitle);
 
         ws.cell(6, 1, 6, 13, true).string(`REPORTE GENERAL DE VENTAS`).style(styleTitle);
-        ws.cell(7, 1, 7, 13, true).string(`${req.query.porProyecto == "0" ? "PROYECTO: " + req.query.nombreProyecto : "TODOS LOS PROYECTOS"}`).style(styleTitle);
+        ws.cell(7, 1, 7, 13, true).string(`${req.query.porSucursal == "0" ? "SUCURSAL: " + req.query.nombreSucursal : "TODOS LOS SUCURSALES"}`).style(styleTitle);
 
         const header = ["N°", "Cliente", "Propiedad", "Comprobante", "1° Pago", "Cta Mensual", "Cta Total", "Ctas Pagadas", "Ctas Pendiente", "Frecuencia", "Total", "Cobrado", "Por Cobrar"];
 

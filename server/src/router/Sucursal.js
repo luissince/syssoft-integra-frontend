@@ -1,23 +1,23 @@
 const express = require('express');
 const router = express.Router();
-const proyecto = require('../services/Proyecto');
+const sucursal = require('../services/Sucursal');
 
 /**
  * endpoint
- * [/api/proyecto/*]
+ * [/api/sucursal/*]
  */
 
 router.get('/list', async function (req, res) {
-    return await proyecto.list(req, res);
+    return await sucursal.list(req, res);
 });
 
 
 /**
  * @swagger
- * /api/proyecto/:
+ * /api/sucursal/:
  *  post:
- *      summary: Registrar un nuevo proyecto
- *      tags: [Proyecto]
+ *      summary: Registrar un nuevo sucursal
+ *      tags: [Sucursal]
  *      requestBody:
  *          required: true
  *          content:
@@ -30,7 +30,7 @@ router.get('/list', async function (req, res) {
  *                          
  *      responses:
  *          201:
- *              description: Proyecto creado
+ *              description: Sucursal creado
  *              content:
  *                  application/json:
  *                      schema:
@@ -43,27 +43,27 @@ router.get('/list', async function (req, res) {
  *                          type: string
  */
 router.post('/', async function (req, res) {
-    return await proyecto.add(req, res);
+    return await sucursal.add(req, res);
 });
 
 router.put('/', async function (req, res) {
-    return await proyecto.edit(req, res);
+    return await sucursal.edit(req, res);
 });
 
 router.get('/id', async function (req, res) {
-    return await proyecto.id(req, res);
+    return await sucursal.id(req, res);
 });
 
 router.delete('/', async function (req, res) {
-    return await proyecto.delete(req, res);
+    return await sucursal.delete(req, res);
 });
 
 router.get('/inicio', async function (req, res) {
-    return await proyecto.inicio(req, res);
+    return await sucursal.inicio(req, res);
 });
 
 router.get('/combo',async function (req, res){
-    return await proyecto.combo(req, res);
+    return await sucursal.combo(req, res);
 });
 
 module.exports = router;

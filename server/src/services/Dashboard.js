@@ -10,18 +10,18 @@ class Dashboard {
             let totalCategorias = await conec.query(`SELECT
                 IFNULL(COUNT(*), 0) AS total
                 FROM categoria AS m
-                INNER JOIN proyecto as p ON m.idProyecto=p.idProyecto
-                WHERE p.idProyecto=?`, [
-                req.query.idProyecto,
+                INNER JOIN sucursal as p ON m.idSucursal=p.idSucursal
+                WHERE p.idSucursal=?`, [
+                req.query.idSucursal,
             ])
 
             let totalProductos = await conec.query(`SELECT
                 IFNULL(COUNT(*), 0) AS total
                 FROM producto AS l
                 INNER JOIN categoria AS m ON l.idCategoria=m.idCategoria
-                INNER JOIN proyecto as p ON m.idProyecto=p.idProyecto
-                WHERE p.idProyecto=?`, [
-                req.query.idProyecto,
+                INNER JOIN sucursal as p ON m.idSucursal=p.idSucursal
+                WHERE p.idSucursal=?`, [
+                req.query.idSucursal,
             ])
 
             let totalClientes = await conec.query(`SELECT IFNULL(COUNT(*), 0) AS total FROM cliente`)
@@ -32,9 +32,9 @@ class Dashboard {
                 LEFT JOIN ventaDetalle AS vd ON vd.idVenta = v.idVenta
                 WHERE 
                 MONTH(v.fecha)=MONTH(CURRENT_DATE()) AND YEAR(v.fecha)=YEAR(CURRENT_DATE())
-                AND v.idProyecto = ? 
+                AND v.idSucursal = ? 
                 AND v.estado <> 3`, [
-                req.query.idProyecto,
+                req.query.idSucursal,
             ])
 
             return sendSuccess(res, { "totalCategorias": totalCategorias[0].total, "totalProductos": totalProductos[0].total, "totalClientes": totalClientes[0].total, "totalVentas": totalVentas[0].total });

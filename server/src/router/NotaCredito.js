@@ -3,7 +3,7 @@ const router = express.Router();
 const nodemailer = require("nodemailer");
 const smtpTransport = require('nodemailer-smtp-transport');
 const notaCredito = require('../services/NotaCredito');
-const sede = require('../services/Sede');
+const empresa = require('../services/Empresa');
 const RepNotaCredito = require('../report/RepNotaCredito');
 const { decrypt } = require('../tools/CryptoJS');
 const { sendSuccess, sendClient, sendError } = require('../tools/Message');
@@ -37,17 +37,17 @@ router.delete('/', async function (req, res) {
 
 router.get('/email', async function (req, res) {
     try {
-        const sedeInfo = await sede.infoSedeReporte(req)
+        const empresaInfo = await empresa.infoEmpresaReporte(req)
 
-        if (typeof sedeInfo !== 'object') {
-            return sendError(res, sedeInfo);
+        if (typeof empresaInfo !== 'object') {
+            return sendError(res, empresaInfo);
         }
 
         const detalle = await notaCredito.idReport(req)
 
         if (typeof detalle === 'object') {
 
-            let pdf = await repNotaCredito.repComprobante(req, sedeInfo, detalle);
+            let pdf = await repNotaCredito.repComprobante(req, empresaInfo, detalle);
 
             if (typeof pdf === 'string') {
                 return sendError(res, pdf);
@@ -58,7 +58,7 @@ router.get('/email', async function (req, res) {
                 if (typeof xml === 'string') {
                     return sendError(res, xml);
                 } else {
-                    if (!isEmail(sedeInfo.usuarioEmail) && sedeInfo.claveEmail == "") {
+                    if (!isEmail(empresaInfo.usuarioEmail) && empresaInfo.claveEmail == "") {
                         return sendClient(res, "Las credenciales del correo para el envío no pueden ser vacios.");
                     } else {
                         if (!isEmail(detalle.cabecera.email)) {
@@ -70,14 +70,14 @@ router.get('/email', async function (req, res) {
                                 // port: 587,
                                 service: 'gmail',
                                 auth: {
-                                    user: sedeInfo.usuarioEmail, // generated ethereal user
-                                    pass: sedeInfo.claveEmail, // generated ethereal password
+                                    user: empresaInfo.usuarioEmail, // generated ethereal user
+                                    pass: empresaInfo.claveEmail, // generated ethereal password
                                 }
                             }));
                             // send mail with defined transport object
                             // Message object
                             let message = {
-                                from: `"${sedeInfo.nombreEmpresa} 👻" ${sedeInfo.usuarioEmail}`,
+                                from: `"${empresaInfo.nombreEmpresa} 👻" ${empresaInfo.usuarioEmail}`,
 
                                 // Comma separated list of recipients
                                 to: detalle.cabecera.email,
@@ -87,7 +87,7 @@ router.get('/email', async function (req, res) {
                                 subject: 'Comprobante Electrónico ✔',
 
                                 // plaintext body
-                                text: sedeInfo.ruc,
+                                text: empresaInfo.ruc,
 
                                 // HTML body
                                 html:
@@ -96,7 +96,7 @@ router.get('/email', async function (req, res) {
                                     <span>Tipo de Documento: <b>${detalle.cabecera.comprobante}</b></span><br/>
                                     <span>Número de Serie: <b>${detalle.cabecera.serie}</b></span><br/>
                                     <span>Número de Documento: <b>${detalle.cabecera.numeracion}</b></span><br/>
-                                    <span>N° RUC del Emisor: <b>${sedeInfo.ruc}</b></span><br/>
+                                    <span>N° RUC del Emisor: <b>${empresaInfo.ruc}</b></span><br/>
                                     <span>N° RUC/DNI del Cliente: <b>${detalle.cabecera.documento}</b></span><br/>
                                     <span>Fecha de Emisión: <b>${detalle.cabecera.fecha}</b></span><br/>
                                     <p>Atentamente ,</p>`,
@@ -104,13 +104,13 @@ router.get('/email', async function (req, res) {
                                 // An array of attachments
                                 attachments: [
                                     {
-                                        filename: `${sedeInfo.nombreEmpresa} ${detalle.cabecera.comprobante} ${detalle.cabecera.serie}-${detalle.cabecera.numeracion}.xml`,
+                                        filename: `${empresaInfo.nombreEmpresa} ${detalle.cabecera.comprobante} ${detalle.cabecera.serie}-${detalle.cabecera.numeracion}.xml`,
                                         content: xml.xmlGenerado,
                                         contentType: 'text/plain'
                                     },
 
                                     {
-                                        filename: `${sedeInfo.nombreEmpresa} ${detalle.cabecera.comprobante} ${detalle.cabecera.serie}-${detalle.cabecera.numeracion}.pdf`,
+                                        filename: `${empresaInfo.nombreEmpresa} ${detalle.cabecera.comprobante} ${detalle.cabecera.serie}-${detalle.cabecera.numeracion}.pdf`,
                                         content: pdf,
                                         contentType: 'application/pdf'
                                     },
@@ -133,19 +133,19 @@ router.get('/email', async function (req, res) {
 
 router.get('/repcomprobante', async function (req, res) {
     const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
-    req.query.idSede = decryptedData.idSede;
+    req.query.idEmpresa = decryptedData.idEmpresa;
     req.query.idNotaCredito = decryptedData.idNotaCredito;
 
-    const sedeInfo = await sede.infoSedeReporte(req);
+    const empresaInfo = await empresa.infoEmpresaReporte(req);
 
-    if (typeof sedeInfo !== 'object') {
-        return sendError(res, sedeInfo);
+    if (typeof empresaInfo !== 'object') {
+        return sendError(res, empresaInfo);
     }
 
     const detalle = await notaCredito.idReport(req);
     if (typeof detalle === 'object') {
 
-        let data = await repNotaCredito.repComprobante(req, sedeInfo, detalle);
+        let data = await repNotaCredito.repComprobante(req, empresaInfo, detalle);
 
         if (typeof data === 'string') {
             return sendError(res, data);
@@ -161,21 +161,21 @@ router.get('/repcomprobante', async function (req, res) {
 
 router.get('/xmlsunat', async function (req, res) {
     const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
-    req.query.idSede = decryptedData.idSede;
+    req.query.idEmpresa = decryptedData.idEmpresa;
     req.query.idNotaCredito = decryptedData.idNotaCredito;
     req.query.xmlSunat = decryptedData.xmlSunat;
 
-    const sedeInfo = await sede.infoSedeReporte(req);
+    const empresaInfo = await empresa.infoEmpresaReporte(req);
 
-    if (typeof sedeInfo !== 'object') {
-        return sendError(res, sedeInfo);
+    if (typeof empresaInfo !== 'object') {
+        return sendError(res, empresaInfo);
     }
 
     const detalle = await notaCredito.xmlGenerate(req);
 
     if (typeof detalle === 'object') {
         const object = {
-            "name": `${sedeInfo.nombreEmpresa} ${detalle.comprobante} ${detalle.serie}-${detalle.numeracion}.xml`,
+            "name": `${empresaInfo.nombreEmpresa} ${detalle.comprobante} ${detalle.serie}-${detalle.numeracion}.xml`,
             "data": detalle.xmlGenerado
         };
         const buffXmlSunat = Buffer.from(JSON.stringify(object), "utf-8");

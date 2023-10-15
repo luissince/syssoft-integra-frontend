@@ -24,7 +24,7 @@ class Gastos extends React.Component {
             lista: [],
             restart: false,
 
-            idProyecto: this.props.token.project.idProyecto,
+            idSucursal: this.props.token.project.idSucursal,
 
             add: statePrivilegio(this.props.token.userToken.menus[4].submenu[1].privilegio[0].estado),
             view: statePrivilegio(this.props.token.userToken.menus[4].submenu[1].privilegio[1].estado),
@@ -101,7 +101,7 @@ class Gastos extends React.Component {
                 params: {
                     "opcion": opcion,
                     "buscar": buscar,
-                    "idProyecto": this.state.idProyecto,
+                    "idSucursal": this.state.idSucursal,
                     "posicionPagina": ((this.state.paginacion - 1) * this.state.filasPorPagina),
                     "filasPorPagina": this.state.filasPorPagina
                 }

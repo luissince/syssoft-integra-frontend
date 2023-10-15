@@ -5,7 +5,7 @@ import { listarProductosFilter } from "../../../../../network/rest/principal.net
 
 const ItemSearch = (props) => {
 
-    const { refProducto, producto, idProyecto, filterProducto, setStateAsync } = props;
+    const { refProducto, producto, idSucursal, filterProducto, setStateAsync } = props;
 
     const handleFilterProducto = async (event) => {
 
@@ -25,7 +25,7 @@ const ItemSearch = (props) => {
         await setStateAsync({ filterProducto: true, sarchProducto: true });
 
         const params = {
-            idProyecto: idProyecto,
+            idSucursal: idSucursal,
             filtrar: searchWord,
         }
 

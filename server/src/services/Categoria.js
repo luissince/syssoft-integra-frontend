@@ -9,22 +9,22 @@ class Categoria {
         `SELECT 
             m.idCategoria,
             m.nombre,
-            p.nombre as proyecto,
+            p.nombre as sucursal,
             DATE_FORMAT(m.fecha,'%d/%m/%Y') as fecha,
             m.hora
-            FROM categoria AS m INNER JOIN proyecto AS p
-            ON m.idProyecto = p.idProyecto
+            FROM categoria AS m INNER JOIN sucursal AS p
+            ON m.idSucursal = p.idSucursal
             WHERE
-            ? = 0 AND p.idProyecto = ?
+            ? = 0 AND p.idSucursal = ?
             OR
-            ? = 1 AND p.idProyecto = ? AND m.nombre LIKE CONCAT(?,'%')
+            ? = 1 AND p.idSucursal = ? AND m.nombre LIKE CONCAT(?,'%')
             LIMIT ?,?`,
         [
           parseInt(req.query.opcion),
-          req.query.idProyecto,
+          req.query.idSucursal,
 
           parseInt(req.query.opcion),
-          req.query.idProyecto,
+          req.query.idSucursal,
           req.query.buscar,
 
           parseInt(req.query.posicionPagina),
@@ -41,18 +41,18 @@ class Categoria {
 
       let total = await conec.query(
         `SELECT COUNT(*) AS Total     
-            FROM categoria AS m INNER JOIN proyecto AS p
-            ON m.idProyecto = p.idProyecto
+            FROM categoria AS m INNER JOIN sucursal AS p
+            ON m.idSucursal = p.idSucursal
             WHERE
-            ? = 0 AND p.idProyecto = ?
+            ? = 0 AND p.idSucursal = ?
             OR
-            ? = 1 AND p.idProyecto = ? AND m.nombre LIKE CONCAT(?,'%')`,
+            ? = 1 AND p.idSucursal = ? AND m.nombre LIKE CONCAT(?,'%')`,
         [
           parseInt(req.query.opcion),
-          req.query.idProyecto,
+          req.query.idSucursal,
 
           parseInt(req.query.opcion),
-          req.query.idProyecto,
+          req.query.idSucursal,
           req.query.buscar,
         ]
       );
@@ -118,7 +118,7 @@ class Categoria {
         `INSERT INTO categoria(
             idCategoria,
             nombre,
-            idProyecto,
+            idSucursal,
             fecha,
             hora,
             fupdate,
@@ -128,7 +128,7 @@ class Categoria {
         [
           idCategoria,
           req.body.nombre,
-          req.body.idProyecto,
+          req.body.idSucursal,
           currentDate(),
           currentTime(),
           currentDate(),
@@ -156,14 +156,14 @@ class Categoria {
         connection,
         `UPDATE categoria SET
             nombre = ?,
-            idProyecto = ?,
+            idSucursal = ?,
             fupdate = ?,
             hupdate = ?,
             idUsuario = ?
             WHERE idCategoria  = ?`,
         [
           req.body.nombre,
-          req.body.idProyecto,
+          req.body.idSucursal,
           currentDate(),
           currentTime(),
           req.body.idUsuario,
@@ -216,8 +216,8 @@ class Categoria {
   async listcombo(req) {
     try {
       const result = await conec.query(
-        "SELECT idCategoria,nombre FROM categoria WHERE idProyecto = ?",
-        [req.query.idProyecto]
+        "SELECT idCategoria,nombre FROM categoria WHERE idSucursal = ?",
+        [req.query.idSucursal]
       );
       return result;
     } catch (error) {
@@ -230,13 +230,13 @@ class Categoria {
     try {
       connection = await conec.beginTransaction();
 
-      const categoria = await conec.execute(connection,"SELECT * FROM categoria WHERE  idCategoria = ? and idProyecto = ?",[
+      const categoria = await conec.execute(connection,"SELECT * FROM categoria WHERE  idCategoria = ? and idSucursal = ?",[
         req.query.idCategoria,
-        req.query.idProyecto
+        req.query.idSucursal
       ])
 
-      await  conec.execute(connection, 'update categoria set idProyecto = ? where idCategoria = ?',[
-        req.query.idProyectoTrasladar,
+      await  conec.execute(connection, 'update categoria set idSucursal = ? where idCategoria = ?',[
+        req.query.idSucursalTrasladar,
         req.query.idCategoria,
       ])
 
@@ -256,8 +256,8 @@ class Categoria {
 
         if(venta.length != 0){
 
-            await conec.execute(connection,`update venta set idProyecto = ? where idVenta = ?`,[
-                req.query.idProyectoTrasladar,
+            await conec.execute(connection,`update venta set idSucursal = ? where idVenta = ?`,[
+                req.query.idSucursalTrasladar,
                 venta[0].idVenta
             ])
 
@@ -265,8 +265,8 @@ class Categoria {
             //     venta[0].idCliente,
             // ])
 
-            await conec.execute(connection,`update alta set idProyecto = ? where idCliente = ?`,[
-                req.query.idProyectoTrasladar,
+            await conec.execute(connection,`update alta set idSucursal = ? where idCliente = ?`,[
+                req.query.idSucursalTrasladar,
                 venta[0].idCliente,
             ])
     
@@ -275,14 +275,14 @@ class Categoria {
             ])
             
     
-            await conec.execute(connection, `update cobro set idProyecto = ? where idProcedencia = ?`,[
-                req.query.idProyectoTrasladar,
+            await conec.execute(connection, `update cobro set idSucursal = ? where idProcedencia = ?`,[
+                req.query.idSucursalTrasladar,
                 venta[0].idVenta
             ])
     
             for(const cobro of cobros){
-                await conec.execute(connection, `update notaCredito set idProyecto = ?  where idCobro = ?`,[
-                    req.query.idProyectoTrasladar,
+                await conec.execute(connection, `update notaCredito set idSucursal = ?  where idCobro = ?`,[
+                    req.query.idSucursalTrasladar,
                     cobro.idCobro
                 ])
             }

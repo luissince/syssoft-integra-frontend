@@ -132,7 +132,7 @@ class NotaCreditoDetalle extends React.Component {
 
     async onEventImprimir() {
         const data = {
-            "idSede": "SD0001",
+            "idEmpresa": "EM0001",
             "idNotaCredito": this.state.idNotaCredito
         }
 

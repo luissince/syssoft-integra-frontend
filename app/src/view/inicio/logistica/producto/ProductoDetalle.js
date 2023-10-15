@@ -34,7 +34,7 @@ class ProductoDetalle extends CustomComponent{
             detalle: [],
 
             idUsuario: this.props.token.userToken.idUsuario,
-            idProyecto: this.props.token.project.idProyecto,
+            idSucursal: this.props.token.project.idSucursal,
 
             loading: true,
             messageWarning: '',
@@ -166,7 +166,7 @@ class ProductoDetalle extends CustomComponent{
                     "idCliente": this.state.idCliente,
                     "idClienteOld": this.state.idClienteOld,
                     "idUsuario": this.state.idUsuario,
-                    "idProyecto": this.state.idProyecto,
+                    "idSucursal": this.state.idSucursal,
                 }
 
                 const response = await productoSocio(data);
@@ -224,7 +224,7 @@ class ProductoDetalle extends CustomComponent{
     async onEventImprimir() {
         const data = {
             "idProducto": this.state.idProducto,
-            "idSede": "SD0001"
+            "idEmpresa": "EM0001"
         }
 
         let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
@@ -232,7 +232,7 @@ class ProductoDetalle extends CustomComponent{
         window.open("/api/producto/repproductodetalle?" + params, "_blank");
 
         //Despliegue 
-        // window.open("/api/producto/repproductodetalle?idProducto=" + this.state.idProducto + "&idSede=SD0001", "_blank");
+        // window.open("/api/producto/repproductodetalle?idProducto=" + this.state.idProducto + "&idEmpresa=EM0001", "_blank");
 
         //Desarrollo
         // try {
@@ -241,7 +241,7 @@ class ProductoDetalle extends CustomComponent{
         //         responseType: "blob",
         //         params: {
         //             "idProducto": this.state.idProducto,
-        //             "idSede": 'SD0001'
+        //             "idEmpresa": 'EM0001'
         //         }
         //     });
 

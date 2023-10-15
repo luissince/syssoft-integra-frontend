@@ -23,7 +23,7 @@ class Cobros extends React.Component {
         this.state = {
             idCobro: '',
 
-            idProyecto: this.props.token.project.idProyecto,
+            idSucursal: this.props.token.project.idSucursal,
             idUsuario: this.props.token.userToken.idUsuario,
 
             add: statePrivilegio(this.props.token.userToken.menus[2].submenu[3].privilegio[0].estado),
@@ -105,7 +105,7 @@ class Cobros extends React.Component {
                 params: {
                     "opcion": opcion,
                     "buscar": buscar,
-                    "idProyecto": this.state.idProyecto,
+                    "idSucursal": this.state.idSucursal,
                     "posicionPagina": ((this.state.paginacion - 1) * this.state.filasPorPagina),
                     "filasPorPagina": this.state.filasPorPagina
                 }

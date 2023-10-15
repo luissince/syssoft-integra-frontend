@@ -43,7 +43,7 @@ class CobroProceso extends React.Component {
             detalleConcepto: [],
             idUsuario: this.props.token.userToken.idUsuario,
 
-            idProyecto: this.props.token.project.idProyecto,
+            idSucursal: this.props.token.project.idSucursal,
 
             idImpuesto: '',
             impuestos: [],
@@ -358,7 +358,7 @@ class CobroProceso extends React.Component {
                         "metodoPago": this.state.metodoPago,
                         "estado": 1,
                         "observacion": this.state.observacion.trim().toUpperCase(),
-                        "idProyecto": this.state.idProyecto,
+                        "idSucursal": this.state.idSucursal,
                         "cobroDetalle": this.state.detalleConcepto
                     });
 

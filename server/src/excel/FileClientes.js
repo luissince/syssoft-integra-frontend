@@ -1,7 +1,7 @@
 const xl = require('excel4node');
 const { formatMoney, dateFormat, numberFormat } = require('../tools/Tools');
 
-async function generateExcelCliente(req, sedeInfo, data, condicion) {
+async function generateExcelCliente(req, empresaInfo, data, condicion) {
     try {
         const wb = new xl.Workbook();
 
@@ -77,10 +77,10 @@ async function generateExcelCliente(req, sedeInfo, data, condicion) {
             ws.column(3).setWidth(30);
             ws.column(4).setWidth(20);
 
-            ws.cell(1, 1, 1, 4, true).string(`${sedeInfo.nombreEmpresa}`).style(styleTitle);
-            ws.cell(2, 1, 2, 4, true).string(`RUC: ${sedeInfo.ruc}`).style(styleTitle);
-            ws.cell(3, 1, 3, 4, true).string(`${sedeInfo.direccion}`).style(styleTitle);
-            ws.cell(4, 1, 4, 4, true).string(`Celular: ${sedeInfo.celular} / Telefono: ${sedeInfo.telefono}`).style(styleTitle);
+            ws.cell(1, 1, 1, 4, true).string(`${empresaInfo.nombreEmpresa}`).style(styleTitle);
+            ws.cell(2, 1, 2, 4, true).string(`RUC: ${empresaInfo.ruc}`).style(styleTitle);
+            ws.cell(3, 1, 3, 4, true).string(`${empresaInfo.direccion}`).style(styleTitle);
+            ws.cell(4, 1, 4, 4, true).string(`Celular: ${empresaInfo.celular} / Telefono: ${empresaInfo.telefono}`).style(styleTitle);
 
             ws.cell(6, 1, 6, 4, true).string(`REPORTE DE CLIENTES`).style(styleTitle);
             ws.cell(7, 1, 7, 4, true).string(`PERIODO: ${dateFormat(req.query.fechaIni)} al ${dateFormat(req.query.fechaFin)}`).style(styleTitle);
@@ -143,10 +143,10 @@ async function generateExcelCliente(req, sedeInfo, data, condicion) {
             ws.column(5).setWidth(30);
             ws.column(6).setWidth(20);
 
-            ws.cell(1, 1, 1, 6, true).string(`${sedeInfo.nombreEmpresa}`).style(styleTitle);
-            ws.cell(2, 1, 2, 6, true).string(`RUC: ${sedeInfo.ruc}`).style(styleTitle);
-            ws.cell(3, 1, 3, 6, true).string(`${sedeInfo.direccion}`).style(styleTitle);
-            ws.cell(4, 1, 4, 6, true).string(`Celular: ${sedeInfo.celular} / Telefono: ${sedeInfo.telefono}`).style(styleTitle);
+            ws.cell(1, 1, 1, 6, true).string(`${empresaInfo.nombreEmpresa}`).style(styleTitle);
+            ws.cell(2, 1, 2, 6, true).string(`RUC: ${empresaInfo.ruc}`).style(styleTitle);
+            ws.cell(3, 1, 3, 6, true).string(`${empresaInfo.direccion}`).style(styleTitle);
+            ws.cell(4, 1, 4, 6, true).string(`Celular: ${empresaInfo.celular} / Telefono: ${empresaInfo.telefono}`).style(styleTitle);
 
             ws.cell(6, 1, 6, 6, true).string(`LISTA DE APORTACIONES`).style(styleTitle);
             ws.cell(7, 1, 7, 6, true).string(`PERIODO: ${dateFormat(req.query.fechaIni)} al ${dateFormat(req.query.fechaFin)}`).style(styleTitle);
@@ -197,7 +197,7 @@ async function generateExcelCliente(req, sedeInfo, data, condicion) {
     }
 }
 
-async function generateExcelDeudas(req, sedeInfo, data) {
+async function generateExcelDeudas(req, empresaInfo, data) {
     try {
 
         const wb = new xl.Workbook();
@@ -277,10 +277,10 @@ async function generateExcelDeudas(req, sedeInfo, data) {
         ws.column(8).setWidth(20);
         ws.column(9).setWidth(20);
 
-        ws.cell(1, 1, 1, 9, true).string(`${sedeInfo.nombreEmpresa}`).style(styleTitle);
-        ws.cell(2, 1, 2, 9, true).string(`RUC: ${sedeInfo.ruc}`).style(styleTitle);
-        ws.cell(3, 1, 3, 9, true).string(`${sedeInfo.direccion}`).style(styleTitle);
-        ws.cell(4, 1, 4, 9, true).string(`Celular: ${sedeInfo.celular} / Telefono: ${sedeInfo.telefono}`).style(styleTitle);
+        ws.cell(1, 1, 1, 9, true).string(`${empresaInfo.nombreEmpresa}`).style(styleTitle);
+        ws.cell(2, 1, 2, 9, true).string(`RUC: ${empresaInfo.ruc}`).style(styleTitle);
+        ws.cell(3, 1, 3, 9, true).string(`${empresaInfo.direccion}`).style(styleTitle);
+        ws.cell(4, 1, 4, 9, true).string(`Celular: ${empresaInfo.celular} / Telefono: ${empresaInfo.telefono}`).style(styleTitle);
 
         ws.cell(6, 1, 6, 9, true).string(`LISTA DE DEUDAS POR CLIENTE`).style(styleTitle);
 
@@ -311,7 +311,7 @@ async function generateExcelDeudas(req, sedeInfo, data) {
     }
 }
 
-async function generarSociosPorFecha(req, sedeInfo, data) {
+async function generarSociosPorFecha(req, empresaInfo, data) {
     try {
         const wb = new xl.Workbook();
 
@@ -411,13 +411,13 @@ async function generarSociosPorFecha(req, sedeInfo, data) {
         ws.column(4).setWidth(40);
         ws.column(5).setWidth(20);
 
-        ws.cell(1, 1, 1, 5, true).string(`${sedeInfo.nombreEmpresa}`).style(styleTitle);
-        ws.cell(2, 1, 2, 5, true).string(`RUC: ${sedeInfo.ruc}`).style(styleTitle);
-        ws.cell(3, 1, 3, 5, true).string(`${sedeInfo.direccion}`).style(styleTitle);
-        ws.cell(4, 1, 4, 5, true).string(`Celular: ${sedeInfo.celular} / Telefono: ${sedeInfo.telefono}`).style(styleTitle);
+        ws.cell(1, 1, 1, 5, true).string(`${empresaInfo.nombreEmpresa}`).style(styleTitle);
+        ws.cell(2, 1, 2, 5, true).string(`RUC: ${empresaInfo.ruc}`).style(styleTitle);
+        ws.cell(3, 1, 3, 5, true).string(`${empresaInfo.direccion}`).style(styleTitle);
+        ws.cell(4, 1, 4, 5, true).string(`Celular: ${empresaInfo.celular} / Telefono: ${empresaInfo.telefono}`).style(styleTitle);
 
         ws.cell(6, 1, 6, 5, true).string(`LISTA DE SOCIOS AGREGADOS POR FECHA`).style(styleTitle);
-        ws.cell(7, 1, 7, 5, true).string(req.query.porProyecto == "1" ? "TODOS LOS PROYECTOS" : `PROYECTO: ${req.query.nombreProyecto}`).style(styleTitle);
+        ws.cell(7, 1, 7, 5, true).string(req.query.porSucursal == "1" ? "TODOS LOS SUCURSALES" : `SUCURSAL: ${req.query.nombreSucursal}`).style(styleTitle);
 
         const header = ["N°", "Documento", "Socio", "Celular", "Teléfono"];
         header.map((item, index) => ws.cell(9, 1 + index).string(item).style(styleTableHeader).style(fillVenta));

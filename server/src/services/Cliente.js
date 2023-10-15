@@ -84,7 +84,7 @@ class Cliente {
                 req.query.fechaInicio,
                 req.query.fechaFinal,
                 req.query.idConcepto,
-                req.query.idProyecto,
+                req.query.idSucursal,
 
                 parseInt(req.query.posicionPagina),
                 parseInt(req.query.filasPorPagina)
@@ -123,7 +123,7 @@ class Cliente {
                 req.query.fechaInicio,
                 req.query.fechaFinal,
                 req.query.idConcepto,
-                req.query.idProyecto
+                req.query.idSucursal
             ]);
 
             return { "result": resultLista, "total": total[0].Total };
@@ -472,18 +472,18 @@ class Cliente {
             INNER JOIN cliente AS cl ON v.idCliente = cl.idCliente 
             LEFT JOIN ventaDetalle AS vd ON vd.idVenta = v.idVenta 
             WHERE  
-            ? = 1 AND v.estado = 2 AND v.idProyecto = ?
+            ? = 1 AND v.estado = 2 AND v.idSucursal = ?
             OR
-            ? = 0 AND v.estado = 2 AND v.frecuencia = ? AND v.idProyecto = ?
+            ? = 0 AND v.estado = 2 AND v.frecuencia = ? AND v.idSucursal = ?
 
             GROUP BY v.idVenta
             ORDER BY cl.informacion ASC`, [
                 req.query.seleccionado,
-                req.query.idProyecto,
+                req.query.idSucursal,
 
                 req.query.seleccionado,
                 req.query.frecuencia,
-                req.query.idProyecto
+                req.query.idSucursal
             ]);
 
             let newLista = []
@@ -689,7 +689,7 @@ class Cliente {
                     const detalle = await conec.query(`select 
                         l.descripcion,
                         m.nombre as categoria,
-                        p.nombre as proyecto,
+                        p.nombre as sucursal,
                         im.porcentaje,
                         im.nombre as impuesto,
                         vd.cantidad,
@@ -698,7 +698,7 @@ class Cliente {
                         inner join impuesto as im on im.idImpuesto = vd.idImpuesto
                         inner join producto as l on l.idProducto = vd.idProducto
                         inner join categoria as m on m.idCategoria = l.idCategoria
-                        inner join proyecto as p on p.idProyecto = m.idProyecto
+                        inner join sucursal as p on p.idSucursal = m.idSucursal
                         where vd.idVenta = ?`, [
                         venta.idVenta
                     ]);
@@ -756,13 +756,13 @@ class Cliente {
         try {
             connection = await conec.beginTransaction();
 
-            const venta = await conec.execute(connection, `SELECT * FROM venta WHERE idProyecto = ?`, [
-                req.query.idProyecto
+            const venta = await conec.execute(connection, `SELECT * FROM venta WHERE idSucursal = ?`, [
+                req.query.idSucursal
             ]);
             for (let value of venta) {
-                const alta = await conec.execute(connection, `SELECT * FROM alta WHERE idCliente = ? AND idProyecto = ?`, [
+                const alta = await conec.execute(connection, `SELECT * FROM alta WHERE idCliente = ? AND idSucursal = ?`, [
                     value.idCliente,
-                    value.idProyecto
+                    value.idSucursal
                 ]);
                 if (alta.length == 0) {
                     let resultAlta = await conec.execute(connection, 'SELECT idAlta FROM alta');
@@ -783,14 +783,14 @@ class Cliente {
                     await conec.execute(connection, `INSERT INTO alta(
                         idAlta,
                         idCliente,
-                        idProyecto,
+                        idSucursal,
                         fecha,
                         hora,
                         idUsuario
                     ) VALUES(?,?,?,?,?,?)`, [
                         idAlta,
                         value.idCliente,
-                        value.idProyecto,
+                        value.idSucursal,
                         currentDate(),
                         currentTime(),
                         'US0001'
@@ -834,16 +834,16 @@ class Cliente {
                 INNER JOIN producto AS lo ON vd.idProducto = lo.idProducto
                 INNER JOIN categoria AS ma ON ma.idCategoria = lo.idCategoria
                 WHERE 
-                YEAR(v.fecha) = ? AND v.idProyecto = ? AND ? = 0 AND v.estado IN (1,2)
+                YEAR(v.fecha) = ? AND v.idSucursal = ? AND ? = 0 AND v.estado IN (1,2)
                 OR
                 YEAR(v.fecha) = ? AND ? = 1 AND v.estado IN (1,2)
                 GROUP BY v.idVenta`, [
                 parseInt(req.query.yearPago),
-                req.query.idProyecto,
-                parseInt(req.query.porProyecto),
+                req.query.idSucursal,
+                parseInt(req.query.porSucursal),
 
                 parseInt(req.query.yearPago),
-                parseInt(req.query.porProyecto),
+                parseInt(req.query.porSucursal),
             ]);
 
             let newClientes = [];

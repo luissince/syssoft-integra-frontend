@@ -58,7 +58,7 @@ class VentaProceso extends CustomComponent {
 
             detalleVenta: [],
 
-            idProyecto: this.props.token.project.idProyecto,
+            idSucursal: this.props.token.project.idSucursal,
 
             loading: true,
             msgLoading: 'Cargando datos...',
@@ -619,7 +619,7 @@ class VentaProceso extends CustomComponent {
                             idUsuario: this.state.idUsuario,
 
                             idMoneda: this.state.idMoneda,
-                            idProyecto: this.state.idProyecto,
+                            idSucursal: this.state.idSucursal,
 
                             detalleVenta: this.state.detalleVenta
                         }
@@ -719,7 +719,7 @@ class VentaProceso extends CustomComponent {
                 <section className='invoice-left'>
                     <InvoiceView
                         producto={this.state.producto}
-                        idProyecto={this.state.idProyecto}
+                        idSucursal={this.state.idSucursal}
                         filterProducto={this.state.filterProducto}
                         setStateAsync={this.setStateAsync}
 

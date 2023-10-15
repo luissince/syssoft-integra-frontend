@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { decrypt } = require('../tools/CryptoJS');
-const sede = require('../services/Sede');
+const empresa = require('../services/Empresa');
 const Gasto = require('../services/Gasto');
 const RepFinanciero = require('../report/RepFinanciero')
 const RepFactura = require('../report/RepFactura');
@@ -27,7 +27,7 @@ router.post('/add', async function (req, res) {
     }
 });
 
-router.get('/id', async function (req, res) {
+router.get('/id', async function (req, res) {    
     const result = await gasto.id(req)
     if (typeof result === 'object') {
         res.status(200).send(result);
@@ -47,13 +47,13 @@ router.delete('/anular', async function (req, res) {
 
 router.get('/repcomprobante', async function (req, res) {
     const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
-    req.query.idSede = decryptedData.idSede;
+    req.query.idEmpresa = decryptedData.idEmpresa;
     req.query.idGasto = decryptedData.idGasto;
 
-    const sedeInfo = await sede.infoSedeReporte(req)
+    const empresaInfo = await empresa.infoEmpresaReporte(req)
 
-    if (typeof sedeInfo !== 'object') {
-        res.status(500).send(sedeInfo)
+    if (typeof empresaInfo !== 'object') {
+        res.status(500).send(empresaInfo)
         return;
     }
 
@@ -61,7 +61,7 @@ router.get('/repcomprobante', async function (req, res) {
 
     if (typeof detalle === 'object') {
 
-        let data = await repFactura.repGasto(req, sedeInfo, detalle);
+        let data = await repFactura.repGasto(req, empresaInfo, detalle);
 
         if (typeof data === 'string') {
             res.status(500).send(data);

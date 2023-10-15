@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { decrypt } = require('../tools/CryptoJS');
 const { generateExcelCliente, generateExcelDeudas, generarSociosPorFecha } = require('../excel/FileClientes')
-const sede = require('../services/Sede');
+const empresa = require('../services/Empresa');
 const Cliente = require('../services/Cliente');
 const RepCliente = require('../report/RepCliente');
 
@@ -118,23 +118,23 @@ router.get('/listcobrosasociados', async function (req, res) {
 
 router.get('/repcliente', async function (req, res) {
     const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
-    req.query.idSede = decryptedData.idSede;
+    req.query.idEmpresa = decryptedData.idEmpresa;
     req.query.fechaIni = decryptedData.fechaIni;
     req.query.fechaFin = decryptedData.fechaFin;
     req.query.idCliente = decryptedData.idCliente;
     req.query.cliente = decryptedData.cliente;
 
-    const sedeInfo = await sede.infoSedeReporte(req);
+    const empresaInfo = await empresa.infoempresaReporte(req);
 
-    if (typeof sedeInfo !== 'object') {
-        res.status(500).send(sedeInfo);
+    if (typeof empresaInfo !== 'object') {
+        res.status(500).send(empresaInfo);
         return;
     }
 
     const detalle = await cliente.listapagos(req)
 
     if (Array.isArray(detalle)) {
-        let data = await repCliente.repGeneral(req, sedeInfo, detalle);
+        let data = await repCliente.repGeneral(req, empresaInfo, detalle);
 
         if (typeof data === 'string') {
             res.status(500).send(data);
@@ -150,20 +150,20 @@ router.get('/repcliente', async function (req, res) {
 
 router.get('/repclientehistorial', async function (req, res) {
     const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
-    req.query.idSede = decryptedData.idSede;
+    req.query.idEmpresa = decryptedData.idEmpresa;
     req.query.idCliente = decryptedData.idCliente;
 
-    const sedeInfo = await sede.infoSedeReporte(req);
+    const empresaInfo = await empresa.infoEmpresaReporte(req);
 
-    if (typeof sedeInfo !== 'object') {
-        res.status(500).send(sedeInfo);
+    if (typeof empresaInfo !== 'object') {
+        res.status(500).send(empresaInfo);
         return;
     }
 
     const detalle = await cliente.listventasasociadas(req)
 
     if (typeof detalle === 'object') {
-        let data = await repCliente.repHistorial(req, sedeInfo, detalle);
+        let data = await repCliente.repHistorial(req, empresaInfo, detalle);
 
         if (typeof data === 'string') {
             res.status(500).send(data);
@@ -179,16 +179,16 @@ router.get('/repclientehistorial', async function (req, res) {
 
 router.get('/excelcliente', async function (req, res) {
     const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
-    req.query.idSede = decryptedData.idSede;
+    req.query.idEmpresa = decryptedData.idEmpresa;
     req.query.fechaIni = decryptedData.fechaIni;
     req.query.fechaFin = decryptedData.fechaFin;
     req.query.idCliente = decryptedData.idCliente;
     req.query.cliente = decryptedData.cliente;
 
-    const sedeInfo = await sede.infoSedeReporte(req);
+    const empresaInfo = await empresa.infoEmpresaReporte(req);
 
-    if (typeof sedeInfo !== 'object') {
-        res.status(500).send(sedeInfo);
+    if (typeof empresaInfo !== 'object') {
+        res.status(500).send(empresaInfo);
         return;
     }
 
@@ -197,7 +197,7 @@ router.get('/excelcliente', async function (req, res) {
     if (Array.isArray(detalle)) {
 
         if (req.query.idCliente == '') {
-            const data = await generateExcelCliente(req, sedeInfo, detalle, 0);
+            const data = await generateExcelCliente(req, empresaInfo, detalle, 0);
 
             if (typeof data === 'string') {
                 res.status(500).send(data);
@@ -205,7 +205,7 @@ router.get('/excelcliente', async function (req, res) {
                 res.end(data);
             }
         } else {
-            const data = await generateExcelCliente(req, sedeInfo, detalle, 1);
+            const data = await generateExcelCliente(req, empresaInfo, detalle, 1);
 
             if (typeof data === 'string') {
                 res.status(500).send(data);
@@ -220,23 +220,23 @@ router.get('/excelcliente', async function (req, res) {
 
 router.get('/repdeudas', async function (req, res) {
     const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
-    req.query.idSede = decryptedData.idSede;
-    req.query.idProyecto = decryptedData.idProyecto;
-    req.query.nombreProyecto = decryptedData.nombreProyecto;
+    req.query.idEmpresa = decryptedData.idEmpresa;
+    req.query.idSucursal = decryptedData.idSucursal;
+    req.query.nombreSucursal = decryptedData.nombreSucursal;
     req.query.seleccionado = decryptedData.seleccionado;
     req.query.frecuencia = decryptedData.frecuencia;
 
-    const sedeInfo = await sede.infoSedeReporte(req);
+    const empresaInfo = await empresa.infoEmpresaReporte(req);
 
-    if (typeof sedeInfo !== 'object') {
-        res.status(500).send(sedeInfo);
+    if (typeof empresaInfo !== 'object') {
+        res.status(500).send(empresaInfo);
         return;
     }
 
     const detalle = await cliente.listadeudas(req)
 
     if (Array.isArray(detalle)) {
-        let data = await repCliente.repDeudas(req, sedeInfo, detalle);
+        let data = await repCliente.repDeudas(req, empresaInfo, detalle);
 
         if (typeof data === 'string') {
             res.status(500).send(data);
@@ -252,23 +252,23 @@ router.get('/repdeudas', async function (req, res) {
 
 router.get('/exceldeudas', async function (req, res) {
     const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
-    req.query.idSede = decryptedData.idSede;
-    req.query.idProyecto = decryptedData.idProyecto;
-    req.query.nombreProyecto = decryptedData.nombreProyecto;
+    req.query.idEmpresa = decryptedData.idEmpresa;
+    req.query.idSucursal = decryptedData.idSucursal;
+    req.query.nombreSucursal = decryptedData.nombreSucursal;
     req.query.seleccionado = decryptedData.seleccionado;
     req.query.frecuencia = decryptedData.frecuencia;
 
-    const sedeInfo = await sede.infoSedeReporte(req);
+    const empresaInfo = await empresa.infoEmpresaReporte(req);
 
-    if (typeof sedeInfo !== 'object') {
-        res.status(500).send(sedeInfo);
+    if (typeof empresaInfo !== 'object') {
+        res.status(500).send(empresaInfo);
         return;
     }
 
     const detalle = await cliente.listadeudas(req)
 
     if (Array.isArray(detalle)) {
-        const data = await generateExcelDeudas(req, sedeInfo, detalle);
+        const data = await generateExcelDeudas(req, empresaInfo, detalle);
 
         if (typeof data === 'string') {
             res.status(500).send(data);
@@ -297,23 +297,23 @@ router.get("/updatealta", async function (req, res) {
  */
 router.get("/replistarsociosporfecha", async function (req, res) {
     const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
-    req.query.idSede = decryptedData.idSede;
-    req.query.idProyecto = decryptedData.idProyecto;
-    req.query.nombreProyecto = decryptedData.nombreProyecto;
+    req.query.idEmpresa = decryptedData.idEmpresa;
+    req.query.idSucursal = decryptedData.idSucursal;
+    req.query.nombreSucursal = decryptedData.nombreSucursal;
     req.query.yearPago = decryptedData.yearPago;
-    req.query.porProyecto = decryptedData.porProyecto;
+    req.query.porSucursal = decryptedData.porSucursal;
 
-    const sedeInfo = await sede.infoSedeReporte(req);
+    const empresaInfo = await empresa.infoEmpresaReporte(req);
 
-    if (typeof sedeInfo !== 'object') {
-        res.status(500).send(sedeInfo);
+    if (typeof empresaInfo !== 'object') {
+        res.status(500).send(empresaInfo);
         return;
     }
 
     const clientes = await cliente.listarsociosporfecha(req);
 
     if (Array.isArray(clientes)) {
-        const data = await repCliente.repListarSociosPorFecha(req, sedeInfo, clientes);
+        const data = await repCliente.repListarSociosPorFecha(req, empresaInfo, clientes);
 
         if (typeof data === 'string') {
             res.status(500).send(data);
@@ -332,23 +332,23 @@ router.get("/replistarsociosporfecha", async function (req, res) {
  */
 router.get("/exacellistarsociosporfecha", async function (req, res) {
     const decryptedData = decrypt(req.query.params, 'key-report-inmobiliaria');
-    req.query.idSede = decryptedData.idSede;
-    req.query.idProyecto = decryptedData.idProyecto;
-    req.query.nombreProyecto = decryptedData.nombreProyecto;
+    req.query.idEmpresa = decryptedData.idEmpresa;
+    req.query.idSucursal = decryptedData.idSucursal;
+    req.query.nombreSucursal = decryptedData.nombreSucursal;
     req.query.yearPago = decryptedData.yearPago;
-    req.query.porProyecto = decryptedData.porProyecto;
+    req.query.porSucursal = decryptedData.porSucursal;
 
-    const sedeInfo = await sede.infoSedeReporte(req);
+    const empresaInfo = await empresa.infoEmpresaReporte(req);
 
-    if (typeof sedeInfo !== 'object') {
-        res.status(500).send(sedeInfo);
+    if (typeof empresaInfo !== 'object') {
+        res.status(500).send(empresaInfo);
         return;
     }
 
     const clientes = await cliente.listarsociosporfecha(req);
 
     if (Array.isArray(clientes)) {
-        const data = await generarSociosPorFecha(req, sedeInfo, clientes);
+        const data = await generarSociosPorFecha(req, empresaInfo, clientes);
 
         if (typeof data === 'string') {
             res.status(500).send(data);

@@ -14,8 +14,8 @@ class RepClientes extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            idProyecto: this.props.token.project.idProyecto,
-            nombreProyecto: this.props.token.project.nombre,
+            idSucursal: this.props.token.project.idSucursal,
+            nombreSucursal: this.props.token.project.nombre,
 
             fechaIni: '',
             fechaFin: '',
@@ -36,8 +36,8 @@ class RepClientes extends React.Component {
             year: [2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2020, 2021, 2022, 2023],
             yearCheck: true,
 
-            porProyecto: "0",
-            proyectoCkeck: true,
+            porSucursal: "0",
+            sucursalCkeck: true,
         }
 
         this.refFechaIni = React.createRef();
@@ -129,7 +129,7 @@ class RepClientes extends React.Component {
         }
 
         const data = {
-            "idSede": "SD0001",
+            "idEmpresa": "EM0001",
             "fechaIni": this.state.fechaIni,
             "fechaFin": this.state.fechaFin,
             "idCliente": this.state.idCliente,
@@ -149,7 +149,7 @@ class RepClientes extends React.Component {
         }
 
         const data = {
-            "idSede": "SD0001",
+            "idEmpresa": "EM0001",
             "fechaIni": this.state.fechaIni,
             "fechaFin": this.state.fechaFin,
             "idCliente": this.state.idCliente,
@@ -174,9 +174,9 @@ class RepClientes extends React.Component {
         }
 
         const data = {
-            "idSede": "SD0001",
-            "idProyecto": this.state.idProyecto,
-            "nombreProyecto": this.state.nombreProyecto,
+            "idEmpresa": "EM0001",
+            "idSucursal": this.state.idSucursal,
+            "nombreSucursal": this.state.nombreSucursal,
             "seleccionado": this.state.frecuenciaCheck,
             "frecuencia": this.state.cada
         }
@@ -194,9 +194,9 @@ class RepClientes extends React.Component {
         }
 
         const data = {
-            "idSede": "SD0001",
-            "idProyecto": this.state.idProyecto,
-            "nombreProyecto": this.state.nombreProyecto,
+            "idEmpresa": "EM0001",
+            "idSucursal": this.state.idSucursal,
+            "nombreSucursal": this.state.nombreSucursal,
             "seleccionado": this.state.frecuenciaCheck,
             "frecuencia": this.state.cada
         }
@@ -213,11 +213,11 @@ class RepClientes extends React.Component {
 
     async onEventPdfRegistro() {
         const data = {
-            "idSede": "SD0001",
-            "idProyecto": this.state.idProyecto,
-            "nombreProyecto": this.state.nombreProyecto,
+            "idEmpresa": "EM0001",
+            "idSucursal": this.state.idSucursal,
+            "nombreSucursal": this.state.nombreSucursal,
             "yearPago": this.state.yearPago,
-            "porProyecto": this.state.porProyecto
+            "porSucursal": this.state.porSucursal
         }
         let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
         let params = new URLSearchParams({ "params": ciphertext });
@@ -226,11 +226,11 @@ class RepClientes extends React.Component {
 
     async onEventExcelRegistro() {
         const data = {
-            "idSede": "SD0001",
-            "idProyecto": this.state.idProyecto,
-            "nombreProyecto": this.state.nombreProyecto,
+            "idEmpresa": "EM0001",
+            "idSucursal": this.state.idSucursal,
+            "nombreSucursal": this.state.nombreSucursal,
             "yearPago": this.state.yearPago,
-            "porProyecto": this.state.porProyecto
+            "porSucursal": this.state.porSucursal
         }
         let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
 
@@ -490,15 +490,15 @@ class RepClientes extends React.Component {
 
                                         <div className="col-lg-6 col-md-12 col-sm-12 col-12">
                                             <div className="form-group">
-                                                <label>Proyecto<i className="fa fa-asterisk text-danger small"></i></label>
+                                                <label>Sucursal<i className="fa fa-asterisk text-danger small"></i></label>
                                                 <div className="input-group">
                                                     <select
                                                         title="Año"
                                                         className="form-control"
-                                                        disabled={this.state.proyectoCkeck}
-                                                        value={this.state.porProyecto}
-                                                        onChange={(event) => this.setState({ porProyecto: event.target.value })}>
-                                                        <option value={"0"}>{"Por proyecto"}</option>
+                                                        disabled={this.state.sucursalCkeck}
+                                                        value={this.state.porSucursal}
+                                                        onChange={(event) => this.setState({ porSucursal: event.target.value })}>
+                                                        <option value={"0"}>{"Por sucursal"}</option>
                                                         <option value={"1"}>{"Todos"}</option>
                                                     </select>
                                                     <div className="input-group-append">
@@ -507,8 +507,8 @@ class RepClientes extends React.Component {
                                                                 <input
                                                                     className="form-check-input"
                                                                     type="checkbox"
-                                                                    checked={this.state.proyectoCkeck}
-                                                                    onChange={async (event) => await this.setStateAsync({ proyectoCkeck: event.target.checked })} />
+                                                                    checked={this.state.sucursalCkeck}
+                                                                    onChange={async (event) => await this.setStateAsync({ sucursalCkeck: event.target.checked })} />
                                                             </div>
                                                         </div>
                                                     </div>

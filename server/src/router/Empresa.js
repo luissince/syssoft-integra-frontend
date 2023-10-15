@@ -23,4 +23,8 @@ router.post('/save', async function (req, res) {
     return await empresa.save(req, res);
 });
 
+router.get('/listcombo', async function (req, res) {
+    return await empresa.listarCombo(req , res);
+});
+
 module.exports = router;

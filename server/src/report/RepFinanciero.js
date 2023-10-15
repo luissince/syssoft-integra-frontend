@@ -5,7 +5,7 @@ const { dateFormat, numberFormat, currentDate, isFile } = require('../tools/Tool
 
 class RepFinanciero {
 
-    async repFiltroCobros(req, sedeInfo, data) {
+    async repFiltroCobros(req, empresaInfo, data) {
         try {
             const doc = new PDFDocument({
                 margins: {
@@ -28,14 +28,14 @@ class RepFinanciero {
             let h2 = 11;
             let h3 = 9;
 
-            if (isFile(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo))) {
-                doc.image(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo), doc.x, doc.y, { width: 75 });
+            if (isFile(path.join(__dirname, "..", "path/company/" + empresaInfo.rutaLogo))) {
+                doc.image(path.join(__dirname, "..", "path/company/" + empresaInfo.rutaLogo), doc.x, doc.y, { width: 75 });
             } else {
                 doc.image(path.join(__dirname, "..", "path/to/noimage.jpg"), doc.x, doc.y, { width: 75 });
             }
 
             doc.fontSize(h1).text(
-                `${sedeInfo.nombreEmpresa}`,
+                `${empresaInfo.nombreEmpresa}`,
                 titleX,
                 orgY,
                 {
@@ -45,7 +45,7 @@ class RepFinanciero {
             );
 
             doc.fontSize(h3).text(
-                `RUC: ${sedeInfo.ruc}\n${sedeInfo.direccion}\nCelular: ${sedeInfo.celular} / Telefono: ${sedeInfo.telefono}`,
+                `RUC: ${empresaInfo.ruc}\n${empresaInfo.direccion}\nCelular: ${empresaInfo.celular} / Telefono: ${empresaInfo.telefono}`,
                 titleX,
                 orgY + 17,
                 {
@@ -64,15 +64,37 @@ class RepFinanciero {
                 }
             );
 
-            doc.fontSize(h3).text(
-                `PERIODO: ${dateFormat(req.query.fechaIni)} al ${dateFormat(req.query.fechaFin)}`,
-                orgX,
-                cabeceraY + 25,
-                {
-                    width: 300,
-                    align: "left",
-                }
-            );
+            if (empresaInfo.nombreSucursal) {
+                doc.fontSize(h3).text(
+                    `SUCURSAL: ${empresaInfo.nombreSucursal}`,
+                    orgX,
+                    cabeceraY + 25,
+                    {
+                        width: 300,
+                        align: "left",
+                    }
+                );
+
+                doc.fontSize(h3).text(
+                    `PERIODO: ${dateFormat(req.query.fechaIni)} al ${dateFormat(req.query.fechaFin)}`,
+                    orgX + 200,
+                    cabeceraY + 25,
+                    {
+                        width: 300,
+                        align: "right",
+                    }
+                );
+            } else {
+                doc.fontSize(h3).text(
+                    `PERIODO: ${dateFormat(req.query.fechaIni)} al ${dateFormat(req.query.fechaFin)}`,
+                    orgX,
+                    cabeceraY + 25,
+                    {
+                        width: 300,
+                        align: "left",
+                    }
+                );
+            }
 
             let sumaIngreso = 0;
             let sumaEgreso = 0;
@@ -108,7 +130,7 @@ class RepFinanciero {
                 columnSpacing: 5,
                 columnsSize: [40, 132, 90, 90, 90, 90],
                 x: orgX,
-                y: doc.y + 10,
+                y: doc.y + 20,
                 width: doc.page.width - doc.options.margins.left - doc.options.margins.right
             });
 
@@ -182,7 +204,7 @@ class RepFinanciero {
         }
     }
 
-    async repFiltroCobrosDetallados(req, sedeInfo, data) {
+    async repFiltroCobrosDetallados(req, empresaInfo, data) {
         try {
             const doc = new PDFDocument({
                 margins: {
@@ -205,14 +227,14 @@ class RepFinanciero {
             let h3 = 9;
             let h4 = 8;
 
-            if (isFile(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo))) {
-                doc.image(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo), doc.x, doc.y, { width: 75 });
+            if (isFile(path.join(__dirname, "..", "path/company/" + empresaInfo.rutaLogo))) {
+                doc.image(path.join(__dirname, "..", "path/company/" + empresaInfo.rutaLogo), doc.x, doc.y, { width: 75 });
             } else {
                 doc.image(path.join(__dirname, "..", "path/to/noimage.jpg"), doc.x, doc.y, { width: 75 });
             }
 
             doc.fontSize(h1).text(
-                `${sedeInfo.nombreEmpresa}`,
+                `${empresaInfo.nombreEmpresa}`,
                 titleX,
                 orgY,
                 {
@@ -222,7 +244,7 @@ class RepFinanciero {
             );
 
             doc.fontSize(h3).text(
-                `RUC: ${sedeInfo.ruc}\n${sedeInfo.direccion}\nCelular: ${sedeInfo.celular} / Telefono: ${sedeInfo.telefono}`,
+                `RUC: ${empresaInfo.ruc}\n${empresaInfo.direccion}\nCelular: ${empresaInfo.celular} / Telefono: ${empresaInfo.telefono}`,
                 titleX,
                 orgY + 17,
                 {
@@ -241,15 +263,37 @@ class RepFinanciero {
                 }
             );
 
-            doc.fontSize(h3).text(
-                `PERIODO: ${dateFormat(req.query.fechaIni)} al ${dateFormat(req.query.fechaFin)}`,
-                orgX,
-                cabeceraY + 25,
-                {
-                    width: 300,
-                    align: "left",
-                }
-            );
+            if (empresaInfo.nombreSucursal) {
+                doc.fontSize(h3).text(
+                    `SUCURSAL: ${empresaInfo.nombreSucursal}`,
+                    orgX,
+                    cabeceraY + 25,
+                    {
+                        width: 300,
+                        align: "left",
+                    }
+                );
+
+                doc.fontSize(h3).text(
+                    `PERIODO: ${dateFormat(req.query.fechaIni)} al ${dateFormat(req.query.fechaFin)}`,
+                    orgX + 200,
+                    cabeceraY + 25,
+                    {
+                        width: 300,
+                        align: "right",
+                    }
+                );
+            } else {
+                doc.fontSize(h3).text(
+                    `PERIODO: ${dateFormat(req.query.fechaIni)} al ${dateFormat(req.query.fechaFin)}`,
+                    orgX,
+                    cabeceraY + 25,
+                    {
+                        width: 300,
+                        align: "left",
+                    }
+                );
+            }
 
             let sumaMontoCobros = 0;
             let cobros = data.cobros.map((item, index) => {
@@ -291,7 +335,7 @@ class RepFinanciero {
                 columnSpacing: 5,
                 columnsSize: [22, 60, 80, 60, 60, 60, 70, 60, 60], //532
                 x: orgX,
-                y: doc.y + 10,
+                y: doc.y + 20,
                 width: doc.page.width - doc.options.margins.left - doc.options.margins.right
             });
 
@@ -341,11 +385,11 @@ class RepFinanciero {
         }
     }
 
-    async repDetalleBanco(sedeInfo, data) {
+    async repDetalleBanco(empresaInfo, data) {
 
         try {
             const cabecera = data.cabecera;
-
+            
             const doc = new PDFDocument({
                 margins: {
                     top: 40,
@@ -367,14 +411,14 @@ class RepFinanciero {
             let h2 = 11;
             let h3 = 9;
 
-            if (isFile(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo))) {
-                doc.image(path.join(__dirname, "..", "path/company/" + sedeInfo.rutaLogo), doc.x, doc.y, { width: 75 });
+            if (isFile(path.join(__dirname, "..", "path/company/" + empresaInfo.rutaLogo))) {
+                doc.image(path.join(__dirname, "..", "path/company/" + empresaInfo.rutaLogo), doc.x, doc.y, { width: 75 });
             } else {
                 doc.image(path.join(__dirname, "..", "path/to/noimage.jpg"), doc.x, doc.y, { width: 75 });
             }
 
             doc.fontSize(h1).text(
-                `${sedeInfo.nombreEmpresa}`,
+                `${empresaInfo.nombreEmpresa}`,
                 titleX,
                 orgY,
                 {
@@ -384,7 +428,7 @@ class RepFinanciero {
             );
 
             doc.fontSize(h3).text(
-                `RUC: ${sedeInfo.ruc}\n${sedeInfo.direccion}\nCelular: ${sedeInfo.celular} / Telefono: ${sedeInfo.telefono}`,
+                `RUC: ${empresaInfo.ruc}\n${empresaInfo.direccion}\nCelular: ${empresaInfo.celular} / Telefono: ${empresaInfo.telefono}`,
                 titleX,
                 orgY + 17,
                 {
@@ -471,6 +515,7 @@ class RepFinanciero {
 
             return getStream.buffer(doc);
         } catch (error) {
+            console.log(error)
             return "Se genero un error al generar el reporte.";
         }
     }

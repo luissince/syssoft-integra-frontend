@@ -9,12 +9,12 @@ class Perfil {
         try {
             let lista = await conec.query(`SELECT 
             p.idPerfil,
-            s.nombreSede as empresa,
+            s.nombreEmpresa as empresa,
             p.descripcion,
             DATE_FORMAT(p.fecha,'%d/%m/%Y') as fecha,
             p.hora
             FROM perfil AS p 
-            INNER JOIN sede AS s ON s.idSede = p.idSede 
+            INNER JOIN empresa AS s ON s.idEmpresa = p.idEmpresa 
             WHERE 
             ? = 0
             OR
@@ -38,7 +38,7 @@ class Perfil {
 
             let total = await conec.query(`SELECT COUNT(*) AS Total 
             FROM perfil AS p 
-            INNER JOIN sede AS s ON s.idSede = p.idSede 
+            INNER JOIN empresa AS s ON s.idEmpresa = p.idEmpresa 
             WHERE 
             ? = 0
             OR
@@ -90,7 +90,7 @@ class Perfil {
             await conec.execute(connection, `INSERT INTO perfil
             (
             idPerfil, 
-            idSede, 
+            idEmpresa, 
             descripcion,
             fecha,
             hora,
@@ -99,7 +99,7 @@ class Perfil {
             idUsuario) 
             VALUES(?,?,?,?,?,?,?,?)`, [
                 idPerfil,
-                req.body.idSede,
+                req.body.idEmpresa,
                 req.body.descripcion,
                 currentDate(),
                 currentTime(),
@@ -176,9 +176,9 @@ class Perfil {
         try {
 
             connection = await conec.beginTransaction();
-            await conec.execute(connection, `UPDATE perfil SET idSede=?, descripcion=?, fecha=?, hora=?, idUsuario=? 
+            await conec.execute(connection, `UPDATE perfil SET idEmpresa=?, descripcion=?, fecha=?, hora=?, idUsuario=? 
             WHERE idPerfil=?`, [
-                req.body.idSede,
+                req.body.idEmpresa,
                 req.body.descripcion,
                 currentDate(),
                 currentTime(),
