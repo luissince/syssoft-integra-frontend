@@ -2,7 +2,7 @@ import React from 'react';
 import axios from 'axios';
 import {
     numberFormat,
-    timeForma24,
+    formatTime,
     spinnerLoading,
     alertDialog,
     alertInfo,
@@ -242,7 +242,7 @@ class Cobros extends React.Component {
                                                         <td className="text-center">{item.id}</td>
                                                         <td>{item.documento}{<br />}{item.informacion}</td>
                                                         <td>{item.comprobante}{<br />}{item.serie + "-" + item.numeracion}</td>
-                                                        <td>{item.fecha}{<br />}{timeForma24(item.hora)}</td>
+                                                        <td>{item.fecha}{<br />}{formatTime(item.hora)}</td>
                                                         <td>{item.banco}</td>
                                                         <td>{item.detalle}
                                                             <br />

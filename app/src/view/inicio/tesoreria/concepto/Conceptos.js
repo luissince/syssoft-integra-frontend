@@ -1,7 +1,7 @@
 import React from 'react';
 import axios from 'axios';
 import {
-    timeForma24,
+    formatTime,
     showModal,
     hideModal,
     viewModal,
@@ -445,7 +445,7 @@ class Conceptos extends React.Component {
                                                         <td>{item.nombre}</td>
                                                         <td>{item.tipo === 1 ? 'CONCEPTO DE GASTO' : 'CONCEPTO DE COBRO'}</td>
                                                         <td>{item.sistema === 1 ? 'SISTEMA' : 'LIBRE'}</td>
-                                                        <td>{item.fecha}{<br />}{timeForma24(item.hora)}</td>
+                                                        <td>{item.fecha}{<br />}{formatTime(item.hora)}</td>
                                                         <td className="text-center">
                                                             <button
                                                                 className="btn btn-outline-warning btn-sm"

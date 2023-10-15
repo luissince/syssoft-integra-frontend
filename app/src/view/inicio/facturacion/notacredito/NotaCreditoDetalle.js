@@ -6,7 +6,7 @@ import {
     numberFormat,
     calculateTaxBruto,
     calculateTax,
-    timeForma24,
+    formatTime,
     spinnerLoading,
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
@@ -70,7 +70,7 @@ class NotaCreditoDetalle extends React.Component {
                 idNotaCredito: id,
                 comprobante: cabecera.comprobante + "  " + cabecera.serie + "-" + cabecera.numeracion,
                 cliente: cabecera.documento + " - " + cabecera.informacion,
-                fecha: cabecera.fecha + " " + timeForma24(cabecera.hora),
+                fecha: cabecera.fecha + " " + formatTime(cabecera.hora),
                 estado: cabecera.estado,
                 codiso: cabecera.codiso,
                 usuario: cabecera.usuario,

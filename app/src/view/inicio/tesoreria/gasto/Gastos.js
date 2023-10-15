@@ -3,7 +3,7 @@ import axios from 'axios';
 import {
     spinnerLoading,
     formatMoney,
-    timeForma24,
+    formatTime,
     alertDialog,
     alertInfo,
     alertSuccess,
@@ -237,7 +237,7 @@ class Gastos extends React.Component {
                                                         <td className="text-center">{item.id}</td>
                                                         <td>{item.documento}{<br />}{item.informacion}</td>
                                                         <td>{item.comprobante}{<br />}{item.serie + "-" + item.numeracion}</td>
-                                                        <td>{item.fecha}{<br />}{timeForma24(item.hora)}</td>
+                                                        <td>{item.fecha}{<br />}{formatTime(item.hora)}</td>
                                                         <td>{item.banco}</td>
                                                         <td>{item.detalle}</td>
                                                         <td>{item.simbolo + " " + formatMoney(item.monto)}</td>

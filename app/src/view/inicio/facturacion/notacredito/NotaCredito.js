@@ -3,7 +3,7 @@ import axios from 'axios';
 import {
     spinnerLoading,
     numberFormat,
-    timeForma24,
+    formatTime,
     alertDialog,
     alertInfo,
     alertSuccess,
@@ -236,7 +236,7 @@ class NotaCredito extends React.Component {
                                                         <td className="text-center">{item.id}</td>
                                                         <td>{item.documento}{<br />}{item.informacion}</td>
                                                         <td>{item.comprobante}{<br />}{item.serie + "-" + item.numeracion}</td>
-                                                        <td>{<span>{item.fecha}</span>}{<br></br>}{<span>{timeForma24(item.hora)}</span>}</td>
+                                                        <td>{<span>{item.fecha}</span>}{<br></br>}{<span>{formatTime(item.hora)}</span>}</td>
                                                         <td>{numberFormat(item.total, item.codiso)}</td>
                                                         <td>{item.comprobanteModi}{<br />}{item.serieModi + "-" + item.numeracionModi}</td>
                                                         <td className="text-center">

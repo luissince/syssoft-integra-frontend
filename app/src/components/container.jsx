@@ -4,7 +4,7 @@ import Footer from './footer/Footer';
 const ContainerWrapper = ({ children }) => {
   return (
     <main>
-      <div className="container-fluid mt-3">
+      <div className="container-xl mt-3">
         <div className="bg-white p-3 border border-light-purple rounded position-relative">
           {children}
         </div>

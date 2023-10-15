@@ -3,7 +3,7 @@ import axios from 'axios';
 import CryptoJS from 'crypto-js';
 import {
     formatMoney,
-    timeForma24,
+    formatTime,
     numberFormat,
     calculateTaxBruto,
     calculateTax,
@@ -75,7 +75,7 @@ class GastoDetalle extends React.Component {
                 estado: cabecera.estado,
                 cliente: cabecera.documento + " - " + cabecera.informacion,
                 // usuario: cabecera.apellidoUse + " " + cabecera.nombreUse,
-                fecha: cabecera.fecha + " " + timeForma24(cabecera.hora),
+                fecha: cabecera.fecha + " " + formatTime(cabecera.hora),
                 cuentaBancaria: cabecera.nombreBanco,
                 observacion: cabecera.observacion === "" ? "" : cabecera.observacion,
                 metodoPago: cabecera.metodoPago === 1 ? "Efectivo"

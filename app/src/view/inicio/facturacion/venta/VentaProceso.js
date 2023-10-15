@@ -709,11 +709,10 @@ class VentaProceso extends CustomComponent {
                 />
 
                 {
-                    this.state.loading ?
+                    this.state.loading &&
                         <div className="clearfix absolute-all bg-white">
                             {spinnerLoading(this.state.msgLoading)}
-                        </div>
-                        : null
+                        </div>                     
                 }
 
                 <section className='invoice-left'>

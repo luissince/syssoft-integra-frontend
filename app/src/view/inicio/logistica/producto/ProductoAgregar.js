@@ -2,28 +2,408 @@ import React from 'react';
 import CustomComponent from '../../../../model/class/custom-component';
 import ContainerWrapper from '../../../../components/Container';
 import { images } from '../../../../helper';
-import { keyNumberFloat } from '../../../../helper/utils.helper';
+import { alertDialog, alertInfo, alertSuccess, alertWarning, clearModal, hideModal, isNumeric, isText, keyNumberFloat, showModal, spinnerLoading, viewModal } from '../../../../helper/utils.helper';
+import { addProducto, comboAlmacen, comboMedida, listComboCategoria } from '../../../../network/rest/principal.network';
+import SuccessReponse from '../../../../model/class/response';
+import ErrorResponse from '../../../../model/class/error-response';
+import ModalInventario from './component/ModalInventario';
+import { CANCELED } from '../../../../model/types/types';
+import { connect } from 'react-redux';
+import Producto from './component/Producto';
+import Servicio from './component/Servicio';
+import Combo from './component/Combo';
 
 class ProductoAgregar extends CustomComponent {
 
+    /**
+     * 
+     * Constructor
+     */
     constructor(props) {
         super(props);
         this.state = {
             imagen: images.noImage,
+            nombre: '',
+            codigo: '',
+            codigoSunat: '',
+
+            idMedida: '',
+            medidas: [],
+
+            idCategoria: '',
+            categorias: [],
+
+            descripcion: '',
+
+            precio: '',
+            costo: '',
+
+            almacenes: [],
+            idAlmacen: '',
+            nombreAlmacen: '',
+            cantidad: '',
+            cantidadMaxima: '',
+            cantidadMinima: '',
+
+            idUsuario: this.props.token.userToken.idUsuario,
+
+            tipo: 1,
+
+            loadModal: false,
+
+            loading: true,
+            msgLoading: 'Cargando datos...'
         }
+
+        this.idModalInventario = "modalInventario";
+
+        this.refNombre = React.createRef();
+        this.refCodigo = React.createRef();
+        this.refCodigoSunat = React.createRef();
+        this.refIdMedida = React.createRef();
+        this.refIdCategoria = React.createRef();
+        this.refDescripcion = React.createRef();
+
+        this.refPrecio = React.createRef();
+        this.refCosto = React.createRef();
+
+        this.refIdAlmacen = React.createRef();
+        this.refCantidad = React.createRef();
+        this.refCantidadMaxima = React.createRef();
+        this.refCantidadMinima = React.createRef();
     }
 
+    /**
+     * Método de cliclo de vida
+     */
     componentDidMount() {
+        this.loadingData();
 
+        viewModal(this.idModalInventario, async () => {
+            const almacenes = await this.fetchComboAlmacen();
+
+            this.setState({
+                almacenes: almacenes,
+                loadModal: false
+            });
+        });
+
+        clearModal(this.idModalInventario, async () => {
+        });
     }
 
     componentWillUnmount() {
 
     }
 
+
+    /**
+     * 
+     * Métodos de acción
+     */
+
+    loadingData = async () => {
+        const [medidas, categorias] = await Promise.all([
+            await this.fetchComboMedida(),
+            await this.fetchComboCategoria()
+        ]);
+
+        await this.setStateAsync({
+            medidas,
+            categorias,
+            loading: false
+        });
+    };
+
+    async fetchComboMedida() {
+        const response = await comboMedida();
+
+        if (response instanceof SuccessReponse) {
+            return response.data
+        }
+
+        if (response instanceof ErrorResponse) {
+            if (response.getType() === CANCELED) return;
+
+            return [];
+        }
+    }
+
+    async fetchComboCategoria() {
+        const response = await listComboCategoria();
+
+        if (response instanceof SuccessReponse) {
+            return response.data
+        }
+
+        if (response instanceof ErrorResponse) {
+            if (response.getType() === CANCELED) return;
+
+            return [];
+        }
+    }
+
+    async fetchComboAlmacen() {
+        const response = await comboAlmacen();
+
+        if (response instanceof SuccessReponse) {
+            return response.data
+        }
+
+        if (response instanceof ErrorResponse) {
+            if (response.getType() === CANCELED) return;
+
+            return [];
+        }
+    }
+
+
+    /**
+     * Método de eventos
+     */
+
+    handleSelectNombre = (event) => {
+        this.setState({
+            nombre: event.target.value
+        });
+    }
+
+
+    handleSelectCodigo = (event) => {
+        this.setState({
+            codigo: event.target.value
+        });
+    }
+
+    handleSelectCodigoSunat = (event) => {
+        this.setState({
+            codigoSunat: event.target.value
+        });
+    }
+
+    handleSelectIdMedida = (event) => {
+        this.setState({
+            idMedida: event.target.value
+        });
+    }
+
+    handleSelectIdCategoria = (event) => {
+        this.setState({
+            idCategoria: event.target.value
+        });
+    }
+
+    handleInputDescripcion = (event) => {
+        this.setState({
+            descripcion: event.target.value
+        });
+    }
+
+    handleInputPrecio = (event) => {
+        this.setState({
+            precio: event.target.value
+        });
+    }
+
+    handleInputCosto = (event) => {
+        this.setState({
+            costo: event.target.value
+        });
+    }
+
+    handleOpenAlmacen = async () => {
+        showModal(this.idModalInventario);
+        this.refIdAlmacen.current.value = this.state.idAlmacen
+        this.refCantidad.current.value = this.state.cantidad
+        this.refCantidadMaxima.current.value = this.state.cantidadMaxima
+        this.refCantidadMinima.current.value = this.state.cantidadMinima
+        await this.setStateAsync({
+            loadModal: true
+        })
+    }
+
+    handleSaveAlmacen = () => {
+        if (!isText(this.refIdAlmacen.current.value)) {
+            alertWarning("Producto", "Seleccione el almacen.", () => {
+                this.refIdAlmacen.current.focus();
+            });
+            return;
+        }
+
+        if (!isText(this.refCantidad.current.value)) {
+            alertWarning("Producto", "Ingrese la cantidad inicial.", () => {
+                this.refCantidad.current.focus();
+            });
+            return;
+        }
+
+        if (!isText(this.refCantidadMaxima.current.value)) {
+            alertWarning("Producto", "Ingrese la cantidad máxima.", () => {
+                this.refCantidadMaxima.current.focus();
+            });
+            return;
+        }
+
+        if (!isText(this.refCantidadMinima.current.value)) {
+            alertWarning("Producto", "Ingrese la cantidad mínima.", () => {
+                this.refCantidadMinima.current.focus();
+            });
+            return;
+        }
+
+        this.setState({
+            idAlmacen: this.refIdAlmacen.current.value,
+            nombreAlmacen: this.refIdAlmacen.current.options[this.refIdAlmacen.current.selectedIndex].innerText,
+            cantidad: this.refCantidad.current.value,
+            cantidadMaxima: this.refCantidadMaxima.current.value,
+            cantidadMinima: this.refCantidadMinima.current.value,
+        })
+
+        hideModal(this.idModalInventario)
+    }
+
+    /**
+     * Esta es una función se encarga de activar un tab automáticamente al llamar la función
+     *
+     * @param {string} idTab - Id del tab
+     * @param {string} idContent - Id del contendor
+     * @returns {void}
+     *
+     * @example
+     * handleFocusTab("info-tab", "info");
+     */
+    handleFocusTab(idTab, idContent) {
+        if (!document.getElementById(idTab).classList.contains('active')) {
+            for (let child of document.getElementById('myTab').childNodes) {
+                child.childNodes[0].classList.remove('active')
+            }
+            for (let child of document.getElementById('myTabContent').childNodes) {
+                child.classList.remove('show', 'active')
+            }
+            document.getElementById(idTab).classList.add('active');
+            document.getElementById(idContent).classList.add('show', 'active');
+
+            console.log(idTab, idContent)
+        }
+    }
+
+
+    /**
+    * Esta es una función se encarga de registrar un nuevo producto
+    *
+    * @returns {void}
+    *
+    * @example
+    * handleRegistrar();
+    */
+    handleRegistrar = () => {
+        if (!isText(this.state.nombre)) {
+            alertWarning("Producto", "Ingrese el nombre del producto.", () => {
+                this.refNombre.current.focus();
+            });
+            return;
+        }
+
+        if (!isText(this.state.idMedida)) {
+            alertWarning("Producto", "Seleccione la medida.", () => {
+                this.refIdMedida.current.focus();
+            });
+            return;
+        }
+
+        if (!isText(this.state.idCategoria)) {
+            alertWarning("Producto", "Seleccione la categoría.", () => {
+                this.refIdCategoria.current.focus();
+            });
+            return;
+        }
+
+        if (!isNumeric(this.state.precio)) {
+            alertWarning("Producto", "Ingrese el precio.", () => {
+                this.refPrecio.current.focus();
+            });
+            return;
+        }
+
+        if (!isNumeric(this.state.costo)) {
+            alertWarning("Producto", "Ingrese el costo.", () => {
+                this.refCosto.current.focus();
+            });
+            return;
+        }
+
+        if (!isText(this.state.idAlmacen)) {
+            alertWarning("Producto", "Agrega el almacen.", () => {
+                this.handleOpenAlmacen()
+            });
+            return;
+        }
+
+        alertDialog("Producto", "¿Estás seguro de continuar?", async (event) => {
+            if (event) {
+                alertInfo("Producto", "Procesando información...")
+                const data = {
+                    nombre: this.state.nombre,
+                    codigo: this.state.codigo,
+                    codigoSunat: this.state.codigoSunat,
+                    idMedida: this.state.idMedida,
+                    idCategoria: this.state.idCategoria,
+                    descripcion: this.state.descripcion,
+                    precio: this.state.precio,
+                    costo: this.state.costo,
+                    idAlmacen: this.state.idAlmacen,
+                    cantidad: this.state.cantidad,
+                    cantidadMaxima: this.state.cantidadMaxima,
+                    cantidadMinima: this.state.cantidadMinima,
+                    tipo: this.state.tipo,
+                    idUsuario: this.state.idUsuario
+                }
+
+                const response = await addProducto(data);
+                if (response instanceof SuccessReponse) {
+                    alertSuccess("Producto", response.data, () => {
+                        // this.props.history.goBack();
+                    })
+                }
+
+                if (response instanceof ErrorResponse) {
+                    alertWarning("Producto", response.getMessage())
+                }
+            }
+        });
+    }
+
     render() {
+
+        const { nombre, codigo, codigoSunat, idMedida, idCategoria, descripcion, precio, costo } = this.state;
+
+        const { idAlmacen, nombreAlmacen, cantidad, cantidadMinima, cantidadMaxima } = this.state;
+
+        const { medidas, categorias } = this.state;
+
         return (
             <ContainerWrapper>
+
+                <ModalInventario
+                    loadModal={this.state.loadModal}
+                    almacenes={this.state.almacenes}
+
+                    idModalInventario={this.idModalInventario}
+
+                    refIdAlmacen={this.refIdAlmacen}
+                    refCantidad={this.refCantidad}
+                    refCantidadMaxima={this.refCantidadMaxima}
+                    refCantidadMinima={this.refCantidadMinima}
+
+                    handleSaveAlmacen={this.handleSaveAlmacen}
+                />
+
+                {
+                    this.state.loading &&
+                    <div className="clearfix absolute-all bg-white">
+                        {spinnerLoading(this.state.msgLoading)}
+                    </div>
+                }
 
                 <div className='row'>
                     <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
@@ -37,756 +417,123 @@ class ProductoAgregar extends CustomComponent {
                 </div>
 
                 <div className='row'>
-                    <div className='col-lg-8 col-md-8 col-sm-8 col-xs-8'>
+                    <div className='col-xl-8 col-lg-8 col-md-12 col-sm-12 col-12'>
                         <div className='row'>
-                            <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
+                            <div className='col-lg-12 col-md-12 col-sm-12 col-12'>
                                 <ul className="nav nav-tabs" id="myTab" role="tablist">
                                     <li className="nav-item" role="presentation">
-                                        <a className="nav-link active" id="addproducto-tab" data-bs-toggle="tab" href="#addproducto" role="tab" aria-controls="addproducto" aria-selected={true}><i className="bi bi-info-circle"></i> Producto</a>
+                                        <button className="nav-link active"
+                                            id="addproducto-tab"
+                                            data-bs-toggle="tab"
+                                            href="#addproducto"
+                                            type="button"
+                                            role="tab"
+                                            aria-controls="addproducto"
+                                            aria-selected={true}
+                                            onClick={() => this.setState({ tipo: 1 })}>
+                                            <i className="bi bi-info-circle"></i> Producto
+                                        </button>
                                     </li>
                                     <li className="nav-item" role="presentation">
-                                        <a className="nav-link" id="addservicio-tab" data-bs-toggle="tab" href="#addservicio" role="tab" aria-controls="addservicio" aria-selected={false}><i className="bi bi-geo-alt-fill"></i> Servicio</a>
+                                        <button className="nav-link"
+                                            id="addservicio-tab"
+                                            data-bs-toggle="tab"
+                                            href="#addservicio"
+                                            type="button"
+                                            role="tab"
+                                            aria-controls="addservicio"
+                                            aria-selected={false}
+                                            onClick={() => this.setState({ tipo: 2 })}>
+                                            <i className="bi bi-geo-alt-fill"></i> Servicio
+                                        </button>
                                     </li>
                                     <li className="nav-item" role="presentation">
-                                        <a className="nav-link" id="addcombo-tab" data-bs-toggle="tab" href="#addcombo" role="tab" aria-controls="addcombo" aria-selected={false}><i className="bi bi-border-all"></i> Combo</a>
+                                        <button className="nav-link"
+                                            id="addcombo-tab"
+                                            data-bs-toggle="tab"
+                                            href="#addcombo"
+                                            type="button"
+                                            role="tab"
+                                            aria-controls="addcombo"
+                                            aria-selected={false}
+                                            onClick={() => this.setState({ tipo: 3 })}>
+                                            <i className="bi bi-border-all"></i> Combo
+                                        </button>
                                     </li>
                                 </ul>
+
                                 <div className="tab-content pt-2" id="myTabContent">
+                                    <Producto
+                                        nombre={nombre}
+                                        refNombre={this.refNombre}
+                                        handleSelectNombre={this.handleSelectNombre}
 
-                                    <div className="tab-pane fade show active" id="addproducto" role="tabpanel" aria-labelledby="addproducto-tab">
-                                        {/* SECTOR INFORMACIÓN GENERAL */}
-                                        <div className="form-group pb-2">
-                                            <label>
-                                                Crea los bienes y mercancías que vendes e indica si deseas tener el control de tu inventario.
-                                            </label>
-                                        </div>
-                                        <div className="dropdown-divider"></div>
-                                        <div className="form-group pt-4">
-                                            <label>
-                                                Indica si manejas productos con variantes como color, talla u otra cualidad.
-                                            </label>
-                                            <div className="form-row">
-                                                <div className="form-group col-md-6">
-                                                    <div className="custom-control custom-radio custom-control-inline">
-                                                        <input type="radio" id="customRadioInline1" name="customRadioInline" className="custom-control-input" />
-                                                        <label className="custom-control-label" for="customRadioInline1">Producto sin variantes</label>
-                                                    </div>
-                                                </div>
-                                                <div className="form-group col-md-6">
-                                                    <div className="custom-control custom-radio custom-control-inline">
-                                                        <input type="radio" id="customRadioInline2" name="customRadioInline" className="custom-control-input" />
-                                                        <label className="custom-control-label" for="customRadioInline2">Producto con variantes</label>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="form-row">
-                                            <div className="form-group col-md-12">
-                                                <label>Nombre del producto: <i className="fa fa-asterisk text-danger small"></i></label>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    placeholder="Dijite un nombre..." />
-                                            </div>
-                                        </div>
-                                        <div className="form-row">
-                                            <div className="form-group col-md-6">
-                                                <label>Referencia: <i className="fa fa-asterisk text-danger small"></i></label>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    // ref={this.refTxtArea}
-                                                    // value={this.state.area}
-                                                    // onChange={(event) => this.setState({ area: event.target.value })}
-                                                    placeholder="Ejemplo: CAS002 ..." />
+                                        codigo={codigo}
+                                        refCodigo={this.refCodigo}
+                                        handleSelectCodigo={this.handleSelectCodigo}
 
-                                            </div>
-                                            <div className="form-group col-md-6">
-                                                <label>Código producto SUNAT: <i className="fa fa-asterisk text-danger small"></i></label>
-                                                <div className="input-group">
-                                                    <select
-                                                        className="form-control"
-                                                    // value={this.state.estado}
-                                                    // onChange={(event) => this.setState({ estado: event.target.value })}
-                                                    >
-                                                        <option value="1">codigo 01</option>
-                                                        <option value="2">código 02</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="form-row">
-                                            <div className="form-group col-md-6">
-                                                <label>Unidad de medida: <i className="fa fa-asterisk text-danger small"></i></label>
-                                                <div className="input-group">
-                                                    <select
-                                                        className="form-control"
-                                                    // value={this.state.estado}
-                                                    // onChange={(event) => this.setState({ estado: event.target.value })}
-                                                    >
-                                                        <option value="1">medida 01</option>
-                                                        <option value="2">medida 02</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div className="form-group col-md-6">
-                                                <label>Categoria: <i className="fa fa-asterisk text-danger small"></i></label>
-                                                <div className="input-group">
-                                                    <select
-                                                        className="form-control"
-                                                    // value={this.state.estado}
-                                                    // onChange={(event) => this.setState({ estado: event.target.value })}
-                                                    >
-                                                        <option value="1">categoria 01</option>
-                                                        <option value="2">categoria 02</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="form-row">
-                                            <div className="form-group col-md-12">
-                                                <label>Descripción: <i className="fa fa-asterisk text-danger small"></i></label>
-                                                <textarea className="form-control" id="" rows="3"></textarea>
-                                            </div>
-                                        </div>
-                                        {/* SECTOR PRECIO */}
-                                        <div className='row pt-3'>
-                                            <div className='col-lg-8 col-md-8 col-sm-8 col-xs-8'>
-                                                <div className='row'>
-                                                    <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
-                                                        <h5>
-                                                            PRECIO
-                                                        </h5>
-                                                    </div>
-                                                </div>
-                                                <div className="dropdown-divider"></div>
-                                                <div className="form-group pb-2">
-                                                    <label>
-                                                        Indica el valor de venta y el costo de compra de tu producto.
-                                                    </label>
-                                                </div>
-                                                <div className="form-row">
-                                                    <div className="form-group col-md-3">
-                                                        <label>Precio base: <i className="fa fa-asterisk text-danger small"></i></label>
-                                                        <input
-                                                            type="text"
-                                                            className="form-control"
-                                                            placeholder=" S/0.000 " />
-                                                    </div>
-                                                    <div className="form-group col-md-1">
-                                                        <div className="d-flex justify-content-center mt-2" style={{ "paddingTop": "33px" }}>
-                                                            <i className="fa fa-plus" aria-hidden="true"></i>
-                                                        </div>
-                                                    </div>
-                                                    <div className="form-group col-md-3">
-                                                        <label>Impuesto: </label>
-                                                        <div className="input-group">
-                                                            <select
-                                                                className="form-control"
-                                                            >
-                                                                <option value="1">codigo 01</option>
-                                                                <option value="2">código 02</option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <div className="form-group col-md-1">
-                                                        <div className="d-flex justify-content-center mt-2" style={{ "paddingTop": "33px" }}>
-                                                            <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 448 512">
-                                                                <path d="M48 128c-17.7 0-32 14.3-32 32s14.3 32 32 32H400c17.7 0 32-14.3 32-32s-14.3-32-32-32H48zm0 192c-17.7 0-32 14.3-32 32s14.3 32 32 32H400c17.7 0 32-14.3 32-32s-14.3-32-32-32H48z" />
-                                                            </svg>
-                                                        </div>
-                                                    </div>
-                                                    <div className="form-group col-md-4">
-                                                        <label>Precio Total: <i className="fa fa-asterisk text-danger small"></i></label>
-                                                        <input
-                                                            type="text"
-                                                            className="form-control"
-                                                            placeholder=" " />
-                                                    </div>
-                                                </div>
-                                                <div className="dropdown-divider"></div>
-                                                <div className="form-row">
-                                                    <div className="form-group col-md-7">
-                                                        <label>Costo inicial: <i className="fa fa-asterisk text-danger small"></i></label>
-                                                        <input
-                                                            type="text"
-                                                            className="form-control"
-                                                            placeholder=" " />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        {/* SECTOR INVENTARIO */}
-                                        <div className='row pt-3'>
-                                            <div className='col-lg-8 col-md-8 col-sm-8 col-xs-8'>
-                                                <div className='row'>
-                                                    <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
-                                                        <h5>
-                                                            DETALLE DE INVENTARIO
-                                                        </h5>
-                                                    </div>
-                                                </div>
-                                                <div className="dropdown-divider"></div>
-                                                <div className="form-group pb-2">
-                                                    <label>
-                                                        Distribuye y controla las cantidades de tus productos en diferentes lugares.
-                                                    </label>
-                                                </div>
-                                                <div className="form-row">
-                                                    <div className="form-group col-md-2 m-3" >
-                                                        <div className="rounded  border border-secondary d-flex justify-content-center align-items-center" style={{ "height": "150px" }}>
-                                                            <div>
-                                                                <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" className="bi bi-tag" viewBox="0 0 16 16">
-                                                                    <path d="M6 4.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm-1 0a.5.5 0 1 0-1 0 .5.5 0 0 0 1 0z" />
-                                                                    <path d="M2 1h4.586a1 1 0 0 1 .707.293l7 7a1 1 0 0 1 0 1.414l-4.586 4.586a1 1 0 0 1-1.414 0l-7-7A1 1 0 0 1 1 6.586V2a1 1 0 0 1 1-1zm0 5.586 7 7L13.586 9l-7-7H2v4.586z" />
-                                                                </svg>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div className="form-group col-md-9 align-self-center">
-                                                        <label>Principal: </label>
-                                                        <label>0 cantidad - 0 min - 0 max</label>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        {/* SECTOR PRECIOS */}
-                                        <div className='row pt-4'>
-                                            <div className='col-lg-8 col-md-8 col-sm-8 col-xs-8'>
-                                                <div className='row'>
-                                                    <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
-                                                        <h5>
-                                                            LISTA DE PRECIOS
-                                                        </h5>
-                                                    </div>
-                                                </div>
-                                                <div className="dropdown-divider"></div>
-                                                <div className="form-group pb-2">
-                                                    <label>
-                                                        Asigna varios precios con valor fijo o un % de descuento sobre el precio base.
-                                                    </label>
-                                                </div>
-                                                <div className="form-row">
-                                                    <div className="form-group col-md-6">
-                                                        <label>Lista de precios: </label>
-                                                        <div className="input-group">
-                                                            <select
-                                                                className="form-control"
-                                                            >
-                                                                <option value="1">codigo 01</option>
-                                                                <option value="2">código 02</option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <div className="form-group col-md-6">
-                                                        <label>Valor:</label>
-                                                        <input
-                                                            type="text"
-                                                            className="form-control"
-                                                            placeholder="" />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                        codigoSunat={codigoSunat}
+                                        refCodigoSunat={this.refCodigoSunat}
+                                        handleSelectCodigoSunat={this.handleSelectCodigoSunat}
 
-                                    <div className="tab-pane fade show active" id="addservicio" role="tabpanel" aria-labelledby="addservicio-tab">
-                                        {/* SECTOR INFORMACIÓN GENERAL */}
-                                        <div className="form-group pb-2">
-                                            <label>
-                                                Crea las actividades comerciales o de consultoría que ofreces a tus clientes.
-                                            </label>
-                                        </div>
-                                        <div className="dropdown-divider"></div>
-                                        <div className="form-row">
-                                            <div className="form-group col-md-12">
-                                                <label>Nombre del servicio: <i className="fa fa-asterisk text-danger small"></i></label>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    placeholder="Dijite un nombre..." />
-                                            </div>
-                                        </div>
-                                        <div className="form-row">
-                                            <div className="form-group col-md-6">
-                                                <label>Referencia: <i className="fa fa-asterisk text-danger small"></i></label>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    // ref={this.refTxtArea}
-                                                    // value={this.state.area}
-                                                    // onChange={(event) => this.setState({ area: event.target.value })}
-                                                    placeholder="Ejemplo: CAS002 ..." />
+                                        idMedida={idMedida}
+                                        refIdMedida={this.refIdMedida}
+                                        handleSelectIdMedida={this.handleSelectIdMedida}
+                                        medidas={medidas}
 
-                                            </div>
-                                            <div className="form-group col-md-6">
-                                                <label>Código producto SUNAT: <i className="fa fa-asterisk text-danger small"></i></label>
-                                                <div className="input-group">
-                                                    <select
-                                                        className="form-control"
-                                                    // value={this.state.estado}
-                                                    // onChange={(event) => this.setState({ estado: event.target.value })}
-                                                    >
-                                                        <option value="1">codigo 01</option>
-                                                        <option value="2">código 02</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="form-row">
-                                            <div className="form-group col-md-6">
-                                                <label>Unidad de medida: <i className="fa fa-asterisk text-danger small"></i></label>
-                                                <div className="input-group">
-                                                    <select
-                                                        className="form-control"
-                                                    // value={this.state.estado}
-                                                    // onChange={(event) => this.setState({ estado: event.target.value })}
-                                                    >
-                                                        <option value="1">medida 01</option>
-                                                        <option value="2">medida 02</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div className="form-group col-md-6">
-                                                <label>Categoria: <i className="fa fa-asterisk text-danger small"></i></label>
-                                                <div className="input-group">
-                                                    <select
-                                                        className="form-control"
-                                                    // value={this.state.estado}
-                                                    // onChange={(event) => this.setState({ estado: event.target.value })}
-                                                    >
-                                                        <option value="1">categoria 01</option>
-                                                        <option value="2">categoria 02</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="form-row">
-                                            <div className="form-group col-md-12">
-                                                <label>Descripción: <i className="fa fa-asterisk text-danger small"></i></label>
-                                                <textarea className="form-control" id="" rows="3"></textarea>
-                                            </div>
-                                        </div>
-                                        {/* SECTOR DE PRECIO */}
-                                        <div className='row pt-3'>
-                                            <div className='col-lg-8 col-md-8 col-sm-8 col-xs-8'>
-                                                <div className='row'>
-                                                    <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
-                                                        <h5>
-                                                            PRECIO
-                                                        </h5>
-                                                    </div>
-                                                </div>
-                                                <div className="dropdown-divider"></div>
-                                                <div className="form-group pb-2">
-                                                    <label>
-                                                        Indica el valor de venta y el costo de compra de tu producto.
-                                                    </label>
-                                                </div>
-                                                <div className="form-row">
-                                                    <div className="form-group col-md-3">
-                                                        <label>Precio base: <i className="fa fa-asterisk text-danger small"></i></label>
-                                                        <input
-                                                            type="text"
-                                                            className="form-control"
-                                                            placeholder=" S/0.000 " />
-                                                    </div>
-                                                    <div className="form-group col-md-1">
-                                                        <div className="d-flex justify-content-center mt-2" style={{ "paddingTop": "33px" }}>
-                                                            <i className="fa fa-plus" aria-hidden="true"></i>
-                                                        </div>
-                                                    </div>
-                                                    <div className="form-group col-md-3">
-                                                        <label>Impuesto: </label>
-                                                        <div className="input-group">
-                                                            <select
-                                                                className="form-control"
-                                                            >
-                                                                <option value="1">codigo 01</option>
-                                                                <option value="2">código 02</option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <div className="form-group col-md-1">
-                                                        <div className="d-flex justify-content-center mt-2" style={{ "paddingTop": "33px" }}>
-                                                            <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 448 512">
-                                                                <path d="M48 128c-17.7 0-32 14.3-32 32s14.3 32 32 32H400c17.7 0 32-14.3 32-32s-14.3-32-32-32H48zm0 192c-17.7 0-32 14.3-32 32s14.3 32 32 32H400c17.7 0 32-14.3 32-32s-14.3-32-32-32H48z" />
-                                                            </svg>
-                                                        </div>
-                                                    </div>
-                                                    <div className="form-group col-md-4">
-                                                        <label>Precio Total: <i className="fa fa-asterisk text-danger small"></i></label>
-                                                        <input
-                                                            type="text"
-                                                            className="form-control"
-                                                            placeholder=" " />
-                                                    </div>
-                                                </div>
-                                                <div className="dropdown-divider"></div>
-                                                <div className="form-row">
-                                                    <div className="form-group col-md-7">
-                                                        <label>Costo inicial: <i className="fa fa-asterisk text-danger small"></i></label>
-                                                        <input
-                                                            type="text"
-                                                            className="form-control"
-                                                            placeholder=" " />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        {/* SECTOR DETALLE DE INVENTARIO */}
-                                        <div className='row pt-3'>
-                                            <div className='col-lg-8 col-md-8 col-sm-8 col-xs-8'>
-                                                <div className='row'>
-                                                    <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
-                                                        <h5>
-                                                            LISTAS DE PRECIOS
-                                                        </h5>
-                                                    </div>
-                                                </div>
-                                                <div className="dropdown-divider"></div>
-                                                <div className="form-group pb-2">
-                                                    <label>
-                                                        Asigna varios precios con valor fijo o un % de descuento sobre el precio base.
-                                                    </label>
-                                                </div>
-                                                <div className="form-row">
-                                                    <div className="form-group col-md-6" >
-                                                        <label>Listas de prec: </label>
-                                                        <select
-                                                            className="form-control"
-                                                        >
-                                                            <option value="1">codigo 01</option>
-                                                            <option value="2">código 02</option>
-                                                        </select>
-                                                    </div>
-                                                    <div className="form-group col-md-6">
-                                                        <label>Valor: </label>
-                                                        <input
-                                                            type="text"
-                                                            className="form-control"
-                                                            placeholder=" " />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                        idCategoria={idCategoria}
+                                        refIdCategoria={this.refIdCategoria}
+                                        handleSelectIdCategoria={this.handleSelectIdCategoria}
+                                        categorias={categorias}
 
-                                    <div className="tab-pane fade show active" id="addcombo" role="tabpanel" aria-labelledby="addcombo-tab">
-                                        {/* SECTOR INFORMACIÓN GENERAL */}
-                                        <div className="form-group pb-2">
-                                            <label>
-                                                Agrupa en un solo ítem un conjunto de productos, servicios o una combinación entre ambos.
-                                            </label>
-                                        </div>
-                                        <div className="dropdown-divider"></div>
-                                        <div className="form-row">
-                                            <div className="form-group col-md-12">
-                                                <label>Nombre del combo: <i className="fa fa-asterisk text-danger small"></i></label>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    placeholder="Dijite un nombre..." />
-                                            </div>
-                                        </div>
-                                        <div className="form-row">
-                                            <div className="form-group col-md-6">
-                                                <label>Referencia: <i className="fa fa-asterisk text-danger small"></i></label>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    // ref={this.refTxtArea}
-                                                    // value={this.state.area}
-                                                    // onChange={(event) => this.setState({ area: event.target.value })}
-                                                    placeholder="Ejemplo: CAS002 ..." />
+                                        descripcion={descripcion}
+                                        refDescripcion={this.refDescripcion}
+                                        handleInputDescripcion={this.handleInputDescripcion}
 
-                                            </div>
-                                            <div className="form-group col-md-6">
-                                                <label>Almacén: <i className="fa fa-asterisk text-danger small"></i></label>
-                                                <div className="input-group">
-                                                    <select
-                                                        className="form-control"
-                                                    // value={this.state.estado}
-                                                    // onChange={(event) => this.setState({ estado: event.target.value })}
-                                                    >
-                                                        <option value="1">Princial</option>
-                                                        <option value="2">Secundario</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="form-row">
-                                            <div className="form-group col-md-6">
-                                                <label>Código producto SUNAT: <i className="fa fa-asterisk text-danger small"></i></label>
-                                                <div className="input-group">
-                                                    <select
-                                                        className="form-control"
-                                                    // value={this.state.estado}
-                                                    // onChange={(event) => this.setState({ estado: event.target.value })}
-                                                    >
-                                                        <option value="1">codigo 01</option>
-                                                        <option value="2">codigo 02</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div className="form-group col-md-6">
-                                                <label>Unidad de medida: <i className="fa fa-asterisk text-danger small"></i></label>
-                                                <div className="input-group">
-                                                    <select
-                                                        className="form-control"
-                                                    // value={this.state.estado}
-                                                    // onChange={(event) => this.setState({ estado: event.target.value })}
-                                                    >
-                                                        <option value="1">unidad</option>
-                                                        <option value="2">otro</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="form-row">
-                                            <div className="form-group col-md-6">
-                                                <label>Categoria: <i className="fa fa-asterisk text-danger small"></i></label>
-                                                <div className="input-group">
-                                                    <select
-                                                        className="form-control"
-                                                    // value={this.state.estado}
-                                                    // onChange={(event) => this.setState({ estado: event.target.value })}
-                                                    >
-                                                        <option value="1">categoria 01</option>
-                                                        <option value="2">categoria 02</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="form-row">
-                                            <div className="form-group col-md-12">
-                                                <label>Descripción: <i className="fa fa-asterisk text-danger small"></i></label>
-                                                <textarea className="form-control" id="" rows="3"></textarea>
-                                            </div>
-                                        </div>
-                                        {/*  SECTOR PRECIO */}
-                                        <div className='row pt-3'>
-                                            <div className='col-lg-8 col-md-8 col-sm-8 col-xs-8'>
-                                                <div className='row'>
-                                                    <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
-                                                        <h5>
-                                                            PRECIO
-                                                        </h5>
-                                                    </div>
-                                                </div>
-                                                <div className="dropdown-divider"></div>
-                                                <div className="form-group pb-2">
-                                                    <label>
-                                                        Indica el valor de venta y el costo de compra de tu producto.
-                                                    </label>
-                                                </div>
-                                                <div className="form-row">
-                                                    <div className="form-group col-md-3">
-                                                        <label>Precio base: <i className="fa fa-asterisk text-danger small"></i></label>
-                                                        <input
-                                                            type="text"
-                                                            className="form-control"
-                                                            placeholder=" S/0.000 " />
-                                                    </div>
-                                                    <div className="form-group col-md-1">
-                                                        <div className="d-flex justify-content-center mt-2" style={{ "paddingTop": "33px" }}>
-                                                            <i className="fa fa-plus" aria-hidden="true"></i>
-                                                        </div>
-                                                    </div>
-                                                    <div className="form-group col-md-3">
-                                                        <label>Impuesto: </label>
-                                                        <div className="input-group">
-                                                            <select
-                                                                className="form-control"
-                                                            >
-                                                                <option value="1">codigo 01</option>
-                                                                <option value="2">código 02</option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <div className="form-group col-md-1">
-                                                        <div className="d-flex justify-content-center mt-2" style={{ "paddingTop": "33px" }}>
-                                                            <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 448 512">
-                                                                <path d="M48 128c-17.7 0-32 14.3-32 32s14.3 32 32 32H400c17.7 0 32-14.3 32-32s-14.3-32-32-32H48zm0 192c-17.7 0-32 14.3-32 32s14.3 32 32 32H400c17.7 0 32-14.3 32-32s-14.3-32-32-32H48z" />
-                                                            </svg>
-                                                        </div>
-                                                    </div>
-                                                    <div className="form-group col-md-4">
-                                                        <label>Precio Total: <i className="fa fa-asterisk text-danger small"></i></label>
-                                                        <input
-                                                            type="text"
-                                                            className="form-control"
-                                                            placeholder=" " />
-                                                    </div>
-                                                </div>
-                                                <div className="dropdown-divider"></div>
-                                                <div className="form-row">
-                                                    <div className="form-group col-md-7">
-                                                        <label>Costo inicial: <i className="fa fa-asterisk text-danger small"></i></label>
-                                                        <input
-                                                            type="text"
-                                                            className="form-control"
-                                                            placeholder=" " />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        {/* SECTOR COMBO */}
-                                        <div className='row pt-3'>
-                                            <div className='col-lg-8 col-md-8 col-sm-8 col-xs-8'>
-                                                <div className='row'>
-                                                    <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
-                                                        <h5>
-                                                            COMBO
-                                                        </h5>
-                                                    </div>
-                                                </div>
-                                                <div className="dropdown-divider"></div>
-                                                <div className="form-group pb-2">
-                                                    <label>
-                                                        Selecciona los productos y sus cantidades para armar un combo
-                                                    </label>
-                                                </div>
-                                                <div className="form-row">
-                                                    <div className="form-group col-md-2" >
-                                                        <div className="rounded  border border-secondary d-flex justify-content-center align-items-center" style={{ "height": "80px" }}>
-                                                            <div>
-                                                                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" className="bi bi-tag" viewBox="0 0 16 16">
-                                                                    <path d="M6 4.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm-1 0a.5.5 0 1 0-1 0 .5.5 0 0 0 1 0z" />
-                                                                    <path d="M2 1h4.586a1 1 0 0 1 .707.293l7 7a1 1 0 0 1 0 1.414l-4.586 4.586a1 1 0 0 1-1.414 0l-7-7A1 1 0 0 1 1 6.586V2a1 1 0 0 1 1-1zm0 5.586 7 7L13.586 9l-7-7H2v4.586z" />
-                                                                </svg>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div className="form-group col-md-8 align-self-center">
-                                                        <label>Seleccionar: </label>
-                                                        <label>Agrega aquí uno de los productos de tu combo</label>
-                                                    </div>
-                                                    <div className="form-group col-md-2 align-self-center">
-                                                        <input
-                                                            type="text"
-                                                            className="form-control"
-                                                            placeholder="S/ 0.00" />
-                                                    </div>
-                                                </div>
-                                                <div className="form-row">
-                                                    <div className="form-group col-md-2" >
-                                                        <div className="rounded  border border-secondary d-flex justify-content-center align-items-center" style={{ "height": "80px" }}>
-                                                            <div>
-                                                                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" className="bi bi-tag" viewBox="0 0 16 16">
-                                                                    <path d="M6 4.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm-1 0a.5.5 0 1 0-1 0 .5.5 0 0 0 1 0z" />
-                                                                    <path d="M2 1h4.586a1 1 0 0 1 .707.293l7 7a1 1 0 0 1 0 1.414l-4.586 4.586a1 1 0 0 1-1.414 0l-7-7A1 1 0 0 1 1 6.586V2a1 1 0 0 1 1-1zm0 5.586 7 7L13.586 9l-7-7H2v4.586z" />
-                                                                </svg>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div className="form-group col-md-8 align-self-center">
-                                                        <label>Seleccionar: </label>
-                                                        <label>Agrega aquí uno de los productos de tu combo</label>
-                                                    </div>
-                                                    <div className="form-group col-md-2 align-self-center">
-                                                        <input
-                                                            type="text"
-                                                            className="form-control"
-                                                            placeholder="S/ 0.00" />
-                                                    </div>
-                                                </div>
-                                                <div className="form-row">
-                                                    <div className="form-group col-md-2" >
-                                                        <div className="rounded  border border-secondary d-flex justify-content-center align-items-center" style={{ "height": "80px" }}>
-                                                            <div>
-                                                                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" className="bi bi-tag" viewBox="0 0 16 16">
-                                                                    <path d="M6 4.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm-1 0a.5.5 0 1 0-1 0 .5.5 0 0 0 1 0z" />
-                                                                    <path d="M2 1h4.586a1 1 0 0 1 .707.293l7 7a1 1 0 0 1 0 1.414l-4.586 4.586a1 1 0 0 1-1.414 0l-7-7A1 1 0 0 1 1 6.586V2a1 1 0 0 1 1-1zm0 5.586 7 7L13.586 9l-7-7H2v4.586z" />
-                                                                </svg>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div className="form-group col-md-8 align-self-center">
-                                                        <label>Seleccionar: </label>
-                                                        <label>Agrega aquí uno de los productos de tu combo</label>
-                                                    </div>
-                                                    <div className="form-group col-md-2 align-self-center">
-                                                        <input
-                                                            type="text"
-                                                            className="form-control"
-                                                            placeholder="S/ 0.00" />
-                                                    </div>
-                                                </div>
-                                                <div className="form-row">
-                                                    <div className="form-group col-md-10 " >
-                                                        <div className="float-right">
-                                                            <h4 className="text-black-50">Costo Total: </h4>
-                                                        </div>
+                                        precio={precio}
+                                        refPrecio={this.refPrecio}
+                                        handleInputPrecio={this.handleInputPrecio}
 
-                                                    </div>
-                                                    <div className="form-group col-md-2 align-self-center">
-                                                        <h4 className="text-black-50">S/ 0.00</h4>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        {/* SECTOR LISTAS DE PRECIOS */}
-                                        <div className='row pt-4'>
-                                            <div className='col-lg-8 col-md-8 col-sm-8 col-xs-8'>
-                                                <div className='row'>
-                                                    <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
-                                                        <h5>
-                                                            LISTA DE PRECIOS
-                                                        </h5>
-                                                    </div>
-                                                </div>
-                                                <div className="dropdown-divider"></div>
-                                                <div className="form-group pb-2">
-                                                    <label>
-                                                        Asigna varios precios con valor fijo o un % de descuento sobre el precio base.
-                                                    </label>
-                                                </div>
-                                                <div className="form-row">
-                                                    <div className="form-group col-md-6">
-                                                        <label>Lista de precios: </label>
-                                                        <div className="input-group">
-                                                            <select
-                                                                className="form-control"
-                                                            >
-                                                                <option value="1">codigo 01</option>
-                                                                <option value="2">código 02</option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <div className="form-group col-md-6">
-                                                        <label>Valor:</label>
-                                                        <input
-                                                            type="text"
-                                                            className="form-control"
-                                                            placeholder="" />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                        costo={costo}
+                                        refCosto={this.refCosto}
+                                        handleInputCosto={this.handleInputCosto}
 
+                                        idAlmacen={idAlmacen}
+                                        nombreAlmacen={nombreAlmacen}
+                                        cantidad={cantidad}
+                                        cantidadMinima={cantidadMinima}
+                                        cantidadMaxima={cantidadMaxima}
 
+                                        handleOpenAlmacen={this.handleOpenAlmacen}
+                                    />
+
+                                    <Servicio />
+
+                                    <Combo />
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div className='col-lg-4 col-md-4 col-sm-4 col-xs-4'>
-                        <div className="form-row">
-                            <div className="col-lg-12 col-md-10 col-sm-12 col-xs-12">
+
+                    <div className='col-xl-4 col-lg-4 col-md-12 col-sm-12 col-12'>
+                        <div className="row">
+                            <div className="col-md-10 col-sm-12 col-12 text-center">
                                 <img src={this.state.imagen} alt="" className="card-img-top" />
                             </div>
                         </div>
+
                         <div className="form-row p-4">
                             <div className="form-group col-md-12">
                                 <div className="form-row">
-                                    <h4 className="text-black-50">Producto sin nombre</h4>
+                                    <h4 className="text-black-50">{this.state.nombre !== '' ? this.state.nombre : "Producto sin nombre"}</h4>
                                 </div>
                                 <div className="form-row">
                                     <h2 className="text-black-50">S/ 0.00 PEN</h2>
                                 </div>
                             </div>
+
                             <div className="dropdown-divider"></div>
+
                             <div className="form-group col-md-12">
                                 <div className="form-row">
                                     <div className="form-group col-md-12">
@@ -799,6 +546,7 @@ class ProductoAgregar extends CustomComponent {
                                         </div>
                                     </div>
                                 </div>
+
                                 <div className="form-row">
                                     <div className="form-group col-md-12">
                                         <div className="custom-control custom-switch">
@@ -810,11 +558,15 @@ class ProductoAgregar extends CustomComponent {
                                         </div>
                                     </div>
                                 </div>
+
                                 <div className="form-row">
                                     <div className="col-md-12">
                                         <div className="form-row">
                                             <div className="form-group col-md-6">
-                                                <button type="button" className="btn btn-primary btn-block" >
+                                                <button
+                                                    type="button"
+                                                    className="btn btn-primary btn-block"
+                                                    onClick={this.handleRegistrar}>
                                                     Guardar
                                                 </button>
                                             </div>
@@ -824,11 +576,10 @@ class ProductoAgregar extends CustomComponent {
                                                 </button>
                                             </div>
                                         </div>
-
-
                                     </div>
                                 </div>
                             </div>
+
                         </div>
                     </div>
                 </div>
@@ -838,4 +589,18 @@ class ProductoAgregar extends CustomComponent {
     }
 }
 
-export default ProductoAgregar;
+/**
+ * 
+ * Método encargado de traer la información de redux
+ */
+const mapStateToProps = (state) => {
+    return {
+        token: state.reducer
+    }
+}
+
+/**
+ * 
+ * Método encargado de conectar con redux y exportar la clase
+ */
+export default connect(mapStateToProps, null)(ProductoAgregar);

@@ -2,7 +2,7 @@ import React from 'react';
 import axios from 'axios';
 import {
     keyNumberInteger,
-    timeForma24,
+    formatTime,
     showModal,
     hideModal,
     viewModal,
@@ -555,7 +555,7 @@ class Comprobantes extends React.Component {
                                                         <td>{item.nombre}</td>
                                                         <td>{item.serie}</td>
                                                         <td>{item.numeracion}</td>
-                                                        <td>{<span>{item.fecha}</span>}{<br></br>}{<span>{timeForma24(item.hora)}</span>}</td>
+                                                        <td>{<span>{item.fecha}</span>}{<br></br>}{<span>{formatTime(item.hora)}</span>}</td>
                                                         <td className="text-center">
                                                             <div>
                                                                 {item.preferida === 1 ? "Si" : "No"}

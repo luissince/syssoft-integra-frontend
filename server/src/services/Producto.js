@@ -80,83 +80,45 @@ class Producto {
         try {
             connection = await conec.beginTransaction();
 
-            if (req.body.estado === '3') {
-                await conec.rollback(connection);
-                return "No se puede usar el estado vendido al insertar un producto, cambie los datos e intente nuevamente.";
-            }
+            const result = await conec.execute(connection, 'SELECT idProducto FROM producto');
+            let idProducto = "PD0001";
 
-            let result = await conec.execute(connection, 'SELECT idProducto FROM producto');
-            let idProducto = "";
             if (result.length != 0) {
-
-                let quitarValor = result.map(function (item) {
-                    return parseInt(item.idProducto.replace("LT", ''));
-                });
-
-                let valorActual = Math.max(...quitarValor);
-                let incremental = valorActual + 1;
-                let codigoGenerado = "";
-                if (incremental <= 9) {
-                    codigoGenerado = 'LT000' + incremental;
-                } else if (incremental >= 10 && incremental <= 99) {
-                    codigoGenerado = 'LT00' + incremental;
-                } else if (incremental >= 100 && incremental <= 999) {
-                    codigoGenerado = 'LT0' + incremental;
-                } else {
-                    codigoGenerado = 'LT' + incremental;
-                }
-
-                idProducto = codigoGenerado;
-            } else {
-                idProducto = "LT0001";
+                const quitarValor = result.map(item => parseInt(item.idProducto.replace("PD", '')));
+                const incremental = Math.max(...quitarValor) + 1;
+                const formattedIncremental = String(incremental).padStart(4, '0'); // Formatea el número con ceros a la izquierda si es necesario
+                idProducto = `PD${formattedIncremental}`;
             }
+
+            console.log(req.body)
 
             await conec.execute(connection, `INSERT INTO producto(
-                idProducto, 
+                idProducto,
                 idCategoria,
                 idConcepto,
-                descripcion,
-                costo,
-                precio,
                 idMedida,
+                nombre,
+                descripcion,
+                precio,
+                costo,
+                tipo,
                 estado,
-                medidaFrontal,
-                costadoDerecho,
-                costadoIzquierdo,
-                medidaFondo,
-                areaProducto,
-                numeroPartida,
-                limiteFrontal,
-                limiteDerecho,
-                limiteIzquierdo,
-                limitePosterior,
-                ubicacionProducto,
                 fecha,
                 hora,
                 fupdate,
                 hupdate,
                 idUsuario
-                ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)        
-                `, [
+            ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, [
                 idProducto,
                 req.body.idCategoria,
-                req.body.idConcepto,
-                req.body.descripcion,
-                req.body.costo,
-                req.body.precio,
+                'CP0001',
                 req.body.idMedida,
-                req.body.estado,
-                req.body.medidaFrontal,
-                req.body.costadoDerecho,
-                req.body.costadoIzquierdo,
-                req.body.medidaFondo,
-                req.body.areaProducto,
-                req.body.numeroPartida,
-                req.body.limiteFrontal,
-                req.body.limiteDerecho,
-                req.body.limiteIzquierdo,
-                req.body.limitePosterior,
-                req.body.ubicacionProducto,
+                req.body.nombre,
+                req.body.descripcion,
+                req.body.precio,
+                req.body.costo,
+                req.body.tipo,
+                true,
                 currentDate(),
                 currentTime(),
                 currentDate(),
@@ -164,12 +126,29 @@ class Producto {
                 req.body.idUsuario,
             ])
 
+            await conec.execute(connection, `INSERT INTO productoAlmacen(
+                idProductoAlmacen,
+                idProducto,
+                idAlmacen,
+                cantidad,
+                cantidadMaxima,
+                cantidadMinima
+            ) VALUES(?,?,?,?,?,?)`, [
+                idProducto + "" + req.body.idAlmacen,
+                idProducto,
+                req.body.idAlmacen,
+                req.body.cantidad,
+                req.body.cantidadMaxima,
+                req.body.cantidadMinima,
+            ]);
+
             await conec.commit(connection);
             return "insert";
         } catch (error) {
             if (connection != null) {
                 await conec.rollback(connection);
             }
+            console.log(error)
             return "Se produjo un error de servidor, intente nuevamente.";
         }
     }
@@ -776,8 +755,13 @@ class Producto {
 
     async listarFilter(req) {
         try {
+<<<<<<< HEAD
             const result = await conec.procedure("CALL Filtrar_Productos_Para_Venta(?,?)",[
                 req.query.idSucursal,
+=======
+            const result = await conec.procedure("CALL Filtrar_Productos_Para_Venta(?,?)", [
+                req.query.idProyecto,
+>>>>>>> origin/master
                 req.query.filtrar,
             ])
             return result

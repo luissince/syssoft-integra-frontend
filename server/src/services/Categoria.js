@@ -85,32 +85,30 @@ class Categoria {
     try {
       connection = await conec.beginTransaction();
 
-      let result = await conec.execute(
+      const result = await conec.execute(
         connection,
         "SELECT idCategoria FROM categoria"
       );
       let idCategoria = "";
       if (result.length != 0) {
-        let quitarValor = result.map(function (item) {
-          return parseInt(item.idCategoria.replace("MZ", ""));
-        });
+        const quitarValor = result.map((item) => parseInt(item.idCategoria.replace("CT", "")));
 
-        let valorActual = Math.max(...quitarValor);
-        let incremental = valorActual + 1;
+        const incremental =  Math.max(...quitarValor) + 1;
+
         let codigoGenerado = "";
         if (incremental <= 9) {
-          codigoGenerado = "MZ000" + incremental;
+          codigoGenerado = "CT000" + incremental;
         } else if (incremental >= 10 && incremental <= 99) {
-          codigoGenerado = "MZ00" + incremental;
+          codigoGenerado = "CT00" + incremental;
         } else if (incremental >= 100 && incremental <= 999) {
-          codigoGenerado = "MZ0" + incremental;
+          codigoGenerado = "CT0" + incremental;
         } else {
-          codigoGenerado = "MZ" + incremental;
+          codigoGenerado = "CT" + incremental;
         }
 
         idCategoria = codigoGenerado;
       } else {
-        idCategoria = "MZ0001";
+        idCategoria = "CT0001";
       }
 
       await conec.execute(
@@ -240,30 +238,30 @@ class Categoria {
         req.query.idCategoria,
       ])
 
-      const productos = await conec.execute(connection,"select * from producto where idCategoria = ?",[
+      const productos = await conec.execute(connection, "select * from producto where idCategoria = ?", [
         categoria[0].idCategoria
       ])
-      
 
-      for(const producto of productos){
+
+      for (const producto of productos) {
 
         const venta = await conec.execute(connection, `select * from venta as v 
         inner join ventaDetalle as vd 
         on vd.idVenta = v.idVenta 
-        where vd.idProducto = ?`,[
-            producto.idProducto
+        where vd.idProducto = ?`, [
+          producto.idProducto
         ])
 
-        if(venta.length != 0){
+        if (venta.length != 0) {
 
             await conec.execute(connection,`update venta set idSucursal = ? where idVenta = ?`,[
                 req.query.idSucursalTrasladar,
                 venta[0].idVenta
             ])
 
-            // const alta = await conec.execute(connection,`select * from alta where idCliente = ?`,[
-            //     venta[0].idCliente,
-            // ])
+          // const alta = await conec.execute(connection,`select * from alta where idCliente = ?`,[
+          //     venta[0].idCliente,
+          // ])
 
             await conec.execute(connection,`update alta set idSucursal = ? where idCliente = ?`,[
                 req.query.idSucursalTrasladar,
@@ -293,7 +291,6 @@ class Categoria {
       await conec.commit(connection);
       return "update";
     } catch (error) {
-        console.log(error)
       if (connection != null) {
         await conec.rollback(connection);
       }

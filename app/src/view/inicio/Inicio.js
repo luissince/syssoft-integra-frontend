@@ -80,6 +80,7 @@ import NotFoundMain from '../../components/errors/NotFoundMain';
 import { getNotifications } from '../../network/rest/principal.network';
 import SuccessReponse from '../../model/class/response';
 import ErrorResponse from '../../model/class/error-response';
+import { CANCELED } from '../../model/types/types';
 
 class Inicio extends React.Component {
 
@@ -90,6 +91,7 @@ class Inicio extends React.Component {
             notificaciones: [],
         }
 
+        this.abortNotificacion = new AbortController();
         // this.socket = io();
         // this.audio = new Audio(mixkit);
     }
@@ -110,6 +112,7 @@ class Inicio extends React.Component {
         window.removeEventListener('focus', this.onEventFocused);
         window.removeEventListener('resize', this.onEventResize);
 
+        this.abortNotificacion.abort();
         // this.socket.disconnect();
     }
 
@@ -177,10 +180,12 @@ class Inicio extends React.Component {
     }
 
     async loadNotifications() {
-        const response = await getNotifications();
+        const response = await getNotifications(this.abortNotificacion.signal);
         if (response instanceof SuccessReponse) {
             this.setState({ notificaciones: response.data });
         } else if (response instanceof ErrorResponse) {
+            if (response.getType() === CANCELED) return;
+
             this.setState({ notificaciones: [] });
         }
     }

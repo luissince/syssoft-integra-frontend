@@ -2,7 +2,7 @@ import React from 'react';
 import axios from 'axios';
 import {
     spinnerLoading,
-    timeForma24,
+    formatTime,
 } from '../../../helper/utils.helper';
 import Paginacion from '../../../components/Paginacion';
 import ContainerWrapper from '../../../components/Container';
@@ -142,7 +142,7 @@ class Notications extends React.Component {
                                                             <td className="text-center">{item.id}</td>
                                                             <td>{item.comprobante}{<br />}{item.serie + "-" + item.numeracion}</td>
                                                             <td>{item.estado == 1 ? <span className="text-success">DECLARAR</span> : <span className="text-danger">ANULAR</span>}</td>
-                                                            <td>{item.fecha}{<br />}{timeForma24(item.hora)}</td>
+                                                            <td>{item.fecha}{<br />}{formatTime(item.hora)}</td>
                                                         </tr>
                                                     )
                                                 })

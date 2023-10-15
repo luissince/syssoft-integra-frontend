@@ -19,6 +19,10 @@ import { connect } from 'react-redux';
 import Paginacion from '../../../../components/Paginacion';
 import ContainerWrapper from '../../../../components/Container';
 import CustomComponent from '../../../../model/class/custom-component';
+import { deleteProducto, listProducto } from '../../../../network/rest/principal.network';
+import SuccessReponse from '../../../../model/class/response';
+import ErrorResponse from '../../../../model/class/error-response';
+import { CANCELED } from '../../../../model/types/types';
 
 class Productos extends CustomComponent {
     constructor(props) {
@@ -96,8 +100,7 @@ class Productos extends CustomComponent {
     async componentDidMount() {
         this.loadInit();
 
-        viewModal(this.idModal, () => {
-            console.log("open")
+        viewModal(this.idModal, () => {           
             this.abortControllerModal = new AbortController();
             if (this.idCodigo !== "") {
                 this.loadDataId(this.idCodigo);
@@ -107,7 +110,7 @@ class Productos extends CustomComponent {
         });
 
         clearModal(this.idModal, async () => {
-            console.log("close") 
+            console.log("close")
             this.abortControllerModal.abort();
 
             if (this.completo) {
@@ -190,9 +193,29 @@ class Productos extends CustomComponent {
     }
 
     fillTable = async (opcion, buscar) => {
-        try {
-            await this.setStateAsync({ loading: true, lista: [], messageTable: "Cargando información...", messagePaginacion: "Mostranto 0 de 0 Páginas" });
+        await this.setStateAsync({
+            loading: true,
+            lista: [],
+            messageTable: "Cargando información...",
+            messagePaginacion: "Mostranto 0 de 0 Páginas"
+        });
 
+        const params = {
+            "idProyecto": this.state.idProyecto,
+            "opcion": opcion,
+            "buscar": buscar.trim(),
+            "posicionPagina": ((this.state.paginacion - 1) * this.state.filasPorPagina),
+            "filasPorPagina": this.state.filasPorPagina
+        }
+
+
+        const response = await listProducto(params);
+
+        if (response instanceof SuccessReponse) {
+            let totalPaginacion = parseInt(Math.ceil((parseFloat(response.data.total) / this.state.filasPorPagina)));
+            let messagePaginacion = `Mostrando ${response.data.result.length} de ${totalPaginacion} Páginas`;
+
+<<<<<<< HEAD
             const result = await axios.get('/api/producto/list', {
                 params: {
                     "idSucursal": this.state.idSucursal,
@@ -204,23 +227,27 @@ class Productos extends CustomComponent {
             });
             let totalPaginacion = parseInt(Math.ceil((parseFloat(result.data.total) / this.state.filasPorPagina)));
             let messagePaginacion = `Mostrando ${result.data.result.length} de ${totalPaginacion} Páginas`;
+=======
+>>>>>>> origin/master
 
             await this.setStateAsync({
                 loading: false,
-                lista: result.data.result,
+                lista: response.data.result,
                 totalPaginacion: totalPaginacion,
                 messagePaginacion: messagePaginacion
             });
-        } catch (error) {
-            if (error.message !== "canceled") {
-                await this.setStateAsync({
-                    loading: false,
-                    lista: [],
-                    totalPaginacion: 0,
-                    messageTable: "Se produjo un error interno, intente nuevamente por favor.",
-                    messagePaginacion: "Mostranto 0 de 0 Páginas",
-                });
-            }
+        }
+
+        if (response instanceof ErrorResponse) {
+            if (response.getType() === CANCELED) return;
+
+            await this.setStateAsync({
+                loading: false,
+                lista: [],
+                totalPaginacion: 0,
+                messageTable: "Se produjo un error interno, intente nuevamente por favor.",
+                messagePaginacion: "Mostranto 0 de 0 Páginas",
+            });
         }
     }
 
@@ -316,9 +343,13 @@ class Productos extends CustomComponent {
         }
     }
 
-    handleOpenModal = async () => {
-        showModal(this.idModal);
-        await this.setStateAsync({ nameModal: "Nuevo Producto", loadModal: true });
+    handleAgregar = async () => {
+        this.props.history.push({
+            pathname: `${this.props.location.pathname}/agregar`
+        })
+        // showModal(this.idModal);
+
+        // await this.setStateAsync({ nameModal: "Nuevo Producto", loadModal: true });
     }
 
     handleCompleto = () => {
@@ -382,25 +413,22 @@ class Productos extends CustomComponent {
     }
 
 
-    handleBorrar = (idProducto) => {
+    handleEliminar = (idProducto) => {
         alertDialog("Producto", "¿Estás seguro de eliminar el producto?", async (event) => {
             if (event) {
-                try {
-                    alertInfo("Producto", "Procesando información...")
-                    let result = await axios.delete('/api/producto', {
-                        params: {
-                            "idProducto": idProducto
-                        }
-                    })
-                    alertSuccess("Producto", result.data, () => {
+                alertInfo("Producto", "Procesando información...")
+                const params = {
+                    "idProducto": idProducto
+                }
+                const response = await deleteProducto(params);
+                if (response instanceof SuccessReponse) {
+                    alertSuccess("Producto", response.data, () => {
                         this.loadInit();
                     })
-                } catch (error) {
-                    if (error.response !== undefined) {
-                        alertWarning("Producto", error.response.data)
-                    } else {
-                        alertWarning("Producto", "Se genero un error interno, intente nuevamente.")
-                    }
+                }
+
+                if (response instanceof ErrorResponse) {
+                    alertWarning("Producto", response.getMessage())
                 }
             }
         })
@@ -1258,7 +1286,7 @@ class Productos extends CustomComponent {
                     </div>
                     <div className="col-md-6 col-sm-12">
                         <div className="form-group">
-                            <button className="btn btn-outline-info" onClick={this.handleOpenModal} disabled={!this.state.add}>
+                            <button className="btn btn-outline-info" onClick={this.handleAgregar} disabled={!this.state.add}>
                                 <i className="bi bi-file-plus"></i> Nuevo Registro
                             </button>
                             {" "}
@@ -1302,20 +1330,20 @@ class Productos extends CustomComponent {
                                         ) : (
                                             this.state.lista.map((item, index) => {
 
-                                                const estado = function(){
-                                                    if(item.estado === 1){
+                                                const estado = function () {
+                                                    if (item.estado === 1) {
                                                         return <span className="badge badge-warning">Disponible</span>;
                                                     }
 
-                                                    if(item.estado === 2){
+                                                    if (item.estado === 2) {
                                                         return <span className="badge badge-info">Reservado</span>;
                                                     }
 
-                                                    if(item.estado === 3){
+                                                    if (item.estado === 3) {
                                                         return <span className="badge badge-success">Vendido</span>;
                                                     }
 
-                                                    return  <span className="badge badge-warnin">Inactivo</span>;
+                                                    return <span className="badge badge-warnin">Inactivo</span>;
                                                 }
 
                                                 return (
@@ -1349,7 +1377,7 @@ class Productos extends CustomComponent {
                                                             <button
                                                                 className="btn btn-outline-danger btn-sm"
                                                                 title="Anular"
-                                                                onClick={() => this.handleBorrar(item.idProducto)}
+                                                                onClick={() => this.handleEliminar(item.idProducto)}
                                                                 disabled={!this.state.remove}>
                                                                 <i className="bi bi-trash"></i>
                                                             </button>

@@ -1,4 +1,3 @@
-import axios from 'axios';
 import React from 'react';
 import {
     spinnerLoading,
@@ -13,6 +12,8 @@ import { keyUpSearch } from "../../../../helper/utils.helper";
 import CustomComponent from "../../../../model/class/custom-component";
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
+import { deleteAlmacen, listAlmacen } from '../../../../network/rest/principal.network';
+import { CANCELED } from '../../../../model/types/types';
 
 class Almacenes extends CustomComponent {
 
@@ -79,14 +80,14 @@ class Almacenes extends CustomComponent {
     }
 
     fillTable = async (opcion, buscar) => {
-        try {
-            await this.setStateAsync({
-                loading: true,
-                lista: [],
-                messageTable: "Cargando información...",
-                messagePaginacion: "Mostranto 0 de 0 Páginas"
-            });
+        await this.setStateAsync({
+            loading: true,
+            lista: [],
+            messageTable: "Cargando información...",
+            messagePaginacion: "Mostranto 0 de 0 Páginas"
+        });
 
+<<<<<<< HEAD
             const result = await axios.get('/api/almacen/listalmacenes', {
                 signal: this.abortControllerTable.signal,
                 params: {
@@ -97,27 +98,42 @@ class Almacenes extends CustomComponent {
                     "filasPorPagina": this.state.filasPorPagina
                 }
             });
+=======
+        const params = {
+            "opcion": opcion,
+            "buscar": buscar,
+            // "idProyecto": this.state.idProyecto,
+            "posicionPagina": ((this.state.paginacion - 1) * this.state.filasPorPagina),
+            "filasPorPagina": this.state.filasPorPagina
+        }
+>>>>>>> origin/master
 
-            let total = result.data.total
-            let totalPaginacion = parseInt(Math.ceil((parseFloat(total) / this.state.filasPorPagina)));
-            let messagePaginacion = `Mostrando ${result.data.result.length} de ${totalPaginacion} Páginas`;
+        const response = await listAlmacen(params, this.abortControllerTable.signal);
+
+        if (response instanceof SuccessReponse) {
+            const result = response.data.result;
+            const total = response.data.total
+            const totalPaginacion = parseInt(Math.ceil((parseFloat(total) / this.state.filasPorPagina)));
+            const messagePaginacion = `Mostrando ${result.length} de ${totalPaginacion} Páginas`;
 
             await this.setStateAsync({
                 loading: false,
-                lista: result.data.result,
+                lista: result,
                 totalPaginacion: totalPaginacion,
                 messagePaginacion: messagePaginacion
             });
-        } catch (error) {
-            if (error.message !== "canceled") {
-                await this.setStateAsync({
-                    loading: false,
-                    lista: [],
-                    totalPaginacion: 0,
-                    messageTable: "Se produjo un error interno, intente nuevamente por favor.",
-                    messagePaginacion: "Mostranto 0 de 0 Páginas",
-                });
-            }
+        }
+
+        if (response instanceof ErrorResponse) {
+            if (response.getType() === CANCELED) return;
+
+            await this.setStateAsync({
+                loading: false,
+                lista: [],
+                totalPaginacion: 0,
+                messageTable: "Se produjo un error interno, intente nuevamente por favor.",
+                messagePaginacion: "Mostranto 0 de 0 Páginas",
+            });
         }
     }
 
@@ -179,15 +195,17 @@ class Almacenes extends CustomComponent {
                     id: idAlmacen
                 }
 
-                const response = await axios.delete('/api/almacen/deletealmacen',{
-                    data: params
-                }).then((response) =>{
+                const response = await deleteAlmacen(params);
+
+                if(response instanceof SuccessReponse){
                     alertSuccess("Almacen", response.data, () => {
                         this.loadInit();
                     })
-                }).catch((error) => {
-                    alertWarning("Almacen", error.response.data)
-                });
+                }
+
+                if(response instanceof ErrorResponse){
+                    alertWarning("Almacen", response.getMessage())
+                }
             }
         })
     }
