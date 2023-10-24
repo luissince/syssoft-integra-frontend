@@ -127,7 +127,7 @@ class Notications extends React.Component {
                                         this.state.loading ? (
                                             <tr>
                                                 <td className="text-center" colSpan="4">
-                                                    {spinnerLoading()}
+                                                    {spinnerLoading("Cargando información de la tabla...", true)}
                                                 </td>
                                             </tr>
                                         ) : this.state.lista.length === 0 ? (

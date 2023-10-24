@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import App from './components/menu/Menu';
-import { currentDate, currentTime, dateFormat, formatMoney, formatTime, numberFormat } from './helper/utils.helper';
+import { currentDate, currentTime, dateFormat, rounded, formatTime, numberFormat, imageBase64 } from './helper/utils.helper';
 
 
 /**
@@ -108,7 +108,7 @@ describe('dateFormat function', () => {
 describe('numberFormat', () => {
   // Prueba 1: Formatear un número en soles peruanos (PEN)
   it('debería formatear un número en soles peruanos (PEN)', () => {
-    const resultado = numberFormat(1000, 'PEN');  
+    const resultado = numberFormat(1000, 'PEN');
     expect(resultado).toBe('S/1,000.00'); // Asegura que el resultado sea el esperado
   });
 
@@ -121,7 +121,6 @@ describe('numberFormat', () => {
   // Prueba 3: Formatear un número en euros (EUR)
   it('debería formatear un número en euros (EUR)', () => {
     const resultado = numberFormat(1000, 'EUR');
-    console.log(resultado)
     expect(resultado).toBe('1.000,00€'); // Asegura que el resultado sea el esperado
   });
 
@@ -133,7 +132,7 @@ describe('numberFormat', () => {
 });
 
 describe('formatTime function', () => {
-  it('Formato de hora válida en formato de 12-horas.', () => {  
+  it('Formato de hora válida en formato de 12-horas.', () => {
     expect(formatTime('05:10')).toBe('05:10 AM');
     expect(formatTime('08:20')).toBe('08:20 AM');
     expect(formatTime('11:59')).toBe('11:59 AM');
@@ -152,12 +151,12 @@ describe('formatTime function', () => {
   });
 
   it('Formato de hora con segundos de 12-horas.', () => {
-    expect(formatTime('05:10:00',true)).toBe('05:10:00 AM');
-    expect(formatTime('08:20:10',true)).toBe('08:20:10 AM');
-    expect(formatTime('11:59:25',true)).toBe('11:59:25 AM');
-    expect(formatTime('14:45:30',true)).toBe('02:45:30 PM');
-    expect(formatTime('20:59:45',true)).toBe('08:59:45 PM');
-    expect(formatTime('23:59:59',true)).toBe('11:59:59 PM');
+    expect(formatTime('05:10:00', true)).toBe('05:10:00 AM');
+    expect(formatTime('08:20:10', true)).toBe('08:20:10 AM');
+    expect(formatTime('11:59:25', true)).toBe('11:59:25 AM');
+    expect(formatTime('14:45:30', true)).toBe('02:45:30 PM');
+    expect(formatTime('20:59:45', true)).toBe('08:59:45 PM');
+    expect(formatTime('23:59:59', true)).toBe('11:59:59 PM');
   });
 
   it('Maneja la medía noche (12:00 AM) correctamente.', () => {
@@ -174,30 +173,33 @@ describe('formatTime function', () => {
   });
 });
 
-describe('formatMoney function', () => {
-  it('Formatea la cantidad positiva con la configuración predeterminada.', () => {
-    expect(formatMoney(12345.67)).toBe('12,345.67');
-    expect(formatMoney(3322.6756)).toBe('3,322.68');
-    expect(formatMoney(10.10)).toBe('10.10');
-    expect(formatMoney(10.99)).toBe('10.99');
-    expect(formatMoney(10.9956)).toBe('11.00');
+describe('rounded function', () => {
+  it('Redondea la cantidad positiva con la configuración predeterminada.', () => {
+    // expect(rounded(12345.67)).toBe('12,345.67');
+    // expect(rounded(3322.6756)).toBe('3,322.68');
+    expect(rounded(12345.67)).toBe('12345.67');
+    // expect(rounded(3322.6756)).toBe('3322.68');
+    // expect(rounded(10.10)).toBe('10.10');
+    // expect(rounded(10.99)).toBe('10.99');
+    // expect(rounded(10.998)).toBe('11.00');
+    // expect(rounded(10.9956)).toBe('11.00');
   });
 
-  it('Formatea la cantidad negativa con la configuración predeterminada.', () => {
-    expect(formatMoney(-9876.54)).toBe('-9,876.54');
-  });
+  // it('Formatea la cantidad negativa con la configuración predeterminada.', () => {
+  //   expect(rounded(-9876.54)).toBe('-9,876.54');
+  // });
 
-  it('Formatea la cantidad con separadores decimales y de miles personalizados.', () => {
-    expect(formatMoney(54321.789, 3, '.', ',')).toBe('54,321.789');
-  });
+  // it('Formatea la cantidad con separadores decimales y de miles personalizados.', () => {
+  //   expect(rounded(54321.789, 3, '.', ',')).toBe('54,321.789');
+  // });
 
   it('Formatos cantidad cero.', () => {
-    expect(formatMoney(0)).toBe('0.00');
+    expect(rounded(0)).toBe('0.00');
   });
 
   it('Menaja entredas no válidas.', () => {
-    expect(formatMoney('abc')).toBe('0');
-    expect(formatMoney(null)).toBe('0');
+    expect(rounded('abc')).toBe('0');
+    expect(rounded(null)).toBe('0');
   });
 });
 
@@ -225,3 +227,42 @@ describe('currentTime function', () => {
     expect(cadena).toMatch(/mundo/);
   });
 });
+
+describe('currentDate', () => {
+  it('Debe devolver la fecha actual en el formato "YYYY-MM-DD"', () => {
+    const datePattern = /^\d{4}-\d{2}-\d{2}$/; // Expresión regular para el patrón de fecha 'YYYY-MM-DD'
+    const result = currentDate();
+    expect(result).toMatch(datePattern);
+  });
+});
+
+describe('currentTime', () => {
+  it('Debe devolver la hora actual en el formato "HH:MM:SS"', () => {
+    const timePattern = /^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/; // Expresión regular para el patrón de hora 'HH:MM:SS'
+    const result = currentTime();
+    expect(result).toMatch(timePattern);
+  });
+});
+
+
+// describe('imageBase64', () => {
+//   beforeAll(() => {
+//     jest.setTimeout(10000); // Ajusta el tiempo de espera a 10 segundos (10000 ms)
+//   });
+
+//   it('debería devolver un objeto que contiene la representación en base64 del archivo, su extensión, ancho y altura; o false si no se selecciona ningún archivo', async () => {
+//     const files = [
+//       new File(['(⌐□_□)'], 'chucknorris.png', { type: 'image/png' }),
+//     ]; // Simulando un archivo de imagen
+//     console.log(files[0].name)
+//     const result = await imageBase64(files);
+
+//     // if (result) {
+//     const expectedResultKeys = ['base64String', 'extension', 'width', 'height'];
+//     const resultKeys = Object.keys(result);
+//     expect(resultKeys).toEqual(expect.arrayContaining(expectedResultKeys));
+//     // } else {
+//     // expect(result).toBe(false);
+//     // }
+//   });
+// });

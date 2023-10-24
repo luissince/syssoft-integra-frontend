@@ -35,13 +35,12 @@ export async function loginApi(params, signal = null) {
 
 /**
  * 
- * @param {*} params 
  * @param {*} signal 
  * @returns SuccessReponse | ErrorResponse
  */
-export async function liberarTerreno(params, signal = null) {
+export async function listarComboCliente(signal = null) {
   return await Resolve.create(
-    instancePrincipal.post("/api/producto/liberar", params, {
+    instancePrincipal.get("/api/cliente/listcombo", {
       signal: signal,
     })
   );
@@ -49,12 +48,13 @@ export async function liberarTerreno(params, signal = null) {
 
 /**
  * 
+ * @param {*} params 
  * @param {*} signal 
  * @returns SuccessReponse | ErrorResponse
  */
-export async function listarComboCliente(signal = null) {
+export async function liberarTerreno(params, signal = null) {
   return await Resolve.create(
-    instancePrincipal.get("/api/cliente/listcombo", {
+    instancePrincipal.post("/api/producto/liberar", params, {
       signal: signal,
     })
   );
@@ -118,6 +118,65 @@ export async function validToken() {
     instancePrincipal.get("/api/login/validtoken")
   );
 }
+
+/**
+ * 
+ * @param {*} data 
+ * @param {*} signal 
+ * @returns 
+ */
+export async function addBanco(data, signal = null) {
+  return await Resolve.create(
+    instancePrincipal.post("/api/banco/", data, {
+      signal: signal
+    }
+    )
+  );
+}
+
+/**
+ * 
+ * @param {*} params 
+ * @param {*} signal 
+ * @returns 
+ */
+export async function getBancoId(params, signal = null) {
+  return await Resolve.create(
+    instancePrincipal.get("/api/banco/id", {
+      signal: signal,
+      params: params,
+    })
+  );
+}
+
+/**
+ * 
+ * @param {*} data 
+ * @param {*} signal 
+ * @returns 
+ */
+export async function updateBanco(data, signal = null) {
+  return await Resolve.create(
+    instancePrincipal.put("/api/banco/", data, {
+      signal: signal
+    }
+    )
+  );
+}
+
+/**
+ * 
+ * @param {*} params 
+ * @returns 
+ */
+export async function deleteBanco(params) {
+  return await Resolve.create(
+    instancePrincipal.delete("/api/banco/", {
+      params: params
+    })
+  );
+}
+
 
 /**
  * 
@@ -318,6 +377,16 @@ export async function getNotifications(signal) {
     instancePrincipal.get("/api/cobro/notificaciones", {
       signal: signal
     })
+  );
+}
+
+/**
+ * 
+ * @returns SuccessReponse | ErrorResponse 
+ */
+export async function comboProductos() {
+  return await Resolve.create(
+    instancePrincipal.get("/api/producto/listcombo")
   );
 }
 
@@ -650,9 +719,10 @@ export async function deleteImpuesto(params) {
  * @param {} params 
  * @returns 
  */
-export async function listProducto(params) {
+export async function listProducto(params, signal) {
   return await Resolve.create(
     instancePrincipal.get('/api/producto/list', {
+      signal: signal,
       params: params
     })
   );

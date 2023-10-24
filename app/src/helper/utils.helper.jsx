@@ -11,9 +11,9 @@ export function sleep(time) {
 }
 
 export function makeid(length) {
-  var result = "";
-  var characters = '0123456789';
-  for (var i = 0; i < length; i++) {
+  let result = "";
+  const characters = '0123456789';
+  for (const i = 0; i < length; i++) {
     result += characters[Math.floor(Math.random() * characters.length)];
   }
   result = result.match(/\d{1,4}/g).join("");
@@ -25,13 +25,18 @@ export function statePrivilegio(value) {
   return value === 1 ? true : false;
 }
 
-export async function imageBase64(ref) {
-  let files = ref.current.files;
+/**
+ * Lee un archivo de imagen y devuelve su representación en base64, su extensión y dimensiones.
+ * @param {File[]} files - La lista de archivos de imagen seleccionados.
+ * @returns {Promise<{ base64String: string, extension: string, width: number, height: number } | false>} Un objeto que contiene la representación en base64 del archivo, su extensión, ancho y altura; o false si no se selecciona ningún archivo.
+ */
+export async function imageBase64(files) {
   if (files.length !== 0) {
-    let read = await readDataURL(files);
-    let base64String = read.replace(/^data:.+;base64,/, '');
-    let extension = getExtension(files[0].name);
-    let { width, height } = await imageSizeData(read);
+    const name = files[0].name
+    const read = await readDataURL(files);
+    const base64String = read.replace(/^data:.+;base64,/, '');
+    const extension = getExtension(name);
+    const { width, height } = await imageSizeData(read);
     return { base64String, extension, width, height }
   }
 
@@ -47,7 +52,50 @@ export async function imageBase64(ref) {
  * @param {string} [thousands=","] - El separador de miles.
  * @returns {string} La cantidad formateada como dinero.
  */
-export function formatMoney(amount, decimalCount = 2, decimal = ".", thousands = ",") {
+export function formatDecimal(amount, decimalCount = 2, decimal = ".", thousands = ",") {
+  try {
+    // Validamos si es un número
+    const isNumber = /^-?\d*\.?\d+$/.test(amount);
+    if (!isNumber) throw new Error("0.00");
+
+    decimalCount = Math.abs(decimalCount);
+    decimalCount = isNaN(decimalCount) ? 2 : decimalCount;
+
+    const negativeSign = amount < 0 ? "-" : "";
+
+    const parsedAmount = Math.abs(Number(amount)) || 0;
+    const fixedAmount = parsedAmount.toFixed(decimalCount);
+    const formattedAmount = parseInt(fixedAmount).toString();
+    const groupDigits = 3;
+
+    const index = formattedAmount.length > groupDigits ? formattedAmount.length % groupDigits : 0;
+
+    return (
+      negativeSign +
+      (index ? formattedAmount.substring(0, index) + thousands : "") +
+      formattedAmount.substring(index).replace(/(\d{3})(?=\d)/g, "$1" + thousands) +
+      (decimalCount
+        ? decimal +
+        Math.abs(amount - formattedAmount)
+          .toFixed(decimalCount)
+          .slice(2)
+        : "")
+    );
+  } catch (e) {
+    return "0.00";
+  }
+}
+
+
+/**
+ * Redondear un número como una cantidad.
+ *
+ * @param {number} amount - La cantidad numérica que se va a formatear como dinero.
+ * @param {number} [decimalCount=2] - El número de decimales a mostrar.
+ * @param {string} [decimal="."] - El separador decimal.
+ * @returns {string} La cantidad formateada como dinero.
+ */
+export function rounded(amount, decimalCount = 2, decimal = ".", thousands = "") {
   try {
     // Validamos si es un número
     const isNumber = /^-?\d*\.?\d+$/.test(amount);
@@ -58,22 +106,18 @@ export function formatMoney(amount, decimalCount = 2, decimal = ".", thousands =
 
     const negativeSign = amount < 0 ? "-" : "";
 
-    const i = parseInt(
-      (amount = Math.abs(Number(amount) || 0).toFixed(decimalCount))
-    ).toString();
-    const j = i.length > 3 ? i.length % 3 : 0;
+    const parsedAmount = Math.abs(Number(amount)) || 0;
+    const fixedAmount = parsedAmount.toFixed(decimalCount);
+    const formattedAmount = parseInt(fixedAmount).toString();
+    const groupDigits = 3;
 
-    return (
-      negativeSign +
-      (j ? i.substr(0, j) + thousands : "") +
-      i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + thousands) +
-      (decimalCount
-        ? decimal +
-        Math.abs(amount - i)
-          .toFixed(decimalCount)
-          .slice(2)
-        : "")
-    );
+    const index = formattedAmount.length > groupDigits ? formattedAmount.length % groupDigits : 0;
+
+    const inicio = (index ? formattedAmount.substring(0, index) + thousands : "");
+    const restante = formattedAmount.substring(index).replace(/(\d{3})(?=\d)/g, "$1" + thousands);
+    const flotante = decimalCount ? decimal + Math.abs(amount - formattedAmount).toFixed(decimalCount).slice(2) : "";
+
+    return negativeSign + inicio + restante + flotante;
   } catch (e) {
     return "0";
   }
@@ -137,6 +181,10 @@ export const numberFormat = (value, currency = "PEN") => {
   }
 }
 
+/**
+ * Obtiene la fecha actual en el formato 'YYYY-MM-DD'.
+ * @returns {string} Fecha actual en formato 'YYYY-MM-DD'.
+ */
 export function currentDate() {
   const date = new Date();
   const year = date.getFullYear();
@@ -146,6 +194,10 @@ export function currentDate() {
   return formatted_date;
 }
 
+/**
+ * Obtiene la hora actual en el formato "HH:MM:SS".
+ * @returns {string} La hora actual en el formato "HH:MM:SS".
+ */
 export function currentTime() {
   const time = new Date();
   const hours = (time.getHours() > 9 ? time.getHours() : "0" + time.getHours());
@@ -228,10 +280,10 @@ export function isNumeric(valor) {
 
 export function isText(value) {
   if (
-    value.trim() === "" ||
-    value.trim().length === 0 ||
+    value === null ||
     value === "undefined" ||
-    value === null
+    value.trim() === "" ||
+    value.trim().length === 0
   ) {
     return false;
   }
@@ -397,11 +449,28 @@ export function clearModal(id, callback = function () { }) {
   myModalEl.addEventListener("hidden.bs.modal", callback);
 }
 
-export function getInstanceModal(id){
+export function getInstanceModal(id) {
   return bootstrap.Modal.getInstance(document.getElementById(id));
 }
 
-export function spinnerLoading(message = "Cargando datos...") {
+export function spinnerLoading(message = "Cargando datos...", table = false) {
+  if (!table) {
+    return (
+      <div className="clearfix absolute-all bg-white">
+        <div className="d-flex flex-column justify-content-center align-items-center h-100">
+          <div>
+            <div className="spinner-grow text-danger" role="status"></div>
+            <div className="spinner-grow text-warning" role="status"></div>
+            <div className="spinner-grow text-info" role="status"></div>
+          </div>
+          <div>
+            <strong>{message}</strong>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="d-flex flex-column justify-content-center align-items-center h-100">
       <div>
@@ -418,9 +487,9 @@ export function spinnerLoading(message = "Cargando datos...") {
 
 export function readDataURL(files) {
   return new Promise((resolve, reject) => {
-    let file = files[0];
-    let blob = file.slice();
-    var reader = new FileReader();
+    const file = files[0];
+    const blob = file.slice();
+    const reader = new FileReader();
     reader.onload = () => {
       resolve(reader.result);
     };
@@ -431,7 +500,7 @@ export function readDataURL(files) {
 
 export function readDataBlob(blob) {
   return new Promise((resolve, reject) => {
-    var reader = new FileReader();
+    const reader = new FileReader();
     reader.onload = () => {
       resolve(JSON.parse(reader.result));
     };
@@ -443,11 +512,11 @@ export function readDataBlob(blob) {
 
 export function imageSizeData(data) {
   return new Promise((resolve, reject) => {
-    let image = new Image();
+    const image = new Image();
     image.src = data;
     image.onload = function () {
-      var height = this.height;
-      var width = this.width;
+      const height = this.height;
+      const width = this.width;
       resolve({ width, height });
     };
     image.onerror = reject;
