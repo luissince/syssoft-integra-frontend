@@ -254,8 +254,8 @@ class Banco {
     }
 
     async detalleBanco(req) {
-        try {         
-            
+        try {
+
             const lista = await conec.query(`SELECT 
             DATE_FORMAT(bd.fecha,'%d/%m/%Y') as fecha, 
             bd.hora,
@@ -303,7 +303,7 @@ class Banco {
                 req.query.idBanco
             ])
 
-            return {"lista": resultLista, "total": total[0].Total };
+            return { "lista": resultLista, "total": total[0].Total };
 
         } catch (error) {
             return 'Error interno de conexión, intente nuevamente.'
@@ -330,7 +330,7 @@ class Banco {
             WHERE b.idBanco = ?`, [
                 req.query.idBanco
             ])
-            
+
             const lista = await conec.query(`SELECT 
             DATE_FORMAT(bd.fecha,'%d/%m/%Y') as fecha, 
             bd.hora,
@@ -362,7 +362,7 @@ class Banco {
                 }
             });
 
-            return {"cabecera": cabecera[0], "lista": resultLista};
+            return { "cabecera": cabecera[0], "lista": resultLista };
 
         } catch (error) {
             return 'Error interno de conexión, intente nuevamente.'

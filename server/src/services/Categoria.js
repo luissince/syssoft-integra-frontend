@@ -93,7 +93,7 @@ class Categoria {
       if (result.length != 0) {
         const quitarValor = result.map((item) => parseInt(item.idCategoria.replace("CT", "")));
 
-        const incremental =  Math.max(...quitarValor) + 1;
+        const incremental = Math.max(...quitarValor) + 1;
 
         let codigoGenerado = "";
         if (incremental <= 9) {
@@ -214,8 +214,7 @@ class Categoria {
   async listcombo(req) {
     try {
       const result = await conec.query(
-        "SELECT idCategoria,nombre FROM categoria WHERE idSucursal = ?",
-        [req.query.idSucursal]
+        "SELECT idCategoria,nombre FROM categoria"
       );
       return result;
     } catch (error) {
@@ -228,12 +227,12 @@ class Categoria {
     try {
       connection = await conec.beginTransaction();
 
-      const categoria = await conec.execute(connection,"SELECT * FROM categoria WHERE  idCategoria = ? and idSucursal = ?",[
+      const categoria = await conec.execute(connection, "SELECT * FROM categoria WHERE  idCategoria = ? and idSucursal = ?", [
         req.query.idCategoria,
         req.query.idSucursal
       ])
 
-      await  conec.execute(connection, 'update categoria set idSucursal = ? where idCategoria = ?',[
+      await conec.execute(connection, 'update categoria set idSucursal = ? where idCategoria = ?', [
         req.query.idSucursalTrasladar,
         req.query.idCategoria,
       ])
@@ -254,36 +253,36 @@ class Categoria {
 
         if (venta.length != 0) {
 
-            await conec.execute(connection,`update venta set idSucursal = ? where idVenta = ?`,[
-                req.query.idSucursalTrasladar,
-                venta[0].idVenta
-            ])
+          await conec.execute(connection, `update venta set idSucursal = ? where idVenta = ?`, [
+            req.query.idSucursalTrasladar,
+            venta[0].idVenta
+          ])
 
           // const alta = await conec.execute(connection,`select * from alta where idCliente = ?`,[
           //     venta[0].idCliente,
           // ])
 
-            await conec.execute(connection,`update alta set idSucursal = ? where idCliente = ?`,[
-                req.query.idSucursalTrasladar,
-                venta[0].idCliente,
+          await conec.execute(connection, `update alta set idSucursal = ? where idCliente = ?`, [
+            req.query.idSucursalTrasladar,
+            venta[0].idCliente,
+          ])
+
+          const cobros = await conec.execute(connection, `select * from cobro where idProcedencia = ?`, [
+            venta[0].idVenta
+          ])
+
+
+          await conec.execute(connection, `update cobro set idSucursal = ? where idProcedencia = ?`, [
+            req.query.idSucursalTrasladar,
+            venta[0].idVenta
+          ])
+
+          for (const cobro of cobros) {
+            await conec.execute(connection, `update notaCredito set idSucursal = ?  where idCobro = ?`, [
+              req.query.idSucursalTrasladar,
+              cobro.idCobro
             ])
-    
-            const cobros = await conec.execute(connection, `select * from cobro where idProcedencia = ?`,[
-                venta[0].idVenta
-            ])
-            
-    
-            await conec.execute(connection, `update cobro set idSucursal = ? where idProcedencia = ?`,[
-                req.query.idSucursalTrasladar,
-                venta[0].idVenta
-            ])
-    
-            for(const cobro of cobros){
-                await conec.execute(connection, `update notaCredito set idSucursal = ?  where idCobro = ?`,[
-                    req.query.idSucursalTrasladar,
-                    cobro.idCobro
-                ])
-            }
+          }
         }
 
       }

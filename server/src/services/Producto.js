@@ -8,34 +8,25 @@ class Producto {
     async list(req) {
         try {
             const lista = await conec.query(`SELECT 
-                l.idProducto,
-                l.descripcion,
-                m.nombre as categoria,
-                l.precio,
-                l.estado,
-                l.medidaFrontal,
-                l.costadoDerecho,
-                l.costadoIzquierdo,
-                l.medidaFondo,
-                l.areaProducto
-                FROM producto AS l 
-                INNER JOIN categoria AS m ON l.idCategoria = m.idCategoria 
+                p.idProducto,
+                p.tipo,
+                p.nombre,
+                p.precio,
+                p.estado,
+                c.nombre AS categoria,
+                m.nombre AS medida
+                FROM producto AS p 
+                INNER JOIN categoria AS c ON p.idCategoria = c.idCategoria 
+                INNER  JOIN medida AS m ON p.idMedida = m.idMedida               
                 WHERE
-                ? = 0 AND m.idSucursal = ?
+                ? = 0 
                 OR
-                ? = 1 AND m.idSucursal = ? AND l.descripcion LIKE CONCAT(?,'%')    
-                OR
-                ? = 1 AND m.idSucursal = ? AND m.nombre LIKE CONCAT(?,'%')    
+                ? = 1 AND p.nombre LIKE CONCAT(?,'%')       
+                ORDER BY p.fecha DESC, p.hora DESC
                 LIMIT ?,?`, [
                 parseInt(req.query.opcion),
-                req.query.idSucursal,
 
                 parseInt(req.query.opcion),
-                req.query.idSucursal,
-                req.query.buscar,
-
-                parseInt(req.query.opcion),
-                req.query.idSucursal,
                 req.query.buscar,
 
                 parseInt(req.query.posicionPagina),
@@ -49,25 +40,19 @@ class Producto {
                 }
             });
 
-            const total = await conec.query(`SELECT COUNT(*) AS Total 
-                FROM producto AS l INNER JOIN categoria AS m 
-                ON l.idCategoria = m.idCategoria 
+            const total = await conec.query(`SELECT COUNT(*) AS Total
+                FROM producto AS p 
+                INNER JOIN categoria AS c ON p.idCategoria = c.idCategoria 
+                INNER  JOIN medida AS m ON p.idMedida = m.idMedida 
                 WHERE
-                ? = 0 AND m.idSucursal = ?
+                ? = 0 
                 OR
-                ? = 1 AND m.idSucursal = ? AND l.descripcion LIKE CONCAT(?,'%')
-                OR
-                ? = 1 AND m.idSucursal = ? AND m.nombre LIKE CONCAT(?,'%')`, [
+                ? = 1 AND p.nombre LIKE CONCAT(?,'%')`, [
                 parseInt(req.query.opcion),
-                req.query.idSucursal,
 
                 parseInt(req.query.opcion),
-                req.query.idSucursal,
                 req.query.buscar,
 
-                parseInt(req.query.opcion),
-                req.query.idSucursal,
-                req.query.buscar,
             ]);
             return { "result": resultLista, "total": total[0].Total }
         } catch (error) {
@@ -98,27 +83,37 @@ class Producto {
                 idConcepto,
                 idMedida,
                 nombre,
+                codigo,
+                idCodigoSunat,
                 descripcion,
                 precio,
                 costo,
                 tipo,
+                publicar,
+                inventariado,
+                negativo,
                 estado,
                 fecha,
                 hora,
                 fupdate,
                 hupdate,
                 idUsuario
-            ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, [
+            ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, [
                 idProducto,
                 req.body.idCategoria,
                 'CP0001',
                 req.body.idMedida,
                 req.body.nombre,
+                req.body.codigo,
+                req.body.idCodigoSunat,
                 req.body.descripcion,
                 req.body.precio,
                 req.body.costo,
                 req.body.tipo,
-                true,
+                req.body.publicar,
+                req.body.inventariado,
+                req.body.negativo,
+                req.body.estado,
                 currentDate(),
                 currentTime(),
                 currentDate(),
@@ -126,23 +121,27 @@ class Producto {
                 req.body.idUsuario,
             ])
 
-            await conec.execute(connection, `INSERT INTO productoAlmacen(
-                idProductoAlmacen,
-                idProducto,
-                idAlmacen,
-                cantidad,
-                cantidadMaxima,
-                cantidadMinima
-            ) VALUES(?,?,?,?,?,?)`, [
-                idProducto + "" + req.body.idAlmacen,
-                idProducto,
-                req.body.idAlmacen,
-                req.body.cantidad,
-                req.body.cantidadMaxima,
-                req.body.cantidadMinima,
-            ]);
+            for (const inventariado of req.body.inventarios) {
+                await conec.execute(connection, `INSERT INTO productoAlmacen(
+                    idProductoAlmacen,
+                    idProducto,
+                    idAlmacen,
+                    cantidad,
+                    cantidadMaxima,
+                    cantidadMinima
+                ) VALUES(?,?,?,?,?,?)`, [
+                    idProducto + "" + inventariado.idAlmacen,
+                    idProducto,
+                    inventariado.idAlmacen,
+                    inventariado.cantidad,
+                    inventariado.cantidadMaxima,
+                    inventariado.cantidadMinima,
+                ]);
 
-            await conec.commit(connection);
+                
+            }
+
+            await conec.rollback(connection);
             return "insert";
         } catch (error) {
             if (connection != null) {
@@ -736,18 +735,16 @@ class Producto {
 
     async listarCombo(req) {
         try {
-            let result = await conec.query(`SELECT 
-            l.idProducto, 
-            l.descripcion AS nombreoProducto, 
-            l.precio,
-            m.nombre AS nombreCategoria 
-            FROM producto AS l INNER JOIN categoria AS m 
-            ON l.idCategoria = m.idCategoria
-            WHERE m.idSucursal = ? AND l.estado = 1`, [
-                req.query.idSucursal
-            ]);
+            const result = await conec.query(`SELECT 
+            p.idProducto,
+            p.tipo,
+            p.nombre,
+            p.costo,
+            m.nombre as medida 
+            FROM producto AS p
+            INNER JOIN medida as m ON m.idMedida = p.idMedida
+            WHERE p.tipo <> 3`);
             return result
-
         } catch (error) {
             return "Se produjo un error de servidor, intente nuevamente.";
         }
@@ -755,13 +752,7 @@ class Producto {
 
     async listarFilter(req) {
         try {
-<<<<<<< HEAD
-            const result = await conec.procedure("CALL Filtrar_Productos_Para_Venta(?,?)",[
-                req.query.idSucursal,
-=======
-            const result = await conec.procedure("CALL Filtrar_Productos_Para_Venta(?,?)", [
-                req.query.idProyecto,
->>>>>>> origin/master
+            const result = await conec.procedure("CALL Filtrar_Productos_Para_Venta(?)", [
                 req.query.filtrar,
             ])
             return result

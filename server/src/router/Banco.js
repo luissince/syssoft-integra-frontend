@@ -47,6 +47,7 @@ router.put('/', async function (req, res) {
 });
 
 router.delete('/', async function (req, res) {
+    console.log(req)
     const result = await banco.delete(req)
     if (result === 'delete') {
         res.status(201).send("Se eliminó correctamente el banco.");
