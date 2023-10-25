@@ -373,6 +373,10 @@ class VentaProceso extends CustomComponent {
         this.setState({ idMoneda: event.target.value, });
     }
 
+    handleSaveOptions = () => {
+        
+    }
+
     handleModalOptions = () => {
         const invoice = document.getElementById("side-model-invoice");
         if (invoice.classList.contains("toggled")) {
@@ -384,6 +388,10 @@ class VentaProceso extends CustomComponent {
 
     handleCloseOptions = (event) => {
         event.stopPropagation();
+        this.handleModalOptions();
+    }
+
+    handleCloseOverlay = () => {
         this.handleModalOptions();
     }
 
@@ -766,11 +774,15 @@ class VentaProceso extends CustomComponent {
                     idImpuesto={this.state.idImpuesto}
                     refImpuesto={this.refImpuesto}
                     impuestos={this.state.impuestos}
+                    handleSelectImpuesto={this.handleSelectImpuesto}
+
                     idMoneda={this.state.idMoneda}
                     refMoneda={this.refMoneda}
                     monedas={this.state.monedas}
-                    handleSelectImpuesto={this.handleSelectImpuesto}
                     handleSelectMoneda={this.handleSelectMoneda}
+
+                    handleSaveOptions={this.handleSaveOptions}
+                    handleCloseOverlay={this.handleCloseOverlay}
                     handleCloseOptions={this.handleCloseOptions}
                 />
             </PosContainerWrapper>

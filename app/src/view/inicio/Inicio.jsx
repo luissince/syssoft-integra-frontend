@@ -54,7 +54,8 @@ import AlmacenAgregar from './logistica/almacen/AlmacenAgregar';
 import AlmacenEditar from './logistica/almacen/AlmacenEditar';
 
 import Clientes from './facturacion/cliente/Clientes';
-import ClienteProceso from './facturacion/cliente/ClienteProceso';
+import ClienteAgregar from './facturacion/cliente/ClienteAgregar';
+import ClienteEditar from './facturacion/cliente/ClienteEditar';
 import ClienteDetalle from './facturacion/cliente/ClienteDetalle';
 
 import NotaCredito from './facturacion/notacredito/NotaCredito';
@@ -207,9 +208,16 @@ class Inicio extends React.Component {
         return (
 
             <div className='app'>
-                <Menu  {...this.props} url={url} />
+                <Menu
+                    {...this.props}
+                    url={url}
+                />
 
-                <Head {...this.props} openAndClose={this.openAndClose} notificaciones={this.state.notificaciones} />
+                <Head
+                    {...this.props}
+                    openAndClose={this.openAndClose}
+                    notificaciones={this.state.notificaciones}
+                />
 
                 <Switch>
                     <Route
@@ -254,9 +262,14 @@ class Inicio extends React.Component {
                         render={(props) => <Clientes {...props} />}
                     />
                     <Route
-                        path={`${path}/clientes/proceso`}
+                        path={`${path}/clientes/agregar`}
                         exact={true}
-                        render={(props) => <ClienteProceso {...props} />}
+                        render={(props) => <ClienteAgregar {...props} />}
+                    />
+                    <Route
+                        path={`${path}/clientes/editar`}
+                        exact={true}
+                        render={(props) => <ClienteEditar {...props} />}
                     />
                     <Route
                         path={`${path}/clientes/detalle`}

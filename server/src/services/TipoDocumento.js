@@ -6,7 +6,12 @@ class TipoDocumento {
 
     async listcombo(req, res) {
         try {
-            let result = await conec.query(`SELECT idTipoDocumento, nombre FROM tipoDocumento WHERE estado = 1`);
+            const result = await conec.query(`SELECT 
+            idTipoDocumento,
+            nombre
+            FROM tipoDocumento 
+            WHERE 
+            estado = 1`);
             return sendSuccess(res, result)
         } catch (error) {
             return sendError(res, "Se produjo un error de servidor, intente nuevamente.");

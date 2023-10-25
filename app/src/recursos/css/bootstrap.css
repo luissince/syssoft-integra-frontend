@@ -12427,7 +12427,6 @@ a.text-dark:focus {
   right: 0;
   bottom: 0;
   left: 0;
-  background-color: rgba(0, 0, 0, .3);
   z-index: 1006;
   display: none;
 }
@@ -12444,6 +12443,7 @@ a.text-dark:focus {
   max-width: 550px;
   background-color: #ffffff;
   height: 100%;
+  transition: all 0.3s;
 }
 
 .side-modal .side-modal_wrapper button.close{
@@ -12458,6 +12458,12 @@ a.text-dark:focus {
   align-items: center;
   justify-content: space-between;
   margin: 0.5rem 1rem;
+}
+
+.side-modal .side-modal_overlay{
+  cursor: pointer;
+  height: 100%;
+  background-color: rgba(0, 0, 0, .3); 
 }
 
 @media (max-width: 576px) {}

@@ -8,6 +8,7 @@ import {
     alertInfo,
     alertSuccess,
     alertWarning,
+    isText,
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import SearchBar from "../../../../components/SearchBar";
@@ -15,12 +16,12 @@ import ContainerWrapper from '../../../../components/Container';
 import { images } from '../../../../helper';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
-import { addCliente, editCliente, getClienteId, getUbigeo, listComboTipoDocumento } from '../../../../network/rest/principal.network';
+import { editCliente, getClienteId, getUbigeo, listComboTipoDocumento } from '../../../../network/rest/principal.network';
 import { getDni, getRuc } from '../../../../network/rest/apisperu.network';
 import { CANCELED } from '../../../../model/types/types';
 import CustomComponent from '../../../../model/class/custom-component';
 
-class ClienteProceso extends CustomComponent {
+class ClienteEditar extends CustomComponent {
     constructor(props) {
         super(props);
         this.state = {
@@ -71,31 +72,15 @@ class ClienteProceso extends CustomComponent {
     async componentDidMount() {
         const url = this.props.location.search;
         const idcliente = new URLSearchParams(url).get("idCliente");
-        if (idcliente !== null) {
+        if (isText(idcliente)) {
             this.loadingDataId(idcliente)
         } else {
-            this.loadingData();
+            this.props.history.goBack()
         }
     }
 
     componentWillUnmount() {
         this.abortControllerTable.abort();
-    }
-
-    loadingData = async () => {
-        const documentos = await this.fetchTipoDocumento();
-
-        if (documentos.length !== 0) {
-            await this.setStateAsync({
-                tiposDocumentos: documentos,
-
-                loading: false
-            })
-        } else {
-            await this.setStateAsync({
-                msgLoading: "Se produjo un error un interno, intente nuevamente."
-            });
-        }
     }
 
     loadingDataId = async (id) => {
@@ -171,73 +156,7 @@ class ClienteProceso extends CustomComponent {
         }
     }
 
-    async handleAdd() {
-        const data = {
-            "idTipoDocumento": this.state.idTipoDocumento,
-            "documento": this.state.documento.toString().trim().toUpperCase(),
-            "informacion": this.state.informacion.trim().toUpperCase(),
-            "telefono": this.state.telefono.toString().trim().toUpperCase(),
-            "celular": this.state.celular.toString().trim().toUpperCase(),
-            "fechaNacimiento": this.state.fechaNacimiento,
-            "email": this.state.email.trim(),
-            "genero": this.state.genero,
-            "direccion": this.state.direccion.trim().toUpperCase(),
-            "idUbigeo": this.state.idUbigeo,
-            "estadoCivil": this.state.estadoCivil,
-            "predeterminado": this.state.predeterminado,
-            "estado": this.state.estado,
-            "observacion": this.state.observacion.trim().toUpperCase(),
-            "idUsuario": this.state.idUsuario
-        }
-
-        const response = await addCliente(data);
-
-        if (response instanceof SuccessReponse) {
-            alertSuccess("Cliente", response.data, () => {
-                this.props.history.goBack();
-            });
-        }
-
-        if (response instanceof ErrorResponse) {
-            alertWarning("Cliente", response.getMessage())
-        }
-    }
-
-    async handleEdit() {
-        const data = {
-            "idTipoDocumento": this.state.idTipoDocumento,
-            "documento": this.state.documento.toString().trim().toUpperCase(),
-            "informacion": this.state.informacion.trim().toUpperCase(),
-            "telefono": this.state.telefono.toString().trim().toUpperCase(),
-            "celular": this.state.celular.toString().trim().toUpperCase(),
-            "fechaNacimiento": this.state.fechaNacimiento,
-            "email": this.state.email.trim(),
-            "genero": this.state.genero,
-            "direccion": this.state.direccion.trim().toUpperCase(),
-            "idUbigeo": this.state.idUbigeo,
-            "estadoCivil": this.state.estadoCivil,
-            "predeterminado": this.state.predeterminado,
-            "estado": this.state.estado,
-            "observacion": this.state.observacion.trim().toUpperCase(),
-            "idUsuario": this.state.idUsuario,
-            "idCliente": this.state.idCliente
-        }
-
-        const response = await editCliente(data);
-
-        if (response instanceof SuccessReponse) {
-            alertSuccess("Cliente", response.data, () => {
-                this.props.history.goBack();
-            });
-        }
-
-        if (response instanceof ErrorResponse) {
-            alertWarning("Cliente", response.getMessage())
-        }
-
-    }
-
-    handleSave() {
+    handleEditarCliente = async () => {
         if (this.state.idTipoDocumento === "") {
             this.setState({ messageWarning: "Seleccione el tipo de documento." });
             this.handleFocusTab("datos-tab", "datos");
@@ -275,10 +194,35 @@ class ClienteProceso extends CustomComponent {
 
         alertInfo("Cliente", "Procesando información...");
 
-        if (this.state.idCliente !== '') {
-            this.handleEdit();
-        } else {
-            this.handleAdd();
+        const data = {
+            "idTipoDocumento": this.state.idTipoDocumento,
+            "documento": this.state.documento.toString().trim().toUpperCase(),
+            "informacion": this.state.informacion.trim().toUpperCase(),
+            "telefono": this.state.telefono.toString().trim().toUpperCase(),
+            "celular": this.state.celular.toString().trim().toUpperCase(),
+            "fechaNacimiento": this.state.fechaNacimiento,
+            "email": this.state.email.trim(),
+            "genero": this.state.genero,
+            "direccion": this.state.direccion.trim().toUpperCase(),
+            "idUbigeo": this.state.idUbigeo,
+            "estadoCivil": this.state.estadoCivil,
+            "predeterminado": this.state.predeterminado,
+            "estado": this.state.estado,
+            "observacion": this.state.observacion.trim().toUpperCase(),
+            "idUsuario": this.state.idUsuario,
+            "idCliente": this.state.idCliente
+        }
+
+        const response = await editCliente(data);
+
+        if (response instanceof SuccessReponse) {
+            alertSuccess("Cliente", response.data, () => {
+                this.props.history.goBack();
+            });
+        }
+
+        if (response instanceof ErrorResponse) {
+            alertWarning("Cliente", response.getMessage())
         }
     }
 
@@ -389,7 +333,7 @@ class ClienteProceso extends CustomComponent {
         }
     }
 
-    onEventSelectItem = async (value) => {
+    handleSelectItem = async (value) => {
         await this.setStateAsync({
             ubigeo: value.departamento + "-" + value.provincia + "-" + value.distrito + " (" + value.ubigeo + ")",
             filteredData: [],
@@ -398,7 +342,7 @@ class ClienteProceso extends CustomComponent {
         this.selectItem = true;
     }
 
-    onEventClearInput = async () => {
+    handleClearInput = async () => {
         await this.setStateAsync({ filteredData: [], idUbigeo: '', ubigeo: "" });
         this.selectItem = false;
     }
@@ -445,7 +389,7 @@ class ClienteProceso extends CustomComponent {
                         <div className="tab-content pt-2" id="myTabContent">
                             <div className="tab-pane fade show active" id="datos" role="tabpanel" aria-labelledby="datos-tab">
 
-                                <div className="form-row">
+                                <div className="row">
                                     <div className="form-group col-md-6">
                                         <label>Tipo Documento <i className="fa fa-asterisk text-danger small"></i></label>
                                         <select
@@ -553,7 +497,7 @@ class ClienteProceso extends CustomComponent {
                                     />
                                 </div>
 
-                                <div className="form-row">
+                                <div className="row">
                                     <div className="form-group col-md-6">
                                         <label>Genero <i className="fa fa-asterisk text-danger small"></i></label>
                                         <select
@@ -592,7 +536,7 @@ class ClienteProceso extends CustomComponent {
                                         placeholder='Ingrese alguna observación' />
                                 </div>
 
-                                <div className="form-row">
+                                <div className="row">
                                     <div className="form-group col-md-6">
                                         <label>Estado:</label>
                                         <div className="custom-control custom-switch">
@@ -623,41 +567,48 @@ class ClienteProceso extends CustomComponent {
 
                             <div className="tab-pane fade" id="contacto" role="tabpanel" aria-labelledby="contacto-tab">
 
-                                <div className="form-group">
-                                    <label>N° de Celular <i className="fa fa-asterisk text-danger small"></i></label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        value={this.state.celular}
-                                        ref={this.refCelular}
-                                        onChange={(event) => {
-                                            if (event.target.value.trim().length > 0) {
-                                                this.setState({
-                                                    celular: event.target.value,
-                                                    messageWarning: '',
-                                                });
-                                            } else {
-                                                this.setState({
-                                                    celular: event.target.value,
-                                                    messageWarning: 'Ingrese el número de celular.',
-                                                });
-                                            }
-                                        }}
-                                        onKeyPress={keyNumberPhone}
-                                        placeholder='Ingrese el número de celular.' />
+                                <div className="row">
+                                    <div className='col-md-6 col-12'>
+                                        <div className='form-group'>
+                                            <label>N° de Celular <i className="fa fa-asterisk text-danger small"></i></label>
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                value={this.state.celular}
+                                                ref={this.refCelular}
+                                                onChange={(event) => {
+                                                    if (event.target.value.trim().length > 0) {
+                                                        this.setState({
+                                                            celular: event.target.value,
+                                                            messageWarning: '',
+                                                        });
+                                                    } else {
+                                                        this.setState({
+                                                            celular: event.target.value,
+                                                            messageWarning: 'Ingrese el número de celular.',
+                                                        });
+                                                    }
+                                                }}
+                                                onKeyDown={keyNumberPhone}
+                                                placeholder='Ingrese el número de celular.' />
+                                        </div>
+                                    </div>
+
+                                    <div className='col-md-6 col-12'>
+                                        <div className="form-group">
+                                            <label>N° de Telefono</label>
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                value={this.state.telefono}
+                                                ref={this.refTelefono}
+                                                onChange={(event) => this.setState({ telefono: event.target.value, })}
+                                                onKeyDown={keyNumberPhone}
+                                                placeholder='Ingrese el número de telefono.' />
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <div className="form-group">
-                                    <label>N° de Telefono</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        value={this.state.telefono}
-                                        ref={this.refTelefono}
-                                        onChange={(event) => this.setState({ telefono: event.target.value, })}
-                                        onKeyPress={keyNumberPhone}
-                                        placeholder='Ingrese el número de telefono.' />
-                                </div>
 
                                 <div className="form-group">
                                     <label>E-Mail</label>
@@ -687,9 +638,9 @@ class ClienteProceso extends CustomComponent {
                                         refTxtUbigeo={this.refUbigeo}
                                         ubigeo={this.state.ubigeo}
                                         filteredData={this.state.filteredData}
-                                        onEventClearInput={this.onEventClearInput}
+                                        onEventClearInput={this.handleClearInput}
                                         handleFilter={this.handleFilter}
-                                        onEventSelectItem={this.onEventSelectItem}
+                                        onEventSelectItem={this.handleSelectItem}
                                     />
                                 </div>
 
@@ -701,7 +652,7 @@ class ClienteProceso extends CustomComponent {
 
                 <div className="row">
                     <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
-                        <button type="button" className="btn btn-primary mr-2" onClick={() => this.handleSave()}>Guardar</button>
+                        <button type="button" className="btn btn-primary mr-2" onClick={this.handleEditarCliente}>Guardar</button>
                         <button type="button" className="btn btn-danger" onClick={() => this.props.history.goBack()}>Cancelar</button>
                     </div>
                 </div>
@@ -717,4 +668,4 @@ const mapStateToProps = (state) => {
     }
 }
 
-export default connect(mapStateToProps, null)(ClienteProceso);
+export default connect(mapStateToProps, null)(ClienteEditar);

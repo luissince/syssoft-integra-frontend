@@ -67,30 +67,14 @@ class Banco {
         try {
             connection = await conec.beginTransaction();
 
-            let result = await conec.execute(connection, 'SELECT idBanco FROM banco');
-            let idBanco = "";
+            const result = await conec.execute(connection, 'SELECT idBanco FROM banco');
+            let idBanco = "BC0001";
+
             if (result.length != 0) {
-
-                let quitarValor = result.map(function (item) {
-                    return parseInt(item.idBanco.replace("BC", ''));
-                });
-
-                let valorActual = Math.max(...quitarValor);
-                let incremental = valorActual + 1;
-                let codigoGenerado = "";
-                if (incremental <= 9) {
-                    codigoGenerado = 'BC000' + incremental;
-                } else if (incremental >= 10 && incremental <= 99) {
-                    codigoGenerado = 'BC00' + incremental;
-                } else if (incremental >= 100 && incremental <= 999) {
-                    codigoGenerado = 'BC0' + incremental;
-                } else {
-                    codigoGenerado = 'BC' + incremental;
-                }
-
-                idBanco = codigoGenerado;
-            } else {
-                idBanco = "BC0001";
+                const quitarValor = result.map(item => parseInt(item.idBanco.replace("BC", '')));
+                const incremental = Math.max(...quitarValor) + 1;
+                const formattedIncremental = String(incremental).padStart(4, '0'); // Formatea el número con ceros a la izquierda si es necesario
+                idBanco = `BC${formattedIncremental}`;
             }
 
             await conec.execute(connection, `INSERT INTO banco(
@@ -304,7 +288,6 @@ class Banco {
             ])
 
             return { "lista": resultLista, "total": total[0].Total };
-
         } catch (error) {
             return 'Error interno de conexión, intente nuevamente.'
         }
@@ -363,7 +346,6 @@ class Banco {
             });
 
             return { "cabecera": cabecera[0], "lista": resultLista };
-
         } catch (error) {
             return 'Error interno de conexión, intente nuevamente.'
         }

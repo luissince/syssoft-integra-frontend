@@ -130,27 +130,27 @@ class Clientes extends CustomComponent {
         }
     }
 
-    onEventAdd() {
+    handleAgregarCliente() {
         this.props.history.push({
-            pathname: `${this.props.location.pathname}/proceso`
+            pathname: `${this.props.location.pathname}/agregar`
         })
     }
 
-    onEventDetail(idCliente) {
+    handleDetalleCliente(idCliente) {
         this.props.history.push({
             pathname: `${this.props.location.pathname}/detalle`,
             search: "?idCliente=" + idCliente
         })
     }
 
-    onEventEdit(idCliente) {
+    handleEditarCliente(idCliente) {
         this.props.history.push({
-            pathname: `${this.props.location.pathname}/proceso`,
+            pathname: `${this.props.location.pathname}/editar`,
             search: "?idCliente=" + idCliente
         })
     }
 
-    onEventDelete(idCliente) {
+    handleRemoverCliente(idCliente) {
         alertDialog("Eliminar cliente", "¿Está seguro de que desea eliminar el contacto? Esta operación no se puede deshacer.", async (value) => {
             if (value) {
                 alertInfo("Cliente", "Procesando información...")
@@ -207,7 +207,7 @@ class Clientes extends CustomComponent {
 
                     <div className="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">
                         <div className="form-group">
-                            <button className="btn btn-outline-info" onClick={() => this.onEventAdd()} disabled={!this.state.add}>
+                            <button className="btn btn-outline-info" onClick={() => this.handleAgregarCliente()} disabled={!this.state.add}>
                                 <i className="bi bi-file-plus"></i> Nuevo Registro
                             </button>
                             {" "}
@@ -272,7 +272,7 @@ class Clientes extends CustomComponent {
                                                             <button
                                                                 className="btn btn-outline-info btn-sm"
                                                                 title="Editar"
-                                                                onClick={() => this.onEventDetail(item.idCliente)}
+                                                                onClick={() => this.handleDetalleCliente(item.idCliente)}
                                                                 disabled={!this.state.view}>
                                                                 <i className="bi bi-eye"></i>
                                                             </button>
@@ -281,7 +281,7 @@ class Clientes extends CustomComponent {
                                                             <button
                                                                 className="btn btn-outline-warning btn-sm"
                                                                 title="Editar"
-                                                                onClick={() => this.onEventEdit(item.idCliente)}
+                                                                onClick={() => this.handleEditarCliente(item.idCliente)}
                                                                 disabled={!this.state.edit}>
                                                                 <i className="bi bi-pencil"></i>
                                                             </button>
@@ -290,7 +290,7 @@ class Clientes extends CustomComponent {
                                                             <button
                                                                 className="btn btn-outline-danger btn-sm"
                                                                 title="Editar"
-                                                                onClick={() => this.onEventDelete(item.idCliente)}
+                                                                onClick={() => this.handleRemoverCliente(item.idCliente)}
                                                                 disabled={!this.state.remove}>
                                                                 <i className="bi bi-trash">
                                                                 </i></button>

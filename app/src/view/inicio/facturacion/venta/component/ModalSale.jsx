@@ -164,7 +164,7 @@ const ModalSale = (props) => {
 
     return (
         <div className="modal fade" id="modalVentaProceso" data-bs-keyboard="false" data-bs-backdrop="static">
-            <div className="modal-dialog modal-md modal-dialog-centered">
+            <div className="modal-dialog modal-lg modal-dialog-centered">
                 <div className="modal-content">
                     <div className="modal-header">
                         <h6 className="modal-title">Completar Venta</h6>
@@ -199,7 +199,7 @@ const ModalSale = (props) => {
                         </div>
 
                         <div className="row">
-                            <div className="col-md-4 col-sm-4">
+                            <div className="col-md-3 col-sm-3">
                                 <button className={`btn ${selectTipoPago === 1 ? "btn-primary" : "btn-light"} btn-block`}
                                     type="button"
                                     title="Pago al contado"
@@ -216,7 +216,7 @@ const ModalSale = (props) => {
                                 </button>
                             </div>
 
-                            <div className="col-md-4 col-sm-4">
+                            <div className="col-md-3 col-sm-3">
                                 <button className={`btn ${selectTipoPago === 2 ? "btn-primary" : "btn-light"} btn-block`}
                                     type="button"
                                     title="Pago al credito"
@@ -233,7 +233,7 @@ const ModalSale = (props) => {
                                 </button>
                             </div>
 
-                            <div className="col-md-4 col-sm-4">
+                            <div className="col-md-3 col-sm-3">
                                 <button className={`btn ${selectTipoPago === 3 ? "btn-primary" : "btn-light"} btn-block`}
                                     type="button"
                                     title="Pago al credito"
@@ -246,6 +246,23 @@ const ModalSale = (props) => {
                                     </div>
                                     <div className="text-center">
                                         <label>Crédito variable</label>
+                                    </div>
+                                </button>
+                            </div>
+
+                            <div className="col-md-3 col-sm-3">
+                                <button className={`btn ${selectTipoPago === 4 ? "btn-primary" : "btn-light"} btn-block`}
+                                    type="button"
+                                    title="Pago al credito"
+                                    onClick={() => handleSelectTipoPago(4)}
+                                >
+                                    <div className="row">
+                                        <div className="col-md-12">
+                                            <i className="bi bi-columns-gap fa-2x"></i>
+                                        </div>
+                                    </div>
+                                    <div className="text-center">
+                                        <label>Pago Adelantado</label>
                                     </div>
                                 </button>
                             </div>

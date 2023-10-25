@@ -148,27 +148,13 @@ class Cliente {
             }
 
             const result = await conec.execute(connection, 'SELECT idCliente FROM cliente');
-            let idCliente = "";
+            let idCliente = "CL0001";
+
             if (result.length != 0) {
-                const quitarValor = result.map(function (item) {
-                    return parseInt(item.idCliente.replace("CL", ''));
-                });
-
+                const quitarValor = result.map(item => parseInt(item.idCliente.replace("CL", '')));
                 const incremental = Math.max(...quitarValor) + 1;
-                let codigoGenerado = "";
-                if (incremental <= 9) {
-                    codigoGenerado = 'CL000' + incremental;
-                } else if (incremental >= 10 && incremental <= 99) {
-                    codigoGenerado = 'CL00' + incremental;
-                } else if (incremental >= 100 && incremental <= 999) {
-                    codigoGenerado = 'CL0' + incremental;
-                } else {
-                    codigoGenerado = 'CL' + incremental;
-                }
-
-                idCliente = codigoGenerado;
-            } else {
-                idCliente = "CL0001";
+                const formattedIncremental = String(incremental).padStart(4, '0'); // Formatea el número con ceros a la izquierda si es necesario
+                idBanco = `CL${formattedIncremental}`;
             }
 
             if (req.body.predeterminado) {
@@ -396,10 +382,6 @@ class Cliente {
 
     async listsearch(req) {
         try {
-            /* El código anterior es un fragmento de código JavaScript. Comienza con la declaración de
-            una variable constante usando la palabra clave `const`. Sin embargo, el fragmento de
-            código está incompleto y no proporciona más información sobre para qué se asigna o se
-            utiliza la variable constante. */
             const result = await conec.query(`
             SELECT 
             idCliente, 
@@ -546,99 +528,13 @@ class Cliente {
                     venta.idVenta
                 ]);
 
-                // for(const detalle of detalles){
-                //     const cobros = await conec.query(`SELECT
-                //     IFNULL(co.idConcepto,'CV01') AS idConcepto,
-                //     IFNULL(co.nombre,'PRODUCTO') AS concepto,
-                //     'INGRESO' AS tipo,
-                //     b.idBanco,
-                //     b.nombre,
-                //     CASE 
-                //     WHEN b.tipoCuenta = 1 THEN 'Banco'
-                //     WHEN b.tipoCuenta = 2 THEN 'Tarjeta'
-                //     ELSE 'Efectivo' END AS 'tipoCuenta',
-                //     IFNULL(SUM(cd.precio*cd.cantidad),SUM(cv.precio)) AS monto
-                //     FROM cobro as c
-                //     LEFT JOIN banco AS b ON c.idBanco = b.idBanco
-                //     LEFT JOIN cobroDetalle AS cd ON c.idCobro = cd.idCobro
-                //     LEFT JOIN concepto AS co ON co.idConcepto = cd.idConcepto
-                //     LEFT JOIN cobroVenta AS cv ON cv.idCobro = c.idCobro
-                //     LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro
-                //     WHERE 
-                //     c.idProcedencia = ? AND c.estado = 1 AND nc.idNotaCredito IS NULL
-                //     OR
-                //     c.idProcedencia = ? AND c.estado = 1 AND nc.idNotaCredito IS NULL
-                //     GROUP BY c.idCobro`,[
-                //         venta.idVenta,
-                //         detalle.idProducto 
-                //     ]);
-                // }
-
                 newVentas.push({
                     ...venta,
                     "detalle": detalle
                 });
             }
-
-            // console.log(newVentas);
-
             return newVentas;
-            // if (req.query.idCliente !== "") {
-            //     let lista = await conec.query(`SELECT 
-            //     c.idCobro, 
-            //     co.nombre as comprobante,
-            //     c.serie,
-            //     c.numeracion,
-            //     CASE 
-            //     WHEN cn.idConcepto IS NOT NULL THEN cn.nombre
-            //     ELSE CONCAT(cp.nombre,': ',v.serie,'-',v.numeracion) END AS detalle,
-            //     m.simbolo,
-            //     b.nombre as banco,  
-            //     c.observacion, 
-            //     DATE_FORMAT(c.fecha,'%d/%m/%Y') as fecha, 
-            //     c.hora,
-            //     IFNULL(SUM(cd.precio*cd.cantidad),SUM(cv.precio)) AS monto
-            //     FROM cobro AS c
-            //     INNER JOIN cliente AS cl ON c.idCliente = cl.idCliente
-            //     INNER JOIN banco AS b ON c.idBanco = b.idBanco
-            //     INNER JOIN moneda AS m ON c.idMoneda = m.idMoneda 
-            //     INNER JOIN comprobante AS co ON co.idComprobante = c.idComprobante
-            //     LEFT JOIN cobroDetalle AS cd ON c.idCobro = cd.idCobro
-            //     LEFT JOIN concepto AS cn ON cd.idConcepto = cn.idConcepto 
-            //     LEFT JOIN cobroVenta AS cv ON cv.idCobro = c.idCobro 
-            //     LEFT JOIN venta AS v ON cv.idVenta = v.idVenta 
-            //     LEFT JOIN comprobante AS cp ON v.idComprobante = cp.idComprobante
-            //     LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro
-            //     WHERE c.idCliente = ? AND c.estado = 1 AND nc.idNotaCredito IS NULL
-            //     AND (c.fecha BETWEEN ? AND ?)
-            //     GROUP BY c.idCobro
-            //     ORDER BY c.fecha DESC,c.hora DESC`, [
-            //         req.query.idCliente,
-            //         req.query.fechaIni,
-            //         req.query.fechaFin
-            //     ]);
-
-            //     return lista;
-            // } else {
-            //     let lista = await conec.query(`SELECT
-            //     c.idCliente,
-            //     c.documento,
-            //     c.informacion,
-            //     (SELECT IFNULL(SUM(cd.precio*cd.cantidad),0) FROM cobroDetalle AS cd WHERE cd.idCobro = co.idCobro) AS ingresos,
-            //     (SELECT IFNULL(SUM(cv.precio),0) FROM cobroVenta AS cv WHERE cv.idCobro = co.idCobro) AS ventas
-            //     FROM cobro AS co
-            //     INNER JOIN cliente AS c ON c.idCliente = co.idCliente
-            //     LEFT JOIN notaCredito AS nc ON nc.idCobro = co.idCobro
-            //     WHERE 
-            //     co.fecha BETWEEN ? AND ? AND co.estado = 1 AND nc.idNotaCredito IS NULL`, [
-            //         req.query.fechaIni,
-            //         req.query.fechaFin
-            //     ]);
-
-            //     return lista;
-            // }
         } catch (error) {
-            console.error(error);
             return "Se produjo un error de servidor, intente nuevamente.";
         }
     }

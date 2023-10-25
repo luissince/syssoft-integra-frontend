@@ -325,7 +325,16 @@ export function keyNumberPhone(event) {
   // Verifica si el carácter ya existe en el valor actual del campo
   const charAlreadyExists = inputValue.includes(key);
 
-  if (!isDigitOrAllowedChar || (key === "-" && charAlreadyExists)) {
+
+  if (key === "-" && charAlreadyExists) {
+    event.preventDefault();
+  }
+
+  if (key === "+" && charAlreadyExists) {
+    event.preventDefault();
+  }
+
+  if (!(isDigitOrAllowedChar || key === "Backspace" || key === "Delete" || key === "ArrowLeft" || key === "ArrowRight" || key === "Tab")) {
     event.preventDefault();
   }
 }

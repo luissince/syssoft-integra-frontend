@@ -63,7 +63,7 @@ class Menu extends React.Component {
                         <ul className="app-notification dropdown-menu dropdown-menu-right">
                             <div className="app-notification__content">
                                 {
-                                    this.props.notificaciones.length != 0 ?
+                                    this.props.notificaciones.length !== 0 ?
                                         this.props.notificaciones.map((item, index) => (
                                             <li key={index}>
                                                 <div className="app-notification__item">
