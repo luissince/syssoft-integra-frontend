@@ -395,6 +395,8 @@ class VentaProceso extends CustomComponent {
         this.handleModalOptions();
     }
 
+    handle
+
     handleClearInputClient = async () => {
         await this.setStateAsync({ clientes: [], idCliente: '', cliente: "" });
         this.selectItemClient = false;
