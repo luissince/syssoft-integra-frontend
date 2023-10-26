@@ -44,7 +44,7 @@ class Cobro {
 
             IFNULL(SUM(cd.precio*cd.cantidad),SUM(cv.precio)) AS monto
             FROM cobro AS c
-            INNER JOIN cliente AS cl ON c.idCliente = cl.idCliente
+            INNER JOIN clienteNatural AS cl ON c.idCliente = cl.idCliente
             INNER JOIN banco AS b ON c.idBanco = b.idBanco
             INNER JOIN moneda AS m ON c.idMoneda = m.idMoneda 
             INNER JOIN comprobante AS co ON co.idComprobante = c.idComprobante
@@ -106,7 +106,7 @@ class Cobro {
 
             const total = await conec.query(`SELECT COUNT(*) AS Total        
             FROM cobro AS c
-            INNER JOIN cliente AS cl ON c.idCliente = cl.idCliente
+            INNER JOIN clienteNatural AS cl ON c.idCliente = cl.idCliente
             INNER JOIN banco AS b ON c.idBanco = b.idBanco
             INNER JOIN moneda AS m ON c.idMoneda = m.idMoneda 
             LEFT JOIN notaCredito AS nc ON nc.idCobro = c.idCobro AND nc.estado = 1
@@ -1158,7 +1158,7 @@ class Cobro {
             IFNULL(SUM(cb.precio*cb.cantidad),SUM(cv.precio)) AS monto
     
             FROM cobro AS c
-            INNER JOIN cliente AS cl ON c.idCliente = cl.idCliente
+            INNER JOIN clienteNatural AS cl ON c.idCliente = cl.idCliente
             INNER JOIN usuario AS us ON us.idUsuario = c.idUsuario
             INNER JOIN tipoDocumento AS td ON td.idTipoDocumento = cl.idTipoDocumento 
             INNER JOIN banco AS b ON c.idBanco = b.idBanco
@@ -1237,7 +1237,7 @@ class Cobro {
             m.nombre as moneda
             FROM venta AS v 
             INNER JOIN moneda AS m ON m.idMoneda  = v.idMoneda 
-            INNER JOIN cliente AS c ON c.idCliente = v.idCliente
+            INNER JOIN clienteNatural AS c ON c.idCliente = v.idCliente
             WHERE v.idVenta = ?`, [
                 req.query.idVenta
             ]);
@@ -1692,7 +1692,7 @@ class Cobro {
                     u.apellidos,
                     s.nombre AS nombreSucursal
                     FROM cobro AS c
-                    INNER JOIN cliente AS cl ON c.idCliente = cl.idCliente
+                    INNER JOIN clienteNatural AS cl ON c.idCliente = cl.idCliente
                     INNER JOIN banco AS b ON c.idBanco = b.idBanco
                     INNER JOIN moneda AS m ON c.idMoneda = m.idMoneda 
                     INNER JOIN comprobante AS co ON co.idComprobante = c.idComprobante
@@ -1789,7 +1789,7 @@ class Cobro {
                     IFNULL(SUM(gd.precio*gd.cantidad),0) AS monto,
                     s.nombre AS nombreSucursal
                     FROM gasto AS g          
-                    INNER JOIN cliente AS cl ON g.idCliente = cl.idCliente 
+                    INNER JOIN clienteNatural AS cl ON g.idCliente = cl.idCliente 
                     INNER JOIN banco AS b ON g.idBanco = b.idBanco
                     INNER JOIN moneda AS m ON g.idMoneda = m.idMoneda     
                     INNER JOIN comprobante AS co ON co.idComprobante = g.idComprobante   
@@ -2109,7 +2109,7 @@ class Cobro {
 
             const total = await conec.query(`SELECT COUNT(*) AS Total 
             FROM cobro AS v 
-            INNER JOIN cliente AS c ON v.idCliente = c.idCliente
+            INNER JOIN clienteNatural AS c ON v.idCliente = c.idCliente
             INNER JOIN comprobante as co ON v.idComprobante = co.idComprobante
             INNER JOIN moneda AS m ON v.idMoneda = m.idMoneda
             WHERE 
@@ -2121,7 +2121,7 @@ class Cobro {
 
             SELECT COUNT(*) AS Total 
             FROM notaCredito AS nc 
-            INNER JOIN cliente AS c ON nc.idCliente = c.idCliente
+            INNER JOIN clienteNatural AS c ON nc.idCliente = c.idCliente
             INNER JOIN comprobante as co ON nc.idComprobante = co.idComprobante
             INNER JOIN moneda AS m ON nc.idMoneda = m.idMoneda
             WHERE 
@@ -2158,7 +2158,7 @@ class Cobro {
             m.codiso
 
             FROM cobro AS c
-            INNER JOIN cliente AS cl ON c.idCliente = cl.idCliente
+            INNER JOIN clienteNatural AS cl ON c.idCliente = cl.idCliente
             INNER JOIN tipoDocumento AS td ON td.idTipoDocumento = cl.idTipoDocumento 
             INNER JOIN moneda AS m ON c.idMoneda = m.idMoneda
             INNER JOIN comprobante AS co ON co.idComprobante = c.idComprobante

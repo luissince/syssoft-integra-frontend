@@ -20,7 +20,7 @@ class Cliente {
                 c.direccion,
                 c.predeterminado,
                 c.estado
-                FROM cliente AS c
+                FROM clienteNatural AS c
                 INNER JOIN tipoDocumento AS td ON td.idTipoDocumento = c.idTipoDocumento                
                 WHERE 
                 ? = 0 
@@ -52,7 +52,7 @@ class Cliente {
             });
 
             const total = await conec.query(`SELECT COUNT(*) AS Total 
-                FROM cliente AS c
+                FROM clienteNatural AS c
                 INNER JOIN tipoDocumento AS td ON td.idTipoDocumento = c.idTipoDocumento               
                 WHERE 
                 ? = 0 
@@ -138,7 +138,7 @@ class Cliente {
         try {
             connection = await conec.beginTransaction();
 
-            const validate = await conec.execute(connection, `SELECT * FROM cliente WHERE documento = ?`, [
+            const validate = await conec.execute(connection, `SELECT * FROM clienteNatural WHERE documento = ?`, [
                 req.body.documento,
             ]);
 
@@ -147,7 +147,7 @@ class Cliente {
                 return `El número de documento a ingresar ya se encuentre registrado con los datos de ${validate[0].informacion}`;
             }
 
-            const result = await conec.execute(connection, 'SELECT idCliente FROM cliente');
+            const result = await conec.execute(connection, 'SELECT idCliente FROM clienteNatural');
             let idCliente = "CL0001";
 
             if (result.length != 0) {
@@ -158,10 +158,10 @@ class Cliente {
             }
 
             if (req.body.predeterminado) {
-                await conec.execute(connection, `UPDATE cliente SET predeterminado = 0`);
+                await conec.execute(connection, `UPDATE clienteNatural SET predeterminado = 0`);
             }
 
-            await conec.execute(connection, `INSERT INTO cliente(
+            await conec.execute(connection, `INSERT INTO clienteNatural(
             idCliente, 
             idTipoDocumento,
             documento,
@@ -237,7 +237,7 @@ class Cliente {
             cl.predeterminado,
             cl.estado, 
             cl.observacion
-            FROM cliente AS cl 
+            FROM clienteNatural AS cl 
             LEFT JOIN ubigeo AS u ON u.idUbigeo = cl.idUbigeo
             WHERE 
             cl.idCliente = ?`, [
@@ -259,7 +259,7 @@ class Cliente {
         try {
             connection = await conec.beginTransaction();
 
-            const validate = await conec.execute(connection, `SELECT * FROM cliente WHERE idCliente <> ? AND documento = ?`, [
+            const validate = await conec.execute(connection, `SELECT * FROM clienteNatural WHERE idCliente <> ? AND documento = ?`, [
                 req.body.idCliente,
                 req.body.documento,
             ]);
@@ -270,10 +270,10 @@ class Cliente {
             }
 
             if (req.body.predeterminado) {
-                await conec.execute(connection, `UPDATE cliente SET predeterminado = 0`);
+                await conec.execute(connection, `UPDATE clienteNatural SET predeterminado = 0`);
             }
 
-            await conec.execute(connection, `UPDATE cliente SET
+            await conec.execute(connection, `UPDATE clienteNatural SET
                 idTipoDocumento=?, 
                 documento=?,
                 informacion=?, 
@@ -357,7 +357,7 @@ class Cliente {
                 return 'No se puede eliminar el cliente ya que esta ligada a una venta.';
             }
 
-            await conec.execute(connection, `DELETE FROM cliente WHERE idCliente  = ?`, [
+            await conec.execute(connection, `DELETE FROM clienteNatural WHERE idCliente  = ?`, [
                 req.query.idCliente
             ]);
 
@@ -373,7 +373,7 @@ class Cliente {
 
     async listcombo(req) {
         try {
-            const result = await conec.query('SELECT idCliente, documento, informacion FROM cliente');
+            const result = await conec.query('SELECT idCliente, documento, informacion FROM clienteNatural');
             return result;
         } catch (error) {
             return "Se produjo un error de servidor, intente nuevamente.";
@@ -387,7 +387,7 @@ class Cliente {
             idCliente, 
             documento, 
             informacion
-            FROM cliente
+            FROM clienteNatural
             WHERE 
             documento LIKE CONCAT('%',?,'%')
             OR 
@@ -408,7 +408,7 @@ class Cliente {
             idCliente, 
             documento, 
             informacion
-            FROM cliente
+            FROM clienteNatural
             WHERE predeterminado = 1`);
             if (result.length !== 0) {
                 return result[0];
@@ -451,7 +451,7 @@ class Cliente {
             FROM venta AS v 
             INNER JOIN moneda AS m ON m.idMoneda = v.idMoneda
             INNER JOIN comprobante AS cm ON v.idComprobante = cm.idComprobante 
-            INNER JOIN cliente AS cl ON v.idCliente = cl.idCliente 
+            INNER JOIN clienteNatural AS cl ON v.idCliente = cl.idCliente 
             LEFT JOIN ventaDetalle AS vd ON vd.idVenta = v.idVenta 
             WHERE  
             ? = 1 AND v.estado = 2 AND v.idSucursal = ?
@@ -555,7 +555,7 @@ class Cliente {
                 c.email,
                 c.direccion
                 from 
-                cliente as c 
+                clienteNatural as c 
                 inner join tipoDocumento as tp on tp.idTipoDocumento = c.idTipoDocumento
                 where c.idCliente = ?`, [
                 req.query.idCliente,
@@ -633,7 +633,7 @@ class Cliente {
             INNER JOIN cobro AS c ON cd.idCobro = c.idCobro
             INNER JOIN moneda AS m ON c.idMoneda = m.idMoneda
             INNER JOIN comprobante as com on com.idComprobante = c.idComprobante
-            INNER JOIN cliente AS cl ON c.idCliente = cl.idCliente
+            INNER JOIN clienteNatural AS cl ON c.idCliente = cl.idCliente
             INNER JOIN concepto AS co ON cd.idConcepto = co.idConcepto
             WHERE cl.idCliente = ? AND co.idConcepto = ?
             ORDER BY c.fecha DESC, c.hora DESC`, [
@@ -724,7 +724,7 @@ class Cliente {
                 mo.codiso,
                 SUM(vd.cantidad * vd.precio) AS monto
                 FROM venta AS v 
-                INNER JOIN cliente AS cl ON cl.idCliente = v.idCliente
+                INNER JOIN clienteNatural AS cl ON cl.idCliente = v.idCliente
                 INNER JOIN moneda AS mo ON mo.idMoneda = v.idMoneda
                 INNER JOIN ventaDetalle AS vd ON vd.idVenta = v.idVenta
                 INNER JOIN producto AS lo ON vd.idProducto = lo.idProducto

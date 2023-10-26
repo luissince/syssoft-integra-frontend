@@ -675,7 +675,7 @@ class Producto {
                     c.informacion,
                     a.estado
                     FROM asociado AS a
-                    INNER JOIN cliente AS c ON a.idCliente = c.idCliente
+                    INNER JOIN clienteNatural AS c ON a.idCliente = c.idCliente
                     WHERE a.idVenta = ?`, [
                     venta[0].idVenta
                 ]);
@@ -699,7 +699,7 @@ class Producto {
                     c.hora,
                     IFNULL(SUM(cd.precio*cd.cantidad),SUM(cv.precio)) AS monto
                     FROM cobro AS c
-                    INNER JOIN cliente AS cl ON c.idCliente = cl.idCliente
+                    INNER JOIN clienteNatural AS cl ON c.idCliente = cl.idCliente
                     INNER JOIN banco AS b ON c.idBanco = b.idBanco
                     INNER JOIN moneda AS m ON c.idMoneda = m.idMoneda 
                     INNER JOIN comprobante AS co ON co.idComprobante = c.idComprobante
@@ -771,7 +771,7 @@ class Producto {
                 m.nombre AS categoria
                 FROM venta AS v
                 INNER JOIN asociado AS a ON a.idVenta = v.idVenta
-                INNER JOIN cliente AS c ON a.idCliente = c.idCliente
+                INNER JOIN clienteNatural AS c ON a.idCliente = c.idCliente
                 INNER JOIN ventaDetalle AS vd ON v.idVenta = vd.idVenta
                 INNER JOIN producto AS l ON l.idProducto = vd.idProducto
                 INNER JOIN categoria AS m ON m.idCategoria = l.idCategoria
@@ -907,7 +907,7 @@ class Producto {
             FROM venta AS v 
             INNER JOIN moneda AS m ON m.idMoneda = v.idMoneda
             INNER JOIN comprobante AS cm ON v.idComprobante = cm.idComprobante 
-            INNER JOIN cliente AS cl ON v.idCliente = cl.idCliente 
+            INNER JOIN clienteNatural AS cl ON v.idCliente = cl.idCliente 
             INNER JOIN ventaDetalle AS vd ON vd.idVenta = v.idVenta 
             INNER JOIN producto AS lo ON vd.idProducto = lo.idProducto 
             INNER JOIN categoria AS ma ON lo.idCategoria = ma.idCategoria 

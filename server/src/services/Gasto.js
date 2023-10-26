@@ -21,7 +21,7 @@ class Gasto {
                 g.hora,
                 IFNULL(SUM(gd.precio*gd.cantidad),0) AS monto
                 FROM gasto AS g          
-                LEFT JOIN cliente AS cl ON g.idCliente = cl.idCliente 
+                LEFT JOIN clienteNatural AS cl ON g.idCliente = cl.idCliente 
                 INNER JOIN banco AS b ON g.idBanco = b.idBanco
                 INNER JOIN moneda AS m ON g.idMoneda = m.idMoneda     
                 INNER JOIN comprobante AS co ON co.idComprobante = g.idComprobante       
@@ -54,7 +54,7 @@ class Gasto {
 
             let total = await conec.query(`SELECT COUNT(*) AS Total 
                 FROM gasto AS g
-                LEFT JOIN cliente AS cl ON g.idCliente = cl.idCliente 
+                LEFT JOIN clienteNatural AS cl ON g.idCliente = cl.idCliente 
                 INNER JOIN banco AS b ON g.idBanco = b.idBanco
                 INNER JOIN moneda AS m ON g.idMoneda = m.idMoneda 
                 WHERE 
@@ -246,7 +246,7 @@ class Gasto {
             IFNULL(SUM(gd.precio*gd.cantidad), 0) AS monto
     
             FROM gasto AS g
-            LEFT JOIN cliente AS cl ON g.idCliente = cl.idCliente
+            LEFT JOIN clienteNatural AS cl ON g.idCliente = cl.idCliente
             LEFT JOIN tipoDocumento AS td ON td.idTipoDocumento = cl.idTipoDocumento
             INNER JOIN usuario AS us ON g.idUsuario = us.idUsuario
             INNER JOIN moneda AS m ON g.idMoneda = m.idMoneda

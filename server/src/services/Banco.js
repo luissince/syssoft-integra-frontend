@@ -252,10 +252,10 @@ class Banco {
             FROM bancoDetalle AS bd 
             INNER JOIN banco AS b ON b.idBanco = bd.idBanco
             LEFT JOIN cobro AS c ON c.idCobro = bd.idProcedencia     
-            LEFT JOIN cliente AS cl ON cl.idCliente = c.idCliente
+            LEFT JOIN clienteNatural AS cl ON cl.idCliente = c.idCliente
             LEFT JOIN comprobante AS cc ON cc.idComprobante = c.idComprobante
             LEFT JOIN gasto AS g ON g.idGasto = bd.idProcedencia
-            LEFT JOIN cliente AS cf ON cf.idCliente = g.idCliente
+            LEFT JOIN clienteNatural AS cf ON cf.idCliente = g.idCliente
             LEFT JOIN comprobante AS cg ON cg.idComprobante = g.idComprobante
             
             WHERE bd.idBanco = ?
@@ -278,10 +278,10 @@ class Banco {
             FROM bancoDetalle AS bd 
             INNER JOIN banco AS b ON b.idBanco = bd.idBanco
             LEFT JOIN cobro AS c ON c.idCobro = bd.idProcedencia     
-            LEFT JOIN cliente AS cl ON cl.idCliente = c.idCliente
+            LEFT JOIN clienteNatural AS cl ON cl.idCliente = c.idCliente
             LEFT JOIN comprobante AS cc ON cc.idComprobante = c.idComprobante
             LEFT JOIN gasto AS g ON g.idGasto = bd.idProcedencia
-            LEFT JOIN cliente AS cf ON cf.idCliente = g.idCliente
+            LEFT JOIN clienteNatural AS cf ON cf.idCliente = g.idCliente
             LEFT JOIN comprobante AS cg ON cg.idComprobante = g.idComprobante            
             WHERE bd.idBanco = ?`, [
                 req.query.idBanco
@@ -326,10 +326,10 @@ class Banco {
             FROM bancoDetalle AS bd 
             INNER JOIN banco AS b ON b.idBanco = bd.idBanco
             LEFT JOIN cobro AS c ON c.idCobro = bd.idProcedencia     
-            LEFT JOIN cliente AS cl ON cl.idCliente = c.idCliente
+            LEFT JOIN clienteNatural AS cl ON cl.idCliente = c.idCliente
             LEFT JOIN comprobante AS cc ON cc.idComprobante = c.idComprobante
             LEFT JOIN gasto AS g ON g.idGasto = bd.idProcedencia
-            LEFT JOIN cliente AS cf ON cf.idCliente = g.idCliente
+            LEFT JOIN clienteNatural AS cf ON cf.idCliente = g.idCliente
             LEFT JOIN comprobante AS cg ON cg.idComprobante = g.idComprobante
             
             WHERE bd.idBanco = ?

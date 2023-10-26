@@ -30,7 +30,7 @@ class Factura {
                 m.simbolo,
                 IFNULL(SUM(vd.precio*vd.cantidad),0) AS total
                 FROM venta AS v 
-                INNER JOIN cliente AS c ON v.idCliente = c.idCliente
+                INNER JOIN clienteNatural AS c ON v.idCliente = c.idCliente
                 INNER JOIN comprobante AS co ON v.idComprobante = co.idComprobante
                 INNER JOIN moneda AS m ON v.idMoneda = m.idMoneda
                 LEFT JOIN ventaDetalle AS vd ON vd.idVenta = v.idVenta
@@ -86,7 +86,7 @@ class Factura {
 
             const total = await conec.query(`SELECT COUNT(*) AS Total 
                 FROM venta AS v 
-                INNER JOIN cliente AS c ON v.idCliente = c.idCliente
+                INNER JOIN clienteNatural AS c ON v.idCliente = c.idCliente
                 INNER JOIN comprobante as co ON v.idComprobante = co.idComprobante
                 INNER JOIN moneda AS m ON v.idMoneda = m.idMoneda
                 WHERE 
@@ -1323,7 +1323,7 @@ class Factura {
 
             IFNULL(SUM(vd.precio*vd.cantidad),0) AS monto
             FROM venta AS v 
-            INNER JOIN cliente AS c ON v.idCliente = c.idCliente
+            INNER JOIN clienteNatural AS c ON v.idCliente = c.idCliente
             INNER JOIN usuario AS us ON us.idUsuario = v.idUsuario 
             INNER JOIN tipoDocumento AS td ON td.idTipoDocumento = c.idTipoDocumento 
             INNER JOIN comprobante AS com ON v.idComprobante = com.idComprobante
@@ -1512,7 +1512,7 @@ class Factura {
 
             IFNULL(SUM(vd.precio*vd.cantidad),0) AS monto
             FROM venta AS v 
-            INNER JOIN cliente AS c ON v.idCliente = c.idCliente
+            INNER JOIN clienteNatural AS c ON v.idCliente = c.idCliente
             INNER JOIN tipoDocumento AS td ON td.idTipoDocumento = c.idTipoDocumento 
             INNER JOIN comprobante AS com ON v.idComprobante = com.idComprobante
             INNER JOIN moneda AS m ON m.idMoneda = v.idMoneda
@@ -1594,7 +1594,7 @@ class Factura {
             FROM venta AS v 
             INNER JOIN moneda AS m ON m.idMoneda = v.idMoneda
             INNER JOIN comprobante AS cm ON v.idComprobante = cm.idComprobante 
-            INNER JOIN cliente AS cl ON v.idCliente = cl.idCliente 
+            INNER JOIN clienteNatural AS cl ON v.idCliente = cl.idCliente 
             LEFT JOIN ventaDetalle AS vd ON vd.idVenta = v.idVenta 
             WHERE  
             v.idVenta = ?
@@ -1750,7 +1750,7 @@ class Factura {
             FROM venta AS v 
             INNER JOIN moneda AS m ON m.idMoneda = v.idMoneda
             INNER JOIN comprobante AS cm ON v.idComprobante = cm.idComprobante 
-            INNER JOIN cliente AS cl ON v.idCliente = cl.idCliente 
+            INNER JOIN clienteNatural AS cl ON v.idCliente = cl.idCliente 
             LEFT JOIN ventaDetalle AS vd ON vd.idVenta = v.idVenta 
             WHERE  
             v.idVenta = ?
