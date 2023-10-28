@@ -24,7 +24,6 @@ class RepFinanciero extends React.Component {
             idBanco: '',
             bancos: [],
 
-            idSucursal: '',
             idComprobante: '',
             comprobantes: [],
             comprobanteCheck: true,

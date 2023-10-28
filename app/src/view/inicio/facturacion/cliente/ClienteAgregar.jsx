@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+    alertDialog,
     currentDate,
     keyNumberPhone,
     keyNumberInteger,
@@ -28,25 +29,34 @@ class ClienteAgregar extends CustomComponent {
             tipo: 1,
             // persona natural
             idTipoDocumentoPn: '',
-            documento: '',
-            informacion: '',
-            telefono: '',
-            celular: '',
+            documentoPn: '',
+            informacionPn: '',
+            telefonoPn: '',
+            celularPn: '',
             fechaNacimiento: currentDate(),
-            email: '',
+            emailPn: '',
             genero: '',
-            direccion: '',
+            direccionPn: '',
 
-            idUbigeo: '',
-            ubigeo: '',
+            idUbigeoPn: '',
+            ubigeoPn: '',
 
             estadoCivil: '',
             predeterminado: false,
-            estado: true,
+            estadoPn: true,
             observacion: '',
 
             // persona juridica
             idTipoDocumentoPj: '',
+            documentoPj: '',
+            informacionPj: '',
+            telefonoPj: '',
+            celularPj: '',
+            emailPj: '',
+            direccionPj: '',
+            idUbigeoPj: '',
+            ubigeoPj: '',
+            estadoPj: true,
 
             // otros datos
             idUsuario: this.props.token.userToken.idUsuario,
@@ -63,17 +73,26 @@ class ClienteAgregar extends CustomComponent {
 
         // Persona natural
         this.refTipoDocumentoPn = React.createRef();
-        this.refDocumento = React.createRef();
-        this.refInformacion = React.createRef();
-        this.refCelular = React.createRef();
+        this.refDocumentoPn = React.createRef();
+        this.refInformacionPn = React.createRef();
+        this.refCelularPn = React.createRef();
+        this.refTelefonoPn = React.createRef();
         this.refGenero = React.createRef();
 
-        this.refDireccion = React.createRef();
-        this.refUbigeo = React.createRef();
+        this.refDireccionPn = React.createRef();
+        this.refUbigeoPn = React.createRef();
         this.refFechaNacimiento = React.createRef();
 
         // Persona juridica
         this.refTipoDocumentoPj = React.createRef();
+        this.refDocumentoPj = React.createRef();
+        this.refInformacionPj = React.createRef();
+        this.refCelularPj = React.createRef();
+        this.refTelefonoPj = React.createRef();
+
+        this.refDireccionPj = React.createRef();
+        this.refDireccionPj = React.createRef();
+        this.refUbigeoPj = React.createRef();
 
         this.abortControllerTable = new AbortController();
 
@@ -131,7 +150,7 @@ class ClienteAgregar extends CustomComponent {
         }
     }
 
-    handleSelectTipoDocumento = (event) => {
+    handleSelectTipoDocumentoPn = (event) => {
         const messageWarning = event.target.value.trim().length > 0 ? '' : 'Seleccione el tipo de documento';
 
         this.setState({
@@ -140,20 +159,47 @@ class ClienteAgregar extends CustomComponent {
         });
     }
 
-    handleInputNumeroDocumento = (event) => {
+    handleSelectTipoDocumentoPj = (event) => {
+        const messageWarning = event.target.value.trim().length > 0 ? '' : 'Seleccione el tipo de documento';
+
+        this.setState({
+            idTipoDocumentoPj: event.target.value,
+            messageWarning: messageWarning
+        });
+    }
+
+    handleInputNumeroDocumentoPn = (event) => {
         const messageWarning = event.target.value.trim().length > 0 ? "" : "Ingrese el número de documento";
 
         this.setState({
-            documento: event.target.value,
+            documentoPn: event.target.value,
             messageWarning: messageWarning,
         });
     }
 
-    handleInputInformacion = (event) => {
+    handleInputNumeroDocumentoPj = (event) => {
+        const messageWarning = event.target.value.trim().length > 0 ? "" : "Ingrese el número de documento";
+
+        this.setState({
+            documentoPj: event.target.value,
+            messageWarning: messageWarning,
+        });
+    }
+
+    handleInputInformacionPn = (event) => {
         const messageWarning = event.target.value.trim().length > 0 ? '' : "Ingrese la razón social o apellidos y nombres";
 
         this.setState({
-            informacion: event.target.value,
+            informacionPn: event.target.value,
+            messageWarning: messageWarning
+        });
+    }
+
+    handleInputInformacionPj = (event) => {
+        const messageWarning = event.target.value.trim().length > 0 ? '' : "Ingrese la razón social o apellidos y nombres";
+
+        this.setState({
+            informacionPj: event.target.value,
             messageWarning: messageWarning
         });
     }
@@ -179,28 +225,28 @@ class ClienteAgregar extends CustomComponent {
 
     handleInputCelular = (event) => {
         this.setState({
-            celular: event.target.value
+            celularPn: event.target.value
         });
     }
 
 
     handleInputTelefono = (event) => {
-        this.setState({ telefono: event.target.value, })
+        this.setState({ telefonoPn: event.target.value, })
     }
 
 
     handleInputEmail = (event) => {
-        this.setState({ email: event.target.value })
+        this.setState({ emailPn: event.target.value })
     }
 
 
     handleInputDireccion = (event) => {
-        this.setState({ direccion: event.target.value })
+        this.setState({ direccionPn: event.target.value })
     }
 
 
     handleInputEstado = (value) => {
-        this.setState({ estado: value.target.checked })
+        this.setState({ estadoPn: value.target.checked })
     }
 
 
@@ -222,7 +268,7 @@ class ClienteAgregar extends CustomComponent {
     }
 
     handleGetApiReniec = async () => {
-        if (this.state.documento.length !== 8) {
+        if (this.state.documentoPn.length !== 8) {
             this.setState({
                 messageWarning: "Para iniciar la busqueda en número dni debe tener 8 caracteres."
             });
@@ -234,12 +280,12 @@ class ClienteAgregar extends CustomComponent {
             msgLoading: 'Consultando número de DNI...',
         });
 
-        const response = await getDni(this.state.documento);
+        const response = await getDni(this.state.documentoPn);
 
         if (response instanceof SuccessReponse) {
             this.setState({
-                documento: convertNullText(response.data.dni),
-                informacion: convertNullText(response.data.apellidoPaterno) + " " + convertNullText(response.data.apellidoMaterno) + " " + convertNullText(response.data.nombres),
+                documentoPn: convertNullText(response.data.dni),
+                informacionPn: convertNullText(response.data.apellidoPaterno) + " " + convertNullText(response.data.apellidoMaterno) + " " + convertNullText(response.data.nombres),
                 loading: false,
             });
         }
@@ -254,7 +300,7 @@ class ClienteAgregar extends CustomComponent {
     }
 
     handleGetApiSunat = async () => {
-        if (this.state.documento.length !== 11) {
+        if (this.state.documentoPj.length !== 11) {
             this.setState({
                 messageWarning: "Para iniciar la busqueda en número ruc debe tener 11 caracteres."
             });
@@ -270,9 +316,9 @@ class ClienteAgregar extends CustomComponent {
 
         if (response instanceof SuccessReponse) {
             this.setState({
-                documento: convertNullText(response.data.ruc),
-                informacion: convertNullText(response.data.razonSocial),
-                direccion: convertNullText(response.data.direccion),
+                documentoPj: convertNullText(response.data.ruc),
+                informacionPj: convertNullText(response.data.razonSocial),
+                direccionPj: convertNullText(response.data.direccion),
                 loading: false,
             });
         }
@@ -286,9 +332,10 @@ class ClienteAgregar extends CustomComponent {
         }
     }
 
-    handleFilter = async (event) => {
+    handleFilterPn = async (event) => {
+
         const searchWord = this.selectItem ? "" : event.target.value;
-        await this.setStateAsync({ idUbigeo: '', ubigeo: searchWord });
+        await this.setStateAsync({ idUbigeoPn: '', ubigeoPn: searchWord });
         this.selectItem = false;
         if (searchWord.length === 0) {
             await this.setStateAsync({ filteredData: [] });
@@ -314,11 +361,49 @@ class ClienteAgregar extends CustomComponent {
         }
     }
 
-    handleSelectItem = async (value) => {
+    handleFilterPj = async (event) => {
+
+        const searchWord = this.selectItem ? "" : event.target.value;
+        await this.setStateAsync({ idUbigeoPj: '', ubigeoPj: searchWord });
+        this.selectItem = false;
+        if (searchWord.length === 0) {
+            await this.setStateAsync({ filteredData: [] });
+            return;
+        }
+
+        if (this.state.filter) return;
+
+        await this.setStateAsync({ filter: true });
+
+        const params = {
+            filtrar: searchWord,
+        }
+
+        const response = await getUbigeo(params);
+
+        if (response instanceof SuccessReponse) {
+            await this.setStateAsync({ filter: false, filteredData: response.data });
+        }
+
+        if (response instanceof ErrorResponse) {
+            await this.setStateAsync({ filter: false, filteredData: [] });
+        }
+    }
+
+    handleSelectItemPn = async (value) => {
         await this.setStateAsync({
-            ubigeo: value.departamento + "-" + value.provincia + "-" + value.distrito + " (" + value.ubigeo + ")",
+            ubigeoPn: value.departamento + "-" + value.provincia + "-" + value.distrito + " (" + value.ubigeo + ")",
             filteredData: [],
-            idUbigeo: value.idUbigeo
+            idUbigeoPn: value.idUbigeo
+        });
+        this.selectItem = true;
+    }
+
+    handleSelectItemPj = async (value) => {
+        await this.setStateAsync({
+            ubigeoPj: value.departamento + "-" + value.provincia + "-" + value.distrito + " (" + value.ubigeo + ")",
+            filteredData: [],
+            idUbigeoPj: value.idUbigeo
         });
         this.selectItem = true;
     }
@@ -335,113 +420,113 @@ class ClienteAgregar extends CustomComponent {
             return;
         }
 
-        if (!isText(this.state.documento)) {
+        if (!isText(this.state.documentoPn)) {
             this.setState({ messageWarning: "Ingrese el número de documento." });
-            this.refDocumento.current.focus();
+            this.refDocumentoPn.current.focus();
             return;
         }
 
-        if (!isText(this.state.informacion)) {
+        if (!isText(this.state.informacionPn)) {
             this.setState({ messageWarning: "Ingrese los apellidos y nombres." });
-            this.refInformacion.current.focus();
+            this.refInformacionPn.current.focus();
             return;
         }
 
-        alertInfo("Cliente", "Procesando información...");
+        alertDialog("Cliente", "¿Estás seguro de continuar?", async (event) => {
+            if (event) {
+                alertInfo("Cliente", "Procesando información...");
+                const data = {
+                    "tipo": this.state.tipo,
+                    "idTipoDocumento": this.state.idTipoDocumentoPn,
+                    "documento": this.state.documentoPn.toString().trim().toUpperCase(),
+                    "informacion": this.state.informacionPn.trim().toUpperCase(),
+                    "telefono": this.state.telefonoPn.toString().trim().toUpperCase(),
+                    "celular": this.state.celularPn.toString().trim().toUpperCase(),
+                    "fechaNacimiento": this.state.fechaNacimiento,
+                    "email": this.state.emailPn.trim(),
+                    "genero": this.state.genero,
+                    "direccion": this.state.direccionPn.trim().toUpperCase(),
+                    "idUbigeo": this.state.idUbigeoPn,
+                    "estadoCivil": this.state.estadoCivil,
+                    "predeterminado": this.state.predeterminado,
+                    "estado": this.state.estadoPn,
+                    "observacion": this.state.observacion.trim().toUpperCase(),
+                    "idUsuario": this.state.idUsuario
+                }
 
-        const data = {
-            "tipo": this.state.tipo,
-            "idTipoDocumento": this.state.idTipoDocumentoPn,
-            "documento": this.state.documento.toString().trim().toUpperCase(),
-            "informacion": this.state.informacion.trim().toUpperCase(),
-            "telefono": this.state.telefono.toString().trim().toUpperCase(),
-            "celular": this.state.celular.toString().trim().toUpperCase(),
-            "fechaNacimiento": this.state.fechaNacimiento,
-            "email": this.state.email.trim(),
-            "genero": this.state.genero,
-            "direccion": this.state.direccion.trim().toUpperCase(),
-            "idUbigeo": this.state.idUbigeo,
-            "estadoCivil": this.state.estadoCivil,
-            "predeterminado": this.state.predeterminado,
-            "estado": this.state.estado,
-            "observacion": this.state.observacion.trim().toUpperCase(),
-            "idUsuario": this.state.idUsuario
-        }
+                const response = await addCliente(data);
+                if (response instanceof SuccessReponse) {
+                    alertSuccess("Cliente", response.data, () => {
+                        this.props.history.goBack();
+                    });
+                }
 
-        const response = await addCliente(data);
-
-        if (response instanceof SuccessReponse) {
-            alertSuccess("Cliente", response.data, () => {
-                this.props.history.goBack();
-            });
-        }
-
-        if (response instanceof ErrorResponse) {
-            alertWarning("Cliente", response.getMessage())
-        }
+                if (response instanceof ErrorResponse) {
+                    alertWarning("Cliente", response.getMessage())
+                }
+            }
+        });
     }
 
     handleGuardarPJuridica = async () => {
         if (this.state.idTipoDocumentoPj === "") {
             this.setState({ messageWarning: "Seleccione el tipo de documento." });
-            this.handleFocusTab("datos-tab", "datos");
             this.refTipoDocumentoPj.current.focus();
             return;
         }
 
-        if (this.state.documento === "") {
+        if (this.state.documentoPj === "") {
             this.setState({ messageWarning: "Ingrese el número de documento." });
-            this.handleFocusTab("datos-tab", "datos");
-            this.refDocumento.current.focus();
+            this.refDocumentoPj.current.focus();
             return;
         }
 
-        if (this.state.informacion === "") {
+        if (this.state.informacionPj === "") {
             this.setState({ messageWarning: "Ingrese los apellidos y nombres." });
-            this.handleFocusTab("datos-tab", "datos");
-            this.refInformacion.current.focus();
+            this.refInformacionPj.current.focus();
             return;
         }
 
-        if (this.state.celular === "") {
+        if (this.state.celularPj === "") {
             this.setState({ messageWarning: "Ingrese el número de celular." });
-            this.handleFocusTab("contacto-tab", "contacto");
-            this.refCelular.current.focus();
+            this.refCelularPj.current.focus();
             return;
         }
 
-        alertInfo("Cliente", "Procesando información...");
+        alertDialog("Producto", "¿Estás seguro de continuar?", async (event) => {
+            if (event) {
 
-        const data = {
-            "tipo": this.state.tipo,
-            "idTipoDocumento": this.state.idTipoDocumentoPj,
-            "documento": this.state.documento.toString().trim().toUpperCase(),
-            "informacion": this.state.informacion.trim().toUpperCase(),
-            "telefono": this.state.telefono.toString().trim().toUpperCase(),
-            "celular": this.state.celular.toString().trim().toUpperCase(),
-            "email": this.state.email.trim(),
-            "direccion": this.state.direccion.trim().toUpperCase(),
-            "idUbigeo": this.state.idUbigeo,
-            "estado": this.state.estado,
-            "observacion": this.state.observacion.trim().toUpperCase(),
-            "idUsuario": this.state.idUsuario
-        }
+                alertInfo("Cliente", "Procesando información...");
+                const data = {
+                    "tipo": this.state.tipo,
+                    "idTipoDocumento": this.state.idTipoDocumentoPj,
+                    "documento": this.state.documentoPj.toString().trim().toUpperCase(),
+                    "informacion": this.state.informacionPj.trim().toUpperCase(),
+                    "telefono": this.state.telefonoPj.toString().trim().toUpperCase(),
+                    "celular": this.state.celularPj.toString().trim().toUpperCase(),
+                    "email": this.state.emailPj.trim(),
+                    "direccion": this.state.direccionPj.trim().toUpperCase(),
+                    "idUbigeo": this.state.idUbigeoPj,
+                    "estado": this.state.estadoPj,
+                    "observacion": this.state.observacion.trim().toUpperCase(),
+                    "idUsuario": this.state.idUsuario
+                }
 
-        const response = await addCliente(data);
+                const response = await addCliente(data);
+                if (response instanceof SuccessReponse) {
+                    alertSuccess("Cliente", response.data, () => {
+                        this.props.history.goBack();
+                    });
+                }
 
-        if (response instanceof SuccessReponse) {
-            alertSuccess("Cliente", response.data, () => {
-                this.props.history.goBack();
-            });
-        }
-
-        if (response instanceof ErrorResponse) {
-            alertWarning("Cliente", response.getMessage())
-        }
-
+                if (response instanceof ErrorResponse) {
+                    alertWarning("Cliente", response.getMessage())
+                }
+            }
+        });
     }
 
-    handleGuardar = () => {
+    handleSave = () => {
         if (this.state.tipo === 1) {
             this.handleGuardarPNatural();
         } else {
@@ -451,9 +536,9 @@ class ClienteAgregar extends CustomComponent {
 
     render() {
 
-        const { idTipoDocumentoPn, documento, informacion, genero, estadoCivil, fechaNacimiento, observacion, celular, telefono, email, direccion, ubigeo, estado, predeterminado } = this.state;
+        const { idTipoDocumentoPn, documentoPn, informacionPn, genero, estadoCivil, fechaNacimiento, observacion, celularPn, telefonoPn, emailPn, direccionPn, ubigeoPn, estadoPn, predeterminado } = this.state;
 
-        const { idTipoDocumentoPj } = this.state;
+        const { idTipoDocumentoPj, documentoPj, informacionPj, celularPj, telefonoPj, emailPj, direccionPj, ubigeoPj, estadoPj } = this.state;
 
         return (
             <ContainerWrapper>
@@ -465,7 +550,7 @@ class ClienteAgregar extends CustomComponent {
                     <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
                         <section className="content-header">
                             <h5>
-                                <span role="button" onClick={() => this.props.history.goBack()}><i className="bi bi-arrow-left-short"></i></span> {this.state.idCliente === '' ? 'Registrar Cliente' : 'Editar Cliente'}
+                                <span role="button" onClick={() => this.props.history.goBack()}><i className="bi bi-arrow-left-short"></i></span> Registrar Cliente
                             </h5>
                         </section>
                     </div>
@@ -521,7 +606,7 @@ class ClienteAgregar extends CustomComponent {
                                             className={`form-control ${idTipoDocumentoPn ? "" : "is-invalid"}`}
                                             value={idTipoDocumentoPn}
                                             ref={this.refTipoDocumentoPn}
-                                            onChange={this.handleSelectTipoDocumento}>
+                                            onChange={this.handleSelectTipoDocumentoPn}>
                                             <option value="">-- Seleccione --</option>
                                             {
                                                 this.state.tiposDocumentos.filter(item => item.idTipoDocumento !== 'TD0003').map((item, index) => (
@@ -542,10 +627,10 @@ class ClienteAgregar extends CustomComponent {
                                         <div className="input-group">
                                             <input
                                                 type="text"
-                                                className={`form-control ${documento ? "" : "is-invalid"}`}
-                                                ref={this.refDocumento}
-                                                value={documento}
-                                                onChange={this.handleInputNumeroDocumento}
+                                                className={`form-control ${documentoPn ? "" : "is-invalid"}`}
+                                                ref={this.refDocumentoPn}
+                                                value={documentoPn}
+                                                onChange={this.handleInputNumeroDocumentoPn}
                                                 onKeyDown={keyNumberInteger}
                                                 placeholder='00000000' />
                                             <div className="input-group-append">
@@ -558,7 +643,7 @@ class ClienteAgregar extends CustomComponent {
                                                 </button>
                                             </div>
                                             {
-                                                documento === "" &&
+                                                documentoPn === "" &&
                                                 <div className="invalid-feedback">
                                                     Ingrese un valor.
                                                 </div>
@@ -573,14 +658,14 @@ class ClienteAgregar extends CustomComponent {
                                         <label>Apellidos y Nombres <i className="fa fa-asterisk text-danger small"></i></label>
                                         <input
                                             type="text"
-                                            className={`form-control ${informacion ? "" : "is-invalid"}`}
+                                            className={`form-control ${informacionPn ? "" : "is-invalid"}`}
                                             ref={this.refInformacion}
-                                            value={informacion}
-                                            onChange={this.handleInputInformacion}
+                                            value={informacionPn}
+                                            onChange={this.handleInputInformacionPn}
                                             placeholder='Ingrese la razón social o apellidos y nombres'
                                         />
                                         {
-                                            informacion === "" &&
+                                            informacionPn === "" &&
                                             <div className="invalid-feedback">
                                                 Ingrese un valor.
                                             </div>
@@ -649,8 +734,8 @@ class ClienteAgregar extends CustomComponent {
                                         <input
                                             type="text"
                                             className="form-control"
-                                            value={celular}
-                                            ref={this.refCelular}
+                                            value={celularPn}
+                                            ref={this.refCelularPn}
                                             onChange={this.handleInputCelular}
                                             onKeyDown={keyNumberPhone}
                                             placeholder='Ingrese el número de celular.' />
@@ -661,8 +746,8 @@ class ClienteAgregar extends CustomComponent {
                                         <input
                                             type="text"
                                             className="form-control"
-                                            value={telefono}
-                                            ref={this.refTelefono}
+                                            value={telefonoPn}
+                                            ref={this.refTelefonoPn}
                                             onChange={this.handleInputTelefono}
                                             onKeyDown={keyNumberPhone}
                                             placeholder='Ingrese el número de telefono.' />
@@ -676,7 +761,7 @@ class ClienteAgregar extends CustomComponent {
                                         <input
                                             type="email"
                                             className="form-control"
-                                            value={email}
+                                            value={emailPn}
                                             onChange={this.handleInputEmail}
                                             placeholder='Ingrese el email' />
                                     </div>
@@ -689,8 +774,8 @@ class ClienteAgregar extends CustomComponent {
                                         <input
                                             type="text"
                                             className="form-control"
-                                            ref={this.refDireccion}
-                                            value={direccion}
+                                            ref={this.refDireccionPn}
+                                            value={direccionPn}
                                             onChange={this.handleInputDireccion}
                                             placeholder='Ingrese la dirección' />
                                     </div>
@@ -702,12 +787,12 @@ class ClienteAgregar extends CustomComponent {
                                         <label>Ubigeo</label>
                                         <SearchBar
                                             placeholder="Escribe para iniciar a filtrar..."
-                                            refTxtUbigeo={this.refUbigeo}
-                                            ubigeo={ubigeo}
+                                            refTxtUbigeo={this.refUbigeoPn}
+                                            ubigeo={ubigeoPn}
                                             filteredData={this.state.filteredData}
                                             onEventClearInput={this.handleClearInput}
-                                            handleFilter={this.handleFilter}
-                                            onEventSelectItem={this.handleSelectItem}
+                                            handleFilter={this.handleFilterPn}
+                                            onEventSelectItem={this.handleSelectItemPn}
                                         />
                                     </div>
                                 </div>
@@ -721,9 +806,9 @@ class ClienteAgregar extends CustomComponent {
                                                 type="checkbox"
                                                 className="custom-control-input"
                                                 id="switch1"
-                                                checked={estado}
+                                                checked={estadoPn}
                                                 onChange={this.handleInputEstado} />
-                                            <label className="custom-control-label" htmlFor="switch1">{estado ? "Activo" : "Inactivo"}</label>
+                                            <label className="custom-control-label" htmlFor="switch1">{estadoPn ? "Activo" : "Inactivo"}</label>
                                         </div>
                                     </div>
 
@@ -754,7 +839,7 @@ class ClienteAgregar extends CustomComponent {
                                             className={`form-control ${idTipoDocumentoPj ? "" : "is-invalid"}`}
                                             value={idTipoDocumentoPj}
                                             ref={this.refTipoDocumentoPj}
-                                            onChange={this.handleSelectTipoDocumento}>
+                                            onChange={this.handleSelectTipoDocumentoPj}>
                                             <option value="">-- Seleccione --</option>
                                             {
                                                 this.state.tiposDocumentos.filter(item => item.idTipoDocumento === 'TD0003').map((item, index) => (
@@ -775,10 +860,10 @@ class ClienteAgregar extends CustomComponent {
                                         <div className="input-group">
                                             <input
                                                 type="text"
-                                                className={`form-control ${documento ? "" : "is-invalid"}`}
-                                                ref={this.refDocumento}
-                                                value={documento}
-                                                onChange={this.handleInputNumeroDocumento}
+                                                className={`form-control ${documentoPj ? "" : "is-invalid"}`}
+                                                ref={this.refDocumentoPj}
+                                                value={documentoPj}
+                                                onChange={this.handleInputNumeroDocumentoPj}
                                                 onKeyDown={keyNumberInteger}
                                                 placeholder='00000000' />
                                             <div className="input-group-append">
@@ -791,7 +876,7 @@ class ClienteAgregar extends CustomComponent {
                                                 </button>
                                             </div>
                                             {
-                                                documento === "" &&
+                                                documentoPj === "" &&
                                                 <div className="invalid-feedback">
                                                     Ingrese un valor.
                                                 </div>
@@ -806,14 +891,14 @@ class ClienteAgregar extends CustomComponent {
                                         <label>Razón Social <i className="fa fa-asterisk text-danger small"></i></label>
                                         <input
                                             type="text"
-                                            className={`form-control ${informacion ? "" : "is-invalid"}`}
-                                            ref={this.refInformacion}
-                                            value={informacion}
-                                            onChange={this.handleInputInformacion}
+                                            className={`form-control ${informacionPj ? "" : "is-invalid"}`}
+                                            ref={this.refInformacionPj}
+                                            value={informacionPj}
+                                            onChange={this.handleInputInformacionPj}
                                             placeholder='Ingrese la razón social o apellidos y nombres'
                                         />
                                         {
-                                            informacion === "" &&
+                                            informacionPj === "" &&
                                             <div className="invalid-feedback">
                                                 Ingrese un valor.
                                             </div>
@@ -828,17 +913,17 @@ class ClienteAgregar extends CustomComponent {
                                         <input
                                             type="text"
                                             className="form-control"
-                                            value={this.state.celular}
-                                            ref={this.refCelular}
+                                            value={celularPj}
+                                            ref={this.refCelularPj}
                                             onChange={(event) => {
                                                 if (event.target.value.trim().length > 0) {
                                                     this.setState({
-                                                        celular: event.target.value,
+                                                        celularPj: event.target.value,
                                                         messageWarning: '',
                                                     });
                                                 } else {
                                                     this.setState({
-                                                        celular: event.target.value,
+                                                        celularPj: event.target.value,
                                                         messageWarning: 'Ingrese el número de celular.',
                                                     });
                                                 }
@@ -852,9 +937,9 @@ class ClienteAgregar extends CustomComponent {
                                         <input
                                             type="text"
                                             className="form-control"
-                                            value={this.state.telefono}
-                                            ref={this.refTelefono}
-                                            onChange={(event) => this.setState({ telefono: event.target.value, })}
+                                            value={telefonoPj}
+                                            ref={this.refTelefonoPj}
+                                            onChange={(event) => this.setState({ telefonoPj: event.target.value, })}
                                             onKeyDown={keyNumberPhone}
                                             placeholder='Ingrese el número de telefono.' />
                                     </div>
@@ -867,8 +952,8 @@ class ClienteAgregar extends CustomComponent {
                                         <input
                                             type="email"
                                             className="form-control"
-                                            value={this.state.email}
-                                            onChange={(event) => this.setState({ email: event.target.value })}
+                                            value={emailPj}
+                                            onChange={(event) => this.setState({ emailPj: event.target.value })}
                                             placeholder='Ingrese el email' />
                                     </div>
                                 </div>
@@ -880,9 +965,9 @@ class ClienteAgregar extends CustomComponent {
                                         <input
                                             type="text"
                                             className="form-control"
-                                            value={this.state.direccion}
-                                            ref={this.refDireccion}
-                                            onChange={(event) => this.setState({ direccion: event.target.value })}
+                                            value={direccionPj}
+                                            ref={this.refDireccionPj}
+                                            onChange={(event) => this.setState({ direccionPj: event.target.value })}
                                             placeholder='Ingrese la dirección' />
                                     </div>
                                 </div>
@@ -893,12 +978,12 @@ class ClienteAgregar extends CustomComponent {
                                         <label>Ubigeo</label>
                                         <SearchBar
                                             placeholder="Escribe para iniciar a filtrar..."
-                                            refTxtUbigeo={this.refUbigeo}
-                                            ubigeo={this.state.ubigeo}
+                                            refTxtUbigeo={this.refUbigeoPj}
+                                            ubigeo={ubigeoPj}
                                             filteredData={this.state.filteredData}
                                             onEventClearInput={this.handleClearInput}
-                                            handleFilter={this.handleFilter}
-                                            onEventSelectItem={this.handleSelectItem}
+                                            handleFilter={this.handleFilterPj}
+                                            onEventSelectItem={this.handleSelectItemPj}
                                         />
                                     </div>
                                 </div>
@@ -911,10 +996,10 @@ class ClienteAgregar extends CustomComponent {
                                             <input
                                                 type="checkbox"
                                                 className="custom-control-input"
-                                                id="switch1"
-                                                checked={this.state.estado}
-                                                onChange={(value) => this.setState({ estado: value.target.checked })} />
-                                            <label className="custom-control-label" htmlFor="switch1">{this.state.estado ? "Activo" : "Inactivo"}</label>
+                                                id="switch3"
+                                                checked={estadoPj}
+                                                onChange={(value) => this.setState({ estadoPj: value.target.checked })} />
+                                            <label className="custom-control-label" htmlFor="switch3">{this.state.estadoPj ? "Activo" : "Inactivo"}</label>
                                         </div>
                                     </div>
 

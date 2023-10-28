@@ -196,7 +196,7 @@ class UsuarioProceso extends React.Component {
             return;
         }
 
-        if (this.state.activeLogin && this.state.configClave == "") {
+        if (this.state.activeLogin && this.state.configClave === "") {
             this.setState({ messageWarning: "Ingrese nuevamente su clave para el inicio de sesión." });
             this.onFocusTab("login-tab", "login");
             this.refConfigClave.current.focus();

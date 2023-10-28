@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+    alertDialog,
     currentDate,
     keyNumberPhone,
     keyNumberInteger,
@@ -25,26 +26,43 @@ class ClienteEditar extends CustomComponent {
     constructor(props) {
         super(props);
         this.state = {
+            tipo: 0,
             idCliente: '',
-            idTipoDocumento: '',
-            tiposDocumentos: [],
-            documento: '',
-            informacion: '',
-            telefono: '',
-            celular: '',
+            // persona natural
+            idTipoDocumentoPn: '',
+            documentoPn: '',
+            informacionPn: '',
+            telefonoPn: '',
+            celularPn: '',
             fechaNacimiento: currentDate(),
-            email: '',
+            emailPn: '',
             genero: '',
-            direccion: '',
+            direccionPn: '',
 
-            idUbigeo: '',
-            ubigeo: '',
+            idUbigeoPn: '',
+            ubigeoPn: '',
 
             estadoCivil: '',
             predeterminado: false,
-            estado: true,
+            estadoPn: true,
             observacion: '',
+
+            // persona juridica
+            idTipoDocumentoPj: '',
+            documentoPj: '',
+            informacionPj: '',
+            telefonoPj: '',
+            celularPj: '',
+            emailPj: '',
+            direccionPj: '',
+            idUbigeoPj: '',
+            ubigeoPj: '',
+            estadoPj: true,
+
+            // otros datos
             idUsuario: this.props.token.userToken.idUsuario,
+
+            tiposDocumentos: [],
 
             filter: false,
             filteredData: [],
@@ -54,15 +72,28 @@ class ClienteEditar extends CustomComponent {
             msgLoading: 'Cargando datos...',
         }
 
-        this.refTipoDocumento = React.createRef();
-        this.refDocumento = React.createRef();
-        this.refInformacion = React.createRef();
-        this.refCelular = React.createRef();
+        // Persona natural
+        this.refTipoDocumentoPn = React.createRef();
+        this.refDocumentoPn = React.createRef();
+        this.refInformacionPn = React.createRef();
+        this.refCelularPn = React.createRef();
+        this.refTelefonoPn = React.createRef();
         this.refGenero = React.createRef();
 
-        this.refDireccion = React.createRef();
-        this.refUbigeo = React.createRef();
+        this.refDireccionPn = React.createRef();
+        this.refUbigeoPn = React.createRef();
         this.refFechaNacimiento = React.createRef();
+
+        // Persona juridica
+        this.refTipoDocumentoPj = React.createRef();
+        this.refDocumentoPj = React.createRef();
+        this.refInformacionPj = React.createRef();
+        this.refCelularPj = React.createRef();
+        this.refTelefonoPj = React.createRef();
+
+        this.refDireccionPj = React.createRef();
+        this.refDireccionPj = React.createRef();
+        this.refUbigeoPj = React.createRef();
 
         this.abortControllerTable = new AbortController();
 
@@ -100,32 +131,62 @@ class ClienteEditar extends CustomComponent {
             return;
         }
 
-        await this.setStateAsync({
-            idCliente: cliente.idCliente,
-            idTipoDocumento: cliente.idTipoDocumento,
-            documento: cliente.documento,
-            informacion: cliente.informacion,
-            telefono: cliente.telefono,
-            celular: cliente.celular,
-            fechaNacimiento: cliente.fechaNacimiento,
-            email: cliente.email,
-            genero: cliente.genero,
-            direccion: cliente.direccion,
+        if (cliente.idCliente.startsWith("CN")) {
+            this.handleFocusTab("personaNatural-tab", "datosPn")
+            await this.setStateAsync({
+                tipo: 1,
+                idCliente: cliente.idCliente,
+                idTipoDocumentoPn: cliente.idTipoDocumento,
+                documentoPn: cliente.documento,
+                informacionPn: cliente.informacion,
+                telefonoPn: cliente.telefono,
+                celularPn: cliente.celular,
+                fechaNacimiento: cliente.fechaNacimiento,
+                emailPn: cliente.email,
+                genero: cliente.genero,
+                direccionPn: cliente.direccion,
 
-            idUbigeo: cliente.idUbigeo === 0 ? '' : cliente.idUbigeo.toString(),
-            ubigeo: cliente.ubigeo === '' ? '' : cliente.departamento + "-" + cliente.provincia + "-" + cliente.distrito + " (" + cliente.ubigeo + ")",
+                idUbigeoPn: cliente.idUbigeo === 0 ? '' : cliente.idUbigeo.toString(),
+                ubigeoPn: cliente.ubigeo === '' ? '' : cliente.departamento + "-" + cliente.provincia + "-" + cliente.distrito + " (" + cliente.ubigeo + ")",
 
-            estadoCivil: cliente.estadoCivil,
-            predeterminado: cliente.predeterminado,
-            estado: cliente.estado,
-            observacion: cliente.observacion,
+                estadoCivil: cliente.estadoCivil,
+                predeterminado: cliente.predeterminado,
+                estadoPn: cliente.estado,
+                observacion: cliente.observacion,
 
-            tiposDocumentos: documentos,
+                tiposDocumentos: documentos,
 
-            loading: false
-        })
+                loading: false
+            })
 
-        this.selectItem = cliente.idUbigeo === 0 ? false : true;
+            this.selectItem = cliente.idUbigeo === 0 ? false : true;
+        } else {
+            this.handleFocusTab("personaJuridica-tab", "datosPj")
+            await this.setStateAsync({
+                tipo: 2,
+                idCliente: cliente.idCliente,
+                idTipoDocumentoPj: cliente.idTipoDocumento,
+                documentoPj: cliente.documento,
+                informacionPj: cliente.informacion,
+                telefonoPj: cliente.telefono,
+                celularPj: cliente.celular,
+                emailPj: cliente.email,
+                direccionPj: cliente.direccion,
+
+                idUbigeoPj: cliente.idUbigeo === 0 ? '' : cliente.idUbigeo.toString(),
+                ubigeoPj: cliente.ubigeo === '' ? '' : cliente.departamento + "-" + cliente.provincia + "-" + cliente.distrito + " (" + cliente.ubigeo + ")",
+
+                estadoPj: cliente.estado,
+
+                tiposDocumentos: documentos,
+
+                loading: false
+            })
+
+            this.selectItem = cliente.idUbigeo === 0 ? false : true;
+        }
+
+
     }
 
     async fetchTipoDocumento() {
@@ -156,74 +217,108 @@ class ClienteEditar extends CustomComponent {
         }
     }
 
-    handleEditarCliente = async () => {
-        if (this.state.idTipoDocumento === "") {
-            this.setState({ messageWarning: "Seleccione el tipo de documento." });
-            this.handleFocusTab("datos-tab", "datos");
-            this.refTipoDocumento.current.focus();
-            return;
-        }
+    handleSelectTipoDocumentoPn = (event) => {
+        const messageWarning = event.target.value.trim().length > 0 ? '' : 'Seleccione el tipo de documento';
 
-        if (this.state.documento === "") {
-            this.setState({ messageWarning: "Ingrese el número de documento." });
-            this.handleFocusTab("datos-tab", "datos");
-            this.refDocumento.current.focus();
-            return;
-        }
+        this.setState({
+            idTipoDocumentoPn: event.target.value,
+            messageWarning: messageWarning
+        });
+    }
 
-        if (this.state.informacion === "") {
-            this.setState({ messageWarning: "Ingrese los apellidos y nombres." });
-            this.handleFocusTab("datos-tab", "datos");
-            this.refInformacion.current.focus();
-            return;
-        }
+    handleSelectTipoDocumentoPj = (event) => {
+        const messageWarning = event.target.value.trim().length > 0 ? '' : 'Seleccione el tipo de documento';
 
-        if (this.state.genero === "") {
-            this.setState({ messageWarning: "Seleccione un genero." });
-            this.handleFocusTab("datos-tab", "datos");
-            this.refGenero.current.focus();
-            return;
-        }
+        this.setState({
+            idTipoDocumentoPj: event.target.value,
+            messageWarning: messageWarning
+        });
+    }
 
-        if (this.state.celular === "") {
-            this.setState({ messageWarning: "Ingrese el número de celular." });
-            this.handleFocusTab("contacto-tab", "contacto");
-            this.refCelular.current.focus();
-            return;
-        }
+    handleInputNumeroDocumentoPn = (event) => {
+        const messageWarning = event.target.value.trim().length > 0 ? "" : "Ingrese el número de documento";
 
-        alertInfo("Cliente", "Procesando información...");
+        this.setState({
+            documentoPn: event.target.value,
+            messageWarning: messageWarning,
+        });
+    }
 
-        const data = {
-            "idTipoDocumento": this.state.idTipoDocumento,
-            "documento": this.state.documento.toString().trim().toUpperCase(),
-            "informacion": this.state.informacion.trim().toUpperCase(),
-            "telefono": this.state.telefono.toString().trim().toUpperCase(),
-            "celular": this.state.celular.toString().trim().toUpperCase(),
-            "fechaNacimiento": this.state.fechaNacimiento,
-            "email": this.state.email.trim(),
-            "genero": this.state.genero,
-            "direccion": this.state.direccion.trim().toUpperCase(),
-            "idUbigeo": this.state.idUbigeo,
-            "estadoCivil": this.state.estadoCivil,
-            "predeterminado": this.state.predeterminado,
-            "estado": this.state.estado,
-            "observacion": this.state.observacion.trim().toUpperCase(),
-            "idUsuario": this.state.idUsuario,
-            "idCliente": this.state.idCliente
-        }
+    handleInputNumeroDocumentoPj = (event) => {
+        const messageWarning = event.target.value.trim().length > 0 ? "" : "Ingrese el número de documento";
 
-        const response = await editCliente(data);
+        this.setState({
+            documentoPj: event.target.value,
+            messageWarning: messageWarning,
+        });
+    }
 
-        if (response instanceof SuccessReponse) {
-            alertSuccess("Cliente", response.data, () => {
-                this.props.history.goBack();
-            });
-        }
+    handleInputInformacionPn = (event) => {
+        const messageWarning = event.target.value.trim().length > 0 ? '' : "Ingrese la razón social o apellidos y nombres";
+        
+        this.setState({
+            informacionPn: event.target.value,
+            messageWarning: messageWarning
+        });
+    }
 
-        if (response instanceof ErrorResponse) {
-            alertWarning("Cliente", response.getMessage())
-        }
+    handleInputInformacionPj = (event) => {
+        const messageWarning = event.target.value.trim().length > 0 ? '' : "Ingrese la razón social o apellidos y nombres";
+
+        this.setState({
+            informacionPj: event.target.value,
+            messageWarning: messageWarning
+        });
+    }
+
+    handleSelectGenero = (event) => {
+        this.setState({ genero: event.target.value })
+    }
+
+    handleSelectEstadoCvil = (event) => {
+        this.setState({ estadoCivil: event.target.value })
+    }
+
+
+    handleInputFechaNacimiento = (event) => {
+        this.setState({ fechaNacimiento: event.target.value })
+    }
+
+
+    handleInputObservacion = (event) => {
+        this.setState({ observacion: event.target.value })
+    }
+
+
+    handleInputCelular = (event) => {
+        this.setState({
+            celularPn: event.target.value
+        });
+    }
+
+
+    handleInputTelefono = (event) => {
+        this.setState({ telefonoPn: event.target.value, })
+    }
+
+
+    handleInputEmail = (event) => {
+        this.setState({ emailPn: event.target.value })
+    }
+
+
+    handleInputDireccion = (event) => {
+        this.setState({ direccionPn: event.target.value })
+    }
+
+
+    handleInputEstado = (value) => {
+        this.setState({ estadoPn: value.target.checked })
+    }
+
+
+    handleInputPredeterminado = (value) => {
+        this.setState({ predeterminado: value.target.checked })
     }
 
     handleFocusTab(idTab, idContent) {
@@ -240,7 +335,7 @@ class ClienteEditar extends CustomComponent {
     }
 
     handleGetApiReniec = async () => {
-        if (this.state.documento.length !== 8) {
+        if (this.state.documentoPn.length !== 8) {
             this.setState({
                 messageWarning: "Para iniciar la busqueda en número dni debe tener 8 caracteres."
             });
@@ -252,12 +347,12 @@ class ClienteEditar extends CustomComponent {
             msgLoading: 'Consultando número de DNI...',
         });
 
-        const response = await getDni(this.state.documento);
+        const response = await getDni(this.state.documentoPn);
 
         if (response instanceof SuccessReponse) {
             this.setState({
-                documento: convertNullText(response.data.dni),
-                informacion: convertNullText(response.data.apellidoPaterno) + " " + convertNullText(response.data.apellidoMaterno) + " " + convertNullText(response.data.nombres),
+                documentoPn: convertNullText(response.data.dni),
+                informacionPn: convertNullText(response.data.apellidoPaterno) + " " + convertNullText(response.data.apellidoMaterno) + " " + convertNullText(response.data.nombres),
                 loading: false,
             });
         }
@@ -272,7 +367,7 @@ class ClienteEditar extends CustomComponent {
     }
 
     handleGetApiSunat = async () => {
-        if (this.state.documento.length !== 11) {
+        if (this.state.documentoPj.length !== 11) {
             this.setState({
                 messageWarning: "Para iniciar la busqueda en número ruc debe tener 11 caracteres."
             });
@@ -284,13 +379,13 @@ class ClienteEditar extends CustomComponent {
             msgLoading: 'Consultando número de RUC...',
         });
 
-        const response = await getRuc(this.state.documento);
+        const response = await getRuc(this.state.documentoPj);
 
         if (response instanceof SuccessReponse) {
             this.setState({
-                documento: convertNullText(response.data.ruc),
-                informacion: convertNullText(response.data.razonSocial),
-                direccion: convertNullText(response.data.direccion),
+                documentoPj: convertNullText(response.data.ruc),
+                informacionPj: convertNullText(response.data.razonSocial),
+                direccionPj: convertNullText(response.data.direccion),
                 loading: false,
             });
         }
@@ -304,10 +399,10 @@ class ClienteEditar extends CustomComponent {
         }
     }
 
-    handleFilter = async (event) => {
+    handleFilterPn = async (event) => {
 
         const searchWord = this.selectItem ? "" : event.target.value;
-        await this.setStateAsync({ idUbigeo: '', ubigeo: searchWord });
+        await this.setStateAsync({ idUbigeoPn: '', ubigeoPn: searchWord });
         this.selectItem = false;
         if (searchWord.length === 0) {
             await this.setStateAsync({ filteredData: [] });
@@ -333,11 +428,49 @@ class ClienteEditar extends CustomComponent {
         }
     }
 
-    handleSelectItem = async (value) => {
+    handleFilterPj = async (event) => {
+
+        const searchWord = this.selectItem ? "" : event.target.value;
+        await this.setStateAsync({ idUbigeoPj: '', ubigeoPj: searchWord });
+        this.selectItem = false;
+        if (searchWord.length === 0) {
+            await this.setStateAsync({ filteredData: [] });
+            return;
+        }
+
+        if (this.state.filter) return;
+
+        await this.setStateAsync({ filter: true });
+
+        const params = {
+            filtrar: searchWord,
+        }
+
+        const response = await getUbigeo(params);
+
+        if (response instanceof SuccessReponse) {
+            await this.setStateAsync({ filter: false, filteredData: response.data });
+        }
+
+        if (response instanceof ErrorResponse) {
+            await this.setStateAsync({ filter: false, filteredData: [] });
+        }
+    }
+
+    handleSelectItemPn = async (value) => {
         await this.setStateAsync({
-            ubigeo: value.departamento + "-" + value.provincia + "-" + value.distrito + " (" + value.ubigeo + ")",
+            ubigeoPn: value.departamento + "-" + value.provincia + "-" + value.distrito + " (" + value.ubigeo + ")",
             filteredData: [],
-            idUbigeo: value.idUbigeo
+            idUbigeoPn: value.idUbigeo
+        });
+        this.selectItem = true;
+    }
+
+    handleSelectItemPj = async (value) => {
+        await this.setStateAsync({
+            ubigeoPj: value.departamento + "-" + value.provincia + "-" + value.distrito + " (" + value.ubigeo + ")",
+            filteredData: [],
+            idUbigeoPj: value.idUbigeo
         });
         this.selectItem = true;
     }
@@ -347,7 +480,136 @@ class ClienteEditar extends CustomComponent {
         this.selectItem = false;
     }
 
+    handleGuardarPNatural =  async () => {
+        if (!isText(this.state.idTipoDocumentoPn)) {
+            this.setState({ messageWarning: "Seleccione el tipo de documento." });
+            this.refTipoDocumentoPn.current.focus();
+            return;
+        }
+
+        if (!isText(this.state.documentoPn)) {
+            this.setState({ messageWarning: "Ingrese el número de documento." });
+            this.refDocumentoPn.current.focus();
+            return;
+        }
+
+        if (!isText(this.state.informacionPn)) {
+            this.setState({ messageWarning: "Ingrese los apellidos y nombres." });
+            this.refInformacionPn.current.focus();
+            return;
+        }
+
+        alertDialog("Cliente", "¿Estás seguro de continuar?", async (event) => {
+            if (event) {
+                alertInfo("Cliente", "Procesando información...");
+                
+                const data = {
+                    "tipo": this.state.tipo,
+                    "idCliente": this.state.idCliente,
+                    "idTipoDocumento": this.state.idTipoDocumentoPn,
+                    "documento": this.state.documentoPn.toString().trim().toUpperCase(),
+                    "informacion": this.state.informacionPn.trim().toUpperCase(),
+                    "telefono": this.state.telefonoPn.toString().trim().toUpperCase(),
+                    "celular": this.state.celularPn.toString().trim().toUpperCase(),
+                    "fechaNacimiento": this.state.fechaNacimiento,
+                    "email": this.state.emailPn.trim(),
+                    "genero": this.state.genero,
+                    "direccion": this.state.direccionPn.trim().toUpperCase(),
+                    "idUbigeo": this.state.idUbigeoPn,
+                    "estadoCivil": this.state.estadoCivil,
+                    "predeterminado": this.state.predeterminado,
+                    "estado": this.state.estadoPn,
+                    "observacion": this.state.observacion.trim().toUpperCase(),
+                    "idUsuario": this.state.idUsuario
+                }
+
+                const response = await editCliente(data);
+                if (response instanceof SuccessReponse) {
+                    alertSuccess("Cliente", response.data, () => {
+                        this.props.history.goBack();
+                    });
+                }
+
+                if (response instanceof ErrorResponse) {
+                    alertWarning("Cliente", response.getMessage())
+                }
+            }
+        });
+    }
+
+    handleGuardarPJuridica = async () => {
+        if (this.state.idTipoDocumentoPj === "") {
+            this.setState({ messageWarning: "Seleccione el tipo de documento." });
+            this.refTipoDocumentoPj.current.focus();
+            return;
+        }
+
+        if (this.state.documentoPj === "") {
+            this.setState({ messageWarning: "Ingrese el número de documento." });
+            this.refDocumentoPj.current.focus();
+            return;
+        }
+
+        if (this.state.informacionPj === "") {
+            this.setState({ messageWarning: "Ingrese los apellidos y nombres." });
+            this.refInformacionPj.current.focus();
+            return;
+        }
+
+        if (this.state.celularPj === "") {
+            this.setState({ messageWarning: "Ingrese el número de celular." });
+            this.refCelularPj.current.focus();
+            return;
+        }
+
+        alertDialog("Producto", "¿Estás seguro de continuar?", async (event) => {
+            if (event) {
+
+                alertInfo("Cliente", "Procesando información...");
+                const data = {
+                    "tipo": this.state.tipo,
+                    "idCliente": this.state.idCliente,
+                    "idTipoDocumento": this.state.idTipoDocumentoPj,
+                    "documento": this.state.documentoPj.toString().trim().toUpperCase(),
+                    "informacion": this.state.informacionPj.trim().toUpperCase(),
+                    "telefono": this.state.telefonoPj.toString().trim().toUpperCase(),
+                    "celular": this.state.celularPj.toString().trim().toUpperCase(),
+                    "email": this.state.emailPj.trim(),
+                    "direccion": this.state.direccionPj.trim().toUpperCase(),
+                    "idUbigeo": this.state.idUbigeoPj,
+                    "estado": this.state.estadoPj,
+                    "observacion": this.state.observacion.trim().toUpperCase(),
+                    "idUsuario": this.state.idUsuario
+                }
+
+                const response = await editCliente(data);
+                if (response instanceof SuccessReponse) {
+                    alertSuccess("Cliente", response.data, () => {
+                        this.props.history.goBack();
+                    });
+                }
+
+                if (response instanceof ErrorResponse) {
+                    alertWarning("Cliente", response.getMessage())
+                }
+            }
+        });
+    }
+
+    handleSave = () => {
+        
+        if (this.state.tipo === 1) {
+            this.handleGuardarPNatural();
+        } else {
+            this.handleGuardarPJuridica();
+        }
+    }
+
     render() {
+        const { idTipoDocumentoPn, documentoPn, informacionPn, genero, estadoCivil, fechaNacimiento, observacion, celularPn, telefonoPn, emailPn, direccionPn, ubigeoPn, estadoPn, predeterminado } = this.state;
+
+        const { idTipoDocumentoPj, documentoPj, informacionPj, celularPj, telefonoPj, emailPj, direccionPj, ubigeoPj, estadoPj } = this.state;
+
         return (
             <ContainerWrapper>
                 {
@@ -358,7 +620,7 @@ class ClienteEditar extends CustomComponent {
                     <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
                         <section className="content-header">
                             <h5>
-                                <span role="button" onClick={() => this.props.history.goBack()}><i className="bi bi-arrow-left-short"></i></span> {this.state.idCliente === '' ? 'Registrar Cliente' : 'Editar Cliente'}
+                                <span role="button" onClick={() => this.props.history.goBack()}><i className="bi bi-arrow-left-short"></i></span> Registrar Cliente
                             </h5>
                         </section>
                     </div>
@@ -374,48 +636,60 @@ class ClienteEditar extends CustomComponent {
                 <div className='row'>
                     <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
                         <ul className="nav nav-tabs" id="myTab" role="tablist">
+                            {/* Persona Natural */}
                             <li className="nav-item" role="presentation">
-                                <a className="nav-link active" id="datos-tab" data-bs-toggle="tab" href="#datos" role="tab" aria-controls="datos" aria-selected={true}>
-                                    <i className="bi bi-info-circle"></i> Datos
+                                <a className="nav-link active"
+                                    id="personaNatural-tab"
+                                    data-bs-toggle="tab"
+                                    href="#datosPn"
+                                    role="tab"
+                                    aria-controls="datosPn"
+                                    aria-selected={true}
+                                    onClick={() => this.setState({ tipo: 1 })}>
+                                    <i className="bi bi-person"></i> Persona Natural
                                 </a>
                             </li>
+                            {/* Persona Juridica */}
                             <li className="nav-item" role="presentation">
-                                <a className="nav-link" id="contacto-tab" data-bs-toggle="tab" href="#contacto" role="tab" aria-controls="contacto" aria-selected={false}>
-                                    <i className="bi bi-person-workspace"></i> Contacto
+                                <a className="nav-link"
+                                    id="personaJuridica-tab"
+                                    data-bs-toggle="tab"
+                                    href="#datosPj"
+                                    role="tab"
+                                    aria-controls="datosPj"
+                                    aria-selected={false}
+                                    onClick={() => this.setState({ tipo: 2 })}>
+                                    <i className="bi bi-building"></i> Persona Juridica
                                 </a>
                             </li>
                         </ul>
 
                         <div className="tab-content pt-2" id="myTabContent">
-                            <div className="tab-pane fade show active" id="datos" role="tabpanel" aria-labelledby="datos-tab">
+                            {/* Contenedor person natural  */}
+                            <div className="tab-pane fade show active" id="datosPn" role="tabpanel" aria-labelledby="personaNatural-tab">
 
+                                {/* Tipo documento y Número de documento */}
                                 <div className="row">
                                     <div className="form-group col-md-6">
                                         <label>Tipo Documento <i className="fa fa-asterisk text-danger small"></i></label>
                                         <select
-                                            className="form-control"
-                                            value={this.state.idTipoDocumento}
-                                            ref={this.refTipoDocumento}
-                                            onChange={(event) => {
-                                                if (event.target.value.trim().length > 0) {
-                                                    this.setState({
-                                                        idTipoDocumento: event.target.value,
-                                                        messageWarning: '',
-                                                    });
-                                                } else {
-                                                    this.setState({
-                                                        idTipoDocumento: event.target.value,
-                                                        messageWarning: 'Seleccione el tipo de documento',
-                                                    });
-                                                }
-                                            }}>
+                                            className={`form-control ${idTipoDocumentoPn ? "" : "is-invalid"}`}
+                                            value={idTipoDocumentoPn}
+                                            ref={this.refTipoDocumentoPn}
+                                            onChange={this.handleSelectTipoDocumentoPn}>
                                             <option value="">-- Seleccione --</option>
                                             {
-                                                this.state.tiposDocumentos.map((item, index) => (
+                                                this.state.tiposDocumentos.filter(item => item.idTipoDocumento !== 'TD0003').map((item, index) => (
                                                     <option key={index} value={item.idTipoDocumento}>{item.nombre}</option>
                                                 ))
                                             }
                                         </select>
+                                        {
+                                            idTipoDocumentoPn === "" &&
+                                            <div className="invalid-feedback">
+                                                Seleccione un valor.
+                                            </div>
+                                        }
                                     </div>
 
                                     <div className="form-group col-md-6">
@@ -423,22 +697,10 @@ class ClienteEditar extends CustomComponent {
                                         <div className="input-group">
                                             <input
                                                 type="text"
-                                                className="form-control"
-                                                ref={this.refDocumento}
-                                                value={this.state.documento}
-                                                onChange={(event) => {
-                                                    if (event.target.value.trim().length > 0) {
-                                                        this.setState({
-                                                            documento: event.target.value,
-                                                            messageWarning: '',
-                                                        });
-                                                    } else {
-                                                        this.setState({
-                                                            documento: event.target.value,
-                                                            messageWarning: 'Ingrese el número de documento',
-                                                        });
-                                                    }
-                                                }}
+                                                className={`form-control ${documentoPn ? "" : "is-invalid"}`}
+                                                ref={this.refDocumentoPn}
+                                                value={documentoPn}
+                                                onChange={this.handleInputNumeroDocumentoPn}
                                                 onKeyDown={keyNumberInteger}
                                                 placeholder='00000000' />
                                             <div className="input-group-append">
@@ -450,73 +712,58 @@ class ClienteEditar extends CustomComponent {
                                                     <img src={images.reniec} alt="Reniec" width="12" />
                                                 </button>
                                             </div>
-                                            <div className="input-group-append">
-                                                <button
-                                                    className="btn btn-outline-secondary"
-                                                    type="button"
-                                                    title="Sunat"
-                                                    onClick={this.handleGetApiSunat}>
-                                                    <img src={images.sunat} alt="Sunat" width="12" />
-                                                </button>
-                                            </div>
+                                            {
+                                                documentoPn === "" &&
+                                                <div className="invalid-feedback">
+                                                    Ingrese un valor.
+                                                </div>
+                                            }
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="form-group">
-                                    <label>Razón Social/Apellidos y Nombres <i className="fa fa-asterisk text-danger small"></i></label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        ref={this.refInformacion}
-                                        value={this.state.informacion}
-                                        onChange={(event) => {
-                                            if (event.target.value.trim().length > 0) {
-                                                this.setState({
-                                                    informacion: event.target.value,
-                                                    messageWarning: '',
-                                                });
-                                            } else {
-                                                this.setState({
-                                                    informacion: event.target.value,
-                                                    messageWarning: 'Ingrese la razón social o apellidos y nombres',
-                                                });
-                                            }
-                                        }}
-                                        placeholder='Ingrese la razón social o apellidos y nombres' />
+                                {/* Apelldiso y Npmbres */}
+                                <div className='row'>
+                                    <div className="form-group col-md-12">
+                                        <label>Apellidos y Nombres <i className="fa fa-asterisk text-danger small"></i></label>
+                                        <input
+                                            type="text"
+                                            className={`form-control ${informacionPn ? "" : "is-invalid"}`}
+                                            ref={this.refInformacion}
+                                            value={informacionPn}
+                                            onChange={this.handleInputInformacionPn}
+                                            placeholder='Ingrese la razón social o apellidos y nombres'
+                                        />
+                                        {
+                                            informacionPn === "" &&
+                                            <div className="invalid-feedback">
+                                                Ingrese un valor.
+                                            </div>
+                                        }
+                                    </div>
                                 </div>
 
-                                <div className="form-group">
-                                    <label>Fecha de Nacimiento</label>
-                                    <input
-                                        type="date"
-                                        className="form-control"
-                                        ref={this.refFechaNacimiento}
-                                        value={this.state.fechaNacimiento}
-                                        onChange={(event) => this.setState({ fechaNacimiento: event.target.value })}
-                                    />
-                                </div>
-
+                                {/* Genero, Fecha de Nacimiento y Estado civil */}
                                 <div className="row">
-                                    <div className="form-group col-md-6">
-                                        <label>Genero <i className="fa fa-asterisk text-danger small"></i></label>
+                                    <div className="form-group col-md-4">
+                                        <label>Genero </label>
                                         <select
                                             className="form-control"
                                             ref={this.refGenero}
-                                            value={this.state.genero}
-                                            onChange={(event) => this.setState({ genero: event.target.value })}>
+                                            value={genero}
+                                            onChange={this.handleSelectGenero}>
                                             <option value="">-- Seleccione --</option>
                                             <option value="1">Masculino</option>
                                             <option value="2">Femenino</option>
                                         </select>
                                     </div>
 
-                                    <div className="form-group col-md-6">
+                                    <div className="form-group col-md-4">
                                         <label>Estado Civil</label>
                                         <select
                                             className="form-control"
-                                            value={this.state.estadoCivil}
-                                            onChange={(event) => this.setState({ estadoCivil: event.target.value })}>
+                                            value={estadoCivil}
+                                            onChange={this.handleSelectEstadoCvil}>
                                             <option value="">-- seleccione --</option>
                                             <option value="1">Soltero(a)</option>
                                             <option value="2">Casado(a)</option>
@@ -524,18 +771,103 @@ class ClienteEditar extends CustomComponent {
                                             <option value="4">Divorciado(a)</option>
                                         </select>
                                     </div>
+
+                                    <div className="form-group col-md-4">
+                                        <label>Fecha de Nacimiento</label>
+                                        <input
+                                            type="date"
+                                            className="form-control"
+                                            ref={this.refFechaNacimiento}
+                                            value={fechaNacimiento}
+                                            onChange={this.handleInputFechaNacimiento}
+                                        />
+                                    </div>
                                 </div>
 
-                                <div className="form-group">
-                                    <label>Observación</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        value={this.state.observacion}
-                                        onChange={(event) => this.setState({ observacion: event.target.value })}
-                                        placeholder='Ingrese alguna observación' />
+                                {/* Observación */}
+                                <div className='row'>
+                                    <div className="form-group col-md-12">
+                                        <label>Observación</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            value={observacion}
+                                            onChange={this.handleInputObservacion}
+                                            placeholder='Ingrese alguna observación' />
+                                    </div>
                                 </div>
 
+                                {/* Número de celular y Teléfono */}
+                                <div className='row'>
+                                    <div className="form-group col-md-6 col-12">
+                                        <label>N° de Celular </label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            value={celularPn}
+                                            ref={this.refCelularPn}
+                                            onChange={this.handleInputCelular}
+                                            onKeyDown={keyNumberPhone}
+                                            placeholder='Ingrese el número de celular.' />
+                                    </div>
+
+                                    <div className="form-group col-md-6 col-12">
+                                        <label>N° de Telefono</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            value={telefonoPn}
+                                            ref={this.refTelefonoPn}
+                                            onChange={this.handleInputTelefono}
+                                            onKeyDown={keyNumberPhone}
+                                            placeholder='Ingrese el número de telefono.' />
+                                    </div>
+                                </div>
+
+                                {/* Email */}
+                                <div className='row'>
+                                    <div className="form-group col-md-12">
+                                        <label>E-Mail</label>
+                                        <input
+                                            type="email"
+                                            className="form-control"
+                                            value={emailPn}
+                                            onChange={this.handleInputEmail}
+                                            placeholder='Ingrese el email' />
+                                    </div>
+                                </div>
+
+                                {/* Dirección */}
+                                <div className='row'>
+                                    <div className="form-group col-md-12">
+                                        <label>Dirección</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            ref={this.refDireccionPn}
+                                            value={direccionPn}
+                                            onChange={this.handleInputDireccion}
+                                            placeholder='Ingrese la dirección' />
+                                    </div>
+                                </div>
+
+                                {/* Ubigeo */}
+                                <div className='row'>
+                                    <div className="form-group col-md-12">
+                                        <label>Ubigeo</label>
+                                        <SearchBar
+                                            placeholder="Escribe para iniciar a filtrar..."
+                                            refTxtUbigeo={this.refUbigeoPn}
+                                            ubigeo={ubigeoPn}
+                                            filteredData={this.state.filteredData}
+                                            onEventClearInput={this.handleClearInput}
+                                            handleFilter={this.handleFilterPn}
+                                            onEventSelectItem={this.handleSelectItemPn}
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Estado y Predeterminado */}
                                 <div className="row">
                                     <div className="form-group col-md-6">
                                         <label>Estado:</label>
@@ -544,9 +876,9 @@ class ClienteEditar extends CustomComponent {
                                                 type="checkbox"
                                                 className="custom-control-input"
                                                 id="switch1"
-                                                checked={this.state.estado}
-                                                onChange={(value) => this.setState({ estado: value.target.checked })} />
-                                            <label className="custom-control-label" htmlFor="switch1">{this.state.estado ? "Activo" : "Inactivo"}</label>
+                                                checked={estadoPn}
+                                                onChange={this.handleInputEstado} />
+                                            <label className="custom-control-label" htmlFor="switch1">{estadoPn ? "Activo" : "Inactivo"}</label>
                                         </div>
                                     </div>
 
@@ -557,93 +889,191 @@ class ClienteEditar extends CustomComponent {
                                                 type="checkbox"
                                                 className="custom-control-input"
                                                 id="switch2"
-                                                checked={this.state.predeterminado}
-                                                onChange={(value) => this.setState({ predeterminado: value.target.checked })} />
-                                            <label className="custom-control-label" htmlFor="switch2">{this.state.predeterminado ? "Si" : "No"}</label>
+                                                checked={predeterminado}
+                                                onChange={this.handleInputPredeterminado} />
+                                            <label className="custom-control-label" htmlFor="switch2">{predeterminado ? "Si" : "No"}</label>
                                         </div>
                                     </div>
                                 </div>
+
                             </div>
 
-                            <div className="tab-pane fade" id="contacto" role="tabpanel" aria-labelledby="contacto-tab">
+                            {/* Contenedor persona juridica */}
+                            <div className="tab-pane fade" id="datosPj" role="tabpanel" aria-labelledby="personaJuridica-tab">
 
+                                {/* Tipo documento y Número de documento */}
                                 <div className="row">
-                                    <div className='col-md-6 col-12'>
-                                        <div className='form-group'>
-                                            <label>N° de Celular <i className="fa fa-asterisk text-danger small"></i></label>
+                                    <div className="form-group col-md-6">
+                                        <label>Tipo Documento <i className="fa fa-asterisk text-danger small"></i></label>
+                                        <select
+                                            className={`form-control ${idTipoDocumentoPj ? "" : "is-invalid"}`}
+                                            value={idTipoDocumentoPj}
+                                            ref={this.refTipoDocumentoPj}
+                                            onChange={this.handleSelectTipoDocumentoPj}>
+                                            <option value="">-- Seleccione --</option>
+                                            {
+                                                this.state.tiposDocumentos.filter(item => item.idTipoDocumento === 'TD0003').map((item, index) => (
+                                                    <option key={index} value={item.idTipoDocumento}>{item.nombre}</option>
+                                                ))
+                                            }
+                                        </select>
+                                        {
+                                            idTipoDocumentoPj === "" &&
+                                            <div className="invalid-feedback">
+                                                Seleccione un valor.
+                                            </div>
+                                        }
+                                    </div>
+
+                                    <div className="form-group col-md-6">
+                                        <label>N° de documento <i className="fa fa-asterisk text-danger small"></i></label>
+                                        <div className="input-group">
                                             <input
                                                 type="text"
-                                                className="form-control"
-                                                value={this.state.celular}
-                                                ref={this.refCelular}
-                                                onChange={(event) => {
-                                                    if (event.target.value.trim().length > 0) {
-                                                        this.setState({
-                                                            celular: event.target.value,
-                                                            messageWarning: '',
-                                                        });
-                                                    } else {
-                                                        this.setState({
-                                                            celular: event.target.value,
-                                                            messageWarning: 'Ingrese el número de celular.',
-                                                        });
-                                                    }
-                                                }}
-                                                onKeyDown={keyNumberPhone}
-                                                placeholder='Ingrese el número de celular.' />
+                                                className={`form-control ${documentoPj ? "" : "is-invalid"}`}
+                                                ref={this.refDocumentoPj}
+                                                value={documentoPj}
+                                                onChange={this.handleInputNumeroDocumentoPj}
+                                                onKeyDown={keyNumberInteger}
+                                                placeholder='00000000' />
+                                            <div className="input-group-append">
+                                                <button
+                                                    className="btn btn-outline-secondary"
+                                                    type="button"
+                                                    title="Sunat"
+                                                    onClick={this.handleGetApiSunat}>
+                                                    <img src={images.sunat} alt="Sunat" width="12" />
+                                                </button>
+                                            </div>
+                                            {
+                                                documentoPj === "" &&
+                                                <div className="invalid-feedback">
+                                                    Ingrese un valor.
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Razón Social */}
+                                <div className='row'>
+                                    <div className="form-group col-md-12">
+                                        <label>Razón Social <i className="fa fa-asterisk text-danger small"></i></label>
+                                        <input
+                                            type="text"
+                                            className={`form-control ${informacionPj ? "" : "is-invalid"}`}
+                                            ref={this.refInformacionPj}
+                                            value={informacionPj}
+                                            onChange={this.handleInputInformacionPj}
+                                            placeholder='Ingrese la razón social o apellidos y nombres'
+                                        />
+                                        {
+                                            informacionPj === "" &&
+                                            <div className="invalid-feedback">
+                                                Ingrese un valor.
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+
+                                {/* Número de celular y Teléfono */}
+                                <div className='row'>
+                                    <div className="form-group col-md-6 col-12">
+                                        <label>N° de Celular <i className="fa fa-asterisk text-danger small"></i></label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            value={celularPj}
+                                            ref={this.refCelularPj}
+                                            onChange={(event) => {
+                                                if (event.target.value.trim().length > 0) {
+                                                    this.setState({
+                                                        celularPj: event.target.value,
+                                                        messageWarning: '',
+                                                    });
+                                                } else {
+                                                    this.setState({
+                                                        celularPj: event.target.value,
+                                                        messageWarning: 'Ingrese el número de celular.',
+                                                    });
+                                                }
+                                            }}
+                                            onKeyDown={keyNumberPhone}
+                                            placeholder='Ingrese el número de celular.' />
+                                    </div>
+
+                                    <div className="form-group col-md-6 col-12">
+                                        <label>N° de Telefono</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            value={telefonoPj}
+                                            ref={this.refTelefonoPj}
+                                            onChange={(event) => this.setState({ telefonoPj: event.target.value, })}
+                                            onKeyDown={keyNumberPhone}
+                                            placeholder='Ingrese el número de telefono.' />
+                                    </div>
+                                </div>
+
+                                {/* Email */}
+                                <div className='row'>
+                                    <div className="form-group col-md-12">
+                                        <label>E-Mail</label>
+                                        <input
+                                            type="email"
+                                            className="form-control"
+                                            value={emailPj}
+                                            onChange={(event) => this.setState({ emailPj: event.target.value })}
+                                            placeholder='Ingrese el email' />
+                                    </div>
+                                </div>
+
+                                {/* Dirección */}
+                                <div className='row'>
+                                    <div className="form-group col-md-12">
+                                        <label>Dirección</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            value={direccionPj}
+                                            ref={this.refDireccionPj}
+                                            onChange={(event) => this.setState({ direccionPj: event.target.value })}
+                                            placeholder='Ingrese la dirección' />
+                                    </div>
+                                </div>
+
+                                {/* Ubigeo */}
+                                <div className='row'>
+                                    <div className="form-group col-md-12">
+                                        <label>Ubigeo</label>
+                                        <SearchBar
+                                            placeholder="Escribe para iniciar a filtrar..."
+                                            refTxtUbigeo={this.refUbigeoPj}
+                                            ubigeo={ubigeoPj}
+                                            filteredData={this.state.filteredData}
+                                            onEventClearInput={this.handleClearInput}
+                                            handleFilter={this.handleFilterPj}
+                                            onEventSelectItem={this.handleSelectItemPj}
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Estado y Predeterminado */}
+                                <div className="row">
+                                    <div className="form-group col-md-6 col-12">
+                                        <label>Estado:</label>
+                                        <div className="custom-control custom-switch">
+                                            <input
+                                                type="checkbox"
+                                                className="custom-control-input"
+                                                id="switch3"
+                                                checked={estadoPj}
+                                                onChange={(value) => this.setState({ estadoPj: value.target.checked })} />
+                                            <label className="custom-control-label" htmlFor="switch3">{this.state.estadoPj ? "Activo" : "Inactivo"}</label>
                                         </div>
                                     </div>
 
-                                    <div className='col-md-6 col-12'>
-                                        <div className="form-group">
-                                            <label>N° de Telefono</label>
-                                            <input
-                                                type="text"
-                                                className="form-control"
-                                                value={this.state.telefono}
-                                                ref={this.refTelefono}
-                                                onChange={(event) => this.setState({ telefono: event.target.value, })}
-                                                onKeyDown={keyNumberPhone}
-                                                placeholder='Ingrese el número de telefono.' />
-                                        </div>
-                                    </div>
                                 </div>
-
-
-                                <div className="form-group">
-                                    <label>E-Mail</label>
-                                    <input
-                                        type="email"
-                                        className="form-control"
-                                        value={this.state.email}
-                                        onChange={(event) => this.setState({ email: event.target.value })}
-                                        placeholder='Ingrese el email' />
-                                </div>
-
-                                <div className="form-group">
-                                    <label>Dirección</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        value={this.state.direccion}
-                                        ref={this.refDireccion}
-                                        onChange={(event) => this.setState({ direccion: event.target.value })}
-                                        placeholder='Ingrese la dirección' />
-                                </div>
-
-                                <div className="form-group">
-                                    <label>Ubigeo</label>
-                                    <SearchBar
-                                        placeholder="Escribe para iniciar a filtrar..."
-                                        refTxtUbigeo={this.refUbigeo}
-                                        ubigeo={this.state.ubigeo}
-                                        filteredData={this.state.filteredData}
-                                        onEventClearInput={this.handleClearInput}
-                                        handleFilter={this.handleFilter}
-                                        onEventSelectItem={this.handleSelectItem}
-                                    />
-                                </div>
-
                             </div>
                         </div>
 
@@ -652,7 +1082,7 @@ class ClienteEditar extends CustomComponent {
 
                 <div className="row">
                     <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
-                        <button type="button" className="btn btn-primary mr-2" onClick={this.handleEditarCliente}>Guardar</button>
+                        <button type="button" className="btn btn-primary mr-2" onClick={() => this.handleSave()}>Guardar</button>
                         <button type="button" className="btn btn-danger" onClick={() => this.props.history.goBack()}>Cancelar</button>
                     </div>
                 </div>

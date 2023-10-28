@@ -10,26 +10,46 @@ class Cliente {
      */
     async list(req) {
         try {
-            const lista = await conec.query(`SELECT 
-                c.idCliente ,             
-                td.nombre as tipodocumento,
-                c.documento,
-                c.informacion,
-                c.celular,
-                c.telefono,
-                c.direccion,
-                c.predeterminado,
-                c.estado
-                FROM clienteNatural AS c
-                INNER JOIN tipoDocumento AS td ON td.idTipoDocumento = c.idTipoDocumento                
+            const lista = await conec.query(`SELECT *
+                FROM(
+                    SELECT 
+                    cn.idCliente ,             
+                    td.nombre as tipodocumento,
+                    cn.documento,
+                    cn.informacion,
+                    cn.celular,
+                    cn.telefono,
+                    cn.direccion,
+                    cn.predeterminado,
+                    cn.estado,
+                    cn.fecha,
+                    cn.hora
+                    FROM clienteNatural AS cn
+                    INNER JOIN tipoDocumento AS td ON td.idTipoDocumento = cn.idTipoDocumento 
+                    UNION 
+                    SELECT 
+                    cj.idCliente,             
+                    td.nombre as tipodocumento,
+                    cj.documento,
+                    cj.informacion,
+                    cj.celular,
+                    cj.telefono,
+                    cj.direccion,
+                    0 AS predeterminado,
+                    cj.estado,
+                    cj.fecha,
+                    cj.hora                    
+                    FROM clienteJuridico AS cj
+                    INNER JOIN tipoDocumento AS td ON td.idTipoDocumento = cj.idTipoDocumento 
+                ) AS ac      
                 WHERE 
                 ? = 0 
                 OR
-                ? = 1 and c.documento like concat(?,'%') 
+                ? = 1 and ac.documento like concat(?,'%') 
                 OR
-                ? = 1 and c.informacion like concat('%',?,'%')
+                ? = 1 and ac.informacion like concat('%',?,'%')
                 
-                ORDER BY c.fecha ASC, c.hora ASC
+                ORDER BY ac.fecha ASC, ac.hora ASC
                 LIMIT ?,?`, [
                 parseInt(req.query.opcion),
 
@@ -138,109 +158,192 @@ class Cliente {
         try {
             connection = await conec.beginTransaction();
 
-            const validate = await conec.execute(connection, `SELECT * FROM clienteNatural WHERE documento = ?`, [
-                req.body.documento,
-            ]);
+            if (req.body.tipo === 1) {
+                const validate = await conec.execute(connection, `SELECT * FROM clienteNatural WHERE documento = ?`, [
+                    req.body.documento,
+                ]);
 
-            if (validate.length > 0) {
-                await conec.rollback(connection);
-                return `El número de documento a ingresar ya se encuentre registrado con los datos de ${validate[0].informacion}`;
+                if (validate.length > 0) {
+                    await conec.rollback(connection);
+                    return `El número de documento a ingresar ya se encuentre registrado con los datos de ${validate[0].informacion}`;
+                }
+
+                const result = await conec.execute(connection, 'SELECT idCliente FROM clienteNatural');
+                let idCliente = "CN0001";
+
+                if (result.length != 0) {
+                    const quitarValor = result.map(item => parseInt(item.idCliente.replace("CN", '')));
+                    const incremental = Math.max(...quitarValor) + 1;
+                    const formattedIncremental = String(incremental).padStart(4, '0'); // Formatea el número con ceros a la izquierda si es necesario
+                    idCliente = `CN${formattedIncremental}`;
+                }
+
+                await conec.execute(connection, `INSERT INTO clienteNatural(
+                    idCliente, 
+                    idTipoDocumento,
+                    documento,
+                    informacion,
+                    celular,
+                    telefono,
+                    fechaNacimiento,
+                    email, 
+                    genero, 
+                    direccion,
+                    idUbigeo, 
+                    estadoCivil,
+                    predeterminado,
+                    estado, 
+                    observacion,
+                    fecha,
+                    hora,
+                    fupdate,
+                    hupdate,
+                    idUsuario)
+                    VALUES(?, ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, [
+                    idCliente,
+                    req.body.idTipoDocumento,
+                    req.body.documento,
+                    req.body.informacion,
+                    req.body.celular,
+                    req.body.telefono,
+                    req.body.fechaNacimiento,
+                    req.body.email,
+                    req.body.genero,
+                    req.body.direccion,
+                    req.body.idUbigeo,
+                    req.body.estadoCivil,
+                    req.body.predeterminado,
+                    req.body.estado,
+                    req.body.observacion,
+                    currentDate(),
+                    currentTime(),
+                    currentDate(),
+                    currentTime(),
+                    req.body.idUsuario,
+                ])
+
+                await conec.commit(connection);
+                return "insert";
+            } else {
+                const validate = await conec.execute(connection, `SELECT * FROM clienteJuridico WHERE documento = ?`, [
+                    req.body.documento,
+                ]);
+
+                if (validate.length > 0) {
+                    await conec.rollback(connection);
+                    return `El número de documento a ingresar ya se encuentre registrado con los datos de ${validate[0].informacion}`;
+                }
+
+                const result = await conec.execute(connection, 'SELECT idCliente FROM clienteJuridico');
+                let idCliente = "CJ0001";
+
+                if (result.length != 0) {
+                    const quitarValor = result.map(item => parseInt(item.idCliente.replace("CJ", '')));
+                    const incremental = Math.max(...quitarValor) + 1;
+                    const formattedIncremental = String(incremental).padStart(4, '0'); // Formatea el número con ceros a la izquierda si es necesario
+                    idCliente = `CJ${formattedIncremental}`;
+                }
+
+                await conec.execute(connection, `INSERT INTO clienteJuridico(
+                    idCliente, 
+                    idTipoDocumento,
+                    documento,
+                    informacion,
+                    celular,
+                    telefono,
+                    email,
+                    direccion,
+                    idUbigeo,
+                    estado,
+                    fecha,
+                    hora,
+                    fupdate,
+                    hupdate,
+                    idUsuario)
+                    VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, [
+                    idCliente,
+                    req.body.idTipoDocumento,
+                    req.body.documento,
+                    req.body.informacion,
+                    req.body.celular,
+                    req.body.telefono,
+                    req.body.email,
+                    req.body.direccion,
+                    req.body.idUbigeo,
+                    req.body.estado,
+                    currentDate(),
+                    currentTime(),
+                    currentDate(),
+                    currentTime(),
+                    req.body.idUsuario,
+                ])
+
+                await conec.commit(connection);
+                return "insert";
             }
-
-            const result = await conec.execute(connection, 'SELECT idCliente FROM clienteNatural');
-            let idCliente = "CL0001";
-
-            if (result.length != 0) {
-                const quitarValor = result.map(item => parseInt(item.idCliente.replace("CL", '')));
-                const incremental = Math.max(...quitarValor) + 1;
-                const formattedIncremental = String(incremental).padStart(4, '0'); // Formatea el número con ceros a la izquierda si es necesario
-                idBanco = `CL${formattedIncremental}`;
-            }
-
-            if (req.body.predeterminado) {
-                await conec.execute(connection, `UPDATE clienteNatural SET predeterminado = 0`);
-            }
-
-            await conec.execute(connection, `INSERT INTO clienteNatural(
-            idCliente, 
-            idTipoDocumento,
-            documento,
-            informacion,
-            celular,
-            telefono,
-            fechaNacimiento,
-            email, 
-            genero, 
-            direccion,
-            idUbigeo, 
-            estadoCivil,
-            predeterminado,
-            estado, 
-            observacion,
-            fecha,
-            hora,
-            fupdate,
-            hupdate,
-            idUsuario)
-            VALUES(?, ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, [
-                idCliente,
-                req.body.idTipoDocumento,
-                req.body.documento,
-                req.body.informacion,
-                req.body.celular,
-                req.body.telefono,
-                req.body.fechaNacimiento,
-                req.body.email,
-                req.body.genero,
-                req.body.direccion,
-                req.body.idUbigeo,
-                req.body.estadoCivil,
-                req.body.predeterminado,
-                req.body.estado,
-                req.body.observacion,
-                currentDate(),
-                currentTime(),
-                currentDate(),
-                currentTime(),
-                req.body.idUsuario,
-            ])
-
-            await conec.commit(connection);
-            return "insert";
         } catch (error) {
             if (connection != null) {
                 await conec.rollback(connection);
             }
+            console.log(error)
             return "Se produjo un error de servidor, intente nuevamente.";
         }
     }
 
     async id(req) {
         try {
-            const result = await conec.query(`SELECT 
-            cl.idCliente,
-            cl.idTipoDocumento,
-            cl.documento,
-            cl.informacion,
-            cl.celular,
-            cl.telefono, 
-            DATE_FORMAT(cl.fechaNacimiento,'%Y-%m-%d') as fechaNacimiento,
-            cl.email, 
-            cl.genero,  
-            cl.direccion,
-            IFNULL(cl.idUbigeo,0) AS idUbigeo,
-            IFNULL(u.ubigeo, '') AS ubigeo,
-            IFNULL(u.departamento, '') AS departamento,
-            IFNULL(u.provincia, '') AS provincia,
-            IFNULL(u.distrito, '') AS distrito,
-            cl.estadoCivil,
-            cl.predeterminado,
-            cl.estado, 
-            cl.observacion
-            FROM clienteNatural AS cl 
-            LEFT JOIN ubigeo AS u ON u.idUbigeo = cl.idUbigeo
+            const result = await conec.query(`SELECT *
+            FROM (
+                SELECT 
+                cn.idCliente,
+                cn.idTipoDocumento,
+                cn.documento,
+                cn.informacion,
+                cn.celular,
+                cn.telefono, 
+                DATE_FORMAT(cn.fechaNacimiento,'%Y-%m-%d') as fechaNacimiento,
+                cn.email, 
+                cn.genero,  
+                cn.direccion,
+                IFNULL(cn.idUbigeo,0) AS idUbigeo,
+                IFNULL(u.ubigeo, '') AS ubigeo,
+                IFNULL(u.departamento, '') AS departamento,
+                IFNULL(u.provincia, '') AS provincia,
+                IFNULL(u.distrito, '') AS distrito,
+                cn.estadoCivil,
+                cn.predeterminado,
+                cn.estado, 
+                cn.observacion
+                FROM clienteNatural AS cn 
+                LEFT JOIN ubigeo AS u ON u.idUbigeo = cn.idUbigeo
+
+                UNION
+
+                SELECT 
+                cj.idCliente,
+                cj.idTipoDocumento,
+                cj.documento,
+                cj.informacion,
+                cj.celular,
+                cj.telefono, 
+                null AS fechaNacimiento,
+                cj.email, 
+                null AS genero,  
+                cj.direccion,
+                IFNULL(cj.idUbigeo,0) AS idUbigeo,
+                IFNULL(u.ubigeo, '') AS ubigeo,
+                IFNULL(u.departamento, '') AS departamento,
+                IFNULL(u.provincia, '') AS provincia,
+                IFNULL(u.distrito, '') AS distrito,
+                null AS estadoCivil,
+                0 AS predeterminado,
+                cj.estado, 
+                null AS observacion
+                FROM clienteJuridico AS cj 
+                LEFT JOIN ubigeo AS u ON u.idUbigeo = cj.idUbigeo
+            ) ac
             WHERE 
-            cl.idCliente = ?`, [
+            ac.idCliente = ?`, [
                 req.query.idCliente,
             ]);
 
@@ -259,21 +362,22 @@ class Cliente {
         try {
             connection = await conec.beginTransaction();
 
-            const validate = await conec.execute(connection, `SELECT * FROM clienteNatural WHERE idCliente <> ? AND documento = ?`, [
-                req.body.idCliente,
-                req.body.documento,
-            ]);
+            if (req.body.tipo === 1) {
+                const validate = await conec.execute(connection, `SELECT * FROM clienteNatural WHERE idCliente <> ? AND documento = ?`, [
+                    req.body.idCliente,
+                    req.body.documento,
+                ]);
 
-            if (validate.length > 0) {
-                await conec.rollback(connection);
-                return `El número de documento a ingresar ya se encuentre registrado con los datos de ${validate[0].informacion}`;
-            }
+                if (validate.length > 0) {
+                    await conec.rollback(connection);
+                    return `El número de documento a ingresar ya se encuentre registrado con los datos de ${validate[0].informacion}`;
+                }
 
-            if (req.body.predeterminado) {
-                await conec.execute(connection, `UPDATE clienteNatural SET predeterminado = 0`);
-            }
+                if (req.body.predeterminado) {
+                    await conec.execute(connection, `UPDATE clienteNatural SET predeterminado = 0`);
+                }
 
-            await conec.execute(connection, `UPDATE clienteNatural SET
+                await conec.execute(connection, `UPDATE clienteNatural SET
                 idTipoDocumento=?, 
                 documento=?,
                 informacion=?, 
@@ -292,30 +396,79 @@ class Cliente {
                 hupdate=?,
                 idUsuario=?
                 WHERE idCliente=?`, [
-                req.body.idTipoDocumento,
-                req.body.documento,
-                req.body.informacion,
-                req.body.celular,
-                req.body.telefono,
-                req.body.fechaNacimiento,
-                req.body.email,
-                req.body.genero,
-                req.body.direccion,
-                req.body.idUbigeo,
-                req.body.estadoCivil,
-                req.body.predeterminado,
-                req.body.estado,
-                req.body.observacion,
-                currentDate(),
-                currentTime(),
-                req.body.idUsuario,
-                req.body.idCliente
-            ]);
+                    req.body.idTipoDocumento,
+                    req.body.documento,
+                    req.body.informacion,
+                    req.body.celular,
+                    req.body.telefono,
+                    req.body.fechaNacimiento,
+                    req.body.email,
+                    req.body.genero,
+                    req.body.direccion,
+                    req.body.idUbigeo,
+                    req.body.estadoCivil,
+                    req.body.predeterminado,
+                    req.body.estado,
+                    req.body.observacion,
+                    currentDate(),
+                    currentTime(),
+                    req.body.idUsuario,
+                    req.body.idCliente
+                ]);
 
-            // global.io.emit('message', `Cliente actualizado :D`);
+                await conec.commit(connection)
+                return "update";
 
-            await conec.commit(connection)
-            return "update";
+            } else {
+
+                const validate = await conec.execute(connection, `SELECT * FROM clienteJuridico WHERE idCliente <> ? AND documento = ?`, [
+                    req.body.idCliente,
+                    req.body.documento,
+                ]);
+
+                if (validate.length > 0) {
+                    await conec.rollback(connection);
+                    return `El número de documento a ingresar ya se encuentre registrado con los datos de ${validate[0].informacion}`;
+                }
+
+                if (req.body.predeterminado) {
+                    await conec.execute(connection, `UPDATE clienteJuridico SET predeterminado = 0`);
+                }
+
+                await conec.execute(connection, `UPDATE clienteJuridico SET
+                idTipoDocumento=?, 
+                documento=?,
+                informacion=?, 
+                celular=?,
+                telefono=?,
+                email=?, 
+                direccion=?, 
+                idUbigeo=?,
+                estado=?,
+                fupdate=?,
+                hupdate=?,
+                idUsuario=?
+                WHERE idCliente=?`, [
+                    req.body.idTipoDocumento,
+                    req.body.documento,
+                    req.body.informacion,
+                    req.body.celular,
+                    req.body.telefono,
+                    req.body.email,
+                    req.body.direccion,
+                    req.body.idUbigeo,
+                    req.body.estado,
+                    currentDate(),
+                    currentTime(),
+                    req.body.idUsuario,
+                    req.body.idCliente
+                ]);
+
+                await conec.commit(connection)
+                return "update";
+
+            }
+
         } catch (error) {
             console.log(error)
             if (connection != null) {
@@ -357,9 +510,18 @@ class Cliente {
                 return 'No se puede eliminar el cliente ya que esta ligada a una venta.';
             }
 
-            await conec.execute(connection, `DELETE FROM clienteNatural WHERE idCliente  = ?`, [
-                req.query.idCliente
-            ]);
+            if (req.query.idCliente.startsWith("CN")) {
+                console.log("CN")
+                await conec.execute(connection, `DELETE FROM clienteNatural WHERE idCliente  = ?`, [
+                    req.query.idCliente
+                ]);
+            } else {
+                console.log("CJ")
+                await conec.execute(connection, `DELETE FROM clienteJuridico WHERE idCliente  = ?`, [
+                    req.query.idCliente
+                ]);
+            }
+
 
             await conec.commit(connection);
             return "delete";
@@ -382,16 +544,26 @@ class Cliente {
 
     async listsearch(req) {
         try {
-            const result = await conec.query(`
-            SELECT 
-            idCliente, 
-            documento, 
-            informacion
-            FROM clienteNatural
+            const result = await conec.query(`SELECT *
+            FROM (
+                SELECT 
+                cn.idCliente, 
+                cn.documento, 
+                cn.informacion
+                FROM clienteNatural AS cn
+
+                UNION
+
+                SELECT 
+                cj.idCliente, 
+                cj.documento, 
+                cj.informacion
+                FROM clienteJuridico AS cj
+            ) ac
             WHERE 
-            documento LIKE CONCAT('%',?,'%')
+            ac.documento LIKE CONCAT('%',?,'%')
             OR 
-            informacion LIKE CONCAT('%',?,'%')`, [
+            ac.informacion LIKE CONCAT('%',?,'%')`, [
                 req.query.filtrar,
                 req.query.filtrar,
             ]);
@@ -546,7 +718,11 @@ class Cliente {
      */
     async listventasasociadas(req) {
         try {
-            const cliente = await conec.query(`select
+
+            let cliente
+
+            if(req.query.idCliente.startsWith("CN")){
+                cliente = await conec.query(`select
                 tp.nombre as tipoDocumento,
                 c.documento,
                 c.informacion,
@@ -560,6 +736,23 @@ class Cliente {
                 where c.idCliente = ?`, [
                 req.query.idCliente,
             ]);
+            } else{
+                cliente = await conec.query(`select
+                tp.nombre as tipoDocumento,
+                c.documento,
+                c.informacion,
+                c.celular,
+                c.telefono,
+                c.email,
+                c.direccion
+                from 
+                clienteJuridico as c 
+                inner join tipoDocumento as tp on tp.idTipoDocumento = c.idTipoDocumento
+                where c.idCliente = ?`, [
+                req.query.idCliente,
+            ]);
+            }
+            
 
             if (cliente.length > 0) {
                 const ventas = await conec.query(`select 
