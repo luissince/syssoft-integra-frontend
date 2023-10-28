@@ -1,4 +1,4 @@
-import { keyNumberFloat, rounded } from "../../../../../../helper/utils.helper";
+import { keyNumberFloat, rounded } from "../../../../../helper/utils.helper";
 import ItemAlmacen from "./ItemAlmacen";
 import ItemProducto from "./ItemProducto";
 
@@ -214,104 +214,112 @@ const Combo = (props) => {
                 </div>
             </div>
 
+
+
             {/* SECTOR COMBO */}
-            <div className='row pt-3'>
-                <div className='col-12'>
+            {nombre == '' ?
+                <div className='row pt-3'>
+                    <div className='col-12'>
 
-                    <div className='row'>
-                        <div className="col-12">
-                            <h6>
-                                COMBO
-                            </h6>
+                        <div className='row'>
+                            <div className="col-12">
+                                <h6>
+                                    COMBO
+                                </h6>
+                            </div>
                         </div>
-                    </div>
 
-                    <div className="dropdown-divider"></div>
+                        <div className="dropdown-divider"></div>
 
-                    <div className="form-group">
-                        <label>
-                            Selecciona los productos y sus cantidades para armar un combo
-                        </label>
-                    </div>
+                        <div className="form-group">
+                            <label>
+                                Selecciona los productos y sus cantidades para armar un combo
+                            </label>
+                        </div>
 
-                    {
-                        combos.map((item, index) => {
-                            return <ItemProducto
-                                key={index}
-                                item={item}
-                                handleInputCantidadCombos={handleInputCantidadCombos}
-                                handleRemoveItemCombo={handleRemoveItemCombo}
-                            />;
-                        })
-                    }
+                        {
+                            combos.map((item, index) => {
+                                return <ItemProducto
+                                    key={index}
+                                    item={item}
+                                    handleInputCantidadCombos={handleInputCantidadCombos}
+                                    handleRemoveItemCombo={handleRemoveItemCombo}
+                                />;
+                            })
+                        }
 
-                    <div className="row">
-                        <div className='col-12'>
-                            <div className='form-group'>
-                                <div className="d-flex justify-content-between align-items-center">
-                                    <button className='btn text-success'
-                                        onClick={handleAddItemCombo}>
-                                        <i className='fa fa-plus-circle'></i> Agregar producto
-                                    </button>
+                        <div className="row">
+                            <div className='col-12'>
+                                <div className='form-group'>
+                                    <div className="d-flex justify-content-between align-items-center">
+                                        <button className='btn text-success'
+                                            onClick={handleAddItemCombo}>
+                                            <i className='fa fa-plus-circle'></i> Agregar producto
+                                        </button>
 
-                                    <h5 className="text-secondary">Costo total: S/ {rounded(combos.reduce((acumulador, item) => acumulador += item.costo * (item.cantidad ?? 0), 0))}</h5>
+                                        <h5 className="text-secondary">Costo total: S/ {rounded(combos.reduce((acumulador, item) => acumulador += item.costo * (item.cantidad ?? 0), 0))}</h5>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+                :
+                <div />
+            }
+
 
             {/* SECTOR INVENTARIO */}
-            <div className='row pt-3'>
-                <div className='col-12'>
+            {nombre == '' ?
+                <div className='row pt-3'>
+                    <div className='col-12'>
 
-                    <div className='row'>
-                        <div className="col-12">
-                            <h6>
-                                DETALLE DE INVENTARIO
-                            </h6>
-                        </div>
-                    </div>
-
-
-                    <div className="dropdown-divider"></div>
-
-                    <div className="form-group">
-                        <label>
-                            Distribuye y controla las cantidades de tus productos en diferentes lugares.
-                        </label>
-                    </div>
-
-                    {
-                        inventarios.map((item, index) => {
-                            return <ItemAlmacen
-                                key={index}
-                                idAlmacen={item.idAlmacen}
-                                nombreAlmacen={item.nombreAlmacen}
-
-                                cantidad={item.cantidad}
-                                cantidadMinima={item.cantidadMinima}
-                                cantidadMaxima={item.cantidadMaxima}
-
-                                handleRemoveItemInventario={handleRemoveItemInventario}
-                            />
-                        })
-                    }
-
-                    <div className="row">
-                        <div className='col-12'>
-                            <div className='form-group'>
-                                <button
-                                    className='btn text-success'
-                                    onClick={handleAddItemInventario}>
-                                    <i className='fa fa-plus-circle'></i> Agregar almacen
-                                </button>
+                        <div className='row'>
+                            <div className="col-12">
+                                <h6>
+                                    DETALLE DE INVENTARIO
+                                </h6>
                             </div>
                         </div>
-                    </div>
 
-                    {/* <div className='d-flex flex-row'>
+
+                        <div className="dropdown-divider"></div>
+
+                        <div className="form-group">
+                            <label>
+                                Distribuye y controla las cantidades de tus productos en diferentes lugares.
+                            </label>
+                        </div>
+
+                        {
+                            inventarios.map((item, index) => {
+                                return <ItemAlmacen
+                                    key={index}
+                                    idAlmacen={item.idAlmacen}
+                                    nombreAlmacen={item.nombreAlmacen}
+
+                                    cantidad={item.cantidad}
+                                    cantidadMinima={item.cantidadMinima}
+                                    cantidadMaxima={item.cantidadMaxima}
+
+                                    handleRemoveItemInventario={handleRemoveItemInventario}
+                                />
+                            })
+                        }
+
+                        <div className="row">
+                            <div className='col-12'>
+                                <div className='form-group'>
+                                    <button
+                                        className='btn text-success'
+                                        onClick={handleAddItemInventario}>
+                                        <i className='fa fa-plus-circle'></i> Agregar almacen
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* <div className='d-flex flex-row'>
                         <button
                             type='button'
                             className='btn'
@@ -353,8 +361,12 @@ const Combo = (props) => {
                             </div>
                         </button>
                     </div> */}
+                    </div>
                 </div>
-            </div>
+                :
+                <div />
+            }
+
 
 
             {/* SECTOR LISTAS DE PRECIOS */}

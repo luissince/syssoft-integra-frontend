@@ -1,4 +1,4 @@
-import { keyNumberFloat } from "../../../../../../helper/utils.helper";
+import { keyNumberFloat } from "../../../../../helper/utils.helper";
 import ItemAlmacen from "./ItemAlmacen";
 
 const Producto = (props) => {
@@ -20,7 +20,6 @@ const Producto = (props) => {
     const { costo, refCosto, handleInputCosto } = props;
 
     const { inventarios, handleAddItemInventario, handleRemoveItemInventario } = props;
-
 
     return (
         <div className="tab-pane fade show active" id="addproducto" role="tabpanel" aria-labelledby="addproducto-tab">
@@ -262,54 +261,59 @@ const Producto = (props) => {
             </div>
 
             {/* SECTOR INVENTARIO */}
-            <div className='row pt-3'>
-                <div className='col-12'>
+            {nombre == '' ?
+                <div className='row pt-3'>
+                    <div className='col-12'>
 
-                    <div className='row'>
-                        <div className="col-12">
-                            <h6>
-                                DETALLE DE INVENTARIO
-                            </h6>
+                        <div className='row'>
+                            <div className="col-12">
+                                <h6>
+                                    DETALLE DE INVENTARIO
+                                </h6>
+                            </div>
                         </div>
-                    </div>
 
-                    <div className="dropdown-divider"></div>
+                        <div className="dropdown-divider"></div>
 
-                    <div className="form-group">
-                        <label>
-                            Distribuye y controla las cantidades de tus productos en diferentes lugares.
-                        </label>
-                    </div>
+                        <div className="form-group">
+                            <label>
+                                Distribuye y controla las cantidades de tus productos en diferentes lugares.
+                            </label>
+                        </div>
 
-                    {
-                        inventarios.map((item, index) => {
-                            return <ItemAlmacen
-                                key={index}
-                                idAlmacen={item.idAlmacen}
-                                nombreAlmacen={item.nombreAlmacen}
+                        {
+                            inventarios.map((item, index) => {
+                                return <ItemAlmacen
+                                    key={index}
+                                    idAlmacen={item.idAlmacen}
+                                    nombreAlmacen={item.nombreAlmacen}
 
-                                cantidad={item.cantidad}
-                                cantidadMinima={item.cantidadMinima}
-                                cantidadMaxima={item.cantidadMaxima}
+                                    cantidad={item.cantidad}
+                                    cantidadMinima={item.cantidadMinima}
+                                    cantidadMaxima={item.cantidadMaxima}
 
-                                handleRemoveItemInventario={handleRemoveItemInventario}
-                            />
-                        })
-                    }
+                                    handleRemoveItemInventario={handleRemoveItemInventario}
+                                />
+                            })
+                        }
 
-                    <div className="row">
-                        <div className='col-12'>
-                            <div className='form-group'>
-                                <button
-                                    className='btn text-success'
-                                    onClick={handleAddItemInventario}>
-                                    <i className='fa fa-plus-circle'></i> Agregar almacen
-                                </button>
+                        <div className="row">
+                            <div className='col-12'>
+                                <div className='form-group'>
+                                    <button
+                                        className='btn text-success'
+                                        onClick={handleAddItemInventario}>
+                                        <i className='fa fa-plus-circle'></i> Agregar almacen
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+                : 
+                <div/>
+            }
+
 
             {/* SECTOR PRECIOS */}
             {/* <div className='row pt-4'>

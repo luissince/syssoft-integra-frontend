@@ -1,4 +1,4 @@
-import { keyNumberFloat, spinnerLoading } from "../../../../../../helper/utils.helper";
+import { keyNumberFloat, spinnerLoading } from "../../../../../helper/utils.helper";
 
 const ModalProducto = (props) => {
 

@@ -25,14 +25,14 @@ import {
 } from '../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
-import ModalInventario from './component/ModalInventario';
+import ModalInventario from '../component/ModalInventario';
 import { CANCELED } from '../../../../../model/types/types';
 import { connect } from 'react-redux';
-import Producto from './component/Producto';
-import Servicio from './component/Servicio';
-import Combo from './component/Combo';
-import DetalleImagen from './component/DetalleImagen';
-import ModalProducto from './component/ModalProducto';
+import Producto from '../component/Producto';
+import Servicio from '../component/Servicio';
+import Combo from '../component/Combo';
+import DetalleImagen from '../component/DetalleImagen';
+import ModalProducto from '../component/ModalProducto';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -196,6 +196,7 @@ class ProductoAgregar extends CustomComponent {
      */
     componentDidMount() {
         this.loadingData();
+        // this.handleFocusTab("addservicio-tab","addservicio")
 
         viewModal(this.idModalInventario, async () => {
             const almacenes = await this.fetchComboAlmacen();
@@ -955,7 +956,7 @@ class ProductoAgregar extends CustomComponent {
                     idMedida: this.state.idMedidaCombo,
                     idCategoria: this.state.idCategoriaCombo,
                     descripcion: this.state.descripcionCombo,
-                    precio: this.state.precioServicio,
+                    precio: this.state.precioCombo,
                     costo: 0,
                     combos: [],
                     inventarios: [],                    

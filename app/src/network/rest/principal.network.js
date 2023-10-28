@@ -66,6 +66,21 @@ export async function liberarTerreno(params, signal = null) {
  * @param {*} signal 
  * @returns SuccessReponse | ErrorResponse
  */
+export async function getProductId(params, signal = null) {
+  return await Resolve.create(
+    instancePrincipal.get("/api/producto/productbyid", {
+      signal: signal,
+      params: params,
+    })
+  );
+}
+
+/**
+ * 
+ * @param {*} params 
+ * @param {*} signal 
+ * @returns SuccessReponse | ErrorResponse
+ */
 export async function productoDetalle(params, signal = null) {
   return await Resolve.create(
     instancePrincipal.get("/api/producto/detalle", {
@@ -736,6 +751,17 @@ export async function listProducto(params, signal) {
 export async function addProducto(data) {
   return await Resolve.create(
     axios.post("/api/producto", data)
+  );
+}
+
+/**
+ * 
+ * @param {*} data 
+ * @returns 
+ */
+export async function updateProducto(data) {
+  return await Resolve.create(
+    axios.put("/api/producto", data)
   );
 }
 

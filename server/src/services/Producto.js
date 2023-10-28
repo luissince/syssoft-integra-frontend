@@ -75,7 +75,13 @@ class Producto {
                 idProducto = `PD${formattedIncremental}`;
             }
 
-            console.log(req.body)
+            const resultKardex = await conec.execute(connection, 'SELECT idKardex FROM kardex');
+            let idKardex = 0;
+
+            if (resultKardex.length != 0) {
+                const quitarValor = resultKardex.map(item => parseInt(item.idKardex.replace("KD", '')));
+                idKardex = Math.max(...quitarValor);
+            }
 
             await conec.execute(connection, `INSERT INTO producto(
                 idProducto,
@@ -138,10 +144,34 @@ class Producto {
                     inventariado.cantidadMinima,
                 ]);
 
-                
+                await conec.execute(connection, `INSERT INTO kardex(
+                    idKardex,
+                    idProducto,
+                    idTipoKardex,
+                    idMotivoKardex,
+                    detalle,
+                    cantidad,
+                    costo,
+                    idAlmacen,
+                    hora,
+                    fecha,
+                    idUsuario
+                ) VALUES(?,?,?,?,?,?,?,?,?,?,?)`, [
+                    `KD${String(idKardex += 1).padStart(4, '0')}`,
+                    idProducto,
+                    'TK0001',
+                    'MK0001',
+                    'insert: ' + req.body.descripcion,
+                    inventariado.cantidad,
+                    req.body.costo,
+                    inventariado.idAlmacen,
+                    currentTime(),
+                    currentDate(),
+                    req.body.idUsuario
+                ]);
             }
 
-            await conec.rollback(connection);
+            await conec.commit(connection);
             return "insert";
         } catch (error) {
             if (connection != null) {
@@ -486,113 +516,50 @@ class Producto {
         try {
             connection = await conec.beginTransaction();
 
-            let producto = await conec.execute(connection, `SELECT estado FROM producto
-            WHERE idProducto = ? `, [
+            await conec.execute(connection, `UPDATE producto SET
+                idCategoria = ?,
+                idMedida = ?,     
+                nombre = ?,
+                codigo = ?,
+                idCodigoSunat = ?,
+                descripcion = ?,
+                precio = ?,
+                costo = ?,
+                publicar = ?,
+                inventariado = ?,
+                negativo = ?,
+                estado = ?,
+                idUsuario = ?,
+                fupdate = ?,
+                hupdate = ?
+                WHERE idProducto = ?
+            `, [
+                req.body.idCategoria,
+                req.body.idMedida,
+                req.body.nombre,
+                req.body.codigo,
+                req.body.idCodigoSunat,
+                req.body.descripcion,
+                req.body.precio,
+                req.body.costo,
+                req.body.publicar,
+                req.body.inventariado,
+                req.body.negativo,
+                req.body.estado,
+                req.body.idUsuario,
+                currentDate(),
+                currentTime(),
                 req.body.idProducto
             ]);
 
-            if (producto.length === 0) {
-                await conec.rollback(connection);
-                return "noid";
-            }
+            await conec.commit(connection);
+            return "update";
 
-            if (producto[0].estado === 3) {
-                await conec.execute(connection, `UPDATE producto SET        
-                    descripcion = ?,
-                    idMedida = ?,
-                    medidaFrontal =?,
-                    costadoDerecho = ?,
-                    costadoIzquierdo = ?,
-                    medidaFondo = ?,
-                    areaProducto = ?,
-                    numeroPartida = ?,
-                    limiteFrontal = ?,
-                    limiteDerecho = ?,
-                    limiteIzquierdo = ?,
-                    limitePosterior = ?,
-                    ubicacionProducto = ?,
-                    fupdate = ?,
-                    hupdate = ?,
-                    idUsuario = ?
-                    WHERE idProducto = ?
-                    `, [
-                    req.body.descripcion,
-                    req.body.idMedida,
-                    req.body.medidaFrontal,
-                    req.body.costadoDerecho,
-                    req.body.costadoIzquierdo,
-                    req.body.medidaFondo,
-                    req.body.areaProducto,
-                    req.body.numeroPartida,
-                    req.body.limiteFrontal,
-                    req.body.limiteDerecho,
-                    req.body.limiteIzquierdo,
-                    req.body.limitePosterior,
-                    req.body.ubicacionProducto,
-                    currentDate(),
-                    currentTime(),
-                    req.body.idUsuario,
-                    req.body.idProducto
-                ]);
-
-                await conec.commit(connection);
-                return "update";
-            } else {
-                await conec.execute(connection, `UPDATE producto SET        
-                    idCategoria = ?,
-                    idConcepto = ?,
-                    descripcion = ?,
-                    costo = ?,
-                    precio = ?,
-                    idMedida = ?,
-                    estado = ?,
-                    medidaFrontal =?,
-                    costadoDerecho = ?,
-                    costadoIzquierdo = ?,
-                    medidaFondo = ?,
-                    areaProducto = ?,
-                    numeroPartida = ?,
-                    limiteFrontal = ?,
-                    limiteDerecho = ?,
-                    limiteIzquierdo = ?,
-                    limitePosterior = ?,
-                    ubicacionProducto = ?,
-                    fupdate = ?,
-                    hupdate = ?,
-                    idUsuario = ?
-                    WHERE idProducto = ?
-                    `, [
-                    req.body.idCategoria,
-                    req.body.idConcepto,
-                    req.body.descripcion,
-                    req.body.costo,
-                    req.body.precio,
-                    req.body.idMedida,
-                    req.body.estado,
-                    req.body.medidaFrontal,
-                    req.body.costadoDerecho,
-                    req.body.costadoIzquierdo,
-                    req.body.medidaFondo,
-                    req.body.areaProducto,
-                    req.body.numeroPartida,
-                    req.body.limiteFrontal,
-                    req.body.limiteDerecho,
-                    req.body.limiteIzquierdo,
-                    req.body.limitePosterior,
-                    req.body.ubicacionProducto,
-                    currentDate(),
-                    currentTime(),
-                    req.body.idUsuario,
-                    req.body.idProducto,
-                ])
-
-                await conec.commit(connection);
-                return "update";
-            }
         } catch (error) {
             if (connection != null) {
                 await conec.rollback(connection);
             }
+            HTMLFormControlsCollection.log(error)
             return "Se produjo un error de servidor, intente nuevamente.";
         }
     }
@@ -606,6 +573,14 @@ class Producto {
                 req.query.idProducto
             ]);
 
+            // Consulta el producto en algún almacen; de existir se procede con la eliminación de los almacenes
+            let almacenes = await conec.execute(connection, `SELECT pa.*, p.costo
+                FROM productoAlmacen AS pa
+                INNER JOIN producto AS p on pa.idProducto = p.idProducto
+                WHERE pa.idProducto = ?`, [
+                req.query.idProducto
+            ]);
+
             if (producto.length > 0) {
                 await conec.rollback(connection);
                 return "No se puede eliminar el producto ya que esta ligado a una venta.";
@@ -615,12 +590,69 @@ class Producto {
                 req.query.idProducto
             ]);
 
+            if (almacenes.length != 0) {
+                await conec.execute(connection, `DELETE FROM productoAlmacen WHERE idProducto = ?`, [
+                    req.query.idProducto
+                ]);
+
+                const resultKardex = await conec.execute(connection, 'SELECT idKardex FROM kardex');
+                let idKardex = 0;
+
+                if (resultKardex.length != 0) {
+                    const quitarValor = resultKardex.map(item => parseInt(item.idKardex.replace("KD", '')));
+                    idKardex = Math.max(...quitarValor);
+                }
+
+                for (const almacen of almacenes) {
+                    await conec.execute(connection, `INSERT INTO kardex(
+                        idKardex,
+                        idProducto,
+                        idTipoKardex,
+                        idMotivoKardex,
+                        detalle,
+                        cantidad,
+                        costo,
+                        idAlmacen,
+                        hora,
+                        fecha,
+                        idUsuario
+                    ) VALUES(?,?,?,?,?,?,?,?,?,?,?)`, [
+                        `KD${String(idKardex += 1).padStart(4, '0')}`,
+                        req.query.idProducto,
+                        'TK0002',
+                        'MK0003',
+                        'deleted',
+                        almacen.cantidad,
+                        almacen.costo,
+                        almacen.idAlmacen,
+                        currentTime(),
+                        currentDate(),
+                        req.query.idUsuario
+                    ]);
+                }
+            }
+
             await conec.commit(connection)
             return "delete";
         } catch (error) {
             if (connection != null) {
                 await conec.rollback(connection);
             }
+            console.log(error)
+            return "Se produjo un error de servidor, intente nuevamente.";
+        }
+    }
+
+    async productoById(req) {
+        try {
+            const cabecera = await conec.query(`SELECT *
+                from producto
+                WHERE idProducto = ?`, [
+                req.query.idProducto,
+            ]);
+
+            return cabecera[0];
+        } catch (error) {
             return "Se produjo un error de servidor, intente nuevamente.";
         }
     }

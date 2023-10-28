@@ -67,8 +67,6 @@ router.put('/', async function (req, res) {
     const result = await producto.update(req)
     if (result === "update") {
         res.status(200).send("Los datos se actualizarón correctamente.");
-    } else if (result === "noid") {
-        res.status(400).send("Se genero un problema al tratar de obtener los datos.")
     } else {
         res.status(500).send(result)
     }
@@ -78,6 +76,15 @@ router.delete('/', async function (req, res) {
     const result = await producto.delete(req);
     if (result === "delete") {
         res.status(200).send("Se eliminó correctamente el producto.");
+    } else {
+        res.status(500).send(result)
+    }
+});
+
+router.get('/productbyid', async function (req, res) {
+    const result = await producto.productoById(req)
+    if (typeof result === 'object') {
+        res.status(200).send(result)
     } else {
         res.status(500).send(result)
     }

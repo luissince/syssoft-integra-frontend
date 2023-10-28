@@ -1,4 +1,4 @@
-import { keyNumberFloat } from "../../../../../../helper/utils.helper";
+import { keyNumberFloat } from "../../../../../helper/utils.helper";
 
 const Servicio = (props) => {
 
@@ -16,9 +16,8 @@ const Servicio = (props) => {
 
     const { precio, refPrecio, handleInputPrecio } = props;
 
-
     return (
-        <div className="tab-pane fade" id="addservicio" role="tabpanel" aria-labelledby="addservicio-tab">
+        <div className="tab-pane fade " id="addservicio" role="tabpanel" aria-labelledby="addservicio-tab">
             {/* SECTOR TITULO*/}
             <div className='row'>
                 <div className="form-group col-md-12">

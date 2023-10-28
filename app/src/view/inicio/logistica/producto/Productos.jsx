@@ -33,6 +33,8 @@ class Productos extends CustomComponent {
             lista: [],
             restart: false,
 
+            idUsuario: this.props.token.userToken.idUsuario,
+
             opcion: 0,
             paginacion: 0,
             totalPaginacion: 0,
@@ -160,8 +162,10 @@ class Productos extends CustomComponent {
             if (event) {
                 alertInfo("Producto", "Procesando información...")
                 const params = {
-                    "idProducto": idProducto
+                    "idProducto": idProducto,
+                    "idUsuario": this.state.idUsuario
                 }
+                console.log(this.state.idUsuario)
                 const response = await deleteProducto(params);
                 if (response instanceof SuccessReponse) {
                     alertSuccess("Producto", response.data, () => {

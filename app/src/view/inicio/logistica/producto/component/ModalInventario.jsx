@@ -1,4 +1,4 @@
-import { keyNumberFloat, spinnerLoading } from "../../../../../../helper/utils.helper";
+import { keyNumberFloat, spinnerLoading } from "../../../../../helper/utils.helper";
 
 const ModalInventario = (props) => {
 
@@ -22,7 +22,7 @@ const ModalInventario = (props) => {
             <div className="modal-dialog modal-dialog-centered">
                 <div className="modal-content">
                     <div className="modal-header">
-                        <h5 className="modal-title">Seleccione bodeda</h5>
+                        <h5 className="modal-title">Seleccione Almacen</h5>
                         <button
                             type="button"
                             className="close"

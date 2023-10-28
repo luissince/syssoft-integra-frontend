@@ -1,4 +1,4 @@
-import { formatDecimal } from "../../../../../../helper/utils.helper";
+import { formatDecimal } from "../../../../../helper/utils.helper";
 
 const DetalleImagen = (props) => {
 
