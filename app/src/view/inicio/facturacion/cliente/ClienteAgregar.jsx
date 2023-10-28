@@ -331,21 +331,18 @@ class ClienteAgregar extends CustomComponent {
     handleGuardarPNatural = async () => {
         if (!isText(this.state.idTipoDocumentoPn)) {
             this.setState({ messageWarning: "Seleccione el tipo de documento." });
-            this.handleFocusTab("datos-tab", "datos");
             this.refTipoDocumentoPn.current.focus();
             return;
         }
 
         if (!isText(this.state.documento)) {
             this.setState({ messageWarning: "Ingrese el número de documento." });
-            this.handleFocusTab("datos-tab", "datos");
             this.refDocumento.current.focus();
             return;
         }
 
         if (!isText(this.state.informacion)) {
             this.setState({ messageWarning: "Ingrese los apellidos y nombres." });
-            this.handleFocusTab("datos-tab", "datos");
             this.refInformacion.current.focus();
             return;
         }
@@ -353,6 +350,7 @@ class ClienteAgregar extends CustomComponent {
         alertInfo("Cliente", "Procesando información...");
 
         const data = {
+            "tipo": this.state.tipo,
             "idTipoDocumento": this.state.idTipoDocumentoPn,
             "documento": this.state.documento.toString().trim().toUpperCase(),
             "informacion": this.state.informacion.trim().toUpperCase(),
@@ -415,6 +413,7 @@ class ClienteAgregar extends CustomComponent {
         alertInfo("Cliente", "Procesando información...");
 
         const data = {
+            "tipo": this.state.tipo,
             "idTipoDocumento": this.state.idTipoDocumentoPj,
             "documento": this.state.documento.toString().trim().toUpperCase(),
             "informacion": this.state.informacion.trim().toUpperCase(),
@@ -592,7 +591,7 @@ class ClienteAgregar extends CustomComponent {
                                 {/* Genero, Fecha de Nacimiento y Estado civil */}
                                 <div className="row">
                                     <div className="form-group col-md-4">
-                                        <label>Genero <i className="fa fa-asterisk text-danger small"></i></label>
+                                        <label>Genero </label>
                                         <select
                                             className="form-control"
                                             ref={this.refGenero}

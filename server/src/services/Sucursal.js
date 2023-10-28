@@ -391,7 +391,7 @@ class Sucursal {
     }
 
     async inicio(req, res) {
-        try {
+        try {           
             const result = await conec.query(`SELECT 
             p.idSucursal,
             p.nombre,
