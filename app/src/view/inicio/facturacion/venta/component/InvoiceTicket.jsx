@@ -2,7 +2,7 @@ import { images } from "../../../../../helper";
 
 const InvoiceTicket = (props) => {
 
-    const {handleCloseOptions} = props;
+    const {handleOpenAndCloseOptions} = props;
 
     return (
         <div className='invoice-ticket d-flex pl-3 align-items-center justify-content-between'>
@@ -19,7 +19,7 @@ const InvoiceTicket = (props) => {
                     <button 
                     className='btn btn-link rounded-circle'
                     data-bs-toggle="tooltip" data-bs-placement="bottom" title="Tooltip on bottom"
-                    onClick={handleCloseOptions}>
+                    onClick={handleOpenAndCloseOptions}>
                         <img src={images.options} alt='Opciones' />
                     </button>
                 </span>

@@ -163,7 +163,8 @@ class SearchBarClient extends React.Component {
               onKeyUp={(event) => this.onEventKeyUp(event)}
             />
             <div className="input-group-append">
-              <button className='btn btn-outline-success d-flex'>
+              <button className='btn btn-outline-success d-flex'
+              onClick={this.props.handleNewClient}>
                 <img src={images.addclient} alt='Nuevo cliente' />
                 <div className='ml-2'>Nuevo</div>
               </button>

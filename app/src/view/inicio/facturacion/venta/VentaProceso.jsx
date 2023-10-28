@@ -1,9 +1,12 @@
 import React from 'react';
 import {
+    alertDialog,
+    alertSuccess,
     alertWarning,
     clearModal,
     getCurrentMonth,
     getCurrentYear,
+    isText,
     showModal,
     spinnerLoading,
     viewModal,
@@ -11,7 +14,7 @@ import {
 import { connect } from 'react-redux';
 import { PosContainerWrapper } from '../../../../components/Container';
 import InvoiceTicket from './component/InvoiceTicket';
-import { getPredeterminado, listBancoCombo, listComprobanteCombo, listImpuestCombo, listMonedaCombo, listarClientesFilter } from '../../../../network/rest/principal.network';
+import { createFactura, getPredeterminado, listBancoCombo, listComprobanteCombo, listImpuestCombo, listMonedaCombo, listarClientesFilter } from '../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
 import { CANCELED } from '../../../../model/types/types';
@@ -23,6 +26,7 @@ import ModalConfiguration from './component/ModalConfiguration';
 import InvoiceView from './component/InvoiceView';
 import ModalSale from './component/ModalSale';
 import CustomComponent from '../../../../model/class/custom-component';
+import ModalCliente from './component/ModalCliente';
 
 class VentaProceso extends CustomComponent {
 
@@ -133,6 +137,12 @@ class VentaProceso extends CustomComponent {
         this.refMetodoCreditoVariable = React.createRef();
 
         this.abortControllerView = new AbortController();
+
+        this.sideModalInovice = "side-model-invoice";
+
+        this.sideModalCliente = "side-model-cliente";
+
+        this.modalVentaProceso = "modalVentaProceso";
     }
 
 
@@ -143,7 +153,7 @@ class VentaProceso extends CustomComponent {
     componentDidMount() {
         this.loadingData();
 
-        viewModal("modalVentaProceso", () => {
+        viewModal(this.modalVentaProceso, () => {
             this.refBancoContado.current.focus();
             const importeTotal = this.state.detalleVenta.reduce((accumulator, item) => {
                 const totalProductPrice = item.precio * item.cantidad;
@@ -153,7 +163,7 @@ class VentaProceso extends CustomComponent {
             this.setState({ importeTotal, loadModal: false })
         });
 
-        clearModal("modalVentaProceso", async () => {
+        clearModal(this.modalVentaProceso, async () => {
             await this.setStateAsync({
                 selectTipoPago: 1,
                 idBancoContado: '',
@@ -373,12 +383,8 @@ class VentaProceso extends CustomComponent {
         this.setState({ idMoneda: event.target.value, });
     }
 
-    handleSaveOptions = () => {
-        
-    }
-
     handleModalOptions = () => {
-        const invoice = document.getElementById("side-model-invoice");
+        const invoice = document.getElementById(this.sideModalInovice);
         if (invoice.classList.contains("toggled")) {
             invoice.classList.remove("toggled");
         } else {
@@ -386,16 +392,41 @@ class VentaProceso extends CustomComponent {
         }
     }
 
-    handleCloseOptions = (event) => {
+    handleSaveOptions = () => {
+
+    }
+
+    handleOpenAndCloseOptions = (event) => {
         event.stopPropagation();
         this.handleModalOptions();
     }
 
-    handleCloseOverlay = () => {
+    handleOpenAndCloseOverlay = () => {
         this.handleModalOptions();
     }
 
-    handle
+
+    handleModalCliente = () => {
+        const invoice = document.getElementById(this.sideModalCliente);
+        if (invoice.classList.contains("toggled")) {
+            invoice.classList.remove("toggled");
+        } else {
+            invoice.classList.add("toggled");
+        }
+    }
+
+    handleSaveCliente = () => {
+
+    }
+
+    handleOpenAndCloseCiente = (event) => {
+        event.stopPropagation();
+        this.handleModalCliente();
+    }
+
+    handleOpenAndCloseOverlayCliente = () => {
+        this.handleModalCliente();
+    }
 
     handleClearInputClient = async () => {
         await this.setStateAsync({ clientes: [], idCliente: '', cliente: "" });
@@ -459,78 +490,8 @@ class VentaProceso extends CustomComponent {
             return;
         }
 
-        showModal("modalVentaProceso");
+        showModal(this.modalVentaProceso);
         await this.setStateAsync({ loadModal: true })
-    }
-
-    handleClearSale = () => {
-        this.refProducto.current.focus();
-
-        this.setState({
-            loading: true,
-            msgLoading: 'Cargando datos...',
-
-            idComprobante: '',
-            comprobantes: [],
-
-            idMoneda: '',
-            monedas: [],
-            codiso: "PEN",
-
-            producto: '',
-            productos: [],
-            sarchProducto: false,
-            filterProducto: false,
-
-            idCliente: '',
-            clientes: [],
-            cliente: '',
-            filterCliente: false,
-
-            idImpuesto: '',
-            impuestos: [],
-
-            detalleVenta: [],
-
-            selectTipoPago: 1,
-
-            idComprobanteContado: '',
-            comprobantesCobro: [],
-
-            metodoPagoContado: '',
-
-            idBancoContado: '',
-            bancos: [],
-
-            montoInicialCheck: false,
-            inicial: '',
-            idComprobanteCredito: '',
-
-            idBancoCredito: '',
-            metodoPagoCredito: '',
-
-            monthPago: getCurrentMonth(),
-            yearPago: getCurrentYear(),
-
-            numCuota: '',
-            letraMensual: '',
-
-            frecuenciaPagoCredito: new Date().getDate() > 15 ? '30' : '15',
-
-            inicialCreditoVariableCheck: false,
-            inicialCreditoVariable: '',
-
-            frecuenciaPago: new Date().getDate() > 15 ? '30' : '15',
-            idComprobanteCreditoVariable: '',
-
-            idBancoCreditoVariable: '',
-            metodoPagoCreditoVariable: '',
-
-            importeTotal: 0.0
-        }, () => {
-            this.loadingData();
-        })
-
     }
 
     handleSelectTipoPago = (tipo) => {
@@ -613,6 +574,135 @@ class VentaProceso extends CustomComponent {
         this.setState({ metodoPagoCreditoVariable: event.target.value })
     }
 
+    handleClearSale = () => {
+        this.refProducto.current.focus();
+
+        this.setState({
+            loading: true,
+            msgLoading: 'Cargando datos...',
+
+            idComprobante: '',
+            comprobantes: [],
+
+            idMoneda: '',
+            monedas: [],
+            codiso: "PEN",
+
+            producto: '',
+            productos: [],
+            sarchProducto: false,
+            filterProducto: false,
+
+            idCliente: '',
+            clientes: [],
+            cliente: '',
+            filterCliente: false,
+
+            idImpuesto: '',
+            impuestos: [],
+
+            detalleVenta: [],
+
+            selectTipoPago: 1,
+
+            idComprobanteContado: '',
+            comprobantesCobro: [],
+
+            metodoPagoContado: '',
+
+            idBancoContado: '',
+            bancos: [],
+
+            montoInicialCheck: false,
+            inicial: '',
+            idComprobanteCredito: '',
+
+            idBancoCredito: '',
+            metodoPagoCredito: '',
+
+            monthPago: getCurrentMonth(),
+            yearPago: getCurrentYear(),
+
+            numCuota: '',
+            letraMensual: '',
+
+            frecuenciaPagoCredito: new Date().getDate() > 15 ? '30' : '15',
+
+            inicialCreditoVariableCheck: false,
+            inicialCreditoVariable: '',
+
+            frecuenciaPago: new Date().getDate() > 15 ? '30' : '15',
+            idComprobanteCreditoVariable: '',
+
+            idBancoCreditoVariable: '',
+            metodoPagoCreditoVariable: '',
+
+            importeTotal: 0.0
+        }, () => {
+            this.loadingData();
+        })
+    }
+
+    handleSaveProcess = () => {
+        if (!isText(this.state.idBancoContado)) {
+            alertWarning("Venta", "Seleccione un cuenta bancaria", () => {
+                this.refBancoContado.current.focus();
+            });
+            return;
+        }
+
+        alertDialog("Venta", "¿Estás seguro de continuar?", async (value) => {
+            if (value) {
+
+                let numCuota = 0;
+                switch (this.state.selectTipoPago) {
+                    case 2:
+                        numCuota = parseInt(this.state.numCuota);
+                        break;
+                    default: numCuota = 0;
+                }
+
+                let frecuencia = 0;
+                // switch(selectTipoPago){
+
+                // }
+
+                const data = {
+                    idComprobante: this.state.idComprobante,
+                    idCliente: this.state.idCliente,
+                    idUsuario: this.state.idUsuario,
+                    idSucursal: this.state.idSucursal,
+                    idMoneda: this.state.idMoneda,
+                    tipo: this.state.selectTipoPago === 1 ? 1 : 2,
+                    selectTipoPago: this.state.selectTipoPago,
+                    numCuota: numCuota,
+                    estado: this.state.selectTipoPago === 1 ? 1 : 2,
+                    frecuenciaPago: frecuencia,
+
+                    idComprobanteContado: this.state.idComprobanteContado,
+                    idBancoContado: this.state.idBancoContado,
+                    metodoPagoContado: this.state.metodoPagoContado,
+
+                    detalleVenta: this.state.detalleVenta
+                }
+
+                const response = await createFactura(data);
+
+                if (response instanceof SuccessReponse) {
+                    alertSuccess("Venta", response.data, () => {
+                        this.handleClearSale();
+                    });
+                }
+
+                if (response instanceof ErrorResponse) {
+                    alertWarning("Venta", response.getMessage(), () => {
+
+                    });
+                }
+            }
+        });
+    }
+
     /**
      * 
      * Método encargado de renderizar el html y mostrar en el DOM
@@ -622,18 +712,7 @@ class VentaProceso extends CustomComponent {
             <PosContainerWrapper>
 
                 <ModalSale
-                    informacion={
-                        {
-                            idCliente: this.state.idCliente,
-                            idComprobante: this.state.idComprobante,
-                            idUsuario: this.state.idUsuario,
-
-                            idMoneda: this.state.idMoneda,
-                            idSucursal: this.state.idSucursal,
-
-                            detalleVenta: this.state.detalleVenta
-                        }
-                    }
+                    modalVentaProceso={this.modalVentaProceso}
                     loadModal={this.state.loadModal}
                     selectTipoPago={this.state.selectTipoPago}
                     handleSelectTipoPago={this.handleSelectTipoPago}
@@ -715,6 +794,7 @@ class VentaProceso extends CustomComponent {
 
                     importeTotal={this.state.importeTotal}
 
+                    handleSaveProcess={this.handleSaveProcess}
                     handleClearSale={this.handleClearSale}
                 />
 
@@ -736,7 +816,7 @@ class VentaProceso extends CustomComponent {
                     />
                 </section>
                 <section className='invoice-right'>
-                    <InvoiceTicket handleCloseOptions={this.handleCloseOptions} />
+                    <InvoiceTicket handleOpenAndCloseOptions={this.handleOpenAndCloseOptions} />
                     {/* <InvoiceListPrices
                         refComprobante={this.refComprobante}
                         idComprobante={this.state.idComprobante}
@@ -750,6 +830,7 @@ class VentaProceso extends CustomComponent {
                         handleSelectComprobante={this.handleSelectComprobante}
                     />
                     <InvoiceClient
+                        handleOpenAndCloseCiente={this.handleOpenAndCloseCiente}
                         placeholder="Filtrar clientes..."
                         refCliente={this.refCliente}
                         cliente={this.state.cliente}
@@ -773,6 +854,8 @@ class VentaProceso extends CustomComponent {
                 </section>
 
                 <ModalConfiguration
+                    sideModalInovice={this.sideModalInovice}
+
                     idImpuesto={this.state.idImpuesto}
                     refImpuesto={this.refImpuesto}
                     impuestos={this.state.impuestos}
@@ -784,8 +867,16 @@ class VentaProceso extends CustomComponent {
                     handleSelectMoneda={this.handleSelectMoneda}
 
                     handleSaveOptions={this.handleSaveOptions}
-                    handleCloseOverlay={this.handleCloseOverlay}
-                    handleCloseOptions={this.handleCloseOptions}
+                    handleOpenAndCloseOverlay={this.handleOpenAndCloseOverlay}
+                    handleOpenAndCloseOptions={this.handleOpenAndCloseOptions}
+                />
+
+                <ModalCliente
+                    sideModalCliente={this.sideModalCliente}
+
+                    handleSaveCliente={this.handleSaveCliente}
+                    handleOpenAndCloseOverlayCliente={this.handleOpenAndCloseOverlayCliente}
+                    handleOpenAndCloseCiente={this.handleOpenAndCloseCiente}
                 />
             </PosContainerWrapper>
         );

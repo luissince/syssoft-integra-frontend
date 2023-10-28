@@ -63,10 +63,10 @@ const ItemSearch = (props) => {
                     />
                 </div>
             </div>
-            <button className='btn btn-outline-success d-flex align-items-center justify-content-center' style={{ minWidth: "10rem" }}>
+            {/* <button className='btn btn-outline-success d-flex align-items-center justify-content-center' style={{ minWidth: "10rem" }}>
                 <div className='mr-2'>Nuevo producto</div>
                 <img src={images.add} alt='Agregar Producto' />
-            </button>
+            </button> */}
         </div>
     );
 }
