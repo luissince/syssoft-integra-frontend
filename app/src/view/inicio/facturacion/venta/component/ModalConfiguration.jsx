@@ -1,6 +1,6 @@
 const ModalConfiguration = (props) => {
 
-    const { sideModalInovice } = props;
+    const { idModalConfiguration } = props;
 
     const { idImpuesto, refImpuesto, impuestos, handleSelectImpuesto } = props;
 
@@ -9,7 +9,7 @@ const ModalConfiguration = (props) => {
     const { handleSaveOptions, handleOpenAndCloseOverlay, handleOpenAndCloseOptions } = props;
 
     return (
-        <div id={sideModalInovice} className='side-modal'>
+        <div id={idModalConfiguration} className='side-modal'>
             <div className='side-modal_wrapper'>
                 <div className="card border-0 rounded-0">
                     <div className="card-header">Configuración de Venta</div>

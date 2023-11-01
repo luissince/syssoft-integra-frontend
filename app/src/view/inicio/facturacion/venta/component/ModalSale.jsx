@@ -1,3 +1,4 @@
+
 import {
     rounded,
     keyNumberFloat,
@@ -9,7 +10,7 @@ import {
 
 const ModalSale = (props) => {
 
-    const { modalVentaProceso } = props;
+    const { idModalVentaProceso } = props;
 
     const {
         loadModal,
@@ -21,17 +22,7 @@ const ModalSale = (props) => {
         mmonth,
         year,
 
-        refComprobanteContado,
-        idComprobanteContado,
-        handleSelectComprobanteContado,
-
-        refBancoContado,
-        idBancoContado,
-        handleSelectBancoContado,
-
         refMetodoContado,
-        metodoPagoContado,
-        handleSelectMetodoPagoContado,
 
         refMontoInicial,
         inicial,
@@ -94,12 +85,35 @@ const ModalSale = (props) => {
         importeTotal,
 
         handleSaveProcess,
-        handleClearSale
+
+        metodosPagoLista,
+        metodoPagoAgregado,
+        handleAddMetodPay,
+        handleInputMontoMetodoPay,
+        handleRemoveItemMetodPay,
+        vuelto
+
     } = props;
 
+    const generarVuelto = () => {
+        if (metodoPagoAgregado.length === 0) {
+            return <h6>Agrega algún método de pago.</h6>;
+        }
+
+        if (metodoPagoAgregado.length === 1) {
+            const metodo = metodoPagoAgregado[0];
+            if (metodo.vuelto) {
+                return <h6>Su cambio: <span>{rounded(vuelto)}</span></h6>
+            } else {
+                return <h6>El método de pago no genera vuelto.</h6>
+            }
+        }
+
+        return <h6>Más de dos metodos de pago no generan vuelto.</h6>
+    }
 
     return (
-        <div className="modal fade" id={modalVentaProceso} data-bs-keyboard="false" data-bs-backdrop="static">
+        <div className="modal fade" id={idModalVentaProceso} data-bs-keyboard="false" data-bs-backdrop="static">
             <div className="modal-dialog modal-lg modal-dialog-centered">
                 <div className="modal-content">
                     <div className="modal-header">
@@ -217,79 +231,61 @@ const ModalSale = (props) => {
                             selectTipoPago === 1 &&
                             <div className="row">
                                 <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
-                                    <div className="form-row">
-                                        <div className="form-group col-md-12">
-                                            <div className="input-group">
-                                                <div className="input-group-prepend">
-                                                    <div className="input-group-text"><i className="bi bi-receipt"></i></div>
-                                                </div>
-                                                <select
-                                                    title="Lista de caja o banco a depositar"
-                                                    className="form-control"
-                                                    ref={refComprobanteContado}
-                                                    value={idComprobanteContado}
-                                                    onChange={handleSelectComprobanteContado}
-                                                >
-                                                    <option value="">-- Comprobante --</option>
-                                                    {
-                                                        comprobantesCobro.map((item, index) => (
-                                                            <option key={index} value={item.idComprobante}>{item.nombre + " (" + item.serie + ")"}</option>
-                                                        ))
-                                                    }
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
 
                                     <div className="form-row">
                                         <div className="form-group col-md-12">
+                                            <label>Metodo de pago:</label>
                                             <div className="input-group">
                                                 <div className="input-group-prepend">
-                                                    <div className="input-group-text"><i className="bi bi-bank"></i></div>
-                                                </div>
-                                                <select
-                                                    title="Lista de caja o banco a depositar"
-                                                    className="form-control"
-                                                    ref={refBancoContado}
-                                                    value={idBancoContado}
-                                                    onChange={handleSelectBancoContado}
-                                                >
-                                                    <option value="">-- Cuenta bancaria --</option>
-                                                    {
-                                                        bancos.map((item, index) => (
-                                                            <option key={index} value={item.idBanco}>{item.nombre}</option>
-                                                        ))
-                                                    }
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="form-row">
-                                        <div className="form-group col-md-12">
-                                            <div className="input-group">
-                                                <div className="input-group-prepend">
-                                                    <div className="input-group-text"><i className="bi bi-credit-card-2-back"></i></div>
+                                                    <div className="input-group-text"><i className="bi bi-tag-fill"></i></div>
                                                 </div>
                                                 <select
                                                     title="Lista metodo de pago"
                                                     className="form-control"
                                                     ref={refMetodoContado}
-                                                    value={metodoPagoContado}
-                                                    onChange={handleSelectMetodoPagoContado}
                                                 >
-                                                    <option value="">-- Metodo de pago --</option>
-                                                    <option value="1">Efectivo</option>
-                                                    <option value="2">Consignación</option>
-                                                    <option value="3">Transferencia</option>
-                                                    <option value="4">Cheque</option>
-                                                    <option value="5">Tarjeta crédito</option>
-                                                    <option value="6">Tarjeta débito</option>
+
+                                                    {metodosPagoLista.map((item, index) => (
+                                                        <option key={index} value={item.idMetodo}>
+                                                            {item.nombre}
+                                                        </option>
+                                                    ))}
                                                 </select>
+                                                <div className="input-group-append">
+                                                    <button className='btn btn-outline-success d-flex' title="Agregar Pago"
+                                                        onClick={handleAddMetodPay}>
+                                                        <i className="bi bi-plus-circle-fill"></i>
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
+
+                                    {
+                                        metodoPagoAgregado.map((item, index) => (
+                                            <MetodoPago
+                                                key={index}
+                                                nameMetodPay={item.nombre}
+                                                idMetodo={item.idMetodo}
+                                                monto={item.monto}
+                                                handleInputMontoMetodoPay={handleInputMontoMetodoPay}
+                                                handleRemoveItemMetodPay={handleRemoveItemMetodPay}
+                                            />
+                                        ))
+                                    }
                                 </div>
+
+                                <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"><br /></div>
+
+                                <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                                    <div className="text-center">
+                                        {
+                                            generarVuelto()
+                                        }
+
+                                    </div>
+                                </div>
+
                             </div>
                         }
 
@@ -662,7 +658,7 @@ const ModalSale = (props) => {
 
                     </div>
 
-                        {/* Procesar y cerrar venta */}
+                    {/* Procesar y cerrar venta */}
                     <div className="modal-footer">
                         <button type="button" className="btn btn-primary" onClick={handleSaveProcess}>Completar venta</button>
                         <button type="button" className="btn btn-danger" data-bs-dismiss="modal">Cerrar</button>
@@ -672,5 +668,35 @@ const ModalSale = (props) => {
         </div>
     );
 }
+
+const MetodoPago = ({ idMetodo, nameMetodPay, monto, handleInputMontoMetodoPay, handleRemoveItemMetodPay }) => {
+    return (
+        <div className="input-group mb-2">
+            <input
+                autoFocus
+                title="Monto"
+                type="text"
+                className="form-control"
+                placeholder="Monto"
+                value={monto}
+                onChange={(event) => handleInputMontoMetodoPay(event, idMetodo)}
+                onKeyDown={keyNumberFloat}
+            />
+            <div className="input-group-prepend">
+                <div className="input-group-text">
+                    <span>{nameMetodPay}</span>
+                </div>
+            </div>
+            <div className="input-group-append">
+                <button className='btn btn-outline-danger d-flex' title="Agregar Pago"
+                    onClick={() => handleRemoveItemMetodPay(idMetodo)}>
+                    <i className="bi bi-trash3-fill"></i>
+                </button>
+            </div>
+        </div>
+    )
+}
+
+
 
 export default ModalSale;

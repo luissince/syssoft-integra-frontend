@@ -28,6 +28,10 @@ import ModalSale from './component/ModalSale';
 import CustomComponent from '../../../../model/class/custom-component';
 import ModalCliente from './component/ModalCliente';
 
+/**
+ * Componente que representa una funcionalidad específica.
+ * @extends React.Component
+ */
 class VentaProceso extends CustomComponent {
 
     /**
@@ -37,6 +41,11 @@ class VentaProceso extends CustomComponent {
 
     constructor(props) {
         super(props);
+
+        /**
+         * Estado inicial del componente.
+         * @type {Object}
+         */
         this.state = {
             idComprobante: '',
             comprobantes: [],
@@ -71,12 +80,7 @@ class VentaProceso extends CustomComponent {
             loadModal: false,
             selectTipoPago: 1,
 
-            idComprobanteContado: '',
             comprobantesCobro: [],
-
-            metodoPagoContado: '',
-
-            idBancoContado: '',
             bancos: [],
 
             montoInicialCheck: false,
@@ -106,7 +110,35 @@ class VentaProceso extends CustomComponent {
             mmonth: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
             year: [2015, 2016, 2017, 2018, 2019, 2020, 2020, 2021, 2022, 2023, 2024, 2025, 2026, 2027, 2028, 2029, 2030],
 
-            importeTotal: 0.0
+            importeTotal: 0.0,
+
+            //Modal Sale
+            metodosPagoLista: [
+                {
+                    "idMetodo": "MT0001",
+                    "nombre": "Efectivo",
+                    "decripcion": "",
+                    "predeterminado": true,
+                    "vuelto": true
+                },
+                {
+                    "idMetodo": "MT0002",
+                    "nombre": "Yape",
+                    "decripcion": "",
+                    "predeterminado": false,
+                    "vuelto": false
+                },
+                {
+                    "idMetodo": "MT0003",
+                    "nombre": "Tarjeta de crédito",
+                    "decripcion": "",
+                    "predeterminado": false,
+                    "vuelto": false
+                }
+            ],
+
+            metodoPagoAgregado: [],
+            vuelto: 0
         }
 
         this.refProducto = React.createRef();
@@ -117,9 +149,6 @@ class VentaProceso extends CustomComponent {
         this.refCliente = React.createRef();
         this.refMoneda = React.createRef();
 
-        this.refComprobanteContado = React.createRef();
-
-        this.refBancoContado = React.createRef();
         this.refMetodoContado = React.createRef();
 
         this.refMontoInicial = React.createRef();
@@ -138,36 +167,66 @@ class VentaProceso extends CustomComponent {
 
         this.abortControllerView = new AbortController();
 
-        this.sideModalInovice = "side-model-invoice";
+        this.idModalConfiguration = "idModalConfiguration";
 
-        this.sideModalCliente = "side-model-cliente";
+        this.idModalCliente = "idModalCliente";
 
-        this.modalVentaProceso = "modalVentaProceso";
+        this.idModalVentaProceso = "idModalVentaProceso";
+
     }
 
 
-    /**
-     * Método de cliclo de vida
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | Método de cliclo de vida
+    |--------------------------------------------------------------------------
+    |
+    | El ciclo de vida de un componente en React consta de varios métodos que se ejecutan en diferentes momentos durante la vida útil
+    | del componente. Estos métodos proporcionan puntos de entrada para realizar acciones específicas en cada etapa del ciclo de vida,
+    | como inicializar el estado, montar el componente, actualizar el estado y desmontar el componente. Estos métodos permiten a los
+    | desarrolladores controlar y realizar acciones específicas en respuesta a eventos de ciclo de vida, como la creación, actualización
+    | o eliminación del componente. Entender y utilizar el ciclo de vida de React es fundamental para implementar correctamente la lógica
+    | de la aplicación y optimizar el rendimiento del componente.
+    |
+    */
 
+    /**
+     * @description Método que se ejecuta después de que el componente se haya montado en el DOM.
+     */
     componentDidMount() {
         this.loadingData();
 
-        viewModal(this.modalVentaProceso, () => {
-            this.refBancoContado.current.focus();
+        viewModal(this.idModalVentaProceso, () => {
+
             const importeTotal = this.state.detalleVenta.reduce((accumulator, item) => {
                 const totalProductPrice = item.precio * item.cantidad;
                 return accumulator + totalProductPrice;
             }, 0);
 
+
+            const metodoContadoPred = this.state.metodosPagoLista.find(item => item.predeterminado === true);
+
+            this.refMetodoContado.current.value = metodoContadoPred ? metodoContadoPred.idMetodo : ''
+
+            if (metodoContadoPred) {
+                const item = {
+                    "idMetodo": metodoContadoPred.idMetodo,
+                    "nombre": metodoContadoPred.nombre,
+                    "monto": '',
+                    "vuelto": metodoContadoPred.vuelto
+                }
+                this.setState(prevState => ({
+                    metodoPagoAgregado: [...prevState.metodoPagoAgregado, item]
+                }))
+            }
+
             this.setState({ importeTotal, loadModal: false })
         });
 
-        clearModal(this.modalVentaProceso, async () => {
+        clearModal(this.idModalVentaProceso, async () => {
             await this.setStateAsync({
-                selectTipoPago: 1,
-                idBancoContado: '',
-                metodoPagoContado: '',
+                selectTipoPago: 1,        
+
                 montoInicialCheck: false,
                 inicial: '',
                 idBancoCredito: '',
@@ -183,19 +242,37 @@ class VentaProceso extends CustomComponent {
                 idBancoCreditoVariable: '',
                 metodoPagoCreditoVariable: '',
                 frecuenciaPago: new Date().getDate() > 15 ? '30' : '15',
+
+                metodoPagoAgregado: [],
+                vuelto: 0
             });
         })
     }
 
+    /**
+    * @description Método que se ejecuta antes de que el componente se desmonte del DOM.
+    */
     componentWillUnmount() {
         this.abortControllerView.abort();
     }
 
-    /**
-     * 
-     * Métodos de acción
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | Métodos de acción
+    |--------------------------------------------------------------------------
+    |
+    | Carga los datos iniciales necesarios para inicializar el componente. Este método se utiliza típicamente
+    | para obtener datos desde un servicio externo, como una API o una base de datos, y actualizar el estado del
+    | componente en consecuencia. El método loadingData puede ser responsable de realizar peticiones asíncronas
+    | para obtener los datos iniciales y luego actualizar el estado del componente una vez que los datos han sido
+    | recuperados. La función loadingData puede ser invocada en el montaje inicial del componente para asegurarse
+    | de que los datos requeridos estén disponibles antes de renderizar el componente en la interfaz de usuario.
+    |
+    */
 
+    /**
+    * @description Método que se ejecuta después de que el componente se haya montado en el DOM.
+    */
     loadingData = async () => {
         const [libre, facturado, cobro, monedas, impuestos, bancos, predeterminado] = await Promise.all([
             await this.fetchComprobante("2"),
@@ -210,8 +287,7 @@ class VentaProceso extends CustomComponent {
         const comprobantes = [...facturado, ...libre];
         const monedaFilter = monedas.find((item) => item.predeterminado === 1);
         const impuestoFilter = impuestos.find((item) => item.preferida === 1);
-        const comprobanteFilter = comprobantes.find((item) => item.preferida === 1);
-        const comprobanteCobroFilter = cobro.find((item) => item.preferida === 1);
+        const comprobanteFilter = comprobantes.find((item) => item.preferida === 1);       
 
         if (typeof predeterminado === 'object') {
             this.handleSelectItemClient(predeterminado);
@@ -227,7 +303,6 @@ class VentaProceso extends CustomComponent {
             idMoneda: monedaFilter ? monedaFilter.idMoneda : "",
             idImpuesto: impuestoFilter ? impuestoFilter.idImpuesto : "",
             idComprobante: comprobanteFilter ? comprobanteFilter.idComprobante : "",
-            idComprobanteContado: comprobanteCobroFilter ? comprobanteCobroFilter.idComprobante : "",
 
             codiso: monedaFilter ? monedaFilter.codiso : "PEN",
 
@@ -321,9 +396,21 @@ class VentaProceso extends CustomComponent {
         this.setState({ letraMensual: letra.toFixed(2) })
     }
 
-    /**
-     * Método de eventos
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | Método de eventos
+    |--------------------------------------------------------------------------
+    |
+    | El método handle es una convención utilizada para denominar funciones que manejan eventos específicos
+    | en los componentes de React. Estas funciones se utilizan comúnmente para realizar tareas o actualizaciones
+    | en el estado del componente cuando ocurre un evento determinado, como hacer clic en un botón, cambiar el valor
+    | de un campo de entrada, o cualquier otra interacción del usuario. Los métodos handle suelen recibir el evento
+    | como parámetro y se encargan de realizar las operaciones necesarias en función de la lógica de la aplicación.
+    | Por ejemplo, un método handle para un evento de clic puede actualizar el estado del componente o llamar a
+    | otra función específica de la lógica de negocio. La convención de nombres handle suele combinarse con un prefijo
+    | que describe el tipo de evento que maneja, como handleInputChange, handleClick, handleSubmission, entre otros. 
+    |
+    */
 
     handleAddItem = async (producto) => {
         if (this.state.idImpuesto === "") {
@@ -407,7 +494,7 @@ class VentaProceso extends CustomComponent {
 
 
     handleModalCliente = () => {
-        const invoice = document.getElementById(this.sideModalCliente);
+        const invoice = document.getElementById(this.modalCliente);
         if (invoice.classList.contains("toggled")) {
             invoice.classList.remove("toggled");
         } else {
@@ -490,24 +577,17 @@ class VentaProceso extends CustomComponent {
             return;
         }
 
-        showModal(this.modalVentaProceso);
+        showModal(this.idModalVentaProceso);
         await this.setStateAsync({ loadModal: true })
     }
 
+    
+    //------------------------------------------------------------------------------------------
+    // Modal Venta
+    //------------------------------------------------------------------------------------------
+
     handleSelectTipoPago = (tipo) => {
         this.setState({ selectTipoPago: tipo })
-    }
-
-    handleSelectComprobanteContado = (event) => {
-        this.setState({ idComprobanteContado: event.target.value })
-    }
-
-    handleSelectBancoContado = (event) => {
-        this.setState({ idBancoContado: event.target.value })
-    }
-
-    handleSelectMetodoPagoContado = (event) => {
-        this.setState({ metodoPagoContado: event.target.value })
     }
 
     handleTextMontoInicial = async (event) => {
@@ -605,12 +685,8 @@ class VentaProceso extends CustomComponent {
 
             selectTipoPago: 1,
 
-            idComprobanteContado: '',
             comprobantesCobro: [],
 
-            metodoPagoContado: '',
-
-            idBancoContado: '',
             bancos: [],
 
             montoInicialCheck: false,
@@ -643,14 +719,7 @@ class VentaProceso extends CustomComponent {
         })
     }
 
-    handleSaveProcess = () => {
-        if (!isText(this.state.idBancoContado)) {
-            alertWarning("Venta", "Seleccione un cuenta bancaria", () => {
-                this.refBancoContado.current.focus();
-            });
-            return;
-        }
-
+    handleSaveProcess = () => {    
         alertDialog("Venta", "¿Estás seguro de continuar?", async (value) => {
             if (value) {
 
@@ -677,11 +746,7 @@ class VentaProceso extends CustomComponent {
                     selectTipoPago: this.state.selectTipoPago,
                     numCuota: numCuota,
                     estado: this.state.selectTipoPago === 1 ? 1 : 2,
-                    frecuenciaPago: frecuencia,
-
-                    idComprobanteContado: this.state.idComprobanteContado,
-                    idBancoContado: this.state.idBancoContado,
-                    metodoPagoContado: this.state.metodoPagoContado,
+                    frecuenciaPago: frecuencia,                 
 
                     detalleVenta: this.state.detalleVenta
                 }
@@ -703,36 +768,101 @@ class VentaProceso extends CustomComponent {
         });
     }
 
-    /**
-     * 
-     * Método encargado de renderizar el html y mostrar en el DOM
-     */
+
+    //Metodos Modal Sale
+    handleAddMetodPay = () => {
+        const listAdd = this.state.metodoPagoAgregado.find(item => item.idMetodo === this.refMetodoContado.current.value)
+
+        if (listAdd) {
+            return
+        }
+
+        const metodo = this.state.metodosPagoLista.find(item => item.idMetodo === this.refMetodoContado.current.value);
+
+        const item = {
+            "idMetodo": metodo.idMetodo,
+            "nombre": metodo.nombre,
+            "monto": '',
+            "vuelto": metodo.vuelto
+        }
+
+        this.setState(prevState => ({
+            metodoPagoAgregado: [...prevState.metodoPagoAgregado, item]
+        }))
+    }
+
+    handleRemoveItemMetodPay = (idMetodo) => {
+        const metodoPagoAgregado = this.state.metodoPagoAgregado.filter(item => item.idMetodo !== idMetodo);
+        this.setState({ metodoPagoAgregado })
+
+    }
+
+    handleInputMontoMetodoPay = async (event, idMetodo) => {
+        const { value } = event.target;
+        await this.setStateAsync(prevState => ({
+            metodoPagoAgregado: prevState.metodoPagoAgregado.map(item =>
+                item.idMetodo === idMetodo ? { ...item, monto: value ? parseFloat(value) : '' } : item
+            ),
+        }));
+
+        this.handleCalcularMetodoPagoContado()
+    }
+
+    handleCalcularMetodoPagoContado = () => {
+        const suma = this.state.metodoPagoAgregado.reduce((accumulator, item) => {
+            const monto = item.monto ? parseFloat(item.monto) : 0
+            return accumulator + monto;
+        }, 0)
+
+        if (suma >= this.state.importeTotal) {
+            this.setState({
+                vuelto: suma - this.state.importeTotal
+            })
+        } else {
+            this.setState({
+                vuelto: this.state.importeTotal - suma
+            })
+        }
+
+        console.log(this.state.importeTotal)
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Método de cliclo de vida
+    |--------------------------------------------------------------------------
+    |
+    | El método render() es esencial en los componentes de React y se encarga de determinar
+    | qué debe mostrarse en la interfaz de usuario basado en el estado y las propiedades actuales
+    | del componente. Este método devuelve un elemento React que describe lo que debe renderizarse
+    | en la interfaz de usuario. La salida del método render() puede incluir otros componentes
+    | de React, elementos HTML o una combinación de ambos. Es importante que el método render()
+    | sea una función pura, es decir, no debe modificar el estado del componente ni interactuar
+    | directamente con el DOM. En su lugar, debe basarse únicamente en los props y el estado
+    | actuales del componente para determinar lo que se mostrará.
+    |
+    */
+
     render() {
-        return (
+        const {loadModal, selectTipoPago, comprobantesCobro} = this.state;
+
+        return (   
+
             <PosContainerWrapper>
 
                 <ModalSale
-                    modalVentaProceso={this.modalVentaProceso}
-                    loadModal={this.state.loadModal}
-                    selectTipoPago={this.state.selectTipoPago}
+                    idModalVentaProceso={this.idModalVentaProceso}
+                    loadModal={loadModal}
+
+                    selectTipoPago={selectTipoPago}
                     handleSelectTipoPago={this.handleSelectTipoPago}
 
-                    comprobantesCobro={this.state.comprobantesCobro}
+                    comprobantesCobro={comprobantesCobro}
                     bancos={this.state.bancos}
                     mmonth={this.state.mmonth}
-                    year={this.state.year}
-
-                    refComprobanteContado={this.refComprobanteContado}
-                    idComprobanteContado={this.state.idComprobanteContado}
-                    handleSelectComprobanteContado={this.handleSelectComprobanteContado}
-
-                    refBancoContado={this.refBancoContado}
-                    idBancoContado={this.state.idBancoContado}
-                    handleSelectBancoContado={this.handleSelectBancoContado}
-
+                    year={this.state.year}           
+            
                     refMetodoContado={this.refMetodoContado}
-                    metodoPagoContado={this.state.metodoPagoContado}
-                    handleSelectMetodoPagoContado={this.handleSelectMetodoPagoContado}
 
                     refMontoInicial={this.refMontoInicial}
                     inicial={this.state.inicial}
@@ -795,7 +925,14 @@ class VentaProceso extends CustomComponent {
                     importeTotal={this.state.importeTotal}
 
                     handleSaveProcess={this.handleSaveProcess}
-                    handleClearSale={this.handleClearSale}
+
+                    // 
+                    metodosPagoLista={this.state.metodosPagoLista}
+                    metodoPagoAgregado={this.state.metodoPagoAgregado}
+                    handleAddMetodPay={this.handleAddMetodPay}
+                    handleInputMontoMetodoPay={this.handleInputMontoMetodoPay}
+                    handleRemoveItemMetodPay={this.handleRemoveItemMetodPay}
+                    vuelto={this.state.vuelto}
                 />
 
                 {
@@ -813,22 +950,28 @@ class VentaProceso extends CustomComponent {
                         productos={this.state.productos}
                         refProducto={this.refProducto}
                         handleAddItem={this.handleAddItem}
+
                     />
                 </section>
                 <section className='invoice-right'>
-                    <InvoiceTicket handleOpenAndCloseOptions={this.handleOpenAndCloseOptions} />
+                    <InvoiceTicket
+                        handleOpenAndCloseOptions={this.handleOpenAndCloseOptions}
+                    />
+
                     {/* <InvoiceListPrices
                         refComprobante={this.refComprobante}
                         idComprobante={this.state.idComprobante}
                         comprobantes={this.state.comprobantes}
                         handleSelectComprobante={this.handleSelectComprobante}
                     /> */}
+
                     <InvoiceVoucher
                         refComprobante={this.refComprobante}
                         idComprobante={this.state.idComprobante}
                         comprobantes={this.state.comprobantes}
                         handleSelectComprobante={this.handleSelectComprobante}
                     />
+
                     <InvoiceClient
                         handleOpenAndCloseCiente={this.handleOpenAndCloseCiente}
                         placeholder="Filtrar clientes..."
@@ -839,11 +982,13 @@ class VentaProceso extends CustomComponent {
                         handleFilter={this.handleFilterClient}
                         onEventSelectItem={this.handleSelectItemClient}
                     />
+
                     <InvoiceDetail
                         codiso={this.state.codiso}
                         setStateAsync={this.setStateAsync}
                         detalleVenta={this.state.detalleVenta}
                     />
+
                     <InvoiceFooter
                         codiso={this.state.codiso}
                         impuestos={this.state.impuestos}
@@ -854,7 +999,7 @@ class VentaProceso extends CustomComponent {
                 </section>
 
                 <ModalConfiguration
-                    sideModalInovice={this.sideModalInovice}
+                    idModalConfiguration={this.idModalConfiguration}
 
                     idImpuesto={this.state.idImpuesto}
                     refImpuesto={this.refImpuesto}
@@ -872,7 +1017,7 @@ class VentaProceso extends CustomComponent {
                 />
 
                 <ModalCliente
-                    sideModalCliente={this.sideModalCliente}
+                    idModalCliente={this.idModalCliente}
 
                     handleSaveCliente={this.handleSaveCliente}
                     handleOpenAndCloseOverlayCliente={this.handleOpenAndCloseOverlayCliente}
