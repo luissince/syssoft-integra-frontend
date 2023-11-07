@@ -392,7 +392,7 @@ class Sucursal {
 
     async inicio(req, res) {
         try {           
-            const result = await conec.query(`SELECT 
+            const sucursales = await conec.query(`SELECT 
             p.idSucursal,
             p.nombre,
             p.ubicacion,
@@ -405,19 +405,6 @@ class Sucursal {
             FROM sucursal AS p
             INNER JOIN moneda AS m ON m.idMoneda = p.idMoneda
             `);
-
-            const sucursales = await Promise.all(result.map(async (sucursal) => {
-                const productos = await conec.query(`SELECT estado FROM 
-                producto AS l INNER JOIN categoria AS m
-                ON l.idCategoria = m.idCategoria
-                WHERE m.idSucursal = ?`, [
-                    sucursal.idSucursal
-                ]);
-                return await {
-                    ...sucursal,
-                    productos
-                }
-            }))
 
             return sendSuccess(res, sucursales);
         } catch (error) {

@@ -1,4 +1,4 @@
-const { currentDate, currentTime } = require('../tools/Tools');
+const { currentDate, currentTime, generateAlphanumericCode } = require('../tools/Tools');
 const Conexion = require('../database/Conexion');
 const conec = new Conexion();
 
@@ -169,14 +169,7 @@ class Cliente {
                 }
 
                 const result = await conec.execute(connection, 'SELECT idCliente FROM clienteNatural');
-                let idCliente = "CN0001";
-
-                if (result.length != 0) {
-                    const quitarValor = result.map(item => parseInt(item.idCliente.replace("CN", '')));
-                    const incremental = Math.max(...quitarValor) + 1;
-                    const formattedIncremental = String(incremental).padStart(4, '0'); // Formatea el número con ceros a la izquierda si es necesario
-                    idCliente = `CN${formattedIncremental}`;
-                }
+                const idCliente = generateAlphanumericCode("CN0001", result, 'idCliente');
 
                 await conec.execute(connection, `INSERT INTO clienteNatural(
                     idCliente, 

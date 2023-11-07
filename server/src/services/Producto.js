@@ -1,6 +1,6 @@
 const Conexion = require('../database/Conexion');
 const { sendSuccess, sendError, sendClient, sendSave } = require('../tools/Message');
-const { currentDate, currentTime } = require('../tools/Tools');
+const { currentDate, currentTime, generateAlphanumericCode } = require('../tools/Tools');
 const conec = new Conexion();
 
 class Producto {
@@ -65,16 +65,9 @@ class Producto {
         try {
             connection = await conec.beginTransaction();
 
-            const result = await conec.execute(connection, 'SELECT idProducto FROM producto');
-            let idProducto = "PD0001";
-
-            if (result.length != 0) {
-                const quitarValor = result.map(item => parseInt(item.idProducto.replace("PD", '')));
-                const incremental = Math.max(...quitarValor) + 1;
-                const formattedIncremental = String(incremental).padStart(4, '0'); // Formatea el número con ceros a la izquierda si es necesario
-                idProducto = `PD${formattedIncremental}`;
-            }
-
+            const resultProducto = await conec.execute(connection, 'SELECT idProducto FROM producto');
+            const idProducto = generateAlphanumericCode("PD0001", resultProducto, 'idProducto');
+       
             const resultKardex = await conec.execute(connection, 'SELECT idKardex FROM kardex');
             let idKardex = 0;
 

@@ -1,5 +1,5 @@
 const Conexion = require('../database/Conexion');
-const { currentDate, currentTime } = require('../tools/Tools');
+const { currentDate, currentTime, generateAlphanumericCode } = require('../tools/Tools');
 const conec = new Conexion();
 
 class Almacen {
@@ -10,10 +10,10 @@ class Almacen {
          */
     async list(req) {
         try {
-            const lista = await conec.procedure(`CALL Listar_Almacenes(?,?,?,?)`, [
+            const lista = await conec.procedure(`CALL Listar_Almacenes(?,?,?,?,?)`, [
                 parseInt(req.query.opcion),
                 req.query.buscar,
-                // req.query.idSucursal,
+                req.query.idSucursal,
 
                 parseInt(req.query.posicionPagina),
                 parseInt(req.query.filasPorPagina)
@@ -26,9 +26,10 @@ class Almacen {
                 }
             })
 
-            const total = await conec.procedure(`CALL Listar_Almacenes_count(?,?)`, [
+            const total = await conec.procedure(`CALL Listar_Almacenes_count(?,?,?)`, [
                 parseInt(req.query.opcion),
-                req.query.buscar
+                req.query.buscar,
+                req.query.idSucursal
             ]);
 
             return { "result": resultLista, "total": total[0].Total };
@@ -43,13 +44,8 @@ class Almacen {
             connection = await conec.beginTransaction();
 
             const result = await conec.execute(connection, 'SELECT idAlmacen FROM almacen');
-            let idAlmacen = "AM0001";
-            if (result.length != 0) {
-                const quitarValor = result.map(item => parseInt(item.idAlmacen.replace("AM", '')));
-                const incremental = Math.max(...quitarValor) + 1;
-                const formattedIncremental = String(incremental).padStart(4, '0'); // Formatea el número con ceros a la izquierda si es necesario
-                idProductidAlmaceno = `AM${formattedIncremental}`;
-            } 
+            const idAlmacen = generateAlphanumericCode("AM0001", result, 'idAlmacen');
+    
 
             await conec.execute(connection, `INSERT INTO almacen(
                 idAlmacen, 

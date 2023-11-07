@@ -62,14 +62,5 @@ router.get('/listcombo', async function (req, res) {
     }
 });
 
-router.get('/traslado', async function(req, res){
-    const result = await categoria.trasladar(req);
-    if(result === "update"){
-        res.status(200).send("Se completo el proceso de trasladar correctamente.");
-    }else{
-        res.status(500).send(result);
-    }
-})
-
 
 module.exports = router;

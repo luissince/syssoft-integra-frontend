@@ -1,4 +1,4 @@
-const { currentDate, currentTime } = require('../tools/Tools');
+const { currentDate, currentTime, generateAlphanumericCode } = require('../tools/Tools');
 const Conexion = require('../database/Conexion');
 const conec = new Conexion();
 
@@ -68,14 +68,7 @@ class Banco {
             connection = await conec.beginTransaction();
 
             const result = await conec.execute(connection, 'SELECT idBanco FROM banco');
-            let idBanco = "BC0001";
-
-            if (result.length != 0) {
-                const quitarValor = result.map(item => parseInt(item.idBanco.replace("BC", '')));
-                const incremental = Math.max(...quitarValor) + 1;
-                const formattedIncremental = String(incremental).padStart(4, '0'); // Formatea el número con ceros a la izquierda si es necesario
-                idBanco = `BC${formattedIncremental}`;
-            }
+            const idBanco = generateAlphanumericCode("BC0001", result, 'idBanco');
 
             await conec.execute(connection, `INSERT INTO banco(
             idBanco,
@@ -169,7 +162,7 @@ class Banco {
         try {
             connection = await conec.beginTransaction();
 
-            let cobro = await conec.execute(connection, `SELECT * FROM cobro WHERE idBanco = ?`, [
+            const cobro = await conec.execute(connection, `SELECT * FROM cobro WHERE idBanco = ?`, [
                 req.query.idBanco
             ]);
 
@@ -178,7 +171,7 @@ class Banco {
                 return 'No se puede eliminar el banco ya que esta ligada a un cobro.';
             }
 
-            let gasto = await conec.execute(connection, `SELECT * FROM gasto WHERE idBanco = ?`, [
+            const gasto = await conec.execute(connection, `SELECT * FROM gasto WHERE idBanco = ?`, [
                 req.query.idBanco
             ]);
 
@@ -203,7 +196,7 @@ class Banco {
 
     async listcombo() {
         try {
-            let result = await conec.query('SELECT idBanco, nombre, tipoCuenta FROM banco');
+            const result = await conec.query('SELECT idBanco, nombre, tipoCuenta FROM banco');
             return result;
         } catch (error) {
             return "Se produjo un error de servidor, intente nuevamente.";
