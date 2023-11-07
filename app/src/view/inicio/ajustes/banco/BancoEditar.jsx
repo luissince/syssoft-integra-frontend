@@ -117,9 +117,6 @@ class BancoEditar extends CustomComponent {
 
         alertDialog("Banco", "¿Estás seguro de continuar?", async (event) => {
             if (event) {
-
-                alertInfo("Banco", "Procesando información...");
-
                 const data = {
                     nombre: this.state.nombre.trim().toUpperCase(),
                     tipoCuenta: this.state.tipoCuenta,
@@ -129,6 +126,8 @@ class BancoEditar extends CustomComponent {
                     idUsuario: this.state.idUsuario,
                     idBanco: this.state.idBanco,
                 }
+
+                alertInfo("Banco", "Procesando información...");
 
                 const response = await updateBanco(data, this.abortController.signal)
                 if (response instanceof SuccessReponse) {

@@ -1,78 +1,87 @@
 import React from "react";
-import axios from "axios";
 import { Redirect } from "react-router-dom";
 import { connect } from "react-redux";
 import { signOut, selectProject } from "../../redux/actions";
 import { spinnerLoading } from "../../helper/utils.helper";
 import { images } from "../../helper";
+import CustomComponent from "../../model/class/custom-component";
+import { listSucursales } from "../../network/rest/principal.network";
+import SuccessReponse from "../../model/class/response";
+import ErrorResponse from "../../model/class/error-response";
+import { CANCELED } from "../../model/types/types";
 
-class Principal extends React.Component {
+class Principal extends CustomComponent {
   constructor(props) {
     super(props);
     this.state = {
-      data: [],
+      sucursales: [],
       filter: [],
-      loadModal: true,
-      msgModal: "Cargando sucursales...",
+      loading: true,
+      loadMessage: "Cargando sucursales...",
     };
     this.refTxtSearch = React.createRef();
 
     this.abortControllerTable = new AbortController();
   }
 
-  setStateAsync(state) {
-    return new Promise((resolve) => {
-      this.setState(state, resolve);
-    });
-  }
-
   async componentDidMount() {
-    try {
-      let result = await axios.get("/api/sucursal/inicio", {
-        signal: this.abortControllerTable.signal,
-      });
-
-      await this.setStateAsync({
-        data: result.data,
-        filter: result.data,
-        loadModal: false,
-      });
-    } catch (error) {
-      if (error.message !== "canceled") {
-        await this.setStateAsync({
-          msgModal: "Se produjo un error interno, intente nuevamente.",
-        });
-      }
-    }
-    window.addEventListener("focus", this.onEventFocused);
+    this.loadingData();
+    window.addEventListener("focus", this.handleFocused);
   }
 
   componentWillUnmount() {
     this.abortControllerTable.abort();
-    window.removeEventListener("focus", this.onEventFocused);
+    window.removeEventListener("focus", this.handleFocused);
   }
 
-  onEventFocused = (event) => {
+  async loadingData() {
+
+    const [sucursales] = await Promise.all([
+      await this.fetchSucursales()
+    ]);
+
+    this.setState({
+      sucursales:sucursales,
+      filter: sucursales,
+      loading: false,
+    });
+
+  }
+
+  async fetchSucursales() {
+    const response = await listSucursales();
+
+    if (response instanceof SuccessReponse) {
+      return response.data;
+    }
+
+    if (response instanceof ErrorResponse) {
+      if (response.getType() === CANCELED) return;
+
+      return [];
+    }
+  }
+
+  handleFocused = (event) => {
     let userToken = window.localStorage.getItem("login");
     if (userToken === null) {
       this.props.restore();
-      // this.props.history.push("login");
     } else {
       let projectToken = window.localStorage.getItem("project");
       if (projectToken !== null) {
         this.props.project(JSON.parse(projectToken));
       }
     }
-  };
+  }
 
-  onEventSearch = async (value) => {
-    let data = this.state.data.filter(
+  handleSearch = async (value) => {
+    const sucursales = this.state.data.filter(
       (item) => item.nombre.toUpperCase().indexOf(value.toUpperCase()) > -1
     );
-    await this.setStateAsync({ filter: data });
-  };
+    await this.setStateAsync({ filter: sucursales });
+  }
 
-  onEventSignIn = async (event) => {
+  handleSignIn = async (event) => {
     try {
       window.localStorage.removeItem("login");
       window.localStorage.removeItem("project");
@@ -82,9 +91,9 @@ class Principal extends React.Component {
       this.props.restore();
       this.props.history.push("login");
     }
-  };
+  }
 
-  onEventIngresar(item) {
+  handleIngresar(item) {
     const proyect = {
       idSucursal: item.idSucursal,
       nombre: item.nombre,
@@ -110,7 +119,7 @@ class Principal extends React.Component {
       <div className="container pt-5">
 
         {
-          this.state.loadModal && spinnerLoading(this.state.msgModal)
+          this.state.loading && spinnerLoading(this.state.loadMessage)
         }
 
         <div className="row">
@@ -142,11 +151,11 @@ class Principal extends React.Component {
             <div className="d-flex h-100 justify-content-end align-items-center">
               <div className="form-group">
                 <button
-                  onClick={this.onEventSignIn}
-                  className="btn btn-outline-success"
+                  onClick={this.handleSignIn}
+                  className="btn btn-danger"
                   type="button"
                 >
-                  <i className="bi bi-box-arrow-right"></i>
+                <i className="fa fa-power-off"></i>
                 </button>
               </div>
             </div>
@@ -163,10 +172,9 @@ class Principal extends React.Component {
                   placeholder="filtar por sucursal o nombre del sucursal"
                   aria-label="Search"
                   ref={this.refTxtSearch}
-                  onKeyUp={(event) =>
-                    this.onEventSearch(event.target.value)
-                  }
+                  onKeyUp={(event) => this.handleSearch(event.target.value)}
                 />
+
                 <div className="input-group-append">
                   <span className="input-group-text">
                     <i className="bi bi-search"></i>
@@ -190,13 +198,14 @@ class Principal extends React.Component {
                     alt=""
                     className="card-img-top"
                   />
+
                   <div className="card-body m-2">
                     <h6 className="text-primary font-weight-bold">
                       {item.nombre}
                     </h6>
                     <h6 className="text-secondary">{item.ubicacion}</h6>
                     <button
-                      onClick={() => this.onEventIngresar(item)}
+                      onClick={() => this.handleIngresar(item)}
                       type="button"
                       className="btn btn-block btn-outline-primary"
                     >
@@ -204,26 +213,28 @@ class Principal extends React.Component {
                       Ingresar
                     </button>
                   </div>
+
                   <hr className="m-0" />
+
                   <div className="card-body m-2">
                     <ul className="list-group text-left pt-0">
                       <li className="list-group-item border-0 px-0 pt-0">
                         <i className="bi bi-geo-fill"></i> Moneda{" "}
                         {item.moneda}({item.simbolo})
                       </li>
-                      <li className="list-group-item border-0 px-0">
+                      {/* <li className="list-group-item border-0 px-0">
                         <i className="bi bi-geo-fill"></i> Total de productos{" "}
                         {item.productos.length}
-                      </li>
-                      <li className="list-group-item border-0 px-0">
+                      </li> */}
+                      {/* <li className="list-group-item border-0 px-0">
                         <i className="bi bi-geo-fill"></i> Productos
                         disponibles{" "}
                         {
                           item.productos.filter((producto) => producto.estado === 1)
                             .length
                         }
-                      </li>
-                      <li className="list-group-item border-0 px-0">
+                      </li> */}
+                      {/* <li className="list-group-item border-0 px-0">
                         <i className="fa fa-info"></i>
                         {item.estado === 1 ? (
                           <span className="text-success">
@@ -236,7 +247,7 @@ class Principal extends React.Component {
                             Estado en Litigio
                           </span>
                         )}
-                      </li>
+                      </li> */}
                     </ul>
                   </div>
                 </div>

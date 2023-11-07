@@ -2,9 +2,11 @@ import SearchBarClient from "../../../../../components/SearchBarClient";
 
 const InvoiceClient = (props) => {
 
-    const { placeholder, refCliente, cliente, clientes, onEventClearInput,handleFilter,onEventSelectItem } = props;
+    const { placeholder, refCliente, cliente, clientes } = props;
 
-    const {handleOpenAndCloseCiente} = props;
+    const { onEventClearInput, handleFilter, onEventSelectItem } = props;
+
+    const { handleOpenAndCloseCliente } = props;
 
     return (
         <div className='invoice-client px-3 pb-3'>
@@ -17,7 +19,7 @@ const InvoiceClient = (props) => {
                 onEventClearInput={onEventClearInput}
                 handleFilter={handleFilter}
                 onEventSelectItem={onEventSelectItem}
-                handleNewClient={handleOpenAndCloseCiente}
+                handleNewClient={handleOpenAndCloseCliente}
             />
         </div>
     );

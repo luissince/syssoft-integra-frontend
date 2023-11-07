@@ -7,6 +7,7 @@ import {
     calculateTax,
     formatTime,
     spinnerLoading,
+    formatDate,
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../../components/Container';
@@ -33,7 +34,7 @@ class VentaDetalle extends CustomComponent {
             usuario: '',
 
             detalle: [],
-            cobros: [],
+            ingresos: [],
 
             loading: true,
             msgLoading: 'Cargando datos...',
@@ -67,12 +68,11 @@ class VentaDetalle extends CustomComponent {
 
 
     async loadingData(id) {
-        const [factura, cobros] = await Promise.all([
+        const [factura] = await Promise.all([
             await this.fetchFacturaId(id),
-            await this.fetchCobroVentaId(id)
         ]);
 
-        if (!factura || !cobros) {
+        if (!factura) {
             this.props.history.goBack();
             return;
         }
@@ -89,9 +89,10 @@ class VentaDetalle extends CustomComponent {
             estado,
             simbolo,
             codiso,
-            usuario,
-            monto
+            usuario
         } = factura.cabecera;
+
+        const monto = factura.ingresos.reduce((accumlate, item) => accumlate + item.monto, 0);
 
         await this.setStateAsync({
             idVenta: id,
@@ -107,7 +108,7 @@ class VentaDetalle extends CustomComponent {
             total: rounded(monto),
             detalle: factura.detalle,
 
-            cobros: cobros,
+            ingresos: factura.ingresos,
 
             loading: false
         });
@@ -131,38 +132,20 @@ class VentaDetalle extends CustomComponent {
         }
     }
 
-    async fetchCobroVentaId(id) {
-        const params = {
-            "idVenta": id
-        }
-
-        const response = await getCobroVentaId(params, this.abortControllerView.signal);
-
-        if (response instanceof SuccessReponse) {
-            return response.data;
-        }
-
-        if (response instanceof ErrorResponse) {
-            if (response.getType() === CANCELED) return;
-
-            return false;
-        }
-    }
-
     renderTotal() {
         let subTotal = 0;
         let total = 0;
 
-        for (let item of this.state.detalle) {
-            let cantidad = item.cantidad;
-            let valor = item.precio;
+        for (const item of this.state.detalle) {
+            const cantidad = item.cantidad;
+            const valor = item.precio;
 
-            let impuesto = item.porcentaje;
+            const impuesto = item.porcentaje;
 
-            let valorActual = cantidad * valor;
-            let valorSubNeto = calculateTaxBruto(impuesto, valorActual);
-            let valorImpuesto = calculateTax(impuesto, valorSubNeto);
-            let valorNeto = valorSubNeto + valorImpuesto;
+            const valorActual = cantidad * valor;
+            const valorSubNeto = calculateTaxBruto(impuesto, valorActual);
+            const valorImpuesto = calculateTax(impuesto, valorSubNeto);
+            const valorNeto = valorSubNeto + valorImpuesto;
 
             subTotal += valorSubNeto;
             total += valorNeto;
@@ -195,8 +178,8 @@ class VentaDetalle extends CustomComponent {
 
                     return (
                         <tr key={index}>
-                            <th className="text-right">{impuesto.nombre} :</th>
-                            <th className="text-right">{numberFormat(impuesto.valor, this.state.codiso)}</th>
+                            <th className="text-right mb-2">{impuesto.nombre} :</th>
+                            <th className="text-right mb-2">{numberFormat(impuesto.valor, this.state.codiso)}</th>
                         </tr>
                     );
                 })
@@ -206,8 +189,8 @@ class VentaDetalle extends CustomComponent {
         return (
             <>
                 <tr>
-                    <th className="text-right">SUB TOTAL :</th>
-                    <th className="text-right">{numberFormat(subTotal, this.state.codiso)}</th>
+                    <th className="text-right mb-2">SUB TOTAL :</th>
+                    <th className="text-right mb-2">{numberFormat(subTotal, this.state.codiso)}</th>
                 </tr>
                 {impuestosGenerado()}
                 <tr className="border-bottom">
@@ -258,7 +241,6 @@ class VentaDetalle extends CustomComponent {
                             {" "}
                             {/* <button type="button" className="btn btn-light"><i className="fa fa-remove"></i> Eliminar</button> */}
                             {" "}
-                            <button type="button" className="btn btn-light"><i className="fa fa-file-archive-o"></i> Adjuntar</button>
                         </div>
                     </div>
                 </div>
@@ -296,7 +278,7 @@ class VentaDetalle extends CustomComponent {
                                                     this.state.estado === 1 ? <span className="text-success font-weight-bold">Cobrado</span>
                                                         : this.state.estado === 2 ? <span className="text-warning font-weight-bold">Por cobrar</span>
                                                             : this.state.estado === 3 ? <span className="text-danger font-weight-bold">Anulado</span>
-                                                                : <span className="text-secondary font-weight-bold">Liberado</span>
+                                                                : <span className="text-info font-weight-bold">Por llevar</span>
                                                 }
                                             </th>
                                         </tr>
@@ -307,10 +289,6 @@ class VentaDetalle extends CustomComponent {
                                         <tr>
                                             <th className="table-secondary w-25 p-1 font-weight-normal ">Total</th>
                                             <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">{numberFormat(this.state.total, this.state.codiso)}</th>
-                                        </tr>
-                                        <tr>
-                                            <th className="table-secondary w-25 p-1 font-weight-normal ">Archivos adjuntos</th>
-                                            <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">{ }</th>
                                         </tr>
                                     </thead>
                                 </table>
@@ -329,6 +307,7 @@ class VentaDetalle extends CustomComponent {
                                         <th>#</th>
                                         <th>Concepto</th>
                                         <th>Unidad</th>
+                                        <th>Categoría</th>
                                         <th>Cantidad</th>
                                         <th>Impuesto</th>
                                         <th>Precio</th>
@@ -340,8 +319,9 @@ class VentaDetalle extends CustomComponent {
                                         this.state.detalle.map((item, index) => (
                                             <tr key={index}>
                                                 <td>{++index}</td>
-                                                <td>{item.producto}{<br />}{<small>{item.categoria}</small>}</td>
+                                                <td>{item.producto}</td>
                                                 <td>{item.medida}</td>
+                                                <td>{item.categoria}</td>
                                                 <td className="text-right">{rounded(item.cantidad)}</td>
                                                 <td className="text-right">{item.impuesto}</td>
                                                 <td className="text-right">{numberFormat(item.precio, this.state.codiso)}</td>
@@ -369,27 +349,35 @@ class VentaDetalle extends CustomComponent {
 
                 <div className="row">
                     <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                        <p className="lead">Cobros</p>
+                        <p className="lead">Ingresos asociado</p>
                         <div className="table-responsive">
                             <table className="table table-light table-striped">
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>Concepto</th>
+                                        <th>Fecha y Hora</th>
+                                        <th>Metodo</th>
+                                        <th>Descripción</th>
                                         <th>Monto</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {
-                                        this.state.cobros.length === 0 ?
+                                        this.state.ingresos.length === 0 ?
                                             <tr>
-                                                <td colSpan="3" className="text-center">No hay cobro</td>
+                                                <td colSpan="5" className="text-center">No hay ingresos para mostrar.</td>
                                             </tr>
                                             :
-                                            this.state.cobros.map((item, index) => (
+                                            this.state.ingresos.map((item, index) => (
                                                 <tr key={index}>
                                                     <td>{++index}</td>
-                                                    <td>{item.concepto}</td>
+                                                    <td>
+                                                        <span>{item.fecha}</span>
+                                                        <br />
+                                                        <span>{formatTime(item.hora)}</span>
+                                                    </td>
+                                                    <td>{item.nombre}</td>
+                                                    <td>{item.descripcion}</td>
                                                     <td>{numberFormat(item.monto, item.codiso)}</td>
                                                 </tr>
                                             ))

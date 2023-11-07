@@ -66,7 +66,7 @@ class BancoAgregar extends CustomComponent {
         }
     }
 
-    handleEditar = () => {
+    handleGuardar = () => {
         if (!isText(this.state.nombre)) {
             this.refTxtNombre.current.focus();
             return;
@@ -234,7 +234,7 @@ class BancoAgregar extends CustomComponent {
                             <button
                                 type="button"
                                 className="btn btn-primary"
-                                onClick={this.handleEditar}
+                                onClick={this.handleGuardar}
                             >
                                 Guardar
                             </button>{" "}

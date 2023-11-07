@@ -9,7 +9,6 @@ import {
     alertWarning,
     clearModal,
     hideModal,
-    imageBase64,
     isNumeric,
     isText,
     showModal,

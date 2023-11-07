@@ -2,11 +2,7 @@ const ModalCliente = (props) => {
 
     const { idModalCliente } = props;
 
-    const { idImpuesto, refImpuesto, impuestos, handleSelectImpuesto } = props;
-
-    const { idMoneda, refMoneda, monedas, handleSelectMoneda } = props;
-
-    const { handleSaveCliente, handleCloseOverlayCliente, handleOpenAndCloseCiente } = props;
+    const { handleSaveCliente, handleOpenAndCloseCliente } = props;
 
     return (
         <div id={idModalCliente} className='side-modal'>
@@ -17,7 +13,7 @@ const ModalCliente = (props) => {
                         type="button"
                         className="close"
                         aria-label="Close"
-                        onClick={handleOpenAndCloseCiente}>
+                        onClick={handleOpenAndCloseCliente}>
                         <span aria-hidden="true">&times;</span>
                     </button>
 
@@ -31,7 +27,7 @@ const ModalCliente = (props) => {
                             <span className="d-block">Campos obligatorios <i className="fa fa-asterisk text-danger small"></i></span>
                             <div>
                                 <button className='btn btn-outline-success mr-2' onClick={handleSaveCliente}>Aceptar</button>
-                                <button className='btn btn-outline-secondary ' onClick={handleOpenAndCloseCiente}>Cancelar</button>
+                                <button className='btn btn-outline-secondary ' onClick={handleOpenAndCloseCliente}>Cancelar</button>
                             </div>
                         </div>
                     </div>
@@ -40,7 +36,7 @@ const ModalCliente = (props) => {
                 <div className='side-modal_bottom'>
                 </div>
             </div>
-            <div className="side-modal_overlay" onClick={handleCloseOverlayCliente}>
+            <div className="side-modal_overlay" onClick={handleOpenAndCloseCliente}>
             </div>
         </div>
     );

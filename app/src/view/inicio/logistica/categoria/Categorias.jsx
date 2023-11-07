@@ -1,39 +1,31 @@
 import React from "react";
 import {
-  showModal,
-  hideModal,
-  viewModal,
-  clearModal,
   alertDialog,
-  alertInfo,
   alertSuccess,
   alertWarning,
   spinnerLoading,
   statePrivilegio,
   keyUpSearch,
+  alertInfo,
 } from "../../../../helper/utils.helper";
 import { connect } from "react-redux";
 import Paginacion from "../../../../components/Paginacion";
 import {
-  comboSucursales,
-  listarCategoria,
-  trasladarCategoria,
+  listarCategoria
 } from "../../../../network/rest/principal.network";
 import SuccessReponse from "../../../../model/class/response";
 import ErrorResponse from "../../../../model/class/error-response";
 import { CANCELED } from "../../../../model/types/types";
 import ContainerWrapper from "../../../../components/Container";
-import { addCategoria, getIdCategoria, removeCategoria, updateCategoria } from "../../../../network/rest/principal.network";
+import { removeCategoria } from "../../../../network/rest/principal.network";
+import CustomComponent from "../../../../model/class/custom-component";
 
-class Categorias extends React.Component {
+class Categorias extends CustomComponent {
+  
   constructor(props) {
     super(props);
-    this.state = {
-      idCategoria: "",
-      nombre: "",
-      idSucursal: this.props.token.project.idSucursal,
-      idUsuario: this.props.token.userToken.idUsuario,
 
+    this.state = {
       add: statePrivilegio(
         this.props.token.userToken.menus[3].submenu[0].privilegio[0].estado
       ),
@@ -47,18 +39,6 @@ class Categorias extends React.Component {
         this.props.token.userToken.menus[3].submenu[0].privilegio[3].estado
       ),
 
-      loadModal: false,
-      nameModal: "Nuevo Categoria",
-      msgModal: "Cargando datos...",
-
-      loadModalTraslado: false,
-      nameModalTraslado: "Nuevo Categoria",
-      msgModalTraslado: "Cargando datos...",
-
-      idSucursalTrasladar: "",
-      sucursales: [],
-      messageWarning: "",
-
       loading: false,
       lista: [],
       restart: false,
@@ -71,61 +51,12 @@ class Categorias extends React.Component {
       messagePaginacion: "Mostranto 0 de 0 Páginas",
     };
 
-    this.refNombre = React.createRef();
-
     this.refTxtSearch = React.createRef();
-
-    this.idCodigo = "";
     this.abortControllerTable = new AbortController();
-  }
-
-  setStateAsync(state) {
-    return new Promise((resolve) => {
-      this.setState(state, resolve);
-    });
   }
 
   async componentDidMount() {
     this.loadInit();
-
-    viewModal("modalCategoria", () => {
-      this.abortControllerModal = new AbortController();
-
-      if (this.idCodigo !== "") this.loadDataId(this.idCodigo);
-    });
-
-    clearModal("modalCategoria", async () => {
-      this.abortControllerModal.abort();
-      await this.setStateAsync({
-        idCategoria: "",
-        nombre: "",
-
-        loadModal: false,
-        nameModal: "Nueva Categoria",
-        msgModal: "Cargando datos...",
-      });
-      this.idCodigo = "";
-    });
-
-    viewModal("modalCategoriaTraslado", () => {
-      this.abortControllerModalTraslado = new AbortController();
-      this.loadComboSucursal();
-    });
-
-    clearModal("modalCategoriaTraslado", async () => {
-      this.abortControllerModalTraslado.abort();
-      await this.setStateAsync({
-        idCategoria: "",
-        idSucursalTrasladar: "",
-        messageWarning: "",
-        sucursales: [],
-
-        loadModalTraslado: false,
-        nameModalTraslado: "Trasladar",
-        msgModalTraslado: "Cargando datos...",
-      });
-      this.idCodigo = "";
-    });
   }
 
   componentWillUnmount() {
@@ -172,7 +103,7 @@ class Categorias extends React.Component {
     /**
      * Restablecer las variables para la busqueda
      */
-    await this.setStateAsync({
+    this.setState({
       loading: true,
       lista: [],
       messageTable: "Cargando información...",
@@ -183,7 +114,6 @@ class Categorias extends React.Component {
      * Parametros para iniciar la consulta
      */
     const params = {
-      idSucursal: this.state.idSucursal,
       opcion: opcion,
       buscar: buscar.trim().toUpperCase(),
       posicionPagina: (this.state.paginacion - 1) * this.state.filasPorPagina,
@@ -207,9 +137,12 @@ class Categorias extends React.Component {
       const totalPaginacion = parseInt(
         Math.ceil(parseFloat(data.total) / this.state.filasPorPagina)
       );
-      const messagePaginacion = `Mostrando ${data.result.length} de ${totalPaginacion} Páginas`;
 
-      await this.setStateAsync({
+      const pagina = totalPaginacion === 1 ? `${totalPaginacion} Página` : `${totalPaginacion} Páginas`;
+
+      const messagePaginacion = `Mostrando ${data.result.length} de ${pagina}`;
+
+      this.setState({
         loading: false,
         lista: data.result,
         totalPaginacion: totalPaginacion,
@@ -223,7 +156,7 @@ class Categorias extends React.Component {
     if (response instanceof ErrorResponse) {
       if (response.getType() === CANCELED) return;
 
-      await this.setStateAsync({
+      this.setState({
         loading: false,
         lista: [],
         totalPaginacion: 0,
@@ -233,140 +166,28 @@ class Categorias extends React.Component {
     }
   };
 
-  async openModal(id) {
-    if (id === "") {
-      showModal("modalCategoria");
-      await this.setStateAsync({ nameModal: "Nueva Categoria" });
-    } else {
-      showModal("modalCategoria");
-      this.idCodigo = id;
-      await this.setStateAsync({
-        idCategoria: id,
-        nameModal: "Editar Categoria",
-        loadModal: true,
-      });
-    }
+  handleAgregar = () => {
+    this.props.history.push({
+      pathname: `${this.props.location.pathname}/agregar`
+    })
   }
 
-  async loadDataId(id) {
-    const params = {
-      idCategoria: id,
-    }
-
-    const response = await getIdCategoria(params, this.abortControllerModal.signal);
-
-    if (response instanceof SuccessReponse) {
-      await this.setStateAsync({
-        idCategoria: response.data.idCategoria,
-        nombre: response.data.nombre,
-        loadModal: false,
-      });
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
-
-      await this.setStateAsync({
-        msgModal: response.getMessage(),
-      });
-    }
+  handleEditar = (idCategoria) => {
+    this.props.history.push({
+      pathname: `${this.props.location.pathname}/editar`,
+      search: "?idCategoria=" + idCategoria
+    })
   }
 
-  async openModalTraslado(id) {
-    showModal("modalCategoriaTraslado");
-    await this.setStateAsync({
-      idCategoria: id,
-      nameModalTraslado: "Trasladar",
-      loadModalTraslado: true,
-    });
-  }
-
-  async loadComboSucursal() {
-    const response = await comboSucursales(
-      this.abortControllerModalTraslado.signal
-    );
-
-    if (response instanceof SuccessReponse) {
-      await this.setStateAsync({
-        sucursales: response.data.filter(
-          (item) => item.idSucursal !== this.state.idSucursal
-        ),
-        loadModalTraslado: false,
-      });
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
-
-      await this.setStateAsync({
-        msgModalTraslado: response.getMessage(),
-      });
-    }
-  }
-
-  async handleAgregarCategoria() {
-    const data = {
-      nombre: this.state.nombre,
-      idSucursal: this.state.idSucursal,
-      idUsuario: this.state.idUsuario,
-    }
-
-    const response = await addCategoria(data);
-    if (response instanceof SuccessReponse) {
-      alertSuccess("Categoria", response.data, () => {
-        this.loadInit();
-      });
-    }
-
-    if (response instanceof ErrorResponse) {
-      alertWarning("Categoria", response.getMessage());
-    }
-  }
-
-  async handleEditarCategoria() {
-    const data = {
-      idCategoria: this.state.idCategoria,
-      nombre: this.state.nombre,
-      idSucursal: this.state.idSucursal,
-      idUsuario: this.state.idUsuario,
-    }
-
-    const response = await updateCategoria(data);
-    if (response instanceof SuccessReponse) {
-      alertSuccess("Categoria", response.data, () => {
-        this.onEventPaginacion();
-      });
-    }
-
-    if (response instanceof ErrorResponse) {
-      alertWarning("Categoria", response.getMessage());
-    }
-  }
-
-  onEventGuardar = async () => {
-    if (this.state.nombre === "") {
-      this.refNombre.current.focus();
-      return;
-    }
-
-
-    alertInfo("Categoria", "Procesando información...");
-    hideModal("modalCategoria");
-
-    if (this.state.idCategoria === "") {
-      this.handleAgregarCategoria();
-    } else {
-      this.handleEditarCategoria();
-    }
-  };
-
-  onEventDelete = (idCategoria) => {
+  handleDelete = (id) => {
     alertDialog("Categoria", "¿Estás seguro de eliminar la Categoria?", async (event) => {
       if (event) {
 
         const params = {
-          idCategoria: idCategoria,
+          idCategoria: id,
         }
+
+        alertInfo("Categoria","Se esta procesando la petición...")
 
         const response = await removeCategoria(params);
 
@@ -382,205 +203,11 @@ class Categorias extends React.Component {
       }
     }
     );
-  };
-
-  onEventTrasladar = async () => {
-    if (this.state.idSucursalTrasladar === "") {
-      this.setState({
-        messageWarning: "Seleccione el sucursal a donde trasladar.",
-      });
-      return;
-    }
-
-    alertDialog("Categoria", "¿Está seguro de continuar?", async (value) => {
-      if (value) {
-        const params = {
-          idCategoria: this.state.idCategoria,
-          idSucursal: this.state.idSucursal,
-          idSucursalTrasladar: this.state.idSucursalTrasladar,
-          idUsuario: this.state.idUsuario,
-        };
-
-        alertInfo("Moneda", "Procesando información...");
-        hideModal("modalCategoriaTraslado");
-
-        const response = await trasladarCategoria(params);
-
-        if (response instanceof SuccessReponse) {
-          console.log(response.data);
-
-          alertSuccess("Categoria", response.data, () => {
-            this.loadInit();
-          });
-        }
-
-        if (response instanceof ErrorResponse) {
-          alertWarning("Categoria", response.getMessage());
-        }
-      }
-    });
-  };
+  }
 
   render() {
     return (
       <ContainerWrapper>
-        {/* Inicio modal nuevo cliente*/}
-        <div
-          className="modal fade"
-          id="modalCategoria"
-          tabIndex="-1"
-          aria-labelledby="modalCategoriaLabel"
-          aria-hidden={true}
-          data-bs-backdrop="static"
-        >
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">{this.state.nameModal}</h5>
-                <button
-                  type="button"
-                  className="close"
-                  data-bs-dismiss="modal"
-                  aria-label="Close"
-                >
-                  <span aria-hidden={true}>&times;</span>
-                </button>
-              </div>
-              <div className="modal-body">
-                {
-                  this.state.loadModal && spinnerLoading(this.state.msgModal)
-                }
-
-                <div className="form-group">
-                  <label htmlFor="categoria">
-                    Nombre Categoria{" "}
-                    <i className="fa fa-asterisk text-danger small"></i>
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Ingrese el nombre de la categoria"
-                    ref={this.refNombre}
-                    value={this.state.nombre}
-                    onChange={(event) =>
-                      this.setState({ nombre: event.target.value })
-                    }
-                  />
-                </div>
-              </div>
-
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={() => this.onEventGuardar()}
-                >
-                  Aceptar
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-danger"
-                  data-bs-dismiss="modal"
-                >
-                  Cerrar
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-        {/* fin modal nuevo cliente*/}
-
-        {/* Inicio modal nuevo cliente*/}
-        <div
-          className="modal fade"
-          id="modalCategoriaTraslado"
-          tabIndex="-1"
-          aria-labelledby="modalCategoriaLabel"
-          aria-hidden={true}
-        >
-          <div className="modal-dialog">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">{this.state.nameModalTraslado}</h5>
-                <button
-                  type="button"
-                  className="close"
-                  data-bs-dismiss="modal"
-                  aria-label="Close"
-                >
-                  <span aria-hidden={true}>&times;</span>
-                </button>
-              </div>
-              <div className="modal-body">
-                {
-                  this.state.loadModalTraslado && spinnerLoading(this.state.msgModalTraslado)
-                }
-
-                {
-                  this.state.messageWarning !== "" && (
-                    <div className="alert alert-warning" role="alert">
-                      <i className="bi bi-exclamation-diamond-fill"></i>{" "}
-                      {this.state.messageWarning}
-                    </div>
-                  )
-                }
-
-                <div className="form-group">
-                  <label htmlFor="sucursal">
-                    Sucursales{" "}
-                    <i className="fa fa-asterisk text-danger small"></i>
-                  </label>
-                  <select
-                    className="form-control"
-                    id="sucursal"
-                    value={this.state.idSucursalTrasladar}
-                    onChange={(event) => {
-                      const message = event.target.value || "Seleccione el sucursal a donde trasladar.";
-                      this.setState({
-                        idSucursalTrasladar: event.target.value,
-                        messageWarning: message
-                      });
-                    }}
-                  >
-                    <option value="">- Seleccione -</option>
-                    {
-                      this.state.sucursales.map((item, index) => (
-                        <option key={index} value={item.idSucursal}>
-                          {item.nombre}
-                        </option>
-                      ))
-                    }
-                  </select>
-                </div>
-
-                <div className="form-group">
-                  <label>
-                    Seleccione un sucursal para que puedas continuar.
-                  </label>
-                </div>
-              </div>
-
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={() => this.onEventTrasladar()}
-                >
-                  Aceptar
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-danger"
-                  data-bs-dismiss="modal"
-                >
-                  Cerrar
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-        {/* fin modal nuevo cliente*/}
-
         <div className="row">
           <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
             <div className="form-group">
@@ -618,7 +245,7 @@ class Categorias extends React.Component {
             <div className="form-group">
               <button
                 className="btn btn-outline-info"
-                onClick={() => this.openModal("")}
+                onClick={this.handleAgregar}
                 disabled={!this.state.add}
               >
                 <i className="bi bi-file-plus"></i> Nuevo Registro
@@ -642,11 +269,7 @@ class Categorias extends React.Component {
                     <th width="5%" className="text-center">
                       #
                     </th>
-                    <th width="15%">Categoria</th>
-                    <th width="25%">Sucursal</th>
-                    <th width="5%" className="text-center">
-                      Trasladar
-                    </th>
+                    <th width="25%">Categoria</th>
                     <th width="5%" className="text-center">
                       Editar
                     </th>
@@ -659,13 +282,13 @@ class Categorias extends React.Component {
                   {
                     this.state.loading ? (
                       <tr>
-                        <td className="text-center" colSpan="6">
+                        <td className="text-center" colSpan="4">
                           {spinnerLoading("Cargando información de la tabla...", true)}
                         </td>
                       </tr>
                     ) : this.state.lista.length === 0 ? (
                       <tr className="text-center">
-                        <td colSpan="6">¡No hay datos registrados!</td>
+                        <td colSpan="4">¡No hay datos registrados!</td>
                       </tr>
                     ) : (
                       this.state.lista.map((item, index) => {
@@ -673,24 +296,11 @@ class Categorias extends React.Component {
                           <tr key={index}>
                             <td className="text-center">{item.id}</td>
                             <td>{item.nombre}</td>
-                            <td>{item.sucursal}</td>
-                            <td className="text-center">
-                              <button
-                                className="btn btn-outline-info btn-sm"
-                                title="Editar"
-                                onClick={() =>
-                                  this.openModalTraslado(item.idCategoria)
-                                }
-                                disabled={!this.state.move}
-                              >
-                                <i className="bi bi-arrow-left-right"></i>
-                              </button>
-                            </td>
                             <td className="text-center">
                               <button
                                 className="btn btn-outline-warning btn-sm"
                                 title="Editar"
-                                onClick={() => this.openModal(item.idCategoria)}
+                                onClick={() => this.handleEditar(item.idCategoria)}
                                 disabled={!this.state.edit}
                               >
                                 <i className="bi bi-pencil"></i>
@@ -700,7 +310,7 @@ class Categorias extends React.Component {
                               <button
                                 className="btn btn-outline-danger btn-sm"
                                 title="Anular"
-                                onClick={() => this.onEventDelete(item.idCategoria)}
+                                onClick={() => this.handleDelete(item.idCategoria)}
                                 disabled={!this.state.remove}
                               >
                                 <i className="bi bi-trash"></i>

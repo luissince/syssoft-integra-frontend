@@ -43,6 +43,8 @@ import Sucursales from './ajustes/Sucursales';
 import ProcesoSucursal from './ajustes/sucursal/ProcesoSucursal';
 
 import Categorias from './logistica/categoria/Categorias';
+import CategoriaAgregar from './logistica/categoria/CategoriaAgregar';
+import CategoriaEditar from './logistica/categoria/CategoriaEditar';
 
 import Productos from './logistica/producto/Productos';
 import ProductoAgregar from './logistica/producto/agregar/ProductoAgregar';
@@ -52,6 +54,14 @@ import ProductoDetalle from './logistica/producto/detalle/ProductoDetalle';
 import Almacenes from './logistica/almacen/Almacenes';
 import AlmacenAgregar from './logistica/almacen/AlmacenAgregar';
 import AlmacenEditar from './logistica/almacen/AlmacenEditar';
+
+import Ajuste from './logistica/ajuste/Ajuste.jsx';
+import AjusteAgregar from './logistica/ajuste/AjusteAgregar.jsx';
+import AjusteDetalle from './logistica/ajuste/AjusteDetalle.jsx';
+
+import Inventario from './logistica/inventario/Inventario.jsx';
+
+import Kardex from './logistica/kardex/Kardex.jsx';
 
 import Clientes from './facturacion/cliente/Clientes';
 import ClienteAgregar from './facturacion/cliente/ClienteAgregar';
@@ -408,10 +418,23 @@ class Inicio extends React.Component {
                         path={`${path}/impuestos`}
                         render={(props) => <Impuestos {...props} />}
                     />
+
                     <Route
                         path={`${path}/categorias`}
+                        exact={true}
                         render={(props) => <Categorias {...props} />}
                     />
+                    <Route
+                        path={`${path}/categorias/agregar`}
+                        exact={true}
+                        render={(props) => <CategoriaAgregar {...props} />}
+                    />
+                    <Route
+                        path={`${path}/categorias/editar`}
+                        exact={true}
+                        render={(props) => <CategoriaEditar {...props} />}
+                    />
+
                     <Route
                         path={`${path}/productos`}
                         exact={true}
@@ -447,6 +470,34 @@ class Inicio extends React.Component {
                         path={`${path}/almacenes/editar`}
                         exact={true}
                         render={(props) => <AlmacenEditar {...props} />}
+                    />
+
+                    <Route
+                        path={`${path}/ajuste`}
+                        exact={true}
+                        render={(props) => <Ajuste {...props} />}
+                    />
+                    <Route
+                        path={`${path}/ajuste/agregar`}
+                        exact={true}
+                        render={(props) => <AjusteAgregar {...props} />}
+                    />
+                    <Route
+                        path={`${path}/ajuste/editar`}
+                        exact={true}
+                        render={(props) => <AjusteDetalle {...props} />}
+                    />
+
+                    <Route
+                        path={`${path}/inventario`}
+                        exact={true}
+                        render={(props) => <Inventario {...props} />}
+                    />
+
+                    <Route
+                        path={`${path}/kardex`}
+                        exact={true}
+                        render={(props) => <Kardex {...props} />}
                     />
 
                     <Route

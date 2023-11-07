@@ -33,6 +33,15 @@ export async function loginApi(params, signal = null) {
   );
 }
 
+export async function listSucursales(signal = null) {
+  return await Resolve.create(
+    instancePrincipal.get("/api/sucursal/inicio", {
+      signal: signal,
+    })
+  );
+}
+
+
 /**
  * 
  * @param {*} signal 
@@ -217,21 +226,6 @@ export async function listarBancos(params, signal = null) {
 export async function listarCategoria(params, signal = null) {
   return await Resolve.create(
     instancePrincipal.get("/api/categoria/list", {
-      signal: signal,
-      params: params,
-    })
-  );
-}
-
-/**
- * 
- * @param {*} params 
- * @param {*} signal 
- * @returns SuccessReponse | ErrorResponse
- */
-export async function trasladarCategoria(params, signal = null) {
-  return await Resolve.create(
-    instancePrincipal.get("/api/categoria/traslado", {
       signal: signal,
       params: params,
     })
@@ -864,6 +858,14 @@ export async function comboAlmacen(signal = null) {
 export async function comboMedida(signal) {
   return await Resolve.create(
     instancePrincipal.get('/api/medida/listcombo', {
+      signal: signal,
+    })
+  );
+}
+
+export async function comboMetodoPago(signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/metodopago/combo', {
       signal: signal,
     })
   );

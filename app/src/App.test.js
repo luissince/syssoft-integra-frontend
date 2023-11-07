@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import App from './components/menu/Menu';
-import { currentDate, currentTime, dateFormat, rounded, formatTime, numberFormat, imageBase64 } from './helper/utils.helper';
+import { currentDate, currentTime, formatDate, rounded, formatTime, numberFormat, imageBase64, formatDecimal } from './helper/utils.helper';
 
 
 /**
@@ -74,11 +74,11 @@ import { currentDate, currentTime, dateFormat, rounded, formatTime, numberFormat
 
   */
 
-describe('dateFormat function', () => {
+describe('formatDate function', () => {
   it('Prueba de formato de fecha válido', () => {
     const inputDate = '2023-10-09';
     const expectedOutput = '09/10/2023';
-    expect(dateFormat(inputDate)).toBe(expectedOutput);
+    expect(formatDate(inputDate)).toBe(expectedOutput);
   });
 
   // it('Prueba de formato de fecha inválido', () => {
@@ -175,23 +175,20 @@ describe('formatTime function', () => {
 
 describe('rounded function', () => {
   it('Redondea la cantidad positiva con la configuración predeterminada.', () => {
-    // expect(rounded(12345.67)).toBe('12,345.67');
-    // expect(rounded(3322.6756)).toBe('3,322.68');
     expect(rounded(12345.67)).toBe('12345.67');
-    // expect(rounded(3322.6756)).toBe('3322.68');
-    // expect(rounded(10.10)).toBe('10.10');
-    // expect(rounded(10.99)).toBe('10.99');
-    // expect(rounded(10.998)).toBe('11.00');
-    // expect(rounded(10.9956)).toBe('11.00');
+    expect(rounded(3322.6756)).toBe('3322.68');
+    expect(rounded(102345.67)).toBe('102345.67');
+
+    expect(rounded(-12345.6739)).toBe('-12345.67');
+    expect(rounded(-3322.6756)).toBe('-3322.68');
+    expect(rounded(-102345.67)).toBe('-102345.67');
+
+    expect(rounded(3322.6756)).toBe('3322.68');
+    expect(rounded(10.10)).toBe('10.10');
+    expect(rounded(10.99)).toBe('10.99');
+    expect(rounded(10.998)).toBe('11.00');
+    expect(rounded(10.9956)).toBe('11.00');
   });
-
-  // it('Formatea la cantidad negativa con la configuración predeterminada.', () => {
-  //   expect(rounded(-9876.54)).toBe('-9,876.54');
-  // });
-
-  // it('Formatea la cantidad con separadores decimales y de miles personalizados.', () => {
-  //   expect(rounded(54321.789, 3, '.', ',')).toBe('54,321.789');
-  // });
 
   it('Formatos cantidad cero.', () => {
     expect(rounded(0)).toBe('0.00');
@@ -200,6 +197,41 @@ describe('rounded function', () => {
   it('Menaja entredas no válidas.', () => {
     expect(rounded('abc')).toBe('0');
     expect(rounded(null)).toBe('0');
+  });
+});
+
+describe('formatDecimal function', () => {
+  it('Formatea la cantidad positiva con la configuración predeterminada.', () => {
+    expect(formatDecimal(12345.67)).toBe('12,345.67');
+    expect(formatDecimal(3322.6756)).toBe('3,322.68');
+    expect(formatDecimal(102345.67)).toBe('102,345.67');
+
+    expect(formatDecimal(-12345.6739)).toBe('-12,345.67');
+    expect(formatDecimal(-3322.6756)).toBe('-3,322.68');
+    expect(formatDecimal(-102345.67)).toBe('-102,345.67');
+
+    expect(formatDecimal(3322.6756)).toBe('3,322.68');
+    expect(formatDecimal(10.10)).toBe('10.10');
+    expect(formatDecimal(10.99)).toBe('10.99');
+    expect(formatDecimal(10.998)).toBe('11.00');
+    expect(formatDecimal(10.9956)).toBe('11.00');
+  });
+
+  it('Formatea la cantidad negativa con la configuración predeterminada.', () => {
+    expect(formatDecimal(-9876.54)).toBe('-9,876.54');
+  });
+
+  it('Formatea la cantidad con separadores decimales y de miles personalizados.', () => {
+    expect(formatDecimal(54321.789, 3, '.')).toBe('54,321.789');
+  });
+
+  it('Formatos cantidad cero.', () => {
+    expect(formatDecimal(0)).toBe('0.00');
+  });
+
+  it('Menaja entredas no válidas.', () => {
+    expect(formatDecimal('abc')).toBe('0.00');
+    expect(formatDecimal(null)).toBe('0.00');
   });
 });
 

@@ -16,7 +16,7 @@ const InvoiceFooter = (props) => {
         return accumulator + calculateTaxBruto(impuesto, total);
     }, 0);
 
-    const _impuestosTotal = () => {
+    const impuestosTotal = () => {
         const resultado = detalleVenta.reduce((acc, item) => {
             const impuesto = impuestos.find(imp => imp.idImpuesto === item.idImpuesto);
 
@@ -68,7 +68,7 @@ const InvoiceFooter = (props) => {
                     <div>{numberFormat(subTotal, codiso)}</div>
                 </div>
 
-                {_impuestosTotal()}
+                {impuestosTotal()}
             </div>
             <div className='px-3 mb-2'>
                 <div>

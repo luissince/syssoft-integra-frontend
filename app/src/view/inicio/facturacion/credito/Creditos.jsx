@@ -3,7 +3,7 @@ import React from 'react';
 import CryptoJS from 'crypto-js';
 import {
     spinnerLoading,
-    dateFormat,
+    formatDate,
     numberFormat,
     statePrivilegio,
     keyUpSearch
@@ -274,7 +274,7 @@ class Creditos extends React.Component {
                                                         }</td>
                                                         <td>{item.nombre}{<br />}{item.serie + "-" + item.numeracion}</td>
                                                         <td>{item.credito === 1 ? item.frecuencia : item.numCuota === 1 ? item.numCuota + " Cuota" : item.numCuota + " Cuotas"}</td>
-                                                        <td>{item.fechaPago === "" ? "-" : dateFormat(item.fechaPago)}</td>
+                                                        <td>{item.fechaPago === "" ? "-" : formatDate(item.fechaPago)}</td>
                                                         <td className="text-right">{numberFormat(item.total)}</td>
                                                         <td className="text-right text-success">{numberFormat(item.cobrado)}</td>
                                                         <td className="text-right text-danger">{numberFormat(item.total - item.cobrado)}</td>

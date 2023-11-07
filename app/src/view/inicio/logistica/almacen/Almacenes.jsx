@@ -14,6 +14,7 @@ import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
 import { deleteAlmacen, listAlmacen } from '../../../../network/rest/principal.network';
 import { CANCELED } from '../../../../model/types/types';
+import { connect } from 'react-redux';
 
 class Almacenes extends CustomComponent {
 
@@ -24,16 +25,15 @@ class Almacenes extends CustomComponent {
             lista: [],
             restart: false,
 
-            // idSucursal: this.props.token.project.idSucursal,
-
-            // view: statePrivilegio(this.props.token.userToken.menus[2].submenu[4].privilegio[0].estado),
-
             opcion: 0,
             paginacion: 0,
             totalPaginacion: 0,
             filasPorPagina: 10,
             messageTable: 'Cargando información...',
-            messagePaginacion: 'Mostranto 0 de 0 Páginas'
+            messagePaginacion: 'Mostranto 0 de 0 Páginas',
+
+            idSucursal: this.props.token.project.idSucursal,
+            idUsuario: this.props.token.userToken.idUsuario,
         }
 
         this.abortControllerTable = new AbortController();
@@ -90,7 +90,7 @@ class Almacenes extends CustomComponent {
         const params = {
             "opcion": opcion,
             "buscar": buscar,
-            // "idProyecto": this.state.idProyecto,
+            "idSucursal": this.state.idSucursal,
             "posicionPagina": ((this.state.paginacion - 1) * this.state.filasPorPagina),
             "filasPorPagina": this.state.filasPorPagina
         }
@@ -344,7 +344,20 @@ class Almacenes extends CustomComponent {
             </ContainerWrapper>
         );
     }
-
 }
 
-export default Almacenes;
+/**
+ * 
+ * Método encargado de traer la información de redux
+ */
+const mapStateToProps = (state) => {
+    return {
+        token: state.reducer
+    }
+}
+
+/**
+ * 
+ * Método encargado de conectar con redux y exportar la clase
+ */
+export default connect(mapStateToProps, null)(Almacenes);

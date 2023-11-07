@@ -110,7 +110,7 @@ class Menu extends React.Component {
                             </li>
                             <li className="user-footer">
                                 <button className="btn btn-secondary" onClick={() => this.onEventCloseProject()}>
-                                    <i className="fa fa-sign-out fa-sm" ></i> Cerrar Módulo
+                                    <i className="fa fa-sign-out fa-sm" ></i> Cerrar sucursal
                                 </button>
 
                                 <button className="btn btn-secondary" onClick={() => this.onEventSignIn()}>

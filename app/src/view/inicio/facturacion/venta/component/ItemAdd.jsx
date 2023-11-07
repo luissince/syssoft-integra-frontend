@@ -3,41 +3,31 @@ import { numberFormat } from "../../../../../helper/utils.helper";
 
 const ItemAdd = (props) => {
 
-    const { idDetalle, nombre, precio, cantidad, codiso, detalleVenta, setStateAsync } = props;
+    const { idDetalle, nombre, precio, cantidad, codiso } = props;
+
+    const { detalleVenta, setStateAsync } = props;
 
     const handleMinus = async () => {
         if (cantidad <= 1) {
             return;
         }
 
-        for (let item of detalleVenta) {
-            if (item.idDetalle === idDetalle) {
-                let currenteObject = item;
-                currenteObject.cantidad = parseFloat(currenteObject.cantidad) - 1;
-                break;
-            }
-        }
-
-        const newArr = [...detalleVenta];
+        const detalle = detalleVenta.filter(item => {
+            return item.cantidad = parseFloat(item.cantidad) - 1;
+        });
 
         await setStateAsync({
-            detalleVenta: newArr,
+            detalleVenta: detalle,
         });
     }
 
     const handlePlus = async () => {
-        for (let item of detalleVenta) {
-            if (item.idDetalle === idDetalle) {
-                let currenteObject = item;
-                currenteObject.cantidad = parseFloat(currenteObject.cantidad) + 1;
-                break;
-            }
-        }
-
-        const newArr = [...detalleVenta];
+        const detalle = detalleVenta.filter(item => {
+            return item.cantidad = parseFloat(item.cantidad) + 1;
+        });
 
         await setStateAsync({
-            detalleVenta: newArr,
+            detalleVenta: detalle,
         });
     }
 
@@ -46,7 +36,7 @@ const ItemAdd = (props) => {
     }
 
     const handleRemove = async () => {
-        const newArr = detalleVenta.filter((item)=>idDetalle !== item.idDetalle);
+        const newArr = detalleVenta.filter((item) => idDetalle !== item.idDetalle);
 
         await setStateAsync({
             detalleVenta: newArr,

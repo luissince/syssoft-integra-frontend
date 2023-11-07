@@ -1,12 +1,17 @@
 import React from 'react';
 import {
     alertDialog,
+    alertInfo,
     alertSuccess,
     alertWarning,
     clearModal,
     getCurrentMonth,
     getCurrentYear,
+    hideModal,
+    isEmpty,
+    isNumeric,
     isText,
+    rounded,
     showModal,
     spinnerLoading,
     viewModal,
@@ -14,7 +19,7 @@ import {
 import { connect } from 'react-redux';
 import { PosContainerWrapper } from '../../../../components/Container';
 import InvoiceTicket from './component/InvoiceTicket';
-import { createFactura, getPredeterminado, listBancoCombo, listComprobanteCombo, listImpuestCombo, listMonedaCombo, listarClientesFilter } from '../../../../network/rest/principal.network';
+import { comboMetodoPago, createFactura, getPredeterminado, listBancoCombo, listComprobanteCombo, listImpuestCombo, listMonedaCombo, listarClientesFilter } from '../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
 import { CANCELED } from '../../../../model/types/types';
@@ -48,30 +53,19 @@ class VentaProceso extends CustomComponent {
          */
         this.state = {
             idComprobante: '',
-            comprobantes: [],
 
-            idUsuario: this.props.token.userToken.idUsuario,
+            idMoneda: "",
+            codiso: "",
 
-            idMoneda: '',
-            monedas: [],
-            codiso: "PEN",
+            idImpuesto: "",
 
             producto: '',
-            productos: [],
             sarchProducto: false,
             filterProducto: false,
 
             idCliente: '',
-            clientes: [],
             cliente: '',
             filterCliente: false,
-
-            idImpuesto: '',
-            impuestos: [],
-
-            detalleVenta: [],
-
-            idSucursal: this.props.token.project.idSucursal,
 
             loading: true,
             msgLoading: 'Cargando datos...',
@@ -80,8 +74,14 @@ class VentaProceso extends CustomComponent {
             loadModal: false,
             selectTipoPago: 1,
 
+            comprobantes: [],
             comprobantesCobro: [],
+            productos: [],
+            clientes: [],
             bancos: [],
+            impuestos: [],
+            monedas: [],
+            detalleVenta: [],
 
             montoInicialCheck: false,
             inicial: '',
@@ -113,40 +113,40 @@ class VentaProceso extends CustomComponent {
             importeTotal: 0.0,
 
             //Modal Sale
-            metodosPagoLista: [
-                {
-                    "idMetodo": "MT0001",
-                    "nombre": "Efectivo",
-                    "decripcion": "",
-                    "predeterminado": true,
-                    "vuelto": true
-                },
-                {
-                    "idMetodo": "MT0002",
-                    "nombre": "Yape",
-                    "decripcion": "",
-                    "predeterminado": false,
-                    "vuelto": false
-                },
-                {
-                    "idMetodo": "MT0003",
-                    "nombre": "Tarjeta de crédito",
-                    "decripcion": "",
-                    "predeterminado": false,
-                    "vuelto": false
-                }
-            ],
+            metodosPagoLista: [],
 
             metodoPagoAgregado: [],
-            vuelto: 0
+
+            idSucursal: this.props.token.project.idSucursal,
+            idUsuario: this.props.token.userToken.idUsuario,
         }
+
+        /**
+         * Identificador del modal configuración.
+         * @type {string}
+         */
+        this.idModalConfiguration = "idModalConfiguration";
+
+        /**
+         * Identificador del modal cliente.
+         * @type {string}
+         */
+        this.idModalCliente = "idModalCliente";
+
+        /**
+         * Identificador del modal venta.
+         * @type {string}
+         */
+        this.idModalSale = "idModalSale";
 
         this.refProducto = React.createRef();
 
         this.refComprobante = React.createRef();
+
         this.refImpuesto = React.createRef();
 
         this.refCliente = React.createRef();
+
         this.refMoneda = React.createRef();
 
         this.refMetodoContado = React.createRef();
@@ -166,13 +166,6 @@ class VentaProceso extends CustomComponent {
         this.refMetodoCreditoVariable = React.createRef();
 
         this.abortControllerView = new AbortController();
-
-        this.idModalConfiguration = "idModalConfiguration";
-
-        this.idModalCliente = "idModalCliente";
-
-        this.idModalVentaProceso = "idModalVentaProceso";
-
     }
 
 
@@ -196,25 +189,26 @@ class VentaProceso extends CustomComponent {
     componentDidMount() {
         this.loadingData();
 
-        viewModal(this.idModalVentaProceso, () => {
+        viewModal(this.idModalSale, () => {
 
             const importeTotal = this.state.detalleVenta.reduce((accumulator, item) => {
                 const totalProductPrice = item.precio * item.cantidad;
                 return accumulator + totalProductPrice;
             }, 0);
 
+            const metodo = this.state.metodosPagoLista.find(item => item.predeterminado === 1);
 
-            const metodoContadoPred = this.state.metodosPagoLista.find(item => item.predeterminado === true);
+            this.refMetodoContado.current.value = metodo ? metodo.idMetodoPago : ''
 
-            this.refMetodoContado.current.value = metodoContadoPred ? metodoContadoPred.idMetodo : ''
-
-            if (metodoContadoPred) {
+            if (metodo) {
                 const item = {
-                    "idMetodo": metodoContadoPred.idMetodo,
-                    "nombre": metodoContadoPred.nombre,
+                    "idMetodoPago": metodo.idMetodoPago,
+                    "nombre": metodo.nombre,
                     "monto": '',
-                    "vuelto": metodoContadoPred.vuelto
+                    "vuelto": metodo.vuelto,
+                    "descripcion": ""
                 }
+
                 this.setState(prevState => ({
                     metodoPagoAgregado: [...prevState.metodoPagoAgregado, item]
                 }))
@@ -223,9 +217,9 @@ class VentaProceso extends CustomComponent {
             this.setState({ importeTotal, loadModal: false })
         });
 
-        clearModal(this.idModalVentaProceso, async () => {
+        clearModal(this.idModalSale, async () => {
             await this.setStateAsync({
-                selectTipoPago: 1,        
+                selectTipoPago: 1,
 
                 montoInicialCheck: false,
                 inicial: '',
@@ -244,7 +238,6 @@ class VentaProceso extends CustomComponent {
                 frecuenciaPago: new Date().getDate() > 15 ? '30' : '15',
 
                 metodoPagoAgregado: [],
-                vuelto: 0
             });
         })
     }
@@ -274,20 +267,21 @@ class VentaProceso extends CustomComponent {
     * @description Método que se ejecuta después de que el componente se haya montado en el DOM.
     */
     loadingData = async () => {
-        const [libre, facturado, cobro, monedas, impuestos, bancos, predeterminado] = await Promise.all([
+        const [libre, facturado, cobro, monedas, impuestos, bancos, predeterminado, metodoPagos] = await Promise.all([
             await this.fetchComprobante("2"),
             await this.fetchComprobante("1"),
             await this.fetchComprobante("5"),
             await this.fetchMoneda(),
             await this.fetchImpuesto(),
             await this.fetchBanco(),
-            await this.fetchClientePredeterminado()
+            await this.fetchClientePredeterminado(),
+            await this.fetchMetodoPago()
         ]);
 
         const comprobantes = [...facturado, ...libre];
         const monedaFilter = monedas.find((item) => item.predeterminado === 1);
         const impuestoFilter = impuestos.find((item) => item.preferida === 1);
-        const comprobanteFilter = comprobantes.find((item) => item.preferida === 1);       
+        const comprobanteFilter = comprobantes.find((item) => item.preferida === 1);
 
         if (typeof predeterminado === 'object') {
             this.handleSelectItemClient(predeterminado);
@@ -299,15 +293,21 @@ class VentaProceso extends CustomComponent {
             monedas,
             impuestos,
             bancos,
+            metodosPagoLista: metodoPagos,
 
-            idMoneda: monedaFilter ? monedaFilter.idMoneda : "",
-            idImpuesto: impuestoFilter ? impuestoFilter.idImpuesto : "",
             idComprobante: comprobanteFilter ? comprobanteFilter.idComprobante : "",
 
+            idMoneda: monedaFilter ? monedaFilter.idMoneda : "",
             codiso: monedaFilter ? monedaFilter.codiso : "PEN",
+
+            idImpuesto: impuestoFilter ? impuestoFilter.idImpuesto : "",
 
             loading: false,
         });
+
+        this.refImpuesto.current.value = impuestoFilter ? impuestoFilter.idImpuesto : "";
+
+        this.refMoneda.current.value = monedaFilter ? monedaFilter.idMoneda : "";
     }
 
 
@@ -385,6 +385,20 @@ class VentaProceso extends CustomComponent {
         }
     }
 
+    async fetchMetodoPago() {
+        const response = await comboMetodoPago();
+
+        if (response instanceof SuccessReponse) {
+            return response.data
+        }
+
+        if (response instanceof ErrorResponse) {
+            if (response.getType() === CANCELED) return;
+
+            return [];
+        }
+    }
+
     calcularLetraMensual = () => {
         if (this.state.numCuota === '') {
             return;
@@ -412,11 +426,16 @@ class VentaProceso extends CustomComponent {
     |
     */
 
+    //------------------------------------------------------------------------------------------
+    // Componenente busqueda
+    //------------------------------------------------------------------------------------------
+
     handleAddItem = async (producto) => {
-        if (this.state.idImpuesto === "") {
-            alertWarning("Venta", "Seleccione un impuesto.");
-            this.handleModalOptions();
-            this.refImpuesto.current.focus();
+        if (!isText(this.refImpuesto.current.value)) {
+            alertWarning("Venta", "Seleccione un impuesto.", () => {
+                this.handleOpenAndCloseOptions();
+                this.refImpuesto.current.focus();
+            });
             return;
         }
 
@@ -426,16 +445,14 @@ class VentaProceso extends CustomComponent {
         }
 
         const detalleVenta = [...this.state.detalleVenta];
-        const existingItem = detalleVenta.find(item => item.idDetalle === producto.idProducto);
+        const existingItem = detalleVenta.find(item => item.idProducto === producto.idProducto);
 
         if (!existingItem) {
             detalleVenta.push({
-                idDetalle: producto.idProducto,
+                idProducto: producto.idProducto,
                 nombreProducto: producto.nombreProducto,
-                nombreCategoria: producto.nombreCategoria,
                 cantidad: 1,
-                idImpuesto: this.state.idImpuesto,
-                idMedida: producto.idMedida,
+                idImpuesto: this.refImpuesto.current.value,
                 precio: producto.precio
             });
         } else {
@@ -447,31 +464,25 @@ class VentaProceso extends CustomComponent {
         });
     }
 
+    //------------------------------------------------------------------------------------------
+    // Modal configuración
+    //------------------------------------------------------------------------------------------
+
+
     handleSelectComprobante = (event) => {
         this.setState({ idComprobante: event.target.value })
     }
 
-    handleSelectImpuesto = (event) => {
-        const idImpuesto = event.target.value;
-        if (idImpuesto === "" || idImpuesto === null) {
-            alertWarning("Venta", "¡El impuesto no debe tener un valor vacio!");
-            return;
-        }
+    //------------------------------------------------------------------------------------------
+    // Modal configuración
+    //------------------------------------------------------------------------------------------
 
-        const detalleVenta = this.state.detalleVenta.map(item => ({
-            ...item,
-            idImpuesto: idImpuesto
-        }));
 
-        this.setState({ idImpuesto, detalleVenta });
-    }
+    handleOpenAndCloseOptions = () => {
+        const invoice = document.getElementById(this.idModalConfiguration);
+        this.refImpuesto.current.value = this.state.idImpuesto;
+        this.refMoneda.current.value = this.state.idMoneda;
 
-    handleSelectMoneda = (event) => {
-        this.setState({ idMoneda: event.target.value, });
-    }
-
-    handleModalOptions = () => {
-        const invoice = document.getElementById(this.sideModalInovice);
         if (invoice.classList.contains("toggled")) {
             invoice.classList.remove("toggled");
         } else {
@@ -480,21 +491,37 @@ class VentaProceso extends CustomComponent {
     }
 
     handleSaveOptions = () => {
+        if (!isText(this.refImpuesto.current.value)) {
+            alertWarning("Venta", "Seleccione un impuesto.", () => this.refImpuesto.current.focus());
+            return;
+        };
 
+        if (!isText(this.refMoneda.current.value)) {
+            alertWarning("Venta", "Seleccione una moneda.", () => this.refMoneda.current.focus());
+            return;
+        };
+
+        const detalleVenta = this.state.detalleVenta.map(item => ({
+            ...item,
+            idImpuesto: this.refImpuesto.current.value
+        }));
+
+        const moneda = this.state.monedas.find(item => item.idMoneda === this.refMoneda.current.value)
+
+        this.setState({
+            idMoneda: moneda.idMoneda,
+            codiso: moneda.codiso,
+            idImpuesto: this.refImpuesto.current.value,
+            detalleVenta
+        }, () => this.handleOpenAndCloseOptions())
     }
 
-    handleOpenAndCloseOptions = (event) => {
-        event.stopPropagation();
-        this.handleModalOptions();
-    }
+    //------------------------------------------------------------------------------------------
+    // Modal cliente
+    //------------------------------------------------------------------------------------------
 
-    handleOpenAndCloseOverlay = () => {
-        this.handleModalOptions();
-    }
-
-
-    handleModalCliente = () => {
-        const invoice = document.getElementById(this.modalCliente);
+    handleOpenAndCloseCliente = () => {
+        const invoice = document.getElementById(this.idModalCliente);
         if (invoice.classList.contains("toggled")) {
             invoice.classList.remove("toggled");
         } else {
@@ -506,14 +533,9 @@ class VentaProceso extends CustomComponent {
 
     }
 
-    handleOpenAndCloseCiente = (event) => {
-        event.stopPropagation();
-        this.handleModalCliente();
-    }
-
-    handleOpenAndCloseOverlayCliente = () => {
-        this.handleModalCliente();
-    }
+    //------------------------------------------------------------------------------------------
+    // Filtrar cliente
+    //------------------------------------------------------------------------------------------
 
     handleClearInputClient = async () => {
         await this.setStateAsync({ clientes: [], idCliente: '', cliente: "" });
@@ -558,6 +580,11 @@ class VentaProceso extends CustomComponent {
         this.selectItemClient = true;
     }
 
+    //------------------------------------------------------------------------------------------
+    // Componente footer
+    //------------------------------------------------------------------------------------------
+
+
     handleOpenSale = async () => {
         if (this.state.detalleVenta.length === 0) {
             alertWarning("Venta", "La lista de productos esta vacía.");
@@ -577,11 +604,75 @@ class VentaProceso extends CustomComponent {
             return;
         }
 
-        showModal(this.idModalVentaProceso);
+        showModal(this.idModalSale);
         await this.setStateAsync({ loadModal: true })
     }
 
-    
+
+    handleClearSale = () => {
+        this.refProducto.current.focus();
+
+        this.setState({
+            idComprobante: '',
+
+            idMoneda: "",
+            codiso: "",
+
+            idImpuesto: "",
+
+            producto: '',
+            sarchProducto: false,
+            filterProducto: false,
+
+            idCliente: '',
+            cliente: '',
+            filterCliente: false,
+
+            loading: true,
+            msgLoading: 'Cargando datos...',
+
+            loadModal: false,
+            selectTipoPago: 1,
+
+            comprobantes: [],
+            comprobantesCobro: [],
+            productos: [],
+            clientes: [],
+            bancos: [],
+            impuestos: [],
+            monedas: [],
+            detalleVenta: [],
+
+            montoInicialCheck: false,
+            inicial: '',
+            idComprobanteCredito: '',
+
+            idBancoCredito: '',
+            metodoPagoCredito: '',
+
+            monthPago: getCurrentMonth(),
+            yearPago: getCurrentYear(),
+
+            numCuota: '',
+            letraMensual: '',
+
+            inicialCreditoVariableCheck: false,
+            inicialCreditoVariable: '',
+
+            idBancoCreditoVariable: '',
+            metodoPagoCreditoVariable: '',
+
+            importeTotal: 0.0,
+
+            metodosPagoLista: [],
+
+            metodoPagoAgregado: [],
+        }, () => {
+            this.loadingData();
+        })
+    }
+
+
     //------------------------------------------------------------------------------------------
     // Modal Venta
     //------------------------------------------------------------------------------------------
@@ -590,14 +681,12 @@ class VentaProceso extends CustomComponent {
         this.setState({ selectTipoPago: tipo })
     }
 
-    handleTextMontoInicial = async (event) => {
-        await this.setStateAsync({ inicial: event.target.value })
-        this.calcularLetraMensual()
+    handleTextMontoInicial = (event) => {
+        this.setState({ inicial: event.target.value }, () => this.calcularLetraMensual())
     }
 
-    handleCheckMontoInicial = async (event) => {
-        await this.setStateAsync({ montoInicialCheck: event.target.checked })
-        this.refMontoInicial.current.focus();
+    handleCheckMontoInicial = (event) => {
+        this.setState({ montoInicialCheck: event.target.checked }, () => this.refMontoInicial.current.focus())
     }
 
     handleSelectComprobanteCredito = (event) => {
@@ -612,9 +701,8 @@ class VentaProceso extends CustomComponent {
         this.setState({ metodoPagoCredito: event.target.value })
     }
 
-    handleSelectNumeroCuotas = async (event) => {
-        await this.setStateAsync({ numCuota: event.target.value })
-        this.calcularLetraMensual()
+    handleSelectNumeroCuotas = (event) => {
+        this.setState({ numCuota: event.target.value }, () => this.calcularLetraMensual())
     }
 
     handleSelectMonthPago = (event) => {
@@ -634,8 +722,7 @@ class VentaProceso extends CustomComponent {
     }
 
     handleCheckInicialCreditoVarible = (event) => {
-        this.setState({ inicialCreditoVariableCheck: event.target.checked })
-        this.refInicialCreditoVariable.current.focus();
+        this.setState({ inicialCreditoVariableCheck: event.target.checked }, () => this.refInicialCreditoVariable.current.focus())
     }
 
     handleSelectFrecuenciaPago = (event) => {
@@ -654,104 +741,127 @@ class VentaProceso extends CustomComponent {
         this.setState({ metodoPagoCreditoVariable: event.target.value })
     }
 
-    handleClearSale = () => {
-        this.refProducto.current.focus();
+    //Metodos Modal Sale
+    handleAddMetodPay = () => {
+        const listAdd = this.state.metodoPagoAgregado.find(item => item.idMetodoPago === this.refMetodoContado.current.value)
 
-        this.setState({
-            loading: true,
-            msgLoading: 'Cargando datos...',
+        if (listAdd) {
+            return
+        }
 
-            idComprobante: '',
-            comprobantes: [],
+        const metodo = this.state.metodosPagoLista.find(item => item.idMetodoPago === this.refMetodoContado.current.value);
 
-            idMoneda: '',
-            monedas: [],
-            codiso: "PEN",
+        const item = {
+            "idMetodoPago": metodo.idMetodoPago,
+            "nombre": metodo.nombre,
+            "monto": '',
+            "vuelto": metodo.vuelto,
+            "descripcion": ""
+        }
 
-            producto: '',
-            productos: [],
-            sarchProducto: false,
-            filterProducto: false,
-
-            idCliente: '',
-            clientes: [],
-            cliente: '',
-            filterCliente: false,
-
-            idImpuesto: '',
-            impuestos: [],
-
-            detalleVenta: [],
-
-            selectTipoPago: 1,
-
-            comprobantesCobro: [],
-
-            bancos: [],
-
-            montoInicialCheck: false,
-            inicial: '',
-            idComprobanteCredito: '',
-
-            idBancoCredito: '',
-            metodoPagoCredito: '',
-
-            monthPago: getCurrentMonth(),
-            yearPago: getCurrentYear(),
-
-            numCuota: '',
-            letraMensual: '',
-
-            frecuenciaPagoCredito: new Date().getDate() > 15 ? '30' : '15',
-
-            inicialCreditoVariableCheck: false,
-            inicialCreditoVariable: '',
-
-            frecuenciaPago: new Date().getDate() > 15 ? '30' : '15',
-            idComprobanteCreditoVariable: '',
-
-            idBancoCreditoVariable: '',
-            metodoPagoCreditoVariable: '',
-
-            importeTotal: 0.0
-        }, () => {
-            this.loadingData();
-        })
+        this.setState(prevState => ({
+            metodoPagoAgregado: [...prevState.metodoPagoAgregado, item]
+        }))
     }
 
-    handleSaveProcess = () => {    
+    handleRemoveItemMetodPay = (idMetodoPago) => {
+        const metodoPagoAgregado = this.state.metodoPagoAgregado.filter(item => item.idMetodoPago !== idMetodoPago);
+        this.setState({ metodoPagoAgregado })
+
+    }
+
+    handleInputMontoMetodoPay = (event, idMetodoPago) => {
+        const { value } = event.target;
+
+        this.setState(prevState => ({
+            metodoPagoAgregado: prevState.metodoPagoAgregado.map(item => {
+                if (item.idMetodoPago === idMetodoPago) {
+                    return { ...item, monto: value ? value : '' }
+                } else {
+                    return item;
+                }
+            }),
+        }));
+    }
+
+    handleProcessContado = async () => {
+        const {
+            selectTipoPago,
+            idComprobante,
+            idMoneda,
+            idImpuesto,
+            idCliente,
+            idSucursal,
+            idUsuario,
+            detalleVenta,
+            metodoPagoAgregado,
+            importeTotal
+        } = this.state;
+
+        let metodoPagoLista = [...metodoPagoAgregado];
+
+        if (isEmpty(metodoPagoLista)) {
+            alertWarning("Venta", "Tiene que agregar método de cobro para continuar.",)
+            return;
+        }
+
+        if (metodoPagoLista.filter(item => !isNumeric(item.monto)).length !== 0) {
+            alertWarning("Venta", "Hay montos del metodo de cobro que no tiene valor.",)
+            return;
+        }
+
+        const metodoCobroTotal = metodoPagoLista.reduce((accumulator, item) => {
+            return accumulator += parseFloat(item.monto);
+        }, 0);
+
+        if (metodoPagoLista.length > 1) {
+            if (metodoCobroTotal !== importeTotal) {
+                alertWarning("Venta", "Al tener mas de 2 métodos de cobro el monto debe ser igual al total.",)
+                return;
+            }
+        } else {
+            const metodo = metodoPagoLista[0];
+            if (metodo.vuelto === 1) {
+                if (metodoCobroTotal < importeTotal) {
+                    alertWarning("Venta", "El monto a cobrar es menor que el total.",)
+                    return;
+                }
+
+                metodoPagoLista.map((item) => {
+                    item.descripcion = `Pago con ${rounded(parseFloat(item.monto))} y su vuelto es ${rounded(parseFloat(item.monto) - importeTotal)}`;
+                    item.monto = importeTotal;
+                    return item;
+                });
+
+            } else {
+                if (metodoCobroTotal !== importeTotal) {
+                    alertWarning("Venta", "El monto a cobrar debe ser igual al total.",)
+                    return;
+                }
+            }
+        }
+
         alertDialog("Venta", "¿Estás seguro de continuar?", async (value) => {
             if (value) {
 
-                let numCuota = 0;
-                switch (this.state.selectTipoPago) {
-                    case 2:
-                        numCuota = parseInt(this.state.numCuota);
-                        break;
-                    default: numCuota = 0;
-                }
-
-                let frecuencia = 0;
-                // switch(selectTipoPago){
-
-                // }
-
                 const data = {
-                    idComprobante: this.state.idComprobante,
-                    idCliente: this.state.idCliente,
-                    idUsuario: this.state.idUsuario,
-                    idSucursal: this.state.idSucursal,
-                    idMoneda: this.state.idMoneda,
-                    tipo: this.state.selectTipoPago === 1 ? 1 : 2,
-                    selectTipoPago: this.state.selectTipoPago,
-                    numCuota: numCuota,
-                    estado: this.state.selectTipoPago === 1 ? 1 : 2,
-                    frecuenciaPago: frecuencia,                 
-
-                    detalleVenta: this.state.detalleVenta
+                    tipo: selectTipoPago,
+                    idComprobante: idComprobante,
+                    idMoneda: idMoneda,
+                    idImpuesto: idImpuesto,
+                    idCliente: idCliente,
+                    idSucursal: idSucursal,
+                    idUsuario: idUsuario,
+                    detalleVenta: detalleVenta,
+                    metodoPagoAgregado: metodoPagoAgregado
                 }
+
+                hideModal(this.idModalSale)
+                alertInfo("Venta", "Procesando venta...");
+
 
                 const response = await createFactura(data);
+
 
                 if (response instanceof SuccessReponse) {
                     alertSuccess("Venta", response.data, () => {
@@ -768,63 +878,10 @@ class VentaProceso extends CustomComponent {
         });
     }
 
-
-    //Metodos Modal Sale
-    handleAddMetodPay = () => {
-        const listAdd = this.state.metodoPagoAgregado.find(item => item.idMetodo === this.refMetodoContado.current.value)
-
-        if (listAdd) {
-            return
+    handleSaveSale = () => {
+        if (this.state.selectTipoPago === 1) {
+            this.handleProcessContado();
         }
-
-        const metodo = this.state.metodosPagoLista.find(item => item.idMetodo === this.refMetodoContado.current.value);
-
-        const item = {
-            "idMetodo": metodo.idMetodo,
-            "nombre": metodo.nombre,
-            "monto": '',
-            "vuelto": metodo.vuelto
-        }
-
-        this.setState(prevState => ({
-            metodoPagoAgregado: [...prevState.metodoPagoAgregado, item]
-        }))
-    }
-
-    handleRemoveItemMetodPay = (idMetodo) => {
-        const metodoPagoAgregado = this.state.metodoPagoAgregado.filter(item => item.idMetodo !== idMetodo);
-        this.setState({ metodoPagoAgregado })
-
-    }
-
-    handleInputMontoMetodoPay = async (event, idMetodo) => {
-        const { value } = event.target;
-        await this.setStateAsync(prevState => ({
-            metodoPagoAgregado: prevState.metodoPagoAgregado.map(item =>
-                item.idMetodo === idMetodo ? { ...item, monto: value ? parseFloat(value) : '' } : item
-            ),
-        }));
-
-        this.handleCalcularMetodoPagoContado()
-    }
-
-    handleCalcularMetodoPagoContado = () => {
-        const suma = this.state.metodoPagoAgregado.reduce((accumulator, item) => {
-            const monto = item.monto ? parseFloat(item.monto) : 0
-            return accumulator + monto;
-        }, 0)
-
-        if (suma >= this.state.importeTotal) {
-            this.setState({
-                vuelto: suma - this.state.importeTotal
-            })
-        } else {
-            this.setState({
-                vuelto: this.state.importeTotal - suma
-            })
-        }
-
-        console.log(this.state.importeTotal)
     }
 
     /*
@@ -844,110 +901,145 @@ class VentaProceso extends CustomComponent {
     */
 
     render() {
-        const {loadModal, selectTipoPago, comprobantesCobro} = this.state;
+        const { loadModal, selectTipoPago, comprobantesCobro } = this.state;
 
-        return (   
+        const { impuestos, monedas, codiso } = this.state;
+
+        const { idComprobante, comprobantes } = this.state;
+
+        const { producto, idSucursal, filterProducto } = this.state;
+
+        const { sarchProducto, productos } = this.state;
+
+        const { cliente, clientes } = this.state;
+
+        const { loading, msgLoading } = this.state;
+
+        const { detalleVenta } = this.state;
+
+        const { bancos, mmonth, year, inicial } = this.state;
+
+        const {
+            montoInicialCheck,
+            idComprobanteCredito,
+            idBancoCredito,
+            metodoPagoCredito,
+            numCuota,
+            monthPago,
+            yearPago,
+            frecuenciaPagoCredito,
+            letraMensual,
+            inicialCreditoVariable,
+            inicialCreditoVariableCheck,
+            idComprobanteCreditoVariable,
+            idBancoCreditoVariable,
+            metodoPagoCreditoVariable,
+            frecuenciaPago,
+            importeTotal,
+            metodosPagoLista,
+            metodoPagoAgregado,
+        } = this.state;
+
+        return (
 
             <PosContainerWrapper>
 
                 <ModalSale
-                    idModalVentaProceso={this.idModalVentaProceso}
+                    idModalSale={this.idModalSale}
                     loadModal={loadModal}
 
                     selectTipoPago={selectTipoPago}
                     handleSelectTipoPago={this.handleSelectTipoPago}
 
                     comprobantesCobro={comprobantesCobro}
-                    bancos={this.state.bancos}
-                    mmonth={this.state.mmonth}
-                    year={this.state.year}           
-            
+                    bancos={bancos}
+                    mmonth={mmonth}
+                    year={year}
+
                     refMetodoContado={this.refMetodoContado}
 
                     refMontoInicial={this.refMontoInicial}
-                    inicial={this.state.inicial}
+                    inicial={inicial}
                     handleTextMontoInicial={this.handleTextMontoInicial}
 
-                    montoInicialCheck={this.state.montoInicialCheck}
+                    montoInicialCheck={montoInicialCheck}
                     handleCheckMontoInicial={this.handleCheckMontoInicial}
 
                     refComprobanteCredito={this.refComprobanteCredito}
-                    idComprobanteCredito={this.state.idComprobanteCredito}
+                    idComprobanteCredito={idComprobanteCredito}
                     handleSelectComprobanteCredito={this.handleSelectComprobanteCredito}
 
                     refBancoCredito={this.refBancoCredito}
-                    idBancoCredito={this.state.idBancoCredito}
+                    idBancoCredito={idBancoCredito}
                     handleSelectBancoCredito={this.handleSelectBancoCredito}
 
                     refMetodoCredito={this.refMetodoCredito}
-                    metodoPagoCredito={this.state.metodoPagoCredito}
+                    metodoPagoCredito={metodoPagoCredito}
                     handleSelectMetodoPagoCredito={this.handleSelectMetodoPagoCredito}
 
                     refNumCutoas={this.refNumCutoas}
-                    numCuota={this.state.numCuota}
+                    numCuota={numCuota}
                     handleSelectNumeroCuotas={this.handleSelectNumeroCuotas}
 
-                    monthPago={this.state.monthPago}
+                    monthPago={monthPago}
                     handleSelectMonthPago={this.handleSelectMonthPago}
 
-                    yearPago={this.state.yearPago}
+                    yearPago={yearPago}
                     handleSelectYearPago={this.handleSelectYearPago}
 
                     refFrecuenciaPagoCredito={this.refFrecuenciaPagoCredito}
-                    frecuenciaPagoCredito={this.state.frecuenciaPagoCredito}
+                    frecuenciaPagoCredito={frecuenciaPagoCredito}
                     handleSelectFrecuenciaPagoCredito={this.handleSelectFrecuenciaPagoCredito}
 
-                    letraMensual={this.state.letraMensual}
+                    letraMensual={letraMensual}
 
                     refInicialCreditoVariable={this.refInicialCreditoVariable}
-                    inicialCreditoVariable={this.state.inicialCreditoVariable}
+                    inicialCreditoVariable={inicialCreditoVariable}
                     handleTextInicialCreditoVariable={this.handleTextInicialCreditoVariable}
 
-                    inicialCreditoVariableCheck={this.state.inicialCreditoVariableCheck}
+                    inicialCreditoVariableCheck={inicialCreditoVariableCheck}
                     handleCheckInicialCreditoVarible={this.handleCheckInicialCreditoVarible}
 
                     refComprobanteCreditoVariable={this.refComprobanteCreditoVariable}
-                    idComprobanteCreditoVariable={this.state.idComprobanteCreditoVariable}
+                    idComprobanteCreditoVariable={idComprobanteCreditoVariable}
                     handleSelectComprobanteCreditoVarible={this.handleSelectComprobanteCreditoVarible}
 
                     refBancoCreditoVariable={this.refBancoCreditoVariable}
-                    idBancoCreditoVariable={this.state.idBancoCreditoVariable}
+                    idBancoCreditoVariable={idBancoCreditoVariable}
                     handleSelectBancoCreditoVariable={this.handleSelectBancoCreditoVariable}
 
                     refMetodoCreditoVariable={this.refMetodoCreditoVariable}
-                    metodoPagoCreditoVariable={this.state.metodoPagoCreditoVariable}
+                    metodoPagoCreditoVariable={metodoPagoCreditoVariable}
                     handleSelectMetodoPagoCreditoVariable={this.handleSelectMetodoPagoCreditoVariable}
 
                     refFrecuenciaPago={this.refFrecuenciaPago}
-                    frecuenciaPago={this.state.frecuenciaPago}
+                    frecuenciaPago={frecuenciaPago}
                     handleSelectFrecuenciaPago={this.handleSelectFrecuenciaPago}
 
-                    importeTotal={this.state.importeTotal}
+                    importeTotal={importeTotal}
 
-                    handleSaveProcess={this.handleSaveProcess}
+                    handleSaveSale={this.handleSaveSale}
 
-                    // 
-                    metodosPagoLista={this.state.metodosPagoLista}
-                    metodoPagoAgregado={this.state.metodoPagoAgregado}
+                    metodosPagoLista={metodosPagoLista}
+                    metodoPagoAgregado={metodoPagoAgregado}
                     handleAddMetodPay={this.handleAddMetodPay}
                     handleInputMontoMetodoPay={this.handleInputMontoMetodoPay}
                     handleRemoveItemMetodPay={this.handleRemoveItemMetodPay}
-                    vuelto={this.state.vuelto}
                 />
 
                 {
-                    this.state.loading && spinnerLoading(this.state.msgLoading)
+                    loading && spinnerLoading(msgLoading)
                 }
 
                 <section className='invoice-left'>
                     <InvoiceView
-                        producto={this.state.producto}
-                        idSucursal={this.state.idSucursal}
-                        filterProducto={this.state.filterProducto}
+                        producto={producto}
+                        idSucursal={idSucursal}
+                        filterProducto={filterProducto}
                         setStateAsync={this.setStateAsync}
 
-                        sarchProducto={this.state.sarchProducto}
-                        productos={this.state.productos}
+                        sarchProducto={sarchProducto}
+                        productos={productos}
                         refProducto={this.refProducto}
                         handleAddItem={this.handleAddItem}
 
@@ -967,32 +1059,32 @@ class VentaProceso extends CustomComponent {
 
                     <InvoiceVoucher
                         refComprobante={this.refComprobante}
-                        idComprobante={this.state.idComprobante}
-                        comprobantes={this.state.comprobantes}
+                        idComprobante={idComprobante}
+                        comprobantes={comprobantes}
                         handleSelectComprobante={this.handleSelectComprobante}
                     />
 
                     <InvoiceClient
-                        handleOpenAndCloseCiente={this.handleOpenAndCloseCiente}
+                        handleOpenAndCloseCliente={this.handleOpenAndCloseCliente}
                         placeholder="Filtrar clientes..."
                         refCliente={this.refCliente}
-                        cliente={this.state.cliente}
-                        clientes={this.state.clientes}
+                        cliente={cliente}
+                        clientes={clientes}
                         onEventClearInput={this.handleClearInputClient}
                         handleFilter={this.handleFilterClient}
                         onEventSelectItem={this.handleSelectItemClient}
                     />
 
                     <InvoiceDetail
-                        codiso={this.state.codiso}
+                        codiso={codiso}
                         setStateAsync={this.setStateAsync}
-                        detalleVenta={this.state.detalleVenta}
+                        detalleVenta={detalleVenta}
                     />
 
                     <InvoiceFooter
-                        codiso={this.state.codiso}
-                        impuestos={this.state.impuestos}
-                        detalleVenta={this.state.detalleVenta}
+                        codiso={codiso}
+                        impuestos={impuestos}
+                        detalleVenta={detalleVenta}
                         handleOpenSale={this.handleOpenSale}
                         handleClearSale={this.handleClearSale}
                     />
@@ -1001,18 +1093,13 @@ class VentaProceso extends CustomComponent {
                 <ModalConfiguration
                     idModalConfiguration={this.idModalConfiguration}
 
-                    idImpuesto={this.state.idImpuesto}
                     refImpuesto={this.refImpuesto}
-                    impuestos={this.state.impuestos}
-                    handleSelectImpuesto={this.handleSelectImpuesto}
+                    impuestos={impuestos}
 
-                    idMoneda={this.state.idMoneda}
                     refMoneda={this.refMoneda}
-                    monedas={this.state.monedas}
-                    handleSelectMoneda={this.handleSelectMoneda}
+                    monedas={monedas}
 
                     handleSaveOptions={this.handleSaveOptions}
-                    handleOpenAndCloseOverlay={this.handleOpenAndCloseOverlay}
                     handleOpenAndCloseOptions={this.handleOpenAndCloseOptions}
                 />
 
@@ -1020,8 +1107,7 @@ class VentaProceso extends CustomComponent {
                     idModalCliente={this.idModalCliente}
 
                     handleSaveCliente={this.handleSaveCliente}
-                    handleOpenAndCloseOverlayCliente={this.handleOpenAndCloseOverlayCliente}
-                    handleOpenAndCloseCiente={this.handleOpenAndCloseCiente}
+                    handleOpenAndCloseCliente={this.handleOpenAndCloseCliente}
                 />
             </PosContainerWrapper>
         );

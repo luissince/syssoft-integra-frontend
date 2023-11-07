@@ -10,7 +10,7 @@ import {
 
 const ModalSale = (props) => {
 
-    const { idModalVentaProceso } = props;
+    const { idModalSale } = props;
 
     const {
         loadModal,
@@ -84,36 +84,76 @@ const ModalSale = (props) => {
 
         importeTotal,
 
-        handleSaveProcess,
+        handleSaveSale,
 
         metodosPagoLista,
         metodoPagoAgregado,
         handleAddMetodPay,
         handleInputMontoMetodoPay,
         handleRemoveItemMetodPay,
-        vuelto
 
     } = props;
 
     const generarVuelto = () => {
+
+        const total = parseFloat(importeTotal)
+
         if (metodoPagoAgregado.length === 0) {
-            return <h6>Agrega algún método de pago.</h6>;
+            return <h5>Agrega algún método de pago.</h5>;
         }
 
-        if (metodoPagoAgregado.length === 1) {
-            const metodo = metodoPagoAgregado[0];
-            if (metodo.vuelto) {
-                return <h6>Su cambio: <span>{rounded(vuelto)}</span></h6>
+        const currentAmount = metodoPagoAgregado.reduce((accumulator, item) => {
+            accumulator += item.monto ? parseFloat(item.monto) : 0
+            return accumulator;
+        }, 0);
+
+        if (metodoPagoAgregado.length > 1) {
+            if (currentAmount >= total) {
+                return (
+                    <>
+                        <h5>RESTANTE: <span>{rounded(currentAmount - total)}</span></h5>
+                        <h6 className="text-danger">Más de dos metodos de pago no generan vuelto.</h6>
+                    </>
+                )
             } else {
-                return <h6>El método de pago no genera vuelto.</h6>
+                return (
+                    <>
+                        <h5>POR COBRAR: <span>{rounded(total - currentAmount)}</span></h5>
+                        <h6 className="text-danger">Más de dos metodos de pago no generan vuelto.</h6>
+                    </>
+                )
             }
         }
 
-        return <h6>Más de dos metodos de pago no generan vuelto.</h6>
+        const metodo = metodoPagoAgregado[0];
+        if (metodo.vuelto === 1) {
+            if (currentAmount >= total) {
+                return <h5>SU CAMBIO ES: <span>{rounded(currentAmount - total)}</span></h5>
+            } else {
+                return <h5 className="text-danger">POR COBRAR: <span>{rounded(total - currentAmount)}</span></h5>
+            }
+
+        } else {
+            if (currentAmount >= total) {
+                return (
+                    <>
+                        <h5>RESTANTE: <span>{rounded(currentAmount - total)}</span></h5>
+                        <h6 className="text-danger">El método de pago no genera vuelto.</h6>
+                    </>
+                );
+            } else {
+                return (
+                    <>
+                        <h5>POR COBRAR: <span>{rounded(total - currentAmount)}</span></h5>
+                        <h6 className="text-danger">El método de pago no genera vuelto.</h6>
+                    </>
+                );
+            }
+        }
     }
 
     return (
-        <div className="modal fade" id={idModalVentaProceso} data-bs-keyboard="false" data-bs-backdrop="static">
+        <div className="modal fade" id={idModalSale} data-bs-keyboard="false" data-bs-backdrop="static">
             <div className="modal-dialog modal-lg modal-dialog-centered">
                 <div className="modal-content">
                     <div className="modal-header">
@@ -132,7 +172,7 @@ const ModalSale = (props) => {
                         <div className="row">
                             <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
                                 <div className="text-center">
-                                    <h5>TOTAL A PAGAR: <span>{rounded(importeTotal)}</span></h5>
+                                    <h5>TOTAL A COBRAR: <span>{rounded(importeTotal)}</span></h5>
                                 </div>
                             </div>
                         </div>
@@ -143,7 +183,7 @@ const ModalSale = (props) => {
                                 <hr />
                             </div>
                             <div className="col-md-4 col-sm-4 d-flex align-items-center justify-content-center">
-                                <h6 className="mb-0">Tipos de pagos</h6>
+                                <h6 className="mb-0">Tipos de cobros</h6>
                             </div>
                             <div className="col-md-4 col-sm-4">
                                 <hr />
@@ -234,22 +274,24 @@ const ModalSale = (props) => {
 
                                     <div className="form-row">
                                         <div className="form-group col-md-12">
-                                            <label>Metodo de pago:</label>
+                                            <label>Metodo de cobro:</label>
                                             <div className="input-group">
                                                 <div className="input-group-prepend">
                                                     <div className="input-group-text"><i className="bi bi-tag-fill"></i></div>
                                                 </div>
                                                 <select
-                                                    title="Lista metodo de pago"
+                                                    title="Lista metodo de cobro"
                                                     className="form-control"
                                                     ref={refMetodoContado}
                                                 >
 
-                                                    {metodosPagoLista.map((item, index) => (
-                                                        <option key={index} value={item.idMetodo}>
-                                                            {item.nombre}
-                                                        </option>
-                                                    ))}
+                                                    {
+                                                        metodosPagoLista.map((item, index) => (
+                                                            <option key={index} value={item.idMetodoPago}>
+                                                                {item.nombre}
+                                                            </option>
+                                                        ))
+                                                    }
                                                 </select>
                                                 <div className="input-group-append">
                                                     <button className='btn btn-outline-success d-flex' title="Agregar Pago"
@@ -265,8 +307,8 @@ const ModalSale = (props) => {
                                         metodoPagoAgregado.map((item, index) => (
                                             <MetodoPago
                                                 key={index}
+                                                idMetodoPago={item.idMetodoPago}
                                                 nameMetodPay={item.nombre}
-                                                idMetodo={item.idMetodo}
                                                 monto={item.monto}
                                                 handleInputMontoMetodoPay={handleInputMontoMetodoPay}
                                                 handleRemoveItemMetodPay={handleRemoveItemMetodPay}
@@ -660,7 +702,7 @@ const ModalSale = (props) => {
 
                     {/* Procesar y cerrar venta */}
                     <div className="modal-footer">
-                        <button type="button" className="btn btn-primary" onClick={handleSaveProcess}>Completar venta</button>
+                        <button type="button" className="btn btn-primary" onClick={handleSaveSale}>Completar venta</button>
                         <button type="button" className="btn btn-danger" data-bs-dismiss="modal">Cerrar</button>
                     </div>
                 </div>
@@ -669,17 +711,16 @@ const ModalSale = (props) => {
     );
 }
 
-const MetodoPago = ({ idMetodo, nameMetodPay, monto, handleInputMontoMetodoPay, handleRemoveItemMetodPay }) => {
+const MetodoPago = ({ idMetodoPago, nameMetodPay, monto, handleInputMontoMetodoPay, handleRemoveItemMetodPay }) => {
     return (
         <div className="input-group mb-2">
             <input
                 autoFocus
-                title="Monto"
                 type="text"
                 className="form-control"
                 placeholder="Monto"
                 value={monto}
-                onChange={(event) => handleInputMontoMetodoPay(event, idMetodo)}
+                onChange={(event) => handleInputMontoMetodoPay(event, idMetodoPago)}
                 onKeyDown={keyNumberFloat}
             />
             <div className="input-group-prepend">
@@ -689,7 +730,7 @@ const MetodoPago = ({ idMetodo, nameMetodPay, monto, handleInputMontoMetodoPay, 
             </div>
             <div className="input-group-append">
                 <button className='btn btn-outline-danger d-flex' title="Agregar Pago"
-                    onClick={() => handleRemoveItemMetodPay(idMetodo)}>
+                    onClick={() => handleRemoveItemMetodPay(idMetodoPago)}>
                     <i className="bi bi-trash3-fill"></i>
                 </button>
             </div>

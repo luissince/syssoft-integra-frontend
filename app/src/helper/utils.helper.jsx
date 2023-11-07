@@ -53,37 +53,27 @@ export async function imageBase64(files) {
  * @returns {string} La cantidad formateada como dinero.
  */
 export function formatDecimal(amount, decimalCount = 2, decimal = ".", thousands = ",") {
-  try {
-    // Validamos si es un número
-    const isNumber = /^-?\d*\.?\d+$/.test(amount);
-    if (!isNumber) throw new Error("0.00");
+  const isNumber = /^-?\d*\.?\d+$/.test(amount);
+  if (!isNumber) return "0.00";
 
-    decimalCount = Math.abs(decimalCount);
-    decimalCount = isNaN(decimalCount) ? 2 : decimalCount;
+  decimalCount = Math.abs(decimalCount);
+  decimalCount = isNaN(decimalCount) ? 2 : decimalCount;
 
-    const negativeSign = amount < 0 ? "-" : "";
+  const negativeSign = amount < 0 ? "-" : "";
 
-    const parsedAmount = Math.abs(Number(amount)) || 0;
-    const fixedAmount = parsedAmount.toFixed(decimalCount);
-    const formattedAmount = parseInt(fixedAmount).toString();
-    const groupDigits = 3;
+  let i = parseInt((amount = Math.abs(Number(amount) || 0).toFixed(decimalCount))).toString();
 
-    const index = formattedAmount.length > groupDigits ? formattedAmount.length % groupDigits : 0;
+  let j = i.length > 3 ? i.length % 3 : 0;
 
-    return (
-      negativeSign +
-      (index ? formattedAmount.substring(0, index) + thousands : "") +
-      formattedAmount.substring(index).replace(/(\d{3})(?=\d)/g, "$1" + thousands) +
-      (decimalCount
-        ? decimal +
-        Math.abs(amount - formattedAmount)
-          .toFixed(decimalCount)
-          .slice(2)
-        : "")
-    );
-  } catch (e) {
-    return "0.00";
-  }
+  const negative = negativeSign + (j ? i.substring(0, j) + thousands : "");
+
+  const a = i.substring(j).replace(/(\d{3})(?=\d)/g, "$1" + thousands);
+
+  const d = (decimalCount ? decimal + Math.abs(amount - i).toFixed(decimalCount).slice(2) : "");
+
+  const total = negative + a + d;
+
+  return total
 }
 
 
@@ -92,35 +82,21 @@ export function formatDecimal(amount, decimalCount = 2, decimal = ".", thousands
  *
  * @param {number} amount - La cantidad numérica que se va a formatear como dinero.
  * @param {number} [decimalCount=2] - El número de decimales a mostrar.
- * @param {string} [decimal="."] - El separador decimal.
  * @returns {string} La cantidad formateada como dinero.
  */
-export function rounded(amount, decimalCount = 2, decimal = ".", thousands = "") {
-  try {
-    // Validamos si es un número
-    const isNumber = /^-?\d*\.?\d+$/.test(amount);
-    if (!isNumber) throw new Error("0");
+export function rounded(amount, decimalCount = 2) {
+  const isNumber = /^-?\d*\.?\d+$/.test(amount);
+  if (!isNumber) return "0";
 
-    decimalCount = Math.abs(decimalCount);
-    decimalCount = isNaN(decimalCount) ? 2 : decimalCount;
+  decimalCount = Math.abs(decimalCount);
+  decimalCount = isNaN(decimalCount) ? 2 : decimalCount;
 
-    const negativeSign = amount < 0 ? "-" : "";
+  const negativeSign = amount < 0 ? "-" : "";
 
-    const parsedAmount = Math.abs(Number(amount)) || 0;
-    const fixedAmount = parsedAmount.toFixed(decimalCount);
-    const formattedAmount = parseInt(fixedAmount).toString();
-    const groupDigits = 3;
+  const parsedAmount = Math.abs(Number(amount)) || 0;
+  const fixedAmount = parsedAmount.toFixed(decimalCount);
 
-    const index = formattedAmount.length > groupDigits ? formattedAmount.length % groupDigits : 0;
-
-    const inicio = (index ? formattedAmount.substring(0, index) + thousands : "");
-    const restante = formattedAmount.substring(index).replace(/(\d{3})(?=\d)/g, "$1" + thousands);
-    const flotante = decimalCount ? decimal + Math.abs(amount - formattedAmount).toFixed(decimalCount).slice(2) : "";
-
-    return negativeSign + inicio + restante + flotante;
-  } catch (e) {
-    return "0";
-  }
+  return negativeSign + fixedAmount;
 }
 
 /**
@@ -355,7 +331,7 @@ export function keyUpSearch(event, callback) {
   }
 }
 
-export function dateFormat(date) {
+export function formatDate(date) {
   const parts = date.split("-");
   const today = new Date(parts[0], parts[1] - 1, parts[2]);
   const day = (today.getDate() > 9 ? today.getDate() : "0" + today.getDate());
@@ -403,6 +379,20 @@ export function getExtension(filename) {
 export function convertNullText(value) {
   const text = value === undefined ? null : value;
   return text === null ? "" : text;
+}
+
+export function isEmpty(object) {
+  if (Array.isArray(object)) {
+    return object.length === 0 ? true : false;
+  }
+
+  if (typeof object === 'string') {
+    return object === "" ? true : false
+  }
+
+  if (typeof object === 'undefined') {
+    return true;
+  }
 }
 
 export function getCookie(cname) {

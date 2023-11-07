@@ -2,11 +2,11 @@ const ModalConfiguration = (props) => {
 
     const { idModalConfiguration } = props;
 
-    const { idImpuesto, refImpuesto, impuestos, handleSelectImpuesto } = props;
+    const { refImpuesto, impuestos } = props;
 
-    const { idMoneda, refMoneda, monedas, handleSelectMoneda } = props;
+    const { refMoneda, monedas } = props;
 
-    const { handleSaveOptions, handleOpenAndCloseOverlay, handleOpenAndCloseOptions } = props;
+    const { handleSaveOptions, handleOpenAndCloseOptions} = props;
 
     return (
         <div id={idModalConfiguration} className='side-modal'>
@@ -29,9 +29,7 @@ const ModalConfiguration = (props) => {
                                     <select
                                         title="Lista de Impuestos"
                                         className="form-control"
-                                        // value={idImpuesto}
                                         ref={refImpuesto}
-                                    // onChange={handleSelectImpuesto}
                                     >
                                         <option value="">-- Impuesto --</option>
                                         {
@@ -52,8 +50,6 @@ const ModalConfiguration = (props) => {
                                         title="Lista de Monedas"
                                         className="form-control"
                                         ref={refMoneda}
-                                    // value={idMoneda}
-                                    // onChange={handleSelectMoneda}
                                     >
                                         <option value="">-- Moneda --</option>
                                         {
@@ -75,15 +71,13 @@ const ModalConfiguration = (props) => {
                                 <button className='btn btn-outline-secondary ' onClick={handleOpenAndCloseOptions}>Cancelar</button>
                             </div>
                         </div>
-
-
                     </div>
                 </div>
 
                 <div className='side-modal_bottom'>
                 </div>
             </div>
-            <div className="side-modal_overlay" onClick={handleOpenAndCloseOverlay}>
+            <div className="side-modal_overlay" onClick={handleOpenAndCloseOptions}>
             </div>
         </div>
     );

@@ -145,20 +145,20 @@ class Bancos extends CustomComponent {
     }
   }
 
-  handleAgregarBanco = () => {
+  handleAgregar = () => {
     this.props.history.push({
       pathname: `${this.props.location.pathname}/agregar`
     })
   }
 
-  handleEditarBanco = (idBanco) => {
+  handleEditar = (idBanco) => {
     this.props.history.push({
       pathname: `${this.props.location.pathname}/editar`,
       search: "?idBanco=" + idBanco
     })
   }
 
-  handleBorrarBanco = (idBanco) => {
+  handleBorrar = (idBanco) => {
     alertDialog("Banco", "¿Estás seguro de eliminar el banco?", async (event) => {
       if (event) {
 
@@ -224,7 +224,7 @@ class Bancos extends CustomComponent {
             <div className="form-group">
               <button
                 className="btn btn-outline-info"
-                onClick={this.handleAgregarBanco}
+                onClick={this.handleAgregar}
                 disabled={!this.state.add}
               >
                 <i className="bi bi-file-plus"></i> Nuevo Registro
@@ -312,7 +312,7 @@ class Bancos extends CustomComponent {
                             <button
                               className="btn btn-outline-warning btn-sm"
                               title="Editar"
-                              onClick={() => this.handleEditarBanco(item.idBanco)}
+                              onClick={() => this.handleEditar(item.idBanco)}
                               disabled={!this.state.edit}
                             >
                               <i className="bi bi-pencil"></i>
@@ -322,7 +322,7 @@ class Bancos extends CustomComponent {
                             <button
                               className="btn btn-outline-danger btn-sm"
                               title="Anular"
-                              onClick={() => this.handleBorrarBanco(item.idBanco)}
+                              onClick={() => this.handleBorrar(item.idBanco)}
                               disabled={!this.state.remove}
                             >
                               <i className="bi bi-trash"></i>
