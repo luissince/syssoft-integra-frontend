@@ -483,7 +483,7 @@ class Inicio extends React.Component {
                         render={(props) => <AjusteAgregar {...props} />}
                     />
                     <Route
-                        path={`${path}/ajuste/editar`}
+                        path={`${path}/ajuste/detalle`}
                         exact={true}
                         render={(props) => <AjusteDetalle {...props} />}
                     />
