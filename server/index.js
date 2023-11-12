@@ -102,6 +102,7 @@ app.use('/api/motivo', require('./src/router/Motivo'));
 app.use('/api/empresa', require('./src/router/Empresa'));
 app.use('/api/dashboard', require('./src/router/Dashboard'));
 
+app.use('/api/kardex', require('./src/router/Kardex'));
 app.use('/api/metodopago', require('./src/router/MetodoPago'));
 
 /**

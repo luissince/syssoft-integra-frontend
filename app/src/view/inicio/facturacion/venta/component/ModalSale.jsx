@@ -13,7 +13,7 @@ const ModalSale = (props) => {
     const { idModalSale } = props;
 
     const {
-        loadModal,
+        loadingModal,
         selectTipoPago,
         handleSelectTipoPago,
 
@@ -165,7 +165,7 @@ const ModalSale = (props) => {
                     <div className="modal-body">
 
                         {
-                            loadModal && spinnerLoading("Cargando datos...")
+                            loadingModal && spinnerLoading("Cargando datos...")
                         }
 
                         {/* Titutlo del modal */}

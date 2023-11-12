@@ -5,7 +5,7 @@ import FileDownloader from "../../../components/FileDownloader";
 import { spinnerLoading, currentDate, getCurrentYear } from '../../../helper/utils.helper';
 import SearchBarClient from "../../../components/SearchBarClient";
 import ContainerWrapper from '../../../components/Container';
-import { listarClientesFilter } from '../../../network/rest/principal.network';
+import { filtrarCliente } from '../../../network/rest/principal.network';
 import SuccessReponse from '../../../model/class/response';
 import ErrorResponse from '../../../model/class/error-response';
 
@@ -101,7 +101,7 @@ class RepClientes extends React.Component {
             filtrar: searchWord,
         }
 
-        const response = await listarClientesFilter(params);
+        const response = await filtrarCliente(params);
 
         if (response instanceof SuccessReponse) {
             await this.setStateAsync({ filter: false, clientes: response.data });

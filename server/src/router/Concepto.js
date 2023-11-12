@@ -30,4 +30,12 @@ router.get('/listcombogasto', async function (req, res) {
     return await concepto.listcombogasto(req, res);
 });
 
+router.get('/filtrar/cobro', async function (req, res) {
+    return await concepto.filtrarCobro(req, res);
+});
+
+router.get('/filtrar/gasto', async function (req, res) {
+    return await concepto.filtrarGasto(req, res);
+});
+
 module.exports = router;

@@ -54,7 +54,6 @@ class Impuestos extends CustomComponent {
             totalPaginacion: 0,
             filasPorPagina: 10,
             messageTable: 'Cargando información...',
-            messagePaginacion: 'Mostranto 0 de 0 Páginas'
         }
         this.refNombre = React.createRef();
         this.refPorcentaje = React.createRef();
@@ -138,7 +137,6 @@ class Impuestos extends CustomComponent {
             loading: true,
             lista: [],
             messageTable: "Cargando información...",
-            messagePaginacion: "Mostranto 0 de 0 Páginas"
         });
 
         const params = {
@@ -151,13 +149,11 @@ class Impuestos extends CustomComponent {
         const response = await listImpuesto(params, this.abortControllerTable.signal);
         if (response instanceof SuccessReponse) {
             const totalPaginacion = parseInt(Math.ceil((parseFloat(response.data.total) / this.state.filasPorPagina)));
-            const messagePaginacion = `Mostrando ${response.data.result.length} de ${totalPaginacion} Páginas`;
 
             await this.setStateAsync({
                 loading: false,
                 lista: response.data.result,
                 totalPaginacion: totalPaginacion,
-                messagePaginacion: messagePaginacion
             });
         }
 
@@ -168,8 +164,7 @@ class Impuestos extends CustomComponent {
                 loading: false,
                 lista: [],
                 totalPaginacion: 0,
-                messageTable: "Se produjo un error interno, intente nuevamente por favor.",
-                messagePaginacion: "Mostranto 0 de 0 Páginas",
+                messageTable: response.getMessage(),
             });
         }
     }
@@ -516,26 +511,15 @@ class Impuestos extends CustomComponent {
                     </div>
                 </div>
 
-                <div className="row">
-                    <div className="col-sm-12 col-md-5">
-                        <div className="dataTables_info mt-2" role="status" aria-live="polite">{this.state.messagePaginacion}</div>
-                    </div>
-                    <div className="col-sm-12 col-md-7">
-                        <div className="dataTables_paginate paging_simple_numbers">
-                            <nav aria-label="Page navigation example">
-                                <ul className="pagination justify-content-end">
-                                    <Paginacion
-                                        loading={this.state.loading}
-                                        totalPaginacion={this.state.totalPaginacion}
-                                        paginacion={this.state.paginacion}
-                                        fillTable={this.paginacionContext}
-                                        restart={this.state.restart}
-                                    />
-                                </ul>
-                            </nav>
-                        </div>
-                    </div>
-                </div>
+                <Paginacion
+                    loading={this.state.loading}
+                    data={this.state.lista}
+                    totalPaginacion={this.state.totalPaginacion}
+                    paginacion={this.state.paginacion}
+                    fillTable={this.paginacionContext}
+                    restart={this.state.restart}
+                />
+
             </ContainerWrapper>
         );
     }

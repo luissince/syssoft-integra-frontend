@@ -9,7 +9,6 @@ import {
     alertWarning,
     clearModal,
     hideModal,
-    imageBase64,
     isNumeric,
     isText,
     showModal,
@@ -17,7 +16,6 @@ import {
     viewModal
 } from '../../../../../helper/utils.helper';
 import {
-    addProducto,
     comboAlmacen,
     comboMedida,
     comboProductos,
@@ -27,7 +25,6 @@ import {
 } from '../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
-import ModalInventario from '../component/ModalInventario';
 import { CANCELED } from '../../../../../model/types/types';
 import { connect } from 'react-redux';
 import Producto from '../component/Producto';
@@ -49,7 +46,7 @@ class ProductoEditar extends CustomComponent {
     constructor(props) {
         super(props);
         this.state = {
-            tipo: 1,
+            tipo: "TP0001",
             idProducto: '',
             imagen: images.noImage,
 
@@ -64,8 +61,6 @@ class ProductoEditar extends CustomComponent {
             precioProducto: '',
             costoProducto: '',
 
-            inventariosProducto: [],
-
             nombre: '',
             precio: '',
 
@@ -74,7 +69,6 @@ class ProductoEditar extends CustomComponent {
             inventariado: true,
             estado: true,
 
-            idUsuario: this.props.token.userToken.idUsuario,
 
             // servicio
             nombreServicio: '',
@@ -99,28 +93,22 @@ class ProductoEditar extends CustomComponent {
 
             precioCombo: '',
 
-            inventariosCombo: [],
-
             // imagen
             fileImage: [],
 
             // lista libre
             medidas: [],
-            almacenes: [],
             categorias: [],
             productos: [],
 
             loadModal: false,
 
             loading: true,
-            msgLoading: 'Cargando datos...'
-        }
+            msgLoading: 'Cargando datos...',
 
-        /**
-         * Identificador del modal de inventario.
-         * @type {string}
-         */
-        this.idModalInventario = "modalInventario";
+            idUsuario: this.props.token.userToken.idUsuario,
+
+        }
 
         /**
         * Identificador del modal de producto.
@@ -139,12 +127,6 @@ class ProductoEditar extends CustomComponent {
 
         this.refCostoProducto = React.createRef();
         this.refPrecioProducto = React.createRef();
-
-        //--> almacen - modal
-        this.refIdAlmacenProducto = React.createRef();
-        this.refCantidadProducto = React.createRef();
-        this.refCantidadMaximaProducto = React.createRef();
-        this.refCantidadMinimaProducto = React.createRef();
 
         // servicio
         this.refNombreServicio = React.createRef();
@@ -193,22 +175,6 @@ class ProductoEditar extends CustomComponent {
             this.props.history.goBack();
         }
 
-        viewModal(this.idModalInventario, async () => {
-            const almacenes = await this.fetchComboAlmacen();
-
-            this.setState({
-                almacenes: almacenes,
-                loadModal: false
-            });
-        });
-
-        clearModal(this.idModalInventario, async () => {
-            this.refIdAlmacenProducto.current.value = "";
-            this.refCantidadProducto.current.value = "";
-            this.refCantidadMaximaProducto.current.value = "";
-            this.refCantidadMinimaProducto.current.value = "";
-        });
-
         viewModal(this.idModalProducto, async () => {
             const productos = await this.fetchComboProductos();
 
@@ -229,8 +195,6 @@ class ProductoEditar extends CustomComponent {
     componentWillUnmount() {
 
     }
-
-
 
     /*
     |--------------------------------------------------------------------------
@@ -257,10 +221,10 @@ class ProductoEditar extends CustomComponent {
             await this.fetchProduct(idProducto)
         ]);
 
-        if (producto.tipo === 1) {
+        if (producto.idTipoProducto === "TP0001") {
             this.handleFocusTab("addproducto-tab", "addproducto")
             await this.setStateAsync({
-                tipo: producto.tipo,
+                tipo: producto.idTipoProducto,
                 nombreProducto: producto.nombre,
                 codigoProducto: producto.codigo,
                 codigoSunatProducto: producto.idCodigoSunat,
@@ -274,10 +238,10 @@ class ProductoEditar extends CustomComponent {
                 negativo: producto.negativo,
                 estado: producto.estado
             });
-        } else if (producto.tipo === 2) {
+        } else if (producto.idTipoProducto === "TP0002") {
             this.handleFocusTab("addservicio-tab", "addservicio")
             await this.setStateAsync({
-                tipo: producto.tipo,
+                tipo: producto.idTipoProducto,
                 nombreServicio: producto.nombre,
                 codigoServicio: producto.codigo,
                 codigoSunatServicio: producto.idCodigoSunat,
@@ -293,7 +257,7 @@ class ProductoEditar extends CustomComponent {
         } else {
             this.handleFocusTab("addcombo-tab", "addcombo")
             await this.setStateAsync({
-                tipo: producto.tipo,
+                tipo: producto.idTipoProducto,
                 nombreCombo: producto.nombre,
                 codigoCombo: producto.codigo,
                 codigoSunatCombo: producto.idCodigoSunat,
@@ -483,78 +447,6 @@ class ProductoEditar extends CustomComponent {
         });
     }
 
-    handleOpenAlmacenProducto = async () => {
-        showModal(this.idModalInventario);
-        await this.setStateAsync({ loadModal: true })
-    }
-
-    handleAddItemInventarioProducto = () => {
-        this.handleOpenAlmacenProducto();
-    }
-
-    handleRemoveItemInventarioProducto = (idAlmacen) => {
-        const inventariosProducto = this.state.inventariosProducto.filter(item => item.idAlmacen !== idAlmacen);
-        this.setState({ inventariosProducto })
-    }
-
-    handleSaveAlmacenProducto = () => {
-        if (!isText(this.refIdAlmacenProducto.current.value)) {
-            alertWarning("Producto", "Seleccione el almacen.", () => {
-                this.refIdAlmacenProducto.current.focus();
-            });
-            return;
-        }
-
-        if (!isText(this.refCantidadProducto.current.value)) {
-            alertWarning("Producto", "Ingrese la cantidad inicial.", () => {
-                this.refCantidadProducto.current.focus();
-            });
-            return;
-        }
-
-        if (parseFloat(this.refCantidadProducto.current.value) <= 0) {
-            alertWarning("Producto", "Su cantidad tiene que se mayor a cero(0).", () => {
-                this.refCantidadProducto.current.focus();
-            });
-            return;
-        }
-
-        if (!isText(this.refCantidadMaximaProducto.current.value)) {
-            alertWarning("Producto", "Ingrese la cantidad máxima.", () => {
-                this.refCantidadMaximaProducto.current.focus();
-            });
-            return;
-        }
-
-        if (!isText(this.refCantidadMinimaProducto.current.value)) {
-            alertWarning("Producto", "Ingrese la cantidad mínima.", () => {
-                this.refCantidadMinimaProducto.current.focus();
-            });
-            return;
-        }
-
-        if (this.state.inventariosProducto.find(item => item.idAlmacen === this.refIdAlmacenProducto.current.value)) {
-            alertWarning("Producto", "El almacen ya se encuentra agregado.", () => {
-                this.refIdAlmacenProducto.current.focus();
-            });
-            return;
-        }
-
-        const item = {
-            idAlmacen: this.refIdAlmacenProducto.current.value,
-            nombreAlmacen: this.refIdAlmacenProducto.current.options[this.refIdAlmacenProducto.current.selectedIndex].innerText,
-            cantidad: this.refCantidadProducto.current.value,
-            cantidadMaxima: this.refCantidadMaximaProducto.current.value,
-            cantidadMinima: this.refCantidadMinimaProducto.current.value,
-        }
-
-        this.setState(prevState => ({
-            inventariosProducto: [...prevState.inventariosProducto, item]
-        }))
-
-        hideModal(this.idModalInventario)
-    }
-
     //------------------------------------------------------------------------------------------
     // Servicio
     //------------------------------------------------------------------------------------------
@@ -694,9 +586,9 @@ class ProductoEditar extends CustomComponent {
             return;
         }
 
-        if (parseFloat(this.refCantidadProducto.current.value) <= 0) {
+        if (parseFloat(this.refCantidadCombo.current.value) <= 0) {
             alertWarning("Producto - Combo", "Su cantidad tiene que se mayor a cero(0).", () => {
-                this.refCantidadProducto.current.focus();
+                this.refCantidadCombo.current.focus();
             });
             return;
         }
@@ -724,77 +616,6 @@ class ProductoEditar extends CustomComponent {
         hideModal(this.idModalProducto)
     }
 
-    handleOpenAlmacenCombo = async () => {
-        showModal(this.idModalInventario);
-        await this.setStateAsync({ loadModal: true })
-    }
-
-    handleAddItemInventarioCombo = () => {
-        this.handleOpenAlmacenCombo();
-    }
-
-    handleRemoveItemInventarioCombo = (idAlmacen) => {
-        const inventariosCombo = this.state.inventariosCombo.filter(item => item.idAlmacen !== idAlmacen);
-        this.setState({ inventariosCombo })
-    }
-
-    handleSaveAlmacenCombo = () => {
-        if (!isText(this.refIdAlmacenProducto.current.value)) {
-            alertWarning("Producto - Combo ", "Seleccione el almacen.", () => {
-                this.refIdAlmacenProducto.current.focus();
-            });
-            return;
-        }
-
-        if (!isText(this.refCantidadProducto.current.value)) {
-            alertWarning("Producto - Combo", "Ingrese la cantidad inicial.", () => {
-                this.refCantidadProducto.current.focus();
-            });
-            return;
-        }
-
-        if (parseFloat(this.refCantidadProducto.current.value) <= 0) {
-            alertWarning("Producto - Combo", "Su cantidad tiene que se mayor a cero(0).", () => {
-                this.refCantidadProducto.current.focus();
-            });
-            return;
-        }
-
-        if (!isText(this.refCantidadMaximaProducto.current.value)) {
-            alertWarning("Producto - Combo", "Ingrese la cantidad máxima.", () => {
-                this.refCantidadMaximaProducto.current.focus();
-            });
-            return;
-        }
-
-        if (!isText(this.refCantidadMinimaProducto.current.value)) {
-            alertWarning("Producto- Combo", "Ingrese la cantidad mínima.", () => {
-                this.refCantidadMinimaProducto.current.focus();
-            });
-            return;
-        }
-
-        if (this.state.inventariosCombo.find(item => item.idAlmacen === this.refIdAlmacenProducto.current.value)) {
-            alertWarning("Producto - Combo", "El almacen ya se encuentra agregado.", () => {
-                this.refIdAlmacenProducto.current.focus();
-            });
-            return;
-        }
-
-        const item = {
-            idAlmacen: this.refIdAlmacenProducto.current.value,
-            nombreAlmacen: this.refIdAlmacenProducto.current.options[this.refIdAlmacenProducto.current.selectedIndex].innerText,
-            cantidad: this.refCantidadProducto.current.value,
-            cantidadMaxima: this.refCantidadMaximaProducto.current.value,
-            cantidadMinima: this.refCantidadMinimaProducto.current.value,
-        }
-
-        this.setState(prevState => ({
-            inventariosCombo: [...prevState.inventariosCombo, item]
-        }))
-
-        hideModal(this.idModalInventario)
-    }
 
     //------------------------------------------------------------------------------------------
     // imagen
@@ -1045,20 +866,24 @@ class ProductoEditar extends CustomComponent {
     }
 
     handleRegistrar = () => {
-        if (this.state.tipo === 1) {
+        if (this.state.tipo === "TP0001") {
             this.handleOpcionProducto();
             return;
         }
 
-        if (this.state.tipo === 2) {
+        if (this.state.tipo === "TP0002") {
             this.handleOpcionServicio();
             return;
         }
 
-        if (this.state.tipo === 3) {
+        if (this.state.tipo === "TP0003") {
             this.handleOpcionCombo();
             return;
         }
+    }
+
+    handleCerrar = () =>{
+        this.props.history.goBack()
     }
 
     /*
@@ -1087,8 +912,6 @@ class ProductoEditar extends CustomComponent {
 
         const { precioProducto, costoProducto } = this.state;
 
-        const { inventariosProducto } = this.state;
-
         const { medidas, categorias, publicar, negativo, inventariado, estado } = this.state;
 
         const { nombreServicio, codigoServicio, codigoSunatServicio } = this.state;
@@ -1101,26 +924,16 @@ class ProductoEditar extends CustomComponent {
 
         const { idMedidaCombo, idCategoriaCombo, descripcionCombo } = this.state;
 
-        const { precioCombo, combos, inventariosCombo } = this.state;
+        const { precioCombo, combos } = this.state;
 
         const { imagen } = this.state;
 
         return (
             <ContainerWrapper>
 
-                <ModalInventario
-                    idModalInventario={this.idModalInventario}
-
-                    loadModal={this.state.loadModal}
-                    almacenes={this.state.almacenes}
-
-                    refIdAlmacen={this.refIdAlmacenProducto}
-                    refCantidad={this.refCantidadProducto}
-                    refCantidadMaxima={this.refCantidadMaximaProducto}
-                    refCantidadMinima={this.refCantidadMinimaProducto}
-
-                    handleSaveAlmacen={this.handleSaveAlmacenProducto}
-                />
+                {
+                    this.state.loading && spinnerLoading(this.state.msgLoading)
+                }
 
                 <ModalProducto
                     idModalProducto={this.idModalProducto}
@@ -1137,27 +950,13 @@ class ProductoEditar extends CustomComponent {
                     handleSaveItemCombo={this.handleSaveItemCombo}
                 />
 
-                {
-                    this.state.loading && spinnerLoading(this.state.msgLoading)
-                }
-
                 <div className='row'>
-                    <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
+                    <div className='col-lg-12 col-md-12 col-sm-12 col-12'>
                         <div className="form-group">
                             <h5>
                                 <span role="button" onClick={() => this.props.history.goBack()}><i className="bi bi-arrow-left-short"></i></span> Producto
                                 <small className="text-secondary"> Editar</small>
                             </h5>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="row">
-                    <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                        <div className="form-group">
-                            <button type="button" className="btn btn-light"><i className="fa fa-file-archive-o"></i> Adjuntar</button>
-                            {" "}
-                            <button type="button" className="btn btn-danger"><i className="fa fa-ban"></i> Liberar</button>
                         </div>
                     </div>
                 </div>
@@ -1176,7 +975,7 @@ class ProductoEditar extends CustomComponent {
                                             role="tab"
                                             aria-controls="addproducto"
                                             aria-selected={true}
-                                            onClick={() => this.setState({ tipo: 1 })}>
+                                            disabled={tipo !== "TP0001" }>
                                             <i className="bi bi-info-circle"></i> Producto
                                         </button>
                                     </li>
@@ -1189,7 +988,7 @@ class ProductoEditar extends CustomComponent {
                                             role="tab"
                                             aria-controls="addservicio"
                                             aria-selected={false}
-                                            onClick={() => this.setState({ tipo: 2 })}>
+                                            disabled={tipo !== "TP0002" }>
                                             <i className="bi bi-geo-alt-fill"></i> Servicio
                                         </button>
                                     </li>
@@ -1202,7 +1001,7 @@ class ProductoEditar extends CustomComponent {
                                             role="tab"
                                             aria-controls="addcombo"
                                             aria-selected={false}
-                                            onClick={() => this.setState({ tipo: 3 })}>
+                                            disabled={tipo !== "TP0003" }>
                                             <i className="bi bi-border-all"></i> Combo
                                         </button>
                                     </li>
@@ -1244,9 +1043,10 @@ class ProductoEditar extends CustomComponent {
                                         refCosto={this.refCostoProducto}
                                         handleInputCosto={this.handleInputCostoProducto}
 
-                                        inventarios={inventariosProducto}
-                                        handleAddItemInventario={this.handleAddItemInventarioProducto}
-                                        handleRemoveItemInventario={this.handleRemoveItemInventarioProducto}
+                                        activarInventario={false}
+                                        inventario={{}}
+                                        handleAddItemInventario={() => { }}
+                                        handleRemoveItemInventario={() => { }}
                                     />
 
                                     <Servicio
@@ -1317,9 +1117,10 @@ class ProductoEditar extends CustomComponent {
                                         handleInputCantidadCombos={this.handleInputCantidadCombos}
                                         handleRemoveItemCombo={this.handleRemoveItemCombo}
 
-                                        inventarios={inventariosCombo}
-                                        handleAddItemInventario={this.handleAddItemInventarioCombo}
-                                        handleRemoveItemInventario={this.handleRemoveItemInventarioCombo}
+                                        activarInventario={false}
+                                        inventario={[]}
+                                        handleAddItemInventario={() => { }}
+                                        handleRemoveItemInventario={() => { }}
                                     />
                                 </div>
                             </div>
@@ -1335,8 +1136,8 @@ class ProductoEditar extends CustomComponent {
                             handleInputImagen={this.handleInputImagen}
                             handleRemoveImagen={this.handleRemoveImagen}
 
-                            nombre={tipo == 1? nombreProducto : tipo == 2 ? nombreServicio: nombreCombo}
-                            precio={tipo == 1? precioProducto : tipo == 2 ? precioServicio: precioCombo}
+                            nombre={tipo === "TP0001" ? nombreProducto : tipo === "TP0002" ? nombreServicio : nombreCombo}
+                            precio={tipo === "TP0001" ? precioProducto : tipo === "TP0002" ? precioServicio : precioCombo}
 
                             publicar={publicar}
                             handleSelectPublico={this.handleSelectPublico}
@@ -1351,6 +1152,7 @@ class ProductoEditar extends CustomComponent {
                             handleSelectEstado={this.handleSelectEstado}
 
                             handleRegistrar={this.handleRegistrar}
+                            handleCerrar={this.handleCerrar}
                         />
                     </div>
                 </div>

@@ -9,11 +9,11 @@ class SearchBarClient extends React.Component {
   }
 
   componentDidMount() {
-    window.addEventListener("click", this.onEventWindowClick);    
+    window.addEventListener("click", this.onEventWindowClick);
   }
 
   componentWillUnmount() {
-    window.removeEventListener("click", this.onEventWindowClick);    
+    window.removeEventListener("click", this.onEventWindowClick);
   }
 
   onEventWindowClick = (event) => {
@@ -41,6 +41,10 @@ class SearchBarClient extends React.Component {
       const children = dataResult.children;
       if (children.length > 0) {
         this.index = 0;
+        for (const item of children) {
+          item.classList.remove("active")
+        }
+        children[this.index].classList.add("active")
         children[this.index].focus();
       }
     } else if (event.keyCode === 13) {
@@ -51,6 +55,10 @@ class SearchBarClient extends React.Component {
       const children = dataResult.children;
       if (children.length > 0) {
         this.index = 0;
+        for (const item of children) {
+          item.classList.remove("active")
+        }
+        children[this.index].classList.add("active")
         children[this.index].focus();
       }
     }
@@ -63,6 +71,10 @@ class SearchBarClient extends React.Component {
       if (this.index !== 0) {
         if (this.index > 0) {
           this.index--;
+          for (const item of children) {
+            item.classList.remove("active")
+          }
+          children[this.index].classList.add("active")
           children[this.index].focus();
         }
       }
@@ -71,6 +83,10 @@ class SearchBarClient extends React.Component {
 
       if (this.index < children.length - 1) {
         this.index++;
+        for (const item of children) {
+          item.classList.remove("active")
+        }
+        children[this.index].classList.add("active")
         children[this.index].focus();
       }
     }
@@ -164,7 +180,7 @@ class SearchBarClient extends React.Component {
             />
             <div className="input-group-append">
               <button className='btn btn-outline-success d-flex'
-              onClick={this.props.handleNewClient}>
+                onClick={this.props.handleNewClient}>
                 <img src={images.addclient} alt='Nuevo cliente' />
                 <div className='ml-2'>Nuevo</div>
               </button>

@@ -21,7 +21,7 @@ import {
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 // import { apiComprobanteListcombo, apiFacturaCreditoDetalle, apiVentaCobro } from '../../../../network/api';
-import SearchBarProducto from "../../../../components/SearchBarProducto";
+import SearchInput from "../../../../components/SearchInput";
 import ContainerWrapper from '../../../../components/Container';
 import { listarProductosFilter } from '../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../model/class/response';
@@ -1704,14 +1704,19 @@ class CreditoProceso extends React.Component {
                                 <div className="row">
                                     <div className="col-md-12 col-sm-12 col-12">
                                         <label>Seleccione el producto</label>
-                                        <SearchBarProducto
+                                        <SearchInput
                                             placeholder="Filtrar productos..."
-                                            refProducto={this.refProducto}
-                                            producto={this.state.producto}
-                                            productos={this.state.productos}
-                                            onEventClearInput={this.onEventClearInputProducto}
+                                            refValue={this.refProducto}
+                                            value={this.state.producto}
+                                            data={this.state.productos}
+                                            handleClearInput={this.onEventClearInputProducto}
                                             handleFilter={this.handleFilterProducto}
-                                            onEventSelectItem={this.onEventSelectItemProducto}
+                                            handleSelectItem={this.onEventSelectItemProducto}
+                                            renderItem={(value) => (
+                                                <>
+                                                    {value.nombreProducto} / <small>{value.categoria}</small>
+                                                </>
+                                            )}
                                         />
                                     </div>
                                 </div>

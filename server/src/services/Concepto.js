@@ -121,7 +121,7 @@ class Concepto {
 
     async id(req, res) {
         try {
-            let result = await conec.query('SELECT * FROM concepto WHERE idConcepto  = ?', [
+            const result = await conec.query('SELECT * FROM concepto WHERE idConcepto  = ?', [
                 req.query.idConcepto
             ]);
 
@@ -226,6 +226,36 @@ class Concepto {
         try {
             let result = await conec.query('SELECT idConcepto, nombre FROM concepto WHERE tipo = 1');
             return sendSuccess(res, result);
+        } catch (error) {
+            return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
+        }
+    }
+
+    async filtrarCobro(req, res) {
+        try {
+            let result = await conec.query(`SELECT 
+            idConcepto, 
+            nombre 
+            FROM concepto 
+            WHERE tipo = 2 AND nombre LIKE concat(?,'%')`,[
+                req.query.filtrar,
+            ]);
+            return sendSuccess(res,result);
+        } catch (error) {
+            return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
+        }
+    }
+
+    async filtrarGasto(req, res) {
+        try {
+            let result = await conec.query(`SELECT 
+            idConcepto, 
+            nombre 
+            FROM concepto 
+            WHERE tipo = 1 AND nombre LIKE concat(?,'%')`,[
+                req.query.filtrar,
+            ]);
+            return sendSuccess(res,result);;
         } catch (error) {
             return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
         }

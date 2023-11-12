@@ -1,164 +1,160 @@
 import React from 'react';
 import ContainerWrapper from '../../../../components/Container';
+import { alertDialog } from '../../../../helper/utils.helper';
+import CustomComponent from '../../../../model/class/custom-component';
 
-const Cotizaciones = () => {
-    return (
-        <ContainerWrapper>
-            {/* Inicio modal nuevo cliente*/}
-            <div className="modal fade" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden={true}>
-                <div className="modal-dialog">
-                    <div className="modal-content">
-                        <div className="modal-header">
-                            <h5 className="modal-title" id="exampleModalLabel"><i className="bi bi-file-earmark-plus-fill"></i> Registrar Cotización</h5>
-                            <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden={true}>&times;</span>
-                            </button>
+class Compras extends CustomComponent {
+
+
+    constructor(props) {
+        super(props)
+
+        this.state = {
+
+        }
+    }
+
+    handleCrear = () => {
+        this.props.history.push({
+            pathname: `${this.props.location.pathname}/crear`
+        })
+    }
+
+    handleEditar = (idCompra) => {
+        this.props.history.push({
+            pathname: `${this.props.location.pathname}/editar`,
+            search: "?idCotizacion=" + idCompra
+        })
+    }
+
+    handleDetalle = (idCompra) => {
+        this.props.history.push({
+            pathname: `${this.props.location.pathname}/detalle`,
+            search: "?idCotizacion=" + idCompra
+        })
+    }
+
+    handleAnular = () => {
+        alertDialog("Cotización", "¿Estás seguro de anular la cotización?", async (event) => {
+            if (event) {
+
+            }
+        });
+    }
+
+    render() {
+        return (
+            <ContainerWrapper>
+
+                <div className='row'>
+                    <div className='col-lg-12 col-md-12 col-sm-12 col-12'>
+                        <div className="form-group">
+                            <h5> Cotización <small className='text-secondary'> Lista </small> </h5>
                         </div>
-                        <div className="modal-body">
-                            <div className='row py-1'>
-                                <div className='col-lg-4 col-md-4 col-sm-12 col-xs-12'>
-                                    <label>Nombre Banco: </label>
-                                </div>
-                                <div className='col-lg-8 col-md-8 col-sm-12 col-xs-12'>
-                                    <input type="" className="form-control" placeholder='Ingrese nombre banco' />
-                                </div>
-                            </div>
-                            <div className='row py-1'>
-                                <div className='col-lg-4 col-md-4 col-sm-12 col-xs-12'>
-                                    <label>Tipo de Cuenta: </label>
-                                </div>
-                                <div className='col-lg-8 col-md-8 col-sm-12 col-xs-12'>
-                                    <input type="" className="form-control" placeholder='corriente, recaudadora, etc' />
-                                </div>
-                            </div>
-                            <div className='row py-1'>
-                                <div className='col-lg-4 col-md-4 col-sm-12 col-xs-12'>
-                                    <label>Moneda: </label>
-                                </div>
-                                <div className='col-lg-8 col-md-8 col-sm-12 col-xs-12'>
-                                    <input type="" className="form-control" placeholder='Soles, Dolares, etc' />
-                                </div>
-                            </div>
-                            <div className='row py-1'>
-                                <div className='col-lg-4 col-md-4 col-sm-12 col-xs-12'>
-                                    <label>Representante: </label>
-                                </div>
-                                <div className='col-lg-8 col-md-8 col-sm-12 col-xs-12'>
-                                    <input type="" className="form-control" placeholder='inmobiliaria' />
-                                </div>
-                            </div>
-                            <div className='row py-1'>
-                                <div className='col-lg-4 col-md-4 col-sm-12 col-xs-12'>
-                                    <label>Estado: </label>
-                                </div>
-                                <div className='col-lg-8 col-md-8 col-sm-12 col-xs-12'>
-                                    <div className="form-check form-switch">
-                                        <form>
-                                            <div className="custom-control custom-switch">
-                                                <input type="checkbox" className="custom-control-input" id="switch1" />
-                                                <label className="custom-control-label" htmFor="switch1">Active o desactive</label>
-                                            </div>
-                                        </form>
+                    </div>
+                </div>
+
+                <div className="row">
+                    <div className="col-md-6 col-sm-12">
+                        <div className="form-group">
+                            <div className="input-group mb-2">
+                                <div className="input-group-prepend">
+                                    <div className="input-group-text">
+                                        <i className="bi bi-search"></i>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                        <div className="modal-footer">
-                            <button type="button" className="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-                            <button type="button" className="btn btn-primary">Aceptar</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {/* fin modal nuevo cliente*/}
 
-            <div className='row pb-3'>
-                <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
-                    <section className="content-header">
-                        <h5 className="no-margin"> Cotizaciones <small style={{ color: 'gray' }}> Lista </small> </h5>
-                    </section>
-                </div>
-            </div>
-
-            <div className='row'>
-                <div className="col-lg-3 col-md-3 col-sm-12 col-xs-12">
-                    <label>Nueva Cotización</label>
-                    <div className="form-group">
-                        <button type="button" className="btn btn-success" data-toggle="modal" data-target="#exampleModal">
-                            <i className="bi bi-plus-lg"></i> Agregar Cotización
-                        </button>
-                    </div>
-                </div>
-
-                <div className="col-lg-6 col-md-3 col-sm-12 col-xs-12">
-                    <label>Opción.</label>
-                    <div className="form-group">
-                        <button className="btn btn-light">
-                            <i className="bi bi-arrow-repeat"></i> Recargar
-                        </button>
-                    </div>
-                </div>
-
-                <div className="col-lg-6 col-md-6 col-sm-12 col-xs-12">
-                    <label>Filtrar por cliente, ruc, comprobante</label>
-                    <div className="form-group">
-                        <div className="input-group mb-3">
-                            <input type="text" className="form-control" placeholder="Ingrese para buscar" aria-label="Recipient's username" aria-describedby="basic-addon2" />
-                            <div className="input-group-append">
-                                <button className="btn btn-outline-secondary" type="button">Button</button>
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    placeholder="Buscar..."
+                                />
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <div className="row">
-                <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                    <div className="table-responsive">
-                        <table className="table table-striped" style={{ borderWidth: '1px', borderStyle: 'inset', borderColor: '#CFA7C9' }}>
-                            <thead>
-                                <tr>
-                                    <th width="5%" className="text-center">#</th>
-                                    <th width="17%" className="text-center">Cliente</th>
-                                    <th width="10%" className="text-center">DNI/RUC</th>
-                                    <th width="10%" className="text-center">Fecha</th>
-                                    <th width="10%" className="text-center">Cuotas</th>
-                                    <th width="10%" className="text-center">Inicial</th>
-                                    <th width="7%" className="text-center">Saldo</th>
-                                    <th width="6%" className="text-center">Interes</th>
-                                    <th width="7%" className="text-center">Total</th>
-                                    <th width="5%" className="text-center">Imprimir</th>
-                                    <th width="5%" colSpan='2' className="text-center">Opciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
+                    <div className="col-md-6 col-sm-12">
+                        <div className="form-group">
+                            <button
+                                className="btn btn-outline-info"
+                                onClick={this.handleCrear}
+                            >
+                                <i className="bi bi-file-plus"></i> Crear cotización
+                            </button>{" "}
 
-                            </tbody>
-
-                        </table>
+                            <button
+                                className="btn btn-outline-secondary"
+                                onClick={() => { }}
+                            >
+                                <i className="bi bi-arrow-clockwise"></i>
+                            </button>
+                        </div>
                     </div>
-                    <div className="col-md-12" style={{ textAlign: 'center' }}>
-                        <nav aria-label="...">
-                            <ul className="pagination justify-content-end">
-                                <li className="page-item disabled">
-                                    <a className="page-link">Previous</a>
-                                </li>
-                                <li className="page-item"><a className="page-link" href="#">1</a></li>
-                                <li className="page-item active" aria-current="page">
-                                    <a className="page-link" href="#">2</a>
-                                </li>
-                                <li className="page-item"><a className="page-link" href="#">3</a></li>
-                                <li className="page-item">
-                                    <a className="page-link" href="#">Next</a>
-                                </li>
-                            </ul>
-                        </nav>
-                    </div>
-
                 </div>
-            </div>
-        </ContainerWrapper>
-    );
+
+                <div className="row">
+                    <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <div className="table-responsive">
+                            <table className="table table-striped table-bordered rounded">
+                                <thead>
+                                    <tr>
+                                        <th width="5%" className="text-center"> #</th>
+                                        <th width="10%">Fecha</th>
+                                        <th width="15%">Proveedor</th>
+                                        <th width="5%" className="text-center">
+                                            Mostrar
+                                        </th>
+                                        <th width="5%" className="text-center">
+                                            Editar
+                                        </th>
+                                        <th width="5%" className="text-center">
+                                            Eliminar
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr >
+                                        <td className="text-center">1</td>
+                                        <td>ss</td>
+                                        <td>ss</td>
+                                        <td className="text-center">
+                                            <button
+                                                className="btn btn-outline-info btn-sm"
+                                                title="Detalle"
+                                                onClick={() => this.handleDetalle("")}
+                                            >
+                                                <i className="fa fa-eye"></i>
+                                            </button>
+                                        </td>
+
+                                        <td className="text-center">
+                                            <button
+                                                className="btn btn-outline-warning btn-sm"
+                                                title="Editar"
+                                                onClick={() => this.handleEditar("")}
+                                            >
+                                                <i className="bi bi-pencil"></i>
+                                            </button>
+                                        </td>
+                                        <td className="text-center">
+                                            <button
+                                                className="btn btn-outline-danger btn-sm"
+                                                title="Anular"
+                                                onClick={() => this.handleAnular("")}
+                                            >
+                                                <i className="bi bi-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </ContainerWrapper>
+        );
+    }
 }
 
-export default Cotizaciones;
+export default Compras;

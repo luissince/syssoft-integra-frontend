@@ -150,356 +150,356 @@ class GastoProceso extends React.Component {
     }
 
     async addConcepto() {
-        if (this.state.idConcepto === '') {
-            await this.setStateAsync({ messageWarning: "Seleccione un concepto" })
-            this.refConcepto.current.focus();
-            return;
-        }
+        // if (this.state.idConcepto === '') {
+        //     await this.setStateAsync({ messageWarning: "Seleccione un concepto" })
+        //     this.refConcepto.current.focus();
+        //     return;
+        // }
 
-        if (!isNumeric(this.state.monto)) {
-            await this.setStateAsync({ messageWarning: "Ingrese un monto númerico" })
-            this.refMonto.current.focus();
-            return;
-        }
+        // if (!isNumeric(this.state.monto)) {
+        //     await this.setStateAsync({ messageWarning: "Ingrese un monto númerico" })
+        //     this.refMonto.current.focus();
+        //     return;
+        // }
 
-        if (this.state.monto <= 0) {
-            await this.setStateAsync({ messageWarning: "Ingrese un monto mayor a 0" })
-            this.refMonto.current.focus();
-            return;
-        }
+        // if (this.state.monto <= 0) {
+        //     await this.setStateAsync({ messageWarning: "Ingrese un monto mayor a 0" })
+        //     this.refMonto.current.focus();
+        //     return;
+        // }
 
-        if (this.state.idImpuesto === "") {
-            await this.setStateAsync({ messageWarning: "Seleccione un impuesto." });
+        // if (this.state.idImpuesto === "") {
+        //     await this.setStateAsync({ messageWarning: "Seleccione un impuesto." });
 
-            if (!this.refCollpseContent.current.classList.contains("show")) {
-                this.refCollpse.current.classList.remove("collapsed");
-                this.refCollpseContent.current.classList.add("show");
-                this.refCollpse.current.attributes["aria-expanded"].value = true;
-                await this.setStateAsync({
-                    expandedOpciones: !(this.refCollpse.current.attributes["aria-expanded"].value.toLowerCase() === 'true')
-                });
-            }
+        //     if (!this.refCollpseContent.current.classList.contains("show")) {
+        //         this.refCollpse.current.classList.remove("collapsed");
+        //         this.refCollpseContent.current.classList.add("show");
+        //         this.refCollpse.current.attributes["aria-expanded"].value = true;
+        //         await this.setStateAsync({
+        //             expandedOpciones: !(this.refCollpse.current.attributes["aria-expanded"].value.toLowerCase() === 'true')
+        //         });
+        //     }
 
-            this.refImpuesto.current.focus();
-            return;
-        }
+        //     this.refImpuesto.current.focus();
+        //     return;
+        // }
 
-        if (this.state.idMedida === "") {
-            await this.setStateAsync({ messageWarning: "Seleccione una unidad." })
+        // if (this.state.idMedida === "") {
+        //     await this.setStateAsync({ messageWarning: "Seleccione una unidad." })
 
-            if (!this.refCollpseContent.current.classList.contains("show")) {
-                this.refCollpse.current.classList.remove("collapsed");
-                this.refCollpseContent.current.classList.add("show");
-                this.refCollpse.current.attributes["aria-expanded"].value = true;
-                await this.setStateAsync({
-                    expandedOpciones: !(this.refCollpse.current.attributes["aria-expanded"].value.toLowerCase() === 'true')
-                });
-            }
+        //     if (!this.refCollpseContent.current.classList.contains("show")) {
+        //         this.refCollpse.current.classList.remove("collapsed");
+        //         this.refCollpseContent.current.classList.add("show");
+        //         this.refCollpse.current.attributes["aria-expanded"].value = true;
+        //         await this.setStateAsync({
+        //             expandedOpciones: !(this.refCollpse.current.attributes["aria-expanded"].value.toLowerCase() === 'true')
+        //         });
+        //     }
 
-            this.refMedida.current.focus();
-            return;
-        }
+        //     this.refMedida.current.focus();
+        //     return;
+        // }
 
-        let nombre = "";
-        for (let item of this.state.conceptos) {
-            if (this.state.idConcepto === item.idConcepto) {
-                nombre = item.nombre;
-                break;
-            }
-        }
+        // let nombre = "";
+        // for (let item of this.state.conceptos) {
+        //     if (this.state.idConcepto === item.idConcepto) {
+        //         nombre = item.nombre;
+        //         break;
+        //     }
+        // }
 
-        if (!this.validarDuplicado(this.state.idConcepto)) {
-            let detalle = {
-                "idConcepto": this.state.idConcepto,
-                "concepto": nombre,
-                "cantidad": 1,
-                "idImpuesto": this.state.idImpuesto,
-                "impuesto": this.refImpuesto.current.children[this.refImpuesto.current.selectedIndex].innerText,
-                "idMedida": this.state.idMedida,
-                "medida": this.refMedida.current.children[this.refMedida.current.selectedIndex].innerText,
-                "monto": this.state.monto
-            }
+        // if (!this.validarDuplicado(this.state.idConcepto)) {
+        //     let detalle = {
+        //         "idConcepto": this.state.idConcepto,
+        //         "concepto": nombre,
+        //         "cantidad": 1,
+        //         "idImpuesto": this.state.idImpuesto,
+        //         "impuesto": this.refImpuesto.current.children[this.refImpuesto.current.selectedIndex].innerText,
+        //         "idMedida": this.state.idMedida,
+        //         "medida": this.refMedida.current.children[this.refMedida.current.selectedIndex].innerText,
+        //         "monto": this.state.monto
+        //     }
 
-            this.state.detalleConcepto.push(detalle)
-        } else {
-            for (let item of this.state.detalleConcepto) {
-                if (item.idConcepto === this.state.idConcepto) {
-                    let currenteObject = item;
-                    currenteObject.cantidad = parseFloat(currenteObject.cantidad) + 1;
-                    break;
-                }
-            }
-        }
+        //     this.state.detalleConcepto.push(detalle)
+        // } else {
+        //     for (let item of this.state.detalleConcepto) {
+        //         if (item.idConcepto === this.state.idConcepto) {
+        //             let currenteObject = item;
+        //             currenteObject.cantidad = parseFloat(currenteObject.cantidad) + 1;
+        //             break;
+        //         }
+        //     }
+        // }
 
-        let newArr = [...this.state.detalleConcepto];
+        // let newArr = [...this.state.detalleConcepto];
 
-        const impuestoFilter = this.state.impuestos.filter(item => item.preferida === 1);
+        // const impuestoFilter = this.state.impuestos.filter(item => item.preferida === 1);
 
-        const medidaFilter = this.state.medidas.filter(item => item.preferida === 1);
+        // const medidaFilter = this.state.medidas.filter(item => item.preferida === 1);
 
-        await this.setStateAsync({
-            detalleConcepto: newArr,
-            idConcepto: '',
-            messageWarning: '',
-            idMedida: medidaFilter.length > 0 ? medidaFilter[0].idMedida : '',
-            idImpuesto: impuestoFilter.length > 0 ? impuestoFilter[0].idImpuesto : '',
-        });
-        this.refConcepto.current.focus();
+        // await this.setStateAsync({
+        //     detalleConcepto: newArr,
+        //     idConcepto: '',
+        //     messageWarning: '',
+        //     idMedida: medidaFilter.length > 0 ? medidaFilter[0].idMedida : '',
+        //     idImpuesto: impuestoFilter.length > 0 ? impuestoFilter[0].idImpuesto : '',
+        // });
+        // this.refConcepto.current.focus();
     }
 
     validarDuplicado(id) {
-        let value = false
-        for (let item of this.state.detalleConcepto) {
-            if (item.idConcepto === id) {
-                value = true
-                break;
-            }
-        }
-        return value
+        // let value = false
+        // for (let item of this.state.detalleConcepto) {
+        //     if (item.idConcepto === id) {
+        //         value = true
+        //         break;
+        //     }
+        // }
+        // return value
     }
 
     async removerConcepto(id) {
-        for (let i = 0; i < this.state.detalleConcepto.length; i++) {
-            if (id === this.state.detalleConcepto[i].id) {
-                this.state.detalleConcepto.splice(i, 1)
-                i--;
-                break;
-            }
-        }
+        // for (let i = 0; i < this.state.detalleConcepto.length; i++) {
+        //     if (id === this.state.detalleConcepto[i].id) {
+        //         this.state.detalleConcepto.splice(i, 1)
+        //         i--;
+        //         break;
+        //     }
+        // }
 
-        await this.setStateAsync({
-            detalleConcepto: this.state.detalleConcepto
-        })
+        // await this.setStateAsync({
+        //     detalleConcepto: this.state.detalleConcepto
+        // })
     }
 
     async onEventGuardar() {
-        if (this.state.idComprobante === '') {
-            await this.setStateAsync({ messageWarning: "Seleccione el comprobante." })
-            this.refComprobante.current.focus();
-            return;
-        }
+        // if (this.state.idComprobante === '') {
+        //     await this.setStateAsync({ messageWarning: "Seleccione el comprobante." })
+        //     this.refComprobante.current.focus();
+        //     return;
+        // }
 
-        if (this.state.idBanco === "") {
-            await this.setStateAsync({ messageWarning: "Seleccione el banco a desembolsar." })
-            this.refCuentaBancaria.current.focus();
-            return;
-        }
+        // if (this.state.idBanco === "") {
+        //     await this.setStateAsync({ messageWarning: "Seleccione el banco a desembolsar." })
+        //     this.refCuentaBancaria.current.focus();
+        //     return;
+        // }
 
-        if (this.state.metodoPago === "") {
-            await this.setStateAsync({ messageWarning: "Seleccione el metodo de pago." })
-            this.refMetodoPago.current.focus();
-            return;
-        }
+        // if (this.state.metodoPago === "") {
+        //     await this.setStateAsync({ messageWarning: "Seleccione el metodo de pago." })
+        //     this.refMetodoPago.current.focus();
+        //     return;
+        // }
 
-        if (this.state.idMoneda === '') {
-            await this.setStateAsync({ messageWarning: "Seleccione un moneda." })
-            this.refMoneda.current.focus();
-            return;
-        }
+        // if (this.state.idMoneda === '') {
+        //     await this.setStateAsync({ messageWarning: "Seleccione un moneda." })
+        //     this.refMoneda.current.focus();
+        //     return;
+        // }
 
-        if (this.state.detalleConcepto.length <= 0) {
-            await this.setStateAsync({ messageWarning: "Agregar datos a la tabla." })
-            this.refConcepto.current.focus();
-            return;
-        }
+        // if (this.state.detalleConcepto.length <= 0) {
+        //     await this.setStateAsync({ messageWarning: "Agregar datos a la tabla." })
+        //     this.refConcepto.current.focus();
+        //     return;
+        // }
 
-        let validate = this.state.detalleConcepto.reduce((acumulador, item) =>
-            item.idImpuesto === "" ? acumulador + 1 : acumulador + 0
-            , 0);
+        // let validate = this.state.detalleConcepto.reduce((acumulador, item) =>
+        //     item.idImpuesto === "" ? acumulador + 1 : acumulador + 0
+        //     , 0);
 
-        if (validate > 0) {
-            await this.setStateAsync({ messageWarning: "Hay detalles en la tabla sin impuesto seleccionado." });
-            let count = 0;
-            for (let item of this.state.detalleConcepto) {
-                count++;
-                if (item.idImpuesto === "") {
-                    document.getElementById(count + "img").focus()
-                }
-            }
-            return;
-        } else {
-            await this.setStateAsync({ messageWarning: "" });
-        }
+        // if (validate > 0) {
+        //     await this.setStateAsync({ messageWarning: "Hay detalles en la tabla sin impuesto seleccionado." });
+        //     let count = 0;
+        //     for (let item of this.state.detalleConcepto) {
+        //         count++;
+        //         if (item.idImpuesto === "") {
+        //             document.getElementById(count + "img").focus()
+        //         }
+        //     }
+        //     return;
+        // } else {
+        //     await this.setStateAsync({ messageWarning: "" });
+        // }
 
-        alertDialog("Gasto", "¿Estás seguro de continuar?", async (event) => {
-            if (event) {
-                // try {
-                //     alertInfo("Gasto", "Procesando información...");
+        // alertDialog("Gasto", "¿Estás seguro de continuar?", async (event) => {
+        //     if (event) {
+        //         try {
+        //             alertInfo("Gasto", "Procesando información...");
 
-                //     let result = await axios.post('/api/gasto/add', {
-                //         "idComprobante": this.state.idComprobante,
-                //         "idCliente": this.state.idCliente,
-                //         "idUsuario": this.state.idUsuario,
-                //         'idMoneda': this.state.idMoneda,
-                //         "idBanco": this.state.idBanco,
-                //         "idMedida": this.state.idMedida,
-                //         "idImpuesto": this.state.idImpuesto,
-                //         "metodoPago": this.state.metodoPago,
-                //         "estado": 1,
-                //         "observacion": this.state.observacion.trim().toUpperCase(),
-                //         "idSucursal": this.state.idSucursal,
-                //         "gastoDetalle": this.state.detalleConcepto
-                //     });
+        //             let result = await axios.post('/api/gasto/add', {
+        //                 "idComprobante": this.state.idComprobante,
+        //                 "idCliente": this.state.idCliente,
+        //                 "idUsuario": this.state.idUsuario,
+        //                 'idMoneda': this.state.idMoneda,
+        //                 "idBanco": this.state.idBanco,
+        //                 "idMedida": this.state.idMedida,
+        //                 "idImpuesto": this.state.idImpuesto,
+        //                 "metodoPago": this.state.metodoPago,
+        //                 "estado": 1,
+        //                 "observacion": this.state.observacion.trim().toUpperCase(),
+        //                 "idSucursal": this.state.idSucursal,
+        //                 "gastoDetalle": this.state.detalleConcepto
+        //             });
 
-                //     alertSuccess("Gasto", result.data, () => {
-                //         this.onEventLimpiar()
-                //     });
-                // } catch (error) {
-                //     if (error.response !== undefined) {
-                //         alertWarning("Gasto", error.response.data)
-                //     } else {
-                //         alertWarning("Gasto", "Se genero un error interno, intente nuevamente.")
-                //     }
-                // }
-            }
-        });
+        //             alertSuccess("Gasto", result.data, () => {
+        //                 this.onEventLimpiar()
+        //             });
+        //         } catch (error) {
+        //             if (error.response !== undefined) {
+        //                 alertWarning("Gasto", error.response.data)
+        //             } else {
+        //                 alertWarning("Gasto", "Se genero un error interno, intente nuevamente.")
+        //             }
+        //         }
+        //     }
+        // });
     }
 
     async onEventLimpiar() {
-        await this.setStateAsync({
-            idComprobante: '',
-            comprobantes: [],
-            idMoneda: '',
-            idCliente: '',
-            clientes: [],
-            cliente: '',
+        // await this.setStateAsync({
+        //     idComprobante: '',
+        //     comprobantes: [],
+        //     idMoneda: '',
+        //     idCliente: '',
+        //     clientes: [],
+        //     cliente: '',
 
-            monedas: [],
-            idConcepto: '',
-            conceptos: [],
-            idBanco: '',
-            cuentasBancarias: [],
-            metodoPago: '',
-            observacion: '',
-            detalleConcepto: [],
+        //     monedas: [],
+        //     idConcepto: '',
+        //     conceptos: [],
+        //     idBanco: '',
+        //     cuentasBancarias: [],
+        //     metodoPago: '',
+        //     observacion: '',
+        //     detalleConcepto: [],
 
-            monto: '',
+        //     monto: '',
 
-            idImpuesto: '',
-            impuestos: [],
+        //     idImpuesto: '',
+        //     impuestos: [],
 
-            idMedida: '',
-            medidas: [],
+        //     idMedida: '',
+        //     medidas: [],
 
-            expandedOpciones: true,
+        //     expandedOpciones: true,
 
-            loading: true,
-        });
+        //     loading: true,
+        // });
 
-        this.loadData();
+        // this.loadData();
     }
 
     calcularTotales() {
-        let subTotal = 0;
-        let impuestoTotal = 0;
-        let total = 0;
+        // let subTotal = 0;
+        // let impuestoTotal = 0;
+        // let total = 0;
 
-        for (let item of this.state.detalleConcepto) {
-            let cantidad = item.cantidad;
-            let valor = parseFloat(item.monto);
-            let filter = this.state.impuestos.filter(imp =>
-                imp.idImpuesto === item.idImpuesto
-            )
-            let impuesto = filter.length > 0 ? filter[0].porcentaje : 0;
+        // for (let item of this.state.detalleConcepto) {
+        //     let cantidad = item.cantidad;
+        //     let valor = parseFloat(item.monto);
+        //     let filter = this.state.impuestos.filter(imp =>
+        //         imp.idImpuesto === item.idImpuesto
+        //     )
+        //     let impuesto = filter.length > 0 ? filter[0].porcentaje : 0;
 
-            let valorActual = cantidad * valor;
-            let valorSubNeto = calculateTaxBruto(impuesto, valorActual);
-            let valorImpuesto = calculateTax(impuesto, valorSubNeto);
-            let valorNeto = valorSubNeto + valorImpuesto;
+        //     let valorActual = cantidad * valor;
+        //     let valorSubNeto = calculateTaxBruto(impuesto, valorActual);
+        //     let valorImpuesto = calculateTax(impuesto, valorSubNeto);
+        //     let valorNeto = valorSubNeto + valorImpuesto;
 
-            subTotal += valorSubNeto;
-            impuestoTotal += valorImpuesto;
-            total += valorNeto;
-        }
-        return { subTotal, impuestoTotal, total }
+        //     subTotal += valorSubNeto;
+        //     impuestoTotal += valorImpuesto;
+        //     total += valorNeto;
+        // }
+        // return { subTotal, impuestoTotal, total }
     }
 
     renderTotal() {
-        const { subTotal, impuestoTotal, total } = this.calcularTotales();
-        let moneda = this.state.monedas.filter(item => item.idMoneda === this.state.idMoneda);
-        let codigo = moneda.length > 0 ? moneda[0].codiso : "PEN";
+        // const { subTotal, impuestoTotal, total } = this.calcularTotales();
+        // let moneda = this.state.monedas.filter(item => item.idMoneda === this.state.idMoneda);
+        // let codigo = moneda.length > 0 ? moneda[0].codiso : "PEN";
 
-        return (
-            <>
-                <tr>
-                    <td className="text-left">Sub Total:</td>
-                    <td className="text-right">{numberFormat(subTotal, codigo)}</td>
-                </tr>
-                <tr>
-                    <td className="text-left">Impuesto:</td>
-                    <td className="text-right">{numberFormat(impuestoTotal, codigo)}</td>
-                </tr>
-                <tr className="border-bottom">
-                </tr>
-                <tr>
-                    <td className="text-left h4">Total:</td>
-                    <td className="text-right h4">{numberFormat(total, codigo)}</td>
-                </tr>
-            </>
-        )
+        // return (
+        //     <>
+        //         <tr>
+        //             <td className="text-left">Sub Total:</td>
+        //             <td className="text-right">{numberFormat(subTotal, codigo)}</td>
+        //         </tr>
+        //         <tr>
+        //             <td className="text-left">Impuesto:</td>
+        //             <td className="text-right">{numberFormat(impuestoTotal, codigo)}</td>
+        //         </tr>
+        //         <tr className="border-bottom">
+        //         </tr>
+        //         <tr>
+        //             <td className="text-left h4">Total:</td>
+        //             <td className="text-right h4">{numberFormat(total, codigo)}</td>
+        //         </tr>
+        //     </>
+        // )
     }
 
     handleSelect = async (event, idConcepto) => {
-        let updatedList = [...this.state.detalleConcepto];
-        for (let item of updatedList) {
-            if (item.idConcepto === idConcepto) {
-                item.idImpuesto = event.target.value;
-                break;
-            }
-        }
+        // let updatedList = [...this.state.detalleConcepto];
+        // for (let item of updatedList) {
+        //     if (item.idConcepto === idConcepto) {
+        //         item.idImpuesto = event.target.value;
+        //         break;
+        //     }
+        // }
 
-        await this.setStateAsync({ detalleConcepto: updatedList })
+        // await this.setStateAsync({ detalleConcepto: updatedList })
     }
 
     onEventClearInput = async () => {
-        await this.setStateAsync({ clientes: [], idCliente: '', cliente: "" });
-        this.selectItem = false;
+        // await this.setStateAsync({ clientes: [], idCliente: '', cliente: "" });
+        // this.selectItem = false;
     }
 
     handleFilter = async (event) => {
 
-        const searchWord = this.selectItem ? "" : event.target.value;
-        await this.setStateAsync({ idCliente: '', cliente: searchWord });
-        this.selectItem = false;
-        if (searchWord.length === 0) {
-            await this.setStateAsync({ clientes: [] });
-            return;
-        }
+        // const searchWord = this.selectItem ? "" : event.target.value;
+        // await this.setStateAsync({ idCliente: '', cliente: searchWord });
+        // this.selectItem = false;
+        // if (searchWord.length === 0) {
+        //     await this.setStateAsync({ clientes: [] });
+        //     return;
+        // }
 
-        if (this.state.filter) return;
+        // if (this.state.filter) return;
 
-        await this.setStateAsync({ filter: true });
+        // await this.setStateAsync({ filter: true });
 
-        const params = {
-            filtrar: searchWord,
-        }
+        // const params = {
+        //     filtrar: searchWord,
+        // }
 
-        const response = await listarClientesFilter(params);
+        // const response = await listarClientesFilter(params);
 
-        if (response instanceof SuccessReponse) {
-            await this.setStateAsync({ filter: false, clientes: response.data });
-        }
+        // if (response instanceof SuccessReponse) {
+        //     await this.setStateAsync({ filter: false, clientes: response.data });
+        // }
 
-        if (response instanceof ErrorResponse) {
-            await this.setStateAsync({ filter: false, clientes: [] });
-        }
+        // if (response instanceof ErrorResponse) {
+        //     await this.setStateAsync({ filter: false, clientes: [] });
+        // }
     }
 
     onEventSelectItem = async (value) => {
-        await this.setStateAsync({
-            cliente: value.documento + " - " + value.informacion,
-            clientes: [],
-            idCliente: value.idCliente
-        });
-        this.selectItem = true;
+        // await this.setStateAsync({
+        //     cliente: value.documento + " - " + value.informacion,
+        //     clientes: [],
+        //     idCliente: value.idCliente
+        // });
+        // this.selectItem = true;
     }
 
     render() {
         return (
             <ContainerWrapper>
-                {
+                {/* {
                     this.state.loading && spinnerLoading(this.state.msgLoading)
-                }
+                } */}
 
                 <div className='row'>
                     <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
@@ -511,13 +511,6 @@ class GastoProceso extends React.Component {
                         </div>
                     </div>
                 </div>
-
-                {
-                    this.state.messageWarning === '' ? null :
-                        <div className="alert alert-warning" role="alert">
-                            <i className="bi bi-exclamation-diamond-fill"></i> {this.state.messageWarning}
-                        </div>
-                }
 
                 <div className="row">
                     <div className="col-xl-8 col-lg-8 col-md-8 col-sm-12 col-12">
@@ -870,7 +863,7 @@ class GastoProceso extends React.Component {
                         <div className="form-group">
                             <table width="100%">
                                 <tbody>
-                                    {this.renderTotal()}
+                                    {/* {this.renderTotal()} */}
                                 </tbody>
                             </table>
                         </div>

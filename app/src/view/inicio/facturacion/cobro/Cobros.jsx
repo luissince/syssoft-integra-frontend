@@ -5,19 +5,21 @@ import {
     formatTime,
     spinnerLoading,
     alertDialog,
-    alertInfo,
-    alertSuccess,
-    alertWarning,
-    alertError,
     statePrivilegio,
-    keyUpSearch
+    keyUpSearch,
+    isEmpty
 } from '../../../../helper/utils.helper';
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import Paginacion from '../../../../components/Paginacion';
 import ContainerWrapper from '../../../../components/Container';
+import { listCobro } from '../../../../network/rest/principal.network';
+import SuccessReponse from '../../../../model/class/response';
+import ErrorResponse from '../../../../model/class/error-response';
+import { CANCELED } from '../../../../model/types/types';
+import CustomComponent from '../../../../model/class/custom-component';
 
-class Cobros extends React.Component {
+class Cobros extends CustomComponent {
     constructor(props) {
         super(props);
         this.state = {
@@ -39,18 +41,11 @@ class Cobros extends React.Component {
             totalPaginacion: 0,
             filasPorPagina: 10,
             messageTable: 'Cargando información...',
-            messagePaginacion: 'Mostranto 0 de 0 Páginas'
         }
         this.refTxtSearch = React.createRef();
 
         this.idCodigo = "";
         this.abortControllerTable = new AbortController();
-    }
-
-    setStateAsync(state) {
-        return new Promise((resolve) => {
-            this.setState(state, resolve)
-        });
     }
 
     componentDidMount() {
@@ -97,6 +92,43 @@ class Cobros extends React.Component {
     }
 
     fillTable = async (opcion, buscar) => {
+        await this.setStateAsync({
+            loading: true,
+            lista: [],
+            messageTable: "Cargando información...",
+        });
+
+        const params = {
+            "opcion": opcion,
+            "buscar": buscar,
+            "idSucursal": this.state.idSucursal,
+            "posicionPagina": ((this.state.paginacion - 1) * this.state.filasPorPagina),
+            "filasPorPagina": this.state.filasPorPagina
+        }
+
+        const response = await listCobro(params, this.abortControllerTable.signal);
+
+        if (response instanceof SuccessReponse) {
+            const totalPaginacion = parseInt(Math.ceil((parseFloat(response.data.total) / this.state.filasPorPagina)));
+
+            await this.setStateAsync({
+                loading: false,
+                lista: response.data.result,
+                totalPaginacion: totalPaginacion,
+            });
+        }
+
+        if (response instanceof ErrorResponse) {
+            if (response.getType() === CANCELED) return;
+
+            await this.setStateAsync({
+                loading: false,
+                lista: [],
+                totalPaginacion: 0,
+                messageTable: response.getMessage(),
+            });
+        }
+
         // try {
         //     await this.setStateAsync({ loading: true, lista: [], messageTable: "Cargando información...", messagePaginacion: "Mostranto 0 de 0 Páginas" });
 
@@ -164,6 +196,96 @@ class Cobros extends React.Component {
         })
     }
 
+    generarBody() {
+        if (this.state.loading) {
+            return (
+                <tr>
+                    <td className="text-center" colSpan="8">
+                        {spinnerLoading("Cargando información de la tabla...", true)}
+                    </td>
+                </tr>
+            );
+        }
+
+        if (isEmpty(this.state.lista)) {
+            return (
+                <tr className="text-center">
+                    <td colSpan="8">¡No hay datos registrados!</td>
+                </tr>
+            );
+        }
+
+
+        return this.state.lista.map((item, index) => {
+
+
+
+            return (
+                <tr key={index}>
+                    <td className="text-center">{item.id}</td>
+                </tr>
+                // <tr key={index}>
+                //     <td className="text-center">{item.id}</td>
+                //     <td>{item.documento}{<br />}{item.informacion}</td>
+                //     <td>{item.comprobante}{<br />}{item.serie + "-" + item.numeracion}</td>
+                //     <td>{item.fecha}{<br />}{formatTime(item.hora)}</td>
+                //     <td>{item.banco}</td>
+                //     <td>{item.detalle}
+                //         <br />
+                //         <small>
+                //             {
+                //                 item.comprobanteRef !== "" ?
+                //                     <Link className='btn-link' to={`/inicio/ventas/detalle?idVenta=${item.idVentaRef}`}>
+                //                         {item.comprobanteRef} <i className='fa fa-external-link-square'></i>
+                //                     </Link>
+                //                     : null
+                //             }
+                //         </small>
+                //         <br />
+                //         <small>{item.productoRef}</small>
+                //         {
+                //             item.estadoRef === 4 ?
+                //                 <>
+                //                     <br />
+                //                     <small className="text-danger">MODIFICADO</small>
+                //                 </>
+                //                 :
+                //                 null
+                //         }
+                //     </td>
+                //     <td>{item.estado === 1 && item.idNotaCredito === null ?
+                //         <span className="text-success">COBRADO</span> :
+                //         item.idNotaCredito != null ?
+                //             <span className="text-warning">MODIFICADO</span> :
+                //             <span className="text-danger">ANULADO</span>}
+                //     </td>
+                //     <td>{numberFormat(item.monto)}</td>
+                //     <td className="text-center">
+                //         <button
+                //             className="btn btn-outline-info btn-sm"
+                //             title="Detalle"
+                //             onClick={() => {
+                //                 this.props.history.push({ pathname: `${this.props.location.pathname}/detalle`, search: "?idCobro=" + item.idCobro })
+                //             }}
+                //             disabled={!this.state.view}>
+                //             <i className="fa fa-eye"></i>
+                //         </button>
+                //     </td>
+                //     <td className="text-center">
+                //         <button
+                //             className="btn btn-outline-danger btn-sm"
+                //             title="Eliminar"
+                //             onClick={() => this.onEventAnularCobro(item.idCobro)}
+                //             disabled={!this.state.remove}>
+                //             <i className="fa fa-remove"></i>
+                //         </button>
+                //     </td>
+                // </tr>
+            )
+        })
+
+    }
+
     render() {
         return (
             <ContainerWrapper>
@@ -212,119 +334,32 @@ class Cobros extends React.Component {
                                 <thead>
                                     <tr>
                                         <th width="5%" className="text-center">#</th>
-                                        <th width="10%">Cliente</th>
-                                        <th width="10%">Correlativo</th>
-                                        <th width="10%">Creación</th>
-                                        <th width="10%">Cuenta</th>
-                                        <th width="15%">Observación</th>
+                                        <th width="10%">Fecha</th>
+                                        <th width="10%">Comprobante</th>
+                                        <th width="10%">Cliente</th>                                        
                                         <th width="10%">Estado</th>
                                         <th width="10%">Monto</th>
                                         <th width="5%" className="text-center">Detalle</th>
-                                        <th width="5%" className="text-center">Eliminar</th>
+                                        <th width="5%" className="text-center">Anular</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {
-                                        this.state.loading ? (
-                                            <tr>
-                                                <td className="text-center" colSpan="10">
-                                                    {spinnerLoading("Cargando información de la tabla...", true)}
-                                                </td>
-                                            </tr>
-                                        ) : this.state.lista.length === 0 ? (
-                                            <tr className="text-center">
-                                                <td colSpan="10">¡No hay datos registrados!</td>
-                                            </tr>
-                                        ) : (
-                                            this.state.lista.map((item, index) => {
-                                                return (
-                                                    <tr key={index}>
-                                                        <td className="text-center">{item.id}</td>
-                                                        <td>{item.documento}{<br />}{item.informacion}</td>
-                                                        <td>{item.comprobante}{<br />}{item.serie + "-" + item.numeracion}</td>
-                                                        <td>{item.fecha}{<br />}{formatTime(item.hora)}</td>
-                                                        <td>{item.banco}</td>
-                                                        <td>{item.detalle}
-                                                            <br />
-                                                            <small>
-                                                                {
-                                                                    item.comprobanteRef !== "" ?
-                                                                        <Link className='btn-link' to={`/inicio/ventas/detalle?idVenta=${item.idVentaRef}`}>
-                                                                            {item.comprobanteRef} <i className='fa fa-external-link-square'></i>
-                                                                        </Link>
-                                                                        : null
-                                                                }
-                                                            </small>
-                                                            <br />
-                                                            <small>{item.productoRef}</small>
-                                                            {
-                                                                item.estadoRef === 4 ?
-                                                                    <>
-                                                                        <br />
-                                                                        <small className="text-danger">MODIFICADO</small>
-                                                                    </>
-                                                                    :
-                                                                    null
-                                                            }
-                                                        </td>
-                                                        <td>{item.estado === 1 && item.idNotaCredito === null ?
-                                                            <span className="text-success">COBRADO</span> :
-                                                            item.idNotaCredito != null ?
-                                                                <span className="text-warning">MODIFICADO</span> :
-                                                                <span className="text-danger">ANULADO</span>}
-                                                        </td>
-                                                        <td>{numberFormat(item.monto)}</td>
-                                                        <td className="text-center">
-                                                            <button
-                                                                className="btn btn-outline-info btn-sm"
-                                                                title="Detalle"
-                                                                onClick={() => {
-                                                                    this.props.history.push({ pathname: `${this.props.location.pathname}/detalle`, search: "?idCobro=" + item.idCobro })
-                                                                }}
-                                                                disabled={!this.state.view}>
-                                                                <i className="fa fa-eye"></i>
-                                                            </button>
-                                                        </td>
-                                                        <td className="text-center">
-                                                            <button
-                                                                className="btn btn-outline-danger btn-sm"
-                                                                title="Eliminar"
-                                                                onClick={() => this.onEventAnularCobro(item.idCobro)}
-                                                                disabled={!this.state.remove}>
-                                                                <i className="fa fa-remove"></i>
-                                                            </button>
-                                                        </td>
-                                                    </tr>
-                                                )
-                                            })
-                                        )
-                                    }
+                                    {this.generarBody()}
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
 
-                <div className="row">
-                    <div className="col-sm-12 col-md-5">
-                        <div className="dataTables_info mt-2" role="status" aria-live="polite">{this.state.messagePaginacion}</div>
-                    </div>
-                    <div className="col-sm-12 col-md-7">
-                        <div className="dataTables_paginate paging_simple_numbers">
-                            <nav aria-label="Page navigation example">
-                                <ul className="pagination justify-content-end">
-                                    <Paginacion
-                                        loading={this.state.loading}
-                                        totalPaginacion={this.state.totalPaginacion}
-                                        paginacion={this.state.paginacion}
-                                        fillTable={this.paginacionContext}
-                                        restart={this.state.restart}
-                                    />
-                                </ul>
-                            </nav>
-                        </div>
-                    </div>
-                </div>
+                <Paginacion
+                    loading={this.state.loading}
+                    data={this.state.lista}
+                    totalPaginacion={this.state.totalPaginacion}
+                    paginacion={this.state.paginacion}
+                    fillTable={this.paginacionContext}
+                    restart={this.state.restart}
+                />
+
             </ContainerWrapper>
         );
     }

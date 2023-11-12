@@ -19,7 +19,7 @@ const Producto = (props) => {
 
     const { costo, refCosto, handleInputCosto } = props;
 
-    const { inventarios, handleAddItemInventario, handleRemoveItemInventario } = props;
+    const { activarInventario, inventario, handleAddItemInventario, handleRemoveItemInventario } = props;
 
     return (
         <div className="tab-pane fade show active" id="addproducto" role="tabpanel" aria-labelledby="addproducto-tab">
@@ -261,8 +261,8 @@ const Producto = (props) => {
             </div>
 
             {/* SECTOR INVENTARIO */}
-            {nombre == '' ?
-                <div className='row pt-3'>
+            {
+                activarInventario && <div className='row pt-3'>
                     <div className='col-12'>
 
                         <div className='row'>
@@ -282,7 +282,7 @@ const Producto = (props) => {
                         </div>
 
                         {
-                            inventarios.map((item, index) => {
+                            inventario.map((item, index) => {
                                 return <ItemAlmacen
                                     key={index}
                                     idAlmacen={item.idAlmacen}
@@ -310,8 +310,6 @@ const Producto = (props) => {
                         </div>
                     </div>
                 </div>
-                : 
-                <div/>
             }
 
 

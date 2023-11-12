@@ -19,10 +19,11 @@ class BancoEditar extends CustomComponent {
             monedas: [],
             numCuenta: "",
             cci: "",
-            idUsuario: this.props.token.userToken.idUsuario,
 
             loading: true,
             msgLoading: "Cargando datos...",
+
+            idUsuario: this.props.token.userToken.idUsuario,
         }
 
         this.refTxtNombre = React.createRef();

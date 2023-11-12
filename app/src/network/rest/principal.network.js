@@ -417,9 +417,9 @@ export async function listarProductosFilter(params) {
  * @param {*} params 
  * @returns SuccessReponse | ErrorResponse 
  */
-export async function listarClientesFilter(params) {
+export async function filtrarCliente(params) {
   return await Resolve.create(
-    instancePrincipal.get("/api/cliente/listfiltrar", {
+    instancePrincipal.get("/api/cliente/filtrar", {
       params: params,
     })
   );
@@ -520,12 +520,15 @@ export async function getCobroVentaId(params, signal) {
   );
 }
 
-/**
- * 
- * @param {*} params 
- * @param {*} signal 
- * @returns SuccessReponse | ErrorResponse 
- */
+export async function getIdConcepto(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/concepto/id', {
+      signal: signal,
+      params: params
+    })
+  );
+}
+
 export async function listConceptos(params, signal) {
   return await Resolve.create(
     instancePrincipal.get('/api/concepto/list', {
@@ -534,6 +537,75 @@ export async function listConceptos(params, signal) {
     })
   );
 }
+
+export async function addConcepto(data, signal = null) {
+  return await Resolve.create(
+    instancePrincipal.post('/api/concepto/add', data, {
+      signal: signal,
+    })
+  );
+}
+
+export async function editConcepto(data, signal = null) {
+  return await Resolve.create(
+    instancePrincipal.post('/api/concepto/update', data, {
+      signal: signal,
+    })
+  );
+}
+
+export async function removeConcepto(params, signal = null) {
+  return await Resolve.create(
+    instancePrincipal.delete('/api/concepto', {
+      params: params,
+      signal: signal,
+    })
+  );
+}
+
+export async function filtrarCobroConcepto(params, signal = null) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/concepto/filtrar/cobro', {
+      params: params,
+      signal: signal,
+    })
+  );
+}
+
+export async function filtrarGastoConcepto(params, signal = null) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/concepto/filtrar/gasto', {
+      params: params,
+      signal: signal,
+    })
+  );
+}
+
+export async function listCobro(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/cobro/list', {
+      signal: signal,
+      params: params
+    })
+  );
+}
+
+export async function addCobro(data, signal) {
+  return await Resolve.create(
+    instancePrincipal.post('/api/cobro/add', data,{
+      signal: signal,
+    })
+  );
+}
+
+export async function editCobro(data, signal) {
+  return await Resolve.create(
+    instancePrincipal.post('/api/cobro/edit', data,{
+      signal: signal,
+    })
+  );
+}
+
 
 /**
  * 
@@ -866,6 +938,16 @@ export async function comboMedida(signal) {
 export async function comboMetodoPago(signal) {
   return await Resolve.create(
     instancePrincipal.get('/api/metodopago/combo', {
+      signal: signal,
+    })
+  );
+}
+
+
+export async function listKardex(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/kardex/list', {
+      params: params,
       signal: signal,
     })
   );

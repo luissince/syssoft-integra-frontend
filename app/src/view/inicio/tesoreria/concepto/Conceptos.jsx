@@ -1,41 +1,28 @@
 import React from 'react';
-import axios from 'axios';
 import {
     formatTime,
-    showModal,
-    hideModal,
-    viewModal,
-    clearModal,
     alertDialog,
-    alertInfo,
     alertSuccess,
     alertWarning,
     spinnerLoading,
     statePrivilegio,
-    keyUpSearch
+    keyUpSearch,
+    alertInfo
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import Paginacion from '../../../../components/Paginacion';
 import ContainerWrapper from '../../../../components/Container';
-import { listConceptos } from '../../../../network/rest/principal.network';
+import { listConceptos, removeConcepto } from '../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
 import { CANCELED } from '../../../../model/types/types';
+import CustomComponent from '../../../../model/class/custom-component';
 
-class Conceptos extends React.Component {
+class Conceptos extends CustomComponent {
+
     constructor(props) {
         super(props);
         this.state = {
-            idConcepto: '',
-            nombre: '',
-            tipo: '',
-            codigo: '',
-            idUsuario: this.props.token.userToken.idUsuario,
-
-            loadModal: false,
-            nameModal: 'Nuevo Comprobante',
-            messageWarning: '',
-            msgModal: 'Cargando datos...',
 
             add: statePrivilegio(this.props.token.userToken.menus[4].submenu[0].privilegio[0].estado),
             edit: statePrivilegio(this.props.token.userToken.menus[4].submenu[0].privilegio[1].estado),
@@ -48,48 +35,19 @@ class Conceptos extends React.Component {
             opcion: 0,
             paginacion: 0,
             totalPaginacion: 0,
-            filasPorPagina: 10,
+            filasPorPagina: 5,
             messageTable: 'Cargando información...',
-            messagePaginacion: 'Mostranto 0 de 0 Páginas'
+
+            idUsuario: this.props.token.userToken.idUsuario,
         }
-        this.refTipo = React.createRef();
 
         this.refTxtSearch = React.createRef();
 
-        this.idCodigo = "";
         this.abortControllerTable = new AbortController();
-    }
-
-    setStateAsync(state) {
-        return new Promise((resolve) => {
-            this.setState(state, resolve)
-        });
     }
 
     async componentDidMount() {
         this.loadInit();
-
-        viewModal("modalConcepto", () => {
-            this.abortControllerModal = new AbortController();
-
-            if (this.idCodigo !== "") this.loadDataId(this.idCodigo);
-        });
-
-        clearModal("modalConcepto", async () => {
-            this.abortControllerModal.abort();
-            await this.setStateAsync({
-                nombre: '',
-                tipo: '',
-                codigo: '',
-                idConcepto: '',
-
-                loadModal: false,
-                nameModal: 'Nuevo Concepto',
-                messageWarning: '',
-                msgModal: 'Cargando datos...',
-            })
-            this.idCodigo = "";
-        })
     }
 
     componentWillUnmount() {
@@ -132,12 +90,15 @@ class Conceptos extends React.Component {
     }
 
     fillTable = async (opcion, buscar) => {
-
-        await this.setStateAsync({ loading: true, lista: [], messageTable: "Cargando información...", messagePaginacion: "Mostranto 0 de 0 Páginas" });
+        await this.setStateAsync({
+            loading: true,
+            lista: [],
+            messageTable: "Cargando información...",
+        });
 
         const params = {
             "opcion": opcion,
-            "buscar": buscar.trim().toUpperCase(),
+            "buscar": buscar,
             "posicionPagina": ((this.state.paginacion - 1) * this.state.filasPorPagina),
             "filasPorPagina": this.state.filasPorPagina
         }
@@ -146,13 +107,11 @@ class Conceptos extends React.Component {
 
         if (response instanceof SuccessReponse) {
             const totalPaginacion = parseInt(Math.ceil((parseFloat(response.data.total) / this.state.filasPorPagina)));
-            const messagePaginacion = `Mostrando ${response.data.result.length} de ${totalPaginacion} Páginas`;
 
             await this.setStateAsync({
                 loading: false,
                 lista: response.data.result,
                 totalPaginacion: totalPaginacion,
-                messagePaginacion: messagePaginacion
             });
         }
 
@@ -164,106 +123,45 @@ class Conceptos extends React.Component {
                 lista: [],
                 totalPaginacion: 0,
                 messageTable: "Se produjo un error interno, intente nuevamente por favor.",
-                messagePaginacion: "Mostranto 0 de 0 Páginas",
             });
         }
     }
 
-    async openModal(id) {
-        if (id === "") {
-            showModal('modalConcepto');
-            await this.setStateAsync({ nameModal: "Nuevo Concepto" });
-        } else {
-            showModal('modalConcepto');
-            this.idCodigo = id;
-            await this.setStateAsync({ idConcepto: id, nameModal: "Editar Concepto", loadModal: true });
-        }
+    handleAgregar = () => {
+        this.props.history.push({
+            pathname: `${this.props.location.pathname}/agregar`
+        })
     }
 
-    loadDataId = async (id) => {
-        try {
-            const result = await axios.get("/api/concepto/id", {
-                signal: this.abortControllerModal.signal,
-                params: {
-                    idConcepto: id
-                }
-            });
-
-            await this.setStateAsync({
-                nombre: result.data.nombre,
-                tipo: result.data.tipo,
-                idConcepto: result.data.idConcepto,
-                loadModal: false
-            });
-        } catch (error) {
-            if (error.message !== "canceled") {
-                await this.setStateAsync({
-                    msgModal: "Se produjo un error interno, intente nuevamente"
-                });
-            }
-        }
+    handleEditar = (idConcepto) => {
+        this.props.history.push({
+            pathname: `${this.props.location.pathname}/editar`,
+            search: "?idConcepto=" + idConcepto
+        })
     }
 
-    async onEventGuardar() {
-        if (this.state.nombre === "") {
-            this.setState({ messageWarning: "Ingrese el nombre del concepto" });
-            this.refNombre.current.focus();
-        } else if (this.state.tipo === "") {
-            this.setState({ messageWarning: "Seleccione el concepto" })
-            this.tipo.current.focus();
-        } else {
-            try {
-                alertInfo("Concepto", "Procesando información...");
-                hideModal("modalConcepto");
-                if (this.state.idConcepto !== '') {
-                    const result = await axios.post('/api/concepto/update', {
-                        "nombre": this.state.nombre.trim().toUpperCase(),
-                        "tipo": this.state.tipo,
-                        "codigo": this.state.codigo,
-                        "idUsuario": this.state.idUsuario,
-                        "idConcepto": this.state.idConcepto
-                    })
-
-                    alertSuccess("Concepto", result.data, () => {
-                        this.onEventPaginacion();
-                    });
-                } else {
-                    const result = await axios.post('/api/concepto/add', {
-                        "nombre": this.state.nombre.trim().toUpperCase(),
-                        "tipo": this.state.tipo,
-                        "codigo": this.state.codigo,
-                        "idUsuario": this.state.idUsuario,
-                    });
-
-                    alertSuccess("Concepto", result.data, () => {
-                        this.loadInit();
-                    });
-                }
-            } catch (error) {
-                alertWarning("Concepto", "Se produjo un error un interno, intente nuevamente.");
-            }
-        }
-    }
-
-    onEventDelete(idConcepto) {
+    handleBorrar(idConcepto) {
         alertDialog("Concepto", "¿Estás seguro de eliminar el concepto?", async (event) => {
             if (event) {
-                try {
-                    alertInfo("Moneda", "Procesando información...")
-                    let result = await axios.delete('/api/concepto', {
-                        params: {
-                            "idConcepto": idConcepto
-                        }
-                    })
-                    alertSuccess("Concepto", result.data, () => {
+
+                const params = {
+                    "idConcepto": idConcepto
+                }
+
+                alertInfo("Concepto", "Procesando información...")
+
+                const response = await removeConcepto(params);
+
+                if (response instanceof SuccessReponse) {
+                    alertSuccess("Concepto", response.data, () => {
                         this.loadInit();
                     })
-                } catch (error) {
-                    if (error.response !== undefined) {
-                        alertWarning("Concepto", error.response.data)
-                    } else {
-                        alertWarning("Concepto", "Se genero un error interno, intente nuevamente.")
-                    }
+                }
+
+                if (response instanceof ErrorResponse) {
+                    if (response.getType() === CANCELED) return;
+
+                    alertWarning("Concepto", response.getMessage())
                 }
             }
         })
@@ -272,102 +170,6 @@ class Conceptos extends React.Component {
     render() {
         return (
             <ContainerWrapper>
-                {/* Inicio modal */}
-                <div className="modal fade" id="modalConcepto" data-backdrop="static">
-                    <div className="modal-dialog">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h6 className="modal-title">{this.state.nameModal}</h6>
-                                <button type="button" className="close" data-bs-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden={true}>&times;</span>
-                                </button>
-                            </div>
-                            <div className="modal-body">
-                                {
-                                    this.state.loadModal && spinnerLoading(this.state.msgModal)
-                                }
-
-                                {
-                                    this.state.messageWarning !== '' &&
-                                    <div className="alert alert-warning" role="alert">
-                                        <i className="bi bi-exclamation-diamond-fill"></i> {this.state.messageWarning}
-                                    </div>
-                                }
-
-                                <div className="form-row">
-                                    <div className="form-group col-md-12">
-                                        <label>Concepto</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            value={this.state.nombre}
-                                            ref={this.refNombre}
-                                            onChange={(event) => {
-                                                if (event.target.value.trim().length > 0) {
-                                                    this.setState({
-                                                        nombre: event.target.value,
-                                                        messageWarning: '',
-                                                    });
-                                                } else {
-                                                    this.setState({
-                                                        nombre: event.target.value,
-                                                        messageWarning: 'Ingrese el nombre del concepto',
-                                                    });
-                                                }
-                                            }}
-                                            placeholder="Ingrese el nombre del concepto" />
-                                    </div>
-
-                                    <div className="form-group col-md-12">
-                                        <label>Tipo de Concepto:</label>
-                                        <div className="input-group">
-                                            <select
-                                                className="form-control"
-                                                value={this.state.tipo}
-                                                ref={this.refTipo}
-                                                onChange={(event) => {
-                                                    if (event.target.value.trim().length > 0) {
-                                                        this.setState({
-                                                            tipo: event.target.value,
-                                                            messageWarning: '',
-                                                        });
-                                                    } else {
-                                                        this.setState({
-                                                            tipo: event.target.value,
-                                                            messageWarning: 'Seleccione el concepto',
-                                                        });
-                                                    }
-                                                }}>
-                                                <option value="">-- Seleccione --</option>
-                                                <option value="1">CONCEPTO DE GASTO</option>
-                                                <option value="2">CONCEPTO DE COBRO</option>
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    <div className="form-group col-md-12">
-                                        <label>Código:</label>
-                                        <div className="input-group">
-                                            <input
-                                                type="text"
-                                                className="form-control"
-                                                value={this.state.codigo}
-                                                onChange={(event) => this.setState({ codigo: event.target.value })}
-                                                placeholder="Código" />
-                                        </div>
-                                    </div>
-                                </div>
-
-                            </div>
-                            <div className="modal-footer">
-                                <button type="button" className="btn btn-primary" onClick={() => this.onEventGuardar()}>Aceptar</button>
-                                <button type="button" className="btn btn-danger" data-bs-dismiss="modal">Cerrar</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {/* fin modal */}
-
                 <div className='row'>
                     <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
                         <div className="form-group">
@@ -395,7 +197,7 @@ class Conceptos extends React.Component {
                     </div>
                     <div className="col-md-6 col-sm-12">
                         <div className="form-group">
-                            <button className="btn btn-outline-info" onClick={() => this.openModal('')} disabled={!this.state.add}>
+                            <button className="btn btn-outline-info" onClick={this.handleAgregar} disabled={!this.state.add}>
                                 <i className="bi bi-file-plus"></i> Nuevo Registro
                             </button>
                             {" "}
@@ -446,7 +248,7 @@ class Conceptos extends React.Component {
                                                             <button
                                                                 className="btn btn-outline-warning btn-sm"
                                                                 title="Editar"
-                                                                onClick={() => this.openModal(item.idConcepto)}
+                                                                onClick={() => this.handleEditar(item.idConcepto)}
                                                                 disabled={!this.state.edit}>
                                                                 <i className="bi bi-pencil"></i>
                                                             </button>
@@ -455,7 +257,7 @@ class Conceptos extends React.Component {
                                                             <button
                                                                 className="btn btn-outline-danger btn-sm"
                                                                 title="Anular"
-                                                                onClick={() => this.onEventDelete(item.idConcepto)}
+                                                                onClick={() => this.handleBorrar(item.idConcepto)}
                                                                 disabled={!this.state.remove}>
                                                                 <i className="bi bi-trash"></i>
                                                             </button>
@@ -471,26 +273,15 @@ class Conceptos extends React.Component {
                     </div>
                 </div>
 
-                <div className="row">
-                    <div className="col-sm-12 col-md-5">
-                        <div className="dataTables_info mt-2" role="status" aria-live="polite">{this.state.messagePaginacion}</div>
-                    </div>
-                    <div className="col-sm-12 col-md-7">
-                        <div className="dataTables_paginate paging_simple_numbers">
-                            <nav aria-label="Page navigation example">
-                                <ul className="pagination justify-content-end">
-                                    <Paginacion
-                                        loading={this.state.loading}
-                                        totalPaginacion={this.state.totalPaginacion}
-                                        paginacion={this.state.paginacion}
-                                        fillTable={this.paginacionContext}
-                                        restart={this.state.restart}
-                                    />
-                                </ul>
-                            </nav>
-                        </div>
-                    </div>
-                </div>
+                <Paginacion
+                    loading={this.state.loading}
+                    data={this.state.lista}
+                    totalPaginacion={this.state.totalPaginacion}
+                    paginacion={this.state.paginacion}
+                    fillTable={this.paginacionContext}
+                    restart={this.state.restart}
+                />
+
             </ContainerWrapper>
         )
     }

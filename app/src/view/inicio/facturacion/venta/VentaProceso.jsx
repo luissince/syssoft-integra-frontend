@@ -19,7 +19,7 @@ import {
 import { connect } from 'react-redux';
 import { PosContainerWrapper } from '../../../../components/Container';
 import InvoiceTicket from './component/InvoiceTicket';
-import { comboMetodoPago, createFactura, getPredeterminado, listBancoCombo, listComprobanteCombo, listImpuestCombo, listMonedaCombo, listarClientesFilter } from '../../../../network/rest/principal.network';
+import { comboMetodoPago, createFactura, getPredeterminado, listBancoCombo, listComprobanteCombo, listImpuestCombo, listMonedaCombo, filtrarCliente } from '../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
 import { CANCELED } from '../../../../model/types/types';
@@ -71,7 +71,7 @@ class VentaProceso extends CustomComponent {
             msgLoading: 'Cargando datos...',
 
             // Variables del modal de venta
-            loadModal: false,
+            loadingModal: false,
             selectTipoPago: 1,
 
             comprobantes: [],
@@ -161,9 +161,11 @@ class VentaProceso extends CustomComponent {
 
         this.refFrecuenciaPago = React.createRef();
         this.refNumCutoas = React.createRef();
+        this.refFrecuenciaPagoCredito = React.createRef();
 
         this.refComprobanteCreditoVariable = React.createRef();
         this.refMetodoCreditoVariable = React.createRef();
+        this.refBancoCreditoVariable = React.createRef();
 
         this.abortControllerView = new AbortController();
     }
@@ -214,7 +216,7 @@ class VentaProceso extends CustomComponent {
                 }))
             }
 
-            this.setState({ importeTotal, loadModal: false })
+            this.setState({ importeTotal, loadingModal: false })
         });
 
         clearModal(this.idModalSale, async () => {
@@ -560,7 +562,7 @@ class VentaProceso extends CustomComponent {
             filtrar: searchWord,
         }
 
-        const response = await listarClientesFilter(params);
+        const response = await filtrarCliente(params);
 
         if (response instanceof SuccessReponse) {
             await this.setStateAsync({ filterCliente: false, clientes: response.data });
@@ -605,7 +607,7 @@ class VentaProceso extends CustomComponent {
         }
 
         showModal(this.idModalSale);
-        await this.setStateAsync({ loadModal: true })
+        await this.setStateAsync({ loadingModal: true })
     }
 
 
@@ -631,7 +633,7 @@ class VentaProceso extends CustomComponent {
             loading: true,
             msgLoading: 'Cargando datos...',
 
-            loadModal: false,
+            loadingModal: false,
             selectTipoPago: 1,
 
             comprobantes: [],
@@ -767,7 +769,6 @@ class VentaProceso extends CustomComponent {
     handleRemoveItemMetodPay = (idMetodoPago) => {
         const metodoPagoAgregado = this.state.metodoPagoAgregado.filter(item => item.idMetodoPago !== idMetodoPago);
         this.setState({ metodoPagoAgregado })
-
     }
 
     handleInputMontoMetodoPay = (event, idMetodoPago) => {
@@ -901,7 +902,7 @@ class VentaProceso extends CustomComponent {
     */
 
     render() {
-        const { loadModal, selectTipoPago, comprobantesCobro } = this.state;
+        const { loadingModal, selectTipoPago, comprobantesCobro } = this.state;
 
         const { impuestos, monedas, codiso } = this.state;
 
@@ -946,7 +947,7 @@ class VentaProceso extends CustomComponent {
 
                 <ModalSale
                     idModalSale={this.idModalSale}
-                    loadModal={loadModal}
+                    loadingModal={loadingModal}
 
                     selectTipoPago={selectTipoPago}
                     handleSelectTipoPago={this.handleSelectTipoPago}

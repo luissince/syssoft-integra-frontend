@@ -21,7 +21,15 @@ import CobroDetalle from './facturacion/cobro/CobroDetalle';
 import Creditos from './facturacion/credito/Creditos';
 import CreditoProceso from './facturacion/credito/CreditoProceso';
 
-import Cotizaciones from './facturacion/cotizacion/Cotizaciones';
+import Cotizaciones from './facturacion/cotizacion/Cotizaciones.jsx';
+import CotizacioneCrear from './facturacion/cotizacion/CotizacionCrear.jsx';
+import CotizacioneEditar from './facturacion/cotizacion/CotizacionEditar.jsx';
+import CotizacionDetalle from './facturacion/cotizacion/CotizacionDetalle.jsx';
+
+import GuiaRemision from './facturacion/guiaremision/GuiaRemision.jsx';
+import GuiaRemisionCrear from './facturacion/guiaremision/GuiaRemisionCrear.jsx';
+import GuiaRemisionEditar from './facturacion/guiaremision/GuiaRemisionEditar.jsx';
+import GuiaRemisionDetalle from './facturacion/guiaremision/GuiaRemisionDetalle.jsx';
 
 import Reservas from './facturacion/reserva/Reservas';
 
@@ -72,11 +80,18 @@ import NotaCredito from './facturacion/notacredito/NotaCredito';
 import NotaCreditoProceso from './facturacion/notacredito/NotaCreditoProceso';
 import NotaCreditoDetalle from './facturacion/notacredito/NotaCreditoDetalle';
 
-import Conceptos from './tesoreria/concepto/Conceptos';
+import Conceptos from './tesoreria/concepto/Conceptos.jsx';
+import ConceptoAgregar from './tesoreria/concepto/ConceptoAgregar.jsx';
+import ConceptoEditar from './tesoreria/concepto/ConceptoEditar.jsx';
 
 import Gastos from './tesoreria/gasto/Gastos';
 import GastoProceso from './tesoreria/gasto/GastoProceso';
 import GastoDetalle from './tesoreria/gasto/GastoDetalle';
+
+import Compras from './tesoreria/compra/Compras.jsx';
+import CompraCrear from './tesoreria/compra/CompraCrear.jsx';
+import CompraEditar from './tesoreria/compra/CompraEditar.jsx';
+import CompraDetalle from './tesoreria/compra/CompraDetalle.jsx';
 
 import Perfiles from './seguridad/Perfiles';
 import Usuarios from './seguridad/Usuarios';
@@ -355,7 +370,44 @@ class Inicio extends React.Component {
 
                     <Route
                         path={`${path}/cotizaciones`}
+                        exact={true}
                         render={(props) => <Cotizaciones {...props} />}
+                    />
+                    <Route
+                        path={`${path}/cotizaciones/crear`}
+                        exact={true}
+                        render={(props) => <CotizacioneCrear {...props} />}
+                    />
+                    <Route
+                        path={`${path}/cotizaciones/editar`}
+                        exact={true}
+                        render={(props) => <CotizacioneEditar {...props} />}
+                    />
+                    <Route
+                        path={`${path}/cotizaciones/detalle`}
+                        exact={true}
+                        render={(props) => <CotizacionDetalle {...props} />}
+                    />
+
+                    <Route
+                        path={`${path}/guiaremision`}
+                        exact={true}
+                        render={(props) => <GuiaRemision {...props} />}
+                    />
+                    <Route
+                        path={`${path}/guiaremision/crear`}
+                        exact={true}
+                        render={(props) => <GuiaRemisionCrear {...props} />}
+                    />
+                    <Route
+                        path={`${path}/guiaremision/editar`}
+                        exact={true}
+                        render={(props) => <GuiaRemisionEditar {...props} />}
+                    />
+                    <Route
+                        path={`${path}/guiaremision/detalle`}
+                        exact={true}
+                        render={(props) => <GuiaRemisionDetalle {...props} />}
                     />
 
                     <Route
@@ -502,8 +554,20 @@ class Inicio extends React.Component {
 
                     <Route
                         path={`${path}/conceptos`}
+                        exact={true}
                         render={(props) => <Conceptos {...props} />}
                     />
+                    <Route
+                        path={`${path}/conceptos/agregar`}
+                        exact={true}
+                        render={(props) => <ConceptoAgregar {...props} />}
+                    />
+                    <Route
+                        path={`${path}/conceptos/editar`}
+                        exact={true}
+                        render={(props) => <ConceptoEditar {...props} />}
+                    />
+
                     <Route
                         path={`${path}/gastos`}
                         exact={true}
@@ -519,6 +583,28 @@ class Inicio extends React.Component {
                         exact={true}
                         render={(props) => <GastoDetalle {...props} />}
                     />
+
+                    <Route
+                        path={`${path}/compras`}
+                        exact={true}
+                        render={(props) => <Compras {...props} />}
+                    />
+                    <Route
+                        path={`${path}/compras/crear`}
+                        exact={true}
+                        render={(props) => <CompraCrear {...props} />}
+                    />
+                    <Route
+                        path={`${path}/compras/editar`}
+                        exact={true}
+                        render={(props) => <CompraEditar {...props} />}
+                    />
+                    <Route
+                        path={`${path}/compras/detalle`}
+                        exact={true}
+                        render={(props) => <CompraDetalle {...props} />}
+                    />
+
                     <Route
                         path={`${path}/repventas`}
                         render={(props) => <RepVentas {...props} />}

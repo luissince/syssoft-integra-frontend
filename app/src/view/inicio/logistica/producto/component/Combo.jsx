@@ -20,7 +20,7 @@ const Combo = (props) => {
 
     const { combos, handleAddItemCombo, handleInputCantidadCombos, handleRemoveItemCombo } = props;
 
-    const { inventarios, handleAddItemInventario, handleRemoveItemInventario } = props;
+    const { activarInventario, inventario, handleAddItemInventario, handleRemoveItemInventario } = props;
 
     return (
         <div className="tab-pane fade" id="addcombo" role="tabpanel" aria-labelledby="addcombo-tab">
@@ -217,61 +217,58 @@ const Combo = (props) => {
 
 
             {/* SECTOR COMBO */}
-            {nombre == '' ?
-                <div className='row pt-3'>
-                    <div className='col-12'>
+            <div className='row pt-3'>
+                <div className='col-12'>
 
-                        <div className='row'>
-                            <div className="col-12">
-                                <h6>
-                                    COMBO
-                                </h6>
-                            </div>
+                    <div className='row'>
+                        <div className="col-12">
+                            <h6>
+                                COMBO
+                            </h6>
                         </div>
+                    </div>
 
-                        <div className="dropdown-divider"></div>
+                    <div className="dropdown-divider"></div>
 
-                        <div className="form-group">
-                            <label>
-                                Selecciona los productos y sus cantidades para armar un combo
-                            </label>
-                        </div>
+                    <div className="form-group">
+                        <label>
+                            Selecciona los productos y sus cantidades para armar un combo
+                        </label>
+                    </div>
 
-                        {
-                            combos.map((item, index) => {
-                                return <ItemProducto
-                                    key={index}
-                                    item={item}
-                                    handleInputCantidadCombos={handleInputCantidadCombos}
-                                    handleRemoveItemCombo={handleRemoveItemCombo}
-                                />;
-                            })
-                        }
+                    {
+                        combos.map((item, index) => {
+                            return <ItemProducto
+                                key={index}
+                                item={item}
+                                handleInputCantidadCombos={handleInputCantidadCombos}
+                                handleRemoveItemCombo={handleRemoveItemCombo}
+                            />;
+                        })
+                    }
 
-                        <div className="row">
-                            <div className='col-12'>
-                                <div className='form-group'>
-                                    <div className="d-flex justify-content-between align-items-center">
-                                        <button className='btn text-success'
-                                            onClick={handleAddItemCombo}>
-                                            <i className='fa fa-plus-circle'></i> Agregar producto
-                                        </button>
+                    <div className="row">
+                        <div className='col-12'>
+                            <div className='form-group'>
+                                <div className="d-flex justify-content-between align-items-center">
+                                    <button className='btn text-success'
+                                        onClick={handleAddItemCombo}>
+                                        <i className='fa fa-plus-circle'></i> Agregar producto
+                                    </button>
 
-                                        <h5 className="text-secondary">Costo total: S/ {rounded(combos.reduce((acumulador, item) => acumulador += item.costo * (item.cantidad ?? 0), 0))}</h5>
-                                    </div>
+                                    <h5 className="text-secondary">Costo total: S/ {rounded(combos.reduce((acumulador, item) => acumulador += item.costo * (item.cantidad ?? 0), 0))}</h5>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                :
-                <div />
-            }
+            </div>
+
 
 
             {/* SECTOR INVENTARIO */}
-            {nombre == '' ?
-                <div className='row pt-3'>
+            {
+                activarInventario && <div className='row pt-3'>
                     <div className='col-12'>
 
                         <div className='row'>
@@ -292,7 +289,7 @@ const Combo = (props) => {
                         </div>
 
                         {
-                            inventarios.map((item, index) => {
+                            inventario.map((item, index) => {
                                 return <ItemAlmacen
                                     key={index}
                                     idAlmacen={item.idAlmacen}
@@ -318,55 +315,9 @@ const Combo = (props) => {
                                 </div>
                             </div>
                         </div>
-
-                        {/* <div className='d-flex flex-row'>
-                        <button
-                            type='button'
-                            className='btn'
-                            onClick={handleOpenAlmacen}>
-                            <div className="form-row d-flex align-items-center">
-                                <div className="mr-2" >
-                                    <div className="rounded border border-secondary d-flex justify-content-center align-items-center p-4" >
-                                        <div>
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" className="bi bi-tag" viewBox="0 0 16 16">
-                                                <path d="M6 4.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm-1 0a.5.5 0 1 0-1 0 .5.5 0 0 0 1 0z" />
-                                                <path d="M2 1h4.586a1 1 0 0 1 .707.293l7 7a1 1 0 0 1 0 1.414l-4.586 4.586a1 1 0 0 1-1.414 0l-7-7A1 1 0 0 1 1 6.586V2a1 1 0 0 1 1-1zm0 5.586 7 7L13.586 9l-7-7H2v4.586z" />
-                                            </svg>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="text-left">
-                                    <p className='m-0'>
-                                        {
-                                            idAlmacen === "" && (
-                                                <>
-                                                    Almacen <i className="fa fa-asterisk text-danger small"></i>
-                                                </>
-                                            )
-                                        }
-                                        {
-                                            idAlmacen !== "" && `${nombreAlmacen}`
-                                        }
-                                    </p>
-                                    <p className='m-0'>
-                                        {
-                                            idAlmacen === "" && "Agregar aquí la cantidad inicial de tu producto"
-                                        }
-                                        {
-                                            idAlmacen !== "" && `${cantidad} cantidad - ${cantidadMinima} min - ${cantidadMaxima} max`
-                                        }
-                                    </p>
-                                </div>
-                            </div>
-                        </button>
-                    </div> */}
                     </div>
                 </div>
-                :
-                <div />
             }
-
 
 
             {/* SECTOR LISTAS DE PRECIOS */}

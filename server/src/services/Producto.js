@@ -9,7 +9,7 @@ class Producto {
         try {
             const lista = await conec.query(`SELECT 
                 p.idProducto,
-                p.tipo,
+                t.nombre as tipo,
                 p.nombre,
                 p.precio,
                 p.estado,
@@ -17,7 +17,8 @@ class Producto {
                 m.nombre AS medida
                 FROM producto AS p 
                 INNER JOIN categoria AS c ON p.idCategoria = c.idCategoria 
-                INNER  JOIN medida AS m ON p.idMedida = m.idMedida               
+                INNER JOIN medida AS m ON p.idMedida = m.idMedida       
+                INNER JOIN tipoProducto AS t ON t.idTipoProducto = p.idTipoProducto
                 WHERE
                 ? = 0 
                 OR
@@ -43,7 +44,8 @@ class Producto {
             const total = await conec.query(`SELECT COUNT(*) AS Total
                 FROM producto AS p 
                 INNER JOIN categoria AS c ON p.idCategoria = c.idCategoria 
-                INNER  JOIN medida AS m ON p.idMedida = m.idMedida 
+                INNER JOIN medida AS m ON p.idMedida = m.idMedida 
+                INNER JOIN tipoProducto AS t ON t.idTipoProducto = p.idTipoProducto
                 WHERE
                 ? = 0 
                 OR
@@ -56,6 +58,7 @@ class Producto {
             ]);
             return { "result": resultLista, "total": total[0].Total }
         } catch (error) {
+            console.log(error)
             return "Se produjo un error de servidor, intente nuevamente.";
         }
     }
@@ -87,7 +90,7 @@ class Producto {
                 descripcion,
                 precio,
                 costo,
-                tipo,
+                idTipoProducto,
                 publicar,
                 inventariado,
                 negativo,
@@ -120,7 +123,7 @@ class Producto {
                 req.body.idUsuario,
             ])
 
-            for (const inventariado of req.body.inventarios) {
+            for (const inventariado of req.body.inventario) {
                 await conec.execute(connection, `INSERT INTO productoAlmacen(
                     idProductoAlmacen,
                     idProducto,
@@ -154,7 +157,7 @@ class Producto {
                     idProducto,
                     'TK0001',
                     'MK0001',
-                    'insert: ' + req.body.descripcion,
+                    'INGRESO AL CREAR EL PRODUCTO',
                     inventariado.cantidad,
                     req.body.costo,
                     inventariado.idAlmacen,
@@ -768,7 +771,7 @@ class Producto {
             m.nombre as medida 
             FROM producto AS p
             INNER JOIN medida as m ON m.idMedida = p.idMedida
-            WHERE p.tipo <> 3`);
+            WHERE p.idTipoProducto <> 'TP0003'`);
             return result
         } catch (error) {
             return "Se produjo un error de servidor, intente nuevamente.";

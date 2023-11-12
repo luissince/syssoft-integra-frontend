@@ -149,7 +149,6 @@ class Factura {
                 metodoPagoAgregado
 
             } = req.body;
-            console.log(req.body)
 
             /**
              * Generar un código unico para la venta. 
@@ -169,8 +168,6 @@ class Factura {
                 idComprobante
             ]);
 
-            let numeracion = 0;
-
             const ventas = await conec.execute(connection, `SELECT 
                 numeracion  
                 FROM venta 
@@ -178,12 +175,7 @@ class Factura {
                 idComprobante
             ]);
 
-            if (ventas.length > 0) {
-                const quitarValor = ventas.map((item) => item.numeracion);
-                numeracion = Math.max(...quitarValor) + 1;
-            } else {
-                numeracion = comprobante[0].numeracion;
-            }
+            const numeracion = generateNumericCode(comprobante[0].numeracion, ventas, "numeracion");
 
             /**
              * Proceso para ingresar una venta.
@@ -293,7 +285,7 @@ class Factura {
 
             // Generar el Id único
             const listaAuditoriaId = await conec.execute(connection, 'SELECT idAuditoria FROM auditoria');
-            let idAuditoria = generateNumericCode(1, listaAuditoriaId, 'idAuditoria');
+            const idAuditoria = generateNumericCode(1, listaAuditoriaId, 'idAuditoria');
 
             // Proceso de registro            
             await conec.execute(connection, `INSERT INTO auditoria(

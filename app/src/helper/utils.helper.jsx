@@ -255,14 +255,18 @@ export function isNumeric(valor) {
 }
 
 export function isText(value) {
+  if (typeof value !== 'string') {
+    return false;
+  }
+
   if (
     value === null ||
     value === "undefined" ||
     value.trim() === "" ||
     value.trim().length === 0
-  ) {
+  )
     return false;
-  }
+
 
   return true;
 }
@@ -382,12 +386,20 @@ export function convertNullText(value) {
 }
 
 export function isEmpty(object) {
+  if (object === null) {
+    return true;
+  }
+
   if (Array.isArray(object)) {
     return object.length === 0 ? true : false;
   }
 
   if (typeof object === 'string') {
     return object === "" ? true : false
+  }
+
+  if(typeof object === 'object'){
+    return false;
   }
 
   if (typeof object === 'undefined') {

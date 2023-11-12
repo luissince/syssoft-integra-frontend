@@ -36,6 +36,15 @@ router.post('/add', async function (req, res) {
     }
 });
 
+router.post('/edit', async function (req, res) {
+    const result = await cobro.edit(req)
+    if (result === 'update') {
+        res.status(201).send("Se registró correctamente el cobro.");
+    } else {
+        res.status(500).send(result);
+    }
+});
+
 router.post('/plazo', async function (req, res) {
     const result = await cobro.plazo(req)
     if (result === 'insert') {

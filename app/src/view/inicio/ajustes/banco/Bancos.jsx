@@ -8,6 +8,7 @@ import {
   spinnerLoading,
   statePrivilegio,
   keyUpSearch,
+  isEmpty,
 } from "../../../../helper/utils.helper";
 import { connect } from "react-redux";
 import Paginacion from "../../../../components/Paginacion";
@@ -49,7 +50,6 @@ class Bancos extends CustomComponent {
       totalPaginacion: 0,
       filasPorPagina: 10,
       messageTable: "Cargando información...",
-      messagePaginacion: "Mostranto 0 de 0 Páginas",
     };
 
     this.refTxtSearch = React.createRef();
@@ -106,7 +106,7 @@ class Bancos extends CustomComponent {
       loading: true,
       lista: [],
       messageTable: "Cargando información...",
-      messagePaginacion: "Mostranto 0 de 0 Páginas",
+
     });
 
     const data = {
@@ -122,13 +122,11 @@ class Bancos extends CustomComponent {
       const totalPaginacion = parseInt(
         Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina)
       );
-      const messagePaginacion = `Mostrando ${response.data.result.length} de ${totalPaginacion} Páginas`;
 
       await this.setStateAsync({
         loading: false,
         lista: response.data.result,
         totalPaginacion: totalPaginacion,
-        messagePaginacion: messagePaginacion,
       });
     }
 
@@ -140,7 +138,6 @@ class Bancos extends CustomComponent {
         lista: [],
         totalPaginacion: 0,
         messageTable: response.getMessage(),
-        messagePaginacion: "Mostranto 0 de 0 Páginas",
       });
     }
   }
@@ -158,12 +155,19 @@ class Bancos extends CustomComponent {
     })
   }
 
+  handleDetalle = (idBanco) => {
+    this.props.history.push({
+      pathname: `${this.props.location.pathname}/detalle`,
+      search: "?idBanco=" + idBanco,
+    });
+  }
+
   handleBorrar = (idBanco) => {
     alertDialog("Banco", "¿Estás seguro de eliminar el banco?", async (event) => {
       if (event) {
 
         alertInfo("Banco", "Procesando información...");
-      
+
         const params = { idBanco: idBanco, }
         const response = await deleteBanco(params);
 
@@ -181,12 +185,80 @@ class Bancos extends CustomComponent {
     });
   }
 
+  generarBody() {
+    if (this.state.loading) {
+      return (
+        <tr>
+          <td className="text-center" colSpan="9">
+            {spinnerLoading("Cargando información de la tabla...", true)}
+          </td>
+        </tr>
+      );
+    }
+
+    if (isEmpty(this.state.lista)) {
+      return (
+        <tr className="text-center">
+          <td colSpan="9">¡No hay datos registrados!</td>
+        </tr>
+      );
+    }
+
+    return this.state.lista.map((item, index) => {
+      return (
+        <tr key={index}>
+          <td className="text-center">{item.id}</td>
+          <td>{item.nombre}</td>
+          <td>{item.tipoCuenta.toUpperCase()}</td>
+          <td>{item.moneda}</td>
+          <td>{item.numCuenta}</td>
+          <td className={`text-right ${item.saldo >= 0 ? "text-success" : "text-danger"}`} >
+            {numberFormat(item.saldo, item.codiso)}
+          </td>
+
+          <td className="text-center">
+            <button
+              className="btn btn-outline-info btn-sm"
+              title="Detalle"
+              onClick={() => this.handleDetalle(item.idBanco)}
+              disabled={!this.state.view}
+            >
+              <i className="fa fa-eye"></i>
+            </button>
+          </td>
+
+          <td className="text-center">
+            <button
+              className="btn btn-outline-warning btn-sm"
+              title="Editar"
+              onClick={() => this.handleEditar(item.idBanco)}
+              disabled={!this.state.edit}
+            >
+              <i className="bi bi-pencil"></i>
+            </button>
+          </td>
+          <td className="text-center">
+            <button
+              className="btn btn-outline-danger btn-sm"
+              title="Anular"
+              onClick={() => this.handleBorrar(item.idBanco)}
+              disabled={!this.state.remove}
+            >
+              <i className="bi bi-trash"></i>
+            </button>
+          </td>
+        </tr>
+      );
+    })
+
+  }
+
   render() {
     return (
       <ContainerWrapper>
 
         <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+          <div className="col-lg-12 col-md-12 col-sm-12 col-12">
             <div className="form-group">
               <h5>
                 Bancos <small className="text-secondary">LISTA</small>
@@ -246,9 +318,7 @@ class Bancos extends CustomComponent {
               <table className="table table-striped table-bordered rounded">
                 <thead>
                   <tr>
-                    <th width="5%" className="text-center">
-                      #
-                    </th>
+                    <th width="5%" className="text-center"> #</th>
                     <th width="10%">Nombre</th>
                     <th width="15%">Tipo Cuenta</th>
                     <th width="10%">Moneda</th>
@@ -266,104 +336,22 @@ class Bancos extends CustomComponent {
                   </tr>
                 </thead>
                 <tbody>
-                  {this.state.loading ? (
-                    <tr>
-                      <td className="text-center" colSpan="9">
-                        {spinnerLoading("Cargando información de la tabla...", true)}
-                      </td>
-                    </tr>
-                  ) : this.state.lista.length === 0 ? (
-                    <tr className="text-center">
-                      <td colSpan="9">¡No hay datos registrados!</td>
-                    </tr>
-                  ) : (
-                    this.state.lista.map((item, index) => {
-                      return (
-                        <tr key={index}>
-                          <td className="text-center">{item.id}</td>
-                          <td>{item.nombre}</td>
-                          <td>{item.tipoCuenta.toUpperCase()}</td>
-                          <td>{item.moneda}</td>
-                          <td>{item.numCuenta}</td>
-                          <td
-                            className={`text-right ${item.saldo >= 0 ? "text-success" : "text-danger"
-                              }`}
-                          >
-                            {numberFormat(item.saldo, item.codiso)}
-                          </td>
-
-                          <td className="text-center">
-                            <button
-                              className="btn btn-outline-info btn-sm"
-                              title="Detalle"
-                              onClick={() => {
-                                this.props.history.push({
-                                  pathname: `${this.props.location.pathname}/detalle`,
-                                  search: "?idBanco=" + item.idBanco,
-                                });
-                              }}
-                              disabled={!this.state.view}
-                            >
-                              <i className="fa fa-eye"></i>
-                            </button>
-                          </td>
-
-                          <td className="text-center">
-                            <button
-                              className="btn btn-outline-warning btn-sm"
-                              title="Editar"
-                              onClick={() => this.handleEditar(item.idBanco)}
-                              disabled={!this.state.edit}
-                            >
-                              <i className="bi bi-pencil"></i>
-                            </button>
-                          </td>
-                          <td className="text-center">
-                            <button
-                              className="btn btn-outline-danger btn-sm"
-                              title="Anular"
-                              onClick={() => this.handleBorrar(item.idBanco)}
-                              disabled={!this.state.remove}
-                            >
-                              <i className="bi bi-trash"></i>
-                            </button>
-                          </td>
-                        </tr>
-                      );
-                    })
-                  )}
+                  {this.generarBody()}
                 </tbody>
               </table>
             </div>
           </div>
         </div>
 
-        <div className="row">
-          <div className="col-sm-12 col-md-5">
-            <div
-              className="dataTables_info mt-2"
-              role="status"
-              aria-live="polite"
-            >
-              {this.state.messagePaginacion}
-            </div>
-          </div>
-          <div className="col-sm-12 col-md-7">
-            <div className="dataTables_paginate paging_simple_numbers">
-              <nav aria-label="Page navigation example">
-                <ul className="pagination justify-content-end">
-                  <Paginacion
-                    loading={this.state.loading}
-                    totalPaginacion={this.state.totalPaginacion}
-                    paginacion={this.state.paginacion}
-                    fillTable={this.paginacionContext}
-                    restart={this.state.restart}
-                  />
-                </ul>
-              </nav>
-            </div>
-          </div>
-        </div>
+        <Paginacion
+          loading={this.state.loading}
+          data={this.state.lista}
+          totalPaginacion={this.state.totalPaginacion}
+          paginacion={this.state.paginacion}
+          fillTable={this.paginacionContext}
+          restart={this.state.restart}
+        />
+
       </ContainerWrapper>
     );
   }

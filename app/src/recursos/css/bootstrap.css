@@ -1064,54 +1064,62 @@ pre code {
 }
 
 @keyframes mulShdSpin {
+
   0%,
   100% {
-    box-shadow: 0 -3em 0 0.2em, 
-    2em -2em 0 0em, 3em 0 0 -1em, 
-    2em 2em 0 -1em, 0 3em 0 -1em, 
-    -2em 2em 0 -1em, -3em 0 0 -1em, 
-    -2em -2em 0 0;
+    box-shadow: 0 -3em 0 0.2em,
+      2em -2em 0 0em, 3em 0 0 -1em,
+      2em 2em 0 -1em, 0 3em 0 -1em,
+      -2em 2em 0 -1em, -3em 0 0 -1em,
+      -2em -2em 0 0;
   }
+
   12.5% {
-    box-shadow: 0 -3em 0 0, 2em -2em 0 0.2em, 
-    3em 0 0 0, 2em 2em 0 -1em, 0 3em 0 -1em, 
-    -2em 2em 0 -1em, -3em 0 0 -1em, 
-    -2em -2em 0 -1em;
+    box-shadow: 0 -3em 0 0, 2em -2em 0 0.2em,
+      3em 0 0 0, 2em 2em 0 -1em, 0 3em 0 -1em,
+      -2em 2em 0 -1em, -3em 0 0 -1em,
+      -2em -2em 0 -1em;
   }
+
   25% {
-    box-shadow: 0 -3em 0 -0.5em, 
-    2em -2em 0 0, 3em 0 0 0.2em, 
-    2em 2em 0 0, 0 3em 0 -1em, 
-    -2em 2em 0 -1em, -3em 0 0 -1em, 
-    -2em -2em 0 -1em;
+    box-shadow: 0 -3em 0 -0.5em,
+      2em -2em 0 0, 3em 0 0 0.2em,
+      2em 2em 0 0, 0 3em 0 -1em,
+      -2em 2em 0 -1em, -3em 0 0 -1em,
+      -2em -2em 0 -1em;
   }
+
   37.5% {
     box-shadow: 0 -3em 0 -1em, 2em -2em 0 -1em,
-     3em 0em 0 0, 2em 2em 0 0.2em, 0 3em 0 0em, 
-     -2em 2em 0 -1em, -3em 0em 0 -1em, -2em -2em 0 -1em;
+      3em 0em 0 0, 2em 2em 0 0.2em, 0 3em 0 0em,
+      -2em 2em 0 -1em, -3em 0em 0 -1em, -2em -2em 0 -1em;
   }
+
   50% {
     box-shadow: 0 -3em 0 -1em, 2em -2em 0 -1em,
-     3em 0 0 -1em, 2em 2em 0 0em, 0 3em 0 0.2em, 
-     -2em 2em 0 0, -3em 0em 0 -1em, -2em -2em 0 -1em;
+      3em 0 0 -1em, 2em 2em 0 0em, 0 3em 0 0.2em,
+      -2em 2em 0 0, -3em 0em 0 -1em, -2em -2em 0 -1em;
   }
+
   62.5% {
     box-shadow: 0 -3em 0 -1em, 2em -2em 0 -1em,
-     3em 0 0 -1em, 2em 2em 0 -1em, 0 3em 0 0, 
-     -2em 2em 0 0.2em, -3em 0 0 0, -2em -2em 0 -1em;
+      3em 0 0 -1em, 2em 2em 0 -1em, 0 3em 0 0,
+      -2em 2em 0 0.2em, -3em 0 0 0, -2em -2em 0 -1em;
   }
+
   75% {
-    box-shadow: 0em -3em 0 -1em, 2em -2em 0 -1em, 
-    3em 0em 0 -1em, 2em 2em 0 -1em, 0 3em 0 -1em, 
-    -2em 2em 0 0, -3em 0em 0 0.2em, -2em -2em 0 0;
+    box-shadow: 0em -3em 0 -1em, 2em -2em 0 -1em,
+      3em 0em 0 -1em, 2em 2em 0 -1em, 0 3em 0 -1em,
+      -2em 2em 0 0, -3em 0em 0 0.2em, -2em -2em 0 0;
   }
+
   87.5% {
-    box-shadow: 0em -3em 0 0, 2em -2em 0 -1em, 
-    3em 0 0 -1em, 2em 2em 0 -1em, 0 3em 0 -1em, 
-    -2em 2em 0 0, -3em 0em 0 0, -2em -2em 0 0.2em;
+    box-shadow: 0em -3em 0 0, 2em -2em 0 -1em,
+      3em 0 0 -1em, 2em 2em 0 -1em, 0 3em 0 -1em,
+      -2em 2em 0 0, -3em 0em 0 0, -2em -2em 0 0.2em;
   }
 }
-  
+
 
 .container,
 .container-fluid,
@@ -2508,7 +2516,7 @@ pre code {
 }
 
 .table thead th {
-  vertical-align: bottom;
+  vertical-align: middle;
   border-bottom: 2px solid #dee2e6;
 }
 
@@ -6679,19 +6687,23 @@ a.badge-dark.focus {
 .list-group-item {
   position: relative;
   display: block;
-  padding: 0.75rem 1.25rem;
+  padding: 0.6rem 1rem;
   background-color: #fff;
   border: 1px solid rgba(0, 0, 0, 0.125);
 }
 
 .list-group-item:first-child {
-  border-top-left-radius: inherit;
-  border-top-right-radius: inherit;
+  /* border-top-left-radius: inherit;
+  border-top-right-radius: inherit; */
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
 }
 
 .list-group-item:last-child {
-  border-bottom-right-radius: inherit;
-  border-bottom-left-radius: inherit;
+  /* border-bottom-right-radius: inherit;
+  border-bottom-left-radius: inherit; */
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
 }
 
 .list-group-item.disabled,
@@ -12421,7 +12433,7 @@ a.text-dark:focus {
   color: #474747;
 }
 
-.side-modal{
+.side-modal {
   position: fixed;
   top: 0;
   right: 0;
@@ -12431,11 +12443,11 @@ a.text-dark:focus {
   display: none;
 }
 
-.side-modal.toggled{
+.side-modal.toggled {
   display: block;
 }
 
-.side-modal .side-modal_wrapper{
+.side-modal .side-modal_wrapper {
   position: absolute;
   top: 0;
   right: 0;
@@ -12446,24 +12458,24 @@ a.text-dark:focus {
   transition: all 0.3s;
 }
 
-.side-modal .side-modal_wrapper button.close{
+.side-modal .side-modal_wrapper button.close {
   position: absolute;
   right: 0;
   font-size: 2.0rem;
   margin: 0.5rem 1.1rem;
 }
 
-.side-modal .side-modal_wrapper .side-modal_bottom{
+.side-modal .side-modal_wrapper .side-modal_bottom {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin: 0.5rem 1rem;
 }
 
-.side-modal .side-modal_overlay{
+.side-modal .side-modal_overlay {
   cursor: pointer;
   height: 100%;
-  background-color: rgba(0, 0, 0, .3); 
+  background-color: rgba(0, 0, 0, .3);
 }
 
 @media (max-width: 576px) {}

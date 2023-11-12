@@ -51,7 +51,7 @@ class ProductoAgregar extends CustomComponent {
          * @type {Object}
          */
         this.state = {
-            tipo: 1,
+            tipo: 'TP0001',
             imagen: images.noImage,
 
             nombreProducto: '',
@@ -65,7 +65,7 @@ class ProductoAgregar extends CustomComponent {
             precioProducto: '',
             costoProducto: '',
 
-            inventariosProducto: [],
+            inventarioProducto: [],
 
             publicar: false,
             negativo: false,
@@ -97,7 +97,7 @@ class ProductoAgregar extends CustomComponent {
 
             precioCombo: '',
 
-            inventariosCombo: [],
+            inventarioCombo: [],
 
             // imagen
             fileImage: [],
@@ -195,7 +195,6 @@ class ProductoAgregar extends CustomComponent {
      */
     componentDidMount() {
         this.loadingData();
-        // this.handleFocusTab("addservicio-tab","addservicio")
 
         viewModal(this.idModalInventario, async () => {
             const almacenes = await this.fetchComboAlmacen();
@@ -427,8 +426,8 @@ class ProductoAgregar extends CustomComponent {
     }
 
     handleRemoveItemInventarioProducto = (idAlmacen) => {
-        const inventariosProducto = this.state.inventariosProducto.filter(item => item.idAlmacen !== idAlmacen);
-        this.setState({ inventariosProducto })
+        const inventarioProducto = this.state.inventarioProducto.filter(item => item.idAlmacen !== idAlmacen);
+        this.setState({ inventarioProducto })
     }
 
     handleSaveAlmacenProducto = () => {
@@ -467,7 +466,7 @@ class ProductoAgregar extends CustomComponent {
             return;
         }
 
-        if (this.state.inventariosProducto.find(item => item.idAlmacen === this.refIdAlmacenProducto.current.value)) {
+        if (this.state.inventarioProducto.find(item => item.idAlmacen === this.refIdAlmacenProducto.current.value)) {
             alertWarning("Producto", "El almacen ya se encuentra agregado.", () => {
                 this.refIdAlmacenProducto.current.focus();
             });
@@ -483,7 +482,7 @@ class ProductoAgregar extends CustomComponent {
         }
 
         this.setState(prevState => ({
-            inventariosProducto: [...prevState.inventariosProducto, item]
+            inventarioProducto: [...prevState.inventarioProducto, item]
         }))
 
         hideModal(this.idModalInventario)
@@ -628,9 +627,9 @@ class ProductoAgregar extends CustomComponent {
             return;
         }
 
-        if (parseFloat(this.refCantidadProducto.current.value) <= 0) {
+        if (parseFloat(this.refCantidadCombo.current.value) <= 0) {
             alertWarning("Producto - Combo", "Su cantidad tiene que se mayor a cero(0).", () => {
-                this.refCantidadProducto.current.focus();
+                this.refCantidadCombo.current.focus();
             });
             return;
         }
@@ -668,8 +667,8 @@ class ProductoAgregar extends CustomComponent {
     }
 
     handleRemoveItemInventarioCombo = (idAlmacen) => {
-        const inventariosCombo = this.state.inventariosCombo.filter(item => item.idAlmacen !== idAlmacen);
-        this.setState({ inventariosCombo })
+        const inventarioCombo = this.state.inventarioCombo.filter(item => item.idAlmacen !== idAlmacen);
+        this.setState({ inventarioCombo })
     }
 
     handleSaveAlmacenCombo = () => {
@@ -708,7 +707,7 @@ class ProductoAgregar extends CustomComponent {
             return;
         }
 
-        if (this.state.inventariosCombo.find(item => item.idAlmacen === this.refIdAlmacenProducto.current.value)) {
+        if (this.state.inventarioCombo.find(item => item.idAlmacen === this.refIdAlmacenProducto.current.value)) {
             alertWarning("Producto - Combo", "El almacen ya se encuentra agregado.", () => {
                 this.refIdAlmacenProducto.current.focus();
             });
@@ -724,7 +723,7 @@ class ProductoAgregar extends CustomComponent {
         }
 
         this.setState(prevState => ({
-            inventariosCombo: [...prevState.inventariosCombo, item]
+            inventarioCombo: [...prevState.inventarioCombo, item]
         }))
 
         hideModal(this.idModalInventario)
@@ -828,7 +827,7 @@ class ProductoAgregar extends CustomComponent {
                     descripcion: this.state.descripcionProducto,
                     precio: this.state.precioProducto,
                     costo: this.state.costoProducto,
-                    inventarios: this.state.inventariosProducto,
+                    inventario: this.state.inventarioProducto,
                     publicar: this.state.publicar,
                     inventariado: this.state.inventariado,
                     negativo: this.state.negativo,
@@ -893,7 +892,7 @@ class ProductoAgregar extends CustomComponent {
                     descripcion: this.state.descripcionServicio,
                     precio: this.state.precioServicio,
                     costo: 0,
-                    inventarios:[],
+                    inventario: [],
                     publicar: this.state.publicar,
                     inventariado: false,
                     negativo: false,
@@ -958,7 +957,7 @@ class ProductoAgregar extends CustomComponent {
                     precio: this.state.precioCombo,
                     costo: 0,
                     combos: [],
-                    inventarios: [],                    
+                    inventarios: [],
                     publicar: this.state.publicar,
                     inventariado: false,
                     negativo: false,
@@ -981,17 +980,17 @@ class ProductoAgregar extends CustomComponent {
     }
 
     handleRegistrar = () => {
-        if (this.state.tipo === 1) {
+        if (this.state.tipo === "TP0001") {
             this.handleOpcionProducto();
             return;
         }
 
-        if (this.state.tipo === 2) {
+        if (this.state.tipo === "TP0002") {
             this.handleOpcionServicio();
             return;
         }
 
-        if (this.state.tipo === 3) {
+        if (this.state.tipo === "TP0003") {
             this.handleOpcionCombo();
             return;
         }
@@ -1023,7 +1022,7 @@ class ProductoAgregar extends CustomComponent {
 
         const { precioProducto, costoProducto } = this.state;
 
-        const { inventariosProducto } = this.state;
+        const { inventarioProducto } = this.state;
 
         const { medidas, categorias, publicar, negativo, inventariado, estado } = this.state;
 
@@ -1037,7 +1036,7 @@ class ProductoAgregar extends CustomComponent {
 
         const { idMedidaCombo, idCategoriaCombo, descripcionCombo } = this.state;
 
-        const { precioCombo, combos, inventariosCombo } = this.state;
+        const { precioCombo, combos, inventarioCombo } = this.state;
 
         const { imagen } = this.state;
 
@@ -1103,7 +1102,7 @@ class ProductoAgregar extends CustomComponent {
                                             role="tab"
                                             aria-controls="addproducto"
                                             aria-selected={true}
-                                            onClick={() => this.setState({ tipo: 1 })}>
+                                            onClick={() => this.setState({ tipo: "TP0001" })}>
                                             <i className="bi bi-info-circle"></i> Producto
                                         </button>
                                     </li>
@@ -1116,7 +1115,7 @@ class ProductoAgregar extends CustomComponent {
                                             role="tab"
                                             aria-controls="addservicio"
                                             aria-selected={false}
-                                            onClick={() => this.setState({ tipo: 2 })}>
+                                            onClick={() => this.setState({ tipo: "TP0002" })}>
                                             <i className="bi bi-geo-alt-fill"></i> Servicio
                                         </button>
                                     </li>
@@ -1129,7 +1128,7 @@ class ProductoAgregar extends CustomComponent {
                                             role="tab"
                                             aria-controls="addcombo"
                                             aria-selected={false}
-                                            onClick={() => this.setState({ tipo: 3 })}>
+                                            onClick={() => this.setState({ tipo: "TP0003" })}>
                                             <i className="bi bi-border-all"></i> Combo
                                         </button>
                                     </li>
@@ -1171,7 +1170,8 @@ class ProductoAgregar extends CustomComponent {
                                         refCosto={this.refCostoProducto}
                                         handleInputCosto={this.handleInputCostoProducto}
 
-                                        inventarios={inventariosProducto}
+                                        activarInventario={true}
+                                        inventario={inventarioProducto}
                                         handleAddItemInventario={this.handleAddItemInventarioProducto}
                                         handleRemoveItemInventario={this.handleRemoveItemInventarioProducto}
                                     />
@@ -1244,7 +1244,8 @@ class ProductoAgregar extends CustomComponent {
                                         handleInputCantidadCombos={this.handleInputCantidadCombos}
                                         handleRemoveItemCombo={this.handleRemoveItemCombo}
 
-                                        inventarios={inventariosCombo}
+                                        activarInventario={true}
+                                        inventario={inventarioCombo}
                                         handleAddItemInventario={this.handleAddItemInventarioCombo}
                                         handleRemoveItemInventario={this.handleRemoveItemInventarioCombo}
                                     />
@@ -1262,8 +1263,8 @@ class ProductoAgregar extends CustomComponent {
                             handleInputImagen={this.handleInputImagen}
                             handleRemoveImagen={this.handleRemoveImagen}
 
-                            nombre={nombreProducto}
-                            precio={precioProducto}
+                            nombre={tipo === "TP0001" ? nombreProducto : tipo === "TP0002" ? nombreServicio : nombreCombo}
+                            precio={tipo === "TP0001" ? precioProducto : tipo === "TP0002" ? precioServicio : precioCombo}
 
                             publicar={publicar}
                             handleSelectPublico={this.handleSelectPublico}

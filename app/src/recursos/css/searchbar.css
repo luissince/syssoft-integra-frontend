@@ -5,16 +5,23 @@
   flex-direction: column;
   padding-left: 0;
   margin-bottom: 0;
-  border-end-end-radius: 0.3rem;
+  border-radius: none;
   background-color: white;
   overflow: hidden;
   overflow-y: auto;
   position: absolute;
   z-index: 100;
-  border: 1px solid #ced4da;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 0px 1px, rgba(0, 0, 0, 0.1) 0px 4px 11px;
+  /* border: 1px solid #ced4da; */
+  border-bottom-left-radius: 0.3rem;
+  border-bottom-right-radius: 0.3rem;
+  margin-top: 10px;
 }
 
 .dataResult:focus-within {
+  /* border: 1px solid rgb(115, 135, 214);
+  box-shadow: rgba(115, 135, 214,0.25) 0px 0px 0px 0.5px;
+  outline: 0px !important; */
   border: 1px solid #80bdff;
   outline: 0;
   box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);

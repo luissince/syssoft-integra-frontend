@@ -1,21 +1,18 @@
 import React from 'react';
 import {
     spinnerLoading,
-    alertDialog,
-    alertInfo,
-    alertSuccess,
-    alertWarning
+    isEmpty,
+    formatTime,
+    rounded,
+    formatDecimal
 } from '../../../../helper/utils.helper';
 import ContainerWrapper from "../../../../components/Container";
-import Paginacion from "../../../../components/Paginacion";
-import { keyUpSearch } from "../../../../helper/utils.helper";
 import CustomComponent from "../../../../model/class/custom-component";
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
-import { deleteAlmacen, listAlmacen } from '../../../../network/rest/principal.network';
-import { CANCELED } from '../../../../model/types/types';
+import { listKardex, listarProductosFilter } from '../../../../network/rest/principal.network';
 import { connect } from 'react-redux';
-import SearchBarProducto from '../../../../components/SearchBarProducto';
+import SearchInput from '../../../../components/SearchInput';
 
 class Kardex extends CustomComponent {
 
@@ -23,16 +20,32 @@ class Kardex extends CustomComponent {
         super(props);
 
         this.state = {
+            producto: null,
+            cantidad: 0,
+            costo: 0,
+            filtrar: '',
+            productos: [],
+            loadingProducto: false,
 
+            loading: false,
+            lista: [],
+            restart: false,
+            opcion: 0,
+            paginacion: 0,
+            totalPaginacion: 0,
+            filasPorPagina: 10,
+            messageTable: 'Cargando información...',
 
             idSucursal: this.props.token.project.idSucursal,
             idUsuario: this.props.token.userToken.idUsuario,
         }
 
+        this.refProducto = React.createRef();
+
+        this.selectItemProducto = false;
     }
 
-
-    async componentDidMount() {
+    componentDidMount() {
 
     }
 
@@ -40,8 +53,159 @@ class Kardex extends CustomComponent {
 
     }
 
+    async fetchListarKardex(params) {
+        const response = await listKardex(params);
+
+        if (response instanceof SuccessReponse) {
+            return response.data;
+        }
+
+        if (response instanceof ErrorResponse) {
+            return [];
+        }
+    }
+
+    async fetchFiltrarProducto(params) {
+        const response = await listarProductosFilter(params);
+
+        if (response instanceof SuccessReponse) {
+            return response.data;
+        }
+
+        if (response instanceof ErrorResponse) {
+            return [];
+        }
+    }
+
+    //------------------------------------------------------------------------------------------
+    // Filtrar producto
+    //------------------------------------------------------------------------------------------
+
+    handleClearInputProducto = async () => {
+        await this.setStateAsync({ productos: [], filtrar: "", producto: null });
+        this.selectItemProducto = false;
+    }
+
+    handleFilterProducto = async (event) => {
+        const searchWord = this.selectItemProducto ? "" : event.target.value;
+        await this.setStateAsync({ producto: null, filtrar: searchWord });
+
+        this.selectItemProducto = false;
+        if (searchWord.length === 0) {
+            await this.setStateAsync({ productos: [] });
+            return;
+        }
+
+        if (this.state.loadingProducto) return;
+
+        await this.setStateAsync({ loadingProducto: true });
+
+        const params = {
+            filtrar: searchWord,
+        }
+
+        const productos = await this.fetchFiltrarProducto(params);
+
+        await this.setStateAsync({ loadingProducto: false, productos });
+    }
+
+    handleSelectItemProducto = async (value) => {
+        await this.setStateAsync({
+            producto: value,
+            filtrar: value.nombreProducto,
+            productos: [],
+        });
+        this.selectItemProducto = true;
+
+        const params = {
+            idProducto: value.idProducto,
+        }
+
+        this.setState({
+            loading: true,
+            lista: [],
+            messageTable: "Cargando información...",
+        })
+
+        const kardex = await this.fetchListarKardex(params);
+
+        const cantidad = kardex.reduce((accumlate, item) => {
+            accumlate += item.tipo === "INGRESO" ? parseFloat(item.cantidad) : -parseFloat(item.cantidad);
+            return accumlate;
+        }, 0);
+
+        const costo = kardex.reduce((accumlate, item) => {
+            accumlate += item.tipo === "INGRESO" ? parseFloat(item.costo * item.cantidad) : -parseFloat(item.costo * item.cantidad);
+            return accumlate;
+        }, 0);
+
+        this.setState({
+            lista: kardex,
+            cantidad: cantidad,
+            costo: costo,
+            loading: false,
+        });
+    }
+
+    bodyTable() {
+        const { loading, lista, messageTable } = this.state;
+
+        if (loading) {
+            return (
+                <tr>
+                    <td className="text-center" colSpan="12">
+                        {spinnerLoading(messageTable, true)}
+                    </td>
+                </tr>
+            );
+        }
+
+        if (isEmpty(lista)) {
+            return (
+                <tr className="text-center">
+                    <td colSpan="12">¡No hay datos para mostrar!</td>
+                </tr>
+            );
+        }
+
+        let cantidad = 0;
+        let costo = 0;
+
+        return lista.map((item, index) => {
+
+            cantidad = cantidad + (item.tipo === "INGRESO" ? parseFloat(item.cantidad) : -parseFloat(item.cantidad));
+            costo = costo + (item.tipo === "INGRESO" ? parseFloat(item.costo * item.cantidad) : -parseFloat(item.costo * item.cantidad));
+
+            return (
+                <tr key={index}>
+                    <td>{++index}</td>
+                    <td>
+                        {item.fecha}
+                        <br />
+                        {formatTime(item.hora)}
+                    </td>
+                    <td>{item.detalle}</td>
+
+                    <td className='bg-success text-white'>{item.tipo === "INGRESO" ? "+" + rounded(item.cantidad) : ""}</td>
+                    <td className='bg-danger text-white'>{item.tipo === "SALIDA" ? "-" + rounded(item.cantidad) : ""}</td>
+                    <td className='font-weight-bold'>{rounded(cantidad)}</td>
+                    <td>{"S/ " + rounded(item.costo)}</td>
+
+                    <td>{item.tipo === "INGRESO" ? "+" + rounded(item.costo * item.cantidad) : ""}</td>
+                    <td>{item.tipo === "SALIDA" ? "-" + rounded(item.costo * item.cantidad) : ""}</td>
+                    <td>{"S/ " + rounded(costo)}</td>
+
+                    <td>{item.almacen}</td>
+                    <td>{item.apellidos}{<br />}{item.nombres}</td>
+                </tr>
+            )
+        })
+    }
 
     render() {
+
+        const { producto, cantidad, costo } = this.state;
+
         return (
             <ContainerWrapper>
 
@@ -55,104 +219,75 @@ class Kardex extends CustomComponent {
 
                 <div className="row">
                     <div className="col-md-12">
-                        <SearchBarProducto
+                        <SearchInput
                             placeholder="Filtrar productos..."
-                            refProducto={null}
-                            producto={""}
-                            productos={[]}
-                            onEventClearInput={()=>{}}
-                            handleFilter={()=>{}}
-                            onEventSelectItem={()=>{}}
+                            refValue={this.refProducto}
+                            value={this.state.filtrar}
+                            data={this.state.productos}
+                            handleClearInput={this.handleClearInputProducto}
+                            handleFilter={this.handleFilterProducto}
+                            handleSelectItem={this.handleSelectItemProducto}
+                            renderItem={(value) => (
+                                <>
+                                    {value.nombreProducto} / <small>{value.categoria}</small>
+                                </>
+                            )}
                         />
                     </div>
                 </div>
 
+                <div className="row mb-1">
+                    <div className="col">
+                        <h5>Información del Producto</h5>
+                        <p><strong>Nombre del Producto:</strong> {producto && producto.nombreProducto}</p>
+                        <p><strong>Cantidad Actual:</strong>  {cantidad} {producto && producto.medida}</p>
+                        <p><strong>Valor del Producto:</strong> S/ {formatDecimal(costo)}</p>
+                    </div>
+                </div>
+
                 <div className="row">
-                    <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                    <div className="col">
                         <div className="table-responsive">
-                            <table className="table table-striped table-bordered rounded">
+                            <table className="table table-bordered rounded">
                                 <thead>
                                     <tr>
-                                        <th width="5%" className="text-center">#</th>
-                                        <th width="15%">Nombre</th>
-                                        <th width="25%">Dirección</th>
-                                        <th width="20%">Distrito</th>
-                                        <th width="20%">Código Sunat</th>
-                                        <th width="5%" className="text-center">Editar</th>
-                                        <th width="5%" className="text-center">Eliminar</th>
+                                        <th scope="col" rowSpan={2} colSpan={1} width="5%" className="text-center">#</th>
+                                        <th scope="col" rowSpan={2} colSpan={1} width="10%">Fecha</th>
+                                        <th scope="col" rowSpan={2} colSpan={1} width="30%">Detalle</th>
+                                        <th scope="col" rowSpan={1} colSpan={3} width="25%">Unidades</th>
+                                        <th scope="col" rowSpan={2} colSpan={1} width="15%">Cambios <br /> Costo</th>
+                                        <th scope="col" rowSpan={1} colSpan={3} width="25%" className="text-center">Valores</th>
+                                        <th scope="col" rowSpan={2} colSpan={1} width="10%" className="text-center">Almacen</th>
+                                        <th scope="col" rowSpan={2} colSpan={1} width="10%" className="text-center">Usuario</th>
+                                    </tr>
+                                    <tr>
+                                        <th>Ingreso</th>
+                                        <th>Salida</th>
+                                        <th>Existencia</th>
+
+                                        <th>Debe</th>
+                                        <th>Haber</th>
+                                        <th>Saldo</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    {
-                                        this.state.loading ? (
-                                            <tr>
-                                                <td className="text-center" colSpan="7">
-                                                    {spinnerLoading("Cargando información de la tabla...", true)}
-                                                </td>
-                                            </tr>
-                                        ) : this.state.lista.length === 0 ? (
-                                            <tr className="text-center">
-                                                <td colSpan="7">¡No hay datos registrados!</td>
-                                            </tr>
-                                        ) : (
-                                            this.state.lista.map((item, index) => {
-                                                return (
-                                                    <tr key={index}>
-                                                        <td className="text-center">{item.id}</td>
-                                                        <td>{item.nombre}</td>
-                                                        <td>{item.direccion}</td>
-                                                        <td>{item.distrito}</td>
-                                                        <td>{item.codigoSunat}</td>
-                                                        <td className="text-center">
-                                                            <button
-                                                                className="btn btn-outline-warning btn-sm"
-                                                                title="Editar"
-                                                                onClick={() => this.handleEditar(item.idAlmacen)}
-                                                            >
-                                                                <i className="bi bi-pencil"></i>
-                                                            </button>
-                                                        </td>
-                                                        <td className="text-center">
-                                                            <button
-                                                                className="btn btn-outline-danger btn-sm"
-                                                                title="Anular"
-                                                                onClick={() => this.handleEliminar(item.idAlmacen)}
-                                                            >
-                                                                <i className="bi bi-trash"></i>
-                                                            </button>
-                                                        </td>
-                                                    </tr>
-                                                )
-                                            })
-                                        )
-                                    }
-                                </tbody>
 
+                                <tbody>
+                                    {this.bodyTable()}
+                                </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
 
-                <div className="row">
-                    <div className="col-sm-12 col-md-5">
-                        <div className="dataTables_info mt-2" role="status" aria-live="polite"></div>
-                    </div>
-                    <div className="col-sm-12 col-md-7">
-                        <div className="dataTables_paginate paging_simple_numbers">
-                            <nav aria-label="Page navigation example">
-                                <ul className="pagination justify-content-end">
+                {/*
                                     <Paginacion
-                                        loading={false}
-                                        totalPaginacion={0}
-                                        paginacion={0}
-                                        fillTable={()=>{}}
+                                        loading={this.state.loading}
+                                        totalPaginacion={this.state.totalPaginacion}
+                                        paginacion={this.state.paginacion}
+                                        fillTable={() => { }}
                                         restart={this.state.restart}
                                     />
-                                </ul>
-                            </nav>
-                        </div>
-                    </div>
-                </div>
+                            */}
 
             </ContainerWrapper>
         );

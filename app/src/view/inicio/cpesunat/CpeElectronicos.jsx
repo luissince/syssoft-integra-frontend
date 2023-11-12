@@ -70,7 +70,6 @@ class CpeElectronicos extends React.Component {
             totalPaginacion: 0,
             filasPorPagina: 10,
             messageTable: 'Cargando información...',
-            messagePaginacion: 'Mostranto 0 de 0 Páginas',
         }
         this.refTxtSearch = React.createRef();
         this.refUseFileXml = React.createRef();
@@ -216,8 +215,7 @@ class CpeElectronicos extends React.Component {
         await this.setStateAsync({
             loading: true,
             lista: [],
-            messageTable: "Cargando información...",
-            messagePaginacion: "Mostranto 0 de 0 Páginas"
+            messageTable: "Cargando información...",        
         });
 
         const params = {
@@ -236,13 +234,11 @@ class CpeElectronicos extends React.Component {
 
         if (response instanceof SuccessReponse) {
             let totalPaginacion = parseInt(Math.ceil((parseFloat(response.data.total) / this.state.filasPorPagina)));
-            let messagePaginacion = `Mostrando ${response.data.result.length} de ${totalPaginacion} Páginas`;
 
             await this.setStateAsync({
                 loading: false,
                 lista: response.data.result,
                 totalPaginacion: totalPaginacion,
-                messagePaginacion: messagePaginacion
             });
         }
 
@@ -253,8 +249,7 @@ class CpeElectronicos extends React.Component {
                 loading: false,
                 lista: [],
                 totalPaginacion: 0,
-                messageTable: "Se produjo un error interno, intente nuevamente por favor.",
-                messagePaginacion: "Mostranto 0 de 0 Páginas",
+                messageTable: response.getMessage(),
             });
         }
     }
@@ -831,26 +826,16 @@ class CpeElectronicos extends React.Component {
                     </div>
                 </div>
 
-                <div className="row">
-                    <div className="col-sm-12 col-md-5">
-                        <div className="dataTables_info mt-2" role="status" aria-live="polite">{this.state.messagePaginacion}</div>
-                    </div>
-                    <div className="col-sm-12 col-md-7">
-                        <div className="dataTables_paginate paging_simple_numbers">
-                            <nav aria-label="Page navigation example">
-                                <ul className="pagination justify-content-end">
-                                    <Paginacion
-                                        loading={this.state.loading}
-                                        totalPaginacion={this.state.totalPaginacion}
-                                        paginacion={this.state.paginacion}
-                                        fillTable={this.paginacionContext}
-                                        restart={this.state.restart}
-                                    />
-                                </ul>
-                            </nav>
-                        </div>
-                    </div>
-                </div>
+
+                <Paginacion
+                    loading={this.state.loading}
+                    data={this.state.lista}
+                    totalPaginacion={this.state.totalPaginacion}
+                    paginacion={this.state.paginacion}
+                    fillTable={this.paginacionContext}
+                    restart={this.state.restart}
+                />
+
                 <FileDownloader ref={this.refUseFileXml} />
             </ContainerWrapper>
         );

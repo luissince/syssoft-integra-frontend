@@ -30,7 +30,6 @@ class Almacenes extends CustomComponent {
             totalPaginacion: 0,
             filasPorPagina: 10,
             messageTable: 'Cargando información...',
-            messagePaginacion: 'Mostranto 0 de 0 Páginas',
 
             idSucursal: this.props.token.project.idSucursal,
             idUsuario: this.props.token.userToken.idUsuario,
@@ -40,13 +39,7 @@ class Almacenes extends CustomComponent {
         this.refTxtSearch = React.createRef();
     }
 
-    setStateAsync(state) {
-        return new Promise((resolve) => {
-            this.setState(state, resolve)
-        });
-    }
-
-    async componentDidMount() {
+    componentDidMount() {
         this.loadInit();
     }
 
@@ -54,6 +47,10 @@ class Almacenes extends CustomComponent {
         this.abortControllerTable.abort();
     }
 
+    /**
+     * Carga la inicialización de la tabla.
+     * @returns {Promise<void>} Una promesa que se resuelve después de cargar la inicialización de la tabla.
+     */
     loadInit = async () => {
         if (this.state.loading) return;
 
@@ -62,11 +59,19 @@ class Almacenes extends CustomComponent {
         await this.setStateAsync({ opcion: 0 });
     }
 
+    /**
+     * Gestiona la paginación de la tabla según el ID de la lista proporcionado.
+     * @param {number} listid - El ID de la lista para la paginación.
+     * @returns {Promise<void>} Una promesa que se resuelve después de gestionar la paginación de la tabla.
+     */
     paginacionContext = async (listid) => {
         await this.setStateAsync({ paginacion: listid, restart: false });
         this.onEventPaginacion();
     }
 
+    /**
+     * Gestiona los eventos de paginación de la tabla.
+     */
     onEventPaginacion = () => {
         switch (this.state.opcion) {
             case 0:
@@ -79,12 +84,20 @@ class Almacenes extends CustomComponent {
         }
     }
 
+    /**
+     * Llena la tabla con los datos recuperados según la opción y el texto de búsqueda proporcionados.
+     * @param {number} opcion - La opción específica para la tabla.
+     * @param {string} buscar - El texto de búsqueda que se utilizará para filtrar los datos.
+     * @returns {Promise<void>} Una promesa que se resuelve después de que se completa el proceso de llenado de la tabla.
+     * @example
+     * // Ejemplo de uso:
+     * fillTable(1, "texto de búsqueda");
+     */
     fillTable = async (opcion, buscar) => {
         await this.setStateAsync({
             loading: true,
             lista: [],
             messageTable: "Cargando información...",
-            messagePaginacion: "Mostranto 0 de 0 Páginas"
         });
 
         const params = {
@@ -101,13 +114,11 @@ class Almacenes extends CustomComponent {
             const result = response.data.result;
             const total = response.data.total
             const totalPaginacion = parseInt(Math.ceil((parseFloat(total) / this.state.filasPorPagina)));
-            const messagePaginacion = `Mostrando ${result.length} de ${totalPaginacion} Páginas`;
 
             await this.setStateAsync({
                 loading: false,
                 lista: result,
                 totalPaginacion: totalPaginacion,
-                messagePaginacion: messagePaginacion
             });
         }
 
@@ -118,19 +129,34 @@ class Almacenes extends CustomComponent {
                 loading: false,
                 lista: [],
                 totalPaginacion: 0,
-                messageTable: "Se produjo un error interno, intente nuevamente por favor.",
-                messagePaginacion: "Mostranto 0 de 0 Páginas",
+                messageTable: response.getMessage(),
             });
         }
     }
 
+    /**
+     * Realiza una búsqueda de texto y actualiza la tabla en función del texto proporcionado.
+     * @param {string} text - El texto a buscar.
+     * @returns {Promise<void>} Una promesa que se resuelve después de que se completa la búsqueda y actualización de la tabla.
+     * @example
+     * // Ejemplo de uso:
+     * searchText("Ejemplo de texto de búsqueda");
+     */
     async searchText(text) {
         if (this.state.loading) return;
 
         if (text.trim().length === 0) return;
 
+        /**
+         * Incrementa la paginación y reinicia el estado si se cumple la condición.
+         * @type {number}
+         */
         await this.setStateAsync({ paginacion: 1, restart: false });
+
+        // Llena la tabla con el nuevo texto.
         this.fillTable(1, text.trim());
+
+        // Actualiza la opción después de la búsqueda.
         await this.setStateAsync({ opcion: 1 });
     }
 
@@ -140,6 +166,7 @@ class Almacenes extends CustomComponent {
      * @returns {void}
      *
      * @example
+     * // Ejemplo de uso:
      * handleAgregar();
      */
     handleAgregar = () => {
@@ -171,6 +198,7 @@ class Almacenes extends CustomComponent {
      * @returns {void}
      *
      * @example
+     * // Ejemplo de uso:
      * handleEliminar('AL0001');
      */
     handleEliminar = (idAlmacen) => {
@@ -184,13 +212,13 @@ class Almacenes extends CustomComponent {
 
                 const response = await deleteAlmacen(params);
 
-                if(response instanceof SuccessReponse){
+                if (response instanceof SuccessReponse) {
                     alertSuccess("Almacen", response.data, () => {
                         this.loadInit();
                     })
                 }
 
-                if(response instanceof ErrorResponse){
+                if (response instanceof ErrorResponse) {
                     alertWarning("Almacen", response.getMessage())
                 }
             }
@@ -306,26 +334,15 @@ class Almacenes extends CustomComponent {
                     </div>
                 </div>
 
-                <div className="row">
-                    <div className="col-sm-12 col-md-5">
-                        <div className="dataTables_info mt-2" role="status" aria-live="polite">{this.state.messagePaginacion}</div>
-                    </div>
-                    <div className="col-sm-12 col-md-7">
-                        <div className="dataTables_paginate paging_simple_numbers">
-                            <nav aria-label="Page navigation example">
-                                <ul className="pagination justify-content-end">
-                                    <Paginacion
-                                        loading={this.state.loading}
-                                        totalPaginacion={this.state.totalPaginacion}
-                                        paginacion={this.state.paginacion}
-                                        fillTable={this.paginacionContext}
-                                        restart={this.state.restart}
-                                    />
-                                </ul>
-                            </nav>
-                        </div>
-                    </div>
-                </div>
+                <Paginacion
+                    loading={this.state.loading}
+                    data={this.state.lista}
+                    totalPaginacion={this.state.totalPaginacion}
+                    paginacion={this.state.paginacion}
+                    fillTable={this.paginacionContext}
+                    restart={this.state.restart}
+                />
+
             </ContainerWrapper>
         );
     }

@@ -22,7 +22,6 @@ class Productos extends CustomComponent {
     constructor(props) {
         super(props);
         this.state = {
-            idSucursal: this.props.token.project.idSucursal,
 
             add: statePrivilegio(this.props.token.userToken.menus[3].submenu[1].privilegio[0].estado),
             view: statePrivilegio(this.props.token.userToken.menus[3].submenu[1].privilegio[1].estado),
@@ -33,14 +32,14 @@ class Productos extends CustomComponent {
             lista: [],
             restart: false,
 
-            idUsuario: this.props.token.userToken.idUsuario,
-
             opcion: 0,
             paginacion: 0,
             totalPaginacion: 0,
             filasPorPagina: 10,
             messageTable: 'Cargando información...',
-            messagePaginacion: 'Mostranto 0 de 0 Páginas'
+
+            idSucursal: this.props.token.project.idSucursal,
+            idUsuario: this.props.token.userToken.idUsuario,
         }
 
         this.refTxtSearch = React.createRef();
@@ -96,7 +95,6 @@ class Productos extends CustomComponent {
             loading: true,
             lista: [],
             messageTable: "Cargando información...",
-            messagePaginacion: "Mostranto 0 de 0 Páginas"
         });
 
         const params = {
@@ -111,15 +109,12 @@ class Productos extends CustomComponent {
         const response = await listProducto(params, this.abortControllerTable.signal);
 
         if (response instanceof SuccessReponse) {
-            let totalPaginacion = parseInt(Math.ceil((parseFloat(response.data.total) / this.state.filasPorPagina)));
-            let messagePaginacion = `Mostrando ${response.data.result.length} de ${totalPaginacion} Páginas`;
-
+            const totalPaginacion = parseInt(Math.ceil((parseFloat(response.data.total) / this.state.filasPorPagina)));
 
             await this.setStateAsync({
                 loading: false,
                 lista: response.data.result,
                 totalPaginacion: totalPaginacion,
-                messagePaginacion: messagePaginacion
             });
         }
 
@@ -131,7 +126,6 @@ class Productos extends CustomComponent {
                 lista: [],
                 totalPaginacion: 0,
                 messageTable: "Se produjo un error interno, intente nuevamente por favor.",
-                messagePaginacion: "Mostranto 0 de 0 Páginas",
             });
         }
     }
@@ -258,11 +252,11 @@ class Productos extends CustomComponent {
                                         ) : (
                                             lista.map((item, index) => {
                                                 const tipo = function () {
-                                                    if (item.tipo === 1) {
+                                                    if (item.tipo === "PRODUCTO") {
                                                         return <span>Producto <i className='bi bi-basket'></i></span>;
                                                     }
 
-                                                    if (item.tipo === 2) {
+                                                    if (item.tipo === "SERVICIO") {
                                                         return <span>Servicio <i className='bi bi-person-workspace'></i></span>;
                                                     }
 
@@ -316,26 +310,15 @@ class Productos extends CustomComponent {
                     </div>
                 </div>
 
-                <div className="row">
-                    <div className="col-sm-12 col-md-5">
-                        <div className="dataTables_info mt-2" role="status" aria-live="polite">{this.state.messagePaginacion}</div>
-                    </div>
-                    <div className="col-sm-12 col-md-7">
-                        <div className="dataTables_paginate paging_simple_numbers">
-                            <nav aria-label="Page navigation example">
-                                <ul className="pagination justify-content-end">
-                                    <Paginacion
-                                        loading={this.state.loading}
-                                        totalPaginacion={this.state.totalPaginacion}
-                                        paginacion={this.state.paginacion}
-                                        fillTable={this.paginacionContext}
-                                        restart={this.state.restart}
-                                    />
-                                </ul>
-                            </nav>
-                        </div>
-                    </div>
-                </div>
+                <Paginacion
+                    loading={this.state.loading}
+                    data={this.state.lista}
+                    totalPaginacion={this.state.totalPaginacion}
+                    paginacion={this.state.paginacion}
+                    fillTable={this.paginacionContext}
+                    restart={this.state.restart}
+                />
+
             </ContainerWrapper>
         );
     }

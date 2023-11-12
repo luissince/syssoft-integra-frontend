@@ -38,7 +38,6 @@ class Socios extends React.Component {
             totalPaginacion: 0,
             filasPorPagina: 10,
             messageTable: 'Cargando información...',
-            messagePaginacion: 'Mostranto 0 de 0 Páginas'
         }
         this.refTxtSearch = React.createRef();
         this.refConcepto = React.createRef();
@@ -114,7 +113,11 @@ class Socios extends React.Component {
 
     fillTable = async (opcion, buscar, fechaInicio, fechaFinal, idConcepto) => {
         try {
-            await this.setStateAsync({ loading: true, lista: [], messageTable: "Cargando información...", messagePaginacion: "Mostranto 0 de 0 Páginas" });
+            await this.setStateAsync({
+                loading: true,
+                lista: [],
+                messageTable: "Cargando información...",
+            });
 
             const result = await axios.get('/api/cliente/listsocios', {
                 signal: this.abortControllerTable.signal,
@@ -130,14 +133,12 @@ class Socios extends React.Component {
                 }
             });
 
-            let totalPaginacion = parseInt(Math.ceil((parseFloat(result.data.total) / this.state.filasPorPagina)));
-            let messagePaginacion = `Mostrando ${result.data.result.length} de ${totalPaginacion} Páginas`;
+            const totalPaginacion = parseInt(Math.ceil((parseFloat(result.data.total) / this.state.filasPorPagina)));
 
             await this.setStateAsync({
                 loading: false,
                 lista: result.data.result,
                 totalPaginacion: totalPaginacion,
-                messagePaginacion: messagePaginacion
             });
         } catch (error) {
             if (error.message !== "canceled") {
@@ -146,7 +147,6 @@ class Socios extends React.Component {
                     lista: [],
                     totalPaginacion: 0,
                     messageTable: "Se produjo un error interno, intente nuevamente por favor.",
-                    messagePaginacion: "Mostranto 0 de 0 Páginas",
                 });
             }
         }
@@ -356,26 +356,16 @@ class Socios extends React.Component {
                     </div>
                 </div>
 
-                <div className="row">
-                    <div className="col-xl-5 col-lg-5 col-md-5 col-sm-12 col-12">
-                        <div className="dataTables_info mt-2" role="status" aria-live="polite">{this.state.messagePaginacion}</div>
-                    </div>
-                    <div className="col-xl-7 col-lg-7 col-md-7 col-sm-12 col-12">
-                        <div className="dataTables_paginate paging_simple_numbers">
-                            <nav aria-label="Page navigation example">
-                                <ul className="pagination justify-content-end">
-                                    <Paginacion
-                                        loading={this.state.loading}
-                                        totalPaginacion={this.state.totalPaginacion}
-                                        paginacion={this.state.paginacion}
-                                        fillTable={this.paginacionContext}
-                                        restart={this.state.restart}
-                                    />
-                                </ul>
-                            </nav>
-                        </div>
-                    </div>
-                </div>
+
+                <Paginacion
+                    loading={this.state.loading}
+                    data={this.state.lista}
+                    totalPaginacion={this.state.totalPaginacion}
+                    paginacion={this.state.paginacion}
+                    fillTable={this.paginacionContext}
+                    restart={this.state.restart}
+                />
+
             </ContainerWrapper>
         );
     }

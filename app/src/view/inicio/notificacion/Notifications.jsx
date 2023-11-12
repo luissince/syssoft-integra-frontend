@@ -22,9 +22,7 @@ class Notications extends React.Component {
             totalPaginacion: 0,
             filasPorPagina: 10,
             messageTable: 'Cargando información...',
-            messagePaginacion: 'Mostranto 0 de 0 Páginas'
         }
-
 
         this.abortControllerTable = new AbortController();
     }
@@ -67,7 +65,11 @@ class Notications extends React.Component {
 
     fillTable = async () => {
         try {
-            await this.setStateAsync({ loading: true, lista: [], messageTable: "Cargando información...", messagePaginacion: "Mostranto 0 de 0 Páginas" });
+            await this.setStateAsync({
+                loading: true,
+                lista: [],
+                messageTable: "Cargando información...",
+            });
 
             const result = await axios.get('/api/cobro/detallenotificaciones', {
                 signal: this.abortControllerTable.signal,
@@ -77,14 +79,12 @@ class Notications extends React.Component {
                 }
             });
 
-            let totalPaginacion = parseInt(Math.ceil((parseFloat(result.data.total) / this.state.filasPorPagina)));
-            let messagePaginacion = `Mostrando ${result.data.result.length} de ${totalPaginacion} Páginas`;
+            const totalPaginacion = parseInt(Math.ceil((parseFloat(result.data.total) / this.state.filasPorPagina)));
 
             await this.setStateAsync({
                 loading: false,
                 lista: result.data.result,
                 totalPaginacion: totalPaginacion,
-                messagePaginacion: messagePaginacion
             });
         } catch (error) {
             if (error.message !== "canceled") {
@@ -93,7 +93,6 @@ class Notications extends React.Component {
                     lista: [],
                     totalPaginacion: 0,
                     messageTable: "Se produjo un error interno, intente nuevamente por favor.",
-                    messagePaginacion: "Mostranto 0 de 0 Páginas",
                 });
             }
         }
@@ -154,26 +153,15 @@ class Notications extends React.Component {
                     </div>
                 </div>
 
-                <div className="row">
-                    <div className="col-sm-12 col-md-5">
-                        <div className="dataTables_info mt-2" role="status" aria-live="polite">{this.state.messagePaginacion}</div>
-                    </div>
-                    <div className="col-sm-12 col-md-7">
-                        <div className="dataTables_paginate paging_simple_numbers">
-                            <nav aria-label="Page navigation example">
-                                <ul className="pagination justify-content-end">
-                                    <Paginacion
-                                        loading={this.state.loading}
-                                        totalPaginacion={this.state.totalPaginacion}
-                                        paginacion={this.state.paginacion}
-                                        fillTable={this.paginacionContext}
-                                        restart={this.state.restart}
-                                    />
-                                </ul>
-                            </nav>
-                        </div>
-                    </div>
-                </div>
+                <Paginacion
+                    loading={this.state.loading}
+                    data={this.state.lista}
+                    totalPaginacion={this.state.totalPaginacion}
+                    paginacion={this.state.paginacion}
+                    fillTable={this.paginacionContext}
+                    restart={this.state.restart}
+                />
+
             </ContainerWrapper>
         )
     }

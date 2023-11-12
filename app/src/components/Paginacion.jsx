@@ -1,6 +1,7 @@
 import React from "react";
 
 class Paginacion extends React.Component {
+
   constructor(props) {
     super(props);
     this.upperPageBound = 3;
@@ -8,20 +9,21 @@ class Paginacion extends React.Component {
     this.isPrevBtnActive = "disabled";
     this.isNextBtnActive = "";
     this.pageBound = 3;
+    this.messagePaginacion = "Mostranto 0 de 0 Páginas";
   }
 
   setPrevAndNextBtnClass = async (listid) => {
+
+    const { totalPaginacion } = this.props;
+
     this.isNextBtnActive = "disabled";
     this.isPrevBtnActive = "disabled";
 
-    if (
-      this.props.totalPaginacion === listid &&
-      this.props.totalPaginacion > 1
-    ) {
+    if (totalPaginacion === listid && totalPaginacion > 1) {
       this.isPrevBtnActive = "";
-    } else if (listid === 1 && this.props.totalPaginacion > 1) {
+    } else if (listid === 1 && totalPaginacion > 1) {
       this.isNextBtnActive = "";
-    } else if (this.props.totalPaginacion > 1) {
+    } else if (totalPaginacion > 1) {
       this.isNextBtnActive = "";
       this.isPrevBtnActive = "";
     }
@@ -79,7 +81,11 @@ class Paginacion extends React.Component {
   };
 
   render() {
-    if (this.props.restart) {
+    const { restart, totalPaginacion, paginacion, data } = this.props;
+
+    this.messagePaginacion = `Mostrando ${data.length} de ${totalPaginacion === 1 ? totalPaginacion + " Página" : totalPaginacion + " Páginas"}`;
+
+    if (restart) {
       this.upperPageBound = 3;
       this.lowerPageBound = 0;
       this.isPrevBtnActive = "disabled";
@@ -88,27 +94,26 @@ class Paginacion extends React.Component {
     }
 
     const pageNumbers = [];
-    for (let i = 1; i <= this.props.totalPaginacion; i++) {
+    for (let i = 1; i <= totalPaginacion; i++) {
       pageNumbers.push(i);
     }
 
     const renderPageNumbers = pageNumbers.map((number, index) => {
-      if (number === 1 && this.props.paginacion === 1) {
+      if (number === 1 && paginacion === 1) {
         return (
           <li key={index} className="page-item active" aria-current="page">
             <span className="page-link">{number}</span>
           </li>
         );
-      } else if (
-        number < this.upperPageBound + 1 &&
-        number > this.lowerPageBound
-      ) {
+      }
+
+      if (number < this.upperPageBound + 1 && number > this.lowerPageBound) {
         return (
           <li
             key={index}
-            className={`page-item ${number === this.props.paginacion ? "active" : ""}`}
+            className={`page-item ${number === paginacion ? "active" : ""}`}
           >
-            {number === this.props.paginacion ? (
+            {number === paginacion ? (
               <span id={number} className="page-link">
                 {number}
               </span>
@@ -123,9 +128,9 @@ class Paginacion extends React.Component {
             )}
           </li>
         );
-      } else {
-        return null;
       }
+
+      return null;
     });
 
     let pageDecrementBtn = null;
@@ -154,7 +159,7 @@ class Paginacion extends React.Component {
 
     let renderPrevBtn = null;
     if (this.isPrevBtnActive === "disabled" ||
-      this.props.totalPaginacion <= 1) {
+      totalPaginacion <= 1) {
       renderPrevBtn = (
         <li className="page-item disabled">
           <span className="page-link"> Ante. </span>
@@ -174,7 +179,7 @@ class Paginacion extends React.Component {
     let renderNextBtn = null;
     if (
       this.isNextBtnActive === "disabled" ||
-      this.props.totalPaginacion <= 1
+      totalPaginacion <= 1
     ) {
       renderNextBtn = (
         <li className="page-item disabled">
@@ -193,13 +198,24 @@ class Paginacion extends React.Component {
     }
 
     return (
-      <>
-        {renderPrevBtn}
-        {pageDecrementBtn}
-        {renderPageNumbers}
-        {pageIncrementBtn}
-        {renderNextBtn}
-      </>
+      <div className="row">
+        <div className="col-sm-12 col-md-5">
+          <div className="dataTables_info mt-2" role="status" aria-live="polite">{this.messagePaginacion}</div>
+        </div>
+        <div className="col-sm-12 col-md-7">
+          <div className="dataTables_paginate paging_simple_numbers">
+            <nav aria-label="Page navigation example">
+              <ul className="pagination justify-content-end">
+                {renderPrevBtn}
+                {pageDecrementBtn}
+                {renderPageNumbers}
+                {pageIncrementBtn}
+                {renderNextBtn}
+              </ul>
+            </nav>
+          </div>
+        </div>
+      </div>
     );
   }
 }

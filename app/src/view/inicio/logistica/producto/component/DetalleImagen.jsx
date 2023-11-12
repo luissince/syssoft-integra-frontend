@@ -6,7 +6,7 @@ const DetalleImagen = (props) => {
 
     const { imagen, refFileImagen, handleInputImagen, handleRemoveImagen } = props;
 
-    const { nombre, precio, handleRegistrar } = props;
+    const { nombre, precio } = props;
 
     const { publicar, handleSelectPublico } = props;
 
@@ -15,6 +15,8 @@ const DetalleImagen = (props) => {
     const { inventariado, handleSelectInventariado, } = props;
 
     const { estado, handleSelectEstado } = props;
+
+    const { handleRegistrar, handleCerrar } = props;
 
     return (
         <>
@@ -92,7 +94,7 @@ const DetalleImagen = (props) => {
                 </div>
             </div>
 
-            {tipo === 1 && <div className="row">
+            {tipo === "TP0001" && <div className="row">
                 <div className="form-group col-md-12">
                     <div className="custom-control custom-switch">
                         <input
@@ -111,7 +113,7 @@ const DetalleImagen = (props) => {
             </div>
             }
 
-            {tipo === 1 && <div className="row">
+            {tipo === "TP0001" && <div className="row">
                 <div className="form-group col-md-12">
                     <div className="custom-control custom-switch">
                         <input
@@ -160,7 +162,8 @@ const DetalleImagen = (props) => {
                 <div className="form-group col-md-6">
                     <button
                         type="button"
-                        className="btn btn-secondary btn-block" >
+                        className="btn btn-secondary btn-block"
+                        onClick={handleCerrar}>
                         Cerrar
                     </button>
                 </div>

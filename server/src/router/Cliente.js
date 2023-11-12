@@ -75,8 +75,8 @@ router.get('/listcombo', async function (req, res) {
     }
 });
 
-router.get('/listfiltrar', async function (req, res) {
-    const result = await cliente.listsearch(req)
+router.get('/filtrar', async function (req, res) {
+    const result = await cliente.filtrar(req)
     if (Array.isArray(result)) {
         res.status(200).send(result);
     } else {

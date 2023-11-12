@@ -535,7 +535,7 @@ class Cliente {
         }
     }
 
-    async listsearch(req) {
+    async filtrar(req) {
         try {
             const result = await conec.query(`SELECT *
             FROM (
