@@ -52,11 +52,11 @@ class Almacenes extends CustomComponent {
      * @returns {Promise<void>} Una promesa que se resuelve después de cargar la inicialización de la tabla.
      */
     loadInit = async () => {
-        if (this.state.loading) return;
+        // if (this.state.loading) return;
 
-        await this.setStateAsync({ paginacion: 1, restart: true });
-        this.fillTable(0, "");
-        await this.setStateAsync({ opcion: 0 });
+        // await this.setStateAsync({ paginacion: 1, restart: true });
+        // this.fillTable(0, "");
+        // await this.setStateAsync({ opcion: 0 });
     }
 
     /**
@@ -65,23 +65,23 @@ class Almacenes extends CustomComponent {
      * @returns {Promise<void>} Una promesa que se resuelve después de gestionar la paginación de la tabla.
      */
     paginacionContext = async (listid) => {
-        await this.setStateAsync({ paginacion: listid, restart: false });
-        this.onEventPaginacion();
+        // await this.setStateAsync({ paginacion: listid, restart: false });
+        // this.onEventPaginacion();
     }
 
     /**
      * Gestiona los eventos de paginación de la tabla.
      */
     onEventPaginacion = () => {
-        switch (this.state.opcion) {
-            case 0:
-                this.fillTable(0, "");
-                break;
-            case 1:
-                this.fillTable(1, this.refTxtSearch.current.value);
-                break;
-            default: this.fillTable(0, "");
-        }
+        // switch (this.state.opcion) {
+        //     case 0:
+        //         this.fillTable(0, "");
+        //         break;
+        //     case 1:
+        //         this.fillTable(1, this.refTxtSearch.current.value);
+        //         break;
+        //     default: this.fillTable(0, "");
+        // }
     }
 
     /**
@@ -94,44 +94,44 @@ class Almacenes extends CustomComponent {
      * fillTable(1, "texto de búsqueda");
      */
     fillTable = async (opcion, buscar) => {
-        await this.setStateAsync({
-            loading: true,
-            lista: [],
-            messageTable: "Cargando información...",
-        });
+        // await this.setStateAsync({
+        //     loading: true,
+        //     lista: [],
+        //     messageTable: "Cargando información...",
+        // });
 
-        const params = {
-            "opcion": opcion,
-            "buscar": buscar,
-            "idSucursal": this.state.idSucursal,
-            "posicionPagina": ((this.state.paginacion - 1) * this.state.filasPorPagina),
-            "filasPorPagina": this.state.filasPorPagina
-        }
+        // const params = {
+        //     "opcion": opcion,
+        //     "buscar": buscar,
+        //     "idSucursal": this.state.idSucursal,
+        //     "posicionPagina": ((this.state.paginacion - 1) * this.state.filasPorPagina),
+        //     "filasPorPagina": this.state.filasPorPagina
+        // }
 
-        const response = await listAlmacen(params, this.abortControllerTable.signal);
+        // const response = await listAlmacen(params, this.abortControllerTable.signal);
 
-        if (response instanceof SuccessReponse) {
-            const result = response.data.result;
-            const total = response.data.total
-            const totalPaginacion = parseInt(Math.ceil((parseFloat(total) / this.state.filasPorPagina)));
+        // if (response instanceof SuccessReponse) {
+        //     const result = response.data.result;
+        //     const total = response.data.total
+        //     const totalPaginacion = parseInt(Math.ceil((parseFloat(total) / this.state.filasPorPagina)));
 
-            await this.setStateAsync({
-                loading: false,
-                lista: result,
-                totalPaginacion: totalPaginacion,
-            });
-        }
+        //     await this.setStateAsync({
+        //         loading: false,
+        //         lista: result,
+        //         totalPaginacion: totalPaginacion,
+        //     });
+        // }
 
-        if (response instanceof ErrorResponse) {
-            if (response.getType() === CANCELED) return;
+        // if (response instanceof ErrorResponse) {
+        //     if (response.getType() === CANCELED) return;
 
-            await this.setStateAsync({
-                loading: false,
-                lista: [],
-                totalPaginacion: 0,
-                messageTable: response.getMessage(),
-            });
-        }
+        //     await this.setStateAsync({
+        //         loading: false,
+        //         lista: [],
+        //         totalPaginacion: 0,
+        //         messageTable: response.getMessage(),
+        //     });
+        // }
     }
 
     /**
@@ -143,21 +143,21 @@ class Almacenes extends CustomComponent {
      * searchText("Ejemplo de texto de búsqueda");
      */
     async searchText(text) {
-        if (this.state.loading) return;
+        // if (this.state.loading) return;
 
-        if (text.trim().length === 0) return;
+        // if (text.trim().length === 0) return;
 
-        /**
-         * Incrementa la paginación y reinicia el estado si se cumple la condición.
-         * @type {number}
-         */
-        await this.setStateAsync({ paginacion: 1, restart: false });
+        // /**
+        //  * Incrementa la paginación y reinicia el estado si se cumple la condición.
+        //  * @type {number}
+        //  */
+        // await this.setStateAsync({ paginacion: 1, restart: false });
 
-        // Llena la tabla con el nuevo texto.
-        this.fillTable(1, text.trim());
+        // // Llena la tabla con el nuevo texto.
+        // this.fillTable(1, text.trim());
 
-        // Actualiza la opción después de la búsqueda.
-        await this.setStateAsync({ opcion: 1 });
+        // // Actualiza la opción después de la búsqueda.
+        // await this.setStateAsync({ opcion: 1 });
     }
 
     /**
@@ -170,9 +170,9 @@ class Almacenes extends CustomComponent {
      * handleAgregar();
      */
     handleAgregar = () => {
-        this.props.history.push({
-            pathname: `${this.props.location.pathname}/agregar`,
-        })
+        // this.props.history.push({
+        //     pathname: `${this.props.location.pathname}/agregar`,
+        // })
     }
 
     /**
@@ -185,10 +185,10 @@ class Almacenes extends CustomComponent {
      * handleEditar('AL0001');
      */
     handleEditar = (idAlmacen) => {
-        this.props.history.push({
-            pathname: `${this.props.location.pathname}/editar`,
-            search: "?idAlmacen=" + idAlmacen
-        })
+        // this.props.history.push({
+        //     pathname: `${this.props.location.pathname}/editar`,
+        //     search: "?idAlmacen=" + idAlmacen
+        // })
     }
 
     /**
@@ -202,27 +202,27 @@ class Almacenes extends CustomComponent {
      * handleEliminar('AL0001');
      */
     handleEliminar = (idAlmacen) => {
-        alertDialog("Eliminar almacen", "¿Está seguro de que desea eliminar el almacen? Esta operación no se puede deshacer.", async (value) => {
-            if (value) {
-                alertInfo("Almacén", "Procesando información...")
+        // alertDialog("Eliminar almacen", "¿Está seguro de que desea eliminar el almacen? Esta operación no se puede deshacer.", async (value) => {
+        //     if (value) {
+        //         alertInfo("Almacén", "Procesando información...")
 
-                const params = {
-                    id: idAlmacen
-                }
+        //         const params = {
+        //             id: idAlmacen
+        //         }
 
-                const response = await deleteAlmacen(params);
+        //         const response = await deleteAlmacen(params);
 
-                if (response instanceof SuccessReponse) {
-                    alertSuccess("Almacen", response.data, () => {
-                        this.loadInit();
-                    })
-                }
+        //         if (response instanceof SuccessReponse) {
+        //             alertSuccess("Almacen", response.data, () => {
+        //                 this.loadInit();
+        //             })
+        //         }
 
-                if (response instanceof ErrorResponse) {
-                    alertWarning("Almacen", response.getMessage())
-                }
-            }
-        })
+        //         if (response instanceof ErrorResponse) {
+        //             alertWarning("Almacen", response.getMessage())
+        //         }
+        //     }
+        // })
     }
 
     render() {
@@ -284,7 +284,7 @@ class Almacenes extends CustomComponent {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {
+                                    {/* {
                                         this.state.loading ? (
                                             <tr>
                                                 <td className="text-center" colSpan="7">
@@ -326,7 +326,7 @@ class Almacenes extends CustomComponent {
                                                 )
                                             })
                                         )
-                                    }
+                                    } */}
                                 </tbody>
 
                             </table>

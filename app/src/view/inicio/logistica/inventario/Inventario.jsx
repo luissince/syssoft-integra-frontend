@@ -273,13 +273,13 @@ class Inventario extends CustomComponent {
                         <div className="dataTables_paginate paging_simple_numbers">
                             <nav aria-label="Page navigation example">
                                 <ul className="pagination justify-content-end">
-                                    <Paginacion
+                                    {/* <Paginacion
                                         loading={this.state.loading}
                                         totalPaginacion={this.state.totalPaginacion}
                                         paginacion={this.state.paginacion}
                                         fillTable={this.paginacionContext}
                                         restart={this.state.restart}
-                                    />
+                                    /> */}
                                 </ul>
                             </nav>
                         </div>
