@@ -100,21 +100,21 @@ class GuiaRemision extends CustomComponent {
                                     <tr>
                                         <th width="5%" className="text-center"> #</th>
                                         <th width="10%">Fecha</th>
-                                        <th width="15%">Proveedor</th>
-                                        <th width="5%" className="text-center">
-                                            Mostrar
-                                        </th>
-                                        <th width="5%" className="text-center">
-                                            Editar
-                                        </th>
-                                        <th width="5%" className="text-center">
-                                            Eliminar
-                                        </th>
+                                        <th width="15%">Comprobante</th>
+                                        <th width="10%">referencia</th>
+                                        <th width="15%">Cliente</th>
+                                        <th width="15%">Estado</th>
+                                        <th width="5%" className="text-center">Mostrar</th>
+                                        <th width="5%" className="text-center">Editar</th>
+                                        <th width="5%" className="text-center">Eliminar</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr >
                                         <td className="text-center">1</td>
+                                        <td>ss</td>
+                                        <td>ss</td>
+                                        <td>ss</td>
                                         <td>ss</td>
                                         <td>ss</td>
                                         <td className="text-center">

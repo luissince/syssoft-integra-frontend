@@ -20,9 +20,9 @@ class AjusteDetalle extends CustomComponent {
 
     constructor(props) {
         super(props);
-        
+
         this.state = {
-            
+
 
             idSucursal: this.props.token.project.idSucursal,
             idUsuario: this.props.token.userToken.idUsuario,
@@ -32,11 +32,11 @@ class AjusteDetalle extends CustomComponent {
 
 
     async componentDidMount() {
-   
+
     }
 
     componentWillUnmount() {
-    
+
     }
 
 
@@ -47,7 +47,10 @@ class AjusteDetalle extends CustomComponent {
                 <div className='row'>
                     <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
                         <div className="form-group">
-                            <h5>Ajuste <small className="text-secondary">detalle</small></h5>
+                            <h5>
+                                <span role="button" onClick={() => this.props.history.goBack()}><i className="bi bi-arrow-left-short"></i></span>Ajuste
+                                <small className="text-secondary">detalle</small>
+                            </h5>
                         </div>
                     </div>
                 </div>
@@ -113,7 +116,7 @@ class AjusteDetalle extends CustomComponent {
                         </div>
                     </div>
                 </div>
-            
+
             </ContainerWrapper>
         );
     }

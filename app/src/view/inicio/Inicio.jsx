@@ -90,7 +90,6 @@ import GastoDetalle from './tesoreria/gasto/GastoDetalle';
 
 import Compras from './tesoreria/compra/Compras.jsx';
 import CompraCrear from './tesoreria/compra/CompraCrear.jsx';
-import CompraEditar from './tesoreria/compra/CompraEditar.jsx';
 import CompraDetalle from './tesoreria/compra/CompraDetalle.jsx';
 
 import Perfiles from './seguridad/Perfiles';
@@ -593,11 +592,6 @@ class Inicio extends React.Component {
                         path={`${path}/compras/crear`}
                         exact={true}
                         render={(props) => <CompraCrear {...props} />}
-                    />
-                    <Route
-                        path={`${path}/compras/editar`}
-                        exact={true}
-                        render={(props) => <CompraEditar {...props} />}
                     />
                     <Route
                         path={`${path}/compras/detalle`}

@@ -34,6 +34,14 @@ class Compras extends CustomComponent {
         })
     }
 
+    handleEliminar = () => {
+        alertDialog("Compra", "¿Estás seguro de eliminar la compra?", async (event) => {
+            if (event) {
+
+            }
+        });
+    }
+
     handleAnular = () => {
         alertDialog("Compra", "¿Estás seguro de anular la compra?", async (event) => {
             if (event) {
@@ -105,7 +113,7 @@ class Compras extends CustomComponent {
                                             Mostrar
                                         </th>
                                         <th width="5%" className="text-center">
-                                            Editar
+                                            Anular
                                         </th>
                                         <th width="5%" className="text-center">
                                             Eliminar
@@ -131,16 +139,16 @@ class Compras extends CustomComponent {
                                             <button
                                                 className="btn btn-outline-warning btn-sm"
                                                 title="Editar"
-                                                onClick={() => this.handleEditar("")}
+                                                onClick={() => this.handleAnular("")}
                                             >
-                                                <i className="bi bi-pencil"></i>
+                                               <i className="bi bi-slash-circle"></i>
                                             </button>
                                         </td>
                                         <td className="text-center">
                                             <button
                                                 className="btn btn-outline-danger btn-sm"
                                                 title="Anular"
-                                                onClick={() => this.handleAnular("")}
+                                                onClick={() => this.handleEliminar("")}
                                             >
                                                 <i className="bi bi-trash"></i>
                                             </button>
