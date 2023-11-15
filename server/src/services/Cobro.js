@@ -12,31 +12,46 @@ class Cobro {
     async list(req) {
         try {
             const lista = await conec.query(`SELECT 
-            c.idCobro, 
-            DATE_FORMAT(c.fecha,'%d/%m/%Y') as fecha,
+            c.idCobro,
+            DATE_FORMAT(c.fecha,'%d/%m/%Y') as fecha, 
             c.hora,
             co.nombre as comprobante,
             c.serie,
             c.numeracion,
-            cl.documento,
-            cl.informacion,
-			c.estado,
+            CASE 
+                WHEN cl.idCliente is NOT NULL THEN  cl.documento
+                ELSE cj.documento
+            END as documento,
+            CASE 
+                WHEN cl.idCliente is NOT NULL THEN cl.informacion
+                ELSE cj.informacion
+            END as informacion,
+            c.estado,
+            m.codiso,
             SUM(cd.precio*cd.cantidad) AS monto
             FROM cobro AS c
-            INNER JOIN clienteNatural AS cl ON c.idCliente = cl.idCliente
-            INNER JOIN banco AS b ON c.idBanco = b.idBanco
-            INNER JOIN moneda AS m ON c.idMoneda = m.idMoneda 
             INNER JOIN comprobante AS co ON co.idComprobante = c.idComprobante
+            LEFT JOIN clienteNatural AS cl ON c.idCliente = cl.idCliente
+            LEFT JOIN clienteJuridico AS cj ON c.idCliente = cj.idCliente
+            INNER JOIN moneda AS m ON c.idMoneda = m.idMoneda 
             INNER JOIN cobroDetalle AS cd ON c.idCobro = cd.idCobro
             
             WHERE 
             ? = 0 AND c.idSucursal = ?
+
             OR
-            ? = 1 AND cl.informacion LIKE CONCAT(?,'%') AND c.idSucursal = ?
+            ? = 1 AND 
+            CASE 
+                WHEN cl.idCliente is NOT NULL THEN  cl.informacion LIKE CONCAT(?,'%')
+                ELSE cj.informacion LIKE CONCAT(?,'%') AND c.idSucursal = ?
+            END
+
             OR
             ? = 1 AND c.serie = ? AND c.idSucursal = ?
+
             OR
             ? = 1 AND c.numeracion = ? AND c.idSucursal = ?
+
             OR
             ? = 1 AND CONCAT(c.serie,'-',c.numeracion) = ? AND c.idSucursal = ?
             
@@ -47,6 +62,7 @@ class Cobro {
                 req.query.idSucursal,
 
                 parseInt(req.query.opcion),
+                req.query.buscar,
                 req.query.buscar,
                 req.query.idSucursal,
 
@@ -75,14 +91,33 @@ class Cobro {
 
             const total = await conec.query(`SELECT COUNT(*) AS Total
             FROM cobro AS c
-            INNER JOIN clienteNatural AS cl ON c.idCliente = cl.idCliente
-            INNER JOIN banco AS b ON c.idBanco = b.idBanco
+            INNER JOIN comprobante AS co ON co.idComprobante = c.idComprobante
+            LEFT JOIN clienteNatural AS cl ON c.idCliente = cl.idCliente
+            LEFT JOIN clienteJuridico AS cj ON c.idCliente = cj.idCliente
             INNER JOIN moneda AS m ON c.idMoneda = m.idMoneda 
-            INNER JOIN comprobante AS co ON co.idComprobante = c.idComprobante`, [
+            WHERE 
+            ? = 0 AND c.idSucursal = ?
+
+            OR
+            ? = 1 AND 
+            CASE 
+                WHEN cl.idCliente is NOT NULL THEN  cl.informacion LIKE CONCAT(?,'%')
+                ELSE cj.informacion LIKE CONCAT(?,'%') AND c.idSucursal = ?
+            END
+            
+            OR
+            ? = 1 AND c.serie = ? AND c.idSucursal = ?
+
+            OR
+            ? = 1 AND c.numeracion = ? AND c.idSucursal = ?
+
+            OR
+            ? = 1 AND CONCAT(c.serie,'-',c.numeracion) = ? AND c.idSucursal = ?`, [
                 parseInt(req.query.opcion),
                 req.query.idSucursal,
 
                 parseInt(req.query.opcion),
+                req.query.buscar,
                 req.query.buscar,
                 req.query.idSucursal,
 
@@ -101,6 +136,7 @@ class Cobro {
 
             return { "result": resultLista, "total": total[0].Total };
         } catch (error) {
+            console.log(error)
             return "Se produjo un error de servidor, intente nuevamente.";
         }
     }
@@ -118,8 +154,11 @@ class Cobro {
                 idComprobante,
                 estado,
                 observacion,
-                detalle
+                detalle,
+                metodoPago
             } = req.body;
+
+            console.log(req.body)
 
             /**
             * Generar un código unico para el cobro. 
@@ -140,8 +179,6 @@ class Cobro {
                 idComprobante
             ]);
 
-    
-
             const cobros = await conec.execute(connection, `SELECT 
                 numeracion  
                 FROM cobro 
@@ -149,7 +186,7 @@ class Cobro {
                 idComprobante
             ]);
 
-            const numeracion = generateNumericCode(comprobante[0].numeracion,cobros,"numeracion");
+            const numeracion = generateNumericCode(comprobante[0].numeracion, cobros, "numeracion");
 
             /**
              * Proceso para ingresar el cobro.
@@ -211,6 +248,43 @@ class Cobro {
                 idCobroDetalle++;
             }
 
+
+            /**
+             * Proceso para ingresa la lista de ingresos con sus método de pagos
+             */
+            // Generar el Id único
+            const listaIngresosId = await conec.execute(connection, 'SELECT idIngreso FROM ingreso');
+            let idIngreso = generateNumericCode(1, listaIngresosId, 'idIngreso');
+
+            // Proceso de registro  
+            for (const item of metodoPago) {
+                await conec.execute(connection, `INSERT INTO ingreso(
+                    idIngreso,
+                    IdVenta,
+                    IdCobro,
+                    idMetodoPago,
+                    monto,
+                    descripcion,
+                    estado,
+                    fecha,
+                    hora,
+                    idUsuario
+                ) VALUES(?,?,?,?,?,?,?,?,?,?)`, [
+                    idIngreso,
+                    null,
+                    idCobro,
+                    item.idMetodoPago,
+                    item.monto,
+                    item.descripcion,
+                    1,
+                    currentDate(),
+                    currentTime(),
+                    idUsuario
+                ])
+
+                idIngreso++;
+            }
+
             /**
              * Proceso de registrar datos en la tabla auditoria para tener un control de los movimientos echos.
              */
@@ -239,6 +313,7 @@ class Cobro {
             await conec.commit(connection);
             return 'insert';
         } catch (error) {
+            console.log(error)
             if (connection != null) {
                 await conec.rollback(connection);
             }

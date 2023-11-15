@@ -18,10 +18,11 @@ class BancoAgregar extends CustomComponent {
             monedas: [],
             numCuenta: "",
             cci: "",
-            idUsuario: this.props.token.userToken.idUsuario,
 
             loading: true,
             msgLoading: "Cargando datos...",
+
+            idUsuario: this.props.token.userToken.idUsuario,
         }
 
         this.refTxtNombre = React.createRef();
@@ -82,8 +83,8 @@ class BancoAgregar extends CustomComponent {
             return;
         }
 
-        alertDialog("Banco", "¿Estás seguro de continuar?", async (event) => {
-            if (event) {
+        alertDialog("Banco", "¿Estás seguro de continuar?", async (accept) => {
+            if (accept) {
 
                 alertInfo("Banco", "Procesando información...");
 
@@ -120,15 +121,15 @@ class BancoAgregar extends CustomComponent {
                 }
 
                 <div className="row">
-                    <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                        <section className="content-header">
+                    <div className="col-lg-12 col-md-12 col-sm-12 col-12">
+                        <div className="form-group">
                             <h5>
                                 <span role="button" onClick={() => this.props.history.goBack()}>
                                     <i className="bi bi-arrow-left-short"></i>
                                 </span>{" "}
                                 Editar Banco
                             </h5>
-                        </section>
+                        </div>
                     </div>
                 </div>
 

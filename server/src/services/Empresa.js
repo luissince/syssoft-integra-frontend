@@ -2,7 +2,6 @@ const {
     sendSuccess,
     sendClient,
     sendError,
-    sendNoAutorizado
 } = require('../tools/Message');
 const {
     currentDate,
@@ -126,12 +125,13 @@ class Empresa {
             let file = path.join(__dirname, '../', 'path/company');
 
             if (!isDirectory(file)) {
+                console.log(file)
                 mkdir(file);
                 chmod(file);
             }
 
             let empresa = await conec.execute(connection, `SELECT
-            logo,
+            logo, 
             image,
             extlogo,
             extimage,

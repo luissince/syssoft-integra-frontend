@@ -13,7 +13,7 @@ export function sleep(time) {
 export function makeid(length) {
   let result = "";
   const characters = '0123456789';
-  for (const i = 0; i < length; i++) {
+  for (let i = 0; i < length; i++) {
     result += characters[Math.floor(Math.random() * characters.length)];
   }
   result = result.match(/\d{1,4}/g).join("");
@@ -155,6 +155,20 @@ export const numberFormat = (value, currency = "PEN") => {
     // Si no se encuentra un formato válido, devolver "0"
     return "0";
   }
+}
+/**
+ * Formatea un número agregando ceros delante hasta alcanzar una longitud específica.
+ *
+ * @param {number} numero - El número que se va a formatear.
+ * @returns {string} El número formateado con ceros delante.
+ */
+export function formatearNumero(numero) {
+  // Convierte el número a cadena y maneja números negativos
+  const numeroAbsoluto = Math.abs(numero);
+  const numeroFormateado = String(numeroAbsoluto).padStart(6, '0');
+
+  // Añade el signo negativo si el número original era negativo
+  return numero < 0 ? `-${numeroFormateado}` : numeroFormateado;
 }
 
 /**
@@ -398,7 +412,7 @@ export function isEmpty(object) {
     return object === "" ? true : false
   }
 
-  if(typeof object === 'object'){
+  if (typeof object === 'object') {
     return false;
   }
 

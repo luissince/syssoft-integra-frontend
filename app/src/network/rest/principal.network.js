@@ -132,6 +132,24 @@ export async function empresaConfig() {
   );
 }
 
+export async function getIdEmpresa(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.get("/api/empresa/id", {
+      params: params,
+      signal: signal
+    })
+  );
+}
+
+export async function updateEmpresa(data, signal) {
+  return await Resolve.create(
+    instancePrincipal.post("/api/empresa/update", data, {
+      signal: signal
+    })
+  );
+}
+
+
 /**
  * @method GET
  * @param {{}} SuccessReponse
@@ -441,9 +459,53 @@ export async function createFactura(data) {
  * @param {*} signal 
  * @returns SuccessReponse | ErrorResponse 
  */
+
+export async function listMoneda(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.get("/api/moneda/list", {
+      params: params,
+      signal: signal
+    })
+  );
+}
+
+export async function getIdMoneda(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.get("/api/moneda/id", {
+      params: params,
+      signal: signal
+    })
+  );
+}
+
 export async function listMonedaCombo(signal) {
   return await Resolve.create(
     instancePrincipal.get("/api/moneda/listcombo", {
+      signal: signal
+    })
+  );
+}
+
+export async function addMoneda(data, signal) {
+  return await Resolve.create(
+    instancePrincipal.post("/api/moneda/add", data, {
+      signal: signal
+    })
+  );
+}
+
+export async function editMoneda(data, signal) {
+  return await Resolve.create(
+    instancePrincipal.post("/api/moneda/update", data, {
+      signal: signal
+    })
+  );
+}
+
+export async function deleteMoneda(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.delete("/api/moneda", {
+      params: params,
       signal: signal
     })
   );
@@ -481,11 +543,63 @@ export async function listBancoCombo(signal) {
  * @param {*} signal 
  * @returns SuccessReponse | ErrorResponse 
  */
+
+export async function listComprobante(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.get("/api/comprobante/list", {
+      signal: signal,
+      params: params
+    })
+  );
+}
+
 export async function listComprobanteCombo(params, signal) {
   return await Resolve.create(
     instancePrincipal.get("/api/comprobante/listcombo", {
       signal: signal,
       params: params
+    })
+  );
+}
+
+export async function comboTipoComprobante(signal) {
+  return await Resolve.create(
+    instancePrincipal.get("/api/comprobante/combo/tipo-comprobante", {
+      signal: signal,
+    })
+  );
+}
+
+export async function getIdComprobante(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.get("/api/comprobante/id", {
+      params: params,
+      signal: signal,
+    })
+  );
+}
+
+export async function addComprobante(data, signal) {
+  return await Resolve.create(
+    instancePrincipal.post("/api/comprobante/add", data, {
+      signal: signal,
+    })
+  );
+}
+
+export async function editComprobante(data, signal) {
+  return await Resolve.create(
+    instancePrincipal.post("/api/comprobante/edit", data, {
+      signal: signal,
+    })
+  );
+}
+
+export async function deleteComprobante(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.delete("/api/comprobante", {
+      params: params,
+      signal: signal,
     })
   );
 }
@@ -592,7 +706,7 @@ export async function listCobro(params, signal) {
 
 export async function addCobro(data, signal) {
   return await Resolve.create(
-    instancePrincipal.post('/api/cobro/add', data,{
+    instancePrincipal.post('/api/cobro/add', data, {
       signal: signal,
     })
   );
@@ -600,7 +714,7 @@ export async function addCobro(data, signal) {
 
 export async function editCobro(data, signal) {
   return await Resolve.create(
-    instancePrincipal.post('/api/cobro/edit', data,{
+    instancePrincipal.post('/api/cobro/edit', data, {
       signal: signal,
     })
   );

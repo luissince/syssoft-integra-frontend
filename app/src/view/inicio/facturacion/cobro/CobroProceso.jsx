@@ -20,11 +20,12 @@ import {
     clearModal,
     viewModal,
     showModal,
+    hideModal,
 } from '../../../../helper/utils.helper';
 // import { apiComprobanteListcombo } from '../../../../network/api';
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../../components/Container';
-import { addCobro, filtrarCliente, filtrarCobroConcepto, listComprobanteCombo, listMonedaCombo } from '../../../../network/rest/principal.network';
+import { addCobro, comboMetodoPago, filtrarCliente, filtrarCobroConcepto, listComprobanteCombo, listMonedaCombo } from '../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
 import CustomComponent from '../../../../model/class/custom-component';
@@ -77,11 +78,17 @@ class CobroProceso extends CustomComponent {
 
             // Atributos libres
             codISO: '',
+            montoInicialCheck: false,
             total: 0,
 
             // Atributos del modal
             loadingModal: false,
             selectTipoPago: 1,
+            metodosPagoLista: [],
+            metodoPagoAgregado: [],
+            frecuenciaPagoCredito: new Date().getDate() > 15 ? '30' : '15',
+            numCuota: '',
+            letraMensual: '',
 
             // Id principales
             idUsuario: this.props.token.userToken.idUsuario,
@@ -138,55 +145,39 @@ class CobroProceso extends CustomComponent {
         this.loadData();
 
         viewModal(this.idModalSale, () => {
+            const metodo = this.state.metodosPagoLista.find(item => item.predeterminado === 1);
 
-            // const importeTotal = this.state.detalleVenta.reduce((accumulator, item) => {
-            //     const totalProductPrice = item.precio * item.cantidad;
-            //     return accumulator + totalProductPrice;
-            // }, 0);
+            this.refMetodoContado.current.value = metodo ? metodo.idMetodoPago : ''
 
-            // const metodo = this.state.metodosPagoLista.find(item => item.predeterminado === 1);
+            if (metodo) {
+                const item = {
+                    "idMetodoPago": metodo.idMetodoPago,
+                    "nombre": metodo.nombre,
+                    "monto": '',
+                    "vuelto": metodo.vuelto,
+                    "descripcion": ""
+                }
 
-            // this.refMetodoContado.current.value = metodo ? metodo.idMetodoPago : ''
-
-            // if (metodo) {
-            //     const item = {
-            //         "idMetodoPago": metodo.idMetodoPago,
-            //         "nombre": metodo.nombre,
-            //         "monto": '',
-            //         "vuelto": metodo.vuelto,
-            //         "descripcion": ""
-            //     }
-
-            //     this.setState(prevState => ({
-            //         metodoPagoAgregado: [...prevState.metodoPagoAgregado, item]
-            //     }))
-            // }
+                this.setState(prevState => ({
+                    metodoPagoAgregado: [...prevState.metodoPagoAgregado, item]
+                }))
+            }
 
             this.setState({ loadingModal: false })
         });
 
         clearModal(this.idModalSale, async () => {
-            // await this.setStateAsync({
-            //     selectTipoPago: 1,
+            await this.setStateAsync({
+                selectTipoPago: 1,
 
-            //     montoInicialCheck: false,
-            //     inicial: '',
-            //     idBancoCredito: '',
-            //     metodoPagoCredito: '',
-            //     letraMensual: '',
-            //     frecuenciaPagoCredito: new Date().getDate() > 15 ? '30' : '15',
-            //     numCuota: '',
+                montoInicialCheck: false,
+                inicial: '',
+                letraMensual: '',
+                frecuenciaPagoCredito: new Date().getDate() > 15 ? '30' : '15',
+                numCuota: '',
 
-            //     idComprobanteCredito: '',
-            //     inicialCreditoVariableCheck: false,
-            //     inicialCreditoVariable: '',
-            //     idComprobanteCreditoVariable: '',
-            //     idBancoCreditoVariable: '',
-            //     metodoPagoCreditoVariable: '',
-            //     frecuenciaPago: new Date().getDate() > 15 ? '30' : '15',
-
-            //     metodoPagoAgregado: [],
-            // });
+                metodoPagoAgregado: [],
+            });
         })
     }
 
@@ -209,9 +200,10 @@ class CobroProceso extends CustomComponent {
     */
 
     loadData = async () => {
-        const [comprobantes, monedas] = await Promise.all([
+        const [comprobantes, monedas, metodoPagos] = await Promise.all([
             await this.fetchComprobante(5),
-            await this.fetchMoneda()
+            await this.fetchMoneda(),
+            await this.fetchMetodoPago()
         ]);
 
         const comprobante = comprobantes.find(item => item.preferida === 1);
@@ -220,6 +212,7 @@ class CobroProceso extends CustomComponent {
         this.setState({
             comprobantes,
             monedas,
+            metodosPagoLista: metodoPagos,
             idComprobante: isEmpty(comprobante) ? '' : comprobante.idComprobante,
             idMoneda: isEmpty(moneda) ? '' : moneda.idMoneda,
             codISO: isEmpty(moneda) ? '' : moneda.codiso,
@@ -275,6 +268,20 @@ class CobroProceso extends CustomComponent {
 
     async fetchMoneda() {
         const response = await listMonedaCombo(this.abortController.signal);
+
+        if (response instanceof SuccessReponse) {
+            return response.data
+        }
+
+        if (response instanceof ErrorResponse) {
+            if (response.getType() === CANCELED) return;
+
+            return [];
+        }
+    }
+
+    async fetchMetodoPago() {
+        const response = await comboMetodoPago();
 
         if (response instanceof SuccessReponse) {
             return response.data
@@ -383,9 +390,190 @@ class CobroProceso extends CustomComponent {
     // Acciones del modal
     //------------------------------------------------------------------------------------------
 
-
     handleSelectTipoPago = (tipo) => {
-        this.setState({ selectTipoPago: tipo});
+        this.setState({ selectTipoPago: tipo });
+    }
+
+    handleCheckMontoInicial = (event) => {
+        this.setState({ montoInicialCheck: event.target.checked })
+    }
+
+    handleAddMetodPay = () => {
+        const listAdd = this.state.metodoPagoAgregado.find(item => item.idMetodoPago === this.refMetodoContado.current.value)
+
+        if (listAdd) {
+            return
+        }
+
+        const metodo = this.state.metodosPagoLista.find(item => item.idMetodoPago === this.refMetodoContado.current.value);
+
+        const item = {
+            "idMetodoPago": metodo.idMetodoPago,
+            "nombre": metodo.nombre,
+            "monto": '',
+            "vuelto": metodo.vuelto,
+            "descripcion": ""
+        }
+
+        this.setState(prevState => ({
+            metodoPagoAgregado: [...prevState.metodoPagoAgregado, item]
+        }))
+    }
+
+    handleInputMontoMetodoPay = (event, idMetodoPago) => {
+        const { value } = event.target;
+
+        this.setState(prevState => ({
+            metodoPagoAgregado: prevState.metodoPagoAgregado.map(item => {
+                if (item.idMetodoPago === idMetodoPago) {
+                    return { ...item, monto: value ? value : '' }
+                } else {
+                    return item;
+                }
+            }),
+        }));
+    }
+
+    handleRemoveItemMetodPay = (idMetodoPago) => {
+        const metodoPagoAgregado = this.state.metodoPagoAgregado.filter(item => item.idMetodoPago !== idMetodoPago);
+        this.setState({ metodoPagoAgregado })
+    }
+
+    handleSelectNumeroCuotas = (event) => {
+        this.setState({ numCuota: event.target.value })
+    }
+
+    handleSelectFrecuenciaPagoCredito = (event) => {
+        this.setState({ frecuenciaPagoCredito: event.target.value })
+    }
+
+    handleProcessContado = async () => {
+        const {
+            cliente,
+            idUsuario,
+            idMoneda,
+            idSucursal,
+            idComprobante,
+            observacion,
+            detalle,
+            total,
+            metodoPagoAgregado
+        } = this.state;
+
+        let metodoPagoLista = [...metodoPagoAgregado];
+
+
+        if (isEmpty(metodoPagoLista)) {
+            alertWarning("Cobro", "Tiene que agregar método de cobro para continuar.",)
+            return;
+        }
+
+        if (metodoPagoLista.filter(item => !isNumeric(item.monto)).length !== 0) {
+            alertWarning("Venta", "Hay montos del metodo de cobro que no tiene valor.",)
+            return;
+        }
+
+        const metodoCobroTotal = metodoPagoLista.reduce((accumulator, item) => {
+            return accumulator += parseFloat(item.monto);
+        }, 0);
+
+        if (metodoPagoLista.length > 1) {
+            if (metodoCobroTotal !== total) {
+                alertWarning("Venta", "Al tener mas de 2 métodos de cobro el monto debe ser igual al total.",)
+                return;
+            }
+        } else {
+            const metodo = metodoPagoLista[0];
+            if (metodo.vuelto === 1) {
+                if (metodoCobroTotal < total) {
+                    alertWarning("Venta", "El monto a cobrar es menor que el total.",)
+                    return;
+                }
+
+                metodoPagoLista.map((item) => {
+                    item.descripcion = `Pago con ${rounded(parseFloat(item.monto))} y su vuelto es ${rounded(parseFloat(item.monto) - total)}`;
+                    item.monto = total;
+                    return item;
+                });
+
+            } else {
+                if (metodoCobroTotal !== total) {
+                    alertWarning("Venta", "El monto a cobrar debe ser igual al total.",)
+                    return;
+                }
+            }
+        }
+
+        alertDialog("Cobro", "¿Está seguro de continuar?", async (accept) => {
+            if (accept) {
+                const data = {
+                    "idCliente": cliente.idCliente,
+                    "idUsuario": idUsuario,
+                    "idMoneda": idMoneda,
+                    "idSucursal": idSucursal,
+                    "idComprobante": idComprobante,
+                    "estado": 1,
+                    "observacion": observacion,
+                    "detalle": detalle,
+                    "metodoPago": metodoPagoAgregado
+                }
+
+                hideModal(this.idModalSale)
+                alertInfo("Cobro", "Procesando información...")
+
+                const response = await addCobro(data);
+
+                if (response instanceof SuccessReponse) {
+                    alertSuccess("Cobro", response.data, () => {
+
+                    })
+                }
+
+                if (response instanceof ErrorResponse) {
+                    if (response.getType() === CANCELED) return;
+
+                    alertWarning("Cobro", response.getMessage())
+                }
+            }
+        });
+
+        // alertDialog("Cobro", "¿Está seguro de continuar?", async (accept) => {
+        //     if (accept) {
+        //         const data = {
+        //             "idCliente": cliente.idCliente,
+        //             "idUsuario": idUsuario,
+        //             "idMoneda": idMoneda,
+        //             "idSucursal": idSucursal,
+        //             "idComprobante": idComprobante,
+        //             "estado": 1,
+        //             "observacion": observacion,
+        //             "detalle": detalle
+        //         }
+
+        //         alertInfo("Cobro", "Procesando información...")
+
+        //         const response = await addCobro(data);
+
+        //         if (response instanceof SuccessReponse) {
+        //             alertSuccess("Cobro", response.data, () => {
+
+        //             })
+        //         }
+
+        //         if (response instanceof ErrorResponse) {
+        //             if (response.getType() === CANCELED) return;
+
+        //             alertWarning("Cobro", response.getMessage())
+        //         }
+        //     }
+        // })
+
+    }
+
+    handleSaveSale = () => {
+        if (this.state.selectTipoPago === 1) {
+            this.handleProcessContado();
+        }
     }
 
     //------------------------------------------------------------------------------------------
@@ -478,7 +666,7 @@ class CobroProceso extends CustomComponent {
     //------------------------------------------------------------------------------------------
 
     handleGuardar = async () => {
-        const { idComprobante, cliente, idMoneda, idUsuario, idSucursal, observacion, detalle } = this.state;
+        const { idComprobante, cliente, idMoneda, detalle } = this.state;
 
         if (!isText(idComprobante)) {
             alertWarning("Cobro", "Seleccione su comprobante.", () => this.refComprobante.current.focus())
@@ -502,37 +690,6 @@ class CobroProceso extends CustomComponent {
 
         showModal(this.idModalSale);
         await this.setStateAsync({ loadingModal: true })
-
-        // alertDialog("Cobro", "¿Está seguro de continuar?", async (accept) => {
-        //     if (accept) {
-        //         const data = {
-        //             "idCliente": cliente.idCliente,
-        //             "idUsuario": idUsuario,
-        //             "idMoneda": idMoneda,
-        //             "idSucursal": idSucursal,
-        //             "idComprobante": idComprobante,
-        //             "estado": 1,
-        //             "observacion": observacion,
-        //             "detalle": detalle
-        //         }
-
-        //         alertInfo("Cobro", "Procesando información...")
-
-        //         const response = await addCobro(data);
-
-        //         if (response instanceof SuccessReponse) {
-        //             alertSuccess("Cobro", response.data, () => {
-
-        //             })
-        //         }
-
-        //         if (response instanceof ErrorResponse) {
-        //             if (response.getType() === CANCELED) return;
-
-        //             alertWarning("Cobro", response.getMessage())
-        //         }
-        //     }
-        // })
     }
 
     handleLimpiar = async () => {
@@ -646,58 +803,34 @@ class CobroProceso extends CustomComponent {
                     selectTipoPago={this.state.selectTipoPago}
                     handleSelectTipoPago={this.handleSelectTipoPago}
 
-                    comprobantesCobro={[]}
-                    bancos={[]}
-                    mmonth={[]}
-                    year={[]}
-
                     refMetodoContado={this.refMetodoContado}
 
                     refMontoInicial={this.refMontoInicial}
                     inicial={''}
                     handleTextMontoInicial={() => { }}
 
-                    montoInicialCheck={false}
-                    handleCheckMontoInicial={() => { }}
-
-                    refComprobanteCredito={this.refComprobanteCredito}
-                    idComprobanteCredito={''}
-                    handleSelectComprobanteCredito={() => { }}
-
-                    refBancoCredito={this.refBancoCredito}
-                    idBancoCredito={''}
-                    handleSelectBancoCredito={() => { }}
-
-                    refMetodoCredito={this.refMetodoCredito}
-                    metodoPagoCredito={''}
-                    handleSelectMetodoPagoCredito={() => { }}
+                    montoInicialCheck={this.state.montoInicialCheck}
+                    handleCheckMontoInicial={this.handleCheckMontoInicial}
 
                     refNumCutoas={this.refNumCutoas}
-                    numCuota={''}
-                    handleSelectNumeroCuotas={() => { }}
-
-                    monthPago={getCurrentMonth()}
-                    handleSelectMonthPago={() => { }}
-
-                    yearPago={getCurrentYear()}
-                    handleSelectYearPago={() => { }}
+                    numCuota={this.state.numCuota}
+                    handleSelectNumeroCuotas={this.handleSelectNumeroCuotas}
 
                     refFrecuenciaPagoCredito={this.refFrecuenciaPagoCredito}
-                    frecuenciaPagoCredito={'10'}
-                    handleSelectFrecuenciaPagoCredito={() => { }}
+                    frecuenciaPagoCredito={this.state.frecuenciaPagoCredito}
+                    handleSelectFrecuenciaPagoCredito={this.handleSelectFrecuenciaPagoCredito}
 
-                    letraMensual={''}
+                    letraMensual={this.state.letraMensual}
 
+                    importeTotal={this.state.total}
 
-                    importeTotal={0.00}
+                    handleSaveSale={this.handleSaveSale}
 
-                    handleSaveSale={() => { }}
-
-                    metodosPagoLista={[]}
-                    metodoPagoAgregado={[]}
-                    handleAddMetodPay={() => { }}
-                    handleInputMontoMetodoPay={() => { }}
-                    handleRemoveItemMetodPay={() => { }}
+                    metodosPagoLista={this.state.metodosPagoLista}
+                    metodoPagoAgregado={this.state.metodoPagoAgregado}
+                    handleAddMetodPay={this.handleAddMetodPay}
+                    handleInputMontoMetodoPay={this.handleInputMontoMetodoPay}
+                    handleRemoveItemMetodPay={this.handleRemoveItemMetodPay}
                 />
 
                 {

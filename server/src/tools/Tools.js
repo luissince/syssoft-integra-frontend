@@ -4,7 +4,6 @@ function isNumber(value) {
     return typeof value === 'number';
 }
 
-
 function isEmail(value) {
     const validRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
     return value.match(validRegex) != null ? true : false;
@@ -28,7 +27,6 @@ function isFile(file) {
     }
 }
 
-
 function removeFile(file) {
     try {
         fs.unlinkSync(file)
@@ -47,7 +45,7 @@ function mkdir(file) {
 }
 
 function chmod(file, mode = 777) {
-    fs.chmod(file, mode);
+    fs.chmodSync(file, mode);
 }
 
 function currentDate() {
@@ -77,7 +75,6 @@ function dateFormat(value) {
     );
 }
 
-
 function formatMoney(amount, decimalCount = 2, decimal = ".", thousands = "") {
     try {
         // Asegurarse de que decimalCount sea un número positivo
@@ -102,7 +99,6 @@ function formatMoney(amount, decimalCount = 2, decimal = ".", thousands = "") {
         return "0"; // Manejar errores devolviendo "0"
     }
 }
-
 
 function numberFormat(value, currency = "PEN") {
     let formats = [

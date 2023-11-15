@@ -1,4 +1,4 @@
-const { currentDate, currentTime } = require('../tools/Tools');
+const { currentDate, currentTime, generateAlphanumericCode } = require('../tools/Tools');
 const { sendSuccess, sendError, sendClient } = require('../tools/Message');
 const Conexion = require('../database/Conexion');
 const conec = new Conexion();
@@ -9,33 +9,26 @@ class Comprobante {
         try {
 
             let lista = await conec.query(`SELECT 
-                idComprobante,
-                CASE
-                WHEN tipo = 1 THEN 'Facturación'
-                WHEN tipo = 2 THEN 'Venta Libre'
-                WHEN tipo = 3 THEN 'Nota de Crédito'
-                WHEN tipo = 4 THEN 'Nota de Debito'
-                WHEN tipo = 5 THEN 'Comprobante de Ingreso'
-                WHEN tipo = 6 THEN 'Comprobante de Egreso'
-                WHEN tipo = 7 THEN 'Cotización'
-                ELSE 'Guía de Remisión' END AS 'tipo',
-                nombre,
-                serie, 
-                numeracion,
-                impresion,
-                estado, 
-                preferida,
-                DATE_FORMAT(fecha,'%d/%m/%Y') as fecha,
-                hora
-                FROM comprobante
+                c.idComprobante,
+                tc.nombre 'tipo',
+                c.nombre,
+                c.serie, 
+                c.numeracion,
+                c.impresion,
+                c.estado, 
+                c.preferida,
+                DATE_FORMAT(c.fecha,'%d/%m/%Y') as fecha,
+                c.hora
+                FROM comprobante AS c
+                INNER JOIN tipoComprobante AS tc on c.idTipoComprobante = tc.idTipoComprobante
                 WHERE 
                 ? = 0
                 OR
-                ? = 1 AND nombre LIKE CONCAT(?,'%')
+                ? = 1 AND c.nombre LIKE CONCAT(?,'%')
                 OR
-                ? = 1 AND serie LIKE CONCAT(?,'%')
+                ? = 1 AND c.serie LIKE CONCAT(?,'%')
                 OR
-                ? = 1 AND numeracion LIKE CONCAT(?,'%')
+                ? = 1 AND c.numeracion LIKE CONCAT(?,'%')
                 LIMIT ?,?`, [
                 parseInt(req.query.opcion),
 
@@ -60,15 +53,17 @@ class Comprobante {
                 };
             });
 
-            let total = await conec.query(`SELECT COUNT(*) AS Total FROM comprobante
+            let total = await conec.query(`SELECT COUNT(*) AS Total 
+            FROM comprobante AS c
+            INNER JOIN tipoComprobante AS tc on c.idTipoComprobante = tc.idTipoComprobante
             WHERE 
             ? = 0
             OR
-            ? = 1 AND nombre LIKE CONCAT(?,'%')
+            ? = 1 AND c.nombre LIKE CONCAT(?,'%')
             OR
-            ? = 1 AND serie LIKE CONCAT(?,'%')
+            ? = 1 AND c.serie LIKE CONCAT(?,'%')
             OR
-            ? = 1 AND numeracion LIKE CONCAT(?,'%')`, [
+            ? = 1 AND c.numeracion LIKE CONCAT(?,'%')`, [
                 parseInt(req.query.opcion),
 
                 parseInt(req.query.opcion),
@@ -83,6 +78,7 @@ class Comprobante {
 
             return sendSuccess(res, { "result": resultLista, "total": total[0].Total })
         } catch (error) {
+            console.log(error)
             return sendError(res, "Se produjo un error de servidor, intente nuevamente.")
         }
     }
@@ -92,35 +88,12 @@ class Comprobante {
         try {
             connection = await conec.beginTransaction();
 
-            let result = await conec.execute(connection, 'SELECT idComprobante FROM comprobante');
-            let idComprobante = "";
-            if (result.length != 0) {
-
-                let quitarValor = result.map(function (item) {
-                    return parseInt(item.idComprobante.replace("CB", ''));
-                });
-
-                let valorActual = Math.max(...quitarValor);
-                let incremental = valorActual + 1;
-                let codigoGenerado = "";
-                if (incremental <= 9) {
-                    codigoGenerado = 'CB000' + incremental;
-                } else if (incremental >= 10 && incremental <= 99) {
-                    codigoGenerado = 'CB00' + incremental;
-                } else if (incremental >= 100 && incremental <= 999) {
-                    codigoGenerado = 'CB0' + incremental;
-                } else {
-                    codigoGenerado = 'CB' + incremental;
-                }
-
-                idComprobante = codigoGenerado;
-            } else {
-                idComprobante = "CB0001";
-            }
+            const result = await conec.execute(connection, 'SELECT idComprobante FROM comprobante');
+            const idComprobante = generateAlphanumericCode("CB0001", result, 'idComprobante');
 
             await conec.execute(connection, `INSERT INTO comprobante(
             idComprobante,
-            tipo,
+            idTipoComprobante,
             nombre,
             serie,
             numeracion,
@@ -136,7 +109,7 @@ class Comprobante {
             idUsuario) 
             VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, [
                 idComprobante,
-                req.body.tipo,
+                req.body.idTipoComprobante,
                 req.body.nombre,
                 req.body.serie,
                 req.body.numeracion,
@@ -152,8 +125,8 @@ class Comprobante {
                 req.body.idUsuario,
             ]);
 
-            let comprobante = await conec.execute(connection, `SELECT * FROM comprobante WHERE tipo = ?`, [
-                req.body.tipo,
+            const comprobante = await conec.execute(connection, `SELECT * FROM comprobante WHERE idTipoComprobante = ?`, [
+                req.body.idTipoComprobante,
             ]);
 
             if (comprobante.length === 0) {
@@ -164,8 +137,8 @@ class Comprobante {
 
             await conec.commit(connection);
             return sendSuccess(res, "Se inserto correctamente el comprobante.")
-        } catch (error) {
-            console.error(error)
+        } catch (error) {    
+            console.log(error)
             if (connection != null) {
                 await conec.rollback(connection);
             }
@@ -193,13 +166,13 @@ class Comprobante {
         try {
             connection = await conec.beginTransaction();
 
-            let venta = await conec.execute(connection, `SELECT  * FROM venta WHERE idComprobante = ?`, [
+            const venta = await conec.execute(connection, `SELECT  * FROM venta WHERE idComprobante = ?`, [
                 req.body.idComprobante
             ]);
 
             if (venta.length > 0) {
                 await conec.execute(connection, `UPDATE comprobante SET 
-                tipo = ?,
+                idTipoComprobante = ?,
                 nombre = ?,
                 impresion = ?,
                 codigo = ?,
@@ -210,7 +183,7 @@ class Comprobante {
                 hupdate = ?,
                 idUsuario = ?
                 WHERE idComprobante = ?`, [
-                    req.body.tipo,
+                    req.body.idTipoComprobante,
                     req.body.nombre,
                     req.body.impresion,
                     req.body.codigo,
@@ -227,7 +200,7 @@ class Comprobante {
                 sendSuccess(res, "Se actualizó correctamente el comprobante. !Hay campos que no se van editar ya que el comprobante esta ligado a un venta¡");
             } else {
                 await conec.execute(connection, `UPDATE comprobante SET 
-                tipo = ?,
+                idTipoComprobante = ?,
                 nombre = ?,
                 serie = ?,
                 numeracion = ?,
@@ -239,7 +212,7 @@ class Comprobante {
                 hupdate = ?,
                 idUsuario = ?
                 WHERE idComprobante = ?`, [
-                    req.body.tipo,
+                    req.body.idTipoComprobante,
                     req.body.nombre,
                     req.body.serie,
                     req.body.numeracion,
@@ -269,7 +242,7 @@ class Comprobante {
         try {
             connection = await conec.beginTransaction();
 
-            let venta = await conec.execute(connection, `SELECT * FROM venta WHERE idComprobante = ?`, [
+            const venta = await conec.execute(connection, `SELECT * FROM venta WHERE idComprobante = ?`, [
                 req.query.idComprobante
             ]);
 
@@ -316,6 +289,18 @@ class Comprobante {
                 req.query.tipo,
                 estado,
             ]);
+            return sendSuccess(res, result);
+        } catch (error) {
+            return sendError(res, "Se produjo un error de servidor, intente nuevamente.")
+        }
+    }
+
+    async comboTipoComprobante(req, res) {
+        try {
+            const result = await conec.query(`SELECT 
+            idTipoComprobante, 
+            nombre
+            FROM tipoComprobante`);
             return sendSuccess(res, result);
         } catch (error) {
             return sendError(res, "Se produjo un error de servidor, intente nuevamente.")

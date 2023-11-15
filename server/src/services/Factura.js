@@ -242,7 +242,7 @@ class Factura {
                 idVentaDetalle++;
             }
 
-            /**¨
+            /**
              * Proceso para ingresa la lista de ingresos con sus método de pagos
              */
 

@@ -24,22 +24,10 @@ class Bancos extends CustomComponent {
   constructor(props) {
     super(props);
     this.state = {
-      add: statePrivilegio(
-        this.props.token.userToken.menus[5].submenu[2].privilegio[0].estado
-      ),
-      view: statePrivilegio(
-        this.props.token.userToken.menus[5].submenu[2].privilegio[1].estado
-      ),
-      edit: statePrivilegio(
-        this.props.token.userToken.menus[5].submenu[2].privilegio[2].estado
-      ),
-      remove: statePrivilegio(
-        this.props.token.userToken.menus[5].submenu[2].privilegio[3].estado
-      ),
-
-      loadModal: false,
-      nameModal: "Nuevo Comprobante",
-      msgModal: "Cargando datos...",
+      add: statePrivilegio(this.props.token.userToken.menus[5].submenu[2].privilegio[0].estado),
+      view: statePrivilegio(this.props.token.userToken.menus[5].submenu[2].privilegio[1].estado),
+      edit: statePrivilegio(this.props.token.userToken.menus[5].submenu[2].privilegio[2].estado),
+      remove: statePrivilegio(this.props.token.userToken.menus[5].submenu[2].privilegio[3].estado),
 
       loading: false,
       lista: [],
@@ -119,9 +107,7 @@ class Bancos extends CustomComponent {
     const response = await listarBancos(data, this.abortControllerTable.signal);
 
     if (response instanceof SuccessReponse) {
-      const totalPaginacion = parseInt(
-        Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina)
-      );
+      const totalPaginacion = parseInt(Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina));
 
       await this.setStateAsync({
         loading: false,
@@ -163,8 +149,8 @@ class Bancos extends CustomComponent {
   }
 
   handleBorrar = (idBanco) => {
-    alertDialog("Banco", "¿Estás seguro de eliminar el banco?", async (event) => {
-      if (event) {
+    alertDialog("Banco", "¿Estás seguro de eliminar el banco?", async (acccept) => {
+      if (acccept) {
 
         alertInfo("Banco", "Procesando información...");
 
@@ -237,6 +223,7 @@ class Bancos extends CustomComponent {
               <i className="bi bi-pencil"></i>
             </button>
           </td>
+
           <td className="text-center">
             <button
               className="btn btn-outline-danger btn-sm"

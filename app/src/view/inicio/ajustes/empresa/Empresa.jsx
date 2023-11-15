@@ -2,14 +2,14 @@ import React from 'react';
 import {
     spinnerLoading,
     statePrivilegio
-} from '../../../helper/utils.helper';
+} from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
-import ContainerWrapper from '../../../components/Container';
-import { images } from '../../../helper';
-import { loadEmpresa } from '../../../network/rest/principal.network';
-import SuccessReponse from '../../../model/class/response';
-import ErrorResponse from '../../../model/class/error-response';
-import { CANCELED } from '../../../model/types/types';
+import ContainerWrapper from '../../../../components/Container';
+import { images } from '../../../../helper';
+import { loadEmpresa } from '../../../../network/rest/principal.network';
+import SuccessReponse from '../../../../model/class/response';
+import ErrorResponse from '../../../../model/class/error-response';
+import { CANCELED } from '../../../../model/types/types';
 
 class Empresa extends React.Component {
     constructor(props) {

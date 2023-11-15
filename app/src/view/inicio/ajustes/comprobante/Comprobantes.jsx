@@ -1,31 +1,31 @@
 import React from 'react';
 import {
+    formatTime,
     alertDialog,
     alertInfo,
     alertSuccess,
     alertWarning,
     spinnerLoading,
     statePrivilegio,
-    keyUpSearch,
-    isEmpty
+    keyUpSearch
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import Paginacion from '../../../../components/Paginacion';
 import ContainerWrapper from '../../../../components/Container';
 import CustomComponent from '../../../../model/class/custom-component';
-import { deleteImpuesto, listImpuesto } from '../../../../network/rest/principal.network';
+import { deleteComprobante, listComprobante } from '../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
 import { CANCELED } from '../../../../model/types/types';
 
-class Impuestos extends CustomComponent {
+class Comprobantes extends CustomComponent {
 
     constructor(props) {
         super(props);
         this.state = {
-            add: statePrivilegio(this.props.token.userToken.menus[5].submenu[5].privilegio[0].estado),
-            edit: statePrivilegio(this.props.token.userToken.menus[5].submenu[5].privilegio[1].estado),
-            remove: statePrivilegio(this.props.token.userToken.menus[5].submenu[5].privilegio[2].estado),
+            add: statePrivilegio(this.props.token.userToken.menus[5].submenu[0].privilegio[0].estado),
+            edit: statePrivilegio(this.props.token.userToken.menus[5].submenu[0].privilegio[1].estado),
+            remove: statePrivilegio(this.props.token.userToken.menus[5].submenu[0].privilegio[2].estado),
 
             loading: false,
             lista: [],
@@ -42,9 +42,9 @@ class Impuestos extends CustomComponent {
 
         this.refTxtSearch = React.createRef();
 
-        this.idCodigo = "";
         this.abortControllerTable = new AbortController();
     }
+
 
     async componentDidMount() {
         this.loadInit();
@@ -104,7 +104,8 @@ class Impuestos extends CustomComponent {
             "filasPorPagina": this.state.filasPorPagina
         }
 
-        const response = await listImpuesto(params, this.abortControllerTable.signal);
+        const response = await listComprobante(params, this.abortControllerTable.signal);
+
         if (response instanceof SuccessReponse) {
             const totalPaginacion = parseInt(Math.ceil((parseFloat(response.data.total) / this.state.filasPorPagina)));
 
@@ -122,7 +123,8 @@ class Impuestos extends CustomComponent {
                 loading: false,
                 lista: [],
                 totalPaginacion: 0,
-                messageTable: response.getMessage(),
+                messageTable: response.getMessage()
+
             });
         }
     }
@@ -133,103 +135,48 @@ class Impuestos extends CustomComponent {
         })
     }
 
-    handleEditar = (idImpuesto) => {
+    handleEditar = (idBanco) => {
         this.props.history.push({
             pathname: `${this.props.location.pathname}/editar`,
-            search: "?idImpuesto=" + idImpuesto
+            search: "?idComprobante=" + idBanco
         })
     }
 
-    handleBorrar(idImpuesto) {
-        alertDialog("Impuesto", "¿Estás seguro de eliminar la moneda?", async (event) => {
+    handleBorrar(idComprobante) {
+        alertDialog("Comprobante", "¿Estás seguro de eliminar el comprobante?", async (event) => {
             if (event) {
-                alertInfo("Impuesto", "Procesando información...")
 
                 const params = {
-                    "idImpuesto": idImpuesto
+                    "idComprobante": idComprobante
                 }
 
-                const response = await deleteImpuesto(params);
+                alertInfo("Comprobante", "Procesando información...")
+
+                const response = await deleteComprobante(params);
+
                 if (response instanceof SuccessReponse) {
-                    alertSuccess("Impuesto", response.data, () => {
+                    alertSuccess("Comprobante", response.data, () => {
                         this.loadInit();
                     })
                 }
 
                 if (response instanceof ErrorResponse) {
-                    alertWarning("Impuesto", response.getMessage())
+                    if (response.getType() === CANCELED) return;
 
+                    alertWarning("Comprobante", response.getMessage())
                 }
             }
-        })
-    }
-
-    generarBody() {
-        if (this.state.loading) {
-            return (
-                <tr>
-                    <td className="text-center" colSpan="9">
-                        {spinnerLoading("Cargando información de la tabla...", true)}
-                    </td>
-                </tr>
-            );
-        }
-
-        if (isEmpty(this.state.lista)) {
-            return (
-                <tr>
-                    <td className="text-center" colSpan="9">¡No hay comprobantes registrados!</td>
-                </tr>
-            );
-        }
-
-        return this.state.lista.map((item, index) => {
-            return (
-                <tr key={index}>
-                    <td className="text-center">{item.id}</td>
-                    <td>{item.nombre}</td>
-                    <td>{item.porcentaje + "%"}</td>
-                    <td>{item.codigo}</td>
-                    <td className="text-center">
-                        <div className={`badge ${item.preferida ? "badge-success" : "badge-warning"}`}>
-                            {item.preferida ? "SI" : "NO"}
-                        </div>
-                    </td>
-                    <td className="text-center">
-                        <div className={`badge ${item.estado ? "badge-info" : "badge-danger"}`}>
-                            {item.estado ? "ACTIVO" : "INACTIVO"}
-                        </div>
-                    </td>
-                    <td className="text-center">
-                        <button
-                            className="btn btn-outline-warning btn-sm"
-                            title="Editar"
-                            onClick={() => this.handleEditar(item.idImpuesto)}
-                            disabled={!this.state.edit}>
-                            <i className="bi bi-pencil"></i>
-                        </button>
-                    </td>
-                    <td className="text-center">
-                        <button
-                            className="btn btn-outline-danger btn-sm"
-                            title="Anular"
-                            onClick={() => this.handleBorrar(item.idImpuesto)}
-                            disabled={!this.state.remove}>
-                            <i className="bi bi-trash"></i>
-                        </button>
-                    </td>
-                </tr>
-            )
         })
     }
 
     render() {
         return (
             <ContainerWrapper>
+
                 <div className="row">
                     <div className="col-md-12">
                         <div className="form-group">
-                            <h5>Impuestos <small className="text-secondary">LISTA</small></h5>
+                            <h5>Comprobantes <small className="text-secondary">LISTA</small></h5>
                         </div>
                     </div>
                 </div>
@@ -253,7 +200,9 @@ class Impuestos extends CustomComponent {
                     </div>
                     <div className="col-md-6 col-sm-12">
                         <div className="form-group">
-                            <button className="btn btn-outline-info" onClick={this.handleAgregar} disabled={!this.state.add}>
+                            <button className="btn btn-outline-info"
+                                onClick={this.handleAgregar}
+                                disabled={!this.state.add}>
                                 <i className="bi bi-file-plus"></i> Nuevo Registro
                             </button>
                             {" "}
@@ -271,17 +220,71 @@ class Impuestos extends CustomComponent {
                                 <thead>
                                     <tr>
                                         <th width="5%" className="text-center">#</th>
-                                        <th width="40%" >Nombre</th>
-                                        <th width="15%" >Porcentaje</th>
-                                        <th width="15%" >Código</th>
-                                        <th width="15%" >Preferida</th>
-                                        <th width="15%" >Estado</th>
-                                        <th width="5%" className="text-center">Editar</th>
+                                        <th width="20%" >Tipo Comprobante</th>
+                                        <th width="20%" >Nombre</th>
+                                        <th width="10%" >Serie</th>
+                                        <th width="10%" >Numeración</th>
+                                        <th width="10%" >Creación</th>
+                                        <th width="10%" >Preferida</th>
+                                        <th width="10%" >Estado</th>
+                                        <th width="5%" className="text-center">Edición</th>
                                         <th width="5%" className="text-center">Anular</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {this.generarBody()}
+                                    {
+                                        this.state.loading ? (
+                                            <tr>
+                                                <td className="text-center" colSpan="10">
+                                                    {spinnerLoading("Cargando información de la tabla...", true)}
+                                                </td>
+                                            </tr>
+                                        ) : this.state.lista.length === 0 ? (
+                                            <tr>
+                                                <td className="text-center" colSpan="10">¡No hay comprobantes registrados!</td>
+                                            </tr>
+                                        ) :
+                                            this.state.lista.map((item, index) => {
+                                                return (
+                                                    <tr key={index}>
+                                                        <td className="text-center">{item.id}</td>
+                                                        <td>{item.tipo.toUpperCase()}</td>
+                                                        <td>{item.nombre}</td>
+                                                        <td>{item.serie}</td>
+                                                        <td>{item.numeracion}</td>
+                                                        <td>{<span>{item.fecha}</span>}{<br></br>}{<span>{formatTime(item.hora)}</span>}</td>
+                                                        <td className="text-center">
+                                                            <div>
+                                                                {item.preferida === 1 ? "Si" : "No"}
+                                                            </div>
+                                                        </td>
+                                                        <td className="text-center">
+                                                            <div className={`badge ${item.estado === 1 ? "badge-info" : "badge-danger"}`}>
+                                                                {item.estado === 1 ? "ACTIVO" : "INACTIVO"}
+                                                            </div>
+                                                        </td>
+                                                        <td className="text-center">
+                                                            <button
+                                                                className="btn btn-outline-warning btn-sm"
+                                                                title="Editar"
+                                                                onClick={() => this.handleEditar(item.idComprobante)}
+                                                                disabled={!this.state.edit}>
+                                                                <i className="bi bi-pencil"></i>
+                                                            </button>
+                                                        </td>
+                                                        <td className="text-center">
+                                                            <button
+                                                                className="btn btn-outline-danger btn-sm"
+                                                                title="Anular"
+                                                                onClick={() => this.handleBorrar(item.idComprobante)}
+                                                                disabled={!this.state.remove}>
+                                                                <i className="bi bi-trash"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                )
+                                            })
+                                    }
                                 </tbody>
                             </table>
                         </div>
@@ -309,4 +312,4 @@ const mapStateToProps = (state) => {
     }
 }
 
-export default connect(mapStateToProps, null)(Impuestos);
+export default connect(mapStateToProps, null)(Comprobantes);

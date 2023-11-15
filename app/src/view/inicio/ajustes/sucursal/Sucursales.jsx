@@ -7,13 +7,13 @@ import {
     alertDialog,
     statePrivilegio,
     keyUpSearch
-} from '../../../helper/utils.helper';
+} from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
-import Paginacion from '../../../components/Paginacion';
-import ContainerWrapper from '../../../components/Container';
-import { borrarSucursal } from '../../../network/rest/principal.network';
-import SuccessReponse from '../../../model/class/response';
-import ErrorResponse from '../../../model/class/error-response';
+import Paginacion from '../../../../components/Paginacion';
+import ContainerWrapper from '../../../../components/Container';
+import { borrarSucursal } from '../../../../network/rest/principal.network';
+import SuccessReponse from '../../../../model/class/response';
+import ErrorResponse from '../../../../model/class/error-response';
 
 class Sucursales extends React.Component {
     constructor(props) {

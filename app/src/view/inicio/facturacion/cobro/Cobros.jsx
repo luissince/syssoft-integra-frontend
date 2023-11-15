@@ -7,7 +7,8 @@ import {
     alertDialog,
     statePrivilegio,
     keyUpSearch,
-    isEmpty
+    isEmpty,
+    formatearNumero
 } from '../../../../helper/utils.helper';
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
@@ -165,13 +166,20 @@ class Cobros extends CustomComponent {
         // }
     }
 
-    onEventNuevoCobro() {
+    handleCrear = () => {
         this.props.history.push({
             pathname: `${this.props.location.pathname}/proceso`,
         })
     }
 
-    onEventAnularCobro(idCobro) {
+    handleDetalle = (idCobro) => {
+        this.props.history.push({
+            pathname: `${this.props.location.pathname}/detalle`,
+            search: "?idCobro=" + idCobro
+        })
+    }
+
+    handleAnular = (idCobro) => {
         alertDialog("Cobro", "¿Está seguro de que desea eliminar la transacción? Esta operación no se puede deshacer.", async (value) => {
             if (value) {
                 // try {
@@ -217,12 +225,38 @@ class Cobros extends CustomComponent {
 
 
         return this.state.lista.map((item, index) => {
-
-
-
             return (
                 <tr key={index}>
                     <td className="text-center">{item.id}</td>
+                    <td>{item.fecha}{<br />}{formatTime(item.hora)}</td>
+                    <td>{item.comprobante}{<br />}{item.serie + "-" + formatearNumero(item.numeracion)}</td>
+                    <td>{item.documento}{<br />}{item.informacion}</td>
+                    <td className="text-center">
+                        {
+                            item.estado === 1
+                                ? <span className="text-success">COBRADO</span>
+                                : <span className="text-danger">ANULADO</span>
+                        }
+                    </td>
+                    <td className='text-right'>{numberFormat(item.monto, item.codiso)}</td>
+                    <td className="text-center">
+                        <button
+                            className="btn btn-outline-info btn-sm"
+                            title="Detalle"
+                            onClick={() => this.handleDetalle(item.idCobro)}
+                            disabled={!this.state.view}>
+                            <i className="fa fa-eye"></i>
+                        </button>
+                    </td>
+                    <td className="text-center">
+                        <button
+                            className="btn btn-outline-danger btn-sm"
+                            title="Eliminar"
+                            onClick={() => this.handleAnular(item.idCobro)}
+                            disabled={!this.state.remove}>
+                            <i className="fa fa-remove"></i>
+                        </button>
+                    </td>
                 </tr>
                 // <tr key={index}>
                 //     <td className="text-center">{item.id}</td>
@@ -316,11 +350,13 @@ class Cobros extends CustomComponent {
                     </div>
                     <div className="col-md-6 col-sm-12">
                         <div className="form-group">
-                            <button className="btn btn-outline-info" onClick={() => this.onEventNuevoCobro()} disabled={!this.state.add}>
+                            <button className="btn btn-outline-info"
+                                onClick={this.handleCrear}
+                                disabled={!this.state.add}>
                                 <i className="bi bi-file-plus"></i> Nuevo Registro
                             </button>
                             {" "}
-                            <button className="btn btn-outline-secondary" onClick={() => this.loadInit()}>
+                            <button className="btn btn-outline-secondary" onClick={this.loadInit}>
                                 <i className="bi bi-arrow-clockwise"></i>
                             </button>
                         </div>
@@ -336,7 +372,7 @@ class Cobros extends CustomComponent {
                                         <th width="5%" className="text-center">#</th>
                                         <th width="10%">Fecha</th>
                                         <th width="10%">Comprobante</th>
-                                        <th width="10%">Cliente</th>                                        
+                                        <th width="20%">Cliente</th>
                                         <th width="10%">Estado</th>
                                         <th width="10%">Monto</th>
                                         <th width="5%" className="text-center">Detalle</th>

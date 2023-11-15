@@ -312,7 +312,7 @@ class ClienteAgregar extends CustomComponent {
             msgLoading: 'Consultando número de RUC...',
         });
 
-        const response = await getRuc(this.state.documento);
+        const response = await getRuc(this.state.documentoPj);
 
         if (response instanceof SuccessReponse) {
             this.setState({

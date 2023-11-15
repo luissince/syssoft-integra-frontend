@@ -3,7 +3,6 @@ import {
     rounded,
     keyNumberFloat,
     keyNumberInteger,
-    monthName,
     spinnerLoading
 } from "../../../../../helper/utils.helper";
 
@@ -17,10 +16,6 @@ const ModalSale = (props) => {
         selectTipoPago,
         handleSelectTipoPago,
 
-        comprobantesCobro,
-        bancos,
-        mmonth,
-        year,
 
         refMetodoContado,
 
@@ -31,27 +26,9 @@ const ModalSale = (props) => {
         montoInicialCheck,
         handleCheckMontoInicial,
 
-        refComprobanteCredito,
-        idComprobanteCredito,
-        handleSelectComprobanteCredito,
-
-        refBancoCredito,
-        idBancoCredito,
-        handleSelectBancoCredito,
-
-        refMetodoCredito,
-        metodoPagoCredito,
-        handleSelectMetodoPagoCredito,
-
         refNumCutoas,
         numCuota,
         handleSelectNumeroCuotas,
-
-        monthPago,
-        handleSelectMonthPago,
-
-        yearPago,
-        handleSelectYearPago,
 
         refFrecuenciaPagoCredito,
         frecuenciaPagoCredito,
@@ -131,7 +108,7 @@ const ModalSale = (props) => {
 
     return (
         <div className="modal fade" id={idModalSale} data-bs-keyboard="false" data-bs-backdrop="static">
-            <div className="modal-dialog modal-lg modal-dialog-centered">
+            <div className="modal-dialog modal-dialog-centered">
                 <div className="modal-content">
                     <div className="modal-header">
                         <h6 className="modal-title">Completar Venta</h6>
@@ -170,7 +147,7 @@ const ModalSale = (props) => {
                         {/* Tipos de venta */}
                         <div className="row">
                             {/* Al contado */}
-                            <div className="col-md-3 col-sm-3">
+                            <div className="col">
                                 <button className={`btn ${selectTipoPago === 1 ? "btn-primary" : "btn-light"} btn-block`}
                                     type="button"
                                     title="Pago al contado"
@@ -188,7 +165,7 @@ const ModalSale = (props) => {
                             </div>
 
                             {/* Crédito fijo*/}
-                            <div className="col-md-3 col-sm-3">
+                            <div className="col">
                                 <button className={`btn ${selectTipoPago === 2 ? "btn-primary" : "btn-light"} btn-block`}
                                     type="button"
                                     title="Pago al credito"
@@ -311,89 +288,6 @@ const ModalSale = (props) => {
                                         </div>
                                     </div>
 
-                                    {
-                                        montoInicialCheck ?
-                                            <div className="form-row">
-                                                <div className="form-group col-md-12">
-                                                    <div className="input-group">
-                                                        <div className="input-group-prepend">
-                                                            <div className="input-group-text">
-                                                                <i className="bi bi-receipt"></i>
-                                                            </div>
-                                                        </div>
-                                                        <select
-                                                            title="Lista de caja o banco a depositar"
-                                                            className="form-control"
-                                                            ref={refComprobanteCredito}
-                                                            value={idComprobanteCredito}
-                                                            onChange={handleSelectComprobanteCredito}
-                                                        >
-                                                            <option value="">-- Comprobante --</option>
-                                                            {
-                                                                comprobantesCobro.map((item, index) => (
-                                                                    <option key={index} value={item.idComprobante}>{item.nombre}</option>
-                                                                ))
-                                                            }
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            : null
-                                    }
-
-                                    {
-                                        montoInicialCheck ?
-                                            <div className="form-group">
-                                                <div className="input-group">
-                                                    <div className="input-group-prepend">
-                                                        <div className="input-group-text"><i className="bi bi-bank"></i></div>
-                                                    </div>
-                                                    <select
-                                                        title="Lista de caja o banco a depositar"
-                                                        className="form-control"
-                                                        ref={refBancoCredito}
-                                                        value={idBancoCredito}
-                                                        onChange={handleSelectBancoCredito}
-                                                    >
-                                                        <option value="">-- Cuenta bancaria --</option>
-                                                        {
-                                                            bancos.map((item, index) => (
-                                                                <option key={index} value={item.idBanco}>{item.nombre}</option>
-                                                            ))
-                                                        }
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            : null
-                                    }
-
-                                    {
-                                        montoInicialCheck ?
-                                            <div className="form-group">
-                                                <div className="input-group">
-                                                    <div className="input-group-prepend">
-                                                        <div className="input-group-text"><i className="bi bi-credit-card-2-back"></i></div>
-                                                    </div>
-                                                    <select
-                                                        title="Lista metodo de pago"
-                                                        className="form-control"
-                                                        ref={refMetodoCredito}
-                                                        value={metodoPagoCredito}
-                                                        onChange={handleSelectMetodoPagoCredito}
-                                                    >
-                                                        <option value="">-- Metodo de pago --</option>
-                                                        <option value="1">Efectivo</option>
-                                                        <option value="2">Consignación</option>
-                                                        <option value="3">Transferencia</option>
-                                                        <option value="4">Cheque</option>
-                                                        <option value="5">Tarjeta crédito</option>
-                                                        <option value="6">Tarjeta débito</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            : null
-                                    }
-
                                     <div className="form-group">
                                         <div className="input-group">
                                             <div className="input-group-prepend">
@@ -414,40 +308,6 @@ const ModalSale = (props) => {
                                         </div>
                                     </div>
 
-                                    <div className="form-group">
-                                        <div className="input-group">
-                                            <div className="input-group-prepend">
-                                                <div className="input-group-text">
-                                                    <i className="bi bi-calendar"></i>
-                                                </div>
-                                            </div>
-
-                                            <select
-                                                title="Mes"
-                                                className="form-control"
-                                                value={monthPago}
-                                                onChange={handleSelectMonthPago}
-                                            >
-                                                {
-                                                    mmonth.map((item, index) => (
-                                                        <option key={index} value={item}>{monthName(item)}</option>
-                                                    ))
-                                                }
-                                            </select>
-                                            <select
-                                                title="Año"
-                                                className="form-control"
-                                                value={yearPago}
-                                                onChange={handleSelectYearPago}
-                                            >
-                                                {
-                                                    year.map((item, index) => (
-                                                        <option key={index} value={item}>{item}</option>
-                                                    ))
-                                                }
-                                            </select>
-                                        </div>
-                                    </div>
 
                                     <div className="form-group">
                                         <div className="input-group">

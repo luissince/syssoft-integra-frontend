@@ -114,7 +114,6 @@ class VentaProceso extends CustomComponent {
 
             //Modal Sale
             metodosPagoLista: [],
-
             metodoPagoAgregado: [],
 
             idSucursal: this.props.token.project.idSucursal,
@@ -862,7 +861,6 @@ class VentaProceso extends CustomComponent {
 
 
                 const response = await createFactura(data);
-
 
                 if (response instanceof SuccessReponse) {
                     alertSuccess("Venta", response.data, () => {

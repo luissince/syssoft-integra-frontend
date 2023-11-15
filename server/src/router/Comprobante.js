@@ -26,4 +26,9 @@ router.get('/listcombo', async function (req, res) {
     return await comprobante.listcombo(req, res)
 });
 
+router.get('/combo/tipo-comprobante', async function (req, res) {
+    return await comprobante.comboTipoComprobante(req, res)
+});
+
+
 module.exports = router;

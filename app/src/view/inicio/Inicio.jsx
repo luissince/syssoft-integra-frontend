@@ -35,20 +35,28 @@ import Reservas from './facturacion/reserva/Reservas';
 
 import Socios from './facturacion/socio/Socios';
 
-import Monedas from './ajustes/Monedas';
-import Comprobantes from './ajustes/Comprobantes';
+import Monedas from './ajustes/moneda/Monedas.jsx';
+import MonedaAgregar from './ajustes/moneda/MonedaAgregar.jsx';
+import MonedaEditar from './ajustes/moneda/MonedaEditar.jsx';
 
-import Impuestos from './ajustes/impuesto/Impuestos';
+import Comprobantes from './ajustes/comprobante/Comprobantes.jsx';
+import ComprobanteAgregar from './ajustes/comprobante/ComprobanteAgregar.jsx';
+import ComprobanteEditar from './ajustes/comprobante/ComprobanteEditar.jsx';
+
+import Impuestos from './ajustes/impuesto/Impuestos.jsx';
+import ImpuestoAgregar from './ajustes/impuesto/ImpuestoAgregar.jsx';
+import ImpuestoEditar from './ajustes/impuesto/ImpuestoEditar.jsx';
 
 import Bancos from './ajustes/banco/Bancos';
 import BancoDetalle from './ajustes/banco/BancoDetalle';
 import BancoAgregar from './ajustes/banco/BancoAgregar';
 import BancoEditar from './ajustes/banco/BancoEditar';
 
-import Empresa from './ajustes/Empresa';
-import EmpresaProceso from './ajustes/registros/EmpresaProceso';
-import Sucursales from './ajustes/Sucursales';
-import ProcesoSucursal from './ajustes/sucursal/ProcesoSucursal';
+import Empresa from './ajustes/empresa/Empresa.jsx';
+import EmpresaEditar from './ajustes/empresa/EmpresaEditar.jsx';
+
+import Sucursales from './ajustes/sucursal/Sucursales.jsx';
+import SucursalEditar from './ajustes/sucursal/SucursalEditar.jsx';
 
 import Categorias from './logistica/categoria/Categorias';
 import CategoriaAgregar from './logistica/categoria/CategoriaAgregar';
@@ -416,12 +424,34 @@ class Inicio extends React.Component {
 
                     <Route
                         path={`${path}/monedas`}
+                        exact={true}
                         render={(props) => <Monedas {...props} />}
+                    />
+                    <Route
+                        path={`${path}/monedas/agregar`}
+                        exact={true}
+                        render={(props) => <MonedaAgregar {...props} />}
+                    />
+                    <Route
+                        path={`${path}/monedas/editar`}
+                        exact={true}
+                        render={(props) => <MonedaEditar {...props} />}
                     />
 
                     <Route
                         path={`${path}/comprobantes`}
+                        exact={true}
                         render={(props) => <Comprobantes {...props} />}
+                    />
+                    <Route
+                        path={`${path}/comprobantes/agregar`}
+                        exact={true}
+                        render={(props) => <ComprobanteAgregar {...props} />}
+                    />
+                    <Route
+                        path={`${path}/comprobantes/editar`}
+                        exact={true}
+                        render={(props) => <ComprobanteEditar {...props} />}
                     />
 
                     <Route
@@ -453,7 +483,7 @@ class Inicio extends React.Component {
                     <Route
                         path={`${path}/empresa/proceso`}
                         exact={true}
-                        render={(props) => <EmpresaProceso {...props} />}
+                        render={(props) => <EmpresaEditar {...props} />}
                     />
                     <Route
                         path={`${path}/sucursales`}
@@ -463,11 +493,23 @@ class Inicio extends React.Component {
                     <Route
                         path={`${path}/sucursales/proceso`}
                         exact={true}
-                        render={(props) => <ProcesoSucursal {...props} />}
+                        render={(props) => <SucursalEditar {...props} />}
                     />
+
                     <Route
                         path={`${path}/impuestos`}
+                        exact={true}
                         render={(props) => <Impuestos {...props} />}
+                    />
+                    <Route
+                        path={`${path}/impuestos/agregar`}
+                        exact={true}
+                        render={(props) => <ImpuestoAgregar {...props} />}
+                    />
+                    <Route
+                        path={`${path}/impuestos/editar`}
+                        exact={true}
+                        render={(props) => <ImpuestoEditar {...props} />}
                     />
 
                     <Route

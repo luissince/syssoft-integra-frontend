@@ -1,5 +1,4 @@
 import React from "react";
-import axios from "axios";
 import {
   convertNullText,
   alertDialog,
@@ -9,12 +8,20 @@ import {
   spinnerLoading,
   keyNumberInteger,
   imageBase64,
+  isText,
 } from "../../../../helper/utils.helper";
 import { connect } from "react-redux";
 import ContainerWrapper from "../../../../components/Container";
 import { images } from "../../../../helper";
+import { getIdEmpresa, updateEmpresa } from "../../../../network/rest/principal.network";
+import SuccessReponse from "../../../../model/class/response";
+import ErrorResponse from "../../../../model/class/error-response";
+import { CANCELED } from "../../../../model/types/types";
+import { getRuc } from "../../../../network/rest/apisperu.network";
+import CustomComponent from "../../../../model/class/custom-component";
 
-class EmpresaProceso extends React.Component {
+class EmpresaProceso extends CustomComponent {
+
   constructor(props) {
     super(props);
 
@@ -54,20 +61,15 @@ class EmpresaProceso extends React.Component {
 
     this.refFileLogo = React.createRef();
     this.refFileImagen = React.createRef();
-    this.abortControllerModal = new AbortController();
-  }
 
-  setStateAsync(state) {
-    return new Promise((resolve) => {
-      this.setState(state, resolve);
-    });
+    this.abortController = new AbortController();
   }
 
   componentDidMount() {
     const url = this.props.location.search;
     const idEmpresa = new URLSearchParams(url).get("idEmpresa");
     if (idEmpresa !== null) {
-      this.loadDataId(idEmpresa);
+      this.loadingData(idEmpresa);
     } else {
       this.props.history.goBack();
     }
@@ -82,28 +84,17 @@ class EmpresaProceso extends React.Component {
   }
 
   componentWillUnmount() {
-    this.abortControllerModal.abort();
+    this.abortController.abort();
 
-    this.refFileLogo.current.removeEventListener(
-      "change",
-      this.onEventFileLogo
-    );
-    this.refFileImagen.current.removeEventListener(
-      "change",
-      this.onEventFileImage
-    );
+    this.refFileLogo.current.removeEventListener("change", this.onEventFileLogo);
+    this.refFileImagen.current.removeEventListener("change", this.onEventFileImage);
   }
 
-  onEventFileLogo = async (event) => {
-    console.log(event.target.files);
+  onEventFileLogo = async (event) => {  
     if (event.target.files.length !== 0) {
-      await this.setStateAsync({
-        logo: URL.createObjectURL(event.target.files[0]),
-      });
+      await this.setStateAsync({ logo: URL.createObjectURL(event.target.files[0]), });
     } else {
-      await this.setStateAsync({
-        logo: images.noImage,
-      });
+      await this.setStateAsync({ logo: images.noImage, });
       this.refFileLogo.current.value = "";
     }
   };
@@ -135,42 +126,44 @@ class EmpresaProceso extends React.Component {
     this.refFileImagen.current.value = "";
   }
 
-  loadDataId = async (id) => {
-    try {
-      const result = await axios.get("/api/empresa/id", {
-        signal: this.abortControllerModal.signal,
-        params: {
-          idEmpresa: id,
-        },
-      });
+  loadingData = async (id) => {
+    const params = {
+      idEmpresa: id,
+    }
 
-      const data = result.data;
+    const response = await getIdEmpresa(params, this.abortController.signal);
 
-      await this.setStateAsync({
-        idEmpresa: data.idEmpresa,
+    if (response instanceof SuccessReponse) {
 
-        documento: data.documento,
-        razonSocial: data.razonSocial,
-        nombreEmpresa: data.nombreEmpresa,
-        direccion: data.direccion,
+      const empresa = response.data;
 
-        useSol: data.useSol,
-        claveSol: data.claveSol,
+      this.setState({
+        idEmpresa: empresa.idEmpresa,
 
-        usuarioEmail: data.usuarioEmail,
-        claveEmail: data.claveEmail,
+        documento: empresa.documento,
+        razonSocial: empresa.razonSocial,
+        nombreEmpresa: empresa.nombreEmpresa,
+        direccion: empresa.direccion,
 
-        logo: data.rutaLogo !== "" ? "/" + data.rutaLogo : images.noImage,
-        image: data.rutaImage !== "" ? "/" + data.rutaImage : images.noImage,
+        useSol: empresa.useSol,
+        claveSol: empresa.claveSol,
+
+        usuarioEmail: empresa.usuarioEmail,
+        claveEmail: empresa.claveEmail,
+
+        logo: empresa.rutaLogo !== "" ? "/" + empresa.rutaLogo : images.noImage,
+        image: empresa.rutaImage !== "" ? "/" + empresa.rutaImage : images.noImage,
 
         loading: false,
       });
-    } catch (error) {
-      if (error.message !== "canceled") {
-        await this.setStateAsync({
-          msgModal: "Se produjo un error interno, intente nuevamente",
-        });
-      }
+    }
+
+    if (response instanceof ErrorResponse) {
+      if (response.getType() === CANCELED) return;
+
+      this.setState({
+        msgModal: response.getMessage()
+      });
     }
   };
 
@@ -185,87 +178,87 @@ class EmpresaProceso extends React.Component {
       return;
     }
 
-    try {
-      await this.setStateAsync({
-        loading: true,
-        msgLoading: "Consultando número de RUC...",
-      });
+    this.setState({
+      loading: true,
+      msgLoading: "Consultando número de RUC...",
+    });
 
-      let result = await axios.get(
-        "https://dniruc.apisperu.com/api/v1/ruc/" +
-        this.state.documento +
-        "?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6ImFsZXhhbmRlcl9keF8xMEBob3RtYWlsLmNvbSJ9.6TLycBwcRyW1d-f_hhCoWK1yOWG_HJvXo8b-EoS5MhE",
-        {
-          timeout: 5000,
-        }
-      );
-      await this.setStateAsync({
-        documento: convertNullText(result.data.ruc),
-        razonSocial: convertNullText(result.data.razonSocial),
-        direccion: convertNullText(result.data.direccion),
+    const response = await getRuc(this.state.documento);
+
+    if (response instanceof SuccessReponse) {
+      this.setState({
+        documento: convertNullText(response.data.ruc),
+        razonSocial: convertNullText(response.data.razonSocial),
+        direccion: convertNullText(response.data.direccion),
         loading: false,
       });
-    } catch (error) {
-      await this.setStateAsync({
-        loading: false,
-      });
+    }
+
+    if (response instanceof ErrorResponse) {
+      if (response.getType() === CANCELED) return;
+
+      alertWarning("Empresa", response.getMessage(), () => {
+        this.setState({
+          loading: false,
+        });
+      })
     }
   }
 
   async onEventGuardar() {
-    if (this.state.documento === "") {
-      this.refDocumento.current.focus();
+    if (!isText(this.state.documento)) {
+      alertWarning("Empresa", "Ingrese el número de documento.", () => this.refDocumento.current.focus())
       return;
     }
 
     if (this.state.razonSocial === "") {
-      this.refRazonSocial.current.focus();
+      alertWarning("Empresa", "Ingrese la razón social.", () => this.refRazonSocial.current.focus())
       return;
     }
+
     alertDialog("Empresa", "¿Está seguro de continuar?", async () => {
-      try {
-        alertInfo("Empresa", "Procesando información...");
+      alertInfo("Empresa", "Procesando información...");
 
-        let logoSend = await imageBase64(this.refFileLogo.current.files);
-        let baseLogo = logoSend ? logoSend.base64String : "";
-        let extLogo = logoSend ? logoSend.extension : "";
+      const logoSend = await imageBase64(this.refFileLogo.current.files);
+      const baseLogo = logoSend ? logoSend.base64String : "";
+      const extLogo = logoSend ? logoSend.extension : "";
 
-        let imageSend = await imageBase64(this.refFileImagen.current.files);
-        let baseImage = imageSend ? imageSend.base64String : "";
-        let extImage = imageSend ? imageSend.extension : "";
+      const imageSend = await imageBase64(this.refFileImagen.current.files);
+      const baseImage = imageSend ? imageSend.base64String : "";
+      const extImage = imageSend ? imageSend.extension : "";
 
-        let result = await axios.post("/api/empresa/update", {
-          documento: this.state.documento.trim(),
-          razonSocial: this.state.razonSocial.trim().toUpperCase(),
-          nombreEmpresa: this.state.nombreEmpresa.trim().toUpperCase(),
-          direccion: this.state.direccion.trim().toUpperCase(),
+      const data = {
+        documento: this.state.documento.trim(),
+        razonSocial: this.state.razonSocial.trim(),
+        nombreEmpresa: this.state.nombreEmpresa.trim(),
+        direccion: this.state.direccion.trim(),
 
-          useSol: this.state.useSol.trim(),
-          claveSol: this.state.claveSol.trim(),
+        useSol: this.state.useSol.trim(),
+        claveSol: this.state.claveSol.trim(),
 
-          usuarioEmail: this.state.usuarioEmail.trim(),
-          claveEmail: this.state.claveEmail.trim(),
+        usuarioEmail: this.state.usuarioEmail.trim(),
+        claveEmail: this.state.claveEmail.trim(),
 
-          logo: baseLogo,
-          image: baseImage,
-          extlogo: extLogo,
-          extimage: extImage,
+        logo: baseLogo,
+        image: baseImage,
+        extlogo: extLogo,
+        extimage: extImage,
 
-          idEmpresa: this.state.idEmpresa,
-        });
+        idEmpresa: this.state.idEmpresa,
+      }
 
-        alertSuccess("Empresa", result.data, () => {
+      const response = await updateEmpresa(data);
+
+      if (response instanceof SuccessReponse) {
+        alertSuccess("Empresa", response.data, () => {
           this.props.history.goBack();
         });
-      } catch (error) {
-        if (error.response) {
-          alertWarning("Empresa", error.response.data);
-        } else {
-          alertWarning(
-            "Empresa",
-            "Se produjo un error un interno, intente nuevamente."
-          );
-        }
+      }
+
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertWarning("Empresa", response.getMessage());
       }
     });
   }
@@ -303,10 +296,6 @@ class EmpresaProceso extends React.Component {
             </section>
           </div>
         </div>
-
-        {
-          this.state.loadModal && spinnerLoading(this.state.msgModal)
-        }
 
         <div className="row">
           <div className="form-group col-md-6">

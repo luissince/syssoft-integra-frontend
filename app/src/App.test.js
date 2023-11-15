@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import App from './components/menu/Menu';
-import { currentDate, currentTime, formatDate, rounded, formatTime, numberFormat, imageBase64, formatDecimal } from './helper/utils.helper';
+import { currentDate, currentTime, formatDate, rounded, formatTime, numberFormat, imageBase64, formatDecimal, formatearNumero } from './helper/utils.helper';
 
 
 /**
@@ -276,6 +276,24 @@ describe('currentTime', () => {
   });
 });
 
+describe('formatearNumero', () => {
+  test('debería formatear correctamente el número', () => {
+    expect(formatearNumero(1)).toBe('000001');
+    expect(formatearNumero(11)).toBe('000011');
+    expect(formatearNumero(111)).toBe('000111');
+    expect(formatearNumero(1111)).toBe('001111');
+    expect(formatearNumero(11111)).toBe('011111');
+    expect(formatearNumero(111111)).toBe('111111');
+  });
+
+  test('debería manejar números negativos', () => {
+    expect(formatearNumero(-1)).toBe('-000001');
+  });
+
+  test('debería manejar números con más de 6 dígitos', () => {
+    expect(formatearNumero(1234567)).toBe('1234567');
+  });
+});
 
 // describe('imageBase64', () => {
 //   beforeAll(() => {
