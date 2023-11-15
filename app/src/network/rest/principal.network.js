@@ -18,12 +18,6 @@ instancePrincipal.interceptors.request.use((config) => {
   return config;
 });
 
-/**
- * 
- * @param {*} params 
- * @param {*} signal 
- * @returns SuccessReponse | ErrorResponse
- */
 export async function loginApi(params, signal = null) {
   return await Resolve.create(
     instancePrincipal.get("/api/login/createsession", {
@@ -33,6 +27,11 @@ export async function loginApi(params, signal = null) {
   );
 }
 
+/*
+|--------------------------------------------------------------------------
+| ENDPOINTS DE SUCURSAL
+|--------------------------------------------------------------------------
+*/
 export async function listSucursales(signal = null) {
   return await Resolve.create(
     instancePrincipal.get("/api/sucursal/inicio", {
@@ -41,56 +40,131 @@ export async function listSucursales(signal = null) {
   );
 }
 
-
-/**
- * 
- * @param {*} signal 
- * @returns SuccessReponse | ErrorResponse
- */
-export async function listarComboCliente(signal = null) {
+export async function comboSucursales(signal = null) {
   return await Resolve.create(
-    instancePrincipal.get("/api/cliente/listcombo", {
+    instancePrincipal.get("/api/sucursal/combo", {
       signal: signal,
     })
   );
 }
 
-/**
- * 
- * @param {*} params 
- * @param {*} signal 
- * @returns SuccessReponse | ErrorResponse
- */
-export async function liberarTerreno(params, signal = null) {
+export async function borrarSucursal(idSucursal) {
   return await Resolve.create(
-    instancePrincipal.post("/api/producto/liberar", params, {
+    instancePrincipal.delete('/api/sucursal', {
+      params: {
+        "idSucursal": idSucursal
+      }
+    })
+  );
+}
+// ------------------------------------------------------------------------
+// FIN PARA SUCURSAL
+// ------------------------------------------------------------------------
+
+/*
+|--------------------------------------------------------------------------
+| ENDPOINTS DE CLIENTE
+|--------------------------------------------------------------------------
+*/
+export async function listClientes(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/cliente/list', {
+      signal: signal,
+      params: params
+    })
+  );
+}
+
+export async function comboCliente(signal = null) {
+  return await Resolve.create(
+    instancePrincipal.get("/api/cliente/combo", {
       signal: signal,
     })
   );
 }
 
-/**
- * 
- * @param {*} params 
- * @param {*} signal 
- * @returns SuccessReponse | ErrorResponse
- */
-export async function getProductId(params, signal = null) {
+export async function filtrarCliente(params) {
   return await Resolve.create(
-    instancePrincipal.get("/api/producto/productbyid", {
+    instancePrincipal.get("/api/cliente/filtrar", {
+      params: params,
+    })
+  );
+}
+
+export async function addCliente(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.post('/api/cliente/add', params)
+  );
+}
+
+export async function editCliente(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.post('/api/cliente/update', params)
+  );
+}
+
+export async function deleteCliente(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.delete('/api/cliente', {
+      params: params
+    })
+  );
+}
+
+export async function getClienteId(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.get("/api/cliente/id", {
+      signal: signal,
+      params: params
+    })
+  );
+}
+
+export async function getPredeterminado(signal) {
+  return await Resolve.create(
+    instancePrincipal.get("/api/cliente/predeterminado", {
+      signal: signal,
+    })
+  );
+}
+// ------------------------------------------------------------------------
+// FIN PARA CLIENTE
+// ------------------------------------------------------------------------
+
+/*
+|--------------------------------------------------------------------------
+| ENDPOINTS DE INVENTARIO
+|--------------------------------------------------------------------------
+*/
+
+export async function listInventario(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.get("/api/inventario/list", {
+      params: params,
+      signal: signal,
+    })
+  );
+}
+
+// ------------------------------------------------------------------------
+// FIN PARA INVENTARIO
+// ------------------------------------------------------------------------
+
+/*
+|--------------------------------------------------------------------------
+| ENDPOINTS DE PRODUCTO
+|--------------------------------------------------------------------------
+*/
+export async function getIdProducto(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.get("/api/producto/id", {
       signal: signal,
       params: params,
     })
   );
 }
 
-/**
- * 
- * @param {*} params 
- * @param {*} signal 
- * @returns SuccessReponse | ErrorResponse
- */
-export async function productoDetalle(params, signal = null) {
+export async function productoDetalle(params, signal) {
   return await Resolve.create(
     instancePrincipal.get("/api/producto/detalle", {
       signal: signal,
@@ -99,33 +173,108 @@ export async function productoDetalle(params, signal = null) {
   );
 }
 
-/**
- * @method POST
- * @param {{}} params
- * @returns SuccessReponse | ErrorResponse
- */
-export async function productoSocio(params) {
+export async function comboProductos() {
   return await Resolve.create(
-    instancePrincipal.post("/api/producto/socio", params)
+    instancePrincipal.get("/api/producto/listcombo")
   );
 }
 
-/**
- * @method POST
- * @param {{}} params
- * @returns SuccessReponse | Object
- */
-export async function productoRestablecer(params) {
+export async function listarProductosFilter(params) {
   return await Resolve.create(
-    instancePrincipal.post("/api/producto/restablecer", params)
+    instancePrincipal.get("/api/producto/listfilter", {
+      params: params,
+    })
   );
 }
 
-/**
- * @method GET
- * @param {{}} SuccessReponse
- * @returns SuccesReponse | Object
- */
+export async function listProducto(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/producto/list', {
+      signal: signal,
+      params: params
+    })
+  );
+}
+
+export async function addProducto(data) {
+  return await Resolve.create(
+    instancePrincipal.post("/api/producto", data)
+  );
+}
+
+export async function updateProducto(data) {
+  return await Resolve.create(
+    instancePrincipal.put("/api/producto", data)
+  );
+}
+
+export async function deleteProducto(params) {
+  return await Resolve.create(
+    instancePrincipal.delete('/api/producto', {
+      params: params
+    })
+  );
+}
+// ------------------------------------------------------------------------
+// FIN PARA PRODUCTO
+// ------------------------------------------------------------------------
+
+
+/*
+|--------------------------------------------------------------------------
+| ENDPOINTS DE ALMACEN
+|--------------------------------------------------------------------------
+*/
+export async function listAlmacen(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/almacen/list', {
+      signal: signal,
+      params: params
+    })
+  );
+}
+
+export async function getIdAlmacen(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.get("/api/almacen/id", {
+      params: params,
+      signal: signal
+    })
+  );
+}
+
+export async function addAlmacen(data) {
+  return await Resolve.create(
+    instancePrincipal.post('/api/almacen/add', data)
+  );
+}
+
+export async function updateAlmacen(data) {
+  return await Resolve.create(
+    instancePrincipal.post('/api/almacen/update', data)
+  );
+}
+
+export async function deleteAlmacen(params) {
+  return await Resolve.create(
+    instancePrincipal.delete('/api/almacen/delete', {
+      data: params
+    })
+  );
+}
+
+export async function comboAlmacen(signal = null) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/almacen/combo', {
+      signal: signal,
+    })
+  );
+}
+// ------------------------------------------------------------------------
+// FIN PARA ALMACEN
+// ------------------------------------------------------------------------
+
+
 export async function empresaConfig() {
   return await Resolve.create(
     instancePrincipal.get("/api/empresa/config")
@@ -150,23 +299,12 @@ export async function updateEmpresa(data, signal) {
 }
 
 
-/**
- * @method GET
- * @param {{}} SuccessReponse
- * @returns SuccesReponse | Object
- */
 export async function validToken() {
   return await Resolve.create(
     instancePrincipal.get("/api/login/validtoken")
   );
 }
 
-/**
- * 
- * @param {*} data 
- * @param {*} signal 
- * @returns 
- */
 export async function addBanco(data, signal = null) {
   return await Resolve.create(
     instancePrincipal.post("/api/banco/", data, {
@@ -176,12 +314,6 @@ export async function addBanco(data, signal = null) {
   );
 }
 
-/**
- * 
- * @param {*} params 
- * @param {*} signal 
- * @returns 
- */
 export async function getBancoId(params, signal = null) {
   return await Resolve.create(
     instancePrincipal.get("/api/banco/id", {
@@ -191,12 +323,6 @@ export async function getBancoId(params, signal = null) {
   );
 }
 
-/**
- * 
- * @param {*} data 
- * @param {*} signal 
- * @returns 
- */
 export async function updateBanco(data, signal = null) {
   return await Resolve.create(
     instancePrincipal.put("/api/banco/", data, {
@@ -206,11 +332,6 @@ export async function updateBanco(data, signal = null) {
   );
 }
 
-/**
- * 
- * @param {*} params 
- * @returns 
- */
 export async function deleteBanco(params) {
   return await Resolve.create(
     instancePrincipal.delete("/api/banco/", {
@@ -219,13 +340,6 @@ export async function deleteBanco(params) {
   );
 }
 
-
-/**
- * 
- * @param {*} params 
- * @param {*} signal 
- * @returns SuccessReponse | ErrorResponse
- */
 export async function listarBancos(params, signal = null) {
   return await Resolve.create(
     instancePrincipal.get("/api/banco/list", {
@@ -235,12 +349,6 @@ export async function listarBancos(params, signal = null) {
   );
 }
 
-/**
- * 
- * @param {*} params 
- * @param {*} signal 
- * @returns SuccessReponse | ErrorResponse 
- */
 export async function listarCategoria(params, signal = null) {
   return await Resolve.create(
     instancePrincipal.get("/api/categoria/list", {
@@ -250,12 +358,6 @@ export async function listarCategoria(params, signal = null) {
   );
 }
 
-/**
- * 
- * @param {*} params 
- * @param {*} signal 
- * @returns 
- */
 export async function listComboCategoria(params, signal = null) {
   return await Resolve.create(
     instancePrincipal.get('/api/categoria/listcombo', {
@@ -265,51 +367,12 @@ export async function listComboCategoria(params, signal = null) {
   );
 }
 
-/**
- * 
- * @param {*} signal 
- * @returns SuccessReponse | ErrorResponse 
- */
-export async function comboSucursales(signal = null) {
-  return await Resolve.create(
-    instancePrincipal.get("/api/sucursal/combo", {
-      signal: signal,
-    })
-  );
-}
-
-/**
- * 
- * @param {*} idSucursal 
- * @returns SuccessReponse | ErrorResponse 
- */
-export async function borrarSucursal(idSucursal) {
-  return await Resolve.create(
-    instancePrincipal.delete('/api/sucursal', {
-      params: {
-        "idSucursal": idSucursal
-      }
-    })
-  );
-}
-
-/**
- * 
- * @param {*} signal 
- * @returns SuccessReponse | ErrorResponse 
- */
 export async function loadEmpresa(signal = null) {
   return await Resolve.create(
     instancePrincipal.get("/api/empresa/load")
   );
 }
 
-/**
- * 
- * @param {*} params 
- * @param {*} signal 
- * @returns SuccessReponse | ErrorResponse 
- */
 export async function getIdCategoria(params, signal = null) {
   return await Resolve.create(
     instancePrincipal.get("/api/categoria/id", {
@@ -319,33 +382,18 @@ export async function getIdCategoria(params, signal = null) {
   );
 }
 
-/**
- * 
- * @param {*} data 
- * @returns SuccessReponse | ErrorResponse 
- */
 export async function addCategoria(data) {
   return await Resolve.create(
     await instancePrincipal.post("/api/categoria/", data)
   );
 }
 
-/**
- * 
- * @param {*} data 
- * @returns SuccessReponse | ErrorResponse 
- */
 export async function updateCategoria(data) {
   return await Resolve.create(
     await instancePrincipal.put("/api/categoria", data)
   );
 }
 
-/**
- * 
- * @param {*} params 
- * @returns SuccessReponse | ErrorResponse 
- */
 export async function removeCategoria(params) {
   return await Resolve.create(
     instancePrincipal.delete("/api/categoria", {
@@ -354,12 +402,6 @@ export async function removeCategoria(params) {
   );
 }
 
-/**
- * 
- * @param {*} params 
- * @param {*} signal 
- * @returns SuccessReponse | ErrorResponse 
- */
 export async function listCpeSunat(params, signal) {
   return await Resolve.create(
     instancePrincipal.get('/api/factura/cpesunat', {
@@ -369,11 +411,6 @@ export async function listCpeSunat(params, signal) {
   );
 }
 
-/**
- * 
- * @param {*} params 
- * @returns SuccessReponse | ErrorResponse 
- */
 export async function sendEmailBoleta(params) {
   return await Resolve.create(
     instancePrincipal.get("/api/cobro/email", {
@@ -382,11 +419,6 @@ export async function sendEmailBoleta(params) {
   );
 }
 
-/**
- * 
- * @param {*} params 
- * @returns SuccessReponse | ErrorResponse 
- */
 export async function sendEmailNotaCredito(params) {
   return await Resolve.create(
     instancePrincipal.get("/api/notacredito/email", {
@@ -395,10 +427,6 @@ export async function sendEmailNotaCredito(params) {
   );
 }
 
-/**
- * 
- * @returns SuccessReponse | ErrorResponse 
- */
 export async function getNotifications(signal) {
   return await Resolve.create(
     instancePrincipal.get("/api/cobro/notificaciones", {
@@ -407,58 +435,13 @@ export async function getNotifications(signal) {
   );
 }
 
-/**
- * 
- * @returns SuccessReponse | ErrorResponse 
- */
-export async function comboProductos() {
-  return await Resolve.create(
-    instancePrincipal.get("/api/producto/listcombo")
-  );
-}
 
-/**
- * 
- * @param {*} params 
- * @returns SuccessReponse | ErrorResponse 
- */
-export async function listarProductosFilter(params) {
-  return await Resolve.create(
-    instancePrincipal.get("/api/producto/listfilter", {
-      params: params,
-    })
-  );
-}
 
-/**
- * 
- * @param {*} params 
- * @returns SuccessReponse | ErrorResponse 
- */
-export async function filtrarCliente(params) {
-  return await Resolve.create(
-    instancePrincipal.get("/api/cliente/filtrar", {
-      params: params,
-    })
-  );
-}
-
-/**
- * 
- * @param {*} data 
- * @returns SuccessReponse | ErrorResponse 
- */
 export async function createFactura(data) {
   return await Resolve.create(
     instancePrincipal.post('/api/factura/add', data),
   );
 }
-
-/**
- * 
- * @param {*} signal 
- * @returns SuccessReponse | ErrorResponse 
- */
 
 export async function listMoneda(params, signal) {
   return await Resolve.create(
@@ -511,11 +494,6 @@ export async function deleteMoneda(params, signal) {
   );
 }
 
-/**
- * 
- * @param {*} signal 
- * @returns SuccessReponse | ErrorResponse 
- */
 export async function listImpuestCombo(signal) {
   return await Resolve.create(
     instancePrincipal.get("/api/impuesto/listcombo", {
@@ -524,11 +502,6 @@ export async function listImpuestCombo(signal) {
   );
 }
 
-/**
- * 
- * @param {*} signal 
- * @returns SuccessReponse | ErrorResponse 
- */
 export async function listBancoCombo(signal) {
   return await Resolve.create(
     instancePrincipal.get("/api/banco/listcombo", {
@@ -536,13 +509,6 @@ export async function listBancoCombo(signal) {
     })
   );
 }
-
-/**
- * 
- * @param {*} params 
- * @param {*} signal 
- * @returns SuccessReponse | ErrorResponse 
- */
 
 export async function listComprobante(params, signal) {
   return await Resolve.create(
@@ -604,12 +570,6 @@ export async function deleteComprobante(params, signal) {
   );
 }
 
-/**
- * 
- * @param {*} params 
- * @param {*} signal 
- * @returns SuccessReponse | ErrorResponse 
- */
 export async function getFacturaId(params, signal) {
   return await Resolve.create(
     instancePrincipal.get("/api/factura/id", {
@@ -619,12 +579,6 @@ export async function getFacturaId(params, signal) {
   );
 }
 
-/**
- * 
- * @param {*} params 
- * @param {*} signal 
- * @returns SuccessReponse | ErrorResponse 
- */
 export async function getCobroVentaId(params, signal) {
   return await Resolve.create(
     instancePrincipal.get("/api/factura/venta/cobro", {
@@ -720,13 +674,6 @@ export async function editCobro(data, signal) {
   );
 }
 
-
-/**
- * 
- * @param {*} params 
- * @param {*} signal 
- * @returns SuccessReponse | ErrorResponse 
- */
 export async function getCobroId(params, signal) {
   return await Resolve.create(
     instancePrincipal.get('/api/cobro/id', {
@@ -736,65 +683,6 @@ export async function getCobroId(params, signal) {
   );
 }
 
-/**
- * 
- * @param {*} params 
- * @param {*} signal 
- * @returns SuccessReponse | ErrorResponse 
- */
-export async function listClientes(params, signal) {
-  return await Resolve.create(
-    instancePrincipal.get('/api/cliente/list', {
-      signal: signal,
-      params: params
-    })
-  );
-}
-
-/**
- * 
- * @param {*} params 
- * @param {*} signal 
- * @returns SuccessReponse | ErrorResponse 
- */
-export async function addCliente(params, signal) {
-  return await Resolve.create(
-    instancePrincipal.post('/api/cliente/add', params)
-  );
-}
-
-/**
- * 
- * @param {*} params 
- * @param {*} signal 
- * @returns SuccessReponse | ErrorResponse 
- */
-export async function editCliente(params, signal) {
-  return await Resolve.create(
-    instancePrincipal.post('/api/cliente/update', params)
-  );
-}
-
-/**
- * 
- * @param {*} params 
- * @param {*} signal 
- * @returns SuccessReponse | ErrorResponse 
- */
-export async function deleteCliente(params, signal) {
-  return await Resolve.create(
-    instancePrincipal.delete('/api/cliente', {
-      params: params
-    })
-  );
-}
-
-/**
- * 
- * @param {*} params 
- * @param {*} signal 
- * @returns 
- */
 export async function getUbigeo(params, signal) {
   return await Resolve.create(
     instancePrincipal.get("/api/ubigeo/", {
@@ -803,11 +691,6 @@ export async function getUbigeo(params, signal) {
   );
 }
 
-/**
- * 
- * @param {*} signal 
- * @returns 
- */
 export async function listComboTipoDocumento(signal) {
   return await Resolve.create(
     instancePrincipal.get("/api/tipodocumento/listcombo", {
@@ -816,40 +699,8 @@ export async function listComboTipoDocumento(signal) {
   );
 }
 
-/**
- * 
- * @param {*} params 
- * @param {*} signal 
- * @returns 
- */
-export async function getClienteId(params, signal) {
-  return await Resolve.create(
-    instancePrincipal.get("/api/cliente/id", {
-      signal: signal,
-      params: params
-    })
-  );
-}
 
-/**
- * 
- * @param {*} signal 
- * @returns 
- */
-export async function getPredeterminado(signal) {
-  return await Resolve.create(
-    instancePrincipal.get("/api/cliente/getpredeterminado", {
-      signal: signal,
-    })
-  );
-}
 
-/**
- * 
- * @param {*} params 
- * @param {*} signal 
- * @returns 
- */
 export async function listImpuesto(params, signal) {
   return await Resolve.create(
     instancePrincipal.get('/api/impuesto/list', {
@@ -859,12 +710,6 @@ export async function listImpuesto(params, signal) {
   );
 }
 
-/**
- * 
- * @param {*} params 
- * @param {*} signal 
- * @returns 
- */
 export async function getImpuestoId(params, signal) {
   return await Resolve.create(
     instancePrincipal.get("/api/impuesto/id", {
@@ -874,33 +719,18 @@ export async function getImpuestoId(params, signal) {
   );
 }
 
-/**
- * 
- * @param {*} data 
- * @returns 
- */
 export async function addImpuesto(data) {
   return await Resolve.create(
     instancePrincipal.post('/api/impuesto/add', data)
   );
 }
 
-/**
- * 
- * @param {*} data 
- * @returns 
- */
 export async function editImpuesto(data) {
   return await Resolve.create(
     instancePrincipal.post('/api/impuesto/edit', data)
   );
 }
 
-/**
- * 
- * @param {*} params 
- * @returns 
- */
 export async function deleteImpuesto(params) {
   return await Resolve.create(
     instancePrincipal.delete('/api/impuesto', {
@@ -909,138 +739,6 @@ export async function deleteImpuesto(params) {
   );
 }
 
-/**
- * 
- * @param {} params 
- * @returns 
- */
-export async function listProducto(params, signal) {
-  return await Resolve.create(
-    instancePrincipal.get('/api/producto/list', {
-      signal: signal,
-      params: params
-    })
-  );
-}
-
-/**
- * 
- * @param {*} data 
- * @returns 
- */
-export async function addProducto(data) {
-  return await Resolve.create(
-    axios.post("/api/producto", data)
-  );
-}
-
-/**
- * 
- * @param {*} data 
- * @returns 
- */
-export async function updateProducto(data) {
-  return await Resolve.create(
-    axios.put("/api/producto", data)
-  );
-}
-
-/**
- * 
- * @param {*} params 
- * @returns 
- */
-export async function deleteProducto(params) {
-  return await Resolve.create(
-    instancePrincipal.delete('/api/producto', {
-      params: params
-    })
-  );
-}
-
-/**
- * 
- * @param {*} params 
- * @param {*} signal 
- * @returns 
- */
-export async function listAlmacen(params, signal) {
-  return await Resolve.create(
-    instancePrincipal.get('/api/almacen/list', {
-      signal: signal,
-      params: params
-    })
-  );
-}
-
-/**
- * 
- * @param {*} params 
- * @param {*} signal 
- * @returns 
- */
-export async function getAlmacenId(params, signal) {
-  return await Resolve.create(
-    instancePrincipal.get("/api/almacen/id", {
-      signal: signal,
-      params: params
-    })
-  );
-}
-
-/**
- * 
- * @param {*} params 
- * @returns 
- */
-export async function deleteAlmacen(params) {
-  return await Resolve.create(
-    instancePrincipal.delete('/api/almacen/delete', {
-      data: params
-    })
-  );
-}
-
-/**
- * 
- * @param {*} data 
- * @returns 
- */
-export async function addAlmacen(data) {
-  return await Resolve.create(
-    instancePrincipal.post('/api/almacen/add', data)
-  );
-}
-
-/**
- * 
- * @param {*} data 
- * @returns 
- */
-export async function updateAlmacen(data) {
-  return await Resolve.create(
-    instancePrincipal.post('/api/almacen/update', data)
-  );
-}
-
-/**
- * 
- * @param {*} signal 
- * @returns 
- */
-export async function comboAlmacen(signal = null) {
-  return await Resolve.create(
-    instancePrincipal.get('/api/almacen/combo', {
-      signal: signal,
-    })
-  );
-}
-
-/**
- * 
- * @param {*} signal 
- * @returns 
- */
 export async function comboMedida(signal) {
   return await Resolve.create(
     instancePrincipal.get('/api/medida/listcombo', {

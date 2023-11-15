@@ -566,7 +566,7 @@ class Cliente {
         }
     }
 
-    async getPredeterminado(req) {
+    async predeterminado(req) {
         try {
             const result = await conec.query(`
             SELECT 
@@ -578,7 +578,6 @@ class Cliente {
             if (result.length !== 0) {
                 return result[0];
             }
-
             return "";
         } catch (error) {
             return "Se produjo un error de servidor, intente nuevamente.";

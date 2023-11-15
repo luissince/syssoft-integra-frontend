@@ -1,17 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const Almacen = require('../services/Almacen');
-const { decrypt } = require('../tools/CryptoJS');
-// const { generateExcelCliente, generateExcelDeudas, generarSociosPorFecha } = require('../excel/FileClientes')
-// const empresa = require('../services/Empresa');
-
-// const RepCliente = require('../report/RepCliente');
 
 const almacen = new Almacen();
-/**
- * Api usado en los modulos
- * [logística: almacenes]
- */
+
 router.get('/list', async function (req, res) {
     const result = await almacen.list(req)
     if (typeof result === 'object') {
@@ -31,7 +23,7 @@ router.post('/add', async function (req, res) {
 });
 
 router.get('/id', async function (req, res) {
-    const result = await almacen.id(req)
+    const result = await almacen.id(req)  
     if (typeof result === 'object') {
         res.status(200).send(result);
     } else {

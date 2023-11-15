@@ -104,6 +104,7 @@ app.use('/api/dashboard', require('./src/router/Dashboard'));
 
 app.use('/api/kardex', require('./src/router/Kardex'));
 app.use('/api/metodopago', require('./src/router/MetodoPago'));
+app.use('/api/inventario', require('./src/router/Inventario'));
 
 /**
  * 

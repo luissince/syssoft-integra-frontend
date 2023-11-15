@@ -7,7 +7,8 @@ import {
     spinnerLoading,
     statePrivilegio,
     keyUpSearch,
-    rounded
+    rounded,
+    isEmpty
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import Paginacion from '../../../../components/Paginacion';
@@ -174,6 +175,78 @@ class Productos extends CustomComponent {
         })
     }
 
+    generarBody() {
+        if (this.state.loading) {
+            return (
+                <tr>
+                    <td className="text-center" colSpan="9">
+                        {spinnerLoading("Cargando información de la tabla...", true)}
+                    </td>
+                </tr>
+            );
+        }
+
+        if (isEmpty(this.state.lista)) {
+            return (
+                <tr className="text-center">
+                    <td colSpan="9">¡No hay datos registrados!</td>
+                </tr>
+            );
+        }
+
+        return this.state.lista.map((item, index) => {
+            const tipo = function () {
+                if (item.tipo === "PRODUCTO") {
+                    return <span>Producto <i className='bi bi-basket'></i></span>;
+                }
+
+                if (item.tipo === "SERVICIO") {
+                    return <span>Servicio <i className='bi bi-person-workspace'></i></span>;
+                }
+
+                return <span>Combo <i className='bi bi-fill'></i></span>;
+            }
+
+            const estado = function () {
+                if (item.estado) {
+                    return <span className="badge badge-success">Activo</span>;
+                }
+
+                return <span className="badge badge-danger">Inactivo</span>;
+            }
+
+            return (
+                <tr key={index}>
+                    <td className="text-center">{item.id}</td>
+                    <td>{tipo()}</td>
+                    <td>{item.codigo}<br/><b>{item.nombre}</b></td>
+                    <td className='text-right'>{rounded(item.precio)}</td>
+                    <td>{item.medida}</td>
+                    <td>{item.categoria}</td>
+                    <td>{estado()}</td>
+                    <td className="text-center">
+                        <button
+                            className="btn btn-outline-warning btn-sm"
+                            title="Editar"
+                            onClick={() => this.handleEditar(item.idProducto)}
+                            disabled={!this.state.edit}>
+                            <i className="bi bi-pencil"></i>
+                        </button>
+                    </td>
+                    <td className="text-center">
+                        <button
+                            className="btn btn-outline-danger btn-sm"
+                            title="Anular"
+                            onClick={() => this.handleEliminar(item.idProducto)}
+                            disabled={!this.state.remove}>
+                            <i className="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            )
+        })
+    }
+
 
     render() {
 
@@ -227,82 +300,18 @@ class Productos extends CustomComponent {
                                 <thead>
                                     <tr>
                                         <th width="5%" className="text-center">#</th>
-                                        <th width="15%">Tipo</th>
+                                        <th width="10%">Tipo</th>
                                         <th width="30%">Nombre</th>
-                                        <th width="20%">Precio</th>
-                                        <th width="20%">Medida</th>
-                                        <th width="20%">Categoría</th>
+                                        <th width="15%">Precio</th>
+                                        <th width="10%">Medida</th>
+                                        <th width="10%">Categoría</th>
                                         <th width="10%">Estado</th>
                                         <th width="5%" className="text-center">Editar</th>
                                         <th width="5%" className="text-center">Eliminar</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {
-                                        loading ? (
-                                            <tr>
-                                                <td className="text-center" colSpan="9">
-                                                    {spinnerLoading("Cargando información de la tabla...", true)}
-                                                </td>
-                                            </tr>
-                                        ) : lista.length === 0 ? (
-                                            <tr className="text-center">
-                                                <td colSpan="9">¡No hay datos registrados!</td>
-                                            </tr>
-                                        ) : (
-                                            lista.map((item, index) => {
-                                                const tipo = function () {
-                                                    if (item.tipo === "PRODUCTO") {
-                                                        return <span>Producto <i className='bi bi-basket'></i></span>;
-                                                    }
-
-                                                    if (item.tipo === "SERVICIO") {
-                                                        return <span>Servicio <i className='bi bi-person-workspace'></i></span>;
-                                                    }
-
-                                                    return <span>Combo <i className='bi bi-fill'></i></span>;
-                                                }
-
-                                                const estado = function () {
-                                                    if (item.estado) {
-                                                        return <span className="badge badge-success">Activo</span>;
-                                                    }
-
-                                                    return <span className="badge badge-danger">Inactivo</span>;
-                                                }
-
-                                                return (
-                                                    <tr key={index}>
-                                                        <td className="text-center">{item.id}</td>
-                                                        <td>{tipo()}</td>
-                                                        <td>{item.nombre}</td>
-                                                        <td className='text-right'>{rounded(item.precio)}</td>
-                                                        <td>{item.medida}</td>
-                                                        <td>{item.categoria}</td>
-                                                        <td>{estado()}</td>
-                                                        <td className="text-center">
-                                                            <button
-                                                                className="btn btn-outline-warning btn-sm"
-                                                                title="Editar"
-                                                                onClick={() => this.handleEditar(item.idProducto)}
-                                                                disabled={!this.state.edit}>
-                                                                <i className="bi bi-pencil"></i>
-                                                            </button>
-                                                        </td>
-                                                        <td className="text-center">
-                                                            <button
-                                                                className="btn btn-outline-danger btn-sm"
-                                                                title="Anular"
-                                                                onClick={() => this.handleEliminar(item.idProducto)}
-                                                                disabled={!this.state.remove}>
-                                                                <i className="bi bi-trash"></i>
-                                                            </button>
-                                                        </td>
-                                                    </tr>
-                                                )
-                                            })
-                                        )
-                                    }
+                                    {this.generarBody()}
                                 </tbody>
 
                             </table>

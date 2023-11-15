@@ -1,6 +1,6 @@
 const Conexion = require('../database/Conexion');
 const { sendSuccess, sendError, sendClient, sendSave } = require('../tools/Message');
-const { currentDate, currentTime, generateAlphanumericCode } = require('../tools/Tools');
+const { currentDate, currentTime, generateAlphanumericCode, generateNumericCode } = require('../tools/Tools');
 const conec = new Conexion();
 
 class Producto {
@@ -10,6 +10,7 @@ class Producto {
             const lista = await conec.query(`SELECT 
                 p.idProducto,
                 t.nombre as tipo,
+                p.codigo,
                 p.nombre,
                 p.precio,
                 p.estado,
@@ -68,9 +69,26 @@ class Producto {
         try {
             connection = await conec.beginTransaction();
 
+            const {
+                idCategoria,
+                idMedida,
+                nombre,
+                codigo,
+                idCodigoSunat,
+                descripcion,
+                precio,
+                costo,
+                tipo,
+                publicar,
+                inventariado,
+                negativo,
+                estado,
+                idUsuario
+            } = req.body;
+
             const resultProducto = await conec.execute(connection, 'SELECT idProducto FROM producto');
             const idProducto = generateAlphanumericCode("PD0001", resultProducto, 'idProducto');
-       
+
             const resultKardex = await conec.execute(connection, 'SELECT idKardex FROM kardex');
             let idKardex = 0;
 
@@ -102,37 +120,40 @@ class Producto {
                 idUsuario
             ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, [
                 idProducto,
-                req.body.idCategoria,
+                idCategoria,
                 'CP0001',
-                req.body.idMedida,
-                req.body.nombre,
-                req.body.codigo,
-                req.body.idCodigoSunat,
-                req.body.descripcion,
-                req.body.precio,
-                req.body.costo,
-                req.body.tipo,
-                req.body.publicar,
-                req.body.inventariado,
-                req.body.negativo,
-                req.body.estado,
+                idMedida,
+                nombre,
+                codigo,
+                idCodigoSunat,
+                descripcion,
+                precio,
+                costo,
+                tipo,
+                publicar,
+                inventariado,
+                negativo,
+                estado,
                 currentDate(),
                 currentTime(),
                 currentDate(),
                 currentTime(),
-                req.body.idUsuario,
+                idUsuario,
             ])
 
+            const listaInventarios = await conec.execute(connection, 'SELECT idInventario FROM inventario');
+            let idInventario = generateNumericCode(1, listaInventarios, 'idInventario');
+
             for (const inventariado of req.body.inventario) {
-                await conec.execute(connection, `INSERT INTO productoAlmacen(
-                    idProductoAlmacen,
+                await conec.execute(connection, `INSERT INTO inventario(
+                    idInventario,
                     idProducto,
                     idAlmacen,
                     cantidad,
                     cantidadMaxima,
                     cantidadMinima
                 ) VALUES(?,?,?,?,?,?)`, [
-                    idProducto + "" + inventariado.idAlmacen,
+                    idInventario,
                     idProducto,
                     inventariado.idAlmacen,
                     inventariado.cantidad,
@@ -159,184 +180,15 @@ class Producto {
                     'MK0001',
                     'INGRESO AL CREAR EL PRODUCTO',
                     inventariado.cantidad,
-                    req.body.costo,
+                    costo,
                     inventariado.idAlmacen,
                     currentTime(),
                     currentDate(),
-                    req.body.idUsuario
-                ]);
-            }
-
-            await conec.commit(connection);
-            return "insert";
-        } catch (error) {
-            if (connection != null) {
-                await conec.rollback(connection);
-            }
-            console.log(error)
-            return "Se produjo un error de servidor, intente nuevamente.";
-        }
-    }
-
-    async socio(req) {
-        let connection = null;
-        try {
-            connection = await conec.beginTransaction();
-            const asociados = await conec.query(`SELECT * FROM asociado 
-                WHERE idCliente = ?`, [
-                req.body.idCliente
-            ]);
-
-            if (asociados.length != 0) {
-                await conec.rollback(connection);
-                return "cliente";
-            }
-
-            await conec.execute(connection, `UPDATE asociado SET estado = 0 
-                WHERE idVenta = ?`, [
-                req.body.idVenta
-            ]);
-
-            await conec.execute(connection, `INSERT INTO asociado(
-                idVenta ,
-                idCliente,
-                estado,
-                fecha,
-                hora,
-                idUsuario) 
-                VALUES(?,?,?,?,?,?)`, [
-                req.body.idVenta,
-                req.body.idCliente,
-                1,
-                currentDate(),
-                currentTime(),
-                req.body.idUsuario
-            ]);
-
-
-            // await conec.execute(connection, `DELETE FROM asociado WHERE idVenta = ? AND idCliente = ?`, [
-            //     req.query.idVenta,
-            //     req.query.idClienteOld,
-            // ]);
-
-            let result = await conec.execute(connection, 'SELECT idTraspado FROM traspaso');
-            let idTraspado = "";
-            if (result.length != 0) {
-                let quitarValor = result.map(function (item) {
-                    return parseInt(item.idTraspado.replace("TR", ''));
-                });
-
-                let valorActual = Math.max(...quitarValor);
-                let incremental = valorActual + 1;
-                let codigoGenerado = "";
-                if (incremental <= 9) {
-                    codigoGenerado = 'TR000' + incremental;
-                } else if (incremental >= 10 && incremental <= 99) {
-                    codigoGenerado = 'TR00' + incremental;
-                } else if (incremental >= 100 && incremental <= 999) {
-                    codigoGenerado = 'TR0' + incremental;
-                } else {
-                    codigoGenerado = 'TR' + incremental;
-                }
-
-                idTraspado = codigoGenerado;
-            } else {
-                idTraspado = "TR0001";
-            }
-
-            await conec.execute(connection, `INSERT INTO traspaso(
-                idTraspado,
-                idVenta,
-                idClienteNuevo,
-                idClienteAntiguo,
-                fecha,
-                hora,
-                idUsuario) 
-                VALUES(?,?,?,?,?,?,?)`, [
-                idTraspado,
-                req.body.idVenta,
-                req.body.idCliente,
-                req.body.idClienteOld,
-                currentDate(),
-                currentTime(),
-                req.body.idUsuario
-            ]);
-
-            const alta = await conec.execute(connection, `SELECT * FROM alta
-                WHERE idCliente = ?`, [
-                req.body.idCliente
-            ]);
-
-            if (alta.length === 0) {
-                let resultAlta = await conec.execute(connection, 'SELECT idAlta FROM alta');
-                let idAlta = 0;
-                if (resultAlta.length != 0) {
-                    let quitarValor = resultAlta.map(function (item) {
-                        return parseInt(item.idAlta);
-                    });
-
-                    let valorActual = Math.max(...quitarValor);
-                    let incremental = valorActual + 1;
-
-                    idAlta = incremental;
-                } else {
-                    idAlta = 1;
-                }
-
-                await conec.execute(connection, `INSERT INTO alta(
-                    idAlta ,
-                    idCliente,
-                    idSucursal,
-                    fecha,
-                    hora,
                     idUsuario
-                ) VALUES(?,?,?,?,?,?)`, [
-                    idAlta,
-                    req.body.idCliente,
-                    req.body.idSucursal,
-                    currentDate(),
-                    currentTime(),
-                    req.body.idUsuario,
                 ]);
+
+                idInventario++;
             }
-
-            await conec.execute(connection, `UPDATE venta 
-                SET idCliente = ?
-                WHERE idVenta = ?`, [
-                req.body.idCliente,
-                req.body.idVenta
-            ]);
-
-            let resultAuditoria = await conec.execute(connection, 'SELECT idAuditoria FROM auditoria');
-            let idAuditoria = 0;
-            if (resultAuditoria.length != 0) {
-                let quitarValor = resultAuditoria.map(function (item) {
-                    return parseInt(item.idAuditoria);
-                });
-
-                let valorActual = Math.max(...quitarValor);
-                let incremental = valorActual + 1;
-
-                idAuditoria = incremental;
-            } else {
-                idAuditoria = 1;
-            }
-
-            await conec.execute(connection, `INSERT INTO auditoria(
-                idAuditoria,
-                idProcedencia,
-                descripcion,
-                fecha,
-                hora,
-                idUsuario) 
-                VALUES(?,?,?,?,?,?)`, [
-                idAuditoria,
-                idTraspado,
-                `TRASPASO`,
-                currentDate(),
-                currentTime(),
-                req.body.idUsuario
-            ]);
 
             await conec.commit(connection);
             return "insert";
@@ -348,147 +200,6 @@ class Producto {
         }
     }
 
-    /**
-     * 
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
-     */
-    async restablecer(req, res) {
-        let connection = null;
-        try {
-            connection = await conec.beginTransaction();
-
-            await conec.execute(connection, `UPDATE asociado SET estado = 0 
-            WHERE idVenta = ?`, [
-                req.body.idVenta
-            ]);
-
-            await conec.execute(connection, `UPDATE asociado 
-            SET estado = 1 
-            WHERE idVenta = ? AND idCliente = ?`, [
-                req.body.idVenta,
-                req.body.idCliente,
-            ]);
-
-            let result = await conec.execute(connection, 'SELECT idTraspado FROM traspaso');
-            let idTraspado = "";
-            if (result.length != 0) {
-                let quitarValor = result.map(function (item) {
-                    return parseInt(item.idTraspado.replace("TR", ''));
-                });
-
-                let valorActual = Math.max(...quitarValor);
-                let incremental = valorActual + 1;
-                let codigoGenerado = "";
-                if (incremental <= 9) {
-                    codigoGenerado = 'TR000' + incremental;
-                } else if (incremental >= 10 && incremental <= 99) {
-                    codigoGenerado = 'TR00' + incremental;
-                } else if (incremental >= 100 && incremental <= 999) {
-                    codigoGenerado = 'TR0' + incremental;
-                } else {
-                    codigoGenerado = 'TR' + incremental;
-                }
-
-                idTraspado = codigoGenerado;
-            } else {
-                idTraspado = "TR0001";
-            }
-
-            await conec.execute(connection, `INSERT INTO traspaso(
-                idTraspado,
-                idVenta,
-                idClienteNuevo,
-                idClienteAntiguo,
-                fecha,
-                hora,
-                idUsuario) 
-                VALUES(?,?,?,?,?,?,?)`, [
-                idTraspado,
-                req.body.idVenta,
-                req.body.idCliente,
-                req.body.idCliente,
-                currentDate(),
-                currentTime(),
-                req.body.idUsuario
-            ]);
-
-            await conec.execute(connection, `UPDATE venta 
-            SET idCliente = ?
-            WHERE idVenta = ?`, [
-                req.body.idCliente,
-                req.body.idVenta
-            ]);
-
-            let resultAuditoria = await conec.execute(connection, 'SELECT idAuditoria FROM auditoria');
-            let idAuditoria = 0;
-            if (resultAuditoria.length != 0) {
-                let quitarValor = resultAuditoria.map(function (item) {
-                    return parseInt(item.idAuditoria);
-                });
-
-                let valorActual = Math.max(...quitarValor);
-                let incremental = valorActual + 1;
-
-                idAuditoria = incremental;
-            } else {
-                idAuditoria = 1;
-            }
-
-            await conec.execute(connection, `INSERT INTO auditoria(
-                idAuditoria,
-                idProcedencia,
-                descripcion,
-                fecha,
-                hora,
-                idUsuario) 
-                VALUES(?,?,?,?,?,?)`, [
-                idAuditoria,
-                idTraspado,
-                `RESTABLECER TRASPADO`,
-                currentDate(),
-                currentTime(),
-                req.body.idUsuario
-            ]);
-
-            await conec.commit(connection);
-            return "insert";
-        } catch (ex) {
-            console.log(ex)
-            if (connection != null) {
-                await conec.rollback(connection);
-            }
-            return "Se produjo un error de servidor, intente nuevamente.";
-        }
-    }
-
-
-    async liberar(req, res) {
-        let connection = null;
-        try {
-            connection = await conec.beginTransaction();
-
-            await conec.execute(connection, `UPDATE producto SET estado = 1 
-            WHERE idProducto = ?`, [
-                req.body.idProducto
-            ]);
-
-            await conec.execute(connection, `UPDATE venta SET estado = 4 
-            WHERE idVenta = ?`, [
-                req.body.idVenta
-            ]);
-
-            await conec.commit(connection);
-            return sendSuccess(res, "El proceso se liberación del producto se completo correctamente.");
-        } catch (error) {
-            console.log(error)
-            if (connection != null) {
-                await conec.rollback(connection);
-            }
-            return sendError(res, "Se produjo un error de servidor, intente nuevamente.");
-        }
-    }
 
     async id(req) {
         try {
@@ -639,20 +350,6 @@ class Producto {
         }
     }
 
-    async productoById(req) {
-        try {
-            const cabecera = await conec.query(`SELECT *
-                from producto
-                WHERE idProducto = ?`, [
-                req.query.idProducto,
-            ]);
-
-            return cabecera[0];
-        } catch (error) {
-            return "Se produjo un error de servidor, intente nuevamente.";
-        }
-    }
-
     async detalle(req) {
         try {
 
@@ -791,27 +488,6 @@ class Producto {
         }
     }
 
-    async listarComboProductoCliente(req) {
-        try {
-            let result = await conec.query(`SELECT 
-                v.idVenta, 
-                l.descripcion AS producto, 
-                m.nombre AS categoria
-                FROM venta AS v
-                INNER JOIN asociado AS a ON a.idVenta = v.idVenta
-                INNER JOIN clienteNatural AS c ON a.idCliente = c.idCliente
-                INNER JOIN ventaDetalle AS vd ON v.idVenta = vd.idVenta
-                INNER JOIN producto AS l ON l.idProducto = vd.idProducto
-                INNER JOIN categoria AS m ON m.idCategoria = l.idCategoria
-                WHERE c.idCliente = ? AND v.estado IN(1,2)`, [
-                req.query.idCliente
-            ]);
-            return result;
-        } catch (error) {
-            return "Se produjo un error de servidor, intente nuevamente.";
-        }
-    }
-
     async listaEstadoProducto(req) {
         try {
 
@@ -851,48 +527,6 @@ class Producto {
 
             return { "sucursal": sucursal[0], "lista": lista };
         } catch (error) {
-            return "Se produjo un error de servidor, intente nuevamente.";
-        }
-    }
-
-    async cambiar(req) {
-        let connection = null;
-        try {
-            connection = await conec.beginTransaction();
-
-            await conec.execute(connection, `UPDATE ventaDetalle 
-            SET idProducto = ?
-            WHERE idProducto = ?`, [
-                req.body.idProductoDestino,
-                req.body.idProductoOrigen
-            ]);
-
-            // await conec.execute(connection, `UPDATE cobro 
-            // SET idProcedencia = ?
-            // WHERE idProcedencia = ?`, [
-            //     req.body.idProductoDestino,
-            //     req.body.idProductoOrigen
-            // ]);
-
-            await conec.execute(connection, `UPDATE producto
-            SET estado = 1
-            WHERE idProducto = ?`, [
-                req.body.idProductoOrigen
-            ]);
-
-            await conec.execute(connection, `UPDATE producto
-            SET estado = 3
-            WHERE idProducto = ?`, [
-                req.body.idProductoDestino
-            ]);
-
-            await conec.commit(connection);
-            return "update";
-        } catch (error) {
-            console.log(error)
-            if (connection != null) {
-                await conec.rollback(connection);
-            }
             return "Se produjo un error de servidor, intente nuevamente.";
         }
     }

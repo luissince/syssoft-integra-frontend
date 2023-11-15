@@ -20,7 +20,7 @@ import {
     comboMedida,
     comboProductos,
     listComboCategoria,
-    getProductId,
+    getIdProducto,
     updateProducto
 } from '../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../model/class/response';
@@ -283,7 +283,7 @@ class ProductoEditar extends CustomComponent {
             "idProducto": idProducto
         }
 
-        const response = await getProductId(params, this.abortControllerTable.signal);
+        const response = await getIdProducto(params, this.abortControllerTable.signal);
 
         if (response instanceof SuccessReponse) {
             return response.data

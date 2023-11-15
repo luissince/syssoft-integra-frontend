@@ -1,15 +1,18 @@
 import React from 'react';
 import {
+    alertDialog,
     alertInfo,
     alertSuccess,
-    alertWarning
+    alertWarning,
+    isText,
+    spinnerLoading
 } from '../../../../helper/utils.helper';
 import ContainerWrapper from "../../../../components/Container";
 import CustomComponent from "../../../../model/class/custom-component";
 import { connect } from 'react-redux';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
-import { getAlmacenId, updateAlmacen } from '../../../../network/rest/principal.network';
+import { getIdAlmacen, updateAlmacen } from '../../../../network/rest/principal.network';
 import { CANCELED } from '../../../../model/types/types';
 
 class AlmaceneEditar extends CustomComponent {
@@ -17,149 +20,133 @@ class AlmaceneEditar extends CustomComponent {
     constructor(props) {
         super(props);
         this.state = {
-            loading: false,
             idAlmacen: '',
-            nombreAlmacen: '',
+            nombre: '',
             direccion: '',
             distrito: '',
             codigoSunat: '',
             observacion: '',
-            idUsuario: this.props.token.userToken.idUsuario,
 
-            messageWarning: '',
+            loading: true,
+            msgLoading: "Cargando datos...",
+
+            idSucursal: this.props.token.project.idSucursal,
+            idUsuario: this.props.token.userToken.idUsuario,
         }
 
-        this.abortControllerTable = new AbortController();
-
-        this.refNombreAlmacen = React.createRef();
+        this.refNombre = React.createRef();
         this.refDireccion = React.createRef();
-        this.refDistrito = React.createRef();
-        this.refCodigoSunat = React.createRef();
-        this.refObservacion = React.createRef();
-    }
 
+        this.abortController = new AbortController();
+    }
 
     async componentDidMount() {
         const url = this.props.location.search;
-        const idResult = new URLSearchParams(url).get("idAlmacen");
-        if (idResult !== null) {
-            this.loadDataId(idResult);
+        const idAlmacen = new URLSearchParams(url).get("idAlmacen");
+        if (isText(idAlmacen)) {
+            this.loadingData(idAlmacen);
         } else {
             this.props.history.goBack();
         }
     }
 
     componentWillUnmount() {
-        this.abortControllerTable.abort();
+        this.abortController.abort();
     }
 
-    async loadDataId(id) {
+    async loadingData(id) {
+        const [almacen] = await Promise.all([
+            await this.fetchGetIdAlmacen(id)
+        ])
+
+        this.setState({
+            idAlmacen: id,
+            nombre: almacen.nombre,
+            direccion: almacen.direccion,
+            distrito: almacen.distrito,
+            codigoSunat: almacen.codigoSunat,
+            observacion: almacen.observacion,
+            loading: false
+        });
+    }
+
+    async fetchGetIdAlmacen(id) {
         const params = {
             "idAlmacen": id
         }
 
-        const response = await getAlmacenId(params, this.abortControllerTable.signal);
+        const response = await getIdAlmacen(params, this.abortController.signal);
 
         if (response instanceof SuccessReponse) {
-            const almacen = response.data.result;
-
-            this.setState({
-                idAlmacen: id,
-                nombreAlmacen: almacen.nombre,
-                direccion: almacen.direccion,
-                distrito: almacen.distrito,
-                codigoSunat: almacen.codigoSunat,
-                observacion: almacen.observacion,
-
-                loading: false
-            });
+            return response.data;
         }
 
         if (response instanceof ErrorResponse) {
             if (response.getType() === CANCELED) return;
 
-            this.props.history.goBack();
+            return [];
         }
     }
 
     handleSave() {
-        if (this.state.nombreAlmacen === "") {
-            this.setState({ messageWarning: "ingrese un nombre para el almacén." });
-            this.refNombreAlmacen.current.focus();
+        if (!isText(this.state.nombre)) {
+            alertWarning("Almacén", "Ingrese un nombre para el almacén", () => this.refNombre.current.focus())
             return;
         }
 
-        if (this.state.direccion === "") {
-            this.setState({ messageWarning: "ingrese una dirección para el almacén." });
-            this.refDireccion.current.focus();
+        if (!isText(this.state.direccion)) {
+            alertWarning("Almacén", "Ingrese una dirección para el almacén.", () => this.refDireccion.current.focus())
             return;
         }
 
-        if (this.state.distrito === "") {
-            this.setState({ messageWarning: "ingrese un distrito para el almacén." });
-            this.refDistrito.current.focus();
-            return;
-        }
+        alertDialog("Almacén", "¿Esta seguro de continuar?", async (accept) => {
+            if (accept) {
+                alertInfo("Almacen", "Procesando información...");
 
-        if (this.state.codigoSunat === "") {
-            this.setState({ messageWarning: "ingrese un codigoSunat para el almacén." });
-            this.refCodigoSunat.current.focus();
-            return;
-        }
+                const data = {
+                    nombre: this.state.nombre.trim(),
+                    direccion: this.state.direccion.trim(),
+                    distrito: this.state.distrito.toString().trim(),
+                    codigoSunat: this.state.codigoSunat.toString().trim(),
+                    observacion: this.state.observacion,
+                    idUsuario: this.state.idUsuario,
+                    idSucursal: this.state.idSucursal,
+                    idAlmacen: this.state.idAlmacen
+                }
 
-        alertInfo("Almacen", "Procesando información...");
+                const response = await updateAlmacen(data);
+                if (response instanceof SuccessReponse) {
+                    alertSuccess("Almacen", response.data, () => {
+                        this.props.history.goBack();
+                    });
+                }
 
-
-        this.handleAdd();
-    }
-
-    async handleAdd() {
-
-        const data = {
-            nombreAlmacen: this.state.nombreAlmacen.toString().trim().toUpperCase(),
-            direccion: this.state.direccion.trim().toUpperCase(),
-            distrito: this.state.distrito.toString().trim().toUpperCase(),
-            codigoSunat: this.state.codigoSunat.toString().trim().toUpperCase(),
-            observacion: this.state.observacion,
-            idUsuario: this.state.idUsuario,
-            idAlmacen: this.state.idAlmacen
-        }
-
-        const response = await updateAlmacen(data);
-        if (response instanceof SuccessReponse) {
-            alertSuccess("Almacen", response.data, () => {
-                this.props.history.goBack();
-            });
-        }
-
-        if (response instanceof ErrorResponse) {
-            alertWarning("Almacen", response.getMessage(), () => {
-                this.refNombreAlmacen.current.focus();
-            });
-        }
+                if (response instanceof ErrorResponse) {
+                    alertWarning("Almacen", response.getMessage(), () => {
+                        this.refNombre.current.focus();
+                    });
+                }
+            }
+        })
     }
 
     render() {
         return (
             <ContainerWrapper>
+                {
+                    this.state.loading && spinnerLoading(this.state.msgLoading)
+                }
 
                 <div className='row'>
-                    <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
+                    <div className='col-lg-12 col-md-12 col-sm-12 col-12'>
                         <div className="form-group">
                             <h5>
-                                <span role="button" onClick={() => this.props.history.goBack()}><i className="bi bi-arrow-left-short"></i></span> Editar
-                                <small className="text-secondary"> Agregar</small>
+                                <span role="button" onClick={() => this.props.history.goBack()}><i className="bi bi-arrow-left-short"></i></span> Almacen
+                                <small className="text-secondary"> Editar</small>
                             </h5>
                         </div>
                     </div>
                 </div>
-
-                {
-                    this.state.messageWarning === '' ? null :
-                        <div className="alert alert-warning" role="alert">
-                            <i className="bi bi-exclamation-diamond-fill"></i> {this.state.messageWarning}
-                        </div>
-                }
 
                 <div className="dropdown-divider"></div>
 
@@ -169,7 +156,7 @@ class AlmaceneEditar extends CustomComponent {
                     </label>
                 </div>
 
-                <div className="form-row">
+                <div className="row">
                     <div className="form-group col-md-6">
                         <div className="form-row">
                             <div className="form-group col-md-12">
@@ -177,86 +164,55 @@ class AlmaceneEditar extends CustomComponent {
                                 <input
                                     type="text"
                                     className="form-control"
-                                    ref={this.refNombreAlmacen}
-                                    value={this.state.nombreAlmacen}
+                                    ref={this.refNombre}
+                                    value={this.state.nombre}
                                     onChange={(event) => {
-                                        if (event.target.value.trim().length > 0) {
-                                            this.setState({
-                                                nombreAlmacen: event.target.value,
-                                                messageWarning: '',
-                                            });
-                                        } else {
-                                            this.setState({
-                                                nombreAlmacen: event.target.value,
-                                                messageWarning: 'Ingrese un nombre para el almacén',
-                                            });
-                                        }
+                                        this.setState({
+                                            nombre: event.target.value,
+                                        });
                                     }}
                                     placeholder="Ingrese el nombre del almacen" />
                             </div>
+
                             <div className="form-group col-md-12">
                                 <label>Dirección: <i className="fa fa-asterisk text-danger small"></i></label>
                                 <input
                                     type="text"
                                     className="form-control"
-                                    // ref={this.refDireccion}
+                                    ref={this.refDireccion}
                                     value={this.state.direccion}
                                     onChange={(event) => {
-                                        if (event.target.value.trim().length > 0) {
-                                            this.setState({
-                                                direccion: event.target.value,
-                                                messageWarning: '',
-                                            });
-                                        } else {
-                                            this.setState({
-                                                direccion: event.target.value,
-                                                messageWarning: 'Ingrese una dirección para el almacén',
-                                            });
-                                        }
+                                        this.setState({
+                                            direccion: event.target.value,
+                                        });
                                     }}
                                     placeholder="Ingrese una dirección" />
                             </div>
+
                             <div className="form-group col-md-12">
-                                <label>Distrito: <i className="fa fa-asterisk text-danger small"></i></label>
+                                <label>Distrito:</label>
                                 <input
                                     type="text"
                                     className="form-control"
-                                    // ref={this.refDistrito}
                                     value={this.state.distrito}
                                     onChange={(event) => {
-                                        if (event.target.value.trim().length > 0) {
-                                            this.setState({
-                                                distrito: event.target.value,
-                                                messageWarning: '',
-                                            });
-                                        } else {
-                                            this.setState({
-                                                distrito: event.target.value,
-                                                messageWarning: 'Ingrese una dirección para el almacén',
-                                            });
-                                        }
+                                        this.setState({
+                                            distrito: event.target.value,
+                                        });
                                     }}
                                     placeholder="Ingrese un distrito" />
                             </div>
+
                             <div className="form-group col-md-12">
-                                <label>Código SUNAT: <i className="fa fa-asterisk text-danger small"></i></label>
+                                <label>Código SUNAT:</label>
                                 <input
                                     type="text"
                                     className="form-control"
-                                    // ref={this.refCodigoSunat}
                                     value={this.state.codigoSunat}
                                     onChange={(event) => {
-                                        if (event.target.value.trim().length > 0) {
-                                            this.setState({
-                                                codigoSunat: event.target.value,
-                                                messageWarning: '',
-                                            });
-                                        } else {
-                                            this.setState({
-                                                codigoSunat: event.target.value,
-                                                messageWarning: 'Ingrese una dirección para el almacén',
-                                            });
-                                        }
+                                        this.setState({
+                                            codigoSunat: event.target.value,
+                                        });
                                     }}
                                     placeholder="" />
                             </div>
@@ -266,6 +222,7 @@ class AlmaceneEditar extends CustomComponent {
                         </div>
 
                     </div>
+
                     <div className="form-group col-md-6">
                         <div className="form-row h-100">
                             <div className="form-group col-md-12">
@@ -273,28 +230,30 @@ class AlmaceneEditar extends CustomComponent {
                                 <textarea className="form-control "
                                     id="exampleFormControlTextarea1"
                                     rows="13"
-                                    ref={this.refObservacion}
                                     value={this.state.observacion}
                                     onChange={(event) => this.setState({
                                         observacion: event.target.value
                                     })}
                                 ></textarea>
                             </div>
+
                             <div className="form-group col-md-12">
                                 <div className="form-row">
                                     <div className="form-group col-md-6">
-                                        <button type="button" className="btn btn-primary btn-block" onClick={() => this.handleSave()}>
+                                        <button type="button"
+                                            className="btn btn-primary btn-block"
+                                            onClick={() => this.handleSave()}>
                                             Guardar
                                         </button>
                                     </div>
                                     <div className="form-group col-md-6">
-                                        <button type="button" className="btn btn-secondary btn-block ml-2" onClick={() => this.props.history.goBack()}>
+                                        <button type="button"
+                                            className="btn btn-secondary btn-block ml-2"
+                                            onClick={() => this.props.history.goBack()}>
                                             Cerrar
                                         </button>
                                     </div>
                                 </div>
-
-
                             </div>
                         </div>
                     </div>

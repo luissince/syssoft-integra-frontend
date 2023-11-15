@@ -2,21 +2,15 @@ import React from 'react';
 import CryptoJS from 'crypto-js';
 import {
     showModal,
-    hideModal,
     viewModal,
     clearModal,
     numberFormat,
     spinnerLoading,
     formatTime,
-    alertDialog,
-    alertInfo,
-    alertSuccess,
-    alertWarning,
-    alertError
-} from '../../../../../helper/utils.helper';
-import { liberarTerreno, listarComboCliente, productoDetalle, productoRestablecer, productoSocio } from '../../../../../network/rest/principal.network';
+    alertDialog} from '../../../../../helper/utils.helper';
+import { comboCliente, productoDetalle } from '../../../../../network/rest/principal.network';
 import { connect } from 'react-redux';
-import { CANCELED, ERROR } from '../../../../../model/types/types';
+import { CANCELED } from '../../../../../model/types/types';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import ContainerWrapper from '../../../../../components/Container';
@@ -87,7 +81,7 @@ class ProductoDetalle extends CustomComponent {
     }
 
     async loadData() {
-        const response = await listarComboCliente(this.abortControllerModal.signal);
+        const response = await comboCliente(this.abortControllerModal.signal);
 
         if (response instanceof SuccessReponse) {
             let newLista = [];
@@ -157,34 +151,34 @@ class ProductoDetalle extends CustomComponent {
 
         alertDialog("Producto", "¿Está seguro de registrar el asociado?. El producto va pasar a nombre del nuevo socio.", async (value) => {
             if (value) {
-                alertInfo("Producto", "Procesando información...");
-                hideModal("modalSocio");
+                // alertInfo("Producto", "Procesando información...");
+                // hideModal("modalSocio");
 
-                const data = {
-                    "idProducto": this.state.idProducto,
-                    "idVenta": this.state.idVenta,
-                    "idCliente": this.state.idCliente,
-                    "idClienteOld": this.state.idClienteOld,
-                    "idUsuario": this.state.idUsuario,
-                    "idSucursal": this.state.idSucursal,
-                }
+                // const data = {
+                //     "idProducto": this.state.idProducto,
+                //     "idVenta": this.state.idVenta,
+                //     "idCliente": this.state.idCliente,
+                //     "idClienteOld": this.state.idClienteOld,
+                //     "idUsuario": this.state.idUsuario,
+                //     "idSucursal": this.state.idSucursal,
+                // }
 
-                const response = await productoSocio(data);
+                // const response = await productoSocio(data);
 
-                if (response instanceof SuccessReponse) {
-                    alertSuccess("Producto", response.data, () => this.loadDataId(this.state.idProducto));
-                    return;
-                }
+                // if (response instanceof SuccessReponse) {
+                //     alertSuccess("Producto", response.data, () => this.loadDataId(this.state.idProducto));
+                //     return;
+                // }
 
-                if (response instanceof ErrorResponse) {
-                    if (response.type === CANCELED) return;
+                // if (response instanceof ErrorResponse) {
+                //     if (response.type === CANCELED) return;
 
-                    if (response.type === ERROR) {
-                        alertError("Producto", response.message);
-                    } else {
-                        alertWarning("Producto", response.message);
-                    }
-                }
+                //     if (response.type === ERROR) {
+                //         alertError("Producto", response.message);
+                //     } else {
+                //         alertWarning("Producto", response.message);
+                //     }
+                // }
             }
         })
     }
@@ -192,31 +186,31 @@ class ProductoDetalle extends CustomComponent {
     async onEventRestablecer(idCliente) {
         alertDialog("Producto", "¿Está seguro de restablecer al socio, la operación no es reversible?", async (value) => {
             if (value) {
-                alertInfo("Producto", "Procesando información...");
+                // alertInfo("Producto", "Procesando información...");
 
-                const data = {
-                    "idVenta": this.state.idVenta,
-                    "idCliente": idCliente,
-                    "idUsuario": this.state.idUsuario
-                }
+                // const data = {
+                //     "idVenta": this.state.idVenta,
+                //     "idCliente": idCliente,
+                //     "idUsuario": this.state.idUsuario
+                // }
 
-                const response = await productoRestablecer(data);
+                // const response = await productoRestablecer(data);
 
-                if (response instanceof SuccessReponse) {
+                // if (response instanceof SuccessReponse) {
 
-                    alertSuccess("Producto", response.data, () => this.loadDataId(this.state.idProducto));
-                    return;
-                }
+                //     alertSuccess("Producto", response.data, () => this.loadDataId(this.state.idProducto));
+                //     return;
+                // }
 
-                if (response instanceof ErrorResponse) {
-                    if (response.type === CANCELED) return;
+                // if (response instanceof ErrorResponse) {
+                //     if (response.type === CANCELED) return;
 
-                    if (response.type === ERROR) {
-                        alertError("Producto", response.message);
-                    } else {
-                        alertWarning("Producto", response.message);
-                    }
-                }
+                //     if (response.type === ERROR) {
+                //         alertError("Producto", response.message);
+                //     } else {
+                //         alertWarning("Producto", response.message);
+                //     }
+                // }
             }
         })
     }
@@ -256,25 +250,25 @@ class ProductoDetalle extends CustomComponent {
     async onEventLiberar() {
         alertDialog("Producto", "¿Está seguro de liberar el producto?. Los cambios no son irreversibles.", async (value) => {
             if (value) {
-                alertInfo("Producto", "Procesando liberación...");
+                // alertInfo("Producto", "Procesando liberación...");
 
-                const data = {
-                    "idProducto": this.state.idProducto,
-                    "idVenta": this.state.idVenta,
-                }
+                // const data = {
+                //     "idProducto": this.state.idProducto,
+                //     "idVenta": this.state.idVenta,
+                // }
 
-                const response = await liberarTerreno(data, this.abortControllerLiberar.signal);
-                if (response instanceof SuccessReponse) {
-                    alertSuccess("Producto", response.data, () => this.props.history.goBack());
-                    return;
-                }
+                // const response = await liberarTerreno(data, this.abortControllerLiberar.signal);
+                // if (response instanceof SuccessReponse) {
+                //     alertSuccess("Producto", response.data, () => this.props.history.goBack());
+                //     return;
+                // }
 
-                if (response instanceof ErrorResponse) {
-                    if (response.type === CANCELED) return;
+                // if (response instanceof ErrorResponse) {
+                //     if (response.type === CANCELED) return;
 
-                    alertWarning("Producto", response.message);
-                    return;
-                }
+                //     alertWarning("Producto", response.message);
+                //     return;
+                // }
             }
         });
     }

@@ -14,8 +14,10 @@ import ContainerWrapper from '../../../../components/Container';
 import { borrarSucursal } from '../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
+import CustomComponent from '../../../../model/class/custom-component';
 
-class Sucursales extends React.Component {
+class Sucursales extends CustomComponent{
+
     constructor(props) {
         super(props);
         this.state = {
@@ -38,12 +40,6 @@ class Sucursales extends React.Component {
         this.refTxtSearch = React.createRef();
 
         this.abortControllerTable = new AbortController();
-    }
-
-    setStateAsync(state) {
-        return new Promise((resolve) => {
-            this.setState(state, resolve)
-        });
     }
 
     async componentDidMount() {

@@ -84,8 +84,8 @@ router.get('/filtrar', async function (req, res) {
     }
 });
 
-router.get('/getpredeterminado', async function (req, res) {
-    const result = await cliente.getPredeterminado(req)
+router.get('/predeterminado', async function (req, res) {
+    const result = await cliente.predeterminado(req)
     if (typeof result === 'object') {
         res.status(200).send(result);
     } else if (result === "") {

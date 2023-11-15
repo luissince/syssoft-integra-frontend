@@ -3,14 +3,25 @@ const { currentDate, currentTime, generateAlphanumericCode } = require('../tools
 const conec = new Conexion();
 
 class Almacen {
-    /**
-         * Metodo usado en el modulo logistica/almacenes.
-         * @param {*} req 
-         * @returns object | string
-         */
+  
     async list(req) {
         try {
-            const lista = await conec.procedure(`CALL Listar_Almacenes(?,?,?,?,?)`, [
+            const lista = await conec.query(`SELECT 
+            idAlmacen,
+            nombre,
+            direccion,
+            distrito,
+            codigoSunat
+            FROM almacen
+            WHERE
+            ? = 0 AND idSucursal = ?
+            OR
+            ? = 1 AND nombre LIKE CONCAT(?,'%') AND idSucursal = ?
+            ORDER BY fecha ASC, hora ASC
+            LIMIT ?,?;`, [
+                parseInt(req.query.opcion),
+                req.query.idSucursal,
+
                 parseInt(req.query.opcion),
                 req.query.buscar,
                 req.query.idSucursal,
@@ -26,10 +37,19 @@ class Almacen {
                 }
             })
 
-            const total = await conec.procedure(`CALL Listar_Almacenes_count(?,?,?)`, [
+            const total = await conec.query(`SELECT COUNT(*) AS Total
+            FROM almacen
+            WHERE
+            ? = 0 AND idSucursal = ?
+            OR
+            ? = 1 AND nombre LIKE CONCAT(?,'%') AND idSucursal = ?
+            `, [
+                parseInt(req.query.opcion),
+                req.query.idSucursal,
+
                 parseInt(req.query.opcion),
                 req.query.buscar,
-                req.query.idSucursal
+                req.query.idSucursal,
             ]);
 
             return { "result": resultLista, "total": total[0].Total };
@@ -45,25 +65,26 @@ class Almacen {
 
             const result = await conec.execute(connection, 'SELECT idAlmacen FROM almacen');
             const idAlmacen = generateAlphanumericCode("AM0001", result, 'idAlmacen');
-    
-
+            console.log(req.body.idSucursal)
             await conec.execute(connection, `INSERT INTO almacen(
                 idAlmacen, 
+                idSucursal,
                 nombre,
                 direccion,
                 distrito,
                 codigoSunat,
-                observacion,
+                observacion,                
                 idUsuario,
-                created_at,
-                updated_at)
-                VALUES(?,?,?,?,?,?,?,?,?)`, [
+                fecha,
+                hora)
+                VALUES(?,?,?,?,?,?,?,?,?,?)`, [
                 idAlmacen,
-                req.body.nombreAlmacen,
+                req.body.idSucursal,
+                req.body.nombre,
                 req.body.direccion,
                 req.body.distrito,
                 req.body.codigoSunat,
-                req.body.observacion,
+                req.body.observacion,                
                 req.body.idUsuario,
                 currentDate(),
                 currentTime()
@@ -71,8 +92,8 @@ class Almacen {
 
             await conec.commit(connection);
             return "insert";
-
         } catch (error) {
+            console.log(error)
             if (connection != null) {
                 await conec.rollback(connection);
             }
@@ -82,11 +103,11 @@ class Almacen {
     }
 
     async id(req) {
-        try {
-            let lista = await conec.procedure(`select * from almacen where idAlmacen = ?`, [
+        try {            
+            const result = await conec.query(`select * from almacen where idAlmacen = ?`, [
                 req.query.idAlmacen
-            ]);
-            return { "result": lista };
+            ]);           
+            return result[0];
         } catch (error) {
             return "Se produjo un error de servidor, intente nuevamente.";
         }
@@ -103,11 +124,9 @@ class Almacen {
                 distrito = ?,
                 codigoSunat = ?,
                 observacion = ?,
-                idUsuario = ?,
-                updated_at = CONVERT_TZ(NOW(), 'UTC', 'America/Lima')
+                idUsuario = ?
                 where idAlmacen = ?`, [
-
-                req.body.nombreAlmacen,
+                req.body.nombre,
                 req.body.direccion,
                 req.body.distrito,
                 req.body.codigoSunat,
@@ -118,7 +137,6 @@ class Almacen {
 
             await conec.commit(connection);
             return "updated";
-
         } catch (error) {
             if (connection != null) {
                 await conec.rollback(connection);

@@ -30,30 +30,6 @@ router.post('/', async function (req, res) {
     }
 });
 
-router.post('/socio', async function (req, res) {
-    const result = await producto.socio(req)
-    if (result === "insert") {
-        res.status(201).send("Datos registrados correctamente.")
-    } else if (result === "cliente") {
-        res.status(400).send("El cliente ya está registrado como asociado.")
-    } else {
-        res.status(500).send(result)
-    }
-});
-
-router.post('/restablecer', async function (req, res) {
-    const result = await producto.restablecer(req)
-    if (result === "insert") {
-        res.status(201).send("Socio restablecido.")
-    } else {
-        res.status(500).send(result)
-    }
-});
-
-router.post("/liberar",async function (req, res) {
-    return await producto.liberar(req,res);
-});
-
 router.get('/id', async function (req, res) {
     const result = await producto.id(req)
     if (typeof result === "object") {
@@ -81,15 +57,6 @@ router.delete('/', async function (req, res) {
     }
 });
 
-router.get('/productbyid', async function (req, res) {
-    const result = await producto.productoById(req)
-    if (typeof result === 'object') {
-        res.status(200).send(result)
-    } else {
-        res.status(500).send(result)
-    }
-});
-
 router.get('/detalle', async function (req, res) {
     const result = await producto.detalle(req)
     if (typeof result === 'object') {
@@ -99,7 +66,7 @@ router.get('/detalle', async function (req, res) {
     }
 });
 
-router.get('/listcombo', async function (req, res) {
+router.get('/combo', async function (req, res) {
     const result = await producto.listarCombo(req)
     if (Array.isArray(result)) {
         res.status(200).send(result)
@@ -114,25 +81,6 @@ router.get('/listfilter', async function (req, res) {
         res.status(200).send(result)
     } else {
         res.status(500).send(result)
-    }
-});
-
-router.get('/productocliente', async function (req, res) {
-    const result = await producto.listarComboProductoCliente(req)
-    if (Array.isArray(result)) {
-        res.status(200).send(result)
-    } else {
-        res.status(500).send(result)
-    }
-});
-
-router.put('/cambiar', async function (req, res) {
-    const result = await producto.cambiar(req);
-    
-    if (result == "update") {
-        res.status(200).send("Se actualizó correctamente el cambio del producto.");
-    } else {
-        res.status(500).send(result);
     }
 });
 
