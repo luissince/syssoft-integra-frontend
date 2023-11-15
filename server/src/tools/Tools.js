@@ -37,15 +37,24 @@ function removeFile(file) {
 }
 
 function writeFile(file, data, options = 'base64') {
-    fs.writeFile(file, data, options, function () { });
+    try {
+        fs.writeFileSync(file, data, options);
+    } catch (error) {
+    }
 }
 
 function mkdir(file) {
-    fs.mkdirSync(file);
+    try {
+        fs.mkdirSync(file);
+    } catch (error) {
+    }
 }
 
-function chmod(file, mode = 777) {
-    fs.chmodSync(file, mode);
+async function chmod(file, mode = 755) {
+    try {
+        fs.chmodSync(file, mode);
+    } catch (err) {
+    }
 }
 
 function currentDate() {

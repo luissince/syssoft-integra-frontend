@@ -2210,22 +2210,26 @@ class Cobro {
     async notificaciones(req) {
         try {
             const result = await conec.query(`SELECT 
-            c.serie,
+            v.serie,
             co.nombre,
-            CASE c.estado
-            WHEN 3 THEN 'DAR DE BAJA'
-            ELSE 'POR DECLARAR' END AS 'estado',
-            COUNT(c.serie) AS 'cantidad'
-            FROM cobro AS c 
-            INNER JOIN comprobante AS co 
-            ON co.idComprobante = c.idComprobante
+            CASE v.estado
+                WHEN 3 THEN 'DAR DE BAJA'
+                ELSE 'POR DECLARAR' 
+            END AS 'estado',
+            COUNT(v.serie) AS 'cantidad'
+            FROM venta AS v 
+            INNER JOIN comprobante AS co  ON co.idComprobante = v.idComprobante
             WHERE 
-            co.tipo = 1 AND IFNULL(c.xmlSunat,'') <> '0' AND IFNULL(c.xmlSunat,'') <> '1032'
+            co.idTipoComprobante = 'TC0001' AND IFNULL(v.xmlSunat,'') <> '0' AND IFNULL(v.xmlSunat,'') <> '1032'
             OR
-            co.tipo = 1 AND IFNULL(c.xmlSunat,'') = '0' AND c.estado = 3
-            GROUP BY c.serie,co.nombre`);
+            co.idTipoComprobante = 'TC0001' AND IFNULL(v.xmlSunat,'') = '0' AND v.estado = 3
+
+            GROUP BY 
+            v.serie,
+            co.nombre`);
             return result;
         } catch (error) {
+            console.log(error)
             return "Se produjo un error de servidor, intente nuevamente.";
         }
     }
@@ -2328,10 +2332,10 @@ class Cobro {
             cl.informacion,
             cl.direccion,
             cl.email,
-                      
+
             m.idMoneda,
             m.codiso
-
+            
             FROM cobro AS c
             INNER JOIN clienteNatural AS cl ON c.idCliente = cl.idCliente
             INNER JOIN tipoDocumento AS td ON td.idTipoDocumento = cl.idTipoDocumento 

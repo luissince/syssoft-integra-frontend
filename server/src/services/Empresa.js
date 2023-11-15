@@ -177,7 +177,7 @@ class Empresa {
                 extImage = empresa[0].extimage;
                 rutaImage = empresa[0].rutaImage;
             }
-            console.log(req.body.nombreEmpresa)
+            
             await conec.execute(connection, `UPDATE empresa SET 
             documento = ?,
             razonSocial = ?,
