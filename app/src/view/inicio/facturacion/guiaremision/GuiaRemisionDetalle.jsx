@@ -40,11 +40,6 @@ class GuiaRemisionDetalle extends CustomComponent {
                     <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                         <div className="form-group">
                             <button type="button" className="btn btn-light" onClick={() => this.onEventImprimir()}><i className="fa fa-print"></i> Imprimir</button>
-                            {" "}
-                            {/* <button type="button" className="btn btn-light"><i className="fa fa-edit"></i> Editar</button> */}
-                            {" "}
-                            {/* <button type="button" className="btn btn-light"><i className="fa fa-remove"></i> Eliminar</button> */}
-                            {" "}
                         </div>
                     </div>
                 </div>
