@@ -1,7 +1,7 @@
 # SOFTWARE DE RESTAURANTE
 
 <!-- ![IMAGES DE GO LANG](images/ladder.svg) -->
-<img src="app/src/recursos/images/syssoftintegra.png" alt="Imagen SysSoft Integra" width="200" />
+<img src="src/recursos/images/syssoftintegra.png" alt="Imagen SysSoft Integra" width="200" />
 
 <font size="5" face="Qwitcher Grypen">
 Aplicación para el control de restaurantes.
@@ -119,7 +119,7 @@ Siga los pasos para iniciar el desarrollo:
 
     #code
 
-         <!-- puerto del servidor -->
+        <!-- puerto del servidor -->
         PORT=5000
 
         <!-- ip o nombre del servidor de la base datos -->
@@ -143,7 +143,7 @@ Siga los pasos para iniciar el desarrollo:
 
     #code 
 
-         "proxy": "http://localhost:5000"
+        "proxy": "http://localhost:5000"
 
 9.  Ejecute **npm run dev:app** para iniciar el front-end
 

@@ -1,0 +1,10 @@
+export const FACTURACION = 'TC0001';
+export const VENTA_LIBRE = 'TC0002';
+export const COMPRA = 'TC0003';
+export const ORDEN_DE_COMPRA = 'TC0004';
+export const NOTA_DE_CREDITO = 'TC0005';
+export const NOTA_DE_DEBITO = 'TC0006';
+export const COMPROBANTE_DE_INGRESO = 'TC0007';
+export const COMPROBANTE_DE_SALIDA = 'TC0008';
+export const COTIZACION = 'TC0009';
+export const GUIA_DE_REMISION = 'TC0010';
