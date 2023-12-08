@@ -218,20 +218,20 @@ class UsuarioEditar extends CustomComponent {
             if (accept) {
                 const data = {
                     //datos
-                    "nombres": this.state.nombres.trim().toUpperCase(),
-                    "apellidos": this.state.apellidos.trim().toUpperCase(),
-                    "dni": this.state.dni.toString().trim().toUpperCase(),
+                    "nombres": this.state.nombres.trim(),
+                    "apellidos": this.state.apellidos.trim(),
+                    "dni": this.state.dni.toString().trim(),
                     "genero": this.state.genero,
-                    "direccion": this.state.direccion.trim().toUpperCase(),
-                    "telefono": this.state.telefono.toString().trim().toUpperCase(),
-                    "email": this.state.email.trim().toUpperCase(),
+                    "direccion": this.state.direccion.trim(),
+                    "telefono": this.state.telefono.toString().trim(),
+                    "email": this.state.email.trim(),
                     //login
-                    "idPerfil": this.state.idPerfil.trim().toUpperCase(),
+                    "idPerfil": this.state.idPerfil.trim(),
                     "representante": this.state.representante,
                     "estado": this.state.estado,
                     "activeLogin": this.state.activeLogin,
-                    "usuario": this.state.usuario.trim().toUpperCase(),
-                    "clave": this.state.clave.trim().toUpperCase(),
+                    "usuario": this.state.usuario.trim(),
+                    "clave": this.state.clave.trim(),
 
                     //idUsuario
                     "idUsuario": this.state.idUsuario
