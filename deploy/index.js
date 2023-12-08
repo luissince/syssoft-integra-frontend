@@ -1,41 +1,27 @@
 const express = require('express');
-const app = express();
 const path = require('path');
 const cors = require('cors');
-/**
- * Carga de variable de entorno
- */
-require('dotenv').config();
+const dotenv = require('dotenv');
 
-/**
- * CORS para peticiones externas
- * setHeader('Access-Control-Allow-Origin', '*')
- * setHeader('Access-Control-Allow-Headers', 'X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method')
- * setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE')
- */
+dotenv.config();
+
+const app = express();
+
+// Middleware
 app.use(cors());
-
-/**
- * 
- */
-app.set('port', process.env.PORT || 3000);
-
 app.use(express.json({ limit: '1024mb' }));
 app.use(express.urlencoded({ limit: '1024mb', extended: false }));
 
-/**
- * Cargar la app estatica compilada
- */
-app.use(express.static(path.join(__dirname, "..", "build")));
+// Servir archivos estáticos desde la carpeta 'dist'
+app.use(express.static(path.join(__dirname, '..', 'build')));
 
-/**
- * 
- */
-app.use((req, res, next) => {
-    res.sendFile(path.join(__dirname, "..", "build", "index.html"));
+// Ruta para manejar SPA (Single Page Application)
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'build', 'index.html'));
 });
 
+const PORT = process.env.PORT || 80;
 
-app.listen(app.get("port"),()=>{
-    console.log(`El servidor está corriendo en el puerto ${app.get("port")}`);
+app.listen(PORT, () => {
+    console.log(`El servidor está corriendo en el puerto ${PORT}`);
 });
