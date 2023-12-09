@@ -44,5 +44,5 @@ jobs:
       - name: Mostrar contenido del archivo .env.production
         run: cat .env.production
 
-      - name: Create container
+      - name: Creando y ejecutando contenedor
         run: docker compose up --build -d

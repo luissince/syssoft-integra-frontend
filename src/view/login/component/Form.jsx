@@ -85,7 +85,7 @@ const Form = (props) => {
                             type="submit"
                             className="btn btn-primary btn-block mb-4"
                         >
-                            Ingresar <i className="fa fa-arrow-right"></i>
+                            Iniciar Sesión <i className="fa fa-arrow-right"></i>
                         </button>
 
                         <div className="text-center">
