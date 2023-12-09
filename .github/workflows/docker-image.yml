@@ -1,18 +1,50 @@
-name: Docker Image CI
+name: Docker Image CI - SysSoftIntegra FrontEnd
 
 on:
   push:
     branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
 
 jobs:
-
   build:
+    runs-on: self-hosted
 
-    runs-on: ubuntu-latest
+    env:  
+      REACT_APP_END_POINT: ${{ secrets.REACT_APP_END_POINT }}
+      REACT_APP_URL: ${{ secrets.REACT_APP_URL }}
+      REACT_APP_APIS_PERU: ${{ secrets.REACT_APP_APIS_PERU }}
+      REACT_APP_IMAGE: ${{ secrets.REACT_APP_IMAGE }}
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+      - name: Checkout código
+        uses: actions/checkout@v3
+
+      - name: Verificar variables de entorno
+        run: |
+          check_variable() {
+            if [ -z "${!1}" ]; then
+              echo "La variable de entorno $1 está vacía."
+            else
+              echo "La variable de entorno $1 contiene datos: ${!1}"
+            fi
+          }
+
+          check_variable REACT_APP_END_POINT
+          check_variable REACT_APP_URL
+          check_variable REACT_APP_APIS_PERU
+          check_variable REACT_APP_IMAGE
+
+      - name: Crear archivo .env
+        run: cp .env.production.example .env.production
+
+      - name: Editar archivo .env.production
+        run: |
+          sed -i "s~REACT_APP_END_POINT = \"\"~REACT_APP_END_POINT = \"$REACT_APP_END_POINT\"~" .env
+          sed -i "s~REACT_APP_URL = \"\"~REACT_APP_URL = \"$REACT_APP_URL\"~" .env
+          sed -i "s~REACT_APP_APIS_PERU = \"\"~REACT_APP_APIS_PERU = \"$REACT_APP_APIS_PERU\"~" .env
+          sed -i "s~REACT_APP_IMAGE = \"\"~REACT_APP_IMAGE = \"$REACT_APP_IMAGE\"~" .env
+
+      - name: Mostrar contenido del archivo .env.production
+        run: cat .env.production
+
+      - name: Create container
+        run: docker-compose up --build -d
