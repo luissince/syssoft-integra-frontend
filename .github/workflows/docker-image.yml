@@ -33,18 +33,18 @@ jobs:
           check_variable REACT_APP_APIS_PERU
           check_variable REACT_APP_IMAGE
 
-      - name: Crear archivo .env
+      - name: Crear archivo .env.production
         run: cp .env.production.example .env.production
 
       - name: Editar archivo .env.production
         run: |
-          sed -i "s~REACT_APP_END_POINT = \"\"~REACT_APP_END_POINT = \"$REACT_APP_END_POINT\"~" .env
-          sed -i "s~REACT_APP_URL = \"\"~REACT_APP_URL = \"$REACT_APP_URL\"~" .env
-          sed -i "s~REACT_APP_APIS_PERU = \"\"~REACT_APP_APIS_PERU = \"$REACT_APP_APIS_PERU\"~" .env
-          sed -i "s~REACT_APP_IMAGE = \"\"~REACT_APP_IMAGE = \"$REACT_APP_IMAGE\"~" .env
+          sed -i "s~REACT_APP_END_POINT = \"\"~REACT_APP_END_POINT = \"$REACT_APP_END_POINT\"~" .env.production
+          sed -i "s~REACT_APP_URL = \"\"~REACT_APP_URL = \"$REACT_APP_URL\"~" .env.production
+          sed -i "s~REACT_APP_APIS_PERU = \"\"~REACT_APP_APIS_PERU = \"$REACT_APP_APIS_PERU\"~" .env.production
+          sed -i "s~REACT_APP_IMAGE = \"\"~REACT_APP_IMAGE = \"$REACT_APP_IMAGE\"~" .env.production
 
       - name: Mostrar contenido del archivo .env.production
         run: cat .env.production
 
-      - name: Create container
-        run: docker-compose up --build -d
+      # - name: Create container
+        # run: docker-compose up --build -d
