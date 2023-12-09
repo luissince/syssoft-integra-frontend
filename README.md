@@ -139,9 +139,9 @@ Siga los pasos para iniciar el desarrollo:
         <!-- Configuración de la zona horaria del servidor -->
         TZ="America/Lima"
 
-8. Agregar la propiedad **"proxy": "http://localhost:3002"** el package.json de la carpeta app/package.json con la url del back-end, ese propiedad es solo para desarrollo
+8.  Agregar la propiedad **"proxy": "http://localhost:3002"** el package.json de la carpeta app/package.json con la url del back-end, ese propiedad es solo para desarrollo
 
-    #code 
+    #code
 
         "proxy": "http://localhost:5000"
 
@@ -162,3 +162,48 @@ Siga los pasos para iniciar el desarrollo:
     #code
 
         npm run build
+
+### 12. Configuración para Ejecutar GitHub Actions:
+
+Para ejecutar los flujos de trabajo de GitHub Actions, asegúrate de que tu usuario tenga los privilegios de ejecución necesarios. A continuación, te proporcionamos algunos pasos para empezar:
+
+#### 12.1. Verifica la Existencia del Grupo de Docker:
+
+```bash
+sudo groupadd docker
+```
+
+##### 12.2. Agrega tu Usuario al Grupo de Docker:
+
+```bash
+sudo usermod -aG docker $USER
+```
+
+##### 12.3. Aplica los Cambios en el Grupo de Docker:
+
+```bash
+newgrp docker
+```
+
+##### 12.4. Verifica que tu Usuario esté en el Grupo de Docker:
+
+```bash
+newgrp docker
+```
+Asegúrate de que "docker" esté en la lista de grupos.
+
+##### 12.5. Configuración y Uso del Runner:
+
+Para iniciar la creación del runner, ve a Settings del proyecto, luego a Actions, Runners, y selecciona "New self-hosted runner".
+
+Si deseas ejecutar en segundo plano, utiliza los siguientes comandos de configuración:
+
+```bash
+sudo ./svc.sh status
+sudo ./svc.sh install
+sudo ./svc.sh start
+sudo ./svc.sh stop
+sudo ./svc.sh uninstall
+```
+
+Estos comandos te permiten controlar el runner según sea necesario.
