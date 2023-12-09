@@ -20,28 +20,26 @@ jobs:
 
       - name: Verificar variables de entorno
         run: |
-          check_variable() {
-            if [ -z "${!1}" ]; then
-              echo "La variable de entorno $1 está vacía."
-            else
-              echo "La variable de entorno $1 contiene datos: ${!1}"
-            fi
+          check_variables() {
+            for var in REACT_APP_END_POINT REACT_APP_URL REACT_APP_APIS_PERU REACT_APP_IMAGE; do
+              if [ -z "${!var}" ]; then
+                echo "La variable de entorno $var está vacía."
+              else
+                echo "La variable de entorno $var contiene datos: ${!var}"
+              fi
+            done
           }
 
-          check_variable REACT_APP_END_POINT
-          check_variable REACT_APP_URL
-          check_variable REACT_APP_APIS_PERU
-          check_variable REACT_APP_IMAGE
+          check_variables
 
       - name: Crear archivo .env.production
-        run: cp .env.production.example .env.production
-
-      - name: Editar archivo .env.production
         run: |
-          sed -i "s~REACT_APP_END_POINT = \"\"~REACT_APP_END_POINT = \"$REACT_APP_END_POINT\"~" .env.production
-          sed -i "s~REACT_APP_URL = \"\"~REACT_APP_URL = \"$REACT_APP_URL\"~" .env.production
-          sed -i "s~REACT_APP_APIS_PERU = \"\"~REACT_APP_APIS_PERU = \"$REACT_APP_APIS_PERU\"~" .env.production
-          sed -i "s~REACT_APP_IMAGE = \"\"~REACT_APP_IMAGE = \"$REACT_APP_IMAGE\"~" .env.production
+          cat > .env.production <<EOL
+          REACT_APP_END_POINT="${REACT_APP_END_POINT}"
+          REACT_APP_URL="${REACT_APP_URL}"
+          REACT_APP_APIS_PERU="${REACT_APP_APIS_PERU}"
+          REACT_APP_IMAGE="${REACT_APP_IMAGE}"
+          EOL
 
       - name: Mostrar contenido del archivo .env.production
         run: cat .env.production
