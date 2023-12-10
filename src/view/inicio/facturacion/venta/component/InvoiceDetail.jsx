@@ -3,7 +3,7 @@ import ItemAdd from "./ItemAdd";
 
 const InvoiceDetail = (props) => {
 
-    const { codiso, setStateAsync, detalleVenta } = props;
+    const { codiso, setStateAsync, detalleVenta, handleOpenAndClose } = props;
 
     if (detalleVenta.length === 0) {
         return (
@@ -35,6 +35,7 @@ const InvoiceDetail = (props) => {
                                 codiso={codiso}
                                 detalleVenta={detalleVenta}
                                 setStateAsync={setStateAsync}
+                                handleOpenAndClose={handleOpenAndClose}
                             />
                         );
                     })

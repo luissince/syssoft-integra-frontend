@@ -5,7 +5,7 @@ const ItemAdd = (props) => {
 
     const { idProducto, nombre, precio, cantidad, codiso } = props;
 
-    const { detalleVenta, setStateAsync } = props;
+    const { detalleVenta, setStateAsync, handleOpenAndClose} = props;
 
     const handleMinus = async () => {
         const updatedDetalle = detalleVenta.map(item =>
@@ -54,7 +54,7 @@ const ItemAdd = (props) => {
                             <span>
                                 <div
                                     className=" d-flex justify-content-center align-items-center h-100 invoice-item_add-item-options_button mr-1"
-                                    onClick={handleEdit}>
+                                    onClick={handleOpenAndClose}>
                                     <img src={images.edit} alt='Editar' />
                                 </div>
                             </span>

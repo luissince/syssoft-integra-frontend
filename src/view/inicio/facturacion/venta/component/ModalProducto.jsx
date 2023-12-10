@@ -1,4 +1,4 @@
-const ModalCliente = (props) => {
+const ModalProducto = (props) => {
 
     const { idModal } = props;
 
@@ -8,7 +8,7 @@ const ModalCliente = (props) => {
         <div id={idModal} className='side-modal'>
             <div className='side-modal_wrapper'>
                 <div className="card border-0 rounded-0">
-                    <div className="card-header">Configuración de Venta</div>
+                    <div className="card-header">Editar producto</div>
                     <button
                         type="button"
                         className="close"
@@ -42,4 +42,4 @@ const ModalCliente = (props) => {
     );
 }
 
-export default ModalCliente;
+export default ModalProducto;

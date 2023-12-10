@@ -47,6 +47,7 @@ import CustomComponent from '../../../../model/class/custom-component';
 import ModalCliente from './component/ModalCliente';
 import { COMPROBANTE_DE_INGRESO, FACTURACION, VENTA_LIBRE } from '../../../../model/types/tipo-comprobante';
 import { starProduct, favoriteProducts } from '../../../../redux/actions';
+import ModalProducto from './component/ModalProducto';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -135,23 +136,11 @@ class VentaProceso extends CustomComponent {
             idUsuario: this.props.token.userToken.idUsuario,
         }
 
-        /**
-         * Identificador del modal configuración.
-         * @type {string}
-         */
+        // Lista de id para los modales
         this.idModalConfiguration = "idModalConfiguration";
-
-        /**
-         * Identificador del modal cliente.
-         * @type {string}
-         */
         this.idModalCliente = "idModalCliente";
-
-        /**
-         * Identificador del modal venta.
-         * @type {string}
-         */
         this.idModalSale = "idModalSale";
+        this.idModalProducto = "idModalProducto";
 
         this.refProducto = React.createRef();
 
@@ -506,7 +495,6 @@ class VentaProceso extends CustomComponent {
     // Modal configuración
     //------------------------------------------------------------------------------------------
 
-
     handleSelectComprobante = (event) => {
         this.setState({ idComprobante: event.target.value })
     }
@@ -598,6 +586,23 @@ class VentaProceso extends CustomComponent {
     }
 
     handleSaveCliente = () => {
+
+    }
+
+    //------------------------------------------------------------------------------------------
+    // Modal producto
+    //------------------------------------------------------------------------------------------
+
+    handleOpenAndCloseProducto = () => {
+        const invoice = document.getElementById(this.idModalProducto);
+        if (invoice.classList.contains("toggled")) {
+            invoice.classList.remove("toggled");
+        } else {
+            invoice.classList.add("toggled");
+        }
+    }
+
+    handleSaveProducto = () => {
 
     }
 
@@ -1197,6 +1202,7 @@ class VentaProceso extends CustomComponent {
                         codiso={codiso}
                         setStateAsync={this.setStateAsync}
                         detalleVenta={detalleVenta}
+                        handleOpenAndClose={this.handleOpenAndCloseProducto}
                     />
 
                     <InvoiceFooter
@@ -1222,10 +1228,17 @@ class VentaProceso extends CustomComponent {
                 />
 
                 <ModalCliente
-                    idModalCliente={this.idModalCliente}
+                    idModal={this.idModalCliente}
 
-                    handleSaveCliente={this.handleSaveCliente}
-                    handleOpenAndCloseCliente={this.handleOpenAndCloseCliente}
+                    handleSave={this.handleSaveCliente}
+                    handleOpenAndClose={this.handleOpenAndCloseCliente}
+                />
+
+                <ModalProducto
+                    idModal={this.idModalProducto}
+
+                    handleSave={this.handleSaveProducto}
+                    handleOpenAndClose={this.handleOpenAndCloseProducto}
                 />
             </PosContainerWrapper>
         );
