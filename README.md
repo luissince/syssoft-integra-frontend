@@ -137,6 +137,8 @@ npm run build
 
 Para ejecutar los workflows de GitHub Actions, asegúrate de que tu usuario tenga los privilegios de ejecución necesarios. A continuación, te proporcionamos algunos pasos para empezar:
 
+### 9. Configuración en el servidor para el CI/CD continuo.
+
 #### 9.1. Verifica la Existencia del Grupo de Docker:
 
 ```bash
