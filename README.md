@@ -177,3 +177,13 @@ sudo ./svc.sh uninstall
 ```
 
 Estos comandos te permiten controlar el runner según sea necesario.
+
+### 10. Punto importante la hacer git push
+
+Cuando realices un git push origin master y desees evitar que se ejecute el flujo de trabajo de GitHub Actions, puedes incorporar [skip ci] o [ci skip] en el mensaje del commit. Esta adición indicará a GitHub Actions que omita la ejecución de los trabajos para ese commit específico.
+
+Por ejemplo, al realizar un commit, puedes utilizar el siguiente comando para incluir [skip ci] en el mensaje del commit:
+
+```bash
+git commit -m "Tu mensaje del commit [skip ci]"
+```
