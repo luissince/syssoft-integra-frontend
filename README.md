@@ -1,10 +1,10 @@
-# SOFTWARE DE RESTAURANTE
+# SOFTWARE DE PUNTO DE VENTA
 
 <!-- ![IMAGES DE GO LANG](images/ladder.svg) -->
 <img src="src/recursos/images/syssoftintegra.png" alt="Imagen SysSoft Integra" width="200" />
 
 <font size="5" face="Qwitcher Grypen">
-Aplicación para el control de restaurantes.
+Aplicación para el control de puntos de ventas.
 </font>
 
 ## Iniciar
@@ -16,7 +16,7 @@ Algunos recursos para iniciar con este proyecto puedes ver en:
 - [Node Js](https://nodejs.org/es/) Entorno de desarrollo para aplicación web o movil usando JavaScript.
 - [React Js](https://reactjs.org/) Biblioteca para diseñar interfeces de usuario usando JavaScript.
 - [Visual Studio](https://code.visualstudio.com/) Editor de código para todos tipos de lenguaje de programación.
-- [Tailwindcss](https://tailwindcss.com/) Framework css para la parte visual.
+- [Bootstrap](https://getbootstrap.com/) Framework css para la parte visual.
 - [TypeScript](https://www.typescriptlang.org/) Lenguaje de programación de tipado fuerte.
 - [JavaScript](https://developer.mozilla.org/es/docs/Web/JavaScript) Lenguaje de programación interpretado.
 - [Git](https://git-scm.com/) Software de control de versiones.
@@ -26,173 +26,143 @@ Algunos recursos para iniciar con este proyecto puedes ver en:
 
 Siga los pasos para iniciar el desarrollo:
 
-1.  Clona el proyecto o agrague el ssh al repositorio para contribuir en nuevos cambios [Git Hub - Software Restaurante](https://github.com/luissince/SoftwareRestaurante)
+### 1.  Clona el proyecto o agrague el ssh al repositorio para contribuir en nuevos cambios [Git Hub - Software Punto de Venta](https://github.com/luissince/syssoft-integra-frontend)
 
-    1.1. Agregue por ssh para la integración
+#### 1.1. Agregue por ssh para la integración
 
-    #Code
+Generar tu clave ssh para poder contribuir al proyecto.
 
-        /**
-        ** Para el proceso de integración **
-        **/
+```bash
+ssh-keygen -t rsa -b 4096 -C "tu email"
+```
 
-        // ejecute en su consola cmd, bash, git los siguientes comandos
+Configuración global del nombre.
 
-        // Generar tu clave ssh para poder contribuir al proyecto
-        ssh-keygen -t rsa -b 4096 -C "tu email"
+```bash
+git config --global user.name "John Doe"
+```
 
-        // Configuración global del nombre
-        git config --global user.name "John Doe"
+Configuración global del email.
 
-        // Configuración global del email
-        git config --global user.email johndoe@example.com
+```bash
+git config --global user.email johndoe@example.com
+```
 
-        // crea una carpeta
-        mkdir SoftwareRestaurante
+Crea una carpeta.
 
-        // moverse a la carpeta
-        cd SoftwareRestaurante
+```bash
+mkdir SoftwareRestaurante
+```
 
-        // comando que inicia git
-        git init
+Moverse a la carpeta.
 
-        // comando que agrega la referencia de la rama
-        git remote add origin git@github.com:luissince/SoftwareRestaurante.git
+```bash
+cd SoftwareRestaurante
+```
 
-        // comando que descarga los archivos al working directory
-        git fetch origin master
+Comando para inicia git.
 
-        // comando que une los cambios al staging area
-        git merge origin/master
+```bash
+git init
+```
 
-    2.2 Clonar
+Comando que agrega la referencia de la rama.
 
-        #code
+```bash
+git remote add origin git@github.com:luissince/syssoft-integra-frontend.git
+```
 
-        /**
-        ** Para el proceso de clonación **
-        **/
+Comando que descarga los archivos al working directory.
 
-        // Clonar al proyecto
-        git clone https://github.com/luissince/SoftwareRestaurante.git
+```bash
+git fetch origin master
+```
 
-2.  Instale typescript si su proyecto lo usa
+Comando que une los cambios al staging area.
 
-    #Code
+```bash
+git merge origin/master
+```
 
-        npm install -g typescript
+#### 1.2 Clonar al proyecto
 
-3.  Ejecute en la carpeta la clonada **npm install** para descargar las dependencias del proyecto
+Al clonar un proyecto no necesitas crear ninguna carpeta.
 
-    #Code
+```bash
+git clone https://github.com/luissince/syssoft-integra-frontend.git
+```
 
-        npm install
+### 2. Instale typescript si su proyecto lo usa
 
-4.  Copiar el arhivo de la ruta del EndPoint en app/.env.env.development.example
+```bash
+npm install -g typescript
+```
 
-    #code
+### 3. Ejecute en la carpeta la clonada **npm install** para descargar las dependencias del proyecto
 
-        <!-- copie el archivo .env.development.example a .env.development  -->
-        cp .env.development.example .env.development
+```bash
+npm install
+```
 
-5.  Configuración de la variables de entorno del front-end
+### 4. Copiar el arhivo de la ruta del EndPoint en app/.env.env.development.example
 
-        #code
+```bash
+cp .env.development.example .env.development
+```
 
-            <!-- ruta para las peticiones del back-end princial -->
-            REACT_APP_END_POINT=http://localhost:3002
+### 5. Configuración de Variables de Entorno del Front-end
 
-            <!-- ruta para en envió de las facturas electrónicas -->
-            REACT_APP_URL=http://localhost:3002
+A continuación, se presenta la configuración de las variables de entorno utilizadas en el front-end:
 
-            <!-- ruta para las peticiones http -->
-            REACT_APP_IMAGE=http://localhost:3002
+```bash
+REACT_APP_END_POINT=http://localhost:3002
+REACT_APP_URL=http://localhost:3002
+REACT_APP_APIS_PERU=http://localhost:3002
+REACT_APP_IMAGE=http://localhost:3002
+```
 
-6.  Copiar el arhivo de la configuración del servidor en server/.env
+### 6.  Ejecute **npm run start** para iniciar el Front-end
 
-    #code
+```bash
+npm run start
+```
 
-        <!-- copie el archivo .env.development.example a .env.development  -->
-        cp .env.example .env
+### 7. Ejecute **npm run build** para construir le proyecto
 
-7.  Configuración de la variables de entorno del back-end
+```bash
+npm run build
+```
 
-    #code
+### 8. Configuración para Ejecutar GitHub Actions:
 
-        <!-- puerto del servidor -->
-        PORT=5000
+Para ejecutar los workflows de GitHub Actions, asegúrate de que tu usuario tenga los privilegios de ejecución necesarios. A continuación, te proporcionamos algunos pasos para empezar:
 
-        <!-- ip o nombre del servidor de la base datos -->
-        DB_HOST=
-        //nombre de usuario del servidor de la base de datos
-        DB_USER=
-
-        <!-- contraseña del usuario del servidor de la base de datos -->
-        DB_PASSWORD=
-
-        <!-- nombre del servidor de la base de la base de datos -->
-        DB_NAME=
-
-        <!-- puerto del servidor de base de datos -->
-        DB_PORT=3306
-
-        <!-- Configuración de la zona horaria del servidor -->
-        TZ="America/Lima"
-
-8.  Agregar la propiedad **"proxy": "http://localhost:3002"** el package.json de la carpeta app/package.json con la url del back-end, ese propiedad es solo para desarrollo
-
-    #code
-
-        "proxy": "http://localhost:5000"
-
-9.  Ejecute **npm run dev:app** para iniciar el front-end
-
-    #code
-
-        npm run dev:app
-
-10. Ejecute **npm run dev:server** para iniciar el backend-end
-
-    #code
-
-        npm run dev:server
-
-11. Ejecute **npm run build** para construir le proyecto
-
-    #code
-
-        npm run build
-
-### 12. Configuración para Ejecutar GitHub Actions:
-
-Para ejecutar los flujos de trabajo de GitHub Actions, asegúrate de que tu usuario tenga los privilegios de ejecución necesarios. A continuación, te proporcionamos algunos pasos para empezar:
-
-#### 12.1. Verifica la Existencia del Grupo de Docker:
+#### 9.1. Verifica la Existencia del Grupo de Docker:
 
 ```bash
 sudo groupadd docker
 ```
 
-##### 12.2. Agrega tu Usuario al Grupo de Docker:
+##### 9.2. Agrega tu Usuario al Grupo de Docker:
 
 ```bash
 sudo usermod -aG docker $USER
 ```
 
-##### 12.3. Aplica los Cambios en el Grupo de Docker:
+##### 9.3. Aplica los Cambios en el Grupo de Docker:
 
 ```bash
 newgrp docker
 ```
 
-##### 12.4. Verifica que tu Usuario esté en el Grupo de Docker:
+##### 9.4. Verifica que tu Usuario esté en el Grupo de Docker:
 
 ```bash
 newgrp docker
 ```
 Asegúrate de que "docker" esté en la lista de grupos.
 
-##### 12.5. Configuración y Uso del Runner:
+##### 9.5. Configuración y Uso del Runner:
 
 Para iniciar la creación del runner, ve a Settings del proyecto, luego a Actions, Runners, y selecciona "New self-hosted runner".
 
