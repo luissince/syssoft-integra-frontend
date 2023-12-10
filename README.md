@@ -133,38 +133,37 @@ npm run start
 npm run build
 ```
 
-### 8. Configuración para Ejecutar GitHub Actions:
+### 8. Configuración para Ejecutar GitHub Actions para el CI/CD:
 
 Para ejecutar los workflows de GitHub Actions, asegúrate de que tu usuario tenga los privilegios de ejecución necesarios. A continuación, te proporcionamos algunos pasos para empezar:
 
-### 9. Configuración en el servidor para el CI/CD continuo.
 
-#### 9.1. Verifica la Existencia del Grupo de Docker:
+#### 8.1. Verifica la Existencia del Grupo de Docker:
 
 ```bash
 sudo groupadd docker
 ```
 
-##### 9.2. Agrega tu Usuario al Grupo de Docker:
+##### 8.2. Agrega tu Usuario al Grupo de Docker:
 
 ```bash
 sudo usermod -aG docker $USER
 ```
 
-##### 9.3. Aplica los Cambios en el Grupo de Docker:
+##### 8.3. Aplica los Cambios en el Grupo de Docker:
 
 ```bash
 newgrp docker
 ```
 
-##### 9.4. Verifica que tu Usuario esté en el Grupo de Docker:
+##### 8.4. Verifica que tu Usuario esté en el Grupo de Docker:
 
 ```bash
 newgrp docker
 ```
 Asegúrate de que "docker" esté en la lista de grupos.
 
-##### 9.5. Configuración y Uso del Runner:
+##### 8.5. Configuración y Uso del Runner:
 
 Para iniciar la creación del runner, ve a Settings del proyecto, luego a Actions, Runners, y selecciona "New self-hosted runner".
 
@@ -180,7 +179,7 @@ sudo ./svc.sh uninstall
 
 Estos comandos te permiten controlar el runner según sea necesario.
 
-### 10. Punto importante la hacer git push
+### 9. Punto importante la hacer git push
 
 Cuando realices un git push origin master y desees evitar que se ejecute el flujo de trabajo de GitHub Actions, puedes incorporar [skip ci] o [ci skip] en el mensaje del commit. Esta adición indicará a GitHub Actions que omita la ejecución de los trabajos para ese commit específico.
 
