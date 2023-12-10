@@ -1,16 +1,30 @@
+# Versión de la configuración de Docker Compose
 version: '3'
+
+# Definición de servicios
 services:
-  next-app:
+  # Servicio llamado 'next-app'
+  sysintegra-frontend-services:
+    # Configuración para construir la imagen del contenedor
     build:
       context: .
       dockerfile: Dockerfile
-    image: sysintegra-front-end
+    # Nombre de la imagen resultante
+    image: sysintegra-frontend-image
+    # Conexión a la red llamada 'luis'
     networks:
       - luis
+    # Mapeo de puertos: Mapea el puerto 6000 del host al puerto 80 del contenedor
     ports:
       - 6000:80
-    container_name: sysintegra-front-end
+    # Nombre del contenedor
+    container_name: sysintegra-frontend
+    # Configuración para reiniciar siempre el contenedor
     restart: always
+
+# Definición de redes
 networks:
+  # Definición de la red llamada 'luis'
   luis:
+    # Especifica que la red es externa (puede haber sido creada fuera de este archivo)
     external: true

@@ -104,7 +104,7 @@ npm install -g typescript
 npm install
 ```
 
-### 4. Copiar el arhivo de la ruta del EndPoint en app/.env.env.development.example
+### 4. Copiar el arhivo de la ruta del EndPoint en .env.env.development.example
 
 ```bash
 cp .env.development.example .env.development
@@ -144,26 +144,26 @@ Para ejecutar los workflows de GitHub Actions, asegúrate de que tu usuario teng
 sudo groupadd docker
 ```
 
-##### 8.2. Agrega tu Usuario al Grupo de Docker:
+#### 8.2. Agrega tu Usuario al Grupo de Docker:
 
 ```bash
 sudo usermod -aG docker $USER
 ```
 
-##### 8.3. Aplica los Cambios en el Grupo de Docker:
+#### 8.3. Aplica los Cambios en el Grupo de Docker:
 
 ```bash
 newgrp docker
 ```
 
-##### 8.4. Verifica que tu Usuario esté en el Grupo de Docker:
+#### 8.4. Verifica que tu Usuario esté en el Grupo de Docker:
 
 ```bash
 newgrp docker
 ```
 Asegúrate de que "docker" esté en la lista de grupos.
 
-##### 8.5. Configuración y Uso del Runner:
+#### 8.5. Configuración y Uso del Runner:
 
 Para iniciar la creación del runner, ve a Settings del proyecto, luego a Actions, Runners, y selecciona "New self-hosted runner".
 

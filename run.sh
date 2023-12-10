@@ -1,12 +1,12 @@
-docker stop sysintegra-front-end && docker rm sysintegra-front-end
+docker stop sysintegra-frontend && docker rm sysintegra-frontend
 
-docker image rm sysintegra-front-end
+docker image rm sysintegra-frontend-image
 
-docker build -t sysintegra-front-end .
+docker build -t sysintegra-frontend-image .
 
 docker run -d \
 --restart always \
---name sysintegra-front-end \
+--name sysintegra-frontend \
 --net=luis \
 -p 6000:80 \
-sysintegra-front-end
+sysintegra-frontend-image
