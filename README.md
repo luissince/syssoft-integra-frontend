@@ -51,13 +51,13 @@ git config --global user.email johndoe@example.com
 Crea una carpeta.
 
 ```bash
-mkdir SoftwareRestaurante
+mkdir syssoft-integra-frontend
 ```
 
 Moverse a la carpeta.
 
 ```bash
-cd SoftwareRestaurante
+cd syssoft-integra-frontend
 ```
 
 Comando para inicia git.
