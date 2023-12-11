@@ -1,17 +1,87 @@
 import React from 'react';
-import axios from 'axios';
-import {
-    numberFormat,
-    spinnerLoading,
-} from '../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../components/Container';
-import { images } from '../../../helper';
-import { Bar, Doughnut, Line, Pie, PolarArea } from 'react-chartjs-2';
-import { Chart, LinearScale, CategoryScale, BarElement, PointElement, LineElement, ArcElement, RadialLinearScale } from 'chart.js';
+import { Chart as ChartJS, defaults } from "chart.js/auto";
+import { Bar, Doughnut, Line, Pie } from "react-chartjs-2";
+
+defaults.maintainAspectRatio = false;
+defaults.responsive = true;
+
+defaults.plugins.title.display = true;
+defaults.plugins.title.align = "start";
+defaults.plugins.title.font.size = 20;
+defaults.plugins.title.color = "black";
 
 
-Chart.register(LinearScale, CategoryScale, BarElement, PointElement, LineElement, ArcElement, RadialLinearScale);
+const sourceData1 = [
+    {
+        "label": "ENE",
+        "value": 32
+    },
+    {
+        "label": "FEB",
+        "value": 45
+    },
+    {
+        "label": "MAR",
+        "value": 23
+    },
+    {
+        "label": "ABR",
+        "value": 23
+    },
+    {
+        "label": "MAY",
+        "value": 23
+    },
+    {
+        "label": "JUN",
+        "value": 23
+    },
+    {
+        "label": "JUL",
+        "value": 23
+    },
+    {
+        "label": "AGO",
+        "value": 23
+    },
+    {
+        "label": "SET",
+        "value": 23
+    },
+    {
+        "label": "OCT",
+        "value": 23
+    },
+    {
+        "label": "NOV",
+        "value": 23
+    },
+    {
+        "label": "DIC",
+        "value": 23
+    },
+]
+
+const sourceData2 = [
+    {
+        "label": "Ads",
+        "value": 32
+    },
+    {
+        "label": "Subscriptions",
+        "value": 45
+    },
+    {
+        "label": "Sponsorships",
+        "value": 23
+    },
+    {
+        "label": "Sponsorships",
+        "value": 23
+    },
+]
 
 class Dashboard extends React.Component {
 
@@ -23,32 +93,38 @@ class Dashboard extends React.Component {
             totales: {},
             sucursales: [],
 
-            data: {
-                labels: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo'],            
+            dataBar: {
+                labels: sourceData1.map((data) => data.label),
                 datasets: [
                     {
-                        label: 'Ventas mensuales',
-                        backgroundColor: 'rgb(255, 99, 134)',
-                        data: [12, 19, 3, 5, 2],
-                        fill: false,
-                        borderColor: 'rgb(45, 45, 45)',
-                        tension: 0.1,
+                        label: new Date().getFullYear(),
+                        data: sourceData1.map((data) => data.value),
+                        backgroundColor: [
+                            "rgba(43, 63, 229, 0.8)",
+                            "rgba(250, 192, 19, 0.8)",
+                            "rgba(253, 135, 135, 0.8)",
+                        ],
+                        borderRadius: 1,
                     },
+                ],
+            },
+
+            dataDoughnut: {
+                labels: sourceData2.map((data) => data.label),
+                datasets: [
                     {
-                        label: 'Ventas mensuales',
-                        backgroundColor: 'rgb(255, 206, 86)',
-                        data: [12, 19, 3, 5, 2],
-                        fill: false,
-                        borderColor: 'rgb(45, 45, 45)',
-                        tension: 0.1,
-                    },
-                    {
-                        label: 'Ventas mensuales',
-                        backgroundColor: 'rgb(55, 162, 235)',
-                        data: [12, 19, 3, 5, 2],
-                        fill: false,
-                        borderColor: 'rgb(45, 45, 45)',
-                        tension: 0.1,
+                        label: "Count",
+                        data: sourceData2.map((data) => data.value),
+                        backgroundColor: [
+                            "rgba(43, 63, 229, 0.8)",
+                            "rgba(250, 192, 19, 0.8)",
+                            "rgba(253, 135, 135, 0.8)",
+                        ],
+                        borderColor: [
+                            "rgba(43, 63, 229, 0.8)",
+                            "rgba(250, 192, 19, 0.8)",
+                            "rgba(253, 135, 135, 0.8)",
+                        ],
                     },
                 ],
             },
@@ -58,65 +134,20 @@ class Dashboard extends React.Component {
             loading: true
         }
 
-        this.options = {
-            scales: {
-                y: {
-                    beginAtZero: true,
-                },
-            },
-        };
-
-
         this.abortControllerView = new AbortController();
     }
 
 
     async componentDidMount() {
-
-
-        setTimeout(() => {
-            const data = {
-                labels: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio'],             
-                datasets: [
-                    {
-                        label: 'Ventas mensuales',
-                        backgroundColor: 'rgb(255, 99, 134)',
-                        data: [12, 19, 3, 5, 2,50,60],
-                        fill: false,
-                        borderColor: 'rgb(45, 45, 45)',
-                        tension: 0.1,
-                    },
-                    {
-                        label: 'Ventas mensuales',
-                        backgroundColor: 'rgb(255, 206, 86)',
-                        data: [12, 19, 3, 5, 2,20,4],
-                        fill: false,
-                        borderColor: 'rgb(45, 45, 45)',
-                        tension: 0.1,
-                    },
-                    {
-                        label: 'Ventas mensuales',
-                        backgroundColor: 'rgb(55, 162, 235)',
-                        data: [12, 19, 3, 5, 2, 70,2],
-                        fill: false,
-                        borderColor: 'rgb(45, 45, 45)',
-                        tension: 0.1,
-                    },
-                ],
-            }
-            this.setState({ data })
-        }, 5000)
     }
 
     componentWillUnmount() {
         this.abortControllerView.abort();
     }
 
-
-
     render() {
 
-        const { data } = this.state;
+        const { dataBar, dataDoughnut } = this.state;
 
         return (
             <ContainerWrapper>
@@ -233,17 +264,287 @@ class Dashboard extends React.Component {
 
                 <div className='row'>
                     <div className='col'>
-                        <div className='form-group'>
-                            <h2>Gráfico de Ventas Mensuales (Línea)</h2>
-                            <Bar data={data} options={this.options} />
+                        <div className="form-group">
+                            <h5>
+                                Dashboard <small className="text-secondary"> detalle</small>
+                            </h5>
+                        </div>
+                    </div>
+                </div>
+
+                <div className='row'>
+                    <div className='col'>
+                        <div className="card text-white bg-primary mb-3">
+                            <div className="card-body">
+                                <h5 className="card-title">0.00</h5>
+                                <p className="card-text">VENTAS DEL DÍA</p>
+                            </div>
                         </div>
                     </div>
 
                     <div className='col'>
-                        <div className='form-group'>
-                            <h2>Gráfico de Ventas Mensuales (Línea)</h2>
-                            <Line data={data} options={this.options} />
+                        <div className="card text-white bg-danger mb-3">
+                            <div className="card-body">
+                                <h5 className="card-title">0.00</h5>
+                                <p className="card-text">COMPRAS DEL DÍA</p>
+                            </div>
+                        </div>
+                    </div>
 
+                    <div className='col'>
+                        <div className="card text-white bg-warning mb-3">
+                            <div className="card-body">
+                                <h5 className="card-title">0</h5>
+                                <p className="card-text">CUENTAS POR COBRAR</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className='col'>
+                        <div className="card text-white bg-success mb-3">
+                            <div className="card-body">
+                                <h5 className="card-title">0</h5>
+                                <p className="card-text">CUENTAS POR PAGAR</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className='row'>
+                    <div className='col-lg-6 col-md-12 col-sm-12 col-12'>
+                        <div className='form-group'>
+                            <div className='card'>
+                                <div className='card-body p-0'>
+                                    <div className='p-2' style={{ height: '400px' }}>
+                                        <Bar
+                                            data={dataBar}
+                                            options={{
+                                                plugins: {
+                                                    title: {
+                                                        align: 'center',
+                                                        fullSize: false,
+                                                        display: true,
+                                                        text: "VENTAS POR AÑO",
+                                                        color: "#020203",
+                                                        font: {
+                                                            size: 14
+                                                        }
+                                                    },
+                                                },
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className='col-lg-6 col-md-12 col-sm-12 col-12'>
+                        <div className='form-group'>
+                            <div className='card'>
+                                <div className='card-body p-0'>
+                                    <div className='p-2' style={{ height: '400px' }}>
+                                        <Pie
+                                            data={dataDoughnut}
+                                            options={{
+                                                plugins: {
+                                                    title: {
+                                                        align: 'center',
+                                                        fullSize: false,
+                                                        display: true,
+                                                        text: "INVENTARIO",
+                                                        color: "#020203",
+                                                        font: {
+                                                            size: 14
+                                                        }
+                                                    },
+                                                },
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className='row'>
+                    <div className='col-lg-6 col-md-12 col-sm-12 col-12'>
+                        <div className='form-group'>
+                            <div className='card'>
+                                <div className='card-body p-0'>
+                                    <div className='p-2' style={{ height: '400px' }}>
+
+                                        {/* <div className='table-responsive'>
+                                        <table className='table table-striped border-0'>
+                                            <thead className='bg-white'>
+                                                <tr>
+                                                    <th>Mes</th>
+                                                    <th>Venta Sunat</th>
+                                                    <th>Venta Libre</th>
+                                                    <th>Venta Total</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>Enero</td>
+                                                    <td>0.00</td>
+                                                    <td>0.00</td>
+                                                    <td>0.00</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Febrero</td>
+                                                    <td>0.00</td>
+                                                    <td>0.00</td>
+                                                    <td>0.00</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Marzo</td>
+                                                    <td>0.00</td>
+                                                    <td>0.00</td>
+                                                    <td>0.00</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Abril</td>
+                                                    <td>0.00</td>
+                                                    <td>0.00</td>
+                                                    <td>0.00</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Mayo</td>
+                                                    <td>0.00</td>
+                                                    <td>0.00</td>
+                                                    <td>0.00</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Junio</td>
+                                                    <td>0.00</td>
+                                                    <td>0.00</td>
+                                                    <td>0.00</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Julio</td>
+                                                    <td>0.00</td>
+                                                    <td>0.00</td>
+                                                    <td>0.00</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Agosto</td>
+                                                    <td>0.00</td>
+                                                    <td>0.00</td>
+                                                    <td>0.00</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Setiembre</td>
+                                                    <td>0.00</td>
+                                                    <td>0.00</td>
+                                                    <td>0.00</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Octubre</td>
+                                                    <td>0.00</td>
+                                                    <td>0.00</td>
+                                                    <td>0.00</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Noviembre</td>
+                                                    <td>0.00</td>
+                                                    <td>0.00</td>
+                                                    <td>0.00</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Diciembre</td>
+                                                    <td>0.00</td>
+                                                    <td>0.00</td>
+                                                    <td>0.00</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div> */}
+                                        <Line
+                                            data={
+                                                {
+                                                    labels: ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SET', 'OCT', 'NOV', 'DIC'],
+                                                    datasets: [
+                                                        {
+                                                            label: 'Venta Sunat',
+                                                            data: [0.00, 0.00, 500, 800, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00],
+                                                            borderColor: 'rgba(255, 99, 132, 1)',
+                                                            borderWidth: 2,
+                                                            fill: false,
+                                                        },
+                                                        {
+                                                            label: 'Venta Libre',
+                                                            data: [0.00, 0.00, 300, 200, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00],
+                                                            borderColor: 'rgba(54, 162, 235, 1)',
+                                                            borderWidth: 2,
+                                                            fill: false,
+                                                        },
+                                                        {
+                                                            label: 'Venta Total',
+                                                            data: [0.00, 0.00, 900, 1000, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00],
+                                                            borderColor: 'rgba(75, 192, 192, 1)',
+                                                            borderWidth: 2,
+                                                            fill: false,
+                                                        },
+                                                    ],
+                                                }
+                                            }
+                                            options={{
+                                                scales: {
+                                                    x: { stacked: true },
+                                                    y: { stacked: true },
+                                                },
+                                                plugins: {
+                                                    title: {
+                                                        align: 'center',
+                                                        fullSize: false,
+                                                        display: true,
+                                                        text: "VENTAS POR AÑO",
+                                                        color: "#020203",
+                                                        font: {
+                                                            size: 14
+                                                        }
+                                                    },
+                                                    tooltip: {
+                                                        callbacks: {
+                                                            label: (context) => `Monto: ${context.parsed.y.toFixed(2)}`,
+                                                        },
+                                                    },
+                                                },
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className='col-lg-6 col-md-12 col-sm-12 col-12'>
+                        <div className='form-group'>
+                            <div className='card'>
+                                <div className='card-body p-0'>
+                                    <div className='p-2' style={{ height: '400px' }}>
+                                        <Doughnut
+                                            data={dataDoughnut}
+                                            options={{
+                                                plugins: {
+                                                    title: {
+                                                        align: 'center',
+                                                        fullSize: false,
+                                                        display: true,
+                                                        text: "TIPOS DE VENTA",
+                                                        color: "#020203",
+                                                        font: {
+                                                            size: 14
+                                                        }
+                                                    },
+                                                },
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -251,24 +552,45 @@ class Dashboard extends React.Component {
                 <div className='row'>
                     <div className='col'>
                         <div className='form-group'>
-                            <h2>Gráfico de Ventas Mensuales (Torta)</h2>
-                            <Pie data={data} />
+                            <div className='card'>
+                                <div className='card-title text-center text-dark font-weight-bold text-base pt-2'>Productos más veces vendidos</div>
+                                <div className='card-body p-0'>
+                                    <div className='table-responsive'>
+                                        <table className='table table-striped border-0'>
+                                            <thead className='bg-white'>
+                                                <tr>
+                                                    <th>N°</th>
+                                                    <th>Producto</th>
+                                                    <th>Categoría/Marca</th>
+                                                    <th>Veces</th>
+                                                </tr>
+                                            </thead>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                     <div className='col'>
                         <div className='form-group'>
-                            <h2>Gráfico de Ventas Mensuales (Doughnut)</h2>
-                            <Doughnut data={data} />
-                        </div>
-                    </div>
-                </div>
-
-                <div className='row'>
-                    <div className='col'>
-                        <div className='form-group'>
-                            <h2>Gráfico de Ventas Mensuales (Área)</h2>
-                            <PolarArea data={data} />
+                            <div className='card'>
+                                <div className='card-title text-center text-dark font-weight-bold text-base pt-2'>Productos con más cantidades vendidas</div>
+                                <div className='card-body p-0'>
+                                    <div className='table-responsive'>
+                                        <table className='table table-striped border-0'>
+                                            <thead className='bg-white'>
+                                                <tr>
+                                                    <th>N°</th>
+                                                    <th>Producto</th>
+                                                    <th>Categoría/Marca</th>
+                                                    <th>Cantidad</th>
+                                                </tr>
+                                            </thead>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

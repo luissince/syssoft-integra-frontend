@@ -221,7 +221,7 @@ class VentaDetalle extends CustomComponent {
                 }
 
                 <div className='row'>
-                    <div className='col-lg-12 col-md-12 col-sm-12 col-12'>
+                    <div className='col'>
                         <div className="form-group">
                             <h5>
                                 <span role="button" onClick={() => this.props.history.goBack()}><i className="bi bi-arrow-left-short"></i></span> Venta
@@ -232,7 +232,7 @@ class VentaDetalle extends CustomComponent {
                 </div>
 
                 <div className="row">
-                    <div className="col-lg-12 col-md-12 col-sm-12 col-12">
+                    <div className="col">
                         <div className="form-group">
                             <button type="button" className="btn btn-light" onClick={() => this.onEventImprimir()}><i className="fa fa-print"></i> Imprimir</button>
                             {" "}
@@ -245,7 +245,7 @@ class VentaDetalle extends CustomComponent {
                 </div>
 
                 <div className="row">
-                    <div className="col-lg-12 col-md-12 col-sm-12 col-12">
+                    <div className="col">
                         <div className="form-group">
                             <div className="table-responsive">
                                 <table width="100%">
@@ -297,7 +297,7 @@ class VentaDetalle extends CustomComponent {
                 </div>
 
                 <div className="row">
-                    <div className="col-lg-12 col-md-12 col-sm-12 col-12">
+                    <div className="col">
                         <div className="form-group">
                             <p className="lead">Detalle</p>
                             <div className="table-responsive">
@@ -349,7 +349,7 @@ class VentaDetalle extends CustomComponent {
                 </div>
 
                 <div className="row">
-                    <div className="col-lg-12 col-md-12 col-sm-12 col-12">
+                    <div className="col">
                         <p className="lead">Ingresos asociado</p>
                         <div className="table-responsive">
                             <table className="table table-light table-striped">
