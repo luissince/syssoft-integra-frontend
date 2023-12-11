@@ -7,7 +7,7 @@ const ModalCliente = (props) => {
     return (
         <div id={idModal} className='side-modal'>
             <div className='side-modal_wrapper'>
-                <div className="card border-0 rounded-0">
+                <div className="card h-100 border-0 rounded-0">
                     <div className="card-header">Configuración de Venta</div>
                     <button
                         type="button"
@@ -17,8 +17,9 @@ const ModalCliente = (props) => {
                         <span aria-hidden="true">&times;</span>
                     </button>
 
-                    <div className="card-body">
+                    <div className="card-body h-100 overflow-y-auto">
 
+                        
 
                     </div>
 

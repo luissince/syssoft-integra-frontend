@@ -7,6 +7,11 @@ import {
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../components/Container';
 import { images } from '../../../helper';
+import { Bar, Doughnut, Line, Pie, PolarArea } from 'react-chartjs-2';
+import { Chart, LinearScale, CategoryScale, BarElement, PointElement, LineElement, ArcElement, RadialLinearScale } from 'chart.js';
+
+
+Chart.register(LinearScale, CategoryScale, BarElement, PointElement, LineElement, ArcElement, RadialLinearScale);
 
 class Dashboard extends React.Component {
 
@@ -18,71 +23,108 @@ class Dashboard extends React.Component {
             totales: {},
             sucursales: [],
 
+            data: {
+                labels: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo'],            
+                datasets: [
+                    {
+                        label: 'Ventas mensuales',
+                        backgroundColor: 'rgb(255, 99, 134)',
+                        data: [12, 19, 3, 5, 2],
+                        fill: false,
+                        borderColor: 'rgb(45, 45, 45)',
+                        tension: 0.1,
+                    },
+                    {
+                        label: 'Ventas mensuales',
+                        backgroundColor: 'rgb(255, 206, 86)',
+                        data: [12, 19, 3, 5, 2],
+                        fill: false,
+                        borderColor: 'rgb(45, 45, 45)',
+                        tension: 0.1,
+                    },
+                    {
+                        label: 'Ventas mensuales',
+                        backgroundColor: 'rgb(55, 162, 235)',
+                        data: [12, 19, 3, 5, 2],
+                        fill: false,
+                        borderColor: 'rgb(45, 45, 45)',
+                        tension: 0.1,
+                    },
+                ],
+            },
+
             codiso: '',
             msgLoading: 'Cargando datos...',
             loading: true
         }
 
+        this.options = {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                },
+            },
+        };
+
+
         this.abortControllerView = new AbortController();
     }
 
-    setStateAsync(state) {
-        return new Promise((resolve) => {
-            this.setState(state, resolve)
-        });
-    }
 
     async componentDidMount() {
-        this.loadInit();
+
+
+        setTimeout(() => {
+            const data = {
+                labels: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio'],             
+                datasets: [
+                    {
+                        label: 'Ventas mensuales',
+                        backgroundColor: 'rgb(255, 99, 134)',
+                        data: [12, 19, 3, 5, 2,50,60],
+                        fill: false,
+                        borderColor: 'rgb(45, 45, 45)',
+                        tension: 0.1,
+                    },
+                    {
+                        label: 'Ventas mensuales',
+                        backgroundColor: 'rgb(255, 206, 86)',
+                        data: [12, 19, 3, 5, 2,20,4],
+                        fill: false,
+                        borderColor: 'rgb(45, 45, 45)',
+                        tension: 0.1,
+                    },
+                    {
+                        label: 'Ventas mensuales',
+                        backgroundColor: 'rgb(55, 162, 235)',
+                        data: [12, 19, 3, 5, 2, 70,2],
+                        fill: false,
+                        borderColor: 'rgb(45, 45, 45)',
+                        tension: 0.1,
+                    },
+                ],
+            }
+            this.setState({ data })
+        }, 5000)
     }
 
     componentWillUnmount() {
         this.abortControllerView.abort();
     }
 
-    async loadInit() {
-        try {
-
-            const total = await axios.get("/api/dashboard/totales", {
-                signal: this.abortControllerView.signal,
-                headers: {
-                    Authorization: "Bearer " + this.state.token
-                },
-                params: {
-                    "idSucursal": this.props.token.project.idSucursal
-                },
-            });
-
-            const sucursal = await axios.get("/api/sucursal/inicio", {
-                signal: this.abortControllerView.signal
-            });
-
-            const actual = sucursal.data.filter((proy) => proy.idSucursal === this.props.token.project.idSucursal);
-
-            await this.setStateAsync({
-                totales: total.data,
-                sucursales: sucursal.data,
-                codiso: actual[0].codiso,
-                loading: false
-            });
-        } catch (error) {
-            if (error.message !== "canceled") {
-                this.setState({
-                    msgLoading: "Se produjo un error interno, intente nuevamente."
-                })
-            }
-        }
-    }
 
 
     render() {
+
+        const { data } = this.state;
+
         return (
             <ContainerWrapper>
-                {
+                {/* {
                     this.state.loading && spinnerLoading(this.state.msgLoading)
-                }
+                } */}
 
-                <div className='col-lg-12 col-md-12 mt-8 mb-12'>
+                {/* <div className='col-lg-12 col-md-12 mt-8 mb-12'>
                     <div className="container-fluid py-4 ">
 
                         <div className="row ">
@@ -96,11 +138,7 @@ class Dashboard extends React.Component {
                                             <p className="text-sm mb-0">Total de Categorias</p>
                                             <h4 className="mb-0">{this.state.totales.totalCategorias}</h4>
                                         </div>
-                                    </div>
-                                    {/* <hr className="dark horizontal my-0" />
-                                            <div className="card-footer p-3 bg-transparent">
-                                                <p className="mb-0"><span className="text-success text-sm font-weight-bolder">+55% </span>than lask week</p>
-                                            </div> */}
+                                    </div>                                 
                                 </div>
                             </div>
                             <div className="col-xl-3 col-sm-6 mb-xl-0 mb-4">
@@ -189,6 +227,48 @@ class Dashboard extends React.Component {
                                         })
                                     )
                             }
+                        </div>
+                    </div>
+                </div> */}
+
+                <div className='row'>
+                    <div className='col'>
+                        <div className='form-group'>
+                            <h2>Gráfico de Ventas Mensuales (Línea)</h2>
+                            <Bar data={data} options={this.options} />
+                        </div>
+                    </div>
+
+                    <div className='col'>
+                        <div className='form-group'>
+                            <h2>Gráfico de Ventas Mensuales (Línea)</h2>
+                            <Line data={data} options={this.options} />
+
+                        </div>
+                    </div>
+                </div>
+
+                <div className='row'>
+                    <div className='col'>
+                        <div className='form-group'>
+                            <h2>Gráfico de Ventas Mensuales (Torta)</h2>
+                            <Pie data={data} />
+                        </div>
+                    </div>
+
+                    <div className='col'>
+                        <div className='form-group'>
+                            <h2>Gráfico de Ventas Mensuales (Doughnut)</h2>
+                            <Doughnut data={data} />
+                        </div>
+                    </div>
+                </div>
+
+                <div className='row'>
+                    <div className='col'>
+                        <div className='form-group'>
+                            <h2>Gráfico de Ventas Mensuales (Área)</h2>
+                            <PolarArea data={data} />
                         </div>
                     </div>
                 </div>
