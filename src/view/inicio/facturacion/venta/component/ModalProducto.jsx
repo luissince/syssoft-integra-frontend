@@ -1,11 +1,22 @@
+import { spinnerLoading } from "../../../../../helper/utils.helper";
+
 const ModalProducto = (props) => {
 
-    const { idModal } = props;
+    const { idModal, loading, producto, detalleVenta } = props;
+
+    const { refPrecio, refBonificacion, refDescripcion } = props;
+
+    const { refListPrecio, listPrecio } = props;
 
     const { handleSave, handleOpenAndClose } = props;
 
+    const handleSeleccionar = (precio) => {
+        refPrecio.current.value = precio.valor
+    }
+
     return (
         <div id={idModal} className='side-modal'>
+
             <div className='side-modal_wrapper'>
                 <div className="card h-100 border-0 rounded-0">
                     <div className="card-header">Editar producto</div>
@@ -18,11 +29,12 @@ const ModalProducto = (props) => {
                     </button>
 
                     <div className="card-body h-100 overflow-y-auto">
+                        {loading && spinnerLoading()}
 
                         <div className="row">
                             <div className="col">
                                 <div className="form-group">
-                                    <h5><i className="fa fa-pencil"></i> sdf</h5>
+                                    <h5><i className="fa fa-pencil"></i> {producto && producto.nombreProducto}</h5>
                                 </div>
                             </div>
                         </div>
@@ -32,7 +44,9 @@ const ModalProducto = (props) => {
                                 <div className="form-group">
                                     <label>Precio:</label>
                                     <input className="form-control"
-                                        placeholder="0.00" />
+                                        autoFocus
+                                        placeholder="0.00"
+                                        ref={refPrecio} />
                                 </div>
                             </div>
                         </div>
@@ -42,7 +56,8 @@ const ModalProducto = (props) => {
                                 <div className="form-group">
                                     <label>Bonificación:</label>
                                     <input className="form-control"
-                                        placeholder="0" />
+                                        placeholder="0" 
+                                        ref={refBonificacion}/>
                                 </div>
                             </div>
                         </div>
@@ -52,7 +67,8 @@ const ModalProducto = (props) => {
                                 <div className="form-group">
                                     <label>Descripción:</label>
                                     <textarea className="form-control"
-                                        placeholder="Ingrese los datos del producto">
+                                        placeholder="Ingrese los datos del producto"
+                                        ref={refDescripcion}>
                                     </textarea>
                                 </div>
                             </div>
@@ -63,16 +79,22 @@ const ModalProducto = (props) => {
                                 <div className="form-group">
                                     <label>Lista de Precios:</label>
                                     <ul className="list-group">
-                                        <li className="list-group-item">An item</li>
+                                        {listPrecio.map((item, index) => (
+                                            <button
+                                                key={index}
+                                                className="list-group-item list-group-item-action"
+                                                onClick={()=>handleSeleccionar(item)}>
+                                                {item.nombre} - {item.valor}
+                                            </button>
+                                        ))}
+                                        {/* <li className="list-group-item">An item</li>
                                         <li className="list-group-item">A second item</li>
                                         <li className="list-group-item">A third item</li>
-                                        <li className="list-group-item">A fourth item</li>
+                                        <li className="list-group-item">A fourth item</li> */}
                                     </ul>
                                 </div>
                             </div>
                         </div>
-
-
                     </div>
 
                     <div className="card-footer bg-white">
@@ -84,9 +106,6 @@ const ModalProducto = (props) => {
                             </div>
                         </div>
                     </div>
-                </div>
-
-                <div className='side-modal_bottom'>
                 </div>
             </div>
             <div className="side-modal_overlay" onClick={handleOpenAndClose}>

@@ -28,10 +28,7 @@ const InvoiceDetail = (props) => {
                         return (
                             <ItemAdd
                                 key={index}
-                                idProducto={item.idProducto}
-                                nombre={item.nombreProducto}
-                                precio={item.precio}
-                                cantidad={item.cantidad}
+                                producto={item}
                                 codiso={codiso}
                                 detalleVenta={detalleVenta}
                                 setStateAsync={setStateAsync}

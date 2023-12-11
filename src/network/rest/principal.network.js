@@ -215,6 +215,15 @@ export async function actualizarStockInventario(data, signal) {
 | ENDPOINTS DE PRODUCTO
 |--------------------------------------------------------------------------
 */
+export async function listProducto(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/producto/list', {
+      signal: signal,
+      params: params
+    })
+  );
+}
+
 export async function getIdProducto(params, signal) {
   return await Resolve.create(
     instancePrincipal.get("/api/producto/id", {
@@ -256,6 +265,7 @@ export async function filtrarProducto(params) {
     })
   );
 }
+
 export async function filtrarAlmacenProducto(params) {
   return await Resolve.create(
     instancePrincipal.get("/api/producto/filter/almacen", {
@@ -264,19 +274,17 @@ export async function filtrarAlmacenProducto(params) {
   );
 }
 
-
-export async function listProducto(params, signal) {
+export async function preferidosProducto(params) {
   return await Resolve.create(
-    instancePrincipal.get('/api/producto/list', {
-      signal: signal,
+    instancePrincipal.get('/api/producto/preferidos', {
       params: params
     })
   );
 }
 
-export async function preferidosProducto(params) {
+export async function obtenerListaPrecioProducto(params) {
   return await Resolve.create(
-    instancePrincipal.get('/api/producto/preferidos', {
+    instancePrincipal.get('/api/producto/lista/precios', {
       params: params
     })
   );

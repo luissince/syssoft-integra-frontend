@@ -3,17 +3,17 @@ import { numberFormat } from "../../../../../helper/utils.helper";
 
 const ItemAdd = (props) => {
 
-    const { idProducto, nombre, precio, cantidad, codiso } = props;
+    const { producto, codiso } = props;
 
-    const { detalleVenta, setStateAsync, handleOpenAndClose} = props;
+    const { detalleVenta, setStateAsync, handleOpenAndClose } = props;
 
     const handleMinus = async () => {
         const updatedDetalle = detalleVenta.map(item =>
-            item.idProducto === idProducto
+            item.idProducto === producto.idProducto
                 ? { ...item, cantidad: Math.max(parseFloat(item.cantidad) - 1, 1) }
                 : item
         );
-    
+
         await setStateAsync({
             detalleVenta: updatedDetalle,
         });
@@ -21,7 +21,7 @@ const ItemAdd = (props) => {
 
     const handlePlus = async () => {
         const updatedDetalle = detalleVenta.map(item => {
-            if (item.idProducto === idProducto) {
+            if (item.idProducto === producto.idProducto) {
                 return { ...item, cantidad: parseFloat(item.cantidad) + 1 };
             }
             return item;
@@ -37,7 +37,7 @@ const ItemAdd = (props) => {
     }
 
     const handleRemove = async () => {
-        const updatedDetalle = detalleVenta.filter((item) => idProducto !== item.idProducto);
+        const updatedDetalle = detalleVenta.filter((item) => producto.idProducto !== item.idProducto);
 
         await setStateAsync({
             detalleVenta: updatedDetalle,
@@ -54,7 +54,7 @@ const ItemAdd = (props) => {
                             <span>
                                 <div
                                     className=" d-flex justify-content-center align-items-center h-100 invoice-item_add-item-options_button mr-1"
-                                    onClick={handleOpenAndClose}>
+                                    onClick={() => handleOpenAndClose(producto)}>
                                     <img src={images.edit} alt='Editar' />
                                 </div>
                             </span>
@@ -69,10 +69,10 @@ const ItemAdd = (props) => {
 
                         <div className='invoice-item_add-item-describe d-flex flex-column text-break text-truncate text-nowrap'>
                             <div className='invoice-item_add-item-describe-title text-truncate text-base'>
-                                {nombre}
+                                {producto.nombreProducto}
                             </div>
                             <div className='invoice-item_add-item-describe-price d-flex text-break text-truncate text-nowrap text-sm'>
-                                {numberFormat(precio, codiso)}
+                                {numberFormat(producto.precio, codiso)}
                             </div>
                         </div>
 
@@ -83,7 +83,7 @@ const ItemAdd = (props) => {
                                 <img src={images.minus} alt='Menorar' />
                             </button>
                             <div className="item_quantity d-flex justify-content-center align-items-center">
-                                {cantidad}
+                                {producto.cantidad}
                             </div>
                             <button
                                 className="btn m-0 d-flex justify-content-center align-items-center pointer"
@@ -94,7 +94,7 @@ const ItemAdd = (props) => {
 
                         <div className='invoice-item_add-item-total'>
                             <div className='h-100 d-flex justify-content-end align-items-center text-base'>
-                                {numberFormat(precio * cantidad, codiso)}
+                                {numberFormat(producto.precio * producto.cantidad, codiso)}
                             </div>
                         </div>
                     </div>

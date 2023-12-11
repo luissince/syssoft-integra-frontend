@@ -33,9 +33,6 @@ const ModalCliente = (props) => {
                         </div>
                     </div>
                 </div>
-
-                <div className='side-modal_bottom'>
-                </div>
             </div>
             <div className="side-modal_overlay" onClick={handleOpenAndClose}>
             </div>

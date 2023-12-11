@@ -15,6 +15,7 @@ import {
     isText,
     rounded,
     showModal,
+    sleep,
     spinnerLoading,
     viewModal,
 } from '../../../../helper/utils.helper';
@@ -31,7 +32,8 @@ import {
     comboMoneda,
     filtrarCliente,
     filtrarProductoVenta,
-    preferidosProducto
+    preferidosProducto,
+    obtenerListaPrecioProducto
 } from '../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
@@ -128,9 +130,12 @@ class VentaProceso extends CustomComponent {
 
             importeTotal: 0.0,
 
-            //Modal Sale
+            // modal venta
             metodosPagoLista: [],
             metodoPagoAgregado: [],
+
+            // modal producto
+            loadingProducto: true,
 
             idSucursal: this.props.token.project.idSucursal,
             idUsuario: this.props.token.userToken.idUsuario,
@@ -169,6 +174,14 @@ class VentaProceso extends CustomComponent {
         this.refComprobanteCreditoVariable = React.createRef();
         this.refMetodoCreditoVariable = React.createRef();
         this.refBancoCreditoVariable = React.createRef();
+
+        // atributos para el modal producto
+        this.producto = null;
+        this.refPrecioProducto = React.createRef();
+        this.refBonificacionProducto = React.createRef();
+        this.refDescripcionProducto = React.createRef();
+        this.refListPrecioProducto = React.createRef();
+        this.listPrecioProducto = []
 
         this.abortControllerView = new AbortController();
     }
@@ -424,6 +437,23 @@ class VentaProceso extends CustomComponent {
         }
     }
 
+    async fetchObtenerListaPrecio(id) {
+        const params = {
+            idProducto: id
+        }
+        const response = await obtenerListaPrecioProducto(params);
+
+        if (response instanceof SuccessReponse) {
+            return response.data
+        }
+
+        if (response instanceof ErrorResponse) {
+            if (response.getType() === CANCELED) return;
+
+            return [];
+        }
+    }
+
     calcularLetraMensual = () => {
         if (this.state.numCuota === '') {
             return;
@@ -593,18 +623,61 @@ class VentaProceso extends CustomComponent {
     // Modal producto
     //------------------------------------------------------------------------------------------
 
-    handleOpenAndCloseProducto = () => {
+    handleOpenAndCloseProducto = async (producto) => {
         const invoice = document.getElementById(this.idModalProducto);
+        
         if (invoice.classList.contains("toggled")) {
+            if (this.state.loadingProducto) return;
+
             invoice.classList.remove("toggled");
+            this.producto = null;
+            this.listPrecioProducto = [];
+            this.setState({ loadingProducto: true })
         } else {
             invoice.classList.add("toggled");
+            const lista = await this.fetchObtenerListaPrecio(producto.idProducto);
+            this.producto = producto;
+            this.refPrecioProducto.current.value = producto.precio;
+            this.refBonificacionProducto.current.value = 0;
+            this.refDescripcionProducto.current.value = producto.nombreProducto;
+            this.listPrecioProducto = lista;
+            this.setState({ loadingProducto: false })
         }
     }
 
     handleSaveProducto = () => {
+        const precioProducto = this.refPrecioProducto.current.value;
+        const descripcionProducto = this.refDescripcionProducto.current.value;
 
+        if (!isNumeric(precioProducto) || parseFloat(precioProducto) <= 0) {
+            alertWarning("Venta", "El precio del producto tiene un valor no admitido o es menor o igual a 0.", () => {
+                this.refPrecioProducto.current.focus();
+            });
+            return;
+        }
+
+        if (isEmpty(descripcionProducto)) {
+            alertWarning("Venta", "La descripción del producto no puede ser vacía.", () => {
+                this.refDescripcionProducto.current.focus();
+            });
+            return;
+        }
+
+        const updatedDetalle = this.state.detalleVenta.map(item =>
+            item.idProducto === this.producto.idProducto
+                ? {
+                    ...item,
+                    nombreProducto: descripcionProducto,
+                    precio: parseFloat(precioProducto)
+                }
+                : item
+        );
+
+        this.setState({
+            detalleVenta: updatedDetalle,
+        });
     }
+
 
     //------------------------------------------------------------------------------------------
     // Filtrar cliente
@@ -1236,6 +1309,16 @@ class VentaProceso extends CustomComponent {
 
                 <ModalProducto
                     idModal={this.idModalProducto}
+                    loading={this.state.loadingProducto}
+                    producto={this.producto}
+                    detalleVenta={detalleVenta}
+
+                    refPrecio={this.refPrecioProducto}
+                    refBonificacion={this.refBonificacionProducto}
+                    refDescripcion={this.refDescripcionProducto}
+
+                    refListPrecio={this.refListPrecioProducto}
+                    listPrecio={this.listPrecioProducto}
 
                     handleSave={this.handleSaveProducto}
                     handleOpenAndClose={this.handleOpenAndCloseProducto}
