@@ -7,14 +7,9 @@ on:
 jobs:
   build:
     runs-on: self-hosted
-    environment: produccion-bodega
+    environment: desarrollo
 
     env:  
-      REACT_APP_END_POINT: ${{ secrets.REACT_APP_END_POINT }}
-      REACT_APP_URL: ${{ secrets.REACT_APP_URL }}
-      REACT_APP_APIS_PERU: ${{ secrets.REACT_APP_APIS_PERU }}
-      REACT_APP_IMAGE: ${{ secrets.REACT_APP_IMAGE }}
-
       VITE_APP_END_POINT: ${{ secrets.VITE_APP_END_POINT }}
       VITE_APP_URL: ${{ secrets.VITE_APP_URL }}
       VITE_APP_APIS_PERU: ${{ secrets.VITE_APP_APIS_PERU }}
@@ -23,20 +18,6 @@ jobs:
     steps:
       - name: Checkout código
         uses: actions/checkout@v3
-
-      # - name: Verificar variables de entorno
-      #   run: |
-      #     check_variables() {
-      #       for var in REACT_APP_END_POINT REACT_APP_URL REACT_APP_APIS_PERU REACT_APP_IMAGE; do
-      #         if [ -z "${!var}" ]; then
-      #           echo "La variable de entorno $var está vacía."
-      #         else
-      #           echo "La variable de entorno $var contiene datos: ${!var}"
-      #         fi
-      #       done
-      #     }
-
-      #     check_variables
 
       - name: Crear archivo .env
         run: |
@@ -50,5 +31,5 @@ jobs:
       - name: Mostrar contenido del archivo .env
         run: cat .env
 
-      # - name: Creando y ejecutando contenedor
-      #   run: docker compose up --build -d
+      - name: Creando y ejecutando contenedor
+        run: docker compose up --build -d
