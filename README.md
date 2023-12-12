@@ -115,16 +115,16 @@ cp .env.development.example .env.development
 A continuación, se presenta la configuración de las variables de entorno utilizadas en el front-end:
 
 ```bash
-REACT_APP_END_POINT=http://localhost:3002
-REACT_APP_URL=http://localhost:3002
-REACT_APP_APIS_PERU=http://localhost:3002
-REACT_APP_IMAGE=http://localhost:3002
+VITE_APP_END_POINT=http://localhost:3002
+VITE_APP_URL=http://localhost:3002
+VITE_APP_APIS_PERU=http://localhost:3002
+VITE_APP_IMAGE=http://localhost:3002
 ```
 
-### 6.  Ejecute **npm run start** para iniciar el Front-end
+### 6.  Ejecute **npm run dev** para iniciar el Front-end
 
 ```bash
-npm run start
+npm run dev
 ```
 
 ### 7. Ejecute **npm run build** para construir le proyecto
@@ -133,37 +133,43 @@ npm run start
 npm run build
 ```
 
-### 8. Configuración para Ejecutar GitHub Actions para el CI/CD:
+### 8. Ejecute **npm run preview** para tener un preview del proyecto
+
+```bash
+npm run preview
+```
+
+### 9. Configuración para Ejecutar GitHub Actions para el CI/CD:
 
 Para ejecutar los workflows de GitHub Actions, asegúrate de que tu usuario tenga los privilegios de ejecución necesarios. A continuación, te proporcionamos algunos pasos para empezar:
 
 
-#### 8.1. Verifica la Existencia del Grupo de Docker:
+#### 9.1. Verifica la Existencia del Grupo de Docker:
 
 ```bash
 sudo groupadd docker
 ```
 
-#### 8.2. Agrega tu Usuario al Grupo de Docker:
+#### 9.2. Agrega tu Usuario al Grupo de Docker:
 
 ```bash
 sudo usermod -aG docker $USER
 ```
 
-#### 8.3. Aplica los Cambios en el Grupo de Docker:
+#### 9.3. Aplica los Cambios en el Grupo de Docker:
 
 ```bash
 newgrp docker
 ```
 
-#### 8.4. Verifica que tu Usuario esté en el Grupo de Docker:
+#### 9.4. Verifica que tu Usuario esté en el Grupo de Docker:
 
 ```bash
 newgrp docker
 ```
 Asegúrate de que "docker" esté en la lista de grupos.
 
-#### 8.5. Configuración y Uso del Runner:
+#### 9.5. Configuración y Uso del Runner:
 
 Para iniciar la creación del runner, ve a Settings del proyecto, luego a Actions, Runners, y selecciona "New self-hosted runner".
 

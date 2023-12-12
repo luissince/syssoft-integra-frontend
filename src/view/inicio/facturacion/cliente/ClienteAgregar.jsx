@@ -909,7 +909,7 @@ class ClienteAgregar extends CustomComponent {
                                 {/* Número de celular y Teléfono */}
                                 <div className='row'>
                                     <div className="form-group col-md-6 col-12">
-                                        <label>N° de Celular <i className="fa fa-asterisk text-danger small"></i></label>
+                                        <label>N° de Celular </label>
                                         <input
                                             type="text"
                                             className="form-control"

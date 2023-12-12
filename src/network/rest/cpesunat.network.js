@@ -2,7 +2,7 @@ import axios from "axios";
 import Resolve from "../../model/class/resolve";
 
 const instanceCpeSunat = axios.create({
-    baseURL: process.env.REACT_APP_URL,
+    baseURL: import.meta.env.VITE_APP_URL,
     timeout: 10000,
     headers: {
         Accept: "application/json",

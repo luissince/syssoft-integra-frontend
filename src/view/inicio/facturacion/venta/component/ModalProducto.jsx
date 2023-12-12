@@ -42,7 +42,7 @@ const ModalProducto = (props) => {
                         <div className="row">
                             <div className="col">
                                 <div className="form-group">
-                                    <label>Precio:</label>
+                                    <label>Precio: <i className="fa fa-asterisk text-danger small"></i> </label>
                                     <input className="form-control"
                                         autoFocus
                                         placeholder="0.00"
@@ -65,7 +65,7 @@ const ModalProducto = (props) => {
                         <div className="row">
                             <div className="col">
                                 <div className="form-group">
-                                    <label>Descripción:</label>
+                                    <label>Descripción: <i className="fa fa-asterisk text-danger small"></i></label>
                                     <textarea className="form-control"
                                         placeholder="Ingrese los datos del producto"
                                         ref={refDescripcion}>
@@ -87,10 +87,6 @@ const ModalProducto = (props) => {
                                                 {item.nombre} - {item.valor}
                                             </button>
                                         ))}
-                                        {/* <li className="list-group-item">An item</li>
-                                        <li className="list-group-item">A second item</li>
-                                        <li className="list-group-item">A third item</li>
-                                        <li className="list-group-item">A fourth item</li> */}
                                     </ul>
                                 </div>
                             </div>

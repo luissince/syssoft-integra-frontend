@@ -2,7 +2,7 @@ import axios from "axios";
 import Resolve from "../../model/class/resolve";
 
 const instancePrincipal = axios.create({
-  baseURL: process.env.REACT_APP_END_POINT,
+  baseURL: import.meta.env.VITE_APP_END_POINT,
   timeout: 50000,
   headers: {
     Accept: "application/json",
@@ -136,19 +136,19 @@ export async function filtrarCliente(params) {
   );
 }
 
-export async function addCliente(params, signal) {
+export async function addCliente(params) {
   return await Resolve.create(
     instancePrincipal.post('/api/cliente/add', params)
   );
 }
 
-export async function editCliente(params, signal) {
+export async function editCliente(params) {
   return await Resolve.create(
     instancePrincipal.post('/api/cliente/update', params)
   );
 }
 
-export async function deleteCliente(params, signal) {
+export async function deleteCliente(params) {
   return await Resolve.create(
     instancePrincipal.delete('/api/cliente', {
       params: params
@@ -388,7 +388,7 @@ export async function listVenta(params, signal) {
   );
 }
 
-export async function deleteVenta(params, signal) {
+export async function deleteVenta(params) {
   return await Resolve.create(
     instancePrincipal.delete("/api/factura/anular", {
       params: params
@@ -1210,7 +1210,7 @@ export async function comboImpuesto(signal) {
 | ENDPOINTS DE UBIGEO
 |--------------------------------------------------------------------------
 */
-export async function getUbigeo(params, signal) {
+export async function getUbigeo(params) {
   return await Resolve.create(
     instancePrincipal.get("/api/ubigeo/", {
       params: params,

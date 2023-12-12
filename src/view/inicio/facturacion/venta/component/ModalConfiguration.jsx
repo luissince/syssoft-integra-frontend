@@ -26,7 +26,7 @@ const ModalConfiguration = (props) => {
                         <div className='row'>
                             <div className='col'>
                                 <div className='form-group'>
-                                    <label>Impuesto</label>
+                                    <label>Impuesto: <i className="fa fa-asterisk text-danger small"></i></label>
                                     <select
                                         title="Lista de Impuestos"
                                         className="form-control"
@@ -46,7 +46,7 @@ const ModalConfiguration = (props) => {
                         <div className='row'>
                             <div className='col'>
                                 <div className='form-group'>
-                                    <label>Moneda</label>
+                                    <label>Moneda: <i className="fa fa-asterisk text-danger small"></i> </label>
                                     <select
                                         title="Lista de Monedas"
                                         className="form-control"

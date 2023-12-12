@@ -676,6 +676,8 @@ class VentaProceso extends CustomComponent {
         this.setState({
             detalleVenta: updatedDetalle,
         });
+
+        this.handleOpenAndCloseProducto();
     }
 
 

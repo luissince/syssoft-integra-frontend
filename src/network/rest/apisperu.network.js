@@ -2,7 +2,7 @@ import axios from "axios";
 import Resolve from "../../model/class/resolve";
 
 const instanceApisPeru = axios.create({
-    baseURL: process.env.REACT_APP_APIS_PERU,
+    baseURL: import.meta.env.VITE_APP_APIS_PERU,
     timeout: 4000,
     headers: {
         "Accept": "application/json",
