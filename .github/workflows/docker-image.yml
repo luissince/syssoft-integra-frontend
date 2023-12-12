@@ -7,7 +7,7 @@ on:
 jobs:
   build:
     runs-on: self-hosted
-    environment: desarrollo
+    environment: produccion-bodega
 
     env:  
       REACT_APP_END_POINT: ${{ secrets.REACT_APP_END_POINT }}
