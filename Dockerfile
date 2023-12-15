@@ -1,29 +1,30 @@
-# Utiliza la imagen base de Node.js versión 18
-FROM node:18
+# Fase de construcción
+FROM node:lts-alpine as builder
 
-# Crea el directorio de la aplicación en la imagen
-RUN mkdir -p /home/app
+WORKDIR /app
 
-# Establece el directorio de trabajo para los comandos siguientes
-WORKDIR /home/app
+COPY package*.json ./
 
-# Copia todos los archivos del contexto del build al directorio de la aplicación en la imagen
+RUN npm install
+
 COPY . .
 
-# Instala las dependencias del proyecto Node.js
-RUN npm install
+RUN npm run build 
 
-# Ejecuta el comando 'npm run build' para construir la aplicación
-RUN npm run build
+# Fase de producción
+FROM nginx:alpine
 
-# Cambia el directorio de trabajo al directorio 'deploy'
-WORKDIR /home/app/deploy
+# Copia tu archivo de configuración personalizado
+COPY config.conf /etc/nginx/conf.d/
 
-# Instala las dependencias específicas del directorio 'deploy'
-RUN npm install
+# Copia archivos desde la fase de construcción
+COPY --from=builder --chown=nginx:nginx /app/dist /usr/share/nginx/html
 
-# Expone el puerto 6000, que puede ser el puerto en el que la aplicación escucha
-EXPOSE 6000
+# Ajusta propietario de directorios necesarios
+RUN chown -R nginx:nginx /var/cache/nginx /var/log/nginx /etc/nginx/conf.d \
+    && touch /var/run/nginx.pid \
+    && chown -R nginx:nginx /var/run/nginx.pid
 
-# Comando que se ejecutará cuando se inicie un contenedor basado en esta imagen
-CMD ["npm", "start"]
+USER nginx
+
+EXPOSE 80
