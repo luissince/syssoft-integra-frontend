@@ -18,7 +18,7 @@ FROM nginx:alpine
 COPY config.conf /etc/nginx/conf.d/
 
 # Copia archivos desde la fase de construcción
-COPY --from=builder --chown=nginx:nginx /app/dist /usr/share/nginx/html
+COPY --from=builder --chown=nginx:nginx /app/dist /usr/share/nginx/html/
 
 # Ajusta propietario de directorios necesarios
 RUN chown -R nginx:nginx /var/cache/nginx /var/log/nginx /etc/nginx/conf.d \
