@@ -1,8 +1,8 @@
-import bootstrap from "../recursos/js/bootstrap";
-import Swal from "../recursos/js/sweetalert";
+import bootstrap from '../recursos/js/bootstrap';
+import Swal from '../recursos/js/sweetalert';
 
 /**
- * 
+ *
  * @param {Number} time Tiempo de espera del time out
  * @returns {Promise<void>}
  */
@@ -11,12 +11,12 @@ export function sleep(time) {
 }
 
 export function makeid(length) {
-  let result = "";
+  let result = '';
   const characters = '0123456789';
   for (let i = 0; i < length; i++) {
     result += characters[Math.floor(Math.random() * characters.length)];
   }
-  result = result.match(/\d{1,4}/g).join("");
+  result = result.match(/\d{1,4}/g).join('');
   return result;
 }
 
@@ -32,12 +32,12 @@ export function statePrivilegio(value) {
  */
 export async function imageBase64(files) {
   if (files.length !== 0) {
-    const name = files[0].name
+    const name = files[0].name;
     const read = await readDataURL(files);
     const base64String = read.replace(/^data:.+;base64,/, '');
     const extension = getExtension(name);
     const { width, height } = await imageSizeData(read);
-    return { base64String, extension, width, height }
+    return { base64String, extension, width, height };
   }
 
   return false;
@@ -52,30 +52,41 @@ export async function imageBase64(files) {
  * @param {string} [thousands=","] - El separador de miles.
  * @returns {string} La cantidad formateada como dinero.
  */
-export function formatDecimal(amount, decimalCount = 2, decimal = ".", thousands = ",") {
+export function formatDecimal(
+  amount,
+  decimalCount = 2,
+  decimal = '.',
+  thousands = ',',
+) {
   const isNumber = /^-?\d*\.?\d+$/.test(amount);
-  if (!isNumber) return "0.00";
+  if (!isNumber) return '0.00';
 
   decimalCount = Math.abs(decimalCount);
   decimalCount = isNaN(decimalCount) ? 2 : decimalCount;
 
-  const negativeSign = amount < 0 ? "-" : "";
+  const negativeSign = amount < 0 ? '-' : '';
 
-  let i = parseInt((amount = Math.abs(Number(amount) || 0).toFixed(decimalCount))).toString();
+  let i = parseInt(
+    (amount = Math.abs(Number(amount) || 0).toFixed(decimalCount)),
+  ).toString();
 
   let j = i.length > 3 ? i.length % 3 : 0;
 
-  const negative = negativeSign + (j ? i.substring(0, j) + thousands : "");
+  const negative = negativeSign + (j ? i.substring(0, j) + thousands : '');
 
-  const a = i.substring(j).replace(/(\d{3})(?=\d)/g, "$1" + thousands);
+  const a = i.substring(j).replace(/(\d{3})(?=\d)/g, '$1' + thousands);
 
-  const d = (decimalCount ? decimal + Math.abs(amount - i).toFixed(decimalCount).slice(2) : "");
+  const d = decimalCount
+    ? decimal +
+      Math.abs(amount - i)
+        .toFixed(decimalCount)
+        .slice(2)
+    : '';
 
   const total = negative + a + d;
 
-  return total
+  return total;
 }
-
 
 /**
  * Redondear un número como una cantidad.
@@ -86,12 +97,12 @@ export function formatDecimal(amount, decimalCount = 2, decimal = ".", thousands
  */
 export function rounded(amount, decimalCount = 2) {
   const isNumber = /^-?\d*\.?\d+$/.test(amount);
-  if (!isNumber) return "0";
+  if (!isNumber) return '0';
 
   decimalCount = Math.abs(decimalCount);
   decimalCount = isNaN(decimalCount) ? 2 : decimalCount;
 
-  const negativeSign = amount < 0 ? "-" : "";
+  const negativeSign = amount < 0 ? '-' : '';
 
   const parsedAmount = Math.abs(Number(amount)) || 0;
   const fixedAmount = parsedAmount.toFixed(decimalCount);
@@ -110,26 +121,26 @@ export const numberFormat = (value, currency) => {
   // Definir formatos para diferentes monedas
   const formats = [
     {
-      locales: "es-PE",
+      locales: 'es-PE',
       options: {
-        style: "currency",
-        currency: "PEN",
+        style: 'currency',
+        currency: 'PEN',
         minimumFractionDigits: 2,
       },
     },
     {
-      locales: "en-US",
+      locales: 'en-US',
       options: {
-        style: "currency",
-        currency: "USD",
+        style: 'currency',
+        currency: 'USD',
         minimumFractionDigits: 2,
       },
     },
     {
-      locales: "de-DE",
+      locales: 'de-DE',
       options: {
-        style: "currency",
-        currency: "EUR",
+        style: 'currency',
+        currency: 'EUR',
         minimumFractionDigits: 2,
       },
     },
@@ -150,12 +161,11 @@ export const numberFormat = (value, currency) => {
 
     // Elimina todos los espacios en blanco
     return formattedValue.replace(/\s/g, '');
-
   } else {
     // Si no se encuentra un formato válido, devolver "0"
-    return "MN " + formatDecimal(value);
+    return 'MN ' + formatDecimal(value);
   }
-}
+};
 /**
  * Formatea un número agregando ceros delante hasta alcanzar una longitud específica.
  *
@@ -178,8 +188,9 @@ export function formatearNumero(numero) {
 export function currentDate() {
   const date = new Date();
   const year = date.getFullYear();
-  const month = (date.getMonth() + 1 > 9 ? date.getMonth() + 1 : "0" + (date.getMonth() + 1));
-  const day = (date.getDate() > 9 ? date.getDate() : "0" + date.getDate());
+  const month =
+    date.getMonth() + 1 > 9 ? date.getMonth() + 1 : '0' + (date.getMonth() + 1);
+  const day = date.getDate() > 9 ? date.getDate() : '0' + date.getDate();
   const formatted_date = `${year}-${month}-${day}`;
   return formatted_date;
 }
@@ -190,16 +201,18 @@ export function currentDate() {
  */
 export function currentTime() {
   const time = new Date();
-  const hours = (time.getHours() > 9 ? time.getHours() : "0" + time.getHours());
-  const minutes = (time.getMinutes() > 9 ? time.getMinutes() : "0" + time.getMinutes());
-  const seconds = (time.getSeconds() > 9 ? time.getSeconds() : "0" + time.getSeconds());
+  const hours = time.getHours() > 9 ? time.getHours() : '0' + time.getHours();
+  const minutes =
+    time.getMinutes() > 9 ? time.getMinutes() : '0' + time.getMinutes();
+  const seconds =
+    time.getSeconds() > 9 ? time.getSeconds() : '0' + time.getSeconds();
   const formatted_time = `${hours}:${minutes}:${seconds}`;
   return formatted_time;
 }
 
 export function getCurrentMonth() {
   const today = new Date();
-  return (today.getMonth() + 1);
+  return today.getMonth() + 1;
 }
 
 export function getCurrentYear() {
@@ -209,18 +222,18 @@ export function getCurrentYear() {
 
 export function monthName(month) {
   const months = [
-    "Enero",
-    "Febrero",
-    "Marzo",
-    "Abril",
-    "Mayo",
-    "Junio",
-    "Julio",
-    "Agosto",
-    "Septiembre",
-    "Octubre",
-    "Noviembre",
-    "Diciembre",
+    'Enero',
+    'Febrero',
+    'Marzo',
+    'Abril',
+    'Mayo',
+    'Junio',
+    'Julio',
+    'Agosto',
+    'Septiembre',
+    'Octubre',
+    'Noviembre',
+    'Diciembre',
   ];
 
   return months[month - 1];
@@ -228,18 +241,18 @@ export function monthName(month) {
 
 export function validateDate(date) {
   const regex = new RegExp(
-    "([0-9]{4}[-](0[1-9]|1[0-2])[-]([0-2]{1}[0-9]{1}|3[0-1]{1})|([0-2]{1}[0-9]{1}|3[0-1]{1})[-](0[1-9]|1[0-2])[-][0-9]{4})"
+    '([0-9]{4}[-](0[1-9]|1[0-2])[-]([0-2]{1}[0-9]{1}|3[0-1]{1})|([0-2]{1}[0-9]{1}|3[0-1]{1})[-](0[1-9]|1[0-2])[-][0-9]{4})',
   );
 
   return regex.test(date);
 }
 
 export function validateComboBox(comboBox) {
-  if (comboBox.children("option").length === 0) {
+  if (comboBox.children('option').length === 0) {
     return true;
   }
 
-  if (comboBox.children("option").length > 0 && comboBox.val() === "") {
+  if (comboBox.children('option').length > 0 && comboBox.val() === '') {
     return true;
   }
 
@@ -275,12 +288,11 @@ export function isText(value) {
 
   if (
     value === null ||
-    value === "undefined" ||
-    value.trim() === "" ||
+    value === 'undefined' ||
+    value.trim() === '' ||
     value.trim().length === 0
   )
     return false;
-
 
   return true;
 }
@@ -289,7 +301,16 @@ export function keyNumberInteger(event) {
   const key = event.key;
   const isDigit = /\d/.test(key);
 
-  if (!(isDigit || key === "Backspace" || key === "Delete" || key === "ArrowLeft" || key === "ArrowRight" || key === "Tab")) {
+  if (
+    !(
+      isDigit ||
+      key === 'Backspace' ||
+      key === 'Delete' ||
+      key === 'ArrowLeft' ||
+      key === 'ArrowRight' ||
+      key === 'Tab'
+    )
+  ) {
     event.preventDefault();
   }
 }
@@ -297,10 +318,20 @@ export function keyNumberInteger(event) {
 export function keyNumberFloat(event) {
   const key = event.key;
   const isDigit = /\d/.test(key);
-  const isDot = key === ".";
-  const hasDot = event.target.value.includes(".");
+  const isDot = key === '.';
+  const hasDot = event.target.value.includes('.');
 
-  if (!(isDigit || isDot || key === "Backspace" || key === "Delete" || key === "ArrowLeft" || key === "ArrowRight" || key === "Tab")) {
+  if (
+    !(
+      isDigit ||
+      isDot ||
+      key === 'Backspace' ||
+      key === 'Delete' ||
+      key === 'ArrowLeft' ||
+      key === 'ArrowRight' ||
+      key === 'Tab'
+    )
+  ) {
     event.preventDefault();
   }
 
@@ -319,41 +350,56 @@ export function keyNumberPhone(event) {
   // Verifica si el carácter ya existe en el valor actual del campo
   const charAlreadyExists = inputValue.includes(key);
 
-
-  if (key === "-" && charAlreadyExists) {
+  if (key === '-' && charAlreadyExists) {
     event.preventDefault();
   }
 
-  if (key === "+" && charAlreadyExists) {
+  if (key === '+' && charAlreadyExists) {
     event.preventDefault();
   }
 
-  if (!(isDigitOrAllowedChar || key === "Backspace" || key === "Delete" || key === "ArrowLeft" || key === "ArrowRight" || key === "Tab")) {
+  if (
+    !(
+      isDigitOrAllowedChar ||
+      key === 'Backspace' ||
+      key === 'Delete' ||
+      key === 'ArrowLeft' ||
+      key === 'ArrowRight' ||
+      key === 'Tab'
+    )
+  ) {
     event.preventDefault();
   }
 }
 
 export function keyUpSearch(event, callback) {
-  if (event.key !== "Tab"
-    && event.key !== "Backspace"
-    && event.key !== "Control"
-    && event.key !== "AltRight"
-    && (event.key !== "Control" && event.key !== "AltRight")
-    && (event.key !== "Control" && event.key !== "c")
-    && event.key !== "Alt"
-    && event.key !== "ArrowRight"
-    && event.key !== "ArrowLeft"
-    && event.key !== "ArrowDown"
-    && event.key !== "ArrowUp") {
+  if (
+    event.key !== 'Tab' &&
+    event.key !== 'Backspace' &&
+    event.key !== 'Control' &&
+    event.key !== 'AltRight' &&
+    event.key !== 'Control' &&
+    event.key !== 'AltRight' &&
+    event.key !== 'Control' &&
+    event.key !== 'c' &&
+    event.key !== 'Alt' &&
+    event.key !== 'ArrowRight' &&
+    event.key !== 'ArrowLeft' &&
+    event.key !== 'ArrowDown' &&
+    event.key !== 'ArrowUp'
+  ) {
     callback();
   }
 }
 
 export function formatDate(date) {
-  const parts = date.split("-");
+  const parts = date.split('-');
   const today = new Date(parts[0], parts[1] - 1, parts[2]);
-  const day = (today.getDate() > 9 ? today.getDate() : "0" + today.getDate());
-  const month = (today.getMonth() + 1 > 9 ? today.getMonth() + 1 : "0" + (today.getMonth() + 1));
+  const day = today.getDate() > 9 ? today.getDate() : '0' + today.getDate();
+  const month =
+    today.getMonth() + 1 > 9
+      ? today.getMonth() + 1
+      : '0' + (today.getMonth() + 1);
   const year = today.getFullYear();
   return `${day}/${month}/${year}`;
 }
@@ -366,22 +412,23 @@ export function formatDate(date) {
  * @returns {string} La cadena de tiempo formateada.
  */
 export function formatTime(time, addSeconds = false) {
-  const timeRegex = /^(0\d|1\d|2[0-4]):((0[0-9])|([1-5][0-9])|59)(?::([0-5][0-9]))?$/;
+  const timeRegex =
+    /^(0\d|1\d|2[0-4]):((0[0-9])|([1-5][0-9])|59)(?::([0-5][0-9]))?$/;
   const match = time.match(timeRegex);
 
   if (!match) {
-    return "Invalid Time";
+    return 'Invalid Time';
   }
 
-  const parts = time.split(":");
+  const parts = time.split(':');
 
   const HH = parts[0];
   const mm = parts[1];
-  const ss = parts[2] === undefined ? "00" : parts[2];
+  const ss = parts[2] === undefined ? '00' : parts[2];
 
   const thf = HH % 12 || 12;
-  const ampm = HH < 12 || HH === 24 ? "AM" : "PM";
-  const formattedHour = thf < 10 ? "0" + thf : thf;
+  const ampm = HH < 12 || HH === 24 ? 'AM' : 'PM';
+  const formattedHour = thf < 10 ? '0' + thf : thf;
 
   if (addSeconds) {
     return `${formattedHour}:${mm}:${ss} ${ampm}`;
@@ -391,12 +438,12 @@ export function formatTime(time, addSeconds = false) {
 }
 
 export function getExtension(filename) {
-  return filename.split("?")[0].split("#")[0].split(".").pop();
+  return filename.split('?')[0].split('#')[0].split('.').pop();
 }
 
 export function convertNullText(value) {
   const text = value === undefined ? null : value;
-  return text === null ? "" : text;
+  return text === null ? '' : text;
 }
 
 export function isEmpty(object) {
@@ -409,7 +456,7 @@ export function isEmpty(object) {
   }
 
   if (typeof object === 'string') {
-    return object === "" ? true : false
+    return object === '' ? true : false;
   }
 
   if (typeof object === 'object') {
@@ -422,19 +469,19 @@ export function isEmpty(object) {
 }
 
 export function getCookie(cname) {
-  let name = cname + "=";
+  let name = cname + '=';
   let decodedCookie = decodeURIComponent(document.cookie);
-  let ca = decodedCookie.split(";");
+  let ca = decodedCookie.split(';');
   for (let i = 0; i < ca.length; i++) {
     let c = ca[i];
-    while (c.charAt(0) === " ") {
+    while (c.charAt(0) === ' ') {
       c = c.substring(1);
     }
     if (c.indexOf(name) === 0) {
       return c.substring(name.length, c.length);
     }
   }
-  return "";
+  return '';
 }
 
 export function limitarCadena(cadena, limite, sufijo) {
@@ -464,21 +511,21 @@ export function hideModal(id) {
   myModal.hide();
 }
 
-export function viewModal(id, callback = function () { }) {
+export function viewModal(id, callback = function () {}) {
   const myModalEl = document.getElementById(id);
-  myModalEl.addEventListener("shown.bs.modal", callback);
+  myModalEl.addEventListener('shown.bs.modal', callback);
 }
 
-export function clearModal(id, callback = function () { }) {
+export function clearModal(id, callback = function () {}) {
   const myModalEl = document.getElementById(id);
-  myModalEl.addEventListener("hidden.bs.modal", callback);
+  myModalEl.addEventListener('hidden.bs.modal', callback);
 }
 
 export function getInstanceModal(id) {
   return bootstrap.Modal.getInstance(document.getElementById(id));
 }
 
-export function spinnerLoading(message = "Cargando datos...", table = false) {
+export function spinnerLoading(message = 'Cargando datos...', table = false) {
   if (!table) {
     return (
       <div className="clearfix absolute-all bg-white">
@@ -513,12 +560,12 @@ export function spinnerLoading(message = "Cargando datos...", table = false) {
 export function validateNumericInputs(ref, type = 'number') {
   if (!ref || !ref.current) return;
 
-  const inputs = ref.current.querySelectorAll("input");
+  const inputs = ref.current.querySelectorAll('input');
 
   for (const input of inputs) {
     const inputValue = input.value.trim();
 
-    if (type === 'number') {    
+    if (type === 'number') {
       if (!isNumeric(inputValue)) {
         input.focus();
         break;
@@ -531,20 +578,18 @@ export function validateNumericInputs(ref, type = 'number') {
         break;
       }
     }
-
   }
 }
 
 export function focusOnFirstInvalidInput(ref) {
   if (!ref || !ref.current) return;
 
-  const inputs = ref.current.querySelectorAll("input");
+  const inputs = ref.current.querySelectorAll('input');
 
   if (inputs.length === 0) return;
 
   const input = inputs[0];
   input.focus();
-
 }
 
 export function readDataURL(files) {
@@ -571,7 +616,6 @@ export function readDataBlob(blob) {
   });
 }
 
-
 export function imageSizeData(data) {
   return new Promise((resolve, reject) => {
     const image = new Image();
@@ -589,9 +633,9 @@ export function alertInfo(title, message) {
   Swal({
     title: title,
     text: message,
-    type: "info",
-    confirmButtonText: "Aceptar",
-    cancelButtonText: "Cancelar",
+    type: 'info',
+    confirmButtonText: 'Aceptar',
+    cancelButtonText: 'Cancelar',
     showConfirmButton: false,
     allowOutsideClick: false,
     allowEscapeKey: false,
@@ -606,31 +650,31 @@ export function alertHTML(title, html) {
   });
 }
 
-export function alertSuccess(title, message, callback = function () { }) {
+export function alertSuccess(title, message, callback = function () {}) {
   Swal({
     title: title,
     text: message,
-    type: "success",
-    confirmButtonText: "Aceptar",
-    cancelButtonText: "Cancelar",
+    type: 'success',
+    confirmButtonText: 'Aceptar',
+    cancelButtonText: 'Cancelar',
     showConfirmButton: true,
     allowOutsideClick: false,
-    showCloseButton: true
+    showCloseButton: true,
   }).then((event) => {
     callback();
   });
 }
 
-export function alertWarning(title, message, callback = function () { }) {
+export function alertWarning(title, message, callback = function () {}) {
   Swal({
     title: title,
     text: message,
-    type: "warning",
-    confirmButtonText: "Aceptar",
-    cancelButtonText: "Cancelar",
+    type: 'warning',
+    confirmButtonText: 'Aceptar',
+    cancelButtonText: 'Cancelar',
     showConfirmButton: true,
     allowOutsideClick: false,
-    showCloseButton: true
+    showCloseButton: true,
   }).then((event) => {
     callback();
   });
@@ -640,10 +684,10 @@ export function alertError(title, message) {
   Swal({
     title: title,
     text: message,
-    type: "error",
+    type: 'error',
     showConfirmButton: true,
     allowOutsideClick: false,
-    showCloseButton: true
+    showCloseButton: true,
   });
 }
 
@@ -651,12 +695,12 @@ export function alertDialog(title, mensaje, callback) {
   Swal({
     title: title,
     text: mensaje,
-    type: "question",
+    type: 'question',
     showCancelButton: true,
-    confirmButtonText: "Si",
-    cancelButtonText: "No",
+    confirmButtonText: 'Si',
+    cancelButtonText: 'No',
     allowOutsideClick: false,
-    showCloseButton: true
+    showCloseButton: true,
   }).then((isConfirm) => {
     if (isConfirm.value === undefined) {
       return false;

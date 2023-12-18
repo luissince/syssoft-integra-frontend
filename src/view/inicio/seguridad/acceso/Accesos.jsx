@@ -8,10 +8,15 @@ import {
   alertWarning,
   isEmpty,
   spinnerLoading,
-  statePrivilegio
+  statePrivilegio,
 } from '../../../../helper/utils.helper.jsx';
 import ContainerWrapper from '../../../../components/Container.jsx';
-import { comboPerfil, getAccesos, saveAcceso, updateAcceso } from '../../../../network/rest/principal.network.js';
+import {
+  comboPerfil,
+  getAccesos,
+  saveAcceso,
+  updateAcceso,
+} from '../../../../network/rest/principal.network.js';
 import SuccessReponse from '../../../../model/class/response.js';
 import ErrorResponse from '../../../../model/class/error-response.js';
 import { CANCELED } from '../../../../model/types/types.js';
@@ -19,21 +24,25 @@ import CustomComponent from '../../../../model/class/custom-component.js';
 
 class Accesos extends CustomComponent {
   constructor(props) {
-    super(props)
+    super(props);
     this.state = {
-      idEmpresa: "",
-      idPerfil: "",
+      idEmpresa: '',
+      idPerfil: '',
       perfiles: [],
       menu: [],
       catalogo: [],
       loading: true,
       msgLoading: 'Cargando datos...',
 
-      save: statePrivilegio(this.props.token.userToken.menus[1].submenu[2].privilegio[0].estado),
-      update: statePrivilegio(this.props.token.userToken.menus[1].submenu[2].privilegio[1].estado),
+      save: statePrivilegio(
+        this.props.token.userToken.menus[1].submenu[2].privilegio[0].estado,
+      ),
+      update: statePrivilegio(
+        this.props.token.userToken.menus[1].submenu[2].privilegio[1].estado,
+      ),
 
-      messageWarning: ""
-    }
+      messageWarning: '',
+    };
     this.refIdPerfil = React.createRef();
 
     this.abortControllerView = new AbortController();
@@ -48,15 +57,13 @@ class Accesos extends CustomComponent {
   }
 
   loadData = async () => {
-    const [perfiles] = await Promise.all([
-      await this.fetchComboPerfil(),
-    ]);
+    const [perfiles] = await Promise.all([await this.fetchComboPerfil()]);
 
     this.setState({
       perfiles,
       loading: false,
     });
-  }
+  };
 
   async fetchComboPerfil() {
     const response = await comboPerfil(this.abortControllerView.signal);
@@ -72,17 +79,16 @@ class Accesos extends CustomComponent {
     }
   }
 
-
   loadDataAcceso = async (id) => {
     await this.setStateAsync({
       menu: [],
       loading: true,
-      msgLoading: 'Cargando accesos...'
+      msgLoading: 'Cargando accesos...',
     });
 
     const params = {
-      idPerfil: id
-    }
+      idPerfil: id,
+    };
 
     const response = await getAccesos(params, this.abortControllerView.signal);
 
@@ -94,32 +100,35 @@ class Accesos extends CustomComponent {
 
           if (item.idMenu === value.idMenu) {
             for (const content of response.data.privilegio) {
-              if (content.idSubMenu === value.idSubMenu && item.idMenu === content.idMenu) {
+              if (
+                content.idSubMenu === value.idSubMenu &&
+                item.idMenu === content.idMenu
+              ) {
                 privilegio.push({
-                  "estado": content.estado,
-                  "idMenu": content.idMenu,
-                  "idPrivilegio": content.idPrivilegio,
-                  "idSubMenu": content.idSubMenu,
-                  "nombre": content.nombre,
-                  "children": []
+                  estado: content.estado,
+                  idMenu: content.idMenu,
+                  idPrivilegio: content.idPrivilegio,
+                  idSubMenu: content.idSubMenu,
+                  nombre: content.nombre,
+                  children: [],
                 });
               }
             }
 
             submenu.push({
-              "estado": value.estado,
-              "idMenu": value.idMenu,
-              "idSubMenu": value.idSubMenu,
-              "nombre": value.nombre,
-              "children": privilegio
+              estado: value.estado,
+              idMenu: value.idMenu,
+              idSubMenu: value.idSubMenu,
+              nombre: value.nombre,
+              children: privilegio,
             });
           }
         }
 
         return {
           ...item,
-          "children": submenu
-        }
+          children: submenu,
+        };
       });
 
       await this.setStateAsync({
@@ -127,28 +136,28 @@ class Accesos extends CustomComponent {
         loading: false,
       });
 
-      new Tree("#tree1");
+      new Tree('#tree1');
     }
 
     if (response instanceof ErrorResponse) {
       if (response.getType() === CANCELED) return;
 
-      alertWarning("Acceso", response.getMessage())
+      alertWarning('Acceso', response.getMessage());
     }
-  }
+  };
 
   async onChangePerfil(event) {
     if (event.target.value.length > 0) {
       await this.setStateAsync({
         idPerfil: event.target.value,
-        messageWarning: ""
-      })
+        messageWarning: '',
+      });
       this.loadDataAcceso(event.target.value);
     } else {
       await this.setStateAsync({
         idPerfil: event.target.value,
         menu: [],
-        messageWarning: "Seleccione el perfil."
+        messageWarning: 'Seleccione el perfil.',
       });
     }
   }
@@ -162,12 +171,15 @@ class Accesos extends CustomComponent {
       } else {
         if (menu.children.length !== 0) {
           for (let submenu of menu.children) {
-            if ((menu.idMenu + submenu.idSubMenu) === event.target.value) {
+            if (menu.idMenu + submenu.idSubMenu === event.target.value) {
               submenu.estado = event.target.checked ? 1 : 0;
               break;
             } else {
               for (let privilegio of submenu.children) {
-                if ((menu.idMenu + submenu.idSubMenu + privilegio.idPrivilegio) === event.target.value) {
+                if (
+                  menu.idMenu + submenu.idSubMenu + privilegio.idPrivilegio ===
+                  event.target.value
+                ) {
                   privilegio.estado = event.target.checked ? 1 : 0;
                   break;
                 }
@@ -177,106 +189,105 @@ class Accesos extends CustomComponent {
         }
       }
     }
-    await this.setStateAsync({ menu: updatedList })
-  }
+    await this.setStateAsync({ menu: updatedList });
+  };
 
   async onEventGuardar() {
     if (isEmpty(this.state.idPerfil)) {
-      alertWarning("Acceso", "Seleccione el perfil.", () => {
+      alertWarning('Acceso', 'Seleccione el perfil.', () => {
         this.refIdPerfil.current.focus();
-      })
+      });
       return;
     }
 
-    alertDialog("Acceso", "¿Está seguro de continuar?", async (accept) => {
+    alertDialog('Acceso', '¿Está seguro de continuar?', async (accept) => {
       if (accept) {
         const data = {
-          "idPerfil": this.state.idPerfil,
-          "menu": this.state.menu
-        }
+          idPerfil: this.state.idPerfil,
+          menu: this.state.menu,
+        };
 
-        alertInfo("Acceso", "Procesando información...")
+        alertInfo('Acceso', 'Procesando información...');
 
         const response = await saveAcceso(data);
 
         if (response instanceof SuccessReponse) {
-          alertSuccess("Acceso", response.data, async () => {
+          alertSuccess('Acceso', response.data, async () => {
             await this.setStateAsync({
-              idPerfil: "",
+              idPerfil: '',
               menu: [],
             });
           });
         }
 
         if (response instanceof ErrorResponse) {
-          alertWarning("Acceso", response.getMessage())
+          alertWarning('Acceso', response.getMessage());
         }
       }
-    })
+    });
   }
 
   async onEventUpdateData() {
     if (isEmpty(this.state.idPerfil)) {
-      alertWarning("Acceso", "Seleccione el perfil.", () => {
+      alertWarning('Acceso', 'Seleccione el perfil.', () => {
         this.refIdPerfil.current.focus();
-      })
+      });
       return;
     }
 
-    alertDialog("Acceso", "¿Está seguro de continuar?", async (accept) => {
+    alertDialog('Acceso', '¿Está seguro de continuar?', async (accept) => {
       if (accept) {
         const data = {
-          "idPerfil": this.state.idPerfil,
-          "menu": this.state.menu
-        }
+          idPerfil: this.state.idPerfil,
+          menu: this.state.menu,
+        };
 
-        alertInfo("Acceso", "Procesando información...")
+        alertInfo('Acceso', 'Procesando información...');
 
         const response = await updateAcceso(data);
 
         if (response instanceof SuccessReponse) {
-          alertSuccess("Acceso", response.data, async () => {
+          alertSuccess('Acceso', response.data, async () => {
             await this.setStateAsync({
-              idPerfil: "",
+              idPerfil: '',
               menu: [],
             });
           });
         }
 
         if (response instanceof ErrorResponse) {
-          alertWarning("Acceso", response.getMessage())
+          alertWarning('Acceso', response.getMessage());
         }
       }
-    })
+    });
   }
 
   render() {
     return (
       <ContainerWrapper>
-        {
-          this.state.loading && spinnerLoading(this.state.msgLoading)
-        }
+        {this.state.loading && spinnerLoading(this.state.msgLoading)}
 
-        <div className='row'>
-          <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
+        <div className="row">
+          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
             <div className="form-group">
-              <h5>Accesos <small className="text-secondary">LISTA</small></h5>
+              <h5>
+                Accesos <small className="text-secondary">LISTA</small>
+              </h5>
             </div>
           </div>
         </div>
 
-        {
-          this.state.messageWarning !== "" ?
-            <div className="alert alert-warning" role="alert">
-              <i className="bi bi-exclamation-diamond-fill"></i> {this.state.messageWarning}
-            </div> :
-            null
-        }
+        {this.state.messageWarning !== '' ? (
+          <div className="alert alert-warning" role="alert">
+            <i className="bi bi-exclamation-diamond-fill"></i>{' '}
+            {this.state.messageWarning}
+          </div>
+        ) : null}
 
-        <div className='row'>
-          <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
+        <div className="row">
+          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
             <label>Perfil: </label>
-            <div className='form-group'>
+            <div className="form-group">
               <select
                 className="form-control"
                 ref={this.refIdPerfil}
@@ -284,11 +295,11 @@ class Accesos extends CustomComponent {
                 onChange={(event) => this.onChangePerfil(event)}
               >
                 <option value="">- Seleccione -</option>
-                {
-                  this.state.perfiles.map((item, index) => (
-                    <option key={index} value={item.idPerfil}>{item.descripcion}</option>
-                  ))
-                }
+                {this.state.perfiles.map((item, index) => (
+                  <option key={index} value={item.idPerfil}>
+                    {item.descripcion}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
@@ -296,7 +307,12 @@ class Accesos extends CustomComponent {
 
         <div className="row">
           <div className="col-md-12">
-            {<OptionsList options={this.state.menu} handleCheck={this.handleCheck} />}
+            {
+              <OptionsList
+                options={this.state.menu}
+                handleCheck={this.handleCheck}
+              />
+            }
           </div>
         </div>
 
@@ -306,88 +322,99 @@ class Accesos extends CustomComponent {
               type="button"
               className="btn btn-primary"
               onClick={() => this.onEventGuardar()}
-              disabled={!this.state.save}>
+              disabled={!this.state.save}
+            >
               <i className="fa fa-save"></i> Guardar
-            </button>
-            {" "}
+            </button>{' '}
             <button
               type="button"
               className="btn btn-info"
               onClick={() => this.onEventUpdateData()}
-              disabled={!this.state.update}>
+              disabled={!this.state.update}
+            >
               <i className="fa fa-refresh"></i> Actualizar
-            </button>
-            {" "}
+            </button>{' '}
             <button type="button" className="btn btn-outline-danger">
               <i className="fa fa-close"></i> Cancelar
             </button>
           </div>
         </div>
       </ContainerWrapper>
-    )
+    );
   }
 }
 
 const OptionsList = ({ options, handleCheck }) => {
   return (
     <ul id="tree1">
-      {
-        options.map((option, index) => {
-          if (isEmpty(option.children)) {
-            const value = option.idMenu + (option.idSubMenu === undefined ? "" : option.idSubMenu) + (option.idPrivilegio === undefined ? "" : option.idPrivilegio)
-            return (
-              <li key={index}>
-                <div className="form-check form-check-inline m-1">
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    id={`id${option.nombre}`}
-                    value={value}
-                    checked={option.estado === 1 ? true : false}
-                    onChange={handleCheck} />
-                  <label className="form-check-label" htmlFor={`id${option.nombre}`}>
-                    {option.nombre}
-                  </label>
-                </div>
-              </li>
-            );
-          } else {
-            const value = option.idMenu + (option.idSubMenu === undefined ? "" : option.idSubMenu) + (option.idPrivilegio === undefined ? "" : option.idPrivilegio)
-            return (
-              <li key={index}>
-                <i className='cursor-pointer mr-3 mt-1 mb-1 fa fa-plus-square text-lg align-middle'></i>
-                <div className="form-check form-check-inline m-1 pl-1">
-                  <input
-                    type="checkbox"
-                    className="form-check-input"
-                    id={`id${option.nombre}`}
-                    value={value}
-                    checked={option.estado === 1 ? true : false}
-                    onChange={handleCheck} />
-                  <label className="form-check-label" htmlFor={`id${option.nombre}`}>
-                    {option.nombre}
-                  </label>
-                </div>
-                {
-                  (option.children.length) &&
-                  <OptionsList
-                    options={option.children}
-                    handleCheck={handleCheck}
-                  />
-                }
-              </li>
-            );
-          }
-        })
-      }
+      {options.map((option, index) => {
+        if (isEmpty(option.children)) {
+          const value =
+            option.idMenu +
+            (option.idSubMenu === undefined ? '' : option.idSubMenu) +
+            (option.idPrivilegio === undefined ? '' : option.idPrivilegio);
+          return (
+            <li key={index}>
+              <div className="form-check form-check-inline m-1">
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  id={`id${option.nombre}`}
+                  value={value}
+                  checked={option.estado === 1 ? true : false}
+                  onChange={handleCheck}
+                />
+                <label
+                  className="form-check-label"
+                  htmlFor={`id${option.nombre}`}
+                >
+                  {option.nombre}
+                </label>
+              </div>
+            </li>
+          );
+        } else {
+          const value =
+            option.idMenu +
+            (option.idSubMenu === undefined ? '' : option.idSubMenu) +
+            (option.idPrivilegio === undefined ? '' : option.idPrivilegio);
+          return (
+            <li key={index}>
+              <i className="cursor-pointer mr-3 mt-1 mb-1 fa fa-plus-square text-lg align-middle"></i>
+              <div className="form-check form-check-inline m-1 pl-1">
+                <input
+                  type="checkbox"
+                  className="form-check-input"
+                  id={`id${option.nombre}`}
+                  value={value}
+                  checked={option.estado === 1 ? true : false}
+                  onChange={handleCheck}
+                />
+                <label
+                  className="form-check-label"
+                  htmlFor={`id${option.nombre}`}
+                >
+                  {option.nombre}
+                </label>
+              </div>
+              {option.children.length && (
+                <OptionsList
+                  options={option.children}
+                  handleCheck={handleCheck}
+                />
+              )}
+            </li>
+          );
+        }
+      })}
     </ul>
-  )
-}
+  );
+};
 
 const mapStateToProps = (state) => {
   return {
-    token: state.reducer
-  }
-}
+    token: state.reducer,
+  };
+};
 
-export default connect(mapStateToProps, null)(Accesos); 
+export default connect(mapStateToProps, null)(Accesos);

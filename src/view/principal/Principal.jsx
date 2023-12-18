@@ -1,14 +1,14 @@
-import React from "react";
-import { Redirect } from "react-router-dom";
-import { connect } from "react-redux";
-import { signOut, selectProject } from "../../redux/actions";
-import { spinnerLoading } from "../../helper/utils.helper";
-import { images } from "../../helper";
-import CustomComponent from "../../model/class/custom-component";
-import { initSucursales } from "../../network/rest/principal.network";
-import SuccessReponse from "../../model/class/response";
-import ErrorResponse from "../../model/class/error-response";
-import { CANCELED } from "../../model/types/types";
+import React from 'react';
+import { Redirect } from 'react-router-dom';
+import { connect } from 'react-redux';
+import { signOut, selectProject } from '../../redux/actions';
+import { spinnerLoading } from '../../helper/utils.helper';
+import { images } from '../../helper';
+import CustomComponent from '../../model/class/custom-component';
+import { initSucursales } from '../../network/rest/principal.network';
+import SuccessReponse from '../../model/class/response';
+import ErrorResponse from '../../model/class/error-response';
+import { CANCELED } from '../../model/types/types';
 
 class Principal extends CustomComponent {
   constructor(props) {
@@ -17,7 +17,7 @@ class Principal extends CustomComponent {
       sucursales: [],
       filter: [],
       loading: true,
-      loadMessage: "Cargando sucursales...",
+      loadMessage: 'Cargando sucursales...',
     };
 
     this.refTxtSearch = React.createRef();
@@ -25,24 +25,21 @@ class Principal extends CustomComponent {
 
   async componentDidMount() {
     this.loadingData();
-    window.addEventListener("focus", this.handleFocused);
+    window.addEventListener('focus', this.handleFocused);
   }
 
   componentWillUnmount() {
-    window.removeEventListener("focus", this.handleFocused);
+    window.removeEventListener('focus', this.handleFocused);
   }
 
   async loadingData() {
-    const [sucursales] = await Promise.all([
-      await this.fetchSucursales()
-    ]);
+    const [sucursales] = await Promise.all([await this.fetchSucursales()]);
 
     this.setState({
-      sucursales:sucursales,
+      sucursales: sucursales,
       filter: sucursales,
       loading: false,
     });
-
   }
 
   async fetchSucursales() {
@@ -60,35 +57,35 @@ class Principal extends CustomComponent {
   }
 
   handleFocused = (event) => {
-    const userToken = window.localStorage.getItem("login");
+    const userToken = window.localStorage.getItem('login');
     if (userToken === null) {
       this.props.restore();
     } else {
-      const projectToken = window.localStorage.getItem("project");
+      const projectToken = window.localStorage.getItem('project');
       if (projectToken !== null) {
         this.props.project(JSON.parse(projectToken));
       }
     }
-  }
+  };
 
   handleSearch = async (value) => {
     const sucursales = this.state.data.filter(
-      (item) => item.nombre.toUpperCase().indexOf(value.toUpperCase()) > -1
+      (item) => item.nombre.toUpperCase().indexOf(value.toUpperCase()) > -1,
     );
     await this.setStateAsync({ filter: sucursales });
-  }
+  };
 
   handleSignIn = async (event) => {
     try {
-      window.localStorage.removeItem("login");
-      window.localStorage.removeItem("project");
+      window.localStorage.removeItem('login');
+      window.localStorage.removeItem('project');
       this.props.restore();
-      this.props.history.push("login");
+      this.props.history.push('login');
     } catch (e) {
       this.props.restore();
-      this.props.history.push("login");
+      this.props.history.push('login');
     }
-  }
+  };
 
   handleIngresar(item) {
     const proyect = {
@@ -96,8 +93,8 @@ class Principal extends CustomComponent {
       nombre: item.nombre,
       direccion: item.direccion,
     };
-    window.localStorage.setItem("project", JSON.stringify(proyect));
-    this.props.project(JSON.parse(window.localStorage.getItem("project")));
+    window.localStorage.setItem('project', JSON.stringify(proyect));
+    this.props.project(JSON.parse(window.localStorage.getItem('project')));
   }
 
   render() {
@@ -109,15 +106,10 @@ class Principal extends CustomComponent {
       return <Redirect to="/inicio" />;
     }
 
-    const { documento, razonSocial, nombreEmpresa } =
-      this.props.token.empresa;
+    const { documento, razonSocial, nombreEmpresa } = this.props.token.empresa;
     return (
-
       <div className="container pt-5">
-
-        {
-          this.state.loading && spinnerLoading(this.state.loadMessage)
-        }
+        {this.state.loading && spinnerLoading(this.state.loadMessage)}
 
         <div className="row">
           <div className="col-md-3 col-12">
@@ -152,7 +144,7 @@ class Principal extends CustomComponent {
                   className="btn btn-danger"
                   type="button"
                 >
-                <i className="fa fa-power-off"></i>
+                  <i className="fa fa-power-off"></i>
                 </button>
               </div>
             </div>
@@ -184,14 +176,11 @@ class Principal extends CustomComponent {
 
         <div className="row">
           {this.state.filter.map((item, index) => (
-            <div
-              key={index}
-              className="col-lg-4 col-md-4 col-sm-12 col-xs-12"
-            >
+            <div key={index} className="col-lg-4 col-md-4 col-sm-12 col-xs-12">
               <div className="form-group">
                 <div className="card">
                   <img
-                    src={item.ruta === "" ? images.noImage : "/" + item.ruta}
+                    src={item.ruta === '' ? images.noImage : '/' + item.ruta}
                     alt=""
                     className="card-img-top"
                   />
@@ -206,8 +195,7 @@ class Principal extends CustomComponent {
                       type="button"
                       className="btn btn-block btn-outline-primary"
                     >
-                      <i className="bi bi-arrow-right-circle-fill"></i>{" "}
-                      Ingresar
+                      <i className="bi bi-arrow-right-circle-fill"></i> Ingresar
                     </button>
                   </div>
 
@@ -252,9 +240,7 @@ class Principal extends CustomComponent {
             </div>
           ))}
         </div>
-
       </div>
-
     );
   }
 }

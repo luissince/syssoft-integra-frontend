@@ -17,7 +17,7 @@ const ContainerWrapper = ({ children }) => {
 
 export const PosContainerWrapper = ({ children }) => {
   return (
-    <main className='main-pos'>
+    <main className="main-pos">
       <div className="h-100">
         <div className="d-flex border border-light-purple rounded position-relative h-100">
           {children}

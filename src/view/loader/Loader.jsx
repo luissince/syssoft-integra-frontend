@@ -2,156 +2,161 @@ import React from 'react';
 import '../../recursos/css/loader.css';
 import { connect } from 'react-redux';
 import { config, monedaNacional, restoreToken } from '../../redux/actions';
-import { empresaConfig, nacionalMoneda, preferidosProducto, validToken } from '../../network/rest/principal.network';
+import {
+  empresaConfig,
+  nacionalMoneda,
+  preferidosProducto,
+  validToken,
+} from '../../network/rest/principal.network';
 
 import { CANCELED } from '../../model/types/types';
 import ErrorResponse from '../../model/class/error-response';
 import SuccessReponse from '../../model/class/response';
 
 class Loader extends React.Component {
+  constructor(props) {
+    super(props);
 
-    constructor(props) {
-        super(props);
+    this.abortController = new AbortController();
+  }
 
-        this.abortController = new AbortController();
+  async componentDidMount() {
+    const [empresa, token, moneda] = await Promise.all([
+      await this.fetchObtenerEmpresa(),
+      await this.fetchValidarToken(),
+      await this.fetchMonedaNacional(),
+    ]);
+
+    if (!Array.isArray(empresa)) {
+      if (moneda) this.props.monedaNacional(moneda);
+
+      if (token) {
+        const userToken = window.localStorage.getItem('login');
+        const login = JSON.parse(userToken);
+        const project = JSON.parse(window.localStorage.getItem('project'));
+
+        const user = {
+          ...login,
+          project: project,
+        };
+
+        this.props.restore(user, empresa);
+      } else {
+        this.clearLocalStorage();
+        this.props.restore(null, empresa);
+      }
+    } else {
+      if (empresa[0] === 400) {
+        this.props.config();
+      } else {
+        this.clearLocalStorage();
+        this.props.restore(null, null);
+      }
+    }
+  }
+
+  componentWillUnmount() {
+    this.abortController.abort();
+  }
+
+  async fetchObtenerEmpresa() {
+    const response = await empresaConfig();
+
+    if (response instanceof SuccessReponse) {
+      return response.data;
     }
 
-    async componentDidMount() {
-        const [empresa, token, moneda] = await Promise.all([
-            await this.fetchObtenerEmpresa(),
-            await this.fetchValidarToken(),
-            await this.fetchMonedaNacional(),
-        ])
+    if (response instanceof ErrorResponse) {
+      if (response.type === CANCELED) return;
 
-        if (!Array.isArray(empresa)) {
-            if (moneda) this.props.monedaNacional(moneda)
+      return [response.status];
+    }
+  }
 
-            if (token) {
-                const userToken = window.localStorage.getItem('login');
-                const login = JSON.parse(userToken);
-                const project = JSON.parse(window.localStorage.getItem('project'));
+  async fetchValidarToken() {
+    const response = await validToken();
 
-                const user = {
-                    ...login,
-                    project: project
-                }
-
-                this.props.restore(user, empresa);
-            } else {
-                this.clearLocalStorage();
-                this.props.restore(null, empresa);
-            }
-        } else {
-            if (empresa[0] === 400) {
-                this.props.config();
-            } else {
-                this.clearLocalStorage();
-                this.props.restore(null, null);
-            }
-        }
+    if (response instanceof SuccessReponse) {
+      return response.data;
     }
 
-    componentWillUnmount() {
-        this.abortController.abort();
+    if (response instanceof ErrorResponse) {
+      if (response.type === CANCELED) return;
+
+      return null;
+    }
+  }
+
+  async fetchMonedaNacional() {
+    const response = await nacionalMoneda(this.abortController.signal);
+
+    if (response instanceof SuccessReponse) {
+      return response.data;
     }
 
-    async fetchObtenerEmpresa() {
-        const response = await empresaConfig();
+    if (response instanceof ErrorResponse) {
+      if (response.type === CANCELED) return;
 
-        if (response instanceof SuccessReponse) {
-            return response.data;
-        }
+      return null;
+    }
+  }
 
-        if (response instanceof ErrorResponse) {
-            if (response.type === CANCELED) return;
+  async fetchProductoPreferidos() {
+    const response = await preferidosProducto();
 
-            return [response.status];
-        }
+    if (response instanceof SuccessReponse) {
+      return response.data;
     }
 
-    async fetchValidarToken() {
-        const response = await validToken();
+    if (response instanceof ErrorResponse) {
+      if (response.getType() === CANCELED) return;
 
-        if (response instanceof SuccessReponse) {
-            return response.data;
-        }
-
-        if (response instanceof ErrorResponse) {
-            if (response.type === CANCELED) return;
-
-            return null;
-        }
+      return [];
     }
+  }
 
-    async fetchMonedaNacional() {
-        const response = await nacionalMoneda(this.abortController.signal);
+  clearLocalStorage() {
+    window.localStorage.removeItem('login');
+    window.localStorage.removeItem('project');
+  }
 
-        if (response instanceof SuccessReponse) {
-            return response.data;
-        }
+  render() {
+    return (
+      <div className="loader text-center">
+        <div className="loader-inner">
+          <div className="lds-roller mb-3">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+          </div>
 
-        if (response instanceof ErrorResponse) {
-            if (response.type === CANCELED) return;
-
-            return null;
-        }
-    }
-
-    async fetchProductoPreferidos() {
-        const response = await preferidosProducto();
-
-        if (response instanceof SuccessReponse) {
-            return response.data
-        }
-
-        if (response instanceof ErrorResponse) {
-            if (response.getType() === CANCELED) return;
-
-            return [];
-        }
-    }
-
-    clearLocalStorage() {
-        window.localStorage.removeItem('login');
-        window.localStorage.removeItem('project');
-    }
-
-    render() {
-        return (
-            <div className="loader text-center">
-                <div className="loader-inner">
-
-                    <div className="lds-roller mb-3">
-                        <div></div>
-                        <div></div>
-                        <div></div>
-                        <div></div>
-                        <div></div>
-                        <div></div>
-                        <div></div>
-                        <div></div>
-                    </div>
-
-                    <h4 className="text-uppercase font-weight-bold">Cargando...</h4>
-                    <p className="font-italic text-muted">Se está estableciendo conexión con el servidor...</p>
-                </div>
-            </div>
-        );
-    }
+          <h4 className="text-uppercase font-weight-bold">Cargando...</h4>
+          <p className="font-italic text-muted">
+            Se está estableciendo conexión con el servidor...
+          </p>
+        </div>
+      </div>
+    );
+  }
 }
 
 const mapStateToProps = (state) => {
-    return {
-        token: state.reducer
-    }
-}
+  return {
+    token: state.reducer,
+  };
+};
 
 const mapDispatchToProps = (dispatch) => {
-    return {
-        config: () => dispatch(config()),
-        monedaNacional: (moneda) => dispatch(monedaNacional(moneda)),
-        restore: (user, empresa) => dispatch(restoreToken(user, empresa)),
-    }
-}
+  return {
+    config: () => dispatch(config()),
+    monedaNacional: (moneda) => dispatch(monedaNacional(moneda)),
+    restore: (user, empresa) => dispatch(restoreToken(user, empresa)),
+  };
+};
 
 export default connect(mapStateToProps, mapDispatchToProps)(Loader);

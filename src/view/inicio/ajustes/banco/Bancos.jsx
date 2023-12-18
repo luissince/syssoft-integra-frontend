@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   numberFormat,
   alertDialog,
@@ -9,25 +9,35 @@ import {
   statePrivilegio,
   keyUpSearch,
   isEmpty,
-} from "../../../../helper/utils.helper";
-import { connect } from "react-redux";
-import Paginacion from "../../../../components/Paginacion";
-import { deleteBanco, listarBancos } from "../../../../network/rest/principal.network";
-import ErrorResponse from "../../../../model/class/error-response";
-import SuccessReponse from "../../../../model/class/response";
-import { CANCELED } from "../../../../model/types/types";
-import ContainerWrapper from "../../../../components/Container";
-import CustomComponent from "../../../../model/class/custom-component";
+} from '../../../../helper/utils.helper';
+import { connect } from 'react-redux';
+import Paginacion from '../../../../components/Paginacion';
+import {
+  deleteBanco,
+  listarBancos,
+} from '../../../../network/rest/principal.network';
+import ErrorResponse from '../../../../model/class/error-response';
+import SuccessReponse from '../../../../model/class/response';
+import { CANCELED } from '../../../../model/types/types';
+import ContainerWrapper from '../../../../components/Container';
+import CustomComponent from '../../../../model/class/custom-component';
 
 class Bancos extends CustomComponent {
-
   constructor(props) {
     super(props);
     this.state = {
-      add: statePrivilegio(this.props.token.userToken.menus[5].submenu[2].privilegio[0].estado),
-      view: statePrivilegio(this.props.token.userToken.menus[5].submenu[2].privilegio[1].estado),
-      edit: statePrivilegio(this.props.token.userToken.menus[5].submenu[2].privilegio[2].estado),
-      remove: statePrivilegio(this.props.token.userToken.menus[5].submenu[2].privilegio[3].estado),
+      add: statePrivilegio(
+        this.props.token.userToken.menus[5].submenu[2].privilegio[0].estado,
+      ),
+      view: statePrivilegio(
+        this.props.token.userToken.menus[5].submenu[2].privilegio[1].estado,
+      ),
+      edit: statePrivilegio(
+        this.props.token.userToken.menus[5].submenu[2].privilegio[2].estado,
+      ),
+      remove: statePrivilegio(
+        this.props.token.userToken.menus[5].submenu[2].privilegio[3].estado,
+      ),
 
       loading: false,
       lista: [],
@@ -37,7 +47,7 @@ class Bancos extends CustomComponent {
       paginacion: 0,
       totalPaginacion: 0,
       filasPorPagina: 10,
-      messageTable: "Cargando información...",
+      messageTable: 'Cargando información...',
     };
 
     this.refTxtSearch = React.createRef();
@@ -57,7 +67,7 @@ class Bancos extends CustomComponent {
     if (this.state.loading) return;
 
     await this.setStateAsync({ paginacion: 1, restart: true });
-    this.fillTable(0, "");
+    this.fillTable(0, '');
     await this.setStateAsync({ opcion: 0 });
   };
 
@@ -79,13 +89,13 @@ class Bancos extends CustomComponent {
   onEventPaginacion = () => {
     switch (this.state.opcion) {
       case 0:
-        this.fillTable(0, "");
+        this.fillTable(0, '');
         break;
       case 1:
         this.fillTable(1, this.refTxtSearch.current.value);
         break;
       default:
-        this.fillTable(0, "");
+        this.fillTable(0, '');
     }
   };
 
@@ -93,8 +103,7 @@ class Bancos extends CustomComponent {
     await this.setStateAsync({
       loading: true,
       lista: [],
-      messageTable: "Cargando información...",
-
+      messageTable: 'Cargando información...',
     });
 
     const data = {
@@ -107,7 +116,9 @@ class Bancos extends CustomComponent {
     const response = await listarBancos(data, this.abortControllerTable.signal);
 
     if (response instanceof SuccessReponse) {
-      const totalPaginacion = parseInt(Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina));
+      const totalPaginacion = parseInt(
+        Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
+      );
 
       await this.setStateAsync({
         loading: false,
@@ -126,57 +137,59 @@ class Bancos extends CustomComponent {
         messageTable: response.getMessage(),
       });
     }
-  }
+  };
 
   handleAgregar = () => {
     this.props.history.push({
-      pathname: `${this.props.location.pathname}/agregar`
-    })
-  }
+      pathname: `${this.props.location.pathname}/agregar`,
+    });
+  };
 
   handleEditar = (idBanco) => {
     this.props.history.push({
       pathname: `${this.props.location.pathname}/editar`,
-      search: "?idBanco=" + idBanco
-    })
-  }
+      search: '?idBanco=' + idBanco,
+    });
+  };
 
   handleDetalle = (idBanco) => {
     this.props.history.push({
       pathname: `${this.props.location.pathname}/detalle`,
-      search: "?idBanco=" + idBanco,
+      search: '?idBanco=' + idBanco,
     });
-  }
+  };
 
   handleBorrar = (idBanco) => {
-    alertDialog("Banco", "¿Estás seguro de eliminar el banco?", async (acccept) => {
-      if (acccept) {
+    alertDialog(
+      'Banco',
+      '¿Estás seguro de eliminar el banco?',
+      async (acccept) => {
+        if (acccept) {
+          alertInfo('Banco', 'Procesando información...');
 
-        alertInfo("Banco", "Procesando información...");
+          const params = { idBanco: idBanco };
+          const response = await deleteBanco(params);
 
-        const params = { idBanco: idBanco, }
-        const response = await deleteBanco(params);
+          if (response instanceof SuccessReponse) {
+            alertSuccess('Banco', response.data, () => {
+              this.loadInit();
+            });
+          }
 
-        if (response instanceof SuccessReponse) {
-          alertSuccess("Banco", response.data, () => {
-            this.loadInit();
-          });
+          if (response instanceof ErrorResponse) {
+            alertWarning('Banco', response.getMessage());
+          }
         }
-
-        if (response instanceof ErrorResponse) {
-          alertWarning("Banco", response.getMessage()
-          );
-        }
-      }
-    });
-  }
+      },
+    );
+  };
 
   generarBody() {
     if (this.state.loading) {
       return (
         <tr>
           <td className="text-center" colSpan="9">
-            {spinnerLoading("Cargando información de la tabla...", true)}
+            {spinnerLoading('Cargando información de la tabla...', true)}
           </td>
         </tr>
       );
@@ -198,7 +211,11 @@ class Bancos extends CustomComponent {
           <td>{item.tipoCuenta.toUpperCase()}</td>
           <td>{item.moneda}</td>
           <td>{item.numCuenta}</td>
-          <td className={`text-right ${item.saldo >= 0 ? "text-success" : "text-danger"}`} >
+          <td
+            className={`text-right ${
+              item.saldo >= 0 ? 'text-success' : 'text-danger'
+            }`}
+          >
             {numberFormat(item.saldo, item.codiso)}
           </td>
 
@@ -236,14 +253,12 @@ class Bancos extends CustomComponent {
           </td>
         </tr>
       );
-    })
-
+    });
   }
 
   render() {
     return (
       <ContainerWrapper>
-
         <div className="row">
           <div className="col-lg-12 col-md-12 col-sm-12 col-12">
             <div className="form-group">
@@ -271,7 +286,7 @@ class Bancos extends CustomComponent {
                   ref={this.refTxtSearch}
                   onKeyUp={(event) =>
                     keyUpSearch(event, () =>
-                      this.searchText(event.target.value)
+                      this.searchText(event.target.value),
                     )
                   }
                 />
@@ -287,8 +302,7 @@ class Bancos extends CustomComponent {
                 disabled={!this.state.add}
               >
                 <i className="bi bi-file-plus"></i> Nuevo Registro
-              </button>{" "}
-
+              </button>{' '}
               <button
                 className="btn btn-outline-secondary"
                 onClick={() => this.loadInit()}
@@ -305,7 +319,10 @@ class Bancos extends CustomComponent {
               <table className="table table-striped table-bordered rounded">
                 <thead>
                   <tr>
-                    <th width="5%" className="text-center"> #</th>
+                    <th width="5%" className="text-center">
+                      {' '}
+                      #
+                    </th>
                     <th width="10%">Nombre</th>
                     <th width="15%">Tipo Cuenta</th>
                     <th width="10%">Moneda</th>
@@ -322,9 +339,7 @@ class Bancos extends CustomComponent {
                     </th>
                   </tr>
                 </thead>
-                <tbody>
-                  {this.generarBody()}
-                </tbody>
+                <tbody>{this.generarBody()}</tbody>
               </table>
             </div>
           </div>
@@ -338,7 +353,6 @@ class Bancos extends CustomComponent {
           fillTable={this.paginacionContext}
           restart={this.state.restart}
         />
-
       </ContainerWrapper>
     );
   }

@@ -1,26 +1,25 @@
-import React from "react";
+import React from 'react';
 import {
   alertInfo,
   alertSuccess,
   alertWarning,
   isEmpty,
   alertDialog,
-} from "../../../../helper/utils.helper";
-import { connect } from "react-redux";
-import SuccessReponse from "../../../../model/class/response";
-import ErrorResponse from "../../../../model/class/error-response";
-import ContainerWrapper from "../../../../components/Container";
-import { addMedida } from "../../../../network/rest/principal.network";
+} from '../../../../helper/utils.helper';
+import { connect } from 'react-redux';
+import SuccessReponse from '../../../../model/class/response';
+import ErrorResponse from '../../../../model/class/error-response';
+import ContainerWrapper from '../../../../components/Container';
+import { addMedida } from '../../../../network/rest/principal.network';
 
 class MedidaAgregar extends React.Component {
-
   constructor(props) {
     super(props);
 
     this.state = {
-      codigo: "",
-      nombre: "",
-      descripcion: "",
+      codigo: '',
+      nombre: '',
+      descripcion: '',
       estado: false,
 
       idUsuario: this.props.token.userToken.idUsuario,
@@ -31,37 +30,37 @@ class MedidaAgregar extends React.Component {
   }
 
   handleInputCodigo = (event) => {
-    this.setState({ codigo: event.target.value })
-  }
+    this.setState({ codigo: event.target.value });
+  };
 
   handleInputNombre = (event) => {
-    this.setState({ nombre: event.target.value })
-  }
+    this.setState({ nombre: event.target.value });
+  };
 
   handleInputDescripcion = (event) => {
-    this.setState({ descripcion: event.target.value })
-  }
+    this.setState({ descripcion: event.target.value });
+  };
 
   handleSelectEstado = (event) => {
     this.setState({ estado: event.target.checked });
-  }
+  };
 
   handleGuardar = async () => {
     if (isEmpty(this.state.codigo)) {
-      alertWarning("Medida", "Ingrese el codigo de la medida", () => {
+      alertWarning('Medida', 'Ingrese el codigo de la medida', () => {
         this.refCodigo.current.focus();
-      })
+      });
       return;
     }
 
     if (isEmpty(this.state.nombre)) {
-      alertWarning("Medida", "Ingrese el nombre de la medida", () => {
+      alertWarning('Medida', 'Ingrese el nombre de la medida', () => {
         this.refNombre.current.focus();
-      })
+      });
       return;
     }
 
-    alertDialog("Categoría", "¿Está seguro de continuar?", async (accept) => {
+    alertDialog('Categoría', '¿Está seguro de continuar?', async (accept) => {
       if (accept) {
         const data = {
           codigo: this.state.codigo,
@@ -69,36 +68,35 @@ class MedidaAgregar extends React.Component {
           descripcion: this.state.descripcion,
           estado: this.state.estado,
           idUsuario: this.state.idUsuario,
-        }
+        };
 
-        alertInfo("Categoria", "Procesando información...");
+        alertInfo('Categoria', 'Procesando información...');
 
         const response = await addMedida(data);
 
         if (response instanceof SuccessReponse) {
-          alertSuccess("Categoria", response.data, () => {
-            this.props.history.goBack()
+          alertSuccess('Categoria', response.data, () => {
+            this.props.history.goBack();
           });
         }
 
         if (response instanceof ErrorResponse) {
-          alertWarning("Categoria", response.getMessage());
+          alertWarning('Categoria', response.getMessage());
         }
       }
     });
-  }
+  };
 
   render() {
     return (
       <ContainerWrapper>
-
         <div className="row">
           <div className="col">
             <div className="form-group">
               <h5>
                 <span role="button" onClick={() => this.props.history.goBack()}>
                   <i className="bi bi-arrow-left-short"></i>
-                </span>{" "}
+                </span>{' '}
                 Agregar <small>medida</small> <i className="fa fa-plus"></i>
               </h5>
             </div>
@@ -144,9 +142,7 @@ class MedidaAgregar extends React.Component {
         <div className="row">
           <div className="col">
             <div className="form-group">
-              <label htmlFor="categoria">
-                Descripción:
-              </label>
+              <label htmlFor="categoria">Descripción:</label>
               <input
                 type="text"
                 className="form-control"
@@ -168,8 +164,14 @@ class MedidaAgregar extends React.Component {
                   className="custom-control-input"
                   id="customSwitchEstado"
                   checked={this.state.estado}
-                  onChange={this.handleSelectEstado} />
-                <label className="custom-control-label" htmlFor="customSwitchEstado">{this.state.estado ? "Activo" : "Inactivo"}</label>
+                  onChange={this.handleSelectEstado}
+                />
+                <label
+                  className="custom-control-label"
+                  htmlFor="customSwitchEstado"
+                >
+                  {this.state.estado ? 'Activo' : 'Inactivo'}
+                </label>
               </div>
             </div>
           </div>
@@ -184,8 +186,7 @@ class MedidaAgregar extends React.Component {
                 onClick={() => this.handleGuardar()}
               >
                 Guardar
-              </button>
-              {" "}
+              </button>{' '}
               <button
                 type="button"
                 className="btn btn-danger"
@@ -205,6 +206,6 @@ const mapStateToProps = (state) => {
   return {
     token: state.reducer,
   };
-}
+};
 
 export default connect(mapStateToProps, null)(MedidaAgregar);

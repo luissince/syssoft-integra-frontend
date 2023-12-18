@@ -1,5 +1,5 @@
-import React from "react";
-import "../recursos/css/searchbar.css";
+import React from 'react';
+import '../recursos/css/searchbar.css';
 
 class SearchBar extends React.Component {
   constructor(props) {
@@ -8,15 +8,15 @@ class SearchBar extends React.Component {
   }
 
   componentDidMount() {
-    window.addEventListener("click", this.onEventWindowClick);
+    window.addEventListener('click', this.onEventWindowClick);
   }
 
   componentWillUnmount() {
-    window.removeEventListener("click", this.onEventWindowClick);
+    window.removeEventListener('click', this.onEventWindowClick);
   }
 
   onEventWindowClick = (event) => {
-    let parent = document.getElementById("idDataResult");
+    let parent = document.getElementById('idDataResult');
     let click = event.target.parentElement.parentElement;
 
     if (parent == null) return;
@@ -35,29 +35,29 @@ class SearchBar extends React.Component {
     if (event.keyCode === 40 || event.which === 40) {
       if (this.props.filteredData.length === 0) return;
 
-      const dataResult = document.getElementById("idDataResult");
+      const dataResult = document.getElementById('idDataResult');
       dataResult.focus();
       let children = dataResult.children;
       if (children.length > 0) {
         this.index = 0;
         for (const item of children) {
-          item.classList.remove("active")
+          item.classList.remove('active');
         }
-        children[this.index].classList.add("active")
+        children[this.index].classList.add('active');
         children[this.index].focus();
       }
     } else if (event.keyCode === 13) {
       if (this.props.filteredData.length === 0) return;
 
-      const dataResult = document.getElementById("idDataResult");
+      const dataResult = document.getElementById('idDataResult');
       dataResult.focus();
       let children = dataResult.children;
       if (children.length > 0) {
         this.index = 0;
         for (const item of children) {
-          item.classList.remove("active")
+          item.classList.remove('active');
         }
-        children[this.index].classList.add("active")
+        children[this.index].classList.add('active');
         children[this.index].focus();
       }
     }
@@ -65,27 +65,27 @@ class SearchBar extends React.Component {
 
   onEventKeyDown(event) {
     if (event.keyCode === 38) {
-      let children = document.getElementById("idDataResult").children;
+      let children = document.getElementById('idDataResult').children;
 
       if (this.index !== 0) {
         if (this.index > 0) {
           this.index--;
           for (const item of children) {
-            item.classList.remove("active")
+            item.classList.remove('active');
           }
-          children[this.index].classList.add("active")
+          children[this.index].classList.add('active');
           children[this.index].focus();
         }
       }
     } else if (event.keyCode === 40) {
-      let children = document.getElementById("idDataResult").children;
+      let children = document.getElementById('idDataResult').children;
 
       if (this.index < children.length - 1) {
         this.index++;
         for (const item of children) {
-          item.classList.remove("active")
+          item.classList.remove('active');
         }
-        children[this.index].classList.add("active")
+        children[this.index].classList.add('active');
         children[this.index].focus();
       }
     }
@@ -138,13 +138,13 @@ class SearchBar extends React.Component {
                   }}
                 >
                   {value.departamento +
-                    "-" +
+                    '-' +
                     value.provincia +
-                    "-" +
+                    '-' +
                     value.distrito +
-                    " (" +
+                    ' (' +
                     value.ubigeo +
-                    ")"}
+                    ')'}
                 </button>
               ))}
             </div>

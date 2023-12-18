@@ -1,6 +1,6 @@
-import React from "react";
-import "../recursos/css/searchbar.css";
-import { images } from "../helper";
+import React from 'react';
+import '../recursos/css/searchbar.css';
+import { images } from '../helper';
 
 class SearchBarClient extends React.Component {
   constructor(props) {
@@ -9,15 +9,15 @@ class SearchBarClient extends React.Component {
   }
 
   componentDidMount() {
-    window.addEventListener("click", this.onEventWindowClick);
+    window.addEventListener('click', this.onEventWindowClick);
   }
 
   componentWillUnmount() {
-    window.removeEventListener("click", this.onEventWindowClick);
+    window.removeEventListener('click', this.onEventWindowClick);
   }
 
   onEventWindowClick = (event) => {
-    const parent = document.getElementById("idDataResultClient");
+    const parent = document.getElementById('idDataResultClient');
     const click = event.target.parentElement.parentElement;
 
     if (parent == null) return;
@@ -36,29 +36,29 @@ class SearchBarClient extends React.Component {
     if (event.keyCode === 40 || event.which === 40) {
       if (this.props.clientes.length === 0) return;
 
-      const dataResult = document.getElementById("idDataResultClient");
+      const dataResult = document.getElementById('idDataResultClient');
       dataResult.focus();
       const children = dataResult.children;
       if (children.length > 0) {
         this.index = 0;
         for (const item of children) {
-          item.classList.remove("active")
+          item.classList.remove('active');
         }
-        children[this.index].classList.add("active")
+        children[this.index].classList.add('active');
         children[this.index].focus();
       }
     } else if (event.keyCode === 13) {
       if (this.props.clientes.length === 0) return;
 
-      const dataResult = document.getElementById("idDataResultClient");
+      const dataResult = document.getElementById('idDataResultClient');
       dataResult.focus();
       const children = dataResult.children;
       if (children.length > 0) {
         this.index = 0;
         for (const item of children) {
-          item.classList.remove("active")
+          item.classList.remove('active');
         }
-        children[this.index].classList.add("active")
+        children[this.index].classList.add('active');
         children[this.index].focus();
       }
     }
@@ -66,27 +66,27 @@ class SearchBarClient extends React.Component {
 
   onEventKeyDown(event) {
     if (event.keyCode === 38) {
-      const children = document.getElementById("idDataResultClient").children;
+      const children = document.getElementById('idDataResultClient').children;
 
       if (this.index !== 0) {
         if (this.index > 0) {
           this.index--;
           for (const item of children) {
-            item.classList.remove("active")
+            item.classList.remove('active');
           }
-          children[this.index].classList.add("active")
+          children[this.index].classList.add('active');
           children[this.index].focus();
         }
       }
     } else if (event.keyCode === 40) {
-      const children = document.getElementById("idDataResultClient").children;
+      const children = document.getElementById('idDataResultClient').children;
 
       if (this.index < children.length - 1) {
         this.index++;
         for (const item of children) {
-          item.classList.remove("active")
+          item.classList.remove('active');
         }
-        children[this.index].classList.add("active")
+        children[this.index].classList.add('active');
         children[this.index].focus();
       }
     }
@@ -99,7 +99,9 @@ class SearchBarClient extends React.Component {
           <div className="form-group position-relative mb-0">
             <div className="input-group">
               <div className="input-group-prepend">
-                <div className="input-group-text"><i className="bi bi-person-fill"></i></div>
+                <div className="input-group-text">
+                  <i className="bi bi-person-fill"></i>
+                </div>
               </div>
               <input
                 type="text"
@@ -142,14 +144,14 @@ class SearchBarClient extends React.Component {
                       this.index = -1;
                     }}
                   >
-                    {value.documento + " - " + value.informacion}
+                    {value.documento + ' - ' + value.informacion}
                   </button>
                 ))}
               </div>
             )}
           </div>
         </div>
-      )
+      );
     }
 
     return (
@@ -179,10 +181,12 @@ class SearchBarClient extends React.Component {
               onKeyUp={(event) => this.onEventKeyUp(event)}
             />
             <div className="input-group-append">
-              <button className='btn btn-outline-success d-flex'
-                onClick={this.props.handleNewClient}>
-                <img src={images.addclient} alt='Nuevo cliente' />
-                <div className='ml-2'>Nuevo</div>
+              <button
+                className="btn btn-outline-success d-flex"
+                onClick={this.props.handleNewClient}
+              >
+                <img src={images.addclient} alt="Nuevo cliente" />
+                <div className="ml-2">Nuevo</div>
               </button>
             </div>
           </div>
@@ -204,7 +208,7 @@ class SearchBarClient extends React.Component {
                     this.index = -1;
                   }}
                 >
-                  {value.documento + " - " + value.informacion}
+                  {value.documento + ' - ' + value.informacion}
                 </button>
               ))}
             </div>

@@ -10,67 +10,59 @@ import { config, restoreToken } from './redux/actions';
 import { BrowserRouter, Switch, Route, Redirect } from 'react-router-dom';
 
 class App extends React.Component {
+  constructor(props) {
+    super(props);
+    this.menuRef = React.createRef();
+  }
 
-    constructor(props) {
-        super(props);
-        this.menuRef = React.createRef();
+  render() {
+    if (this.props.token.isLoading) {
+      return <Loader />;
     }
 
-    render() {
-        if (this.props.token.isLoading) {
-            return <Loader />;
-        }
-
-        if (this.props.token.isConfig) {
-            return <Configurar />;
-        }
-
-        return (
-            <BrowserRouter>
-                <Switch>
-
-                    <Route
-                        path="/"
-                        exact={true}>
-                        <Redirect to={"/login"} />
-                    </Route>
-
-                    <Route
-                        path="/login"
-                        exact={true}
-                        render={(props) => <Login {...props} />}
-                    />
-
-                    <Route
-                        path="/principal"
-                        exact={true}
-                        render={(props) => <Principal {...props} />}
-                    />
-
-                    <Route
-                        path="/inicio"
-                        render={(props) => <Inicio {...props} />}
-                    />
-
-                    <Route component={NotFoundInitial} />
-                </Switch>
-
-            </BrowserRouter>
-        );
+    if (this.props.token.isConfig) {
+      return <Configurar />;
     }
+
+    return (
+      <BrowserRouter>
+        <Switch>
+          <Route path="/" exact={true}>
+            <Redirect to={'/login'} />
+          </Route>
+
+          <Route
+            path="/login"
+            exact={true}
+            render={(props) => <Login {...props} />}
+          />
+
+          <Route
+            path="/principal"
+            exact={true}
+            render={(props) => <Principal {...props} />}
+          />
+
+          <Route path="/inicio" render={(props) => <Inicio {...props} />} />
+
+          <Route component={NotFoundInitial} />
+        </Switch>
+      </BrowserRouter>
+    );
+  }
 }
 
 const mapStateToProps = (state) => {
-    return {
-        token: state.reducer
-    }
-}
+  return {
+    token: state.reducer,
+  };
+};
 
 const mapDispatchToProps = (dispatch) => {
-    return {
-        config: () => dispatch(config()),
-        restore: (user) => dispatch(restoreToken(user))
-    }
-}
+  return {
+    config: () => dispatch(config()),
+    restore: (user) => dispatch(restoreToken(user)),
+  };
+};
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);

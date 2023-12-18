@@ -1,6 +1,6 @@
-import icono from "../recursos/images/logo.png";
+import icono from '../recursos/images/logo.png';
 import noImage from '../recursos/images/noimage.jpg';
-import sunat from "../recursos/images/sunat.png";
+import sunat from '../recursos/images/sunat.png';
 import reniec from '../recursos/images/reniec.png';
 import reuse from '../recursos/images/reuse.svg';
 import accept from '../recursos/images/accept.svg';
@@ -26,32 +26,32 @@ import remove from '../recursos/images/remove.svg';
 import plus from '../recursos/images/plus.svg';
 import minus from '../recursos/images/minus.svg';
 
-export    {
-    icono,
-    noImage,
-    sunat,
-    reniec,
-    reuse,
-    accept,
-    unable,
-    error,
-    pdf,
-    xml,
-    email,
-    logo,
-    usuario,
-    sale,
-    start,
-    codbar,
-    search,
-    add,
-    print,
-    cash,
-    options,
-    addclient,
-    basket,
-    edit,
-    remove,
-    plus,
-    minus
-}
+export {
+  icono,
+  noImage,
+  sunat,
+  reniec,
+  reuse,
+  accept,
+  unable,
+  error,
+  pdf,
+  xml,
+  email,
+  logo,
+  usuario,
+  sale,
+  start,
+  codbar,
+  search,
+  add,
+  print,
+  cash,
+  options,
+  addclient,
+  basket,
+  edit,
+  remove,
+  plus,
+  minus,
+};

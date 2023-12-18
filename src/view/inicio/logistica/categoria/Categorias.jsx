@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   alertDialog,
   alertSuccess,
@@ -8,36 +8,33 @@ import {
   keyUpSearch,
   alertInfo,
   isEmpty,
-} from "../../../../helper/utils.helper";
-import { connect } from "react-redux";
-import Paginacion from "../../../../components/Paginacion";
-import {
-  listarCategoria
-} from "../../../../network/rest/principal.network";
-import SuccessReponse from "../../../../model/class/response";
-import ErrorResponse from "../../../../model/class/error-response";
-import { CANCELED } from "../../../../model/types/types";
-import ContainerWrapper from "../../../../components/Container";
-import { removeCategoria } from "../../../../network/rest/principal.network";
-import CustomComponent from "../../../../model/class/custom-component";
+} from '../../../../helper/utils.helper';
+import { connect } from 'react-redux';
+import Paginacion from '../../../../components/Paginacion';
+import { listarCategoria } from '../../../../network/rest/principal.network';
+import SuccessReponse from '../../../../model/class/response';
+import ErrorResponse from '../../../../model/class/error-response';
+import { CANCELED } from '../../../../model/types/types';
+import ContainerWrapper from '../../../../components/Container';
+import { removeCategoria } from '../../../../network/rest/principal.network';
+import CustomComponent from '../../../../model/class/custom-component';
 
 class Categorias extends CustomComponent {
-
   constructor(props) {
     super(props);
 
     this.state = {
       add: statePrivilegio(
-        this.props.token.userToken.menus[3].submenu[0].privilegio[0].estado
+        this.props.token.userToken.menus[3].submenu[0].privilegio[0].estado,
       ),
       edit: statePrivilegio(
-        this.props.token.userToken.menus[3].submenu[0].privilegio[1].estado
+        this.props.token.userToken.menus[3].submenu[0].privilegio[1].estado,
       ),
       remove: statePrivilegio(
-        this.props.token.userToken.menus[3].submenu[0].privilegio[2].estado
+        this.props.token.userToken.menus[3].submenu[0].privilegio[2].estado,
       ),
       move: statePrivilegio(
-        this.props.token.userToken.menus[3].submenu[0].privilegio[3].estado
+        this.props.token.userToken.menus[3].submenu[0].privilegio[3].estado,
       ),
 
       loading: false,
@@ -48,7 +45,7 @@ class Categorias extends CustomComponent {
       paginacion: 0,
       totalPaginacion: 0,
       filasPorPagina: 10,
-      messageTable: "Cargando información...",
+      messageTable: 'Cargando información...',
     };
 
     this.refTxtSearch = React.createRef();
@@ -67,7 +64,7 @@ class Categorias extends CustomComponent {
     if (this.state.loading) return;
 
     await this.setStateAsync({ paginacion: 1, restart: true });
-    this.fillTable(0, "");
+    this.fillTable(0, '');
     await this.setStateAsync({ opcion: 0 });
   };
 
@@ -89,13 +86,13 @@ class Categorias extends CustomComponent {
   onEventPaginacion = () => {
     switch (this.state.opcion) {
       case 0:
-        this.fillTable(0, "");
+        this.fillTable(0, '');
         break;
       case 1:
         this.fillTable(1, this.refTxtSearch.current.value);
         break;
       default:
-        this.fillTable(0, "");
+        this.fillTable(0, '');
     }
   };
 
@@ -106,7 +103,7 @@ class Categorias extends CustomComponent {
     this.setState({
       loading: true,
       lista: [],
-      messageTable: "Cargando información...",
+      messageTable: 'Cargando información...',
     });
 
     /**
@@ -124,7 +121,7 @@ class Categorias extends CustomComponent {
      */
     const response = await listarCategoria(
       params,
-      this.abortControllerTable.signal
+      this.abortControllerTable.signal,
     );
 
     /**
@@ -134,7 +131,7 @@ class Categorias extends CustomComponent {
       const data = response.data;
 
       const totalPaginacion = parseInt(
-        Math.ceil(parseFloat(data.total) / this.state.filasPorPagina)
+        Math.ceil(parseFloat(data.total) / this.state.filasPorPagina),
       );
 
       this.setState({
@@ -161,48 +158,51 @@ class Categorias extends CustomComponent {
 
   handleAgregar = () => {
     this.props.history.push({
-      pathname: `${this.props.location.pathname}/agregar`
-    })
-  }
+      pathname: `${this.props.location.pathname}/agregar`,
+    });
+  };
 
   handleEditar = (idCategoria) => {
     this.props.history.push({
       pathname: `${this.props.location.pathname}/editar`,
-      search: "?idCategoria=" + idCategoria
-    })
-  }
+      search: '?idCategoria=' + idCategoria,
+    });
+  };
 
   handleDelete = (id) => {
-    alertDialog("Categoría", "¿Estás seguro de eliminar la Categoría?", async (accept) => {
-      if (accept) {
+    alertDialog(
+      'Categoría',
+      '¿Estás seguro de eliminar la Categoría?',
+      async (accept) => {
+        if (accept) {
+          const params = {
+            idCategoria: id,
+          };
 
-        const params = {
-          idCategoria: id,
+          alertInfo('Categoría', 'Se esta procesando la petición...');
+
+          const response = await removeCategoria(params);
+
+          if (response instanceof SuccessReponse) {
+            alertSuccess('Categoría', response.data, () => {
+              this.loadInit();
+            });
+          }
+
+          if (response instanceof ErrorResponse) {
+            alertWarning('Categoría', response.getMessage());
+          }
         }
-
-        alertInfo("Categoría", "Se esta procesando la petición...")
-
-        const response = await removeCategoria(params);
-
-        if (response instanceof SuccessReponse) {
-          alertSuccess("Categoría", response.data, () => {
-            this.loadInit();
-          });
-        }
-
-        if (response instanceof ErrorResponse) {
-          alertWarning("Categoría", response.getMessage());
-        }
-      }
-    });
-  }
+      },
+    );
+  };
 
   generarBody() {
     if (this.state.loading) {
       return (
         <tr>
           <td className="text-center" colSpan="6">
-            {spinnerLoading("Cargando información de la tabla...", true)}
+            {spinnerLoading('Cargando información de la tabla...', true)}
           </td>
         </tr>
       );
@@ -211,15 +211,20 @@ class Categorias extends CustomComponent {
     if (isEmpty(this.state.lista)) {
       return (
         <tr>
-          <td className="text-center" colSpan="6">¡No hay datos registrados!</td>
+          <td className="text-center" colSpan="6">
+            ¡No hay datos registrados!
+          </td>
         </tr>
       );
     }
 
     return this.state.lista.map((item, index) => {
-      const estado = item.estado === 1
-        ? <span className="badge badge-success">Activo</span>
-        : <span className="badge badge-danger">Inactivo</span>;
+      const estado =
+        item.estado === 1 ? (
+          <span className="badge badge-success">Activo</span>
+        ) : (
+          <span className="badge badge-danger">Inactivo</span>
+        );
 
       return (
         <tr key={index}>
@@ -249,7 +254,7 @@ class Categorias extends CustomComponent {
           </td>
         </tr>
       );
-    })
+    });
   }
 
   render() {
@@ -281,7 +286,7 @@ class Categorias extends CustomComponent {
                   ref={this.refTxtSearch}
                   onKeyUp={(event) =>
                     keyUpSearch(event, () =>
-                      this.searchText(event.target.value)
+                      this.searchText(event.target.value),
                     )
                   }
                 />
@@ -296,7 +301,7 @@ class Categorias extends CustomComponent {
                 disabled={!this.state.add}
               >
                 <i className="bi bi-file-plus"></i> Nuevo Registro
-              </button>{" "}
+              </button>{' '}
               <button
                 className="btn btn-outline-secondary"
                 onClick={() => this.loadInit()}
@@ -313,17 +318,23 @@ class Categorias extends CustomComponent {
               <table className="table table-striped table-bordered rounded">
                 <thead>
                   <tr>
-                    <th width="5%" className="text-center">#</th>
+                    <th width="5%" className="text-center">
+                      #
+                    </th>
                     <th width="20%">Nombre</th>
                     <th width="30%">Descripción</th>
-                    <th width="10%" className="text-center">Estado</th>
-                    <th width="5%" className="text-center">Editar</th>
-                    <th width="5%" className="text-center">Eliminar</th>
+                    <th width="10%" className="text-center">
+                      Estado
+                    </th>
+                    <th width="5%" className="text-center">
+                      Editar
+                    </th>
+                    <th width="5%" className="text-center">
+                      Eliminar
+                    </th>
                   </tr>
                 </thead>
-                <tbody>
-                  {this.generarBody()}
-                </tbody>
+                <tbody>{this.generarBody()}</tbody>
               </table>
             </div>
           </div>
@@ -337,7 +348,6 @@ class Categorias extends CustomComponent {
           fillTable={this.paginacionContext}
           restart={this.state.restart}
         />
-
       </ContainerWrapper>
     );
   }

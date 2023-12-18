@@ -1,31 +1,29 @@
-import React from "react";
+import React from 'react';
 
 class Paginacion extends React.Component {
-
   constructor(props) {
     super(props);
     this.upperPageBound = 3;
     this.lowerPageBound = 0;
-    this.isPrevBtnActive = "disabled";
-    this.isNextBtnActive = "";
+    this.isPrevBtnActive = 'disabled';
+    this.isNextBtnActive = '';
     this.pageBound = 3;
-    this.messagePaginacion = "Mostranto 0 de 0 Páginas";
+    this.messagePaginacion = 'Mostranto 0 de 0 Páginas';
   }
 
   setPrevAndNextBtnClass = async (listid) => {
-
     const { totalPaginacion } = this.props;
 
-    this.isNextBtnActive = "disabled";
-    this.isPrevBtnActive = "disabled";
+    this.isNextBtnActive = 'disabled';
+    this.isPrevBtnActive = 'disabled';
 
     if (totalPaginacion === listid && totalPaginacion > 1) {
-      this.isPrevBtnActive = "";
+      this.isPrevBtnActive = '';
     } else if (listid === 1 && totalPaginacion > 1) {
-      this.isNextBtnActive = "";
+      this.isNextBtnActive = '';
     } else if (totalPaginacion > 1) {
-      this.isNextBtnActive = "";
-      this.isPrevBtnActive = "";
+      this.isNextBtnActive = '';
+      this.isPrevBtnActive = '';
     }
 
     this.props.fillTable(listid);
@@ -44,7 +42,6 @@ class Paginacion extends React.Component {
     if ((this.props.paginacion - 1) % this.pageBound === 0) {
       this.upperPageBound = this.upperPageBound - this.pageBound;
       this.lowerPageBound = this.lowerPageBound - this.pageBound;
-
     }
     let listid = this.props.paginacion - 1;
     this.setPrevAndNextBtnClass(listid);
@@ -83,13 +80,17 @@ class Paginacion extends React.Component {
   render() {
     const { restart, totalPaginacion, paginacion, data } = this.props;
 
-    this.messagePaginacion = `Mostrando ${data.length} de ${totalPaginacion === 1 ? totalPaginacion + " Página" : totalPaginacion + " Páginas"}`;
+    this.messagePaginacion = `Mostrando ${data.length} de ${
+      totalPaginacion === 1
+        ? totalPaginacion + ' Página'
+        : totalPaginacion + ' Páginas'
+    }`;
 
     if (restart) {
       this.upperPageBound = 3;
       this.lowerPageBound = 0;
-      this.isPrevBtnActive = "disabled";
-      this.isNextBtnActive = "";
+      this.isPrevBtnActive = 'disabled';
+      this.isNextBtnActive = '';
       this.pageBound = 3;
     }
 
@@ -111,7 +112,7 @@ class Paginacion extends React.Component {
         return (
           <li
             key={index}
-            className={`page-item ${number === paginacion ? "active" : ""}`}
+            className={`page-item ${number === paginacion ? 'active' : ''}`}
           >
             {number === paginacion ? (
               <span id={number} className="page-link">
@@ -138,8 +139,8 @@ class Paginacion extends React.Component {
       pageDecrementBtn = (
         <li className="page-item">
           <button className="page-link" onClick={this.btnDecrementClick}>
-            {" "}
-            &hellip;{" "}
+            {' '}
+            &hellip;{' '}
           </button>
         </li>
       );
@@ -150,16 +151,15 @@ class Paginacion extends React.Component {
       pageIncrementBtn = (
         <li className="page-item">
           <button className="page-link" onClick={this.btnIncrementClick}>
-            {" "}
-            &hellip;{" "}
+            {' '}
+            &hellip;{' '}
           </button>
         </li>
       );
     }
 
     let renderPrevBtn = null;
-    if (this.isPrevBtnActive === "disabled" ||
-      totalPaginacion <= 1) {
+    if (this.isPrevBtnActive === 'disabled' || totalPaginacion <= 1) {
       renderPrevBtn = (
         <li className="page-item disabled">
           <span className="page-link"> Ante. </span>
@@ -169,18 +169,15 @@ class Paginacion extends React.Component {
       renderPrevBtn = (
         <li className="page-item">
           <button className="page-link" onClick={this.btnPrevClick}>
-            {" "}
-            Ante.{" "}
+            {' '}
+            Ante.{' '}
           </button>
         </li>
       );
     }
 
     let renderNextBtn = null;
-    if (
-      this.isNextBtnActive === "disabled" ||
-      totalPaginacion <= 1
-    ) {
+    if (this.isNextBtnActive === 'disabled' || totalPaginacion <= 1) {
       renderNextBtn = (
         <li className="page-item disabled">
           <span className="page-link"> Sigui. </span>
@@ -190,8 +187,8 @@ class Paginacion extends React.Component {
       renderNextBtn = (
         <li className="page-item">
           <button className="page-link" onClick={this.btnNextClick}>
-            {" "}
-            Sigui.{" "}
+            {' '}
+            Sigui.{' '}
           </button>
         </li>
       );
@@ -200,7 +197,13 @@ class Paginacion extends React.Component {
     return (
       <div className="row">
         <div className="col-sm-12 col-md-5">
-          <div className="dataTables_info mt-2" role="status" aria-live="polite">{this.messagePaginacion}</div>
+          <div
+            className="dataTables_info mt-2"
+            role="status"
+            aria-live="polite"
+          >
+            {this.messagePaginacion}
+          </div>
         </div>
         <div className="col-sm-12 col-md-7">
           <div className="dataTables_paginate paging_simple_numbers">

@@ -11,7 +11,9 @@
   overflow-y: auto;
   position: absolute;
   z-index: 100;
-  box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 0px 1px, rgba(0, 0, 0, 0.1) 0px 4px 11px;
+  box-shadow:
+    rgba(0, 0, 0, 0.1) 0px 0px 0px 1px,
+    rgba(0, 0, 0, 0.1) 0px 4px 11px;
   /* border: 1px solid #ced4da; */
   border-bottom-left-radius: 0.3rem;
   border-bottom-right-radius: 0.3rem;

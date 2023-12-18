@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   alertDialog,
   alertSuccess,
@@ -8,36 +8,37 @@ import {
   keyUpSearch,
   alertInfo,
   isEmpty,
-} from "../../../../helper/utils.helper";
-import { connect } from "react-redux";
-import Paginacion from "../../../../components/Paginacion";
+} from '../../../../helper/utils.helper';
+import { connect } from 'react-redux';
+import Paginacion from '../../../../components/Paginacion';
 import {
-  listarCategoria, listarMedida, removeMedida
-} from "../../../../network/rest/principal.network";
-import SuccessReponse from "../../../../model/class/response";
-import ErrorResponse from "../../../../model/class/error-response";
-import { CANCELED } from "../../../../model/types/types";
-import ContainerWrapper from "../../../../components/Container";
-import { removeCategoria } from "../../../../network/rest/principal.network";
-import CustomComponent from "../../../../model/class/custom-component";
+  listarCategoria,
+  listarMedida,
+  removeMedida,
+} from '../../../../network/rest/principal.network';
+import SuccessReponse from '../../../../model/class/response';
+import ErrorResponse from '../../../../model/class/error-response';
+import { CANCELED } from '../../../../model/types/types';
+import ContainerWrapper from '../../../../components/Container';
+import { removeCategoria } from '../../../../network/rest/principal.network';
+import CustomComponent from '../../../../model/class/custom-component';
 
 class Medidas extends CustomComponent {
-
   constructor(props) {
     super(props);
 
     this.state = {
       add: statePrivilegio(
-        this.props.token.userToken.menus[3].submenu[0].privilegio[0].estado
+        this.props.token.userToken.menus[3].submenu[0].privilegio[0].estado,
       ),
       edit: statePrivilegio(
-        this.props.token.userToken.menus[3].submenu[0].privilegio[1].estado
+        this.props.token.userToken.menus[3].submenu[0].privilegio[1].estado,
       ),
       remove: statePrivilegio(
-        this.props.token.userToken.menus[3].submenu[0].privilegio[2].estado
+        this.props.token.userToken.menus[3].submenu[0].privilegio[2].estado,
       ),
       move: statePrivilegio(
-        this.props.token.userToken.menus[3].submenu[0].privilegio[3].estado
+        this.props.token.userToken.menus[3].submenu[0].privilegio[3].estado,
       ),
 
       loading: false,
@@ -48,7 +49,7 @@ class Medidas extends CustomComponent {
       paginacion: 0,
       totalPaginacion: 0,
       filasPorPagina: 10,
-      messageTable: "Cargando información...",
+      messageTable: 'Cargando información...',
     };
 
     this.refTxtSearch = React.createRef();
@@ -67,7 +68,7 @@ class Medidas extends CustomComponent {
     if (this.state.loading) return;
 
     await this.setStateAsync({ paginacion: 1, restart: true });
-    this.fillTable(0, "");
+    this.fillTable(0, '');
     await this.setStateAsync({ opcion: 0 });
   };
 
@@ -89,13 +90,13 @@ class Medidas extends CustomComponent {
   onEventPaginacion = () => {
     switch (this.state.opcion) {
       case 0:
-        this.fillTable(0, "");
+        this.fillTable(0, '');
         break;
       case 1:
         this.fillTable(1, this.refTxtSearch.current.value);
         break;
       default:
-        this.fillTable(0, "");
+        this.fillTable(0, '');
     }
   };
 
@@ -106,7 +107,7 @@ class Medidas extends CustomComponent {
     this.setState({
       loading: true,
       lista: [],
-      messageTable: "Cargando información...",
+      messageTable: 'Cargando información...',
     });
 
     /**
@@ -124,7 +125,7 @@ class Medidas extends CustomComponent {
      */
     const response = await listarMedida(
       params,
-      this.abortControllerTable.signal
+      this.abortControllerTable.signal,
     );
 
     /**
@@ -134,7 +135,7 @@ class Medidas extends CustomComponent {
       const data = response.data;
 
       const totalPaginacion = parseInt(
-        Math.ceil(parseFloat(data.total) / this.state.filasPorPagina)
+        Math.ceil(parseFloat(data.total) / this.state.filasPorPagina),
       );
 
       this.setState({
@@ -161,50 +162,53 @@ class Medidas extends CustomComponent {
 
   handleAgregar = () => {
     this.props.history.push({
-      pathname: `${this.props.location.pathname}/agregar`
-    })
-  }
+      pathname: `${this.props.location.pathname}/agregar`,
+    });
+  };
 
   handleEditar = (idMedida) => {
     this.props.history.push({
       pathname: `${this.props.location.pathname}/editar`,
-      search: "?idMedida=" + idMedida
-    })
-  }
+      search: '?idMedida=' + idMedida,
+    });
+  };
 
   handleDelete = (id) => {
-    alertDialog("Medida", "¿Estás seguro de eliminar la Medida?", async (accept) => {
-      if (accept) {
+    alertDialog(
+      'Medida',
+      '¿Estás seguro de eliminar la Medida?',
+      async (accept) => {
+        if (accept) {
+          const params = {
+            idMedida: id,
+          };
 
-        const params = {
-          idMedida: id,
+          alertInfo('Medida', 'Se esta procesando la petición...');
+
+          const response = await removeMedida(params);
+
+          if (response instanceof SuccessReponse) {
+            alertSuccess('Medida', response.data, () => {
+              this.loadInit();
+            });
+          }
+
+          if (response instanceof ErrorResponse) {
+            if (response.getType() === CANCELED) return;
+
+            alertWarning('Medida', response.getMessage());
+          }
         }
-
-        alertInfo("Medida", "Se esta procesando la petición...")
-
-        const response = await removeMedida(params);
-
-        if (response instanceof SuccessReponse) {
-          alertSuccess("Medida", response.data, () => {
-            this.loadInit();
-          });
-        }
-
-        if (response instanceof ErrorResponse) {
-          if (response.getType() === CANCELED) return;
-
-          alertWarning("Medida", response.getMessage());
-        }
-      }
-    });
-  }
+      },
+    );
+  };
 
   generarBody() {
     if (this.state.loading) {
       return (
         <tr>
           <td className="text-center" colSpan="7">
-            {spinnerLoading("Cargando información de la tabla...", true)}
+            {spinnerLoading('Cargando información de la tabla...', true)}
           </td>
         </tr>
       );
@@ -212,16 +216,21 @@ class Medidas extends CustomComponent {
 
     if (isEmpty(this.state.lista)) {
       return (
-        <tr >
-          <td className="text-center" colSpan="7">¡No hay datos registrados!</td>
+        <tr>
+          <td className="text-center" colSpan="7">
+            ¡No hay datos registrados!
+          </td>
         </tr>
       );
     }
 
     return this.state.lista.map((item, index) => {
-      const estado = item.estado === 1
-        ? <span className="badge badge-success">Activo</span>
-        : <span className="badge badge-danger">Inactivo</span>;
+      const estado =
+        item.estado === 1 ? (
+          <span className="badge badge-success">Activo</span>
+        ) : (
+          <span className="badge badge-danger">Inactivo</span>
+        );
 
       return (
         <tr key={index}>
@@ -250,7 +259,7 @@ class Medidas extends CustomComponent {
           </td>
         </tr>
       );
-    })
+    });
   }
 
   render() {
@@ -282,7 +291,7 @@ class Medidas extends CustomComponent {
                   ref={this.refTxtSearch}
                   onKeyUp={(event) =>
                     keyUpSearch(event, () =>
-                      this.searchText(event.target.value)
+                      this.searchText(event.target.value),
                     )
                   }
                 />
@@ -296,7 +305,7 @@ class Medidas extends CustomComponent {
                 onClick={this.handleAgregar}
               >
                 <i className="bi bi-file-plus"></i> Nuevo Registro
-              </button>{" "}
+              </button>{' '}
               <button
                 className="btn btn-outline-secondary"
                 onClick={() => this.loadInit()}
@@ -313,18 +322,25 @@ class Medidas extends CustomComponent {
               <table className="table table-striped table-bordered rounded">
                 <thead>
                   <tr>
-                    <th width="5%" className="text-center"> # </th>
+                    <th width="5%" className="text-center">
+                      {' '}
+                      #{' '}
+                    </th>
                     <th width="10%">Código</th>
                     <th width="25%">Nombre</th>
                     <th width="15%">Descripción</th>
-                    <th width="10%" className="text-center">Estado</th>
-                    <th width="5%" className="text-center">Editar</th>
-                    <th width="5%" className="text-center">Eliminar</th>
+                    <th width="10%" className="text-center">
+                      Estado
+                    </th>
+                    <th width="5%" className="text-center">
+                      Editar
+                    </th>
+                    <th width="5%" className="text-center">
+                      Eliminar
+                    </th>
                   </tr>
                 </thead>
-                <tbody>
-                  {this.generarBody()}
-                </tbody>
+                <tbody>{this.generarBody()}</tbody>
               </table>
             </div>
           </div>
@@ -338,7 +354,6 @@ class Medidas extends CustomComponent {
           fillTable={this.paginacionContext}
           restart={this.state.restart}
         />
-
       </ContainerWrapper>
     );
   }

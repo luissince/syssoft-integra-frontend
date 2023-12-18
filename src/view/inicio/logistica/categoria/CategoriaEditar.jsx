@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   alertInfo,
   alertSuccess,
@@ -7,14 +7,17 @@ import {
   isText,
   isEmpty,
   alertDialog,
-} from "../../../../helper/utils.helper";
-import { connect } from "react-redux";
-import SuccessReponse from "../../../../model/class/response";
-import ErrorResponse from "../../../../model/class/error-response";
-import { CANCELED } from "../../../../model/types/types";
-import ContainerWrapper from "../../../../components/Container";
-import { getIdCategoria, updateCategoria } from "../../../../network/rest/principal.network";
-import CustomComponent from "../../../../model/class/custom-component";
+} from '../../../../helper/utils.helper';
+import { connect } from 'react-redux';
+import SuccessReponse from '../../../../model/class/response';
+import ErrorResponse from '../../../../model/class/error-response';
+import { CANCELED } from '../../../../model/types/types';
+import ContainerWrapper from '../../../../components/Container';
+import {
+  getIdCategoria,
+  updateCategoria,
+} from '../../../../network/rest/principal.network';
+import CustomComponent from '../../../../model/class/custom-component';
 
 class CategoriaEditar extends CustomComponent {
   constructor(props) {
@@ -22,11 +25,11 @@ class CategoriaEditar extends CustomComponent {
 
     this.state = {
       loading: true,
-      loadingMessage: "Cargando datos...",
+      loadingMessage: 'Cargando datos...',
 
-      idCategoria: "",
-      nombre: "",
-      descripcion: "",
+      idCategoria: '',
+      nombre: '',
+      descripcion: '',
       estado: false,
 
       idUsuario: this.props.token.userToken.idUsuario,
@@ -39,7 +42,7 @@ class CategoriaEditar extends CustomComponent {
 
   async componentDidMount() {
     const url = this.props.location.search;
-    const idCategoria = new URLSearchParams(url).get("idCategoria");
+    const idCategoria = new URLSearchParams(url).get('idCategoria');
 
     if (isText(idCategoria)) {
       this.loadingData(idCategoria);
@@ -54,8 +57,8 @@ class CategoriaEditar extends CustomComponent {
 
   async loadingData(id) {
     const [categoria] = await Promise.all([
-      await this.fetchObtenerCategoria(id)
-    ])
+      await this.fetchObtenerCategoria(id),
+    ]);
 
     this.setState({
       idCategoria: categoria.idCategoria,
@@ -69,7 +72,7 @@ class CategoriaEditar extends CustomComponent {
   async fetchObtenerCategoria(id) {
     const params = {
       idCategoria: id,
-    }
+    };
 
     const response = await getIdCategoria(params, this.abortController.signal);
 
@@ -85,27 +88,26 @@ class CategoriaEditar extends CustomComponent {
   }
 
   handleInputNombre = (event) => {
-    this.setState({ nombre: event.target.value })
-  }
-
+    this.setState({ nombre: event.target.value });
+  };
 
   handleInputDescripcion = (event) => {
     this.setState({ descripcion: event.target.value });
-  }
+  };
 
   handleSelectEstado = (event) => {
     this.setState({ estado: event.target.checked });
-  }
+  };
 
   handleEditar = async () => {
     if (isEmpty(this.state.nombre)) {
-      alertWarning("Categoría", "Ingrese el nombre de la categoría", () => {
+      alertWarning('Categoría', 'Ingrese el nombre de la categoría', () => {
         this.refNombre.current.focus();
-      })
+      });
       return;
     }
 
-    alertDialog("Categoría", "¿Está seguro de continuar?", async (accept) => {
+    alertDialog('Categoría', '¿Está seguro de continuar?', async (accept) => {
       if (accept) {
         const data = {
           idCategoria: this.state.idCategoria,
@@ -113,38 +115,38 @@ class CategoriaEditar extends CustomComponent {
           descripcion: this.state.descripcion,
           estado: this.state.estado,
           idUsuario: this.state.idUsuario,
-        }
+        };
 
-        alertInfo("Categoría", "Procesando información...");
+        alertInfo('Categoría', 'Procesando información...');
 
         const response = await updateCategoria(data);
 
         if (response instanceof SuccessReponse) {
-          alertSuccess("Categoría", response.data, () => {
-            this.props.history.goBack()
+          alertSuccess('Categoría', response.data, () => {
+            this.props.history.goBack();
           });
         }
 
         if (response instanceof ErrorResponse) {
-          alertWarning("Categoría", response.getMessage());
+          alertWarning('Categoría', response.getMessage());
         }
       }
-    })
-  }
+    });
+  };
 
   render() {
     return (
       <ContainerWrapper>
-
-        {
-          this.state.loading && spinnerLoading(this.state.loadingMessage)
-        }
+        {this.state.loading && spinnerLoading(this.state.loadingMessage)}
 
         <div className="row">
           <div className="col">
             <div className="form-group">
               <h5>
-                <span role="button" onClick={() => this.props.history.goBack()}> <i className="bi bi-arrow-left-short"></i> </span>
+                <span role="button" onClick={() => this.props.history.goBack()}>
+                  {' '}
+                  <i className="bi bi-arrow-left-short"></i>{' '}
+                </span>
                 Editar <small>categoría</small> <i className="fa fa-edit"></i>
               </h5>
             </div>
@@ -154,7 +156,9 @@ class CategoriaEditar extends CustomComponent {
         <div className="row">
           <div className="col">
             <div className="form-group">
-              <label htmlFor="categoria">Nombre: <i className="fa fa-asterisk text-danger small"></i></label>
+              <label htmlFor="categoria">
+                Nombre: <i className="fa fa-asterisk text-danger small"></i>
+              </label>
               <input
                 type="text"
                 className="form-control"
@@ -192,13 +196,18 @@ class CategoriaEditar extends CustomComponent {
                   className="custom-control-input"
                   id="customSwitchEstado"
                   checked={this.state.estado}
-                  onChange={this.handleSelectEstado} />
-                <label className="custom-control-label" htmlFor="customSwitchEstado">{this.state.estado ? "Activo" : "Inactivo"}</label>
+                  onChange={this.handleSelectEstado}
+                />
+                <label
+                  className="custom-control-label"
+                  htmlFor="customSwitchEstado"
+                >
+                  {this.state.estado ? 'Activo' : 'Inactivo'}
+                </label>
               </div>
             </div>
           </div>
         </div>
-
 
         <div className="row">
           <div className="col-md-12">
@@ -209,8 +218,7 @@ class CategoriaEditar extends CustomComponent {
                 onClick={() => this.handleEditar()}
               >
                 Editar
-              </button>
-              {" "}
+              </button>{' '}
               <button
                 type="button"
                 className="btn btn-danger"

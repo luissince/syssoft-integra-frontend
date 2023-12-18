@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   alertInfo,
   alertSuccess,
@@ -7,28 +7,31 @@ import {
   isText,
   isEmpty,
   alertDialog,
-} from "../../../../helper/utils.helper";
-import { connect } from "react-redux";
-import SuccessReponse from "../../../../model/class/response";
-import ErrorResponse from "../../../../model/class/error-response";
-import { CANCELED } from "../../../../model/types/types";
-import ContainerWrapper from "../../../../components/Container";
-import { getIdCategoria, getIdMedida, updateMedida } from "../../../../network/rest/principal.network";
-import CustomComponent from "../../../../model/class/custom-component";
+} from '../../../../helper/utils.helper';
+import { connect } from 'react-redux';
+import SuccessReponse from '../../../../model/class/response';
+import ErrorResponse from '../../../../model/class/error-response';
+import { CANCELED } from '../../../../model/types/types';
+import ContainerWrapper from '../../../../components/Container';
+import {
+  getIdCategoria,
+  getIdMedida,
+  updateMedida,
+} from '../../../../network/rest/principal.network';
+import CustomComponent from '../../../../model/class/custom-component';
 
 class MedidaEditar extends CustomComponent {
-
   constructor(props) {
     super(props);
 
     this.state = {
       loading: true,
-      loadingMessage: "Cargando datos...",
+      loadingMessage: 'Cargando datos...',
 
-      idMedida: "",
-      codigo: "",
-      nombre: "",
-      descripcion: "",
+      idMedida: '',
+      codigo: '',
+      nombre: '',
+      descripcion: '',
       estado: false,
 
       idUsuario: this.props.token.userToken.idUsuario,
@@ -41,7 +44,7 @@ class MedidaEditar extends CustomComponent {
 
   async componentDidMount() {
     const url = this.props.location.search;
-    const idMedida = new URLSearchParams(url).get("idMedida");
+    const idMedida = new URLSearchParams(url).get('idMedida');
 
     if (isText(idMedida)) {
       this.loadingData(idMedida);
@@ -55,9 +58,7 @@ class MedidaEditar extends CustomComponent {
   }
 
   async loadingData(id) {
-    const [medida] = await Promise.all([
-      await this.fetchObtenerMedida(id)
-    ]);
+    const [medida] = await Promise.all([await this.fetchObtenerMedida(id)]);
 
     this.setState({
       idMedida: id,
@@ -65,14 +66,14 @@ class MedidaEditar extends CustomComponent {
       nombre: medida.nombre,
       descripcion: medida.descripcion,
       estado: medida.estado,
-      loading: false
-    })
+      loading: false,
+    });
   }
 
   async fetchObtenerMedida(id) {
     const params = {
       idMedida: id,
-    }
+    };
 
     const response = await getIdMedida(params, this.abortController.signal);
 
@@ -88,37 +89,37 @@ class MedidaEditar extends CustomComponent {
   }
 
   handleInputCodigo = (event) => {
-    this.setState({ codigo: event.target.value })
-  }
+    this.setState({ codigo: event.target.value });
+  };
 
   handleInputNombre = (event) => {
-    this.setState({ nombre: event.target.value })
-  }
+    this.setState({ nombre: event.target.value });
+  };
 
   handleInputDescripcion = (event) => {
-    this.setState({ descripcion: event.target.value })
-  }
+    this.setState({ descripcion: event.target.value });
+  };
 
   handleSelectEstado = (event) => {
     this.setState({ estado: event.target.checked });
-  }
+  };
 
   handleEditar = async () => {
     if (isEmpty(this.state.codigo)) {
-      alertWarning("Medida", "Ingrese el codigo de la medida", () => {
+      alertWarning('Medida', 'Ingrese el codigo de la medida', () => {
         this.refCodigo.current.focus();
-      })
+      });
       return;
     }
 
     if (isEmpty(this.state.nombre)) {
-      alertWarning("Medida", "Ingrese el nombre de la medida", () => {
+      alertWarning('Medida', 'Ingrese el nombre de la medida', () => {
         this.refNombre.current.focus();
-      })
+      });
       return;
     }
 
-    alertDialog("Medida", "¿Está seguro de continuar?", async (accept) => {
+    alertDialog('Medida', '¿Está seguro de continuar?', async (accept) => {
       if (accept) {
         const data = {
           idMedida: this.state.idMedida,
@@ -127,31 +128,29 @@ class MedidaEditar extends CustomComponent {
           descripcion: this.state.descripcion,
           estado: this.state.estado,
           idUsuario: this.state.idUsuario,
-        }
+        };
 
-        alertInfo("Medida", "Procesando información...");
+        alertInfo('Medida', 'Procesando información...');
 
         const response = await updateMedida(data);
 
         if (response instanceof SuccessReponse) {
-          alertSuccess("Medida", response.data, () => {
-            this.props.history.goBack()
+          alertSuccess('Medida', response.data, () => {
+            this.props.history.goBack();
           });
         }
 
         if (response instanceof ErrorResponse) {
-          alertWarning("Medida", response.getMessage());
+          alertWarning('Medida', response.getMessage());
         }
       }
     });
-  }
+  };
 
   render() {
     return (
       <ContainerWrapper>
-        {
-          this.state.loading && spinnerLoading(this.state.loadingMessage)
-        }
+        {this.state.loading && spinnerLoading(this.state.loadingMessage)}
 
         <div className="row">
           <div className="col">
@@ -159,7 +158,7 @@ class MedidaEditar extends CustomComponent {
               <h5>
                 <span role="button" onClick={() => this.props.history.goBack()}>
                   <i className="bi bi-arrow-left-short"></i>
-                </span>{" "}
+                </span>{' '}
                 Editar categoría <i className="fa fa-edit"></i>
               </h5>
             </div>
@@ -205,9 +204,7 @@ class MedidaEditar extends CustomComponent {
         <div className="row">
           <div className="col">
             <div className="form-group">
-              <label htmlFor="categoria">
-                Descripción:
-              </label>
+              <label htmlFor="categoria">Descripción:</label>
               <input
                 type="text"
                 className="form-control"
@@ -229,8 +226,14 @@ class MedidaEditar extends CustomComponent {
                   className="custom-control-input"
                   id="customSwitchEstado"
                   checked={this.state.estado}
-                  onChange={this.handleSelectEstado} />
-                <label className="custom-control-label" htmlFor="customSwitchEstado">{this.state.estado ? "Activo" : "Inactivo"}</label>
+                  onChange={this.handleSelectEstado}
+                />
+                <label
+                  className="custom-control-label"
+                  htmlFor="customSwitchEstado"
+                >
+                  {this.state.estado ? 'Activo' : 'Inactivo'}
+                </label>
               </div>
             </div>
           </div>
@@ -245,8 +248,7 @@ class MedidaEditar extends CustomComponent {
                 onClick={() => this.handleEditar()}
               >
                 Editar
-              </button>
-              {" "}
+              </button>{' '}
               <button
                 type="button"
                 className="btn btn-danger"

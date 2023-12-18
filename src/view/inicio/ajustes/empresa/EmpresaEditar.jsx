@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   convertNullText,
   alertDialog,
@@ -9,36 +9,38 @@ import {
   keyNumberInteger,
   imageBase64,
   isText,
-} from "../../../../helper/utils.helper";
-import { connect } from "react-redux";
-import ContainerWrapper from "../../../../components/Container";
-import { images } from "../../../../helper";
-import { getIdEmpresa, updateEmpresa } from "../../../../network/rest/principal.network";
-import SuccessReponse from "../../../../model/class/response";
-import ErrorResponse from "../../../../model/class/error-response";
-import { CANCELED } from "../../../../model/types/types";
-import { getRuc } from "../../../../network/rest/apisperu.network";
-import CustomComponent from "../../../../model/class/custom-component";
+} from '../../../../helper/utils.helper';
+import { connect } from 'react-redux';
+import ContainerWrapper from '../../../../components/Container';
+import { images } from '../../../../helper';
+import {
+  getIdEmpresa,
+  updateEmpresa,
+} from '../../../../network/rest/principal.network';
+import SuccessReponse from '../../../../model/class/response';
+import ErrorResponse from '../../../../model/class/error-response';
+import { CANCELED } from '../../../../model/types/types';
+import { getRuc } from '../../../../network/rest/apisperu.network';
+import CustomComponent from '../../../../model/class/custom-component';
 
 class EmpresaProceso extends CustomComponent {
-
   constructor(props) {
     super(props);
 
     this.state = {
-      idEmpresa: "",
-      documento: "",
-      razonSocial: "",
-      nombreEmpresa: "",
-      telefono: "",
-      celular: "",
-      email: "",
-      web: "",
-      direccion: "",
-      useSol: "",
-      claveSol: "",
-      usuarioEmail: "",
-      claveEmail: "",
+      idEmpresa: '',
+      documento: '',
+      razonSocial: '',
+      nombreEmpresa: '',
+      telefono: '',
+      celular: '',
+      email: '',
+      web: '',
+      direccion: '',
+      useSol: '',
+      claveSol: '',
+      usuarioEmail: '',
+      claveEmail: '',
       logo: images.noImage,
       image: images.noImage,
 
@@ -46,8 +48,8 @@ class EmpresaProceso extends CustomComponent {
       lookPasswordSol: false,
 
       loading: true,
-      messageWarning: "",
-      msgLoading: "Cargando datos...",
+      messageWarning: '',
+      msgLoading: 'Cargando datos...',
     };
 
     this.refDocumento = React.createRef();
@@ -67,7 +69,7 @@ class EmpresaProceso extends CustomComponent {
 
   componentDidMount() {
     const url = this.props.location.search;
-    const idEmpresa = new URLSearchParams(url).get("idEmpresa");
+    const idEmpresa = new URLSearchParams(url).get('idEmpresa');
     if (idEmpresa !== null) {
       this.loadingData(idEmpresa);
     } else {
@@ -76,26 +78,34 @@ class EmpresaProceso extends CustomComponent {
 
     this.refDocumento.current.focus();
 
-    this.refFileLogo.current.addEventListener("change", this.onEventFileLogo);
+    this.refFileLogo.current.addEventListener('change', this.onEventFileLogo);
     this.refFileImagen.current.addEventListener(
-      "change",
-      this.onEventFileImage
+      'change',
+      this.onEventFileImage,
     );
   }
 
   componentWillUnmount() {
     this.abortController.abort();
 
-    this.refFileLogo.current.removeEventListener("change", this.onEventFileLogo);
-    this.refFileImagen.current.removeEventListener("change", this.onEventFileImage);
+    this.refFileLogo.current.removeEventListener(
+      'change',
+      this.onEventFileLogo,
+    );
+    this.refFileImagen.current.removeEventListener(
+      'change',
+      this.onEventFileImage,
+    );
   }
 
-  onEventFileLogo = async (event) => {  
+  onEventFileLogo = async (event) => {
     if (event.target.files.length !== 0) {
-      await this.setStateAsync({ logo: URL.createObjectURL(event.target.files[0]), });
+      await this.setStateAsync({
+        logo: URL.createObjectURL(event.target.files[0]),
+      });
     } else {
-      await this.setStateAsync({ logo: images.noImage, });
-      this.refFileLogo.current.value = "";
+      await this.setStateAsync({ logo: images.noImage });
+      this.refFileLogo.current.value = '';
     }
   };
 
@@ -108,7 +118,7 @@ class EmpresaProceso extends CustomComponent {
       await this.setStateAsync({
         image: images.noImage,
       });
-      this.refFileImagen.current.value = "";
+      this.refFileImagen.current.value = '';
     }
   };
 
@@ -116,25 +126,24 @@ class EmpresaProceso extends CustomComponent {
     await this.setStateAsync({
       logo: images.noImage,
     });
-    this.refFileLogo.current.value = "";
+    this.refFileLogo.current.value = '';
   }
 
   async clearImage() {
     await this.setStateAsync({
       image: images.noImage,
     });
-    this.refFileImagen.current.value = "";
+    this.refFileImagen.current.value = '';
   }
 
   loadingData = async (id) => {
     const params = {
       idEmpresa: id,
-    }
+    };
 
     const response = await getIdEmpresa(params, this.abortController.signal);
 
     if (response instanceof SuccessReponse) {
-
       const empresa = response.data;
 
       this.setState({
@@ -151,8 +160,9 @@ class EmpresaProceso extends CustomComponent {
         usuarioEmail: empresa.usuarioEmail,
         claveEmail: empresa.claveEmail,
 
-        logo: empresa.rutaLogo !== "" ? "/" + empresa.rutaLogo : images.noImage,
-        image: empresa.rutaImage !== "" ? "/" + empresa.rutaImage : images.noImage,
+        logo: empresa.rutaLogo !== '' ? '/' + empresa.rutaLogo : images.noImage,
+        image:
+          empresa.rutaImage !== '' ? '/' + empresa.rutaImage : images.noImage,
 
         loading: false,
       });
@@ -162,13 +172,13 @@ class EmpresaProceso extends CustomComponent {
       if (response.getType() === CANCELED) return;
 
       this.setState({
-        msgModal: response.getMessage()
+        msgModal: response.getMessage(),
       });
     }
   };
 
   async onEventGetApiSunat() {
-    if (this.state.documento === "") {
+    if (this.state.documento === '') {
       this.refDocumento.current.focus();
       return;
     }
@@ -180,7 +190,7 @@ class EmpresaProceso extends CustomComponent {
 
     this.setState({
       loading: true,
-      msgLoading: "Consultando número de RUC...",
+      msgLoading: 'Consultando número de RUC...',
     });
 
     const response = await getRuc(this.state.documento);
@@ -197,35 +207,39 @@ class EmpresaProceso extends CustomComponent {
     if (response instanceof ErrorResponse) {
       if (response.getType() === CANCELED) return;
 
-      alertWarning("Empresa", response.getMessage(), () => {
+      alertWarning('Empresa', response.getMessage(), () => {
         this.setState({
           loading: false,
         });
-      })
+      });
     }
   }
 
   async onEventGuardar() {
     if (!isText(this.state.documento)) {
-      alertWarning("Empresa", "Ingrese el número de documento.", () => this.refDocumento.current.focus())
+      alertWarning('Empresa', 'Ingrese el número de documento.', () =>
+        this.refDocumento.current.focus(),
+      );
       return;
     }
 
-    if (this.state.razonSocial === "") {
-      alertWarning("Empresa", "Ingrese la razón social.", () => this.refRazonSocial.current.focus())
+    if (this.state.razonSocial === '') {
+      alertWarning('Empresa', 'Ingrese la razón social.', () =>
+        this.refRazonSocial.current.focus(),
+      );
       return;
     }
 
-    alertDialog("Empresa", "¿Está seguro de continuar?", async () => {
-      alertInfo("Empresa", "Procesando información...");
+    alertDialog('Empresa', '¿Está seguro de continuar?', async () => {
+      alertInfo('Empresa', 'Procesando información...');
 
       const logoSend = await imageBase64(this.refFileLogo.current.files);
-      const baseLogo = logoSend ? logoSend.base64String : "";
-      const extLogo = logoSend ? logoSend.extension : "";
+      const baseLogo = logoSend ? logoSend.base64String : '';
+      const extLogo = logoSend ? logoSend.extension : '';
 
       const imageSend = await imageBase64(this.refFileImagen.current.files);
-      const baseImage = imageSend ? imageSend.base64String : "";
-      const extImage = imageSend ? imageSend.extension : "";
+      const baseImage = imageSend ? imageSend.base64String : '';
+      const extImage = imageSend ? imageSend.extension : '';
 
       const data = {
         documento: this.state.documento.trim(),
@@ -245,12 +259,12 @@ class EmpresaProceso extends CustomComponent {
         extimage: extImage,
 
         idEmpresa: this.state.idEmpresa,
-      }
+      };
 
       const response = await updateEmpresa(data);
 
       if (response instanceof SuccessReponse) {
-        alertSuccess("Empresa", response.data, () => {
+        alertSuccess('Empresa', response.data, () => {
           this.props.history.goBack();
         });
       }
@@ -258,7 +272,7 @@ class EmpresaProceso extends CustomComponent {
       if (response instanceof ErrorResponse) {
         if (response.getType() === CANCELED) return;
 
-        alertWarning("Empresa", response.getMessage());
+        alertWarning('Empresa', response.getMessage());
       }
     });
   }
@@ -280,9 +294,7 @@ class EmpresaProceso extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
-        {
-          this.state.loading && spinnerLoading(this.state.msgLoading)
-        }
+        {this.state.loading && spinnerLoading(this.state.msgLoading)}
 
         <div className="row">
           <div className="col-12">
@@ -290,7 +302,7 @@ class EmpresaProceso extends CustomComponent {
               <h5>
                 <span role="button" onClick={() => this.props.history.goBack()}>
                   <i className="bi bi-arrow-left-short"></i>
-                </span>{" "}
+                </span>{' '}
                 Editar Empresa
               </h5>
             </section>
@@ -377,7 +389,7 @@ class EmpresaProceso extends CustomComponent {
         <div className="row">
           <div className="form-group col-md-6">
             <label>
-              Usuario Email (<small>Para el envío del correo</small>):{" "}
+              Usuario Email (<small>Para el envío del correo</small>):{' '}
             </label>
             <input
               type="text"
@@ -392,12 +404,12 @@ class EmpresaProceso extends CustomComponent {
 
           <div className="form-group col-md-6">
             <label>
-              Contraseña Email (<small>Para el envío del correo</small>):{" "}
+              Contraseña Email (<small>Para el envío del correo</small>):{' '}
             </label>
             <div className="input-group">
               <input
                 ref={this.refPasswordEmail}
-                type={this.state.lookPasswordEmail ? "text" : "password"}
+                type={this.state.lookPasswordEmail ? 'text' : 'password'}
                 className="form-control"
                 value={this.state.claveEmail}
                 onChange={(event) =>
@@ -415,8 +427,8 @@ class EmpresaProceso extends CustomComponent {
                   <i
                     className={
                       this.state.lookPasswordEmail
-                        ? "fa fa-eye"
-                        : "fa fa-eye-slash"
+                        ? 'fa fa-eye'
+                        : 'fa fa-eye-slash'
                     }
                   ></i>
                 </button>
@@ -428,7 +440,7 @@ class EmpresaProceso extends CustomComponent {
         <div className="row">
           <div className="form-group col-md-6">
             <label>
-              Usuario Sol(<small>Para el envío a Sunat</small>):{" "}
+              Usuario Sol(<small>Para el envío a Sunat</small>):{' '}
             </label>
             <input
               type="text"
@@ -443,12 +455,12 @@ class EmpresaProceso extends CustomComponent {
 
           <div className="form-group col-md-6">
             <label>
-              Clave Sol(<small>Para el envío a Sunat</small>):{" "}
+              Clave Sol(<small>Para el envío a Sunat</small>):{' '}
             </label>
             <div className="input-group">
               <input
                 ref={this.refPasswordSol}
-                type={this.state.lookPasswordSol ? "text" : "password"}
+                type={this.state.lookPasswordSol ? 'text' : 'password'}
                 className="form-control"
                 value={this.state.claveSol}
                 onChange={(event) =>
@@ -466,8 +478,8 @@ class EmpresaProceso extends CustomComponent {
                   <i
                     className={
                       this.state.lookPasswordSol
-                        ? "fa fa-eye"
-                        : "fa fa-eye-slash"
+                        ? 'fa fa-eye'
+                        : 'fa fa-eye-slash'
                     }
                   ></i>
                 </button>
@@ -501,7 +513,7 @@ class EmpresaProceso extends CustomComponent {
                 <i className="bi bi-image"></i>
                 <span></span>
               </div>
-            </label>{" "}
+            </label>{' '}
             <button
               className="btn btn-outline-secondary"
               onClick={() => this.clearLogo()}
@@ -537,7 +549,7 @@ class EmpresaProceso extends CustomComponent {
                 <i className="bi bi-image"></i>
                 <span></span>
               </div>
-            </label>{" "}
+            </label>{' '}
             <button
               className="btn btn-outline-secondary"
               onClick={() => this.clearImage()}
@@ -556,7 +568,7 @@ class EmpresaProceso extends CustomComponent {
                 onClick={() => this.onEventGuardar()}
               >
                 Guardar
-              </button>{" "}
+              </button>{' '}
               <button
                 type="button"
                 className="btn btn-danger"
@@ -566,7 +578,6 @@ class EmpresaProceso extends CustomComponent {
               </button>
             </div>
           </div>
-
         </div>
       </ContainerWrapper>
     );

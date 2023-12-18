@@ -1,7 +1,16 @@
 import { render, screen } from '@testing-library/react';
 import App from './components/menu/Menu';
-import { currentDate, currentTime, formatDate, rounded, formatTime, numberFormat, imageBase64, formatDecimal, formatearNumero } from './helper/utils.helper';
-
+import {
+  currentDate,
+  currentTime,
+  formatDate,
+  rounded,
+  formatTime,
+  numberFormat,
+  imageBase64,
+  formatDecimal,
+  formatearNumero,
+} from './helper/utils.helper';
 
 /**
  * 
@@ -104,7 +113,6 @@ describe('formatDate function', () => {
   // });
 });
 
-
 describe('numberFormat', () => {
   // Prueba 1: Formatear un número en soles peruanos (PEN)
   it('debería formatear un número en soles peruanos (PEN)', () => {
@@ -184,7 +192,7 @@ describe('rounded function', () => {
     expect(rounded(-102345.67)).toBe('-102345.67');
 
     expect(rounded(3322.6756)).toBe('3322.68');
-    expect(rounded(10.10)).toBe('10.10');
+    expect(rounded(10.1)).toBe('10.10');
     expect(rounded(10.99)).toBe('10.99');
     expect(rounded(10.998)).toBe('11.00');
     expect(rounded(10.9956)).toBe('11.00');
@@ -211,7 +219,7 @@ describe('formatDecimal function', () => {
     expect(formatDecimal(-102345.67)).toBe('-102,345.67');
 
     expect(formatDecimal(3322.6756)).toBe('3,322.68');
-    expect(formatDecimal(10.10)).toBe('10.10');
+    expect(formatDecimal(10.1)).toBe('10.10');
     expect(formatDecimal(10.99)).toBe('10.99');
     expect(formatDecimal(10.998)).toBe('11.00');
     expect(formatDecimal(10.9956)).toBe('11.00');

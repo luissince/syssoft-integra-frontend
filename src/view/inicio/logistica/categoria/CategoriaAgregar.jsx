@@ -1,23 +1,23 @@
-import React from "react";
+import React from 'react';
 import {
   alertInfo,
   alertSuccess,
   alertWarning,
   isEmpty,
   alertDialog,
-} from "../../../../helper/utils.helper";
-import { connect } from "react-redux";
-import SuccessReponse from "../../../../model/class/response";
-import ErrorResponse from "../../../../model/class/error-response";
-import ContainerWrapper from "../../../../components/Container";
-import { addCategoria } from "../../../../network/rest/principal.network";
+} from '../../../../helper/utils.helper';
+import { connect } from 'react-redux';
+import SuccessReponse from '../../../../model/class/response';
+import ErrorResponse from '../../../../model/class/error-response';
+import ContainerWrapper from '../../../../components/Container';
+import { addCategoria } from '../../../../network/rest/principal.network';
 
 class CategoriaAgregar extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      nombre: "",
-      descripcion: "",
+      nombre: '',
+      descripcion: '',
       estado: false,
 
       idUsuario: this.props.token.userToken.idUsuario,
@@ -27,61 +27,62 @@ class CategoriaAgregar extends React.Component {
   }
 
   handleInputNombre = (event) => {
-    this.setState({ nombre: event.target.value })
-  }
-
+    this.setState({ nombre: event.target.value });
+  };
 
   handleInputDescripcion = (event) => {
     this.setState({ descripcion: event.target.value });
-  }
+  };
 
   handleSelectEstado = (event) => {
     this.setState({ estado: event.target.checked });
-  }
+  };
 
   handleGuardar = async () => {
     if (isEmpty(this.state.nombre)) {
-      alertWarning("Categoría", "Ingrese el nombre de la categoría", () => {
+      alertWarning('Categoría', 'Ingrese el nombre de la categoría', () => {
         this.refNombre.current.focus();
-      })
+      });
       return;
     }
 
-    alertDialog("Categoría", "¿Está seguro de continuar?", async (accept) => {
+    alertDialog('Categoría', '¿Está seguro de continuar?', async (accept) => {
       if (accept) {
         const data = {
           nombre: this.state.nombre,
           descripcion: this.state.descripcion,
           estado: this.state.estado,
           idUsuario: this.state.idUsuario,
-        }
+        };
 
-        alertInfo("Categoría", "Procesando información...");
+        alertInfo('Categoría', 'Procesando información...');
 
         const response = await addCategoria(data);
 
         if (response instanceof SuccessReponse) {
-          alertSuccess("Categoría", response.data, () => {
-            this.props.history.goBack()
+          alertSuccess('Categoría', response.data, () => {
+            this.props.history.goBack();
           });
         }
 
         if (response instanceof ErrorResponse) {
-          alertWarning("Categoría", response.getMessage());
+          alertWarning('Categoría', response.getMessage());
         }
       }
-    })
-  }
+    });
+  };
 
   render() {
     return (
       <ContainerWrapper>
-
         <div className="row">
           <div className="col">
             <div className="form-group">
               <h5>
-                <span role="button" onClick={() => this.props.history.goBack()}> <i className="bi bi-arrow-left-short"></i> </span>
+                <span role="button" onClick={() => this.props.history.goBack()}>
+                  {' '}
+                  <i className="bi bi-arrow-left-short"></i>{' '}
+                </span>
                 Agregar <small>categoría</small> <i className="fa fa-plus"></i>
               </h5>
             </div>
@@ -91,7 +92,8 @@ class CategoriaAgregar extends React.Component {
         <div className="row">
           <div className="col">
             <div className="form-group">
-              <label htmlFor="categoria">Nombre:<i className="fa fa-asterisk text-danger small"></i>
+              <label htmlFor="categoria">
+                Nombre:<i className="fa fa-asterisk text-danger small"></i>
               </label>
               <input
                 type="text"
@@ -130,8 +132,14 @@ class CategoriaAgregar extends React.Component {
                   className="custom-control-input"
                   id="customSwitchEstado"
                   checked={this.state.estado}
-                  onChange={this.handleSelectEstado} />
-                <label className="custom-control-label" htmlFor="customSwitchEstado">{this.state.estado ? "Activo" : "Inactivo"}</label>
+                  onChange={this.handleSelectEstado}
+                />
+                <label
+                  className="custom-control-label"
+                  htmlFor="customSwitchEstado"
+                >
+                  {this.state.estado ? 'Activo' : 'Inactivo'}
+                </label>
               </div>
             </div>
           </div>
@@ -146,8 +154,7 @@ class CategoriaAgregar extends React.Component {
                 onClick={() => this.handleGuardar()}
               >
                 Guardar
-              </button>
-              {" "}
+              </button>{' '}
               <button
                 type="button"
                 className="btn btn-danger"
@@ -167,6 +174,6 @@ const mapStateToProps = (state) => {
   return {
     token: state.reducer,
   };
-}
+};
 
 export default connect(mapStateToProps, null)(CategoriaAgregar);

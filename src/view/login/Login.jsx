@@ -1,22 +1,22 @@
-import React from "react";
-import { Redirect } from "react-router-dom";
-import { connect } from "react-redux";
-import { signIn } from "../../redux/actions";
-import { loginApi } from "../../network/rest/principal.network";
-import SuccessReponse from "../../model/class/response";
-import ErrorResponse from "../../model/class/error-response";
-import CustomComponent from "../../model/class/custom-component";
-import Title from "./component/Title";
-import Form from "./component/Form";
+import React from 'react';
+import { Redirect } from 'react-router-dom';
+import { connect } from 'react-redux';
+import { signIn } from '../../redux/actions';
+import { loginApi } from '../../network/rest/principal.network';
+import SuccessReponse from '../../model/class/response';
+import ErrorResponse from '../../model/class/error-response';
+import CustomComponent from '../../model/class/custom-component';
+import Title from './component/Title';
+import Form from './component/Form';
 
 class Login extends CustomComponent {
   constructor(props) {
     super(props);
 
     this.state = {
-      usuario: "",
-      password: "",
-      message: "",
+      usuario: '',
+      password: '',
+      message: '',
       lookPassword: false,
       loading: false,
     };
@@ -29,22 +29,22 @@ class Login extends CustomComponent {
     if (this.usuarioInput.current !== null) {
       this.usuarioInput.current.focus();
     }
-    window.addEventListener("focus", this.onEventFocused);
+    window.addEventListener('focus', this.onEventFocused);
   }
 
   componentWillUnmount() {
-    window.removeEventListener("focus", this.onEventFocused);
+    window.removeEventListener('focus', this.onEventFocused);
   }
 
   onEventFocused = (event) => {
-    let userToken = window.localStorage.getItem("login");
+    let userToken = window.localStorage.getItem('login');
     if (userToken !== null) {
-      let projectToken = window.localStorage.getItem("project");
+      let projectToken = window.localStorage.getItem('project');
       if (projectToken !== null) {
         this.props.restore(JSON.parse(userToken), JSON.parse(projectToken));
       } else {
         this.props.restore(JSON.parse(userToken));
-        this.props.history.push("principal");
+        this.props.history.push('principal');
       }
     }
   };
@@ -54,18 +54,18 @@ class Login extends CustomComponent {
 
     if (this.state.loading) return;
 
-    if (this.state.usuario === "") {
+    if (this.state.usuario === '') {
       this.usuarioInput.current.focus();
       await this.setStateAsync({
-        message: "Ingrese su usuario para iniciar sesión.",
+        message: 'Ingrese su usuario para iniciar sesión.',
       });
       return;
     }
 
-    if (this.state.password === "") {
+    if (this.state.password === '') {
       this.passwordInput.current.focus();
       await this.setStateAsync({
-        message: "Ingrese su contraseña para iniciar sesión.",
+        message: 'Ingrese su contraseña para iniciar sesión.',
       });
       return;
     }
@@ -129,9 +129,9 @@ class Login extends CustomComponent {
         menus,
       };
 
-      window.localStorage.setItem("login", JSON.stringify(user));
-      this.props.restore(JSON.parse(window.localStorage.getItem("login")));
-      this.props.history.push("principal");
+      window.localStorage.setItem('login', JSON.stringify(user));
+      this.props.restore(JSON.parse(window.localStorage.getItem('login')));
+      this.props.history.push('principal');
     }
 
     if (response instanceof ErrorResponse) {
@@ -145,19 +145,19 @@ class Login extends CustomComponent {
   };
 
   onEventRecuperar = () => {
-    window.open("/api/login/report", "_blank");
+    window.open('/api/login/report', '_blank');
   };
 
   handleChangeUsuario = (event) => {
     if (event.target.value.length > 0) {
       this.setState({
         usuario: event.target.value,
-        message: "",
+        message: '',
       });
     } else {
       this.setState({
         usuario: event.target.value,
-        message: "Ingrese su usuario para iniciar sesión.",
+        message: 'Ingrese su usuario para iniciar sesión.',
       });
     }
   };
@@ -166,12 +166,12 @@ class Login extends CustomComponent {
     if (event.target.value.length > 0) {
       this.setState({
         password: event.target.value,
-        message: "",
+        message: '',
       });
     } else {
       this.setState({
         password: event.target.value,
-        message: "Ingrese su contraseña para iniciar sesión.",
+        message: 'Ingrese su contraseña para iniciar sesión.',
       });
     }
   };
@@ -193,7 +193,7 @@ class Login extends CustomComponent {
     return (
       <div
         className="vh-100 px-4 py-5 px-md-5 text-center text-lg-start d-flex align-items-center"
-        style={{ backgroundColor: "hsl(0, 0%, 96%)" }}
+        style={{ backgroundColor: 'hsl(0, 0%, 96%)' }}
       >
         <div className="container">
           <div className="row gx-lg-5 align-items-center">

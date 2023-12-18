@@ -1,5 +1,5 @@
-import React from "react";
-import "../recursos/css/searchbar.css";
+import React from 'react';
+import '../recursos/css/searchbar.css';
 
 class SearchInput extends React.Component {
   constructor(props) {
@@ -9,11 +9,11 @@ class SearchInput extends React.Component {
   }
 
   componentDidMount() {
-    window.addEventListener("click", this.handleWindowClick);
+    window.addEventListener('click', this.handleWindowClick);
   }
 
   componentWillUnmount() {
-    window.removeEventListener("click", this.handleWindowClick);
+    window.removeEventListener('click', this.handleWindowClick);
   }
 
   handleWindowClick = (event) => {
@@ -27,7 +27,7 @@ class SearchInput extends React.Component {
 
     this.props.handleClearInput();
     this.index = -1;
-  }
+  };
 
   handleKeyUp(event) {
     event.stopPropagation();
@@ -47,13 +47,12 @@ class SearchInput extends React.Component {
       if (children.length > 0) {
         this.index = 0;
         for (const item of children) {
-          item.classList.remove("active")
+          item.classList.remove('active');
         }
-        children[this.index].classList.add("active")
+        children[this.index].classList.add('active');
         children[this.index].focus();
       }
     } else if (event.keyCode === 13) {
-
       if (data.length === 0) return;
 
       dataResult.focus();
@@ -62,7 +61,7 @@ class SearchInput extends React.Component {
 
       if (children.length > 0) {
         this.index = 0;
-        children[this.index].classList.add("active")
+        children[this.index].classList.add('active');
         children[this.index].focus();
       }
     }
@@ -81,9 +80,9 @@ class SearchInput extends React.Component {
         if (this.index > 0) {
           this.index--;
           for (const item of children) {
-            item.classList.remove("active")
+            item.classList.remove('active');
           }
-          children[this.index].classList.add("active")
+          children[this.index].classList.add('active');
           children[this.index].focus();
         }
       }
@@ -91,17 +90,16 @@ class SearchInput extends React.Component {
       if (this.index < children.length - 1) {
         this.index++;
         for (const item of children) {
-          item.classList.remove("active")
+          item.classList.remove('active');
         }
-        children[this.index].classList.add("active")
+        children[this.index].classList.add('active');
         children[this.index].focus();
       }
     }
   }
 
   render() {
-
-    const { showLeftIcon } = this.props
+    const { showLeftIcon } = this.props;
 
     const { autoFocus, value, data, placeholder, refValue } = this.props;
 
@@ -112,14 +110,17 @@ class SearchInput extends React.Component {
     return (
       <div className="form-group position-relative">
         <div className="input-group">
-
-          {
-            showLeftIcon && <div className="input-group-prepend">
+          {showLeftIcon && (
+            <div className="input-group-prepend">
               <div className="input-group-text">
-                {renderIconLeft ? renderIconLeft() : <i className="bi bi-cart4"></i>}
+                {renderIconLeft ? (
+                  renderIconLeft()
+                ) : (
+                  <i className="bi bi-cart4"></i>
+                )}
               </div>
             </div>
-          }
+          )}
 
           <input
             autoFocus={autoFocus}
@@ -142,36 +143,37 @@ class SearchInput extends React.Component {
                 this.index = -1;
               }}
             >
-              {renderIconRight ? renderIconRight() : <i className="fa fa-close"></i>}
+              {renderIconRight ? (
+                renderIconRight()
+              ) : (
+                <i className="fa fa-close"></i>
+              )}
             </button>
           </div>
-
         </div>
 
-        {
-          data.length !== 0 && (
-            <div
-              className="dataResult"
-              ref={this.dataResultRef}
-              tabIndex="-1"
-              onKeyDown={(event) => this.handleKeyDown(event)}
-            >
-              {data.map((value, index) => (
-                <button
-                  key={index}
-                  className="list-group-item list-group-item-action border-0"
-                  onClick={(event) => {
-                    handleSelectItem(value);
-                    refValue.current.focus();
-                    this.index = -1;
-                  }}
-                >
-                  {renderItem(value)}
-                </button>
-              ))}
-            </div>
-          )
-        }
+        {data.length !== 0 && (
+          <div
+            className="dataResult"
+            ref={this.dataResultRef}
+            tabIndex="-1"
+            onKeyDown={(event) => this.handleKeyDown(event)}
+          >
+            {data.map((value, index) => (
+              <button
+                key={index}
+                className="list-group-item list-group-item-action border-0"
+                onClick={(event) => {
+                  handleSelectItem(value);
+                  refValue.current.focus();
+                  this.index = -1;
+                }}
+              >
+                {renderItem(value)}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     );
   }
