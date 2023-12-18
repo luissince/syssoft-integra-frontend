@@ -1,6 +1,6 @@
 import React from 'react';
-import ContainerWrapper from '../../../../components/Container';
-import CustomComponent from '../../../../model/class/custom-component';
+import ContainerWrapper from '../../../../../components/Container';
+import CustomComponent from '../../../../../model/class/custom-component';
 
 class CompraDetalle extends CustomComponent {
   async onEventImprimir() {

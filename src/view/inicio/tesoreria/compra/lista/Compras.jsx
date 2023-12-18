@@ -1,7 +1,7 @@
 import React from 'react';
-import ContainerWrapper from '../../../../components/Container';
-import CustomComponent from '../../../../model/class/custom-component';
-import { alertDialog } from '../../../../helper/utils.helper';
+import ContainerWrapper from '../../../../../components/Container';
+import CustomComponent from '../../../../../model/class/custom-component';
+import { alertDialog } from '../../../../../helper/utils.helper';
 
 class Compras extends CustomComponent {
   constructor(props) {

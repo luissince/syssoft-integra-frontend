@@ -101,9 +101,9 @@ import Gastos from './tesoreria/gasto/lista/Gastos.jsx';
 import GastoCrear from './tesoreria/gasto/crear/GastoCrear.jsx';
 import GastoDetalle from './tesoreria/gasto/detalle/GastoDetalle.jsx';
 
-import Compras from './tesoreria/compra/Compras.jsx';
-import CompraCrear from './tesoreria/compra/CompraCrear.jsx';
-import CompraDetalle from './tesoreria/compra/CompraDetalle.jsx';
+import Compras from './tesoreria/compra/lista/Compras.jsx';
+import CompraCrear from './tesoreria/compra/crear/CompraCrear.jsx';
+import CompraDetalle from './tesoreria/compra/detalle/CompraDetalle.jsx';
 
 import Perfiles from './seguridad/perfil/Perfiles.jsx';
 import PerfilAgregar from './seguridad/perfil/PerfilAgregar.jsx';

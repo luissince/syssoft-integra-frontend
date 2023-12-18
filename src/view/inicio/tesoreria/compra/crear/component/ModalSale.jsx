@@ -5,7 +5,7 @@ import {
   spinnerLoading,
   numberFormat,
   isNumeric,
-} from '../../../../../helper/utils.helper';
+} from '../../../../../../helper/utils.helper';
 
 const ModalSale = (props) => {
   const { idModal } = props;

@@ -1,6 +1,6 @@
 import React from 'react';
-import ContainerWrapper from '../../../../components/Container';
-import CustomComponent from '../../../../model/class/custom-component';
+import ContainerWrapper from '../../../../../components/Container';
+import CustomComponent from '../../../../../model/class/custom-component';
 import {
   alertDialog,
   alertInfo,
@@ -20,9 +20,9 @@ import {
   spinnerLoading,
   validateNumericInputs,
   viewModal,
-} from '../../../../helper/utils.helper';
+} from '../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
-import { COMPRA } from '../../../../model/types/tipo-comprobante';
+import { COMPRA } from '../../../../../model/types/tipo-comprobante';
 import {
   comboAlmacen,
   comboComprobante,
@@ -32,11 +32,11 @@ import {
   createCompra,
   filtrarCliente,
   filtrarProducto,
-} from '../../../../network/rest/principal.network';
-import SuccessReponse from '../../../../model/class/response';
-import ErrorResponse from '../../../../model/class/error-response';
-import { CANCELED } from '../../../../model/types/types';
-import SearchInput from '../../../../components/SearchInput';
+} from '../../../../../network/rest/principal.network';
+import SuccessReponse from '../../../../../model/class/response';
+import ErrorResponse from '../../../../../model/class/error-response';
+import { CANCELED } from '../../../../../model/types/types';
+import SearchInput from '../../../../../components/SearchInput';
 import ModalSale from './component/ModalSale';
 import ModalProduct from './component/ModalProduct';
 

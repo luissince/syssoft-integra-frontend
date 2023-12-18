@@ -144,7 +144,7 @@ npm run preview
 Para ejecutar los workflows de GitHub Actions, asegúrate de que tu usuario tenga los privilegios de ejecución necesarios. A continuación, te proporcionamos algunos pasos para empezar:
 
 
-#### 9.1. Verifica la Existencia del Grupo de Docker:
+#### 9.1. Crea un grupo de Docker:
 
 ```bash
 sudo groupadd docker
@@ -165,7 +165,7 @@ newgrp docker
 #### 9.4. Verifica que tu Usuario esté en el Grupo de Docker:
 
 ```bash
-newgrp docker
+groups
 ```
 Asegúrate de que "docker" esté en la lista de grupos.
 

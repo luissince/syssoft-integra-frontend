@@ -1,7 +1,7 @@
 import {
   keyNumberFloat,
   spinnerLoading,
-} from '../../../../../helper/utils.helper';
+} from '../../../../../../helper/utils.helper';
 
 const ModalProduct = (props) => {
   const { idModal, loading } = props;
