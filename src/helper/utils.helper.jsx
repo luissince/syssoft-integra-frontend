@@ -78,9 +78,9 @@ export function formatDecimal(
 
   const d = decimalCount
     ? decimal +
-      Math.abs(amount - i)
-        .toFixed(decimalCount)
-        .slice(2)
+    Math.abs(amount - i)
+      .toFixed(decimalCount)
+      .slice(2)
     : '';
 
   const total = negative + a + d;
@@ -172,7 +172,7 @@ export const numberFormat = (value, currency) => {
  * @param {number} numero - El número que se va a formatear.
  * @returns {string} El número formateado con ceros delante.
  */
-export function formatearNumero(numero) {
+export function formatNumberWithZeros(numero) {
   // Convierte el número a cadena y maneja números negativos
   const numeroAbsoluto = Math.abs(numero);
   const numeroFormateado = String(numeroAbsoluto).padStart(6, '0');
@@ -267,8 +267,7 @@ export function validateComboBox(comboBox) {
  */
 export function validateEmail(email) {
   // Expresión regular para validar direcciones de correo electrónico
-  const emailRegex =
-    /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  const emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
   // Comprueba si el valor coincide con la expresión regular
   const isValid = emailRegex.test(email);
@@ -282,35 +281,14 @@ export function isNumeric(valor) {
 }
 
 export function isText(value) {
-  if (typeof value !== 'string') {
-    return false;
-  }
-
-  if (
-    value === null ||
-    value === 'undefined' ||
-    value.trim() === '' ||
-    value.trim().length === 0
-  )
-    return false;
-
-  return true;
+  return typeof value === 'string' && value.trim().length > 0;
 }
 
 export function keyNumberInteger(event) {
   const key = event.key;
   const isDigit = /\d/.test(key);
 
-  if (
-    !(
-      isDigit ||
-      key === 'Backspace' ||
-      key === 'Delete' ||
-      key === 'ArrowLeft' ||
-      key === 'ArrowRight' ||
-      key === 'Tab'
-    )
-  ) {
+  if (!(isDigit || key === 'Backspace' || key === 'Delete' || key === 'ArrowLeft' || key === 'ArrowRight' || key === 'Tab')) {
     event.preventDefault();
   }
 }
@@ -321,17 +299,7 @@ export function keyNumberFloat(event) {
   const isDot = key === '.';
   const hasDot = event.target.value.includes('.');
 
-  if (
-    !(
-      isDigit ||
-      isDot ||
-      key === 'Backspace' ||
-      key === 'Delete' ||
-      key === 'ArrowLeft' ||
-      key === 'ArrowRight' ||
-      key === 'Tab'
-    )
-  ) {
+  if (!(isDigit || isDot || key === 'Backspace' || key === 'Delete' || key === 'ArrowLeft' || key === 'ArrowRight' || key === 'Tab')) {
     event.preventDefault();
   }
 
@@ -358,16 +326,7 @@ export function keyNumberPhone(event) {
     event.preventDefault();
   }
 
-  if (
-    !(
-      isDigitOrAllowedChar ||
-      key === 'Backspace' ||
-      key === 'Delete' ||
-      key === 'ArrowLeft' ||
-      key === 'ArrowRight' ||
-      key === 'Tab'
-    )
-  ) {
+  if (!(isDigitOrAllowedChar || key === 'Backspace' || key === 'Delete' || key === 'ArrowLeft' || key === 'ArrowRight' || key === 'Tab')) {
     event.preventDefault();
   }
 }
@@ -511,12 +470,12 @@ export function hideModal(id) {
   myModal.hide();
 }
 
-export function viewModal(id, callback = function () {}) {
+export function viewModal(id, callback = function () { }) {
   const myModalEl = document.getElementById(id);
   myModalEl.addEventListener('shown.bs.modal', callback);
 }
 
-export function clearModal(id, callback = function () {}) {
+export function clearModal(id, callback = function () { }) {
   const myModalEl = document.getElementById(id);
   myModalEl.addEventListener('hidden.bs.modal', callback);
 }
@@ -650,7 +609,7 @@ export function alertHTML(title, html) {
   });
 }
 
-export function alertSuccess(title, message, callback = function () {}) {
+export function alertSuccess(title, message, callback = function () { }) {
   Swal({
     title: title,
     text: message,
@@ -665,7 +624,7 @@ export function alertSuccess(title, message, callback = function () {}) {
   });
 }
 
-export function alertWarning(title, message, callback = function () {}) {
+export function alertWarning(title, message, callback = function () { }) {
   Swal({
     title: title,
     text: message,

@@ -1,4 +1,4 @@
-import SearchBarClient from '../../../../../components/SearchBarClient';
+import SearchBarClient from '../../../../../../components/SearchBarClient';
 
 const InvoiceClient = (props) => {
   const { placeholder, refCliente, cliente, clientes } = props;

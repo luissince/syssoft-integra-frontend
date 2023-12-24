@@ -1,23 +1,227 @@
-import React from 'react';
 import ContainerWrapper from '../../../../../components/Container';
 import CustomComponent from '../../../../../model/class/custom-component';
+import { calculateTax, calculateTaxBruto, formatNumberWithZeros, formatTime, isText, numberFormat, rounded, spinnerLoading } from '../../../../../helper/utils.helper';
+import SuccessReponse from '../../../../../model/class/response';
+import ErrorResponse from '../../../../../model/class/error-response';
+import { CANCELED } from '../../../../../model/types/types';
+import { detailCompra } from '../../../../../network/rest/principal.network';
 
 class CompraDetalle extends CustomComponent {
-  async onEventImprimir() {
-    // const data = {
-    //     "idEmpresa": "EM0001",
-    //     "idVenta": this.state.idVenta,
-    // }
-    // let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
-    // let params = new URLSearchParams({ "params": ciphertext });
-    // window.open("/api/factura/repcomprobante?" + params, "_blank");
+
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      loading: true,
+      msgLoading: 'Cargando datos...',
+
+      idCompra: '',
+      fechaHora: '',
+
+      proveedor: '',
+      telefono: '',
+      celular: '',
+      email: '',
+      direccion: '',
+
+      almacen: '',
+
+      comprobante: '',
+      serieNumeracion: '',
+
+      tipo: '',
+      estado: '',
+
+      observacion: '',
+      notas: '',
+
+      codiso: '',
+      total: 0,
+
+      detalle: [],
+      salidas: []
+    };
+
+    this.abortControllerView = new AbortController();
+  }
+
+  async componentDidMount() {
+    const url = this.props.location.search;
+    const idCompra = new URLSearchParams(url).get('idCompra');
+
+    if (isText(idCompra)) {
+      this.loadingData(idCompra);
+    } else {
+      this.props.history.goBack();
+    }
+  }
+
+  componentWillUnmount() {
+    this.abortControllerView.abort();
+  }
+
+  async loadingData(id) {
+    const [compra] = await Promise.all([
+      await this.fetchDetailCompra(id)
+    ]);
+
+    if (!compra) {
+      this.props.history.goBack();
+      return;
+    }
+
+    const {
+      fecha,
+      hora,
+
+      comprobante,
+      serie,
+      numeracion,
+
+      documento,
+      informacion,
+      telefono,
+      celular,
+      email,
+      direccion,
+
+      almacen,
+
+      tipo,
+      estado,
+      observacion,
+      nota,
+      codiso,
+
+    } = compra.cabecera;
+
+    const monto = compra.detalle.reduce((accumlate, item) => accumlate + (item.costo * item.cantidad), 0,);
+
+    this.setState({
+      idCompra: id,
+      fechaHora: fecha + " " + formatTime(hora),
+
+      comprobante: comprobante,
+      serieNumeracion: serie + "-" + formatNumberWithZeros(numeracion),
+
+      proveedor: documento + " - " + informacion,
+      telefono: telefono,
+      celular: celular,
+      email: email,
+      direccion: direccion,
+
+      almacen: almacen,
+
+      tipo: tipo === 1 ? "CONTADO" : "CRÉDITO",
+      estado: estado === 1 ? <span className='text-success'>PAGADO</span> : estado === 2 ? <span className='text-warning'>POR PAGAR</span> : <span className='text-danger'>ANULADO</span>,
+      observacion: observacion,
+      notas: nota,
+      codiso: codiso,
+      total: monto,
+
+      detalle: compra.detalle,
+      salidas: compra.salidas,
+
+      loading: false,
+    });
+  }
+
+  async fetchDetailCompra(id) {
+    const params = {
+      idCompra: id,
+    };
+
+    const response = await detailCompra(params, this.abortControllerView.signal);
+
+    if (response instanceof SuccessReponse) {
+      return response.data;
+    }
+
+    if (response instanceof ErrorResponse) {
+      if (response.getType() === CANCELED) return;
+
+      return false;
+    }
+  }
+
+  renderTotal() {
+    let subTotal = 0;
+    let total = 0;
+
+    for (const item of this.state.detalle) {
+      const cantidad = item.cantidad;
+      const valor = item.costo;
+
+      const impuesto = item.porcentaje;
+
+      const valorActual = cantidad * valor;
+      const valorSubNeto = calculateTaxBruto(impuesto, valorActual);
+      const valorImpuesto = calculateTax(impuesto, valorSubNeto);
+      const valorNeto = valorSubNeto + valorImpuesto;
+
+      subTotal += valorSubNeto;
+      total += valorNeto;
+    }
+
+    const impuestosGenerado = () => {
+      const resultado = this.state.detalle.reduce((acc, item) => {
+        const total = item.cantidad * item.costo;
+        const subTotal = calculateTaxBruto(item.porcentaje, total);
+        const impuestoTotal = calculateTax(item.porcentaje, subTotal);
+
+        const existingImpuesto = acc.find((imp) => imp.idImpuesto === item.idImpuesto,);
+
+        if (existingImpuesto) {
+          existingImpuesto.valor += impuestoTotal;
+        } else {
+          acc.push({
+            idImpuesto: item.idImpuesto,
+            nombre: item.impuesto,
+            valor: impuestoTotal,
+          });
+        }
+
+        return acc;
+      }, []);
+
+      return resultado.map((impuesto, index) => {
+        return (
+          <tr key={index}>
+            <th className="text-right mb-2">{impuesto.nombre} :</th>
+            <th className="text-right mb-2">
+              {numberFormat(impuesto.valor, this.state.codiso)}
+            </th>
+          </tr>
+        );
+      });
+    }
+    return (
+      <>
+        <tr>
+          <th className="text-right mb-2">SUB TOTAL :</th>
+          <th className="text-right mb-2">
+            {numberFormat(subTotal, this.state.codiso)}
+          </th>
+        </tr>
+        {impuestosGenerado()}
+        <tr className="border-bottom"></tr>
+        <tr>
+          <th className="text-right h5">TOTAL :</th>
+          <th className="text-right h5">
+            {numberFormat(total, this.state.codiso)}
+          </th>
+        </tr>
+      </>
+    );
   }
 
   render() {
     return (
       <ContainerWrapper>
+        {this.state.loading && spinnerLoading(this.state.msgLoading)}
+
         <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+          <div className="col">
             <div className="form-group">
               <h5>
                 <span role="button" onClick={() => this.props.history.goBack()}>
@@ -31,7 +235,7 @@ class CompraDetalle extends CustomComponent {
         </div>
 
         <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+          <div className="col">
             <div className="form-group">
               <button
                 type="button"
@@ -57,7 +261,7 @@ class CompraDetalle extends CustomComponent {
                         Fecha Compra
                       </th>
                       <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {/*{this.state.comprobante}*/}13/11/2023 11:23:00.00
+                        {this.state.fechaHora}
                       </th>
                     </tr>
                     <tr>
@@ -65,7 +269,7 @@ class CompraDetalle extends CustomComponent {
                         Proveedor
                       </th>
                       <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {/*{this.state.cliente}*/}Algún proveedor aqui
+                        {this.state.proveedor}
                       </th>
                     </tr>
                     <tr>
@@ -73,7 +277,7 @@ class CompraDetalle extends CustomComponent {
                         Telefono
                       </th>
                       <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {/*{this.state.fecha}*/} (01) 123 1234
+                        {this.state.telefono}
                       </th>
                     </tr>
                     <tr>
@@ -81,7 +285,7 @@ class CompraDetalle extends CustomComponent {
                         Celular
                       </th>
                       <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {/*{this.state.notas}*/}+51 123 456 789
+                        {this.state.celular}
                       </th>
                     </tr>
                     <tr>
@@ -89,7 +293,7 @@ class CompraDetalle extends CustomComponent {
                         Email
                       </th>
                       <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {/*{this.state.notas}*/}correo@correo.com
+                        {this.state.email}
                       </th>
                     </tr>
                     <tr>
@@ -97,7 +301,7 @@ class CompraDetalle extends CustomComponent {
                         Dirección
                       </th>
                       <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {/*{this.state.notas}*/}alguna dirección aqui
+                        {this.state.direccion}
                       </th>
                     </tr>
                     <tr>
@@ -105,7 +309,7 @@ class CompraDetalle extends CustomComponent {
                         Almacen
                       </th>
                       <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {/*{this.state.notas}*/}Almacen 01
+                        {this.state.almacen}
                       </th>
                     </tr>
                   </thead>
@@ -120,26 +324,34 @@ class CompraDetalle extends CustomComponent {
                   <thead>
                     <tr>
                       <th className="table-secondary w-25 p-1 font-weight-normal ">
-                        Serie - Nuymeración
-                      </th>
-                      <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {/*{this.state.comprobante}*/}F001-000123
-                      </th>
-                    </tr>
-                    <tr>
-                      <th className="table-secondary w-25 p-1 font-weight-normal ">
                         Comprobante
                       </th>
                       <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {/*{this.state.comprobante}*/}Factura
+                        {this.state.comprobante}
                       </th>
                     </tr>
                     <tr>
                       <th className="table-secondary w-25 p-1 font-weight-normal ">
-                        Tipo y Estado
+                        Serie - Numeración
                       </th>
                       <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {/*{this.state.cliente}*/}01 - Pagada
+                        {this.state.serieNumeracion}
+                      </th>
+                    </tr>
+                    <tr>
+                      <th className="table-secondary w-25 p-1 font-weight-normal ">
+                        Tipo
+                      </th>
+                      <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                        {this.state.tipo}
+                      </th>
+                    </tr>
+                    <tr>
+                      <th className="table-secondary w-25 p-1 font-weight-normal ">
+                        Estado
+                      </th>
+                      <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                        {this.state.estado}
                       </th>
                     </tr>
                     <tr>
@@ -147,7 +359,7 @@ class CompraDetalle extends CustomComponent {
                         Observación
                       </th>
                       <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {/*{this.state.fecha}*/} N/D
+                        {this.state.observacion}
                       </th>
                     </tr>
                     <tr>
@@ -155,7 +367,7 @@ class CompraDetalle extends CustomComponent {
                         Notas
                       </th>
                       <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {/*{this.state.notas}*/} N/D
+                        {this.state.notas}
                       </th>
                     </tr>
                     <tr>
@@ -163,7 +375,7 @@ class CompraDetalle extends CustomComponent {
                         Total
                       </th>
                       <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {/*{this.state.notas}*/}S/. 2000.00
+                        {numberFormat(this.state.total, this.state.codiso)}
                       </th>
                     </tr>
                   </thead>
@@ -174,7 +386,7 @@ class CompraDetalle extends CustomComponent {
         </div>
 
         <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+          <div className="col">
             <p className="lead">Detalle</p>
             <div className="table-responsive">
               <table className="table table-light table-striped">
@@ -182,25 +394,35 @@ class CompraDetalle extends CustomComponent {
                   <tr>
                     <th>#</th>
                     <th>Descripción</th>
-                    <th>Precio</th>
-                    <th>Descuento</th>
+                    <th>Costo</th>
+                    <th>Categoría</th>
                     <th>Impuesto %</th>
                     <th>Cantidad</th>
-                    <th>Unidad</th>
+                    <th>Medida</th>
                     <th>Importe</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td>1</td>
-                    <td>Pollo desmenuzado</td>
-                    <td>S/. 50.00</td>
-                    <td>S/. 500.00</td>
-                    <td className="text-right">18%</td>
-                    <td className="text-right">400</td>
-                    <td className="text-right">KG</td>
-                    <td className="text-right">S/. 2000.00</td>
-                  </tr>
+                  {this.state.detalle.map((item, index) => (
+                    <tr key={index}>
+                      <td>{++index}</td>
+                      <td>{item.producto}</td>
+                      <td className="text-right">
+                        {numberFormat(item.costo, this.state.codiso)}
+                      </td>
+
+                      <td>{item.categoria}</td>
+                      <td className="text-right">{item.impuesto}</td>
+                      <td className="text-right">{rounded(item.cantidad)}</td>
+                      <td>{item.medida}</td>
+                      <td className="text-right">
+                        {numberFormat(
+                          item.cantidad * item.costo,
+                          this.state.codiso,
+                        )}
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
@@ -213,48 +435,7 @@ class CompraDetalle extends CustomComponent {
             <div className="form-group">
               <div className="table-responsive">
                 <table width="100%">
-                  <thead>
-                    <tr>
-                      <th className="table-secondary w-35 p-1 font-weight-normal ">
-                        Importe Bruto
-                      </th>
-                      <th className="table-light border-top border-bottom border-right w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {/*{this.state.comprobante}*/}S/. 0.00
-                      </th>
-                    </tr>
-                    <tr>
-                      <th className="table-secondary w-35 p-1 font-weight-normal ">
-                        Descuento
-                      </th>
-                      <th className="table-light border-bottom border-right w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {/*{this.state.cliente}*/}S/. 0.00
-                      </th>
-                    </tr>
-                    <tr>
-                      <th className="table-secondary w-35 p-1 font-weight-normal ">
-                        Sub Importe
-                      </th>
-                      <th className="table-light border-bottom border-right w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {/*{this.state.fecha}*/}S/. 0.00
-                      </th>
-                    </tr>
-                    <tr>
-                      <th className="table-secondary w-35 p-1 font-weight-normal ">
-                        Impuesto
-                      </th>
-                      <th className="table-light border-bottom border-right w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {/*{this.state.notas}*/}S/. 0.00
-                      </th>
-                    </tr>
-                    <tr>
-                      <th className="table-secondary w-35 p-1 font-weight-bold ">
-                        IMPORTE NETO
-                      </th>
-                      <th className="table-light border-bottom border-right w-65 pl-2 pr-2 pt-1 pb-1 font-weight-bold">
-                        {/*{this.state.notas}*/}S/. 0.00
-                      </th>
-                    </tr>
-                  </thead>
+                  <thead>{this.renderTotal()}</thead>
                 </table>
               </div>
             </div>
@@ -262,53 +443,43 @@ class CompraDetalle extends CustomComponent {
         </div>
 
         <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <p className="lead">Lista de egresos asociados</p>
+          <div className="col">
+            <p className="lead">Salidas asociados</p>
             <div className="table-responsive">
               <table className="table table-light table-striped">
                 <thead>
                   <tr>
                     <th>#</th>
-                    <th>Fecha</th>
-                    <th>Banco</th>
-                    <th>Detalle</th>
+                    <th>Fecha y Hora</th>
+                    <th>Metodo</th>
+                    <th>Descripción</th>
                     <th>Monto</th>
-                    <th>Vuelto</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                  </tr>
+                  {this.state.salidas.length === 0 ? (
+                    <tr>
+                      <td colSpan="5" className="text-center">
+                        No hay ingresos para mostrar.
+                      </td>
+                    </tr>
+                  ) : (
+                    this.state.salidas.map((item, index) => (
+                      <tr key={index}>
+                        <td>{++index}</td>
+                        <td>
+                          <span>{item.fecha}</span>
+                          <br />
+                          <span>{formatTime(item.hora)}</span>
+                        </td>
+                        <td>{item.nombre}</td>
+                        <td>{item.descripcion}</td>
+                        <td>{numberFormat(item.monto, this.state.codiso)}</td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
-            </div>
-          </div>
-        </div>
-
-        <div className="row">
-          <div className="col-lg-9 col-md-9 col-sm-12 col-xs-12"></div>
-          <div className="col-lg-3 col-md-3 col-sm-12 col-xs-12">
-            <div className="form-group">
-              <div className="table-responsive">
-                <table width="100%">
-                  <thead>
-                    <tr>
-                      <th className="table-secondary w-35 p-1 font-weight-normal ">
-                        EGRESO TOTAL
-                      </th>
-                      <th className="table-light border-bottom border-right w-65 pl-2 pr-2 pt-1 pb-1 font-weight-bold">
-                        {/*{this.state.notas}*/}S/. 0.00
-                      </th>
-                    </tr>
-                  </thead>
-                </table>
-              </div>
             </div>
           </div>
         </div>

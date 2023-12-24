@@ -17,9 +17,9 @@ import {
   showModal,
   spinnerLoading,
   viewModal,
-} from '../../../../helper/utils.helper';
+} from '../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
-import { PosContainerWrapper } from '../../../../components/Container';
+import { PosContainerWrapper } from '../../../../../components/Container';
 import InvoiceTicket from './component/InvoiceTicket';
 import {
   comboMetodoPago,
@@ -33,10 +33,10 @@ import {
   filtrarProductoVenta,
   preferidosProducto,
   obtenerListaPrecioProducto,
-} from '../../../../network/rest/principal.network';
-import SuccessReponse from '../../../../model/class/response';
-import ErrorResponse from '../../../../model/class/error-response';
-import { CANCELED } from '../../../../model/types/types';
+} from '../../../../../network/rest/principal.network';
+import SuccessReponse from '../../../../../model/class/response';
+import ErrorResponse from '../../../../../model/class/error-response';
+import { CANCELED } from '../../../../../model/types/types';
 import InvoiceDetail from './component/InvoiceDetail';
 import InvoiceClient from './component/InvoiceClient';
 import InvoiceVoucher from './component/InvoiceVoucher';
@@ -44,21 +44,21 @@ import InvoiceFooter from './component/InvoiceFooter';
 import ModalConfiguration from './component/ModalConfiguration';
 import InvoiceView from './component/InvoiceView';
 import ModalSale from './component/ModalSale';
-import CustomComponent from '../../../../model/class/custom-component';
+import CustomComponent from '../../../../../model/class/custom-component';
 import ModalCliente from './component/ModalCliente';
 import {
   COMPROBANTE_DE_INGRESO,
   FACTURACION,
   VENTA_LIBRE,
-} from '../../../../model/types/tipo-comprobante';
-import { starProduct, favoriteProducts } from '../../../../redux/actions';
+} from '../../../../../model/types/tipo-comprobante';
+import { starProduct, favoriteProducts } from '../../../../../redux/actions';
 import ModalProducto from './component/ModalProducto';
 
 /**
  * Componente que representa una funcionalidad específica.
  * @extends React.Component
  */
-class VentaProceso extends CustomComponent {
+class VentaCrear extends CustomComponent {
   /**
    *
    * Constructor
@@ -1463,4 +1463,4 @@ const mapDispatchToProps = (dispatch) => {
  *
  * Método encargado de conectar con redux y exportar la clase
  */
-export default connect(mapStateToProps, mapDispatchToProps)(VentaProceso);
+export default connect(mapStateToProps, mapDispatchToProps)(VentaCrear);

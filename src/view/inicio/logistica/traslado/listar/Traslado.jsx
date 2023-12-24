@@ -7,19 +7,20 @@ import {
   alertWarning,
   isEmpty,
   formatTime,
-} from '../../../../helper/utils.helper';
-import ContainerWrapper from '../../../../components/Container';
-import Paginacion from '../../../../components/Paginacion';
-import { currentDate } from '../../../../helper/utils.helper';
-import CustomComponent from '../../../../model/class/custom-component';
-import SuccessReponse from '../../../../model/class/response';
-import ErrorResponse from '../../../../model/class/error-response';
+} from '../../../../../helper/utils.helper';
+import ContainerWrapper from '../../../../../components/Container';
+import Paginacion from '../../../../../components/Paginacion';
+import { currentDate } from '../../../../../helper/utils.helper';
+import CustomComponent from '../../../../../model/class/custom-component';
+import SuccessReponse from '../../../../../model/class/response';
+import ErrorResponse from '../../../../../model/class/error-response';
 import {
   cancelAjuste,
-  comboTipoAjuste,
-  listAjuste,
-} from '../../../../network/rest/principal.network';
-import { CANCELED } from '../../../../model/types/types';
+  cancelTraslado,
+  comboTipoTraslado,
+  listTraslado,
+} from '../../../../../network/rest/principal.network';
+import { CANCELED } from '../../../../../model/types/types';
 import { connect } from 'react-redux';
 
 class Ajuste extends CustomComponent {
@@ -30,11 +31,11 @@ class Ajuste extends CustomComponent {
       initialLoad: true,
       initialMessage: 'Cargando datos...',
 
-      idTipoAjuste: '',
+      idTipoTraslado: '',
       fechaInicio: currentDate(),
       fechaFinal: currentDate(),
 
-      tipoAjuste: [],
+      tipoTraslado: [],
 
       loading: false,
       lista: [],
@@ -64,10 +65,10 @@ class Ajuste extends CustomComponent {
   }
 
   async loadingData() {
-    const [tipoAjuste] = await Promise.all([await this.fetchComboTipoAjuste()]);
+    const [tipoTraslado] = await Promise.all([await this.fetchComboTipoTraslado()]);
 
     await this.setStateAsync({
-      tipoAjuste,
+      tipoTraslado,
       initialLoad: false,
     });
     this.loadInit();
@@ -116,7 +117,7 @@ class Ajuste extends CustomComponent {
   };
 
   fillTable = async (opcion, buscar) => {
-    await this.setStateAsync({
+    this.setState({
       loading: true,
       lista: [],
       messageTable: 'Cargando información...',
@@ -128,19 +129,19 @@ class Ajuste extends CustomComponent {
       buscar: buscar.trim(),
       fechaInicio: this.state.fechaInicio,
       fechaFinal: this.state.fechaFinal,
-      idTipoAjuste: this.state.idTipoAjuste,
+      idTipoTraslado: this.state.idTipoTraslado,
       posicionPagina: (this.state.paginacion - 1) * this.state.filasPorPagina,
       filasPorPagina: this.state.filasPorPagina,
     };
 
-    const response = await listAjuste(data, this.abortControllerTable.signal);
+    const response = await listTraslado(data, this.abortControllerTable.signal);
 
     if (response instanceof SuccessReponse) {
       const totalPaginacion = parseInt(
         Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
       );
 
-      await this.setStateAsync({
+      this.setState({
         loading: false,
         lista: response.data.result,
         totalPaginacion: totalPaginacion,
@@ -150,7 +151,7 @@ class Ajuste extends CustomComponent {
     if (response instanceof ErrorResponse) {
       if (response.getType() === CANCELED) return;
 
-      await this.setStateAsync({
+      this.setState({
         loading: false,
         lista: [],
         totalPaginacion: 0,
@@ -159,8 +160,8 @@ class Ajuste extends CustomComponent {
     }
   };
 
-  async fetchComboTipoAjuste() {
-    const response = await comboTipoAjuste(this.abortControllerTable.signal);
+  async fetchComboTipoTraslado() {
+    const response = await comboTipoTraslado(this.abortControllerTable.signal);
 
     if (response instanceof SuccessReponse) {
       return response.data;
@@ -173,8 +174,8 @@ class Ajuste extends CustomComponent {
     }
   }
 
-  handleSelectTipoAjuste = (event) => {
-    this.setState({ idTipoAjuste: event.target.value });
+  handleSelectTipoTraslado = (event) => {
+    this.setState({ idTipoTraslado: event.target.value });
   };
 
   handleInputFechaInicio = (event) => {
@@ -187,43 +188,40 @@ class Ajuste extends CustomComponent {
 
   handleAgregar = () => {
     this.props.history.push({
-      pathname: `${this.props.location.pathname}/agregar`,
+      pathname: `${this.props.location.pathname}/crear`,
     });
   };
 
   handleDetalle = (idAjuste) => {
     this.props.history.push({
       pathname: `${this.props.location.pathname}/detalle`,
-      search: '?idAjuste=' + idAjuste,
+      search: '?idTraslado=' + idAjuste,
     });
   };
 
-  handleCancelar = (idAjuste) => {
-    alertDialog(
-      'Ajuste',
-      '¿Estás seguro de anular el ajuste?',
-      async (acccept) => {
-        if (acccept) {
-          alertInfo('Ajuste', 'Procesando información...');
+  handleCancelar = (idTraslado) => {
+    alertDialog('Traslado', '¿Estás seguro de anular el traslado?', async (acccept) => {
+      if (acccept) {
+        alertInfo('Traslado', 'Procesando información...');
 
-          const params = {
-            idAjuste: idAjuste,
-            idUsuario: this.state.idUsuario,
-          };
+        const params = {
+          idTraslado: idTraslado,
+          idUsuario: this.state.idUsuario,
+        };
 
-          const response = await cancelAjuste(params);
+        const response = await cancelTraslado(params);
 
-          if (response instanceof SuccessReponse) {
-            alertSuccess('Ajuste', response.data, () => {
-              this.loadInit();
-            });
-          }
-
-          if (response instanceof ErrorResponse) {
-            alertWarning('Ajuste', response.getMessage());
-          }
+        if (response instanceof SuccessReponse) {
+          alertSuccess('Ajuste', response.data, () => {
+            this.loadInit();
+          });
         }
-      },
+
+        if (response instanceof ErrorResponse) {
+          alertWarning('Ajuste', response.getMessage());
+        }
+      }
+    },
     );
   };
 
@@ -231,7 +229,7 @@ class Ajuste extends CustomComponent {
     if (this.state.loading) {
       return (
         <tr>
-          <td className="text-center" colSpan="8">
+          <td className="text-center" colSpan="9">
             {spinnerLoading('Cargando información de la tabla...', true)}
           </td>
         </tr>
@@ -241,7 +239,7 @@ class Ajuste extends CustomComponent {
     if (isEmpty(this.state.lista)) {
       return (
         <tr>
-          <td className="text-center" colSpan="8">
+          <td className="text-center" colSpan="9">
             ¡No hay datos registrados!
           </td>
         </tr>
@@ -256,12 +254,6 @@ class Ajuste extends CustomComponent {
           <span className="badge badge-danger">Anulado</span>
         );
 
-      const iconTipoAjuste =
-        item.ajuste === 'INCREMENTO' ? (
-          <i className="bi bi-plus-circle-fill text-success"></i>
-        ) : (
-          <i className="bi bi-dash-circle-fill text-danger"></i>
-        );
 
       return (
         <tr key={index}>
@@ -271,27 +263,28 @@ class Ajuste extends CustomComponent {
             {formatTime(item.hora)}
           </td>
           <td>
-            {iconTipoAjuste} {item.ajuste}
+            {item.tipo}
             <br />
             {item.motivo}
           </td>
+          <td>{item.almacenOrigen}</td>
+          <td>{item.almacenDestino}</td>
           <td>{item.observacion}</td>
-          <td>{item.almacen}</td>
           <td>{estado}</td>
-          <td className="text-center">
+          <td className='text-center'>
             <button
               className="btn btn-outline-info btn-sm"
               title="Editar"
-              onClick={() => this.handleDetalle(item.idAjuste)}
+              onClick={() => this.handleDetalle(item.idTraslado)}
             >
               <i className="bi bi-eye"></i>
             </button>
           </td>
-          <td className="text-center">
+          <td className='text-center'>
             <button
               className="btn btn-outline-danger btn-sm"
-              title="Editar"
-              onClick={() => this.handleCancelar(item.idAjuste)}
+              title="Anular"
+              onClick={() => this.handleCancelar(item.idTraslado)}
             >
               <i className="bi bi-trash"></i>
             </button>
@@ -299,7 +292,7 @@ class Ajuste extends CustomComponent {
         </tr>
       );
     });
-  };
+  }
 
   render() {
     return (
@@ -310,7 +303,7 @@ class Ajuste extends CustomComponent {
           <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
             <div className="form-group">
               <h5>
-                Ajustes <small className="text-secondary">REALIZADOS</small>
+                Traslado <small className="text-secondary">REALIZADOS</small>
               </h5>
             </div>
           </div>
@@ -361,12 +354,12 @@ class Ajuste extends CustomComponent {
               <div className="input-group">
                 <select
                   className="form-control"
-                  value={this.state.idTipoAjuste}
-                  onChange={this.handleSelectTipoAjuste}
+                  value={this.state.idTipoTraslado}
+                  onChange={this.handleSelectTipoTraslado}
                 >
                   <option value="0">-- Selecciona --</option>
-                  {this.state.tipoAjuste.map((item, index) => (
-                    <option key={index} value={item.idTipoAjuste}>
+                  {this.state.tipoTraslado.map((item, index) => (
+                    <option key={index} value={item.idTipoTraslado}>
                       {item.nombre}
                     </option>
                   ))}
@@ -410,9 +403,10 @@ class Ajuste extends CustomComponent {
                       #
                     </th>
                     <th width="15%">Fecha y Hora</th>
-                    <th width="15%">Tipo de Movimiento</th>
+                    <th width="15%">Tipo / Motivo</th>
+                    <th width="15%">Almacen Origen</th>
+                    <th width="15%">Almacen Destino</th>
                     <th width="20%">Observación</th>
-                    <th width="15%">Almacen</th>
                     <th width="10%">Estado</th>
                     <th width="5%" className="text-center">
                       Detalle

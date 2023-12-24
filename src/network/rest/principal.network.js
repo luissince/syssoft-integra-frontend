@@ -64,7 +64,7 @@ export async function getIdSucursal(params, signal) {
   );
 }
 
-export async function comboSucursales(signal) {
+export async function comboSucursal(signal) {
   return await Resolve.create(
     instancePrincipal.get('/api/sucursal/combo', {
       signal: signal,
@@ -88,7 +88,7 @@ export async function updateSucursal(data, signal) {
   );
 }
 
-export async function borrarSucursal(idSucursal) {
+export async function deleteSucursal(idSucursal) {
   return await Resolve.create(
     instancePrincipal.delete('/api/sucursal', {
       params: {
@@ -351,9 +351,10 @@ export async function deleteAlmacen(params) {
   );
 }
 
-export async function comboAlmacen(signal) {
+export async function comboAlmacen(params, signal) {
   return await Resolve.create(
     instancePrincipal.get('/api/almacen/combo', {
+      params: params,
       signal: signal,
     }),
   );
@@ -403,12 +404,14 @@ export async function listCpeSunat(params, signal) {
 }
 
 export async function createFactura(data) {
-  return await Resolve.create(instancePrincipal.post('/api/factura/add', data));
+  return await Resolve.create(
+    instancePrincipal.post('/api/factura/add', data))
+    ;
 }
 
-export async function getFacturaId(params, signal) {
+export async function detailFactura(params, signal) {
   return await Resolve.create(
-    instancePrincipal.get('/api/factura/id', {
+    instancePrincipal.get('/api/factura/detail', {
       signal: signal,
       params: params,
     }),
@@ -457,11 +460,9 @@ export async function nacionalMoneda(signal) {
   );
 }
 
-export async function addMoneda(data, signal) {
+export async function addMoneda(data) {
   return await Resolve.create(
-    instancePrincipal.post('/api/moneda/add', data, {
-      signal: signal,
-    }),
+    instancePrincipal.post('/api/moneda/add', data),
   );
 }
 
@@ -583,6 +584,119 @@ export async function cancelAjuste(params, signal) {
 
 /*
 |--------------------------------------------------------------------------
+| ENDPOINTS DE TRASLADO
+|--------------------------------------------------------------------------
+*/
+export async function listTraslado(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/traslado/list', {
+      params: params,
+      signal: signal,
+    }),
+  );
+}
+
+export async function detailTraslado(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/traslado/detail', {
+      params: params,
+      signal: signal,
+    }),
+  );
+}
+
+export async function createTraslado(data, signal) {
+  return await Resolve.create(
+    instancePrincipal.post('/api/traslado/create', data, {
+      signal: signal,
+    }),
+  );
+}
+
+export async function cancelTraslado(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.delete('/api/traslado/cancel', {
+      params: params,
+      signal: signal,
+    }),
+  );
+}
+// ------------------------------------------------------------------------
+// FIN PARA TRASLADO
+// ------------------------------------------------------------------------
+
+/*
+|--------------------------------------------------------------------------
+| ENDPOINTS DE INGRESO
+|--------------------------------------------------------------------------
+*/
+export async function listIngreso(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/ingreso/list', {
+      params: params,
+      signal: signal,
+    }),
+  );
+}
+
+export async function cancelIngreso(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.delete('/api/ingreso/cancel', {
+      params: params,
+      signal: signal,
+    }),
+  );
+}
+// ------------------------------------------------------------------------
+// FIN PARA INGRESO
+// ------------------------------------------------------------------------
+
+/*
+|--------------------------------------------------------------------------
+| ENDPOINTS DE SALIDA
+|--------------------------------------------------------------------------
+*/
+export async function listSalida(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/salida/list', {
+      params: params,
+      signal: signal,
+    }),
+  );
+}
+
+export async function cancelSalida(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.delete('/api/salida/cancel', {
+      params: params,
+      signal: signal,
+    }),
+  );
+}
+// ------------------------------------------------------------------------
+// FIN PARA SALIDA
+// ------------------------------------------------------------------------
+
+
+/*
+|--------------------------------------------------------------------------
+| ENDPOINTS DE TIPO TRASLADO
+|--------------------------------------------------------------------------
+*/
+export async function comboTipoTraslado(signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/tipotraslado/combo', {
+      signal: signal,
+    }),
+  );
+}
+// ------------------------------------------------------------------------
+// FIN PARA TIPO TRASLADO
+// ------------------------------------------------------------------------
+
+
+/*
+|--------------------------------------------------------------------------
 | ENDPOINTS DE MOTIVO AJUSTE
 |--------------------------------------------------------------------------
 */
@@ -621,15 +735,6 @@ export async function comboTipoAjuste(signal) {
 export async function listCompra(params, signal) {
   return await Resolve.create(
     instancePrincipal.get('/api/compra/list', {
-      params: params,
-      signal: signal,
-    }),
-  );
-}
-
-export async function idCompra(params, signal) {
-  return await Resolve.create(
-    instancePrincipal.get('/api/compra/id', {
       params: params,
       signal: signal,
     }),
@@ -1334,6 +1439,23 @@ export async function comboTipoComprobante(signal) {
 // ------------------------------------------------------------------------
 // FIN PARA TIPO DE COMPROBANTE
 // ------------------------------------------------------------------------
+
+/*
+|--------------------------------------------------------------------------
+| ENDPOINTS DE MOTIVO TRASLADO
+|--------------------------------------------------------------------------
+*/
+export async function comboMotivoTraslado(signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/motivotraslado/combo', {
+      signal: signal,
+    }),
+  );
+}
+// ------------------------------------------------------------------------
+// FIN PARA TIPO DE MOTIVO TRASLADO
+// ------------------------------------------------------------------------
+
 
 /*
 |--------------------------------------------------------------------------

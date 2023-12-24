@@ -1,4 +1,3 @@
-import React from 'react';
 import CryptoJS from 'crypto-js';
 import {
   rounded,
@@ -7,19 +6,25 @@ import {
   calculateTax,
   formatTime,
   spinnerLoading,
-} from '../../../../helper/utils.helper';
+  isText,
+} from '../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
-import ContainerWrapper from '../../../../components/Container';
-import { getFacturaId } from '../../../../network/rest/principal.network';
-import SuccessReponse from '../../../../model/class/response';
-import ErrorResponse from '../../../../model/class/error-response';
-import { CANCELED } from '../../../../model/types/types';
-import CustomComponent from '../../../../model/class/custom-component';
+import ContainerWrapper from '../../../../../components/Container';
+import { detailFactura } from '../../../../../network/rest/principal.network';
+import SuccessReponse from '../../../../../model/class/response';
+import ErrorResponse from '../../../../../model/class/error-response';
+import { CANCELED } from '../../../../../model/types/types';
+import CustomComponent from '../../../../../model/class/custom-component';
 
 class VentaDetalle extends CustomComponent {
+
   constructor(props) {
     super(props);
+
     this.state = {
+      loading: true,
+      msgLoading: 'Cargando datos...',
+
       idVenta: '',
       comprobante: '',
       cliente: '',
@@ -34,23 +39,16 @@ class VentaDetalle extends CustomComponent {
 
       detalle: [],
       ingresos: [],
-
-      loading: true,
-      msgLoading: 'Cargando datos...',
     };
 
     this.abortControllerView = new AbortController();
   }
 
-  /**
-   * Método de cliclo de vida
-   */
-
   async componentDidMount() {
     const url = this.props.location.search;
-    const idResult = new URLSearchParams(url).get('idVenta');
-    if (idResult !== null) {
-      this.loadingData(idResult);
+    const idVenta = new URLSearchParams(url).get('idVenta');
+    if (isText(idVenta)) {
+      this.loadingData(idVenta);
     } else {
       this.props.history.goBack();
     }
@@ -60,13 +58,10 @@ class VentaDetalle extends CustomComponent {
     this.abortControllerView.abort();
   }
 
-  /**
-   *
-   * Métodos de acción
-   */
-
   async loadingData(id) {
-    const [factura] = await Promise.all([await this.fetchFacturaId(id)]);
+    const [factura] = await Promise.all([
+      await this.fetchIdFactura(id)
+    ]);
 
     if (!factura) {
       this.props.history.goBack();
@@ -88,10 +83,7 @@ class VentaDetalle extends CustomComponent {
       usuario,
     } = factura.cabecera;
 
-    const monto = factura.ingresos.reduce(
-      (accumlate, item) => accumlate + item.monto,
-      0,
-    );
+    const monto = factura.ingresos.reduce((accumlate, item) => accumlate + item.monto, 0,);
 
     await this.setStateAsync({
       idVenta: id,
@@ -100,7 +92,15 @@ class VentaDetalle extends CustomComponent {
       fecha: fecha + ' ' + formatTime(hora),
       notas: '',
       formaVenta: tipo === 1 ? 'Contado' : 'Crédito',
-      estado: estado,
+      estado: estado === 1 ? <span className="text-success font-weight-bold">
+        Cobrado
+      </span> : estado === 2 ? <span className="text-warning font-weight-bold">
+        Por cobrar
+      </span> : estado == 3 ? <span className="text-danger font-weight-bold">
+        Anulado
+      </span> : <span className="text-info font-weight-bold">
+        Por llevar
+      </span>,
       simbolo: simbolo,
       codiso: codiso,
       usuario: usuario,
@@ -113,15 +113,12 @@ class VentaDetalle extends CustomComponent {
     });
   }
 
-  async fetchFacturaId(id) {
+  async fetchIdFactura(id) {
     const params = {
       idVenta: id,
     };
 
-    const response = await getFacturaId(
-      params,
-      this.abortControllerView.signal,
-    );
+    const response = await detailFactura(params, this.abortControllerView.signal);
 
     if (response instanceof SuccessReponse) {
       return response.data;
@@ -159,9 +156,7 @@ class VentaDetalle extends CustomComponent {
         const subTotal = calculateTaxBruto(item.porcentaje, total);
         const impuestoTotal = calculateTax(item.porcentaje, subTotal);
 
-        const existingImpuesto = acc.find(
-          (imp) => imp.idImpuesto === item.idImpuesto,
-        );
+        const existingImpuesto = acc.find((imp) => imp.idImpuesto === item.idImpuesto,);
 
         if (existingImpuesto) {
           existingImpuesto.valor += impuestoTotal;
@@ -186,7 +181,7 @@ class VentaDetalle extends CustomComponent {
           </tr>
         );
       });
-    };
+    }
 
     return (
       <>
@@ -214,11 +209,8 @@ class VentaDetalle extends CustomComponent {
       idVenta: this.state.idVenta,
     };
 
-    let ciphertext = CryptoJS.AES.encrypt(
-      JSON.stringify(data),
-      'key-report-inmobiliaria',
-    ).toString();
-    let params = new URLSearchParams({ params: ciphertext });
+    const ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria',).toString();
+    const params = new URLSearchParams({ params: ciphertext });
     window.open('/api/factura/repcomprobante?' + params, '_blank');
   }
 
@@ -308,23 +300,7 @@ class VentaDetalle extends CustomComponent {
                         Estado
                       </th>
                       <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {this.state.estado === 1 ? (
-                          <span className="text-success font-weight-bold">
-                            Cobrado
-                          </span>
-                        ) : this.state.estado === 2 ? (
-                          <span className="text-warning font-weight-bold">
-                            Por cobrar
-                          </span>
-                        ) : this.state.estado === 3 ? (
-                          <span className="text-danger font-weight-bold">
-                            Anulado
-                          </span>
-                        ) : (
-                          <span className="text-info font-weight-bold">
-                            Por llevar
-                          </span>
-                        )}
+                        {this.state.estado}
                       </th>
                     </tr>
                     <tr>

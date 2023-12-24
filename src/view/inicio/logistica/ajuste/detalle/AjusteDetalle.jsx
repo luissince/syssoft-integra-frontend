@@ -1,15 +1,14 @@
-import React from 'react';
 import {
   spinnerLoading,
   formatTime,
   rounded,
-} from '../../../../helper/utils.helper';
-import ContainerWrapper from '../../../../components/Container';
-import CustomComponent from '../../../../model/class/custom-component';
-import SuccessReponse from '../../../../model/class/response';
-import ErrorResponse from '../../../../model/class/error-response';
-import { detailAjuste } from '../../../../network/rest/principal.network';
-import { CANCELED } from '../../../../model/types/types';
+} from '../../../../../helper/utils.helper';
+import ContainerWrapper from '../../../../../components/Container';
+import CustomComponent from '../../../../../model/class/custom-component';
+import SuccessReponse from '../../../../../model/class/response';
+import ErrorResponse from '../../../../../model/class/error-response';
+import { detailAjuste } from '../../../../../network/rest/principal.network';
+import { CANCELED } from '../../../../../model/types/types';
 import { connect } from 'react-redux';
 
 class AjusteDetalle extends CustomComponent {

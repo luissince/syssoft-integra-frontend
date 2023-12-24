@@ -2,14 +2,14 @@ import React from 'react';
 import ContainerWrapper from '../../../../../components/Container';
 import CustomComponent from '../../../../../model/class/custom-component';
 import Paginacion from '../../../../../components/Paginacion';
-import { alertDialog, formatTime, formatNumberWithZeros, isEmpty, spinnerLoading, numberFormat, keyUpSearch, alertSuccess, alertWarning, alertInfo } from '../../../../../helper/utils.helper';
+import { alertDialog, isEmpty, spinnerLoading, keyUpSearch, alertSuccess, alertWarning, alertInfo, formatTime, formatNumberWithZeros, numberFormat } from '../../../../../helper/utils.helper';
 import ErrorResponse from '../../../../../model/class/error-response';
 import SuccessReponse from '../../../../../model/class/response';
 import { CANCELED } from '../../../../../model/types/types';
-import { cancelCompra, listCompra } from '../../../../../network/rest/principal.network';
+import { cancelIngreso, listIngreso } from '../../../../../network/rest/principal.network';
 import { connect } from 'react-redux';
 
-class Compras extends CustomComponent {
+class Ingresos extends CustomComponent {
   constructor(props) {
     super(props);
 
@@ -78,7 +78,7 @@ class Compras extends CustomComponent {
   };
 
   fillTable = async (opcion, buscar) => {
-    await this.setStateAsync({
+    this.setState({
       loading: true,
       lista: [],
       messageTable: 'Cargando información...',
@@ -92,14 +92,14 @@ class Compras extends CustomComponent {
       filasPorPagina: this.state.filasPorPagina,
     };
 
-    const response = await listCompra(params, this.abortControllerTable.signal);
+    const response = await listIngreso(params, this.abortControllerTable.signal);
 
     if (response instanceof SuccessReponse) {
       const totalPaginacion = parseInt(
         Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
       );
 
-      await this.setStateAsync({
+      this.setState({
         loading: false,
         lista: response.data.result,
         totalPaginacion: totalPaginacion,
@@ -109,7 +109,7 @@ class Compras extends CustomComponent {
     if (response instanceof ErrorResponse) {
       if (response.getType() === CANCELED) return;
 
-      await this.setStateAsync({
+      this.setState({
         loading: false,
         lista: [],
         totalPaginacion: 0,
@@ -118,42 +118,27 @@ class Compras extends CustomComponent {
     }
   }
 
-  handleCrear = () => {
-    this.props.history.push({
-      pathname: `${this.props.location.pathname}/crear`,
-    });
-  }
-
-  handleDetalle = (idCompra) => {
-    this.props.history.push({
-      pathname: `${this.props.location.pathname}/detalle`,
-      search: '?idCompra=' + idCompra,
-    });
-  }
-
   handleAnular = (id) => {
-    alertDialog('Compra', '¿Estás seguro de anular la compra.?', async (accept) => {
+    alertDialog('Ingreso', '¿Estás seguro de anular el cobro.?', async (accept) => {
       if (accept) {
-
         const params = {
-          idCompra: id,
+          idIngreso: id,
           idUsuario: this.state.idUsuario
         }
 
-        alertInfo("Compra", "Procesando petición...")
+        alertInfo("Ingreso", "Procesando petición...")
 
-        const response = await cancelCompra(params);
+        const response = await cancelIngreso(params);
 
         if (response instanceof SuccessReponse) {
-          alertSuccess("Compra", response.data, async () => {
-            await this.loadInit()
+          alertSuccess("Ingreso", response.data, async () => {
+            // await this.loadInit()
           })
         }
 
         if (response instanceof ErrorResponse) {
-          alertWarning("Compra", response.getMessage())
+          alertWarning("Ingreso", response.getMessage())
         }
-
       }
     });
   }
@@ -162,7 +147,7 @@ class Compras extends CustomComponent {
     if (this.state.loading) {
       return (
         <tr>
-          <td className="text-center" colSpan="9">
+          <td className="text-center" colSpan="8">
             {spinnerLoading('Cargando información de la tabla...', true)}
           </td>
         </tr>
@@ -172,63 +157,40 @@ class Compras extends CustomComponent {
     if (isEmpty(this.state.lista)) {
       return (
         <tr>
-          <td className="text-center" colSpan="9">¡No hay datos registrados!</td>
+          <td className="text-center" colSpan="8">¡No hay datos registrados!</td>
         </tr>
       );
     }
 
-
     return this.state.lista.map((item, index) => {
       return (
         <tr key={index}>
-          <td className={`text-center`}>
-            {item.id}
-          </td>
+          <td className={`text-center`}>{item.id}</td>
           <td>
             {item.fecha}
             <br />
             {formatTime(item.hora)}
           </td>
           <td>
-            {item.documento}
-            <br />
-            {item.informacion}
-          </td>
-          <td>
             {item.comprobante}
             <br />
             {item.serie}-{formatNumberWithZeros(item.numeracion)}
           </td>
-          <td>
-            {
-              item.tipo === 1
-                ? <span>Contado</span>
-                : <span>Crédito</span>
-            }
-          </td>
+          <td>{item.metodo}</td>
+          <td>{item.descripcion}</td>
           <td className='text-center'>
             {
               item.estado === 1
-                ? <span className="text-success">Pagado</span>
-                : item.estado === 2
-                  ? <span className="text-warning">Por Pagar</span>
-                  : <span className="text-danger">Anulado</span>
+                ? <span className="text-success">ACTIVO</span>
+                : <span className="text-danger">ANULADO</span>
             }
           </td>
-          <td className='text-right'>{numberFormat(item.total, item.codiso)} </td>
-          <td className="text-center">
-            <button
-              className="btn btn-outline-primary btn-sm"
-              title="Detalle"
-              onClick={() => this.handleDetalle(item.idCompra)}>
-              <i className="fa fa-eye"></i>
-            </button>
-          </td>
-          <td className="text-center">
+          <td className='text-right'>{numberFormat(item.monto, item.codiso)}</td>
+          <td className='text-center'>
             <button
               className="btn btn-outline-danger btn-sm"
               title="Anular"
-              onClick={() => this.handleAnular(item.idCompra)}>
+              onClick={() => this.handleAnular(item.idIngreso)}>
               <i className="fa fa-remove"></i>
             </button>
           </td>
@@ -245,7 +207,7 @@ class Compras extends CustomComponent {
             <div className="form-group">
               <h5>
                 {' '}
-                Compras <small className="text-secondary"> Lista </small>{' '}
+                Salidas <small className="text-secondary"> Lista </small>{' '}
               </h5>
             </div>
           </div>
@@ -278,12 +240,6 @@ class Compras extends CustomComponent {
 
           <div className="col-md-6 col-sm-12">
             <div className="form-group">
-              <button
-                className="btn btn-outline-info"
-                onClick={this.handleCrear}>
-                <i className="bi bi-file-plus"></i> Crear compra
-              </button>
-              {' '}
               <button className="btn btn-outline-secondary"
                 onClick={this.loadInit}>
                 <i className="bi bi-arrow-clockwise"></i>
@@ -300,17 +256,12 @@ class Compras extends CustomComponent {
                   <tr>
                     <th width="5%" className="text-center">#</th>
                     <th width="10%">Fecha</th>
-                    <th width="15%">Proveedor</th>
                     <th width="15%">Comprobante</th>
-                    <th width="10%">Tipo</th>
+                    <th width="15%">Metodo</th>
+                    <th width="15%">Descripción</th>
                     <th width="10%" className="text-center">Estado</th>
                     <th width="10%" className="text-center">Total</th>
-                    <th width="5%" className="text-center">
-                      Detalle
-                    </th>
-                    <th width="5%" className="text-center">
-                      Anular
-                    </th>
+                    <th width="5%" className="text-center">Anular</th>
                   </tr>
                 </thead>
                 <tbody>{this.generarBody()}</tbody>
@@ -339,4 +290,4 @@ const mapStateToProps = (state) => {
 };
 
 
-export default connect(mapStateToProps, null)(Compras);
+export default connect(mapStateToProps, null)(Ingresos);

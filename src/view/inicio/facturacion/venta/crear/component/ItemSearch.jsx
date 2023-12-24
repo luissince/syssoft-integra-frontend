@@ -1,4 +1,4 @@
-import { images } from '../../../../../helper';
+import { images } from '../../../../../../helper';
 
 const ItemSearch = (props) => {
   const { refProducto, producto, handleFilterProducto } = props;

@@ -9,7 +9,7 @@ import {
   numberFormat,
   imageBase64,
   formatDecimal,
-  formatearNumero,
+  formatNumberWithZeros,
 } from './helper/utils.helper';
 
 /**
@@ -284,22 +284,22 @@ describe('currentTime', () => {
   });
 });
 
-describe('formatearNumero', () => {
+describe('formatNumberWithZeros', () => {
   test('debería formatear correctamente el número', () => {
-    expect(formatearNumero(1)).toBe('000001');
-    expect(formatearNumero(11)).toBe('000011');
-    expect(formatearNumero(111)).toBe('000111');
-    expect(formatearNumero(1111)).toBe('001111');
-    expect(formatearNumero(11111)).toBe('011111');
-    expect(formatearNumero(111111)).toBe('111111');
+    expect(formatNumberWithZeros(1)).toBe('000001');
+    expect(formatNumberWithZeros(11)).toBe('000011');
+    expect(formatNumberWithZeros(111)).toBe('000111');
+    expect(formatNumberWithZeros(1111)).toBe('001111');
+    expect(formatNumberWithZeros(11111)).toBe('011111');
+    expect(formatNumberWithZeros(111111)).toBe('111111');
   });
 
   test('debería manejar números negativos', () => {
-    expect(formatearNumero(-1)).toBe('-000001');
+    expect(formatNumberWithZeros(-1)).toBe('-000001');
   });
 
   test('debería manejar números con más de 6 dígitos', () => {
-    expect(formatearNumero(1234567)).toBe('1234567');
+    expect(formatNumberWithZeros(1234567)).toBe('1234567');
   });
 });
 

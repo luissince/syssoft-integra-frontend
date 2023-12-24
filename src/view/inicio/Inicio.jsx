@@ -10,9 +10,9 @@ import Head from '../../components/head/Head';
 import Notifications from './notificacion/Notifications';
 import Dashboard from './dashboard/Dashboard';
 
-import Ventas from './facturacion/venta/Ventas';
-import VentaProceso from './facturacion/venta/VentaProceso';
-import VentaDetalle from './facturacion/venta/VentaDetalle';
+import Ventas from './facturacion/venta/listar/Ventas';
+import VentaCrear from './facturacion/venta/crear/VentaCrear.jsx';
+import VentaDetalle from './facturacion/venta/detalle/VentaDetalle';
 
 import Cobros from './facturacion/cobro/lista/Cobros';
 import CobroCrear from './facturacion/cobro/crear/CobroCrear';
@@ -30,6 +30,8 @@ import GuiaRemision from './facturacion/guiaremision/GuiaRemision.jsx';
 import GuiaRemisionCrear from './facturacion/guiaremision/GuiaRemisionCrear.jsx';
 import GuiaRemisionEditar from './facturacion/guiaremision/GuiaRemisionEditar.jsx';
 import GuiaRemisionDetalle from './facturacion/guiaremision/GuiaRemisionDetalle.jsx';
+
+import Ingresos from './facturacion/ingreso/lista/Ingresos.jsx';
 
 import Reservas from './facturacion/reserva/Reservas';
 
@@ -76,9 +78,13 @@ import Almacenes from './logistica/almacen/Almacenes';
 import AlmacenAgregar from './logistica/almacen/AlmacenAgregar';
 import AlmacenEditar from './logistica/almacen/AlmacenEditar';
 
-import Ajuste from './logistica/ajuste/Ajuste.jsx';
-import AjusteAgregar from './logistica/ajuste/AjusteAgregar.jsx';
-import AjusteDetalle from './logistica/ajuste/AjusteDetalle.jsx';
+import Ajuste from './logistica/ajuste/lista/Ajuste.jsx';
+import AjusteCrear from './logistica/ajuste/crear/AjusteCrear.jsx';
+import AjusteDetalle from './logistica/ajuste/detalle/AjusteDetalle.jsx';
+
+import Traslado from './logistica/traslado/listar/Traslado.jsx';
+import TrasladoCrear from './logistica/traslado/crear/TrasladoCrear.jsx';
+import TrasladoDetalle from './logistica/traslado/detalle/TrasladoDetalle.jsx';
 
 import Inventario from './logistica/inventario/Inventario.jsx';
 
@@ -104,6 +110,8 @@ import GastoDetalle from './tesoreria/gasto/detalle/GastoDetalle.jsx';
 import Compras from './tesoreria/compra/lista/Compras.jsx';
 import CompraCrear from './tesoreria/compra/crear/CompraCrear.jsx';
 import CompraDetalle from './tesoreria/compra/detalle/CompraDetalle.jsx';
+
+import Salidas from './tesoreria/salida/lista/Salidas.jsx';
 
 import Perfiles from './seguridad/perfil/Perfiles.jsx';
 import PerfilAgregar from './seguridad/perfil/PerfilAgregar.jsx';
@@ -164,7 +172,7 @@ class Inicio extends React.Component {
     // this.socket.disconnect();
   }
 
-  onEventFocused = (event) => {
+  onEventFocused = () => {
     let userToken = window.localStorage.getItem('login');
     if (userToken === null) {
       this.props.restore();
@@ -372,9 +380,9 @@ class Inicio extends React.Component {
             render={(props) => <Ventas {...props} />}
           />
           <Route
-            path={`${path}/ventas/proceso`}
+            path={`${path}/ventas/crear`}
             exact={true}
-            render={(props) => <VentaProceso {...props} />}
+            render={(props) => <VentaCrear {...props} />}
           />
           <Route
             path={`${path}/ventas/detalle`}
@@ -473,6 +481,13 @@ class Inicio extends React.Component {
             exact={true}
             render={(props) => <GuiaRemisionDetalle {...props} />}
           />
+
+          <Route
+            path={`${path}/ingresos`}
+            exact={true}
+            render={(props) => <Ingresos {...props} />}
+          />
+
 
           <Route
             path={`${path}/reservas`}
@@ -649,15 +664,32 @@ class Inicio extends React.Component {
             render={(props) => <Ajuste {...props} />}
           />
           <Route
-            path={`${path}/ajuste/agregar`}
+            path={`${path}/ajuste/crear`}
             exact={true}
-            render={(props) => <AjusteAgregar {...props} />}
+            render={(props) => <AjusteCrear {...props} />}
           />
           <Route
             path={`${path}/ajuste/detalle`}
             exact={true}
             render={(props) => <AjusteDetalle {...props} />}
           />
+
+          <Route
+            path={`${path}/traslado`}
+            exact={true}
+            render={(props) => <Traslado {...props} />}
+          />
+          <Route
+            path={`${path}/traslado/crear`}
+            exact={true}
+            render={(props) => <TrasladoCrear {...props} />}
+          />
+          <Route
+            path={`${path}/traslado/detalle`}
+            exact={true}
+            render={(props) => <TrasladoDetalle {...props} />}
+          />
+
 
           <Route
             path={`${path}/inventario`}
@@ -718,6 +750,13 @@ class Inicio extends React.Component {
             exact={true}
             render={(props) => <CompraDetalle {...props} />}
           />
+
+          <Route
+            path={`${path}/salidas`}
+            exact={true}
+            render={(props) => <Salidas {...props} />}
+          />
+
 
           <Route
             path={`${path}/repventas`}

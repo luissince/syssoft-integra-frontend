@@ -2,7 +2,7 @@ import {
   calculateTax,
   calculateTaxBruto,
   numberFormat,
-} from '../../../../../helper/utils.helper';
+} from '../../../../../../helper/utils.helper';
 
 const InvoiceFooter = (props) => {
   const { codiso, impuestos, detalleVenta, handleOpenSale, handleClearSale } =

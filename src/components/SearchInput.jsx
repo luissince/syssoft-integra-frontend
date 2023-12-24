@@ -1,5 +1,6 @@
 import React from 'react';
 import '../recursos/css/searchbar.css';
+import { isEmpty } from '../helper/utils.helper';
 
 class SearchInput extends React.Component {
   constructor(props) {
@@ -152,28 +153,32 @@ class SearchInput extends React.Component {
           </div>
         </div>
 
-        {data.length !== 0 && (
-          <div
-            className="dataResult"
-            ref={this.dataResultRef}
-            tabIndex="-1"
-            onKeyDown={(event) => this.handleKeyDown(event)}
-          >
-            {data.map((value, index) => (
-              <button
-                key={index}
-                className="list-group-item list-group-item-action border-0"
-                onClick={(event) => {
-                  handleSelectItem(value);
-                  refValue.current.focus();
-                  this.index = -1;
-                }}
-              >
-                {renderItem(value)}
-              </button>
-            ))}
-          </div>
-        )}
+        {
+          !isEmpty(data) && (
+            <div
+              className="dataResult"
+              ref={this.dataResultRef}
+              tabIndex="-1"
+              onKeyDown={(event) => this.handleKeyDown(event)}
+            >
+              {
+                data.map((value, index) => (
+                  <button
+                    key={index}
+                    className="list-group-item list-group-item-action border-0"
+                    onClick={(event) => {
+                      handleSelectItem(value);
+                      refValue.current.focus();
+                      this.index = -1;
+                    }}
+                  >
+                    {renderItem(value)}
+                  </button>
+                ))
+              }
+            </div>
+          )
+        }
       </div>
     );
   }

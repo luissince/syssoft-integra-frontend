@@ -105,7 +105,7 @@ class Inventario extends CustomComponent {
   }
 
   async loadingData() {
-    const [almacenes] = await Promise.all([await this.fetchComboAlmacen()]);
+    const [almacenes] = await Promise.all([await this.fetchComboAlmacen({idSucursal: this.state.idSucursal})]);
 
     await this.setStateAsync({
       almacenes,
@@ -125,6 +125,19 @@ class Inventario extends CustomComponent {
   paginacionContext = async (listid) => {
     await this.setStateAsync({ paginacion: listid, restart: false });
     this.onEventPaginacion();
+  };
+
+  onEventPaginacion = () => {
+    switch (this.state.opcion) {
+      case 0:
+        this.fillTable(0, '');
+        break;
+      case 1:
+        this.fillTable(1, this.refTxtSearch.current.value);
+        break;
+      default:
+        this.fillTable(0, '');
+    }
   };
 
   async searchText(text) {
@@ -184,8 +197,8 @@ class Inventario extends CustomComponent {
     }
   };
 
-  async fetchComboAlmacen() {
-    const response = await comboAlmacen(this.abortControllerTable.signal);
+  async fetchComboAlmacen(params) {
+    const response = await comboAlmacen(params,this.abortControllerTable.signal);
 
     if (response instanceof SuccessReponse) {
       return response.data;

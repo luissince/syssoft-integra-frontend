@@ -72,7 +72,7 @@ class Kardex extends CustomComponent {
   }
 
   async loadingData() {
-    const [almacenes] = await Promise.all([await this.fetchComboAlmacen()]);
+    const [almacenes] = await Promise.all([await this.fetchComboAlmacen({idSucursal: this.state.idSucursal})]);
 
     await this.setStateAsync({
       almacenes,
@@ -80,8 +80,8 @@ class Kardex extends CustomComponent {
     });
   }
 
-  async fetchComboAlmacen() {
-    const response = await comboAlmacen(this.abortControllerTable.signal);
+  async fetchComboAlmacen(params) {
+    const response = await comboAlmacen(params,this.abortControllerTable.signal);
 
     if (response instanceof SuccessReponse) {
       return response.data;
@@ -163,6 +163,7 @@ class Kardex extends CustomComponent {
     const params = {
       idProducto: value.idProducto,
       idAlmacen: this.state.idAlmacen,
+      idSucursal: this.state.idSucursal
     };
 
     this.setState({

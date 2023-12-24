@@ -1,5 +1,5 @@
-import { images } from '../../../../../helper';
-import { numberFormat } from '../../../../../helper/utils.helper';
+import { images } from '../../../../../../helper';
+import { numberFormat } from '../../../../../../helper/utils.helper';
 
 const InvoiceDetail = (props) => {
   const { codiso, detalleVenta } = props;

@@ -4,7 +4,7 @@ import {
   keyNumberInteger,
   monthName,
   spinnerLoading,
-} from '../../../../../helper/utils.helper';
+} from '../../../../../../helper/utils.helper';
 
 const ModalSale = (props) => {
   const { idModalSale } = props;

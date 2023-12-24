@@ -8,7 +8,7 @@ import {
   statePrivilegio,
   keyUpSearch,
   isEmpty,
-  formatearNumero,
+  formatNumberWithZeros,
   alertWarning,
   alertSuccess,
   alertInfo,
@@ -217,7 +217,7 @@ class Cobros extends CustomComponent {
           <td>
             {item.comprobante}
             {<br />}
-            {item.serie + '-' + formatearNumero(item.numeracion)}
+            {item.serie + '-' + formatNumberWithZeros(item.numeracion)}
           </td>
           <td>
             {item.documento}

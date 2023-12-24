@@ -13,7 +13,7 @@ import { connect } from 'react-redux';
 import Paginacion from '../../../../components/Paginacion';
 import ContainerWrapper from '../../../../components/Container';
 import {
-  borrarSucursal,
+  deleteSucursal,
   listSucursales,
 } from '../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../model/class/response';
@@ -161,7 +161,7 @@ class Sucursales extends CustomComponent {
         if (accept) {
           alertInfo('Sucursal', 'Procesando información...');
 
-          const response = await borrarSucursal(idSucursal);
+          const response = await deleteSucursal(idSucursal);
 
           if (response instanceof SuccessReponse) {
             alertSuccess('Sucursal', response.data, () => {

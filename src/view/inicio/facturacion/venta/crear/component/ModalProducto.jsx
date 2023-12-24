@@ -1,4 +1,4 @@
-import { spinnerLoading } from '../../../../../helper/utils.helper';
+import { spinnerLoading } from '../../../../../../helper/utils.helper';
 
 const ModalProducto = (props) => {
   const { idModal, loading, producto } = props;

@@ -39,6 +39,7 @@ import { CANCELED } from '../../../../../model/types/types';
 import SearchInput from '../../../../../components/SearchInput';
 import ModalSale from './component/ModalSale';
 import ModalProduct from './component/ModalProduct';
+import PropTypes from 'prop-types';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -503,23 +504,17 @@ class CompraCrear extends CustomComponent {
     let metodoPagoLista = [...metodoPagoAgregado];
 
     if (isEmpty(metodoPagoLista)) {
-      alertWarning(
-        'Compra',
-        'Tiene que agregar método de cobro para continuar.',
-        () => {
-          this.refMetodoContado.current.focus();
-        },
+      alertWarning('Compra', 'Tiene que agregar método de cobro para continuar.', () => {
+        this.refMetodoContado.current.focus();
+      },
       );
       return;
     }
 
     if (metodoPagoLista.filter((item) => !isNumeric(item.monto)).length !== 0) {
-      alertWarning(
-        'Compra',
-        'Hay montos del metodo de cobro que no tiene valor.',
-        () => {
-          validateNumericInputs(this.refMetodoPagoContenedor);
-        },
+      alertWarning('Compra', 'Hay montos del metodo de cobro que no tiene valor.', () => {
+        validateNumericInputs(this.refMetodoPagoContenedor);
+      },
       );
       return;
     }
@@ -531,12 +526,9 @@ class CompraCrear extends CustomComponent {
 
     if (metodoPagoLista.length > 1) {
       if (metodoCobroTotal !== total) {
-        alertWarning(
-          'Compra',
-          'Al tener mas de 2 métodos de pago el monto debe ser igual al total.',
-          () => {
-            focusOnFirstInvalidInput(this.refMetodoPagoContenedor);
-          },
+        alertWarning('Compra', 'Al tener mas de 2 métodos de pago el monto debe ser igual al total.', () => {
+          focusOnFirstInvalidInput(this.refMetodoPagoContenedor);
+        },
         );
         return;
       }
@@ -544,31 +536,23 @@ class CompraCrear extends CustomComponent {
       const metodo = metodoPagoLista[0];
       if (metodo.vuelto === 1) {
         if (metodoCobroTotal < total) {
-          alertWarning(
-            'Compra',
-            'El monto a pago es menor que el total.',
-            () => {
-              focusOnFirstInvalidInput(this.refMetodoPagoContenedor);
-            },
+          alertWarning('Compra', 'El monto a pago es menor que el total.', () => {
+            focusOnFirstInvalidInput(this.refMetodoPagoContenedor);
+          },
           );
           return;
         }
 
         metodoPagoLista.map((item) => {
-          item.descripcion = `Pago con ${rounded(
-            parseFloat(item.monto),
-          )} y su vuelto es ${rounded(parseFloat(item.monto) - total)}`;
+          item.descripcion = `Pago con ${rounded(parseFloat(item.monto),)} y su vuelto es ${rounded(parseFloat(item.monto) - total)}`;
           item.monto = total;
           return item;
         });
       } else {
         if (metodoCobroTotal !== total) {
-          alertWarning(
-            'Compra',
-            'El monto a pagar debe ser igual al total.',
-            () => {
-              focusOnFirstInvalidInput(this.refMetodoPagoContenedor);
-            },
+          alertWarning('Compra', 'El monto a pagar debe ser igual al total.', () => {
+            focusOnFirstInvalidInput(this.refMetodoPagoContenedor);
+          },
           );
           return;
         }
@@ -585,12 +569,15 @@ class CompraCrear extends CustomComponent {
           idMoneda: idMoneda,
           observacion: observacion,
           nota: nota,
-          detalle: detalle,
           idUsuario: idUsuario,
           idSucursal: idSucursal,
+          estado: 1,
 
-          selectTipoPago: selectTipoPago,
+          tipo: selectTipoPago,
+          credito: 0,
           metodoPago: metodoPagoAgregado,
+
+          detalle: detalle,
         };
 
         hideModal(this.idModalSale);
@@ -641,25 +628,17 @@ class CompraCrear extends CustomComponent {
       return;
     }
 
-    if (tipoCredito === '2' && isNumeric(numeroCuotas)) {
-      alertWarning(
-        'Compra',
-        'Tiene que agregar método de gasto para continuar.',
-        () => {
-          this.refNumeroCuotas.current.focus();
-        },
-      );
+    if (tipoCredito === '2' && !isNumeric(numeroCuotas)) {
+      alertWarning('Compra', 'Ingrese el número de cuotas.', () => {
+        this.refNumeroCuotas.current.focus();
+      });
       return;
     }
 
     if (tipoCredito === '2' && isEmpty(frecuenciaPagoVariable)) {
-      alertWarning(
-        'Compra',
-        'Tiene que agregar método de gasto para continuar.',
-        () => {
-          this.refFrecuenciaPagoVariable.current.focus();
-        },
-      );
+      alertWarning('Compra', 'Seleccione la frecuencia de pago.', () => {
+        this.refFrecuenciaPagoVariable.current.focus();
+      });
       return;
     }
 
@@ -673,15 +652,16 @@ class CompraCrear extends CustomComponent {
           idMoneda: idMoneda,
           observacion: observacion,
           nota: nota,
-          detalle: detalle,
           idUsuario: idUsuario,
           idSucursal: idSucursal,
+          estado: 2,
 
-          selectTipoPago: selectTipoPago,
-          tipoCredito: tipoCredito,
-          frecuenciaPagoFijo: frecuenciaPagoFijo,
-          frecuenciaPagoVariable: frecuenciaPagoVariable,
+          tipo: selectTipoPago,
+          credito: tipoCredito,
+          frecuenciaPago: tipoCredito === '1' ? frecuenciaPagoFijo : frecuenciaPagoVariable,
           numeroCuotas: numeroCuotas,
+
+          detalle: detalle,
         };
 
         hideModal(this.idModalSale);
@@ -839,7 +819,7 @@ class CompraCrear extends CustomComponent {
       (item) => item.tipoProducto !== 'SERVICIO',
     );
 
-    await this.setStateAsync({
+    this.setState({
       productos: filteredProductos,
       loadingProducto: false,
     });
@@ -854,7 +834,7 @@ class CompraCrear extends CustomComponent {
     this.selectItemProducto = true;
 
     showModal(this.idModalProduct);
-    await this.setStateAsync({ loadingModalProducto: true });
+    this.setState({ loadingModalProducto: true });
   };
 
   //------------------------------------------------------------------------------------------
@@ -1006,6 +986,7 @@ class CompraCrear extends CustomComponent {
 
     this.setState(data, async () => {
       await this.loadData();
+      this.refProducto.current.focus();
     });
   };
 
@@ -1188,7 +1169,7 @@ class CompraCrear extends CustomComponent {
           <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
             <div className="form-group">
               <h5>
-                <span role="button" onClick={() => this.props.history.goBack()}>
+                <span role="button" onClick={this.handleCerrar}>
                   <i className="bi bi-arrow-left-short"></i>
                 </span>{' '}
                 Compra
@@ -1426,6 +1407,20 @@ class CompraCrear extends CustomComponent {
       </ContainerWrapper>
     );
   }
+}
+
+CompraCrear.propTypes = {
+  token: PropTypes.shape({
+    userToken: PropTypes.shape({
+      idUsuario: PropTypes.string.isRequired,
+    }).isRequired,
+    project: PropTypes.shape({
+      idSucursal: PropTypes.string.isRequired,
+    }).isRequired,
+  }).isRequired,
+  history: PropTypes.shape({
+    goBack: PropTypes.func.isRequired,
+  }).isRequired
 }
 
 /**

@@ -8,26 +8,26 @@ import {
   keyNumberFloat,
   rounded,
   spinnerLoading,
-} from '../../../../helper/utils.helper';
-import ContainerWrapper from '../../../../components/Container';
-import CustomComponent from '../../../../model/class/custom-component';
-import SuccessReponse from '../../../../model/class/response';
-import ErrorResponse from '../../../../model/class/error-response';
+} from '../../../../../helper/utils.helper';
+import ContainerWrapper from '../../../../../components/Container';
+import CustomComponent from '../../../../../model/class/custom-component';
+import SuccessReponse from '../../../../../model/class/response';
+import ErrorResponse from '../../../../../model/class/error-response';
 import {
   comboAlmacen,
   comboMotivoAjuste,
   createAjuste,
   filtrarAlmacenProducto,
-} from '../../../../network/rest/principal.network';
-import { CANCELED } from '../../../../model/types/types';
+} from '../../../../../network/rest/principal.network';
+import { CANCELED } from '../../../../../model/types/types';
 import { connect } from 'react-redux';
-import SearchInput from '../../../../components/SearchInput';
+import SearchInput from '../../../../../components/SearchInput';
 
 /**
  * Componente que representa una funcionalidad específica.
  * @extends React.Component
  */
-class AjusteAgregar extends CustomComponent {
+class AjusteCrear extends CustomComponent {
   /**
    * Inicializa un nuevo componente.
    * @param {Object} props - Las propiedades pasadas al componente.
@@ -63,15 +63,17 @@ class AjusteAgregar extends CustomComponent {
 
       detalle: [],
 
-      nombreMetodoAjuste: '',
+      nombreMotivoAjuste: '',
       nombreAlmacen: '',
 
       idSucursal: this.props.token.project.idSucursal,
       idUsuario: this.props.token.userToken.idUsuario,
     };
 
+    this.initial = { ...this.state }
+
     this.refIdTipoAjuste = React.createRef();
-    this.refIdMetodoAjuste = React.createRef();
+    this.refIdMotivoAjuste = React.createRef();
     this.refIdAlmacen = React.createRef();
     this.refProducto = React.createRef();
 
@@ -120,7 +122,7 @@ class AjusteAgregar extends CustomComponent {
 
   async loadingData() {
     const [almacenes, motivoAjuste] = await Promise.all([
-      await this.fetchComboAlmacen(),
+      await this.fetchComboAlmacen({ idSucursal: this.state.idSucursal }),
       await this.fetchComboMotivoAjuste(),
     ]);
 
@@ -143,8 +145,8 @@ class AjusteAgregar extends CustomComponent {
     }
   }
 
-  async fetchComboAlmacen() {
-    const response = await comboAlmacen(this.abortController.signal);
+  async fetchComboAlmacen(params) {
+    const response = await comboAlmacen(params, this.abortController.signal);
 
     if (response instanceof SuccessReponse) {
       return response.data;
@@ -224,7 +226,7 @@ class AjusteAgregar extends CustomComponent {
     });
 
     this.selectItemProducto = false;
-  };
+  }
 
   handleFilterProducto = async (event) => {
     const searchWord = this.selectItemProducto ? '' : event.target.value;
@@ -256,7 +258,7 @@ class AjusteAgregar extends CustomComponent {
       productos: filteredProductos,
       loadingProducto: false,
     });
-  };
+  }
 
   handleSelectItemProducto = async (value) => {
     await this.setStateAsync({
@@ -267,25 +269,19 @@ class AjusteAgregar extends CustomComponent {
     this.selectItemProducto = true;
 
     this.agregarProducto(value);
-  };
+  }
 
   handleSelectMetodoAjuste = (event) => {
-    this.setState({
-      idMotivoAjuste: event.target.value,
-    });
+    this.setState({ idMotivoAjuste: event.target.value });
   };
 
   handleOptionTipoAjuste = (event) => {
-    this.setState({
-      idTipoAjuste: event.target.value,
-    });
-  };
+    this.setState({ idTipoAjuste: event.target.value });
+  }
 
   handleSelectAlmacen = (event) => {
-    this.setState({
-      idAlmacen: event.target.value,
-    });
-  };
+    this.setState({ idAlmacen: event.target.value });
+  }
 
   handleSiguiente = () => {
     if (isEmpty(this.state.idTipoAjuste)) {
@@ -296,8 +292,8 @@ class AjusteAgregar extends CustomComponent {
     }
 
     if (isEmpty(this.state.idMotivoAjuste)) {
-      alertWarning('Ajuste', 'Seleccione el método de ajuste.', () => {
-        this.refIdMetodoAjuste.current.focus();
+      alertWarning('Ajuste', 'Seleccione el motivo del ajuste.', () => {
+        this.refIdMotivoAjuste.current.focus();
       });
       return;
     }
@@ -310,30 +306,24 @@ class AjusteAgregar extends CustomComponent {
     }
 
     this.setState({
-      nombreMetodoAjuste:
-        this.refIdMetodoAjuste.current.options[
-          this.refIdMetodoAjuste.current.selectedIndex
-        ].innerText,
-      nombreAlmacen:
-        this.refIdAlmacen.current.options[
-          this.refIdAlmacen.current.selectedIndex
-        ].innerText,
+      nombreMotivoAjuste: this.refIdMotivoAjuste.current.options[this.refIdMotivoAjuste.current.selectedIndex].innerText,
+      nombreAlmacen: this.refIdAlmacen.current.options[this.refIdAlmacen.current.selectedIndex].innerText,
       paso: 2,
     });
-  };
+  }
 
   handleInputObservacion = (event) => {
     this.setState({
       observacion: event.target.value,
     });
-  };
+  }
 
   handleRemoveDetalle = (idProducto) => {
     const detalle = this.state.detalle.filter(
       (item) => item.idProducto !== idProducto,
     );
     this.setState({ detalle });
-  };
+  }
 
   handleInputDetalle = (event, idProducto) => {
     const { value } = event.target;
@@ -342,34 +332,24 @@ class AjusteAgregar extends CustomComponent {
         item.idProducto === idProducto ? { ...item, cantidad: value } : item,
       ),
     }));
-  };
+  }
 
   handleFocusInputTable = (event, isLastRow) => {
     if (event.key === 'Enter' && !isLastRow) {
-      const nextInput =
-        event.target.parentElement.parentElement.nextElementSibling.querySelector(
-          'input',
-        );
+      const nextInput = event.target.parentElement.parentElement.nextElementSibling.querySelector('input',);
       nextInput.focus();
     }
     if (event.key === 'Enter' && isLastRow) {
-      const firstInput =
-        event.target.parentElement.parentElement.parentElement.querySelector(
-          'input',
-        );
+      const firstInput = event.target.parentElement.parentElement.parentElement.querySelector('input',);
       firstInput.focus();
     }
-  };
+  }
 
   handleSave = () => {
     if (isEmpty(this.state.detalle)) {
-      alertWarning(
-        'Ajuste',
-        'Agregue productos en la lista para continuar.',
-        () => {
-          this.refProducto.current.focus();
-        },
-      );
+      alertWarning('Ajuste', 'Agregue productos en la lista para continuar.', () => {
+        this.refProducto.current.focus();
+      });
       return;
     }
 
@@ -391,31 +371,7 @@ class AjusteAgregar extends CustomComponent {
 
         if (response instanceof SuccessReponse) {
           alertSuccess('Ajuste', response.data, () => {
-            const resetState = {
-              initialLoad: true,
-              initialMessage: 'Cargando datos...',
-
-              paso: 1,
-
-              producto: null,
-              cantidad: 0,
-              costo: 0,
-              filtrar: '',
-              productos: [],
-              loadingProducto: false,
-
-              idMotivoAjuste: '',
-              motivoAjuste: [],
-
-              idAlmacen: '',
-              almacenes: [],
-
-              idTipoAjuste: '',
-              observacion: 'S/N',
-
-              detalle: [],
-            };
-            this.setState(resetState, async () => {
+            this.setState(this.initial, async () => {
               await this.loadingData();
               this.refIdTipoAjuste.current.focus();
             });
@@ -429,47 +385,25 @@ class AjusteAgregar extends CustomComponent {
         }
       }
     });
-  };
+  }
+
+  handleBack = () => {
+    this.setState({
+      paso: 1,
+      detalle: []
+    })
+  }
 
   handleClear = () => {
-    const resetState = {
-      initialLoad: true,
-      initialMessage: 'Cargando datos...',
-
-      paso: 1,
-
-      producto: null,
-      cantidad: 0,
-      costo: 0,
-      filtrar: '',
-      productos: [],
-      loadingProducto: false,
-
-      idMotivoAjuste: '',
-      motivoAjuste: [],
-
-      idAlmacen: '',
-      almacenes: [],
-
-      idTipoAjuste: '',
-      observacion: 'S/N',
-
-      detalle: [],
-    };
-
-    alertDialog(
-      'Ajuste',
-      '¿Está seguro de continuar, se va limpiar toda la información?',
-      async (accept) => {
-        if (accept) {
-          this.setState(resetState, async () => {
-            await this.loadingData();
-            this.refIdTipoAjuste.current.focus();
-          });
-        }
-      },
-    );
-  };
+    alertDialog('Ajuste', '¿Está seguro de continuar, se va limpiar toda la información?', async (accept) => {
+      if (accept) {
+        this.setState(this.initial, async () => {
+          await this.loadingData();
+          this.refIdTipoAjuste.current.focus();
+        });
+      }
+    });
+  }
 
   /*
     |--------------------------------------------------------------------------
@@ -551,8 +485,8 @@ class AjusteAgregar extends CustomComponent {
                 <span role="button" onClick={() => this.props.history.goBack()}>
                   <i className="bi bi-arrow-left-short"></i>
                 </span>{' '}
-                Ajuste de inventario
-                <small className="text-secondary"> AGREGAR</small>
+                Ajuste de iventario
+                <small className="text-secondary"> CREAR</small>
               </h5>
             </div>
           </div>
@@ -614,14 +548,14 @@ class AjusteAgregar extends CustomComponent {
             <div className="row">
               <div className="col">
                 <div className="form-group">
-                  <label>Seleccione el método de ajuste:</label>
+                  <label>Seleccione el motivo del ajuste:</label>
                   <select
                     className="form-control"
-                    ref={this.refIdMetodoAjuste}
+                    ref={this.refIdMotivoAjuste}
                     value={this.state.idMotivoAjuste}
                     onChange={this.handleSelectMetodoAjuste}
                   >
-                    <option value="">-- Metodo Ajuste --</option>
+                    <option value="">-- Motivo Ajuste --</option>
                     {this.state.motivoAjuste.map((item, index) => {
                       return (
                         <option key={index} value={item.idMotivoAjuste}>
@@ -710,10 +644,10 @@ class AjusteAgregar extends CustomComponent {
                         </tr>
                         <tr>
                           <th className="table-secondary w-20 p-1 font-weight-normal ">
-                            Método de Ajuste:
+                            Motivo de Ajuste:
                           </th>
                           <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                            {this.state.nombreMetodoAjuste}
+                            {this.state.nombreMotivoAjuste}
                           </th>
                         </tr>
                         <tr>
@@ -795,22 +729,28 @@ class AjusteAgregar extends CustomComponent {
                 <button
                   type="button"
                   className="btn btn-success"
-                  onClick={this.handleSave}
-                >
+                  onClick={this.handleSave}>
                   <i className="fa fa-save"></i> Guardar
-                </button>{' '}
+                </button>
+                {' '}
+                <button
+                  type="button"
+                  className="btn btn-outline-warning"
+                  onClick={this.handleBack}>
+                  <i className="fa fa-arrow-left"></i> Atras
+                </button>
+                {' '}
                 <button
                   type="button"
                   className="btn btn-outline-info"
-                  onClick={this.handleClear}
-                >
+                  onClick={this.handleClear}>
                   <i className="fa fa-trash"></i> Limpiar
-                </button>{' '}
+                </button>
+                {' '}
                 <button
                   type="button"
                   className="btn btn-outline-danger"
-                  onClick={() => this.props.history.goBack()}
-                >
+                  onClick={() => this.props.history.goBack()}>
                   <i className="fa fa-close"></i> Cancelar
                 </button>
               </div>
@@ -836,4 +776,4 @@ const mapStateToProps = (state) => {
  *
  * Método encargado de conectar con redux y exportar la clase
  */
-export default connect(mapStateToProps, null)(AjusteAgregar);
+export default connect(mapStateToProps, null)(AjusteCrear);

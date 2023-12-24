@@ -1,4 +1,4 @@
-import { images } from '../../../../../helper';
+import { images } from '../../../../../../helper';
 
 const InvoiceTicket = (props) => {
   const { handleOpenAndCloseOptions } = props;
