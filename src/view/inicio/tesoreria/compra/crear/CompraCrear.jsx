@@ -248,7 +248,7 @@ class CompraCrear extends CustomComponent {
         await this.fetchComprobante(COMPRA),
         await this.fetchMoneda(),
         await this.fetchMetodoPago(),
-        await this.fetchComboAlmacen(),
+        await this.fetchComboAlmacen({idSucursal: this.state.idSucursal}),
         await this.fetchImpuesto(),
       ]);
 
@@ -347,8 +347,8 @@ class CompraCrear extends CustomComponent {
     }
   }
 
-  async fetchComboAlmacen() {
-    const response = await comboAlmacen();
+  async fetchComboAlmacen(params) {
+    const response = await comboAlmacen(params);
 
     if (response instanceof SuccessReponse) {
       return response.data;

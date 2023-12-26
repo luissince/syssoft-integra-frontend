@@ -72,7 +72,7 @@ class Kardex extends CustomComponent {
   }
 
   async loadingData() {
-    const [almacenes] = await Promise.all([await this.fetchComboAlmacen({idSucursal: this.state.idSucursal})]);
+    const [almacenes] = await Promise.all([await this.fetchComboAlmacen({ idSucursal: this.state.idSucursal })]);
 
     await this.setStateAsync({
       almacenes,
@@ -81,7 +81,7 @@ class Kardex extends CustomComponent {
   }
 
   async fetchComboAlmacen(params) {
-    const response = await comboAlmacen(params,this.abortControllerTable.signal);
+    const response = await comboAlmacen(params, this.abortControllerTable.signal);
 
     if (response instanceof SuccessReponse) {
       return response.data;
@@ -118,6 +118,46 @@ class Kardex extends CustomComponent {
     if (response instanceof ErrorResponse) {
       return [];
     }
+  }
+
+  async loadDataKardex(idProducto) {
+
+    const params = {
+      idProducto: idProducto,
+      idAlmacen: this.state.idAlmacen,
+      idSucursal: this.state.idSucursal
+    };
+
+    this.setState({
+      loading: true,
+      lista: [],
+      messageTable: 'Cargando información...',
+    });
+
+    const kardex = await this.fetchListarKardex(params);
+
+    const cantidad = kardex.reduce((accumlate, item) => {
+      accumlate +=
+        item.tipo === 'INGRESO'
+          ? parseFloat(item.cantidad)
+          : -parseFloat(item.cantidad);
+      return accumlate;
+    }, 0);
+
+    const costo = kardex.reduce((accumlate, item) => {
+      accumlate +=
+        item.tipo === 'INGRESO'
+          ? parseFloat(item.costo * item.cantidad)
+          : -parseFloat(item.costo * item.cantidad);
+      return accumlate;
+    }, 0);
+
+    this.setState({
+      lista: kardex,
+      cantidad: cantidad,
+      costo: costo,
+      loading: false,
+    });
   }
 
   //------------------------------------------------------------------------------------------
@@ -160,42 +200,7 @@ class Kardex extends CustomComponent {
     });
     this.selectItemProducto = true;
 
-    const params = {
-      idProducto: value.idProducto,
-      idAlmacen: this.state.idAlmacen,
-      idSucursal: this.state.idSucursal
-    };
-
-    this.setState({
-      loading: true,
-      lista: [],
-      messageTable: 'Cargando información...',
-    });
-
-    const kardex = await this.fetchListarKardex(params);
-
-    const cantidad = kardex.reduce((accumlate, item) => {
-      accumlate +=
-        item.tipo === 'INGRESO'
-          ? parseFloat(item.cantidad)
-          : -parseFloat(item.cantidad);
-      return accumlate;
-    }, 0);
-
-    const costo = kardex.reduce((accumlate, item) => {
-      accumlate +=
-        item.tipo === 'INGRESO'
-          ? parseFloat(item.costo * item.cantidad)
-          : -parseFloat(item.costo * item.cantidad);
-      return accumlate;
-    }, 0);
-
-    this.setState({
-      lista: kardex,
-      cantidad: cantidad,
-      costo: costo,
-      loading: false,
-    });
+    this.loadDataKardex(value.idProducto)
   };
 
   handleSelectAlmacen = (event) => {
@@ -204,8 +209,12 @@ class Kardex extends CustomComponent {
       nombreAlmacen: isEmpty(event.target.value)
         ? 'TODOS LOS ALMACENES'
         : this.refIdAlmacen.current.options[
-            this.refIdAlmacen.current.selectedIndex
-          ].innerText,
+          this.refIdAlmacen.current.selectedIndex
+        ].innerText,
+    }, () => {
+      if (this.state.producto) {
+        this.loadDataKardex(this.state.producto.idProducto)
+      }
     });
   };
 

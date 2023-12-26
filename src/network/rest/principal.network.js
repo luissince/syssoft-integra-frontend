@@ -377,14 +377,6 @@ export async function listVenta(params, signal) {
   );
 }
 
-export async function deleteVenta(params) {
-  return await Resolve.create(
-    instancePrincipal.delete('/api/factura/anular', {
-      params: params,
-    }),
-  );
-}
-
 export async function getCobroVentaId(params, signal) {
   return await Resolve.create(
     instancePrincipal.get('/api/factura/venta/cobro', {
@@ -405,14 +397,21 @@ export async function listCpeSunat(params, signal) {
 
 export async function createFactura(data) {
   return await Resolve.create(
-    instancePrincipal.post('/api/factura/add', data))
-    ;
+    instancePrincipal.post('/api/factura/create', data));
 }
 
 export async function detailFactura(params, signal) {
   return await Resolve.create(
     instancePrincipal.get('/api/factura/detail', {
       signal: signal,
+      params: params,
+    }),
+  );
+}
+
+export async function cancelVenta(params) {
+  return await Resolve.create(
+    instancePrincipal.delete('/api/factura/cancel', {
       params: params,
     }),
   );

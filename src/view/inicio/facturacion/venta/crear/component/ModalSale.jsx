@@ -1,9 +1,8 @@
 import {
-  rounded,
   keyNumberFloat,
   keyNumberInteger,
-  monthName,
   spinnerLoading,
+  numberFormat,
 } from '../../../../../../helper/utils.helper';
 
 const ModalSale = (props) => {
@@ -11,69 +10,22 @@ const ModalSale = (props) => {
 
   const {
     loadingModal,
+    codiso,
+
     selectTipoPago,
     handleSelectTipoPago,
 
-    comprobantesCobro,
-    bancos,
-    mmonth,
-    year,
-
     refMetodoContado,
-
-    refMontoInicial,
-    inicial,
-    handleTextMontoInicial,
-
-    montoInicialCheck,
-    handleCheckMontoInicial,
-
-    refComprobanteCredito,
-    idComprobanteCredito,
-    handleSelectComprobanteCredito,
-
-    refBancoCredito,
-    idBancoCredito,
-    handleSelectBancoCredito,
-
-    refMetodoCredito,
-    metodoPagoCredito,
-    handleSelectMetodoPagoCredito,
 
     refNumCutoas,
     numCuota,
     handleSelectNumeroCuotas,
-
-    monthPago,
-    handleSelectMonthPago,
-
-    yearPago,
-    handleSelectYearPago,
 
     refFrecuenciaPagoCredito,
     frecuenciaPagoCredito,
     handleSelectFrecuenciaPagoCredito,
 
     letraMensual,
-
-    refInicialCreditoVariable,
-    inicialCreditoVariable,
-    handleTextInicialCreditoVariable,
-
-    inicialCreditoVariableCheck,
-    handleCheckInicialCreditoVarible,
-
-    refComprobanteCreditoVariable,
-    idComprobanteCreditoVariable,
-    handleSelectComprobanteCreditoVarible,
-
-    refBancoCreditoVariable,
-    idBancoCreditoVariable,
-    handleSelectBancoCreditoVariable,
-
-    refMetodoCreditoVariable,
-    metodoPagoCreditoVariable,
-    handleSelectMetodoPagoCreditoVariable,
 
     refFrecuenciaPago,
     frecuenciaPago,
@@ -107,7 +59,7 @@ const ModalSale = (props) => {
         return (
           <>
             <h5>
-              RESTANTE: <span>{rounded(currentAmount - total)}</span>
+              RESTANTE: <span>{numberFormat(currentAmount - total)}</span>
             </h5>
             <h6 className="text-danger">
               Más de dos metodos de pago no generan vuelto.
@@ -118,7 +70,7 @@ const ModalSale = (props) => {
         return (
           <>
             <h5>
-              POR COBRAR: <span>{rounded(total - currentAmount)}</span>
+              POR COBRAR: <span>{numberFormat(total - currentAmount)}</span>
             </h5>
             <h6 className="text-danger">
               Más de dos metodos de pago no generan vuelto.
@@ -133,13 +85,13 @@ const ModalSale = (props) => {
       if (currentAmount >= total) {
         return (
           <h5>
-            SU CAMBIO ES: <span>{rounded(currentAmount - total)}</span>
+            SU CAMBIO ES: <span>{numberFormat(currentAmount - total, codiso)}</span>
           </h5>
         );
       } else {
         return (
           <h5 className="text-danger">
-            POR COBRAR: <span>{rounded(total - currentAmount)}</span>
+            POR COBRAR: <span>{numberFormat(total - currentAmount, codiso)}</span>
           </h5>
         );
       }
@@ -148,7 +100,7 @@ const ModalSale = (props) => {
         return (
           <>
             <h5>
-              RESTANTE: <span>{rounded(currentAmount - total)}</span>
+              RESTANTE: <span>{numberFormat(currentAmount - total, codiso)}</span>
             </h5>
             <h6 className="text-danger">El método de pago no genera vuelto.</h6>
           </>
@@ -157,7 +109,7 @@ const ModalSale = (props) => {
         return (
           <>
             <h5>
-              POR COBRAR: <span>{rounded(total - currentAmount)}</span>
+              POR COBRAR: <span>{numberFormat(total - currentAmount, codiso)}</span>
             </h5>
             <h6 className="text-danger">El método de pago no genera vuelto.</h6>
           </>
@@ -191,10 +143,10 @@ const ModalSale = (props) => {
 
             {/* Titutlo del modal */}
             <div className="row">
-              <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+              <div className="col">
                 <div className="text-center">
                   <h5>
-                    TOTAL A COBRAR: <span>{rounded(importeTotal)}</span>
+                    TOTAL A COBRAR: <span>{numberFormat(importeTotal, codiso)}</span>
                   </h5>
                 </div>
               </div>
@@ -218,9 +170,8 @@ const ModalSale = (props) => {
               {/* Al contado */}
               <div className="col-md-3 col-sm-3">
                 <button
-                  className={`btn ${
-                    selectTipoPago === 1 ? 'btn-primary' : 'btn-light'
-                  } btn-block`}
+                  className={`btn ${selectTipoPago === 1 ? 'btn-primary' : 'btn-light'
+                    } btn-block`}
                   type="button"
                   title="Pago al contado"
                   onClick={() => handleSelectTipoPago(1)}
@@ -239,9 +190,8 @@ const ModalSale = (props) => {
               {/* Crédito fijo*/}
               <div className="col-md-3 col-sm-3">
                 <button
-                  className={`btn ${
-                    selectTipoPago === 2 ? 'btn-primary' : 'btn-light'
-                  } btn-block`}
+                  className={`btn ${selectTipoPago === 2 ? 'btn-primary' : 'btn-light'
+                    } btn-block`}
                   type="button"
                   title="Pago al credito"
                   onClick={() => handleSelectTipoPago(2)}
@@ -260,9 +210,8 @@ const ModalSale = (props) => {
               {/* Crédito variable */}
               <div className="col-md-3 col-sm-3">
                 <button
-                  className={`btn ${
-                    selectTipoPago === 3 ? 'btn-primary' : 'btn-light'
-                  } btn-block`}
+                  className={`btn ${selectTipoPago === 3 ? 'btn-primary' : 'btn-light'
+                    } btn-block`}
                   type="button"
                   title="Pago al credito"
                   onClick={() => handleSelectTipoPago(3)}
@@ -281,9 +230,8 @@ const ModalSale = (props) => {
               {/* Pago adelantado */}
               <div className="col-md-3 col-sm-3">
                 <button
-                  className={`btn ${
-                    selectTipoPago === 4 ? 'btn-primary' : 'btn-light'
-                  } btn-block`}
+                  className={`btn ${selectTipoPago === 4 ? 'btn-primary' : 'btn-light'
+                    } btn-block`}
                   type="button"
                   title="Pago al credito"
                   onClick={() => handleSelectTipoPago(4)}
@@ -303,10 +251,10 @@ const ModalSale = (props) => {
             <br />
             {/* contado detalle */}
             {selectTipoPago === 1 && (
-              <div className="row">
-                <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
-                  <div className="form-row">
-                    <div className="form-group col-md-12">
+              <>
+                <div className="row">
+                  <div className="col">
+                    <div className="form-group">
                       <label>Metodo de cobro:</label>
                       <div className="input-group">
                         <div className="input-group-prepend">
@@ -337,146 +285,43 @@ const ModalSale = (props) => {
                       </div>
                     </div>
                   </div>
-
-                  {metodoPagoAgregado.map((item, index) => (
-                    <MetodoPago
-                      key={index}
-                      idMetodoPago={item.idMetodoPago}
-                      nameMetodPay={item.nombre}
-                      monto={item.monto}
-                      handleInputMontoMetodoPay={handleInputMontoMetodoPay}
-                      handleRemoveItemMetodPay={handleRemoveItemMetodPay}
-                    />
-                  ))}
                 </div>
 
-                <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
-                  <br />
+                <div className='row'>
+                  <div className='col'>
+                    <div className="form-group">
+                      {metodoPagoAgregado.map((item, index) => (
+                        <MetodoPago
+                          key={index}
+                          idMetodoPago={item.idMetodoPago}
+                          nameMetodPay={item.nombre}
+                          monto={item.monto}
+                          handleInputMontoMetodoPay={handleInputMontoMetodoPay}
+                          handleRemoveItemMetodPay={handleRemoveItemMetodPay}
+                        />
+                      ))}
+                    </div>
+                  </div>
                 </div>
 
-                <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
-                  <div className="text-center">{generarVuelto()}</div>
+                <div className='row'>
+                  <div className="col-12">
+                    <br />
+                  </div>
                 </div>
-              </div>
+
+                <div className='row'>
+                  <div className="col-12">
+                    <div className="text-center">{generarVuelto()}</div>
+                  </div>
+                </div>
+              </>
             )}
 
             {/* crédito fijo */}
             {selectTipoPago === 2 && (
               <div className={`row`}>
-                <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
-                  <div className="form-group">
-                    <div className="input-group">
-                      <div className="input-group-prepend">
-                        <div className="input-group-text">
-                          <i className="bi bi-tag-fill"></i>
-                        </div>
-                      </div>
-                      <input
-                        title="Monto inicial"
-                        type="text"
-                        className="form-control"
-                        disabled={!montoInicialCheck}
-                        placeholder="Monto inicial"
-                        ref={refMontoInicial}
-                        value={inicial}
-                        onChange={handleTextMontoInicial}
-                        onKeyDown={keyNumberFloat}
-                      />
-                      <div className="input-group-append">
-                        <div className="input-group-text">
-                          <div className="form-check form-check-inline m-0">
-                            <input
-                              className="form-check-input"
-                              type="checkbox"
-                              checked={montoInicialCheck}
-                              onChange={handleCheckMontoInicial}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {montoInicialCheck ? (
-                    <div className="form-row">
-                      <div className="form-group col-md-12">
-                        <div className="input-group">
-                          <div className="input-group-prepend">
-                            <div className="input-group-text">
-                              <i className="bi bi-receipt"></i>
-                            </div>
-                          </div>
-                          <select
-                            title="Lista de caja o banco a depositar"
-                            className="form-control"
-                            ref={refComprobanteCredito}
-                            value={idComprobanteCredito}
-                            onChange={handleSelectComprobanteCredito}
-                          >
-                            <option value="">-- Comprobante --</option>
-                            {comprobantesCobro.map((item, index) => (
-                              <option key={index} value={item.idComprobante}>
-                                {item.nombre}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
-                    </div>
-                  ) : null}
-
-                  {montoInicialCheck ? (
-                    <div className="form-group">
-                      <div className="input-group">
-                        <div className="input-group-prepend">
-                          <div className="input-group-text">
-                            <i className="bi bi-bank"></i>
-                          </div>
-                        </div>
-                        <select
-                          title="Lista de caja o banco a depositar"
-                          className="form-control"
-                          ref={refBancoCredito}
-                          value={idBancoCredito}
-                          onChange={handleSelectBancoCredito}
-                        >
-                          <option value="">-- Cuenta bancaria --</option>
-                          {bancos.map((item, index) => (
-                            <option key={index} value={item.idBanco}>
-                              {item.nombre}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-                  ) : null}
-
-                  {montoInicialCheck ? (
-                    <div className="form-group">
-                      <div className="input-group">
-                        <div className="input-group-prepend">
-                          <div className="input-group-text">
-                            <i className="bi bi-credit-card-2-back"></i>
-                          </div>
-                        </div>
-                        <select
-                          title="Lista metodo de pago"
-                          className="form-control"
-                          ref={refMetodoCredito}
-                          value={metodoPagoCredito}
-                          onChange={handleSelectMetodoPagoCredito}
-                        >
-                          <option value="">-- Metodo de pago --</option>
-                          <option value="1">Efectivo</option>
-                          <option value="2">Consignación</option>
-                          <option value="3">Transferencia</option>
-                          <option value="4">Cheque</option>
-                          <option value="5">Tarjeta crédito</option>
-                          <option value="6">Tarjeta débito</option>
-                        </select>
-                      </div>
-                    </div>
-                  ) : null}
+                <div className="col">
 
                   <div className="form-group">
                     <div className="input-group">
@@ -495,41 +340,6 @@ const ModalSale = (props) => {
                         onChange={handleSelectNumeroCuotas}
                         onKeyDown={keyNumberInteger}
                       />
-                    </div>
-                  </div>
-
-                  <div className="form-group">
-                    <div className="input-group">
-                      <div className="input-group-prepend">
-                        <div className="input-group-text">
-                          <i className="bi bi-calendar"></i>
-                        </div>
-                      </div>
-
-                      <select
-                        title="Mes"
-                        className="form-control"
-                        value={monthPago}
-                        onChange={handleSelectMonthPago}
-                      >
-                        {mmonth.map((item, index) => (
-                          <option key={index} value={item}>
-                            {monthName(item)}
-                          </option>
-                        ))}
-                      </select>
-                      <select
-                        title="Año"
-                        className="form-control"
-                        value={yearPago}
-                        onChange={handleSelectYearPago}
-                      >
-                        {year.map((item, index) => (
-                          <option key={index} value={item}>
-                            {item}
-                          </option>
-                        ))}
-                      </select>
                     </div>
                   </div>
 
@@ -565,7 +375,7 @@ const ModalSale = (props) => {
                         type="text"
                         className="form-control"
                         placeholder="0.00"
-                        value={letraMensual}
+                        value={numberFormat(letraMensual, codiso)}
                         disabled={true}
                       />
                     </div>
@@ -577,116 +387,7 @@ const ModalSale = (props) => {
             {/* crédito variable */}
             {selectTipoPago === 3 && (
               <div className={`row`}>
-                <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
-                  <div className="form-group">
-                    <div className="input-group">
-                      <div className="input-group-prepend">
-                        <div className="input-group-text">
-                          <i className="bi bi-tag-fill"></i>
-                        </div>
-                      </div>
-                      <input
-                        title="Monto inicial"
-                        type="text"
-                        className="form-control"
-                        ref={refInicialCreditoVariable}
-                        disabled={!inicialCreditoVariableCheck}
-                        placeholder="Monto inicial"
-                        value={inicialCreditoVariable}
-                        onChange={handleTextInicialCreditoVariable}
-                        onKeyDown={keyNumberFloat}
-                      />
-                      <div className="input-group-append">
-                        <div className="input-group-text">
-                          <div className="form-check form-check-inline m-0">
-                            <input
-                              className="form-check-input"
-                              type="checkbox"
-                              checked={inicialCreditoVariableCheck}
-                              onChange={handleCheckInicialCreditoVarible}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {inicialCreditoVariableCheck ? (
-                    <>
-                      <div className="form-row">
-                        <div className="form-group col-md-12">
-                          <div className="input-group">
-                            <div className="input-group-prepend">
-                              <div className="input-group-text">
-                                <i className="bi bi-receipt"></i>
-                              </div>
-                            </div>
-                            <select
-                              title="Lista de caja o banco a depositar"
-                              className="form-control"
-                              ref={refComprobanteCreditoVariable}
-                              value={idComprobanteCreditoVariable}
-                              onChange={handleSelectComprobanteCreditoVarible}
-                            >
-                              <option value="">-- Comprobante --</option>
-                              {comprobantesCobro.map((item, index) => (
-                                <option key={index} value={item.idComprobante}>
-                                  {item.nombre}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="form-group">
-                        <div className="input-group">
-                          <div className="input-group-prepend">
-                            <div className="input-group-text">
-                              <i className="bi bi-bank"></i>
-                            </div>
-                          </div>
-                          <select
-                            title="Lista de caja o banco a depositar"
-                            className="form-control"
-                            ref={refBancoCreditoVariable}
-                            value={idBancoCreditoVariable}
-                            onChange={handleSelectBancoCreditoVariable}
-                          >
-                            <option value="">-- Cuenta bancaria --</option>
-                            {bancos.map((item, index) => (
-                              <option key={index} value={item.idBanco}>
-                                {item.nombre}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
-                      <div className="form-group">
-                        <div className="input-group">
-                          <div className="input-group-prepend">
-                            <div className="input-group-text">
-                              <i className="bi bi-credit-card-2-back"></i>
-                            </div>
-                          </div>
-                          <select
-                            title="Lista metodo de pago"
-                            className="form-control"
-                            ref={refMetodoCreditoVariable}
-                            value={metodoPagoCreditoVariable}
-                            onChange={handleSelectMetodoPagoCreditoVariable}
-                          >
-                            <option value="">-- Metodo de pago --</option>
-                            <option value="1">Efectivo</option>
-                            <option value="2">Consignación</option>
-                            <option value="3">Transferencia</option>
-                            <option value="4">Cheque</option>
-                            <option value="5">Tarjeta crédito</option>
-                            <option value="6">Tarjeta débito</option>
-                          </select>
-                        </div>
-                      </div>
-                    </>
-                  ) : null}
+                <div className="col">
 
                   <div className="form-group">
                     <div className="input-group">
@@ -706,24 +407,6 @@ const ModalSale = (props) => {
                         <option value="15">Quinsenal</option>
                         <option value="30">Mensual</option>
                       </select>
-                    </div>
-                  </div>
-
-                  <div className="form-group">
-                    <div className="input-group">
-                      <div className="input-group-prepend">
-                        <div className="input-group-text">
-                          <i className="bi bi-piggy-bank-fill"></i>
-                        </div>
-                      </div>
-                      <input
-                        title="Deuda restante"
-                        type="text"
-                        className="form-control"
-                        placeholder="0.00"
-                        value={rounded(importeTotal - inicialCreditoVariable)}
-                        disabled={true}
-                      />
                     </div>
                   </div>
                 </div>

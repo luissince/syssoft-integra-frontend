@@ -514,7 +514,7 @@ class CobroCrear extends CustomComponent {
 
         if (response instanceof SuccessReponse) {
           alertSuccess('Cobro', response.data, () => {
-            // this.handleLimpiar();
+            this.handleLimpiar();
           });
         }
 

@@ -629,7 +629,7 @@ class ClienteAgregar extends CustomComponent {
         )}
 
         <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+          <div className="col">
             <ul className="nav nav-tabs" id="myTab" role="tablist">
               {/* Persona Natural */}
               <li className="nav-item" role="presentation">
@@ -675,7 +675,7 @@ class ClienteAgregar extends CustomComponent {
                 <div className="row">
                   <div className="form-group col-md-6">
                     <label>
-                      Tipo Documento{' '}
+                      Tipo Documento:{' '}
                       <i className="fa fa-asterisk text-danger small"></i>
                     </label>
                     <select
@@ -704,7 +704,7 @@ class ClienteAgregar extends CustomComponent {
 
                   <div className="form-group col-md-6">
                     <label>
-                      N° de documento{' '}
+                      N° de documento:{' '}
                       <i className="fa fa-asterisk text-danger small"></i>
                     </label>
                     <div className="input-group">
@@ -742,7 +742,7 @@ class ClienteAgregar extends CustomComponent {
                 <div className="row">
                   <div className="form-group col-md-12">
                     <label>
-                      Apellidos y Nombres{' '}
+                      Apellidos y Nombres:{' '}
                       <i className="fa fa-asterisk text-danger small"></i>
                     </label>
                     <input
@@ -764,7 +764,7 @@ class ClienteAgregar extends CustomComponent {
                 {/* Genero, Fecha de Nacimiento y Estado civil */}
                 <div className="row">
                   <div className="form-group col-md-4">
-                    <label>Genero </label>
+                    <label>Genero: </label>
                     <select
                       className="form-control"
                       ref={this.refGenero}
@@ -778,7 +778,7 @@ class ClienteAgregar extends CustomComponent {
                   </div>
 
                   <div className="form-group col-md-4">
-                    <label>Estado Civil</label>
+                    <label>Estado Civil:</label>
                     <select
                       className="form-control"
                       value={estadoCivil}
@@ -793,7 +793,7 @@ class ClienteAgregar extends CustomComponent {
                   </div>
 
                   <div className="form-group col-md-4">
-                    <label>Fecha de Nacimiento</label>
+                    <label>Fecha de Nacimiento:</label>
                     <input
                       type="date"
                       className="form-control"
@@ -807,7 +807,7 @@ class ClienteAgregar extends CustomComponent {
                 {/* Observación */}
                 <div className="row">
                   <div className="form-group col-md-12">
-                    <label>Observación</label>
+                    <label>Observación:</label>
                     <input
                       type="text"
                       className="form-control"
@@ -821,7 +821,7 @@ class ClienteAgregar extends CustomComponent {
                 {/* Número de celular y Teléfono */}
                 <div className="row">
                   <div className="form-group col-md-6 col-12">
-                    <label>N° de Celular </label>
+                    <label>N° de Celular:</label>
                     <input
                       type="text"
                       className="form-control"
@@ -834,7 +834,7 @@ class ClienteAgregar extends CustomComponent {
                   </div>
 
                   <div className="form-group col-md-6 col-12">
-                    <label>N° de Telefono</label>
+                    <label>N° de Telefono:</label>
                     <input
                       type="text"
                       className="form-control"
@@ -850,7 +850,7 @@ class ClienteAgregar extends CustomComponent {
                 {/* Email */}
                 <div className="row">
                   <div className="form-group col-md-12">
-                    <label>E-Mail</label>
+                    <label>E-Mail:</label>
                     <input
                       type="email"
                       className="form-control"
@@ -864,7 +864,7 @@ class ClienteAgregar extends CustomComponent {
                 {/* Dirección */}
                 <div className="row">
                   <div className="form-group col-md-12">
-                    <label>Dirección</label>
+                    <label>Dirección:</label>
                     <input
                       type="text"
                       className="form-control"
@@ -879,7 +879,7 @@ class ClienteAgregar extends CustomComponent {
                 {/* Ubigeo */}
                 <div className="row">
                   <div className="form-group col-md-12">
-                    <label>Ubigeo</label>
+                    <label>Ubigeo:</label>
                     <SearchBar
                       placeholder="Escribe para iniciar a filtrar..."
                       refTxtUbigeo={this.refUbigeoPn}
@@ -939,7 +939,7 @@ class ClienteAgregar extends CustomComponent {
                 <div className="row">
                   <div className="form-group col-md-6">
                     <label>
-                      Tipo Documento{' '}
+                      Tipo Documento:{' '}
                       <i className="fa fa-asterisk text-danger small"></i>
                     </label>
                     <select
@@ -968,7 +968,7 @@ class ClienteAgregar extends CustomComponent {
 
                   <div className="form-group col-md-6">
                     <label>
-                      N° de documento{' '}
+                      N° de documento:{' '}
                       <i className="fa fa-asterisk text-danger small"></i>
                     </label>
                     <div className="input-group">
@@ -1006,7 +1006,7 @@ class ClienteAgregar extends CustomComponent {
                 <div className="row">
                   <div className="form-group col-md-12">
                     <label>
-                      Razón Social{' '}
+                      Razón Socia:l{' '}
                       <i className="fa fa-asterisk text-danger small"></i>
                     </label>
                     <input
@@ -1028,7 +1028,7 @@ class ClienteAgregar extends CustomComponent {
                 {/* Número de celular y Teléfono */}
                 <div className="row">
                   <div className="form-group col-md-6 col-12">
-                    <label>N° de Celular </label>
+                    <label>N° de Celular: </label>
                     <input
                       type="text"
                       className="form-control"
@@ -1053,7 +1053,7 @@ class ClienteAgregar extends CustomComponent {
                   </div>
 
                   <div className="form-group col-md-6 col-12">
-                    <label>N° de Telefono</label>
+                    <label>N° de Telefono:</label>
                     <input
                       type="text"
                       className="form-control"
@@ -1071,7 +1071,7 @@ class ClienteAgregar extends CustomComponent {
                 {/* Email */}
                 <div className="row">
                   <div className="form-group col-md-12">
-                    <label>E-Mail</label>
+                    <label>E-Mail:</label>
                     <input
                       type="email"
                       className="form-control"
@@ -1087,7 +1087,7 @@ class ClienteAgregar extends CustomComponent {
                 {/* Dirección */}
                 <div className="row">
                   <div className="form-group col-md-12">
-                    <label>Dirección</label>
+                    <label>Dirección:</label>
                     <input
                       type="text"
                       className="form-control"
@@ -1104,7 +1104,7 @@ class ClienteAgregar extends CustomComponent {
                 {/* Ubigeo */}
                 <div className="row">
                   <div className="form-group col-md-12">
-                    <label>Ubigeo</label>
+                    <label>Ubigeo:</label>
                     <SearchBar
                       placeholder="Escribe para iniciar a filtrar..."
                       refTxtUbigeo={this.refUbigeoPj}

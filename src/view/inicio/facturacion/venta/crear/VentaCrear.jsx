@@ -7,8 +7,6 @@ import {
   alertWarning,
   clearModal,
   formatDecimal,
-  getCurrentMonth,
-  getCurrentYear,
   hideModal,
   isEmpty,
   isNumeric,
@@ -25,7 +23,6 @@ import {
   comboMetodoPago,
   createFactura,
   getPredeterminado,
-  listBancoCombo,
   comboComprobante,
   comboImpuesto,
   comboMoneda,
@@ -47,7 +44,6 @@ import ModalSale from './component/ModalSale';
 import CustomComponent from '../../../../../model/class/custom-component';
 import ModalCliente from './component/ModalCliente';
 import {
-  COMPROBANTE_DE_INGRESO,
   FACTURACION,
   VENTA_LIBRE,
 } from '../../../../../model/types/tipo-comprobante';
@@ -96,43 +92,18 @@ class VentaCrear extends CustomComponent {
       selectTipoPago: 1,
 
       comprobantes: [],
-      comprobantesCobro: [],
       productos: [],
       clientes: [],
-      bancos: [],
       impuestos: [],
       monedas: [],
       detalleVenta: [],
-
-      montoInicialCheck: false,
-      inicial: '',
-      idComprobanteCredito: '',
-
-      idBancoCredito: '',
-      metodoPagoCredito: '',
-
-      monthPago: getCurrentMonth(),
-      yearPago: getCurrentYear(),
 
       numCuota: '',
       letraMensual: '',
 
       frecuenciaPagoCredito: new Date().getDate() > 15 ? '30' : '15',
 
-      inicialCreditoVariableCheck: false,
-      inicialCreditoVariable: '',
-
       frecuenciaPago: new Date().getDate() > 15 ? '30' : '15',
-      idComprobanteCreditoVariable: '',
-
-      idBancoCreditoVariable: '',
-      metodoPagoCreditoVariable: '',
-
-      mmonth: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-      year: [
-        2015, 2016, 2017, 2018, 2019, 2020, 2020, 2021, 2022, 2023, 2024, 2025,
-        2026, 2027, 2028, 2029, 2030,
-      ],
 
       importeTotal: 0.0,
 
@@ -167,21 +138,9 @@ class VentaCrear extends CustomComponent {
 
     this.refMetodoContado = React.createRef();
 
-    this.refMontoInicial = React.createRef();
-    this.refComprobanteCredito = React.createRef();
-
-    this.refBancoCredito = React.createRef();
-    this.refMetodoCredito = React.createRef();
-
-    this.refInicialCreditoVariable = React.createRef();
-
     this.refFrecuenciaPago = React.createRef();
     this.refNumCutoas = React.createRef();
     this.refFrecuenciaPagoCredito = React.createRef();
-
-    this.refComprobanteCreditoVariable = React.createRef();
-    this.refMetodoCreditoVariable = React.createRef();
-    this.refBancoCreditoVariable = React.createRef();
 
     // atributos para el modal producto
     this.producto = null;
@@ -245,24 +204,14 @@ class VentaCrear extends CustomComponent {
       this.setState({ importeTotal, loadingModal: false });
     });
 
-    clearModal(this.idModalSale, async () => {
-      await this.setStateAsync({
+    clearModal(this.idModalSale, () => {
+      this.setState({
         selectTipoPago: 1,
 
-        montoInicialCheck: false,
-        inicial: '',
-        idBancoCredito: '',
-        metodoPagoCredito: '',
         letraMensual: '',
         frecuenciaPagoCredito: new Date().getDate() > 15 ? '30' : '15',
         numCuota: '',
 
-        idComprobanteCredito: '',
-        inicialCreditoVariableCheck: false,
-        inicialCreditoVariable: '',
-        idComprobanteCreditoVariable: '',
-        idBancoCreditoVariable: '',
-        metodoPagoCreditoVariable: '',
         frecuenciaPago: new Date().getDate() > 15 ? '30' : '15',
 
         metodoPagoAgregado: [],
@@ -305,19 +254,15 @@ class VentaCrear extends CustomComponent {
     const [
       libre,
       facturado,
-      cobro,
       monedas,
       impuestos,
-      bancos,
       predeterminado,
       metodoPagos,
     ] = await Promise.all([
       await this.fetchComprobante(VENTA_LIBRE),
       await this.fetchComprobante(FACTURACION),
-      await this.fetchComprobante(COMPROBANTE_DE_INGRESO),
       await this.fetchMoneda(),
       await this.fetchImpuesto(),
-      await this.fetchBanco(),
       await this.fetchClientePredeterminado(),
       await this.fetchMetodoPago(),
     ]);
@@ -333,10 +278,8 @@ class VentaCrear extends CustomComponent {
 
     await this.setStateAsync({
       comprobantes,
-      comprobantesCobro: cobro,
       monedas,
       impuestos,
-      bancos,
       metodosPagoLista: metodoPagos,
 
       idComprobante: comprobanteFilter ? comprobanteFilter.idComprobante : '',
@@ -393,20 +336,6 @@ class VentaCrear extends CustomComponent {
 
   async fetchImpuesto() {
     const response = await comboImpuesto();
-
-    if (response instanceof SuccessReponse) {
-      return response.data;
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
-
-      return [];
-    }
-  }
-
-  async fetchBanco() {
-    const response = await listBancoCombo();
 
     if (response instanceof SuccessReponse) {
       return response.data;
@@ -483,9 +412,7 @@ class VentaCrear extends CustomComponent {
       return;
     }
 
-    const saldo =
-      this.state.importeTotal -
-      (this.state.montoInicialCheck ? this.state.inicial : 0);
+    const saldo = this.state.importeTotal;
     const letra = saldo / this.state.numCuota;
 
     this.setState({ letraMensual: letra.toFixed(2) });
@@ -661,7 +588,7 @@ class VentaCrear extends CustomComponent {
     }
   };
 
-  handleSaveCliente = () => {};
+  handleSaveCliente = () => { };
 
   //------------------------------------------------------------------------------------------
   // Opciones del producto y modal
@@ -731,34 +658,26 @@ class VentaCrear extends CustomComponent {
     const descripcionProducto = this.refDescripcionProducto.current.value;
 
     if (!isNumeric(precioProducto) || parseFloat(precioProducto) <= 0) {
-      alertWarning(
-        'Venta',
-        'El precio del producto tiene un valor no admitido o es menor o igual a 0.',
-        () => {
-          this.refPrecioProducto.current.focus();
-        },
-      );
+      alertWarning('Venta', 'El precio del producto tiene un valor no admitido o es menor o igual a 0.', () => {
+        this.refPrecioProducto.current.focus();
+      });
       return;
     }
 
     if (isEmpty(descripcionProducto)) {
-      alertWarning(
-        'Venta',
-        'La descripción del producto no puede ser vacía.',
-        () => {
-          this.refDescripcionProducto.current.focus();
-        },
-      );
+      alertWarning('Venta', 'La descripción del producto no puede ser vacía.', () => {
+        this.refDescripcionProducto.current.focus();
+      });
       return;
     }
 
     const updatedDetalle = this.state.detalleVenta.map((item) =>
       item.idProducto === this.producto.idProducto
         ? {
-            ...item,
-            nombreProducto: descripcionProducto,
-            precio: parseFloat(precioProducto),
-          }
+          ...item,
+          nombreProducto: descripcionProducto,
+          precio: parseFloat(precioProducto),
+        }
         : item,
     );
 
@@ -874,43 +793,18 @@ class VentaCrear extends CustomComponent {
       selectTipoPago: 1,
 
       comprobantes: [],
-      comprobantesCobro: [],
       productos: [],
       clientes: [],
-      bancos: [],
       impuestos: [],
       monedas: [],
       detalleVenta: [],
-
-      montoInicialCheck: false,
-      inicial: '',
-      idComprobanteCredito: '',
-
-      idBancoCredito: '',
-      metodoPagoCredito: '',
-
-      monthPago: getCurrentMonth(),
-      yearPago: getCurrentYear(),
 
       numCuota: '',
       letraMensual: '',
 
       frecuenciaPagoCredito: new Date().getDate() > 15 ? '30' : '15',
-
-      inicialCreditoVariableCheck: false,
-      inicialCreditoVariable: '',
-
+      
       frecuenciaPago: new Date().getDate() > 15 ? '30' : '15',
-      idComprobanteCreditoVariable: '',
-
-      idBancoCreditoVariable: '',
-      metodoPagoCreditoVariable: '',
-
-      mmonth: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-      year: [
-        2015, 2016, 2017, 2018, 2019, 2020, 2020, 2021, 2022, 2023, 2024, 2025,
-        2026, 2027, 2028, 2029, 2030,
-      ],
 
       importeTotal: 0.0,
 
@@ -937,72 +831,18 @@ class VentaCrear extends CustomComponent {
     this.setState({ selectTipoPago: tipo });
   };
 
-  handleTextMontoInicial = (event) => {
-    this.setState({ inicial: event.target.value }, () =>
-      this.calcularLetraMensual(),
-    );
-  };
-
-  handleCheckMontoInicial = (event) => {
-    this.setState({ montoInicialCheck: event.target.checked }, () =>
-      this.refMontoInicial.current.focus(),
-    );
-  };
-
-  handleSelectComprobanteCredito = (event) => {
-    this.setState({ idComprobanteCredito: event.target.value });
-  };
-
-  handleSelectBancoCredito = (event) => {
-    this.setState({ idBancoCredito: event.target.value });
-  };
-
-  handleSelectMetodoPagoCredito = (event) => {
-    this.setState({ metodoPagoCredito: event.target.value });
-  };
-
   handleSelectNumeroCuotas = (event) => {
     this.setState({ numCuota: event.target.value }, () =>
       this.calcularLetraMensual(),
     );
   };
 
-  handleSelectMonthPago = (event) => {
-    this.setState({ monthPago: event.target.value });
-  };
-
-  handleSelectYearPago = (event) => {
-    this.setState({ yearPago: event.target.value });
-  };
-
   handleSelectFrecuenciaPagoCredito = (event) => {
     this.setState({ frecuenciaPagoCredito: event.target.value });
   };
 
-  handleTextInicialCreditoVariable = (event) => {
-    this.setState({ inicialCreditoVariable: event.target.value });
-  };
-
-  handleCheckInicialCreditoVarible = (event) => {
-    this.setState({ inicialCreditoVariableCheck: event.target.checked }, () =>
-      this.refInicialCreditoVariable.current.focus(),
-    );
-  };
-
   handleSelectFrecuenciaPago = (event) => {
     this.setState({ frecuenciaPago: event.target.value });
-  };
-
-  handleSelectComprobanteCreditoVarible = (event) => {
-    this.setState({ idComprobanteCreditoVariable: event.target.value });
-  };
-
-  handleSelectBancoCreditoVariable = (event) => {
-    this.setState({ idBancoCreditoVariable: event.target.value });
-  };
-
-  handleSelectMetodoPagoCreditoVariable = (event) => {
-    this.setState({ metodoPagoCreditoVariable: event.target.value });
   };
 
   //Metodos Modal Sale
@@ -1089,18 +929,12 @@ class VentaCrear extends CustomComponent {
     let metodoPagoLista = [...metodoPagoAgregado];
 
     if (isEmpty(metodoPagoLista)) {
-      alertWarning(
-        'Venta',
-        'Tiene que agregar método de cobro para continuar.',
-      );
+      alertWarning('Venta', 'Tiene que agregar método de cobro para continuar.');
       return;
     }
 
     if (metodoPagoLista.filter((item) => !isNumeric(item.monto)).length !== 0) {
-      alertWarning(
-        'Venta',
-        'Hay montos del metodo de cobro que no tiene valor.',
-      );
+      alertWarning('Venta', 'Hay montos del metodo de cobro que no tiene valor.');
       return;
     }
 
@@ -1110,10 +944,7 @@ class VentaCrear extends CustomComponent {
 
     if (metodoPagoLista.length > 1) {
       if (metodoCobroTotal !== importeTotal) {
-        alertWarning(
-          'Venta',
-          'Al tener mas de 2 métodos de cobro el monto debe ser igual al total.',
-        );
+        alertWarning('Venta', 'Al tener mas de 2 métodos de cobro el monto debe ser igual al total.');
         return;
       }
     } else {
@@ -1125,9 +956,7 @@ class VentaCrear extends CustomComponent {
         }
 
         metodoPagoLista.map((item) => {
-          item.descripcion = `Pago con ${rounded(
-            parseFloat(item.monto),
-          )} y su vuelto es ${rounded(parseFloat(item.monto) - importeTotal)}`;
+          item.descripcion = `Pago con ${rounded(parseFloat(item.monto))} y su vuelto es ${rounded(parseFloat(item.monto) - importeTotal)}`;
           item.monto = importeTotal;
           return item;
         });
@@ -1150,6 +979,7 @@ class VentaCrear extends CustomComponent {
           idSucursal: idSucursal,
           comentario: comentario,
           idUsuario: idUsuario,
+          estado: 1,
           detalleVenta: detalleVenta,
           metodoPagoAgregado: metodoPagoAgregado,
         };
@@ -1168,14 +998,14 @@ class VentaCrear extends CustomComponent {
         if (response instanceof ErrorResponse) {
           if (response.getBody() !== '') {
             const body = response.getBody().map(
-              (item, index) =>
+              (item) =>
                 `<tr>
                                 <td>${item.nombre}</td>
                                 <td>${formatDecimal(item.cantidadActual)}</td>
                                 <td>${formatDecimal(item.cantidadReal)}</td>
                                 <td>${formatDecimal(
-                                  item.cantidadActual - item.cantidadReal,
-                                )}</td>
+                  item.cantidadActual - item.cantidadReal,
+                )}</td>
                             </tr>`,
             );
 
@@ -1201,7 +1031,7 @@ class VentaCrear extends CustomComponent {
                     `,
             );
           } else {
-            alertWarning('Venta', response.getMessage(), () => {});
+            alertWarning('Venta', response.getMessage(), () => { });
           }
         }
       }
@@ -1231,7 +1061,7 @@ class VentaCrear extends CustomComponent {
     */
 
   render() {
-    const { loadingModal, selectTipoPago, comprobantesCobro } = this.state;
+    const { loadingModal, selectTipoPago, } = this.state;
 
     const { impuestos, monedas, codiso } = this.state;
 
@@ -1247,23 +1077,10 @@ class VentaCrear extends CustomComponent {
 
     const { detalleVenta } = this.state;
 
-    const { bancos, mmonth, year, inicial } = this.state;
-
     const {
-      montoInicialCheck,
-      idComprobanteCredito,
-      idBancoCredito,
-      metodoPagoCredito,
       numCuota,
-      monthPago,
-      yearPago,
       frecuenciaPagoCredito,
       letraMensual,
-      inicialCreditoVariable,
-      inicialCreditoVariableCheck,
-      idComprobanteCreditoVariable,
-      idBancoCreditoVariable,
-      metodoPagoCreditoVariable,
       frecuenciaPago,
       importeTotal,
       metodosPagoLista,
@@ -1278,63 +1095,17 @@ class VentaCrear extends CustomComponent {
           idModalSale={this.idModalSale}
           loadingModal={loadingModal}
           selectTipoPago={selectTipoPago}
+          codiso={codiso}
           handleSelectTipoPago={this.handleSelectTipoPago}
-          comprobantesCobro={comprobantesCobro}
-          bancos={bancos}
-          mmonth={mmonth}
-          year={year}
           refMetodoContado={this.refMetodoContado}
-          refMontoInicial={this.refMontoInicial}
-          inicial={inicial}
-          handleTextMontoInicial={this.handleTextMontoInicial}
-          montoInicialCheck={montoInicialCheck}
-          handleCheckMontoInicial={this.handleCheckMontoInicial}
-          refComprobanteCredito={this.refComprobanteCredito}
-          idComprobanteCredito={idComprobanteCredito}
-          handleSelectComprobanteCredito={this.handleSelectComprobanteCredito}
-          refBancoCredito={this.refBancoCredito}
-          idBancoCredito={idBancoCredito}
-          handleSelectBancoCredito={this.handleSelectBancoCredito}
-          refMetodoCredito={this.refMetodoCredito}
-          metodoPagoCredito={metodoPagoCredito}
-          handleSelectMetodoPagoCredito={this.handleSelectMetodoPagoCredito}
           refNumCutoas={this.refNumCutoas}
           numCuota={numCuota}
           handleSelectNumeroCuotas={this.handleSelectNumeroCuotas}
-          monthPago={monthPago}
-          handleSelectMonthPago={this.handleSelectMonthPago}
-          yearPago={yearPago}
-          handleSelectYearPago={this.handleSelectYearPago}
           refFrecuenciaPagoCredito={this.refFrecuenciaPagoCredito}
           frecuenciaPagoCredito={frecuenciaPagoCredito}
-          handleSelectFrecuenciaPagoCredito={
-            this.handleSelectFrecuenciaPagoCredito
-          }
+          handleSelectFrecuenciaPagoCredito={this.handleSelectFrecuenciaPagoCredito}
           letraMensual={letraMensual}
-          refInicialCreditoVariable={this.refInicialCreditoVariable}
-          inicialCreditoVariable={inicialCreditoVariable}
-          handleTextInicialCreditoVariable={
-            this.handleTextInicialCreditoVariable
-          }
-          inicialCreditoVariableCheck={inicialCreditoVariableCheck}
-          handleCheckInicialCreditoVarible={
-            this.handleCheckInicialCreditoVarible
-          }
-          refComprobanteCreditoVariable={this.refComprobanteCreditoVariable}
-          idComprobanteCreditoVariable={idComprobanteCreditoVariable}
-          handleSelectComprobanteCreditoVarible={
-            this.handleSelectComprobanteCreditoVarible
-          }
-          refBancoCreditoVariable={this.refBancoCreditoVariable}
-          idBancoCreditoVariable={idBancoCreditoVariable}
-          handleSelectBancoCreditoVariable={
-            this.handleSelectBancoCreditoVariable
-          }
-          refMetodoCreditoVariable={this.refMetodoCreditoVariable}
-          metodoPagoCreditoVariable={metodoPagoCreditoVariable}
-          handleSelectMetodoPagoCreditoVariable={
-            this.handleSelectMetodoPagoCreditoVariable
-          }
+   
           refFrecuenciaPago={this.refFrecuenciaPago}
           frecuenciaPago={frecuenciaPago}
           handleSelectFrecuenciaPago={this.handleSelectFrecuenciaPago}

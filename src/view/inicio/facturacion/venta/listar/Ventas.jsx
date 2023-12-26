@@ -10,13 +10,14 @@ import {
   keyUpSearch,
   isEmpty,
   formatNumberWithZeros,
+  alertInfo,
 } from '../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import Paginacion from '../../../../../components/Paginacion';
 import ContainerWrapper from '../../../../../components/Container';
 import CustomComponent from '../../../../../model/class/custom-component';
 import {
-  deleteVenta,
+  cancelVenta,
   listVenta,
 } from '../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../model/class/response';
@@ -147,15 +148,17 @@ class Ventas extends CustomComponent {
     });
   };
 
-  handleAnular(idVenta) {
-    alertDialog('Venta', '¿Está seguro de que desea eliminar la venta? Esta operación no se puede deshacer.', async (value) => {
-      if (value) {
+  handleCancelar(idVenta) {
+    alertDialog('Venta', '¿Está seguro de que desea anular la venta? Esta operación no se puede deshacer.', async (accept) => {
+      if (accept) {
         const params = {
           idVenta: idVenta,
           idUsuario: this.state.idUsuario,
         };
 
-        const response = await deleteVenta(params);
+        alertInfo("Venta", "Procesando información...")
+
+        const response = await cancelVenta(params);
 
         if (response instanceof SuccessReponse) {
           alertSuccess('Venta', response.data, () => {
@@ -245,7 +248,7 @@ class Ventas extends CustomComponent {
             <button
               className="btn btn-outline-danger btn-sm"
               title="Anular"
-              onClick={() => this.handleAnular(item.idVenta)}
+              onClick={() => this.handleCancelar(item.idVenta)}
               disabled={!this.state.remove}>
               <i className="fa fa-remove"></i>
             </button>
