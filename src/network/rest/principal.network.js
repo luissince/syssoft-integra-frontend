@@ -131,9 +131,9 @@ export async function filtrarCliente(params) {
   );
 }
 
-export async function addCliente(params) {
+export async function createCliente(params) {
   return await Resolve.create(
-    instancePrincipal.post('/api/cliente/add', params),
+    instancePrincipal.post('/api/cliente/create', params),
   );
 }
 
@@ -151,7 +151,7 @@ export async function deleteCliente(params) {
   );
 }
 
-export async function getClienteId(params, signal) {
+export async function getIdCliente(params, signal) {
   return await Resolve.create(
     instancePrincipal.get('/api/cliente/id', {
       signal: signal,
@@ -377,15 +377,6 @@ export async function listVenta(params, signal) {
   );
 }
 
-export async function getCobroVentaId(params, signal) {
-  return await Resolve.create(
-    instancePrincipal.get('/api/factura/venta/cobro', {
-      signal: signal,
-      params: params,
-    }),
-  );
-}
-
 export async function listCpeSunat(params, signal) {
   return await Resolve.create(
     instancePrincipal.get('/api/factura/cpesunat', {
@@ -412,6 +403,15 @@ export async function detailFactura(params, signal) {
 export async function cancelVenta(params) {
   return await Resolve.create(
     instancePrincipal.delete('/api/factura/cancel', {
+      params: params,
+    }),
+  );
+}
+
+export async function accountsReceivableVenta(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/factura/accounts/receivable', {
+      signal: signal,
       params: params,
     }),
   );
@@ -760,6 +760,15 @@ export async function createCompra(data, signal) {
 export async function cancelCompra(params, signal) {
   return await Resolve.create(
     instancePrincipal.delete('/api/compra/cancel', {
+      params: params,
+      signal: signal,
+    }),
+  );
+}
+
+export async function accountsPayableCompra(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.delete('/api/compra/accounts/payable', {
       params: params,
       signal: signal,
     }),
@@ -1313,7 +1322,7 @@ export async function getUbigeo(params) {
 */
 export async function listComboTipoDocumento(signal) {
   return await Resolve.create(
-    instancePrincipal.get('/api/tipodocumento/listcombo', {
+    instancePrincipal.get('/api/tipodocumento/combo', {
       signal: signal,
     }),
   );

@@ -9,6 +9,7 @@ import {
   keyNumberInteger,
   imageBase64,
   isText,
+  isEmpty,
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../../components/Container';
@@ -32,34 +33,35 @@ class EmpresaProceso extends CustomComponent {
       documento: '',
       razonSocial: '',
       nombreEmpresa: '',
-      telefono: '',
-      celular: '',
-      email: '',
-      web: '',
-      direccion: '',
-      useSol: '',
-      claveSol: '',
+
+      usuarioSolSunat: '',
+      claveSolSunat: '',
+      idApiSunat: '',
+      claveApiSunat: '',
+
       usuarioEmail: '',
       claveEmail: '',
+
       logo: images.noImage,
       image: images.noImage,
 
       lookPasswordEmail: false,
       lookPasswordSol: false,
+      lookPasswordClave: false,
 
       loading: true,
       messageWarning: '',
       msgLoading: 'Cargando datos...',
+
+      idUsuario: this.props.token.userToken.idUsuario,
     };
 
     this.refDocumento = React.createRef();
     this.refRazonSocial = React.createRef();
 
-    this.refDireccion = React.createRef();
-    this.refUbigeo = React.createRef();
-
     this.refPasswordEmail = React.createRef();
     this.refPasswordSol = React.createRef();
+    this.refPasswordClave = React.createRef();
 
     this.refFileLogo = React.createRef();
     this.refFileImagen = React.createRef();
@@ -70,7 +72,7 @@ class EmpresaProceso extends CustomComponent {
   componentDidMount() {
     const url = this.props.location.search;
     const idEmpresa = new URLSearchParams(url).get('idEmpresa');
-    if (idEmpresa !== null) {
+    if (isText(idEmpresa)) {
       this.loadingData(idEmpresa);
     } else {
       this.props.history.goBack();
@@ -78,49 +80,16 @@ class EmpresaProceso extends CustomComponent {
 
     this.refDocumento.current.focus();
 
-    this.refFileLogo.current.addEventListener('change', this.onEventFileLogo);
-    this.refFileImagen.current.addEventListener(
-      'change',
-      this.onEventFileImage,
-    );
+    this.refFileLogo.current.addEventListener('change', this.handleFileLogo);
+    this.refFileImagen.current.addEventListener('change', this.handleFileImage);
   }
 
   componentWillUnmount() {
     this.abortController.abort();
 
-    this.refFileLogo.current.removeEventListener(
-      'change',
-      this.onEventFileLogo,
-    );
-    this.refFileImagen.current.removeEventListener(
-      'change',
-      this.onEventFileImage,
-    );
+    this.refFileLogo.current.removeEventListener('change', this.handleFileLogo);
+    this.refFileImagen.current.removeEventListener('change', this.handleFileImage);
   }
-
-  onEventFileLogo = async (event) => {
-    if (event.target.files.length !== 0) {
-      await this.setStateAsync({
-        logo: URL.createObjectURL(event.target.files[0]),
-      });
-    } else {
-      await this.setStateAsync({ logo: images.noImage });
-      this.refFileLogo.current.value = '';
-    }
-  };
-
-  onEventFileImage = async (event) => {
-    if (event.target.files.length !== 0) {
-      await this.setStateAsync({
-        image: URL.createObjectURL(event.target.files[0]),
-      });
-    } else {
-      await this.setStateAsync({
-        image: images.noImage,
-      });
-      this.refFileImagen.current.value = '';
-    }
-  };
 
   async clearLogo() {
     await this.setStateAsync({
@@ -152,17 +121,18 @@ class EmpresaProceso extends CustomComponent {
         documento: empresa.documento,
         razonSocial: empresa.razonSocial,
         nombreEmpresa: empresa.nombreEmpresa,
-        direccion: empresa.direccion,
 
-        useSol: empresa.useSol,
-        claveSol: empresa.claveSol,
+        usuarioSolSunat: empresa.usuarioSolSunat,
+        claveSolSunat: empresa.claveSolSunat,
+
+        idApiSunat: empresa.idApiSunat,
+        claveApiSunat: empresa.claveApiSunat,
 
         usuarioEmail: empresa.usuarioEmail,
         claveEmail: empresa.claveEmail,
 
-        logo: empresa.rutaLogo !== '' ? '/' + empresa.rutaLogo : images.noImage,
-        image:
-          empresa.rutaImage !== '' ? '/' + empresa.rutaImage : images.noImage,
+        logo: empresa.rutaLogo ? empresa.rutaLogo : images.noImage,
+        image: empresa.rutaImage ? empresa.rutaImage : images.noImage,
 
         loading: false,
       });
@@ -177,8 +147,32 @@ class EmpresaProceso extends CustomComponent {
     }
   };
 
-  async onEventGetApiSunat() {
-    if (this.state.documento === '') {
+  handleFileLogo = async (event) => {
+    if (event.target.files.length !== 0) {
+      await this.setStateAsync({
+        logo: URL.createObjectURL(event.target.files[0]),
+      });
+    } else {
+      await this.setStateAsync({ logo: images.noImage });
+      this.refFileLogo.current.value = '';
+    }
+  };
+
+  handleFileImage = async (event) => {
+    if (event.target.files.length !== 0) {
+      await this.setStateAsync({
+        image: URL.createObjectURL(event.target.files[0]),
+      });
+    } else {
+      await this.setStateAsync({
+        image: images.noImage,
+      });
+      this.refFileImagen.current.value = '';
+    }
+  };
+
+  async handleGetApiSunat() {
+    if (isEmpty(this.state.documento)) {
       this.refDocumento.current.focus();
       return;
     }
@@ -199,7 +193,6 @@ class EmpresaProceso extends CustomComponent {
       this.setState({
         documento: convertNullText(response.data.ruc),
         razonSocial: convertNullText(response.data.razonSocial),
-        direccion: convertNullText(response.data.direccion),
         loading: false,
       });
     }
@@ -215,15 +208,15 @@ class EmpresaProceso extends CustomComponent {
     }
   }
 
-  async onEventGuardar() {
-    if (!isText(this.state.documento)) {
+  async handleGuardar() {
+    if (isEmpty(this.state.documento)) {
       alertWarning('Empresa', 'Ingrese el número de documento.', () =>
         this.refDocumento.current.focus(),
       );
       return;
     }
 
-    if (this.state.razonSocial === '') {
+    if (isEmpty(this.state.razonSocial)) {
       alertWarning('Empresa', 'Ingrese la razón social.', () =>
         this.refRazonSocial.current.focus(),
       );
@@ -245,10 +238,12 @@ class EmpresaProceso extends CustomComponent {
         documento: this.state.documento.trim(),
         razonSocial: this.state.razonSocial.trim(),
         nombreEmpresa: this.state.nombreEmpresa.trim(),
-        direccion: this.state.direccion.trim(),
 
-        useSol: this.state.useSol.trim(),
-        claveSol: this.state.claveSol.trim(),
+        usuarioSolSunat: this.state.usuarioSolSunat.trim(),
+        claveSolSunat: this.state.claveSolSunat.trim(),
+
+        idApiSunat: this.state.idApiSunat.trim(),
+        claveApiSunat: this.state.claveApiSunat.trim(),
 
         usuarioEmail: this.state.usuarioEmail.trim(),
         claveEmail: this.state.claveEmail.trim(),
@@ -258,6 +253,7 @@ class EmpresaProceso extends CustomComponent {
         extlogo: extLogo,
         extimage: extImage,
 
+        idUsuario: this.state.idUsuario,
         idEmpresa: this.state.idEmpresa,
       };
 
@@ -278,17 +274,15 @@ class EmpresaProceso extends CustomComponent {
   }
 
   handleLookPasswordEmail = () => {
-    this.setState({
-      lookPasswordEmail: !this.state.lookPasswordEmail,
+    this.setState({ lookPasswordEmail: !this.state.lookPasswordEmail }, () => {
+      this.refPasswordEmail.current.focus();
     });
-    this.refPasswordEmail.current.focus();
   };
 
   handleLookPasswordSol = () => {
-    this.setState({
-      lookPasswordSol: !this.state.lookPasswordSol,
+    this.setState({ lookPasswordClave: !this.state.lookPasswordClave }, () => {
+      this.refPasswordClave.current.focus();
     });
-    this.refPasswordSol.current.focus();
   };
 
   render() {
@@ -297,15 +291,15 @@ class EmpresaProceso extends CustomComponent {
         {this.state.loading && spinnerLoading(this.state.msgLoading)}
 
         <div className="row">
-          <div className="col-12">
-            <section className="content-header">
+          <div className="col">
+            <div className="form-group">
               <h5>
                 <span role="button" onClick={() => this.props.history.goBack()}>
                   <i className="bi bi-arrow-left-short"></i>
                 </span>{' '}
                 Editar Empresa
               </h5>
-            </section>
+            </div>
           </div>
         </div>
 
@@ -331,7 +325,7 @@ class EmpresaProceso extends CustomComponent {
                   className="btn btn-outline-secondary"
                   type="button"
                   title="Sunat"
-                  onClick={() => this.onEventGetApiSunat()}
+                  onClick={() => this.handleGetApiSunat()}
                 >
                   <img src={images.sunat} alt="Sunat" width="12" />
                 </button>
@@ -365,21 +359,6 @@ class EmpresaProceso extends CustomComponent {
               value={this.state.nombreEmpresa}
               onChange={(event) =>
                 this.setState({ nombreEmpresa: event.target.value })
-              }
-              placeholder="Ingrese el nombre comercial"
-            />
-          </div>
-        </div>
-
-        <div className="row">
-          <div className="form-group col-md-12">
-            <label>Dirección Fiscal: </label>
-            <input
-              type="text"
-              className="form-control"
-              value={this.state.direccion}
-              onChange={(event) =>
-                this.setState({ direccion: event.target.value })
               }
               placeholder="Ingrese el nombre comercial"
             />
@@ -445,9 +424,9 @@ class EmpresaProceso extends CustomComponent {
             <input
               type="text"
               className="form-control"
-              value={this.state.useSol}
+              value={this.state.usuarioSolSunat}
               onChange={(event) =>
-                this.setState({ useSol: event.target.value })
+                this.setState({ usuarioSolSunat: event.target.value })
               }
               placeholder="usuario"
             />
@@ -462,9 +441,9 @@ class EmpresaProceso extends CustomComponent {
                 ref={this.refPasswordSol}
                 type={this.state.lookPasswordSol ? 'text' : 'password'}
                 className="form-control"
-                value={this.state.claveSol}
+                value={this.state.claveSolSunat}
                 onChange={(event) =>
-                  this.setState({ claveSol: event.target.value })
+                  this.setState({ claveSolSunat: event.target.value })
                 }
                 placeholder="********"
               />
@@ -478,6 +457,57 @@ class EmpresaProceso extends CustomComponent {
                   <i
                     className={
                       this.state.lookPasswordSol
+                        ? 'fa fa-eye'
+                        : 'fa fa-eye-slash'
+                    }
+                  ></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="row">
+          <div className="form-group col-md-6">
+            <label>
+              Id Api Sunat(<small>Para el envío de guía de remisión</small>):{' '}
+            </label>
+            <input
+              type="text"
+              className="form-control"
+              value={this.state.idApiSunat}
+              onChange={(event) =>
+                this.setState({ idApiSunat: event.target.value })
+              }
+              placeholder="usuario"
+            />
+          </div>
+
+          <div className="form-group col-md-6">
+            <label>
+              Clave Api Sunat(<small>Para el envío de guía de remisión</small>):{' '}
+            </label>
+            <div className="input-group">
+              <input
+                ref={this.refPasswordClave}
+                type={this.state.lookPasswordClave ? 'text' : 'password'}
+                className="form-control"
+                value={this.state.claveApiSunat}
+                onChange={(event) =>
+                  this.setState({ claveApiSunat: event.target.value })
+                }
+                placeholder="********"
+              />
+              <div className="input-group-append">
+                <button
+                  className="btn btn-outline-secondary"
+                  type="button"
+                  title="Sunat"
+                  onClick={this.handleLookPasswordSol}
+                >
+                  <i
+                    className={
+                      this.state.lookPasswordClave
                         ? 'fa fa-eye'
                         : 'fa fa-eye-slash'
                     }
@@ -529,7 +559,7 @@ class EmpresaProceso extends CustomComponent {
             <div className="text-center mb-2 ">
               <img
                 src={this.state.image}
-                alt=""
+                alt="Logo de la empresa"
                 className="img-fluid border border-primary rounded"
                 width={250}
               />
@@ -565,7 +595,7 @@ class EmpresaProceso extends CustomComponent {
               <button
                 type="button"
                 className="btn btn-primary"
-                onClick={() => this.onEventGuardar()}
+                onClick={() => this.handleGuardar()}
               >
                 Guardar
               </button>{' '}

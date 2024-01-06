@@ -142,6 +142,21 @@ const ModalSale = (props) => {
                             </div>
                         </div>
 
+                        <h5>Lista de métodos:</h5>
+
+                        {metodoPagoAgregado.map((item, index) => (
+                            <MetodoPago
+                                key={index}
+                                idMetodoPago={item.idMetodoPago}
+                                nameMetodPay={item.nombre}
+                                monto={item.monto}
+                                handleInputMontoMetodoPay={handleInputMontoMetodoPay}
+                                handleRemoveItemMetodPay={handleRemoveItemMetodPay}
+                            />
+                        ))}
+
+                        <br />
+
                         <div className="row">
                             <div className='col-md-12'>
                                 <div className="form-group">
@@ -177,82 +192,71 @@ const ModalSale = (props) => {
                             </div>
                         </div>
 
-                        {metodoPagoAgregado.map((item, index) => (
-                            <MetodoPago
-                                key={index}
-                                idMetodoPago={item.idMetodoPago}
-                                nameMetodPay={item.nombre}
-                                monto={item.monto}
-                                handleInputMontoMetodoPay={handleInputMontoMetodoPay}
-                                handleRemoveItemMetodPay={handleRemoveItemMetodPay}
-                            />
-                        ))}
-
                         <div className="row">
                             <div className='col-md-12'>
-                                    <div className="text-center">{generarVuelto()}</div>
-                                </div>
+                                <div className="text-center">{generarVuelto()}</div>
                             </div>
-
                         </div>
 
-                        {/* Procesar y cerrar venta */}
-                        <div className="modal-footer">
-                            <button
-                                type="button"
-                                className="btn btn-primary"
-                                onClick={handleSaveSale}
-                            >
-                                Completar venta
-                            </button>
-                            <button
-                                type="button"
-                                className="btn btn-danger"
-                                data-bs-dismiss="modal"
-                            >
-                                Cerrar
-                            </button>
-                        </div>
+                    </div>
+
+                    {/* Procesar y cerrar venta */}
+                    <div className="modal-footer">
+                        <button
+                            type="button"
+                            className="btn btn-primary"
+                            onClick={handleSaveSale}
+                        >
+                            Completar venta
+                        </button>
+                        <button
+                            type="button"
+                            className="btn btn-danger"
+                            data-bs-dismiss="modal"
+                        >
+                            Cerrar
+                        </button>
                     </div>
                 </div>
             </div>
-            );
+        </div>
+    );
 };
 
-            const MetodoPago = ({
-                idMetodoPago,
-                nameMetodPay,
-                monto,
-                handleInputMontoMetodoPay,
-                handleRemoveItemMetodPay,
+const MetodoPago = ({
+    idMetodoPago,
+    nameMetodPay,
+    monto,
+    handleInputMontoMetodoPay,
+    handleRemoveItemMetodPay,
 }) => {
     return (
-            <div className="input-group mb-2">
-                <input
-                    autoFocus
-                    type="text"
-                    className="form-control"
-                    placeholder="Monto"
-                    value={monto}
-                    onChange={(event) => handleInputMontoMetodoPay(event, idMetodoPago)}
-                    onKeyDown={keyNumberFloat}
-                />
-                <div className="input-group-prepend">
-                    <div className="input-group-text">
-                        <span>{nameMetodPay}</span>
-                    </div>
-                </div>
-                <div className="input-group-append">
-                    <button
-                        className="btn btn-outline-danger d-flex"
-                        title="Agregar Pago"
-                        onClick={() => handleRemoveItemMetodPay(idMetodoPago)}
-                    >
-                        <i className="bi bi-trash3-fill"></i>
-                    </button>
+        <div className="input-group mb-2">
+            <input
+                autoFocus
+                type="text"
+                className="form-control"
+                placeholder="Monto"
+                value={monto}
+                onChange={(event) => handleInputMontoMetodoPay(event, idMetodoPago)}
+                onKeyDown={keyNumberFloat}
+            />
+            <div className="input-group-prepend">
+                <div className="input-group-text">
+                    <span>{nameMetodPay}</span>
                 </div>
             </div>
-            );
+            <div className="input-group-append">
+                <button
+                    className="btn btn-outline-danger d-flex"
+                    title="Agregar Pago"
+                    onClick={() => handleRemoveItemMetodPay(idMetodoPago)}
+                >
+                    <i className="bi bi-trash3-fill"></i>
+                </button>
+            </div>
+        </div>
+    );
 };
 
-            export default ModalSale;
+export default ModalSale;

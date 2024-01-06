@@ -626,6 +626,12 @@ body.swal2-no-backdrop > .swal2-shown.swal2-bottom-right {
   justify-content: center;
 }
 
+.swal2-popup .swal2-contentinput {
+  display: flex;
+  margin: 0px 15px;
+}
+
+
 .swal2-popup .swal2-title {
   color: #020203;
   font-size: 22px;
@@ -788,9 +794,12 @@ body.swal2-no-backdrop > .swal2-shown.swal2-bottom-right {
   width: 100%;
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
-  height: calc(1.5em + 0.775rem + 2px);
+  /* height: calc(1.5em + 0.775rem + 2px); */
+  height: calc(1.5em + 0.9rem + 2px);
+  /* padding: 0.375rem 0.75rem; */
   padding: 0.375rem 0.75rem;
-  font-size: 0.8335rem;
+  /* font-size: 0.8335rem; */
+  font-size: 0.9rem;
   font-weight: 400;
   border: 1px solid #999999;
   border-radius: 2px;
@@ -875,10 +884,10 @@ body.swal2-no-backdrop > .swal2-shown.swal2-bottom-right {
   padding: 0;
 }
 
-.swal2-popup .swal2-input {
+/* .swal2-popup .swal2-input {
   height: 34px;
   padding: 6px 12px;
-}
+} */
 
 .swal2-popup .swal2-input[type='number'] {
   max-width: 150px;

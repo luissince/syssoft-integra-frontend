@@ -111,6 +111,8 @@ class CompraCrear extends CustomComponent {
       idSucursal: this.props.token.project.idSucursal,
     };
 
+    this.initial = { ...this.state }
+
     // Referencia principales
     this.refComprobante = React.createRef();
     this.refMoneda = React.createRef();
@@ -248,7 +250,7 @@ class CompraCrear extends CustomComponent {
         await this.fetchComprobante(COMPRA),
         await this.fetchMoneda(),
         await this.fetchMetodoPago(),
-        await this.fetchComboAlmacen({idSucursal: this.state.idSucursal}),
+        await this.fetchComboAlmacen({ idSucursal: this.state.idSucursal }),
         await this.fetchImpuesto(),
       ]);
 
@@ -929,62 +931,7 @@ class CompraCrear extends CustomComponent {
   };
 
   handleLimpiar = async () => {
-    const data = {
-      // Atributos de carga
-      loading: true,
-      msgLoading: 'Cargando datos...',
-
-      // Atributos principales
-      idComprobante: '',
-      idMoneda: '',
-      idAlmacen: '',
-      idImpuesto: '',
-      observacion: '',
-      nota: '',
-
-      // Detalle del gasto
-      detalle: [],
-
-      // Lista de datos
-      comprobantes: [],
-      monedas: [],
-      almacenes: [],
-      impuestos: [],
-
-      // Filtrar producto
-      filtrarProducto: '',
-      loadingProducto: false,
-      producto: null,
-      productos: [],
-
-      // Filtrar cliente
-      filtrarCliente: '',
-      loadingCliente: false,
-      cliente: null,
-      clientes: [],
-
-      // Atributos libres
-      codISO: '',
-      total: 0,
-
-      // Atributos del modal sale
-      loadingModal: false,
-      selectTipoPago: 1,
-      metodosPagoLista: [],
-      metodoPagoAgregado: [],
-      tipoCredito: '1',
-      frecuenciaPagoFijo: new Date().getDate() > 15 ? '30' : '15',
-      frecuenciaPagoVariable: new Date().getDate() > 15 ? '30' : '15',
-      numeroCuotas: '',
-      letraMensual: '',
-
-      // Atributos del modal producto
-      loadingModalProducto: false,
-      cantidadModalProducto: '',
-      costoModalProducto: '',
-    };
-
-    this.setState(data, async () => {
+    this.setState(this.initial, async () => {
       await this.loadData();
       this.refProducto.current.focus();
     });
@@ -1028,7 +975,7 @@ class CompraCrear extends CustomComponent {
         <td>{rounded(item.cantidad)}</td>
         <td>{numberFormat(item.costo, this.state.codISO)}</td>
         <td>{numberFormat(item.cantidad * item.costo, this.state.codISO)}</td>
-        <td>
+        <td className='text-center'>
           <button
             className="btn btn-outline-danger btn-sm"
             title="Eliminar"
@@ -1212,7 +1159,7 @@ class CompraCrear extends CustomComponent {
                       <th width="5%">Cantidad</th>
                       <th width="5%">Costo</th>
                       <th width="5%">Total</th>
-                      <th width="5%">Quitar</th>
+                      <th width="5%" className='text-center'>Quitar</th>
                     </tr>
                   </thead>
                   <tbody>{this.generarBody()}</tbody>

@@ -8,6 +8,7 @@ import {
   spinnerLoading,
   isText,
   isEmpty,
+  keyNumberPhone,
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../../components/Container';
@@ -32,6 +33,10 @@ class ProcesoSucursal extends CustomComponent {
 
       idSucursal: '',
       nombre: '',
+      telefono: '',
+      celular: '',
+      email: '',
+      paginaWeb: '',
       direcion: '',
       idUbigeo: '',
       estado: true,
@@ -46,6 +51,10 @@ class ProcesoSucursal extends CustomComponent {
     };
 
     this.refNombre = React.createRef();
+    this.refTelefono = React.createRef();
+    this.refCelular = React.createRef();
+    this.refEmail = React.createRef();
+    this.refPaginWeb = React.createRef();
     this.refDireccion = React.createRef();
     this.refIdUbigeo = React.createRef();
 
@@ -73,6 +82,8 @@ class ProcesoSucursal extends CustomComponent {
       await this.fetchIdSucursal(idSucursal),
     ]);
 
+    console.log(sucursal)
+
     const ubigeo = {
       idUbigeo: sucursal.idUbigeo,
       departamento: sucursal.departamento,
@@ -86,19 +97,20 @@ class ProcesoSucursal extends CustomComponent {
     this.setState({
       idSucursal: idSucursal,
       nombre: sucursal.nombre,
-      direcion: sucursal.distrito,
+      telefono: sucursal.telefono,
+      celular: sucursal.celular,
+      email: sucursal.email,
+      paginaWeb: sucursal.paginaWeb,
+      direcion: sucursal.direccion,
       estado: sucursal.estado === 1 ? true : false,
       idUbigeo: sucursal.idUbigeo.toString(),
-      imagen: sucursal.ruta !== '' ? '/' + sucursal.ruta : images.noImage,
+      imagen: sucursal.ruta ? '/' + sucursal.ruta : images.noImage,
       loading: false,
     });
   }
 
   componentWillUnmount() {
-    this.refFileImagen.current.removeEventListener(
-      'change',
-      this.handleFileImage,
-    );
+    this.refFileImagen.current.removeEventListener('change', this.handleFileImage);
     this.abortController.abort();
   }
 
@@ -123,7 +135,6 @@ class ProcesoSucursal extends CustomComponent {
   handleSave = async () => {
     if (isEmpty(this.state.nombre)) {
       alertWarning('Sucursal', 'Ingrese el nombre del sucursal.', () => {
-        this.onFocusTab('datos-tab', 'datos');
         this.refNombre.current.focus();
       });
       return;
@@ -131,7 +142,6 @@ class ProcesoSucursal extends CustomComponent {
 
     if (isEmpty(this.state.direcion)) {
       alertWarning('Sucursal', 'Ingrese la dirección del sucursal.', () => {
-        this.onFocusTab('datos-tab', 'datos');
         this.refDireccion.current.focus();
       });
       return;
@@ -139,7 +149,6 @@ class ProcesoSucursal extends CustomComponent {
 
     if (isEmpty(this.state.idUbigeo)) {
       alertWarning('Sucursal', 'Ingrese su ubigeo.', () => {
-        this.onFocusTab('datos-tab', 'datos');
         this.refIdUbigeo.current.focus();
       });
       return;
@@ -163,8 +172,12 @@ class ProcesoSucursal extends CustomComponent {
 
         const data = {
           //datos
-          nombre: this.state.nombre.trim().toUpperCase(),
-          direccion: this.state.direcion.trim().toUpperCase(),
+          nombre: this.state.nombre.trim(),
+          telefono: this.state.telefono.trim(),
+          celular: this.state.celular.trim(),
+          email: this.state.email.trim(),
+          paginaWeb: this.state.paginaWeb.trim(),
+          direccion: this.state.direcion.trim(),
           idUbigeo: this.state.idUbigeo,
           estado: this.state.estado,
           //imagen
@@ -263,19 +276,6 @@ class ProcesoSucursal extends CustomComponent {
     this.selectItem = true;
   };
 
-  onFocusTab(idTab, idContent) {
-    if (!document.getElementById(idTab).classList.contains('active')) {
-      for (let child of document.getElementById('myTab').childNodes) {
-        child.childNodes[0].classList.remove('active');
-      }
-      for (let child of document.getElementById('myTabContent').childNodes) {
-        child.classList.remove('show', 'active');
-      }
-      document.getElementById(idTab).classList.add('active');
-      document.getElementById(idContent).classList.add('show', 'active');
-    }
-  }
-
   render() {
     return (
       <ContainerWrapper>
@@ -287,196 +287,210 @@ class ProcesoSucursal extends CustomComponent {
               <h5>
                 <span role="button" onClick={() => this.props.history.goBack()}>
                   <i className="bi bi-arrow-left-short"></i>
-                </span>{' '}
-                Sucursal
-                <small className="text-secondary"> Editar</small>
+                </span> Sucursal <small className="text-secondary"> Editar</small>
               </h5>
             </div>
           </div>
         </div>
 
         <div className="row">
+          <div className="form-group col">
+            <label>
+              Nombre: <i className="fa fa-asterisk text-danger small"></i>
+            </label>
+            <input
+              type="text"
+              className="form-control"
+              ref={this.refNombre}
+              value={this.state.nombre}
+              onChange={(event) =>
+                this.setState({ nombre: event.target.value })
+              }
+              placeholder="Ingrese el nombre ..."
+            />
+          </div>
+        </div>
+
+        <div className="row">
+          <div className="form-group col-md-6">
+            <label>
+              N° de Teléfono:
+            </label>
+            <input
+              type="text"
+              className="form-control"
+              ref={this.refTelefono}
+              value={this.state.telefono}
+              onChange={(event) =>
+                this.setState({ telefono: event.target.value })
+              }
+              onKeyDown={keyNumberPhone}
+              placeholder="Ingrese su n° de teléfono ..."
+            />
+          </div>
+
+          <div className="form-group col-md-6">
+            <label>
+              N° de Celular:
+            </label>
+            <input
+              type="text"
+              className="form-control"
+              ref={this.refCelular}
+              value={this.state.celular}
+              onChange={(event) =>
+                this.setState({ celular: event.target.value })
+              }
+              onKeyDown={keyNumberPhone}
+              placeholder="Ingrese su n° de celular ..."
+            />
+          </div>
+        </div>
+
+        <div className="row">
+          <div className="form-group col-md-6">
+            <label>
+              Correo Electrónico:
+            </label>
+            <input
+              type="text"
+              className="form-control"
+              ref={this.refEmail}
+              value={this.state.email}
+              onChange={(event) =>
+                this.setState({ email: event.target.value })
+              }
+              placeholder="Ingrese su correo electrónico ..."
+            />
+          </div>
+
+          <div className="form-group col-md-6">
+            <label>
+              Página Web:
+            </label>
+            <input
+              type="text"
+              className="form-control"
+              ref={this.refPaginWeb}
+              value={this.state.paginaWeb}
+              onChange={(event) =>
+                this.setState({ paginaWeb: event.target.value })
+              }
+              placeholder="Ingrese su página web ..."
+            />
+          </div>
+        </div>
+
+        <div className="row">
+          <div className="form-group col">
+            <label>
+              Dirección: <i className="fa fa-asterisk text-danger small"></i>
+            </label>
+            <input
+              type="text"
+              className="form-control"
+              ref={this.refDireccion}
+              value={this.state.direcion}
+              onChange={(event) =>
+                this.setState({ direcion: event.target.value })
+              }
+              placeholder="Ingrese su dirección ..."
+            />
+          </div>
+        </div>
+
+        <div className="row">
+          <div className="form-group col">
+            <label>
+              Ubigeo: <i className="fa fa-asterisk text-danger small"></i>
+            </label>
+            <SearchInput
+              placeholder="Filtrar productos..."
+              refValue={this.refIdUbigeo}
+              value={this.state.ubigeo}
+              data={this.state.filteredData}
+              handleClearInput={this.handleClearInputaUbigeo}
+              handleFilter={this.handleFilterUbigeo}
+              handleSelectItem={this.handleSelectItemUbigeo}
+              renderItem={(value) => (
+                <>
+                  {value.departamento +
+                    '-' +
+                    value.provincia +
+                    '-' +
+                    value.distrito +
+                    ' (' +
+                    value.ubigeo +
+                    ')'}
+                </>
+              )}
+            />
+          </div>
+        </div>
+
+        <div className="row">
+          <div className="form-group col-md-6">
+            <label>
+              Estado: <i className="fa fa-asterisk text-danger small"></i>
+            </label>
+            <div className="custom-control custom-switch">
+              <input
+                type="checkbox"
+                className="custom-control-input"
+                id="switch1"
+                checked={this.state.estado}
+                onChange={(value) =>
+                  this.setState({ estado: value.target.checked })
+                }
+              />
+              <label className="custom-control-label" htmlFor="switch1">
+                {this.state.estado ? 'Habilitado' : 'Inactivo'}
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div className="row">
+          <div className='form-group col text-center'>
+            <label>Logo</label>
+            <br />
+            <small>Usuado para los reportes</small>
+            <div className="text-center mb-2 ">
+              <img
+                src={this.state.imagen}
+                alt=""
+                className="img-fluid border border-primary rounded"
+                width={250}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="row">
           <div className="col">
-            <ul className="nav nav-tabs" id="myTab" role="tablist">
-              <li className="nav-item" role="presentation">
-                <a
-                  className="nav-link active"
-                  id="datos-tab"
-                  data-bs-toggle="tab"
-                  href="#datos"
-                  role="tab"
-                  aria-controls="datos"
-                  aria-selected={true}
-                >
-                  <i className="bi bi-info-circle"></i> Datos
-                </a>
-              </li>
-              <li className="nav-item" role="presentation">
-                <a
-                  className="nav-link"
-                  id="imagen-tab"
-                  data-bs-toggle="tab"
-                  href="#imagen"
-                  role="tab"
-                  aria-controls="imagen"
-                  aria-selected={false}
-                >
-                  <i className="bi bi-image"></i> Imagen
-                </a>
-              </li>
-            </ul>
-
-            <div className="tab-content pt-2" id="myTabContent">
-              <div
-                className="tab-pane fade show active"
-                id="datos"
-                role="tabpanel"
-                aria-labelledby="datos-tab"
+            <div className="form-group text-center">
+              <input
+                className="d-none"
+                type="file"
+                id="fileImage"
+                accept="image/png, image/jpeg, image/gif, image/svg"
+                ref={this.refFileImagen}
+              />
+              <label
+                htmlFor="fileImage"
+                className="btn btn-outline-secondary m-0"
               >
-                <div className="row">
-                  <div className="form-group col">
-                    <label>
-                      Nombre:{' '}
-                      <i className="fa fa-asterisk text-danger small"></i>
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      ref={this.refNombre}
-                      value={this.state.nombre}
-                      onChange={(event) =>
-                        this.setState({ nombre: event.target.value })
-                      }
-                      placeholder="Ingrese el nombre ..."
-                    />
-                  </div>
+                <div className="content-button">
+                  <i className="bi bi-image"></i>
+                  <span></span>
                 </div>
-
-                <div className="row">
-                  <div className="form-group col">
-                    <label>
-                      Dirección:{' '}
-                      <i className="fa fa-asterisk text-danger small"></i>
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      ref={this.refDireccion}
-                      value={this.state.direcion}
-                      onChange={(event) =>
-                        this.setState({ direcion: event.target.value })
-                      }
-                      placeholder="Ingrese la dirección ..."
-                    />
-                  </div>
-                </div>
-
-                <div className="row">
-                  <div className="form-group col">
-                    <label>
-                      Ubigeo:{' '}
-                      <i className="fa fa-asterisk text-danger small"></i>
-                    </label>
-                    <SearchInput
-                      placeholder="Filtrar productos..."
-                      refValue={this.refIdUbigeo}
-                      value={this.state.ubigeo}
-                      data={this.state.filteredData}
-                      handleClearInput={this.handleClearInputaUbigeo}
-                      handleFilter={this.handleFilterUbigeo}
-                      handleSelectItem={this.handleSelectItemUbigeo}
-                      renderItem={(value) => (
-                        <>
-                          {value.departamento +
-                            '-' +
-                            value.provincia +
-                            '-' +
-                            value.distrito +
-                            ' (' +
-                            value.ubigeo +
-                            ')'}
-                        </>
-                      )}
-                    />
-                  </div>
-                </div>
-
-                <div className="row">
-                  <div className="form-group col-md-6">
-                    <label>
-                      Estado:{' '}
-                      <i className="fa fa-asterisk text-danger small"></i>
-                    </label>
-                    <div className="custom-control custom-switch">
-                      <input
-                        type="checkbox"
-                        className="custom-control-input"
-                        id="switch1"
-                        checked={this.state.estado}
-                        onChange={(value) =>
-                          this.setState({ estado: value.target.checked })
-                        }
-                      />
-                      <label className="custom-control-label" htmlFor="switch1">
-                        {this.state.estado ? 'Habilitado' : 'Inactivo'}
-                      </label>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div
-                className="tab-pane fade"
-                id="imagen"
-                role="tabpanel"
-                aria-labelledby="imagen-tab"
+              </label>{' '}
+              <button
+                className="btn btn-outline-secondary"
+                onClick={this.handleClearImage}
               >
-                <div className="row">
-                  <div className="col">
-                    <div className="form-group">
-                      <div className="row">
-                        <div className="col-lg-8 col-md-10 col-sm-12 col-xs-12">
-                          <img
-                            src={this.state.imagen}
-                            alt=""
-                            className="card-img-top"
-                          />
-                          <p>Imagen de portada 1024 x 629 pixeles </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="row">
-                  <div className="col">
-                    <div className="form-group text-center">
-                      <input
-                        className="d-none"
-                        type="file"
-                        id="fileImage"
-                        accept="image/png, image/jpeg, image/gif, image/svg"
-                        ref={this.refFileImagen}
-                      />
-                      <label
-                        htmlFor="fileImage"
-                        className="btn btn-outline-secondary m-0"
-                      >
-                        <div className="content-button">
-                          <i className="bi bi-image"></i>
-                          <span></span>
-                        </div>
-                      </label>{' '}
-                      <button
-                        className="btn btn-outline-secondary"
-                        onClick={this.handleClearImage}
-                      >
-                        <i className="bi bi-trash"></i>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
+                <i className="bi bi-trash"></i>
+              </button>
             </div>
           </div>
         </div>

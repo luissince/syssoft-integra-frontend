@@ -8,6 +8,7 @@ import {
   alertDialog,
   statePrivilegio,
   keyUpSearch,
+  isEmpty,
 } from '../../../../helper/utils.helper';
 import Paginacion from '../../../../components/Paginacion';
 import ContainerWrapper from '../../../../components/Container';
@@ -100,7 +101,7 @@ class Clientes extends CustomComponent {
   };
 
   fillTable = async (opcion, buscar) => {
-    await this.setStateAsync({
+    this.setState({
       loading: true,
       lista: [],
       messageTable: 'Cargando información...',
@@ -113,17 +114,12 @@ class Clientes extends CustomComponent {
       filasPorPagina: this.state.filasPorPagina,
     };
 
-    const response = await listClientes(
-      params,
-      this.abortControllerTable.signal,
-    );
+    const response = await listClientes(params, this.abortControllerTable.signal,);
 
     if (response instanceof SuccessReponse) {
-      const totalPaginacion = parseInt(
-        Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
-      );
+      const totalPaginacion = parseInt(Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),);
 
-      await this.setStateAsync({
+      this.setState({
         loading: false,
         lista: response.data.result,
         totalPaginacion: totalPaginacion,
@@ -133,7 +129,7 @@ class Clientes extends CustomComponent {
     if (response instanceof ErrorResponse) {
       if (response.getType() === CANCELED) return;
 
-      await this.setStateAsync({
+      this.setState({
         loading: false,
         lista: [],
         totalPaginacion: 0,
@@ -163,31 +159,121 @@ class Clientes extends CustomComponent {
   }
 
   handleRemoverCliente(idCliente) {
-    alertDialog(
-      'Eliminar cliente',
-      '¿Está seguro de que desea eliminar el contacto? Esta operación no se puede deshacer.',
-      async (value) => {
-        if (value) {
-          alertInfo('Cliente', 'Procesando información...');
+    alertDialog('Cliente', '¿Está seguro de que desea eliminar el contacto? Esta operación no se puede deshacer.', async (accept) => {
+      if (accept) {
+        alertInfo('Cliente', 'Procesando información...');
 
-          const params = {
-            idCliente: idCliente,
-          };
+        const params = {
+          idCliente: idCliente,
+        };
 
-          const response = await deleteCliente(params);
+        const response = await deleteCliente(params);
 
-          if (response instanceof SuccessReponse) {
-            alertSuccess('Cliente', response.data, () => {
-              this.loadInit();
-            });
-          }
-
-          if (response instanceof ErrorResponse) {
-            alertWarning('Cliente', response.getMessage());
-          }
+        if (response instanceof SuccessReponse) {
+          alertSuccess('Cliente', response.data, () => {
+            this.loadInit();
+          });
         }
-      },
+
+        if (response instanceof ErrorResponse) {
+          alertWarning('Cliente', response.getMessage());
+        }
+      }
+    },
     );
+  }
+
+  generarBody() {
+    if (this.state.loading) {
+      return (
+        <tr>
+          <td className="text-center" colSpan="10">
+            {spinnerLoading(
+              'Cargando información de la tabla...',
+              true,
+            )}
+          </td>
+        </tr>
+      );
+    }
+
+    if (isEmpty(this.state.lista)) {
+      return (
+        <tr className="text-center">
+          <td colSpan="10">¡No hay datos registrados!</td>
+        </tr>
+      );
+    }
+
+    return this.state.lista.map((item, index) => {
+      return (
+        <tr key={index}>
+          <td className="text-center">{item.id}</td>
+          <td>
+            {item.tipoDocumento}
+            {<br />}
+            {item.documento}
+          </td>
+          <td>{item.informacion}</td>
+          <td>
+            {item.celular}
+            {<br />}
+            {item.telefono}
+          </td>
+          <td>{item.direccion}</td>
+          <td className="text-center">
+            <div
+              className={`badge ${item.predeterminado === 1 ? 'badge-success' : 'badge-warning'}`}
+            >
+              {item.predeterminado === 1 ? 'SI' : 'NO'}
+            </div>
+          </td>
+          <td className="text-center">
+            <div
+              className={`badge ${item.estado === 1 ? 'badge-info' : 'badge-danger'}`}
+            >
+              {item.estado === 1 ? 'ACTIVO' : 'INACTIVO'}
+            </div>
+          </td>
+          <td className="text-center">
+            <button
+              className="btn btn-outline-info btn-sm"
+              title="Editar"
+              onClick={() =>
+                this.handleDetalleCliente(item.idCliente)
+              }
+              disabled={!this.state.view}
+            >
+              <i className="bi bi-eye"></i>
+            </button>
+          </td>
+          <td className="text-center">
+            <button
+              className="btn btn-outline-warning btn-sm"
+              title="Editar"
+              onClick={() =>
+                this.handleEditarCliente(item.idCliente)
+              }
+              disabled={!this.state.edit}
+            >
+              <i className="bi bi-pencil"></i>
+            </button>
+          </td>
+          <td className="text-center">
+            <button
+              className="btn btn-outline-danger btn-sm"
+              title="Editar"
+              onClick={() =>
+                this.handleRemoverCliente(item.idCliente)
+              }
+              disabled={!this.state.remove}
+            >
+              <i className="bi bi-trash"></i>
+            </button>
+          </td>
+        </tr>
+      );
+    });
   }
 
   render() {
@@ -273,98 +359,7 @@ class Clientes extends CustomComponent {
                   </tr>
                 </thead>
                 <tbody>
-                  {this.state.loading ? (
-                    <tr>
-                      <td className="text-center" colSpan="10">
-                        {spinnerLoading(
-                          'Cargando información de la tabla...',
-                          true,
-                        )}
-                      </td>
-                    </tr>
-                  ) : this.state.lista.length === 0 ? (
-                    <tr className="text-center">
-                      <td colSpan="10">¡No hay datos registrados!</td>
-                    </tr>
-                  ) : (
-                    this.state.lista.map((item, index) => {
-                      return (
-                        <tr key={index}>
-                          <td className="text-center">{item.id}</td>
-                          <td>
-                            {item.tipodocumento}
-                            {<br />}
-                            {item.documento}
-                          </td>
-                          <td>{item.informacion}</td>
-                          <td>
-                            {item.celular}
-                            {<br />}
-                            {item.telefono}
-                          </td>
-                          <td>{item.direccion}</td>
-                          <td className="text-center">
-                            <div
-                              className={`badge ${
-                                item.predeterminado === 1
-                                  ? 'badge-success'
-                                  : 'badge-warning'
-                              }`}
-                            >
-                              {item.predeterminado === 1 ? 'SI' : 'NO'}
-                            </div>
-                          </td>
-                          <td className="text-center">
-                            <div
-                              className={`badge ${
-                                item.estado === 1
-                                  ? 'badge-info'
-                                  : 'badge-danger'
-                              }`}
-                            >
-                              {item.estado === 1 ? 'ACTIVO' : 'INACTIVO'}
-                            </div>
-                          </td>
-                          <td className="text-center">
-                            <button
-                              className="btn btn-outline-info btn-sm"
-                              title="Editar"
-                              onClick={() =>
-                                this.handleDetalleCliente(item.idCliente)
-                              }
-                              disabled={!this.state.view}
-                            >
-                              <i className="bi bi-eye"></i>
-                            </button>
-                          </td>
-                          <td className="text-center">
-                            <button
-                              className="btn btn-outline-warning btn-sm"
-                              title="Editar"
-                              onClick={() =>
-                                this.handleEditarCliente(item.idCliente)
-                              }
-                              disabled={!this.state.edit}
-                            >
-                              <i className="bi bi-pencil"></i>
-                            </button>
-                          </td>
-                          <td className="text-center">
-                            <button
-                              className="btn btn-outline-danger btn-sm"
-                              title="Editar"
-                              onClick={() =>
-                                this.handleRemoverCliente(item.idCliente)
-                              }
-                              disabled={!this.state.remove}
-                            >
-                              <i className="bi bi-trash"></i>
-                            </button>
-                          </td>
-                        </tr>
-                      );
-                    })
-                  )}
+                  {this.generarBody()}
                 </tbody>
               </table>
             </div>

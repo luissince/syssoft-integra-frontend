@@ -252,10 +252,31 @@ const ModalSale = (props) => {
             {/* contado detalle */}
             {selectTipoPago === 1 && (
               <>
+                <h6>Lista de métodos:</h6>
+
+                <div className='row'>
+                  <div className='col'>
+                    <div className="form-group">
+                      {metodoPagoAgregado.map((item, index) => (
+                        <MetodoPago
+                          key={index}
+                          idMetodoPago={item.idMetodoPago}
+                          nameMetodPay={item.nombre}
+                          monto={item.monto}
+                          handleInputMontoMetodoPay={handleInputMontoMetodoPay}
+                          handleRemoveItemMetodPay={handleRemoveItemMetodPay}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <br />
+
                 <div className="row">
                   <div className="col">
                     <div className="form-group">
-                      <label>Metodo de cobro:</label>
+                      <label>Agregar método de cobro:</label>
                       <div className="input-group">
                         <div className="input-group-prepend">
                           <div className="input-group-text">
@@ -288,23 +309,6 @@ const ModalSale = (props) => {
                 </div>
 
                 <div className='row'>
-                  <div className='col'>
-                    <div className="form-group">
-                      {metodoPagoAgregado.map((item, index) => (
-                        <MetodoPago
-                          key={index}
-                          idMetodoPago={item.idMetodoPago}
-                          nameMetodPay={item.nombre}
-                          monto={item.monto}
-                          handleInputMontoMetodoPay={handleInputMontoMetodoPay}
-                          handleRemoveItemMetodPay={handleRemoveItemMetodPay}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                <div className='row'>
                   <div className="col-12">
                     <br />
                   </div>
@@ -322,6 +326,15 @@ const ModalSale = (props) => {
             {selectTipoPago === 2 && (
               <div className={`row`}>
                 <div className="col">
+
+                  <div className="form-group">
+                    <span className="text-md">
+                      <i className="bi bi-info-circle text-success text-lg"></i>{' '}
+                      Los pagos se efectúan en función del número de
+                      cuotas, con una alerta que indica la frecuencia de
+                      los pagos.
+                    </span>
+                  </div>
 
                   <div className="form-group">
                     <div className="input-group">
@@ -386,8 +399,17 @@ const ModalSale = (props) => {
 
             {/* crédito variable */}
             {selectTipoPago === 3 && (
-              <div className={`row`}>
+              <div className="row">
                 <div className="col">
+
+                  <div className="form-group">
+                    <span className="text-md">
+                      <i className="bi bi-info-circle text-success text-lg"></i>{' '}
+                      Los pagos se realizan de acuerdo con la frecuencia
+                      establecida, con alertas programadas para recordar
+                      las fechas de pago.
+                    </span>
+                  </div>
 
                   <div className="form-group">
                     <div className="input-group">
@@ -409,6 +431,22 @@ const ModalSale = (props) => {
                       </select>
                     </div>
                   </div>
+                </div>
+              </div>
+            )}
+
+            {/* pago adelantado */}
+            {selectTipoPago === 4 && (
+              <div className="row">
+                <div className="col">
+
+                  <div className="form-group">
+                    <span className="text-md">
+                      <i className="bi bi-info-circle text-success text-lg"></i>{' '}
+                      Los pagos se efectúan de manera habitual; sin embargo, el inventario no se reduce, ya que se trata de un pago anticipado.
+                    </span>
+                  </div>
+
                 </div>
               </div>
             )}

@@ -4,22 +4,23 @@ import React from 'react';
 import { Switch, Route, Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { signOut, closeProject } from '../../redux/actions';
-import Menu from '../../components/menu/Menu';
-import Head from '../../components/head/Head';
 
-import Notifications from './notificacion/Notifications';
-import Dashboard from './dashboard/Dashboard';
+import Bienvenido from './bienvenido/Bienvenido.jsx';
+import NotFoundMain from '../../components/errors/NotFoundMain.jsx';
 
-import Ventas from './facturacion/venta/listar/Ventas';
+import Menu from '../../components/menu/Menu.jsx';
+import Head from '../../components/head/Head.jsx';
+
+import Notifications from './notificacion/Notifications.jsx';
+import Dashboard from './dashboard/Dashboard.jsx';
+
+import Ventas from './facturacion/venta/listar/Ventas.jsx';
 import VentaCrear from './facturacion/venta/crear/VentaCrear.jsx';
-import VentaDetalle from './facturacion/venta/detalle/VentaDetalle';
+import VentaDetalle from './facturacion/venta/detalle/VentaDetalle.jsx';
 
 import Cobros from './facturacion/cobro/lista/Cobros';
 import CobroCrear from './facturacion/cobro/crear/CobroCrear';
 import CobroDetalle from './facturacion/cobro/detalle/CobroDetalle';
-
-import Creditos from './facturacion/credito/Creditos';
-import CreditoProceso from './facturacion/credito/CreditoProceso';
 
 import Cotizaciones from './facturacion/cotizacion/Cotizaciones.jsx';
 import CotizacioneCrear from './facturacion/cotizacion/CotizacionCrear.jsx';
@@ -33,9 +34,8 @@ import GuiaRemisionDetalle from './facturacion/guiaremision/GuiaRemisionDetalle.
 
 import Ingresos from './facturacion/ingreso/lista/Ingresos.jsx';
 
-import Reservas from './facturacion/reserva/Reservas';
-
-import Socios from './facturacion/socio/Socios';
+import CuentasPorCobrar from './facturacion/cuenta-cobrar/lista/CuentasPorCobrar.jsx';
+import CuentasPorCobrarAbonar from './facturacion/cuenta-cobrar/crear/CuentasPorCobrarAbonar.jsx';
 
 import Monedas from './ajustes/moneda/Monedas.jsx';
 import MonedaAgregar from './ajustes/moneda/MonedaAgregar.jsx';
@@ -113,6 +113,9 @@ import CompraDetalle from './tesoreria/compra/detalle/CompraDetalle.jsx';
 
 import Salidas from './tesoreria/salida/lista/Salidas.jsx';
 
+import CuentasPorPagar from './tesoreria/cuenta-pagar/lista/CuentasPorPagar.jsx';
+import CuentasPorPagarAmortizar from './tesoreria/cuenta-pagar/crear/CuentasPorPagarAmortizar.jsx';
+
 import Perfiles from './seguridad/perfil/Perfiles.jsx';
 import PerfilAgregar from './seguridad/perfil/PerfilAgregar.jsx';
 import PerfilEditar from './seguridad/perfil/PerfilEditar.jsx';
@@ -130,12 +133,11 @@ import RepProductos from './reporte/RepProductos';
 import RepClientes from './reporte/RepClientes';
 import CpeConsultar from './cpesunat/CpeConsultar';
 import CpeElectronicos from './cpesunat/CpeElectronicos';
-import Bienvenido from './bienvenido/Bienvenido';
-import NotFoundMain from '../../components/errors/NotFoundMain';
-import { getNotifications } from '../../network/rest/principal.network';
-import SuccessReponse from '../../model/class/response';
-import ErrorResponse from '../../model/class/error-response';
-import { CANCELED } from '../../model/types/types';
+
+import { getNotifications } from '../../network/rest/principal.network.js';
+import SuccessReponse from '../../model/class/response.js';
+import ErrorResponse from '../../model/class/error-response.js';
+import { CANCELED } from '../../model/types/types.js';
 
 class Inicio extends React.Component {
   constructor(props) {
@@ -407,22 +409,6 @@ class Inicio extends React.Component {
           />
 
           <Route
-            path={`${path}/creditos`}
-            exact={true}
-            render={(props) => <Creditos {...props} />}
-          />
-          <Route
-            path={`${path}/creditos/proceso`}
-            exact={true}
-            render={(props) => <CreditoProceso {...props} />}
-          />
-          <Route
-            path={`${path}/socios`}
-            exact={true}
-            render={(props) => <Socios {...props} />}
-          />
-
-          <Route
             path={`${path}/notacredito`}
             exact={true}
             render={(props) => <NotaCredito {...props} />}
@@ -488,10 +474,15 @@ class Inicio extends React.Component {
             render={(props) => <Ingresos {...props} />}
           />
 
-
           <Route
-            path={`${path}/reservas`}
-            render={(props) => <Reservas {...props} />}
+            path={`${path}/cuentacobrar`}
+            exact={true}
+            render={(props) => <CuentasPorCobrar {...props} />}
+          />
+          <Route
+            path={`${path}/cuentacobrar/detalle`}
+            exact={true}
+            render={(props) => <CuentasPorCobrarAbonar {...props} />}
           />
 
           <Route
@@ -755,6 +746,17 @@ class Inicio extends React.Component {
             path={`${path}/salidas`}
             exact={true}
             render={(props) => <Salidas {...props} />}
+          />
+
+          <Route
+            path={`${path}/cuentapagar`}
+            exact={true}
+            render={(props) => <CuentasPorPagar {...props} />}
+          />
+          <Route
+            path={`${path}/cuentapagar/detalle`}
+            exact={true}
+            render={(props) => <CuentasPorPagarAmortizar {...props} />}
           />
 
 

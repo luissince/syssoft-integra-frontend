@@ -619,7 +619,7 @@ export function alertSuccess(title, message, callback = function () { }) {
     showConfirmButton: true,
     allowOutsideClick: false,
     showCloseButton: true,
-  }).then((event) => {
+  }).then(() => {
     callback();
   });
 }
@@ -634,7 +634,7 @@ export function alertWarning(title, message, callback = function () { }) {
     showConfirmButton: true,
     allowOutsideClick: false,
     showCloseButton: true,
-  }).then((event) => {
+  }).then(() => {
     callback();
   });
 }
@@ -644,6 +644,8 @@ export function alertError(title, message) {
     title: title,
     text: message,
     type: 'error',
+    confirmButtonText: 'Aceptar',
+    cancelButtonText: 'Cancelar',
     showConfirmButton: true,
     allowOutsideClick: false,
     showCloseButton: true,
@@ -657,7 +659,9 @@ export function alertDialog(title, mensaje, callback) {
     type: 'question',
     showCancelButton: true,
     confirmButtonText: 'Si',
+    confirmButtonColor: '#007bff',
     cancelButtonText: 'No',
+    cancelButtonColor: '#dc3545',
     allowOutsideClick: false,
     showCloseButton: true,
   }).then((isConfirm) => {
@@ -669,5 +673,31 @@ export function alertDialog(title, mensaje, callback) {
     } else {
       callback(false);
     }
+  });
+}
+
+export function alertInput(title, mensaje, callback) {
+  Swal({
+    title: title,
+    text: mensaje,
+    type: 'info',
+    input: "text",
+    onKeyDown: keyNumberFloat,
+    inputPlaceholder: '0.00',
+    inputAttributes: {
+      autocapitalize: "off"
+    },
+    showCancelButton: true,
+    allowOutsideClick: false,
+    confirmButtonText: "Aceptar",
+    confirmButtonColor: '#007bff',
+    cancelButtonText: 'Cancelar',
+    cancelButtonColor: '#dc3545',
+    showCloseButton: true,
+  }).then((result) => {
+    if (result.value) {
+      callback(true, result.value);
+    }
+    callback(false);
   });
 }

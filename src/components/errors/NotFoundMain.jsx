@@ -2,7 +2,7 @@ import { images } from '../../helper';
 
 const NotFoundMain = (props) => {
   return (
-    <div className="px-4 py-5 my-5 text-center">
+    <div className="px-4 py-5 my-5 text-center w-100">
       <img
         className="d-block mx-auto mb-4"
         src={images.icono}

@@ -186,9 +186,7 @@ const ModalSale = (props) => {
               {/* Al contado */}
               <div className="col">
                 <button
-                  className={`btn ${
-                    selectTipoPago === 1 ? 'btn-primary' : 'btn-light'
-                  } btn-block`}
+                  className={`btn ${selectTipoPago === 1 ? 'btn-primary' : 'btn-light'} btn-block`}
                   type="button"
                   title="Pago al contado"
                   onClick={() => handleSelectTipoPago(1)}
@@ -207,9 +205,7 @@ const ModalSale = (props) => {
               {/* Crédito fijo*/}
               <div className="col">
                 <button
-                  className={`btn ${
-                    selectTipoPago === 2 ? 'btn-primary' : 'btn-light'
-                  } btn-block`}
+                  className={`btn ${selectTipoPago === 2 ? 'btn-primary' : 'btn-light'} btn-block`}
                   type="button"
                   title="Pago al credito"
                   onClick={() => handleSelectTipoPago(2)}
@@ -231,9 +227,26 @@ const ModalSale = (props) => {
             {selectTipoPago === 1 && (
               <div className="row">
                 <div className="col" ref={refMetodoPagoContenedor}>
+
+                  <h6>Lista de métodos:</h6>
+
+                  {metodoPagoAgregado.map((item, index) => (
+                    <MetodoPago
+                      key={index}
+                      idMetodoPago={item.idMetodoPago}
+                      nameMetodPay={item.nombre}
+                      monto={item.monto}
+                      handleInputMontoMetodoPay={handleInputMontoMetodoPay}
+                      handleRemoveItemMetodPay={handleRemoveItemMetodPay}
+                      handleSaveSale={handleSaveSale}
+                    />
+                  ))}
+
+                  <br />
+
                   <div className="form-row">
                     <div className="form-group col-md-12">
-                      <label>Metodo de cobro:</label>
+                      <label>Agregar método de cobro:</label>
                       <div className="input-group">
                         <div className="input-group-prepend">
                           <div className="input-group-text">
@@ -263,18 +276,6 @@ const ModalSale = (props) => {
                       </div>
                     </div>
                   </div>
-
-                  {metodoPagoAgregado.map((item, index) => (
-                    <MetodoPago
-                      key={index}
-                      idMetodoPago={item.idMetodoPago}
-                      nameMetodPay={item.nombre}
-                      monto={item.monto}
-                      handleInputMontoMetodoPay={handleInputMontoMetodoPay}
-                      handleRemoveItemMetodPay={handleRemoveItemMetodPay}
-                      handleSaveSale={handleSaveSale}
-                    />
-                  ))}
                 </div>
 
                 <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
@@ -305,7 +306,7 @@ const ModalSale = (props) => {
                           onChange={handleCheckTipoCredito}
                         />
                         <label className="form-check-label" htmlFor="1">
-                          <i className="bi bi-bag-check-fill "></i> Fijo
+                          <i className="bi bi-bag-check-fill "></i> Variable
                         </label>
                       </div>
 
@@ -320,7 +321,7 @@ const ModalSale = (props) => {
                           onChange={handleCheckTipoCredito}
                         />
                         <label className="form-check-label" htmlFor="2">
-                          <i className="bi bi-bag-check-fill "></i> Variable
+                          <i className="bi bi-bag-check-fill "></i> Fijo
                         </label>
                       </div>
                     </div>

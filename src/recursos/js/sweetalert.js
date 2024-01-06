@@ -60,6 +60,7 @@ const Swal = () => {
     useRejections: false,
     expectRejections: false,
     clearModal: false,
+    onKeyDown: null
   };
 
   var deprecatedParams = ['useRejections', 'expectRejections'];
@@ -93,6 +94,7 @@ const Swal = () => {
     'content',
     'contentwrapper',
     'contentdetail',
+    'contentinput',
     'buttonswrapper',
     'confirm',
     'cancel',
@@ -212,16 +214,16 @@ const Swal = () => {
   var _typeof =
     typeof Symbol === 'function' && typeof Symbol.iterator === 'symbol'
       ? function (obj) {
-          return typeof obj;
-        }
+        return typeof obj;
+      }
       : function (obj) {
-          return obj &&
-            typeof Symbol === 'function' &&
-            obj.constructor === Symbol &&
-            obj !== Symbol.prototype
-            ? 'symbol'
-            : typeof obj;
-        };
+        return obj &&
+          typeof Symbol === 'function' &&
+          obj.constructor === Symbol &&
+          obj !== Symbol.prototype
+          ? 'symbol'
+          : typeof obj;
+      };
 
   var _extends =
     Object.assign ||
@@ -268,8 +270,8 @@ const Swal = () => {
       if (sweetAlert$1.isDeprecatedParameter(param)) {
         warnOnce(
           'The parameter "' +
-            param +
-            '" is deprecated and will be removed in the next major release.',
+          param +
+          '" is deprecated and will be removed in the next major release.',
         );
       }
     }
@@ -581,11 +583,11 @@ const Swal = () => {
       confirmButton.style.backgroundColor =
         confirmButton.style.borderLeftColor =
         confirmButton.style.borderRightColor =
-          '';
+        '';
       cancelButton.style.backgroundColor =
         cancelButton.style.borderLeftColor =
         cancelButton.style.borderRightColor =
-          '';
+        '';
     }
 
     // CSS animation
@@ -717,7 +719,6 @@ const Swal = () => {
     }
 
     var params = _extends({}, popupParams);
-
     switch (_typeof(args[0])) {
       case 'string':
         params.title = args[0];
@@ -770,7 +771,7 @@ const Swal = () => {
       default:
         error(
           'Unexpected type of argument! Expected "string" or "object", got ' +
-            _typeof(args[0]),
+          _typeof(args[0]),
         );
         return false;
     }
@@ -809,10 +810,12 @@ const Swal = () => {
           return dismissWith('timer');
         }, params.timer);
       }
+      // console.log(popup)
 
       // Get input element by specified type or, if type isn't specified, by params.input
       var getInput = function getInput(inputType) {
         inputType = inputType || params.input;
+        // console.log(inputType)
         if (!inputType) {
           return null;
         }
@@ -1418,6 +1421,9 @@ const Swal = () => {
           input.value = params.inputValue;
           input.placeholder = params.inputPlaceholder;
           input.type = params.input;
+          if(params.onKeyDown){
+            input.addEventListener("keydown", params.onKeyDown)
+          }          
           show(input);
           break;
         case 'file':
@@ -1514,8 +1520,8 @@ const Swal = () => {
         default:
           error(
             'Unexpected type of input! Expected "text", "email", "password", "number", "tel", "select", "radio", "checkbox", "textarea", "file" or "url", got "' +
-              params.input +
-              '"',
+            params.input +
+            '"',
           );
           break;
       }
@@ -1532,7 +1538,7 @@ const Swal = () => {
         } else {
           error(
             'Unexpected type of inputOptions! Expected object or Promise, got ' +
-              _typeof(params.inputOptions),
+            _typeof(params.inputOptions),
           );
         }
       }
@@ -1634,66 +1640,66 @@ const Swal = () => {
     sweetAlert$1.closePopup =
     sweetAlert$1.closeModal =
     sweetAlert$1.closeToast =
-      function (onComplete) {
-        var container = getContainer();
-        var popup = getPopup();
-        if (!popup) {
-          return;
+    function (onComplete) {
+      var container = getContainer();
+      var popup = getPopup();
+      if (!popup) {
+        return;
+      }
+      removeClass(popup, swalClasses.show);
+      addClass(popup, swalClasses.hide);
+      clearTimeout(popup.timeout);
+
+      if (!isToast()) {
+        resetPrevState();
+        window.onkeydown = previousWindowKeyDown;
+        windowOnkeydownOverridden = false;
+      }
+
+      var removePopupAndResetState = function removePopupAndResetState() {
+        if (container.parentNode) {
+          container.parentNode.removeChild(container);
         }
-        removeClass(popup, swalClasses.show);
-        addClass(popup, swalClasses.hide);
-        clearTimeout(popup.timeout);
+        removeClass(
+          [document.documentElement, document.body],
+          [
+            swalClasses.shown,
+            swalClasses['no-backdrop'],
+            swalClasses['has-input'],
+            swalClasses['toast-shown'],
+          ],
+        );
 
-        if (!isToast()) {
-          resetPrevState();
-          window.onkeydown = previousWindowKeyDown;
-          windowOnkeydownOverridden = false;
-        }
-
-        var removePopupAndResetState = function removePopupAndResetState() {
-          if (container.parentNode) {
-            container.parentNode.removeChild(container);
-          }
-          removeClass(
-            [document.documentElement, document.body],
-            [
-              swalClasses.shown,
-              swalClasses['no-backdrop'],
-              swalClasses['has-input'],
-              swalClasses['toast-shown'],
-            ],
-          );
-
-          if (isModal()) {
-            undoScrollbar();
-            undoIOSfix();
-          }
-        };
-
-        // If animation is supported, animate
-        if (animationEndEvent && !hasClass(popup, swalClasses.noanimation)) {
-          popup.addEventListener(
-            animationEndEvent,
-            function swalCloseEventFinished() {
-              popup.removeEventListener(
-                animationEndEvent,
-                swalCloseEventFinished,
-              );
-              if (hasClass(popup, swalClasses.hide)) {
-                removePopupAndResetState();
-              }
-            },
-          );
-        } else {
-          // Otherwise, remove immediately
-          removePopupAndResetState();
-        }
-        if (onComplete !== null && typeof onComplete === 'function') {
-          setTimeout(function () {
-            onComplete(popup);
-          });
+        if (isModal()) {
+          undoScrollbar();
+          undoIOSfix();
         }
       };
+
+      // If animation is supported, animate
+      if (animationEndEvent && !hasClass(popup, swalClasses.noanimation)) {
+        popup.addEventListener(
+          animationEndEvent,
+          function swalCloseEventFinished() {
+            popup.removeEventListener(
+              animationEndEvent,
+              swalCloseEventFinished,
+            );
+            if (hasClass(popup, swalClasses.hide)) {
+              removePopupAndResetState();
+            }
+          },
+        );
+      } else {
+        // Otherwise, remove immediately
+        removePopupAndResetState();
+      }
+      if (onComplete !== null && typeof onComplete === 'function') {
+        setTimeout(function () {
+          onComplete(popup);
+        });
+      }
+    };
 
   /*
    * Global function to click 'Confirm' button
@@ -1800,7 +1806,7 @@ const Swal = () => {
     };
   };
 
-  sweetAlert$1.noop = function () {};
+  sweetAlert$1.noop = function () { };
 
   sweetAlert$1.version = '7.3.0';
 
@@ -1917,6 +1923,7 @@ const Swal = () => {
   const imageClass = swalClasses.image;
   const contentWrapperClass = swalClasses.contentwrapper;
   const contentdetailClass = swalClasses.contentdetail;
+  const contentInputClass = swalClasses.contentinput;
   const titleClass = swalClasses.title;
   const contentClass = swalClasses.content;
   const inputClass = swalClasses.input;
@@ -1962,7 +1969,9 @@ const Swal = () => {
         </div>
     </div>
 
-    <input class="${inputClass}" />
+    <div id="miDiv" class="${contentInputClass}">
+      <input class="${inputClass}"  />
+    </div>
 
     <input type="file" class="${fileInputClass}" />
 
@@ -2113,11 +2122,17 @@ const Swal = () => {
     if (!target || !classList) {
       return;
     }
+    // console.log("target",target)
+    // console.log("classList",classList)
+    // console.log("add",add)
+
     if (typeof classList === 'string') {
       classList = classList.split(/\s+/).filter(Boolean);
     }
     classList.forEach(function (className) {
+      // console.log("ingreso", target)
       if (target.forEach) {
+        // console.log("forEach")
         target.forEach(function (elem) {
           add
             ? elem.classList.add(className)
@@ -2129,6 +2144,7 @@ const Swal = () => {
           : target.classList.remove(className);
       }
     });
+    // console.log("")
   };
 
   var addClass = function addClass(target, classList) {
@@ -2141,6 +2157,13 @@ const Swal = () => {
 
   var getChildByClass = function getChildByClass(elem, className) {
     for (var i = 0; i < elem.childNodes.length; i++) {
+      const div = elem.childNodes[i]
+      if (div.id === "miDiv" && div.children.length !== 0) {
+        if (hasClass(div.firstElementChild, className)) {
+          return div.firstElementChild;
+        }
+      }
+
       if (hasClass(elem.childNodes[i], className)) {
         return elem.childNodes[i];
       }

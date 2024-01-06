@@ -5,7 +5,7 @@ const InvoiceClient = (props) => {
 
   const { onEventClearInput, handleFilter, onEventSelectItem } = props;
 
-  const { handleOpenAndCloseCliente } = props;
+  const { handleOpenCliente } = props;
 
   return (
     <div className="invoice-client px-3 pb-3">
@@ -18,7 +18,7 @@ const InvoiceClient = (props) => {
         onEventClearInput={onEventClearInput}
         handleFilter={handleFilter}
         onEventSelectItem={onEventSelectItem}
-        handleNewClient={handleOpenAndCloseCliente}
+        handleNewClient={handleOpenCliente}
       />
     </div>
   );

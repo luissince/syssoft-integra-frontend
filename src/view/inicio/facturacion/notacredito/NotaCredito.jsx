@@ -15,8 +15,9 @@ import {
 import { connect } from 'react-redux';
 import Paginacion from '../../../../components/Paginacion';
 import ContainerWrapper from '../../../../components/Container';
+import CustomComponent from '../../../../model/class/custom-component';
 
-class NotaCredito extends React.Component {
+class NotaCredito extends CustomComponent {
   constructor(props) {
     super(props);
     this.state = {
@@ -25,13 +26,13 @@ class NotaCredito extends React.Component {
       restart: false,
 
       add: statePrivilegio(
-        this.props.token.userToken.menus[2].submenu[5].privilegio[0].estado,
+        this.props.token.userToken.menus[2].submenu[3].privilegio[0].estado,
       ),
       view: statePrivilegio(
-        this.props.token.userToken.menus[2].submenu[5].privilegio[1].estado,
+        this.props.token.userToken.menus[2].submenu[3].privilegio[1].estado,
       ),
       cancel: statePrivilegio(
-        this.props.token.userToken.menus[2].submenu[5].privilegio[2].estado,
+        this.props.token.userToken.menus[2].submenu[3].privilegio[2].estado,
       ),
 
       idSucursal: this.props.token.project.idSucursal,
@@ -43,18 +44,13 @@ class NotaCredito extends React.Component {
       filasPorPagina: 10,
       messageTable: 'Cargando información...',
     };
+
     this.refTxtSearch = React.createRef();
     this.abortControllerTable = new AbortController();
   }
 
-  setStateAsync(state) {
-    return new Promise((resolve) => {
-      this.setState(state, resolve);
-    });
-  }
-
   componentDidMount() {
-    this.loadInit();
+    // this.loadInit();
   }
 
   componentWillUnmount() {

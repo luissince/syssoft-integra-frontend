@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+  isEmpty,
   spinnerLoading,
   statePrivilegio,
 } from '../../../../helper/utils.helper';
@@ -27,14 +28,8 @@ class Empresa extends React.Component {
     this.abortControllerTable = new AbortController();
   }
 
-  setStateAsync(state) {
-    return new Promise((resolve) => {
-      this.setState(state, resolve);
-    });
-  }
-
   async componentDidMount() {
-    this.loadInit();
+    await this.loadInit();
   }
 
   componentWillUnmount() {
@@ -48,33 +43,89 @@ class Empresa extends React.Component {
   };
 
   fillTable = async () => {
-    await this.setStateAsync({
-      loading: true,
-    });
+    this.setState({ loading: true });
 
-    const empresaResponse = await loadEmpresa(this.abortControllerTable.signal);
+    const response = await loadEmpresa(this.abortControllerTable.signal);
 
-    if (empresaResponse instanceof SuccessReponse) {
-      this.state.empresa.push(empresaResponse.data);
+    if (response instanceof SuccessReponse) {
 
-      await this.setStateAsync({
+      this.setState({
         loading: false,
-        empresa: this.state.empresa,
+        empresa: [...this.state.empresa, response.data],
       });
-    } else if (empresaResponse instanceof ErrorResponse) {
-      if (empresaResponse.getType() === CANCELED) return;
+    }
 
-      await this.setStateAsync({
-        loading: false,
-      });
+    if (response instanceof ErrorResponse) {
+      if (response.getType() === CANCELED) return;
+
+      this.setState({ loading: false });
     }
   };
 
-  onEventEditEmpresa(idEmpresa) {
+  handleEdit(idEmpresa) {
     this.props.history.push({
       pathname: `${this.props.location.pathname}/proceso`,
       search: '?idEmpresa=' + idEmpresa,
     });
+  }
+
+  generarBody() {
+    if (this.state.loading) {
+      return (
+        <tr>
+          <td className="text-center" colSpan="7">
+            {spinnerLoading(
+              'Cargando información de la tabla...',
+              true,
+            )}
+          </td>
+        </tr>
+      );
+    }
+    if (isEmpty(this.state.empresa)) {
+      return (
+        <tr className="text-center">
+          <td colSpan="7">¡No hay datos registrados!</td>
+        </tr>
+      );
+    }
+
+    return this.state.empresa.map((item, index) => {
+      return (
+        <tr key={index}>
+          <td className="text-center">{++index}</td>
+          <td>{item.documento}</td>
+          <td>{item.razonSocial}</td>
+          <td>{item.nombreEmpresa}</td>
+          <td>
+            <img
+              src={item.rutaLogo ? item.rutaLogo : images.noImage}
+              alt="Logo"
+              width="100"
+            />
+          </td>
+          <td>
+            <img
+              src={item.rutaImage ? item.rutaImage : images.noImage}
+              alt="Imagen"
+              width="100"
+            />
+          </td>
+          <td className="text-center">
+            <button
+              className="btn btn-outline-warning btn-sm"
+              title="Editar"
+              onClick={() =>
+                this.handleEdit(item.idEmpresa)
+              }
+              disabled={!this.state.edit}
+            >
+              <i className="bi bi-pencil"></i>
+            </button>
+          </td>
+        </tr>
+      );
+    })
   }
 
   render() {
@@ -102,7 +153,6 @@ class Empresa extends React.Component {
                     <th width="10%">N° Documento</th>
                     <th width="15%">Razón Social</th>
                     <th width="15%">Nombre Comercial</th>
-                    <th width="15%">Dirección Fiscal</th>
                     <th width="10%">Logo</th>
                     <th width="10%">Imagen</th>
                     <th width="5%" className="text-center">
@@ -111,66 +161,7 @@ class Empresa extends React.Component {
                   </tr>
                 </thead>
                 <tbody>
-                  {this.state.loading ? (
-                    <tr>
-                      <td className="text-center" colSpan="8">
-                        {spinnerLoading(
-                          'Cargando información de la tabla...',
-                          true,
-                        )}
-                      </td>
-                    </tr>
-                  ) : this.state.empresa.length === 0 ? (
-                    <tr className="text-center">
-                      <td colSpan="8">¡No hay datos registrados!</td>
-                    </tr>
-                  ) : (
-                    this.state.empresa.map((item, index) => {
-                      return (
-                        <tr key={index}>
-                          <td className="text-center">{++index}</td>
-                          <td>{item.documento}</td>
-                          <td>{item.razonSocial}</td>
-                          <td>{item.nombreEmpresa}</td>
-                          <td>{item.direccion}</td>
-                          <td>
-                            <img
-                              src={
-                                item.rutaLogo !== ''
-                                  ? '/' + item.rutaLogo
-                                  : images.noImage
-                              }
-                              alt="Logo"
-                              width="100"
-                            />
-                          </td>
-                          <td>
-                            <img
-                              src={
-                                item.rutaImage !== ''
-                                  ? '/' + item.rutaImage
-                                  : images.noImage
-                              }
-                              alt="Imagen"
-                              width="100"
-                            />
-                          </td>
-                          <td className="text-center">
-                            <button
-                              className="btn btn-outline-warning btn-sm"
-                              title="Editar"
-                              onClick={() =>
-                                this.onEventEditEmpresa(item.idEmpresa)
-                              }
-                              disabled={!this.state.edit}
-                            >
-                              <i className="bi bi-pencil"></i>
-                            </button>
-                          </td>
-                        </tr>
-                      );
-                    })
-                  )}
+                  {this.generarBody()}
                 </tbody>
               </table>
             </div>

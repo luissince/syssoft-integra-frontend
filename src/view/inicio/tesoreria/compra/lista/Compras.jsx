@@ -177,44 +177,20 @@ class Compras extends CustomComponent {
       );
     }
 
-
     return this.state.lista.map((item, index) => {
+
+      const tipo = item.tipo === 1 ?  <span>Contado</span>: <span>Crédito</span>;
+
+      const estado =  item.estado === 1 ? <span className="text-success">Pagado</span> : item.estado === 2 ? <span className="text-warning">Por Pagar</span>: <span className="text-danger">Anulado</span>;
+
       return (
         <tr key={index}>
-          <td className={`text-center`}>
-            {item.id}
-          </td>
-          <td>
-            {item.fecha}
-            <br />
-            {formatTime(item.hora)}
-          </td>
-          <td>
-            {item.documento}
-            <br />
-            {item.informacion}
-          </td>
-          <td>
-            {item.comprobante}
-            <br />
-            {item.serie}-{formatNumberWithZeros(item.numeracion)}
-          </td>
-          <td>
-            {
-              item.tipo === 1
-                ? <span>Contado</span>
-                : <span>Crédito</span>
-            }
-          </td>
-          <td className='text-center'>
-            {
-              item.estado === 1
-                ? <span className="text-success">Pagado</span>
-                : item.estado === 2
-                  ? <span className="text-warning">Por Pagar</span>
-                  : <span className="text-danger">Anulado</span>
-            }
-          </td>
+          <td className={`text-center`}>{item.id}</td>
+          <td>{item.fecha}<br />{formatTime(item.hora)}</td>
+          <td>{item.documento}<br />{item.informacion}</td>
+          <td>{item.comprobante}<br />{item.serie}-{formatNumberWithZeros(item.numeracion)}</td>
+          <td>{tipo}</td>
+          <td className='text-center'>{estado}</td>
           <td className='text-right'>{numberFormat(item.total, item.codiso)} </td>
           <td className="text-center">
             <button

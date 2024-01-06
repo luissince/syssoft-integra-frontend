@@ -148,7 +148,20 @@ const ModalSale = (props) => {
               </div>
             </div>
 
+            <h5>Lista de métodos:</h5>
 
+            {metodoPagoAgregado.map((item, index) => (
+              <MetodoPago
+                key={index}
+                idMetodoPago={item.idMetodoPago}
+                nameMetodPay={item.nombre}
+                monto={item.monto}
+                handleInputMontoMetodoPay={handleInputMontoMetodoPay}
+                handleRemoveItemMetodPay={handleRemoveItemMetodPay}
+              />
+            ))}
+
+            <br />
 
             <div className="row">
               <div className='col-12'>
@@ -185,22 +198,7 @@ const ModalSale = (props) => {
               </div>
             </div>
 
-            {metodoPagoAgregado.map((item, index) => (
-              <MetodoPago
-                key={index}
-                idMetodoPago={item.idMetodoPago}
-                nameMetodPay={item.nombre}
-                monto={item.monto}
-                handleInputMontoMetodoPay={handleInputMontoMetodoPay}
-                handleRemoveItemMetodPay={handleRemoveItemMetodPay}
-              />
-            ))}
 
-            <div className='row'>
-              <div className="col-12">
-                <br />
-              </div>
-            </div>
             <div className='row'>
               <div className="col-12">
                 <div className="text-center">{generarVuelto()}</div>

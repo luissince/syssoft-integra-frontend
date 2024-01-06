@@ -3,6 +3,7 @@ import {
   alertDialog,
   alertHTML,
   alertInfo,
+  alertInput,
   alertSuccess,
   alertWarning,
   clearModal,
@@ -10,7 +11,6 @@ import {
   hideModal,
   isEmpty,
   isNumeric,
-  isText,
   rounded,
   showModal,
   spinnerLoading,
@@ -30,6 +30,7 @@ import {
   filtrarProductoVenta,
   preferidosProducto,
   obtenerListaPrecioProducto,
+  listComboTipoDocumento,
 } from '../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
@@ -49,6 +50,7 @@ import {
 } from '../../../../../model/types/tipo-comprobante';
 import { starProduct, favoriteProducts } from '../../../../../redux/actions';
 import ModalProducto from './component/ModalProducto';
+import { A_GRANEL, SERVICIO, UNIDADES, VALOR_MONETARIO } from '../../../../../model/types/tipo-venta';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -84,6 +86,7 @@ class VentaCrear extends CustomComponent {
       idCliente: '',
       cliente: '',
       filterCliente: false,
+      nuevoCliente: null,
 
       comentario: '',
 
@@ -96,6 +99,7 @@ class VentaCrear extends CustomComponent {
       clientes: [],
       impuestos: [],
       monedas: [],
+      tiposDocumentos: [],
       detalleVenta: [],
 
       numCuota: '',
@@ -111,12 +115,28 @@ class VentaCrear extends CustomComponent {
       metodosPagoLista: [],
       metodoPagoAgregado: [],
 
+      // modal cliente
+      loadingCliente: false,
+      tipoCliente: 'TC0001',
+      idTipoDocumentoPn: '',
+      numeroDocumentoPn: '',
+      informacionPn: '',
+      numerCelularPn: '',
+      direccionPn: '',
+      idTipoDocumentoPj: '',
+      numeroDocumentoPj: '',
+      informacionPj: '',
+      numerCelularPj: '',
+      direccionPj: '',
+
       // modal producto
       loadingProducto: true,
 
       idSucursal: this.props.token.project.idSucursal,
       idUsuario: this.props.token.userToken.idUsuario,
     };
+
+    this.initial = { ...this.state }
 
     // Lista de id para los modales
     this.idModalConfiguration = 'idModalConfiguration';
@@ -149,6 +169,19 @@ class VentaCrear extends CustomComponent {
     this.refDescripcionProducto = React.createRef();
     this.listPrecioProducto = [];
 
+    // atributos para el modal cliente
+    this.refIdTipoDocumentoPn = React.createRef();
+    this.refNumeroDocumentoPn = React.createRef();
+    this.refInformacionPn = React.createRef();
+    this.refNumerCelularPn = React.createRef();
+    this.refDireccionPn = React.createRef();
+
+    this.refIdTipoDocumentoPj = React.createRef();
+    this.refNumeroDocumentoPj = React.createRef();
+    this.refInformacionPj = React.createRef();
+    this.refNumerCelularPj = React.createRef();
+    this.refDireccionPj = React.createRef();
+
     this.abortControllerView = new AbortController();
   }
 
@@ -179,11 +212,11 @@ class VentaCrear extends CustomComponent {
           return accumulator + totalProductPrice;
         },
         0,
-      );
+      )
 
       const metodo = this.state.metodosPagoLista.find(
         (item) => item.predeterminado === 1,
-      );
+      )
 
       this.refMetodoContado.current.value = metodo ? metodo.idMetodoPago : '';
 
@@ -194,15 +227,15 @@ class VentaCrear extends CustomComponent {
           monto: '',
           vuelto: metodo.vuelto,
           descripcion: '',
-        };
+        }
 
         this.setState((prevState) => ({
           metodoPagoAgregado: [...prevState.metodoPagoAgregado, item],
-        }));
+        }))
       }
 
       this.setState({ importeTotal, loadingModal: false });
-    });
+    })
 
     clearModal(this.idModalSale, () => {
       this.setState({
@@ -215,8 +248,8 @@ class VentaCrear extends CustomComponent {
         frecuenciaPago: new Date().getDate() > 15 ? '30' : '15',
 
         metodoPagoAgregado: [],
-      });
-    });
+      })
+    })
   }
 
   /**
@@ -258,6 +291,7 @@ class VentaCrear extends CustomComponent {
       impuestos,
       predeterminado,
       metodoPagos,
+      tiposDocumentos
     ] = await Promise.all([
       await this.fetchComprobante(VENTA_LIBRE),
       await this.fetchComprobante(FACTURACION),
@@ -265,6 +299,7 @@ class VentaCrear extends CustomComponent {
       await this.fetchImpuesto(),
       await this.fetchClientePredeterminado(),
       await this.fetchMetodoPago(),
+      await this.fetchTipoDocumento(),
     ]);
 
     const comprobantes = [...facturado, ...libre];
@@ -288,6 +323,8 @@ class VentaCrear extends CustomComponent {
       codiso: monedaFilter ? monedaFilter.codiso : 'PEN',
 
       idImpuesto: impuestoFilter ? impuestoFilter.idImpuesto : '',
+
+      tiposDocumentos,
 
       loading: false,
     });
@@ -407,6 +444,22 @@ class VentaCrear extends CustomComponent {
     }
   }
 
+  async fetchTipoDocumento() {
+    const response = await listComboTipoDocumento(
+      this.abortControllerView.signal,
+    );
+
+    if (response instanceof SuccessReponse) {
+      return response.data;
+    }
+
+    if (response instanceof ErrorResponse) {
+      if (response.getType() === CANCELED) return;
+
+      return [];
+    }
+  }
+
   calcularLetraMensual = () => {
     if (this.state.numCuota === '') {
       return;
@@ -416,7 +469,31 @@ class VentaCrear extends CustomComponent {
     const letra = saldo / this.state.numCuota;
 
     this.setState({ letraMensual: letra.toFixed(2) });
-  };
+  }
+
+  addItemDetalle = (producto, precio, cantidad) => {
+    const detalleVenta = [...this.state.detalleVenta];
+    const existingItem = detalleVenta.find((item) => item.idProducto === producto.idProducto)
+
+    if (!existingItem) {
+      detalleVenta.push({
+        idProducto: producto.idProducto,
+        nombreProducto: producto.nombreProducto,
+        cantidad: cantidad ? cantidad : 1,
+        idImpuesto: this.refImpuesto.current.value,
+        precio: precio ? precio : producto.precio,
+        idInventario: producto.idInventario,
+        idTipoVenta: producto.idTipoVenta,
+        tipo: producto.tipo,
+      });
+    } else {
+      existingItem.cantidad += 1;
+    }
+
+    this.setState({
+      detalleVenta,
+    });
+  }
 
   /*
     |--------------------------------------------------------------------------
@@ -439,7 +516,7 @@ class VentaCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
 
   handleAddItem = async (producto) => {
-    if (!isText(this.refImpuesto.current.value)) {
+    if (isEmpty(this.refImpuesto.current.value)) {
       alertWarning('Venta', 'Seleccione un impuesto.', () => {
         this.handleOpenAndCloseOptions();
         this.refImpuesto.current.focus();
@@ -452,29 +529,36 @@ class VentaCrear extends CustomComponent {
       return;
     }
 
-    const detalleVenta = [...this.state.detalleVenta];
-    const existingItem = detalleVenta.find(
-      (item) => item.idProducto === producto.idProducto,
-    );
-
-    if (!existingItem) {
-      detalleVenta.push({
-        idProducto: producto.idProducto,
-        nombreProducto: producto.nombreProducto,
-        cantidad: 1,
-        idImpuesto: this.refImpuesto.current.value,
-        precio: producto.precio,
-        idInventario: producto.idInventario,
-        tipo: producto.tipo,
-      });
-    } else {
-      existingItem.cantidad += 1;
+    if (producto.idTipoVenta === UNIDADES || producto.idTipoVenta === SERVICIO) {
+      this.addItemDetalle(producto, null, null);
     }
 
-    await this.setStateAsync({
-      detalleVenta,
-    });
-  };
+    if (producto.idTipoVenta === VALOR_MONETARIO) {
+      alertInput("Venta", "Ingrese el valor monetario (S/, $ u otro) del producto o el total.", (accept, value) => {
+        if (accept) {
+          if (!isNumeric(value)) {
+            alertWarning('Venta', '¡El valor ingresado no es númerico!');
+            return;
+          }
+          this.addItemDetalle(producto, parseFloat(value), null);
+          this.refProducto.current.focus();
+        }
+      })
+    }
+
+    if (producto.idTipoVenta === A_GRANEL) {
+      alertInput("Venta", "Ingrese el peso del producto (KM, GM u otro).", (accept, value) => {
+        if (accept) {
+          if (!isNumeric(value)) {
+            alertWarning('Venta', '¡El valor ingresado no es númerico!');
+            return;
+          }
+          this.addItemDetalle(producto, null, parseFloat(value));
+          this.refProducto.current.focus();
+        }
+      })
+    }
+  }
 
   //------------------------------------------------------------------------------------------
   // Modal configuración
@@ -482,7 +566,7 @@ class VentaCrear extends CustomComponent {
 
   handleSelectComprobante = (event) => {
     this.setState({ idComprobante: event.target.value });
-  };
+  }
 
   handleFilterProducto = async (event) => {
     const searchWord = event.target.value;
@@ -521,7 +605,7 @@ class VentaCrear extends CustomComponent {
         sarchProducto: false,
       });
     }
-  };
+  }
 
   //------------------------------------------------------------------------------------------
   // Modal configuración
@@ -537,17 +621,17 @@ class VentaCrear extends CustomComponent {
     } else {
       invoice.classList.add('toggled');
     }
-  };
+  }
 
   handleSaveOptions = () => {
-    if (!isText(this.refImpuesto.current.value)) {
+    if (isEmpty(this.refImpuesto.current.value)) {
       alertWarning('Venta', 'Seleccione un impuesto.', () =>
         this.refImpuesto.current.focus(),
       );
       return;
     }
 
-    if (!isText(this.refMoneda.current.value)) {
+    if (isEmpty(this.refMoneda.current.value)) {
       alertWarning('Venta', 'Seleccione una moneda.', () =>
         this.refMoneda.current.focus(),
       );
@@ -559,36 +643,189 @@ class VentaCrear extends CustomComponent {
       idImpuesto: this.refImpuesto.current.value,
     }));
 
-    const moneda = this.state.monedas.find(
-      (item) => item.idMoneda === this.refMoneda.current.value,
-    );
+    const moneda = this.state.monedas.find((item) => item.idMoneda === this.refMoneda.current.value)
 
-    this.setState(
-      {
-        idMoneda: moneda.idMoneda,
-        codiso: moneda.codiso,
-        idImpuesto: this.refImpuesto.current.value,
-        comentario: this.refComentario.current.value,
-        detalleVenta,
-      },
-      () => this.handleOpenAndCloseOptions(),
-    );
-  };
+    this.setState({
+      idMoneda: moneda.idMoneda,
+      codiso: moneda.codiso,
+      idImpuesto: this.refImpuesto.current.value,
+      comentario: this.refComentario.current.value,
+      detalleVenta,
+    }, () => this.handleOpenAndCloseOptions());
+  }
 
   //------------------------------------------------------------------------------------------
   // Modal cliente
   //------------------------------------------------------------------------------------------
 
-  handleOpenAndCloseCliente = () => {
-    const invoice = document.getElementById(this.idModalCliente);
-    if (invoice.classList.contains('toggled')) {
-      invoice.classList.remove('toggled');
-    } else {
-      invoice.classList.add('toggled');
-    }
-  };
+  handleClickTipoCliente = (tipo) => {
+    this.setState({ tipoCliente: tipo })
+  }
 
-  handleSaveCliente = () => { };
+  handleSelectIdTipoDocumentoPn = (event) => {
+    this.setState({ idTipoDocumentoPn: event.target.value })
+  }
+
+  handleInputNumeroDocumentoPn = (event) => {
+    this.setState({ numeroDocumentoPn: event.target.value })
+  }
+
+  handleInputInformacionPn = (event) => {
+    this.setState({ informacionPn: event.target.value })
+  }
+
+  handleInputNumeroCelularPn = (event) => {
+    this.setState({ numerCelularPn: event.target.value })
+  }
+
+  handleInputDireccionPn = (event) => {
+    this.setState({ direccionPn: event.target.value })
+  }
+
+  handleSelectIdTipoDocumentoPj = (event) => {
+    this.setState({ idTipoDocumentoPj: event.target.value })
+  }
+
+  handleInputNumeroDocumentoPj = (event) => {
+    this.setState({ numeroDocumentoPj: event.target.value })
+  }
+
+  handleInputInformacionPj = (event) => {
+    this.setState({ informacionPj: event.target.value })
+  }
+
+  handleInputNumeroCelularPj = (event) => {
+    this.setState({ numerCelularPj: event.target.value })
+  }
+
+  handleInputDireccionPj = (event) => {
+    this.setState({ direccionPj: event.target.value })
+  }
+
+  handleOpenCliente = () => {
+    const invoice = document.getElementById(this.idModalCliente);
+    invoice.classList.add('toggled');
+  }
+
+  handleCloseCliente = () => {
+    const invoice = document.getElementById(this.idModalCliente);
+
+    if (this.state.loadingCliente) return;
+
+    invoice.classList.remove('toggled');
+  }
+
+  handleSaveClienteNatural = () => {
+    const tipoDocumento = this.state.tiposDocumentos.find(item => item.idTipoDocumento === this.state.idTipoDocumentoPn);
+
+    if (isEmpty(this.state.idTipoDocumentoPn)) {
+      alertWarning("Venta", "Seleccione el tipo de documento.", () => {
+        this.refIdTipoDocumentoPn.current.focus()
+      })
+      return;
+    }
+
+    if (isEmpty(this.state.numeroDocumentoPn)) {
+      alertWarning("Venta", "Seleccione el tipo de documento.", () => {
+        this.refNumeroDocumentoPn.current.focus()
+      })
+      return;
+    }
+
+    if (tipoDocumento && tipoDocumento.obligado === 1 && tipoDocumento.longitud !== this.state.numeroDocumentoPn.length) {
+      alertWarning("Venta", `El número de documento por ser ${tipoDocumento.nombre} tiene que tener una longitud de ${tipoDocumento.longitud} carácteres.`, () => {
+        this.refNumeroDocumentoPn.current.focus();
+      })
+      return;
+    }
+
+    if (isEmpty(this.state.informacionPn)) {
+      alertWarning("Venta", "Seleccione el tipo de documento.", () => {
+        this.refInformacionPn.current.focus()
+      })
+      return;
+    }
+
+    const nuevoCliente = {
+      idTipoCliente: this.state.tipoCliente,
+      idTipoDocumento: this.state.idTipoDocumentoPn,
+      numeroDocumento: this.state.numeroDocumentoPn,
+      informacion: this.state.informacionPn,
+      numeroCelular: this.state.numerCelularPn,
+      direccion: this.state.direccionPn,
+    }
+
+    const value = {
+      idCliente: "",
+      documento: this.state.numeroDocumentoPn,
+      informacion: this.state.informacionPn
+    }
+
+    this.setState({ nuevoCliente }, () => {
+      this.handleSelectItemClient(value);
+      this.handleCloseCliente();
+    })
+  }
+
+  handleSaveClienteJuridica = () => {
+    const tipoDocumento = this.state.tiposDocumentos.find(item => item.idTipoDocumento === this.state.idTipoDocumentoPj);
+
+    if (isEmpty(this.state.idTipoDocumentoPj)) {
+      alertWarning("Venta", "Seleccione el tipo de documento.", () => {
+        this.refIdTipoDocumentoPj.current.focus()
+      })
+      return;
+    }
+
+    if (isEmpty(this.state.numeroDocumentoPj)) {
+      alertWarning("Venta", "Seleccione el tipo de documento.", () => {
+        this.refNumeroDocumentoPj.current.focus()
+      })
+      return;
+    }
+
+    if (tipoDocumento && tipoDocumento.obligado === 1 && tipoDocumento.longitud !== this.state.numeroDocumentoPj.length) {
+      alertWarning("Venta", `El número de documento por ser ${tipoDocumento.nombre} tiene que tener una longitud de ${tipoDocumento.longitud} carácteres.`, () => {
+        this.refNumeroDocumentoPj.current.focus();
+      })
+      return;
+    }
+
+    if (isEmpty(this.state.informacionPj)) {
+      alertWarning("Venta", "Seleccione el tipo de documento.", () => {
+        this.refInformacionPj.current.focus()
+      })
+      return;
+    }
+
+    const nuevoCliente = {
+      idTipoCliente: this.state.tipoCliente,
+      idTipoDocumento: this.state.idTipoDocumentoPj,
+      numeroDocumento: this.state.numeroDocumentoPj,
+      informacion: this.state.informacionPj,
+      numeroCelular: this.state.numerCelularPj,
+      direccion: this.state.direccionPj,
+    }
+
+    const value = {
+      idCliente: "",
+      documento: this.state.numeroDocumentoPj,
+      informacion: this.state.informacionPj
+    }
+
+    this.setState({ nuevoCliente }, () => {
+      this.handleSelectItemClient(value);
+      this.handleCloseCliente();
+    })
+  }
+
+  handleSaveCliente = () => {
+    if (this.state.tipoCliente === 'TC0001') {
+      this.handleSaveClienteNatural();
+    } else {
+      this.handleSaveClienteJuridica();
+    }
+  }
 
   //------------------------------------------------------------------------------------------
   // Opciones del producto y modal
@@ -604,7 +841,7 @@ class VentaCrear extends CustomComponent {
     this.setState({
       detalleVenta: updatedDetalle,
     });
-  };
+  }
 
   handlePlusProducto = async (producto) => {
     const updatedDetalle = this.state.detalleVenta.map((item) => {
@@ -617,7 +854,7 @@ class VentaCrear extends CustomComponent {
     this.setState({
       detalleVenta: updatedDetalle,
     });
-  };
+  }
 
   handleEditProducto = async (producto) => {
     const invoice = document.getElementById(this.idModalProducto);
@@ -633,9 +870,7 @@ class VentaCrear extends CustomComponent {
   };
 
   handleRemoveProducto = async (producto) => {
-    const updatedDetalle = this.state.detalleVenta.filter(
-      (item) => producto.idProducto !== item.idProducto,
-    );
+    const updatedDetalle = this.state.detalleVenta.filter((item) => producto.idProducto !== item.idProducto);
 
     this.setState({
       detalleVenta: updatedDetalle,
@@ -653,7 +888,9 @@ class VentaCrear extends CustomComponent {
     this.setState({ loadingProducto: true });
   };
 
-  handleSaveProducto = () => {
+  handleSaveProducto = (event) => {
+    event.stopPropagation();
+
     const precioProducto = this.refPrecioProducto.current.value;
     const descripcionProducto = this.refDescripcionProducto.current.value;
 
@@ -686,16 +923,16 @@ class VentaCrear extends CustomComponent {
     });
 
     this.handleCloseProducto();
-  };
+  }
 
   //------------------------------------------------------------------------------------------
   // Filtrar cliente
   //------------------------------------------------------------------------------------------
 
   handleClearInputClient = async () => {
-    await this.setStateAsync({ clientes: [], idCliente: '', cliente: '' });
+    await this.setStateAsync({ clientes: [], idCliente: '', cliente: '', nuevoCliente: null });
     this.selectItemClient = false;
-  };
+  }
 
   handleFilterClient = async (event) => {
     const searchWord = this.selectItemClient ? '' : event.target.value;
@@ -717,43 +954,42 @@ class VentaCrear extends CustomComponent {
     const response = await filtrarCliente(params);
 
     if (response instanceof SuccessReponse) {
-      await this.setStateAsync({
+      this.setState({
         filterCliente: false,
         clientes: response.data,
       });
     }
 
     if (response instanceof ErrorResponse) {
-      await this.setStateAsync({ filterCliente: false, clientes: [] });
+      this.setState({ filterCliente: false, clientes: [] });
     }
-  };
+  }
 
-  handleSelectItemClient = async (value) => {
-    await this.setStateAsync({
+  handleSelectItemClient = (value) => {
+    this.setState({
       cliente: value.documento + ' - ' + value.informacion,
       clientes: [],
       idCliente: value.idCliente,
-    });
-    this.selectItemClient = true;
-  };
+    }, () => this.selectItemClient = true);
+  }
 
   //------------------------------------------------------------------------------------------
   // Componente footer
   //------------------------------------------------------------------------------------------
 
   handleOpenSale = async () => {
-    if (this.state.detalleVenta.length === 0) {
+    if (isEmpty(this.state.detalleVenta)) {
       alertWarning('Venta', 'La lista de productos esta vacía.');
       this.refProducto.current.focus();
       return;
     }
 
-    if (this.state.idComprobante === '') {
+    if (isEmpty(this.state.idComprobante)) {
       alertWarning('Venta', 'Seleccione un comprobante.');
       return;
     }
-
-    if (this.state.idCliente === '') {
+    console.log(this.state.nuevoCliente)
+    if (isEmpty(this.state.idCliente) && this.state.nuevoCliente === null) {
       alertWarning('Venta', 'Selecciona un cliente.', () => {
         this.refCliente.current.focus();
       });
@@ -762,66 +998,22 @@ class VentaCrear extends CustomComponent {
 
     showModal(this.idModalSale);
     await this.setStateAsync({ loadingModal: true });
-  };
+  }
 
   handleClearSale = async () => {
-    this.refProducto.current.focus();
+    alertDialog("Venta", "Los productos serán eliminados de la venta actual ¿Desea continuar?", async (accept) => {
+      if (accept) {
+        this.setState(this.initial, async() => {
+          const productos = await this.fetchProductoPreferidos();
+          this.props.favoriteProducts(productos);
+          await this.setStateAsync({ productos: productos });
+          await this.loadingData();
+          this.refProducto.current.focus();
+        })
+      }
+    })
 
-    await this.setStateAsync({
-      loading: true,
-      msgLoading: 'Cargando datos...',
-
-      idComprobante: '',
-
-      idMoneda: '',
-      codiso: '',
-
-      idImpuesto: '',
-
-      producto: '',
-      sarchProducto: false,
-      filterProducto: false,
-
-      idCliente: '',
-      cliente: '',
-      filterCliente: false,
-
-      comentario: '',
-
-      // Variables del modal de venta
-      loadingModal: false,
-      selectTipoPago: 1,
-
-      comprobantes: [],
-      productos: [],
-      clientes: [],
-      impuestos: [],
-      monedas: [],
-      detalleVenta: [],
-
-      numCuota: '',
-      letraMensual: '',
-
-      frecuenciaPagoCredito: new Date().getDate() > 15 ? '30' : '15',
-      
-      frecuenciaPago: new Date().getDate() > 15 ? '30' : '15',
-
-      importeTotal: 0.0,
-
-      // modal venta
-      metodosPagoLista: [],
-      metodoPagoAgregado: [],
-
-      // modal producto
-      loadingProducto: true,
-    });
-
-    const productos = await this.fetchProductoPreferidos();
-
-    this.props.favoriteProducts(productos);
-
-    await this.loadingData();
-  };
+  }
 
   //------------------------------------------------------------------------------------------
   // Modal Venta
@@ -829,27 +1021,25 @@ class VentaCrear extends CustomComponent {
 
   handleSelectTipoPago = (tipo) => {
     this.setState({ selectTipoPago: tipo });
-  };
+  }
 
   handleSelectNumeroCuotas = (event) => {
     this.setState({ numCuota: event.target.value }, () =>
       this.calcularLetraMensual(),
     );
-  };
+  }
 
   handleSelectFrecuenciaPagoCredito = (event) => {
     this.setState({ frecuenciaPagoCredito: event.target.value });
-  };
+  }
 
   handleSelectFrecuenciaPago = (event) => {
     this.setState({ frecuenciaPago: event.target.value });
-  };
+  }
 
   //Metodos Modal Sale
   handleAddMetodPay = () => {
-    const listAdd = this.state.metodoPagoAgregado.find(
-      (item) => item.idMetodoPago === this.refMetodoContado.current.value,
-    );
+    const listAdd = this.state.metodoPagoAgregado.find((item) => item.idMetodoPago === this.refMetodoContado.current.value);
 
     if (listAdd) {
       return;
@@ -870,7 +1060,7 @@ class VentaCrear extends CustomComponent {
     this.setState((prevState) => ({
       metodoPagoAgregado: [...prevState.metodoPagoAgregado, item],
     }));
-  };
+  }
 
   handleRemoveItemMetodPay = (idMetodoPago) => {
     const metodoPagoAgregado = this.state.metodoPagoAgregado.filter(
@@ -891,7 +1081,7 @@ class VentaCrear extends CustomComponent {
         }
       }),
     }));
-  };
+  }
 
   handleStarProduct = (producto) => {
     // Despachar la acción para manejar el cambio en Redux
@@ -909,7 +1099,7 @@ class VentaCrear extends CustomComponent {
         productos: updatedProductos,
       };
     });
-  };
+  }
 
   handleProcessContado = async () => {
     const {
@@ -921,6 +1111,7 @@ class VentaCrear extends CustomComponent {
       idSucursal,
       idUsuario,
       comentario,
+      nuevoCliente,
       detalleVenta,
       metodoPagoAgregado,
       importeTotal,
@@ -968,8 +1159,8 @@ class VentaCrear extends CustomComponent {
       }
     }
 
-    alertDialog('Venta', '¿Estás seguro de continuar?', async (value) => {
-      if (value) {
+    alertDialog('Venta', '¿Estás seguro de continuar?', async (accept) => {
+      if (accept) {
         const data = {
           tipo: selectTipoPago,
           idComprobante: idComprobante,
@@ -980,6 +1171,7 @@ class VentaCrear extends CustomComponent {
           comentario: comentario,
           idUsuario: idUsuario,
           estado: 1,
+          nuevoCliente: nuevoCliente,
           detalleVenta: detalleVenta,
           metodoPagoAgregado: metodoPagoAgregado,
         };
@@ -991,47 +1183,41 @@ class VentaCrear extends CustomComponent {
 
         if (response instanceof SuccessReponse) {
           alertSuccess('Venta', response.data, () => {
-            // this.handleClearSale();
+            this.handleClearSale();
           });
         }
 
         if (response instanceof ErrorResponse) {
           if (response.getBody() !== '') {
-            const body = response.getBody().map(
-              (item) =>
-                `<tr>
-                                <td>${item.nombre}</td>
-                                <td>${formatDecimal(item.cantidadActual)}</td>
-                                <td>${formatDecimal(item.cantidadReal)}</td>
-                                <td>${formatDecimal(
-                  item.cantidadActual - item.cantidadReal,
-                )}</td>
-                            </tr>`,
+            const body = response.getBody().map((item) =>
+              `<tr>
+                  <td>${item.nombre}</td>
+                  <td>${formatDecimal(item.cantidadActual)}</td>
+                  <td>${formatDecimal(item.cantidadReal)}</td>
+                  <td>${formatDecimal(item.cantidadActual - item.cantidadReal)}</td>
+                </tr>`,
             );
 
-            alertHTML(
-              'Venta',
-              `
-                        <div class="d-flex flex-column align-items-center">
-                            <h5>Productos con cantidades faltantes</h5>
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>Producto</th>
-                                        <th>Cantidad a Vender</th>
-                                        <th>Cantidad de Inventario</th>
-                                        <th>Cantidad Faltante</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                ${body}
-                                </tbody>
-                            </table>
-                        </div>
-                    `,
+            alertHTML('Venta',
+              `<div class="d-flex flex-column align-items-center">
+                    <h5>Productos con cantidades faltantes</h5>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Cantidad a Vender</th>
+                                <th>Cantidad de Inventario</th>
+                                <th>Cantidad Faltante</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        ${body}
+                        </tbody>
+                    </table>
+                </div>`,
             );
           } else {
-            alertWarning('Venta', response.getMessage(), () => { });
+            alertWarning('Venta', response.getMessage());
           }
         }
       }
@@ -1105,7 +1291,7 @@ class VentaCrear extends CustomComponent {
           frecuenciaPagoCredito={frecuenciaPagoCredito}
           handleSelectFrecuenciaPagoCredito={this.handleSelectFrecuenciaPagoCredito}
           letraMensual={letraMensual}
-   
+
           refFrecuenciaPago={this.refFrecuenciaPago}
           frecuenciaPago={frecuenciaPago}
           handleSelectFrecuenciaPago={this.handleSelectFrecuenciaPago}
@@ -1151,7 +1337,7 @@ class VentaCrear extends CustomComponent {
           />
 
           <InvoiceClient
-            handleOpenAndCloseCliente={this.handleOpenAndCloseCliente}
+            handleOpenCliente={this.handleOpenCliente}
             placeholder="Filtrar clientes..."
             refCliente={this.refCliente}
             cliente={cliente}
@@ -1192,8 +1378,52 @@ class VentaCrear extends CustomComponent {
 
         <ModalCliente
           idModal={this.idModalCliente}
+          loading={this.state.loadingCliente}
+          tiposDocumentos={this.state.tiposDocumentos}
+
+          refIdTipoDocumentoPn={this.refIdTipoDocumentoPn}
+          idTipoDocumentoPn={this.state.idTipoDocumentoPn}
+          handleSelectIdTipoDocumentoPn={this.handleSelectIdTipoDocumentoPn}
+
+          refNumeroDocumentoPn={this.refNumeroDocumentoPn}
+          numeroDocumentoPn={this.state.numeroDocumentoPn}
+          handleInputNumeroDocumentoPn={this.handleInputNumeroDocumentoPn}
+
+          refInformacionPn={this.refInformacionPn}
+          informacionPn={this.state.informacionPn}
+          handleInputInformacionPn={this.handleInputInformacionPn}
+
+          refNumerCelularPn={this.refNumerCelularPn}
+          numerCelularPn={this.state.numerCelularPn}
+          handleInputNumeroCelularPn={this.handleInputNumeroCelularPn}
+
+          refDireccionPn={this.refDireccionPn}
+          direccionPn={this.state.direccionPn}
+          handleInputDireccionPn={this.handleInputDireccionPn}
+
+          refIdTipoDocumentoPj={this.refIdTipoDocumentoPj}
+          idTipoDocumentoPj={this.state.idTipoDocumentoPj}
+          handleSelectIdTipoDocumentoPj={this.handleSelectIdTipoDocumentoPj}
+
+          refNumeroDocumentoPj={this.refNumeroDocumentoPj}
+          numeroDocumentoPj={this.state.numeroDocumentoPj}
+          handleInputNumeroDocumentoPj={this.handleInputNumeroDocumentoPj}
+
+          refInformacionPj={this.refInformacionPj}
+          informacionPj={this.state.informacionPj}
+          handleInputInformacionPj={this.handleInputInformacionPj}
+
+          refNumerCelularPj={this.refNumerCelularPj}
+          numerCelularPj={this.state.numerCelularPj}
+          handleInputNumeroCelularPj={this.handleInputNumeroCelularPj}
+
+          refDireccionPj={this.refDireccionPj}
+          direccionPj={this.state.direccionPj}
+          handleInputDireccionPj={this.handleInputDireccionPj}
+
           handleSave={this.handleSaveCliente}
-          handleOpenAndClose={this.handleOpenAndCloseCliente}
+          handleClickTipoCliente={this.handleClickTipoCliente}
+          handleCloseCliente={this.handleCloseCliente}
         />
 
         <ModalProducto
