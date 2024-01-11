@@ -1,7 +1,7 @@
 import { images } from '../../../../../../helper';
 
 const InvoiceTicket = (props) => {
-  const { handleOpenAndCloseOptions } = props;
+  const { handleOpenPrint, handleOpenOptions } = props;
 
   return (
     <div className="invoice-ticket d-flex pl-3 align-items-center justify-content-between">
@@ -10,7 +10,10 @@ const InvoiceTicket = (props) => {
       </div>
       <div className="d-flex">
         <span>
-          <button className="btn btn-link rounded-circle">
+          <button
+            className="btn btn-link rounded-circle"
+            onClick={handleOpenPrint}
+          >
             <img src={images.print} alt="Imprimir" />
           </button>
         </span>
@@ -20,7 +23,7 @@ const InvoiceTicket = (props) => {
             data-bs-toggle="tooltip"
             data-bs-placement="bottom"
             title="Tooltip on bottom"
-            onClick={handleOpenAndCloseOptions}
+            onClick={handleOpenOptions}
           >
             <img src={images.options} alt="Opciones" />
           </button>

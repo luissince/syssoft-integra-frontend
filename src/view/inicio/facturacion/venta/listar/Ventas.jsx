@@ -66,7 +66,7 @@ class Ventas extends CustomComponent {
     await this.setStateAsync({ paginacion: 1, restart: true });
     this.fillTable(0, '');
     await this.setStateAsync({ opcion: 0 });
-  };
+  }
 
   async searchText(text) {
     if (this.state.loading) return;
@@ -81,7 +81,7 @@ class Ventas extends CustomComponent {
   paginacionContext = async (listid) => {
     await this.setStateAsync({ paginacion: listid, restart: false });
     this.onEventPaginacion();
-  };
+  }
 
   onEventPaginacion = () => {
     switch (this.state.opcion) {
@@ -94,10 +94,10 @@ class Ventas extends CustomComponent {
       default:
         this.fillTable(0, '');
     }
-  };
+  }
 
   fillTable = async (opcion, buscar) => {
-    await this.setStateAsync({
+    this.setState({
       loading: true,
       lista: [],
       messageTable: 'Cargando información...',
@@ -118,7 +118,7 @@ class Ventas extends CustomComponent {
         Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
       );
 
-      await this.setStateAsync({
+      this.setState({
         loading: false,
         lista: response.data.result,
         totalPaginacion: totalPaginacion,
@@ -128,14 +128,14 @@ class Ventas extends CustomComponent {
     if (response instanceof ErrorResponse) {
       if (response.getType() === CANCELED) return;
 
-      await this.setStateAsync({
+      this.setState({
         loading: false,
         lista: [],
         totalPaginacion: 0,
         messageTable: response.getMessage(),
       });
     }
-  };
+  }
 
   handleCrear = () => {
     this.props.history.push(`${this.props.location.pathname}/crear`);
@@ -146,7 +146,7 @@ class Ventas extends CustomComponent {
       pathname: `${this.props.location.pathname}/detalle`,
       search: '?idVenta=' + idVenta,
     });
-  };
+  }
 
   handleCancelar(idVenta) {
     alertDialog('Venta', '¿Está seguro de que desea anular la venta? Esta operación no se puede deshacer.', async (accept) => {
@@ -280,7 +280,7 @@ class Ventas extends CustomComponent {
                     <i className="bi bi-search"></i>
                   </div>
                 </div>
-                
+
                 <input
                   type="text"
                   className="form-control"

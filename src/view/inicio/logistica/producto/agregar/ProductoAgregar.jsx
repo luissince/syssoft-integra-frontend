@@ -9,6 +9,7 @@ import {
   alertWarning,
   clearModal,
   hideModal,
+  imageBase64,
   isEmpty,
   isNumeric,
   showModal,
@@ -680,31 +681,19 @@ class ProductoAgregar extends CustomComponent {
       return;
     }
 
-    if (
-      this.state.combos.find(
-        (item) => item.idProducto === this.refIdProductoCombo.current.value,
-      )
-    ) {
-      alertWarning(
-        'Producto - Combo',
-        'Ya se encuentra agregado el producto a la lista.',
-        () => {
-          this.refIdProductoCombo.current.focus();
-        },
+    if (this.state.combos.find((item) => item.idProducto === this.refIdProductoCombo.current.value)) {
+      alertWarning('Producto - Combo', 'Ya se encuentra agregado el producto a la lista.', () => {
+        this.refIdProductoCombo.current.focus();
+      },
       );
       return;
     }
 
-    const producto = this.state.productos.find(
-      (item) => item.idProducto === this.refIdProductoCombo.current.value,
-    );
+    const producto = this.state.productos.find((item) => item.idProducto === this.refIdProductoCombo.current.value);
 
     const item = {
       idProducto: this.refIdProductoCombo.current.value,
-      nombre:
-        this.refIdProductoCombo.current.options[
-          this.refIdProductoCombo.current.selectedIndex
-        ].innerText,
+      nombre: this.refIdProductoCombo.current.options[this.refIdProductoCombo.current.selectedIndex].innerText,
       cantidad: this.refCantidadCombo.current.value,
       costo: producto.costo,
     };
@@ -726,9 +715,7 @@ class ProductoAgregar extends CustomComponent {
   };
 
   handleRemoveItemInventarioCombo = (idAlmacen) => {
-    const inventarioCombo = this.state.inventarioCombo.filter(
-      (item) => item.idAlmacen !== idAlmacen,
-    );
+    const inventarioCombo = this.state.inventarioCombo.filter((item) => item.idAlmacen !== idAlmacen);
     this.setState({ inventarioCombo });
   };
 
@@ -748,13 +735,9 @@ class ProductoAgregar extends CustomComponent {
     }
 
     if (parseFloat(this.refCantidadProducto.current.value) <= 0) {
-      alertWarning(
-        'Producto - Combo',
-        'Su cantidad tiene que se mayor a cero(0).',
-        () => {
-          this.refCantidadProducto.current.focus();
-        },
-      );
+      alertWarning('Producto - Combo', 'Su cantidad tiene que se mayor a cero(0).', () => {
+        this.refCantidadProducto.current.focus();
+      });
       return;
     }
 
@@ -772,27 +755,16 @@ class ProductoAgregar extends CustomComponent {
       return;
     }
 
-    if (
-      this.state.inventarioCombo.find(
-        (item) => item.idAlmacen === this.refIdAlmacenProducto.current.value,
-      )
-    ) {
-      alertWarning(
-        'Producto - Combo',
-        'El almacen ya se encuentra agregado.',
-        () => {
-          this.refIdAlmacenProducto.current.focus();
-        },
-      );
+    if (this.state.inventarioCombo.find((item) => item.idAlmacen === this.refIdAlmacenProducto.current.value)) {
+      alertWarning('Producto - Combo', 'El almacen ya se encuentra agregado.', () => {
+        this.refIdAlmacenProducto.current.focus();
+      });
       return;
     }
 
     const item = {
       idAlmacen: this.refIdAlmacenProducto.current.value,
-      nombreAlmacen:
-        this.refIdAlmacenProducto.current.options[
-          this.refIdAlmacenProducto.current.selectedIndex
-        ].innerText,
+      nombreAlmacen: this.refIdAlmacenProducto.current.options[this.refIdAlmacenProducto.current.selectedIndex].innerText,
       cantidad: this.refCantidadProducto.current.value,
       cantidadMaxima: this.refCantidadMaximaProducto.current.value,
       cantidadMinima: this.refCantidadMinimaProducto.current.value,
@@ -809,56 +781,56 @@ class ProductoAgregar extends CustomComponent {
   // Detalle general
   //------------------------------------------------------------------------------------------
 
-  handleInputImagen = async (event) => {
-    if (event.target.files.length !== 0) {
-      await this.setStateAsync({
+  handleInputImagen = (event) => {
+    if (!isEmpty(event.target.files)) {
+      this.setState({
         imagen: URL.createObjectURL(event.target.files[0]),
         fileImage: event.target.files,
       });
     } else {
-      await this.setStateAsync({
+      this.setState({
         imagen: images.noImage,
         fileImage: [],
       });
     }
-  };
+  }
 
   handleRemoveImagen = () => {
     this.setState({
       imagen: images.noImage,
       fileImage: [],
     });
-  };
+  }
 
   handleSelectPreferido = (event) => {
     this.setState({
       preferido: event.target.checked,
     });
-  };
+  }
 
   handleSelectEstado = (event) => {
     this.setState({
       estado: event.target.checked,
     });
-  };
+  }
 
   handleSelectPublico = (event) => {
     this.setState({
       publicar: event.target.checked,
     });
-  };
+  }
 
   handleSelectNegativo = (event) => {
     this.setState({
       negativo: event.target.checked,
     });
-  };
+  }
 
   handleSelectInventariado = (event) => {
     this.setState({
       inventariado: event.target.checked,
     });
-  };
+  }
   //------------------------------------------------------------------------------------------
   // Registrar
   //------------------------------------------------------------------------------------------
@@ -906,32 +878,21 @@ class ProductoAgregar extends CustomComponent {
       return;
     }
 
-    if (
-      parseFloat(this.state.precioProducto) <=
-      parseFloat(this.state.costoProducto)
-    ) {
-      alertWarning(
-        'Producto',
-        'El costo no debe ser mayor o igual al precio.',
-        () => {
-          this.refCostoProducto.current.focus();
-        },
-      );
+    if (parseFloat(this.state.precioProducto) <= parseFloat(this.state.costoProducto)) {
+      alertWarning('Producto', 'El costo no debe ser mayor o igual al precio.', () => {
+        this.refCostoProducto.current.focus();
+      });
       return;
     }
 
-    if (
-      this.state.precios.filter((item) => isEmpty(item.nombre)).length !== 0
-    ) {
+    if (this.state.precios.filter((item) => isEmpty(item.nombre)).length !== 0) {
       alertWarning('Producto', 'Hay precios sin nombre..', () => {
         validateNumericInputs(this.refPreciosProducto, 'string');
       });
       return;
     }
 
-    if (
-      this.state.precios.filter((item) => !isNumeric(item.precio)).length !== 0
-    ) {
+    if (this.state.precios.filter((item) => !isNumeric(item.precio)).length !== 0) {
       alertWarning('Producto', 'Hay precios sin valor.', () => {
         validateNumericInputs(this.refPreciosProducto);
       });
@@ -941,6 +902,11 @@ class ProductoAgregar extends CustomComponent {
     alertDialog('Producto', '¿Estás seguro de continuar?', async (accept) => {
       if (accept) {
         alertInfo('Producto', 'Procesando información...');
+
+        const logoSend = await imageBase64(this.refFileImagen.current.files);
+        const image = logoSend ? logoSend.base64String : '';
+        const ext = logoSend ? logoSend.extension : '';
+
         const data = {
           tipo: this.state.tipo,
           nombre: this.state.nombreProducto,
@@ -959,6 +925,10 @@ class ProductoAgregar extends CustomComponent {
           negativo: this.state.negativo,
           preferido: this.state.preferido,
           estado: this.state.estado,
+
+          image: image,
+          ext: ext,
+
           idUsuario: this.state.idUsuario,
         };
 
@@ -978,24 +948,16 @@ class ProductoAgregar extends CustomComponent {
 
   handleSaveServicio = () => {
     if (isEmpty(this.state.nombreServicio)) {
-      alertWarning(
-        'Producto - Servicio',
-        'Ingrese el nombre del servicio.',
-        () => {
-          this.refNombreServicio.current.focus();
-        },
-      );
+      alertWarning('Producto - Servicio', 'Ingrese el nombre del servicio.', () => {
+        this.refNombreServicio.current.focus();
+      });
       return;
     }
 
     if (isEmpty(this.state.codigoServicio)) {
-      alertWarning(
-        'Producto - Servicio',
-        'Ingrese el código del servicio.',
-        () => {
-          this.refCodigoServicio.current.focus();
-        },
-      );
+      alertWarning('Producto - Servicio', 'Ingrese el código del servicio.', () => {
+        this.refCodigoServicio.current.focus();
+      });
       return;
     }
 
@@ -1020,45 +982,51 @@ class ProductoAgregar extends CustomComponent {
       return;
     }
 
-    alertDialog(
-      'Producto - Servicio',
-      '¿Estás seguro de continuar?',
-      async (accept) => {
-        if (accept) {
-          alertInfo('Producto - Servicio', 'Procesando información...');
-          const data = {
-            tipo: this.state.tipo,
-            nombre: this.state.nombreServicio,
-            codigo: this.state.codigoServicio,
-            idCodigoSunat: this.state.codigoSunatServicio,
-            idMedida: this.state.idMedidaServicio,
-            idCategoria: this.state.idCategoriaServicio,
-            descripcion: this.state.descripcionServicio,
-            idTipoVenta: 'TV0004',
-            precio: this.state.precioServicio,
-            costo: 0,
-            inventarios: [],
-            precios: [],
-            publicar: this.state.publicar,
-            inventariado: false,
-            negativo: false,
-            preferido: this.state.preferido,
-            estado: this.state.estado,
-            idUsuario: this.state.idUsuario,
-          };
+    alertDialog('Producto - Servicio', '¿Estás seguro de continuar?', async (accept) => {
+      if (accept) {
+        alertInfo('Producto - Servicio', 'Procesando información...');
 
-          const response = await addProducto(data);
-          if (response instanceof SuccessReponse) {
-            alertSuccess('Producto - Servicio', response.data, () => {
-              this.props.history.goBack();
-            });
-          }
+        const logoSend = await imageBase64(this.refFileImagen.current.files);
+        const image = logoSend ? logoSend.base64String : '';
+        const ext = logoSend ? logoSend.extension : '';
 
-          if (response instanceof ErrorResponse) {
-            alertWarning('Producto - Servicio', response.getMessage());
-          }
+        const data = {
+          tipo: this.state.tipo,
+          nombre: this.state.nombreServicio,
+          codigo: this.state.codigoServicio,
+          idCodigoSunat: this.state.codigoSunatServicio,
+          idMedida: this.state.idMedidaServicio,
+          idCategoria: this.state.idCategoriaServicio,
+          descripcion: this.state.descripcionServicio,
+          idTipoVenta: 'TV0004',
+          precio: this.state.precioServicio,
+          costo: 0,
+          inventarios: [],
+          precios: [],
+          publicar: this.state.publicar,
+          inventariado: false,
+          negativo: false,
+          preferido: this.state.preferido,
+          estado: this.state.estado,
+
+          image: image,
+          ext: ext,
+
+          idUsuario: this.state.idUsuario,
+        };
+
+        const response = await addProducto(data);
+        if (response instanceof SuccessReponse) {
+          alertSuccess('Producto - Servicio', response.data, () => {
+            this.props.history.goBack();
+          });
         }
-      },
+
+        if (response instanceof ErrorResponse) {
+          alertWarning('Producto - Servicio', response.getMessage());
+        }
+      }
+    },
     );
   };
 
@@ -1071,13 +1039,9 @@ class ProductoAgregar extends CustomComponent {
     }
 
     if (isEmpty(this.state.codigoCombo)) {
-      alertWarning(
-        'Producto - Servicio',
-        'Ingrese el código del combo.',
-        () => {
-          this.refCodigoCombo.current.focus();
-        },
-      );
+      alertWarning('Producto - Servicio', 'Ingrese el código del combo.', () => {
+        this.refCodigoCombo.current.focus();
+      });
       return;
     }
 
@@ -1102,46 +1066,52 @@ class ProductoAgregar extends CustomComponent {
       return;
     }
 
-    alertDialog(
-      'Producto - Combo',
-      '¿Estás seguro de continuar?',
-      async (accept) => {
-        if (accept) {
-          alertInfo('Producto - Combo', 'Procesando información...');
-          const data = {
-            tipo: this.state.tipo,
-            nombre: this.state.nombreCombo,
-            codigo: this.state.codigoCombo,
-            idCodigoSunat: this.state.codigoSunatCombo,
-            idMedida: this.state.idMedidaCombo,
-            idCategoria: this.state.idCategoriaCombo,
-            descripcion: this.state.descripcionCombo,
-            idTipoVenta: 'TV0001',
-            costo: 0,
-            precio: this.state.precioCombo,
-            combos: [],
-            inventarios: [],
-            precios: [],
-            publicar: this.state.publicar,
-            inventariado: false,
-            negativo: false,
-            preferido: this.state.preferido,
-            estado: this.state.estado,
-            idUsuario: this.state.idUsuario,
-          };
+    alertDialog('Producto - Combo', '¿Estás seguro de continuar?', async (accept) => {
+      if (accept) {
+        alertInfo('Producto - Combo', 'Procesando información...');
 
-          const response = await addProducto(data);
-          if (response instanceof SuccessReponse) {
-            alertSuccess('Producto - Combo', response.data, () => {
-              this.props.history.goBack();
-            });
-          }
+        const logoSend = await imageBase64(this.refFileImagen.current.files);
+        const image = logoSend ? logoSend.base64String : '';
+        const ext = logoSend ? logoSend.extension : '';
 
-          if (response instanceof ErrorResponse) {
-            alertWarning('Producto - Combo', response.getMessage());
-          }
+        const data = {
+          tipo: this.state.tipo,
+          nombre: this.state.nombreCombo,
+          codigo: this.state.codigoCombo,
+          idCodigoSunat: this.state.codigoSunatCombo,
+          idMedida: this.state.idMedidaCombo,
+          idCategoria: this.state.idCategoriaCombo,
+          descripcion: this.state.descripcionCombo,
+          idTipoVenta: 'TV0001',
+          costo: 0,
+          precio: this.state.precioCombo,
+          combos: [],
+          inventarios: [],
+          precios: [],
+          publicar: this.state.publicar,
+          inventariado: false,
+          negativo: false,
+          preferido: this.state.preferido,
+          estado: this.state.estado,
+
+          image: image,
+          ext: ext,
+
+          idUsuario: this.state.idUsuario,
+        };
+
+        const response = await addProducto(data);
+        if (response instanceof SuccessReponse) {
+          alertSuccess('Producto - Combo', response.data, () => {
+            this.props.history.goBack();
+          });
         }
-      },
+
+        if (response instanceof ErrorResponse) {
+          alertWarning('Producto - Combo', response.getMessage());
+        }
+      }
+    },
     );
   };
 

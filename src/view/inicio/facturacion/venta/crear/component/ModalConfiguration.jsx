@@ -7,7 +7,7 @@ const ModalConfiguration = (props) => {
 
   const { refComentario } = props;
 
-  const { handleSaveOptions, handleOpenAndCloseOptions } = props;
+  const { handleSaveOptions, handleCloseOptions } = props;
 
   return (
     <div id={idModalConfiguration} className="side-modal">
@@ -18,7 +18,7 @@ const ModalConfiguration = (props) => {
             type="button"
             className="close"
             aria-label="Close"
-            onClick={handleOpenAndCloseOptions}
+            onClick={handleCloseOptions}
           >
             <span aria-hidden="true">&times;</span>
           </button>
@@ -98,7 +98,7 @@ const ModalConfiguration = (props) => {
                 </button>
                 <button
                   className="btn btn-outline-secondary "
-                  onClick={handleOpenAndCloseOptions}
+                  onClick={handleCloseOptions}
                 >
                   Cancelar
                 </button>
@@ -111,7 +111,7 @@ const ModalConfiguration = (props) => {
       </div>
       <div
         className="side-modal_overlay"
-        onClick={handleOpenAndCloseOptions}
+        onClick={handleCloseOptions}
       ></div>
     </div>
   );

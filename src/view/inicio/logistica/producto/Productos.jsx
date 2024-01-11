@@ -22,6 +22,7 @@ import {
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
 import { CANCELED } from '../../../../model/types/types';
+import { images } from '../../../../helper';
 
 class Productos extends CustomComponent {
   constructor(props) {
@@ -201,7 +202,7 @@ class Productos extends CustomComponent {
     if (this.state.loading) {
       return (
         <tr>
-          <td className="text-center" colSpan="9">
+          <td className="text-center" colSpan="10">
             {spinnerLoading('Cargando información de la tabla...', true)}
           </td>
         </tr>
@@ -211,7 +212,7 @@ class Productos extends CustomComponent {
     if (isEmpty(this.state.lista)) {
       return (
         <tr className="text-center">
-          <td colSpan="9">¡No hay datos registrados!</td>
+          <td colSpan="10">¡No hay datos registrados!</td>
         </tr>
       );
     }
@@ -268,9 +269,7 @@ class Productos extends CustomComponent {
             {item.codigo}
             <br />
             <b>{item.nombre}</b>{' '}
-            {item.preferido === 1 && (
-              <i className="fa fa-star text-warning"></i>
-            )}
+            {item.preferido === 1 && (<i className="fa fa-star text-warning"></i>)}
           </td>
           <td className="text-right">
             {numberFormat(item.precio, this.state.codISO)}
@@ -278,6 +277,13 @@ class Productos extends CustomComponent {
           <td>{item.medida}</td>
           <td>{item.categoria}</td>
           <td className="text-center">{estado}</td>
+          <td>
+          <img
+              src={item.imagen ? item.imagen : images.noImage}
+              alt="Logo"
+              width="100"
+            />
+          </td>
           <td className="text-center">
             <button
               className="btn btn-outline-warning btn-sm"
@@ -374,6 +380,9 @@ class Productos extends CustomComponent {
                     <th width="10%">Categoría</th>
                     <th width="10%" className="text-center">
                       Estado
+                    </th>
+                    <th width="10%" className="text-center">
+                      Imagen
                     </th>
                     <th width="5%" className="text-center">
                       Editar

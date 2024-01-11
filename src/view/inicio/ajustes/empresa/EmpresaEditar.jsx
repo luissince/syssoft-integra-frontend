@@ -403,13 +403,7 @@ class EmpresaProceso extends CustomComponent {
                   title="Email"
                   onClick={this.handleLookPasswordEmail}
                 >
-                  <i
-                    className={
-                      this.state.lookPasswordEmail
-                        ? 'fa fa-eye'
-                        : 'fa fa-eye-slash'
-                    }
-                  ></i>
+                  <i className={this.state.lookPasswordEmail ? 'fa fa-eye' : 'fa fa-eye-slash'}></i>
                 </button>
               </div>
             </div>
@@ -454,13 +448,7 @@ class EmpresaProceso extends CustomComponent {
                   title="Sunat"
                   onClick={this.handleLookPasswordSol}
                 >
-                  <i
-                    className={
-                      this.state.lookPasswordSol
-                        ? 'fa fa-eye'
-                        : 'fa fa-eye-slash'
-                    }
-                  ></i>
+                  <i className={this.state.lookPasswordSol ? 'fa fa-eye' : 'fa fa-eye-slash'}></i>
                 </button>
               </div>
             </div>
@@ -505,13 +493,7 @@ class EmpresaProceso extends CustomComponent {
                   title="Sunat"
                   onClick={this.handleLookPasswordSol}
                 >
-                  <i
-                    className={
-                      this.state.lookPasswordClave
-                        ? 'fa fa-eye'
-                        : 'fa fa-eye-slash'
-                    }
-                  ></i>
+                  <i className={this.state.lookPasswordClave ? 'fa fa-eye' : 'fa fa-eye-slash'}></i>
                 </button>
               </div>
             </div>
@@ -534,7 +516,7 @@ class EmpresaProceso extends CustomComponent {
             <input
               type="file"
               id="fileLogo"
-              accept="image/png, image/jpeg, image/gif, image/svg"
+              accept="image/png, image/jpeg, image/gif, image/svg, image/webp"
               className="display-none"
               ref={this.refFileLogo}
             />

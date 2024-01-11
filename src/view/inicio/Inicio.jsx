@@ -27,10 +27,10 @@ import CotizacioneCrear from './facturacion/cotizacion/CotizacionCrear.jsx';
 import CotizacioneEditar from './facturacion/cotizacion/CotizacionEditar.jsx';
 import CotizacionDetalle from './facturacion/cotizacion/CotizacionDetalle.jsx';
 
-import GuiaRemision from './facturacion/guiaremision/GuiaRemision.jsx';
-import GuiaRemisionCrear from './facturacion/guiaremision/GuiaRemisionCrear.jsx';
-import GuiaRemisionEditar from './facturacion/guiaremision/GuiaRemisionEditar.jsx';
-import GuiaRemisionDetalle from './facturacion/guiaremision/GuiaRemisionDetalle.jsx';
+import GuiaRemision from './facturacion/guiaremision/listar/GuiaRemision.jsx';
+import GuiaRemisionCrear from './facturacion/guiaremision/crear/GuiaRemisionCrear.jsx';
+import GuiaRemisionEditar from './facturacion/guiaremision/editar/GuiaRemisionEditar.jsx';
+import GuiaRemisionDetalle from './facturacion/guiaremision/detalle/GuiaRemisionDetalle.jsx';
 
 import Ingresos from './facturacion/ingreso/lista/Ingresos.jsx';
 

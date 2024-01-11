@@ -1,0 +1,88 @@
+.modal-custom {
+    position: absolute;
+    background: rgb(255, 255, 255);
+    overflow: auto;
+    border-radius: 0.5rem;
+    padding: 0px;
+    width: 100%;
+    max-width: 500px;
+    animation: showCustomModal 0.3s;
+}
+
+.modal-custom.close {
+    -webkit-animation: hideCustomModal 0.15s forwards;
+    animation: hideCustomModal 0.15s forwards;
+}
+
+
+@-webkit-keyframes showCustomModal {
+    0% {
+        -webkit-transform: scale(0.7);
+        transform: scale(0.7);
+    }
+
+    45% {
+        -webkit-transform: scale(1.05);
+        transform: scale(1.05);
+    }
+
+    80% {
+        -webkit-transform: scale(0.95);
+        transform: scale(0.95);
+    }
+
+    100% {
+        -webkit-transform: scale(1);
+        transform: scale(1);
+    }
+}
+
+@keyframes showCustomModal {
+    0% {
+        -webkit-transform: scale(0.7);
+        transform: scale(0.7);
+    }
+
+    45% {
+        -webkit-transform: scale(1.05);
+        transform: scale(1.05);
+    }
+
+    80% {
+        -webkit-transform: scale(0.95);
+        transform: scale(0.95);
+    }
+
+    100% {
+        -webkit-transform: scale(1);
+        transform: scale(1);
+    }
+}
+
+@-webkit-keyframes hideCustomModal {
+    0% {
+        -webkit-transform: scale(1);
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    100% {
+        -webkit-transform: scale(0.5);
+        transform: scale(0.5);
+        opacity: 0;
+    }
+}
+
+@keyframes hideCustomModal {
+    0% {
+        -webkit-transform: scale(1);
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    100% {
+        -webkit-transform: scale(0.5);
+        transform: scale(0.5);
+        opacity: 0;
+    }
+}

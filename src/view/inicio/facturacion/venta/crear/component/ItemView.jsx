@@ -11,30 +11,21 @@ const ItemView = (props) => {
       tipo,
       preferido,
       negativo,
+      imagen
     },
     handleAddItem,
     handleStarProduct,
   } = props;
 
   const cssNegativo =
-    tipo !== 'PRODUCTO'
-      ? ''
-      : tipo === 'PRODUCTO' && negativo === 0
-        ? 'text-danger'
-        : 'text-success';
+    tipo !== 'PRODUCTO' ? '' : tipo === 'PRODUCTO' && negativo === 0 ? 'text-danger' : 'text-success';
   const detalleNegativo =
-    tipo !== 'PRODUCTO'
-      ? ''
-      : tipo === 'PRODUCTO' && negativo === 0
-        ? 'VENTA SIN NEGATIVO'
-        : 'VENTA CON NEGATIVO';
+    tipo !== 'PRODUCTO' ? '' : tipo === 'PRODUCTO' && negativo === 0 ? 'VENTA SIN NEGATIVO' : 'VENTA CON NEGATIVO';
 
   return (
     <button
       type="button"
-      className={`item-view ${
-        tipo === 'PRODUCTO' && cantidad <= 0 ? 'border border-danger' : ''
-      }`}
+      className={`item-view ${tipo === 'PRODUCTO' && cantidad <= 0 ? 'border border-danger' : ''}`}
       onClick={handleAddItem}
     >
       <div
@@ -60,14 +51,13 @@ const ItemView = (props) => {
       </div>
       <div className="item-view_describe">
         <p
-          className={`item-view_describe-title ${
-            tipo === 'PRODUCTO' && cantidad <= 0 ? 'text-danger' : ''
-          } position-absolute`}
+          className={`item-view_describe-title ${tipo === 'PRODUCTO' && cantidad <= 0 ? 'text-danger' : ''
+            } position-absolute`}
         >
           {tipo === 'PRODUCTO' ? `Inv. ${cantidad}` : `SERVICIO`}
         </p>
         <div className="item-view_describe-image">
-          <img src={images.sale} alt="Venta" width={96} height={96} />
+          <img src={imagen ? imagen : images.sale} alt="Venta" width={96} height={96} />
         </div>
       </div>
       <span className="text-center d-block w-100 my-1">

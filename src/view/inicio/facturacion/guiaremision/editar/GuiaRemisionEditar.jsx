@@ -1,14 +1,14 @@
 import React from 'react';
-import ContainerWrapper from '../../../../components/Container';
-import CustomComponent from '../../../../model/class/custom-component';
+import ContainerWrapper from '../../../../../components/Container';
+import CustomComponent from '../../../../../model/class/custom-component';
 import {
   keyUpSearch,
   currentDate,
   validateDate,
-} from '../../../../helper/utils.helper';
+} from '../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 
-class GuiaRemisionCrear extends CustomComponent {
+class GuiaRemisionEditar extends CustomComponent {
   constructor(props) {
     super(props);
 
@@ -81,7 +81,7 @@ class GuiaRemisionCrear extends CustomComponent {
                   <i className="bi bi-arrow-left-short"></i>
                 </span>{' '}
                 Guía Remisión
-                <small className="text-secondary"> Crear </small>
+                <small className="text-secondary"> Editar </small>
               </h5>
             </div>
           </div>
@@ -493,4 +493,4 @@ const mapStateToProps = (state) => {
  *
  * Método encargado de conectar con redux y exportar la clase
  */
-export default connect(mapStateToProps, null)(GuiaRemisionCrear);
+export default connect(mapStateToProps, null)(GuiaRemisionEditar);

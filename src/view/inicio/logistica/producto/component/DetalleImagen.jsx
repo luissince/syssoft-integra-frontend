@@ -3,8 +3,7 @@ import { formatDecimal } from '../../../../../helper/utils.helper';
 const DetalleImagen = (props) => {
   const { tipo } = props;
 
-  const { imagen, refFileImagen, handleInputImagen, handleRemoveImagen } =
-    props;
+  const { imagen, refFileImagen, handleInputImagen, handleRemoveImagen } = props;
 
   const { nombre, precio } = props;
 
@@ -41,7 +40,7 @@ const DetalleImagen = (props) => {
           <input
             type="file"
             id="fileImage"
-            accept="image/png, image/jpeg, image/gif, image/svg"
+            accept="image/png, image/jpeg, image/gif, image/svg, image/webp"
             className="display-none"
             ref={refFileImagen}
             onChange={handleInputImagen}
@@ -188,11 +187,11 @@ const DetalleImagen = (props) => {
               id="customSwitchEstado"
               checked={estado}
               onChange={handleSelectEstado}
-            ></input>
+            >
+            </input>
             <label
               className="custom-control-label"
-              htmlFor="customSwitchEstado"
-            >
+              htmlFor="customSwitchEstado">
               <div className="font-weight-bold text-black-50 ">Estado</div>
               <div className="text-black-50">
                 Controla si el producto esta disponible.

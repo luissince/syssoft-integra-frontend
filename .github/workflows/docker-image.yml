@@ -14,6 +14,7 @@ jobs:
       VITE_APP_URL: ${{ secrets.VITE_APP_URL }}
       VITE_APP_APIS_PERU: ${{ secrets.VITE_APP_APIS_PERU }}
       VITE_APP_IMAGE: ${{ secrets.VITE_APP_IMAGE }}
+      VITE_APP_PDF: ${{ secrets.VITE_APP_PDF }}
 
     steps:
       - name: Checkout código
@@ -22,14 +23,12 @@ jobs:
       - name: Crear archivo .env
         run: |
           cat > .env <<EOL
-          VITE_APP_END_POINT="${VITE_APP_END_POINT}"
-          VITE_APP_URL="${VITE_APP_URL}"
-          VITE_APP_APIS_PERU="${VITE_APP_APIS_PERU}"
-          VITE_APP_IMAGE="${VITE_APP_IMAGE}"
+          VITE_APP_END_POINT="${{env.VITE_APP_END_POINT}}"
+          VITE_APP_URL="${{env.VITE_APP_URL}}"
+          VITE_APP_APIS_PERU="${{env.VITE_APP_APIS_PERU}}"
+          VITE_APP_IMAGE="${{env.VITE_APP_IMAGE}}"
+          VITE_APP_PDF="${{env.VITE_APP_PDF}}"
           EOL
-
-      - name: Mostrar contenido del archivo .env
-        run: cat .env
 
       - name: Creando y ejecutando contenedor
         run: docker compose up --build -d

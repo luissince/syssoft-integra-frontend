@@ -604,8 +604,14 @@ export function alertInfo(title, message) {
 export function alertHTML(title, html) {
   Swal({
     html: html,
-    showConfirmButton: true,
+    showConfirmButton: false,
+    showCancelButton: true,
+    cancelButtonText: 'Cerrar',
+    cancelButtonColor: '#dc3545',
     allowOutsideClick: false,
+    showCloseButton: true,
+  }).then((event)=>{
+    console.log(event)
   });
 }
 

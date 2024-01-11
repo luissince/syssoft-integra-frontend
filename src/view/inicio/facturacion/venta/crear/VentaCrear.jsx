@@ -1,4 +1,5 @@
 import React from 'react';
+import printJS from 'print-js';
 import {
   alertDialog,
   alertHTML,
@@ -13,6 +14,7 @@ import {
   isNumeric,
   rounded,
   showModal,
+  sleep,
   spinnerLoading,
   viewModal,
 } from '../../../../../helper/utils.helper';
@@ -51,6 +53,7 @@ import {
 import { starProduct, favoriteProducts } from '../../../../../redux/actions';
 import ModalProducto from './component/ModalProducto';
 import { A_GRANEL, SERVICIO, UNIDADES, VALOR_MONETARIO } from '../../../../../model/types/tipo-venta';
+import CustomModal from '../../../../../components/CustomModal';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -72,6 +75,7 @@ class VentaCrear extends CustomComponent {
       loading: true,
       msgLoading: 'Cargando datos...',
 
+      idVenta: '',
       idComprobante: '',
 
       idMoneda: '',
@@ -110,6 +114,9 @@ class VentaCrear extends CustomComponent {
       frecuenciaPago: new Date().getDate() > 15 ? '30' : '15',
 
       importeTotal: 0.0,
+
+      // modal custom
+      isOpen: false,
 
       // modal venta
       metodosPagoLista: [],
@@ -471,6 +478,16 @@ class VentaCrear extends CustomComponent {
     this.setState({ letraMensual: letra.toFixed(2) });
   }
 
+  reloadView() {
+    this.setState(this.initial, async () => {
+      const productos = await this.fetchProductoPreferidos();
+      this.props.favoriteProducts(productos);
+      await this.setStateAsync({ productos: productos });
+      await this.loadingData();
+      this.refProducto.current.focus();
+    })
+  }
+
   addItemDetalle = (producto, precio, cantidad) => {
     const detalleVenta = [...this.state.detalleVenta];
     const existingItem = detalleVenta.find((item) => item.idProducto === producto.idProducto)
@@ -518,7 +535,7 @@ class VentaCrear extends CustomComponent {
   handleAddItem = async (producto) => {
     if (isEmpty(this.refImpuesto.current.value)) {
       alertWarning('Venta', 'Seleccione un impuesto.', () => {
-        this.handleOpenAndCloseOptions();
+        this.handleOpenOptions();
         this.refImpuesto.current.focus();
       });
       return;
@@ -608,19 +625,63 @@ class VentaCrear extends CustomComponent {
   }
 
   //------------------------------------------------------------------------------------------
-  // Modal configuración
+  // Modal impresión
   //------------------------------------------------------------------------------------------
 
-  handleOpenAndCloseOptions = () => {
+  handlePrintA4 = () => {
+    printJS({
+      printable: `${import.meta.env.VITE_APP_PDF}/api/v1/venta/a4/${this.state.idVenta}`,
+      type: 'pdf',
+      showModal: true,
+      modalMessage: "Recuperando documento...",
+      onPrintDialogClose: () => {
+        console.log("onPrintDialogClose")
+        this.handleClosePrint()
+      }
+    })
+  }
+
+  handlePrintTicket = () => {
+    printJS({
+      printable: `${import.meta.env.VITE_APP_PDF}/api/v1/venta/ticket/${this.state.idVenta}}`,
+      type: 'pdf',
+      showModal: true,
+      modalMessage: "Recuperando documento...",
+      onPrintDialogClose: () => {
+        console.log("onPrintDialogClose")
+        this.handleClosePrint()
+      }
+    })
+  }
+
+  handleOpenPrint = (idVenta) => {
+    this.setState({ isOpen: true, idVenta: idVenta})
+  }
+
+  handleClosePrint = async () => {
+    const data = document.getElementById("idModalCustom")
+    data.classList.add("close")
+    await sleep(200)
+    this.setState({ isOpen: false }, () => this.reloadView())
+  }
+
+  //------------------------------------------------------------------------------------------
+  // Modal configuración
+  //------------------------------------------------------------------------------------------
+  handleOpenOptions = () => {
     const invoice = document.getElementById(this.idModalConfiguration);
     this.refImpuesto.current.value = this.state.idImpuesto;
     this.refMoneda.current.value = this.state.idMoneda;
 
-    if (invoice.classList.contains('toggled')) {
-      invoice.classList.remove('toggled');
-    } else {
-      invoice.classList.add('toggled');
-    }
+    invoice.classList.add('toggled');
+  }
+
+  handleCloseOptions = () => {
+    const invoice = document.getElementById(this.idModalConfiguration);
+    this.refImpuesto.current.value = this.state.idImpuesto;
+    this.refMoneda.current.value = this.state.idMoneda;
+
+    invoice.classList.remove('toggled');
   }
 
   handleSaveOptions = () => {
@@ -651,7 +712,7 @@ class VentaCrear extends CustomComponent {
       idImpuesto: this.refImpuesto.current.value,
       comentario: this.refComentario.current.value,
       detalleVenta,
-    }, () => this.handleOpenAndCloseOptions());
+    }, () => this.handleOpenOptions());
   }
 
   //------------------------------------------------------------------------------------------
@@ -988,7 +1049,7 @@ class VentaCrear extends CustomComponent {
       alertWarning('Venta', 'Seleccione un comprobante.');
       return;
     }
-    console.log(this.state.nuevoCliente)
+   
     if (isEmpty(this.state.idCliente) && this.state.nuevoCliente === null) {
       alertWarning('Venta', 'Selecciona un cliente.', () => {
         this.refCliente.current.focus();
@@ -1003,13 +1064,7 @@ class VentaCrear extends CustomComponent {
   handleClearSale = async () => {
     alertDialog("Venta", "Los productos serán eliminados de la venta actual ¿Desea continuar?", async (accept) => {
       if (accept) {
-        this.setState(this.initial, async() => {
-          const productos = await this.fetchProductoPreferidos();
-          this.props.favoriteProducts(productos);
-          await this.setStateAsync({ productos: productos });
-          await this.loadingData();
-          this.refProducto.current.focus();
-        })
+        this.reloadView()
       }
     })
 
@@ -1182,8 +1237,9 @@ class VentaCrear extends CustomComponent {
         const response = await createFactura(data);
 
         if (response instanceof SuccessReponse) {
-          alertSuccess('Venta', response.data, () => {
-            this.handleClearSale();
+          alertSuccess('Venta', response.data.message, () => {
+            console.log(response.data)
+            this.handleOpenPrint(response.data.idVenta);
           });
         }
 
@@ -1304,6 +1360,56 @@ class VentaCrear extends CustomComponent {
           handleRemoveItemMetodPay={this.handleRemoveItemMetodPay}
         />
 
+        <CustomModal
+          isOpen={this.state.isOpen}
+          onOpen={() => {
+
+          }}
+          onHidden={() => {
+            
+          }}
+          onClose={this.handleClosePrint}>
+
+          <div className='w-100'>
+            <div className='d-flex align-items-center justify-content-between py-2 px-3' style={{
+              backgroundColor: 'rgba(0, 0, 0, 0.07)',
+              borderBottom: '1px solid #dee2e6',
+            }}>
+              <p className='m-0'>SysSoft Integra</p>
+              <button type="button"
+                className='close'
+                onClick={this.handleClosePrint}>
+                <span aria-hidden="true">×</span>
+              </button>
+            </div>
+
+            <div className="d-flex flex-column align-items-center py-3 px-5">
+              <h5>Opciones de impresión</h5>
+              <div>
+                <button type="button" className="btn btn-outline-info"
+                  onClick={this.handlePrintA4}>
+                  <i className="fa fa-file-pdf-o"></i> A4
+                </button>
+                {" "}
+                <button type="button" className="btn btn-outline-info"
+                  onClick={this.handlePrintTicket}>
+                  <i className="fa fa-sticky-note"></i> Ticket
+                </button>
+              </div>
+            </div>
+
+            <div className='d-flex justify-content-end my-3 mx-0 pt-2 px-3' style={{
+              borderTop: '1px solid #dee2e6',
+            }}>
+              <button type="button"
+                className="btn btn-danger"
+                onClick={this.handleClosePrint}>
+                <i className="fa fa-close"></i> Cerrar
+              </button>
+            </div>
+          </div>
+        </CustomModal>
+
         <section className="invoice-left">
           <InvoiceView
             producto={producto}
@@ -1319,7 +1425,8 @@ class VentaCrear extends CustomComponent {
         </section>
         <section className="invoice-right">
           <InvoiceTicket
-            handleOpenAndCloseOptions={this.handleOpenAndCloseOptions}
+            handleOpenPrint={this.handleOpenPrint}
+            handleOpenOptions={this.handleOpenOptions}
           />
 
           {/* <InvoiceListPrices
@@ -1373,7 +1480,7 @@ class VentaCrear extends CustomComponent {
           monedas={monedas}
           refComentario={this.refComentario}
           handleSaveOptions={this.handleSaveOptions}
-          handleOpenAndCloseOptions={this.handleOpenAndCloseOptions}
+          handleCloseOptions={this.handleCloseOptions}
         />
 
         <ModalCliente

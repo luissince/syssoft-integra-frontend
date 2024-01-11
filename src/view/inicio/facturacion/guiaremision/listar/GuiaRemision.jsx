@@ -1,45 +1,179 @@
 import React from 'react';
-import ContainerWrapper from '../../../../components/Container';
-import CustomComponent from '../../../../model/class/custom-component';
-import { alertDialog } from '../../../../helper/utils.helper';
+import ContainerWrapper from '../../../../../components/Container';
+import CustomComponent from '../../../../../model/class/custom-component';
+import { alertDialog, isEmpty, spinnerLoading } from '../../../../../helper/utils.helper';
+import ErrorResponse from '../../../../../model/class/error-response';
+import { CANCELED } from '../../../../../model/types/types';
+import SuccessReponse from '../../../../../model/class/response';
+import { listGuiaRemision } from '../../../../../network/rest/principal.network';
+import { connect } from 'react-redux';
 
 class GuiaRemision extends CustomComponent {
   constructor(props) {
     super(props);
 
-    this.state = {};
+    this.state = {
+      loading: false,
+      lista: [],
+      restart: false,
+
+      opcion: 0,
+      paginacion: 0,
+      totalPaginacion: 0,
+      filasPorPagina: 10,
+      messageTable: 'Cargando información...',
+
+      idSucursal: this.props.token.project.idSucursal,
+      idUsuario: this.props.token.userToken.idUsuario,
+    };
+
+    this.refTxtSearch = React.createRef();
+
+    this.abortControllerTable = new AbortController();
+  }
+
+  async componentDidMount() {
+    await this.loadInit();
+  }
+
+  componentWillUnmount() {
+    this.abortControllerTable.abort();
+  }
+
+  loadInit = async () => {
+    if (this.state.loading) return;
+
+    await this.setStateAsync({ paginacion: 1, restart: true });
+    this.fillTable(0, '');
+    await this.setStateAsync({ opcion: 0 });
+  }
+
+  async searchText(text) {
+    if (this.state.loading) return;
+
+    if (text.trim().length === 0) return;
+
+    await this.setStateAsync({ paginacion: 1, restart: false });
+    this.fillTable(1, text.trim());
+    await this.setStateAsync({ opcion: 1 });
+  }
+
+  paginacionContext = async (listid) => {
+    await this.setStateAsync({ paginacion: listid, restart: false });
+    this.onEventPaginacion();
+  }
+
+  onEventPaginacion = () => {
+    switch (this.state.opcion) {
+      case 0:
+        this.fillTable(0, '');
+        break;
+      case 1:
+        this.fillTable(1, this.refTxtSearch.current.value);
+        break;
+      default:
+        this.fillTable(0, '');
+    }
+  }
+
+  fillTable = async (opcion, buscar) => {
+    this.setState({
+      loading: true,
+      lista: [],
+      messageTable: 'Cargando información...',
+    });
+
+    const params = {
+      opcion: opcion,
+      buscar: buscar,
+      idSucursal: this.state.idSucursal,
+      posicionPagina: (this.state.paginacion - 1) * this.state.filasPorPagina,
+      filasPorPagina: this.state.filasPorPagina,
+    };
+
+    const response = await listGuiaRemision(params, this.abortControllerTable.signal);
+
+    if (response instanceof SuccessReponse) {
+      const totalPaginacion = parseInt(
+        Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
+      );
+
+      this.setState({
+        loading: false,
+        lista: response.data.result,
+        totalPaginacion: totalPaginacion,
+      });
+    }
+
+    if (response instanceof ErrorResponse) {
+      if (response.getType() === CANCELED) return;
+
+      this.setState({
+        loading: false,
+        lista: [],
+        totalPaginacion: 0,
+        messageTable: response.getMessage(),
+      });
+    }
   }
 
   handleCrear = () => {
     this.props.history.push({
       pathname: `${this.props.location.pathname}/crear`,
     });
-  };
+  }
 
   handleEditar = (idCompra) => {
     this.props.history.push({
       pathname: `${this.props.location.pathname}/editar`,
       search: '?idGuiaRemision=' + idCompra,
     });
-  };
+  }
 
   handleDetalle = (idCompra) => {
     this.props.history.push({
       pathname: `${this.props.location.pathname}/detalle`,
       search: '?idGuiaRemision=' + idCompra,
     });
-  };
+  }
 
   handleAnular = () => {
-    alertDialog(
-      'Guia Remisión',
-      '¿Estás seguro de anular la guía de remisión?',
-      async (event) => {
-        if (event) {
-        }
-      },
-    );
-  };
+    alertDialog('Guia Remisión', '¿Estás seguro de anular la guía de remisión?', async (accept) => {
+      if (accept) {
+
+      }
+    });
+  }
+
+  generateBody() {
+    if (this.state.loading) {
+      return (
+        <tr>
+          <td className="text-center" colSpan="9">
+            {spinnerLoading('Cargando información de la tabla...', true)}
+          </td>
+        </tr>
+      );
+    }
+
+    if (isEmpty(this.state.lista)) {
+      return (
+        <tr>
+          <td className="text-center" colSpan="9">¡No hay datos registrados!</td>
+        </tr>
+      );
+    }
+
+    return this.state.lista.map((item, index) => {
+      return (
+        <tr key={index}>
+          <td className={`text-center`}>
+            {item.id}
+          </td>
+        </tr>
+      )
+    });
+  }
 
   render() {
     return (
@@ -83,7 +217,7 @@ class GuiaRemision extends CustomComponent {
               >
                 <i className="bi bi-file-plus"></i> Crear guía
               </button>{' '}
-              <button className="btn btn-outline-secondary" onClick={() => {}}>
+              <button className="btn btn-outline-secondary" onClick={() => { }}>
                 <i className="bi bi-arrow-clockwise"></i>
               </button>
             </div>
@@ -117,7 +251,8 @@ class GuiaRemision extends CustomComponent {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
+                  {this.generateBody()}
+                  {/* <tr>
                     <td className="text-center">1</td>
                     <td>ss</td>
                     <td>ss</td>
@@ -152,7 +287,7 @@ class GuiaRemision extends CustomComponent {
                         <i className="bi bi-trash"></i>
                       </button>
                     </td>
-                  </tr>
+                  </tr> */}
                 </tbody>
               </table>
             </div>
@@ -163,4 +298,10 @@ class GuiaRemision extends CustomComponent {
   }
 }
 
-export default GuiaRemision;
+const mapStateToProps = (state) => {
+  return {
+    token: state.reducer,
+  };
+};
+
+export default connect(mapStateToProps, null)(GuiaRemision);
