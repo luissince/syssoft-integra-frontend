@@ -1,4 +1,5 @@
 import CryptoJS from 'crypto-js';
+import printJS from 'print-js';
 import {
   rounded,
   numberFormat,
@@ -131,6 +132,31 @@ class VentaDetalle extends CustomComponent {
     }
   }
 
+  handlePrintA4 = () => {
+    printJS({
+      printable: `${import.meta.env.VITE_APP_PDF}/api/v1/venta/a4/${this.state.idVenta}`,
+      type: 'pdf',
+      showModal: true,
+      modalMessage: "Recuperando documento...",
+      onPrintDialogClose: () => {
+        console.log("onPrintDialogClose")
+      }
+    })
+  }
+
+  handlePrintTicket = () => {
+    printJS({
+      printable: `${import.meta.env.VITE_APP_PDF}/api/v1/venta/ticket/${this.state.idVenta}`,
+      type: 'pdf',
+      showModal: true,
+      modalMessage: "Recuperando documento...",
+      onPrintDialogClose: () => {
+        console.log("onPrintDialogClose")
+      }
+    })
+  }
+
+
   renderTotal() {
     let subTotal = 0;
     let total = 0;
@@ -236,13 +262,27 @@ class VentaDetalle extends CustomComponent {
         <div className="row">
           <div className="col">
             <div className="form-group">
-              <button
+              {/* <button
                 type="button"
                 className="btn btn-light"
                 onClick={() => this.onEventImprimir()}
               >
                 <i className="fa fa-print"></i> Imprimir
-              </button>{' '}
+              </button>{' '} */}
+              <button
+                type="button"
+                className="btn btn-light"
+                onClick={this.handlePrintA4}
+              >
+                <i className="fa fa-print"></i> A4
+              </button>
+              <button
+                type="button"
+                className="btn btn-light"
+                onClick={this.handlePrintTicket}
+              >
+                <i className="fa fa-print"></i> Ticket
+              </button>
               {/* <button type="button" className="btn btn-light"><i className="fa fa-edit"></i> Editar</button> */}{' '}
               {/* <button type="button" className="btn btn-light"><i className="fa fa-remove"></i> Eliminar</button> */}{' '}
             </div>
