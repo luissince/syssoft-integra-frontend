@@ -643,7 +643,7 @@ class VentaCrear extends CustomComponent {
 
   handlePrintTicket = () => {
     printJS({
-      printable: `${import.meta.env.VITE_APP_PDF}/api/v1/venta/ticket/${this.state.idVenta}}`,
+      printable: `${import.meta.env.VITE_APP_PDF}/api/v1/venta/ticket/${this.state.idVenta}`,
       type: 'pdf',
       showModal: true,
       modalMessage: "Recuperando documento...",
