@@ -4,6 +4,7 @@ import {
   spinnerLoading,
   numberFormat,
 } from '../../../../../../helper/utils.helper';
+import { ADELANTADO, CONTADO, CREDITO_FIJO, CREDITO_VARIABLE } from '../../../../../../model/types/forma-venta';
 
 const ModalSale = (props) => {
   const { idModalSale } = props;
@@ -12,7 +13,7 @@ const ModalSale = (props) => {
     loadingModal,
     codiso,
 
-    selectTipoPago,
+    formaPago,
     handleSelectTipoPago,
 
     refMetodoContado,
@@ -170,11 +171,11 @@ const ModalSale = (props) => {
               {/* Al contado */}
               <div className="col-md-3 col-sm-3">
                 <button
-                  className={`btn ${selectTipoPago === 1 ? 'btn-primary' : 'btn-light'
+                  className={`btn ${formaPago === CONTADO ? 'btn-primary' : 'btn-light'
                     } btn-block`}
                   type="button"
                   title="Pago al contado"
-                  onClick={() => handleSelectTipoPago(1)}
+                  onClick={() => handleSelectTipoPago(CONTADO)}
                 >
                   <div className="row">
                     <div className="col-md-12">
@@ -190,11 +191,11 @@ const ModalSale = (props) => {
               {/* Crédito fijo*/}
               <div className="col-md-3 col-sm-3">
                 <button
-                  className={`btn ${selectTipoPago === 2 ? 'btn-primary' : 'btn-light'
+                  className={`btn ${formaPago === CREDITO_FIJO ? 'btn-primary' : 'btn-light'
                     } btn-block`}
                   type="button"
                   title="Pago al credito"
-                  onClick={() => handleSelectTipoPago(2)}
+                  onClick={() => handleSelectTipoPago(CREDITO_FIJO)}
                 >
                   <div className="row">
                     <div className="col-md-12">
@@ -210,11 +211,11 @@ const ModalSale = (props) => {
               {/* Crédito variable */}
               <div className="col-md-3 col-sm-3">
                 <button
-                  className={`btn ${selectTipoPago === 3 ? 'btn-primary' : 'btn-light'
+                  className={`btn ${formaPago === CREDITO_VARIABLE ? 'btn-primary' : 'btn-light'
                     } btn-block`}
                   type="button"
                   title="Pago al credito"
-                  onClick={() => handleSelectTipoPago(3)}
+                  onClick={() => handleSelectTipoPago(CREDITO_VARIABLE)}
                 >
                   <div className="row">
                     <div className="col-md-12">
@@ -230,11 +231,11 @@ const ModalSale = (props) => {
               {/* Pago adelantado */}
               <div className="col-md-3 col-sm-3">
                 <button
-                  className={`btn ${selectTipoPago === 4 ? 'btn-primary' : 'btn-light'
+                  className={`btn ${formaPago === ADELANTADO ? 'btn-primary' : 'btn-light'
                     } btn-block`}
                   type="button"
                   title="Pago al credito"
-                  onClick={() => handleSelectTipoPago(4)}
+                  onClick={() => handleSelectTipoPago(ADELANTADO)}
                 >
                   <div className="row">
                     <div className="col-md-12">
@@ -250,7 +251,7 @@ const ModalSale = (props) => {
 
             <br />
             {/* contado detalle */}
-            {selectTipoPago === 1 && (
+            {formaPago === CONTADO && (
               <>
                 <h6>Lista de métodos:</h6>
 
@@ -323,7 +324,7 @@ const ModalSale = (props) => {
             )}
 
             {/* crédito fijo */}
-            {selectTipoPago === 2 && (
+            {formaPago === CREDITO_FIJO && (
               <div className={`row`}>
                 <div className="col">
 
@@ -398,7 +399,7 @@ const ModalSale = (props) => {
             )}
 
             {/* crédito variable */}
-            {selectTipoPago === 3 && (
+            {formaPago === CREDITO_VARIABLE && (
               <div className="row">
                 <div className="col">
 
@@ -436,7 +437,7 @@ const ModalSale = (props) => {
             )}
 
             {/* pago adelantado */}
-            {selectTipoPago === 4 && (
+            {formaPago === ADELANTADO && (
               <div className="row">
                 <div className="col">
 

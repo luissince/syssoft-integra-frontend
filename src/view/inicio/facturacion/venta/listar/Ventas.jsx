@@ -23,6 +23,7 @@ import {
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
+import { CONTADO, CREDITO_FIJO, CREDITO_VARIABLE } from '../../../../../model/types/forma-venta';
 
 class Ventas extends CustomComponent {
   constructor(props) {
@@ -196,11 +197,14 @@ class Ventas extends CustomComponent {
     }
 
     return this.state.lista.map((item, index) => {
+
+      const estado = item.estado === 1 ? <span className="text-success">COBRADO</span> : item.estado === 2 ? <span className="text-warning">POR COBRAR</span> : item.estado === 3 ? <span className="text-danger">ANULADO</span> : <span className="text-primary">POR LLEVAR</span>;
+
+      const tipo = item.idFormaVenta === CONTADO ? "CONTADO" : item.idFormaVenta === CREDITO_FIJO ? "CREDITO FIJO" : item.idFormaVenta === CREDITO_VARIABLE ? "CRÉDITO VARIABLE" : "PAGO ADELTANDO";
+
       return (
         <tr key={index}>
-          <td className={`text-center`}>
-            {item.id}
-          </td>
+          <td className={`text-center`}>{item.id}</td>
           <td>
             {item.fecha}
             <br />
@@ -216,25 +220,9 @@ class Ventas extends CustomComponent {
             <br />
             {item.serie + '-' + formatNumberWithZeros(item.numeracion)}
           </td>
-          <td>
-            {
-              item.tipo === 1
-                ? <span>Contado</span>
-                : <span>Crédito</span>
-            }
-          </td>
+          <td>{tipo}</td>
           <td> {numberFormat(item.total, item.codiso)} </td>
-          <td className="text-center">
-            {
-              item.estado === 1
-                ? <span className="text-success">Cobrado</span>
-                : item.estado === 2
-                  ? <span className="text-warning">Por Cobrar</span>
-                  : item.estado === 3
-                    ? <span className="text-danger">Anulado</span>
-                    : <span className="text-primary">Por Llevar</span>
-            }
-          </td>
+          <td className="text-center">{estado}</td>
           <td className="text-center">
             <button
               className="btn btn-outline-primary btn-sm"

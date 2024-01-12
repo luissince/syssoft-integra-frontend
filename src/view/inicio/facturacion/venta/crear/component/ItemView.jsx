@@ -41,12 +41,14 @@ const ItemView = (props) => {
       >
         {preferido === 1 && (
           <i
-            className="fa fa-star-o text-white"
+            className="fa fa-star text-white"
             style={{ fontSize: '25px' }}
           ></i>
         )}
         {preferido === 0 && (
-          <i className="fa fa-star text-white" style={{ fontSize: '25px' }}></i>
+          <i
+            className="fa fa-star-o text-white"
+            style={{ fontSize: '25px' }}></i>
         )}
       </div>
       <div className="item-view_describe">

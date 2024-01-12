@@ -16,6 +16,7 @@ import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
 import CustomComponent from '../../../../../model/class/custom-component';
+import { CONTADO, CREDITO_FIJO, CREDITO_VARIABLE } from '../../../../../model/types/forma-venta';
 
 class VentaDetalle extends CustomComponent {
 
@@ -77,7 +78,7 @@ class VentaDetalle extends CustomComponent {
       informacion,
       fecha,
       hora,
-      tipo,
+      idFormaVenta,
       estado,
       simbolo,
       codiso,
@@ -86,22 +87,18 @@ class VentaDetalle extends CustomComponent {
 
     const monto = factura.ingresos.reduce((accumlate, item) => accumlate + item.monto, 0,);
 
-    await this.setStateAsync({
+    const nuevoEstado = estado === 1 ? <span className="text-success">COBRADO</span> : estado === 2 ? <span className="text-warning">POR COBRAR</span> : estado === 3 ? <span className="text-danger">ANULADO</span> : <span className="text-primary">POR LLEVAR</span>;
+
+    const tipo = idFormaVenta === CONTADO ? "CONTADO" : idFormaVenta === CREDITO_FIJO ? "CREDITO FIJO" : idFormaVenta === CREDITO_VARIABLE ? "CRÉDITO VARIABLE" : "PAGO ADELTANDO";
+
+    this.setState({
       idVenta: id,
       comprobante: comprobante + '  ' + serie + '-' + numeracion,
       cliente: documento + ' - ' + informacion,
       fecha: fecha + ' ' + formatTime(hora),
       notas: '',
-      formaVenta: tipo === 1 ? 'Contado' : 'Crédito',
-      estado: estado === 1 ? <span className="text-success font-weight-bold">
-        Cobrado
-      </span> : estado === 2 ? <span className="text-warning font-weight-bold">
-        Por cobrar
-      </span> : estado == 3 ? <span className="text-danger font-weight-bold">
-        Anulado
-      </span> : <span className="text-info font-weight-bold">
-        Por llevar
-      </span>,
+      formaVenta: tipo,
+      estado: nuevoEstado,
       simbolo: simbolo,
       codiso: codiso,
       usuario: usuario,

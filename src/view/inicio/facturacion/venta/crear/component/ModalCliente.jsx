@@ -1,11 +1,12 @@
 import { keyNumberInteger, keyNumberPhone, spinnerLoading } from "../../../../../../helper/utils.helper";
+import { CLIENTE_JURIDICO, CLIENTE_NATURAL } from "../../../../../../model/types/tipo-cliente";
 
 // Definir un componente funcional React llamado ModalCliente
 const ModalCliente = (props) => {
   // Desestructurar props para extraer valores específicos
   const { idModal, loading } = props;
 
-  const { handleSave, handleCloseCliente, handleClickTipoCliente } = props;
+  const { handleSave, handleClose, handleClickIdTipoCliente } = props;
 
   const { tiposDocumentos } = props;
 
@@ -42,7 +43,7 @@ const ModalCliente = (props) => {
             type="button"
             className="close"
             aria-label="Close"
-            onClick={handleCloseCliente}
+            onClick={handleClose}
           >
             <span aria-hidden="true">&times;</span>
           </button>
@@ -65,7 +66,7 @@ const ModalCliente = (props) => {
                       role="tab"
                       aria-controls="datos"
                       aria-selected={true}
-                      onClick={() => handleClickTipoCliente('TC0001')}
+                      onClick={() => handleClickIdTipoCliente(CLIENTE_NATURAL)}
                     >
                       <i className="bi bi-person"></i> Persona Natural
                     </a>
@@ -80,7 +81,7 @@ const ModalCliente = (props) => {
                       role="tab"
                       aria-controls="contacto"
                       aria-selected={false}
-                      onClick={() => handleClickTipoCliente('TC0002')}
+                      onClick={() => handleClickIdTipoCliente(CLIENTE_JURIDICO)}
                     >
                       <i className="bi bi-building"></i> Persona Juridica
                     </a>
@@ -321,7 +322,7 @@ const ModalCliente = (props) => {
                 </button>
                 <button
                   className="btn btn-outline-secondary "
-                  onClick={handleCloseCliente}
+                  onClick={handleClose}
                 >
                   Cancelar
                 </button>
@@ -330,7 +331,7 @@ const ModalCliente = (props) => {
           </div>
         </div>
       </div>
-      <div className="side-modal_overlay" onClick={handleCloseCliente}></div>
+      <div className="side-modal_overlay" onClick={handleClose}></div>
     </div>
   );
 };

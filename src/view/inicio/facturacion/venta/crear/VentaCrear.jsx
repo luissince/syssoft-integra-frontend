@@ -52,8 +52,10 @@ import {
 } from '../../../../../model/types/tipo-comprobante';
 import { starProduct, favoriteProducts } from '../../../../../redux/actions';
 import ModalProducto from './component/ModalProducto';
-import { A_GRANEL, SERVICIO, UNIDADES, VALOR_MONETARIO } from '../../../../../model/types/tipo-venta';
+import { A_GRANEL, SERVICIO, UNIDADES, VALOR_MONETARIO } from '../../../../../model/types/tipo-tratamiento-producto';
 import CustomModal from '../../../../../components/CustomModal';
+import { CLIENTE_NATURAL } from '../../../../../model/types/tipo-cliente';
+import { CONTADO } from '../../../../../model/types/forma-venta';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -96,7 +98,7 @@ class VentaCrear extends CustomComponent {
 
       // Variables del modal de venta
       loadingModal: false,
-      selectTipoPago: 1,
+      formaPago: CONTADO,
 
       comprobantes: [],
       productos: [],
@@ -124,7 +126,7 @@ class VentaCrear extends CustomComponent {
 
       // modal cliente
       loadingCliente: false,
-      tipoCliente: 'TC0001',
+      idTipoCliente: CLIENTE_NATURAL,
       idTipoDocumentoPn: '',
       numeroDocumentoPn: '',
       informacionPn: '',
@@ -246,7 +248,7 @@ class VentaCrear extends CustomComponent {
 
     clearModal(this.idModalSale, () => {
       this.setState({
-        selectTipoPago: 1,
+        formaPago: CONTADO,
 
         letraMensual: '',
         frecuenciaPagoCredito: new Date().getDate() > 15 ? '30' : '15',
@@ -500,7 +502,7 @@ class VentaCrear extends CustomComponent {
         idImpuesto: this.refImpuesto.current.value,
         precio: precio ? precio : producto.precio,
         idInventario: producto.idInventario,
-        idTipoVenta: producto.idTipoVenta,
+        idTipoTratamientoProducto: producto.idTipoTratamientoProducto,
         tipo: producto.tipo,
       });
     } else {
@@ -546,11 +548,11 @@ class VentaCrear extends CustomComponent {
       return;
     }
 
-    if (producto.idTipoVenta === UNIDADES || producto.idTipoVenta === SERVICIO) {
+    if (producto.idTipoTratamientoProducto === UNIDADES || producto.idTipoTratamientoProducto === SERVICIO) {
       this.addItemDetalle(producto, null, null);
     }
 
-    if (producto.idTipoVenta === VALOR_MONETARIO) {
+    if (producto.idTipoTratamientoProducto === VALOR_MONETARIO) {
       alertInput("Venta", "Ingrese el valor monetario (S/, $ u otro) del producto o el total.", (accept, value) => {
         if (accept) {
           if (!isNumeric(value)) {
@@ -563,7 +565,7 @@ class VentaCrear extends CustomComponent {
       })
     }
 
-    if (producto.idTipoVenta === A_GRANEL) {
+    if (producto.idTipoTratamientoProducto === A_GRANEL) {
       alertInput("Venta", "Ingrese el peso del producto (KM, GM u otro).", (accept, value) => {
         if (accept) {
           if (!isNumeric(value)) {
@@ -719,8 +721,8 @@ class VentaCrear extends CustomComponent {
   // Modal cliente
   //------------------------------------------------------------------------------------------
 
-  handleClickTipoCliente = (tipo) => {
-    this.setState({ tipoCliente: tipo })
+  handleClickIdTipoCliente = (tipo) => {
+    this.setState({ idTipoCliente: tipo })
   }
 
   handleSelectIdTipoDocumentoPn = (event) => {
@@ -808,7 +810,7 @@ class VentaCrear extends CustomComponent {
     }
 
     const nuevoCliente = {
-      idTipoCliente: this.state.tipoCliente,
+      idTipoCliente: this.state.idTipoCliente,
       idTipoDocumento: this.state.idTipoDocumentoPn,
       numeroDocumento: this.state.numeroDocumentoPn,
       informacion: this.state.informacionPn,
@@ -860,7 +862,7 @@ class VentaCrear extends CustomComponent {
     }
 
     const nuevoCliente = {
-      idTipoCliente: this.state.tipoCliente,
+      idTipoCliente: this.state.idTipoCliente,
       idTipoDocumento: this.state.idTipoDocumentoPj,
       numeroDocumento: this.state.numeroDocumentoPj,
       informacion: this.state.informacionPj,
@@ -881,7 +883,7 @@ class VentaCrear extends CustomComponent {
   }
 
   handleSaveCliente = () => {
-    if (this.state.tipoCliente === 'TC0001') {
+    if (this.state.idTipoCliente === CLIENTE_NATURAL) {
       this.handleSaveClienteNatural();
     } else {
       this.handleSaveClienteJuridica();
@@ -1075,7 +1077,7 @@ class VentaCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
 
   handleSelectTipoPago = (tipo) => {
-    this.setState({ selectTipoPago: tipo });
+    this.setState({ formaPago: tipo });
   }
 
   handleSelectNumeroCuotas = (event) => {
@@ -1158,7 +1160,7 @@ class VentaCrear extends CustomComponent {
 
   handleProcessContado = async () => {
     const {
-      selectTipoPago,
+      formaPago,
       idComprobante,
       idMoneda,
       idImpuesto,
@@ -1217,7 +1219,7 @@ class VentaCrear extends CustomComponent {
     alertDialog('Venta', '¿Estás seguro de continuar?', async (accept) => {
       if (accept) {
         const data = {
-          tipo: selectTipoPago,
+          idFormaVenta: formaPago,
           idComprobante: idComprobante,
           idMoneda: idMoneda,
           idImpuesto: idImpuesto,
@@ -1281,7 +1283,7 @@ class VentaCrear extends CustomComponent {
   };
 
   handleSaveSale = () => {
-    if (this.state.selectTipoPago === 1) {
+    if (this.state.formaPago === CONTADO) {
       this.handleProcessContado();
     }
   };
@@ -1303,7 +1305,7 @@ class VentaCrear extends CustomComponent {
     */
 
   render() {
-    const { loadingModal, selectTipoPago, } = this.state;
+    const { loadingModal, formaPago, } = this.state;
 
     const { impuestos, monedas, codiso } = this.state;
 
@@ -1336,7 +1338,7 @@ class VentaCrear extends CustomComponent {
         <ModalSale
           idModalSale={this.idModalSale}
           loadingModal={loadingModal}
-          selectTipoPago={selectTipoPago}
+          formaPago={formaPago}
           codiso={codiso}
           handleSelectTipoPago={this.handleSelectTipoPago}
           refMetodoContado={this.refMetodoContado}
@@ -1529,8 +1531,8 @@ class VentaCrear extends CustomComponent {
           handleInputDireccionPj={this.handleInputDireccionPj}
 
           handleSave={this.handleSaveCliente}
-          handleClickTipoCliente={this.handleClickTipoCliente}
-          handleCloseCliente={this.handleCloseCliente}
+          handleClickIdTipoCliente={this.handleClickIdTipoCliente}
+          handleClose={this.handleCloseCliente}
         />
 
         <ModalProducto

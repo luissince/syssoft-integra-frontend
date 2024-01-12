@@ -96,6 +96,7 @@ class CompraDetalle extends CustomComponent {
     } = compra.cabecera;
 
     const monto = compra.detalle.reduce((accumlate, item) => accumlate + (item.costo * item.cantidad), 0,);
+    
 
     this.setState({
       idCompra: id,

@@ -34,6 +34,7 @@ import Servicio from '../component/Servicio';
 import Combo from '../component/Combo';
 import DetalleImagen from '../component/DetalleImagen';
 import ModalProducto from '../component/ModalProducto';
+import { SERVICIO, UNIDADES } from '../../../../../model/types/tipo-tratamiento-producto';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -64,7 +65,7 @@ class ProductoAgregar extends CustomComponent {
       idCategoriaProducto: '',
       descripcionProducto: '',
 
-      idTipoVentaProducto: 'TV0001',
+      idTipoTratamientoProducto: UNIDADES,
 
       precioProducto: '',
       costoProducto: '',
@@ -388,9 +389,9 @@ class ProductoAgregar extends CustomComponent {
     });
   };
 
-  handleOptionTipoVentaProducto = (event) => {
+  handleOptionFormaVentaProducto = (event) => {
     this.setState({
-      idTipoVentaProducto: event.target.value,
+      idTipoTratamientoProducto: event.target.value,
     });
   };
 
@@ -915,7 +916,7 @@ class ProductoAgregar extends CustomComponent {
           idMedida: this.state.idMedidaProducto,
           idCategoria: this.state.idCategoriaProducto,
           descripcion: this.state.descripcionProducto,
-          idTipoVenta: this.state.idTipoVentaProducto,
+          idTipoTratamientoProducto: this.state.idTipoTratamientoProducto,
           costo: this.state.costoProducto,
           precio: this.state.precioProducto,
           inventarios: this.state.inventarioProducto,
@@ -998,7 +999,7 @@ class ProductoAgregar extends CustomComponent {
           idMedida: this.state.idMedidaServicio,
           idCategoria: this.state.idCategoriaServicio,
           descripcion: this.state.descripcionServicio,
-          idTipoVenta: 'TV0004',
+          idTipoTratamientoProducto: SERVICIO,
           precio: this.state.precioServicio,
           costo: 0,
           inventarios: [],
@@ -1082,7 +1083,7 @@ class ProductoAgregar extends CustomComponent {
           idMedida: this.state.idMedidaCombo,
           idCategoria: this.state.idCategoriaCombo,
           descripcion: this.state.descripcionCombo,
-          idTipoVenta: 'TV0001',
+          idTipoTratamientoProducto: UNIDADES,
           costo: 0,
           precio: this.state.precioCombo,
           combos: [],
@@ -1153,10 +1154,9 @@ class ProductoAgregar extends CustomComponent {
 
     const { nombreProducto, codigoProducto, codigoSunatProducto } = this.state;
 
-    const { idMedidaProducto, idCategoriaProducto, descripcionProducto } =
-      this.state;
+    const { idMedidaProducto, idCategoriaProducto, descripcionProducto } = this.state;
 
-    const { idTipoVentaProducto } = this.state;
+    const { idTipoTratamientoProducto } = this.state;
 
     const { precioProducto, costoProducto, precios } = this.state;
 
@@ -1306,8 +1306,8 @@ class ProductoAgregar extends CustomComponent {
                     descripcion={descripcionProducto}
                     refDescripcion={this.refDescripcionProducto}
                     handleInputDescripcion={this.handleInputDescripcionProducto}
-                    idTipoVenta={idTipoVentaProducto}
-                    handleOptionTipoVenta={this.handleOptionTipoVentaProducto}
+                    idTipoTratamientoProducto={idTipoTratamientoProducto}
+                    handleOptionFormaVenta={this.handleOptionFormaVentaProducto}
                     costo={costoProducto}
                     refCosto={this.refCostoProducto}
                     handleInputCosto={this.handleInputCostoProducto}

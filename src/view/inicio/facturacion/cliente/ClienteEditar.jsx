@@ -27,6 +27,7 @@ import {
 import { getDni, getRuc } from '../../../../network/rest/apisperu.network';
 import { CANCELED } from '../../../../model/types/types';
 import CustomComponent from '../../../../model/class/custom-component';
+import { CLIENTE_JURIDICO, CLIENTE_NATURAL } from '../../../../model/types/tipo-cliente';
 
 class ClienteEditar extends CustomComponent {
   constructor(props) {
@@ -35,7 +36,7 @@ class ClienteEditar extends CustomComponent {
       loading: true,
       msgLoading: 'Cargando datos...',
 
-      idTipoCliente: 'TC0001',
+      idTipoCliente: CLIENTE_NATURAL,
       idCliente: '',
       // persona natural
       idTipoDocumentoPn: '',
@@ -136,7 +137,7 @@ class ClienteEditar extends CustomComponent {
       return;
     }
 
-    if (cliente.idTipoCliente === 'TC0001') {
+    if (cliente.idTipoCliente === CLIENTE_NATURAL) {
       this.handleFocusTab('personaNatural-tab', 'datosPn');
       await this.setStateAsync({
         idTipoCliente: cliente.idTipoCliente,
@@ -152,17 +153,7 @@ class ClienteEditar extends CustomComponent {
         direccionPn: cliente.direccion,
 
         idUbigeoPn: cliente.idUbigeo === 0 ? '' : cliente.idUbigeo.toString(),
-        ubigeoPn:
-          cliente.ubigeo === ''
-            ? ''
-            : cliente.departamento +
-            '-' +
-            cliente.provincia +
-            '-' +
-            cliente.distrito +
-            ' (' +
-            cliente.ubigeo +
-            ')',
+        ubigeoPn: cliente.ubigeo === '' ? '' : cliente.departamento + '-' + cliente.provincia + '-' + cliente.distrito + ' (' + cliente.ubigeo + ')',
 
         estadoCivil: cliente.estadoCivil,
         predeterminado: cliente.predeterminado,
@@ -189,17 +180,7 @@ class ClienteEditar extends CustomComponent {
         direccionPj: cliente.direccion,
 
         idUbigeoPj: cliente.idUbigeo === 0 ? '' : cliente.idUbigeo.toString(),
-        ubigeoPj:
-          cliente.ubigeo === ''
-            ? ''
-            : cliente.departamento +
-            '-' +
-            cliente.provincia +
-            '-' +
-            cliente.distrito +
-            ' (' +
-            cliente.ubigeo +
-            ')',
+        ubigeoPj: cliente.ubigeo === '' ? '' : cliente.departamento + '-' + cliente.provincia + '-' + cliente.distrito + ' (' + cliente.ubigeo + ')',
 
         estadoPj: cliente.estado,
 
@@ -499,7 +480,7 @@ class ClienteEditar extends CustomComponent {
 
   handleGuardarPNatural = async () => {
     const tipoDocumento = this.state.tiposDocumentos.find(item => item.idTipoDocumento === this.state.idTipoDocumentoPn);
-    
+
     if (isEmpty(this.state.idTipoDocumentoPn)) {
       alertWarning("Cliente", 'Seleccione el tipo de documento.', () => {
         this.refTipoDocumentoPn.current.focus();
@@ -634,7 +615,7 @@ class ClienteEditar extends CustomComponent {
   };
 
   handleSave = () => {
-    if (this.state.idTipoCliente === 'TC0001') {
+    if (this.state.idTipoCliente === CLIENTE_NATURAL) {
       this.handleGuardarPNatural();
     } else {
       this.handleGuardarPJuridica();
@@ -701,7 +682,7 @@ class ClienteEditar extends CustomComponent {
                   role="tab"
                   aria-controls="datosPn"
                   aria-selected={true}
-                  onClick={() => this.setState({ idTipoCliente: 'TC0001' })}
+                  onClick={() => this.setState({ idTipoCliente: CLIENTE_NATURAL })}
                 >
                   <i className="bi bi-person"></i> Persona Natural
                 </a>
@@ -716,7 +697,7 @@ class ClienteEditar extends CustomComponent {
                   role="tab"
                   aria-controls="datosPj"
                   aria-selected={false}
-                  onClick={() => this.setState({ idTipoCliente: 'TC0002' })}
+                  onClick={() => this.setState({ idTipoCliente: CLIENTE_JURIDICO })}
                 >
                   <i className="bi bi-building"></i> Persona Juridica
                 </a>

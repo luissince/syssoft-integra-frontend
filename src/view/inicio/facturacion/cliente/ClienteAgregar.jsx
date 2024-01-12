@@ -26,6 +26,7 @@ import {
 import { getDni, getRuc } from '../../../../network/rest/apisperu.network';
 import { CANCELED } from '../../../../model/types/types';
 import CustomComponent from '../../../../model/class/custom-component';
+import { CLIENTE_JURIDICO, CLIENTE_NATURAL } from '../../../../model/types/tipo-cliente';
 
 class ClienteAgregar extends CustomComponent {
   constructor(props) {
@@ -34,7 +35,7 @@ class ClienteAgregar extends CustomComponent {
       loading: true,
       msgLoading: 'Cargando datos...',
 
-      idTipoCliente: 'TC0001',
+      idTipoCliente: CLIENTE_NATURAL,
       // persona natural
       idTipoDocumentoPn: '',
       documentoPn: '',
@@ -546,7 +547,7 @@ class ClienteAgregar extends CustomComponent {
   };
 
   handleSave = () => {
-    if (this.state.idTipoCliente === 'TC0001') {
+    if (this.state.idTipoCliente === CLIENTE_NATURAL) {
       this.handleGuardarPNatural();
     } else {
       this.handleGuardarPJuridica();
@@ -613,7 +614,7 @@ class ClienteAgregar extends CustomComponent {
                   role="tab"
                   aria-controls="datos"
                   aria-selected={true}
-                  onClick={() => this.setState({ idTipoCliente: 'TC0001' })}
+                  onClick={() => this.setState({ idTipoCliente: CLIENTE_NATURAL })}
                 >
                   <i className="bi bi-person"></i> Persona Natural
                 </a>
@@ -628,7 +629,7 @@ class ClienteAgregar extends CustomComponent {
                   role="tab"
                   aria-controls="contacto"
                   aria-selected={false}
-                  onClick={() => this.setState({ idTipoCliente: 'TC0002' })}
+                  onClick={() => this.setState({ idTipoCliente: CLIENTE_JURIDICO })}
                 >
                   <i className="bi bi-building"></i> Persona Juridica
                 </a>
