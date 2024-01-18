@@ -131,8 +131,9 @@ import RepVentas from './reporte/RepVentas';
 import RepFinanciero from './reporte/RepFinanciero';
 import RepProductos from './reporte/RepProductos';
 import RepClientes from './reporte/RepClientes';
-import CpeConsultar from './cpesunat/CpeConsultar';
-import CpeElectronicos from './cpesunat/CpeElectronicos';
+
+import CpeElectronicos from './cpesunat/lista/CpeElectronicos.jsx';
+import CpeConsultar from './cpesunat/consulta/CpeConsultar.jsx';
 
 import { getNotifications } from '../../network/rest/principal.network.js';
 import SuccessReponse from '../../model/class/response.js';

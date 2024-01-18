@@ -56,6 +56,7 @@ import { A_GRANEL, SERVICIO, UNIDADES, VALOR_MONETARIO } from '../../../../../mo
 import CustomModal from '../../../../../components/CustomModal';
 import { CLIENTE_NATURAL } from '../../../../../model/types/tipo-cliente';
 import { CONTADO } from '../../../../../model/types/forma-venta';
+import { pdfA4Venta, pdfTicketVenta } from '../../../../../helper/lista-pdf.helper';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -632,7 +633,7 @@ class VentaCrear extends CustomComponent {
 
   handlePrintA4 = () => {
     printJS({
-      printable: `${import.meta.env.VITE_APP_PDF}/api/v1/venta/a4/${this.state.idVenta}`,
+      printable: pdfA4Venta(this.state.idVenta),
       type: 'pdf',
       showModal: true,
       modalMessage: "Recuperando documento...",
@@ -645,7 +646,7 @@ class VentaCrear extends CustomComponent {
 
   handlePrintTicket = () => {
     printJS({
-      printable: `${import.meta.env.VITE_APP_PDF}/api/v1/venta/ticket/${this.state.idVenta}`,
+      printable: pdfTicketVenta(this.state.idVenta),
       type: 'pdf',
       showModal: true,
       modalMessage: "Recuperando documento...",
@@ -657,7 +658,7 @@ class VentaCrear extends CustomComponent {
   }
 
   handleOpenPrint = (idVenta) => {
-    this.setState({ isOpen: true, idVenta: idVenta})
+    this.setState({ isOpen: true, idVenta: idVenta })
   }
 
   handleClosePrint = async () => {
@@ -1051,7 +1052,7 @@ class VentaCrear extends CustomComponent {
       alertWarning('Venta', 'Seleccione un comprobante.');
       return;
     }
-   
+
     if (isEmpty(this.state.idCliente) && this.state.nuevoCliente === null) {
       alertWarning('Venta', 'Selecciona un cliente.', () => {
         this.refCliente.current.focus();
@@ -1368,7 +1369,7 @@ class VentaCrear extends CustomComponent {
 
           }}
           onHidden={() => {
-            
+
           }}
           onClose={this.handleClosePrint}>
 

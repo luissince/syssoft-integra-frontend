@@ -2,7 +2,7 @@ import axios from 'axios';
 import Resolve from '../../model/class/resolve';
 
 const instanceCpeSunat = axios.create({
-  baseURL: import.meta.env.VITE_APP_URL,
+  baseURL: import.meta.env.VITE_APP_CPE_SUNAT,
   timeout: 10000,
   headers: {
     Accept: 'application/json',
@@ -26,15 +26,22 @@ export async function cdrStatus(data) {
   );
 }
 
-export async function sendBoleta(idCpeSunat) {
+export async function senFactura(idVenta) {
   return await Resolve.create(
-    instanceCpeSunat.get(`/app/examples/boleta.php`, {
+    instanceCpeSunat.get(`/api/boleta/${idVenta}`, {
       params: {
-        idCobro: idCpeSunat,
+        idVenta: idVenta,
       },
     }),
   );
 }
+
+export async function sendResumenDiario(idVenta) {
+  return await Resolve.create(
+    instanceCpeSunat.get(`/api/resumen/${idVenta}`),
+  );
+}
+
 
 export async function sendNotaCredito(idCpeSunat) {
   return await Resolve.create(
@@ -46,7 +53,7 @@ export async function sendNotaCredito(idCpeSunat) {
   );
 }
 
-export async function sendResumen(idCpeSunat) {
+export async function sendResumenFactura(idCpeSunat) {
   return await Resolve.create(
     instanceCpeSunat.get(`/app/examples/resumen.php`, {
       params: {

@@ -2,7 +2,7 @@ import axios from 'axios';
 import Resolve from '../../model/class/resolve';
 
 const instancePrincipal = axios.create({
-  baseURL: import.meta.env.VITE_APP_END_POINT,
+  baseURL: import.meta.env.VITE_APP_BACK_END,
   timeout: 50000,
   headers: {
     Accept: 'application/json',
@@ -379,7 +379,7 @@ export async function listVenta(params, signal) {
 
 export async function listCpeSunat(params, signal) {
   return await Resolve.create(
-    instancePrincipal.get('/api/factura/cpesunat', {
+    instancePrincipal.get('/api/factura/list/cpesunat', {
       signal: signal,
       params: params,
     }),

@@ -25,6 +25,7 @@ import edit from '../recursos/images/edit.svg';
 import remove from '../recursos/images/remove.svg';
 import plus from '../recursos/images/plus.svg';
 import minus from '../recursos/images/minus.svg';
+import invoice from '../recursos/images/invoice.svg';
 
 export {
   icono,
@@ -54,4 +55,5 @@ export {
   remove,
   plus,
   minus,
+  invoice
 };

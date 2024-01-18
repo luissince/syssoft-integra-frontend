@@ -17,6 +17,7 @@ import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
 import CustomComponent from '../../../../../model/class/custom-component';
 import { CONTADO, CREDITO_FIJO, CREDITO_VARIABLE } from '../../../../../model/types/forma-venta';
+import { pdfA4Venta, pdfTicketVenta } from '../../../../../helper/lista-pdf.helper';
 
 class VentaDetalle extends CustomComponent {
 
@@ -131,7 +132,7 @@ class VentaDetalle extends CustomComponent {
 
   handlePrintA4 = () => {
     printJS({
-      printable: `${import.meta.env.VITE_APP_PDF}/api/v1/venta/a4/${this.state.idVenta}`,
+      printable: pdfA4Venta(this.state.idVenta),
       type: 'pdf',
       showModal: true,
       modalMessage: "Recuperando documento...",
@@ -143,7 +144,7 @@ class VentaDetalle extends CustomComponent {
 
   handlePrintTicket = () => {
     printJS({
-      printable: `${import.meta.env.VITE_APP_PDF}/api/v1/venta/ticket/${this.state.idVenta}`,
+      printable: pdfTicketVenta(this.state.idVenta),
       type: 'pdf',
       showModal: true,
       modalMessage: "Recuperando documento...",
@@ -153,6 +154,16 @@ class VentaDetalle extends CustomComponent {
     })
   }
 
+  async onEventImprimir() {
+    const data = {
+      idEmpresa: 'EM0001',
+      idVenta: this.state.idVenta,
+    };
+
+    const ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria',).toString();
+    const params = new URLSearchParams({ params: ciphertext });
+    window.open('/api/factura/repcomprobante?' + params, '_blank');
+  }
 
   renderTotal() {
     let subTotal = 0;
@@ -224,17 +235,6 @@ class VentaDetalle extends CustomComponent {
         </tr>
       </>
     );
-  }
-
-  async onEventImprimir() {
-    const data = {
-      idEmpresa: 'EM0001',
-      idVenta: this.state.idVenta,
-    };
-
-    const ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria',).toString();
-    const params = new URLSearchParams({ params: ciphertext });
-    window.open('/api/factura/repcomprobante?' + params, '_blank');
   }
 
   render() {

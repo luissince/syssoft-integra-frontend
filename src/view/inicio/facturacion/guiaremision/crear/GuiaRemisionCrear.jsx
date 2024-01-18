@@ -56,6 +56,34 @@ class GuiaRemisionCrear extends CustomComponent {
         </div>
 
         <div className="row">
+          <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
+            <button
+              type="button"
+              className="btn btn-primary mr-2"
+              onClick={() => this.handleSave()}
+            >
+            <i className='fa fa-save'></i>  Guardar
+            </button>
+            <button
+              type="button"
+              className="btn btn-outline-primary mr-2"
+              onClick={() => this.handleSave()}
+            >
+            <i className='fa fa-list'></i>  Ventas
+            </button>
+            <button
+              type="button"
+              className="btn btn-outline-danger"
+              onClick={() => this.props.history.goBack()}
+            >
+            <i className='fa fa-close'></i>  Cancelar
+            </button>
+          </div>
+        </div>
+        
+        <br />
+
+        <div className="row">
           <div className="col">
             <div className="form-group">
               <label>
@@ -83,7 +111,7 @@ class GuiaRemisionCrear extends CustomComponent {
               <label>
                 Selecciona un Cliente: <i className="fa fa-asterisk text-danger small"></i>
               </label>
-              <SearchInput
+              {/* <SearchInput
                 placeholder="Filtrar clientes..."
                 refValue={null}
                 value={null}
@@ -95,7 +123,7 @@ class GuiaRemisionCrear extends CustomComponent {
                   <>{value.documento + ' - ' + value.informacion}</>
                 )}
                 renderIconLeft={() => <i className="bi bi-person-circle"></i>}
-              />
+              /> */}
             </div>
           </div>
         </div>
@@ -144,7 +172,7 @@ class GuiaRemisionCrear extends CustomComponent {
           </div>
         </div>
 
-        <h6><span className='badge badge-primary'>2</span> Datos del Traslado</h6>
+        <h6><span className='badge badge-primary'>3</span> Datos del Traslado</h6>
 
         <div className="dropdown-divider"></div>
 
@@ -215,7 +243,7 @@ class GuiaRemisionCrear extends CustomComponent {
           </div>
         </div>
 
-        <h6><span className='badge badge-primary'>2</span> Datos del Transporte Privado</h6>
+        <h6><span className='badge badge-primary'>4</span> Datos del Transporte Privado</h6>
 
         <div className="dropdown-divider"></div>
 
@@ -236,7 +264,7 @@ class GuiaRemisionCrear extends CustomComponent {
           </div>
         </div>
 
-        <h6><span className='badge badge-primary'>2</span> Datos del Conductor Privado</h6>
+        <h6><span className='badge badge-primary'>5</span> Datos del Conductor Privado</h6>
 
         <div className="dropdown-divider"></div>
 
@@ -257,7 +285,7 @@ class GuiaRemisionCrear extends CustomComponent {
           </div>
         </div>
 
-        <h6><span className='badge badge-primary'>2</span> Datos de la Empresa a Transportar - Pública</h6>
+        <h6><span className='badge badge-primary'>6</span> Datos de la Empresa a Transportar - Pública</h6>
 
         <div className="dropdown-divider"></div>
 
@@ -283,7 +311,7 @@ class GuiaRemisionCrear extends CustomComponent {
         <div className="row">
           <div className="col-md-6 col-12">
 
-            <h6><span className='badge badge-primary'>2</span> Punto de partida</h6>
+            <h6><span className='badge badge-primary'>7</span> Punto de partida</h6>
 
             <div className="dropdown-divider"></div>
 
@@ -338,7 +366,7 @@ class GuiaRemisionCrear extends CustomComponent {
 
           <div className="col-md-6 col12">
 
-            <h6><span className='badge badge-primary'>2</span> Punto de llegada</h6>
+            <h6><span className='badge badge-primary'>8</span> Punto de llegada</h6>
 
             <div className="dropdown-divider"></div>
 
@@ -392,7 +420,7 @@ class GuiaRemisionCrear extends CustomComponent {
           </div>
         </div>
 
-        <h6><span className='badge badge-primary'>2</span> Documento de Referencia</h6>
+        <h6><span className='badge badge-primary'>9</span> Documento de Referencia</h6>
 
         <div className="dropdown-divider"></div>
 
@@ -450,7 +478,7 @@ class GuiaRemisionCrear extends CustomComponent {
           </div>
         </div>
 
-        <h6><span className='badge badge-primary'>2</span> Detalle de Guía de Remisión</h6>
+        <h6><span className='badge badge-primary'>10</span> Detalle de Guía de Remisión</h6>
 
         <div className="row">
           <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
@@ -491,25 +519,6 @@ class GuiaRemisionCrear extends CustomComponent {
                 </tbody>
               </table>
             </div>
-          </div>
-        </div>
-
-        <div className="row">
-          <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
-            <button
-              type="button"
-              className="btn btn-primary mr-2"
-              onClick={() => this.handleSave()}
-            >
-              Guardar
-            </button>
-            <button
-              type="button"
-              className="btn btn-danger"
-              onClick={() => this.props.history.goBack()}
-            >
-              Cancelar
-            </button>
           </div>
         </div>
       </ContainerWrapper>
