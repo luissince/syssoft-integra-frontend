@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    runs-on: self-hostedklo0j
+    runs-on: self-hosted
     environment: desarrollo
 
     env:  
