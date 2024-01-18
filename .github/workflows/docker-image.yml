@@ -11,7 +11,7 @@ jobs:
 
     env:  
       VITE_APP_BACK_END: ${{ secrets.VITE_APP_BACK_END }}
-      VITE_APP_CPE_SUNAT: 0${{ secrets.VITE_APP_CPE_SUNAT }}
+      VITE_APP_CPE_SUNAT: ${{ secrets.VITE_APP_CPE_SUNAT }}
       VITE_APP_APIS_PERU: ${{ secrets.VITE_APP_APIS_PERU }}
       VITE_APP_IMAGE: ${{ secrets.VITE_APP_IMAGE }}
       VITE_APP_PDF: ${{ secrets.VITE_APP_PDF }}
