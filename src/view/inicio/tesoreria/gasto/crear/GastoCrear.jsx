@@ -20,11 +20,11 @@ import { connect } from 'react-redux';
 import ContainerWrapper from '../../../../../components/Container';
 import {
     comboComprobante,
-    comboMetodoPago,
     comboMoneda,
     createGasto,
-    filtrarCliente,
+    filtrarPersona,
     filtrarGastoConcepto,
+    comboBanco,
 } from '../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
@@ -83,13 +83,15 @@ class GastoCrear extends CustomComponent {
 
             // Atributos del modal
             loadingModal: false,
-            metodosPagoLista: [],
-            metodoPagoAgregado: [],
+            bancos: [],
+            bancosAgregados: [],
 
             // Id principales
             idUsuario: this.props.token.userToken.idUsuario,
             idSucursal: this.props.token.project.idSucursal,
         };
+
+        this.initial = { ...this.state }
 
         // Referencia principales
         this.refMonto = React.createRef();
@@ -131,15 +133,13 @@ class GastoCrear extends CustomComponent {
         await this.loadData();
 
         viewModal(this.idModalSale, () => {
-            const metodo = this.state.metodosPagoLista.find(
-                (item) => item.predeterminado === 1,
-            );
+            const metodo = this.state.bancos.find((item) => item.preferido === 1);
 
-            this.refMetodoContado.current.value = metodo ? metodo.idMetodoPago : '';
+            this.refMetodoContado.current.value = metodo ? metodo.idBanco : '';
 
             if (metodo) {
                 const item = {
-                    idMetodoPago: metodo.idMetodoPago,
+                    idBanco: metodo.idBanco,
                     nombre: metodo.nombre,
                     monto: '',
                     vuelto: metodo.vuelto,
@@ -147,7 +147,7 @@ class GastoCrear extends CustomComponent {
                 };
 
                 this.setState((prevState) => ({
-                    metodoPagoAgregado: [...prevState.metodoPagoAgregado, item],
+                    bancosAgregados: [...prevState.bancosAgregados, item],
                 }));
             }
 
@@ -156,7 +156,7 @@ class GastoCrear extends CustomComponent {
 
         clearModal(this.idModalSale, async () => {
             this.setState({
-                metodoPagoAgregado: [],
+                bancosAgregados: [],
             });
         });
     }
@@ -180,10 +180,10 @@ class GastoCrear extends CustomComponent {
     */
 
     loadData = async () => {
-        const [comprobantes, monedas, metodoPagos] = await Promise.all([
+        const [comprobantes, monedas, bancos] = await Promise.all([
             await this.fetchComprobante(COMPROBANTE_DE_SALIDA),
             await this.fetchMoneda(),
-            await this.fetchMetodoPago(),
+            await this.fetchComboBanco(),
         ]);
 
         const comprobante = comprobantes.find((item) => item.preferida === 1);
@@ -192,7 +192,7 @@ class GastoCrear extends CustomComponent {
         this.setState({
             comprobantes,
             monedas,
-            metodosPagoLista: metodoPagos,
+            bancos,
             idComprobante: isEmpty(comprobante) ? '' : comprobante.idComprobante,
             idMoneda: isEmpty(moneda) ? '' : moneda.idMoneda,
             codISO: isEmpty(moneda) ? '' : moneda.codiso,
@@ -217,7 +217,7 @@ class GastoCrear extends CustomComponent {
     }
 
     async fetchFiltrarCliente(params) {
-        const response = await filtrarCliente(params);
+        const response = await filtrarPersona(params);
 
         if (response instanceof SuccessReponse) {
             return response.data;
@@ -263,19 +263,19 @@ class GastoCrear extends CustomComponent {
         }
     }
 
-    async fetchMetodoPago() {
-        const response = await comboMetodoPago();
-
+    async fetchComboBanco() {
+        const response = await comboBanco();
+    
         if (response instanceof SuccessReponse) {
-            return response.data;
+          return response.data;
         }
-
+    
         if (response instanceof ErrorResponse) {
-            if (response.getType() === CANCELED) return;
-
-            return [];
+          if (response.getType() === CANCELED) return;
+    
+          return [];
         }
-    }
+      }
 
     //------------------------------------------------------------------------------------------
     // Funciones para agregar y quitar el detalle
@@ -381,7 +381,7 @@ class GastoCrear extends CustomComponent {
     //------------------------------------------------------------------------------------------
 
     handleAddMetodPay = () => {
-        const listAdd = this.state.metodoPagoAgregado.find(
+        const listAdd = this.state.bancosAgregados.find(
             (item) => item.idMetodoPago === this.refMetodoContado.current.value,
         );
 
@@ -389,7 +389,7 @@ class GastoCrear extends CustomComponent {
             return;
         }
 
-        const metodo = this.state.metodosPagoLista.find(
+        const metodo = this.state.bancos.find(
             (item) => item.idMetodoPago === this.refMetodoContado.current.value,
         );
 
@@ -402,7 +402,7 @@ class GastoCrear extends CustomComponent {
         };
 
         this.setState((prevState) => ({
-            metodoPagoAgregado: [...prevState.metodoPagoAgregado, item],
+            bancosAgregados: [...prevState.bancosAgregados, item],
         }));
     };
 
@@ -410,7 +410,7 @@ class GastoCrear extends CustomComponent {
         const { value } = event.target;
 
         this.setState((prevState) => ({
-            metodoPagoAgregado: prevState.metodoPagoAgregado.map((item) => {
+            bancosAgregados: prevState.bancosAgregados.map((item) => {
                 if (item.idMetodoPago === idMetodoPago) {
                     return { ...item, monto: value ? value : '' };
                 } else {
@@ -421,10 +421,10 @@ class GastoCrear extends CustomComponent {
     };
 
     handleRemoveItemMetodPay = (idMetodoPago) => {
-        const metodoPagoAgregado = this.state.metodoPagoAgregado.filter(
+        const bancosAgregados = this.state.bancosAgregados.filter(
             (item) => item.idMetodoPago !== idMetodoPago,
         );
-        this.setState({ metodoPagoAgregado });
+        this.setState({ bancosAgregados });
     };
 
     handleSaveSale = () => {
@@ -437,10 +437,10 @@ class GastoCrear extends CustomComponent {
             observacion,
             detalle,
             total,
-            metodoPagoAgregado,
+            bancosAgregados,
         } = this.state;
 
-        let metodoPagoLista = [...metodoPagoAgregado];
+        let metodoPagoLista = [...bancosAgregados];
 
         if (isEmpty(metodoPagoLista)) {
             alertWarning(
@@ -497,7 +497,7 @@ class GastoCrear extends CustomComponent {
         alertDialog('Gasto', '¿Está seguro de continuar?', async (accept) => {
             if (accept) {
                 const data = {
-                    idCliente: cliente.idCliente,
+                    idPersona: cliente.idPersona,
                     idUsuario: idUsuario,
                     idMoneda: idMoneda,
                     idSucursal: idSucursal,
@@ -505,7 +505,7 @@ class GastoCrear extends CustomComponent {
                     estado: 1,
                     observacion: observacion,
                     detalle: detalle,
-                    metodoPago: metodoPagoAgregado,
+                    metodoPago: bancosAgregados,
                 };
 
                 hideModal(this.idModalSale);
@@ -660,43 +660,9 @@ class GastoCrear extends CustomComponent {
     };
 
     handleLimpiar = async () => {
-        await this.setStateAsync({
-            // Atributos principales
-            idComprobante: '',
-            idMoneda: '',
-            idConcepto: '',
-            observacion: '',
-            precio: '',
-
-            // Detalle del gasto
-            detalle: [],
-
-            // Atributos de carga
-            loading: true,
-            msgLoading: 'Cargando datos...',
-
-            // Lista de datos
-            comprobantes: [],
-            monedas: [],
-
-            // Filtrar concepto
-            filtrarConcepto: '',
-            loadingConcepto: false,
-            concepto: null,
-            conceptos: [],
-
-            // Filtrar cliente
-            filtrarCliente: '',
-            loadingCliente: false,
-            cliente: null,
-            clientes: [],
-
-            // Atributos libres
-            codISO: '',
-            total: 0,
+        this.setStateAsync(this.initial, async () => {
+            await this.loadData();
         });
-
-        await this.loadData();
     };
 
     handleCerrar = () => {
@@ -768,8 +734,8 @@ class GastoCrear extends CustomComponent {
                     refMetodoContado={this.refMetodoContado}
                     importeTotal={this.state.total}
                     handleSaveSale={this.handleSaveSale}
-                    metodosPagoLista={this.state.metodosPagoLista}
-                    metodoPagoAgregado={this.state.metodoPagoAgregado}
+                    bancos={this.state.bancos}
+                    bancosAgregados={this.state.bancosAgregados}
                     handleAddMetodPay={this.handleAddMetodPay}
                     handleInputMontoMetodoPay={this.handleInputMontoMetodoPay}
                     handleRemoveItemMetodPay={this.handleRemoveItemMetodPay}

@@ -25,15 +25,15 @@ class Impuestos extends CustomComponent {
   constructor(props) {
     super(props);
     this.state = {
-      add: statePrivilegio(
-        this.props.token.userToken.menus[5].submenu[5].privilegio[0].estado,
-      ),
-      edit: statePrivilegio(
-        this.props.token.userToken.menus[5].submenu[5].privilegio[1].estado,
-      ),
-      remove: statePrivilegio(
-        this.props.token.userToken.menus[5].submenu[5].privilegio[2].estado,
-      ),
+      // add: statePrivilegio(
+      //   this.props.token.userToken.menus[5].submenu[5].privilegio[0].estado,
+      // ),
+      // edit: statePrivilegio(
+      //   this.props.token.userToken.menus[5].submenu[5].privilegio[1].estado,
+      // ),
+      // remove: statePrivilegio(
+      //   this.props.token.userToken.menus[5].submenu[5].privilegio[2].estado,
+      // ),
 
       loading: false,
       lista: [],
@@ -112,10 +112,8 @@ class Impuestos extends CustomComponent {
       filasPorPagina: this.state.filasPorPagina,
     };
 
-    const response = await listImpuesto(
-      params,
-      this.abortControllerTable.signal,
-    );
+    const response = await listImpuesto(params,this.abortControllerTable.signal);
+
     if (response instanceof SuccessReponse) {
       const totalPaginacion = parseInt(
         Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
@@ -154,29 +152,26 @@ class Impuestos extends CustomComponent {
   };
 
   handleBorrar(idImpuesto) {
-    alertDialog(
-      'Impuesto',
-      '¿Estás seguro de eliminar la moneda?',
-      async (event) => {
-        if (event) {
-          alertInfo('Impuesto', 'Procesando información...');
+    alertDialog('Impuesto', '¿Estás seguro de eliminar la moneda?', async (accept) => {
+      if (accept) {
+        alertInfo('Impuesto', 'Procesando información...');
 
-          const params = {
-            idImpuesto: idImpuesto,
-          };
+        const params = {
+          idImpuesto: idImpuesto,
+        };
 
-          const response = await deleteImpuesto(params);
-          if (response instanceof SuccessReponse) {
-            alertSuccess('Impuesto', response.data, () => {
-              this.loadInit();
-            });
-          }
-
-          if (response instanceof ErrorResponse) {
-            alertWarning('Impuesto', response.getMessage());
-          }
+        const response = await deleteImpuesto(params);
+        if (response instanceof SuccessReponse) {
+          alertSuccess('Impuesto', response.data, () => {
+            this.loadInit();
+          });
         }
-      },
+
+        if (response instanceof ErrorResponse) {
+          alertWarning('Impuesto', response.getMessage());
+        }
+      }
+    },
     );
   }
 
@@ -210,16 +205,14 @@ class Impuestos extends CustomComponent {
           <td>{item.codigo}</td>
           <td className="text-center">
             <div
-              className={`badge ${
-                item.preferida ? 'badge-success' : 'badge-warning'
-              }`}
+              className={`badge ${item.preferido === 1 ? 'badge-success' : 'badge-warning'}`}
             >
-              {item.preferida ? 'SI' : 'NO'}
+              {item.preferido ? 'SI' : 'NO'}
             </div>
           </td>
           <td className="text-center">
             <div
-              className={`badge ${item.estado ? 'badge-info' : 'badge-danger'}`}
+              className={`badge ${item.estado === 1 ? 'badge-info' : 'badge-danger'}`}
             >
               {item.estado ? 'ACTIVO' : 'INACTIVO'}
             </div>
@@ -229,7 +222,7 @@ class Impuestos extends CustomComponent {
               className="btn btn-outline-warning btn-sm"
               title="Editar"
               onClick={() => this.handleEditar(item.idImpuesto)}
-              disabled={!this.state.edit}
+              // disabled={!this.state.edit}
             >
               <i className="bi bi-pencil"></i>
             </button>
@@ -239,7 +232,7 @@ class Impuestos extends CustomComponent {
               className="btn btn-outline-danger btn-sm"
               title="Anular"
               onClick={() => this.handleBorrar(item.idImpuesto)}
-              disabled={!this.state.remove}
+              // disabled={!this.state.remove}
             >
               <i className="bi bi-trash"></i>
             </button>
@@ -290,7 +283,7 @@ class Impuestos extends CustomComponent {
               <button
                 className="btn btn-outline-info"
                 onClick={this.handleAgregar}
-                disabled={!this.state.add}
+                // disabled={!this.state.add}
               >
                 <i className="bi bi-file-plus"></i> Nuevo Registro
               </button>{' '}
@@ -322,7 +315,7 @@ class Impuestos extends CustomComponent {
                       Editar
                     </th>
                     <th width="5%" className="text-center">
-                      Anular
+                      Eliminar
                     </th>
                   </tr>
                 </thead>

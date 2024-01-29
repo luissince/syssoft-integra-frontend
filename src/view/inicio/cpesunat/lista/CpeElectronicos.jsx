@@ -45,21 +45,21 @@ class CpeElectronicos extends CustomComponent {
       lista: [],
       restart: false,
 
-      viewPdf: statePrivilegio(
-        this.props.token.userToken.menus[7].submenu[0].privilegio[0].estado,
-      ),
-      viewXml: statePrivilegio(
-        this.props.token.userToken.menus[7].submenu[0].privilegio[1].estado,
-      ),
-      viewEmail: statePrivilegio(
-        this.props.token.userToken.menus[7].submenu[0].privilegio[2].estado,
-      ),
-      ViewResumenDiario: statePrivilegio(
-        this.props.token.userToken.menus[7].submenu[0].privilegio[3].estado,
-      ),
-      viewDeclarar: statePrivilegio(
-        this.props.token.userToken.menus[7].submenu[0].privilegio[4].estado,
-      ),
+      // viewPdf: statePrivilegio(
+      //   this.props.token.userToken.menus[7].submenu[0].privilegio[0].estado,
+      // ),
+      // viewXml: statePrivilegio(
+      //   this.props.token.userToken.menus[7].submenu[0].privilegio[1].estado,
+      // ),
+      // viewEmail: statePrivilegio(
+      //   this.props.token.userToken.menus[7].submenu[0].privilegio[2].estado,
+      // ),
+      // ViewResumenDiario: statePrivilegio(
+      //   this.props.token.userToken.menus[7].submenu[0].privilegio[3].estado,
+      // ),
+      // viewDeclarar: statePrivilegio(
+      //   this.props.token.userToken.menus[7].submenu[0].privilegio[4].estado,
+      // ),
 
       fechaInicio: currentDate(),
       fetchaFinal: currentDate(),

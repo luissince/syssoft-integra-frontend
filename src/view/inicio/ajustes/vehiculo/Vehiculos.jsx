@@ -1,42 +1,33 @@
 import React from 'react';
 import {
-  spinnerLoading,
-  numberFormat,
-  formatTime,
   alertDialog,
+  alertInfo,
   alertSuccess,
   alertWarning,
-  statePrivilegio,
+  spinnerLoading,
   keyUpSearch,
   isEmpty,
-  formatNumberWithZeros,
-  alertInfo,
-} from '../../../../../helper/utils.helper';
+} from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
-import Paginacion from '../../../../../components/Paginacion';
-import ContainerWrapper from '../../../../../components/Container';
-import CustomComponent from '../../../../../model/class/custom-component';
+import Paginacion from '../../../../components/Paginacion';
+import ContainerWrapper from '../../../../components/Container';
+import CustomComponent from '../../../../model/class/custom-component';
 import {
-  cancelVenta,
-  listVenta,
-} from '../../../../../network/rest/principal.network';
-import SuccessReponse from '../../../../../model/class/response';
-import ErrorResponse from '../../../../../model/class/error-response';
-import { CANCELED } from '../../../../../model/types/types';
-import { CONTADO, CREDITO_FIJO, CREDITO_VARIABLE } from '../../../../../model/types/forma-pago';
+  deleteVehiculo,
+  listVehiculo,
+} from '../../../../network/rest/principal.network';
+import SuccessReponse from '../../../../model/class/response';
+import ErrorResponse from '../../../../model/class/error-response';
+import { CANCELED } from '../../../../model/types/types';
 
-class Ventas extends CustomComponent {
+class Vehiculo extends CustomComponent {
+
   constructor(props) {
     super(props);
-
     this.state = {
       loading: false,
       lista: [],
       restart: false,
-
-      add: statePrivilegio(this.props.token.userToken.menus[2].submenu[0].privilegio[0].estado,),
-      view: statePrivilegio(this.props.token.userToken.menus[2].submenu[0].privilegio[1].estado,),
-      remove: statePrivilegio(this.props.token.userToken.menus[2].submenu[0].privilegio[2].estado,),
 
       opcion: 0,
       paginacion: 0,
@@ -44,17 +35,17 @@ class Ventas extends CustomComponent {
       filasPorPagina: 10,
       messageTable: 'Cargando información...',
 
-      idSucursal: this.props.token.project.idSucursal,
       idUsuario: this.props.token.userToken.idUsuario,
     };
 
     this.refTxtSearch = React.createRef();
 
+    this.idCodigo = '';
     this.abortControllerTable = new AbortController();
   }
 
   async componentDidMount() {
-    await this.loadInit();
+    this.loadInit();
   }
 
   componentWillUnmount() {
@@ -67,7 +58,7 @@ class Ventas extends CustomComponent {
     await this.setStateAsync({ paginacion: 1, restart: true });
     this.fillTable(0, '');
     await this.setStateAsync({ opcion: 0 });
-  }
+  };
 
   async searchText(text) {
     if (this.state.loading) return;
@@ -82,7 +73,7 @@ class Ventas extends CustomComponent {
   paginacionContext = async (listid) => {
     await this.setStateAsync({ paginacion: listid, restart: false });
     this.onEventPaginacion();
-  }
+  };
 
   onEventPaginacion = () => {
     switch (this.state.opcion) {
@@ -95,10 +86,10 @@ class Ventas extends CustomComponent {
       default:
         this.fillTable(0, '');
     }
-  }
+  };
 
   fillTable = async (opcion, buscar) => {
-    this.setState({
+    await this.setStateAsync({
       loading: true,
       lista: [],
       messageTable: 'Cargando información...',
@@ -107,19 +98,20 @@ class Ventas extends CustomComponent {
     const params = {
       opcion: opcion,
       buscar: buscar,
-      idSucursal: this.state.idSucursal,
       posicionPagina: (this.state.paginacion - 1) * this.state.filasPorPagina,
       filasPorPagina: this.state.filasPorPagina,
     };
 
-    const response = await listVenta(params, this.abortControllerTable.signal);
-
+    const response = await listVehiculo(
+      params,
+      this.abortControllerTable.signal,
+    );
     if (response instanceof SuccessReponse) {
       const totalPaginacion = parseInt(
         Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
       );
 
-      this.setState({
+      await this.setStateAsync({
         loading: false,
         lista: response.data.result,
         totalPaginacion: totalPaginacion,
@@ -129,59 +121,57 @@ class Ventas extends CustomComponent {
     if (response instanceof ErrorResponse) {
       if (response.getType() === CANCELED) return;
 
-      this.setState({
+      await this.setStateAsync({
         loading: false,
         lista: [],
         totalPaginacion: 0,
         messageTable: response.getMessage(),
       });
     }
-  }
-
-  handleCrear = () => {
-    this.props.history.push(`${this.props.location.pathname}/crear`);
   };
 
-  handleDetalle = (idVenta) => {
+  handleAgregar = () => {
     this.props.history.push({
-      pathname: `${this.props.location.pathname}/detalle`,
-      search: '?idVenta=' + idVenta,
+      pathname: `${this.props.location.pathname}/agregar`,
     });
-  }
+  };
 
-  handleCancelar(idVenta) {
-    alertDialog('Venta', '¿Está seguro de que desea anular la venta? Esta operación no se puede deshacer.', async (accept) => {
+  handleEditar = (idVehiculo) => {
+    this.props.history.push({
+      pathname: `${this.props.location.pathname}/editar`,
+      search: '?idVehiculo=' + idVehiculo,
+    });
+  };
+
+  handleBorrar(id) {
+    alertDialog('Vehículo', '¿Estás seguro de eliminar el vehículo?', async (accept) => {
       if (accept) {
+        alertInfo('Vehículo', 'Procesando información...');
+
         const params = {
-          idVenta: idVenta,
-          idUsuario: this.state.idUsuario,
+          idVehiculo: id,
         };
 
-        alertInfo("Venta", "Procesando información...")
-
-        const response = await cancelVenta(params);
-
+        const response = await deleteVehiculo(params);
         if (response instanceof SuccessReponse) {
-          alertSuccess('Venta', response.data, () => {
+          alertSuccess('Vehículo', response.data, () => {
             this.loadInit();
           });
         }
 
         if (response instanceof ErrorResponse) {
-          if (response.getType() === CANCELED) return;
-
-          alertWarning('Venta', response.getMessage());
+          alertWarning('Vehículo', response.getMessage());
         }
       }
     },
     );
   }
 
-  generateBody() {
+  generarBody() {
     if (this.state.loading) {
       return (
         <tr>
-          <td className="text-center" colSpan="10">
+          <td className="text-center" colSpan="8">
             {spinnerLoading('Cargando información de la tabla...', true)}
           </td>
         </tr>
@@ -191,54 +181,49 @@ class Ventas extends CustomComponent {
     if (isEmpty(this.state.lista)) {
       return (
         <tr>
-          <td className="text-center" colSpan="10">¡No hay datos registrados!</td>
+          <td className="text-center" colSpan="8">
+            ¡No hay comprobantes registrados!
+          </td>
         </tr>
       );
     }
 
     return this.state.lista.map((item, index) => {
-
-      const estado = item.estado === 1 ? <span className="text-success">COBRADO</span> : item.estado === 2 ? <span className="text-warning">POR COBRAR</span> : item.estado === 3 ? <span className="text-danger">ANULADO</span> : <span className="text-primary">POR LLEVAR</span>;
-
-      const tipo = item.idFormaPago === CONTADO ? "CONTADO" : item.idFormaPago === CREDITO_FIJO ? "CREDITO FIJO" : item.idFormaPago === CREDITO_VARIABLE ? "CRÉDITO VARIABLE" : "PAGO ADELTANDO";
-
       return (
         <tr key={index}>
-          <td className={`text-center`}>{item.id}</td>
-          <td>
-            {item.fecha}
-            <br />
-            {formatTime(item.hora)}
+          <td className="text-center">{item.id}</td>
+          <td>{item.marca}</td>
+          <td>{item.numeroPlaca}</td>
+          <td className="text-center">
+            <div
+              className={`badge ${item.preferido == 1 ? 'badge-success' : 'badge-warning'}`}
+            >
+              {item.preferida ? 'SI' : 'NO'}
+            </div>
           </td>
-          <td>
-            {item.documento}
-            <br />
-            {item.informacion}
+          <td className="text-center">
+            <div
+              className={`badge ${item.estado === 1 ? 'badge-info' : 'badge-danger'}`}
+            >
+              {item.estado ? 'ACTIVO' : 'INACTIVO'}
+            </div>
           </td>
-          <td>
-            {item.comprobante}
-            <br />
-            {item.serie + '-' + formatNumberWithZeros(item.numeracion)}
-          </td>
-          <td>{tipo}</td>
-          <td> {numberFormat(item.total, item.codiso)} </td>
-          <td className="text-center">{estado}</td>
           <td className="text-center">
             <button
-              className="btn btn-outline-primary btn-sm"
-              title="Detalle"
-              onClick={() => this.handleDetalle(item.idVenta)}
-              disabled={!this.state.view}>
-              <i className="fa fa-eye"></i>
+              className="btn btn-outline-warning btn-sm"
+              title="Editar"
+              onClick={() => this.handleEditar(item.idVehiculo)}
+            >
+              <i className="bi bi-pencil"></i>
             </button>
           </td>
           <td className="text-center">
             <button
               className="btn btn-outline-danger btn-sm"
               title="Anular"
-              onClick={() => this.handleCancelar(item.idVenta)}
-              disabled={!this.state.remove}>
-              <i className="fa fa-remove"></i>
+              onClick={() => this.handleBorrar(item.idVehiculo)}
+            >
+              <i className="bi bi-trash"></i>
             </button>
           </td>
         </tr>
@@ -250,10 +235,10 @@ class Ventas extends CustomComponent {
     return (
       <ContainerWrapper>
         <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+          <div className="col-md-12">
             <div className="form-group">
               <h5>
-                Ventas <small className="text-secondary">LISTA</small>
+                Vehiculos <small className="text-secondary">LISTA</small>
               </h5>
             </div>
           </div>
@@ -268,7 +253,6 @@ class Ventas extends CustomComponent {
                     <i className="bi bi-search"></i>
                   </div>
                 </div>
-
                 <input
                   type="text"
                   className="form-control"
@@ -283,18 +267,18 @@ class Ventas extends CustomComponent {
               </div>
             </div>
           </div>
-
           <div className="col-md-6 col-sm-12">
             <div className="form-group">
               <button
                 className="btn btn-outline-info"
-                onClick={this.handleCrear}
-                disabled={!this.state.add}>
+                onClick={this.handleAgregar}
+              >
                 <i className="bi bi-file-plus"></i> Nuevo Registro
               </button>{' '}
               <button
                 className="btn btn-outline-secondary"
-                onClick={this.loadInit}>
+                onClick={this.loadInit}
+              >
                 <i className="bi bi-arrow-clockwise"></i>
               </button>
             </div>
@@ -302,27 +286,27 @@ class Ventas extends CustomComponent {
         </div>
 
         <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+          <div className="col-md-12 col-sm-12">
             <div className="table-responsive">
               <table className="table table-striped table-bordered rounded">
                 <thead>
                   <tr>
-                    <th width="5%" className="text-center">#</th>
-                    <th width="10%">Fecha</th>
-                    <th width="10%">Cliente</th>
-                    <th width="10%">Comprobante</th>
-                    <th width="10%">Tipo</th>
-                    <th width="10%" className="text-center">Estado</th>
-                    <th width="10%">Total</th>
                     <th width="5%" className="text-center">
-                      Detalle
+                      #
+                    </th>
+                    <th width="25%">Marca</th>
+                    <th width="25%">Número Placa</th>
+                    <th width="15%">Preferida</th>
+                    <th width="15%">Estado</th>
+                    <th width="5%" className="text-center">
+                      Editar
                     </th>
                     <th width="5%" className="text-center">
-                      Anular
+                      Eliminar
                     </th>
                   </tr>
                 </thead>
-                <tbody>{this.generateBody()}</tbody>
+                <tbody>{this.generarBody()}</tbody>
               </table>
             </div>
           </div>
@@ -347,4 +331,4 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(Ventas);
+export default connect(mapStateToProps, null)(Vehiculo);

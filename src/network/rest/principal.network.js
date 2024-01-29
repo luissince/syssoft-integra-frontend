@@ -106,63 +106,90 @@ export async function deleteSucursal(idSucursal) {
 | ENDPOINTS DE CLIENTE
 |--------------------------------------------------------------------------
 */
-export async function listClientes(params, signal) {
+export async function listPersonas(params, signal) {
   return await Resolve.create(
-    instancePrincipal.get('/api/cliente/list', {
+    instancePrincipal.get('/api/persona/list', {
       signal: signal,
       params: params,
     }),
   );
 }
 
-export async function comboCliente(signal = null) {
+export async function listPersonasCliente(params, signal) {
   return await Resolve.create(
-    instancePrincipal.get('/api/cliente/combo', {
-      signal: signal,
-    }),
-  );
-}
-
-export async function filtrarCliente(params) {
-  return await Resolve.create(
-    instancePrincipal.get('/api/cliente/filtrar', {
-      params: params,
-    }),
-  );
-}
-
-export async function createCliente(params) {
-  return await Resolve.create(
-    instancePrincipal.post('/api/cliente/create', params),
-  );
-}
-
-export async function editCliente(params) {
-  return await Resolve.create(
-    instancePrincipal.post('/api/cliente/update', params),
-  );
-}
-
-export async function deleteCliente(params) {
-  return await Resolve.create(
-    instancePrincipal.delete('/api/cliente', {
-      params: params,
-    }),
-  );
-}
-
-export async function getIdCliente(params, signal) {
-  return await Resolve.create(
-    instancePrincipal.get('/api/cliente/id', {
+    instancePrincipal.get('/api/persona/list/clientes', {
       signal: signal,
       params: params,
     }),
   );
 }
 
-export async function getPredeterminado(signal) {
+export async function listPersonasProveedor(params, signal) {
   return await Resolve.create(
-    instancePrincipal.get('/api/cliente/predeterminado', {
+    instancePrincipal.get('/api/persona/list/proveedores', {
+      signal: signal,
+      params: params,
+    }),
+  );
+}
+
+export async function listPersonasConductor(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/persona/list/conductores', {
+      signal: signal,
+      params: params,
+    }),
+  );
+}
+
+export async function comboPersona(signal = null) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/persona/combo', {
+      signal: signal,
+    }),
+  );
+}
+
+export async function filtrarPersona(params) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/persona/filtrar', {
+      params: params,
+    }),
+  );
+}
+
+export async function createPersona(params) {
+  return await Resolve.create(
+    instancePrincipal.post('/api/persona/create', params),
+  );
+}
+
+export async function editPersona(params) {
+  return await Resolve.create(
+    instancePrincipal.post('/api/persona/update', params),
+  );
+}
+
+export async function deletePersona(params) {
+  return await Resolve.create(
+    instancePrincipal.delete('/api/persona', {
+      params: params,
+    }),
+  );
+}
+
+export async function getIdPersona(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/persona/id', {
+      signal: signal,
+      params: params,
+    }),
+  );
+}
+
+export async function getPersonaPredeterminado(signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/persona/predeterminado', {
       signal: signal,
     }),
   );
@@ -380,6 +407,15 @@ export async function listVenta(params, signal) {
 export async function listCpeSunat(params, signal) {
   return await Resolve.create(
     instancePrincipal.get('/api/factura/list/cpesunat', {
+      signal: signal,
+      params: params,
+    }),
+  );
+}
+
+export async function listFiltrar(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/factura/filtrar', {
       signal: signal,
       params: params,
     }),
@@ -1078,11 +1114,19 @@ export async function listImpuesto(params, signal) {
   );
 }
 
-export async function getImpuestoId(params, signal) {
+export async function geIdImpuesto(params, signal) {
   return await Resolve.create(
     instancePrincipal.get('/api/impuesto/id', {
       signal: signal,
       params: params,
+    }),
+  );
+}
+
+export async function comboImpuesto(signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/impuesto/combo', {
+      signal: signal,
     }),
   );
 }
@@ -1109,6 +1153,62 @@ export async function deleteImpuesto(params) {
 // ------------------------------------------------------------------------
 // FIN PARA IMPUESTO
 // ------------------------------------------------------------------------
+
+/*
+|--------------------------------------------------------------------------
+| ENDPOINTS DE IMPUESTO
+|--------------------------------------------------------------------------
+*/
+export async function listVehiculo(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/vehiculo/list', {
+      signal: signal,
+      params: params,
+    }),
+  );
+}
+
+export async function getIdVehiculo(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/vehiculo/id', {
+      signal: signal,
+      params: params,
+    }),
+  );
+}
+
+export async function filtrarVehiculo(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/vehiculo/filter', {
+      signal: signal,
+      params: params,
+    }),
+  );
+}
+
+export async function addVehiculo(data) {
+  return await Resolve.create(
+    instancePrincipal.post('/api/vehiculo/add', data),
+  );
+}
+
+export async function editVehiculo(data) {
+  return await Resolve.create(
+    instancePrincipal.post('/api/vehiculo/edit', data),
+  );
+}
+
+export async function deleteVehiculo(params) {
+  return await Resolve.create(
+    instancePrincipal.delete('/api/vehiculo', {
+      params: params,
+    }),
+  );
+}
+// ------------------------------------------------------------------------
+// FIN PARA IMPUESTO
+// ------------------------------------------------------------------------
+
 
 /*
 |--------------------------------------------------------------------------
@@ -1230,9 +1330,27 @@ export async function comboCategoria(signal) {
 | ENDPOINTS DE BANCO
 |--------------------------------------------------------------------------
 */
-export async function listBancoCombo(signal) {
+export async function listBancos(params, signal = null) {
   return await Resolve.create(
-    instancePrincipal.get('/api/banco/listcombo', {
+    instancePrincipal.get('/api/banco/list', {
+      signal: signal,
+      params: params,
+    }),
+  );
+}
+
+export async function detailtBanco(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/banco/detail', {
+      params: params,
+      signal: signal,
+    }),
+  );
+}
+
+export async function comboBanco(signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/banco/combo', {
       signal: signal,
     }),
   );
@@ -1270,33 +1388,8 @@ export async function deleteBanco(params) {
     }),
   );
 }
-
-export async function listarBancos(params, signal = null) {
-  return await Resolve.create(
-    instancePrincipal.get('/api/banco/list', {
-      signal: signal,
-      params: params,
-    }),
-  );
-}
 // ------------------------------------------------------------------------
 // FIN PARA BANCO
-// ------------------------------------------------------------------------
-
-/*
-|--------------------------------------------------------------------------
-| ENDPOINTS DE IMPUESTO
-|--------------------------------------------------------------------------
-*/
-export async function comboImpuesto(signal) {
-  return await Resolve.create(
-    instancePrincipal.get('/api/impuesto/combo', {
-      signal: signal,
-    }),
-  );
-}
-// ------------------------------------------------------------------------
-// FIN PARA IMPUESTO
 // ------------------------------------------------------------------------
 
 /*
@@ -1446,6 +1539,38 @@ export async function comboTipoComprobante(signal) {
 }
 // ------------------------------------------------------------------------
 // FIN PARA TIPO DE COMPROBANTE
+// ------------------------------------------------------------------------
+
+/*
+|--------------------------------------------------------------------------
+| ENDPOINTS DE MODALIDAD TRASLADO
+|--------------------------------------------------------------------------
+*/
+export async function comboModalidadTraslado(signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/modalidadtraslado/combo', {
+      signal: signal,
+    }),
+  );
+}
+// ------------------------------------------------------------------------
+// FIN PARA MODALIDAD TRASLADO
+// ------------------------------------------------------------------------
+
+/*
+|--------------------------------------------------------------------------
+| ENDPOINTS DE MODALIDAD TRASLADO
+|--------------------------------------------------------------------------
+*/
+export async function comboTipoPeso(signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/tipopeso/combo', {
+      signal: signal,
+    }),
+  );
+}
+// ------------------------------------------------------------------------
+// FIN PARA MODALIDAD TRASLADO
 // ------------------------------------------------------------------------
 
 /*

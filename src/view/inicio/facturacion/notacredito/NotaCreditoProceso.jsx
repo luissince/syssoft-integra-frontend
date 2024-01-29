@@ -178,7 +178,7 @@ class NotaCreditoProceso extends React.Component {
           //         idMoneda: this.state.idMoneda,
           //         fecha: this.state.fecha,
           //         idMotivo: this.state.idMotivo,
-          //         idCliente: this.state.cabecera.idCliente,
+          //         idPersona: this.state.cabecera.idPersona,
           //         idCobro: this.state.cabecera.idCobro,
           //         idSucursal: this.state.idSucursal,
           //         idUsuario: this.state.idUsuario,

@@ -1,12 +1,13 @@
 .modal-custom {
     position: absolute;
     background: rgb(255, 255, 255);
-    overflow: auto;
+    /* overflow: auto; */
     border-radius: 0.5rem;
     padding: 0px;
     width: 100%;
     max-width: 500px;
     animation: showCustomModal 0.3s;
+    -webkit-animation: showCustomModal 0.3s;
 }
 
 .modal-custom.close {

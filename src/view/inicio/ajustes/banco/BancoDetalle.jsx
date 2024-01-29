@@ -5,16 +5,25 @@ import {
   rounded,
   numberFormat,
   spinnerLoading,
+  isText,
+  isEmpty,
 } from '../../../../helper/utils.helper';
 import Paginacion from '../../../../components/Paginacion';
 import ContainerWrapper from '../../../../components/Container';
+import { detailtBanco } from '../../../../network/rest/principal.network';
+import SuccessReponse from '../../../../model/class/response';
+import ErrorResponse from '../../../../model/class/error-response';
+import { CANCELED } from '../../../../model/types/types';
+import CustomComponent from '../../../../model/class/custom-component';
 
-class BancoDetalle extends React.Component {
+class BancoDetalle extends CustomComponent {
+  
   constructor(props) {
     super(props);
     this.state = {
       idBanco: '',
       nombre: '',
+      cci: '',
       tipoCuenta: '',
       numCuenta: '',
       moneda: '',
@@ -34,23 +43,18 @@ class BancoDetalle extends React.Component {
       messageTable: 'Cargando información...',
       messageLoading: 'Cargando datos...',
     };
+
     this.abortControllerView = new AbortController();
     this.abortControllerTable = new AbortController();
   }
 
-  setStateAsync(state) {
-    return new Promise((resolve) => {
-      this.setState(state, resolve);
-    });
-  }
-
   async componentDidMount() {
     const url = this.props.location.search;
-    const idResult = new URLSearchParams(url).get('idBanco');
-    if (idResult !== null) {
-      this.loadDataId(idResult);
+    const idBanco = new URLSearchParams(url).get('idBanco');
+    if (isText(idBanco)) {
+      await this.loadDataId(idBanco);
     } else {
-      this.props.history.goBack();
+      // this.props.history.goBack();
     }
   }
 
@@ -60,95 +64,57 @@ class BancoDetalle extends React.Component {
   }
 
   async loadDataId(id) {
-    try {
-      const detalle = await axios.get('/api/banco/iddetalle', {
-        signal: this.abortControllerView.signal,
-        params: {
-          idBanco: id,
-          // "posicionPagina": ((this.state.paginacion - 1) * this.state.filasPorPagina),
-          // "filasPorPagina": this.state.filasPorPagina
-        },
-      });
+    const params = {
+      idBanco: id
+    }
 
-      const cabecera = detalle.data.cabecera;
+    const response = await detailtBanco(params, this.abortControllerView.signal);
+    if (response instanceof SuccessReponse) {
 
-      await this.setStateAsync({
-        idBanco: cabecera.idBanco,
-        nombre: cabecera.nombre,
-        tipoCuenta: cabecera.tipoCuenta,
-        numCuenta: cabecera.numCuenta,
-        moneda: cabecera.moneda,
-        saldo: cabecera.saldo,
-        codiso: cabecera.codiso,
+      const banco = response.data.banco;
+      const monto = response.data.monto;
 
-        // lista : detalle.data.lista,
+      this.setState({
+        idBanco: id,
+        nombre: banco.nombre,
+        cci: banco.cci,
+        tipoCuenta: banco.tipoCuenta === 1 ? "BANCO" : banco.tipoCuenta === 2 ? "TARJETA" : "EFECTIVO",
+        numCuenta: banco.numCuenta,
+        moneda: banco.moneda,
+        codiso: banco.codiso,
+        saldo: monto,
         initial: false,
-      });
-
-      this.loadInit();
-    } catch (error) {
-      if (error.message !== 'canceled') {
-        this.props.history.goBack();
-      }
+      })
     }
+
+    if (response instanceof ErrorResponse) {
+      if (response.getType() === CANCELED) return;
+
+      // this.props.history.goBack();
+    }
+
+    // const detalle = await axios.get('/api/banco/iddetalle', {
+    //   signal: this.abortControllerView.signal,
+    //   params: {
+    //     idBanco: id,
+    //   },
+    // });
+
+    // const cabecera = detalle.data.cabecera;
+
+    // await this.setStateAsync({
+    //   idBanco: cabecera.idBanco,
+    //   nombre: cabecera.nombre,
+    //   tipoCuenta: cabecera.tipoCuenta,
+    //   numCuenta: cabecera.numCuenta,
+    //   moneda: cabecera.moneda,
+    //   saldo: cabecera.saldo,
+    //   codiso: cabecera.codiso,
+
+    //   // lista : detalle.data.lista,
+    //   initial: false,
+    // });
   }
-
-  loadInit = async () => {
-    if (this.state.loading) return;
-
-    await this.setStateAsync({ paginacion: 1, restart: true });
-    this.fillTable();
-    await this.setStateAsync({ opcion: 0 });
-  };
-
-  paginacionContext = async (listid) => {
-    await this.setStateAsync({ paginacion: listid, restart: false });
-    this.onEventPaginacion();
-  };
-
-  onEventPaginacion = () => {
-    this.fillTable();
-  };
-
-  fillTable = async () => {
-    try {
-      await this.setStateAsync({
-        loading: true,
-        lista: [],
-        messageTable: 'Cargando información...',
-      });
-
-      const result = await axios.get('/api/banco/detalle', {
-        signal: this.abortControllerTable.signal,
-        params: {
-          idBanco: this.state.idBanco,
-          posicionPagina:
-            (this.state.paginacion - 1) * this.state.filasPorPagina,
-          filasPorPagina: this.state.filasPorPagina,
-        },
-      });
-
-      const totalPaginacion = parseInt(
-        Math.ceil(parseFloat(result.data.total) / this.state.filasPorPagina),
-      );
-
-      await this.setStateAsync({
-        loading: false,
-        lista: result.data.lista,
-        totalPaginacion: totalPaginacion,
-      });
-    } catch (error) {
-      if (error.message !== 'canceled') {
-        await this.setStateAsync({
-          loading: false,
-          lista: [],
-          totalPaginacion: 0,
-          messageTable:
-            'Se produjo un error interno, intente nuevamente por favor.',
-        });
-      }
-    }
-  };
 
   async onEventImprimir() {
     const data = {
@@ -162,6 +128,49 @@ class BancoDetalle extends React.Component {
     ).toString();
     let params = new URLSearchParams({ params: ciphertext });
     window.open('/api/banco/repdetallebanco?' + params, '_blank');
+  }
+
+  generarBody() {
+    if (this.state.loading) {
+      return (
+        <tr>
+          <td className="text-center" colSpan="6">
+            {spinnerLoading(
+              'Cargando información de la tabla...',
+              true,
+            )}
+          </td>
+        </tr>
+      );
+    }
+
+    if (isEmpty(this.state.lista)) {
+      return (
+        <tr className="text-center">
+          <td colSpan="6">¡No hay datos registrados!</td>
+        </tr>
+      );
+    }
+
+    return this.state.lista.map((item, index) => (
+      <tr key={index}>
+        <td>{++index}</td>
+        <td>{item.fecha}</td>
+        <td>{item.proveedor}</td>
+        <td className="text-left">{item.cuenta}</td>
+        <td className="text-left text-danger">
+          {item.salida <= 0
+            ? ''
+            : `- ${rounded(item.salida)}`}
+        </td>
+        <td className="text-right text-success">
+          {item.ingreso <= 0
+            ? ''
+            : `+ ${rounded(item.ingreso)}`}
+        </td>
+      </tr>
+    ))
+
   }
 
   render() {
@@ -235,6 +244,14 @@ class BancoDetalle extends React.Component {
                     </tr>
                     <tr>
                       <th className="table-secondary w-25 p-1 font-weight-normal ">
+                        <span>CCI:</span>
+                      </th>
+                      <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                        {this.state.cci}
+                      </th>
+                    </tr>
+                    <tr>
+                      <th className="table-secondary w-25 p-1 font-weight-normal ">
                         <span>Moneda</span>
                       </th>
                       <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
@@ -273,46 +290,13 @@ class BancoDetalle extends React.Component {
                     <tr>
                       <th>#</th>
                       <th>Fecha</th>
-                      <th>Proveedor</th>
-                      <th>Concepto</th>
+                      <th>Estado</th>
                       <th>Salidas</th>
                       <th>Entradas</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {this.state.loading ? (
-                      <tr>
-                        <td className="text-center" colSpan="6">
-                          {spinnerLoading(
-                            'Cargando información de la tabla...',
-                            true,
-                          )}
-                        </td>
-                      </tr>
-                    ) : this.state.lista.length === 0 ? (
-                      <tr className="text-center">
-                        <td colSpan="6">¡No hay datos registrados!</td>
-                      </tr>
-                    ) : (
-                      this.state.lista.map((item, index) => (
-                        <tr key={index}>
-                          <td>{++index}</td>
-                          <td>{item.fecha}</td>
-                          <td>{item.proveedor}</td>
-                          <td className="text-left">{item.cuenta}</td>
-                          <td className="text-left text-danger">
-                            {item.salida <= 0
-                              ? ''
-                              : `- ${rounded(item.salida)}`}
-                          </td>
-                          <td className="text-right text-success">
-                            {item.ingreso <= 0
-                              ? ''
-                              : `+ ${rounded(item.ingreso)}`}
-                          </td>
-                        </tr>
-                      ))
-                    )}
+                    {this.generarBody()}
                   </tbody>
                 </table>
               </div>

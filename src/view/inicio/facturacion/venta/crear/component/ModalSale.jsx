@@ -4,7 +4,7 @@ import {
   spinnerLoading,
   numberFormat,
 } from '../../../../../../helper/utils.helper';
-import { ADELANTADO, CONTADO, CREDITO_FIJO, CREDITO_VARIABLE } from '../../../../../../model/types/forma-venta';
+import { ADELANTADO, CONTADO, CREDITO_FIJO, CREDITO_VARIABLE } from '../../../../../../model/types/forma-pago';
 
 const ModalSale = (props) => {
   const { idModalSale } = props;
@@ -36,26 +36,26 @@ const ModalSale = (props) => {
 
     handleSaveSale,
 
-    metodosPagoLista,
-    metodoPagoAgregado,
-    handleAddMetodPay,
-    handleInputMontoMetodoPay,
-    handleRemoveItemMetodPay,
+    bancos,
+    bancosAgregados,
+    handleAgregarBancos,
+    handleInputMontoAgregarBancos,
+    handleRemoveItemAgregarBanco,
   } = props;
 
   const generarVuelto = () => {
     const total = parseFloat(importeTotal);
 
-    if (metodoPagoAgregado.length === 0) {
+    if (bancosAgregados.length === 0) {
       return <h5>Agrega algún método de pago.</h5>;
     }
 
-    const currentAmount = metodoPagoAgregado.reduce((accumulator, item) => {
+    const currentAmount = bancosAgregados.reduce((accumulator, item) => {
       accumulator += item.monto ? parseFloat(item.monto) : 0;
       return accumulator;
     }, 0);
 
-    if (metodoPagoAgregado.length > 1) {
+    if (bancosAgregados.length > 1) {
       if (currentAmount >= total) {
         return (
           <>
@@ -81,7 +81,7 @@ const ModalSale = (props) => {
       }
     }
 
-    const metodo = metodoPagoAgregado[0];
+    const metodo = bancosAgregados[0];
     if (metodo.vuelto === 1) {
       if (currentAmount >= total) {
         return (
@@ -258,14 +258,14 @@ const ModalSale = (props) => {
                 <div className='row'>
                   <div className='col'>
                     <div className="form-group">
-                      {metodoPagoAgregado.map((item, index) => (
+                      {bancosAgregados.map((item, index) => (
                         <MetodoPago
                           key={index}
-                          idMetodoPago={item.idMetodoPago}
+                          idBanco={item.idBanco}
                           nameMetodPay={item.nombre}
                           monto={item.monto}
-                          handleInputMontoMetodoPay={handleInputMontoMetodoPay}
-                          handleRemoveItemMetodPay={handleRemoveItemMetodPay}
+                          handleInputMontoAgregarBancos={handleInputMontoAgregarBancos}
+                          handleRemoveItemAgregarBanco={handleRemoveItemAgregarBanco}
                         />
                       ))}
                     </div>
@@ -289,8 +289,8 @@ const ModalSale = (props) => {
                           className="form-control"
                           ref={refMetodoContado}
                         >
-                          {metodosPagoLista.map((item, index) => (
-                            <option key={index} value={item.idMetodoPago}>
+                          {bancos.map((item, index) => (
+                            <option key={index} value={item.idBanco}>
                               {item.nombre}
                             </option>
                           ))}
@@ -299,7 +299,7 @@ const ModalSale = (props) => {
                           <button
                             className="btn btn-outline-success d-flex"
                             title="Agregar Pago"
-                            onClick={handleAddMetodPay}
+                            onClick={handleAgregarBancos}
                           >
                             <i className="bi bi-plus-circle-fill"></i>
                           </button>
@@ -477,11 +477,11 @@ const ModalSale = (props) => {
 };
 
 const MetodoPago = ({
-  idMetodoPago,
+  idBanco,
   nameMetodPay,
   monto,
-  handleInputMontoMetodoPay,
-  handleRemoveItemMetodPay,
+  handleInputMontoAgregarBancos,
+  handleRemoveItemAgregarBanco,
 }) => {
   return (
     <div className="input-group mb-2">
@@ -491,7 +491,7 @@ const MetodoPago = ({
         className="form-control"
         placeholder="Monto"
         value={monto}
-        onChange={(event) => handleInputMontoMetodoPay(event, idMetodoPago)}
+        onChange={(event) => handleInputMontoAgregarBancos(event, idBanco)}
         onKeyDown={keyNumberFloat}
       />
       <div className="input-group-prepend">
@@ -503,7 +503,7 @@ const MetodoPago = ({
         <button
           className="btn btn-outline-danger d-flex"
           title="Agregar Pago"
-          onClick={() => handleRemoveItemMetodPay(idMetodoPago)}
+          onClick={() => handleRemoveItemAgregarBanco(idBanco)}
         >
           <i className="bi bi-trash3-fill"></i>
         </button>

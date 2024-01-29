@@ -8,71 +8,68 @@ import {
   alertSuccess,
   alertWarning,
   isEmpty,
-  isNumeric,
-  keyNumberInteger,
   spinnerLoading,
 } from '../../../../helper/utils.helper';
-import { addImpuesto } from '../../../../network/rest/principal.network';
+import { addVehiculo } from '../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
 
-class ImpuestoAgregar extends CustomComponent {
+class VehiculoAgregar extends CustomComponent {
+
   constructor(props) {
     super(props);
     this.state = {
-      nombre: '',
-      porcentaje: '',
-      codigo: '',
+      idVehiculo: '',
+      marca: '',
+      numeroPlaca: '',
       preferido: false,
       estado: true,
 
       idUsuario: this.props.token.userToken.idUsuario,
     };
 
-    this.refNombre = React.createRef();
-    this.refPorcentaje = React.createRef();
-    this.refCodigo = React.createRef();
+    this.refMarca = React.createRef();
+    this.refNumeroPlaca = React.createRef();
 
     this.abortController = new AbortController();
   }
 
   handleGuardar = () => {
-    if (isEmpty(this.state.nombre)) {
-      alertWarning('Impuesto', 'Ingrese el nombre.', () =>
-        this.refNombre.current.focus(),
+    if (isEmpty(this.state.marca)) {
+      alertWarning('Vehículo', 'Ingrese la marca del vehículo.', () =>
+        this.refMarca.current.focus(),
       );
       return;
     }
 
-    if (!isNumeric(this.state.porcentaje)) {
-      alertWarning('Impuesto', 'Ingrese el porcentaje.', () =>
-        this.refPorcentaje.current.focus(),
+    if (isEmpty(this.state.numeroPlaca)) {
+      alertWarning('Vehículo', 'Ingrese el número de placa.', () =>
+        this.refNumeroPlaca.current.focus(),
       );
       return;
     }
 
-    alertDialog('Impuesto', '¿Estás seguro de continuar?', async (accept) => {
+    alertDialog('Vehículo', '¿Estás seguro de continuar?', async (accept) => {
       if (accept) {
-        alertInfo('Impuesto', 'Procesando información...');
+        alertInfo('Vehículo', 'Procesando información...');
 
         const data = {
-          nombre: this.state.nombre,
-          porcentaje: this.state.porcentaje,
-          codigo: this.state.codigo,
+          marca: this.state.marca,
+          numeroPlaca: this.state.numeroPlaca,
           estado: this.state.estado,
           preferido: this.state.preferido,
           idUsuario: this.state.idUsuario,
         };
 
-        const response = await addImpuesto(data);
+        const response = await addVehiculo(data);
         if (response instanceof SuccessReponse) {
-          alertSuccess('Impuesto', response.data, () => {
+          alertSuccess('Vehículo', response.data, () => {
             this.props.history.goBack();
           });
         }
 
         if (response instanceof ErrorResponse) {
-          alertWarning('Impuesto', response.getMessage());
+          alertWarning('Vehículo', response.getMessage());
         }
       }
     });
@@ -90,27 +87,46 @@ class ImpuestoAgregar extends CustomComponent {
                 <span role="button" onClick={() => this.props.history.goBack()}>
                   <i className="bi bi-arrow-left-short"></i>
                 </span>{' '}
-                Agregar Impuesto
+                Agregar Vehículo
               </h5>
             </div>
           </div>
         </div>
 
         <div className="row">
-          <div className="col">
+          <div className="col-md-6 col-12">
             <div className="form-group">
-              <label htmlFor="nombre" className="col-form-label">
-                Nombre: <i className="fa fa-asterisk text-danger small"></i>
+              <label htmlFor="marca" className="col-form-label">
+                Marca: <i className="fa fa-asterisk text-danger small"></i>
               </label>
               <input
                 type="text"
                 placeholder="Digite..."
                 className="form-control"
-                id="nombre"
-                ref={this.refNombre}
-                value={this.state.nombre}
+                id="marca"
+                ref={this.refMarca}
+                value={this.state.marca}
                 onChange={(event) =>
-                  this.setState({ nombre: event.target.value })
+                  this.setState({ marca: event.target.value })
+                }
+              />
+            </div>
+          </div>
+
+          <div className="col-md-6 col-12">
+            <div className="form-group">
+              <label htmlFor="numeroPlaca" className="col-form-label">
+                Número de Placa: <i className="fa fa-asterisk text-danger small"></i>
+              </label>
+              <input
+                type="text"
+                placeholder="Digite..."
+                className="form-control"
+                id="numeroPlaca"
+                ref={this.refNumeroPlaca}
+                value={this.state.numeroPlaca}
+                onChange={(event) =>
+                  this.setState({ numeroPlaca: event.target.value })
                 }
               />
             </div>
@@ -119,41 +135,9 @@ class ImpuestoAgregar extends CustomComponent {
 
         <div className="row">
           <div className="form-group col-md-6">
-            <label htmlFor="serie">
-              Porcentaje: <i className="fa fa-asterisk text-danger small"></i>
+            <label htmlFor="nombre" className="col-form-label">
+              Estado:
             </label>
-            <input
-              type="text"
-              placeholder="Digite..."
-              className="form-control"
-              id="serie"
-              ref={this.refPorcentaje}
-              value={this.state.porcentaje}
-              onChange={(event) =>
-                this.setState({ porcentaje: event.target.value })
-              }
-              onKeyDown={keyNumberInteger}
-            />
-          </div>
-          <div className="form-group col-md-6">
-            <label htmlFor="numeracion">Código:</label>
-            <input
-              type="text"
-              placeholder="Digite..."
-              className="form-control"
-              id="numeracion"
-              ref={this.refCodigo}
-              value={this.state.codigo}
-              onChange={(event) =>
-                this.setState({ codigo: event.target.value })
-              }
-            />
-          </div>
-        </div>
-
-        <div className="row">
-          <div className="form-group col-md-6">
-            <label htmlFor="numeracion">Estado:</label>
             <div className="custom-control custom-switch">
               <input
                 type="checkbox"
@@ -171,7 +155,9 @@ class ImpuestoAgregar extends CustomComponent {
           </div>
 
           <div className="form-group col-md-6">
-            <label htmlFor="numeracion">Preferido:</label>
+            <label htmlFor="nombre" className="col-form-label">
+              Preferido:
+            </label>
             <div className="custom-control custom-switch">
               <input
                 type="checkbox"
@@ -220,4 +206,4 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(ImpuestoAgregar);
+export default connect(mapStateToProps, null)(VehiculoAgregar);

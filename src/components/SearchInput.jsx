@@ -100,6 +100,9 @@ class SearchInput extends React.Component {
   }
 
   render() {
+
+    const { disabled } = this.props;
+
     const { showLeftIcon } = this.props;
 
     const { autoFocus, value, data, placeholder, refValue } = this.props;
@@ -107,6 +110,8 @@ class SearchInput extends React.Component {
     const { handleFilter, handleSelectItem, handleClearInput } = this.props;
 
     const { renderItem, renderIconLeft, renderIconRight } = this.props;
+
+    const { customButton } = this.props;
 
     return (
       <div className="form-group position-relative">
@@ -132,17 +137,23 @@ class SearchInput extends React.Component {
             value={value}
             onChange={handleFilter}
             onKeyUp={(event) => this.handleKeyUp(event)}
+            disabled={disabled}
           />
 
           <div className="input-group-append">
+            {
+              customButton && customButton()
+            }
+
             <button
-              className="input-group-text"
+              className="btn btn-outline-secondary"
               type="button"
               onClick={() => {
                 handleClearInput();
                 refValue.current.focus();
                 this.index = -1;
               }}
+              disabled={disabled}
             >
               {renderIconRight ? (
                 renderIconRight()

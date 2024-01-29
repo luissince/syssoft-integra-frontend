@@ -11,12 +11,11 @@ const Producto = (props) => {
 
   const { idMedida, refIdMedida, handleSelectIdMedida, medidas } = props;
 
-  const { idCategoria, refIdCategoria, handleSelectIdCategoria, categorias } =
-    props;
+  const { idCategoria, refIdCategoria, handleSelectIdCategoria, categorias } = props;
 
   const { descripcion, refDescripcion, handleInputDescripcion } = props;
 
-  const { idTipoTratamientoProducto, handleOptionFormaVenta } = props;
+  const { idTipoTratamientoProducto, handleOptionTipoTratamientoProducto } = props;
 
   const { precio, refPrecio, handleInputPrecio } = props;
 
@@ -214,11 +213,11 @@ const Producto = (props) => {
               <input
                 className="form-check-input"
                 type="radio"
-                name="formaVenta"
+                name="tipoTratamiento"
                 id={UNIDADES}
                 value={UNIDADES}
                 checked={idTipoTratamientoProducto === UNIDADES}
-                onChange={handleOptionFormaVenta}
+                onChange={handleOptionTipoTratamientoProducto}
               />
               <label className="form-check-label" htmlFor={UNIDADES}>
                 Unidades
@@ -232,11 +231,11 @@ const Producto = (props) => {
               <input
                 className="form-check-input"
                 type="radio"
-                name="formaVenta"
+                name="tipoTratamiento"
                 id={VALOR_MONETARIO}
                 value={VALOR_MONETARIO}
                 checked={idTipoTratamientoProducto === VALOR_MONETARIO}
-                onChange={handleOptionFormaVenta}
+                onChange={handleOptionTipoTratamientoProducto}
               />
               <label className="form-check-label" htmlFor={VALOR_MONETARIO}>
                 Valor monetario
@@ -250,11 +249,11 @@ const Producto = (props) => {
               <input
                 className="form-check-input"
                 type="radio"
-                name="formaVenta"
+                name="tipoTratamiento"
                 id={A_GRANEL}
                 value={A_GRANEL}
                 checked={idTipoTratamientoProducto === A_GRANEL}
-                onChange={handleOptionFormaVenta}
+                onChange={handleOptionTipoTratamientoProducto}
               />
               <label className="form-check-label" htmlFor={A_GRANEL}>
                 A Granel

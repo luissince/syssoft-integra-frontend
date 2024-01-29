@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { images } from '../../helper';
+import { isEmpty } from '../../helper/utils.helper';
 
 const Menu = ({
   refSideBar,
@@ -32,7 +33,8 @@ const Menu = ({
             <p>{project.nombre}</p>
             <div className="line"></div>
             {userToken.menus.map((menu, index) => {
-              if (menu.submenu.length === 0 && menu.estado === 1) {
+
+              if (isEmpty(menu.submenu) && menu.estado === 1) {
                 return (
                   <li key={index}>
                     <NavLink
@@ -53,10 +55,7 @@ const Menu = ({
                 );
               }
 
-              if (
-                menu.submenu.filter((submenu) => submenu.estado === 1)
-                  .length !== 0
-              ) {
+              if (menu.submenu.filter((submenu) => submenu.estado === 1).length !== 0) {
                 return (
                   <li key={index}>
                     <a
@@ -94,21 +93,13 @@ const Menu = ({
                         const rutaCompleta = pathname;
                         const rutaBase = `${path}/${submenu.ruta}`;
 
-                        if (
-                          rutaCompleta
-                            .toLowerCase()
-                            .includes(rutaBase.toLowerCase())
-                        ) {
+                        if (rutaCompleta.toLowerCase().includes(rutaBase.toLowerCase())) {
                           if (refSideBar && refSideBar.current) {
                             const collapsibleItems =
-                              refSideBar.current.querySelectorAll(
-                                'ul li .pro-inner-item[data-bs-toggle="collapse"]',
-                              );
+                              refSideBar.current.querySelectorAll('ul li .pro-inner-item[data-bs-toggle="collapse"]');
 
                             collapsibleItems.forEach((element) => {
-                              const anchorList = element.parentNode
-                                .querySelector('ul')
-                                .querySelectorAll('li a');
+                              const anchorList = element.parentNode.querySelector('ul').querySelectorAll('li a');
 
                               anchorList.forEach((a) => {
                                 if (rutaBase === a.getAttribute('href')) {

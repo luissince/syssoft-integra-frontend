@@ -16,7 +16,7 @@ class ClienteDetalle extends CustomComponent {
   constructor(props) {
     super(props);
     this.state = {
-      idCliente: '',
+      idPersona: '',
       tipoDocumento: '',
       documento: '',
       informacion: '',
@@ -36,7 +36,7 @@ class ClienteDetalle extends CustomComponent {
 
   async componentDidMount() {
     const url = this.props.location.search;
-    const idResult = new URLSearchParams(url).get('idCliente');
+    const idResult = new URLSearchParams(url).get('idPersona');
     if (idResult !== null) {
       this.loadDataId(idResult);
     } else {
@@ -53,14 +53,14 @@ class ClienteDetalle extends CustomComponent {
       const result = await axios.get('/api/cliente/listventasasociadas', {
         signal: this.abortControllerView.signal,
         params: {
-          idCliente: id,
+          idPersona: id,
         },
       });
 
       let cliente = result.data.cliente;
 
       await this.setStateAsync({
-        idCliente: id,
+        idPersona: id,
         tipoDocumento: cliente.tipoDocumento,
         documento: cliente.documento,
         informacion: cliente.informacion,
@@ -82,7 +82,7 @@ class ClienteDetalle extends CustomComponent {
   async onEventImprimir() {
     const data = {
       idEmpresa: 'EM0001',
-      idCliente: this.state.idCliente,
+      idPersona: this.state.idPersona,
     };
 
     let ciphertext = CryptoJS.AES.encrypt(

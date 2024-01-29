@@ -9,17 +9,17 @@ import {
   alertInfo,
   alertSuccess,
   alertWarning,
+  isText,
   isEmpty,
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
-import SearchBar from '../../../../components/SearchBar';
 import ContainerWrapper from '../../../../components/Container';
 import { images } from '../../../../helper';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
 import {
-  createCliente,
-  getIdCliente,
+  editPersona,
+  getIdPersona,
   getUbigeo,
   listComboTipoDocumento,
 } from '../../../../network/rest/principal.network';
@@ -27,8 +27,10 @@ import { getDni, getRuc } from '../../../../network/rest/apisperu.network';
 import { CANCELED } from '../../../../model/types/types';
 import CustomComponent from '../../../../model/class/custom-component';
 import { CLIENTE_JURIDICO, CLIENTE_NATURAL } from '../../../../model/types/tipo-cliente';
+import SearchInput from '../../../../components/SearchInput';
 
-class ClienteAgregar extends CustomComponent {
+class PersonaEditar extends CustomComponent {
+
   constructor(props) {
     super(props);
     this.state = {
@@ -36,6 +38,7 @@ class ClienteAgregar extends CustomComponent {
       msgLoading: 'Cargando datos...',
 
       idTipoCliente: CLIENTE_NATURAL,
+      idPersona: '',
       // persona natural
       idTipoDocumentoPn: '',
       documentoPn: '',
@@ -46,7 +49,10 @@ class ClienteAgregar extends CustomComponent {
       emailPn: '',
       genero: '',
       direccionPn: '',
-
+      clientePn: true,
+      proveedorPn: false,
+      conductorPn: false,
+      licenciaConductirPn: '',
       idUbigeoPn: '',
       ubigeoPn: '',
 
@@ -63,6 +69,10 @@ class ClienteAgregar extends CustomComponent {
       celularPj: '',
       emailPj: '',
       direccionPj: '',
+      clientePj: true,
+      proveedorPj: false,
+      conductorPj: false,
+      licenciaConductirPj: '',
       idUbigeoPj: '',
       ubigeoPj: '',
       estadoPj: true,
@@ -105,25 +115,97 @@ class ClienteAgregar extends CustomComponent {
   }
 
   async componentDidMount() {
-    this.loadingData();
+    const url = this.props.location.search;
+    const idPersona = new URLSearchParams(url).get('idPersona');
+    if (isText(idPersona)) {
+      this.loadingDataId(idPersona);
+    } else {
+      this.props.history.goBack();
+    }
   }
 
   componentWillUnmount() {
     this.abortControllerTable.abort();
   }
 
-  loadingData = async () => {
-    const documentos = await this.fetchTipoDocumento();
+  loadingDataId = async (id) => {
+    const params = {
+      idPersona: id,
+    };
 
-    if (documentos.length !== 0) {
-      await this.setStateAsync({
-        tiposDocumentos: documentos,
-        loading: false,
-      });
-    } else {
+    const [documentos, cliente] = await Promise.all([
+      await this.fetchTipoDocumento(),
+      await this.fetchIdPersona(params),
+    ]);
+
+    if (cliente === null) {
       await this.setStateAsync({
         msgLoading: 'Se produjo un error un interno, intente nuevamente.',
       });
+      return;
+    }
+
+    if (cliente.idTipoCliente === CLIENTE_NATURAL) {
+      this.handleFocusTab('personaNatural-tab', 'datosPn');
+      await this.setStateAsync({
+        idTipoCliente: cliente.idTipoCliente,
+        idPersona: cliente.idPersona,
+        idTipoDocumentoPn: cliente.idTipoDocumento,
+        documentoPn: cliente.documento,
+        informacionPn: cliente.informacion,
+        clientePn: cliente.cliente,
+        proveedorPn: cliente.proveedor,
+        conductorPn: cliente.conductor,
+        licenciaConductirPn: cliente.licenciaConducir,
+        telefonoPn: cliente.telefono,
+        celularPn: cliente.celular,
+        fechaNacimiento: cliente.fechaNacimiento,
+        emailPn: cliente.email,
+        genero: cliente.genero,
+        direccionPn: cliente.direccion,
+
+        idUbigeoPn: cliente.idUbigeo === 0 ? '' : cliente.idUbigeo.toString(),
+        ubigeoPn: cliente.ubigeo === '' ? '' : cliente.departamento + '-' + cliente.provincia + '-' + cliente.distrito + ' (' + cliente.ubigeo + ')',
+
+        estadoCivil: cliente.estadoCivil,
+        predeterminado: cliente.predeterminado,
+        estadoPn: cliente.estado,
+        observacion: cliente.observacion,
+
+        tiposDocumentos: documentos,
+
+        loading: false,
+      });
+
+      this.selectItem = cliente.idUbigeo === 0 ? false : true;
+    } else {
+      this.handleFocusTab('personaJuridica-tab', 'datosPj');
+      await this.setStateAsync({
+        idTipoCliente: cliente.idTipoCliente,
+        idPersona: cliente.idPersona,
+        idTipoDocumentoPj: cliente.idTipoDocumento,
+        documentoPj: cliente.documento,
+        informacionPj: cliente.informacion,
+        clientePj: cliente.cliente,
+        proveedorPj: cliente.proveedor,
+        conductorPj: cliente.conductor,
+        licenciaConductirPj: cliente.licenciaConducir,
+        telefonoPj: cliente.telefono,
+        celularPj: cliente.celular,
+        emailPj: cliente.email,
+        direccionPj: cliente.direccion,
+
+        idUbigeoPj: cliente.idUbigeo === 0 ? '' : cliente.idUbigeo.toString(),
+        ubigeoPj: cliente.ubigeo === '' ? '' : cliente.departamento + '-' + cliente.provincia + '-' + cliente.distrito + ' (' + cliente.ubigeo + ')',
+
+        estadoPj: cliente.estado,
+
+        tiposDocumentos: documentos,
+
+        loading: false,
+      });
+
+      this.selectItem = cliente.idUbigeo === 0 ? false : true;
     }
   };
 
@@ -143,8 +225,8 @@ class ClienteAgregar extends CustomComponent {
     }
   }
 
-  async fetchClienteId(params) {
-    const response = await getIdCliente(
+  async fetchIdPersona(params) {
+    const response = await getIdPersona(
       params,
       this.abortControllerTable.signal,
     );
@@ -175,7 +257,6 @@ class ClienteAgregar extends CustomComponent {
   handleInputNumeroDocumentoPn = (event) => {
     this.setState({
       documentoPn: event.target.value,
-
     });
   };
 
@@ -254,9 +335,7 @@ class ClienteAgregar extends CustomComponent {
 
   handleGetApiReniec = async () => {
     if (this.state.documentoPn.length !== 8) {
-      alertWarning("Cliente", 'Para iniciar la busqueda en número dni debe tener 8 caracteres.', () => {
-        this.refDocumentoPn.current.focus();
-      })
+      alertWarning("Persona", 'Para iniciar la busqueda en número dni debe tener 8 caracteres.')
       return;
     }
 
@@ -270,13 +349,18 @@ class ClienteAgregar extends CustomComponent {
     if (response instanceof SuccessReponse) {
       this.setState({
         documentoPn: convertNullText(response.data.dni),
-        informacionPn: convertNullText(response.data.apellidoPaterno) + ' ' + convertNullText(response.data.apellidoMaterno) + ' ' + convertNullText(response.data.nombres),
+        informacionPn:
+          convertNullText(response.data.apellidoPaterno) +
+          ' ' +
+          convertNullText(response.data.apellidoMaterno) +
+          ' ' +
+          convertNullText(response.data.nombres),
         loading: false,
       });
     }
 
     if (response instanceof ErrorResponse) {
-      alertWarning('Cliente', response.getMessage(), () => {
+      alertWarning('Persona', response.getMessage(), () => {
         this.setState({
           loading: false,
         });
@@ -286,9 +370,7 @@ class ClienteAgregar extends CustomComponent {
 
   handleGetApiSunat = async () => {
     if (this.state.documentoPj.length !== 11) {
-      alertWarning("Cliente", 'Para iniciar la busqueda en número ruc debe tener 11 caracteres.', () => {
-        this.refDocumentoPj.current.focus();
-      })
+      alertWarning("Persona", 'Para iniciar la busqueda en número ruc debe tener 11 caracteres.')
       return;
     }
 
@@ -309,7 +391,7 @@ class ClienteAgregar extends CustomComponent {
     }
 
     if (response instanceof ErrorResponse) {
-      alertWarning('Cliente', response.getMessage(), () => {
+      alertWarning('Persona', response.getMessage(), () => {
         this.setState({
           loading: false,
         });
@@ -416,66 +498,77 @@ class ClienteAgregar extends CustomComponent {
     const tipoDocumento = this.state.tiposDocumentos.find(item => item.idTipoDocumento === this.state.idTipoDocumentoPn);
 
     if (isEmpty(this.state.idTipoDocumentoPn)) {
-      alertWarning("Cliente", 'Seleccione el tipo de documento.', () => {
+      alertWarning("Persona", 'Seleccione el tipo de documento.', () => {
         this.refTipoDocumentoPn.current.focus();
-      })
+      });
       return;
     }
 
     if (isEmpty(this.state.documentoPn)) {
-      alertWarning("Cliente", 'Ingrese el número de documento.', () => {
+      alertWarning("Persona", 'Ingrese el número de documento.', () => {
         this.refDocumentoPn.current.focus();
-      })
+      });
       return;
     }
 
     if (tipoDocumento && tipoDocumento.obligado === 1 && tipoDocumento.longitud !== this.state.documentoPn.length) {
-      alertWarning("Cliente", `El número de documento por ser ${tipoDocumento.nombre} tiene que tener una longitud de ${tipoDocumento.longitud} carácteres.`, () => {
+      alertWarning("Persona", `El número de documento por ser ${tipoDocumento.nombre} tiene que tener una longitud de ${tipoDocumento.longitud} carácteres.`, () => {
         this.refDocumentoPn.current.focus();
       })
       return;
     }
 
     if (isEmpty(this.state.informacionPn)) {
-      alertWarning("Cliente", 'Ingrese los apellidos y nombres.', () => {
+      alertWarning("Persona", 'Ingrese los apellidos y nombres.', () => {
         this.refInformacionPn.current.focus();
+      });
+      return;
+    }
+
+    if (this.state.conductorPn && isEmpty(this.state.licenciaConductirPn)) {
+      alertWarning("Persona", 'Ingrese el número de licencia.', () => {
+        this.refLicenciaConducirPn.current.focus();
       })
       return;
     }
 
-    alertDialog('Cliente', '¿Estás seguro de continuar?', async (accept) => {
+    alertDialog('Persona', '¿Estás seguro de continuar?', async (accept) => {
       if (accept) {
         const data = {
           idTipoCliente: this.state.idTipoCliente,
+          idPersona: this.state.idPersona,
           idTipoDocumento: this.state.idTipoDocumentoPn,
-          documento: this.state.documentoPn.toString().trim().toUpperCase(),
-          informacion: this.state.informacionPn.trim().toUpperCase(),
-          telefono: this.state.telefonoPn.toString().trim().toUpperCase(),
-          celular: this.state.celularPn.toString().trim().toUpperCase(),
+          documento: this.state.documentoPn.toString().trim(),
+          informacion: this.state.informacionPn.trim(),
+          cliente: this.state.clientePn,
+          proveedor: this.state.proveedorPn,
+          conductor: this.state.conductorPn,
+          licenciaConducir: this.state.licenciaConductirPn,
+          telefono: this.state.telefonoPn.toString().trim(),
+          celular: this.state.celularPn.toString().trim(),
           fechaNacimiento: this.state.fechaNacimiento,
           email: this.state.emailPn.trim(),
           genero: this.state.genero,
-          direccion: this.state.direccionPn.trim().toUpperCase(),
+          direccion: this.state.direccionPn.trim(),
           idUbigeo: this.state.idUbigeoPn,
           estadoCivil: this.state.estadoCivil,
           predeterminado: this.state.predeterminado,
           estado: this.state.estadoPn,
-          observacion: this.state.observacion.trim().toUpperCase(),
+          observacion: this.state.observacion.trim(),
           idUsuario: this.state.idUsuario,
         };
 
-        alertInfo('Cliente', 'Procesando información...');
+        alertInfo('Persona', 'Procesando información...');
 
-        const response = await createCliente(data);
-
+        const response = await editPersona(data);
         if (response instanceof SuccessReponse) {
-          alertSuccess('Cliente', response.data, () => {
+          alertSuccess('Persona', response.data, () => {
             this.props.history.goBack();
           });
         }
 
         if (response instanceof ErrorResponse) {
-          alertWarning('Cliente', response.getMessage());
+          alertWarning('Persona', response.getMessage());
         }
       }
     });
@@ -485,62 +578,75 @@ class ClienteAgregar extends CustomComponent {
     const tipoDocumento = this.state.tiposDocumentos.find(item => item.idTipoDocumento === this.state.idTipoDocumentoPj);
 
     if (isEmpty(this.state.idTipoDocumentoPj)) {
-      alertWarning("Cliente", 'Seleccione el tipo de documento.', () => {
+      alertWarning("Persona", 'Seleccione el tipo de documento.', () => {
         this.refTipoDocumentoPj.current.focus();
-      })
+      });
       return;
     }
 
     if (isEmpty(this.state.documentoPj)) {
-      alertWarning("Cliente", 'Ingrese el número de documento.', () => {
+      alertWarning("Persona", 'Ingrese el número de documento.', () => {
         this.refDocumentoPj.current.focus();
-      })
+      });
       return;
     }
 
     if (tipoDocumento && tipoDocumento.obligado === 1 && tipoDocumento.longitud !== this.state.documentoPj.length) {
-      alertWarning("Cliente", `El número de documento por ser ${tipoDocumento.nombre} tiene que tener una longitud de ${tipoDocumento.longitud} carácteres.`, () => {
+      alertWarning("Persona", `El número de documento por ser ${tipoDocumento.nombre} tiene que tener una longitud de ${tipoDocumento.longitud} carácteres.`, () => {
         this.refDocumentoPj.current.focus();
       })
       return;
     }
 
     if (isEmpty(this.state.informacionPj)) {
-      alertWarning("Cliente", 'Ingrese los apellidos y nombres.', () => {
+      alertWarning("Persona", 'Ingrese su RUC.', () => {
         this.refInformacionPj.current.focus();
+      });
+      return;
+    }
+
+    if (this.state.conductorPj && isEmpty(this.state.licenciaConductirPj)) {
+      alertWarning("Persona", 'Ingrese el número de licencia.', () => {
+        this.refLicenciaConducirPj.current.focus();
       })
       return;
     }
 
-    alertDialog('Cliente', '¿Estás seguro de continuar?', async (accept) => {
+
+    alertDialog('Persona', '¿Estás seguro de continuar?', async (accept) => {
       if (accept) {
         const data = {
           idTipoCliente: this.state.idTipoCliente,
+          idPersona: this.state.idPersona,
           idTipoDocumento: this.state.idTipoDocumentoPj,
-          documento: this.state.documentoPj.toString().trim().toUpperCase(),
-          informacion: this.state.informacionPj.trim().toUpperCase(),
-          telefono: this.state.telefonoPj.toString().trim().toUpperCase(),
-          celular: this.state.celularPj.toString().trim().toUpperCase(),
+          documento: this.state.documentoPj.toString().trim(),
+          informacion: this.state.informacionPj.trim(),
+          cliente: this.state.clientePj,
+          proveedor: this.state.proveedorPj,
+          conductor: this.state.conductorPj,
+          licenciaConducir: this.state.licenciaConductirPj,
+          telefono: this.state.telefonoPj.toString().trim(),
+          celular: this.state.celularPj.toString().trim(),
           email: this.state.emailPj.trim(),
-          direccion: this.state.direccionPj.trim().toUpperCase(),
+          direccion: this.state.direccionPj.trim(),
           idUbigeo: this.state.idUbigeoPj,
           predeterminado: false,
           estado: this.state.estadoPj,
-          observacion: this.state.observacion.trim().toUpperCase(),
+          observacion: this.state.observacion.trim(),
           idUsuario: this.state.idUsuario,
         };
 
-        alertInfo('Cliente', 'Procesando información...');
+        alertInfo('Persona', 'Procesando información...');
 
-        const response = await createCliente(data);
+        const response = await editPersona(data);
         if (response instanceof SuccessReponse) {
-          alertSuccess('Cliente', response.data, () => {
+          alertSuccess('Persona', response.data, () => {
             this.props.history.goBack();
           });
         }
 
         if (response instanceof ErrorResponse) {
-          alertWarning('Cliente', response.getMessage());
+          alertWarning('Persona', response.getMessage());
         }
       }
     });
@@ -595,24 +701,24 @@ class ClienteAgregar extends CustomComponent {
                 <span role="button" onClick={() => this.props.history.goBack()}>
                   <i className="bi bi-arrow-left-short"></i>
                 </span>{' '}
-                Registrar Cliente
+                Editar Persona
               </h5>
             </section>
           </div>
         </div>
 
         <div className="row">
-          <div className="col">
+          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
             <ul className="nav nav-tabs" id="myTab" role="tablist">
               {/* Persona Natural */}
               <li className="nav-item" role="presentation">
                 <a
                   className="nav-link active"
-                  id="datos-tab"
+                  id="personaNatural-tab"
                   data-bs-toggle="tab"
-                  href="#datos"
+                  href="#datosPn"
                   role="tab"
-                  aria-controls="datos"
+                  aria-controls="datosPn"
                   aria-selected={true}
                   onClick={() => this.setState({ idTipoCliente: CLIENTE_NATURAL })}
                 >
@@ -623,11 +729,11 @@ class ClienteAgregar extends CustomComponent {
               <li className="nav-item" role="presentation">
                 <a
                   className="nav-link"
-                  id="contacto-tab"
+                  id="personaJuridica-tab"
                   data-bs-toggle="tab"
-                  href="#contacto"
+                  href="#datosPj"
                   role="tab"
-                  aria-controls="contacto"
+                  aria-controls="datosPj"
                   aria-selected={false}
                   onClick={() => this.setState({ idTipoCliente: CLIENTE_JURIDICO })}
                 >
@@ -637,79 +743,75 @@ class ClienteAgregar extends CustomComponent {
             </ul>
 
             <div className="tab-content pt-2" id="myTabContent">
-              {/* Contenedor person natural  */}
+              {/* Contenedor persona natural  */}
               <div
                 className="tab-pane fade show active"
-                id="datos"
+                id="datosPn"
                 role="tabpanel"
-                aria-labelledby="datos-tab"
+                aria-labelledby="personaNatural-tab"
               >
                 {/* Tipo documento y Número de documento */}
                 <div className="row">
-                  <div className='col-md-6 col-12'>
-                    <div className="form-group">
-                      <label>
-                        Tipo Documento: <i className="fa fa-asterisk text-danger small"></i>
-                      </label>
-                      <select
-                        className={`form-control ${idTipoDocumentoPn ? '' : 'is-invalid'}`}
-                        value={idTipoDocumentoPn}
-                        ref={this.refTipoDocumentoPn}
-                        onChange={this.handleSelectTipoDocumentoPn}
-                      >
-                        <option value="">-- Seleccione --</option>
-                        {this.state.tiposDocumentos.filter((item) => item.idTipoDocumento !== 'TD0003').map((item, index) => (
-                          <option key={index} value={item.idTipoDocumento}>
-                            {item.nombre}
-                          </option>
-                        ))}
-                      </select>
-                      {idTipoDocumentoPn === '' && (
-                        <div className="invalid-feedback">
-                          Seleccione un valor.
-                        </div>
-                      )}
-                    </div>
+                  {/* Tipo documento  */}
+                  <div className="form-group col-md-6">
+                    <label>
+                      Tipo Documento: <i className="fa fa-asterisk text-danger small"></i>
+                    </label>
+                    <select
+                      className={`form-control ${idTipoDocumentoPn ? '' : 'is-invalid'}`}
+                      value={idTipoDocumentoPn}
+                      ref={this.refTipoDocumentoPn}
+                      onChange={this.handleSelectTipoDocumentoPn}
+                    >
+                      <option value="">-- Seleccione --</option>
+                      {this.state.tiposDocumentos.filter((item) => item.idTipoDocumento !== 'TD0003').map((item, index) => (
+                        <option key={index} value={item.idTipoDocumento}>
+                          {item.nombre}
+                        </option>
+                      ))}
+                    </select>
+                    {idTipoDocumentoPn === '' && (
+                      <div className="invalid-feedback">
+                        Seleccione un valor.
+                      </div>
+                    )}
                   </div>
 
-                  <div className='col-md-6 col-12'>
-                    <div className="form-group ">
-
-                      <label>
-                        N° de documento ({documentoPn.length}):{' '}
-                        <i className="fa fa-asterisk text-danger small"></i>
-                      </label>
-                      <div className="input-group is-invalid">
-                        <input
-                          type="text"
-                          className={`form-control ${documentoPn ? '' : 'is-invalid'}`}
-                          ref={this.refDocumentoPn}
-                          value={documentoPn}
-                          onChange={this.handleInputNumeroDocumentoPn}
-                          onKeyDown={keyNumberInteger}
-                          placeholder="00000000"
-                        />
-                        <div className="input-group-append">
-                          <button
-                            className="btn btn-outline-secondary"
-                            type="button"
-                            title="Reniec"
-                            onClick={this.handleGetApiReniec}
-                          >
-                            <img src={images.reniec} alt="Reniec" width="12" />
-                          </button>
-                        </div>
+                  {/* Número de documento  */}
+                  <div className="form-group col-md-6">
+                    <label>
+                      N° de documento ({documentoPn.length}): <i className="fa fa-asterisk text-danger small"></i>
+                    </label>
+                    <div className="input-group is-invalid">
+                      <input
+                        type="text"
+                        className={`form-control ${documentoPn ? '' : 'is-invalid'}`}
+                        ref={this.refDocumentoPn}
+                        value={documentoPn}
+                        onChange={this.handleInputNumeroDocumentoPn}
+                        onKeyDown={keyNumberInteger}
+                        placeholder="00000000"
+                      />
+                      <div className="input-group-append">
+                        <button
+                          className="btn btn-outline-secondary"
+                          type="button"
+                          title="Reniec"
+                          onClick={this.handleGetApiReniec}
+                        >
+                          <img src={images.reniec} alt="Reniec" width="12" />
+                        </button>
                       </div>
-                      {documentoPn === '' && (
-                        <div className="invalid-feedback">
-                          Ingrese un valor.
-                        </div>
-                      )}
                     </div>
+                    {documentoPn === '' && (
+                      <div className="invalid-feedback">
+                        Ingrese un valor.
+                      </div>
+                    )}
                   </div>
                 </div>
 
-                {/* Apelldiso y Npmbres */}
+                {/* Apellidos y Npmbres */}
                 <div className="row">
                   <div className="form-group col-md-12">
                     <label>
@@ -727,6 +829,64 @@ class ClienteAgregar extends CustomComponent {
                     {informacionPn === '' && (
                       <div className="invalid-feedback">Ingrese un valor.</div>
                     )}
+                  </div>
+                </div>
+
+                {/* Rol */}
+                <div className="row">
+                  <div className="col">
+                    <label>
+                      Tipo de Roles: <i className="fa fa-asterisk text-danger small"></i>
+                    </label>
+                  </div>
+                  <div className="form-group col-md-12">
+                    <div className="form-check form-check">
+                      <input className="form-check-input"
+                        type="checkbox"
+                        id="checkboxPnCliente"
+                        checked={this.state.clientePn}
+                        onChange={(event) => {
+                          this.setState({ clientePn: event.target.checked })
+                        }} />
+                      <label className="form-check-label" htmlFor="checkboxPnCliente"> Cliente</label>
+                    </div>
+                    <div className="form-check form-check">
+                      <input className="form-check-input"
+                        type="checkbox"
+                        id="checkboxPnProveedor"
+                        checked={this.state.proveedorPn}
+                        onChange={(event) => {
+                          this.setState({ proveedorPn: event.target.checked })
+                        }} />
+                      <label className="form-check-label" htmlFor="checkboxPnProveedor"> Proveedor</label>
+                    </div>
+                    <div className="form-check form-check">
+                      <input className="form-check-input"
+                        type="checkbox"
+                        id="checkboxPnConductor"
+                        checked={this.state.conductorPn}
+                        onChange={(event) => {
+                          this.setState({ conductorPn: event.target.checked })
+                        }} />
+                      <label className="form-check-label" htmlFor="checkboxPnConductor"> Conductor</label>
+                    </div>
+                    {
+                      this.state.conductorPn && (
+                        <div className='row'>
+                          <div className='col'>
+                            <input
+                              type='text'
+                              className='form-control'
+                              placeholder='Número de licencia de conducir'
+                              ref={this.refLicenciaConducirPn}
+                              value={this.state.licenciaConductirPn}
+                              onChange={(event) => {
+                                this.setState({ licenciaConductirPn: event.target.value })
+                              }} />
+                          </div>
+                        </div>
+                      )
+                    }
                   </div>
                 </div>
 
@@ -849,14 +1009,27 @@ class ClienteAgregar extends CustomComponent {
                 <div className="row">
                   <div className="form-group col-md-12">
                     <label>Ubigeo:</label>
-                    <SearchBar
+                    <SearchInput
+                      showLeftIcon={false}
                       placeholder="Escribe para iniciar a filtrar..."
-                      refTxtUbigeo={this.refUbigeoPn}
-                      ubigeo={ubigeoPn}
-                      filteredData={this.state.filteredData}
-                      onEventClearInput={this.handleClearInput}
+                      refValue={this.refUbigeoPn}
+                      value={ubigeoPn}
+                      data={this.state.filteredData}
+                      handleClearInput={this.handleClearInput}
                       handleFilter={this.handleFilterPn}
-                      onEventSelectItem={this.handleSelectItemPn}
+                      handleSelectItem={this.handleSelectItemPn}
+                      renderItem={(value) =>
+                        <>
+                          {value.departamento +
+                            '-' +
+                            value.provincia +
+                            '-' +
+                            value.distrito +
+                            ' (' +
+                            value.ubigeo +
+                            ')'}
+                        </>
+                      }
                     />
                   </div>
                 </div>
@@ -900,15 +1073,17 @@ class ClienteAgregar extends CustomComponent {
               {/* Contenedor persona juridica */}
               <div
                 className="tab-pane fade"
-                id="contacto"
+                id="datosPj"
                 role="tabpanel"
-                aria-labelledby="contacto-tab"
+                aria-labelledby="personaJuridica-tab"
               >
                 {/* Tipo documento y Número de documento */}
                 <div className="row">
+                  {/* Tipo documento  */}
                   <div className="form-group col-md-6">
                     <label>
-                      Tipo Documento: <i className="fa fa-asterisk text-danger small"></i>
+                      Tipo Documento:{' '}
+                      <i className="fa fa-asterisk text-danger small"></i>
                     </label>
                     <select
                       className={`form-control ${idTipoDocumentoPj ? '' : 'is-invalid'}`}
@@ -930,9 +1105,11 @@ class ClienteAgregar extends CustomComponent {
                     )}
                   </div>
 
+                  {/* Número de documento  */}
                   <div className="form-group col-md-6">
                     <label>
-                      N° de documento ({documentoPj.length}): <i className="fa fa-asterisk text-danger small"></i>
+                      N° de documento ({documentoPj.length}):{' '}
+                      <i className="fa fa-asterisk text-danger small"></i>
                     </label>
                     <div className="input-group is-invalid">
                       <input
@@ -967,7 +1144,8 @@ class ClienteAgregar extends CustomComponent {
                 <div className="row">
                   <div className="form-group col-md-12">
                     <label>
-                      Razón Social: <i className="fa fa-asterisk text-danger small"></i>
+                      Razón Social:{' '}
+                      <i className="fa fa-asterisk text-danger small"></i>
                     </label>
                     <input
                       type="text"
@@ -983,10 +1161,70 @@ class ClienteAgregar extends CustomComponent {
                   </div>
                 </div>
 
+                {/* Rol */}
+                <div className="row">
+                  <div className="col">
+                    <label>
+                      Tipo de Roles: <i className="fa fa-asterisk text-danger small"></i>
+                    </label>
+                  </div>
+                  <div className="form-group col-md-12">
+                    <div className="form-check form-check">
+                      <input className="form-check-input"
+                        type="checkbox"
+                        id="checkboxPjCliente"
+                        checked={this.state.clientePj}
+                        onChange={(event) => {
+                          this.setState({ clientePj: event.target.checked })
+                        }} />
+                      <label className="form-check-label" htmlFor="checkboxPjCliente"> Cliente</label>
+                    </div>
+                    <div className="form-check form-check">
+                      <input className="form-check-input"
+                        type="checkbox"
+                        id="checkboxPjProveedor"
+                        checked={this.state.proveedorPj}
+                        onChange={(event) => {
+                          this.setState({ proveedorPj: event.target.checked })
+                        }} />
+                      <label className="form-check-label" htmlFor="checkboxPjProveedor"> Proveedor</label>
+                    </div>
+                    <div className="form-check form-check">
+                      <input className="form-check-input"
+                        type="checkbox"
+                        id="checkboxPjConductor"
+                        checked={this.state.conductorPj}
+                        onChange={(event) => {
+                          this.setState({ conductorPj: event.target.checked })
+                        }} />
+                      <label className="form-check-label" htmlFor="checkboxPjConductor"> Conductor</label>
+                    </div>
+                    {
+                      this.state.conductorPj && (
+                        <div className='row'>
+                          <div className='col'>
+                            <input type='text'
+                              className='form-control'
+                              placeholder='Númeoro de licencia de conducir'
+                              ref={this.refLicenciaConducirPj}
+                              value={this.state.licenciaConductirPj}
+                              onChange={(event) => {
+                                this.setState({ licenciaConductirPj: event.target.value })
+                              }} />
+                          </div>
+                        </div>
+                      )
+                    }
+                  </div>
+                </div>
+
                 {/* Número de celular y Teléfono */}
                 <div className="row">
                   <div className="form-group col-md-6 col-12">
-                    <label>N° de Celular: </label>
+                    <label>
+                      N° de Celular:{' '}
+                      <i className="fa fa-asterisk text-danger small"></i>
+                    </label>
                     <input
                       type="text"
                       className="form-control"
@@ -1055,14 +1293,27 @@ class ClienteAgregar extends CustomComponent {
                 <div className="row">
                   <div className="form-group col-md-12">
                     <label>Ubigeo:</label>
-                    <SearchBar
+                    <SearchInput
+                      showLeftIcon={false}
                       placeholder="Escribe para iniciar a filtrar..."
-                      refTxtUbigeo={this.refUbigeoPj}
-                      ubigeo={ubigeoPj}
-                      filteredData={this.state.filteredData}
-                      onEventClearInput={this.handleClearInput}
+                      refValue={this.refUbigeoPj}
+                      value={ubigeoPj}
+                      data={this.state.filteredData}
+                      handleClearInput={this.handleClearInput}
                       handleFilter={this.handleFilterPj}
-                      onEventSelectItem={this.handleSelectItemPj}
+                      handleSelectItem={this.handleSelectItemPj}
+                      renderItem={(value) =>
+                        <>
+                          {value.departamento +
+                            '-' +
+                            value.provincia +
+                            '-' +
+                            value.distrito +
+                            ' (' +
+                            value.ubigeo +
+                            ')'}
+                        </>
+                      }
                     />
                   </div>
                 </div>
@@ -1096,17 +1347,17 @@ class ClienteAgregar extends CustomComponent {
           <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
             <button
               type="button"
-              className="btn btn-primary mr-2"
+              className="btn btn-warning mr-2"
               onClick={() => this.handleSave()}
             >
-              Guardar
+              <i className='fa fa-pencil'></i>  Editar
             </button>
             <button
               type="button"
               className="btn btn-danger"
               onClick={() => this.props.history.goBack()}
             >
-              Cancelar
+              <i className='fa fa-close'></i>  Cancelar
             </button>
           </div>
         </div>
@@ -1121,4 +1372,4 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(ClienteAgregar);
+export default connect(mapStateToProps, null)(PersonaEditar);

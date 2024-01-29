@@ -18,7 +18,7 @@ class RepFinanciero extends React.Component {
       isDetallado: false,
 
       //Cobro
-      idCliente: '',
+      idPersona: '',
       clientes: [],
 
       idBanco: '',

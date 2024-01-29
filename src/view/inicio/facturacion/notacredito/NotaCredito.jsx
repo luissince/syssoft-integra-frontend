@@ -26,13 +26,13 @@ class NotaCredito extends CustomComponent {
       restart: false,
 
       add: statePrivilegio(
-        this.props.token.userToken.menus[2].submenu[3].privilegio[0].estado,
+        this.props.token.userToken.menus[2].submenu[2].privilegio[0].estado,
       ),
       view: statePrivilegio(
-        this.props.token.userToken.menus[2].submenu[3].privilegio[1].estado,
+        this.props.token.userToken.menus[2].submenu[2].privilegio[1].estado,
       ),
       cancel: statePrivilegio(
-        this.props.token.userToken.menus[2].submenu[3].privilegio[2].estado,
+        this.props.token.userToken.menus[2].submenu[2].privilegio[2].estado,
       ),
 
       idSucursal: this.props.token.project.idSucursal,
@@ -44,7 +44,7 @@ class NotaCredito extends CustomComponent {
       filasPorPagina: 10,
       messageTable: 'Cargando información...',
     };
-
+    
     this.refTxtSearch = React.createRef();
     this.abortControllerTable = new AbortController();
   }

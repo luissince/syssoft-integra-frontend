@@ -1,9 +1,7 @@
 import {
   rounded,
   keyNumberFloat,
-  keyNumberInteger,
   spinnerLoading,
-  isNumeric,
 } from '../../../../../../helper/utils.helper';
 
 const ModalSale = (props) => {
@@ -18,26 +16,26 @@ const ModalSale = (props) => {
 
     handleSaveSale,
 
-    metodosPagoLista,
-    metodoPagoAgregado,
-    handleAddMetodPay,
-    handleInputMontoMetodoPay,
-    handleRemoveItemMetodPay,
+    bancos,
+    bancosAgregados,
+    handleAddBancosAgregados,
+    handleInputMontoBancosAgregados,
+    handleRemoveItemBancosAgregados,
   } = props;
 
   const generarVuelto = () => {
     const total = parseFloat(importeTotal);
 
-    if (metodoPagoAgregado.length === 0) {
+    if (bancosAgregados.length === 0) {
       return <h5>Agrega algún método de pago.</h5>;
     }
 
-    const currentAmount = metodoPagoAgregado.reduce((accumulator, item) => {
+    const currentAmount = bancosAgregados.reduce((accumulator, item) => {
       accumulator += item.monto ? parseFloat(item.monto) : 0;
       return accumulator;
     }, 0);
 
-    if (metodoPagoAgregado.length > 1) {
+    if (bancosAgregados.length > 1) {
       if (currentAmount >= total) {
         return (
           <>
@@ -63,7 +61,7 @@ const ModalSale = (props) => {
       }
     }
 
-    const metodo = metodoPagoAgregado[0];
+    const metodo = bancosAgregados[0];
     if (metodo.vuelto === 1) {
       if (currentAmount >= total) {
         return (
@@ -150,14 +148,14 @@ const ModalSale = (props) => {
 
             <h5>Lista de métodos:</h5>
 
-            {metodoPagoAgregado.map((item, index) => (
+            {bancosAgregados.map((item, index) => (
               <MetodoPago
                 key={index}
                 idMetodoPago={item.idMetodoPago}
                 nameMetodPay={item.nombre}
                 monto={item.monto}
-                handleInputMontoMetodoPay={handleInputMontoMetodoPay}
-                handleRemoveItemMetodPay={handleRemoveItemMetodPay}
+                handleInputMontoBancosAgregados={handleInputMontoBancosAgregados}
+                handleRemoveItemBancosAgregados={handleRemoveItemBancosAgregados}
               />
             ))}
 
@@ -178,7 +176,7 @@ const ModalSale = (props) => {
                       className="form-control"
                       ref={refMetodoContado}
                     >
-                      {metodosPagoLista.map((item, index) => (
+                      {bancos.map((item, index) => (
                         <option key={index} value={item.idMetodoPago}>
                           {item.nombre}
                         </option>
@@ -188,7 +186,7 @@ const ModalSale = (props) => {
                       <button
                         className="btn btn-outline-success d-flex"
                         title="Agregar Pago"
-                        onClick={handleAddMetodPay}
+                        onClick={handleAddBancosAgregados}
                       >
                         <i className="bi bi-plus-circle-fill"></i>
                       </button>
@@ -234,8 +232,8 @@ const MetodoPago = ({
   idMetodoPago,
   nameMetodPay,
   monto,
-  handleInputMontoMetodoPay,
-  handleRemoveItemMetodPay,
+  handleInputMontoBancosAgregados,
+  handleRemoveItemBancosAgregados,
 }) => {
   return (
     <div className="input-group mb-2">
@@ -245,7 +243,7 @@ const MetodoPago = ({
         className="form-control"
         placeholder="Monto"
         value={monto}
-        onChange={(event) => handleInputMontoMetodoPay(event, idMetodoPago)}
+        onChange={(event) => handleInputMontoBancosAgregados(event, idMetodoPago)}
         onKeyDown={keyNumberFloat}
       />
       <div className="input-group-prepend">
@@ -257,7 +255,7 @@ const MetodoPago = ({
         <button
           className="btn btn-outline-danger d-flex"
           title="Agregar Pago"
-          onClick={() => handleRemoveItemMetodPay(idMetodoPago)}
+          onClick={() => handleRemoveItemBancosAgregados(idMetodoPago)}
         >
           <i className="bi bi-trash3-fill"></i>
         </button>

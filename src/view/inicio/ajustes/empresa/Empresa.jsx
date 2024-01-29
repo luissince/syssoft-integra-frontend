@@ -18,9 +18,9 @@ class Empresa extends React.Component {
     this.state = {
       empresa: [],
 
-      edit: statePrivilegio(
-        this.props.token.userToken.menus[5].submenu[3].privilegio[0].estado,
-      ),
+      // edit: statePrivilegio(
+      //   this.props.token.userToken.menus[5].submenu[3].privilegio[0].estado,
+      // ),
 
       loading: false,
     };
@@ -118,7 +118,7 @@ class Empresa extends React.Component {
               onClick={() =>
                 this.handleEdit(item.idEmpresa)
               }
-              disabled={!this.state.edit}
+              // disabled={!this.state.edit}
             >
               <i className="bi bi-pencil"></i>
             </button>

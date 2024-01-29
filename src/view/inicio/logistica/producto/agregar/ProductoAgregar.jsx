@@ -389,7 +389,7 @@ class ProductoAgregar extends CustomComponent {
     });
   };
 
-  handleOptionFormaVentaProducto = (event) => {
+  handleOptionTipoTratamientoProducto = (event) => {
     this.setState({
       idTipoTratamientoProducto: event.target.value,
     });
@@ -1307,7 +1307,7 @@ class ProductoAgregar extends CustomComponent {
                     refDescripcion={this.refDescripcionProducto}
                     handleInputDescripcion={this.handleInputDescripcionProducto}
                     idTipoTratamientoProducto={idTipoTratamientoProducto}
-                    handleOptionFormaVenta={this.handleOptionFormaVentaProducto}
+                    handleOptionTipoTratamientoProducto={this.handleOptionTipoTratamientoProducto}
                     costo={costoProducto}
                     refCosto={this.refCostoProducto}
                     handleInputCosto={this.handleInputCostoProducto}

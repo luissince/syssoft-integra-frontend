@@ -7,6 +7,7 @@ import {
   alertInfo,
   alertSuccess,
   alertWarning,
+  isEmpty,
   isNumeric,
   isText,
   keyNumberInteger,
@@ -14,7 +15,7 @@ import {
 } from '../../../../helper/utils.helper';
 import {
   editImpuesto,
-  getImpuestoId,
+  geIdImpuesto,
 } from '../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
@@ -28,7 +29,7 @@ class ImpuestoEditar extends CustomComponent {
       nombre: '',
       porcentaje: '',
       codigo: '',
-      preferida: false,
+      preferido: false,
       estado: true,
 
       loading: true,
@@ -67,7 +68,7 @@ class ImpuestoEditar extends CustomComponent {
       nombre: impuesto.nombre,
       porcentaje: impuesto.porcentaje.toString(),
       codigo: impuesto.codigo,
-      preferida: impuesto.preferida,
+      preferido: impuesto.preferido,
       estado: impuesto.estado,
       loading: false,
     });
@@ -77,7 +78,7 @@ class ImpuestoEditar extends CustomComponent {
     const params = {
       idImpuesto: id,
     };
-    const response = await getImpuestoId(params, this.abortController.signal);
+    const response = await geIdImpuesto(params, this.abortController.signal);
 
     if (response instanceof SuccessReponse) {
       return response.data;
@@ -91,7 +92,7 @@ class ImpuestoEditar extends CustomComponent {
   }
 
   handleEditar = () => {
-    if (!isText(this.state.nombre)) {
+    if (isEmpty(this.state.nombre)) {
       alertWarning('Impuesto', 'Ingrese el nombre.', () =>
         this.refNombre.current.focus(),
       );
@@ -105,9 +106,9 @@ class ImpuestoEditar extends CustomComponent {
       return;
     }
 
-    alertDialog('Banco', '¿Estás seguro de continuar?', async (accept) => {
+    alertDialog('Impuesto', '¿Estás seguro de continuar?', async (accept) => {
       if (accept) {
-        alertInfo('Banco', 'Procesando información...');
+        alertInfo('Impuesto', 'Procesando información...');
 
         const data = {
           idImpuesto: this.state.idImpuesto,
@@ -115,7 +116,7 @@ class ImpuestoEditar extends CustomComponent {
           porcentaje: this.state.porcentaje,
           codigo: this.state.codigo,
           estado: this.state.estado,
-          preferida: this.state.preferida,
+          preferido: this.state.preferido,
           idUsuario: this.state.idUsuario,
         };
 
@@ -208,6 +209,7 @@ class ImpuestoEditar extends CustomComponent {
 
         <div className="row">
           <div className="form-group col-md-6">
+            <label htmlFor="numeracion">Estado:</label>
             <div className="custom-control custom-switch">
               <input
                 type="checkbox"
@@ -225,18 +227,19 @@ class ImpuestoEditar extends CustomComponent {
           </div>
 
           <div className="form-group col-md-6">
+            <label htmlFor="numeracion">Preferido:</label>
             <div className="custom-control custom-switch">
               <input
                 type="checkbox"
                 className="custom-control-input"
                 id="switch2"
-                checked={this.state.preferida}
+                checked={this.state.preferido}
                 onChange={(value) =>
-                  this.setState({ preferida: value.target.checked })
+                  this.setState({ preferido: value.target.checked })
                 }
               />
               <label className="custom-control-label" htmlFor="switch2">
-                {this.state.preferida ? 'Si' : 'No'}
+                {this.state.preferido ? 'Si' : 'No'}
               </label>
             </div>
           </div>

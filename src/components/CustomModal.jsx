@@ -1,5 +1,6 @@
 import Modal from 'react-modal';
-import './CustomModal.css'
+import PropTypes from 'prop-types';
+import '../recursos/css/CustomModal.css'
 
 const customStyles = {
     overlay: {
@@ -18,10 +19,10 @@ const customStyles = {
 
 Modal.setAppElement('#root');
 
-const CustomModal = ({ isOpen, onOpen, onHidden, onClose, children }) => {
+const CustomModal = ({ contentRef, isOpen, onOpen, onHidden, onClose, contentLabel, children }) => {
     return (
         <Modal
-            id="idModalCustom"
+            contentRef={contentRef}
             isOpen={isOpen}
             onAfterOpen={onOpen}
             onRequestClose={onClose}
@@ -29,11 +30,21 @@ const CustomModal = ({ isOpen, onOpen, onHidden, onClose, children }) => {
             style={customStyles}
             className="modal-custom"
             shouldCloseOnOverlayClick={false}
-            contentLabel="Example Modal"
+            contentLabel={contentLabel}
         >
             {children}
         </Modal>
     );
 };
+
+CustomModal.propTypes = {
+    contentRef: PropTypes.func.isRequired,
+    isOpen: PropTypes.bool.isRequired,
+    onOpen: PropTypes.func.isRequired,
+    onHidden: PropTypes.func.isRequired,
+    onClose: PropTypes.func.isRequired,
+    contentLabel: PropTypes.string.isRequired,
+    children: PropTypes.element.isRequired
+}
 
 export default CustomModal;

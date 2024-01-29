@@ -1,4 +1,5 @@
-import SearchBarClient from '../../../../../../components/SearchBarClient';
+import SearchInput from '../../../../../../components/SearchInput';
+import { images } from '../../../../../../helper';
 
 const InvoiceClient = (props) => {
   const { placeholder, refCliente, cliente, clientes } = props;
@@ -9,16 +10,28 @@ const InvoiceClient = (props) => {
 
   return (
     <div className="invoice-client px-3 pb-3">
-      <SearchBarClient
-        desing={true}
+      <SearchInput
+        showLeftIcon={false}
         placeholder={placeholder}
-        refCliente={refCliente}
-        cliente={cliente}
-        clientes={clientes}
-        onEventClearInput={onEventClearInput}
+        refValue={refCliente}
+        value={cliente}
+        data={clientes}
+        handleClearInput={onEventClearInput}
         handleFilter={handleFilter}
-        onEventSelectItem={onEventSelectItem}
-        handleNewClient={handleOpenCliente}
+        handleSelectItem={onEventSelectItem}
+        customButton={() => (
+          <button
+            className="btn btn-outline-success d-flex align-items-center"
+            onClick={handleOpenCliente}>
+            <img src={images.addclient} alt="Nuevo cliente" />
+            <div className="ml-2">Nuevo</div>
+          </button>
+        )}
+        renderItem={(value) =>
+          <>
+            {value.documento + ' - ' + value.informacion}
+          </>
+        }
       />
     </div>
   );

@@ -25,15 +25,15 @@ class Comprobantes extends CustomComponent {
   constructor(props) {
     super(props);
     this.state = {
-      add: statePrivilegio(
-        this.props.token.userToken.menus[5].submenu[0].privilegio[0].estado,
-      ),
-      edit: statePrivilegio(
-        this.props.token.userToken.menus[5].submenu[0].privilegio[1].estado,
-      ),
-      remove: statePrivilegio(
-        this.props.token.userToken.menus[5].submenu[0].privilegio[2].estado,
-      ),
+      // add: statePrivilegio(
+      //   this.props.token.userToken.menus[5].submenu[0].privilegio[0].estado,
+      // ),
+      // edit: statePrivilegio(
+      //   this.props.token.userToken.menus[5].submenu[0].privilegio[1].estado,
+      // ),
+      // remove: statePrivilegio(
+      //   this.props.token.userToken.menus[5].submenu[0].privilegio[2].estado,
+      // ),
 
       loading: false,
       lista: [],
@@ -154,32 +154,29 @@ class Comprobantes extends CustomComponent {
   };
 
   handleBorrar(idComprobante) {
-    alertDialog(
-      'Comprobante',
-      '¿Estás seguro de eliminar el comprobante?',
-      async (event) => {
-        if (event) {
-          const params = {
-            idComprobante: idComprobante,
-          };
+    alertDialog('Comprobante', '¿Estás seguro de eliminar el comprobante?', async (accept) => {
+      if (accept) {
+        const params = {
+          idComprobante: idComprobante,
+        };
 
-          alertInfo('Comprobante', 'Procesando información...');
+        alertInfo('Comprobante', 'Procesando información...');
 
-          const response = await deleteComprobante(params);
+        const response = await deleteComprobante(params);
 
-          if (response instanceof SuccessReponse) {
-            alertSuccess('Comprobante', response.data, () => {
-              this.loadInit();
-            });
-          }
-
-          if (response instanceof ErrorResponse) {
-            if (response.getType() === CANCELED) return;
-
-            alertWarning('Comprobante', response.getMessage());
-          }
+        if (response instanceof SuccessReponse) {
+          alertSuccess('Comprobante', response.data, () => {
+            this.loadInit();
+          });
         }
-      },
+
+        if (response instanceof ErrorResponse) {
+          if (response.getType() === CANCELED) return;
+
+          alertWarning('Comprobante', response.getMessage());
+        }
+      }
+    },
     );
   }
 
@@ -224,7 +221,7 @@ class Comprobantes extends CustomComponent {
               <button
                 className="btn btn-outline-info"
                 onClick={this.handleAgregar}
-                disabled={!this.state.add}
+                // disabled={!this.state.add}
               >
                 <i className="bi bi-file-plus"></i> Nuevo Registro
               </button>{' '}
@@ -297,11 +294,10 @@ class Comprobantes extends CustomComponent {
                           </td>
                           <td className="text-center">
                             <div
-                              className={`badge ${
-                                item.estado === 1
+                              className={`badge ${item.estado === 1
                                   ? 'badge-info'
                                   : 'badge-danger'
-                              }`}
+                                }`}
                             >
                               {item.estado === 1 ? 'ACTIVO' : 'INACTIVO'}
                             </div>
@@ -313,7 +309,7 @@ class Comprobantes extends CustomComponent {
                               onClick={() =>
                                 this.handleEditar(item.idComprobante)
                               }
-                              disabled={!this.state.edit}
+                              // disabled={!this.state.edit}
                             >
                               <i className="bi bi-pencil"></i>
                             </button>
@@ -325,7 +321,7 @@ class Comprobantes extends CustomComponent {
                               onClick={() =>
                                 this.handleBorrar(item.idComprobante)
                               }
-                              disabled={!this.state.remove}
+                              // disabled={!this.state.remove}
                             >
                               <i className="bi bi-trash"></i>
                             </button>

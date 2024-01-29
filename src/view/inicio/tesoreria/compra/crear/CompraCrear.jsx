@@ -30,7 +30,7 @@ import {
   comboMetodoPago,
   comboMoneda,
   createCompra,
-  filtrarCliente,
+  filtrarPersona,
   filtrarProducto,
 } from '../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../model/class/response';
@@ -289,7 +289,7 @@ class CompraCrear extends CustomComponent {
   }
 
   async fetchFiltrarCliente(params) {
-    const response = await filtrarCliente(params);
+    const response = await filtrarPersona(params);
 
     if (response instanceof SuccessReponse) {
       return response.data;
@@ -565,7 +565,7 @@ class CompraCrear extends CustomComponent {
       if (accept) {
         const data = {
           idComprobante: idComprobante,
-          idCliente: cliente.idCliente,
+          idPersona: cliente.idPersona,
           idImpuesto: idImpuesto,
           idAlmacen: idAlmacen,
           idMoneda: idMoneda,
@@ -648,7 +648,7 @@ class CompraCrear extends CustomComponent {
       if (accept) {
         const data = {
           idComprobante: idComprobante,
-          idCliente: cliente.idCliente,
+          idPersona: cliente.idPersona,
           idImpuesto: idImpuesto,
           idAlmacen: idAlmacen,
           idMoneda: idMoneda,
@@ -1082,9 +1082,7 @@ class CompraCrear extends CustomComponent {
           handleSelectFrecuenciaPagoFijo={this.handleSelectFrecuenciaPagoFijo}
           refFrecuenciaPagoVariable={this.refFrecuenciaPagoVariable}
           frecuenciaPagoVariable={this.state.frecuenciaPagoVariable}
-          handleSelectFrecuenciaPagoVariable={
-            this.handleSelectFrecuenciaPagoVariable
-          }
+          handleSelectFrecuenciaPagoVariable={this.handleSelectFrecuenciaPagoVariable}
           letraMensual={this.state.letraMensual}
           codISO={this.state.codISO}
           importeTotal={this.state.total}

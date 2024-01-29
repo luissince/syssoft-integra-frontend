@@ -31,14 +31,10 @@ class Compras extends CustomComponent {
   };
 
   handleAnular = () => {
-    alertDialog(
-      'Cotización',
-      '¿Estás seguro de anular la cotización?',
-      async (event) => {
-        if (event) {
-        }
-      },
-    );
+    alertDialog('Cotización', '¿Estás seguro de anular la cotización?', async (accept) => {
+      if (accept) {
+      }
+    });
   };
 
   render() {
@@ -85,7 +81,7 @@ class Compras extends CustomComponent {
               >
                 <i className="bi bi-file-plus"></i> Crear cotización
               </button>{' '}
-              <button className="btn btn-outline-secondary" onClick={() => {}}>
+              <button className="btn btn-outline-secondary" onClick={() => { }}>
                 <i className="bi bi-arrow-clockwise"></i>
               </button>
             </div>

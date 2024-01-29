@@ -7,9 +7,9 @@ import {
   currentDate,
   getCurrentYear,
 } from '../../../helper/utils.helper';
-import SearchBarClient from '../../../components/SearchBarClient';
+// import SearchBarClient from '../../../components/SearchBarClient';
 import ContainerWrapper from '../../../components/Container';
-import { filtrarCliente } from '../../../network/rest/principal.network';
+import { filtrarPersona } from '../../../network/rest/principal.network';
 import SuccessReponse from '../../../model/class/response';
 import ErrorResponse from '../../../model/class/error-response';
 
@@ -24,7 +24,7 @@ class RepClientes extends React.Component {
       fechaFin: '',
       isFechaActive: false,
 
-      idCliente: '',
+      idPersona: '',
       clientes: [],
       cliente: '',
 
@@ -80,14 +80,14 @@ class RepClientes extends React.Component {
   };
 
   onEventClearInput = async () => {
-    await this.setStateAsync({ clientes: [], idCliente: '', cliente: '' });
+    await this.setStateAsync({ clientes: [], idPersona: '', cliente: '' });
     this.selectItem = false;
   };
 
   handleFilter = async (event) => {
     const searchWord = this.selectItem ? '' : event.target.value;
     await this.setStateAsync({
-      idCliente: '',
+      idPersona: '',
       cliente: searchWord,
       idProducto: '',
       productos: [],
@@ -106,7 +106,7 @@ class RepClientes extends React.Component {
       filtrar: searchWord,
     };
 
-    const response = await filtrarCliente(params);
+    const response = await filtrarPersona(params);
 
     if (response instanceof SuccessReponse) {
       await this.setStateAsync({ filter: false, clientes: response.data });
@@ -121,7 +121,7 @@ class RepClientes extends React.Component {
     await this.setStateAsync({
       cliente: value.documento + ' - ' + value.informacion,
       clientes: [],
-      idCliente: value.idCliente,
+      idPersona: value.idPersona,
     });
     this.selectItem = true;
   };
@@ -139,7 +139,7 @@ class RepClientes extends React.Component {
       idEmpresa: 'EM0001',
       fechaIni: this.state.fechaIni,
       fechaFin: this.state.fechaFin,
-      idCliente: this.state.idCliente,
+      idPersona: this.state.idPersona,
       cliente: this.state.cliente,
     };
 
@@ -164,7 +164,7 @@ class RepClientes extends React.Component {
       idEmpresa: 'EM0001',
       fechaIni: this.state.fechaIni,
       fechaFin: this.state.fechaFin,
-      idCliente: this.state.idCliente,
+      idPersona: this.state.idPersona,
       cliente: this.state.cliente,
     };
 
@@ -374,7 +374,7 @@ class RepClientes extends React.Component {
               <div className="col-lg-6 col-md-12 col-sm-12 col-12">
                 <div className="form-group">
                   <label>Cliente(s)</label>
-                  <SearchBarClient
+                  {/* <SearchBarClient
                     desing={false}
                     placeholder="Filtrar clientes..."
                     refCliente={this.refCliente}
@@ -383,7 +383,7 @@ class RepClientes extends React.Component {
                     onEventClearInput={this.onEventClearInput}
                     handleFilter={this.handleFilter}
                     onEventSelectItem={this.onEventSelectItem}
-                  />
+                  /> */}
                 </div>
               </div>
             </div>

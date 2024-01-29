@@ -25,15 +25,15 @@ class Monedas extends CustomComponent {
   constructor(props) {
     super(props);
     this.state = {
-      add: statePrivilegio(
-        this.props.token.userToken.menus[5].submenu[1].privilegio[0].estado,
-      ),
-      edit: statePrivilegio(
-        this.props.token.userToken.menus[5].submenu[1].privilegio[1].estado,
-      ),
-      remove: statePrivilegio(
-        this.props.token.userToken.menus[5].submenu[1].privilegio[2].estado,
-      ),
+      // add: statePrivilegio(
+      //   this.props.token.userToken.menus[5].submenu[1].privilegio[0].estado,
+      // ),
+      // edit: statePrivilegio(
+      //   this.props.token.userToken.menus[5].submenu[1].privilegio[1].estado,
+      // ),
+      // remove: statePrivilegio(
+      //   this.props.token.userToken.menus[5].submenu[1].privilegio[2].estado,
+      // ),
 
       loading: false,
       lista: [],
@@ -156,30 +156,27 @@ class Monedas extends CustomComponent {
   };
 
   handleBorrar(idMoneda) {
-    alertDialog(
-      'Moneda',
-      '¿Estás seguro de eliminar la moneda?',
-      async (event) => {
-        if (event) {
-          const params = {
-            idMoneda: idMoneda,
-          };
+    alertDialog('Moneda', '¿Estás seguro de eliminar la moneda?', async (accept) => {
+      if (accept) {
+        const params = {
+          idMoneda: idMoneda,
+        };
 
-          alertInfo('Moneda', 'Procesando información...');
+        alertInfo('Moneda', 'Procesando información...');
 
-          const response = await deleteMoneda(params);
+        const response = await deleteMoneda(params);
 
-          if (response instanceof SuccessReponse) {
-            alertSuccess('Moneda', response.data);
-          }
-
-          if (response instanceof ErrorResponse) {
-            if (response.getType() === CANCELED) return;
-
-            alertWarning('Moneda', response.getType());
-          }
+        if (response instanceof SuccessReponse) {
+          alertSuccess('Moneda', response.data);
         }
-      },
+
+        if (response instanceof ErrorResponse) {
+          if (response.getType() === CANCELED) return;
+
+          alertWarning('Moneda', response.getType());
+        }
+      }
+    },
     );
   }
 
@@ -216,9 +213,8 @@ class Monedas extends CustomComponent {
         );
 
       const nmEstado = item.estado === 1 ? 'ACTIVO' : 'INACTIVO';
-      const bgEstado = `badge ${
-        item.estado === 1 ? 'badge-info' : 'badge-danger'
-      }`;
+      const bgEstado = `badge ${item.estado === 1 ? 'badge-info' : 'badge-danger'
+        }`;
 
       return (
         <tr key={index}>
@@ -235,7 +231,7 @@ class Monedas extends CustomComponent {
               className="btn btn-outline-warning btn-sm"
               title="Editar"
               onClick={() => this.handleEditar(item.idMoneda)}
-              disabled={!this.state.edit}
+              // disabled={!this.state.edit}
             >
               <i className="bi bi-pencil"></i>
             </button>
@@ -245,7 +241,7 @@ class Monedas extends CustomComponent {
               className="btn btn-outline-danger btn-sm"
               title="Eliminar"
               onClick={() => this.handleBorrar(item.idMoneda)}
-              disabled={!this.state.remove}
+              // disabled={!this.state.remove}
             >
               <i className="bi bi-trash"></i>
             </button>
@@ -296,7 +292,7 @@ class Monedas extends CustomComponent {
               <button
                 className="btn btn-outline-info"
                 onClick={this.handleAgregar}
-                disabled={!this.state.add}
+                // disabled={!this.state.add}
               >
                 <i className="bi bi-file-plus"></i> Nuevo Registro
               </button>{' '}

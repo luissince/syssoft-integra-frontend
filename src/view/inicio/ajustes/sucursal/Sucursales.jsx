@@ -27,15 +27,15 @@ class Sucursales extends CustomComponent {
     this.state = {
       idSucursal: '',
 
-      add: statePrivilegio(
-        this.props.token.userToken.menus[5].submenu[4].privilegio[0].estado,
-      ),
-      edit: statePrivilegio(
-        this.props.token.userToken.menus[5].submenu[4].privilegio[1].estado,
-      ),
-      remove: statePrivilegio(
-        this.props.token.userToken.menus[5].submenu[4].privilegio[2].estado,
-      ),
+      // add: statePrivilegio(
+      //   this.props.token.userToken.menus[5].submenu[4].privilegio[0].estado,
+      // ),
+      // edit: statePrivilegio(
+      //   this.props.token.userToken.menus[5].submenu[4].privilegio[1].estado,
+      // ),
+      // remove: statePrivilegio(
+      //   this.props.token.userToken.menus[5].submenu[4].privilegio[2].estado,
+      // ),
 
       loading: false,
       lista: [],
@@ -154,26 +154,23 @@ class Sucursales extends CustomComponent {
   };
 
   handleBorrar = (idSucursal) => {
-    alertDialog(
-      'Sucursal',
-      '¿Estás seguro de eliminar el sucursal?',
-      async (accept) => {
-        if (accept) {
-          alertInfo('Sucursal', 'Procesando información...');
+    alertDialog('Sucursal', '¿Estás seguro de eliminar el sucursal?', async (accept) => {
+      if (accept) {
+        alertInfo('Sucursal', 'Procesando información...');
 
-          const response = await deleteSucursal(idSucursal);
+        const response = await deleteSucursal(idSucursal);
 
-          if (response instanceof SuccessReponse) {
-            alertSuccess('Sucursal', response.data, () => {
-              this.loadInit();
-            });
-          }
-
-          if (response instanceof ErrorResponse) {
-            alertWarning('Sucursal', response.getMessage());
-          }
+        if (response instanceof SuccessReponse) {
+          alertSuccess('Sucursal', response.data, () => {
+            this.loadInit();
+          });
         }
-      },
+
+        if (response instanceof ErrorResponse) {
+          alertWarning('Sucursal', response.getMessage());
+        }
+      }
+    },
     );
   };
 
@@ -217,7 +214,7 @@ class Sucursales extends CustomComponent {
               className="btn btn-outline-warning btn-sm"
               title="Editar"
               onClick={() => this.handleEditar(item.idSucursal)}
-              disabled={!this.state.edit}
+              // disabled={!this.state.edit}
             >
               <i className="bi bi-pencil"></i>
             </button>
@@ -227,7 +224,7 @@ class Sucursales extends CustomComponent {
               className="btn btn-outline-danger btn-sm"
               title="Eliminar"
               onClick={() => this.handleBorrar(item.idSucursal)}
-              disabled={!this.state.remove}
+              // disabled={!this.state.remove}
             >
               <i className="bi bi-trash"></i>
             </button>
@@ -323,7 +320,7 @@ class Sucursales extends CustomComponent {
               <button
                 className="btn btn-outline-info"
                 onClick={this.handleAgregar}
-                disabled={!this.state.add}
+                // disabled={!this.state.add}
               >
                 <i className="bi bi-file-plus"></i> Nuevo Registro
               </button>{' '}

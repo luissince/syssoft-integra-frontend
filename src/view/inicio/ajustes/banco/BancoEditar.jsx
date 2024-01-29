@@ -31,6 +31,9 @@ class BancoEditar extends CustomComponent {
       monedas: [],
       numCuenta: '',
       cci: '',
+      preferido: false,
+      vuelto: false,
+      estado: false,
 
       loading: true,
       msgLoading: 'Cargando datos...',
@@ -75,6 +78,9 @@ class BancoEditar extends CustomComponent {
       idMoneda: banco.idMoneda,
       numCuenta: banco.numCuenta,
       cci: banco.cci,
+      preferido: banco.preferido,
+      vuelto: banco.vuelto,
+      estado: banco.estado,
       idBanco: banco.idBanco,
       loading: false,
     });
@@ -269,6 +275,68 @@ class BancoEditar extends CustomComponent {
               placeholder="####################"
             />
           </div>
+
+          <div className="form-group col-md-6">
+            <label htmlFor="nombre" className="col-form-label">
+              Vuelto:
+            </label>
+            <div className="custom-control custom-switch">
+              <input
+                type="checkbox"
+                className="custom-control-input"
+                id="vueltoChecked"
+                checked={this.state.vuelto}
+                onChange={(value) =>
+                  this.setState({ vuelto: value.target.checked })
+                }
+              />
+              <label className="custom-control-label" htmlFor="vueltoChecked">
+                {this.state.vuelto ? 'Si' : 'No'}
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div className="row">
+          <div className="form-group col-md-6">
+            <label htmlFor="nombre" className="col-form-label">
+              Estado:
+            </label>
+            <div className="custom-control custom-switch">
+              <input
+                type="checkbox"
+                className="custom-control-input"
+                id="estadoChecked"
+                checked={this.state.estado}
+                onChange={(value) =>
+                  this.setState({ estado: value.target.checked })
+                }
+              />
+              <label className="custom-control-label" htmlFor="estadoChecked">
+                {this.state.estado ? 'Activo' : 'Inactivo'}
+              </label>
+            </div>
+          </div>
+
+          <div className="form-group col-md-6">
+            <label htmlFor="nombre" className="col-form-label">
+              Preferido:
+            </label>
+            <div className="custom-control custom-switch">
+              <input
+                type="checkbox"
+                className="custom-control-input"
+                id="preferidoChecked"
+                checked={this.state.preferido}
+                onChange={(value) =>
+                  this.setState({ preferido: value.target.checked })
+                }
+              />
+              <label className="custom-control-label" htmlFor="preferidoChecked">
+                {this.state.preferido ? 'Si' : 'No'}
+              </label>
+            </div>
+          </div>
         </div>
 
         <div className="row">
@@ -276,17 +344,17 @@ class BancoEditar extends CustomComponent {
             <div className="form-group">
               <button
                 type="button"
-                className="btn btn-primary"
+                className="btn btn-warning"
                 onClick={this.handleEditar}
               >
-                Guardar
+                <i className='fa fa-edit'></i>  Guardar
               </button>{' '}
               <button
                 type="button"
                 className="btn btn-danger"
                 onClick={() => this.props.history.goBack()}
               >
-                Cerrar
+                <i className='fa fa-close'></i>  Cerrar
               </button>
             </div>
           </div>

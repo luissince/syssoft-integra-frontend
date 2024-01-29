@@ -14,7 +14,6 @@ import {
   isNumeric,
   rounded,
   showModal,
-  sleep,
   spinnerLoading,
   viewModal,
 } from '../../../../../helper/utils.helper';
@@ -22,17 +21,17 @@ import { connect } from 'react-redux';
 import { PosContainerWrapper } from '../../../../../components/Container';
 import InvoiceTicket from './component/InvoiceTicket';
 import {
-  comboMetodoPago,
   createFactura,
-  getPredeterminado,
+  getPersonaPredeterminado,
   comboComprobante,
   comboImpuesto,
   comboMoneda,
-  filtrarCliente,
+  filtrarPersona,
   filtrarProductoVenta,
   preferidosProducto,
   obtenerListaPrecioProducto,
   listComboTipoDocumento,
+  comboBanco,
 } from '../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
@@ -55,7 +54,7 @@ import ModalProducto from './component/ModalProducto';
 import { A_GRANEL, SERVICIO, UNIDADES, VALOR_MONETARIO } from '../../../../../model/types/tipo-tratamiento-producto';
 import CustomModal from '../../../../../components/CustomModal';
 import { CLIENTE_NATURAL } from '../../../../../model/types/tipo-cliente';
-import { CONTADO } from '../../../../../model/types/forma-venta';
+import { CONTADO } from '../../../../../model/types/forma-pago';
 import { pdfA4Venta, pdfTicketVenta } from '../../../../../helper/lista-pdf.helper';
 
 /**
@@ -90,7 +89,7 @@ class VentaCrear extends CustomComponent {
       sarchProducto: false,
       filterProducto: false,
 
-      idCliente: '',
+      idPersona: '',
       cliente: '',
       filterCliente: false,
       nuevoCliente: null,
@@ -122,8 +121,8 @@ class VentaCrear extends CustomComponent {
       isOpen: false,
 
       // modal venta
-      metodosPagoLista: [],
-      metodoPagoAgregado: [],
+      bancos: [],
+      bancosAgregados: [],
 
       // modal cliente
       loadingCliente: false,
@@ -153,6 +152,9 @@ class VentaCrear extends CustomComponent {
     this.idModalCliente = 'idModalCliente';
     this.idModalSale = 'idModalSale';
     this.idModalProducto = 'idModalProducto';
+
+
+    this.refPrinter = React.createRef();
 
     this.refProducto = React.createRef();
 
@@ -216,23 +218,19 @@ class VentaCrear extends CustomComponent {
     await this.initData();
 
     viewModal(this.idModalSale, () => {
-      const importeTotal = this.state.detalleVenta.reduce(
-        (accumulator, item) => {
-          const totalProductPrice = item.precio * item.cantidad;
-          return accumulator + totalProductPrice;
-        },
-        0,
-      )
+      const importeTotal = this.state.detalleVenta.reduce((accumulator, item) => {
+        const totalProductPrice = item.precio * item.cantidad;
+        return accumulator + totalProductPrice;
+      }, 0,)
 
-      const metodo = this.state.metodosPagoLista.find(
-        (item) => item.predeterminado === 1,
-      )
+      const metodo = this.state.bancos.find((item) => item.preferido === 1);
+      console.log(this.state.bancos)
 
-      this.refMetodoContado.current.value = metodo ? metodo.idMetodoPago : '';
+      this.refMetodoContado.current.value = metodo ? metodo.idBanco : '';
 
       if (metodo) {
         const item = {
-          idMetodoPago: metodo.idMetodoPago,
+          idBanco: metodo.idBanco,
           nombre: metodo.nombre,
           monto: '',
           vuelto: metodo.vuelto,
@@ -240,7 +238,7 @@ class VentaCrear extends CustomComponent {
         }
 
         this.setState((prevState) => ({
-          metodoPagoAgregado: [...prevState.metodoPagoAgregado, item],
+          bancosAgregados: [...prevState.bancosAgregados, item],
         }))
       }
 
@@ -257,7 +255,7 @@ class VentaCrear extends CustomComponent {
 
         frecuenciaPago: new Date().getDate() > 15 ? '30' : '15',
 
-        metodoPagoAgregado: [],
+        bancosAgregados: [],
       })
     })
   }
@@ -300,7 +298,7 @@ class VentaCrear extends CustomComponent {
       monedas,
       impuestos,
       predeterminado,
-      metodoPagos,
+      bancos,
       tiposDocumentos
     ] = await Promise.all([
       await this.fetchComprobante(VENTA_LIBRE),
@@ -308,13 +306,13 @@ class VentaCrear extends CustomComponent {
       await this.fetchMoneda(),
       await this.fetchImpuesto(),
       await this.fetchClientePredeterminado(),
-      await this.fetchMetodoPago(),
+      await this.fetchComboBanco(),
       await this.fetchTipoDocumento(),
     ]);
 
     const comprobantes = [...facturado, ...libre];
     const monedaFilter = monedas.find((item) => item.nacional === 1);
-    const impuestoFilter = impuestos.find((item) => item.preferida === 1);
+    const impuestoFilter = impuestos.find((item) => item.preferido === 1);
     const comprobanteFilter = comprobantes.find((item) => item.preferida === 1);
 
     if (typeof predeterminado === 'object') {
@@ -325,7 +323,7 @@ class VentaCrear extends CustomComponent {
       comprobantes,
       monedas,
       impuestos,
-      metodosPagoLista: metodoPagos,
+      bancos,
 
       idComprobante: comprobanteFilter ? comprobanteFilter.idComprobante : '',
 
@@ -396,7 +394,7 @@ class VentaCrear extends CustomComponent {
   }
 
   async fetchClientePredeterminado() {
-    const response = await getPredeterminado();
+    const response = await getPersonaPredeterminado();
 
     if (response instanceof SuccessReponse) {
       return response.data;
@@ -409,8 +407,8 @@ class VentaCrear extends CustomComponent {
     }
   }
 
-  async fetchMetodoPago() {
-    const response = await comboMetodoPago();
+  async fetchComboBanco() {
+    const response = await comboBanco();
 
     if (response instanceof SuccessReponse) {
       return response.data;
@@ -662,10 +660,11 @@ class VentaCrear extends CustomComponent {
   }
 
   handleClosePrint = async () => {
-    const data = document.getElementById("idModalCustom")
+    const data = this.refPrinter.current;
     data.classList.add("close")
-    await sleep(200)
-    this.setState({ isOpen: false }, () => this.reloadView())
+    data.addEventListener('animationend', () => {
+      this.setState({ isOpen: false }, () => this.reloadView())
+    })
   }
 
   //------------------------------------------------------------------------------------------
@@ -820,7 +819,7 @@ class VentaCrear extends CustomComponent {
     }
 
     const value = {
-      idCliente: "",
+      idPersona: "",
       documento: this.state.numeroDocumentoPn,
       informacion: this.state.informacionPn
     }
@@ -872,7 +871,7 @@ class VentaCrear extends CustomComponent {
     }
 
     const value = {
-      idCliente: "",
+      idPersona: "",
       documento: this.state.numeroDocumentoPj,
       informacion: this.state.informacionPj
     }
@@ -994,13 +993,13 @@ class VentaCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
 
   handleClearInputClient = async () => {
-    await this.setStateAsync({ clientes: [], idCliente: '', cliente: '', nuevoCliente: null });
+    await this.setStateAsync({ clientes: [], idPersona: '', cliente: '', nuevoCliente: null });
     this.selectItemClient = false;
   }
 
   handleFilterClient = async (event) => {
     const searchWord = this.selectItemClient ? '' : event.target.value;
-    await this.setStateAsync({ idCliente: '', cliente: searchWord });
+    await this.setStateAsync({ idPersona: '', cliente: searchWord });
     this.selectItemClient = false;
     if (searchWord.length === 0) {
       await this.setStateAsync({ clientes: [] });
@@ -1015,7 +1014,7 @@ class VentaCrear extends CustomComponent {
       filtrar: searchWord,
     };
 
-    const response = await filtrarCliente(params);
+    const response = await filtrarPersona(params);
 
     if (response instanceof SuccessReponse) {
       this.setState({
@@ -1033,7 +1032,7 @@ class VentaCrear extends CustomComponent {
     this.setState({
       cliente: value.documento + ' - ' + value.informacion,
       clientes: [],
-      idCliente: value.idCliente,
+      idPersona: value.idPersona,
     }, () => this.selectItemClient = true);
   }
 
@@ -1053,7 +1052,7 @@ class VentaCrear extends CustomComponent {
       return;
     }
 
-    if (isEmpty(this.state.idCliente) && this.state.nuevoCliente === null) {
+    if (isEmpty(this.state.idPersona) && this.state.nuevoCliente === null) {
       alertWarning('Venta', 'Selecciona un cliente.', () => {
         this.refCliente.current.focus();
       });
@@ -1096,19 +1095,17 @@ class VentaCrear extends CustomComponent {
   }
 
   //Metodos Modal Sale
-  handleAddMetodPay = () => {
-    const listAdd = this.state.metodoPagoAgregado.find((item) => item.idMetodoPago === this.refMetodoContado.current.value);
+  handleAgregarBancos = () => {
+    const listAdd = this.state.bancosAgregados.find((item) => item.idBanco === this.refMetodoContado.current.value);
 
     if (listAdd) {
       return;
     }
 
-    const metodo = this.state.metodosPagoLista.find(
-      (item) => item.idMetodoPago === this.refMetodoContado.current.value,
-    );
+    const metodo = this.state.bancos.find((item) => item.idBanco === this.refMetodoContado.current.value,);
 
     const item = {
-      idMetodoPago: metodo.idMetodoPago,
+      idBanco: metodo.idBanco,
       nombre: metodo.nombre,
       monto: '',
       vuelto: metodo.vuelto,
@@ -1116,23 +1113,23 @@ class VentaCrear extends CustomComponent {
     };
 
     this.setState((prevState) => ({
-      metodoPagoAgregado: [...prevState.metodoPagoAgregado, item],
+      bancosAgregados: [...prevState.bancosAgregados, item],
     }));
   }
 
-  handleRemoveItemMetodPay = (idMetodoPago) => {
-    const metodoPagoAgregado = this.state.metodoPagoAgregado.filter(
-      (item) => item.idMetodoPago !== idMetodoPago,
+  handleRemoveItemAgregarBanco = (idBanco) => {
+    const bancosAgregados = this.state.bancosAgregados.filter(
+      (item) => item.idBanco !== idBanco,
     );
-    this.setState({ metodoPagoAgregado });
+    this.setState({ bancosAgregados });
   };
 
-  handleInputMontoMetodoPay = (event, idMetodoPago) => {
+  handleInputMontoAgregarBancos = (event, idBanco) => {
     const { value } = event.target;
 
     this.setState((prevState) => ({
-      metodoPagoAgregado: prevState.metodoPagoAgregado.map((item) => {
-        if (item.idMetodoPago === idMetodoPago) {
+      bancosAgregados: prevState.bancosAgregados.map((item) => {
+        if (item.idBanco === idBanco) {
           return { ...item, monto: value ? value : '' };
         } else {
           return item;
@@ -1165,17 +1162,17 @@ class VentaCrear extends CustomComponent {
       idComprobante,
       idMoneda,
       idImpuesto,
-      idCliente,
+      idPersona,
       idSucursal,
       idUsuario,
       comentario,
       nuevoCliente,
       detalleVenta,
-      metodoPagoAgregado,
+      bancosAgregados,
       importeTotal,
     } = this.state;
 
-    let metodoPagoLista = [...metodoPagoAgregado];
+    let metodoPagoLista = [...bancosAgregados];
 
     if (isEmpty(metodoPagoLista)) {
       alertWarning('Venta', 'Tiene que agregar método de cobro para continuar.');
@@ -1220,18 +1217,18 @@ class VentaCrear extends CustomComponent {
     alertDialog('Venta', '¿Estás seguro de continuar?', async (accept) => {
       if (accept) {
         const data = {
-          idFormaVenta: formaPago,
+          idFormaPago: formaPago,
           idComprobante: idComprobante,
           idMoneda: idMoneda,
           idImpuesto: idImpuesto,
-          idCliente: idCliente,
+          idPersona: idPersona,
           idSucursal: idSucursal,
           comentario: comentario,
           idUsuario: idUsuario,
           estado: 1,
           nuevoCliente: nuevoCliente,
           detalleVenta: detalleVenta,
-          metodoPagoAgregado: metodoPagoAgregado,
+          bancosAgregados: bancosAgregados,
         };
 
         hideModal(this.idModalSale);
@@ -1328,8 +1325,8 @@ class VentaCrear extends CustomComponent {
       letraMensual,
       frecuenciaPago,
       importeTotal,
-      metodosPagoLista,
-      metodoPagoAgregado,
+      bancos,
+      bancosAgregados,
     } = this.state;
 
     return (
@@ -1356,22 +1353,24 @@ class VentaCrear extends CustomComponent {
           handleSelectFrecuenciaPago={this.handleSelectFrecuenciaPago}
           importeTotal={importeTotal}
           handleSaveSale={this.handleSaveSale}
-          metodosPagoLista={metodosPagoLista}
-          metodoPagoAgregado={metodoPagoAgregado}
-          handleAddMetodPay={this.handleAddMetodPay}
-          handleInputMontoMetodoPay={this.handleInputMontoMetodoPay}
-          handleRemoveItemMetodPay={this.handleRemoveItemMetodPay}
+          bancos={bancos}
+          bancosAgregados={bancosAgregados}
+          handleAgregarBancos={this.handleAgregarBancos}
+          handleInputMontoAgregarBancos={this.handleInputMontoAgregarBancos}
+          handleRemoveItemAgregarBanco={this.handleRemoveItemAgregarBanco}
         />
 
         <CustomModal
+          contentRef={(ref) => this.refPrinter.current = ref}
           isOpen={this.state.isOpen}
           onOpen={() => {
-
+            console.log("onOpen")
           }}
           onHidden={() => {
-
+            console.log("onHidden")
           }}
-          onClose={this.handleClosePrint}>
+          onClose={this.handleClosePrint}
+          contentLabel="Modal de Impresión">
 
           <div className='w-100'>
             <div className='d-flex align-items-center justify-content-between py-2 px-3' style={{

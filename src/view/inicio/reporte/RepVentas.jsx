@@ -20,7 +20,7 @@ class RepVentas extends React.Component {
       comprobantes: [],
       comprobanteCheck: true,
 
-      idCliente: '',
+      idPersona: '',
       clientes: [],
       clienteCheck: true,
 
@@ -106,7 +106,7 @@ class RepVentas extends React.Component {
       return;
     }
 
-    if (!this.state.clienteCheck && this.state.idCliente === '') {
+    if (!this.state.clienteCheck && this.state.idPersona === '') {
       await this.setStateAsync({ messageWarning: 'Seleccione un cliente.' });
       this.refCliente.current.focus();
       return;
@@ -126,7 +126,7 @@ class RepVentas extends React.Component {
       fechaFin: this.state.fechaFin,
       idComprobante:
         this.state.idComprobante === '' ? '' : this.state.idComprobante,
-      idCliente: this.state.idCliente === '' ? '' : this.state.idCliente,
+      idPersona: this.state.idPersona === '' ? '' : this.state.idPersona,
       idUsuario: this.state.idUsuario === '' ? '' : this.state.idUsuario,
       tipoVenta: this.state.tipoVenta === '' ? 0 : this.state.tipoVenta,
       comprobante:
@@ -171,7 +171,7 @@ class RepVentas extends React.Component {
       return;
     }
 
-    if (!this.state.clienteCheck && this.state.idCliente === '') {
+    if (!this.state.clienteCheck && this.state.idPersona === '') {
       await this.setStateAsync({ messageWarning: 'Seleccione un cliente.' });
       this.refCliente.current.focus();
       return;
@@ -191,7 +191,7 @@ class RepVentas extends React.Component {
       fechaFin: this.state.fechaFin,
       idComprobante:
         this.state.idComprobante === '' ? '' : this.state.idComprobante,
-      idCliente: this.state.idCliente === '' ? '' : this.state.idCliente,
+      idPersona: this.state.idPersona === '' ? '' : this.state.idPersona,
       idUsuario: this.state.idUsuario === '' ? '' : this.state.idUsuario,
       tipoVenta: this.state.tipoVenta === '' ? 0 : this.state.tipoVenta,
       comprobante:
@@ -391,20 +391,20 @@ class RepVentas extends React.Component {
                       title="Lista de clientes"
                       className="form-control"
                       ref={this.refCliente}
-                      value={this.state.idCliente}
+                      value={this.state.idPersona}
                       disabled={this.state.clienteCheck}
                       onChange={async (event) => {
                         await this.setStateAsync({
-                          idCliente: event.target.value,
+                          idPersona: event.target.value,
                         });
-                        if (this.state.idCliente === '') {
+                        if (this.state.idPersona === '') {
                           await this.setStateAsync({ clienteCheck: true });
                         }
                       }}
                     >
                       <option value="">-- Todos --</option>
                       {this.state.clientes.map((item, index) => (
-                        <option key={index} value={item.idCliente}>
+                        <option key={index} value={item.idPersona}>
                           {item.informacion}
                         </option>
                       ))}
@@ -422,7 +422,7 @@ class RepVentas extends React.Component {
                                 clienteCheck: event.target.checked,
                               });
                               if (this.state.clienteCheck) {
-                                await this.setStateAsync({ idCliente: '' });
+                                await this.setStateAsync({ idPersona: '' });
                               }
                             }}
                           />

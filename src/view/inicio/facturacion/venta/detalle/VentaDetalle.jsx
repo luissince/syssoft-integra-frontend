@@ -16,7 +16,7 @@ import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
 import CustomComponent from '../../../../../model/class/custom-component';
-import { CONTADO, CREDITO_FIJO, CREDITO_VARIABLE } from '../../../../../model/types/forma-venta';
+import { CONTADO, CREDITO_FIJO, CREDITO_VARIABLE } from '../../../../../model/types/forma-pago';
 import { pdfA4Venta, pdfTicketVenta } from '../../../../../helper/lista-pdf.helper';
 
 class VentaDetalle extends CustomComponent {
@@ -33,7 +33,7 @@ class VentaDetalle extends CustomComponent {
       cliente: '',
       fecha: '',
       notas: '',
-      formaVenta: '',
+      formaPago: '',
       estado: '',
       codiso: '',
       simbolo: '',
@@ -79,7 +79,7 @@ class VentaDetalle extends CustomComponent {
       informacion,
       fecha,
       hora,
-      idFormaVenta,
+      idFormaPago,
       estado,
       simbolo,
       codiso,
@@ -90,7 +90,7 @@ class VentaDetalle extends CustomComponent {
 
     const nuevoEstado = estado === 1 ? <span className="text-success">COBRADO</span> : estado === 2 ? <span className="text-warning">POR COBRAR</span> : estado === 3 ? <span className="text-danger">ANULADO</span> : <span className="text-primary">POR LLEVAR</span>;
 
-    const tipo = idFormaVenta === CONTADO ? "CONTADO" : idFormaVenta === CREDITO_FIJO ? "CREDITO FIJO" : idFormaVenta === CREDITO_VARIABLE ? "CRÉDITO VARIABLE" : "PAGO ADELTANDO";
+    const tipo = idFormaPago === CONTADO ? "CONTADO" : idFormaPago === CREDITO_FIJO ? "CREDITO FIJO" : idFormaPago === CREDITO_VARIABLE ? "CRÉDITO VARIABLE" : "PAGO ADELTANDO";
 
     this.setState({
       idVenta: id,
@@ -98,7 +98,7 @@ class VentaDetalle extends CustomComponent {
       cliente: documento + ' - ' + informacion,
       fecha: fecha + ' ' + formatTime(hora),
       notas: '',
-      formaVenta: tipo,
+      formaPago: tipo,
       estado: nuevoEstado,
       simbolo: simbolo,
       codiso: codiso,
@@ -329,7 +329,7 @@ class VentaDetalle extends CustomComponent {
                         Forma de venta
                       </th>
                       <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {this.state.formaVenta}
+                        {this.state.formaPago}
                       </th>
                     </tr>
                     <tr>

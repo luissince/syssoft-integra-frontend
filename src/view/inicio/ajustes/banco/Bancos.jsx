@@ -6,7 +6,6 @@ import {
   alertSuccess,
   alertWarning,
   spinnerLoading,
-  statePrivilegio,
   keyUpSearch,
   isEmpty,
 } from '../../../../helper/utils.helper';
@@ -14,7 +13,7 @@ import { connect } from 'react-redux';
 import Paginacion from '../../../../components/Paginacion';
 import {
   deleteBanco,
-  listarBancos,
+  listBancos,
 } from '../../../../network/rest/principal.network';
 import ErrorResponse from '../../../../model/class/error-response';
 import SuccessReponse from '../../../../model/class/response';
@@ -26,18 +25,18 @@ class Bancos extends CustomComponent {
   constructor(props) {
     super(props);
     this.state = {
-      add: statePrivilegio(
-        this.props.token.userToken.menus[5].submenu[2].privilegio[0].estado,
-      ),
-      view: statePrivilegio(
-        this.props.token.userToken.menus[5].submenu[2].privilegio[1].estado,
-      ),
-      edit: statePrivilegio(
-        this.props.token.userToken.menus[5].submenu[2].privilegio[2].estado,
-      ),
-      remove: statePrivilegio(
-        this.props.token.userToken.menus[5].submenu[2].privilegio[3].estado,
-      ),
+      // add: statePrivilegio(
+      //   this.props.token.userToken.menus[5].submenu[2].privilegio[0].estado,
+      // ),
+      // view: statePrivilegio(
+      //   this.props.token.userToken.menus[5].submenu[2].privilegio[1].estado,
+      // ),
+      // edit: statePrivilegio(
+      //   this.props.token.userToken.menus[5].submenu[2].privilegio[2].estado,
+      // ),
+      // remove: statePrivilegio(
+      //   this.props.token.userToken.menus[5].submenu[2].privilegio[3].estado,
+      // ),
 
       loading: false,
       lista: [],
@@ -113,12 +112,10 @@ class Bancos extends CustomComponent {
       filasPorPagina: this.state.filasPorPagina,
     };
 
-    const response = await listarBancos(data, this.abortControllerTable.signal);
+    const response = await listBancos(data, this.abortControllerTable.signal);
 
     if (response instanceof SuccessReponse) {
-      const totalPaginacion = parseInt(
-        Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
-      );
+      const totalPaginacion = parseInt(Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),);
 
       await this.setStateAsync({
         loading: false,
@@ -160,27 +157,24 @@ class Bancos extends CustomComponent {
   };
 
   handleBorrar = (idBanco) => {
-    alertDialog(
-      'Banco',
-      '¿Estás seguro de eliminar el banco?',
-      async (acccept) => {
-        if (acccept) {
-          alertInfo('Banco', 'Procesando información...');
+    alertDialog('Banco', '¿Estás seguro de eliminar el banco?', async (accept) => {
+      if (accept) {
+        alertInfo('Banco', 'Procesando información...');
 
-          const params = { idBanco: idBanco };
-          const response = await deleteBanco(params);
+        const params = { idBanco: idBanco };
+        const response = await deleteBanco(params);
 
-          if (response instanceof SuccessReponse) {
-            alertSuccess('Banco', response.data, () => {
-              this.loadInit();
-            });
-          }
-
-          if (response instanceof ErrorResponse) {
-            alertWarning('Banco', response.getMessage());
-          }
+        if (response instanceof SuccessReponse) {
+          alertSuccess('Banco', response.data, () => {
+            this.loadInit();
+          });
         }
-      },
+
+        if (response instanceof ErrorResponse) {
+          alertWarning('Banco', response.getMessage());
+        }
+      }
+    },
     );
   };
 
@@ -212,9 +206,8 @@ class Bancos extends CustomComponent {
           <td>{item.moneda}</td>
           <td>{item.numCuenta}</td>
           <td
-            className={`text-right ${
-              item.saldo >= 0 ? 'text-success' : 'text-danger'
-            }`}
+            className={`text-right ${item.saldo >= 0 ? 'text-success' : 'text-danger'
+              }`}
           >
             {numberFormat(item.saldo, item.codiso)}
           </td>
@@ -224,7 +217,7 @@ class Bancos extends CustomComponent {
               className="btn btn-outline-info btn-sm"
               title="Detalle"
               onClick={() => this.handleDetalle(item.idBanco)}
-              disabled={!this.state.view}
+            // disabled={!this.state.view}
             >
               <i className="fa fa-eye"></i>
             </button>
@@ -235,7 +228,7 @@ class Bancos extends CustomComponent {
               className="btn btn-outline-warning btn-sm"
               title="Editar"
               onClick={() => this.handleEditar(item.idBanco)}
-              disabled={!this.state.edit}
+            // disabled={!this.state.edit}
             >
               <i className="bi bi-pencil"></i>
             </button>
@@ -246,7 +239,7 @@ class Bancos extends CustomComponent {
               className="btn btn-outline-danger btn-sm"
               title="Anular"
               onClick={() => this.handleBorrar(item.idBanco)}
-              disabled={!this.state.remove}
+            // disabled={!this.state.remove}
             >
               <i className="bi bi-trash"></i>
             </button>
@@ -299,7 +292,7 @@ class Bancos extends CustomComponent {
               <button
                 className="btn btn-outline-info"
                 onClick={this.handleAgregar}
-                disabled={!this.state.add}
+              // disabled={!this.state.add}
               >
                 <i className="bi bi-file-plus"></i> Nuevo Registro
               </button>{' '}

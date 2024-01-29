@@ -1,37 +1,26 @@
 import React from 'react';
-// import axios from 'axios';
+import { connect } from 'react-redux';
 import {
-  numberFormat,
-  formatTime,
   spinnerLoading,
-  alertDialog,
-  statePrivilegio,
   keyUpSearch,
   isEmpty,
-  formatNumberWithZeros,
-  alertWarning,
-  alertSuccess,
-  alertInfo,
-} from '../../../../../helper/utils.helper';
-import { connect } from 'react-redux';
-import Paginacion from '../../../../../components/Paginacion';
-import ContainerWrapper from '../../../../../components/Container';
+} from '../../../../helper/utils.helper';
+import Paginacion from '../../../../components/Paginacion';
+import ContainerWrapper from '../../../../components/Container';
 import {
-  cancelCobro,
-  listCobro,
-} from '../../../../../network/rest/principal.network';
-import SuccessReponse from '../../../../../model/class/response';
-import ErrorResponse from '../../../../../model/class/error-response';
-import { CANCELED } from '../../../../../model/types/types';
-import CustomComponent from '../../../../../model/class/custom-component';
+  listPersonasProveedor,
+} from '../../../../network/rest/principal.network';
+import SuccessReponse from '../../../../model/class/response';
+import ErrorResponse from '../../../../model/class/error-response';
+import { CANCELED } from '../../../../model/types/types';
+import CustomComponent from '../../../../model/class/custom-component';
 
-class Cobros extends CustomComponent {
+class Proveedores extends CustomComponent {
+
   constructor(props) {
     super(props);
     this.state = {
-      add: statePrivilegio(this.props.token.userToken.menus[2].submenu[1].privilegio[0].estado),
-      view: statePrivilegio(this.props.token.userToken.menus[2].submenu[1].privilegio[1].estado),
-      remove: statePrivilegio(this.props.token.userToken.menus[2].submenu[1].privilegio[2].estado),
+      idSucursal: this.props.token.project.idSucursal,
 
       loading: false,
       lista: [],
@@ -42,17 +31,15 @@ class Cobros extends CustomComponent {
       totalPaginacion: 0,
       filasPorPagina: 10,
       messageTable: 'Cargando información...',
-
-      idSucursal: this.props.token.project.idSucursal,
-      idUsuario: this.props.token.userToken.idUsuario,
     };
-    
+
     this.refTxtSearch = React.createRef();
 
+    this.idCodigo = '';
     this.abortControllerTable = new AbortController();
   }
 
-  componentDidMount() {
+  async componentDidMount() {
     this.loadInit();
   }
 
@@ -97,7 +84,7 @@ class Cobros extends CustomComponent {
   };
 
   fillTable = async (opcion, buscar) => {
-    await this.setStateAsync({
+    this.setState({
       loading: true,
       lista: [],
       messageTable: 'Cargando información...',
@@ -106,19 +93,16 @@ class Cobros extends CustomComponent {
     const params = {
       opcion: opcion,
       buscar: buscar,
-      idSucursal: this.state.idSucursal,
       posicionPagina: (this.state.paginacion - 1) * this.state.filasPorPagina,
       filasPorPagina: this.state.filasPorPagina,
     };
 
-    const response = await listCobro(params, this.abortControllerTable.signal);
+    const response = await listPersonasProveedor(params, this.abortControllerTable.signal,);
 
     if (response instanceof SuccessReponse) {
-      const totalPaginacion = parseInt(
-        Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
-      );
+      const totalPaginacion = parseInt(Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),);
 
-      await this.setStateAsync({
+      this.setState({
         loading: false,
         lista: response.data.result,
         totalPaginacion: totalPaginacion,
@@ -128,7 +112,7 @@ class Cobros extends CustomComponent {
     if (response instanceof ErrorResponse) {
       if (response.getType() === CANCELED) return;
 
-      await this.setStateAsync({
+      this.setState({
         loading: false,
         lista: [],
         totalPaginacion: 0,
@@ -137,56 +121,22 @@ class Cobros extends CustomComponent {
     }
   };
 
-  handleCrear = () => {
-    this.props.history.push({
-      pathname: `${this.props.location.pathname}/crear`,
-    });
-  };
-
-  handleDetalle = (idCobro) => {
+  handleDetalleCliente(idPersona) {
     this.props.history.push({
       pathname: `${this.props.location.pathname}/detalle`,
-      search: '?idCobro=' + idCobro,
+      search: '?idPersona=' + idPersona,
     });
-  };
-
-  handleAnular = (idCobro) => {
-    alertDialog(
-      'Cobro',
-      '¿Está seguro de que desea eliminar el cobro? Esta operación no se puede deshacer.',
-      async (value) => {
-        if (value) {
-          const params = {
-            idCobro: idCobro,
-            idUsuario: this.state.idUsuario,
-          };
-
-          alertInfo('Cobro', 'Procesando información...');
-
-          const response = await cancelCobro(params);
-
-          if (response instanceof SuccessReponse) {
-            alertSuccess('Cobro', response.data, () => {
-              this.loadInit();
-            });
-          }
-
-          if (response instanceof ErrorResponse) {
-            if (response.getType() === CANCELED) return;
-
-            alertWarning('Cobro', response.getMessage());
-          }
-        }
-      },
-    );
-  };
+  }
 
   generarBody() {
     if (this.state.loading) {
       return (
         <tr>
           <td className="text-center" colSpan="8">
-            {spinnerLoading('Cargando información de la tabla...', true)}
+            {spinnerLoading(
+              'Cargando información de la tabla...',
+              true,
+            )}
           </td>
         </tr>
       );
@@ -205,48 +155,40 @@ class Cobros extends CustomComponent {
         <tr key={index}>
           <td className="text-center">{item.id}</td>
           <td>
-            {item.fecha}
+            {item.tipoDocumento}
             {<br />}
-            {formatTime(item.hora)}
-          </td>
-          <td>
-            {item.comprobante}
-            {<br />}
-            {item.serie + '-' + formatNumberWithZeros(item.numeracion)}
-          </td>
-          <td>
             {item.documento}
+          </td>
+          <td>{item.informacion}</td>
+          <td>
+            {item.celular}
             {<br />}
-            {item.informacion}
+            {item.telefono}
+          </td>
+          <td>{item.direccion}</td>
+          <td className="text-center">
+            <div
+              className={`badge ${item.predeterminado === 1 ? 'badge-success' : 'badge-warning'}`}
+            >
+              {item.predeterminado === 1 ? 'SI' : 'NO'}
+            </div>
           </td>
           <td className="text-center">
-            {item.estado === 1 ? (
-              <span className="text-success">COBRADO</span>
-            ) : (
-              <span className="text-danger">ANULADO</span>
-            )}
-          </td>
-          <td className="text-right">
-            {numberFormat(item.monto, item.codiso)}
+            <div
+              className={`badge ${item.estado === 1 ? 'badge-info' : 'badge-danger'}`}
+            >
+              {item.estado === 1 ? 'ACTIVO' : 'INACTIVO'}
+            </div>
           </td>
           <td className="text-center">
             <button
               className="btn btn-outline-info btn-sm"
-              title="Detalle"
-              onClick={() => this.handleDetalle(item.idCobro)}
-              disabled={!this.state.view}
+              title="Editar"
+              onClick={() =>
+                this.handleDetalleCliente(item.idPersona)
+              }
             >
-              <i className="fa fa-eye"></i>
-            </button>
-          </td>
-          <td className="text-center">
-            <button
-              className="btn btn-outline-danger btn-sm"
-              title="Eliminar"
-              onClick={() => this.handleAnular(item.idCobro)}
-              disabled={!this.state.remove}
-            >
-              <i className="fa fa-remove"></i>
+              <i className="bi bi-eye"></i>
             </button>
           </td>
         </tr>
@@ -261,15 +203,14 @@ class Cobros extends CustomComponent {
           <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
             <div className="form-group">
               <h5>
-                Cobros o Ingresos{' '}
-                <small className="text-secondary">LISTA</small>
+                Proveedores <small className="text-secondary">LISTA</small>
               </h5>
             </div>
           </div>
         </div>
 
         <div className="row">
-          <div className="col-md-6 col-sm-12">
+          <div className="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">
             <div className="form-group">
               <div className="input-group mb-2">
                 <div className="input-group-prepend">
@@ -291,18 +232,12 @@ class Cobros extends CustomComponent {
               </div>
             </div>
           </div>
-          <div className="col-md-6 col-sm-12">
+
+          <div className="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">
             <div className="form-group">
               <button
-                className="btn btn-outline-info"
-                onClick={this.handleCrear}
-                disabled={!this.state.add}
-              >
-                <i className="bi bi-file-plus"></i> Nuevo Registro
-              </button>{' '}
-              <button
                 className="btn btn-outline-secondary"
-                onClick={this.loadInit}
+                onClick={() => this.loadInit()}
               >
                 <i className="bi bi-arrow-clockwise"></i>
               </button>
@@ -311,7 +246,7 @@ class Cobros extends CustomComponent {
         </div>
 
         <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+          <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
             <div className="table-responsive">
               <table className="table table-striped table-bordered rounded">
                 <thead>
@@ -319,20 +254,20 @@ class Cobros extends CustomComponent {
                     <th width="5%" className="text-center">
                       #
                     </th>
-                    <th width="10%">Fecha</th>
-                    <th width="10%">Comprobante</th>
+                    <th width="10%">DNI / RUC</th>
                     <th width="20%">Cliente</th>
-                    <th width="10%">Estado</th>
-                    <th width="10%">Monto</th>
+                    <th width="10%">Cel. / Tel.</th>
+                    <th width="15%">Dirección</th>
+                    <th width="7%">Predeterminado</th>
+                    <th width="7%">Estado</th>
                     <th width="5%" className="text-center">
                       Detalle
                     </th>
-                    <th width="5%" className="text-center">
-                      Anular
-                    </th>
                   </tr>
                 </thead>
-                <tbody>{this.generarBody()}</tbody>
+                <tbody>
+                  {this.generarBody()}
+                </tbody>
               </table>
             </div>
           </div>
@@ -357,4 +292,4 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(Cobros);
+export default connect(mapStateToProps, null)(Proveedores);

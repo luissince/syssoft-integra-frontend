@@ -10,7 +10,7 @@ import {
   alertDialog,
 } from '../../../../../helper/utils.helper';
 import {
-  comboCliente,
+  comboPersona,
   productoDetalle,
 } from '../../../../../network/rest/principal.network';
 import { connect } from 'react-redux';
@@ -26,7 +26,7 @@ class ProductoDetalle extends CustomComponent {
     this.state = {
       idProducto: '',
       idVenta: '',
-      idClienteOld: '',
+      idPersonaOld: '',
       producto: {},
       socios: [],
       detalle: [],
@@ -38,7 +38,7 @@ class ProductoDetalle extends CustomComponent {
       messageWarning: '',
       msgLoading: 'Cargando datos...',
 
-      idCliente: '',
+      idPersona: '',
       clientes: [],
 
       loadModal: false,
@@ -70,7 +70,7 @@ class ProductoDetalle extends CustomComponent {
     clearModal('modalSocio', async () => {
       this.abortControllerModal.abort();
       await this.setStateAsync({
-        idCliente: '',
+        idPersona: '',
         clientes: [],
         loadModal: false,
         nameModal: 'Nuevo Traspaso',
@@ -85,14 +85,14 @@ class ProductoDetalle extends CustomComponent {
   }
 
   async loadData() {
-    const response = await comboCliente(this.abortControllerModal.signal);
+    const response = await comboPersona(this.abortControllerModal.signal);
 
     if (response instanceof SuccessReponse) {
       let newLista = [];
 
       for (let cli of response.data) {
         for (let soc of this.state.socios) {
-          if (cli.idCliente !== soc.idCliente) {
+          if (cli.idPersona !== soc.idPersona) {
             newLista.push({ ...cli });
             break;
           }
@@ -131,7 +131,7 @@ class ProductoDetalle extends CustomComponent {
         detalle: response.data.detalle,
         idProducto: id,
         idVenta: response.data.venta.idVenta,
-        idClienteOld: response.data.venta.idCliente,
+        idPersonaOld: response.data.venta.idPersona,
         loading: false,
       });
       return;
@@ -150,7 +150,7 @@ class ProductoDetalle extends CustomComponent {
   }
 
   async onEventGuardar() {
-    if (this.state.idCliente === '') {
+    if (this.state.idPersona === '') {
       this.refCliente.current.focus();
       return;
     }
@@ -165,8 +165,8 @@ class ProductoDetalle extends CustomComponent {
           // const data = {
           //     "idProducto": this.state.idProducto,
           //     "idVenta": this.state.idVenta,
-          //     "idCliente": this.state.idCliente,
-          //     "idClienteOld": this.state.idClienteOld,
+          //     "idPersona": this.state.idPersona,
+          //     "idPersonaOld": this.state.idPersonaOld,
           //     "idUsuario": this.state.idUsuario,
           //     "idSucursal": this.state.idSucursal,
           // }
@@ -188,7 +188,7 @@ class ProductoDetalle extends CustomComponent {
     );
   }
 
-  async onEventRestablecer(idCliente) {
+  async onEventRestablecer(idPersona) {
     alertDialog(
       'Producto',
       '¿Está seguro de restablecer al socio, la operación no es reversible?',
@@ -197,7 +197,7 @@ class ProductoDetalle extends CustomComponent {
           // alertInfo("Producto", "Procesando información...");
           // const data = {
           //     "idVenta": this.state.idVenta,
-          //     "idCliente": idCliente,
+          //     "idPersona": idPersona,
           //     "idUsuario": this.state.idUsuario
           // }
           // const response = await productoRestablecer(data);
@@ -311,14 +311,14 @@ class ProductoDetalle extends CustomComponent {
                     <select
                       className="form-control"
                       ref={this.refCliente}
-                      value={this.state.idCliente}
+                      value={this.state.idPersona}
                       onChange={(event) =>
-                        this.setState({ idCliente: event.target.value })
+                        this.setState({ idPersona: event.target.value })
                       }
                     >
                       <option value="">- Seleccione -</option>
                       {this.state.clientes.map((item, index) => (
-                        <option key={index} value={item.idCliente}>
+                        <option key={index} value={item.idPersona}>
                           {item.informacion}
                         </option>
                       ))}
@@ -580,7 +580,7 @@ class ProductoDetalle extends CustomComponent {
                             type="button"
                             className="btn btn-warning btn-sm"
                             onClick={() =>
-                              this.onEventRestablecer(item.idCliente)
+                              this.onEventRestablecer(item.idPersona)
                             }
                           >
                             <i className="fa fa-level-up"></i>

@@ -13,15 +13,16 @@ import {
 import Paginacion from '../../../../components/Paginacion';
 import ContainerWrapper from '../../../../components/Container';
 import {
-  deleteCliente,
-  listClientes,
+  deletePersona,
+  listPersonas,
 } from '../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
 import { CANCELED } from '../../../../model/types/types';
 import CustomComponent from '../../../../model/class/custom-component';
 
-class Clientes extends CustomComponent {
+class Personas extends CustomComponent {
+  
   constructor(props) {
     super(props);
     this.state = {
@@ -31,25 +32,13 @@ class Clientes extends CustomComponent {
       lista: [],
       restart: false,
 
-      add: statePrivilegio(
-        this.props.token.userToken.menus[2].submenu[0].privilegio[0].estado,
-      ),
-      edit: statePrivilegio(
-        this.props.token.userToken.menus[2].submenu[0].privilegio[1].estado,
-      ),
-      remove: statePrivilegio(
-        this.props.token.userToken.menus[2].submenu[0].privilegio[2].estado,
-      ),
-      view: statePrivilegio(
-        this.props.token.userToken.menus[2].submenu[0].privilegio[3].estado,
-      ),
-
       opcion: 0,
       paginacion: 0,
       totalPaginacion: 0,
       filasPorPagina: 10,
       messageTable: 'Cargando información...',
     };
+  
     this.refTxtSearch = React.createRef();
 
     this.idCodigo = '';
@@ -114,7 +103,7 @@ class Clientes extends CustomComponent {
       filasPorPagina: this.state.filasPorPagina,
     };
 
-    const response = await listClientes(params, this.abortControllerTable.signal,);
+    const response = await listPersonas(params, this.abortControllerTable.signal,);
 
     if (response instanceof SuccessReponse) {
       const totalPaginacion = parseInt(Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),);
@@ -144,30 +133,30 @@ class Clientes extends CustomComponent {
     });
   }
 
-  handleDetalleCliente(idCliente) {
+  handleDetalleCliente(idPersona) {
     this.props.history.push({
       pathname: `${this.props.location.pathname}/detalle`,
-      search: '?idCliente=' + idCliente,
+      search: '?idPersona=' + idPersona,
     });
   }
 
-  handleEditarCliente(idCliente) {
+  handleEditarCliente(idPersona) {
     this.props.history.push({
       pathname: `${this.props.location.pathname}/editar`,
-      search: '?idCliente=' + idCliente,
+      search: '?idPersona=' + idPersona,
     });
   }
 
-  handleRemoverCliente(idCliente) {
+  handleRemoverCliente(idPersona) {
     alertDialog('Cliente', '¿Está seguro de que desea eliminar el contacto? Esta operación no se puede deshacer.', async (accept) => {
       if (accept) {
         alertInfo('Cliente', 'Procesando información...');
 
         const params = {
-          idCliente: idCliente,
+          idPersona: idPersona,
         };
 
-        const response = await deleteCliente(params);
+        const response = await deletePersona(params);
 
         if (response instanceof SuccessReponse) {
           alertSuccess('Cliente', response.data, () => {
@@ -240,9 +229,8 @@ class Clientes extends CustomComponent {
               className="btn btn-outline-info btn-sm"
               title="Editar"
               onClick={() =>
-                this.handleDetalleCliente(item.idCliente)
+                this.handleDetalleCliente(item.idPersona)
               }
-              disabled={!this.state.view}
             >
               <i className="bi bi-eye"></i>
             </button>
@@ -252,9 +240,8 @@ class Clientes extends CustomComponent {
               className="btn btn-outline-warning btn-sm"
               title="Editar"
               onClick={() =>
-                this.handleEditarCliente(item.idCliente)
+                this.handleEditarCliente(item.idPersona)
               }
-              disabled={!this.state.edit}
             >
               <i className="bi bi-pencil"></i>
             </button>
@@ -264,9 +251,8 @@ class Clientes extends CustomComponent {
               className="btn btn-outline-danger btn-sm"
               title="Editar"
               onClick={() =>
-                this.handleRemoverCliente(item.idCliente)
+                this.handleRemoverCliente(item.idPersona)
               }
-              disabled={!this.state.remove}
             >
               <i className="bi bi-trash"></i>
             </button>
@@ -283,7 +269,7 @@ class Clientes extends CustomComponent {
           <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
             <div className="form-group">
               <h5>
-                Clientes <small className="text-secondary">LISTA</small>
+                Contatos <small className="text-secondary">LISTA</small>
               </h5>
             </div>
           </div>
@@ -318,7 +304,6 @@ class Clientes extends CustomComponent {
               <button
                 className="btn btn-outline-info"
                 onClick={() => this.handleAgregarCliente()}
-                disabled={!this.state.add}
               >
                 <i className="bi bi-file-plus"></i> Nuevo Registro
               </button>{' '}
@@ -385,4 +370,4 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(Clientes);
+export default connect(mapStateToProps, null)(Personas);

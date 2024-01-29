@@ -20,11 +20,11 @@ import { connect } from 'react-redux';
 import ContainerWrapper from '../../../../../components/Container';
 import {
   createCobro,
-  comboMetodoPago,
-  filtrarCliente,
+  filtrarPersona,
   filtrarCobroConcepto,
   comboComprobante,
   comboMoneda,
+  comboBanco,
 } from '../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
@@ -82,13 +82,15 @@ class CobroCrear extends CustomComponent {
 
       // Atributos del modal
       loadingModal: false,
-      metodosPagoLista: [],
-      metodoPagoAgregado: [],
+      bancos: [],
+      bancosAgregados: [],
 
       // Id principales
       idUsuario: this.props.token.userToken.idUsuario,
       idSucursal: this.props.token.project.idSucursal,
     };
+
+    this.initial = {...this.state}
 
     // Referencia principales
     this.refMonto = React.createRef();
@@ -130,15 +132,13 @@ class CobroCrear extends CustomComponent {
     this.loadData();
 
     viewModal(this.idModalSale, () => {
-      const metodo = this.state.metodosPagoLista.find(
-        (item) => item.predeterminado === 1,
-      );
+      const metodo = this.state.bancos.find((item) => item.preferido === 1);
 
-      this.refMetodoContado.current.value = metodo ? metodo.idMetodoPago : '';
+      this.refMetodoContado.current.value = metodo ? metodo.idBanco : '';
 
       if (metodo) {
         const item = {
-          idMetodoPago: metodo.idMetodoPago,
+          idBanco: metodo.idBanco,
           nombre: metodo.nombre,
           monto: '',
           vuelto: metodo.vuelto,
@@ -146,7 +146,7 @@ class CobroCrear extends CustomComponent {
         };
 
         this.setState((prevState) => ({
-          metodoPagoAgregado: [...prevState.metodoPagoAgregado, item],
+          bancosAgregados: [...prevState.bancosAgregados, item],
         }));
       }
 
@@ -155,7 +155,7 @@ class CobroCrear extends CustomComponent {
 
     clearModal(this.idModalSale, async () => {
       this.setState({
-        metodoPagoAgregado: [],
+        bancosAgregados: [],
       });
     });
   }
@@ -179,10 +179,10 @@ class CobroCrear extends CustomComponent {
     */
 
   loadData = async () => {
-    const [comprobantes, monedas, metodoPagos] = await Promise.all([
+    const [comprobantes, monedas, bancos] = await Promise.all([
       await this.fetchComprobante(COMPROBANTE_DE_INGRESO),
       await this.fetchMoneda(),
-      await this.fetchMetodoPago(),
+      await this.fetchComboBanco(),
     ]);
 
     const comprobante = comprobantes.find((item) => item.preferida === 1);
@@ -191,7 +191,7 @@ class CobroCrear extends CustomComponent {
     this.setState({
       comprobantes,
       monedas,
-      metodosPagoLista: metodoPagos,
+      bancos,
       idComprobante: isEmpty(comprobante) ? '' : comprobante.idComprobante,
       idMoneda: isEmpty(moneda) ? '' : moneda.idMoneda,
       codISO: isEmpty(moneda) ? '' : moneda.codiso,
@@ -216,7 +216,7 @@ class CobroCrear extends CustomComponent {
   }
 
   async fetchFiltrarCliente(params) {
-    const response = await filtrarCliente(params);
+    const response = await filtrarPersona(params);
 
     if (response instanceof SuccessReponse) {
       return response.data;
@@ -262,8 +262,8 @@ class CobroCrear extends CustomComponent {
     }
   }
 
-  async fetchMetodoPago() {
-    const response = await comboMetodoPago();
+  async fetchComboBanco() {
+    const response = await comboBanco();
 
     if (response instanceof SuccessReponse) {
       return response.data;
@@ -379,21 +379,17 @@ class CobroCrear extends CustomComponent {
   // Acciones del modal
   //------------------------------------------------------------------------------------------
 
-  handleAddMetodPay = () => {
-    const listAdd = this.state.metodoPagoAgregado.find(
-      (item) => item.idMetodoPago === this.refMetodoContado.current.value,
-    );
+  handleAddBancosAgregados = () => {
+    const listAdd = this.state.bancosAgregados.find((item) => item.idBanco === this.refMetodoContado.current.value);
 
     if (listAdd) {
       return;
     }
 
-    const metodo = this.state.metodosPagoLista.find(
-      (item) => item.idMetodoPago === this.refMetodoContado.current.value,
-    );
+    const metodo = this.state.bancos.find((item) => item.idBanco === this.refMetodoContado.current.value,);
 
     const item = {
-      idMetodoPago: metodo.idMetodoPago,
+      idBanco: metodo.idBanco,
       nombre: metodo.nombre,
       monto: '',
       vuelto: metodo.vuelto,
@@ -401,16 +397,16 @@ class CobroCrear extends CustomComponent {
     };
 
     this.setState((prevState) => ({
-      metodoPagoAgregado: [...prevState.metodoPagoAgregado, item],
+      bancosAgregados: [...prevState.bancosAgregados, item],
     }));
   };
 
-  handleInputMontoMetodoPay = (event, idMetodoPago) => {
+  handleInputMontoBancosAgregados = (event, idBanco) => {
     const { value } = event.target;
 
     this.setState((prevState) => ({
-      metodoPagoAgregado: prevState.metodoPagoAgregado.map((item) => {
-        if (item.idMetodoPago === idMetodoPago) {
+      bancosAgregados: prevState.bancosAgregados.map((item) => {
+        if (item.idBanco === idBanco) {
           return { ...item, monto: value ? value : '' };
         } else {
           return item;
@@ -419,11 +415,9 @@ class CobroCrear extends CustomComponent {
     }));
   };
 
-  handleRemoveItemMetodPay = (idMetodoPago) => {
-    const metodoPagoAgregado = this.state.metodoPagoAgregado.filter(
-      (item) => item.idMetodoPago !== idMetodoPago,
-    );
-    this.setState({ metodoPagoAgregado });
+  handleRemoveItemBancosAgregados = (idBanco) => {
+    const bancosAgregados = this.state.bancosAgregados.filter((item) => item.idBanco !== idBanco);
+    this.setState({ bancosAgregados });
   };
 
   handleSaveSale = () => {
@@ -436,10 +430,10 @@ class CobroCrear extends CustomComponent {
       observacion,
       detalle,
       total,
-      metodoPagoAgregado,
+      bancosAgregados,
     } = this.state;
 
-    let metodoPagoLista = [...metodoPagoAgregado];
+    let metodoPagoLista = [...bancosAgregados];
 
     if (isEmpty(metodoPagoLista)) {
       alertWarning(
@@ -496,7 +490,7 @@ class CobroCrear extends CustomComponent {
     alertDialog('Cobro', '¿Está seguro de continuar?', async (accept) => {
       if (accept) {
         const data = {
-          idCliente: cliente.idCliente,
+          idPersona: cliente.idPersona,
           idUsuario: idUsuario,
           idMoneda: idMoneda,
           idSucursal: idSucursal,
@@ -504,7 +498,7 @@ class CobroCrear extends CustomComponent {
           estado: 1,
           observacion: observacion,
           detalle: detalle,
-          metodoPago: metodoPagoAgregado,
+          bancosAgregados: bancosAgregados,
         };
 
         hideModal(this.idModalSale);
@@ -659,43 +653,7 @@ class CobroCrear extends CustomComponent {
   };
 
   handleLimpiar = async () => {
-    const initial = {
-      // Atributos principales
-      idComprobante: '',
-      idMoneda: '',
-      idConcepto: '',
-      observacion: '',
-      precio: '',
-
-      // Detalle del cobro
-      detalle: [],
-
-      // Atributos de carga
-      loading: true,
-      msgLoading: 'Cargando datos...',
-
-      // Lista de datos
-      comprobantes: [],
-      monedas: [],
-
-      // Filtrar concepto
-      filtrarConcepto: '',
-      loadingConcepto: false,
-      concepto: null,
-      conceptos: [],
-
-      // Filtrar cliente
-      filtrarCliente: '',
-      loadingCliente: false,
-      cliente: null,
-      clientes: [],
-
-      // Atributos libres
-      codISO: '',
-      total: 0,
-    };
-
-    this.setState(initial, async () => {
+    this.setState(this.initial, async () => {
       await this.loadData();
     });
   };
@@ -769,11 +727,11 @@ class CobroCrear extends CustomComponent {
           refMetodoContado={this.refMetodoContado}
           importeTotal={this.state.total}
           handleSaveSale={this.handleSaveSale}
-          metodosPagoLista={this.state.metodosPagoLista}
-          metodoPagoAgregado={this.state.metodoPagoAgregado}
-          handleAddMetodPay={this.handleAddMetodPay}
-          handleInputMontoMetodoPay={this.handleInputMontoMetodoPay}
-          handleRemoveItemMetodPay={this.handleRemoveItemMetodPay}
+          bancos={this.state.bancos}
+          bancosAgregados={this.state.bancosAgregados}
+          handleAddBancosAgregados={this.handleAddBancosAgregados}
+          handleInputMontoBancosAgregados={this.handleInputMontoBancosAgregados}
+          handleRemoveItemBancosAgregados={this.handleRemoveItemBancosAgregados}
         />
 
         {this.state.loading && spinnerLoading(this.state.msgLoading)}

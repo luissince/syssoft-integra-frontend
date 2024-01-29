@@ -114,17 +114,11 @@ class ComporbanteAgregar extends CustomComponent {
     }
 
     if (this.state.numeroCampo < 0 || this.state.numeroCampo > 128) {
-      alertWarning(
-        'Comprobante',
-        'El número de campo no puede ser menor que 0.',
-        () => this.refNumeroCampo.current.focus(),
-      );
+      alertWarning('Comprobante', 'El número de campo no puede ser menor que 0.', () => this.refNumeroCampo.current.focus());
       return;
     }
 
-    alertDialog(
-      'Comprobante',
-      '¿Estás seguro de continuar?',
+    alertDialog('Comprobante', '¿Estás seguro de continuar?',
       async (accept) => {
         if (accept) {
           alertInfo('Comprobante', 'Procesando información...');

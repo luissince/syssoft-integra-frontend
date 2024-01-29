@@ -32,6 +32,10 @@ import GuiaRemisionCrear from './facturacion/guiaremision/crear/GuiaRemisionCrea
 import GuiaRemisionEditar from './facturacion/guiaremision/editar/GuiaRemisionEditar.jsx';
 import GuiaRemisionDetalle from './facturacion/guiaremision/detalle/GuiaRemisionDetalle.jsx';
 
+import NotaCredito from './facturacion/notacredito/NotaCredito';
+import NotaCreditoProceso from './facturacion/notacredito/NotaCreditoProceso';
+import NotaCreditoDetalle from './facturacion/notacredito/NotaCreditoDetalle';
+
 import Ingresos from './facturacion/ingreso/lista/Ingresos.jsx';
 
 import CuentasPorCobrar from './facturacion/cuenta-cobrar/lista/CuentasPorCobrar.jsx';
@@ -48,6 +52,10 @@ import ComprobanteEditar from './ajustes/comprobante/ComprobanteEditar.jsx';
 import Impuestos from './ajustes/impuesto/Impuestos.jsx';
 import ImpuestoAgregar from './ajustes/impuesto/ImpuestoAgregar.jsx';
 import ImpuestoEditar from './ajustes/impuesto/ImpuestoEditar.jsx';
+
+import Vehiculos from './ajustes/vehiculo/Vehiculos.jsx';
+import VehiculoAgregar from './ajustes/vehiculo/VehiculoAgregar.jsx';
+import VehiculoEditar from './ajustes/vehiculo/VehiculoEditar.jsx';
 
 import Bancos from './ajustes/banco/Bancos';
 import BancoDetalle from './ajustes/banco/BancoDetalle';
@@ -90,14 +98,6 @@ import Inventario from './logistica/inventario/Inventario.jsx';
 
 import Kardex from './logistica/kardex/Kardex.jsx';
 
-import Clientes from './facturacion/cliente/Clientes';
-import ClienteAgregar from './facturacion/cliente/ClienteAgregar';
-import ClienteEditar from './facturacion/cliente/ClienteEditar';
-import ClienteDetalle from './facturacion/cliente/ClienteDetalle';
-
-import NotaCredito from './facturacion/notacredito/NotaCredito';
-import NotaCreditoProceso from './facturacion/notacredito/NotaCreditoProceso';
-import NotaCreditoDetalle from './facturacion/notacredito/NotaCreditoDetalle';
 
 import Conceptos from './tesoreria/concepto/Conceptos.jsx';
 import ConceptoAgregar from './tesoreria/concepto/ConceptoAgregar.jsx';
@@ -134,6 +134,15 @@ import RepClientes from './reporte/RepClientes';
 
 import CpeElectronicos from './cpesunat/lista/CpeElectronicos.jsx';
 import CpeConsultar from './cpesunat/consulta/CpeConsultar.jsx';
+
+import Personas from './contacto/todo/Personas.jsx';
+import PersonaAgregar from './contacto/todo/PersonaAgregar.jsx';
+import PersonaEditar from './contacto/todo/PersonaEditar.jsx';
+import PersonaDetalle from './contacto/todo/PersonaDetalle.jsx';
+
+import Clientes from './contacto/cliente/Clientes.jsx';
+import Proveedores from './contacto/proveedor/Proveedores.jsx';
+import Conductores from './contacto/conductor/Conductores.jsx';
 
 import { getNotifications } from '../../network/rest/principal.network.js';
 import SuccessReponse from '../../model/class/response.js';
@@ -299,6 +308,11 @@ class Inicio extends React.Component {
         />
 
         <Switch>
+          {/* 
+          --------------------------------------------------------
+          | DASBOARD
+          --------------------------------------------------------
+          */}
           <Route path="/inicio" exact={true}>
             <Redirect to={`${path}/main`} />
           </Route>
@@ -314,6 +328,12 @@ class Inicio extends React.Component {
             path={`${path}/notifications`}
             render={(props) => <Notifications {...props} />}
           />
+
+          {/* 
+          --------------------------------------------------------
+          | SEGURIDAD
+          --------------------------------------------------------
+          */}
 
           <Route
             path={`${path}/perfiles`}
@@ -356,26 +376,12 @@ class Inicio extends React.Component {
             path={`${path}/accesos`}
             render={(props) => <Accesos {...props} />}
           />
-          <Route
-            path={`${path}/clientes`}
-            exact={true}
-            render={(props) => <Clientes {...props} />}
-          />
-          <Route
-            path={`${path}/clientes/agregar`}
-            exact={true}
-            render={(props) => <ClienteAgregar {...props} />}
-          />
-          <Route
-            path={`${path}/clientes/editar`}
-            exact={true}
-            render={(props) => <ClienteEditar {...props} />}
-          />
-          <Route
-            path={`${path}/clientes/detalle`}
-            exact={true}
-            render={(props) => <ClienteDetalle {...props} />}
-          />
+
+          {/* 
+          --------------------------------------------------------
+          | FACTURACIÓN
+          --------------------------------------------------------
+          */}
 
           <Route
             path={`${path}/ventas`}
@@ -414,13 +420,11 @@ class Inicio extends React.Component {
             exact={true}
             render={(props) => <NotaCredito {...props} />}
           />
-
           <Route
             path={`${path}/notacredito/proceso`}
             exact={true}
             render={(props) => <NotaCreditoProceso {...props} />}
           />
-
           <Route
             path={`${path}/notacredito/detalle`}
             exact={true}
@@ -486,101 +490,11 @@ class Inicio extends React.Component {
             render={(props) => <CuentasPorCobrarAbonar {...props} />}
           />
 
-          <Route
-            path={`${path}/monedas`}
-            exact={true}
-            render={(props) => <Monedas {...props} />}
-          />
-          <Route
-            path={`${path}/monedas/agregar`}
-            exact={true}
-            render={(props) => <MonedaAgregar {...props} />}
-          />
-          <Route
-            path={`${path}/monedas/editar`}
-            exact={true}
-            render={(props) => <MonedaEditar {...props} />}
-          />
-
-          <Route
-            path={`${path}/comprobantes`}
-            exact={true}
-            render={(props) => <Comprobantes {...props} />}
-          />
-          <Route
-            path={`${path}/comprobantes/agregar`}
-            exact={true}
-            render={(props) => <ComprobanteAgregar {...props} />}
-          />
-          <Route
-            path={`${path}/comprobantes/editar`}
-            exact={true}
-            render={(props) => <ComprobanteEditar {...props} />}
-          />
-
-          <Route
-            path={`${path}/bancos`}
-            exact={true}
-            render={(props) => <Bancos {...props} />}
-          />
-          <Route
-            path={`${path}/bancos/detalle`}
-            exact={true}
-            render={(props) => <BancoDetalle {...props} />}
-          />
-          <Route
-            path={`${path}/bancos/agregar`}
-            exact={true}
-            render={(props) => <BancoAgregar {...props} />}
-          />
-          <Route
-            path={`${path}/bancos/editar`}
-            exact={true}
-            render={(props) => <BancoEditar {...props} />}
-          />
-
-          <Route
-            path={`${path}/empresa`}
-            exact={true}
-            render={(props) => <Empresa {...props} />}
-          />
-          <Route
-            path={`${path}/empresa/proceso`}
-            exact={true}
-            render={(props) => <EmpresaEditar {...props} />}
-          />
-          <Route
-            path={`${path}/sucursales`}
-            exact={true}
-            render={(props) => <Sucursales {...props} />}
-          />
-          <Route
-            path={`${path}/sucursales/agregar`}
-            exact={true}
-            render={(props) => <SucursalAgregar {...props} />}
-          />
-          <Route
-            path={`${path}/sucursales/editar`}
-            exact={true}
-            render={(props) => <SucursalEditar {...props} />}
-          />
-
-          <Route
-            path={`${path}/impuestos`}
-            exact={true}
-            render={(props) => <Impuestos {...props} />}
-          />
-          <Route
-            path={`${path}/impuestos/agregar`}
-            exact={true}
-            render={(props) => <ImpuestoAgregar {...props} />}
-          />
-          <Route
-            path={`${path}/impuestos/editar`}
-            exact={true}
-            render={(props) => <ImpuestoEditar {...props} />}
-          />
-
+          {/* 
+          --------------------------------------------------------
+          | LOGISTICA
+          --------------------------------------------------------
+          */}
           <Route
             path={`${path}/categorias`}
             exact={true}
@@ -595,22 +509,6 @@ class Inicio extends React.Component {
             path={`${path}/categorias/editar`}
             exact={true}
             render={(props) => <CategoriaEditar {...props} />}
-          />
-
-          <Route
-            path={`${path}/medida`}
-            exact={true}
-            render={(props) => <Medidas {...props} />}
-          />
-          <Route
-            path={`${path}/medida/agregar`}
-            exact={true}
-            render={(props) => <MedidaAgregar {...props} />}
-          />
-          <Route
-            path={`${path}/medida/editar`}
-            exact={true}
-            render={(props) => <MedidaEditar {...props} />}
           />
 
           <Route
@@ -667,6 +565,34 @@ class Inicio extends React.Component {
           />
 
           <Route
+            path={`${path}/inventario`}
+            exact={true}
+            render={(props) => <Inventario {...props} />}
+          />
+
+          <Route
+            path={`${path}/kardex`}
+            exact={true}
+            render={(props) => <Kardex {...props} />}
+          />
+
+          <Route
+            path={`${path}/medida`}
+            exact={true}
+            render={(props) => <Medidas {...props} />}
+          />
+          <Route
+            path={`${path}/medida/agregar`}
+            exact={true}
+            render={(props) => <MedidaAgregar {...props} />}
+          />
+          <Route
+            path={`${path}/medida/editar`}
+            exact={true}
+            render={(props) => <MedidaEditar {...props} />}
+          />
+
+          <Route
             path={`${path}/traslado`}
             exact={true}
             render={(props) => <Traslado {...props} />}
@@ -683,17 +609,52 @@ class Inicio extends React.Component {
           />
 
 
+          {/* 
+          --------------------------------------------------------
+          | CLIENTE
+          --------------------------------------------------------
+          */}
+
           <Route
-            path={`${path}/inventario`}
+            path={`${path}/todos`}
             exact={true}
-            render={(props) => <Inventario {...props} />}
+            render={(props) => <Personas {...props} />}
+          />
+          <Route
+            path={`${path}/todos/agregar`}
+            exact={true}
+            render={(props) => <PersonaAgregar {...props} />}
+          />
+          <Route
+            path={`${path}/todos/editar`}
+            exact={true}
+            render={(props) => <PersonaEditar {...props} />}
+          />
+          <Route
+            path={`${path}/todos/detalle`}
+            exact={true}
+            render={(props) => <PersonaDetalle {...props} />}
           />
 
           <Route
-            path={`${path}/kardex`}
+            path={`${path}/clientes`}
             exact={true}
-            render={(props) => <Kardex {...props} />}
+            render={(props) => <Clientes {...props} />}
           />
+          <Route
+            path={`${path}/proveedores`}
+            render={(props) => <Proveedores {...props} />}
+          />
+          <Route
+            path={`${path}/conductores`}
+            render={(props) => <Conductores {...props} />}
+          />
+
+          {/* 
+          --------------------------------------------------------
+          | TESORERIA
+          --------------------------------------------------------
+          */}
 
           <Route
             path={`${path}/conceptos`}
@@ -760,6 +721,131 @@ class Inicio extends React.Component {
             render={(props) => <CuentasPorPagarAmortizar {...props} />}
           />
 
+          {/* 
+          --------------------------------------------------------
+          | AJUSTE
+          --------------------------------------------------------
+          */}
+
+          <Route
+            path={`${path}/comprobantes`}
+            exact={true}
+            render={(props) => <Comprobantes {...props} />}
+          />
+          <Route
+            path={`${path}/comprobantes/agregar`}
+            exact={true}
+            render={(props) => <ComprobanteAgregar {...props} />}
+          />
+          <Route
+            path={`${path}/comprobantes/editar`}
+            exact={true}
+            render={(props) => <ComprobanteEditar {...props} />}
+          />
+
+
+          <Route
+            path={`${path}/monedas`}
+            exact={true}
+            render={(props) => <Monedas {...props} />}
+          />
+          <Route
+            path={`${path}/monedas/agregar`}
+            exact={true}
+            render={(props) => <MonedaAgregar {...props} />}
+          />
+          <Route
+            path={`${path}/monedas/editar`}
+            exact={true}
+            render={(props) => <MonedaEditar {...props} />}
+          />
+
+
+          <Route
+            path={`${path}/bancos`}
+            exact={true}
+            render={(props) => <Bancos {...props} />}
+          />
+          <Route
+            path={`${path}/bancos/detalle`}
+            exact={true}
+            render={(props) => <BancoDetalle {...props} />}
+          />
+          <Route
+            path={`${path}/bancos/agregar`}
+            exact={true}
+            render={(props) => <BancoAgregar {...props} />}
+          />
+          <Route
+            path={`${path}/bancos/editar`}
+            exact={true}
+            render={(props) => <BancoEditar {...props} />}
+          />
+
+          <Route
+            path={`${path}/empresa`}
+            exact={true}
+            render={(props) => <Empresa {...props} />}
+          />
+          <Route
+            path={`${path}/empresa/proceso`}
+            exact={true}
+            render={(props) => <EmpresaEditar {...props} />}
+          />
+          <Route
+            path={`${path}/sucursales`}
+            exact={true}
+            render={(props) => <Sucursales {...props} />}
+          />
+          <Route
+            path={`${path}/sucursales/agregar`}
+            exact={true}
+            render={(props) => <SucursalAgregar {...props} />}
+          />
+          <Route
+            path={`${path}/sucursales/editar`}
+            exact={true}
+            render={(props) => <SucursalEditar {...props} />}
+          />
+
+          <Route
+            path={`${path}/impuestos`}
+            exact={true}
+            render={(props) => <Impuestos {...props} />}
+          />
+          <Route
+            path={`${path}/impuestos/agregar`}
+            exact={true}
+            render={(props) => <ImpuestoAgregar {...props} />}
+          />
+          <Route
+            path={`${path}/impuestos/editar`}
+            exact={true}
+            render={(props) => <ImpuestoEditar {...props} />}
+          />
+
+          <Route
+            path={`${path}/vehiculo`}
+            exact={true}
+            render={(props) => <Vehiculos {...props} />}
+          />
+          <Route
+            path={`${path}/vehiculo/agregar`}
+            exact={true}
+            render={(props) => <VehiculoAgregar {...props} />}
+          />
+          <Route
+            path={`${path}/vehiculo/editar`}
+            exact={true}
+            render={(props) => <VehiculoEditar {...props} />}
+          />
+
+          {/* 
+          --------------------------------------------------------
+          | REPORTE
+          --------------------------------------------------------
+          */}
+
 
           <Route
             path={`${path}/repventas`}
@@ -777,6 +863,14 @@ class Inicio extends React.Component {
             path={`${path}/repclientes`}
             render={(props) => <RepClientes {...props} />}
           />
+
+
+          {/* 
+          --------------------------------------------------------
+          | CPE SUNAT
+          --------------------------------------------------------
+          */}
+
           <Route
             path={`${path}/cpeelectronicos`}
             render={(props) => <CpeElectronicos {...props} />}
@@ -785,6 +879,7 @@ class Inicio extends React.Component {
             path={`${path}/cpeconsultar`}
             render={(props) => <CpeConsultar {...props} />}
           />
+
           <Route component={NotFoundMain} />
         </Switch>
         {/* <NotificationContainer /> */}

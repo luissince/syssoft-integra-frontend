@@ -8,7 +8,6 @@ import {
   alertSuccess,
   alertWarning,
   isEmpty,
-  isText,
   spinnerLoading,
 } from '../../../../helper/utils.helper';
 import {
@@ -29,6 +28,9 @@ class BancoAgregar extends CustomComponent {
       monedas: [],
       numCuenta: '',
       cci: '',
+      preferido: false,
+      vuelto: false,
+      estado: false,
 
       loading: true,
       msgLoading: 'Cargando datos...',
@@ -108,6 +110,10 @@ class BancoAgregar extends CustomComponent {
           idMoneda: this.state.idMoneda.trim().toUpperCase(),
           numCuenta: this.state.numCuenta.trim().toUpperCase(),
           cci: this.state.cci.trim().toUpperCase(),
+          preferido: this.state.preferido,
+          vuelto: this.state.vuelto,
+          estado: this.state.estado,
+    
           idUsuario: this.state.idUsuario,
         };
 
@@ -139,7 +145,7 @@ class BancoAgregar extends CustomComponent {
                 <span role="button" onClick={() => this.props.history.goBack()}>
                   <i className="bi bi-arrow-left-short"></i>
                 </span>{' '}
-                Editar Banco
+                Agregar Banco
               </h5>
             </div>
           </div>
@@ -232,6 +238,68 @@ class BancoAgregar extends CustomComponent {
               placeholder="####################"
             />
           </div>
+
+          <div className="form-group col-md-6">
+            <label htmlFor="nombre" className="col-form-label">
+              Vuelto:
+            </label>
+            <div className="custom-control custom-switch">
+              <input
+                type="checkbox"
+                className="custom-control-input"
+                id="vueltoChecked"
+                checked={this.state.vuelto}
+                onChange={(value) =>
+                  this.setState({ vuelto: value.target.checked })
+                }
+              />
+              <label className="custom-control-label" htmlFor="vueltoChecked">
+                {this.state.vuelto ? 'Si' : 'No'}
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div className="row">
+          <div className="form-group col-md-6">
+            <label htmlFor="nombre" className="col-form-label">
+              Estado:
+            </label>
+            <div className="custom-control custom-switch">
+              <input
+                type="checkbox"
+                className="custom-control-input"
+                id="estadoChecked"
+                checked={this.state.estado}
+                onChange={(value) =>
+                  this.setState({ estado: value.target.checked })
+                }
+              />
+              <label className="custom-control-label" htmlFor="estadoChecked">
+                {this.state.estado ? 'Activo' : 'Inactivo'}
+              </label>
+            </div>
+          </div>
+
+          <div className="form-group col-md-6">
+            <label htmlFor="nombre" className="col-form-label">
+              Preferido:
+            </label>
+            <div className="custom-control custom-switch">
+              <input
+                type="checkbox"
+                className="custom-control-input"
+                id="preferidoChecked"
+                checked={this.state.preferido}
+                onChange={(value) =>
+                  this.setState({ preferido: value.target.checked })
+                }
+              />
+              <label className="custom-control-label" htmlFor="preferidoChecked">
+                {this.state.preferido ? 'Si' : 'No'}
+              </label>
+            </div>
+          </div>
         </div>
 
         <div className="row">
@@ -242,14 +310,14 @@ class BancoAgregar extends CustomComponent {
                 className="btn btn-primary"
                 onClick={this.handleGuardar}
               >
-                Guardar
+                <i className='fa fa-save'></i>  Guardar
               </button>{' '}
               <button
                 type="button"
                 className="btn btn-danger"
                 onClick={() => this.props.history.goBack()}
               >
-                Cerrar
+                <i className='fa fa-close'></i>  Cerrar
               </button>
             </div>
           </div>
