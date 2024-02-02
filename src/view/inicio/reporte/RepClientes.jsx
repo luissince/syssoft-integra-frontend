@@ -104,7 +104,7 @@ class RepClientes extends React.Component {
 
     const params = {
       opcion: 1,
-      filtrar: searchWord,
+      filter: searchWord,
       cliente: true,
     };
 

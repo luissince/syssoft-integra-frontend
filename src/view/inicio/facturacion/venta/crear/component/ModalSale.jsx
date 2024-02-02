@@ -60,7 +60,7 @@ const ModalSale = (props) => {
         return (
           <>
             <h5>
-              RESTANTE: <span>{numberFormat(currentAmount - total)}</span>
+              RESTANTE: <span>{numberFormat(currentAmount - total, codiso)}</span>
             </h5>
             <h6 className="text-danger">
               Más de dos metodos de pago no generan vuelto.
@@ -71,7 +71,7 @@ const ModalSale = (props) => {
         return (
           <>
             <h5>
-              POR COBRAR: <span>{numberFormat(total - currentAmount)}</span>
+              POR COBRAR: <span>{numberFormat(total - currentAmount, codiso)}</span>
             </h5>
             <h6 className="text-danger">
               Más de dos metodos de pago no generan vuelto.

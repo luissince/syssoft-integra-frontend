@@ -2,6 +2,7 @@ import {
   rounded,
   keyNumberFloat,
   spinnerLoading,
+  numberFormat,
 } from '../../../../../../helper/utils.helper';
 
 const ModalSale = (props) => {
@@ -17,6 +18,7 @@ const ModalSale = (props) => {
     handleSaveSale,
 
     bancos,
+    codISO,
     bancosAgregados,
     handleAddBancosAgregados,
     handleInputMontoBancosAgregados,
@@ -40,7 +42,7 @@ const ModalSale = (props) => {
         return (
           <>
             <h5>
-              RESTANTE: <span>{rounded(currentAmount - total)}</span>
+              RESTANTE: <span>{numberFormat(currentAmount - total, codISO)}</span>
             </h5>
             <h6 className="text-danger">
               Más de dos metodos de pago no generan vuelto.
@@ -51,7 +53,7 @@ const ModalSale = (props) => {
         return (
           <>
             <h5>
-              POR COBRAR: <span>{rounded(total - currentAmount)}</span>
+              POR COBRAR: <span>{numberFormat(total - currentAmount, codISO)}</span>
             </h5>
             <h6 className="text-danger">
               Más de dos metodos de pago no generan vuelto.
@@ -66,13 +68,13 @@ const ModalSale = (props) => {
       if (currentAmount >= total) {
         return (
           <h5>
-            SU CAMBIO ES: <span>{rounded(currentAmount - total)}</span>
+            SU CAMBIO ES: <span>{numberFormat(currentAmount - total, codISO)}</span>
           </h5>
         );
       } else {
         return (
           <h5 className="text-danger">
-            POR COBRAR: <span>{rounded(total - currentAmount)}</span>
+            POR COBRAR: <span>{numberFormat(total - currentAmount, codISO)}</span>
           </h5>
         );
       }
@@ -81,7 +83,7 @@ const ModalSale = (props) => {
         return (
           <>
             <h5>
-              RESTANTE: <span>{rounded(currentAmount - total)}</span>
+              RESTANTE: <span>{numberFormat(currentAmount - total, codISO)}</span>
             </h5>
             <h6 className="text-danger">El método de pago no genera vuelto.</h6>
           </>
@@ -90,7 +92,7 @@ const ModalSale = (props) => {
         return (
           <>
             <h5>
-              POR COBRAR: <span>{rounded(total - currentAmount)}</span>
+              POR COBRAR: <span>{numberFormat(total - currentAmount, codISO)}</span>
             </h5>
             <h6 className="text-danger">El método de pago no genera vuelto.</h6>
           </>

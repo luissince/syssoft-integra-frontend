@@ -604,7 +604,7 @@ class GastoCrear extends CustomComponent {
 
         const params = {
             opcion: 1,
-            filtrar: searchWord,
+            filter: searchWord,
             proveedor: true,
         };
 

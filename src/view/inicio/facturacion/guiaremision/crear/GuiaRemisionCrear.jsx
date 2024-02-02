@@ -332,6 +332,9 @@ class GuiaRemisionCrear extends CustomComponent {
       modalMessage: "Recuperando documento...",
       onPrintDialogClose: () => {
         console.log("onPrintDialogClose")
+        this.setState(this.initial, async () => {
+          await this.loadData()
+        })
       }
     })
   }

@@ -88,7 +88,7 @@ class VentaCrear extends CustomComponent {
       sarchProducto: false,
       filterProducto: false,
 
-      idPersona: '',
+      idCliente: '',
       cliente: '',
       filterCliente: false,
       nuevoCliente: null,
@@ -465,6 +465,20 @@ class VentaCrear extends CustomComponent {
     }
   }
 
+  async fetchFiltrarPersona(params) {
+    const response = await filtrarPersona(params);
+
+    if (response instanceof SuccessReponse) {
+      return response.data;
+    }
+
+    if (response instanceof ErrorResponse) {
+      if (response.getType() === CANCELED) return;
+
+      return [];
+    }
+  }
+
   calcularLetraMensual = () => {
     if (this.state.numCuota === '') {
       return;
@@ -816,7 +830,7 @@ class VentaCrear extends CustomComponent {
     }
 
     const value = {
-      idPersona: "",
+      idCliente: "",
       documento: this.state.numeroDocumentoPn,
       informacion: this.state.informacionPn
     }
@@ -868,7 +882,7 @@ class VentaCrear extends CustomComponent {
     }
 
     const value = {
-      idPersona: "",
+      idCliente: "",
       documento: this.state.numeroDocumentoPj,
       informacion: this.state.informacionPj
     }
@@ -990,13 +1004,14 @@ class VentaCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
 
   handleClearInputClient = async () => {
-    await this.setStateAsync({ clientes: [], idPersona: '', cliente: '', nuevoCliente: null });
+    await this.setStateAsync({ clientes: [], idCliente: '', cliente: '', nuevoCliente: null });
     this.selectItemClient = false;
   }
 
   handleFilterClient = async (event) => {
     const searchWord = this.selectItemClient ? '' : event.target.value;
-    await this.setStateAsync({ idPersona: '', cliente: searchWord });
+    await this.setStateAsync({ idCliente: '', cliente: searchWord });
+
     this.selectItemClient = false;
     if (searchWord.length === 0) {
       await this.setStateAsync({ clientes: [] });
@@ -1008,30 +1023,25 @@ class VentaCrear extends CustomComponent {
     await this.setStateAsync({ filterCliente: true });
 
     const params = {
-      opcion: 1,
-      filtrar: searchWord,
-      cliente: true,
+      "opcion": 1,
+      "filter": searchWord,
+      "cliente": true,
     };
 
-    const response = await filtrarPersona(params);
+    const clientes = await this.fetchFiltrarPersona(params)
 
-    if (response instanceof SuccessReponse) {
-      this.setState({
-        filterCliente: false,
-        clientes: response.data,
-      });
-    }
+    this.setState({
+      filterCliente: false,
+      clientes: clientes,
+    });
 
-    if (response instanceof ErrorResponse) {
-      this.setState({ filterCliente: false, clientes: [] });
-    }
   }
 
   handleSelectItemClient = (value) => {
     this.setState({
       cliente: value.documento + ' - ' + value.informacion,
       clientes: [],
-      idPersona: value.idPersona,
+      idCliente: value.idPersona,
     }, () => this.selectItemClient = true);
   }
 
@@ -1051,7 +1061,7 @@ class VentaCrear extends CustomComponent {
       return;
     }
 
-    if (isEmpty(this.state.idPersona) && this.state.nuevoCliente === null) {
+    if (isEmpty(this.state.idCliente) && this.state.nuevoCliente === null) {
       alertWarning('Venta', 'Selecciona un cliente.', () => {
         this.refCliente.current.focus();
       });
@@ -1161,7 +1171,7 @@ class VentaCrear extends CustomComponent {
       idComprobante,
       idMoneda,
       idImpuesto,
-      idPersona,
+      idCliente,
       idSucursal,
       idUsuario,
       comentario,
@@ -1220,7 +1230,7 @@ class VentaCrear extends CustomComponent {
           idComprobante: idComprobante,
           idMoneda: idMoneda,
           idImpuesto: idImpuesto,
-          idPersona: idPersona,
+          idCliente: idCliente,
           idSucursal: idSucursal,
           comentario: comentario,
           idUsuario: idUsuario,

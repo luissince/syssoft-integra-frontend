@@ -597,7 +597,7 @@ class CobroCrear extends CustomComponent {
 
     const params = {
       "opcion": 1,
-      "filtrar": searchWord,
+      "filter": searchWord,
       "cliente": true,
     };
 
@@ -730,6 +730,7 @@ class CobroCrear extends CustomComponent {
           importeTotal={this.state.total}
           handleSaveSale={this.handleSaveSale}
           bancos={this.state.bancos}
+          codISO={this.state.codISO}
           bancosAgregados={this.state.bancosAgregados}
           handleAddBancosAgregados={this.handleAddBancosAgregados}
           handleInputMontoBancosAgregados={this.handleInputMontoBancosAgregados}
