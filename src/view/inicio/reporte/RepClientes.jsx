@@ -103,7 +103,9 @@ class RepClientes extends React.Component {
     await this.setStateAsync({ filter: true });
 
     const params = {
+      opcion: 1,
       filtrar: searchWord,
+      cliente: true,
     };
 
     const response = await filtrarPersona(params);

@@ -1,22 +1,26 @@
 import ContainerWrapper from '../../../../../components/Container';
 import CustomComponent from '../../../../../model/class/custom-component';
 import {
-  keyUpSearch,
   currentDate,
   spinnerLoading,
   alertDialog,
   alertWarning,
   keyNumberFloat,
+  isEmpty,
+  alertInfo,
+  alertSuccess,
 } from '../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
-import { comboComprobante, comboMotivoTraslado, comboTipoPeso, createGuiaRemision, filtrarVehiculo, listFiltrar } from '../../../../../network/rest/principal.network';
+import { comboComprobante, comboMotivoTraslado, comboTipoPeso, createGuiaRemision, detailOnlyFactura, filtrarPersona, filtrarVehiculo, getIdSucursal, getUbigeo, listFiltrar } from '../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
 import { GUIA_DE_REMISION } from '../../../../../model/types/tipo-comprobante';
-import CustomModal from '../../../../../components/CustomModal';
 import React from 'react';
 import SearchInput from '../../../../../components/SearchInput';
+import CustomModal from '../../../../../components/CustomModal';
+import printJS from 'print-js';
+import { pdfA4GuiaRemision, pdfTicketGuiaRemision } from '../../../../../helper/lista-pdf.helper';
 
 class GuiaRemisionCrear extends CustomComponent {
   constructor(props) {
@@ -28,17 +32,24 @@ class GuiaRemisionCrear extends CustomComponent {
       msgLoading: 'Cargando datos...',
 
       // Atributos principales
+      idGuiaRemision: '',
       isOpen: false,
       idComprobante: '',
       idModalidadTraslado: 'MT0001',
       idMotivoTraslado: '',
-      fechaTraslado: '',
+      fechaTraslado: currentDate(),
       idTipoPeso: '',
       peso: '',
+      direccionPartida: '',
+      idUbigeoPartida: '',
+      direccionLlegada: '',
+      idUbigeoLlegada: '',
 
       cliente: '',
       disabledPublica: true,
       disabledPrivado: false,
+
+      detalle: [],
 
       // Lista de datos
       comprobantes: [],
@@ -57,14 +68,44 @@ class GuiaRemisionCrear extends CustomComponent {
       vehiculo: null,
       vehiculos: [],
 
+      // Filtrar conductor
+      filtrarConductor: '',
+      loadingConductor: false,
+      conductor: null,
+      conductores: [],
+
+      // Filtrar conductor publico
+      filtrarConductorPublico: '',
+      loadingConductorPublico: false,
+      conductorPublico: null,
+      conductoresPublico: [],
+
+      // Filtrar ubigeo partida
+      filterUbigeoPartida: '',
+      loadingUbigePartida: false,
+      ubigeosPartida: [],
+
+      // Filtrar ubigeo llegada
+      filterUbigeoLlegada: '',
+      loadingUbigeLlegada: false,
+      ubigeosLlegada: [],
+
       idSucursal: this.props.token.project.idSucursal,
       idUsuario: this.props.token.userToken.idUsuario,
-
-      fechaInicio: currentDate(),
-      fechaFinal: currentDate(),
     };
 
+    this.initial = { ...this.state }
+
+    this.refPrinter = React.createRef();
+
+    this.refComprobante = React.createRef();
+    this.refMotivoTraslado = React.createRef();
+    this.refTipoPeso = React.createRef();
+    this.refPeso = React.createRef();
+
     this.refVenta = React.createRef();
+    this.refDireccionPartida = React.createRef();
+    this.refDireccionLlegada = React.createRef();
 
     // Filtrar producto
     this.refFiltrarVenta = React.createRef();
@@ -73,6 +114,22 @@ class GuiaRemisionCrear extends CustomComponent {
     // Filtrar vehículo
     this.refFiltrarVehiculo = React.createRef();
     this.selectItemVehiculo = false;
+
+    // Filtrar conductor
+    this.refFiltrarConductor = React.createRef();
+    this.selectItemConductor = false;
+
+    // Filtrar conductor publico
+    this.refFiltrarConductorPublico = React.createRef();
+    this.selectItemConductorPublico = false;
+
+    // Filtrar ubigeo partida
+    this.refFiltrarUbigeoPartida = React.createRef();
+    this.selectItemUbigeoPartida = false;
+
+    // Filtrar ubigeo llegada
+    this.refFiltrarUbigeoLlegada = React.createRef();
+    this.selectItemUbigeoLlegada = false;
 
     //Anular las peticiones
     this.abortController = new AbortController();
@@ -87,18 +144,30 @@ class GuiaRemisionCrear extends CustomComponent {
   }
 
   loadData = async () => {
-    const [comprobantes, motivoTraslado, tipoPeso] =
+    const [comprobantes, motivoTraslado, tipoPeso, sucursal] =
       await Promise.all([
         await this.fetchComprobante(GUIA_DE_REMISION),
         await this.fetchComboMotivoTraslado(),
-        await this.fetchComboTipoPeso()
+        await this.fetchComboTipoPeso(),
+        await this.fetchObtenerSucursal()
       ]);
+
+    const ubigeo = {
+      idUbigeo: sucursal.idUbigeo,
+      departamento: sucursal.departamento,
+      provincia: sucursal.provincia,
+      distrito: sucursal.distrito,
+      ubigeo: sucursal.ubigeo,
+    };
+
+    this.handleSelectItemUbigeoPartido(ubigeo);
 
     this.setState({
       comprobantes,
       idComprobante: comprobantes.length === 1 ? comprobantes[0].idComprobante : "",
       motivoTraslado,
       tipoPeso,
+      direccionPartida: sucursal.direccion,
       loading: false
     })
   }
@@ -195,20 +264,106 @@ class GuiaRemisionCrear extends CustomComponent {
     }
   }
 
+  async fetchFiltrarConductor(params) {
+    const response = await filtrarPersona(params);
+
+    if (response instanceof SuccessReponse) {
+      return response.data;
+    }
+
+    if (response instanceof ErrorResponse) {
+      return [];
+    }
+  }
+
+  async fetchFiltrarUbigeo(params) {
+    const response = await getUbigeo(params);
+
+    if (response instanceof SuccessReponse) {
+      return response.data;
+    }
+
+    if (response instanceof ErrorResponse) {
+      return [];
+    }
+  }
+
+  async fetchObtenerSucursal() {
+    const params = {
+      idSucursal: this.state.idSucursal
+    }
+
+    const response = await getIdSucursal(params);
+
+    if (response instanceof SuccessReponse) {
+      return response.data;
+    }
+
+    if (response instanceof ErrorResponse) {
+      return [];
+    }
+  }
+
+
+  async fetchObtenerVentaDetalle() {
+    const params = {
+      idVenta: this.state.venta.idVenta
+    }
+
+    const response = await detailOnlyFactura(params);
+
+    if (response instanceof SuccessReponse) {
+      return response.data;
+    }
+
+    if (response instanceof ErrorResponse) {
+      return [];
+    }
+  }
 
   //------------------------------------------------------------------------------------------
   // Eventos para traer el modald de venta
   //------------------------------------------------------------------------------------------
+  handlePrintA4 = () => {
+    printJS({
+      printable: pdfA4GuiaRemision(this.state.idGuiaRemision),
+      type: 'pdf',
+      showModal: true,
+      modalMessage: "Recuperando documento...",
+      onPrintDialogClose: () => {
+        console.log("onPrintDialogClose")
+      }
+    })
+  }
 
-  handleOpenPrint = () => {
-    this.setState({ isOpen: true })
+  handlePrintTicket = () => {
+    printJS({
+      printable: pdfTicketGuiaRemision(this.state.idGuiaRemision),
+      type: 'pdf',
+      showModal: true,
+      modalMessage: "Recuperando documento...",
+      onPrintDialogClose: () => {
+        console.log("onPrintDialogClose")
+        this.setState(this.initial, async () => {
+          await this.loadData()
+        })
+      }
+    })
+  }
+
+  handleOpenPrint = (idGuiaRemision) => {
+    this.setState({ isOpen: true, idGuiaRemision: idGuiaRemision })
   }
 
   handleClosePrint = async () => {
-    const data = this.refVenta.current;
+    const data = this.refPrinter.current;
     data.classList.add("close")
     data.addEventListener('animationend', () => {
-      this.setState({ isOpen: false })
+      this.setState({ isOpen: false }, () => {
+        this.setState(this.initial, async () => {
+          await this.loadData()
+        })
+      })
     })
   }
 
@@ -259,6 +414,16 @@ class GuiaRemisionCrear extends CustomComponent {
       ventas: [],
     });
     this.selectItemVenta = true;
+
+    this.setState({
+      loading: true
+    })
+    const ventaDetalle = await this.fetchObtenerVentaDetalle();
+
+    this.setState({
+      detalle: ventaDetalle,
+      loading: false
+    })
   };
 
   //------------------------------------------------------------------------------------------
@@ -310,6 +475,219 @@ class GuiaRemisionCrear extends CustomComponent {
   };
 
   //------------------------------------------------------------------------------------------
+  // Filtrar conductor
+  //------------------------------------------------------------------------------------------
+
+  handleClearInputConductor = async () => {
+    await this.setStateAsync({
+      conductores: [],
+      filtrarConductor: '',
+      conductor: null,
+    });
+    this.selectItemConductor = false;
+  };
+
+  handleFilterConductor = async (event) => {
+    const searchWord = this.selectItemConductor ? '' : event.target.value;
+    await this.setStateAsync({ conductor: null, filtrarConductor: searchWord });
+
+    this.selectItemConductor = false;
+    if (searchWord.length === 0) {
+      await this.setStateAsync({ conductores: [] });
+      return;
+    }
+
+    if (this.state.loadingConductor) return;
+
+    await this.setStateAsync({ loadingConductor: true });
+
+    const params = {
+      opcion: 1,
+      filter: searchWord,
+      conductor: true
+    };
+
+    const conductores = await this.fetchFiltrarConductor(params);
+
+    this.setState({
+      conductores: conductores,
+      loadingConductor: false,
+    });
+  };
+
+  handleSelectItemConductor = async (value) => {
+    await this.setStateAsync({
+      conductor: value,
+      filtrarConductor: `${value.documento}, ${value.informacion}`,
+      conductores: [],
+    });
+    this.selectItemConductor = true;
+  };
+
+
+  //------------------------------------------------------------------------------------------
+  // Filtrar conductor publico
+  //------------------------------------------------------------------------------------------
+
+  handleClearInputConductorPublico = async () => {
+    await this.setStateAsync({
+      conductoresPublico: [],
+      filtrarConductorPublico: '',
+      conductorPublico: null,
+    });
+    this.selectItemConductorPublico = false;
+  };
+
+  handleFilterConductorPublico = async (event) => {
+    const searchWord = this.selectItemConductorPublico ? '' : event.target.value;
+    await this.setStateAsync({ conductorPublico: null, filtrarConductorPublico: searchWord });
+
+    this.selectItemConductorPublico = false;
+    if (searchWord.length === 0) {
+      await this.setStateAsync({ conductores: [] });
+      return;
+    }
+
+    if (this.state.loadingConductorPublico) return;
+
+    await this.setStateAsync({ loadingConductorPublico: true });
+
+    const params = {
+      opcion: 1,
+      filter: searchWord,
+      conductor: true
+    };
+
+    const conductores = await this.fetchFiltrarConductor(params);
+
+    this.setState({
+      conductoresPublico: conductores,
+      loadingConductorPublico: false,
+    });
+  };
+
+  handleSelectItemConductorPublico = async (value) => {
+    await this.setStateAsync({
+      conductorPublico: value,
+      filtrarConductorPublico: `${value.documento}, ${value.informacion}`,
+      conductoresPublico: [],
+    });
+    this.selectItemConductorPublico = true;
+  };
+
+  //------------------------------------------------------------------------------------------
+  // Filtrar ubigeo partida
+  //------------------------------------------------------------------------------------------
+
+  handleClearInputaUbigeoPartido = async () => {
+    await this.setStateAsync({
+      ubigeosPartida: [],
+      filterUbigeoPartida: '',
+      idUbigeoPartida: ''
+    });
+    this.selectItemUbigeoPartida = false;
+  };
+
+  handleFilterUbigeoPartido = async (event) => {
+    const searchWord = this.selectItemUbigeoPartida ? '' : event.target.value;
+    await this.setStateAsync({ idUbigeoPartida: '', filterUbigeoPartida: searchWord });
+
+    this.selectItemUbigeoPartida = false;
+    if (searchWord.length === 0) {
+      await this.setStateAsync({ ubigeosPartida: [] });
+      return;
+    }
+
+    if (this.state.loadingUbigePartida) return;
+
+    await this.setStateAsync({ loadingUbigePartida: true });
+
+    const params = {
+      filtrar: searchWord,
+    };
+
+    const ubigeos = await this.fetchFiltrarUbigeo(params);
+
+    this.setState({
+      ubigeosPartida: ubigeos,
+      loadingUbigePartida: false,
+    });
+  };
+
+  handleSelectItemUbigeoPartido = async (value) => {
+    await this.setStateAsync({
+      filterUbigeoPartida:
+        value.departamento +
+        ' - ' +
+        value.provincia +
+        ' - ' +
+        value.distrito +
+        ' (' +
+        value.ubigeo +
+        ')',
+      ubigeosPartida: [],
+      idUbigeoPartida: value.idUbigeo,
+    });
+    this.selectItemUbigeoPartida = true;
+  };
+
+  //------------------------------------------------------------------------------------------
+  // Filtrar ubigeo llegada
+  //------------------------------------------------------------------------------------------
+
+  handleClearInputaUbigeoLlegada = async () => {
+    await this.setStateAsync({
+      ubigeosLlegada: [],
+      filterUbigeoLlegada: '',
+      idUbigeoLlegada: ''
+    });
+    this.selectItemUbigeoLlegada = false;
+  };
+
+  handleFilterUbigeoLlegada = async (event) => {
+    const searchWord = this.selectItemUbigeoLlegada ? '' : event.target.value;
+    await this.setStateAsync({ idUbigeoLlegada: '', filterUbigeoLlegada: searchWord });
+
+    this.selectItemUbigeoLlegada = false;
+    if (searchWord.length === 0) {
+      await this.setStateAsync({ ubigeosLlegada: [] });
+      return;
+    }
+
+    if (this.state.loadingUbigeLlegada) return;
+
+    await this.setStateAsync({ loadingUbigeLlegada: true });
+
+    const params = {
+      filtrar: searchWord,
+    };
+
+    const ubigeos = await this.fetchFiltrarUbigeo(params);
+
+    this.setState({
+      ubigeosLlegada: ubigeos,
+      loadingUbigeLlegada: false,
+    });
+  };
+
+  handleSelectItemUbigeoLlegada = async (value) => {
+    await this.setStateAsync({
+      filterUbigeoLlegada:
+        value.departamento +
+        ' - ' +
+        value.provincia +
+        ' - ' +
+        value.distrito +
+        ' (' +
+        value.ubigeo +
+        ')',
+      ubigeosLlegada: [],
+      idUbigeoLlegada: value.idUbigeo,
+    });
+    this.selectItemUbigeoLlegada = true;
+  };
+
+  //------------------------------------------------------------------------------------------
   // Evento para guardar la guía de remisión
   //------------------------------------------------------------------------------------------
 
@@ -333,7 +711,59 @@ class GuiaRemisionCrear extends CustomComponent {
     });
   }
 
+  handleBack() {
+    alertDialog("Guía de Remisión", "¿Está seguro de salir?", (accept) => {
+      if (accept) {
+        this.props.history.goBack()
+      }
+    });
+  }
+
+  handleClear() {
+    alertDialog("Guía de Remisión", "¿Está seguro de limpiar todo el contenido?", (accept) => {
+      if (accept) {
+        this.setState(this.initial, async () => {
+          await this.loadData()
+        })
+      }
+    })
+  }
+
   handleSave() {
+    if (!this.state.venta) {
+      alertWarning("Guía de Remisión", "Filtre una venta para continuar.", () => {
+        this.refFiltrarVenta.current.focus()
+      })
+      return;
+    }
+
+    if (isEmpty(this.state.idComprobante)) {
+      alertWarning("Guía de Remisión", "Seleccione un comprobante.", () => {
+        this.refComprobante.current.focus()
+      })
+      return;
+    }
+
+    if (isEmpty(this.state.idMotivoTraslado)) {
+      alertWarning("Guía de Remisión", "Seleccione el motivo de traslado.", () => {
+        this.refMotivoTraslado.current.focus()
+      })
+      return;
+    }
+
+    if (isEmpty(this.state.idTipoPeso)) {
+      alertWarning("Guía de Remisión", "Seleccione el tipo de peso.", () => {
+        this.refTipoPeso.current.focus()
+      })
+      return;
+    }
+
+    if (isEmpty(this.state.peso)) {
+      alertWarning("Guía de Remisión", "Ingrese el peso total.", () => {
+        this.refPeso.current.focus()
+      })
+      return;
+    }
 
     alertDialog("Guía de Remisión", "¿Está seguro de continuar?", async (accept) => {
       if (accept) {
@@ -347,20 +777,30 @@ class GuiaRemisionCrear extends CustomComponent {
           idTipoPeso: this.state.idTipoPeso,
           peso: this.state.peso,
           idVehiculo: this.state.vehiculo.idVehiculo,
+          idConductor: this.state.idModalidadTraslado === "MT0001" ? this.state.conductorPublico.idPersona : this.state.conductor.idPersona,
+          direccionPartida: this.state.direccionPartida,
+          idUbigeoPartida: this.state.idUbigeoPartida,
+          direccionLlegada: this.state.direccionLlegada,
+          idUbigeoLlegada: this.state.idUbigeoLlegada,
+          detalle: this.state.detalle,
           estado: 1,
           idUsuario: this.state.idUsuario
         }
 
+        alertInfo("Guía de Remisión", "Procesando información...")
+
         const response = await createGuiaRemision(data);
 
         if (response instanceof SuccessReponse) {
-          console.log(response.data)
+          alertSuccess('Guía de Remisión', response.data.message, () => {
+            this.handleOpenPrint(response.data.idGuiaRemision);
+          });
         }
 
         if (response instanceof ErrorResponse) {
           if (response.getType() === CANCELED) return;
 
-          alertWarning('Guía de Remisión"', response.getMessage());
+          alertWarning('Guía de Remisión', response.getMessage());
         }
       }
     })
@@ -372,7 +812,7 @@ class GuiaRemisionCrear extends CustomComponent {
         {this.state.loading && spinnerLoading(this.state.msgLoading)}
 
         <CustomModal
-          contentRef={(ref) => this.refVenta.current = ref}
+          contentRef={(ref) => this.refPrinter.current = ref}
           isOpen={this.state.isOpen}
           onOpen={() => {
             console.log("onOpen")
@@ -396,32 +836,7 @@ class GuiaRemisionCrear extends CustomComponent {
               </button>
             </div>
 
-            <div style={{ "position": "relative", flex: "1 1 auto", "padding": "1rem" }}>
-              <div className='row'>
-                <div className='col'>
-                  <SearchInput
-                    showLeftIcon={true}
-                    autoFocus={true}
-                    placeholder="Filtrar ventas..."
-                    refValue={this.refFiltrarVenta}
-                    value={this.state.filtrarVenta}
-                    data={this.state.ventas}
-                    handleClearInput={this.handleClearInputVenta}
-                    handleFilter={this.handleFilterVenta}
-                    handleSelectItem={this.handleSelectItemVenta}
-                    renderItem={(value) =>
-                      <>
-                        <span>{value.nombreComprobante} {value.serie}-{value.numeracion}</span>
-                        {" / "}
-                        <span>{value.informacion}</span>
-                      </>
-                    }
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* <div className="d-flex flex-column align-items-center py-3 px-5">
+            <div className="d-flex flex-column align-items-center py-3 px-5">
               <h5>Opciones de impresión</h5>
               <div>
                 <button type="button" className="btn btn-outline-info"
@@ -434,7 +849,7 @@ class GuiaRemisionCrear extends CustomComponent {
                   <i className="fa fa-sticky-note"></i> Ticket
                 </button>
               </div>
-            </div> */}
+            </div>
 
             <div className='d-flex justify-content-end my-3 mx-0 pt-2 px-3' style={{
               borderTop: '1px solid #dee2e6',
@@ -452,7 +867,7 @@ class GuiaRemisionCrear extends CustomComponent {
           <div className="col">
             <div className="form-group">
               <h5>
-                <span role="button" onClick={() => this.props.history.goBack()}>
+                <span role="button" onClick={() => this.handleBack()}>
                   <i className="bi bi-arrow-left-short"></i>
                 </span>{' '}
                 Guía Remisión
@@ -466,16 +881,22 @@ class GuiaRemisionCrear extends CustomComponent {
           <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
             <button
               type="button"
-              className="btn btn-primary mr-2"
-              onClick={() => this.handleSave()}
-            >
+              className="btn btn-primary"
+              onClick={() => this.handleSave()}>
               <i className='fa fa-save'></i>  Guardar
             </button>
+            {" "}
+            <button
+              type="button"
+              className="btn btn-outline-info"
+              onClick={() => this.handleClear()}>
+              <i className='fa fa-trash'></i>  Limiar
+            </button>
+            {" "}
             <button
               type="button"
               className="btn btn-outline-danger"
-              onClick={() => this.props.history.goBack()}
-            >
+              onClick={() => this.handleBack()}>
               <i className='fa fa-close'></i>  Cancelar
             </button>
           </div>
@@ -526,6 +947,7 @@ class GuiaRemisionCrear extends CustomComponent {
               <div className="input-group">
                 <select
                   className="form-control"
+                  ref={this.refComprobante}
                   value={this.state.idComprobante}
                   onChange={this.handleSelectComprobante}>
                   <option value="">-- Seleccione --</option>
@@ -623,6 +1045,7 @@ class GuiaRemisionCrear extends CustomComponent {
 
               <div className="input-group">
                 <select className="form-control"
+                  ref={this.refMotivoTraslado}
                   value={this.state.idMotivoTraslado}
                   onChange={(event) => {
                     this.setState({ idMotivoTraslado: event.target.value })
@@ -648,7 +1071,7 @@ class GuiaRemisionCrear extends CustomComponent {
                 type="date"
                 value={this.state.fechaTraslado}
                 onChange={async (event) => {
-                  this.setStateAsync({ fechaTraslado: event.target.value });
+                  this.setState({ fechaTraslado: event.target.value });
                 }}
               />
             </div>
@@ -664,6 +1087,7 @@ class GuiaRemisionCrear extends CustomComponent {
 
               <div className="input-group">
                 <select className="form-control"
+                  ref={this.refTipoPeso}
                   value={this.state.idTipoPeso}
                   onChange={(event) => {
                     this.setState({ idTipoPeso: event.target.value })
@@ -687,6 +1111,7 @@ class GuiaRemisionCrear extends CustomComponent {
                   type="text"
                   className="form-control"
                   placeholder="Ejm: 0.00, 0"
+                  ref={this.refPeso}
                   value={this.state.peso}
                   onChange={(event) => {
                     this.setState({ peso: event.target.value })
@@ -718,17 +1143,6 @@ class GuiaRemisionCrear extends CustomComponent {
               handleClearInput={this.handleClearInputVehiculo}
               handleFilter={this.handleFilterVehiculo}
               handleSelectItem={this.handleSelectItemVehiculo}
-              // customButton={() => (
-              //   <button
-              //     className="btn btn-outline-success d-flex align-items-center"
-              //     onClick={() => {
-              //       console.log("ddas")
-              //     }}
-              //     disabled={this.state.disabledPublica}>
-              //     <i className='fa fa-plus'></i>
-              //     <div className="ml-2">Nuevo</div>
-              //   </button>
-              // )}
               renderItem={(value) =>
                 <>
                   <span>{value.marca}-{value.numeroPlaca}</span>
@@ -746,34 +1160,21 @@ class GuiaRemisionCrear extends CustomComponent {
         <div className='row'>
           <div className='col'>
             <label>
-              Selecciona un Conductor (DNI): <i className="fa fa-asterisk text-danger small"></i>
+              Filtrar un Conductor (DNI): <i className="fa fa-asterisk text-danger small"></i>
             </label>
             <SearchInput
               disabled={this.state.disabledPublica}
               showLeftIcon={false}
-              placeholder="Ejm: B001, 1, F001..."
-              refValue={this.refFiltrarVenta}
-              value={this.state.filtrarVenta}
-              data={this.state.ventas}
-              handleClearInput={this.handleClearInputVenta}
-              handleFilter={this.handleFilterVenta}
-              handleSelectItem={this.handleSelectItemVenta}
-              // customButton={() => (
-              //   <button
-              //     className="btn btn-outline-success d-flex align-items-center"
-              //     onClick={() => {
-              //       console.log("ddas")
-              //     }}
-              //     disabled={this.state.disabledPublica}>
-              //     <i className='fa fa-plus'></i>
-              //     <div className="ml-2">Nuevo</div>
-              //   </button>
-              // )}
+              placeholder="Por número de documento o apellidos y nombres..."
+              refValue={this.refFiltrarConductor}
+              value={this.state.filtrarConductor}
+              data={this.state.conductores}
+              handleClearInput={this.handleClearInputConductor}
+              handleFilter={this.handleFilterConductor}
+              handleSelectItem={this.handleSelectItemConductor}
               renderItem={(value) =>
                 <>
-                  <span>{value.nombreComprobante} {value.serie}-{value.numeracion}</span>
-                  {" / "}
-                  <span>{value.informacion}</span>
+                  <span>{value.documento}, {value.informacion}</span>
                 </>
               }
             />
@@ -794,29 +1195,16 @@ class GuiaRemisionCrear extends CustomComponent {
             <SearchInput
               disabled={this.state.disabledPrivado}
               showLeftIcon={false}
-              placeholder="Ejm: B001, 1, F001..."
-              refValue={this.refFiltrarVenta}
-              value={this.state.filtrarVenta}
-              data={this.state.ventas}
-              handleClearInput={this.handleClearInputVenta}
-              handleFilter={this.handleFilterVenta}
-              handleSelectItem={this.handleSelectItemVenta}
-              // customButton={() => (
-              //   <button
-              //     className="btn btn-outline-success d-flex align-items-center"
-              //     onClick={() => {
-              //       console.log("ddas")
-              //     }}
-              //     disabled={this.state.disabledPrivado}>
-              //     <i className='fa fa-plus'></i>
-              //     <div className="ml-2">Nuevo</div>
-              //   </button>
-              // )}
+              placeholder="Por número de documento o ruc..."
+              refValue={this.refFiltrarConductorPublico}
+              value={this.state.filtrarConductorPublico}
+              data={this.state.conductoresPublico}
+              handleClearInput={this.handleClearInputConductorPublico}
+              handleFilter={this.handleFilterConductorPublico}
+              handleSelectItem={this.handleSelectItemConductorPublico}
               renderItem={(value) =>
                 <>
-                  <span>{value.nombreComprobante} {value.serie}-{value.numeracion}</span>
-                  {" / "}
-                  <span>{value.informacion}</span>
+                  <span>{value.documento}, {value.informacion}</span>
                 </>
               }
             />
@@ -846,12 +1234,11 @@ class GuiaRemisionCrear extends CustomComponent {
                   type="text"
                   className="form-control"
                   placeholder="Ingrese Dirección de partida..."
-                  ref={this.refTxtSearch}
-                  onKeyUp={(event) =>
-                    keyUpSearch(event, () =>
-                      this.searchProveedor(event.target.value),
-                    )
-                  }
+                  ref={this.refDireccionPartida}
+                  value={this.state.direccionPartida}
+                  onChange={(event) => {
+                    this.setState({ direccionPartida: event.target.value })
+                  }}
                 />
               </div>
             </div>
@@ -863,18 +1250,19 @@ class GuiaRemisionCrear extends CustomComponent {
               <SearchInput
                 showLeftIcon={true}
                 renderIconLeft={() => <i className="bi bi-search"></i>}
-                placeholder="Ejm: B001, 1, F001..."
-                refValue={this.refFiltrarVenta}
-                value={this.state.filtrarVenta}
-                data={this.state.ventas}
-                handleClearInput={this.handleClearInputVenta}
-                handleFilter={this.handleFilterVenta}
-                handleSelectItem={this.handleSelectItemVenta}
+                placeholder="Filtrar departamento, distrito o provincia..."
+                refValue={this.refFiltrarUbigeoPartida}
+                value={this.state.filterUbigeoPartida}
+                data={this.state.ubigeosPartida}
+                handleClearInput={this.handleClearInputaUbigeoPartido}
+                handleFilter={this.handleFilterUbigeoPartido}
+                handleSelectItem={this.handleSelectItemUbigeoPartido}
                 renderItem={(value) =>
                   <>
-                    <span>{value.nombreComprobante} {value.serie}-{value.numeracion}</span>
-                    {" / "}
-                    <span>{value.informacion}</span>
+                    {value.departamento} -
+                    {value.provincia} -
+                    {value.distrito}
+                    ({value.ubigeo})
                   </>
                 }
               />
@@ -901,12 +1289,11 @@ class GuiaRemisionCrear extends CustomComponent {
                   type="text"
                   className="form-control"
                   placeholder="Ingrese Dirección de llegada..."
-                  ref={this.refTxtSearch}
-                  onKeyUp={(event) =>
-                    keyUpSearch(event, () =>
-                      this.searchProveedor(event.target.value),
-                    )
-                  }
+                  ref={this.refDireccionLlegada}
+                  value={this.state.direccionLlegada}
+                  onChange={(event) => {
+                    this.setState({ direccionLlegada: event.target.value })
+                  }}
                 />
               </div>
             </div>
@@ -918,18 +1305,19 @@ class GuiaRemisionCrear extends CustomComponent {
               <SearchInput
                 showLeftIcon={true}
                 renderIconLeft={() => <i className="bi bi-search"></i>}
-                placeholder="Ejm: B001, 1, F001..."
-                refValue={this.refFiltrarVenta}
-                value={this.state.filtrarVenta}
-                data={this.state.ventas}
-                handleClearInput={this.handleClearInputVenta}
-                handleFilter={this.handleFilterVenta}
-                handleSelectItem={this.handleSelectItemVenta}
+                placeholder="Filtrar departamento, distrito o provincia..."
+                refValue={this.refFiltrarUbigeoLlegada}
+                value={this.state.filterUbigeoLlegada}
+                data={this.state.ubigeosLlegada}
+                handleClearInput={this.handleClearInputaUbigeoLlegada}
+                handleFilter={this.handleFilterUbigeoLlegada}
+                handleSelectItem={this.handleSelectItemUbigeoLlegada}
                 renderItem={(value) =>
                   <>
-                    <span>{value.nombreComprobante} {value.serie}-{value.numeracion}</span>
-                    {" / "}
-                    <span>{value.informacion}</span>
+                    {value.departamento} -
+                    {value.provincia} -
+                    {value.distrito}
+                    ({value.ubigeo})
                   </>
                 }
               />
@@ -953,24 +1341,20 @@ class GuiaRemisionCrear extends CustomComponent {
                     <th width="35%">Descripción</th>
                     <th width="15%">Und/Medida</th>
                     <th width="15%">Cantidad</th>
-                    <th width="15%">Peso (KG)</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td className="text-center">1</td>
-                    <td>10 UND</td>
-                    <td>PROD0001/Pollo desmenuzado</td>
-                    <td>S/. 25</td>
-                    <td>S/. 1.8</td>
-                    <td className="text-center">
-                      <input
-                        type='text'
-                        className='form-control'
-                        placeholder='0.00'
-                      />
-                    </td>
-                  </tr>
+                  {
+                    this.state.detalle.map((item, index) => (
+                      <tr key={index}>
+                        <td className="text-center">{++index}</td>
+                        <td>{item.codigo}</td>
+                        <td>{item.producto}</td>
+                        <td>{item.medida}</td>
+                        <td>{item.cantidad}</td>
+                      </tr>
+                    ))
+                  }
                 </tbody>
               </table>
             </div>

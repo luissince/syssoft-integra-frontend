@@ -436,6 +436,15 @@ export async function detailFactura(params, signal) {
   );
 }
 
+export async function detailOnlyFactura(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/factura/detail/only', {
+      signal: signal,
+      params: params,
+    }),
+  );
+}
+
 export async function cancelVenta(params) {
   return await Resolve.create(
     instancePrincipal.delete('/api/factura/cancel', {
@@ -1347,6 +1356,16 @@ export async function detailtBanco(params, signal) {
     }),
   );
 }
+
+export async function detailtListBanco(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/banco/detail/list', {
+      params: params,
+      signal: signal,
+    }),
+  );
+}
+
 
 export async function comboBanco(signal) {
   return await Resolve.create(

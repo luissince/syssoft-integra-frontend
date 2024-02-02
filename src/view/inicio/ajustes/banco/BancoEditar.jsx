@@ -148,6 +148,10 @@ class BancoEditar extends CustomComponent {
           idMoneda: this.state.idMoneda.trim().toUpperCase(),
           numCuenta: this.state.numCuenta.trim().toUpperCase(),
           cci: this.state.cci.trim().toUpperCase(),
+          preferido: this.state.preferido,
+          vuelto: this.state.vuelto,
+          estado: this.state.estado,
+          
           idUsuario: this.state.idUsuario,
           idBanco: this.state.idBanco,
         };

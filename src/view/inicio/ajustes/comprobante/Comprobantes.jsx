@@ -221,7 +221,7 @@ class Comprobantes extends CustomComponent {
               <button
                 className="btn btn-outline-info"
                 onClick={this.handleAgregar}
-                // disabled={!this.state.add}
+              // disabled={!this.state.add}
               >
                 <i className="bi bi-file-plus"></i> Nuevo Registro
               </button>{' '}
@@ -244,11 +244,10 @@ class Comprobantes extends CustomComponent {
                     <th width="5%" className="text-center">
                       #
                     </th>
-                    <th width="20%">Tipo Comprobante</th>
+                    <th width="15%">Tipo Comprobante</th>
                     <th width="20%">Nombre</th>
-                    <th width="10%">Serie</th>
+                    <th width="15%">Serie</th>
                     <th width="10%">Numeración</th>
-                    <th width="10%">Creación</th>
                     <th width="10%">Preferida</th>
                     <th width="10%">Estado</th>
                     <th width="5%" className="text-center">
@@ -283,22 +282,12 @@ class Comprobantes extends CustomComponent {
                           <td>{item.tipo.toUpperCase()}</td>
                           <td>{item.nombre}</td>
                           <td>{item.serie}</td>
-                          <td>{item.numeracion}</td>
-                          <td>
-                            {<span>{item.fecha}</span>}
-                            {<br></br>}
-                            {<span>{formatTime(item.hora)}</span>}
+                          <td>{item.numeracion}</td>                   
+                          <td className="text-center">
+                            <div className={`badge ${item.preferida === 1 ? 'badge-info' : 'badge-danger'}`}>{item.preferida === 1 ? 'Si' : 'No'}</div>
                           </td>
                           <td className="text-center">
-                            <div>{item.preferida === 1 ? 'Si' : 'No'}</div>
-                          </td>
-                          <td className="text-center">
-                            <div
-                              className={`badge ${item.estado === 1
-                                  ? 'badge-info'
-                                  : 'badge-danger'
-                                }`}
-                            >
+                            <div className={`badge ${item.estado === 1 ? 'badge-success' : 'badge-danger'}`}>
                               {item.estado === 1 ? 'ACTIVO' : 'INACTIVO'}
                             </div>
                           </td>
@@ -309,7 +298,7 @@ class Comprobantes extends CustomComponent {
                               onClick={() =>
                                 this.handleEditar(item.idComprobante)
                               }
-                              // disabled={!this.state.edit}
+                            // disabled={!this.state.edit}
                             >
                               <i className="bi bi-pencil"></i>
                             </button>
@@ -321,7 +310,7 @@ class Comprobantes extends CustomComponent {
                               onClick={() =>
                                 this.handleBorrar(item.idComprobante)
                               }
-                              // disabled={!this.state.remove}
+                            // disabled={!this.state.remove}
                             >
                               <i className="bi bi-trash"></i>
                             </button>

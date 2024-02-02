@@ -35,6 +35,7 @@ class ComporbanteEditar extends CustomComponent {
       estado: true,
       preferida: false,
       numeroCampo: '',
+      facturado: false,
 
       tipoComprobante: [],
 
@@ -86,6 +87,7 @@ class ComporbanteEditar extends CustomComponent {
       estado: comprobante.estado === 1 ? true : false,
       preferida: comprobante.preferida === 1 ? true : false,
       numeroCampo: comprobante.numeroCampo,
+      facturado: comprobante.facturado === 1 ? true : false,
       loading: false,
     });
   }
@@ -179,13 +181,11 @@ class ComporbanteEditar extends CustomComponent {
             numeroCampo:
               this.state.numeroCampo === '' ? 0 : this.state.numeroCampo,
             idUsuario: this.state.idUsuario,
+            facturado: this.state.facturado,
             idComprobante: this.state.idComprobante,
           };
 
-          const response = await editComprobante(
-            data,
-            this.abortController.signal,
-          );
+          const response = await editComprobante(data, this.abortController.signal);
 
           if (response instanceof SuccessReponse) {
             alertSuccess('Comprobante', response.data, () => {
@@ -224,9 +224,8 @@ class ComporbanteEditar extends CustomComponent {
         <div className="row">
           <div className="col">
             <div className="form-group">
-              <label htmlFor="estado">
-                Tipo de Comprobante{' '}
-                <i className="fa fa-asterisk text-danger small"></i>
+              <label htmlFor="estado" className="col-form-label">
+                Tipo de Comprobante: <i className="fa fa-asterisk text-danger small"></i>
               </label>
               <select
                 className="form-control"
@@ -271,7 +270,7 @@ class ComporbanteEditar extends CustomComponent {
 
         <div className="row">
           <div className="form-group col-md-6">
-            <label htmlFor="serie">
+            <label htmlFor="serie" className="col-form-label">
               Serie <i className="fa fa-asterisk text-danger small"></i>
             </label>
             <input
@@ -285,7 +284,7 @@ class ComporbanteEditar extends CustomComponent {
             />
           </div>
           <div className="form-group col-md-6">
-            <label htmlFor="numeracion">
+            <label htmlFor="numeracion" className="col-form-label">
               Numeración <i className="fa fa-asterisk text-danger small"></i>
             </label>
             <input
@@ -311,6 +310,7 @@ class ComporbanteEditar extends CustomComponent {
             <input
               type="text"
               className="form-control"
+              placeholder='Ejm: Boleta Electrónica, Factura Electrónica...'
               id="impresion"
               value={this.state.impresion}
               onChange={(event) =>
@@ -327,6 +327,7 @@ class ComporbanteEditar extends CustomComponent {
               type="text"
               className="form-control"
               id="codigo"
+              placeholder='01, 06'
               value={this.state.codigo}
               onChange={(event) =>
                 this.setState({ codigo: event.target.value })
@@ -337,6 +338,9 @@ class ComporbanteEditar extends CustomComponent {
 
         <div className="row">
           <div className="form-group col-md-6">
+            <label htmlFor="nombre" className="col-form-label">
+              Estado:
+            </label>
             <div className="custom-control custom-switch">
               <input
                 type="checkbox"
@@ -354,6 +358,9 @@ class ComporbanteEditar extends CustomComponent {
           </div>
 
           <div className="form-group col-md-6">
+            <label htmlFor="nombre" className="col-form-label">
+              Preferido:
+            </label>
             <div className="custom-control custom-switch">
               <input
                 type="checkbox"
@@ -365,7 +372,7 @@ class ComporbanteEditar extends CustomComponent {
                 }
               />
               <label className="custom-control-label" htmlFor="cbPreferido">
-                Preferido
+                {this.state.preferida ? "Si" : "No"}
               </label>
             </div>
           </div>
@@ -373,7 +380,7 @@ class ComporbanteEditar extends CustomComponent {
 
         <div className="row">
           <div className="form-group col-md-6">
-            <label htmlFor="numeracion">Caracteres a Usar</label>
+            <label htmlFor="numeracion" className="col-form-label">Caracteres a Usar</label>
             <input
               ref={this.refNumeroCampo}
               type="text"
@@ -386,6 +393,26 @@ class ComporbanteEditar extends CustomComponent {
               }
               onKeyDown={keyNumberInteger}
             />
+          </div>
+
+          <div className="form-group col-md-6">
+            <label htmlFor="nombre" className="col-form-label">
+              Facturado:
+            </label>
+            <div className="custom-control custom-switch">
+              <input
+                type="checkbox"
+                className="custom-control-input"
+                id="cbFacturado"
+                checked={this.state.facturado}
+                onChange={(value) =>
+                  this.setState({ facturado: value.target.checked })
+                }
+              />
+              <label className="custom-control-label" htmlFor="cbFacturado">
+                {this.state.facturado ? "Si" : "No"}
+              </label>
+            </div>
           </div>
         </div>
 

@@ -596,7 +596,9 @@ class CobroCrear extends CustomComponent {
     await this.setStateAsync({ loadingCliente: true });
 
     const params = {
-      filtrar: searchWord,
+      "opcion": 1,
+      "filtrar": searchWord,
+      "cliente": true,
     };
 
     const clientes = await this.fetchFiltrarCliente(params);

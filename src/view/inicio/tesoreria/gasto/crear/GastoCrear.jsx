@@ -265,17 +265,17 @@ class GastoCrear extends CustomComponent {
 
     async fetchComboBanco() {
         const response = await comboBanco();
-    
+
         if (response instanceof SuccessReponse) {
-          return response.data;
+            return response.data;
         }
-    
+
         if (response instanceof ErrorResponse) {
-          if (response.getType() === CANCELED) return;
-    
-          return [];
+            if (response.getType() === CANCELED) return;
+
+            return [];
         }
-      }
+    }
 
     //------------------------------------------------------------------------------------------
     // Funciones para agregar y quitar el detalle
@@ -603,7 +603,9 @@ class GastoCrear extends CustomComponent {
         await this.setStateAsync({ loadingCliente: true });
 
         const params = {
+            opcion: 1,
             filtrar: searchWord,
+            proveedor: true,
         };
 
         const clientes = await this.fetchFiltrarCliente(params);

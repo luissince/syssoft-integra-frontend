@@ -1,29 +1,189 @@
-import React from 'react';
 import ContainerWrapper from '../../../../../components/Container';
 import CustomComponent from '../../../../../model/class/custom-component';
 import {
-  keyUpSearch,
-  currentDate,
-  validateDate,
+  isText,
+  formatTime,
+  rounded,
+  formatNumberWithZeros,
+  spinnerLoading,
 } from '../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
+import { detailGuiaRemision } from '../../../../../network/rest/principal.network';
+import SuccessReponse from '../../../../../model/class/response';
+import ErrorResponse from '../../../../../model/class/error-response';
+import { CANCELED } from '../../../../../model/types/types';
+import printJS from 'print-js';
+import { pdfA4GuiaRemision, pdfTicketGuiaRemision } from '../../../../../helper/lista-pdf.helper';
 
 class GuiaRemisionDetalle extends CustomComponent {
-  async onEventImprimir() {
-    // const data = {
-    //     "idEmpresa": "EM0001",
-    //     "idVenta": this.state.idVenta,
-    // }
-    // let ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria').toString();
-    // let params = new URLSearchParams({ "params": ciphertext });
-    // window.open("/api/factura/repcomprobante?" + params, "_blank");
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      loading: true,
+      msgLoading: 'Cargando datos...',
+
+      idGuiaRemision:'',
+      fecha: "",
+      hora: "",
+      comprobante: "",
+      serie: "",
+      numeracion: "",
+      modalidadTraslado: "",
+      motivoTraslado: "",
+      fechaTraslado: "",
+      tipoPeso: "",
+      peso: "",
+      marca: "",
+      numeroPlaca: "",
+      documentoConductor: "",
+      informacionConductor: "",
+      licenciaConducir: "",
+      direccionPartida: "",
+      ubigeoPartida: "",
+      direccionLlegada: "",
+      ubigeoLlegada: "",
+      usuario: "",
+      comprobanteRef: "",
+      serieRef: "",
+      numeracionRef: "",
+      cliente: "",
+
+      detalle: []
+    };
+
+    this.abortControllerView = new AbortController();
+  }
+
+  async componentDidMount() {
+    const url = this.props.location.search;
+    const idGuiaRemision = new URLSearchParams(url).get('idGuiaRemision');
+    if (isText(idGuiaRemision)) {
+      await this.loadingData(idGuiaRemision);
+    } else {
+      this.props.history.goBack();
+    }
+  }
+
+  componentWillUnmount() {
+    this.abortControllerView.abort();
+  }
+
+  async loadingData(id) {
+    const [guiaRemision] = await Promise.all([
+      await this.fetchIdFactura(id)
+    ]);
+
+    const {
+      fecha,
+      hora,
+      comprobante,
+      serie,
+      numeracion,
+      modalidadTraslado,
+      motivoTraslado,
+      fechaTraslado,
+      tipoPeso,
+      peso,
+      marca,
+      numeroPlaca,
+      documentoConductor,
+      informacionConductor,
+      licenciaConducir,
+      direccionPartida,
+      ubigeoPartida,
+      direccionLlegada,
+      ubigeoLlegada,
+      usuario,
+      comprobanteRef,
+      serieRef,
+      numeracionRef,
+      cliente
+    } = guiaRemision.cabecera;
+
+
+    this.setState({
+      idGuiaRemision:id,
+      fecha,
+      hora,
+      comprobante,
+      serie,
+      numeracion,
+      modalidadTraslado,
+      motivoTraslado,
+      fechaTraslado,
+      tipoPeso,
+      peso,
+      marca,
+      numeroPlaca,
+      documentoConductor,
+      informacionConductor,
+      licenciaConducir,
+      direccionPartida,
+      ubigeoPartida,
+      direccionLlegada,
+      ubigeoLlegada,
+      usuario,
+      comprobanteRef,
+      serieRef,
+      numeracionRef,
+      cliente,
+
+      detalle: guiaRemision.detalle,
+
+      loading: false,
+    });
+  }
+
+  async fetchIdFactura(id) {
+    const params = {
+      idGuiaRemision: id,
+    };
+
+    const response = await detailGuiaRemision(params, this.abortControllerView.signal);
+
+    if (response instanceof SuccessReponse) {
+      return response.data;
+    }
+
+    if (response instanceof ErrorResponse) {
+      if (response.getType() === CANCELED) return;
+
+      return false;
+    }
+  }
+
+  handlePrintA4 = () => {
+    printJS({
+      printable: pdfA4GuiaRemision(this.state.idGuiaRemision),
+      type: 'pdf',
+      showModal: true,
+      modalMessage: "Recuperando documento...",
+      onPrintDialogClose: () => {
+        console.log("onPrintDialogClose")
+      }
+    })
+  }
+
+  handlePrintTicket = () => {
+    printJS({
+      printable: pdfTicketGuiaRemision(this.state.idGuiaRemision),
+      type: 'pdf',
+      showModal: true,
+      modalMessage: "Recuperando documento...",
+      onPrintDialogClose: () => {
+        console.log("onPrintDialogClose")
+      }
+    })
   }
 
   render() {
     return (
       <ContainerWrapper>
+        {this.state.loading && spinnerLoading(this.state.msgLoading)}
+
         <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+          <div className="col-12">
             <div className="form-group">
               <h5>
                 <span role="button" onClick={() => this.props.history.goBack()}>
@@ -37,21 +197,29 @@ class GuiaRemisionDetalle extends CustomComponent {
         </div>
 
         <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+          <div className="col-12">
             <div className="form-group">
               <button
                 type="button"
                 className="btn btn-light"
-                onClick={() => this.onEventImprimir()}
+                onClick={this.handlePrintA4}
               >
-                <i className="fa fa-print"></i> Imprimir
+                <i className="fa fa-print"></i> A4
+              </button>
+              {" "}
+              <button
+                type="button"
+                className="btn btn-light"
+                onClick={this.handlePrintTicket}
+              >
+                <i className="fa fa-print"></i> Ticket
               </button>
             </div>
           </div>
         </div>
 
         <div className="row">
-          <div className="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+          <div className="col-lg-6 col-md-6 col-sm-12 col-12">
             <div className="form-group">
               <div className="table-responsive">
                 <table width="100%">
@@ -61,7 +229,23 @@ class GuiaRemisionDetalle extends CustomComponent {
                         Fecha
                       </th>
                       <th className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {/*{this.state.comprobante}*/}13/11/2023 11:23:00.00
+                        {this.state.fecha} {formatTime(this.state.hora)}
+                      </th>
+                    </tr>
+                    <tr>
+                      <th className="table-secondary w-35 p-1 font-weight-normal ">
+                        Comprobante
+                      </th>
+                      <th className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                        {this.state.serie}-{formatNumberWithZeros(this.state.numeracion)}
+                      </th>
+                    </tr>
+                    <tr>
+                      <th className="table-secondary w-35 p-1 font-weight-normal ">
+                        Fecha Traslado
+                      </th>
+                      <th className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                        {this.state.fechaTraslado}
                       </th>
                     </tr>
                     <tr>
@@ -69,31 +253,7 @@ class GuiaRemisionDetalle extends CustomComponent {
                         Cliente
                       </th>
                       <th className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {/*{this.state.cliente}*/}Algún proveedor aqui
-                      </th>
-                    </tr>
-                    <tr>
-                      <th className="table-secondary w-35 p-1 font-weight-normal ">
-                        Telefono y Celular
-                      </th>
-                      <th className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {/*{this.state.fecha}*/} (01) 123 1234
-                      </th>
-                    </tr>
-                    <tr>
-                      <th className="table-secondary w-35 p-1 font-weight-normal ">
-                        Correo Electrónico
-                      </th>
-                      <th className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {/*{this.state.notas}*/}+51 123 456 789
-                      </th>
-                    </tr>
-                    <tr>
-                      <th className="table-secondary w-35 p-1 font-weight-normal ">
-                        Dirección
-                      </th>
-                      <th className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {/*{this.state.notas}*/}correo@correo.com
+                        {this.state.cliente}
                       </th>
                     </tr>
                     <tr>
@@ -101,7 +261,7 @@ class GuiaRemisionDetalle extends CustomComponent {
                         Motivo Traslado
                       </th>
                       <th className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {/*{this.state.notas}*/}alguna dirección aqui
+                        {this.state.motivoTraslado}
                       </th>
                     </tr>
                     <tr>
@@ -109,7 +269,7 @@ class GuiaRemisionDetalle extends CustomComponent {
                         Modalidad Traslado
                       </th>
                       <th className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {/*{this.state.notas}*/}Almacen 01
+                        {this.state.modalidadTraslado}
                       </th>
                     </tr>
                     <tr>
@@ -117,7 +277,23 @@ class GuiaRemisionDetalle extends CustomComponent {
                         Peso (KGM o TNE)
                       </th>
                       <th className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {/*{this.state.notas}*/}Almacen 01
+                        {this.state.tipoPeso}  {this.state.peso}
+                      </th>
+                    </tr>
+                    <tr>
+                      <th className="table-secondary w-35 p-1 font-weight-normal ">
+                        Comprobante Asociado
+                      </th>
+                      <th className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                        {this.state.comprobanteRef}
+                      </th>
+                    </tr>
+                    <tr>
+                      <th className="table-secondary w-35 p-1 font-weight-normal ">
+                        Serie y Numeración
+                      </th>
+                      <th className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                        {this.state.serieRef}-{formatNumberWithZeros(this.state.numeracionRef)}
                       </th>
                     </tr>
                   </thead>
@@ -125,7 +301,7 @@ class GuiaRemisionDetalle extends CustomComponent {
               </div>
             </div>
           </div>
-          <div className="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+          <div className="col-lg-6 col-md-6 col-sm-12 col-12">
             <div className="form-group">
               <div className="table-responsive">
                 <table width="100%">
@@ -135,7 +311,7 @@ class GuiaRemisionDetalle extends CustomComponent {
                         Conductor
                       </th>
                       <th className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {/*{this.state.comprobante}*/}F001-000123
+                        {this.state.documentoConductor},  {this.state.informacionConductor}
                       </th>
                     </tr>
                     <tr>
@@ -143,7 +319,7 @@ class GuiaRemisionDetalle extends CustomComponent {
                         Número de Licencia
                       </th>
                       <th className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {/*{this.state.comprobante}*/}Factura
+                        {this.state.licenciaConducir}
                       </th>
                     </tr>
                     <tr>
@@ -151,7 +327,7 @@ class GuiaRemisionDetalle extends CustomComponent {
                         Número de Placa
                       </th>
                       <th className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {/*{this.state.cliente}*/}01 - Pagada
+                        {this.state.numeroPlaca}
                       </th>
                     </tr>
                     <tr>
@@ -159,7 +335,7 @@ class GuiaRemisionDetalle extends CustomComponent {
                         Dirección de Partida
                       </th>
                       <th className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {/*{this.state.fecha}*/} N/D
+                        {this.state.direccionPartida}
                       </th>
                     </tr>
                     <tr>
@@ -167,23 +343,7 @@ class GuiaRemisionDetalle extends CustomComponent {
                         Dirección de Llegada
                       </th>
                       <th className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {/*{this.state.notas}*/} N/D
-                      </th>
-                    </tr>
-                    <tr>
-                      <th className="table-secondary w-35 p-1 font-weight-normal ">
-                        Comprobante Asociado
-                      </th>
-                      <th className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {/*{this.state.notas}*/}S/. 2000.00
-                      </th>
-                    </tr>
-                    <tr>
-                      <th className="table-secondary w-35 p-1 font-weight-normal ">
-                        Serie y Numeración
-                      </th>
-                      <th className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {/*{this.state.notas}*/}S/. 2000.00
+                        {this.state.direccionLlegada}
                       </th>
                     </tr>
                   </thead>
@@ -204,19 +364,21 @@ class GuiaRemisionDetalle extends CustomComponent {
                     <th>Descripción</th>
                     <th>Código</th>
                     <th>Und/Medida</th>
-                    <th>Cantidad</th>
-                    <th>Peso(Kg)</th>
+                    <th>Cantidad</th>                 
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td>1</td>
-                    <td>Pollo desmenuzado</td>
-                    <td>COD0001</td>
-                    <td>KG</td>
-                    <td>40</td>
-                    <td>50</td>
-                  </tr>
+                  {
+                    this.state.detalle.map((item, index) => (
+                      <tr key={index}>
+                        <td>{++index}</td>
+                        <td>{item.nombre}</td>
+                        <td>{item.codigo}</td>
+                        <td>{item.medida}</td>
+                        <td>{rounded(item.cantidad)}</td>                       
+                      </tr>
+                    ))
+                  }
                 </tbody>
               </table>
             </div>

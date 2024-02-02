@@ -33,6 +33,7 @@ class ComporbanteAgregar extends CustomComponent {
       estado: true,
       preferida: false,
       numeroCampo: '',
+      facturado: false,
 
       tipoComprobante: [],
 
@@ -134,13 +135,11 @@ class ComporbanteAgregar extends CustomComponent {
             preferida: this.state.preferida,
             numeroCampo:
               this.state.numeroCampo === '' ? 0 : this.state.numeroCampo,
+              facturado: this.state.facturado,
             idUsuario: this.state.idUsuario,
           };
 
-          const response = await addComprobante(
-            data,
-            this.abortController.signal,
-          );
+          const response = await addComprobante(data,this.abortController.signal);
 
           if (response instanceof SuccessReponse) {
             alertSuccess('Comprobante', response.data, () => {
@@ -180,8 +179,7 @@ class ComporbanteAgregar extends CustomComponent {
           <div className="col">
             <div className="form-group">
               <label htmlFor="estado">
-                Tipo de Comprobante{' '}
-                <i className="fa fa-asterisk text-danger small"></i>
+                Tipo de Comprobante: <i className="fa fa-asterisk text-danger small"></i>
               </label>
               <select
                 className="form-control"
@@ -267,6 +265,7 @@ class ComporbanteAgregar extends CustomComponent {
               type="text"
               className="form-control"
               id="impresion"
+              placeholder='Ejm: Boleta Electrónica, Factura Electrónica...'
               value={this.state.impresion}
               onChange={(event) =>
                 this.setState({ impresion: event.target.value })
@@ -282,6 +281,7 @@ class ComporbanteAgregar extends CustomComponent {
               type="text"
               className="form-control"
               id="codigo"
+              placeholder='01, 06'
               value={this.state.codigo}
               onChange={(event) =>
                 this.setState({ codigo: event.target.value })
@@ -292,6 +292,9 @@ class ComporbanteAgregar extends CustomComponent {
 
         <div className="row">
           <div className="form-group col-md-6">
+            <label htmlFor="nombre" className="col-form-label">
+              Estado:
+            </label>
             <div className="custom-control custom-switch">
               <input
                 type="checkbox"
@@ -309,6 +312,9 @@ class ComporbanteAgregar extends CustomComponent {
           </div>
 
           <div className="form-group col-md-6">
+            <label htmlFor="nombre" className="col-form-label">
+              Preferido:
+            </label>
             <div className="custom-control custom-switch">
               <input
                 type="checkbox"
@@ -320,7 +326,7 @@ class ComporbanteAgregar extends CustomComponent {
                 }
               />
               <label className="custom-control-label" htmlFor="cbPreferido">
-                Preferido
+                {this.state.preferida ? "Si" : "No"}
               </label>
             </div>
           </div>
@@ -341,6 +347,26 @@ class ComporbanteAgregar extends CustomComponent {
               }
               onKeyDown={keyNumberInteger}
             />
+          </div>
+
+          <div className="form-group col-md-6">
+            <label htmlFor="nombre" className="col-form-label">
+              Facturado:
+            </label>
+            <div className="custom-control custom-switch">
+              <input
+                type="checkbox"
+                className="custom-control-input"
+                id="cbFacturado"
+                checked={this.state.facturado}
+                onChange={(value) =>
+                  this.setState({ facturado: value.target.checked })
+                }
+              />
+              <label className="custom-control-label" htmlFor="cbFacturado">
+                {this.state.facturado ? "Si" : "No"}
+              </label>
+            </div>
           </div>
         </div>
 

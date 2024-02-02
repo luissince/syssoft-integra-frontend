@@ -1,5 +1,3 @@
-import React from 'react';
-import axios from 'axios';
 import CryptoJS from 'crypto-js';
 import {
   rounded,
@@ -7,17 +5,18 @@ import {
   spinnerLoading,
   isText,
   isEmpty,
+  formatTime,
 } from '../../../../helper/utils.helper';
 import Paginacion from '../../../../components/Paginacion';
 import ContainerWrapper from '../../../../components/Container';
-import { detailtBanco } from '../../../../network/rest/principal.network';
+import { detailtBanco, detailtListBanco } from '../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
 import { CANCELED } from '../../../../model/types/types';
 import CustomComponent from '../../../../model/class/custom-component';
 
 class BancoDetalle extends CustomComponent {
-  
+
   constructor(props) {
     super(props);
     this.state = {
@@ -54,7 +53,7 @@ class BancoDetalle extends CustomComponent {
     if (isText(idBanco)) {
       await this.loadDataId(idBanco);
     } else {
-      // this.props.history.goBack();
+      this.props.history.goBack();
     }
   }
 
@@ -84,37 +83,75 @@ class BancoDetalle extends CustomComponent {
         codiso: banco.codiso,
         saldo: monto,
         initial: false,
-      })
+      }, async () => {
+        await this.loadingData()
+      });
     }
 
     if (response instanceof ErrorResponse) {
       if (response.getType() === CANCELED) return;
 
-      // this.props.history.goBack();
+      this.props.history.goBack();
+    }
+  }
+
+  loadingData = async () => {
+    if (this.state.loading) return;
+
+    await this.setStateAsync({ paginacion: 1, restart: true });
+    this.fillTable(0);
+    await this.setStateAsync({ opcion: 0 });
+  };
+
+  paginacionContext = async (listid) => {
+    await this.setStateAsync({ paginacion: listid, restart: false });
+    this.onEventPaginacion();
+  };
+
+  onEventPaginacion = () => {
+    switch (this.state.opcion) {
+      case 0:
+        this.fillTable();
+    }
+  };
+
+  fillTable = async () => {
+    await this.setStateAsync({
+      loading: true,
+      lista: [],
+      messageTable: 'Cargando información...',
+    });
+
+    const data = {
+      idBanco: this.state.idBanco,
+      posicionPagina: (this.state.paginacion - 1) * this.state.filasPorPagina,
+      filasPorPagina: this.state.filasPorPagina,
+    };
+
+    const response = await detailtListBanco(data, this.abortControllerTable.signal);
+
+    if (response instanceof SuccessReponse) {
+      const totalPaginacion = parseInt(Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),);
+      console.log(response.data)
+      this.setState({
+        loading: false,
+        lista: response.data.result,
+        totalPaginacion: totalPaginacion,
+      });
     }
 
-    // const detalle = await axios.get('/api/banco/iddetalle', {
-    //   signal: this.abortControllerView.signal,
-    //   params: {
-    //     idBanco: id,
-    //   },
-    // });
+    if (response instanceof ErrorResponse) {
+      if (response.getType() === CANCELED) return;
 
-    // const cabecera = detalle.data.cabecera;
+      this.setState({
+        loading: false,
+        lista: [],
+        totalPaginacion: 0,
+        messageTable: response.getMessage(),
+      });
+    }
+  };
 
-    // await this.setStateAsync({
-    //   idBanco: cabecera.idBanco,
-    //   nombre: cabecera.nombre,
-    //   tipoCuenta: cabecera.tipoCuenta,
-    //   numCuenta: cabecera.numCuenta,
-    //   moneda: cabecera.moneda,
-    //   saldo: cabecera.saldo,
-    //   codiso: cabecera.codiso,
-
-    //   // lista : detalle.data.lista,
-    //   initial: false,
-    // });
-  }
 
   async onEventImprimir() {
     const data = {
@@ -134,7 +171,7 @@ class BancoDetalle extends CustomComponent {
     if (this.state.loading) {
       return (
         <tr>
-          <td className="text-center" colSpan="6">
+          <td className="text-center" colSpan="5">
             {spinnerLoading(
               'Cargando información de la tabla...',
               true,
@@ -147,7 +184,7 @@ class BancoDetalle extends CustomComponent {
     if (isEmpty(this.state.lista)) {
       return (
         <tr className="text-center">
-          <td colSpan="6">¡No hay datos registrados!</td>
+          <td colSpan="5">¡No hay datos registrados!</td>
         </tr>
       );
     }
@@ -155,18 +192,13 @@ class BancoDetalle extends CustomComponent {
     return this.state.lista.map((item, index) => (
       <tr key={index}>
         <td>{++index}</td>
-        <td>{item.fecha}</td>
-        <td>{item.proveedor}</td>
-        <td className="text-left">{item.cuenta}</td>
+        <td>{item.fecha} <br /> {formatTime(item.hora)} </td>
+        <td className="text-left">{item.estado === 1 ? "ACTIVO" : "ANULADO"}</td>
         <td className="text-left text-danger">
-          {item.salida <= 0
-            ? ''
-            : `- ${rounded(item.salida)}`}
+          {item.tipo == 0 ? `- ${rounded(item.monto)}` : ''}
         </td>
         <td className="text-right text-success">
-          {item.ingreso <= 0
-            ? ''
-            : `+ ${rounded(item.ingreso)}`}
+          {item.tipo === 1 ? `+ ${rounded(item.monto)}` : ''}
         </td>
       </tr>
     ))
@@ -288,11 +320,11 @@ class BancoDetalle extends CustomComponent {
                 <table className="table table-light table-striped">
                   <thead>
                     <tr>
-                      <th>#</th>
-                      <th>Fecha</th>
-                      <th>Estado</th>
-                      <th>Salidas</th>
-                      <th>Entradas</th>
+                      <th width="10%">#</th>
+                      <th width="20%">Fecha</th>
+                      <th width="10%">Estado</th>
+                      <th width="10%">Salidas</th>
+                      <th width="10%">Entradas</th>
                     </tr>
                   </thead>
                   <tbody>

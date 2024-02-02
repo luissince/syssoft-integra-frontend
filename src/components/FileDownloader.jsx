@@ -7,23 +7,10 @@ const guid = () => {
       .toString(16)
       .substring(1);
   };
-  return (
-    s4() +
-    s4() +
-    '-' +
-    s4() +
-    '-' +
-    s4() +
-    '-' +
-    s4() +
-    '-' +
-    s4() +
-    s4() +
-    s4()
-  );
+  return (s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4());
 };
 
-class useFileDownloader extends React.Component {
+class FileDownloader extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -54,4 +41,4 @@ class useFileDownloader extends React.Component {
   }
 }
 
-export default useFileDownloader;
+export default FileDownloader;

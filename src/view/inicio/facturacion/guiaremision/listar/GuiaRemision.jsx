@@ -1,7 +1,7 @@
 import React from 'react';
 import ContainerWrapper from '../../../../../components/Container';
 import CustomComponent from '../../../../../model/class/custom-component';
-import { alertDialog, isEmpty, spinnerLoading } from '../../../../../helper/utils.helper';
+import { alertDialog, formatNumberWithZeros, formatTime, isEmpty, spinnerLoading } from '../../../../../helper/utils.helper';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
 import SuccessReponse from '../../../../../model/class/response';
@@ -123,23 +123,27 @@ class GuiaRemision extends CustomComponent {
     });
   }
 
-  handleEditar = (idCompra) => {
+  handleEditar = (idGuiaRemision) => {
     this.props.history.push({
       pathname: `${this.props.location.pathname}/editar`,
-      search: '?idGuiaRemision=' + idCompra,
+      search: '?idGuiaRemision=' + idGuiaRemision,
     });
   }
 
-  handleDetalle = (idCompra) => {
+  handleDetalle = (idGuiaRemision) => {
     this.props.history.push({
       pathname: `${this.props.location.pathname}/detalle`,
-      search: '?idGuiaRemision=' + idCompra,
+      search: '?idGuiaRemision=' + idGuiaRemision,
     });
   }
 
-  handleAnular = () => {
+  handleAnular = (idGuiaRemision) => {
     alertDialog('Guia Remisión', '¿Estás seguro de anular la guía de remisión?', async (accept) => {
       if (accept) {
+        const params = {
+          idGuiaRemision: idGuiaRemision
+        }
+
 
       }
     });
@@ -165,10 +169,62 @@ class GuiaRemision extends CustomComponent {
     }
 
     return this.state.lista.map((item, index) => {
+      const estado = item.estado === 1 ? <span className="text-success">ACTIVO</span> : <span className="text-danger">ANULADO</span>;
+
       return (
         <tr key={index}>
           <td className={`text-center`}>
             {item.id}
+          </td>
+          <td>
+            {item.fecha}
+            <br />
+            {formatTime(item.hora)}
+          </td>
+          <td>
+            {item.comprobante}
+            <br />
+            {item.serie}-{formatNumberWithZeros(item.numeracion)}
+          </td>
+          <td>
+            {item.tipoDocumento}-{item.documento}
+            <br />
+            {item.informacion}
+          </td>
+          <td>
+            {item.comprobanteRef}
+            <br />
+            {item.serieRef}-{formatNumberWithZeros(item.numeracionRef)}
+          </td>        
+          <td className="text-center">
+            {estado}
+          </td>
+          <td className='text-center'>
+            <button
+              className="btn btn-outline-primary btn-sm"
+              title="Detalle"
+              onClick={() => this.handleDetalle(item.idGuiaRemision)}
+            >
+              <i className="fa fa-eye"></i>
+            </button>
+          </td>
+          <td className='text-center'>
+            <button
+              className="btn btn-outline-warning btn-sm"
+              title="Detalle"
+              onClick={() => this.handleEditar(item.idGuiaRemision)}
+            >
+              <i className="fa fa-pencil"></i>
+            </button>
+          </td>
+          <td className='text-center'>
+            <button
+              className="btn btn-outline-danger btn-sm"
+              title="Detalle"
+              onClick={() => this.handleAnular(item.idGuiaRemision)}
+            >
+              <i className="fa fa-remove"></i>
+            </button>
           </td>
         </tr>
       )
@@ -217,7 +273,7 @@ class GuiaRemision extends CustomComponent {
               >
                 <i className="bi bi-file-plus"></i> Crear guía
               </button>{' '}
-              <button className="btn btn-outline-secondary" onClick={() => { }}>
+              <button className="btn btn-outline-secondary" onClick={this.loadInit}>
                 <i className="bi bi-arrow-clockwise"></i>
               </button>
             </div>
@@ -235,10 +291,10 @@ class GuiaRemision extends CustomComponent {
                       #
                     </th>
                     <th width="10%">Fecha</th>
-                    <th width="15%">Comprobante</th>
-                    <th width="10%">referencia</th>
+                    <th width="20%">Comprobante</th>
                     <th width="15%">Cliente</th>
-                    <th width="15%">Estado</th>
+                    <th width="15%">referencia</th>                   
+                    <th width="10%" className="text-center">Estado</th>
                     <th width="5%" className="text-center">
                       Mostrar
                     </th>
@@ -246,48 +302,12 @@ class GuiaRemision extends CustomComponent {
                       Editar
                     </th>
                     <th width="5%" className="text-center">
-                      Eliminar
+                      Anular
                     </th>
                   </tr>
                 </thead>
                 <tbody>
                   {this.generateBody()}
-                  {/* <tr>
-                    <td className="text-center">1</td>
-                    <td>ss</td>
-                    <td>ss</td>
-                    <td>ss</td>
-                    <td>ss</td>
-                    <td>ss</td>
-                    <td className="text-center">
-                      <button
-                        className="btn btn-outline-info btn-sm"
-                        title="Detalle"
-                        onClick={() => this.handleDetalle('')}
-                      >
-                        <i className="fa fa-eye"></i>
-                      </button>
-                    </td>
-
-                    <td className="text-center">
-                      <button
-                        className="btn btn-outline-warning btn-sm"
-                        title="Editar"
-                        onClick={() => this.handleEditar('')}
-                      >
-                        <i className="bi bi-pencil"></i>
-                      </button>
-                    </td>
-                    <td className="text-center">
-                      <button
-                        className="btn btn-outline-danger btn-sm"
-                        title="Anular"
-                        onClick={() => this.handleAnular('')}
-                      >
-                        <i className="bi bi-trash"></i>
-                      </button>
-                    </td>
-                  </tr> */}
                 </tbody>
               </table>
             </div>

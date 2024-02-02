@@ -46,8 +46,7 @@ import ModalSale from './component/ModalSale';
 import CustomComponent from '../../../../../model/class/custom-component';
 import ModalCliente from './component/ModalCliente';
 import {
-  FACTURACION,
-  VENTA_LIBRE,
+  VENTA,
 } from '../../../../../model/types/tipo-comprobante';
 import { starProduct, favoriteProducts } from '../../../../../redux/actions';
 import ModalProducto from './component/ModalProducto';
@@ -293,16 +292,14 @@ class VentaCrear extends CustomComponent {
 
   loadingData = async () => {
     const [
-      libre,
-      facturado,
+      venta,
       monedas,
       impuestos,
       predeterminado,
       bancos,
       tiposDocumentos
     ] = await Promise.all([
-      await this.fetchComprobante(VENTA_LIBRE),
-      await this.fetchComprobante(FACTURACION),
+      await this.fetchComprobante(VENTA),
       await this.fetchMoneda(),
       await this.fetchImpuesto(),
       await this.fetchClientePredeterminado(),
@@ -310,7 +307,7 @@ class VentaCrear extends CustomComponent {
       await this.fetchTipoDocumento(),
     ]);
 
-    const comprobantes = [...facturado, ...libre];
+    const comprobantes = [...venta];
     const monedaFilter = monedas.find((item) => item.nacional === 1);
     const impuestoFilter = impuestos.find((item) => item.preferido === 1);
     const comprobanteFilter = comprobantes.find((item) => item.preferida === 1);
@@ -1011,7 +1008,9 @@ class VentaCrear extends CustomComponent {
     await this.setStateAsync({ filterCliente: true });
 
     const params = {
+      opcion: 1,
       filtrar: searchWord,
+      cliente: true,
     };
 
     const response = await filtrarPersona(params);
@@ -1238,7 +1237,6 @@ class VentaCrear extends CustomComponent {
 
         if (response instanceof SuccessReponse) {
           alertSuccess('Venta', response.data.message, () => {
-            console.log(response.data)
             this.handleOpenPrint(response.data.idVenta);
           });
         }

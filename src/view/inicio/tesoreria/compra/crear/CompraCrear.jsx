@@ -867,7 +867,9 @@ class CompraCrear extends CustomComponent {
     await this.setStateAsync({ loadingCliente: true });
 
     const params = {
+      opcion: 1,
       filtrar: searchWord,
+      proveedor: 1
     };
 
     const clientes = await this.fetchFiltrarCliente(params);

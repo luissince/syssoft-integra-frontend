@@ -38,8 +38,9 @@ class SearchInput extends React.Component {
 
     const data = this.props.data;
 
+    if (isEmpty(data)) return;
+
     if (event.keyCode === 40 || event.which === 40) {
-      if (data.length === 0) return;
 
       dataResult.focus();
 
@@ -53,8 +54,7 @@ class SearchInput extends React.Component {
         children[this.index].classList.add('active');
         children[this.index].focus();
       }
-    } else if (event.keyCode === 13) {
-      if (data.length === 0) return;
+    } else if (event.key === 'Enter') {
 
       dataResult.focus();
 
@@ -77,6 +77,7 @@ class SearchInput extends React.Component {
     const children = dataResult.children;
 
     if (event.keyCode === 38) {
+      event.preventDefault();
       if (this.index !== 0) {
         if (this.index > 0) {
           this.index--;
@@ -88,6 +89,7 @@ class SearchInput extends React.Component {
         }
       }
     } else if (event.keyCode === 40) {
+      event.preventDefault();
       if (this.index < children.length - 1) {
         this.index++;
         for (const item of children) {

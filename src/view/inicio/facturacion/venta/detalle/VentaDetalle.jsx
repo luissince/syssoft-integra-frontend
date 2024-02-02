@@ -1,4 +1,3 @@
-import CryptoJS from 'crypto-js';
 import printJS from 'print-js';
 import {
   rounded,
@@ -23,7 +22,6 @@ class VentaDetalle extends CustomComponent {
 
   constructor(props) {
     super(props);
-
     this.state = {
       loading: true,
       msgLoading: 'Cargando datos...',
@@ -65,11 +63,6 @@ class VentaDetalle extends CustomComponent {
     const [factura] = await Promise.all([
       await this.fetchIdFactura(id)
     ]);
-
-    if (!factura) {
-      this.props.history.goBack();
-      return;
-    }
 
     const {
       comprobante,
@@ -152,17 +145,6 @@ class VentaDetalle extends CustomComponent {
         console.log("onPrintDialogClose")
       }
     })
-  }
-
-  async onEventImprimir() {
-    const data = {
-      idEmpresa: 'EM0001',
-      idVenta: this.state.idVenta,
-    };
-
-    const ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'key-report-inmobiliaria',).toString();
-    const params = new URLSearchParams({ params: ciphertext });
-    window.open('/api/factura/repcomprobante?' + params, '_blank');
   }
 
   renderTotal() {
@@ -259,13 +241,6 @@ class VentaDetalle extends CustomComponent {
         <div className="row">
           <div className="col">
             <div className="form-group">
-              {/* <button
-                type="button"
-                className="btn btn-light"
-                onClick={() => this.onEventImprimir()}
-              >
-                <i className="fa fa-print"></i> Imprimir
-              </button>{' '} */}
               <button
                 type="button"
                 className="btn btn-light"
@@ -280,8 +255,6 @@ class VentaDetalle extends CustomComponent {
               >
                 <i className="fa fa-print"></i> Ticket
               </button>
-              {/* <button type="button" className="btn btn-light"><i className="fa fa-edit"></i> Editar</button> */}{' '}
-              {/* <button type="button" className="btn btn-light"><i className="fa fa-remove"></i> Eliminar</button> */}{' '}
             </div>
           </div>
         </div>

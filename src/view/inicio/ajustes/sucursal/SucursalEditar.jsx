@@ -45,7 +45,7 @@ class ProcesoSucursal extends CustomComponent {
 
       filter: false,
       ubigeo: '',
-      filteredData: [],
+      ubigeos: [],
 
       idUsuario: this.props.token.userToken.idUsuario,
     };
@@ -81,8 +81,6 @@ class ProcesoSucursal extends CustomComponent {
     const [sucursal] = await Promise.all([
       await this.fetchIdSucursal(idSucursal),
     ]);
-
-    console.log(sucursal)
 
     const ubigeo = {
       idUbigeo: sucursal.idUbigeo,
@@ -129,6 +127,18 @@ class ProcesoSucursal extends CustomComponent {
       if (response.getType() === CANCELED) return;
 
       return null;
+    }
+  }
+
+  async fetchFiltrarUbigeo(params) {
+    const response = await getUbigeo(params);
+
+    if (response instanceof SuccessReponse) {
+      return response.data;
+    }
+
+    if (response instanceof ErrorResponse) {
+      return [];
     }
   }
 
@@ -229,7 +239,7 @@ class ProcesoSucursal extends CustomComponent {
   //------------------------------------------------------------------------------------------
 
   handleClearInputaUbigeo = async () => {
-    await this.setStateAsync({ filteredData: [], idUbigeo: '', ubigeo: '' });
+    await this.setStateAsync({ ubigeos: [], idUbigeo: '', ubigeo: '' });
     this.selectItem = false;
   };
 
@@ -238,7 +248,7 @@ class ProcesoSucursal extends CustomComponent {
     await this.setStateAsync({ idUbigeo: '', ubigeo: searchWord });
     this.selectItem = false;
     if (searchWord.length === 0) {
-      await this.setStateAsync({ filteredData: [] });
+      await this.setStateAsync({ ubigeos: [] });
       return;
     }
 
@@ -248,33 +258,30 @@ class ProcesoSucursal extends CustomComponent {
       filtrar: searchWord,
     };
 
-    const response = await getUbigeo(params);
+    const ubigeos = await this.fetchFiltrarUbigeo(params);
 
-    if (response instanceof SuccessReponse) {
-      await this.setStateAsync({ filter: false, filteredData: response.data });
-    }
-
-    if (response instanceof ErrorResponse) {
-      await this.setStateAsync({ filter: false, filteredData: [] });
-    }
-  };
+    this.setState({
+      ubigeos: ubigeos,
+      filter: false,
+    });
+  }
 
   handleSelectItemUbigeo = async (value) => {
     await this.setStateAsync({
       ubigeo:
         value.departamento +
-        '-' +
+        ' - ' +
         value.provincia +
-        '-' +
+        ' - ' +
         value.distrito +
         ' (' +
         value.ubigeo +
         ')',
-      filteredData: [],
+      ubigeos: [],
       idUbigeo: value.idUbigeo,
     });
     this.selectItem = true;
-  };
+  }
 
   render() {
     return (
@@ -408,22 +415,18 @@ class ProcesoSucursal extends CustomComponent {
               placeholder="Filtrar productos..."
               refValue={this.refIdUbigeo}
               value={this.state.ubigeo}
-              data={this.state.filteredData}
+              data={this.state.ubigeos}
               handleClearInput={this.handleClearInputaUbigeo}
               handleFilter={this.handleFilterUbigeo}
               handleSelectItem={this.handleSelectItemUbigeo}
-              renderItem={(value) => (
+              renderItem={(value) =>
                 <>
-                  {value.departamento +
-                    '-' +
-                    value.provincia +
-                    '-' +
-                    value.distrito +
-                    ' (' +
-                    value.ubigeo +
-                    ')'}
+                  {value.departamento} -
+                  {value.provincia} -
+                  {value.distrito}
+                  ({value.ubigeo})
                 </>
-              )}
+              }
             />
           </div>
         </div>

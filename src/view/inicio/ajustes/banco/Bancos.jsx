@@ -22,6 +22,7 @@ import ContainerWrapper from '../../../../components/Container';
 import CustomComponent from '../../../../model/class/custom-component';
 
 class Bancos extends CustomComponent {
+
   constructor(props) {
     super(props);
     this.state = {
@@ -47,6 +48,9 @@ class Bancos extends CustomComponent {
       totalPaginacion: 0,
       filasPorPagina: 10,
       messageTable: 'Cargando información...',
+
+      idSucursal: this.props.token.project.idSucursal,
+      idUsuario: this.props.token.userToken.idUsuario,
     };
 
     this.refTxtSearch = React.createRef();
@@ -54,8 +58,8 @@ class Bancos extends CustomComponent {
     this.abortControllerTable = new AbortController();
   }
 
-  componentDidMount() {
-    this.loadingData();
+  async componentDidMount() {
+    await this.loadingData();
   }
 
   componentWillUnmount() {
@@ -108,6 +112,7 @@ class Bancos extends CustomComponent {
     const data = {
       opcion: opcion,
       buscar: buscar.trim().toUpperCase(),
+      idSucursal: this.state.idSucursal,
       posicionPagina: (this.state.paginacion - 1) * this.state.filasPorPagina,
       filasPorPagina: this.state.filasPorPagina,
     };
@@ -205,13 +210,9 @@ class Bancos extends CustomComponent {
           <td>{item.tipoCuenta.toUpperCase()}</td>
           <td>{item.moneda}</td>
           <td>{item.numCuenta}</td>
-          <td
-            className={`text-right ${item.saldo >= 0 ? 'text-success' : 'text-danger'
-              }`}
-          >
+          <td className={`text-right ${item.saldo >= 0 ? 'text-success' : 'text-danger'}`}>
             {numberFormat(item.saldo, item.codiso)}
           </td>
-
           <td className="text-center">
             <button
               className="btn btn-outline-info btn-sm"
@@ -298,7 +299,7 @@ class Bancos extends CustomComponent {
               </button>{' '}
               <button
                 className="btn btn-outline-secondary"
-                onClick={() => this.loadInit()}
+                onClick={() => this.loadingData()}
               >
                 <i className="bi bi-arrow-clockwise"></i>
               </button>
