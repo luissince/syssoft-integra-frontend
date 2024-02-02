@@ -103,7 +103,7 @@ class Bancos extends CustomComponent {
   };
 
   fillTable = async (opcion, buscar) => {
-    await this.setStateAsync({
+    this.setState({
       loading: true,
       lista: [],
       messageTable: 'Cargando información...',
@@ -122,7 +122,7 @@ class Bancos extends CustomComponent {
     if (response instanceof SuccessReponse) {
       const totalPaginacion = parseInt(Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),);
 
-      await this.setStateAsync({
+      this.setState({
         loading: false,
         lista: response.data.result,
         totalPaginacion: totalPaginacion,
@@ -132,7 +132,7 @@ class Bancos extends CustomComponent {
     if (response instanceof ErrorResponse) {
       if (response.getType() === CANCELED) return;
 
-      await this.setStateAsync({
+      this.setState({
         loading: false,
         lista: [],
         totalPaginacion: 0,

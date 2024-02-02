@@ -33,6 +33,7 @@ class BancoEditar extends CustomComponent {
       cci: '',
       preferido: false,
       vuelto: false,
+      reporte: false,
       estado: false,
 
       loading: true,
@@ -80,6 +81,7 @@ class BancoEditar extends CustomComponent {
       cci: banco.cci,
       preferido: banco.preferido,
       vuelto: banco.vuelto,
+      reporte: banco.reporte,
       estado: banco.estado,
       idBanco: banco.idBanco,
       loading: false,
@@ -150,6 +152,7 @@ class BancoEditar extends CustomComponent {
           cci: this.state.cci.trim().toUpperCase(),
           preferido: this.state.preferido,
           vuelto: this.state.vuelto,
+          reporte: this.state.reporte,
           estado: this.state.estado,
           
           idUsuario: this.state.idUsuario,
@@ -253,7 +256,7 @@ class BancoEditar extends CustomComponent {
           </div>
 
           <div className="form-group col-md-6">
-            <label>Número de cuenta</label>
+            <label>Número de cuenta:</label>
             <input
               type="text"
               className="form-control"
@@ -269,7 +272,7 @@ class BancoEditar extends CustomComponent {
 
         <div className="row">
           <div className="form-group col-md-6">
-            <label>CCI </label>
+            <label>CCI:</label>
             <input
               type="text"
               className="form-control"
@@ -338,6 +341,28 @@ class BancoEditar extends CustomComponent {
               />
               <label className="custom-control-label" htmlFor="preferidoChecked">
                 {this.state.preferido ? 'Si' : 'No'}
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div className="row">
+          <div className="form-group col-md-6">
+            <label htmlFor="nombre" className="col-form-label">
+              Mostrar en Reporte:
+            </label>
+            <div className="custom-control custom-switch">
+              <input
+                type="checkbox"
+                className="custom-control-input"
+                id="reporteChecked"
+                checked={this.state.reporte}
+                onChange={(value) =>
+                  this.setState({ reporte: value.target.checked })
+                }
+              />
+              <label className="custom-control-label" htmlFor="reporteChecked">
+                {this.state.reporte ? 'Si' : 'No'}
               </label>
             </div>
           </div>

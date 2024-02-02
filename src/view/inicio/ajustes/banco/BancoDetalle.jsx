@@ -116,7 +116,7 @@ class BancoDetalle extends CustomComponent {
   };
 
   fillTable = async () => {
-    await this.setStateAsync({
+    this.setState({
       loading: true,
       lista: [],
       messageTable: 'Cargando información...',
@@ -132,7 +132,7 @@ class BancoDetalle extends CustomComponent {
 
     if (response instanceof SuccessReponse) {
       const totalPaginacion = parseInt(Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),);
-      console.log(response.data)
+
       this.setState({
         loading: false,
         lista: response.data.result,
