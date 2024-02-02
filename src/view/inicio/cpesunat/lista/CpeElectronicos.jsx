@@ -30,7 +30,7 @@ import {
 import { CANCELED } from '../../../../model/types/types';
 import CustomComponent from '../../../../model/class/custom-component';
 import { VENTA, GUIA_DE_REMISION, NOTA_DE_CREDITO } from '../../../../model/types/tipo-comprobante';
-import { pdfA4Venta, pdfTicketVenta } from '../../../../helper/lista-pdf.helper';
+import { pdfA4GuiaRemision, pdfA4Venta, pdfTicketGuiaRemision, pdfTicketVenta } from '../../../../helper/lista-pdf.helper';
 import { senFactura, sendResumenDiario } from '../../../../network/rest/cpesunat.network';
 
 class CpeElectronicos extends CustomComponent {
@@ -314,12 +314,21 @@ class CpeElectronicos extends CustomComponent {
     });
   }
 
-  handleOpenPdfA4 = (idVenta) => {
-    window.open(pdfA4Venta(idVenta), '_blank');
+  handleOpenPdfA4 = (idComprobante, tipo) => {
+    if(tipo === "fac"){
+      window.open(pdfA4Venta(idComprobante), '_blank');
+    }else{
+      window.open(pdfA4GuiaRemision(idComprobante), '_blank');
+    }    
   }
 
-  handleOpenPdfTicket = (idVenta) => {
-    window.open(pdfTicketVenta(idVenta), '_blank');
+  handleOpenPdfTicket = (idComprobante, tipo) => {
+    if(tipo === "fac"){
+      window.open(pdfTicketVenta(idComprobante), '_blank');
+    }else{
+      window.open(pdfTicketGuiaRemision(idComprobante), '_blank');
+    }
+    
   }
 
   handleDownloadXml = () => {
@@ -435,11 +444,11 @@ class CpeElectronicos extends CustomComponent {
               </a>
 
               <ul className="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                {this.opcionButtonOpcion(images.pdf, 'Archivo Pdf A4', 22, 'Pdf A4', () => this.handleOpenPdfA4(item.idVenta))}
-                {this.opcionButtonOpcion(images.invoice, 'Archivo Pdf 80mm', 22, 'Pdf Ticket', () => this.handleOpenPdfTicket(item.idVenta))}
-                {this.opcionButtonOpcion(images.xml, 'Archivo Xml', 22, 'Xml', () => this.handleDownloadXml(item.idVenta))}
-                {this.opcionButtonOpcion(images.email, 'Enviar Correo', 22, 'Email', () => this.handleSendEmail(item.idVenta))}
-                {item.tipo === "fac" && this.opcionButtonOpcion(images.error, 'Resumen Diario', 22, 'Error', () => this.handleSendAnular(item.idVenta))}
+                {this.opcionButtonOpcion(images.pdf, 'Archivo Pdf A4', 22, 'Pdf A4', () => this.handleOpenPdfA4(item.idComprobante, item.tipo))}
+                {this.opcionButtonOpcion(images.invoice, 'Archivo Pdf 80mm', 22, 'Pdf Ticket', () => this.handleOpenPdfTicket(item.idComprobante, item.tipo))}
+                {this.opcionButtonOpcion(images.xml, 'Archivo Xml', 22, 'Xml', () => this.handleDownloadXml(item.idComprobante))}
+                {this.opcionButtonOpcion(images.email, 'Enviar Correo', 22, 'Email', () => this.handleSendEmail(item.idComprobante))}
+                {item.tipo === "fac" && this.opcionButtonOpcion(images.error, 'Resumen Diario', 22, 'Error', () => this.handleSendAnular(item.idComprobante))}
               </ul>
             </div>
           </td>
