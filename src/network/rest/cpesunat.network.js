@@ -28,11 +28,7 @@ export async function cdrStatus(data) {
 
 export async function senFactura(idVenta) {
   return await Resolve.create(
-    instanceCpeSunat.get(`/api/boleta/${idVenta}`, {
-      params: {
-        idVenta: idVenta,
-      },
-    }),
+    instanceCpeSunat.get(`/api/boleta/${idVenta}`),
   );
 }
 
