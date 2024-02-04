@@ -153,8 +153,8 @@ const ModalSale = (props) => {
             {bancosAgregados.map((item, index) => (
               <MetodoPago
                 key={index}
-                idMetodoPago={item.idMetodoPago}
-                nameMetodPay={item.nombre}
+                idBanco={item.idBanco}
+                name={item.nombre}
                 monto={item.monto}
                 handleInputMontoBancosAgregados={handleInputMontoBancosAgregados}
                 handleRemoveItemBancosAgregados={handleRemoveItemBancosAgregados}
@@ -179,7 +179,7 @@ const ModalSale = (props) => {
                       ref={refMetodoContado}
                     >
                       {bancos.map((item, index) => (
-                        <option key={index} value={item.idMetodoPago}>
+                        <option key={index} value={item.idBanco}>
                           {item.nombre}
                         </option>
                       ))}
@@ -231,8 +231,8 @@ const ModalSale = (props) => {
 };
 
 const MetodoPago = ({
-  idMetodoPago,
-  nameMetodPay,
+  idBanco,
+  name,
   monto,
   handleInputMontoBancosAgregados,
   handleRemoveItemBancosAgregados,
@@ -245,19 +245,19 @@ const MetodoPago = ({
         className="form-control"
         placeholder="Monto"
         value={monto}
-        onChange={(event) => handleInputMontoBancosAgregados(event, idMetodoPago)}
+        onChange={(event) => handleInputMontoBancosAgregados(event, idBanco)}
         onKeyDown={keyNumberFloat}
       />
       <div className="input-group-prepend">
         <div className="input-group-text">
-          <span>{nameMetodPay}</span>
+          <span>{name}</span>
         </div>
       </div>
       <div className="input-group-append">
         <button
           className="btn btn-outline-danger d-flex"
           title="Agregar Pago"
-          onClick={() => handleRemoveItemBancosAgregados(idMetodoPago)}
+          onClick={() => handleRemoveItemBancosAgregados(idBanco)}
         >
           <i className="bi bi-trash3-fill"></i>
         </button>

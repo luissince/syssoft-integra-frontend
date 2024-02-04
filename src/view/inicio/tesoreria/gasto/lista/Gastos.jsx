@@ -28,9 +28,9 @@ class Gastos extends CustomComponent {
   constructor(props) {
     super(props);
     this.state = {
-      add: statePrivilegio(this.props.token.userToken.menus[2].submenu[3].privilegio[0].estado),
-      view: statePrivilegio(this.props.token.userToken.menus[2].submenu[3].privilegio[1].estado),
-      remove: statePrivilegio(this.props.token.userToken.menus[2].submenu[3].privilegio[2].estado),
+      // add: statePrivilegio(this.props.token.userToken.menus[2].submenu[3].privilegio[0].estado),
+      // view: statePrivilegio(this.props.token.userToken.menus[2].submenu[3].privilegio[1].estado),
+      // remove: statePrivilegio(this.props.token.userToken.menus[2].submenu[3].privilegio[2].estado),
 
       loading: false,
       lista: [],

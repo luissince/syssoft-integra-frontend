@@ -2,12 +2,13 @@ import React from 'react';
 import ContainerWrapper from '../../../../../components/Container';
 import CustomComponent from '../../../../../model/class/custom-component';
 import Paginacion from '../../../../../components/Paginacion';
-import { alertDialog, isEmpty, spinnerLoading, keyUpSearch, alertSuccess, alertWarning, alertInfo, formatTime, formatNumberWithZeros, numberFormat } from '../../../../../helper/utils.helper';
+import { alertDialog, isEmpty, spinnerLoading, keyUpSearch, alertSuccess, alertWarning, alertInfo, formatTime, formatNumberWithZeros, numberFormat, getPathNavigation } from '../../../../../helper/utils.helper';
 import ErrorResponse from '../../../../../model/class/error-response';
 import SuccessReponse from '../../../../../model/class/response';
 import { CANCELED } from '../../../../../model/types/types';
 import { cancelIngreso, listIngreso } from '../../../../../network/rest/principal.network';
 import { connect } from 'react-redux';
+import { Link } from 'react-router-dom/cjs/react-router-dom.min';
 
 class Ingresos extends CustomComponent {
   constructor(props) {
@@ -132,7 +133,7 @@ class Ingresos extends CustomComponent {
 
         if (response instanceof SuccessReponse) {
           alertSuccess("Ingreso", response.data, async () => {
-            // await this.loadInit()
+            await this.loadInit()
           })
         }
 
@@ -163,6 +164,7 @@ class Ingresos extends CustomComponent {
     }
 
     return this.state.lista.map((item, index) => {
+
       return (
         <tr key={index}>
           <td className={`text-center`}>{item.id}</td>
@@ -172,9 +174,11 @@ class Ingresos extends CustomComponent {
             {formatTime(item.hora)}
           </td>
           <td>
-            {item.comprobante}
-            <br />
-            {item.serie}-{formatNumberWithZeros(item.numeracion)}
+            <Link className="btn-link" to={getPathNavigation(item.tipo, item.idComprobante)}>
+              {item.comprobante}
+              <br />
+              {item.serie}-{formatNumberWithZeros(item.numeracion)}
+            </Link>
           </td>
           <td>{item.metodo}</td>
           <td>{item.descripcion}</td>

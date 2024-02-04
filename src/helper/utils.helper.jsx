@@ -601,7 +601,7 @@ export function alertInfo(title, message) {
   });
 }
 
-export function getPathNavigation(opcion, idComprobante){
+export function getPathNavigation(opcion, idComprobante){ 
   if(opcion == "venta"){
     return `/inicio/ventas/detalle?idVenta=${idComprobante}`
   }
