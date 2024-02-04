@@ -42,6 +42,12 @@ export async function sendResumenDiario(idVenta) {
   );
 }
 
+export async function senGuiaRemision(idGuiaRemision) {
+  return await Resolve.create(
+    instanceCpeSunat.get(`/api/guiaremision/${idGuiaRemision}`),
+  );
+}
+
 
 export async function sendNotaCredito(idCpeSunat) {
   return await Resolve.create(

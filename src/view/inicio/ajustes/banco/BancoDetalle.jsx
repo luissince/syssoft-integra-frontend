@@ -6,6 +6,8 @@ import {
   isText,
   isEmpty,
   formatTime,
+  formatNumberWithZeros,
+  getPathNavigation,
 } from '../../../../helper/utils.helper';
 import Paginacion from '../../../../components/Paginacion';
 import ContainerWrapper from '../../../../components/Container';
@@ -14,6 +16,7 @@ import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
 import { CANCELED } from '../../../../model/types/types';
 import CustomComponent from '../../../../model/class/custom-component';
+import { Link } from 'react-router-dom/cjs/react-router-dom.min';
 
 class BancoDetalle extends CustomComponent {
 
@@ -171,7 +174,7 @@ class BancoDetalle extends CustomComponent {
     if (this.state.loading) {
       return (
         <tr>
-          <td className="text-center" colSpan="5">
+          <td className="text-center" colSpan="6">
             {spinnerLoading(
               'Cargando información de la tabla...',
               true,
@@ -184,7 +187,7 @@ class BancoDetalle extends CustomComponent {
     if (isEmpty(this.state.lista)) {
       return (
         <tr className="text-center">
-          <td colSpan="5">¡No hay datos registrados!</td>
+          <td colSpan="6">¡No hay datos registrados!</td>
         </tr>
       );
     }
@@ -193,12 +196,19 @@ class BancoDetalle extends CustomComponent {
       <tr key={index}>
         <td>{++index}</td>
         <td>{item.fecha} <br /> {formatTime(item.hora)} </td>
-        <td className="text-left">{item.estado === 1 ? "ACTIVO" : "ANULADO"}</td>
-        <td className="text-left text-danger">
-          {item.tipo == 0 ? `- ${rounded(item.monto)}` : ''}
+        <td>
+          <Link className='btn-link' to={getPathNavigation(item.opcion, item.idComprobante)}>
+            {item.comprobante}
+            <br />
+            {item.serie}-{formatNumberWithZeros(item.numeracion)}
+          </Link>
         </td>
-        <td className="text-right text-success">
-          {item.tipo === 1 ? `+ ${rounded(item.monto)}` : ''}
+        <td className={`text-left ${item.estado === 1 ? "" : "text-danger"}`}>{item.estado === 1 ? "ACTIVO" : "ANULADO"}</td>
+        <td className={`text-right ${item.estado === 0 ? "" : "text-danger"}`}>
+          {item.estado === 0 && item.tipo == 0 ? rounded(item.monto) : item.tipo == 0 ? `- ${rounded(item.monto)}` : ''}
+        </td>
+        <td className={`text-right ${item.estado === 0 ? "" : "text-success"}`}>
+          {item.estado === 0 && item.tipo == 1 ? rounded(item.monto) : item.tipo === 1 ? `+ ${rounded(item.monto)}` : ''}
         </td>
       </tr>
     ))
@@ -320,8 +330,9 @@ class BancoDetalle extends CustomComponent {
                 <table className="table table-light table-striped">
                   <thead>
                     <tr>
-                      <th width="10%">#</th>
-                      <th width="20%">Fecha</th>
+                      <th width="5%">#</th>
+                      <th width="15%">Fecha</th>
+                      <th width="20%">Comprobante</th>
                       <th width="10%">Estado</th>
                       <th width="10%">Salidas</th>
                       <th width="10%">Entradas</th>

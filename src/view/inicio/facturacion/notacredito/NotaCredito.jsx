@@ -25,15 +25,15 @@ class NotaCredito extends CustomComponent {
       lista: [],
       restart: false,
 
-      add: statePrivilegio(
-        this.props.token.userToken.menus[2].submenu[2].privilegio[0].estado,
-      ),
-      view: statePrivilegio(
-        this.props.token.userToken.menus[2].submenu[2].privilegio[1].estado,
-      ),
-      cancel: statePrivilegio(
-        this.props.token.userToken.menus[2].submenu[2].privilegio[2].estado,
-      ),
+      // add: statePrivilegio(
+      //   this.props.token.userToken.menus[2].submenu[2].privilegio[0].estado,
+      // ),
+      // view: statePrivilegio(
+      //   this.props.token.userToken.menus[2].submenu[2].privilegio[1].estado,
+      // ),
+      // cancel: statePrivilegio(
+      //   this.props.token.userToken.menus[2].submenu[2].privilegio[2].estado,
+      // ),
 
       idSucursal: this.props.token.project.idSucursal,
       idUsuario: this.props.token.userToken.idUsuario,

@@ -31,7 +31,7 @@ import { CANCELED } from '../../../../model/types/types';
 import CustomComponent from '../../../../model/class/custom-component';
 import { VENTA, GUIA_DE_REMISION, NOTA_DE_CREDITO } from '../../../../model/types/tipo-comprobante';
 import { pdfA4GuiaRemision, pdfA4Venta, pdfTicketGuiaRemision, pdfTicketVenta } from '../../../../helper/lista-pdf.helper';
-import { senFactura, sendResumenDiario } from '../../../../network/rest/cpesunat.network';
+import { senFactura, senGuiaRemision, sendResumenDiario } from '../../../../network/rest/cpesunat.network';
 
 class CpeElectronicos extends CustomComponent {
   constructor(props) {
@@ -314,21 +314,55 @@ class CpeElectronicos extends CustomComponent {
     });
   }
 
+  handleSendGuiaRemision = (idGuiaRemision) => {
+    alertDialog("Cpe Sunat", "¿Está seguro de enviar el comprobante electrónico?", async (accept) => {
+      if (accept) {
+
+        alertInfo("Cpe Sunat", "Firmando xml y enviando a sunat.")
+
+        const response = await senGuiaRemision(idGuiaRemision);
+
+        if (response instanceof SuccessReponse) {
+          const { state, accept, code, description } = response.data;
+
+          if (state) {
+            if (accept) {
+              alertSuccess("Cpe Sunat", "Código " + code + " " + description, () => {
+                this.onEventPaginacion()
+              });
+            } else {
+              alertWarning("Cpe Sunat", "Código " + code + " " + description);
+            }
+          } else {
+            alertWarning("Cpe Sunat", "Código " + code + " " + description);
+          }
+        }
+
+        if (response instanceof ErrorResponse) {
+          if (response.getType() === CANCELED) return;
+
+          alertError("Cpe Sunat", response.getMessage())
+        }
+
+      }
+    });
+  }
+
   handleOpenPdfA4 = (idComprobante, tipo) => {
-    if(tipo === "fac"){
+    if (tipo === "fac") {
       window.open(pdfA4Venta(idComprobante), '_blank');
-    }else{
+    } else {
       window.open(pdfA4GuiaRemision(idComprobante), '_blank');
-    }    
+    }
   }
 
   handleOpenPdfTicket = (idComprobante, tipo) => {
-    if(tipo === "fac"){
+    if (tipo === "fac") {
       window.open(pdfTicketVenta(idComprobante), '_blank');
-    }else{
+    } else {
       window.open(pdfTicketGuiaRemision(idComprobante), '_blank');
     }
-    
+
   }
 
   handleDownloadXml = () => {
@@ -402,6 +436,50 @@ class CpeElectronicos extends CustomComponent {
     );
   }
 
+  renderEstado(item) {
+    if (item.tipo === "fac") {
+      if (item.estado === 0) {
+        return this.opcionButtonEnvio(images.error, 'Error', () => {
+          this.handleSendFactura(item.idComprobante);
+        });
+      }
+
+      if (isEmpty(item.xmlSunat)) {
+        return this.opcionButtonEnvio(images.reuse, 'Reutilizar', () => {
+          this.handleSendFactura(item.idComprobante);
+        });
+      }
+
+      if (item.xmlSunat === '0') {
+        return this.opcionButtonEnvio(images.accept, 'Aceptar');
+      }
+
+      return this.opcionButtonEnvio(images.unable, 'Incapaz', () => {
+        this.handleSendFactura(item.idComprobante);
+      });
+    } else {
+      if (item.estado === 0) {
+        return this.opcionButtonEnvio(images.error, 'Error', () => {
+          this.handleSendGuiaRemision(item.idComprobante);
+        });
+      }
+
+      if (isEmpty(item.xmlSunat)) {
+        return this.opcionButtonEnvio(images.reuse, 'Reutilizar', () => {
+          this.handleSendGuiaRemision(item.idComprobante);
+        });
+      }
+
+      if (item.xmlSunat === '0') {
+        return this.opcionButtonEnvio(images.accept, 'Aceptar');
+      }
+
+      return this.opcionButtonEnvio(images.unable, 'Incapaz', () => {
+        this.handleSendGuiaRemision(item.idComprobante);
+      });
+    }
+
+  }
 
   generateBody() {
     const { loading, lista } = this.state;
@@ -476,28 +554,6 @@ class CpeElectronicos extends CustomComponent {
           <td>{descripcion}</td>
         </tr>
       );
-    });
-  }
-
-  renderEstado(item) {
-    if (item.estado === 0) {
-      return this.opcionButtonEnvio(images.error, 'Error', () => {
-        this.handleSendFactura(item.idVenta);
-      });
-    }
-
-    if (item.xmlSunat === '') {
-      return this.opcionButtonEnvio(images.reuse, 'Reutilizar', () => {
-        this.handleSendFactura(item.idVenta);
-      });
-    }
-
-    if (item.xmlSunat === '0') {
-      return this.opcionButtonEnvio(images.accept, 'Aceptar');
-    }
-
-    return this.opcionButtonEnvio(images.unable, 'Incapaz', () => {
-      this.handleSendFactura(item.idVenta);
     });
   }
 

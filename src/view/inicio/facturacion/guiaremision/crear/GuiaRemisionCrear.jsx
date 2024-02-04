@@ -107,7 +107,7 @@ class GuiaRemisionCrear extends CustomComponent {
     this.refDireccionPartida = React.createRef();
     this.refDireccionLlegada = React.createRef();
 
-    // Filtrar producto
+    // Filtrar venta
     this.refFiltrarVenta = React.createRef();
     this.selectItemVenta = false;
 
@@ -764,6 +764,57 @@ class GuiaRemisionCrear extends CustomComponent {
     if (isEmpty(this.state.peso)) {
       alertWarning("Guía de Remisión", "Ingrese el peso total.", () => {
         this.refPeso.current.focus()
+      })
+      return;
+    }
+
+    if (this.state.idModalidadTraslado === "MT0001" && isEmpty(this.state.conductorPublico)) {
+      alertWarning("Guía de Remisión", "Seleccione el conductor que va trandportar.", () => {
+        this.refFiltrarConductorPublico.current.focus()
+      })
+      return;
+    }
+
+
+    if (this.state.idModalidadTraslado === "MT0002" && isEmpty(this.state.vehiculo)) {
+      alertWarning("Guía de Remisión", "Seleccione el vehículo que va transportar.", () => {
+        this.refFiltrarVehiculo.current.focus()
+      })
+      return;
+    }
+
+    if (this.state.idModalidadTraslado === "MT0002" && isEmpty(this.state.conductor)) {
+      alertWarning("Guía de Remisión", "Seleccione el conductor que va transportar.", () => {
+        this.refFiltrarConductor.current.focus()
+      })
+      return;
+    }
+    
+
+    if(isEmpty(this.state.direccionPartida)){
+      alertWarning("Guía de Remisión", "Ingrese la dirección de partida.", () => {
+        this.refDireccionPartida.current.focus()
+      })
+      return;
+    }
+
+    if(isEmpty(this.state.idUbigeoPartida)){
+      alertWarning("Guía de Remisión", "Selecciona el ubigeo de partida.", () => {
+        this.refFiltrarUbigeoPartida.current.focus()
+      })
+      return;
+    }
+
+    if(isEmpty(this.state.direccionLlegada)){
+      alertWarning("Guía de Remisión", "Ingrese la dirección de llegada.", () => {
+        this.refDireccionPartida.current.focus()
+      })
+      return;
+    }
+
+    if(isEmpty(this.state.idUbigeoLlegada)){
+      alertWarning("Guía de Remisión", "Selecciona el ubigeo de llegada.", () => {
+        this.refFiltrarUbigeoLlegada.current.focus()
       })
       return;
     }

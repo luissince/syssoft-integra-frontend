@@ -207,7 +207,7 @@ class Ingresos extends CustomComponent {
             <div className="form-group">
               <h5>
                 {' '}
-                Salidas <small className="text-secondary"> Lista </small>{' '}
+                Ingresos <small className="text-secondary"> Lista </small>{' '}
               </h5>
             </div>
           </div>

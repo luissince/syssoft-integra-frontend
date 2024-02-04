@@ -601,6 +601,24 @@ export function alertInfo(title, message) {
   });
 }
 
+export function getPathNavigation(opcion, idComprobante){
+  if(opcion == "venta"){
+    return `/inicio/ventas/detalle?idVenta=${idComprobante}`
+  }
+
+  if(opcion == "cobro"){
+    return `/inicio/cobros/detalle?idCobro=${idComprobante}`
+  }
+
+  if(opcion == "compra"){
+    return `/inicio/compras/detalle?idCompra=${idComprobante}`
+  }
+
+  if(opcion == "gasto"){
+    return `/inicio/gastos/detalle?idGasto=${idComprobante}`
+  }
+}
+
 export function alertHTML(title, html) {
   Swal({
     html: html,
