@@ -617,6 +617,10 @@ export function getPathNavigation(opcion, idComprobante){
   if(opcion == "gasto"){
     return `/inicio/gastos/detalle?idGasto=${idComprobante}`
   }
+
+  if(opcion == "cpe"){
+    return `/inicio/cpeelectronicos?comprobante=${idComprobante}`
+  }
 }
 
 export function alertHTML(title, html) {

@@ -144,7 +144,7 @@ import Clientes from './contacto/cliente/Clientes.jsx';
 import Proveedores from './contacto/proveedor/Proveedores.jsx';
 import Conductores from './contacto/conductor/Conductores.jsx';
 
-import { getNotifications } from '../../network/rest/principal.network.js';
+import { listNotificacion } from '../../network/rest/principal.network.js';
 import SuccessReponse from '../../model/class/response.js';
 import ErrorResponse from '../../model/class/error-response.js';
 import { CANCELED } from '../../model/types/types.js';
@@ -268,7 +268,7 @@ class Inicio extends React.Component {
   }
 
   async loadNotifications() {
-    const response = await getNotifications(this.abortNotificacion.signal);
+    const response = await listNotificacion(this.abortNotificacion.signal);
     if (response instanceof SuccessReponse) {
       this.setState({ notificaciones: response.data });
     } else if (response instanceof ErrorResponse) {

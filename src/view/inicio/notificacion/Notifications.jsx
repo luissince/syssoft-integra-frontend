@@ -1,10 +1,14 @@
-import React from 'react';
-import axios from 'axios';
-import { spinnerLoading, formatTime } from '../../../helper/utils.helper';
+import { spinnerLoading, formatTime, isEmpty, formatNumberWithZeros, getPathNavigation } from '../../../helper/utils.helper';
 import Paginacion from '../../../components/Paginacion';
 import ContainerWrapper from '../../../components/Container';
+import CustomComponent from '../../../model/class/custom-component';
+import { detailNotifications } from '../../../network/rest/principal.network';
+import SuccessReponse from '../../../model/class/response';
+import ErrorResponse from '../../../model/class/error-response';
+import { CANCELED } from '../../../model/types/types';
+import { Link } from 'react-router-dom/cjs/react-router-dom.min';
 
-class Notications extends React.Component {
+class Notications extends CustomComponent {
   constructor(props) {
     super(props);
 
@@ -21,12 +25,6 @@ class Notications extends React.Component {
     };
 
     this.abortControllerTable = new AbortController();
-  }
-
-  setStateAsync(state) {
-    return new Promise((resolve) => {
-      this.setState(state, resolve);
-    });
   }
 
   componentDidMount() {
@@ -61,43 +59,94 @@ class Notications extends React.Component {
   };
 
   fillTable = async () => {
-    try {
-      await this.setStateAsync({
-        loading: true,
-        lista: [],
-        messageTable: 'Cargando información...',
-      });
 
-      const result = await axios.get('/api/cobro/detallenotificaciones', {
-        signal: this.abortControllerTable.signal,
-        params: {
-          posicionPagina:
-            (this.state.paginacion - 1) * this.state.filasPorPagina,
-          filasPorPagina: this.state.filasPorPagina,
-        },
-      });
+    this.setState({
+      loading: true,
+      lista: [],
+      messageTable: 'Cargando información...',
+    })
 
+    const params = {
+      posicionPagina: (this.state.paginacion - 1) * this.state.filasPorPagina,
+      filasPorPagina: this.state.filasPorPagina,
+    }
+
+    const response = await detailNotifications(params, this.abortControllerTable.signal);
+
+    if (response instanceof SuccessReponse) {
       const totalPaginacion = parseInt(
-        Math.ceil(parseFloat(result.data.total) / this.state.filasPorPagina),
+        Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
       );
 
-      await this.setStateAsync({
+      this.setState({
         loading: false,
-        lista: result.data.result,
+        lista: response.data.result,
         totalPaginacion: totalPaginacion,
       });
-    } catch (error) {
-      if (error.message !== 'canceled') {
-        await this.setStateAsync({
-          loading: false,
-          lista: [],
-          totalPaginacion: 0,
-          messageTable:
-            'Se produjo un error interno, intente nuevamente por favor.',
-        });
-      }
+    }
+
+    if (response instanceof ErrorResponse) {
+      if (response.getType() === CANCELED) return;
+
+      this.setState({
+        loading: false,
+        lista: [],
+        totalPaginacion: 0,
+        messageTable: response.getMessage(),
+      })
     }
   };
+
+  generateBody() {
+    if (this.state.loading) {
+      return (
+        <tr>
+          <td className="text-center" colSpan="4">
+            {spinnerLoading(
+              'Cargando información de la tabla...',
+              true,
+            )}
+          </td>
+        </tr>
+      );
+    }
+
+    if (isEmpty(this.state.lista)) {
+      return (
+        <tr className="text-center">
+          <td colSpan="4">¡No hay datos registrados!</td>
+        </tr>
+      );
+    }
+
+    return this.state.lista.map((item, index) => {
+      const estado = item.estado === 1 ? <span className="text-success">DECLARAR</span> : <span className="text-danger">ANULAR</span>;
+
+      return (
+        <tr key={index}>
+          <td className="text-center">{item.id}</td>
+          <td>
+            <Link className="btn-link" to={getPathNavigation("cpe", `${item.serie}-${item.numeracion}`)}>
+              {item.comprobante}
+              <br />
+              {item.serie}-{formatNumberWithZeros(item.numeracion)}
+            </Link>
+            {/* {item.comprobante}
+            {<br />}
+            {item.serie + '-' + item.numeracion} */}
+          </td>
+          <td>
+            {estado}
+          </td>
+          <td>
+            {item.fecha}
+            {<br />}
+            {formatTime(item.hora)}
+          </td>
+        </tr>
+      );
+    });
+  }
 
   render() {
     return (
@@ -127,45 +176,7 @@ class Notications extends React.Component {
                   </tr>
                 </thead>
                 <tbody>
-                  {this.state.loading ? (
-                    <tr>
-                      <td className="text-center" colSpan="4">
-                        {spinnerLoading(
-                          'Cargando información de la tabla...',
-                          true,
-                        )}
-                      </td>
-                    </tr>
-                  ) : this.state.lista.length === 0 ? (
-                    <tr className="text-center">
-                      <td colSpan="4">¡No hay datos registrados!</td>
-                    </tr>
-                  ) : (
-                    this.state.lista.map((item, index) => {
-                      return (
-                        <tr key={index}>
-                          <td className="text-center">{item.id}</td>
-                          <td>
-                            {item.comprobante}
-                            {<br />}
-                            {item.serie + '-' + item.numeracion}
-                          </td>
-                          <td>
-                            {item.estado == 1 ? (
-                              <span className="text-success">DECLARAR</span>
-                            ) : (
-                              <span className="text-danger">ANULAR</span>
-                            )}
-                          </td>
-                          <td>
-                            {item.fecha}
-                            {<br />}
-                            {formatTime(item.hora)}
-                          </td>
-                        </tr>
-                      );
-                    })
-                  )}
+                  {this.generateBody()}
                 </tbody>
               </table>
             </div>

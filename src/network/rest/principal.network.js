@@ -985,14 +985,6 @@ export async function sendEmailBoleta(params) {
   );
 }
 
-export async function getNotifications(signal) {
-  return await Resolve.create(
-    instancePrincipal.get('/api/cobro/notificaciones', {
-      signal: signal,
-    }),
-  );
-}
-
 // ------------------------------------------------------------------------
 // FIN PARA COBRO
 // ------------------------------------------------------------------------
@@ -1760,3 +1752,29 @@ export async function updateAcceso(data, signal) {
 // ------------------------------------------------------------------------
 // FIN PARA ACCESO
 // ------------------------------------------------------------------------
+
+/*
+|--------------------------------------------------------------------------
+| ENDPOINTS DE NOTIFICACION
+|--------------------------------------------------------------------------
+*/
+export async function listNotificacion(signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/notificacion/list', {
+      signal: signal,
+    }),
+  );
+}
+
+export async function detailNotifications(params,signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/notificacion/detailt', {
+      params: params,
+      signal: signal,
+    }),
+  );
+}
+// ------------------------------------------------------------------------
+// FIN PARA NOTIFICACION
+// ------------------------------------------------------------------------
+

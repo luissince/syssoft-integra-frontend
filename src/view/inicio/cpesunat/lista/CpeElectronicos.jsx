@@ -13,6 +13,7 @@ import {
   alertSuccess,
   alertError,
   alertInfo,
+  isText,
 } from '../../../../helper/utils.helper';
 
 import { connect } from 'react-redux';
@@ -34,6 +35,7 @@ import { pdfA4GuiaRemision, pdfA4Venta, pdfTicketGuiaRemision, pdfTicketVenta } 
 import { senFactura, senGuiaRemision, sendResumenDiario } from '../../../../network/rest/cpesunat.network';
 
 class CpeElectronicos extends CustomComponent {
+
   constructor(props) {
     super(props);
     this.state = {
@@ -83,6 +85,12 @@ class CpeElectronicos extends CustomComponent {
   }
 
   async componentDidMount() {
+    const url = this.props.location.search;
+    const comprobante = new URLSearchParams(url).get('comprobante');
+    if(isText(comprobante)){       
+      this.refTxtSearch.current.value = comprobante  
+    }
+
     await this.loadingData();
   }
 
@@ -90,8 +98,7 @@ class CpeElectronicos extends CustomComponent {
     this.abortControllerTable.abort();
   }
 
-
-  loadingData = async () => {
+  loadingData = async (text) => {
     const [
       facturado,
       notaCredito,
@@ -114,7 +121,11 @@ class CpeElectronicos extends CustomComponent {
       sucursales: sucursales,
       initialLoad: false,
     }, () => {
-      this.loadInit()
+      if(text){
+
+      }else{
+        this.loadInit()
+      }
     })
   }
 
@@ -166,7 +177,6 @@ class CpeElectronicos extends CustomComponent {
     }
   }
 
-
   async fetchResumenDiario() {
     const response = await sendResumenDiario();
     if (response instanceof SuccessReponse) {
@@ -179,7 +189,6 @@ class CpeElectronicos extends CustomComponent {
       return null;
     }
   }
-
 
   loadInit = async () => {
     if (this.state.loading) return;
@@ -283,7 +292,6 @@ class CpeElectronicos extends CustomComponent {
   handleSendFactura = (idVenta) => {
     alertDialog("Cpe Sunat", "¿Está seguro de enviar el comprobante electrónico?", async (accept) => {
       if (accept) {
-
         alertInfo("Cpe Sunat", "Firmando xml y enviando a sunat.")
 
         const response = await senFactura(idVenta);
@@ -309,7 +317,6 @@ class CpeElectronicos extends CustomComponent {
 
           alertError("Cpe Sunat", response.getMessage())
         }
-
       }
     });
   }
