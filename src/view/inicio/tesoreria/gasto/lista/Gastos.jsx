@@ -228,8 +228,7 @@ class Gastos extends CustomComponent {
             <button
               className="btn btn-outline-info btn-sm"
               title="Detalle"
-              onClick={() => this.handleDetalle(item.idGasto)}
-              disabled={!this.state.view}
+              onClick={() => this.handleDetalle(item.idGasto)}              
             >
               <i className="fa fa-eye"></i>
             </button>
@@ -238,8 +237,7 @@ class Gastos extends CustomComponent {
             <button
               className="btn btn-outline-danger btn-sm"
               title="Eliminar"
-              onClick={() => this.handleAnular(item.idGasto)}
-              disabled={!this.state.remove}
+              onClick={() => this.handleAnular(item.idGasto)}          
             >
               <i className="fa fa-remove"></i>
             </button>
@@ -289,8 +287,7 @@ class Gastos extends CustomComponent {
             <div className="form-group">
               <button
                 className="btn btn-outline-info"
-                onClick={this.handleCrear}
-                disabled={!this.state.add}
+                onClick={this.handleCrear}               
               >
                 <i className="bi bi-file-plus"></i> Nuevo Registro
               </button>{' '}

@@ -2,6 +2,7 @@ import {
     rounded,
     keyNumberFloat,
     spinnerLoading,
+    numberFormat,
 } from '../../../../../../helper/utils.helper';
 
 const ModalSale = (props) => {
@@ -9,34 +10,39 @@ const ModalSale = (props) => {
 
     const {
         loadingModal,
+
         refMetodoContado,
+
         importeTotal,
+
         handleSaveSale,
-        metodosPagoLista,
-        metodoPagoAgregado,
-        handleAddMetodPay,
-        handleInputMontoMetodoPay,
-        handleRemoveItemMetodPay,
+
+        bancos,
+        codISO,
+        bancosAgregados,
+        handleAddBancosAgregados,
+        handleInputMontoBancosAgregados,
+        handleRemoveItemBancosAgregados,
     } = props;
 
     const generarVuelto = () => {
         const total = parseFloat(importeTotal);
 
-        if (metodoPagoAgregado.length === 0) {
+        if (bancosAgregados.length === 0) {
             return <h5>Agrega algún método de pago.</h5>;
         }
 
-        const currentAmount = metodoPagoAgregado.reduce((accumulator, item) => {
+        const currentAmount = bancosAgregados.reduce((accumulator, item) => {
             accumulator += item.monto ? parseFloat(item.monto) : 0;
             return accumulator;
         }, 0);
 
-        if (metodoPagoAgregado.length > 1) {
+        if (bancosAgregados.length > 1) {
             if (currentAmount >= total) {
                 return (
                     <>
                         <h5>
-                            RESTANTE: <span>{rounded(currentAmount - total)}</span>
+                            RESTANTE: <span>{numberFormat(currentAmount - total, codISO)}</span>
                         </h5>
                         <h6 className="text-danger">
                             Más de dos metodos de pago no generan vuelto.
@@ -47,7 +53,7 @@ const ModalSale = (props) => {
                 return (
                     <>
                         <h5>
-                            POR COBRAR: <span>{rounded(total - currentAmount)}</span>
+                            POR COBRAR: <span>{numberFormat(total - currentAmount, codISO)}</span>
                         </h5>
                         <h6 className="text-danger">
                             Más de dos metodos de pago no generan vuelto.
@@ -57,18 +63,18 @@ const ModalSale = (props) => {
             }
         }
 
-        const metodo = metodoPagoAgregado[0];
+        const metodo = bancosAgregados[0];
         if (metodo.vuelto === 1) {
             if (currentAmount >= total) {
                 return (
                     <h5>
-                        SU CAMBIO ES: <span>{rounded(currentAmount - total)}</span>
+                        SU CAMBIO ES: <span>{numberFormat(currentAmount - total, codISO)}</span>
                     </h5>
                 );
             } else {
                 return (
                     <h5 className="text-danger">
-                        POR COBRAR: <span>{rounded(total - currentAmount)}</span>
+                        POR COBRAR: <span>{numberFormat(total - currentAmount, codISO)}</span>
                     </h5>
                 );
             }
@@ -77,7 +83,7 @@ const ModalSale = (props) => {
                 return (
                     <>
                         <h5>
-                            RESTANTE: <span>{rounded(currentAmount - total)}</span>
+                            RESTANTE: <span>{numberFormat(currentAmount - total, codISO)}</span>
                         </h5>
                         <h6 className="text-danger">El método de pago no genera vuelto.</h6>
                     </>
@@ -86,7 +92,7 @@ const ModalSale = (props) => {
                 return (
                     <>
                         <h5>
-                            POR COBRAR: <span>{rounded(total - currentAmount)}</span>
+                            POR COBRAR: <span>{numberFormat(total - currentAmount, codISO)}</span>
                         </h5>
                         <h6 className="text-danger">El método de pago no genera vuelto.</h6>
                     </>
@@ -123,7 +129,7 @@ const ModalSale = (props) => {
                             <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
                                 <div className="text-center">
                                     <h5>
-                                        TOTAL A COBRAR: <span>{rounded(importeTotal)}</span>
+                                        TOTAL A COBRAR: <span>{numberFormat(importeTotal, codISO)}</span>
                                     </h5>
                                 </div>
                             </div>
@@ -144,14 +150,14 @@ const ModalSale = (props) => {
 
                         <h5>Lista de métodos:</h5>
 
-                        {metodoPagoAgregado.map((item, index) => (
+                        {bancosAgregados.map((item, index) => (
                             <MetodoPago
                                 key={index}
-                                idMetodoPago={item.idMetodoPago}
-                                nameMetodPay={item.nombre}
+                                idBanco={item.idBanco}
+                                name={item.nombre}
                                 monto={item.monto}
-                                handleInputMontoMetodoPay={handleInputMontoMetodoPay}
-                                handleRemoveItemMetodPay={handleRemoveItemMetodPay}
+                                handleInputMontoBancosAgregados={handleInputMontoBancosAgregados}
+                                handleRemoveItemBancosAgregados={handleRemoveItemBancosAgregados}
                             />
                         ))}
 
@@ -172,8 +178,8 @@ const ModalSale = (props) => {
                                             className="form-control"
                                             ref={refMetodoContado}
                                         >
-                                            {metodosPagoLista.map((item, index) => (
-                                                <option key={index} value={item.idMetodoPago}>
+                                            {bancos.map((item, index) => (
+                                                <option key={index} value={item.idBanco}>
                                                     {item.nombre}
                                                 </option>
                                             ))}
@@ -182,7 +188,7 @@ const ModalSale = (props) => {
                                             <button
                                                 className="btn btn-outline-success d-flex"
                                                 title="Agregar Pago"
-                                                onClick={handleAddMetodPay}
+                                                onClick={handleAddBancosAgregados}
                                             >
                                                 <i className="bi bi-plus-circle-fill"></i>
                                             </button>
@@ -224,11 +230,11 @@ const ModalSale = (props) => {
 };
 
 const MetodoPago = ({
-    idMetodoPago,
-    nameMetodPay,
+    idBanco,
+    name,
     monto,
-    handleInputMontoMetodoPay,
-    handleRemoveItemMetodPay,
+    handleInputMontoBancosAgregados,
+    handleRemoveItemBancosAgregados,
 }) => {
     return (
         <div className="input-group mb-2">
@@ -238,19 +244,19 @@ const MetodoPago = ({
                 className="form-control"
                 placeholder="Monto"
                 value={monto}
-                onChange={(event) => handleInputMontoMetodoPay(event, idMetodoPago)}
+                onChange={(event) => handleInputMontoBancosAgregados(event, idBanco)}
                 onKeyDown={keyNumberFloat}
             />
             <div className="input-group-prepend">
                 <div className="input-group-text">
-                    <span>{nameMetodPay}</span>
+                    <span>{name}</span>
                 </div>
             </div>
             <div className="input-group-append">
                 <button
                     className="btn btn-outline-danger d-flex"
                     title="Agregar Pago"
-                    onClick={() => handleRemoveItemMetodPay(idMetodoPago)}
+                    onClick={() => handleRemoveItemBancosAgregados(idBanco)}
                 >
                     <i className="bi bi-trash3-fill"></i>
                 </button>

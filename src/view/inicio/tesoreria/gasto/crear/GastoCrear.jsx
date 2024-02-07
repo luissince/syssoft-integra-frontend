@@ -134,31 +134,31 @@ class GastoCrear extends CustomComponent {
 
         viewModal(this.idModalSale, () => {
             const metodo = this.state.bancos.find((item) => item.preferido === 1);
-
+      
             this.refMetodoContado.current.value = metodo ? metodo.idBanco : '';
-
+      
             if (metodo) {
-                const item = {
-                    idBanco: metodo.idBanco,
-                    nombre: metodo.nombre,
-                    monto: '',
-                    vuelto: metodo.vuelto,
-                    descripcion: '',
-                };
-
-                this.setState((prevState) => ({
-                    bancosAgregados: [...prevState.bancosAgregados, item],
-                }));
+              const item = {
+                idBanco: metodo.idBanco,
+                nombre: metodo.nombre,
+                monto: '',
+                vuelto: metodo.vuelto,
+                descripcion: '',
+              };
+      
+              this.setState((prevState) => ({
+                bancosAgregados: [...prevState.bancosAgregados, item],
+              }));
             }
-
+      
             this.setState({ loadingModal: false });
-        });
-
-        clearModal(this.idModalSale, async () => {
+          });
+      
+          clearModal(this.idModalSale, async () => {
             this.setState({
-                bancosAgregados: [],
+              bancosAgregados: [],
             });
-        });
+          });
     }
 
     componentWillUnmount() {
@@ -331,20 +331,20 @@ class GastoCrear extends CustomComponent {
     };
 
     /*
-          |--------------------------------------------------------------------------
-          | Método de eventos
-          |--------------------------------------------------------------------------
-          |
-          | El método handle es una convención utilizada para denominar funciones que manejan eventos específicos
-          | en los componentes de React. Estas funciones se utilizan comúnmente para realizar tareas o actualizaciones
-          | en el estado del componente cuando ocurre un evento determinado, como hacer clic en un botón, cambiar el valor
-          | de un campo de entrada, o cualquier otra interacción del usuario. Los métodos handle suelen recibir el evento
-          | como parámetro y se encargan de realizar las operaciones necesarias en función de la lógica de la aplicación.
-          | Por ejemplo, un método handle para un evento de clic puede actualizar el estado del componente o llamar a
-          | otra función específica de la lógica de negocio. La convención de nombres handle suele combinarse con un prefijo
-          | que describe el tipo de evento que maneja, como handleInputChange, handleClick, handleSubmission, entre otros. 
-          |
-          */
+      |--------------------------------------------------------------------------
+      | Método de eventos
+      |--------------------------------------------------------------------------
+      |
+      | El método handle es una convención utilizada para denominar funciones que manejan eventos específicos
+      | en los componentes de React. Estas funciones se utilizan comúnmente para realizar tareas o actualizaciones
+      | en el estado del componente cuando ocurre un evento determinado, como hacer clic en un botón, cambiar el valor
+      | de un campo de entrada, o cualquier otra interacción del usuario. Los métodos handle suelen recibir el evento
+      | como parámetro y se encargan de realizar las operaciones necesarias en función de la lógica de la aplicación.
+      | Por ejemplo, un método handle para un evento de clic puede actualizar el estado del componente o llamar a
+      | otra función específica de la lógica de negocio. La convención de nombres handle suele combinarse con un prefijo
+      | que describe el tipo de evento que maneja, como handleInputChange, handleClick, handleSubmission, entre otros. 
+      |
+      */
 
     handleInputPrecio = (event) => {
         this.setState({ precio: event.target.value });
@@ -380,21 +380,17 @@ class GastoCrear extends CustomComponent {
     // Acciones del modal
     //------------------------------------------------------------------------------------------
 
-    handleAddMetodPay = () => {
-        const listAdd = this.state.bancosAgregados.find(
-            (item) => item.idMetodoPago === this.refMetodoContado.current.value,
-        );
+    handleAddBancosAgregados = () => {
+        const listAdd = this.state.bancosAgregados.find((item) => item.idBanco === this.refMetodoContado.current.value);
 
         if (listAdd) {
             return;
         }
 
-        const metodo = this.state.bancos.find(
-            (item) => item.idMetodoPago === this.refMetodoContado.current.value,
-        );
+        const metodo = this.state.bancos.find((item) => item.idBanco === this.refMetodoContado.current.value);
 
         const item = {
-            idMetodoPago: metodo.idMetodoPago,
+            idBanco: metodo.idBanco,
             nombre: metodo.nombre,
             monto: '',
             vuelto: metodo.vuelto,
@@ -406,12 +402,12 @@ class GastoCrear extends CustomComponent {
         }));
     };
 
-    handleInputMontoMetodoPay = (event, idMetodoPago) => {
+    handleInputMontoBancosAgregados = (event, idBanco) => {
         const { value } = event.target;
-
+        
         this.setState((prevState) => ({
             bancosAgregados: prevState.bancosAgregados.map((item) => {
-                if (item.idMetodoPago === idMetodoPago) {
+                if (item.idBanco === idBanco) {
                     return { ...item, monto: value ? value : '' };
                 } else {
                     return item;
@@ -420,10 +416,8 @@ class GastoCrear extends CustomComponent {
         }));
     };
 
-    handleRemoveItemMetodPay = (idMetodoPago) => {
-        const bancosAgregados = this.state.bancosAgregados.filter(
-            (item) => item.idMetodoPago !== idMetodoPago,
-        );
+    handleRemoveItemBancosAgregados = (idBanco) => {
+        const bancosAgregados = this.state.bancosAgregados.filter((item) => item.idBanco !== idBanco);
         this.setState({ bancosAgregados });
     };
 
@@ -662,7 +656,7 @@ class GastoCrear extends CustomComponent {
     };
 
     handleLimpiar = async () => {
-        this.setStateAsync(this.initial, async () => {
+        this.setState(this.initial, async () => {
             await this.loadData();
         });
     };
@@ -737,10 +731,11 @@ class GastoCrear extends CustomComponent {
                     importeTotal={this.state.total}
                     handleSaveSale={this.handleSaveSale}
                     bancos={this.state.bancos}
+                    codISO={this.state.codISO}
                     bancosAgregados={this.state.bancosAgregados}
-                    handleAddMetodPay={this.handleAddMetodPay}
-                    handleInputMontoMetodoPay={this.handleInputMontoMetodoPay}
-                    handleRemoveItemMetodPay={this.handleRemoveItemMetodPay}
+                    handleAddBancosAgregados={this.handleAddBancosAgregados}
+                    handleInputMontoBancosAgregados={this.handleInputMontoBancosAgregados}
+                    handleRemoveItemBancosAgregados={this.handleRemoveItemBancosAgregados}
                 />
 
                 {this.state.loading && spinnerLoading(this.state.msgLoading)}

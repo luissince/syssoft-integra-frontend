@@ -90,7 +90,7 @@ class CobroCrear extends CustomComponent {
       idSucursal: this.props.token.project.idSucursal,
     };
 
-    this.initial = {...this.state}
+    this.initial = { ...this.state }
 
     // Referencia principales
     this.refMonto = React.createRef();
@@ -129,7 +129,7 @@ class CobroCrear extends CustomComponent {
     */
 
   async componentDidMount() {
-    this.loadData();
+    await this.loadData();
 
     viewModal(this.idModalSale, () => {
       const metodo = this.state.bancos.find((item) => item.preferido === 1);
@@ -596,9 +596,9 @@ class CobroCrear extends CustomComponent {
     await this.setStateAsync({ loadingCliente: true });
 
     const params = {
-      "opcion": 1,
-      "filter": searchWord,
-      "cliente": true,
+      opcion: 1,
+      filter: searchWord,
+      cliente: true,
     };
 
     const clientes = await this.fetchFiltrarCliente(params);

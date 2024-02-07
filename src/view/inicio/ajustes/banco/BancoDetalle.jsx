@@ -205,7 +205,7 @@ class BancoDetalle extends CustomComponent {
         </td>
         <td className={`text-left ${item.estado === 1 ? "" : "text-danger"}`}>{item.estado === 1 ? "ACTIVO" : "ANULADO"}</td>
         <td className={`text-right ${item.estado === 0 ? "" : "text-danger"}`}>
-          {item.estado === 0 && item.tipo == 0 ? rounded(item.monto) : item.tipo == 0 ? `- ${rounded(item.monto)}` : ''}
+          {item.estado === 0 && item.tipo == 2 ? rounded(item.monto) : item.tipo == 2 ? `- ${rounded(item.monto)}` : ''}
         </td>
         <td className={`text-right ${item.estado === 0 ? "" : "text-success"}`}>
           {item.estado === 0 && item.tipo == 1 ? rounded(item.monto) : item.tipo === 1 ? `+ ${rounded(item.monto)}` : ''}

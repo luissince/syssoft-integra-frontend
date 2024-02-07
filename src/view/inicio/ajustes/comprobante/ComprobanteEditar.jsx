@@ -36,6 +36,7 @@ class ComporbanteEditar extends CustomComponent {
       preferida: false,
       numeroCampo: '',
       facturado: false,
+      anulacion: '0',
 
       tipoComprobante: [],
 
@@ -88,6 +89,7 @@ class ComporbanteEditar extends CustomComponent {
       preferida: comprobante.preferida === 1 ? true : false,
       numeroCampo: comprobante.numeroCampo,
       facturado: comprobante.facturado === 1 ? true : false,
+      anulacion: comprobante.anulacion === 0 ? "" :  comprobante.anulacion === 1 ? "1": "2",
       loading: false,
     });
   }
@@ -182,6 +184,7 @@ class ComporbanteEditar extends CustomComponent {
               this.state.numeroCampo === '' ? 0 : this.state.numeroCampo,
             idUsuario: this.state.idUsuario,
             facturado: this.state.facturado,
+            anulacion: this.state.anulacion,
             idComprobante: this.state.idComprobante,
           };
 
@@ -224,7 +227,7 @@ class ComporbanteEditar extends CustomComponent {
         <div className="row">
           <div className="col">
             <div className="form-group">
-              <label htmlFor="estado" className="col-form-label">
+              <label htmlFor="estado">
                 Tipo de Comprobante: <i className="fa fa-asterisk text-danger small"></i>
               </label>
               <select
@@ -270,7 +273,7 @@ class ComporbanteEditar extends CustomComponent {
 
         <div className="row">
           <div className="form-group col-md-6">
-            <label htmlFor="serie" className="col-form-label">
+            <label htmlFor="serie">
               Serie <i className="fa fa-asterisk text-danger small"></i>
             </label>
             <input
@@ -284,7 +287,7 @@ class ComporbanteEditar extends CustomComponent {
             />
           </div>
           <div className="form-group col-md-6">
-            <label htmlFor="numeracion" className="col-form-label">
+            <label htmlFor="numeracion">
               Numeración <i className="fa fa-asterisk text-danger small"></i>
             </label>
             <input
@@ -304,34 +307,18 @@ class ComporbanteEditar extends CustomComponent {
 
         <div className="row">
           <div className="form-group col-md-6">
-            <label htmlFor="impresion" className="col-form-label">
-              Nombre de Impresión:
-            </label>
+            <label htmlFor="numeracion">Caracteres a Usar</label>
             <input
+              ref={this.refNumeroCampo}
               type="text"
               className="form-control"
-              placeholder='Ejm: Boleta Electrónica, Factura Electrónica...'
-              id="impresion"
-              value={this.state.impresion}
+              id="numeracion"
+              placeholder={'0, 8, 11'}
+              value={this.state.numeroCampo}
               onChange={(event) =>
-                this.setState({ impresion: event.target.value })
+                this.setState({ numeroCampo: event.target.value })
               }
-            />
-          </div>
-
-          <div className="form-group col-md-6">
-            <label htmlFor="codigo" className="col-form-label">
-              Código:
-            </label>
-            <input
-              type="text"
-              className="form-control"
-              id="codigo"
-              placeholder='01, 06'
-              value={this.state.codigo}
-              onChange={(event) =>
-                this.setState({ codigo: event.target.value })
-              }
+              onKeyDown={keyNumberInteger}
             />
           </div>
         </div>
@@ -378,26 +365,14 @@ class ComporbanteEditar extends CustomComponent {
           </div>
         </div>
 
+        <div className="dropdown-divider"></div>
+
+        <h6>Opciones de Facturación</h6>
+
         <div className="row">
           <div className="form-group col-md-6">
-            <label htmlFor="numeracion" className="col-form-label">Caracteres a Usar</label>
-            <input
-              ref={this.refNumeroCampo}
-              type="text"
-              className="form-control"
-              id="numeracion"
-              placeholder={'0, 8, 11'}
-              value={this.state.numeroCampo}
-              onChange={(event) =>
-                this.setState({ numeroCampo: event.target.value })
-              }
-              onKeyDown={keyNumberInteger}
-            />
-          </div>
-
-          <div className="form-group col-md-6">
             <label htmlFor="nombre" className="col-form-label">
-              Facturado:
+              El comporbante va ser enviado a Sunat:
             </label>
             <div className="custom-control custom-switch">
               <input
@@ -414,6 +389,91 @@ class ComporbanteEditar extends CustomComponent {
               </label>
             </div>
           </div>
+
+          <div className="form-group col-md-6">
+            <label htmlFor="nombre" className="col-form-label">
+              Formas de anulación:
+            </label>
+            <div className="row">
+              <div className="col">
+                <div className="form-check form-check-inline pr-5">
+                  <input
+                    className="form-check-input checked"
+                    type="radio"
+                    name="inlineRadioOptions"
+                    id="1"
+                    value="1"
+                    checked={this.state.anulacion === '1'}
+                    onChange={(event) => {
+                      this.setState({
+                        anulacion: event.target.value
+                      })
+                    }}
+                  />
+                  <label className="form-check-label" htmlFor="1">
+                    {' '}
+                    Comunicación de baja
+                  </label>
+                </div>
+              </div>
+
+              <div className='col'>
+                <div className="form-check form-check-inline">
+                  <input
+                    className="form-check-input"
+                    type="radio"
+                    name="inlineRadioOptions"
+                    id="2"
+                    value="2"
+                    checked={this.state.anulacion === '2'}
+                    onChange={(event) => {
+                      this.setState({
+                        anulacion: event.target.value
+                      })
+                    }}
+                  />
+                  <label className="form-check-label" htmlFor="2">
+                    {' '}
+                    Resumen diario
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="row">
+          <div className="form-group col-md-6">
+            <label htmlFor="impresion" className="col-form-label">
+              Nombre de Impresión:
+            </label>
+            <input
+              type="text"
+              className="form-control"
+              id="impresion"
+              placeholder='Ejm: Boleta Electrónica, Factura Electrónica...'
+              value={this.state.impresion}
+              onChange={(event) =>
+                this.setState({ impresion: event.target.value })
+              }
+            />
+          </div>
+
+          <div className="form-group col-md-6">
+            <label htmlFor="codigo" className="col-form-label">
+              Código:
+            </label>
+            <input
+              type="text"
+              className="form-control"
+              id="codigo"
+              placeholder='01, 06'
+              value={this.state.codigo}
+              onChange={(event) =>
+                this.setState({ codigo: event.target.value })
+              }
+            />
+          </div>
         </div>
 
         <div className="row">
@@ -421,17 +481,17 @@ class ComporbanteEditar extends CustomComponent {
             <div className="form-group">
               <button
                 type="button"
-                className="btn btn-primary"
+                className="btn btn-warning"
                 onClick={this.handleGuardar}
               >
-                Guardar
+              <i className='fa fa-edit'></i>  Guardar
               </button>{' '}
               <button
                 type="button"
                 className="btn btn-danger"
                 onClick={() => this.props.history.goBack()}
               >
-                Cerrar
+              <i className='fa fa-close'></i>  Cerrar
               </button>
             </div>
           </div>

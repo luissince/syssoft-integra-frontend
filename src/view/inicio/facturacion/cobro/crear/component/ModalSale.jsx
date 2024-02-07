@@ -129,7 +129,7 @@ const ModalSale = (props) => {
               <div className="col">
                 <div className="text-center">
                   <h5>
-                    TOTAL A COBRAR: <span>{rounded(importeTotal)}</span>
+                    TOTAL A COBRAR: <span>{numberFormat(importeTotal, codISO)}</span>
                   </h5>
                 </div>
               </div>

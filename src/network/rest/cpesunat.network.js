@@ -38,39 +38,15 @@ export async function sendResumenDiario(idVenta) {
   );
 }
 
+export async function sendComunicacionDeBaja(idVenta) {
+  return await Resolve.create(
+    instanceCpeSunat.get(`/api/comunicaciondebaja/${idVenta}`),
+  );
+}
+
 export async function senGuiaRemision(idGuiaRemision) {
   return await Resolve.create(
     instanceCpeSunat.get(`/api/guiaremision/${idGuiaRemision}`),
   );
 }
 
-
-export async function sendNotaCredito(idCpeSunat) {
-  return await Resolve.create(
-    instanceCpeSunat.get(`/app/examples/notacredito.php`, {
-      params: {
-        idNotaCredito: idCpeSunat,
-      },
-    }),
-  );
-}
-
-export async function sendResumenFactura(idCpeSunat) {
-  return await Resolve.create(
-    instanceCpeSunat.get(`/app/examples/resumen.php`, {
-      params: {
-        idCobro: idCpeSunat,
-      },
-    }),
-  );
-}
-
-export async function sendResumenNotaCredito(idCpeSunat) {
-  return await Resolve.create(
-    instanceCpeSunat.get(`/app/examples/resumen_nota_credito.php`, {
-      params: {
-        idNotaCredito: idCpeSunat,
-      },
-    }),
-  );
-}
