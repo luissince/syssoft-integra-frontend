@@ -68,23 +68,23 @@ export const CustomModalContent = ({ contentRef, isOpen, onOpen, onHidden, onClo
 CustomModalContent.propTypes = {
     contentRef: PropTypes.func.isRequired,
     isOpen: PropTypes.bool.isRequired,
-    onOpen: PropTypes.func.isRequired,
-    onHidden: PropTypes.func.isRequired,
+    onOpen: PropTypes.func,
+    onHidden: PropTypes.func,
     onClose: PropTypes.func.isRequired,
     contentLabel: PropTypes.string.isRequired,
     titleHeader: PropTypes.string.isRequired,
-    body: PropTypes.element.isRequired,
-    footer: PropTypes.element.isRequired,
+    body: PropTypes.oneOfType([PropTypes.element, PropTypes.arrayOf(PropTypes.element)]).isRequired,
+    footer: PropTypes.oneOfType([PropTypes.element, PropTypes.arrayOf(PropTypes.element)]).isRequired
 }
 
 CustomModal.propTypes = {
     contentRef: PropTypes.func.isRequired,
     isOpen: PropTypes.bool.isRequired,
-    onOpen: PropTypes.func.isRequired,
-    onHidden: PropTypes.func.isRequired,
+    onOpen: PropTypes.func,
+    onHidden: PropTypes.func,
     onClose: PropTypes.func.isRequired,
     contentLabel: PropTypes.string.isRequired,
-    children: PropTypes.arrayOf(PropTypes.element).isRequired
+    children: PropTypes.oneOfType([PropTypes.element, PropTypes.arrayOf(PropTypes.element)]).isRequired
 }
 
 export default CustomModal;

@@ -7,15 +7,12 @@ import {
   alertInput,
   alertSuccess,
   alertWarning,
-  clearModal,
   formatDecimal,
   hideModal,
   isEmpty,
   isNumeric,
   rounded,
-  showModal,
   spinnerLoading,
-  viewModal,
 } from '../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import { PosContainerWrapper } from '../../../../../components/Container';
@@ -49,11 +46,12 @@ import {
   VENTA,
 } from '../../../../../model/types/tipo-comprobante';
 import { starProduct, favoriteProducts } from '../../../../../redux/actions';
+import PropTypes from 'prop-types';
 import ModalProducto from './component/ModalProducto';
 import { A_GRANEL, SERVICIO, UNIDADES, VALOR_MONETARIO } from '../../../../../model/types/tipo-tratamiento-producto';
-import CustomModal from '../../../../../components/CustomModal';
+import { CustomModalContent } from '../../../../../components/CustomModal';
 import { CLIENTE_NATURAL } from '../../../../../model/types/tipo-cliente';
-import { CONTADO } from '../../../../../model/types/forma-pago';
+import { ADELANTADO, CONTADO, CREDITO_FIJO, CREDITO_VARIABLE } from '../../../../../model/types/forma-pago';
 import { pdfA4Venta, pdfTicketVenta } from '../../../../../helper/lista-pdf.helper';
 
 /**
@@ -73,32 +71,29 @@ class VentaCrear extends CustomComponent {
      * @type {Object}
      */
     this.state = {
+      // Atributos de carga
       loading: true,
       msgLoading: 'Cargando datos...',
 
+      // Atributos principales
       idVenta: '',
       idComprobante: '',
-
       idMoneda: '',
-      codiso: '',
-
       idImpuesto: '',
+      comentario: '',
 
+      // Filtrar producto
       producto: '',
       sarchProducto: false,
       filterProducto: false,
 
+      // Filtrar cliente
       idCliente: '',
       cliente: '',
       filterCliente: false,
       nuevoCliente: null,
 
-      comentario: '',
-
-      // Variables del modal de venta
-      loadingModal: false,
-      formaPago: CONTADO,
-
+      // Lista de datos
       comprobantes: [],
       productos: [],
       clientes: [],
@@ -107,23 +102,25 @@ class VentaCrear extends CustomComponent {
       tiposDocumentos: [],
       detalleVenta: [],
 
-      numCuota: '',
-      letraMensual: '',
-
-      frecuenciaPagoCredito: new Date().getDate() > 15 ? '30' : '15',
-
-      frecuenciaPago: new Date().getDate() > 15 ? '30' : '15',
-
+      // Atributos libres
+      codiso: '',
       importeTotal: 0.0,
 
       // modal custom
-      isOpen: false,
+      isOpenPrinter: false,
 
-      // modal venta
+      // Atributos del modal sale
+      isOpenSale: false,
+      loadingModal: false,
+      formaPago: CONTADO,
       bancos: [],
       bancosAgregados: [],
 
-      // modal cliente
+      numCuota: '',
+      frecuenciaPagoCredito: new Date().getDate() > 15 ? '30' : '15',
+      frecuenciaPago: new Date().getDate() > 15 ? '30' : '15',
+
+      // Atributos del modal cliente
       loadingCliente: false,
       idTipoCliente: CLIENTE_NATURAL,
       idTipoDocumentoPn: '',
@@ -137,7 +134,7 @@ class VentaCrear extends CustomComponent {
       numerCelularPj: '',
       direccionPj: '',
 
-      // modal producto
+      // Atributos del modal producto
       loadingProducto: true,
 
       idSucursal: this.props.token.project.idSucursal,
@@ -146,41 +143,41 @@ class VentaCrear extends CustomComponent {
 
     this.initial = { ...this.state }
 
-    // Lista de id para los modales
+    // Atributos para el modal configuración
     this.idModalConfiguration = 'idModalConfiguration';
-    this.idModalCliente = 'idModalCliente';
-    this.idModalSale = 'idModalSale';
-    this.idModalProducto = 'idModalProducto';
-
-
-    this.refPrinter = React.createRef();
-
-    this.refProducto = React.createRef();
-
-    this.refComprobante = React.createRef();
-
-    this.refCliente = React.createRef();
-
     this.refImpuesto = React.createRef();
-
     this.refMoneda = React.createRef();
-
     this.refComentario = React.createRef();
 
+    // Referencia al mmodal sale
+    this.refSale = React.createRef();
     this.refMetodoContado = React.createRef();
-
     this.refFrecuenciaPago = React.createRef();
     this.refNumCutoas = React.createRef();
     this.refFrecuenciaPagoCredito = React.createRef();
 
-    // atributos para el modal producto
+    // Referencia al mmodal printer
+    this.refPrinter = React.createRef();
+
+    // Referencia a la busqueda de productos
+    this.refProducto = React.createRef();
+
+    // Referencia al tipo de comprobante
+    this.refComprobante = React.createRef();
+
+    // Referencia al tipo de cliente
+    this.refCliente = React.createRef();
+
+    // Atributos para el modal producto
+    this.idModalProducto = 'idModalProducto';
     this.producto = null;
     this.refPrecioProducto = React.createRef();
     this.refBonificacionProducto = React.createRef();
     this.refDescripcionProducto = React.createRef();
     this.listPrecioProducto = [];
 
-    // atributos para el modal cliente
+    // Atributos para el modal cliente
+    this.idModalCliente = 'idModalCliente';
     this.refIdTipoDocumentoPn = React.createRef();
     this.refNumeroDocumentoPn = React.createRef();
     this.refInformacionPn = React.createRef();
@@ -215,48 +212,6 @@ class VentaCrear extends CustomComponent {
    */
   async componentDidMount() {
     await this.initData();
-
-    viewModal(this.idModalSale, () => {
-      const importeTotal = this.state.detalleVenta.reduce((accumulator, item) => {
-        const totalProductPrice = item.precio * item.cantidad;
-        return accumulator + totalProductPrice;
-      }, 0,)
-
-      const metodo = this.state.bancos.find((item) => item.preferido === 1);
-      console.log(this.state.bancos)
-
-      this.refMetodoContado.current.value = metodo ? metodo.idBanco : '';
-
-      if (metodo) {
-        const item = {
-          idBanco: metodo.idBanco,
-          nombre: metodo.nombre,
-          monto: '',
-          vuelto: metodo.vuelto,
-          descripcion: '',
-        }
-
-        this.setState((prevState) => ({
-          bancosAgregados: [...prevState.bancosAgregados, item],
-        }))
-      }
-
-      this.setState({ importeTotal, loadingModal: false });
-    })
-
-    clearModal(this.idModalSale, () => {
-      this.setState({
-        formaPago: CONTADO,
-
-        letraMensual: '',
-        frecuenciaPagoCredito: new Date().getDate() > 15 ? '30' : '15',
-        numCuota: '',
-
-        frecuenciaPago: new Date().getDate() > 15 ? '30' : '15',
-
-        bancosAgregados: [],
-      })
-    })
   }
 
   /**
@@ -479,16 +434,6 @@ class VentaCrear extends CustomComponent {
     }
   }
 
-  calcularLetraMensual = () => {
-    if (this.state.numCuota === '') {
-      return;
-    }
-
-    const saldo = this.state.importeTotal;
-    const letra = saldo / this.state.numCuota;
-
-    this.setState({ letraMensual: letra.toFixed(2) });
-  }
 
   reloadView() {
     this.setState(this.initial, async () => {
@@ -639,6 +584,17 @@ class VentaCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
   // Modal impresión
   //------------------------------------------------------------------------------------------
+  handleOpenPrint = (idVenta) => {
+    this.setState({ isOpenPrinter: true, idVenta: idVenta })
+  }
+
+  handleClosePrint = async () => {
+    const data = this.refPrinter.current;
+    data.classList.add("close-cm")
+    data.addEventListener('animationend', () => {
+      this.setState({ isOpenPrinter: false }, () => this.reloadView())
+    })
+  }
 
   handlePrintA4 = () => {
     printJS({
@@ -663,18 +619,6 @@ class VentaCrear extends CustomComponent {
         console.log("onPrintDialogClose")
         this.handleClosePrint()
       }
-    })
-  }
-
-  handleOpenPrint = (idVenta) => {
-    this.setState({ isOpen: true, idVenta: idVenta })
-  }
-
-  handleClosePrint = async () => {
-    const data = this.refPrinter.current;
-    data.classList.add("close")
-    data.addEventListener('animationend', () => {
-      this.setState({ isOpen: false }, () => this.reloadView())
     })
   }
 
@@ -1068,8 +1012,7 @@ class VentaCrear extends CustomComponent {
       return;
     }
 
-    showModal(this.idModalSale);
-    await this.setStateAsync({ loadingModal: true });
+    this.handleOpenModalSale();
   }
 
   handleClearSale = async () => {
@@ -1078,21 +1021,69 @@ class VentaCrear extends CustomComponent {
         this.reloadView()
       }
     })
-
   }
 
   //------------------------------------------------------------------------------------------
   // Modal Venta
   //------------------------------------------------------------------------------------------
+  handleOpenModalSale = () => {
+    this.setState({ loadingModal: true, isOpenSale: true })
+  }
+
+  handleOnOpenModalSale = () => {
+    const importeTotal = this.state.detalleVenta.reduce((accumulator, item) => {
+      const totalProductPrice = item.precio * item.cantidad;
+      return accumulator + totalProductPrice;
+    }, 0)
+
+    const metodo = this.state.bancos.find((item) => item.preferido === 1);
+
+    this.refMetodoContado.current.value = metodo ? metodo.idBanco : '';
+
+    if (metodo) {
+      const item = {
+        idBanco: metodo.idBanco,
+        nombre: metodo.nombre,
+        monto: '',
+        vuelto: metodo.vuelto,
+        descripcion: '',
+      }
+
+      this.setState((prevState) => ({
+        bancosAgregados: [...prevState.bancosAgregados, item],
+      }))
+    }
+
+    this.setState({ importeTotal, loadingModal: false });
+  }
+
+  handleOnHiddenModalSale = () => {
+    this.setState({
+      formaPago: CONTADO,
+
+      frecuenciaPagoCredito: new Date().getDate() > 15 ? '30' : '15',
+      numCuota: '',
+
+      frecuenciaPago: new Date().getDate() > 15 ? '30' : '15',
+
+      bancosAgregados: [],
+    })
+  }
+
+  handleOnCloseModalSale = async () => {
+    const data = this.refSale.current;
+    data.classList.add("close-cm")
+    data.addEventListener('animationend', () => {
+      this.setState({ isOpenSale: false })
+    })
+  }
 
   handleSelectTipoPago = (tipo) => {
     this.setState({ formaPago: tipo });
   }
 
   handleSelectNumeroCuotas = (event) => {
-    this.setState({ numCuota: event.target.value }, () =>
-      this.calcularLetraMensual(),
-    );
+    this.setState({ numCuota: event.target.value });
   }
 
   handleSelectFrecuenciaPagoCredito = (event) => {
@@ -1104,7 +1095,7 @@ class VentaCrear extends CustomComponent {
   }
 
   //Metodos Modal Sale
-  handleAgregarBancos = () => {
+  handleAddBancosAgregados = () => {
     const listAdd = this.state.bancosAgregados.find((item) => item.idBanco === this.refMetodoContado.current.value);
 
     if (listAdd) {
@@ -1126,14 +1117,14 @@ class VentaCrear extends CustomComponent {
     }));
   }
 
-  handleRemoveItemAgregarBanco = (idBanco) => {
+  handleRemoveItemBancosAgregados = (idBanco) => {
     const bancosAgregados = this.state.bancosAgregados.filter(
       (item) => item.idBanco !== idBanco,
     );
     this.setState({ bancosAgregados });
   };
 
-  handleInputMontoAgregarBancos = (event, idBanco) => {
+  handleInputMontoBancosAgregados = (event, idBanco) => {
     const { value } = event.target;
 
     this.setState((prevState) => ({
@@ -1181,36 +1172,36 @@ class VentaCrear extends CustomComponent {
       importeTotal,
     } = this.state;
 
-    let metodoPagoLista = [...bancosAgregados];
+    let metodoPagosLista = [...bancosAgregados];
 
-    if (isEmpty(metodoPagoLista)) {
+    if (isEmpty(metodoPagosLista)) {
       alertWarning('Venta', 'Tiene que agregar método de cobro para continuar.');
       return;
     }
 
-    if (metodoPagoLista.filter((item) => !isNumeric(item.monto)).length !== 0) {
+    if (metodoPagosLista.filter((item) => !isNumeric(item.monto)).length !== 0) {
       alertWarning('Venta', 'Hay montos del metodo de cobro que no tiene valor.');
       return;
     }
 
-    const metodoCobroTotal = metodoPagoLista.reduce((accumulator, item) => {
+    const metodoCobroTotal = metodoPagosLista.reduce((accumulator, item) => {
       return (accumulator += parseFloat(item.monto));
     }, 0);
 
-    if (metodoPagoLista.length > 1) {
+    if (metodoPagosLista.length > 1) {
       if (metodoCobroTotal !== importeTotal) {
         alertWarning('Venta', 'Al tener mas de 2 métodos de cobro el monto debe ser igual al total.');
         return;
       }
     } else {
-      const metodo = metodoPagoLista[0];
+      const metodo = metodoPagosLista[0];
       if (metodo.vuelto === 1) {
         if (metodoCobroTotal < importeTotal) {
           alertWarning('Venta', 'El monto a cobrar es menor que el total.');
           return;
         }
 
-        metodoPagoLista.map((item) => {
+        metodoPagosLista.map((item) => {
           item.descripcion = `Pago con ${rounded(parseFloat(item.monto))} y su vuelto es ${rounded(parseFloat(item.monto) - importeTotal)}`;
           item.monto = importeTotal;
           return item;
@@ -1240,7 +1231,7 @@ class VentaCrear extends CustomComponent {
           bancosAgregados: bancosAgregados,
         };
 
-        hideModal(this.idModalSale);
+        this.handleOnCloseModalSale();
         alertInfo('Venta', 'Procesando venta...');
 
         const response = await createFactura(data);
@@ -1288,9 +1279,394 @@ class VentaCrear extends CustomComponent {
     });
   };
 
+  handleProcessCreditoFijo = async () => {
+    const {
+      formaPago,
+      idComprobante,
+      idMoneda,
+      idImpuesto,
+      idCliente,
+      idSucursal,
+      idUsuario,
+      comentario,
+      nuevoCliente,
+      detalleVenta,
+      bancosAgregados,
+      importeTotal,
+    } = this.state;
+
+    /*
+    let metodoPagoLista = [...bancosAgregados];
+
+    if (isEmpty(metodoPagoLista)) {
+      alertWarning('Venta', 'Tiene que agregar método de cobro para continuar.');
+      return;
+    }
+
+    if (metodoPagoLista.filter((item) => !isNumeric(item.monto)).length !== 0) {
+      alertWarning('Venta', 'Hay montos del metodo de cobro que no tiene valor.');
+      return;
+    }
+
+    const metodoCobroTotal = metodoPagoLista.reduce((accumulator, item) => {
+      return (accumulator += parseFloat(item.monto));
+    }, 0);
+
+    if (metodoPagoLista.length > 1) {
+      if (metodoCobroTotal !== importeTotal) {
+        alertWarning('Venta', 'Al tener mas de 2 métodos de cobro el monto debe ser igual al total.');
+        return;
+      }
+    } else {
+      const metodo = metodoPagoLista[0];
+      if (metodo.vuelto === 1) {
+        if (metodoCobroTotal < importeTotal) {
+          alertWarning('Venta', 'El monto a cobrar es menor que el total.');
+          return;
+        }
+
+        metodoPagoLista.map((item) => {
+          item.descripcion = `Pago con ${rounded(parseFloat(item.monto))} y su vuelto es ${rounded(parseFloat(item.monto) - importeTotal)}`;
+          item.monto = importeTotal;
+          return item;
+        });
+      } else {
+        if (metodoCobroTotal !== importeTotal) {
+          alertWarning('Venta', 'El monto a cobrar debe ser igual al total.');
+          return;
+        }
+      }
+    }
+
+
+    */
+
+    alertDialog('Venta', '¿Estás seguro de continuar?', async (accept) => {
+      if (accept) {
+        const data = {
+          idFormaPago: formaPago,
+          idComprobante: idComprobante,
+          idMoneda: idMoneda,
+          idImpuesto: idImpuesto,
+          idCliente: idCliente,
+          idSucursal: idSucursal,
+          comentario: comentario,
+          idUsuario: idUsuario,
+          estado: 2,
+          nuevoCliente: nuevoCliente,
+          detalleVenta: detalleVenta,
+          bancosAgregados: bancosAgregados,
+        };
+
+        this.handleOnCloseModalSale();
+        alertInfo('Venta', 'Procesando venta...');
+
+        const response = await createFactura(data);
+
+        if (response instanceof SuccessReponse) {
+          alertSuccess('Venta', response.data.message, () => {
+            this.handleOpenPrint(response.data.idVenta);
+          });
+        }
+
+        if (response instanceof ErrorResponse) {
+          if (response.getBody() !== '') {
+            const body = response.getBody().map((item) =>
+              `<tr>
+                  <td>${item.nombre}</td>
+                  <td>${formatDecimal(item.cantidadActual)}</td>
+                  <td>${formatDecimal(item.cantidadReal)}</td>
+                  <td>${formatDecimal(item.cantidadActual - item.cantidadReal)}</td>
+                </tr>`,
+            );
+
+            alertHTML('Venta',
+              `<div class="d-flex flex-column align-items-center">
+                    <h5>Productos con cantidades faltantes</h5>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Cantidad a Vender</th>
+                                <th>Cantidad de Inventario</th>
+                                <th>Cantidad Faltante</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        ${body}
+                        </tbody>
+                    </table>
+                </div>`,
+            );
+          } else {
+            alertWarning('Venta', response.getMessage());
+          }
+        }
+      }
+    });
+  };
+
+  handleProcessCreditoVariable = async () => {
+    const {
+      formaPago,
+      idComprobante,
+      idMoneda,
+      idImpuesto,
+      idCliente,
+      idSucursal,
+      idUsuario,
+      comentario,
+      nuevoCliente,
+      detalleVenta,
+      bancosAgregados,
+      importeTotal,
+    } = this.state;
+    /*
+        let metodoPagoLista = [...bancosAgregados];
+    
+        if (isEmpty(metodoPagoLista)) {
+          alertWarning('Venta', 'Tiene que agregar método de cobro para continuar.');
+          return;
+        }
+    
+        if (metodoPagoLista.filter((item) => !isNumeric(item.monto)).length !== 0) {
+          alertWarning('Venta', 'Hay montos del metodo de cobro que no tiene valor.');
+          return;
+        }
+    
+        const metodoCobroTotal = metodoPagoLista.reduce((accumulator, item) => {
+          return (accumulator += parseFloat(item.monto));
+        }, 0);
+    
+        if (metodoPagoLista.length > 1) {
+          if (metodoCobroTotal !== importeTotal) {
+            alertWarning('Venta', 'Al tener mas de 2 métodos de cobro el monto debe ser igual al total.');
+            return;
+          }
+        } else {
+          const metodo = metodoPagoLista[0];
+          if (metodo.vuelto === 1) {
+            if (metodoCobroTotal < importeTotal) {
+              alertWarning('Venta', 'El monto a cobrar es menor que el total.');
+              return;
+            }
+    
+            metodoPagoLista.map((item) => {
+              item.descripcion = `Pago con ${rounded(parseFloat(item.monto))} y su vuelto es ${rounded(parseFloat(item.monto) - importeTotal)}`;
+              item.monto = importeTotal;
+              return item;
+            });
+          } else {
+            if (metodoCobroTotal !== importeTotal) {
+              alertWarning('Venta', 'El monto a cobrar debe ser igual al total.');
+              return;
+            }
+          }
+        }
+    
+        alertDialog('Venta', '¿Estás seguro de continuar?', async (accept) => {
+          if (accept) {
+            const data = {
+              idFormaPago: formaPago,
+              idComprobante: idComprobante,
+              idMoneda: idMoneda,
+              idImpuesto: idImpuesto,
+              idCliente: idCliente,
+              idSucursal: idSucursal,
+              comentario: comentario,
+              idUsuario: idUsuario,
+              estado: 1,
+              nuevoCliente: nuevoCliente,
+              detalleVenta: detalleVenta,
+              bancosAgregados: bancosAgregados,
+            };
+    
+            this.handleOnCloseModalSale();
+            alertInfo('Venta', 'Procesando venta...');
+    
+            const response = await createFactura(data);
+    
+            if (response instanceof SuccessReponse) {
+              alertSuccess('Venta', response.data.message, () => {
+                this.handleOpenPrint(response.data.idVenta);
+              });
+            }
+    
+            if (response instanceof ErrorResponse) {
+              if (response.getBody() !== '') {
+                const body = response.getBody().map((item) =>
+                  `<tr>
+                      <td>${item.nombre}</td>
+                      <td>${formatDecimal(item.cantidadActual)}</td>
+                      <td>${formatDecimal(item.cantidadReal)}</td>
+                      <td>${formatDecimal(item.cantidadActual - item.cantidadReal)}</td>
+                    </tr>`,
+                );
+    
+                alertHTML('Venta',
+                  `<div class="d-flex flex-column align-items-center">
+                        <h5>Productos con cantidades faltantes</h5>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Producto</th>
+                                    <th>Cantidad a Vender</th>
+                                    <th>Cantidad de Inventario</th>
+                                    <th>Cantidad Faltante</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            ${body}
+                            </tbody>
+                        </table>
+                    </div>`,
+                );
+              } else {
+                alertWarning('Venta', response.getMessage());
+              }
+            }
+          }
+        });*/
+  };
+
+  handleProcessAdelantado = async () => {
+    const {
+      formaPago,
+      idComprobante,
+      idMoneda,
+      idImpuesto,
+      idCliente,
+      idSucursal,
+      idUsuario,
+      comentario,
+      nuevoCliente,
+      detalleVenta,
+      bancosAgregados,
+      importeTotal,
+    } = this.state;
+    /*
+        let metodoPagoLista = [...bancosAgregados];
+    
+        if (isEmpty(metodoPagoLista)) {
+          alertWarning('Venta', 'Tiene que agregar método de cobro para continuar.');
+          return;
+        }
+    
+        if (metodoPagoLista.filter((item) => !isNumeric(item.monto)).length !== 0) {
+          alertWarning('Venta', 'Hay montos del metodo de cobro que no tiene valor.');
+          return;
+        }
+    
+        const metodoCobroTotal = metodoPagoLista.reduce((accumulator, item) => {
+          return (accumulator += parseFloat(item.monto));
+        }, 0);
+    
+        if (metodoPagoLista.length > 1) {
+          if (metodoCobroTotal !== importeTotal) {
+            alertWarning('Venta', 'Al tener mas de 2 métodos de cobro el monto debe ser igual al total.');
+            return;
+          }
+        } else {
+          const metodo = metodoPagoLista[0];
+          if (metodo.vuelto === 1) {
+            if (metodoCobroTotal < importeTotal) {
+              alertWarning('Venta', 'El monto a cobrar es menor que el total.');
+              return;
+            }
+    
+            metodoPagoLista.map((item) => {
+              item.descripcion = `Pago con ${rounded(parseFloat(item.monto))} y su vuelto es ${rounded(parseFloat(item.monto) - importeTotal)}`;
+              item.monto = importeTotal;
+              return item;
+            });
+          } else {
+            if (metodoCobroTotal !== importeTotal) {
+              alertWarning('Venta', 'El monto a cobrar debe ser igual al total.');
+              return;
+            }
+          }
+        }
+    
+        alertDialog('Venta', '¿Estás seguro de continuar?', async (accept) => {
+          if (accept) {
+            const data = {
+              idFormaPago: formaPago,
+              idComprobante: idComprobante,
+              idMoneda: idMoneda,
+              idImpuesto: idImpuesto,
+              idCliente: idCliente,
+              idSucursal: idSucursal,
+              comentario: comentario,
+              idUsuario: idUsuario,
+              estado: 1,
+              nuevoCliente: nuevoCliente,
+              detalleVenta: detalleVenta,
+              bancosAgregados: bancosAgregados,
+            };
+    
+            this.handleOnCloseModalSale();
+            alertInfo('Venta', 'Procesando venta...');
+    
+            const response = await createFactura(data);
+    
+            if (response instanceof SuccessReponse) {
+              alertSuccess('Venta', response.data.message, () => {
+                this.handleOpenPrint(response.data.idVenta);
+              });
+            }
+    
+            if (response instanceof ErrorResponse) {
+              if (response.getBody() !== '') {
+                const body = response.getBody().map((item) =>
+                  `<tr>
+                      <td>${item.nombre}</td>
+                      <td>${formatDecimal(item.cantidadActual)}</td>
+                      <td>${formatDecimal(item.cantidadReal)}</td>
+                      <td>${formatDecimal(item.cantidadActual - item.cantidadReal)}</td>
+                    </tr>`,
+                );
+    
+                alertHTML('Venta',
+                  `<div class="d-flex flex-column align-items-center">
+                        <h5>Productos con cantidades faltantes</h5>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Producto</th>
+                                    <th>Cantidad a Vender</th>
+                                    <th>Cantidad de Inventario</th>
+                                    <th>Cantidad Faltante</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            ${body}
+                            </tbody>
+                        </table>
+                    </div>`,
+                );
+              } else {
+                alertWarning('Venta', response.getMessage());
+              }
+            }
+          }
+        });*/
+  };
+
   handleSaveSale = () => {
     if (this.state.formaPago === CONTADO) {
       this.handleProcessContado();
+    }
+
+    if (this.state.formaPago === CREDITO_FIJO) {
+      this.handleProcessCreditoFijo();
+    }
+
+    if (this.state.formaPago === CREDITO_VARIABLE) {
+      this.handleProcessCreditoVariable();
+    }
+
+    if (this.state.formaPago === ADELANTADO) {
+      this.handleProcessAdelantado();
     }
   };
 
@@ -1311,89 +1687,54 @@ class VentaCrear extends CustomComponent {
     */
 
   render() {
-    const { loadingModal, formaPago, } = this.state;
-
-    const { impuestos, monedas, codiso } = this.state;
-
-    const { idComprobante, comprobantes } = this.state;
-
-    const { producto, idSucursal, filterProducto } = this.state;
-
-    const { sarchProducto, productos } = this.state;
-
-    const { cliente, clientes } = this.state;
-
-    const { loading, msgLoading } = this.state;
-
-    const { detalleVenta } = this.state;
-
-    const {
-      numCuota,
-      frecuenciaPagoCredito,
-      letraMensual,
-      frecuenciaPago,
-      importeTotal,
-      bancos,
-      bancosAgregados,
-    } = this.state;
-
     return (
       <PosContainerWrapper>
-        {loading && spinnerLoading(msgLoading)}
+        {this.state.loading && spinnerLoading(this.state.msgLoading)}
 
         <ModalSale
-          idModalSale={this.idModalSale}
-          loadingModal={loadingModal}
-          formaPago={formaPago}
-          codiso={codiso}
+          refModal={this.refSale}
+          isOpen={this.state.isOpenSale}
+          onOpen={this.handleOnOpenModalSale}
+          onHidden={this.handleOnHiddenModalSale}
+          onClose={this.handleOnCloseModalSale}
+
+          loading={this.state.loadingModal}
+
+          formaPago={this.state.formaPago}
           handleSelectTipoPago={this.handleSelectTipoPago}
+
           refMetodoContado={this.refMetodoContado}
           refNumCutoas={this.refNumCutoas}
-          numCuota={numCuota}
+          numCuota={this.state.numCuota}
           handleSelectNumeroCuotas={this.handleSelectNumeroCuotas}
           refFrecuenciaPagoCredito={this.refFrecuenciaPagoCredito}
-          frecuenciaPagoCredito={frecuenciaPagoCredito}
+          frecuenciaPagoCredito={this.state.frecuenciaPagoCredito}
           handleSelectFrecuenciaPagoCredito={this.handleSelectFrecuenciaPagoCredito}
-          letraMensual={letraMensual}
 
           refFrecuenciaPago={this.refFrecuenciaPago}
-          frecuenciaPago={frecuenciaPago}
+          frecuenciaPago={this.state.frecuenciaPago}
           handleSelectFrecuenciaPago={this.handleSelectFrecuenciaPago}
-          importeTotal={importeTotal}
+
+          codiso={this.state.codiso}
+          importeTotal={this.state.importeTotal}
+
+          bancos={this.state.bancos}
+          bancosAgregados={this.state.bancosAgregados}
+          handleAddBancosAgregados={this.handleAddBancosAgregados}
+          handleInputMontoBancosAgregados={this.handleInputMontoBancosAgregados}
+          handleRemoveItemBancosAgregados={this.handleRemoveItemBancosAgregados}
+
           handleSaveSale={this.handleSaveSale}
-          bancos={bancos}
-          bancosAgregados={bancosAgregados}
-          handleAgregarBancos={this.handleAgregarBancos}
-          handleInputMontoAgregarBancos={this.handleInputMontoAgregarBancos}
-          handleRemoveItemAgregarBanco={this.handleRemoveItemAgregarBanco}
         />
 
-        <CustomModal
+        <CustomModalContent
           contentRef={(ref) => this.refPrinter.current = ref}
-          isOpen={this.state.isOpen}
-          onOpen={() => {
-            console.log("onOpen")
-          }}
-          onHidden={() => {
-            console.log("onHidden")
-          }}
+          isOpen={this.state.isOpenPrinter}
           onClose={this.handleClosePrint}
-          contentLabel="Modal de Impresión">
-
-          <div className='w-100'>
-            <div className='d-flex align-items-center justify-content-between py-2 px-3' style={{
-              backgroundColor: 'rgba(0, 0, 0, 0.07)',
-              borderBottom: '1px solid #dee2e6',
-            }}>
-              <p className='m-0'>SysSoft Integra</p>
-              <button type="button"
-                className='close'
-                onClick={this.handleClosePrint}>
-                <span aria-hidden="true">×</span>
-              </button>
-            </div>
-
-            <div className="d-flex flex-column align-items-center py-3 px-5">
+          contentLabel="Modal de Impresión"
+          titleHeader="SysSoft Integra"
+          body={
+            <>
               <h5>Opciones de impresión</h5>
               <div>
                 <button type="button" className="btn btn-outline-info"
@@ -1406,28 +1747,25 @@ class VentaCrear extends CustomComponent {
                   <i className="fa fa-sticky-note"></i> Ticket
                 </button>
               </div>
-            </div>
-
-            <div className='d-flex justify-content-end my-3 mx-0 pt-2 px-3' style={{
-              borderTop: '1px solid #dee2e6',
-            }}>
-              <button type="button"
-                className="btn btn-danger"
-                onClick={this.handleClosePrint}>
-                <i className="fa fa-close"></i> Cerrar
-              </button>
-            </div>
-          </div>
-        </CustomModal>
+            </>
+          }
+          footer={
+            <button type="button"
+              className="btn btn-danger"
+              onClick={this.handleClosePrint}>
+              <i className="fa fa-close"></i> Cerrar
+            </button>
+          }
+        />
 
         <section className="invoice-left">
           <InvoiceView
-            producto={producto}
-            idSucursal={idSucursal}
-            filterProducto={filterProducto}
+            producto={this.state.producto}
+            idSucursal={this.state.idSucursal}
+            filterProducto={this.state.filterProducto}
             handleFilterProducto={this.handleFilterProducto}
-            sarchProducto={sarchProducto}
-            productos={productos}
+            sarchProducto={this.state.sarchProducto}
+            productos={this.state.productos}
             refProducto={this.refProducto}
             handleAddItem={this.handleAddItem}
             handleStarProduct={this.handleStarProduct}
@@ -1448,8 +1786,8 @@ class VentaCrear extends CustomComponent {
 
           <InvoiceVoucher
             refComprobante={this.refComprobante}
-            idComprobante={idComprobante}
-            comprobantes={comprobantes}
+            idComprobante={this.state.idComprobante}
+            comprobantes={this.state.comprobantes}
             handleSelectComprobante={this.handleSelectComprobante}
           />
 
@@ -1457,16 +1795,16 @@ class VentaCrear extends CustomComponent {
             handleOpenCliente={this.handleOpenCliente}
             placeholder="Filtrar clientes..."
             refCliente={this.refCliente}
-            cliente={cliente}
-            clientes={clientes}
+            cliente={this.state.cliente}
+            clientes={this.state.clientes}
             onEventClearInput={this.handleClearInputClient}
             handleFilter={this.handleFilterClient}
             onEventSelectItem={this.handleSelectItemClient}
           />
 
           <InvoiceDetail
-            codiso={codiso}
-            detalleVenta={detalleVenta}
+            codiso={this.state.codiso}
+            detalleVenta={this.state.detalleVenta}
             handleMinus={this.handleMinusProducto}
             handlePlus={this.handlePlusProducto}
             handleEdit={this.handleEditProducto}
@@ -1474,9 +1812,9 @@ class VentaCrear extends CustomComponent {
           />
 
           <InvoiceFooter
-            codiso={codiso}
-            impuestos={impuestos}
-            detalleVenta={detalleVenta}
+            codiso={this.state.codiso}
+            impuestos={this.state.impuestos}
+            detalleVenta={this.state.detalleVenta}
             handleOpenSale={this.handleOpenSale}
             handleClearSale={this.handleClearSale}
           />
@@ -1485,9 +1823,9 @@ class VentaCrear extends CustomComponent {
         <ModalConfiguration
           idModalConfiguration={this.idModalConfiguration}
           refImpuesto={this.refImpuesto}
-          impuestos={impuestos}
+          impuestos={this.state.impuestos}
           refMoneda={this.refMoneda}
-          monedas={monedas}
+          monedas={this.state.monedas}
           refComentario={this.refComentario}
           handleSaveOptions={this.handleSaveOptions}
           handleCloseOptions={this.handleCloseOptions}
@@ -1558,6 +1896,23 @@ class VentaCrear extends CustomComponent {
     );
   }
 }
+
+VentaCrear.propTypes = {
+  productos: PropTypes.array.isRequired,
+  favoriteProducts: PropTypes.func.isRequired,
+  handleStarProduct: PropTypes.func.isRequired,
+  token: PropTypes.shape({
+    userToken: PropTypes.shape({
+      idUsuario: PropTypes.string.isRequired,
+    }).isRequired,
+    project: PropTypes.shape({
+      idSucursal: PropTypes.string.isRequired,
+    }).isRequired,
+  }).isRequired,
+  history: PropTypes.shape({
+    goBack: PropTypes.func.isRequired,
+  }).isRequired,
+};
 
 /**
  *

@@ -9,14 +9,14 @@ const InvoiceTicket = (props) => {
         <p className="h5 m-0">Boleta de venta</p>
       </div>
       <div className="d-flex">
-        <span>
+        {/* <span>
           <button
             className="btn btn-link rounded-circle"
             onClick={handleOpenPrint}
           >
             <img src={images.print} alt="Imprimir" />
           </button>
-        </span>
+        </span> */}
         <span>
           <button
             className="btn btn-link rounded-circle"

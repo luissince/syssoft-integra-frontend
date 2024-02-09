@@ -11,10 +11,6 @@ import {
   alertWarning,
   isEmpty,
   isText,
-  clearModal,
-  viewModal,
-  showModal,
-  hideModal,
 } from '../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../../../components/Container';
@@ -33,6 +29,7 @@ import SearchInput from '../../../../../components/SearchInput';
 import { CANCELED } from '../../../../../model/types/types';
 import ModalSale from './component/ModalSale';
 import { COMPROBANTE_DE_INGRESO } from '../../../../../model/types/tipo-comprobante';
+import PropTypes from 'prop-types';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -81,6 +78,7 @@ class CobroCrear extends CustomComponent {
       total: 0,
 
       // Atributos del modal
+      isOpenSale: false,
       loadingModal: false,
       bancos: [],
       bancosAgregados: [],
@@ -107,7 +105,7 @@ class CobroCrear extends CustomComponent {
     this.selectItemCliente = false;
 
     // Referencia para el modal
-    this.idModalSale = 'idModalSale';
+    this.refCustomModalSale = React.createRef();
     this.refMetodoContado = React.createRef();
 
     //Anular las peticiones
@@ -130,34 +128,6 @@ class CobroCrear extends CustomComponent {
 
   async componentDidMount() {
     await this.loadData();
-
-    viewModal(this.idModalSale, () => {
-      const metodo = this.state.bancos.find((item) => item.preferido === 1);
-
-      this.refMetodoContado.current.value = metodo ? metodo.idBanco : '';
-
-      if (metodo) {
-        const item = {
-          idBanco: metodo.idBanco,
-          nombre: metodo.nombre,
-          monto: '',
-          vuelto: metodo.vuelto,
-          descripcion: '',
-        };
-
-        this.setState((prevState) => ({
-          bancosAgregados: [...prevState.bancosAgregados, item],
-        }));
-      }
-
-      this.setState({ loadingModal: false });
-    });
-
-    clearModal(this.idModalSale, async () => {
-      this.setState({
-        bancosAgregados: [],
-      });
-    });
   }
 
   componentWillUnmount() {
@@ -378,6 +348,18 @@ class CobroCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
   // Acciones del modal
   //------------------------------------------------------------------------------------------
+  handleOpenModalSale = () => {
+    this.setState({ loadingModal: true, isOpenSale: true })
+}
+
+handleCloseModalSale = () => {     
+    const data = this.refCustomModalSale.current;
+    data.classList.add("close-cm")
+    data.addEventListener('animationend', () => {
+        this.setState({ isOpenSale: false }, () => {
+        })
+    })
+}
 
   handleAddBancosAgregados = () => {
     const listAdd = this.state.bancosAgregados.find((item) => item.idBanco === this.refMetodoContado.current.value);
@@ -501,7 +483,7 @@ class CobroCrear extends CustomComponent {
           bancosAgregados: bancosAgregados,
         };
 
-        hideModal(this.idModalSale);
+        this.handleCloseModalSale();
         alertInfo('Cobro', 'Procesando información...');
 
         const response = await createCobro(data);
@@ -650,8 +632,7 @@ class CobroCrear extends CustomComponent {
       return;
     }
 
-    showModal(this.idModalSale);
-    await this.setStateAsync({ loadingModal: true });
+    this.handleOpenModalSale();
   };
 
   handleLimpiar = async () => {
@@ -724,17 +705,48 @@ class CobroCrear extends CustomComponent {
     return (
       <ContainerWrapper>
         <ModalSale
-          idModalSale={this.idModalSale}
-          loadingModal={this.state.loadingModal}
+          refSale={this.refCustomModalSale}
+          isOpen={this.state.isOpenSale}
+          onOpen={() => {
+            const metodo = this.state.bancos.find((item) => item.preferido === 1);
+
+            this.refMetodoContado.current.value = metodo ? metodo.idBanco : '';
+      
+            if (metodo) {
+              const item = {
+                idBanco: metodo.idBanco,
+                nombre: metodo.nombre,
+                monto: '',
+                vuelto: metodo.vuelto,
+                descripcion: '',
+              };
+      
+              this.setState((prevState) => ({
+                bancosAgregados: [...prevState.bancosAgregados, item],
+              }));
+            }
+      
+            this.setState({ loadingModal: false });
+          }}
+          onHidden={() => {
+            this.setState({
+              bancosAgregados: [],
+            });
+          }}
+          onClose={this.handleCloseModalSale}
+
+          loading={this.state.loadingModal}
           refMetodoContado={this.refMetodoContado}
           importeTotal={this.state.total}
-          handleSaveSale={this.handleSaveSale}
+
           bancos={this.state.bancos}
           codISO={this.state.codISO}
           bancosAgregados={this.state.bancosAgregados}
           handleAddBancosAgregados={this.handleAddBancosAgregados}
           handleInputMontoBancosAgregados={this.handleInputMontoBancosAgregados}
           handleRemoveItemBancosAgregados={this.handleRemoveItemBancosAgregados}
+
+          handleSaveSale={this.handleSaveSale}
         />
 
         {this.state.loading && spinnerLoading(this.state.msgLoading)}
@@ -961,6 +973,21 @@ class CobroCrear extends CustomComponent {
     );
   }
 }
+
+CobroCrear.propTypes = {
+  token: PropTypes.shape({
+    userToken: PropTypes.shape({
+      idUsuario: PropTypes.string.isRequired,
+    }).isRequired,
+    project: PropTypes.shape({
+      idSucursal: PropTypes.string.isRequired,
+    }).isRequired,
+  }).isRequired,
+  history: PropTypes.shape({
+    goBack: PropTypes.func.isRequired,
+  }).isRequired,
+};
+
 
 const mapStateToProps = (state) => {
   return {

@@ -10,11 +10,7 @@ import {
     alertSuccess,
     alertWarning,
     isEmpty,
-    hideModal,
-    showModal,
     isText,
-    viewModal,
-    clearModal,
 } from '../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../../../components/Container';
@@ -82,6 +78,7 @@ class GastoCrear extends CustomComponent {
             total: 0,
 
             // Atributos del modal
+            isOpenSale: false,
             loadingModal: false,
             bancos: [],
             bancosAgregados: [],
@@ -108,7 +105,7 @@ class GastoCrear extends CustomComponent {
         this.selectItemCliente = false;
 
         // Referencia para el modal
-        this.idModalSale = 'idModalSale';
+        this.refCustomModalSale = React.createRef();
         this.refMetodoContado = React.createRef();
 
         //Anular las peticiones
@@ -131,34 +128,6 @@ class GastoCrear extends CustomComponent {
 
     async componentDidMount() {
         await this.loadData();
-
-        viewModal(this.idModalSale, () => {
-            const metodo = this.state.bancos.find((item) => item.preferido === 1);
-
-            this.refMetodoContado.current.value = metodo ? metodo.idBanco : '';
-
-            if (metodo) {
-                const item = {
-                    idBanco: metodo.idBanco,
-                    nombre: metodo.nombre,
-                    monto: '',
-                    vuelto: metodo.vuelto,
-                    descripcion: '',
-                };
-
-                this.setState((prevState) => ({
-                    bancosAgregados: [...prevState.bancosAgregados, item],
-                }));
-            }
-
-            this.setState({ loadingModal: false });
-        });
-
-        clearModal(this.idModalSale, async () => {
-            this.setState({
-                bancosAgregados: [],
-            });
-        });
     }
 
     componentWillUnmount() {
@@ -379,6 +348,18 @@ class GastoCrear extends CustomComponent {
     //------------------------------------------------------------------------------------------
     // Acciones del modal
     //------------------------------------------------------------------------------------------
+    handleOpenModalSale = () => {
+        this.setState({ loadingModal: true, isOpenSale: true })
+    }
+
+    handleCloseModalSale = () => {     
+        const data = this.refCustomModalSale.current;
+        data.classList.add("close-cm")
+        data.addEventListener('animationend', () => {
+            this.setState({ isOpenSale: false }, () => {
+            })
+        })
+    }
 
     handleAddBancosAgregados = () => {
         const listAdd = this.state.bancosAgregados.find((item) => item.idBanco === this.refMetodoContado.current.value);
@@ -502,7 +483,7 @@ class GastoCrear extends CustomComponent {
                     metodoPago: bancosAgregados,
                 };
 
-                hideModal(this.idModalSale);
+                this.handleCloseModalSale();
                 alertInfo('Gasto', 'Procesando información...');
 
                 const response = await createGasto(data);
@@ -651,8 +632,7 @@ class GastoCrear extends CustomComponent {
             return;
         }
 
-        showModal(this.idModalSale);
-        await this.setStateAsync({ loadingModal: true });
+        this.handleOpenModalSale();
     };
 
     handleLimpiar = async () => {
@@ -725,10 +705,40 @@ class GastoCrear extends CustomComponent {
         return (
             <ContainerWrapper>
                 <ModalSale
-                    idModalSale={this.idModalSale}
-                    loadingModal={this.state.loadingModal}
+                    refSale={this.refCustomModalSale}
+                    isOpen={this.state.isOpenSale}
+                    onOpen={() => {
+                        const metodo = this.state.bancos.find((item) => item.preferido === 1);
+
+                        this.refMetodoContado.current.value = metodo ? metodo.idBanco : '';
+
+                        if (metodo) {
+                            const item = {
+                                idBanco: metodo.idBanco,
+                                nombre: metodo.nombre,
+                                monto: '',
+                                vuelto: metodo.vuelto,
+                                descripcion: '',
+                            };
+
+                            this.setState((prevState) => ({
+                                bancosAgregados: [...prevState.bancosAgregados, item],
+                            }));
+                        }
+
+                        this.setState({ loadingModal: false });
+                    }}
+                    onHidden={() => {
+                        this.setState({
+                            bancosAgregados: [],
+                        });
+                    }}
+                    onClose={this.handleCloseModalSale}
+
+                    loading={this.state.loadingModal}
                     refMetodoContado={this.refMetodoContado}
                     importeTotal={this.state.total}
+
                     bancos={this.state.bancos}
                     codISO={this.state.codISO}
                     bancosAgregados={this.state.bancosAgregados}

@@ -1,18 +1,26 @@
+import { CustomModalContent } from '../../../../../../components/CustomModal';
 import {
   keyNumberFloat,
   keyNumberInteger,
   spinnerLoading,
   numberFormat,
   isEmpty,
+  isNumeric,
 } from '../../../../../../helper/utils.helper';
 import { ADELANTADO, CONTADO, CREDITO_FIJO, CREDITO_VARIABLE } from '../../../../../../model/types/forma-pago';
+import PropTypes from 'prop-types';
 
 const ModalSale = (props) => {
-  const { idModalSale } = props;
 
   const {
-    loadingModal,
-    codiso,
+    refModal,
+    isOpen,
+    onOpen,
+    onHidden,
+    onClose,
+
+
+    loading,
 
     formaPago,
     handleSelectTipoPago,
@@ -27,21 +35,20 @@ const ModalSale = (props) => {
     frecuenciaPagoCredito,
     handleSelectFrecuenciaPagoCredito,
 
-    letraMensual,
-
     refFrecuenciaPago,
     frecuenciaPago,
     handleSelectFrecuenciaPago,
 
+    codiso,
     importeTotal,
-
-    handleSaveSale,
 
     bancos,
     bancosAgregados,
-    handleAgregarBancos,
-    handleInputMontoAgregarBancos,
-    handleRemoveItemAgregarBanco,
+    handleAddBancosAgregados,
+    handleInputMontoBancosAgregados,
+    handleRemoveItemBancosAgregados,
+
+    handleSaveSale,
   } = props;
 
   const generarVuelto = () => {
@@ -56,7 +63,7 @@ const ModalSale = (props) => {
       return accumulator;
     }, 0);
 
-    if (!isEmpty(bancosAgregados)) {
+    if (!bancosAgregados.length > 1) {
       if (currentAmount >= total) {
         return (
           <>
@@ -120,369 +127,365 @@ const ModalSale = (props) => {
     }
   };
 
-  return (
-    <div
-      className="modal fade"
-      id={idModalSale}
-      data-bs-keyboard="false"
-      data-bs-backdrop="static"
-    >
-      <div className="modal-dialog modal-lg modal-dialog-centered">
-        <div className="modal-content">
-          <div className="modal-header">
-            <h6 className="modal-title">Completar Venta</h6>
-            <button
-              type="button"
-              className="close"
-              data-bs-dismiss="modal"
-              aria-label="Close"
-            >
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div className="modal-body">
-            {loadingModal && spinnerLoading('Cargando datos...')}
+  const letraMensual = () => {
+    const total = parseFloat(importeTotal);
+    if (!isNumeric(numCuota) || numCuota <= 0) return 0;
+    return total / numCuota;
+  }
 
-            {/* Titutlo del modal */}
+
+  return (
+    <CustomModalContent
+      contentRef={(ref) => refModal.current = ref}
+      isOpen={isOpen}
+      onOpen={onOpen}
+      onHidden={onHidden}
+      onClose={onClose}
+      contentLabel="Modal de Compra"
+      titleHeader="Completar Compra"
+      body={
+        <>
+          {loading && spinnerLoading('Cargando datos...')}
+
+          {/* Titutlo del modal */}
+          <div className="row">
+            <div className="col">
+              <div className="text-center">
+                <h5>
+                  TOTAL A COBRAR: <span>{numberFormat(importeTotal, codiso)}</span>
+                </h5>
+              </div>
+            </div>
+          </div>
+
+          {/* Sun titulo */}
+          <div className="row">
+            <div className="col-md-4 col-sm-4">
+              <hr />
+            </div>
+            <div className="col-md-4 col-sm-4 d-flex align-items-center justify-content-center">
+              <h6 className="mb-0">Tipos de cobros</h6>
+            </div>
+            <div className="col-md-4 col-sm-4">
+              <hr />
+            </div>
+          </div>
+
+          {/* Tipos de venta */}
+          <div className="row">
+            {/* Al contado */}
+            <div className="col-md-3 col-sm-3">
+              <button
+                className={`btn ${formaPago === CONTADO ? 'btn-primary' : 'btn-light'
+                  } btn-block`}
+                type="button"
+                title="Pago al contado"
+                onClick={() => handleSelectTipoPago(CONTADO)}
+              >
+                <div className="row">
+                  <div className="col-md-12">
+                    <i className="bi bi-cash-coin fa-2x"></i>
+                  </div>
+                </div>
+                <div className="text-center">
+                  <label>Contado</label>
+                </div>
+              </button>
+            </div>
+
+            {/* Crédito fijo*/}
+            <div className="col-md-3 col-sm-3">
+              <button
+                className={`btn ${formaPago === CREDITO_FIJO ? 'btn-primary' : 'btn-light'
+                  } btn-block`}
+                type="button"
+                title="Pago al credito"
+                onClick={() => handleSelectTipoPago(CREDITO_FIJO)}
+              >
+                <div className="row">
+                  <div className="col-md-12">
+                    <i className="bi bi-boxes fa-2x"></i>
+                  </div>
+                </div>
+                <div className="text-center">
+                  <label>Crédito fijo</label>
+                </div>
+              </button>
+            </div>
+
+            {/* Crédito variable */}
+            <div className="col-md-3 col-sm-3">
+              <button
+                className={`btn ${formaPago === CREDITO_VARIABLE ? 'btn-primary' : 'btn-light'
+                  } btn-block`}
+                type="button"
+                title="Pago al credito"
+                onClick={() => handleSelectTipoPago(CREDITO_VARIABLE)}
+              >
+                <div className="row">
+                  <div className="col-md-12">
+                    <i className="bi bi-columns-gap fa-2x"></i>
+                  </div>
+                </div>
+                <div className="text-center">
+                  <label>Crédito variable</label>
+                </div>
+              </button>
+            </div>
+
+            {/* Pago adelantado */}
+            <div className="col-md-3 col-sm-3">
+              <button
+                className={`btn ${formaPago === ADELANTADO ? 'btn-primary' : 'btn-light'
+                  } btn-block`}
+                type="button"
+                title="Pago al credito"
+                onClick={() => handleSelectTipoPago(ADELANTADO)}
+              >
+                <div className="row">
+                  <div className="col-md-12">
+                    <i className="bi bi-columns-gap fa-2x"></i>
+                  </div>
+                </div>
+                <div className="text-center">
+                  <label>Pago Adelantado</label>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <br />
+          {/* contado detalle */}
+          {formaPago === CONTADO && (
+            <>
+              <h6>Lista de métodos:</h6>
+
+              <div className='row'>
+                <div className='col'>
+                  <div className="form-group">
+                    {bancosAgregados.map((item, index) => (
+                      <MetodoPago
+                        key={index}
+                        idBanco={item.idBanco}
+                        name={item.nombre}
+                        monto={item.monto}
+                        handleInputMontoBancosAgregados={handleInputMontoBancosAgregados}
+                        handleRemoveItemBancosAgregados={handleRemoveItemBancosAgregados}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <br />
+
+              <div className="row">
+                <div className="col">
+                  <div className="form-group">
+                    <label>Agregar método de cobro:</label>
+                    <div className="input-group">
+                      <div className="input-group-prepend">
+                        <div className="input-group-text">
+                          <i className="bi bi-tag-fill"></i>
+                        </div>
+                      </div>
+                      <select
+                        title="Lista metodo de cobro"
+                        className="form-control"
+                        ref={refMetodoContado}
+                      >
+                        {bancos.map((item, index) => (
+                          <option key={index} value={item.idBanco}>
+                            {item.nombre}
+                          </option>
+                        ))}
+                      </select>
+                      <div className="input-group-append">
+                        <button
+                          className="btn btn-outline-success d-flex"
+                          title="Agregar Pago"
+                          onClick={handleAddBancosAgregados}
+                        >
+                          <i className="bi bi-plus-circle-fill"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className='row'>
+                <div className="col-12">
+                  <br />
+                </div>
+              </div>
+
+              <div className='row'>
+                <div className="col-12">
+                  <div className="text-center">{generarVuelto()}</div>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* crédito fijo */}
+          {formaPago === CREDITO_FIJO && (
+            <div className={`row`}>
+              <div className="col">
+
+                <div className="form-group">
+                  <span className="text-md">
+                    <i className="bi bi-info-circle text-success text-lg"></i>{' '}
+                    Los pagos se efectúan en función del número de
+                    cuotas, con una alerta que indica la frecuencia de
+                    los pagos.
+                  </span>
+                </div>
+
+                <div className="form-group">
+                  <div className="input-group">
+                    <div className="input-group-prepend">
+                      <div className="input-group-text">
+                        <i className="bi bi-hourglass-split"></i>
+                      </div>
+                    </div>
+                    <input
+                      title="Número de cuotas"
+                      type="text"
+                      className="form-control"
+                      placeholder="Número de cuotas"
+                      ref={refNumCutoas}
+                      value={numCuota}
+                      onChange={handleSelectNumeroCuotas}
+                      onKeyDown={keyNumberInteger}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <div className="input-group">
+                    <div className="input-group-prepend">
+                      <div className="input-group-text">
+                        <i className="bi bi-credit-card-2-back"></i>
+                      </div>
+                    </div>
+                    <select
+                      title="Lista frecuencia de pago"
+                      className="form-control"
+                      ref={refFrecuenciaPagoCredito}
+                      value={frecuenciaPagoCredito}
+                      onChange={handleSelectFrecuenciaPagoCredito}
+                    >
+                      <option value="">-- Frecuencia de pago --</option>
+                      <option value="15">Quinsenal</option>
+                      <option value="30">Mensual</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <div className="input-group">
+                    <div className="input-group-prepend">
+                      <div className="input-group-text">
+                        <i className="bi bi-coin"></i>
+                      </div>
+                    </div>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="0.00"
+                      value={letraMensual()}
+                      disabled={true}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* crédito variable */}
+          {formaPago === CREDITO_VARIABLE && (
             <div className="row">
               <div className="col">
-                <div className="text-center">
-                  <h5>
-                    TOTAL A COBRAR: <span>{numberFormat(importeTotal, codiso)}</span>
-                  </h5>
+
+                <div className="form-group">
+                  <span className="text-md">
+                    <i className="bi bi-info-circle text-success text-lg"></i>{' '}
+                    Los pagos se realizan de acuerdo con la frecuencia
+                    establecida, con alertas programadas para recordar
+                    las fechas de pago.
+                  </span>
+                </div>
+
+                <div className="form-group">
+                  <div className="input-group">
+                    <div className="input-group-prepend">
+                      <div className="input-group-text">
+                        <i className="bi bi-credit-card-2-back"></i>
+                      </div>
+                    </div>
+                    <select
+                      title="Lista frecuencia de pago"
+                      className="form-control"
+                      ref={refFrecuenciaPago}
+                      value={frecuenciaPago}
+                      onChange={handleSelectFrecuenciaPago}
+                    >
+                      <option value="">-- Frecuencia de pago --</option>
+                      <option value="15">Quinsenal</option>
+                      <option value="30">Mensual</option>
+                    </select>
+                  </div>
                 </div>
               </div>
             </div>
+          )}
 
-            {/* Sun titulo */}
+          {/* pago adelantado */}
+          {formaPago === ADELANTADO && (
             <div className="row">
-              <div className="col-md-4 col-sm-4">
-                <hr />
-              </div>
-              <div className="col-md-4 col-sm-4 d-flex align-items-center justify-content-center">
-                <h6 className="mb-0">Tipos de cobros</h6>
-              </div>
-              <div className="col-md-4 col-sm-4">
-                <hr />
+              <div className="col">
+
+                <div className="form-group">
+                  <span className="text-md">
+                    <i className="bi bi-info-circle text-success text-lg"></i>{' '}
+                    Los pagos se efectúan de manera habitual; sin embargo, el inventario no se reduce, ya que se trata de un pago anticipado.
+                  </span>
+                </div>
+
               </div>
             </div>
-
-            {/* Tipos de venta */}
-            <div className="row">
-              {/* Al contado */}
-              <div className="col-md-3 col-sm-3">
-                <button
-                  className={`btn ${formaPago === CONTADO ? 'btn-primary' : 'btn-light'
-                    } btn-block`}
-                  type="button"
-                  title="Pago al contado"
-                  onClick={() => handleSelectTipoPago(CONTADO)}
-                >
-                  <div className="row">
-                    <div className="col-md-12">
-                      <i className="bi bi-cash-coin fa-2x"></i>
-                    </div>
-                  </div>
-                  <div className="text-center">
-                    <label>Contado</label>
-                  </div>
-                </button>
-              </div>
-
-              {/* Crédito fijo*/}
-              <div className="col-md-3 col-sm-3">
-                <button
-                  className={`btn ${formaPago === CREDITO_FIJO ? 'btn-primary' : 'btn-light'
-                    } btn-block`}
-                  type="button"
-                  title="Pago al credito"
-                  onClick={() => handleSelectTipoPago(CREDITO_FIJO)}
-                >
-                  <div className="row">
-                    <div className="col-md-12">
-                      <i className="bi bi-boxes fa-2x"></i>
-                    </div>
-                  </div>
-                  <div className="text-center">
-                    <label>Crédito fijo</label>
-                  </div>
-                </button>
-              </div>
-
-              {/* Crédito variable */}
-              <div className="col-md-3 col-sm-3">
-                <button
-                  className={`btn ${formaPago === CREDITO_VARIABLE ? 'btn-primary' : 'btn-light'
-                    } btn-block`}
-                  type="button"
-                  title="Pago al credito"
-                  onClick={() => handleSelectTipoPago(CREDITO_VARIABLE)}
-                >
-                  <div className="row">
-                    <div className="col-md-12">
-                      <i className="bi bi-columns-gap fa-2x"></i>
-                    </div>
-                  </div>
-                  <div className="text-center">
-                    <label>Crédito variable</label>
-                  </div>
-                </button>
-              </div>
-
-              {/* Pago adelantado */}
-              <div className="col-md-3 col-sm-3">
-                <button
-                  className={`btn ${formaPago === ADELANTADO ? 'btn-primary' : 'btn-light'
-                    } btn-block`}
-                  type="button"
-                  title="Pago al credito"
-                  onClick={() => handleSelectTipoPago(ADELANTADO)}
-                >
-                  <div className="row">
-                    <div className="col-md-12">
-                      <i className="bi bi-columns-gap fa-2x"></i>
-                    </div>
-                  </div>
-                  <div className="text-center">
-                    <label>Pago Adelantado</label>
-                  </div>
-                </button>
-              </div>
-            </div>
-
-            <br />
-            {/* contado detalle */}
-            {formaPago === CONTADO && (
-              <>
-                <h6>Lista de métodos:</h6>
-
-                <div className='row'>
-                  <div className='col'>
-                    <div className="form-group">
-                      {bancosAgregados.map((item, index) => (
-                        <MetodoPago
-                          key={index}
-                          idBanco={item.idBanco}
-                          nameMetodPay={item.nombre}
-                          monto={item.monto}
-                          handleInputMontoAgregarBancos={handleInputMontoAgregarBancos}
-                          handleRemoveItemAgregarBanco={handleRemoveItemAgregarBanco}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                <br />
-
-                <div className="row">
-                  <div className="col">
-                    <div className="form-group">
-                      <label>Agregar método de cobro:</label>
-                      <div className="input-group">
-                        <div className="input-group-prepend">
-                          <div className="input-group-text">
-                            <i className="bi bi-tag-fill"></i>
-                          </div>
-                        </div>
-                        <select
-                          title="Lista metodo de cobro"
-                          className="form-control"
-                          ref={refMetodoContado}
-                        >
-                          {bancos.map((item, index) => (
-                            <option key={index} value={item.idBanco}>
-                              {item.nombre}
-                            </option>
-                          ))}
-                        </select>
-                        <div className="input-group-append">
-                          <button
-                            className="btn btn-outline-success d-flex"
-                            title="Agregar Pago"
-                            onClick={handleAgregarBancos}
-                          >
-                            <i className="bi bi-plus-circle-fill"></i>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className='row'>
-                  <div className="col-12">
-                    <br />
-                  </div>
-                </div>
-
-                <div className='row'>
-                  <div className="col-12">
-                    <div className="text-center">{generarVuelto()}</div>
-                  </div>
-                </div>
-              </>
-            )}
-
-            {/* crédito fijo */}
-            {formaPago === CREDITO_FIJO && (
-              <div className={`row`}>
-                <div className="col">
-
-                  <div className="form-group">
-                    <span className="text-md">
-                      <i className="bi bi-info-circle text-success text-lg"></i>{' '}
-                      Los pagos se efectúan en función del número de
-                      cuotas, con una alerta que indica la frecuencia de
-                      los pagos.
-                    </span>
-                  </div>
-
-                  <div className="form-group">
-                    <div className="input-group">
-                      <div className="input-group-prepend">
-                        <div className="input-group-text">
-                          <i className="bi bi-hourglass-split"></i>
-                        </div>
-                      </div>
-                      <input
-                        title="Número de cuotas"
-                        type="text"
-                        className="form-control"
-                        placeholder="Número de cuotas"
-                        ref={refNumCutoas}
-                        value={numCuota}
-                        onChange={handleSelectNumeroCuotas}
-                        onKeyDown={keyNumberInteger}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="form-group">
-                    <div className="input-group">
-                      <div className="input-group-prepend">
-                        <div className="input-group-text">
-                          <i className="bi bi-credit-card-2-back"></i>
-                        </div>
-                      </div>
-                      <select
-                        title="Lista frecuencia de pago"
-                        className="form-control"
-                        ref={refFrecuenciaPagoCredito}
-                        value={frecuenciaPagoCredito}
-                        onChange={handleSelectFrecuenciaPagoCredito}
-                      >
-                        <option value="">-- Frecuencia de pago --</option>
-                        <option value="15">Quinsenal</option>
-                        <option value="30">Mensual</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="form-group">
-                    <div className="input-group">
-                      <div className="input-group-prepend">
-                        <div className="input-group-text">
-                          <i className="bi bi-coin"></i>
-                        </div>
-                      </div>
-                      <input
-                        type="text"
-                        className="form-control"
-                        placeholder="0.00"
-                        value={numberFormat(letraMensual, codiso)}
-                        disabled={true}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* crédito variable */}
-            {formaPago === CREDITO_VARIABLE && (
-              <div className="row">
-                <div className="col">
-
-                  <div className="form-group">
-                    <span className="text-md">
-                      <i className="bi bi-info-circle text-success text-lg"></i>{' '}
-                      Los pagos se realizan de acuerdo con la frecuencia
-                      establecida, con alertas programadas para recordar
-                      las fechas de pago.
-                    </span>
-                  </div>
-
-                  <div className="form-group">
-                    <div className="input-group">
-                      <div className="input-group-prepend">
-                        <div className="input-group-text">
-                          <i className="bi bi-credit-card-2-back"></i>
-                        </div>
-                      </div>
-                      <select
-                        title="Lista frecuencia de pago"
-                        className="form-control"
-                        ref={refFrecuenciaPago}
-                        value={frecuenciaPago}
-                        onChange={handleSelectFrecuenciaPago}
-                      >
-                        <option value="">-- Frecuencia de pago --</option>
-                        <option value="15">Quinsenal</option>
-                        <option value="30">Mensual</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* pago adelantado */}
-            {formaPago === ADELANTADO && (
-              <div className="row">
-                <div className="col">
-
-                  <div className="form-group">
-                    <span className="text-md">
-                      <i className="bi bi-info-circle text-success text-lg"></i>{' '}
-                      Los pagos se efectúan de manera habitual; sin embargo, el inventario no se reduce, ya que se trata de un pago anticipado.
-                    </span>
-                  </div>
-
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Procesar y cerrar venta */}
-          <div className="modal-footer">
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={handleSaveSale}
-            >
-              Completar venta
-            </button>
-            <button
-              type="button"
-              className="btn btn-danger"
-              data-bs-dismiss="modal"
-            >
-              Cerrar
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+          )}
+        </>
+      }
+      footer={
+        <>
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={handleSaveSale}
+          >
+            Completar venta
+          </button>
+          <button
+            type="button"
+            className="btn btn-danger"
+            onClick={onClose}
+          >
+            Cerrar
+          </button>
+        </>
+      }
+    />
   );
 };
 
 const MetodoPago = ({
   idBanco,
-  nameMetodPay,
+  name,
   monto,
-  handleInputMontoAgregarBancos,
-  handleRemoveItemAgregarBanco,
+  handleInputMontoBancosAgregados,
+  handleRemoveItemBancosAgregados,
 }) => {
   return (
     <div className="input-group mb-2">
@@ -492,19 +495,19 @@ const MetodoPago = ({
         className="form-control"
         placeholder="Monto"
         value={monto}
-        onChange={(event) => handleInputMontoAgregarBancos(event, idBanco)}
+        onChange={(event) => handleInputMontoBancosAgregados(event, idBanco)}
         onKeyDown={keyNumberFloat}
       />
       <div className="input-group-prepend">
         <div className="input-group-text">
-          <span>{nameMetodPay}</span>
+          <span>{name}</span>
         </div>
       </div>
       <div className="input-group-append">
         <button
           className="btn btn-outline-danger d-flex"
           title="Agregar Pago"
-          onClick={() => handleRemoveItemAgregarBanco(idBanco)}
+          onClick={() => handleRemoveItemBancosAgregados(idBanco)}
         >
           <i className="bi bi-trash3-fill"></i>
         </button>
@@ -512,5 +515,51 @@ const MetodoPago = ({
     </div>
   );
 };
+
+ModalSale.propTypes = {
+  refModal: PropTypes.object.isRequired,
+  isOpen: PropTypes.bool.isRequired,
+  onOpen: PropTypes.func.isRequired,
+  onHidden: PropTypes.func.isRequired,
+  onClose: PropTypes.func.isRequired,
+
+  loading: PropTypes.bool.isRequired,
+
+  formaPago: PropTypes.string.isRequired,
+  handleSelectTipoPago: PropTypes.func.isRequired,
+
+  refMetodoContado: PropTypes.object.isRequired,
+
+  refNumCutoas: PropTypes.object.isRequired,
+  numCuota: PropTypes.string.isRequired,
+  handleSelectNumeroCuotas: PropTypes.func.isRequired,
+
+  refFrecuenciaPagoCredito: PropTypes.object.isRequired,
+  frecuenciaPagoCredito: PropTypes.string.isRequired,
+  handleSelectFrecuenciaPagoCredito: PropTypes.func.isRequired,
+
+  refFrecuenciaPago: PropTypes.object.isRequired,
+  frecuenciaPago: PropTypes.string.isRequired,
+  handleSelectFrecuenciaPago: PropTypes.func.isRequired,
+
+  codiso: PropTypes.string.isRequired,
+  importeTotal: PropTypes.number.isRequired,
+
+  bancos: PropTypes.array.isRequired,
+  bancosAgregados: PropTypes.array.isRequired,
+  handleAddBancosAgregados: PropTypes.func.isRequired,
+  handleInputMontoBancosAgregados: PropTypes.func.isRequired,
+  handleRemoveItemBancosAgregados: PropTypes.func.isRequired,
+
+  handleSaveSale: PropTypes.func.isRequired,
+}
+
+MetodoPago.propTypes = {
+  idBanco: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  monto: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  handleInputMontoBancosAgregados: PropTypes.func.isRequired,
+  handleRemoveItemBancosAgregados: PropTypes.func.isRequired,
+}
 
 export default ModalSale;

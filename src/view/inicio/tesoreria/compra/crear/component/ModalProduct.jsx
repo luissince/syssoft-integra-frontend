@@ -6,7 +6,7 @@ import {
 import PropTypes from 'prop-types';
 
 export const CustomModalProduct = ({
-  refPrinter,
+  refModal,
   isOpen,
   onOpen,
   onHidden,
@@ -27,7 +27,7 @@ export const CustomModalProduct = ({
 
   return (
     <CustomModalContent
-      contentRef={(ref) => refPrinter.current = ref}
+      contentRef={(ref) => refModal.current = ref}
       isOpen={isOpen}
       onOpen={onOpen}
       onHidden={onHidden}
@@ -110,7 +110,7 @@ export const CustomModalProduct = ({
 }
 
 CustomModalProduct.propTypes = {
-  refPrinter: PropTypes.object.isRequired,
+  refModal: PropTypes.object.isRequired,
   isOpen: PropTypes.bool.isRequired,
   onOpen: PropTypes.func.isRequired,
   onHidden: PropTypes.func.isRequired,

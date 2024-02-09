@@ -20,8 +20,8 @@ const ModalSale = (props) => {
     onClose,
 
     loading,
-    selectTipoPago,
-    handleSelectTipoPago,
+    selectTipoCobro,
+    handleSelectTipoCobro,
 
     refMetodoPagoContenedor,
     refMetodoContado,
@@ -49,7 +49,7 @@ const ModalSale = (props) => {
 
     handleSaveSale,
   } = props;
-
+  
   const generarVuelto = () => {
     const total = parseFloat(importeTotal);
 
@@ -62,7 +62,7 @@ const ModalSale = (props) => {
       return accumulator;
     }, 0);
 
-    if (!isEmpty(bancosAgregados)) {
+    if (bancosAgregados.lenght > 1) {
       if (currentAmount >= total) {
         return (
           <>
@@ -139,8 +139,8 @@ const ModalSale = (props) => {
       onOpen={onOpen}
       onHidden={onHidden}
       onClose={onClose}
-      contentLabel="Modal de Venta"
-      titleHeader="Completar Compra<"
+      contentLabel="Modal de Compra"
+      titleHeader="Completar Compra"
       body={
         <>
           {loading && spinnerLoading('Cargando datos...')}
@@ -174,10 +174,10 @@ const ModalSale = (props) => {
             {/* Al contado */}
             <div className="col">
               <button
-                className={`btn ${selectTipoPago === CONTADO ? 'btn-primary' : 'btn-light'} btn-block`}
+                className={`btn ${selectTipoCobro === CONTADO ? 'btn-primary' : 'btn-light'} btn-block`}
                 type="button"
                 title="Pago al contado"
-                onClick={() => handleSelectTipoPago(CONTADO)}
+                onClick={() => handleSelectTipoCobro(CONTADO)}
               >
                 <div className="row">
                   <div className="col-md-12">
@@ -193,10 +193,10 @@ const ModalSale = (props) => {
             {/* Crédito fijo*/}
             <div className="col">
               <button
-                className={`btn ${selectTipoPago === CREDITO_FIJO ? 'btn-primary' : 'btn-light'} btn-block`}
+                className={`btn ${selectTipoCobro === CREDITO_FIJO ? 'btn-primary' : 'btn-light'} btn-block`}
                 type="button"
                 title="Pago al credito"
-                onClick={() => handleSelectTipoPago(CREDITO_FIJO)}
+                onClick={() => handleSelectTipoCobro(CREDITO_FIJO)}
               >
                 <div className="row">
                   <div className="col-md-12">
@@ -213,10 +213,10 @@ const ModalSale = (props) => {
             {/* Crédito variable*/}
             <div className="col">
               <button
-                className={`btn ${selectTipoPago === CREDITO_VARIABLE ? 'btn-primary' : 'btn-light'} btn-block`}
+                className={`btn ${selectTipoCobro === CREDITO_VARIABLE ? 'btn-primary' : 'btn-light'} btn-block`}
                 type="button"
                 title="Pago al credito"
-                onClick={() => handleSelectTipoPago(CREDITO_VARIABLE)}
+                onClick={() => handleSelectTipoCobro(CREDITO_VARIABLE)}
               >
                 <div className="row">
                   <div className="col-md-12">
@@ -232,7 +232,7 @@ const ModalSale = (props) => {
 
           <br />
           {/* contado detalle */}
-          {selectTipoPago === CONTADO && (
+          {selectTipoCobro === CONTADO && (
             <div className="row">
               <div className="col" ref={refMetodoPagoContenedor}>
 
@@ -296,7 +296,7 @@ const ModalSale = (props) => {
           )}
 
           {/* crédito fijo */}
-          {selectTipoPago === CREDITO_FIJO && (
+          {selectTipoCobro === CREDITO_FIJO && (
             <>
               <div className="row">
                 <div className="col">
@@ -384,7 +384,7 @@ const ModalSale = (props) => {
           )}
 
           {/* crédito variable */}
-          {selectTipoPago === CREDITO_VARIABLE && (
+          {selectTipoCobro === CREDITO_VARIABLE && (
             <>
               <div className="row">
                 <div className="col">
@@ -493,8 +493,8 @@ ModalSale.propTypes = {
   onClose: PropTypes.func.isRequired,
 
   loading: PropTypes.bool.isRequired,
-  selectTipoPago: PropTypes.string.isRequired,
-  handleSelectTipoPago: PropTypes.func.isRequired,
+  selectTipoCobro: PropTypes.string.isRequired,
+  handleSelectTipoCobro: PropTypes.func.isRequired,
 
   refMetodoPagoContenedor: PropTypes.object.isRequired,
   refMetodoContado: PropTypes.object.isRequired,

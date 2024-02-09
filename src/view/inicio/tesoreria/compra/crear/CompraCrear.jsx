@@ -88,8 +88,9 @@ class CompraCrear extends CustomComponent {
       total: 0,
 
       // Atributos del modal sale
-      loadingModal: false,
-      selectTipoPago: CONTADO,
+      isOpenSale: false,
+      loadingModalSale: false,
+      selectTipoCobro: CONTADO,
       bancos: [],
       bancosAgregados: [],
 
@@ -98,15 +99,10 @@ class CompraCrear extends CustomComponent {
       numeroCuotas: '',
 
       // Atributos del modal producto
+      isOpenProducto: false,
       loadingModalProducto: false,
       cantidadModalProducto: '',
       costoModalProducto: '',
-
-      // Atributos para el custom modal producto
-      isOpenProduct: false,
-
-      // Atributos para el custom modal producto
-      isOpenSale: false,
 
       // Id principales
       idUsuario: this.props.token.userToken.idUsuario,
@@ -142,7 +138,7 @@ class CompraCrear extends CustomComponent {
     this.refCostoModalProduct = React.createRef();
 
     // Referencia para el custom modal producto
-    this.refPrinter = React.createRef();
+    this.refModalProducto = React.createRef();
 
     // Referencia para el custom modal producto
     this.refCustomModalSale = React.createRef();
@@ -382,10 +378,43 @@ class CompraCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
 
   handleOpenModalSale = () => {
-    this.setState({ loadingModal: true, isOpenSale: true })
+    this.setState({ loadingModalSale: true, isOpenSale: true })
   }
 
-  handleCloseMosalSale = () => {
+  handleOnOpenModalSale = () => {
+    const metodo = this.state.bancos.find((item) => item.preferido === 1);
+
+    this.refMetodoContado.current.value = metodo ? metodo.idBanco : '';
+
+    if (metodo) {
+      const item = {
+        idBanco: metodo.idBanco,
+        nombre: metodo.nombre,
+        monto: '',
+        vuelto: metodo.vuelto,
+        descripcion: '',
+      };
+
+      this.setState((prevState) => ({
+        bancosAgregados: [...prevState.bancosAgregados, item],
+      }));
+    }
+
+    this.setState({ loadingModalSale: false });
+  }
+
+  handleOnHiddenModalSale = () => {
+    this.setState({
+      loadingModalSale: false,
+      selectTipoCobro: CONTADO,
+      bancosAgregados: [],
+      frecuenciaPagoFijo: new Date().getDate() > 15 ? '30' : '15',
+      frecuenciaPagoVariable: new Date().getDate() > 15 ? '30' : '15',
+      numeroCuotas: '',
+    });
+  }
+
+  handleCloseModalSale = () => {
     const data = this.refCustomModalSale.current;
     data.classList.add("close-cm")
     data.addEventListener('animationend', () => {
@@ -394,8 +423,8 @@ class CompraCrear extends CustomComponent {
     })
   }
 
-  handleSelectTipoPago = (tipo) => {
-    this.setState({ selectTipoPago: tipo });
+  handleSelectTipoCobro = (tipo) => {
+    this.setState({ selectTipoCobro: tipo });
   };
 
   handleAddBancosAgregados = () => {
@@ -453,7 +482,7 @@ class CompraCrear extends CustomComponent {
 
   handleProcessContado = async () => {
     const {
-      selectTipoPago,
+      selectTipoCobro,
 
       idComprobante,
       cliente,
@@ -470,9 +499,9 @@ class CompraCrear extends CustomComponent {
       bancosAgregados,
     } = this.state;
 
-    let metodoPagoLista = [...bancosAgregados];
+    let metodoCobrosLista = [...bancosAgregados];
 
-    if (isEmpty(metodoPagoLista)) {
+    if (isEmpty(metodoCobrosLista)) {
       alertWarning(
         'Compra',
         'Tiene que agregar método de cobro para continuar.',
@@ -483,7 +512,7 @@ class CompraCrear extends CustomComponent {
       return;
     }
 
-    if (metodoPagoLista.filter((item) => !isNumeric(item.monto)).length !== 0) {
+    if (metodoCobrosLista.filter((item) => !isNumeric(item.monto)).length !== 0) {
       alertWarning(
         'Compra',
         'Hay montos del metodo de cobro que no tiene valor.',
@@ -494,12 +523,12 @@ class CompraCrear extends CustomComponent {
       return;
     }
 
-    const metodoCobroTotal = metodoPagoLista.reduce(
+    const metodoCobroTotal = metodoCobrosLista.reduce(
       (accumulator, item) => (accumulator += parseFloat(item.monto)),
       0,
     );
 
-    if (metodoPagoLista.length > 1) {
+    if (metodoCobrosLista.length > 1) {
       if (metodoCobroTotal !== total) {
         alertWarning(
           'Compra',
@@ -510,7 +539,7 @@ class CompraCrear extends CustomComponent {
         return;
       }
     } else {
-      const metodo = metodoPagoLista[0];
+      const metodo = metodoCobrosLista[0];
       if (metodo.vuelto === 1) {
         if (metodoCobroTotal < total) {
           alertWarning(
@@ -522,7 +551,7 @@ class CompraCrear extends CustomComponent {
           return;
         }
 
-        metodoPagoLista.map((item) => {
+        metodoCobrosLista.map((item) => {
           item.descripcion = `Pago con ${rounded(
             parseFloat(item.monto),
           )} y su vuelto es ${rounded(parseFloat(item.monto) - total)}`;
@@ -556,13 +585,13 @@ class CompraCrear extends CustomComponent {
           idSucursal: idSucursal,
           estado: 1,
 
-          idFormaCobro: selectTipoPago,
+          idFormaCobro: selectTipoCobro,
           metodoPago: bancosAgregados,
 
           detalle: detalle,
         };
 
-        this.handleCloseMosalSale();
+        this.handleCloseModalSale();
         alertInfo('Compra', 'Procesando información...');
 
         const response = await createCompra(data);
@@ -584,7 +613,7 @@ class CompraCrear extends CustomComponent {
 
   handleProcessCreditoFijo = async () => {
     const {
-      selectTipoPago,
+      selectTipoCobro,
 
       frecuenciaPagoFijo,
       frecuenciaPagoVariable,
@@ -602,14 +631,14 @@ class CompraCrear extends CustomComponent {
       idSucursal,
     } = this.state;
 
-    if (selectTipoPago === CREDITO_FIJO && isEmpty(frecuenciaPagoFijo)) {
+    if (selectTipoCobro === CREDITO_FIJO && isEmpty(frecuenciaPagoFijo)) {
       alertWarning('Compra', 'Seleccione la frecuenta de pago.', () => {
         this.refFrecuenciaPagoFijo.current.focus();
       });
       return;
     }
 
-    if (selectTipoPago === CREDITO_FIJO && !isNumeric(numeroCuotas)) {
+    if (selectTipoCobro === CREDITO_FIJO && !isNumeric(numeroCuotas)) {
       alertWarning('Compra', 'Ingrese el número de cuotas.', () => {
         this.refNumeroCuotas.current.focus();
       });
@@ -630,14 +659,14 @@ class CompraCrear extends CustomComponent {
           idSucursal: idSucursal,
           estado: 2,
 
-          idFormaCobro: selectTipoPago,
-          frecuenciaPago: selectTipoPago === CREDITO_FIJO ? frecuenciaPagoFijo : frecuenciaPagoVariable,
+          idFormaCobro: selectTipoCobro,
+          frecuenciaPago: selectTipoCobro === CREDITO_FIJO ? frecuenciaPagoFijo : frecuenciaPagoVariable,
           numeroCuotas: numeroCuotas,
 
           detalle: detalle,
         };
 
-        this.handleCloseMosalSale();
+        this.handleCloseModalSale();
         alertInfo('Compra', 'Procesando información...');
 
         const response = await createCompra(data);
@@ -659,7 +688,7 @@ class CompraCrear extends CustomComponent {
 
   handleProcessCreditoVariable = async () => {
     const {
-      selectTipoPago,
+      selectTipoCobro,
 
       frecuenciaPagoFijo,
       frecuenciaPagoVariable,
@@ -677,7 +706,7 @@ class CompraCrear extends CustomComponent {
       idSucursal,
     } = this.state;
 
-    if (selectTipoPago === CREDITO_VARIABLE && isEmpty(frecuenciaPagoVariable)) {
+    if (selectTipoCobro === CREDITO_VARIABLE && isEmpty(frecuenciaPagoVariable)) {
       alertWarning('Compra', 'Seleccione la frecuencia de pago.', () => {
         this.refFrecuenciaPagoVariable.current.focus();
       });
@@ -698,14 +727,14 @@ class CompraCrear extends CustomComponent {
           idSucursal: idSucursal,
           estado: 2,
 
-          idFormaCobro: selectTipoPago,
-          frecuenciaPago: selectTipoPago === CREDITO_FIJO ? frecuenciaPagoFijo : frecuenciaPagoVariable,
+          idFormaCobro: selectTipoCobro,
+          frecuenciaPago: selectTipoCobro === CREDITO_FIJO ? frecuenciaPagoFijo : frecuenciaPagoVariable,
           numeroCuotas: numeroCuotas,
 
           detalle: detalle,
         };
 
-        this.handleCloseMosalSale();
+        this.handleCloseModalSale();
         alertInfo('Compra', 'Procesando información...');
 
         const response = await createCompra(data);
@@ -726,15 +755,15 @@ class CompraCrear extends CustomComponent {
   };
 
   handleSaveSale = () => {
-    if (this.state.selectTipoPago === CONTADO) {
+    if (this.state.selectTipoCobro === CONTADO) {
       this.handleProcessContado();
     }
 
-    if (this.state.selectTipoPago === CREDITO_FIJO) {
+    if (this.state.selectTipoCobro === CREDITO_FIJO) {
       this.handleProcessCreditoFijo();
     }
 
-    if (this.state.selectTipoPago === CREDITO_VARIABLE) {
+    if (this.state.selectTipoCobro === CREDITO_VARIABLE) {
       this.handleProcessCreditoVariable();
     }
   };
@@ -743,15 +772,35 @@ class CompraCrear extends CustomComponent {
   // Acciones del modal product
   //------------------------------------------------------------------------------------------
 
-  handleOpenModalProduct = () => {
-    this.setState({ loadingModalProducto: true, isOpenProduct: true })
+  handleOpenModalProducto = () => {
+    this.setState({ loadingModalProducto: true, isOpenProducto: true })
   }
 
-  handleCloseProduct = async () => {
-    const data = this.refPrinter.current;
+  handleOnOpenModalProducto = () => {
+    this.setState({
+      costoModalProducto: this.state.producto.costo,
+      loadingModalProducto: false,
+    }, () => {
+      this.refCantidadModalProduct.current.focus();
+    })
+  }
+
+  handleOnHiddenModalProducto = async () => {
+    await this.setStateAsync({
+      productos: [],
+      filtrarProducto: '',
+      producto: null,
+      cantidadModalProducto: '',
+      costoModalProducto: '',
+    });
+    this.selectItemProducto = false;
+  }
+
+  handleCloseProducto = async () => {
+    const data = this.refModalProducto.current;
     data.classList.add("close-cm")
     data.addEventListener('animationend', () => {
-      this.setState({ isOpenProduct: false }, () => {
+      this.setState({ isOpenProducto: false }, () => {
       })
     })
   }
@@ -767,7 +816,7 @@ class CompraCrear extends CustomComponent {
   handleAddProduct = async () => {
     if (!isText(this.state.idImpuesto)) {
       alertWarning('Compra', 'Seleccione un IGV para continuar.', () => {
-        this.handleCloseProduct();
+        this.handleCloseProducto();
         this.refImpuesto.current.focus();
       });
       return;
@@ -812,7 +861,7 @@ class CompraCrear extends CustomComponent {
       total,
     });
 
-    this.handleCloseProduct();
+    this.handleCloseProducto();
 
     this.refProducto.current.focus();
   };
@@ -876,7 +925,7 @@ class CompraCrear extends CustomComponent {
     });
     this.selectItemProducto = true;
 
-    this.handleOpenModalProduct();
+    this.handleOpenModalProducto();
   };
 
   //------------------------------------------------------------------------------------------
@@ -1113,43 +1162,13 @@ class CompraCrear extends CustomComponent {
         <ModalSale
           refSale={this.refCustomModalSale}
           isOpen={this.state.isOpenSale}
-          onOpen={() => {
-            const metodo = this.state.bancos.find((item) => item.preferido === 1);
+          onOpen={this.handleOnOpenModalSale}
+          onHidden={this.handleOnHiddenModalSale}
+          onClose={this.handleCloseModalSale}
 
-            this.refMetodoContado.current.value = metodo ? metodo.idBanco : '';
-
-            if (metodo) {
-              const item = {
-                idBanco: metodo.idBanco,
-                nombre: metodo.nombre,
-                monto: '',
-                vuelto: metodo.vuelto,
-                descripcion: '',
-              };
-
-              this.setState((prevState) => ({
-                bancosAgregados: [...prevState.bancosAgregados, item],
-              }));
-            }
-
-            this.setState({ loadingModal: false });
-          }}
-          onHidden={() => {
-            this.setState({
-              loadingModal: false,
-              selectTipoPago: CONTADO,
-              bancosAgregados: [],
-              frecuenciaPagoFijo: new Date().getDate() > 15 ? '30' : '15',
-              frecuenciaPagoVariable: new Date().getDate() > 15 ? '30' : '15',
-              numeroCuotas: '',
-            });
-          }}
-          onClose={this.handleCloseMosalSale}
-
-
-          loading={this.state.loadingModal}
-          selectTipoPago={this.state.selectTipoPago}
-          handleSelectTipoPago={this.handleSelectTipoPago}
+          loading={this.state.loadingModalSale}
+          selectTipoCobro={this.state.selectTipoCobro}
+          handleSelectTipoCobro={this.handleSelectTipoCobro}
 
           refMetodoPagoContenedor={this.refMetodoPagoContenedor}
           refMetodoContado={this.refMetodoContado}
@@ -1179,27 +1198,11 @@ class CompraCrear extends CustomComponent {
         />
 
         <CustomModalProduct
-          refPrinter={this.refPrinter}
-          isOpen={this.state.isOpenProduct}
-          onOpen={() => {
-            this.setState({
-              costoModalProducto: this.state.producto.costo,
-              loadingModalProducto: false,
-            }, () => {
-              this.refCantidadModalProduct.current.focus();
-            })
-          }}
-          onHidden={() => {
-            this.setState({
-              productos: [],
-              filtrarProducto: '',
-              producto: null,
-              cantidadModalProducto: '',
-              costoModalProducto: '',
-            });
-            this.selectItemProducto = false;
-          }}
-          onClose={this.handleCloseProduct}
+          refModal={this.refModalProducto}
+          isOpen={this.state.isOpenProducto}
+          onOpen={this.handleOnOpenModalProducto}
+          onHidden={this.handleOnHiddenModalProducto}
+          onClose={this.handleCloseProducto}
 
           loading={this.state.loadingModalProducto}
           refCantidad={this.refCantidadModalProduct}
