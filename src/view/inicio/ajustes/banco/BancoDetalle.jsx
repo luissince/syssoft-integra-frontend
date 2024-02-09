@@ -1,4 +1,3 @@
-import CryptoJS from 'crypto-js';
 import {
   rounded,
   numberFormat,
@@ -157,17 +156,17 @@ class BancoDetalle extends CustomComponent {
 
 
   async onEventImprimir() {
-    const data = {
-      idBanco: this.state.idBanco,
-      idEmpresa: 'EM0001',
-    };
+    // const data = {
+    //   idBanco: this.state.idBanco,
+    //   idEmpresa: 'EM0001',
+    // };
 
-    let ciphertext = CryptoJS.AES.encrypt(
-      JSON.stringify(data),
-      'key-report-inmobiliaria',
-    ).toString();
-    let params = new URLSearchParams({ params: ciphertext });
-    window.open('/api/banco/repdetallebanco?' + params, '_blank');
+    // let ciphertext = CryptoJS.AES.encrypt(
+    //   JSON.stringify(data),
+    //   'key-report-inmobiliaria',
+    // ).toString();
+    // let params = new URLSearchParams({ params: ciphertext });
+    // window.open('/api/banco/repdetallebanco?' + params, '_blank');
   }
 
   generarBody() {

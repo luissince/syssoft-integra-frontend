@@ -1,9 +1,10 @@
 import {
-    rounded,
     keyNumberFloat,
     spinnerLoading,
     numberFormat,
+    isEmpty,
 } from '../../../../../../helper/utils.helper';
+import PropTypes from 'prop-types';
 
 const ModalSale = (props) => {
     const { idModalSale } = props;
@@ -15,20 +16,20 @@ const ModalSale = (props) => {
 
         importeTotal,
 
-        handleSaveSale,
-
         bancos,
         codISO,
         bancosAgregados,
         handleAddBancosAgregados,
         handleInputMontoBancosAgregados,
         handleRemoveItemBancosAgregados,
+
+        handleSaveSale,
     } = props;
 
     const generarVuelto = () => {
         const total = parseFloat(importeTotal);
 
-        if (bancosAgregados.length === 0) {
+        if (isEmpty(bancosAgregados)) {
             return <h5>Agrega algún método de pago.</h5>;
         }
 
@@ -37,7 +38,7 @@ const ModalSale = (props) => {
             return accumulator;
         }, 0);
 
-        if (bancosAgregados.length > 1) {
+        if (!isEmpty(bancosAgregados)) {
             if (currentAmount >= total) {
                 return (
                     <>
@@ -129,7 +130,7 @@ const ModalSale = (props) => {
                             <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
                                 <div className="text-center">
                                     <h5>
-                                        TOTAL A COBRAR: <span>{numberFormat(importeTotal, codISO)}</span>
+                                        TOTAL A PAGAR: <span>{numberFormat(importeTotal, codISO)}</span>
                                     </h5>
                                 </div>
                             </div>
@@ -264,5 +265,33 @@ const MetodoPago = ({
         </div>
     );
 };
+
+ModalSale.propTypes = {
+    idModalSale: PropTypes.string.isRequired,
+
+    loadingModal: PropTypes.bool.isRequired,
+
+    refMetodoContado: PropTypes.object.isRequired,
+
+    importeTotal: PropTypes.number.isRequired,
+
+
+    bancos: PropTypes.array.isRequired,
+    codISO: PropTypes.string.isRequired,
+    bancosAgregados: PropTypes.array.isRequired,
+    handleAddBancosAgregados: PropTypes.func.isRequired,
+    handleInputMontoBancosAgregados: PropTypes.func.isRequired,
+    handleRemoveItemBancosAgregados: PropTypes.func.isRequired,
+
+    handleSaveSale: PropTypes.func.isRequired,
+}
+
+MetodoPago.propTypes = {
+    idBanco: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
+    monto: PropTypes.number.isRequired,
+    handleInputMontoBancosAgregados: PropTypes.func.isRequired,
+    handleRemoveItemBancosAgregados: PropTypes.func.isRequired,
+}
 
 export default ModalSale;

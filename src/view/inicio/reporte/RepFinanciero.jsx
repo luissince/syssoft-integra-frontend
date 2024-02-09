@@ -5,8 +5,10 @@ import FileDownloader from '../../../components/FileDownloader';
 import { spinnerLoading, currentDate } from '../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../components/Container';
+import CustomComponent from '../../../model/class/custom-component';
 
-class RepFinanciero extends React.Component {
+class RepFinanciero extends CustomComponent{
+
   constructor(props) {
     super(props);
     this.state = {
@@ -34,7 +36,7 @@ class RepFinanciero extends React.Component {
       sucursales: [],
       usuarioCheck: true,
 
-      loading: true,
+      loading: false,
       messageWarning: '',
     };
 
@@ -52,14 +54,8 @@ class RepFinanciero extends React.Component {
     this.abortControllerView = new AbortController();
   }
 
-  setStateAsync(state) {
-    return new Promise((resolve) => {
-      this.setState(state, resolve);
-    });
-  }
-
   componentDidMount() {
-    this.loadData();
+    // this.loadData();
   }
 
   componentWillUnmount() {

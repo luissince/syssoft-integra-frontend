@@ -3,6 +3,7 @@ import {
   keyNumberInteger,
   spinnerLoading,
   numberFormat,
+  isEmpty,
 } from '../../../../../../helper/utils.helper';
 import { ADELANTADO, CONTADO, CREDITO_FIJO, CREDITO_VARIABLE } from '../../../../../../model/types/forma-pago';
 
@@ -46,7 +47,7 @@ const ModalSale = (props) => {
   const generarVuelto = () => {
     const total = parseFloat(importeTotal);
 
-    if (bancosAgregados.length === 0) {
+    if (isEmpty(bancosAgregados)) {
       return <h5>Agrega algún método de pago.</h5>;
     }
 
@@ -55,7 +56,7 @@ const ModalSale = (props) => {
       return accumulator;
     }, 0);
 
-    if (bancosAgregados.length > 1) {
+    if (!isEmpty(bancosAgregados)) {
       if (currentAmount >= total) {
         return (
           <>

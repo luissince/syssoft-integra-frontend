@@ -134,31 +134,31 @@ class GastoCrear extends CustomComponent {
 
         viewModal(this.idModalSale, () => {
             const metodo = this.state.bancos.find((item) => item.preferido === 1);
-      
+
             this.refMetodoContado.current.value = metodo ? metodo.idBanco : '';
-      
+
             if (metodo) {
-              const item = {
-                idBanco: metodo.idBanco,
-                nombre: metodo.nombre,
-                monto: '',
-                vuelto: metodo.vuelto,
-                descripcion: '',
-              };
-      
-              this.setState((prevState) => ({
-                bancosAgregados: [...prevState.bancosAgregados, item],
-              }));
+                const item = {
+                    idBanco: metodo.idBanco,
+                    nombre: metodo.nombre,
+                    monto: '',
+                    vuelto: metodo.vuelto,
+                    descripcion: '',
+                };
+
+                this.setState((prevState) => ({
+                    bancosAgregados: [...prevState.bancosAgregados, item],
+                }));
             }
-      
+
             this.setState({ loadingModal: false });
-          });
-      
-          clearModal(this.idModalSale, async () => {
+        });
+
+        clearModal(this.idModalSale, async () => {
             this.setState({
-              bancosAgregados: [],
+                bancosAgregados: [],
             });
-          });
+        });
     }
 
     componentWillUnmount() {
@@ -404,7 +404,7 @@ class GastoCrear extends CustomComponent {
 
     handleInputMontoBancosAgregados = (event, idBanco) => {
         const { value } = event.target;
-        
+
         this.setState((prevState) => ({
             bancosAgregados: prevState.bancosAgregados.map((item) => {
                 if (item.idBanco === idBanco) {
@@ -729,13 +729,14 @@ class GastoCrear extends CustomComponent {
                     loadingModal={this.state.loadingModal}
                     refMetodoContado={this.refMetodoContado}
                     importeTotal={this.state.total}
-                    handleSaveSale={this.handleSaveSale}
                     bancos={this.state.bancos}
                     codISO={this.state.codISO}
                     bancosAgregados={this.state.bancosAgregados}
                     handleAddBancosAgregados={this.handleAddBancosAgregados}
                     handleInputMontoBancosAgregados={this.handleInputMontoBancosAgregados}
                     handleRemoveItemBancosAgregados={this.handleRemoveItemBancosAgregados}
+
+                    handleSaveSale={this.handleSaveSale}
                 />
 
                 {this.state.loading && spinnerLoading(this.state.msgLoading)}

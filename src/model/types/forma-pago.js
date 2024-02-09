@@ -1,4 +1,4 @@
-export const CONTADO = 'MP0001';
-export const CREDITO_FIJO = 'MP0002';
-export const CREDITO_VARIABLE = 'MP0003';
-export const ADELANTADO = 'MP0004';
+export const CONTADO = 'FP0001';
+export const CREDITO_FIJO = 'FP0002';
+export const CREDITO_VARIABLE = 'FP0003';
+export const ADELANTADO = 'FP0004';

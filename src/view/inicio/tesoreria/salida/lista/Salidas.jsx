@@ -2,12 +2,13 @@ import React from 'react';
 import ContainerWrapper from '../../../../../components/Container';
 import CustomComponent from '../../../../../model/class/custom-component';
 import Paginacion from '../../../../../components/Paginacion';
-import { alertDialog, isEmpty, spinnerLoading, keyUpSearch, alertSuccess, alertWarning, alertInfo, formatTime, formatNumberWithZeros, numberFormat } from '../../../../../helper/utils.helper';
+import { alertDialog, isEmpty, spinnerLoading, keyUpSearch, alertSuccess, alertWarning, alertInfo, formatTime, formatNumberWithZeros, numberFormat, getPathNavigation } from '../../../../../helper/utils.helper';
 import ErrorResponse from '../../../../../model/class/error-response';
 import SuccessReponse from '../../../../../model/class/response';
 import { CANCELED } from '../../../../../model/types/types';
 import { cancelSalida, listSalida } from '../../../../../network/rest/principal.network';
 import { connect } from 'react-redux';
+import { Link } from 'react-router-dom/cjs/react-router-dom.min';
 
 class Salidas extends CustomComponent {
   constructor(props) {
@@ -172,9 +173,14 @@ class Salidas extends CustomComponent {
             {formatTime(item.hora)}
           </td>
           <td>
-            {item.comprobante}
+            <Link className="btn-link" to={getPathNavigation(item.tipo, item.idComprobante)}>
+              {item.comprobante}
+              <br />
+              {item.serie}-{formatNumberWithZeros(item.numeracion)}
+            </Link>
+            {/* {item.comprobante}
             <br />
-            {item.serie}-{formatNumberWithZeros(item.numeracion)}
+            {item.serie}-{formatNumberWithZeros(item.numeracion)} */}
           </td>
           <td>{item.metodo}</td>
           <td>{item.descripcion}</td>

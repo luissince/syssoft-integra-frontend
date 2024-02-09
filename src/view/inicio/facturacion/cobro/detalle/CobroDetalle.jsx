@@ -61,13 +61,10 @@ class CobroDetalle extends CustomComponent {
       return;
     }
 
+    const suma = cobro.detalle.reduce((acumulador, item) => acumulador + item.precio * item.cantidad, 0);
+
     this.setState({
-      comprobante:
-        cobro.cabecera.comprobante +
-        ' ' +
-        cobro.cabecera.serie +
-        '-' +
-        cobro.cabecera.numeracion,
+      comprobante: cobro.cabecera.comprobante + ' ' + cobro.cabecera.serie + '-' + cobro.cabecera.numeracion,
       cliente: cobro.cabecera.documento + ' ' + cobro.cabecera.informacion,
       fecha: cobro.cabecera.fecha + ' ' + cobro.cabecera.hora,
       estado: cobro.cabecera.estado,
@@ -76,6 +73,9 @@ class CobroDetalle extends CustomComponent {
 
       detalle: cobro.detalle,
       ingresos: cobro.ingresos,
+
+      total: suma,
+
       loading: false,
     });
   }
@@ -99,31 +99,31 @@ class CobroDetalle extends CustomComponent {
   }
 
   onEventImprimir() {
-    const data = {
-      idEmpresa: 'EM0001',
-      idCobro: this.state.idCobro,
-    };
+    // const data = {
+    //   idEmpresa: 'EM0001',
+    //   idCobro: this.state.idCobro,
+    // };
 
-    let ciphertext = CryptoJS.AES.encrypt(
-      JSON.stringify(data),
-      'key-report-inmobiliaria',
-    ).toString();
-    let params = new URLSearchParams({ params: ciphertext });
-    window.open('/api/cobro/repcomprobante?' + params, '_blank');
+    // let ciphertext = CryptoJS.AES.encrypt(
+    //   JSON.stringify(data),
+    //   'key-report-inmobiliaria',
+    // ).toString();
+    // let params = new URLSearchParams({ params: ciphertext });
+    // window.open('/api/cobro/repcomprobante?' + params, '_blank');
   }
 
   onEventMatricial() {
-    const data = {
-      idEmpresa: 'EM0001',
-      idCobro: this.state.idCobro,
-    };
+    // const data = {
+    //   idEmpresa: 'EM0001',
+    //   idCobro: this.state.idCobro,
+    // };
 
-    let ciphertext = CryptoJS.AES.encrypt(
-      JSON.stringify(data),
-      'key-report-inmobiliaria',
-    ).toString();
-    let params = new URLSearchParams({ params: ciphertext });
-    window.open('/api/cobro/repcomprobantematricial?' + params, '_blank');
+    // let ciphertext = CryptoJS.AES.encrypt(
+    //   JSON.stringify(data),
+    //   'key-report-inmobiliaria',
+    // ).toString();
+    // let params = new URLSearchParams({ params: ciphertext });
+    // window.open('/api/cobro/repcomprobantematricial?' + params, '_blank');
   }
 
   renderTotal() {

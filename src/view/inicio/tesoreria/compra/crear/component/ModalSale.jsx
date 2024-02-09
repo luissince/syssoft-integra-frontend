@@ -1,25 +1,30 @@
+import { CustomModalContent } from '../../../../../../components/CustomModal';
 import {
-  rounded,
   keyNumberFloat,
   keyNumberInteger,
   spinnerLoading,
   numberFormat,
   isNumeric,
+  isEmpty,
 } from '../../../../../../helper/utils.helper';
+import { CONTADO, CREDITO_FIJO, CREDITO_VARIABLE } from '../../../../../../model/types/forma-cobro';
+import PropTypes from 'prop-types';
 
 const ModalSale = (props) => {
-  const { idModal } = props;
 
   const {
+    refSale,
+    isOpen,
+    onOpen,
+    onHidden,
+    onClose,
+
     loading,
     selectTipoPago,
     handleSelectTipoPago,
 
     refMetodoPagoContenedor,
     refMetodoContado,
-
-    tipoCredito,
-    handleCheckTipoCredito,
 
     refFrecuenciaPagoFijo,
     frecuenciaPagoFijo,
@@ -36,33 +41,33 @@ const ModalSale = (props) => {
     codISO,
     importeTotal,
 
-    handleSaveSale,
+    bancos,
+    bancosAgregados,
+    handleAddBancosAgregados,
+    handleInputMontoBancosAgregados,
+    handleRemoveItemBancosAgregados,
 
-    metodosPagoLista,
-    metodoPagoAgregado,
-    handleAddMetodPay,
-    handleInputMontoMetodoPay,
-    handleRemoveItemMetodPay,
+    handleSaveSale,
   } = props;
 
   const generarVuelto = () => {
     const total = parseFloat(importeTotal);
 
-    if (metodoPagoAgregado.length === 0) {
+    if (isEmpty(bancosAgregados)) {
       return <h5>Agrega algún método de pago.</h5>;
     }
 
-    const currentAmount = metodoPagoAgregado.reduce((accumulator, item) => {
+    const currentAmount = bancosAgregados.reduce((accumulator, item) => {
       accumulator += item.monto ? parseFloat(item.monto) : 0;
       return accumulator;
     }, 0);
 
-    if (metodoPagoAgregado.length > 1) {
+    if (!isEmpty(bancosAgregados)) {
       if (currentAmount >= total) {
         return (
           <>
             <h5>
-              RESTANTE: <span>{rounded(currentAmount - total)}</span>
+              RESTANTE: <span>{numberFormat(currentAmount - total, codISO)}</span>
             </h5>
             <h6 className="text-danger">
               Más de dos metodos de pago no generan vuelto.
@@ -73,7 +78,7 @@ const ModalSale = (props) => {
         return (
           <>
             <h5>
-              POR COBRAR: <span>{rounded(total - currentAmount)}</span>
+              POR COBRAR: <span>{numberFormat(total - currentAmount, codISO)}</span>
             </h5>
             <h6 className="text-danger">
               Más de dos metodos de pago no generan vuelto.
@@ -83,18 +88,18 @@ const ModalSale = (props) => {
       }
     }
 
-    const metodo = metodoPagoAgregado[0];
+    const metodo = bancosAgregados[0];
     if (metodo.vuelto === 1) {
       if (currentAmount >= total) {
         return (
           <h5>
-            SU CAMBIO ES: <span>{rounded(currentAmount - total)}</span>
+            SU CAMBIO ES: <span>{numberFormat(currentAmount - total, codISO)}</span>
           </h5>
         );
       } else {
         return (
           <h5 className="text-danger">
-            POR COBRAR: <span>{rounded(total - currentAmount)}</span>
+            POR COBRAR: <span>{numberFormat(total - currentAmount, codISO)}</span>
           </h5>
         );
       }
@@ -103,7 +108,7 @@ const ModalSale = (props) => {
         return (
           <>
             <h5>
-              RESTANTE: <span>{rounded(currentAmount - total)}</span>
+              RESTANTE: <span>{numberFormat(currentAmount - total, codISO)}</span>
             </h5>
             <h6 className="text-danger">El método de pago no genera vuelto.</h6>
           </>
@@ -112,7 +117,7 @@ const ModalSale = (props) => {
         return (
           <>
             <h5>
-              POR COBRAR: <span>{rounded(total - currentAmount)}</span>
+              POR COBRAR: <span>{numberFormat(total - currentAmount, codISO)}</span>
             </h5>
             <h6 className="text-danger">El método de pago no genera vuelto.</h6>
           </>
@@ -123,373 +128,333 @@ const ModalSale = (props) => {
 
   const letraMensual = () => {
     const total = parseFloat(importeTotal);
-
-    if (tipoCredito === '2') {
-      if (!isNumeric(numeroCuotas) || numeroCuotas <= 0) return 0;
-
-      return total / numeroCuotas;
-    }
-
-    return 0;
-  };
+    if (!isNumeric(numeroCuotas) || numeroCuotas <= 0) return 0;
+    return total / numeroCuotas;
+  }
 
   return (
-    <div
-      className="modal fade"
-      id={idModal}
-      data-bs-keyboard="false"
-      data-bs-backdrop="static"
-    >
-      <div className="modal-dialog modal-dialog-centered">
-        <div className="modal-content">
-          <div className="modal-header">
-            <h6 className="modal-title">Completar Gasto</h6>
-            <button
-              type="button"
-              className="close"
-              data-bs-dismiss="modal"
-              aria-label="Close"
-            >
-              <span aria-hidden="true">&times;</span>
-            </button>
+    <CustomModalContent
+      contentRef={(ref) => refSale.current = ref}
+      isOpen={isOpen}
+      onOpen={onOpen}
+      onHidden={onHidden}
+      onClose={onClose}
+      contentLabel="Modal de Venta"
+      titleHeader="Completar Compra<"
+      body={
+        <>
+          {loading && spinnerLoading('Cargando datos...')}
+
+          {/* Titutlo del modal */}
+          <div className="row">
+            <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+              <div className="text-center">
+                <h5>
+                  TOTAL A PAGAR: <span>{numberFormat(importeTotal, codISO)}</span>
+                </h5>
+              </div>
+            </div>
           </div>
-          <div className="modal-body">
-            {loading && spinnerLoading('Cargando datos...')}
 
-            {/* Titutlo del modal */}
-            <div className="row">
-              <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
-                <div className="text-center">
-                  <h5>
-                    TOTAL A COBRAR:{' '}
-                    <span>{numberFormat(importeTotal, codISO)}</span>
-                  </h5>
-                </div>
-              </div>
+          {/* Sun titulo */}
+          <div className="row">
+            <div className="col-md-4 col-sm-4">
+              <hr />
             </div>
-
-            {/* Sun titulo */}
-            <div className="row">
-              <div className="col-md-4 col-sm-4">
-                <hr />
-              </div>
-              <div className="col-md-4 col-sm-4 d-flex align-items-center justify-content-center">
-                <h6 className="mb-0">Tipos de cobros</h6>
-              </div>
-              <div className="col-md-4 col-sm-4">
-                <hr />
-              </div>
+            <div className="col-md-4 col-sm-4 d-flex align-items-center justify-content-center">
+              <h6 className="mb-0">Tipos de cobros</h6>
             </div>
-
-            {/* Tipos de venta */}
-            <div className="row">
-              {/* Al contado */}
-              <div className="col">
-                <button
-                  className={`btn ${selectTipoPago === 1 ? 'btn-primary' : 'btn-light'} btn-block`}
-                  type="button"
-                  title="Pago al contado"
-                  onClick={() => handleSelectTipoPago(1)}
-                >
-                  <div className="row">
-                    <div className="col-md-12">
-                      <i className="bi bi-cash-coin fa-2x"></i>
-                    </div>
-                  </div>
-                  <div className="text-center">
-                    <label>Contado</label>
-                  </div>
-                </button>
-              </div>
-
-              {/* Crédito fijo*/}
-              <div className="col">
-                <button
-                  className={`btn ${selectTipoPago === 2 ? 'btn-primary' : 'btn-light'} btn-block`}
-                  type="button"
-                  title="Pago al credito"
-                  onClick={() => handleSelectTipoPago(2)}
-                >
-                  <div className="row">
-                    <div className="col-md-12">
-                      <i className="bi bi-boxes fa-2x"></i>
-                    </div>
-                  </div>
-                  <div className="text-center">
-                    <label>Crédito</label>
-                  </div>
-                </button>
-              </div>
+            <div className="col-md-4 col-sm-4">
+              <hr />
             </div>
+          </div>
 
-            <br />
-            {/* contado detalle */}
-            {selectTipoPago === 1 && (
-              <div className="row">
-                <div className="col" ref={refMetodoPagoContenedor}>
-
-                  <h6>Lista de métodos:</h6>
-
-                  {metodoPagoAgregado.map((item, index) => (
-                    <MetodoPago
-                      key={index}
-                      idMetodoPago={item.idMetodoPago}
-                      nameMetodPay={item.nombre}
-                      monto={item.monto}
-                      handleInputMontoMetodoPay={handleInputMontoMetodoPay}
-                      handleRemoveItemMetodPay={handleRemoveItemMetodPay}
-                      handleSaveSale={handleSaveSale}
-                    />
-                  ))}
-
-                  <br />
-
-                  <div className="form-row">
-                    <div className="form-group col-md-12">
-                      <label>Agregar método de cobro:</label>
-                      <div className="input-group">
-                        <div className="input-group-prepend">
-                          <div className="input-group-text">
-                            <i className="bi bi-tag-fill"></i>
-                          </div>
-                        </div>
-                        <select
-                          title="Lista metodo de cobro"
-                          className="form-control"
-                          ref={refMetodoContado}
-                        >
-                          {metodosPagoLista.map((item, index) => (
-                            <option key={index} value={item.idMetodoPago}>
-                              {item.nombre}
-                            </option>
-                          ))}
-                        </select>
-                        <div className="input-group-append">
-                          <button
-                            className="btn btn-outline-success d-flex"
-                            title="Agregar Pago"
-                            onClick={handleAddMetodPay}
-                          >
-                            <i className="bi bi-plus-circle-fill"></i>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
-                  <br />
-                </div>
-
-                <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
-                  <div className="text-center">{generarVuelto()}</div>
-                </div>
-              </div>
-            )}
-
-            {/* crédito fijo */}
-            {selectTipoPago === 2 && (
-              <>
+          {/* Tipos de venta */}
+          <div className="row">
+            {/* Al contado */}
+            <div className="col">
+              <button
+                className={`btn ${selectTipoPago === CONTADO ? 'btn-primary' : 'btn-light'} btn-block`}
+                type="button"
+                title="Pago al contado"
+                onClick={() => handleSelectTipoPago(CONTADO)}
+              >
                 <div className="row">
-                  <div className="col d-flex align-items-center">
-                    <div className="form-group">
-                      <div className="form-check form-check-inline">
-                        <input
-                          className="form-check-input"
-                          type="radio"
-                          // ref={this.refIdTipoAjuste}
-                          name="tipoCredito"
-                          id="1"
-                          value="1"
-                          checked={tipoCredito === '1'}
-                          onChange={handleCheckTipoCredito}
-                        />
-                        <label className="form-check-label" htmlFor="1">
-                          <i className="bi bi-bag-check-fill "></i> Variable
-                        </label>
-                      </div>
+                  <div className="col-md-12">
+                    <i className="bi bi-cash-coin fa-2x"></i>
+                  </div>
+                </div>
+                <div className="text-center">
+                  <label>Contado</label>
+                </div>
+              </button>
+            </div>
 
-                      <div className="form-check form-check-inline">
-                        <input
-                          className="form-check-input"
-                          type="radio"
-                          name="tipoCredito"
-                          id="2"
-                          value="2"
-                          checked={tipoCredito === '2'}
-                          onChange={handleCheckTipoCredito}
-                        />
-                        <label className="form-check-label" htmlFor="2">
-                          <i className="bi bi-bag-check-fill "></i> Fijo
-                        </label>
+            {/* Crédito fijo*/}
+            <div className="col">
+              <button
+                className={`btn ${selectTipoPago === CREDITO_FIJO ? 'btn-primary' : 'btn-light'} btn-block`}
+                type="button"
+                title="Pago al credito"
+                onClick={() => handleSelectTipoPago(CREDITO_FIJO)}
+              >
+                <div className="row">
+                  <div className="col-md-12">
+                    <i className="bi bi-boxes fa-2x"></i>
+                  </div>
+                </div>
+                <div className="text-center">
+                  <label>Crédito Fijo</label>
+                </div>
+              </button>
+            </div>
+
+
+            {/* Crédito variable*/}
+            <div className="col">
+              <button
+                className={`btn ${selectTipoPago === CREDITO_VARIABLE ? 'btn-primary' : 'btn-light'} btn-block`}
+                type="button"
+                title="Pago al credito"
+                onClick={() => handleSelectTipoPago(CREDITO_VARIABLE)}
+              >
+                <div className="row">
+                  <div className="col-md-12">
+                    <i className="bi bi-boxes fa-2x"></i>
+                  </div>
+                </div>
+                <div className="text-center">
+                  <label>Crédito Variable</label>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <br />
+          {/* contado detalle */}
+          {selectTipoPago === CONTADO && (
+            <div className="row">
+              <div className="col" ref={refMetodoPagoContenedor}>
+
+                <h6>Lista de métodos:</h6>
+
+                {bancosAgregados.map((item, index) => (
+                  <MetodoPago
+                    key={index}
+                    idBanco={item.idBanco}
+                    name={item.nombre}
+                    monto={item.monto}
+                    handleInputMontoBancosAgregados={handleInputMontoBancosAgregados}
+                    handleRemoveItemBancosAgregados={handleRemoveItemBancosAgregados}
+                  />
+                ))}
+
+                <br />
+
+                <div className="form-row">
+                  <div className="form-group col-md-12">
+                    <label>Agregar método de cobro:</label>
+                    <div className="input-group">
+                      <div className="input-group-prepend">
+                        <div className="input-group-text">
+                          <i className="bi bi-tag-fill"></i>
+                        </div>
+                      </div>
+                      <select
+                        title="Lista metodo de cobro"
+                        className="form-control"
+                        ref={refMetodoContado}
+                      >
+                        {bancos.map((item, index) => (
+                          <option key={index} value={item.idBanco}>
+                            {item.nombre}
+                          </option>
+                        ))}
+                      </select>
+                      <div className="input-group-append">
+                        <button
+                          className="btn btn-outline-success d-flex"
+                          title="Agregar Pago"
+                          onClick={handleAddBancosAgregados}
+                        >
+                          <i className="bi bi-plus-circle-fill"></i>
+                        </button>
                       </div>
                     </div>
                   </div>
                 </div>
+              </div>
 
-                {tipoCredito === '1' && (
-                  <>
-                    <div className="row">
-                      <div className="col">
-                        <div className="form-group">
-                          <span className="text-md">
-                            <i className="bi bi-info-circle text-success text-lg"></i>{' '}
-                            Los pagos se realizan de acuerdo con la frecuencia
-                            establecida, con alertas programadas para recordar
-                            las fechas de pago.
-                          </span>
+              <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                <br />
+              </div>
+
+              <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                <div className="text-center">{generarVuelto()}</div>
+              </div>
+            </div>
+          )}
+
+          {/* crédito fijo */}
+          {selectTipoPago === CREDITO_FIJO && (
+            <>
+              <div className="row">
+                <div className="col">
+                  <div className="form-group">
+                    <span className="text-md">
+                      <i className="bi bi-info-circle text-success text-lg"></i>{' '}
+                      Los pagos se efectúan en función del número de
+                      cuotas, con una alerta que indica la frecuencia de
+                      los pagos.
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="row">
+                <div className="col">
+                  <div className="form-group">
+                    <div className="input-group">
+                      <div className="input-group-prepend">
+                        <div className="input-group-text">
+                          <i className="bi bi-hourglass-split"></i>
                         </div>
                       </div>
+                      <input
+                        title="Número de cuotas"
+                        type="text"
+                        className="form-control"
+                        placeholder="Número de cuotas"
+                        ref={refNumeroCuotas}
+                        value={numeroCuotas}
+                        onChange={handleSelectNumeroCuotas}
+                        onKeyDown={keyNumberInteger}
+                      />
                     </div>
+                  </div>
+                </div>
+              </div>
 
-                    <div className="row">
-                      <div className="col">
-                        <div className="form-group">
-                          <div className="input-group">
-                            <div className="input-group-prepend">
-                              <div className="input-group-text">
-                                <i className="bi bi-calendar"></i>
-                              </div>
-                            </div>
-                            <select
-                              title="Lista frecuencia de pago"
-                              className="form-control"
-                              ref={refFrecuenciaPagoFijo}
-                              value={frecuenciaPagoFijo}
-                              onChange={handleSelectFrecuenciaPagoFijo}
-                            >
-                              <option value="">-- Frecuencia de pago --</option>
-                              <option value="15">Quinsenal</option>
-                              <option value="30">Mensual</option>
-                            </select>
-                          </div>
+              <div className="row">
+                <div className="col">
+                  <div className="form-group">
+                    <div className="input-group">
+                      <div className="input-group-prepend">
+                        <div className="input-group-text">
+                          <i className="bi bi-calendar"></i>
                         </div>
                       </div>
+                      <select
+                        title="Lista frecuencia de pago"
+                        className="form-control"
+                        ref={refFrecuenciaPagoVariable}
+                        value={frecuenciaPagoVariable}
+                        onChange={handleSelectFrecuenciaPagoVariable}
+                      >
+                        <option value="">-- Frecuencia de pago --</option>
+                        <option value="15">Quinsenal</option>
+                        <option value="30">Mensual</option>
+                      </select>
                     </div>
-                  </>
-                )}
+                  </div>
+                </div>
+              </div>
 
-                {tipoCredito === '2' && (
-                  <>
-                    <div className="row">
-                      <div className="col">
-                        <div className="form-group">
-                          <span className="text-md">
-                            <i className="bi bi-info-circle text-success text-lg"></i>{' '}
-                            Los pagos se efectúan en función del número de
-                            cuotas, con una alerta que indica la frecuencia de
-                            los pagos.
-                          </span>
+              <div className="row">
+                <div className="col">
+                  <div className="form-group">
+                    <div className="input-group">
+                      <div className="input-group-prepend">
+                        <div className="input-group-text">
+                          <i className="bi bi-coin"></i>
                         </div>
                       </div>
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="0.00"
+                        value={letraMensual()}
+                        disabled={true}
+                      />
                     </div>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
 
-                    <div className="row">
-                      <div className="col">
-                        <div className="form-group">
-                          <div className="input-group">
-                            <div className="input-group-prepend">
-                              <div className="input-group-text">
-                                <i className="bi bi-hourglass-split"></i>
-                              </div>
-                            </div>
-                            <input
-                              title="Número de cuotas"
-                              type="text"
-                              className="form-control"
-                              placeholder="Número de cuotas"
-                              ref={refNumeroCuotas}
-                              value={numeroCuotas}
-                              onChange={handleSelectNumeroCuotas}
-                              onKeyDown={keyNumberInteger}
-                            />
-                          </div>
+          {/* crédito variable */}
+          {selectTipoPago === CREDITO_VARIABLE && (
+            <>
+              <div className="row">
+                <div className="col">
+                  <div className="form-group">
+                    <span className="text-md">
+                      <i className="bi bi-info-circle text-success text-lg"></i>{' '}
+                      Los pagos se realizan de acuerdo con la frecuencia
+                      establecida, con alertas programadas para recordar
+                      las fechas de pago.
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="row">
+                <div className="col">
+                  <div className="form-group">
+                    <div className="input-group">
+                      <div className="input-group-prepend">
+                        <div className="input-group-text">
+                          <i className="bi bi-calendar"></i>
                         </div>
                       </div>
+                      <select
+                        title="Lista frecuencia de pago"
+                        className="form-control"
+                        ref={refFrecuenciaPagoFijo}
+                        value={frecuenciaPagoFijo}
+                        onChange={handleSelectFrecuenciaPagoFijo}
+                      >
+                        <option value="">-- Frecuencia de pago --</option>
+                        <option value="15">Quinsenal</option>
+                        <option value="30">Mensual</option>
+                      </select>
                     </div>
-
-                    <div className="row">
-                      <div className="col">
-                        <div className="form-group">
-                          <div className="input-group">
-                            <div className="input-group-prepend">
-                              <div className="input-group-text">
-                                <i className="bi bi-calendar"></i>
-                              </div>
-                            </div>
-                            <select
-                              title="Lista frecuencia de pago"
-                              className="form-control"
-                              ref={refFrecuenciaPagoVariable}
-                              value={frecuenciaPagoVariable}
-                              onChange={handleSelectFrecuenciaPagoVariable}
-                            >
-                              <option value="">-- Frecuencia de pago --</option>
-                              <option value="15">Quinsenal</option>
-                              <option value="30">Mensual</option>
-                            </select>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="row">
-                      <div className="col">
-                        <div className="form-group">
-                          <div className="input-group">
-                            <div className="input-group-prepend">
-                              <div className="input-group-text">
-                                <i className="bi bi-coin"></i>
-                              </div>
-                            </div>
-                            <input
-                              type="text"
-                              className="form-control"
-                              placeholder="0.00"
-                              value={letraMensual()}
-                              disabled={true}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                )}
-              </>
-            )}
-          </div>
-
-          {/* Procesar y cerrar venta */}
-          <div className="modal-footer">
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={handleSaveSale}
-            >
-              Completar venta
-            </button>
-            <button
-              type="button"
-              className="btn btn-danger"
-              data-bs-dismiss="modal"
-            >
-              Cerrar
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+        </>
+      }
+      footer={
+        <>
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={handleSaveSale}
+          >
+            Completar venta
+          </button>
+          <button
+            type="button"
+            className="btn btn-danger"
+            onClick={onClose}
+          >
+            Cerrar
+          </button>
+        </>
+      }
+    />
   );
 };
 
 const MetodoPago = ({
-  idMetodoPago,
-  nameMetodPay,
+  idBanco,
+  name,
   monto,
-  handleInputMontoMetodoPay,
-  handleRemoveItemMetodPay,
-  handleSaveSale,
+  handleInputMontoBancosAgregados,
+  handleRemoveItemBancosAgregados,
 }) => {
   return (
     <div className="input-group mb-2">
@@ -499,28 +464,19 @@ const MetodoPago = ({
         className="form-control"
         placeholder="Monto"
         value={monto}
-        onChange={(event) => handleInputMontoMetodoPay(event, idMetodoPago)}
-        // onKeyUp={(event) => {
-
-        //     if (event.key === 'Enter') {
-        //         handleSaveSale();
-        //     }
-        //     event.preventDefault();
-        // }}
+        onChange={(event) => handleInputMontoBancosAgregados(event, idBanco)}
         onKeyDown={keyNumberFloat}
       />
       <div className="input-group-prepend">
         <div className="input-group-text">
-          <span>{nameMetodPay}</span>
+          <span>{name}</span>
         </div>
       </div>
       <div className="input-group-append">
         <button
           className="btn btn-outline-danger d-flex"
           title="Agregar Pago"
-          onClick={(event) => {
-            handleRemoveItemMetodPay(idMetodoPago);
-          }}
+          onClick={() => handleRemoveItemBancosAgregados(idBanco)}
         >
           <i className="bi bi-trash3-fill"></i>
         </button>
@@ -528,5 +484,51 @@ const MetodoPago = ({
     </div>
   );
 };
+
+ModalSale.propTypes = {
+  refSale: PropTypes.object.isRequired,
+  isOpen: PropTypes.bool.isRequired,
+  onOpen: PropTypes.func.isRequired,
+  onHidden: PropTypes.func.isRequired,
+  onClose: PropTypes.func.isRequired,
+
+  loading: PropTypes.bool.isRequired,
+  selectTipoPago: PropTypes.string.isRequired,
+  handleSelectTipoPago: PropTypes.func.isRequired,
+
+  refMetodoPagoContenedor: PropTypes.object.isRequired,
+  refMetodoContado: PropTypes.object.isRequired,
+
+  refFrecuenciaPagoFijo: PropTypes.object.isRequired,
+  frecuenciaPagoFijo: PropTypes.string.isRequired,
+  handleSelectFrecuenciaPagoFijo: PropTypes.func.isRequired,
+
+  refNumeroCuotas: PropTypes.object.isRequired,
+  numeroCuotas: PropTypes.string.isRequired,
+  handleSelectNumeroCuotas: PropTypes.func.isRequired,
+
+  refFrecuenciaPagoVariable: PropTypes.object.isRequired,
+  frecuenciaPagoVariable: PropTypes.string.isRequired,
+  handleSelectFrecuenciaPagoVariable: PropTypes.func.isRequired,
+
+  codISO: PropTypes.string.isRequired,
+  importeTotal: PropTypes.number.isRequired,
+
+  bancos: PropTypes.array.isRequired,
+  bancosAgregados: PropTypes.array.isRequired,
+  handleAddBancosAgregados: PropTypes.func.isRequired,
+  handleInputMontoBancosAgregados: PropTypes.func.isRequired,
+  handleRemoveItemBancosAgregados: PropTypes.func.isRequired,
+
+  handleSaveSale: PropTypes.func.isRequired,
+}
+
+MetodoPago.propTypes = {
+  idBanco: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  monto: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  handleInputMontoBancosAgregados: PropTypes.func.isRequired,
+  handleRemoveItemBancosAgregados: PropTypes.func.isRequired,
+}
 
 export default ModalSale;

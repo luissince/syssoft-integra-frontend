@@ -1,5 +1,3 @@
-import React from 'react';
-import CryptoJS from 'crypto-js';
 import {
   rounded,
   formatTime,
@@ -61,13 +59,10 @@ class GastoDetalle extends CustomComponent {
       return;
     }
 
+    const suma =  gasto.detalle.reduce((acumulador, item) => acumulador + item.precio * item.cantidad, 0);
+
     this.setState({
-      comprobante:
-        gasto.cabecera.comprobante +
-        ' ' +
-        gasto.cabecera.serie +
-        '-' +
-        gasto.cabecera.numeracion,
+      comprobante: gasto.cabecera.comprobante + ' ' + gasto.cabecera.serie + '-' + gasto.cabecera.numeracion,
       cliente: gasto.cabecera.documento + ' ' + gasto.cabecera.informacion,
       fecha: gasto.cabecera.fecha + ' ' + gasto.cabecera.hora,
       estado: gasto.cabecera.estado,
@@ -76,6 +71,8 @@ class GastoDetalle extends CustomComponent {
 
       detalle: gasto.detalle,
       salidas: gasto.salidas,
+
+      total: suma,
       loading: false,
     });
   }
@@ -99,37 +96,35 @@ class GastoDetalle extends CustomComponent {
   }
 
   onEventImprimir() {
-    const data = {
-      idEmpresa: 'EM0001',
-      idCobro: this.state.idCobro,
-    };
+    // const data = {
+    //   idEmpresa: 'EM0001',
+    //   idCobro: this.state.idCobro,
+    // };
 
-    let ciphertext = CryptoJS.AES.encrypt(
-      JSON.stringify(data),
-      'key-report-inmobiliaria',
-    ).toString();
-    let params = new URLSearchParams({ params: ciphertext });
-    window.open('/api/cobro/repcomprobante?' + params, '_blank');
+    // let ciphertext = CryptoJS.AES.encrypt(
+    //   JSON.stringify(data),
+    //   'key-report-inmobiliaria',
+    // ).toString();
+    // let params = new URLSearchParams({ params: ciphertext });
+    // window.open('/api/cobro/repcomprobante?' + params, '_blank');
   }
 
   onEventMatricial() {
-    const data = {
-      idEmpresa: 'EM0001',
-      idCobro: this.state.idCobro,
-    };
+    // const data = {
+    //   idEmpresa: 'EM0001',
+    //   idCobro: this.state.idCobro,
+    // };
 
-    let ciphertext = CryptoJS.AES.encrypt(
-      JSON.stringify(data),
-      'key-report-inmobiliaria',
-    ).toString();
-    let params = new URLSearchParams({ params: ciphertext });
-    window.open('/api/cobro/repcomprobantematricial?' + params, '_blank');
+    // let ciphertext = CryptoJS.AES.encrypt(
+    //   JSON.stringify(data),
+    //   'key-report-inmobiliaria',
+    // ).toString();
+    // let params = new URLSearchParams({ params: ciphertext });
+    // window.open('/api/cobro/repcomprobantematricial?' + params, '_blank');
   }
 
   renderTotal() {
-    const total = this.state.detalle.reduce((acumulador, item) => {
-      return acumulador + item.precio * item.cantidad;
-    }, 0);
+    const total = this.state.detalle.reduce((acumulador, item) => acumulador + item.precio * item.cantidad, 0);
 
     return (
       <tr>

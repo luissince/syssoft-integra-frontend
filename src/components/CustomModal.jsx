@@ -14,7 +14,7 @@ const customStyles = {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-    },
+    }
 };
 
 Modal.setAppElement('#root');
@@ -37,6 +37,46 @@ const CustomModal = ({ contentRef, isOpen, onOpen, onHidden, onClose, contentLab
     );
 };
 
+export const CustomModalContent = ({ contentRef, isOpen, onOpen, onHidden, onClose, contentLabel, titleHeader, body, footer }) => {
+    return (
+        <CustomModal
+            contentRef={contentRef}
+            isOpen={isOpen}
+            onOpen={onOpen}
+            onHidden={onHidden}
+            onClose={onClose}
+            contentLabel={contentLabel}
+        >      
+            <div className="header-cm">
+                <p className='m-0 h6'>{titleHeader}</p>
+                <button type="button"
+                    className='close'
+                    onClick={onClose}>
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div className="body-cm">
+                {body}
+            </div>
+            <div className="footer-cm">
+                {footer}
+            </div>        
+        </CustomModal>
+    );
+}
+
+CustomModalContent.propTypes = {
+    contentRef: PropTypes.func.isRequired,
+    isOpen: PropTypes.bool.isRequired,
+    onOpen: PropTypes.func.isRequired,
+    onHidden: PropTypes.func.isRequired,
+    onClose: PropTypes.func.isRequired,
+    contentLabel: PropTypes.string.isRequired,
+    titleHeader: PropTypes.string.isRequired,
+    body: PropTypes.element.isRequired,
+    footer: PropTypes.element.isRequired,
+}
+
 CustomModal.propTypes = {
     contentRef: PropTypes.func.isRequired,
     isOpen: PropTypes.bool.isRequired,
@@ -44,7 +84,7 @@ CustomModal.propTypes = {
     onHidden: PropTypes.func.isRequired,
     onClose: PropTypes.func.isRequired,
     contentLabel: PropTypes.string.isRequired,
-    children: PropTypes.element.isRequired
+    children: PropTypes.arrayOf(PropTypes.element).isRequired
 }
 
 export default CustomModal;

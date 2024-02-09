@@ -113,7 +113,7 @@ class CompraDetalle extends CustomComponent {
 
       almacen: almacen,
 
-      tipo: tipo === 1 ? "CONTADO" : "CRÉDITO",
+      tipo: tipo,
       estado: estado === 1 ? <span className='text-success'>PAGADO</span> : estado === 2 ? <span className='text-warning'>POR PAGAR</span> : <span className='text-danger'>ANULADO</span>,
       observacion: observacion,
       notas: nota,
@@ -240,13 +240,16 @@ class CompraDetalle extends CustomComponent {
             <div className="form-group">
               <button
                 type="button"
-                className="btn btn-light"
-                onClick={() => this.onEventImprimir()}
+                className="btn btn-light"               
               >
-                <i className="fa fa-print"></i> Imprimir
+                <i className="fa fa-print"></i> A4
               </button>{' '}
-              {/* <button type="button" className="btn btn-light"><i className="fa fa-edit"></i> Editar</button> */}{' '}
-              {/* <button type="button" className="btn btn-light"><i className="fa fa-remove"></i> Eliminar</button> */}{' '}
+              <button
+                type="button"
+                className="btn btn-light"               
+              >
+                <i className="fa fa-print"></i> Ticket
+              </button>
             </div>
           </div>
         </div>
