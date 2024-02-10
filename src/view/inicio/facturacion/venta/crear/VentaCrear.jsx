@@ -8,7 +8,6 @@ import {
   alertSuccess,
   alertWarning,
   formatDecimal,
-  hideModal,
   isEmpty,
   isNumeric,
   rounded,
@@ -1172,21 +1171,19 @@ class VentaCrear extends CustomComponent {
       importeTotal,
     } = this.state;
 
-    let metodoPagosLista = [...bancosAgregados];
+    let metodoPagosLista = bancosAgregados.map(item => ({ ...item }));
 
     if (isEmpty(metodoPagosLista)) {
       alertWarning('Venta', 'Tiene que agregar método de cobro para continuar.');
       return;
     }
 
-    if (metodoPagosLista.filter((item) => !isNumeric(item.monto)).length !== 0) {
+    if (metodoPagosLista.some((item) => !isNumeric(item.monto))) {
       alertWarning('Venta', 'Hay montos del metodo de cobro que no tiene valor.');
       return;
     }
 
-    const metodoCobroTotal = metodoPagosLista.reduce((accumulator, item) => {
-      return (accumulator += parseFloat(item.monto));
-    }, 0);
+    const metodoCobroTotal = metodoPagosLista.reduce((accumulator, item) => accumulator += parseFloat(item.monto), 0);
 
     if (metodoPagosLista.length > 1) {
       if (metodoCobroTotal !== importeTotal) {
@@ -1201,10 +1198,9 @@ class VentaCrear extends CustomComponent {
           return;
         }
 
-        metodoPagosLista.map((item) => {
-          item.descripcion = `Pago con ${rounded(parseFloat(item.monto))} y su vuelto es ${rounded(parseFloat(item.monto) - importeTotal)}`;
-          item.monto = importeTotal;
-          return item;
+        metodoPagosLista.forEach(item => {         
+            item.descripcion = `Pago con ${rounded(parseFloat(item.monto))} y su vuelto es ${rounded(parseFloat(item.monto) - importeTotal)}`;
+            item.monto = importeTotal;          
         });
       } else {
         if (metodoCobroTotal !== importeTotal) {
@@ -1213,6 +1209,12 @@ class VentaCrear extends CustomComponent {
         }
       }
     }
+
+
+    console.log(metodoPagosLista);
+    console.log(bancosAgregados);
+
+    return;
 
     alertDialog('Venta', '¿Estás seguro de continuar?', async (accept) => {
       if (accept) {
@@ -1295,8 +1297,10 @@ class VentaCrear extends CustomComponent {
       importeTotal,
     } = this.state;
 
+    const metodoPagoLista = [...bancosAgregados];
+
     /*
-    let metodoPagoLista = [...bancosAgregados];
+
 
     if (isEmpty(metodoPagoLista)) {
       alertWarning('Venta', 'Tiene que agregar método de cobro para continuar.');

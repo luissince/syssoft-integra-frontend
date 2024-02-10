@@ -350,16 +350,16 @@ class CobroCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
   handleOpenModalSale = () => {
     this.setState({ loadingModal: true, isOpenSale: true })
-}
+  }
 
-handleCloseModalSale = () => {     
+  handleCloseModalSale = () => {
     const data = this.refCustomModalSale.current;
     data.classList.add("close-cm")
     data.addEventListener('animationend', () => {
-        this.setState({ isOpenSale: false }, () => {
-        })
+      this.setState({ isOpenSale: false }, () => {
+      })
     })
-}
+  }
 
   handleAddBancosAgregados = () => {
     const listAdd = this.state.bancosAgregados.find((item) => item.idBanco === this.refMetodoContado.current.value);
@@ -415,7 +415,7 @@ handleCloseModalSale = () => {
       bancosAgregados,
     } = this.state;
 
-    let metodoPagoLista = [...bancosAgregados];
+    let metodoPagoLista = bancosAgregados.map(item => ({ ...item }));
 
     if (isEmpty(metodoPagoLista)) {
       alertWarning(
@@ -711,7 +711,7 @@ handleCloseModalSale = () => {
             const metodo = this.state.bancos.find((item) => item.preferido === 1);
 
             this.refMetodoContado.current.value = metodo ? metodo.idBanco : '';
-      
+
             if (metodo) {
               const item = {
                 idBanco: metodo.idBanco,
@@ -720,12 +720,12 @@ handleCloseModalSale = () => {
                 vuelto: metodo.vuelto,
                 descripcion: '',
               };
-      
+
               this.setState((prevState) => ({
                 bancosAgregados: [...prevState.bancosAgregados, item],
               }));
             }
-      
+
             this.setState({ loadingModal: false });
           }}
           onHidden={() => {

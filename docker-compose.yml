@@ -22,6 +22,24 @@ services:
     # Configuración para reiniciar siempre el contenedor
     restart: always
 
+  legrand-tiquepos-frontend-services:
+    # Configuración para construir la imagen del contenedor
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # Nombre de la imagen resultante
+    image: sysintegra-frontend-image
+    # Conexión a la red llamada 'luis'
+    networks:
+      - luis
+    # Mapeo de puertos: Mapea el puerto 6000 del host al puerto 80 del contenedor
+    ports:
+      - 6010:80
+    # Nombre del contenedor
+    container_name: legrand-tiquepos-frontend
+    # Configuración para reiniciar siempre el contenedor
+    restart: always
+
 # Definición de redes
 networks:
   # Definición de la red llamada 'luis'
