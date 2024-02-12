@@ -208,6 +208,14 @@ class EmpresaProceso extends CustomComponent {
     }
   }
 
+  handleOpenLink() {
+    // URL que deseas abrir
+    var url = import.meta.env.VITE_APP_CPE_SUNAT;
+    if (isEmpty(url)) return;
+    // Abrir la URL en una nueva ventana
+    window.open(url);
+  }
+
   async handleGuardar() {
     if (isEmpty(this.state.documento)) {
       alertWarning('Empresa', 'Ingrese el número de documento.', () =>
@@ -324,7 +332,7 @@ class EmpresaProceso extends CustomComponent {
                 onChange={(event) =>
                   this.setState({ documento: event.target.value })
                 }
-                placeholder="-----------"
+                placeholder="10909000223"
               />
               <div className="input-group-append">
                 <button
@@ -368,6 +376,28 @@ class EmpresaProceso extends CustomComponent {
               }
               placeholder="Ingrese el nombre comercial"
             />
+          </div>
+
+          <div className="form-group col-md-6">
+            <label>Url de Configuración Sunat: </label>
+            <div className="input-group">
+              <input
+                type="text"
+                className="form-control"
+                defaultValue={isEmpty(import.meta.env.VITE_APP_CPE_SUNAT) ? "" : import.meta.env.VITE_APP_CPE_SUNAT}
+                placeholder="http://192.168.101.2"
+              />
+              <div className="input-group-append">
+                <button
+                  className="btn btn-outline-secondary"
+                  type="button"
+                  title="Open Link"
+                  onClick={() => this.handleOpenLink()}
+                >
+                  <i className='fa fa-external-link'></i>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 

@@ -234,7 +234,7 @@ const ModalSale = (props) => {
             </div>
 
             {/* Pago adelantado */}
-            <div className="col-md-3 col-sm-3">
+            {/* <div className="col-md-3 col-sm-3">
               <button
                 className={`btn ${formaPago === ADELANTADO ? 'btn-primary' : 'btn-light'
                   } btn-block`}
@@ -251,7 +251,7 @@ const ModalSale = (props) => {
                   <label>Pago Adelantado</label>
                 </div>
               </button>
-            </div>
+            </div> */}
           </div>
 
           <br />
@@ -442,7 +442,7 @@ const ModalSale = (props) => {
           )}
 
           {/* pago adelantado */}
-          {formaPago === ADELANTADO && (
+          {/* {formaPago === ADELANTADO && (
             <div className="row">
               <div className="col">
 
@@ -455,7 +455,7 @@ const ModalSale = (props) => {
 
               </div>
             </div>
-          )}
+          )} */}
         </>
       }
       footer={
