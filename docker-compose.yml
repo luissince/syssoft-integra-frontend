@@ -4,7 +4,7 @@ version: '3'
 # Definición de servicios
 services:
   # Servicio llamado 'next-app'
-  sysintegra-frontend-services:
+  test-services:
     # Configuración para construir la imagen del contenedor
     build:
       context: .
@@ -22,7 +22,7 @@ services:
     # Configuración para reiniciar siempre el contenedor
     restart: always
 
-  legrand-tiquepos-frontend-services:
+  legrand-tiquepos-services:
     # Configuración para construir la imagen del contenedor
     build:
       context: .
