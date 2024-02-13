@@ -1210,12 +1210,6 @@ class VentaCrear extends CustomComponent {
       }
     }
 
-
-    console.log(metodoPagosLista);
-    console.log(bancosAgregados);
-
-    return;
-
     alertDialog('Venta', '¿Estás seguro de continuar?', async (accept) => {
       if (accept) {
         const data = {
@@ -1230,7 +1224,7 @@ class VentaCrear extends CustomComponent {
           estado: 1,
           nuevoCliente: nuevoCliente,
           detalleVenta: detalleVenta,
-          bancosAgregados: bancosAgregados,
+          bancosAgregados: metodoPagosLista,
         };
 
         this.handleOnCloseModalSale();
