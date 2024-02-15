@@ -352,7 +352,7 @@ class GastoCrear extends CustomComponent {
         this.setState({ loadingModal: true, isOpenSale: true })
     }
 
-    handleCloseModalSale = () => {     
+    handleCloseModalSale = () => {
         const data = this.refCustomModalSale.current;
         data.classList.add("close-cm")
         data.addEventListener('animationend', () => {
@@ -415,7 +415,7 @@ class GastoCrear extends CustomComponent {
             bancosAgregados,
         } = this.state;
 
-        let metodoPagoLista = [...bancosAgregados];
+        let metodoPagoLista = bancosAgregados.map(item => ({ ...item }));
 
         if (isEmpty(metodoPagoLista)) {
             alertWarning(
@@ -454,12 +454,9 @@ class GastoCrear extends CustomComponent {
                     return;
                 }
 
-                metodoPagoLista.map((item) => {
-                    item.descripcion = `Pago con ${rounded(
-                        parseFloat(item.monto),
-                    )} y su vuelto es ${rounded(parseFloat(item.monto) - total)}`;
+                metodoPagoLista.forEach(item => {
+                    item.descripcion = `Pago con ${rounded(parseFloat(item.monto))} y su vuelto es ${rounded(parseFloat(item.monto) - total)}`;
                     item.monto = total;
-                    return item;
                 });
             } else {
                 if (metodoCobroTotal !== total) {
@@ -480,7 +477,7 @@ class GastoCrear extends CustomComponent {
                     estado: 1,
                     observacion: observacion,
                     detalle: detalle,
-                    metodoPago: bancosAgregados,
+                    metodoPago: metodoPagoLista,
                 };
 
                 this.handleCloseModalSale();

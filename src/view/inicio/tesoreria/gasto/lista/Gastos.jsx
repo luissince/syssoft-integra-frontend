@@ -254,7 +254,7 @@ class Gastos extends CustomComponent {
           <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
             <div className="form-group">
               <h5>
-                Gastos y Salidas <small className="text-secondary">LISTA</small>
+                Gastos <small className="text-secondary">LISTA</small>
               </h5>
             </div>
           </div>

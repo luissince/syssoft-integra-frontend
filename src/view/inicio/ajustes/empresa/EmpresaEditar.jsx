@@ -265,6 +265,7 @@ class EmpresaProceso extends CustomComponent {
         idEmpresa: this.state.idEmpresa,
       };
 
+      
       const response = await updateEmpresa(data);
 
       if (response instanceof SuccessReponse) {
@@ -320,7 +321,7 @@ class EmpresaProceso extends CustomComponent {
         <div className="row">
           <div className="form-group col-md-6">
             <label>
-              Ruc: <i className="fa fa-asterisk text-danger small"></i>
+              Ruc ({this.state.documento.length}): <i className="fa fa-asterisk text-danger small"></i>
             </label>
             <div className="input-group">
               <input
@@ -386,6 +387,7 @@ class EmpresaProceso extends CustomComponent {
                 className="form-control"
                 defaultValue={isEmpty(import.meta.env.VITE_APP_CPE_SUNAT) ? "" : import.meta.env.VITE_APP_CPE_SUNAT}
                 placeholder="http://192.168.101.2"
+                disabled
               />
               <div className="input-group-append">
                 <button

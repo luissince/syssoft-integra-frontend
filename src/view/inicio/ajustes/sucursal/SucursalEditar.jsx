@@ -455,15 +455,16 @@ class ProcesoSucursal extends CustomComponent {
 
         <div className="row">
           <div className='form-group col text-center'>
-            <label>Logo</label>
+            <label className='p-0 m-0'>Logo</label>
+            <p className='p-0 m-0'>Imagen de portada 1024 x 629 pixeles </p>
             <br />
-            <small>Usuado para los reportes</small>
+            <small>Usuado como portada para cada sucursal</small>
             <div className="text-center mb-2 ">
               <img
                 src={this.state.imagen}
                 alt=""
                 className="img-fluid border border-primary rounded"
-                width={250}
+                width={450}
               />
             </div>
           </div>

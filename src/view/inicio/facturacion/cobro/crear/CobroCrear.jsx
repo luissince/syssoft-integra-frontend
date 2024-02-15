@@ -454,13 +454,10 @@ class CobroCrear extends CustomComponent {
           return;
         }
 
-        metodoPagoLista.map((item) => {
-          item.descripcion = `Pago con ${rounded(
-            parseFloat(item.monto),
-          )} y su vuelto es ${rounded(parseFloat(item.monto) - total)}`;
-          item.monto = total;
-          return item;
-        });
+        metodoPagoLista.forEach(item => {         
+          item.descripcion = `Pago con ${rounded(parseFloat(item.monto))} y su vuelto es ${rounded(parseFloat(item.monto) - total)}`;
+          item.monto = total;          
+      });
       } else {
         if (metodoCobroTotal !== total) {
           alertWarning('Cobro', 'El monto a cobrar debe ser igual al total.');
@@ -480,7 +477,7 @@ class CobroCrear extends CustomComponent {
           estado: 1,
           observacion: observacion,
           detalle: detalle,
-          bancosAgregados: bancosAgregados,
+          bancosAgregados: metodoPagoLista,
         };
 
         this.handleCloseModalSale();

@@ -191,7 +191,7 @@ const ModalSale = (props) => {
             </div>
 
             {/* Crédito fijo*/}
-            <div className="col">
+            {/* <div className="col">
               <button
                 className={`btn ${selectTipoCobro === CREDITO_FIJO ? 'btn-primary' : 'btn-light'} btn-block`}
                 type="button"
@@ -207,11 +207,11 @@ const ModalSale = (props) => {
                   <label>Crédito Fijo</label>
                 </div>
               </button>
-            </div>
+            </div> */}
 
 
             {/* Crédito variable*/}
-            <div className="col">
+            {/* <div className="col">
               <button
                 className={`btn ${selectTipoCobro === CREDITO_VARIABLE ? 'btn-primary' : 'btn-light'} btn-block`}
                 type="button"
@@ -227,7 +227,7 @@ const ModalSale = (props) => {
                   <label>Crédito Variable</label>
                 </div>
               </button>
-            </div>
+            </div> */}
           </div>
 
           <br />

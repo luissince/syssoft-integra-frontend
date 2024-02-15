@@ -1668,6 +1668,14 @@ export async function getIdUsuario(params, signal) {
   );
 }
 
+export async function comboUsuario(signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/usuario/combo', {
+      signal: signal,
+    }),
+  );
+}
+
 export async function addUsuario(data, signal) {
   return await Resolve.create(
     instancePrincipal.post('/api/usuario/', data, {

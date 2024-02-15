@@ -1,46 +1,44 @@
 import React from 'react';
-import CryptoJS from 'crypto-js';
 import FileDownloader from '../../../components/FileDownloader';
 // import { apiComprobanteListcombo } from '../../../network/api';
-import { spinnerLoading, currentDate } from '../../../helper/utils.helper';
+import { spinnerLoading, currentDate, alertWarning } from '../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../components/Container';
 import CustomComponent from '../../../model/class/custom-component';
+import printJS from 'print-js';
+import { pdfFinanzas } from '../../../helper/lista-pdf.helper';
+import { comboSucursal, comboUsuario } from '../../../network/rest/principal.network';
+import SuccessReponse from '../../../model/class/response';
+import ErrorResponse from '../../../model/class/error-response';
+import { CANCELED } from '../../../model/types/types';
 
-class RepFinanciero extends CustomComponent{
+class RepFinanciero extends CustomComponent {
 
   constructor(props) {
     super(props);
-    this.state = {
-      idSucursal: this.props.token.project.idSucursal,
 
-      fechaIni: '',
-      fechaFin: '',
+    this.state = {
+      loading: true,
+      msgLoading: "Cargando información...",
+
+      fechaInicio: currentDate(),
+      fechaFinal: currentDate(),
       isFechaActive: false,
       isDetallado: false,
 
-      //Cobro
-      idPersona: '',
-      clientes: [],
-
-      idBanco: '',
-      bancos: [],
-
-      idComprobante: '',
-      comprobantes: [],
-      comprobanteCheck: true,
       sucursalCheck: true,
 
       idUsuario: '',
       usuarios: [],
+
       sucursales: [],
       usuarioCheck: true,
 
-      loading: false,
-      messageWarning: '',
+      idSucursal: this.props.token.project.idSucursal,
     };
 
-    this.refFechaIni = React.createRef();
+    this.refFechaInicio = React.createRef();
+    this.refFechaFinal = React.createRef();
 
     this.refCliente = React.createRef();
     this.refBanco = React.createRef();
@@ -54,8 +52,8 @@ class RepFinanciero extends CustomComponent{
     this.abortControllerView = new AbortController();
   }
 
-  componentDidMount() {
-    // this.loadData();
+  async componentDidMount() {
+    await this.loadData();
   }
 
   componentWillUnmount() {
@@ -63,95 +61,97 @@ class RepFinanciero extends CustomComponent{
   }
 
   loadData = async () => {
-    // try {
-    //     const usuario = await axios.get("/api/usuario/listcombo", {
-    //         signal: this.abortControllerView.signal
-    //     });
-    //     const sucursal = await axios.get("/api/sucursal/combo", {
-    //         signal: this.abortControllerView.signal
-    //     });
-    //     const facturado = await apiComprobanteListcombo(this.abortControllerView.signal, {
-    //         "tipo": "1",
-    //         "estado": "all"
-    //     });
-    //     const comprobante = await apiComprobanteListcombo(this.abortControllerView.signal, {
-    //         "tipo": "5",
-    //         "estado": "all"
-    //     });
-    //     await this.setStateAsync({
-    //         fechaIni: currentDate(),
-    //         fechaFin: currentDate(),
-    //         usuarios: usuario.data,
-    //         comprobantes: [...comprobante.data, ...facturado.data],
-    //         sucursales: sucursal.data,
-    //         loading: false
-    //     });
-    // } catch (error) {
-    //     if (error.message !== "canceled") {
-    //         await this.setStateAsync({
-    //             msgLoading: "Se produjo un error interno, intente nuevamente."
-    //         });
-    //     }
-    // }
-  };
 
-  async onEventImpCobro() {
-    if (this.state.fechaFin < this.state.fechaIni) {
-      this.setState({
-        messageWarning: 'La Fecha inicial no puede ser mayor a la fecha final.',
-      });
-      this.refFechaIni.current.focus();
+    const [sucursales, usuarios] = await Promise.all([
+      await this.fetchComboSucursal(),
+      await this.fetchComboUsuario(),
+    ]);
+
+    this.setState({
+      sucursales,
+      usuarios,
+      loading: false,
+    });
+  }
+
+  async fetchComboSucursal() {
+    const response = await comboSucursal();
+
+    if (response instanceof SuccessReponse) {
+      return response.data;
+    }
+
+    if (response instanceof ErrorResponse) {
+      if (response.getType() === CANCELED) return;
+
+      return [];
+    }
+  }
+
+  async fetchComboUsuario() {
+    const response = await comboUsuario();
+
+    if (response instanceof SuccessReponse) {
+      return response.data;
+    }
+
+    if (response instanceof ErrorResponse) {
+      if (response.getType() === CANCELED) return;
+
+      return [];
+    }
+  }
+
+  async handlePdf() {
+    if (this.state.fechaFinal < this.state.fechaInicio) {
+      alertWarning("Finanzas", 'La Fecha inicial no puede ser mayor a la fecha final.', () => {
+        this.refFechaInicio.current.focus();
+      })
       return;
     }
 
-    const data = {
-      idEmpresa: 'EM0001',
-      fechaIni: this.state.fechaIni,
-      fechaFin: this.state.fechaFin,
-      isDetallado: this.state.isDetallado,
-      idComprobante: this.state.idComprobante,
-      idUsuario: this.state.idUsuario,
-      idSucursal: this.state.idSucursal,
-    };
+    window.open(pdfFinanzas(this.state.fechaInicio, this.state.fechaFinal, this.state.idSucursal, this.state.idUsuario), '_blank');
 
-    let ciphertext = CryptoJS.AES.encrypt(
-      JSON.stringify(data),
-      'key-report-inmobiliaria',
-    ).toString();
-    let params = new URLSearchParams({ params: ciphertext });
-    window.open('/api/cobro/repgeneralcobros?' + params, '_blank');
+    // printJS({
+    //   printable: pdfFinanzas(this.state.fechaInicio, this.state.fechaFinal, this.state.idSucursal, this.state.idUsuario),
+    //   type: 'pdf',
+    //   showModal: true,
+    //   modalMessage: "Recuperando documento...",
+    //   onPrintDialogClose: () => {
+    //     console.log("onPrintDialogClose")
+    //   }
+    // })
   }
 
   async onEventExcel() {
-    if (this.state.fechaFin < this.state.fechaIni) {
-      this.setState({
-        messageWarning: 'La Fecha inicial no puede ser mayor a la fecha final.',
-      });
-      this.refFechaIni.current.focus();
-      return;
-    }
+    // if (this.state.fechaFinal < this.state.fechaInicio) {
+    //   this.setState({
+    //     messageWarning: 'La Fecha inicial no puede ser mayor a la fecha final.',
+    //   });
+    //   this.refFechaInicio.current.focus();
+    //   return;
+    // }
 
-    const data = {
-      idEmpresa: 'EM0001',
-      fechaIni: this.state.fechaIni,
-      fechaFin: this.state.fechaFin,
-      isDetallado: this.state.isDetallado,
-      idComprobante: this.state.idComprobante,
-      idUsuario: this.state.idUsuario,
-      idSucursal: this.state.idSucursal,
-    };
+    // const data = {
+    //   idEmpresa: 'EM0001',
+    //   fechaInicio: this.state.fechaInicio,
+    //   fechaFinal: this.state.fechaFinal,
+    //   isDetallado: this.state.isDetallado,
+    //   idUsuario: this.state.idUsuario,
+    //   idSucursal: this.state.idSucursal,
+    // };
 
-    let ciphertext = CryptoJS.AES.encrypt(
-      JSON.stringify(data),
-      'key-report-inmobiliaria',
-    ).toString();
+    // let ciphertext = CryptoJS.AES.encrypt(
+    //   JSON.stringify(data),
+    //   'key-report-inmobiliaria',
+    // ).toString();
 
-    this.refUseFile.current.download({
-      name: 'Reporte Financiero',
-      file: '/api/cobro/excelgeneralcobros',
-      filename: 'financiero.xlsx',
-      params: ciphertext,
-    });
+    // this.refUseFile.current.download({
+    //   name: 'Reporte Financiero',
+    //   file: '/api/cobro/excelgeneralcobros',
+    //   filename: 'financiero.xlsx',
+    //   params: ciphertext,
+    // });
   }
 
   render() {
@@ -162,17 +162,11 @@ class RepFinanciero extends CustomComponent{
         <div className="card my-1">
           <h6 className="card-header">Reporte de Ingreso y Egresos</h6>
           <div className="card-body">
-            {this.state.messageWarning === '' ? null : (
-              <div className="alert alert-warning" role="alert">
-                <i className="bi bi-exclamation-diamond-fill"></i>{' '}
-                {this.state.messageWarning}
-              </div>
-            )}
 
             <div className="row">
               <div className="col">
                 <div className="form-group">
-                  <label>Filtro por fechas</label>
+                  <label className="col-form-label">Filtro por fechas: </label>
                   <div className="custom-control custom-switch">
                     <input
                       type="checkbox"
@@ -182,9 +176,8 @@ class RepFinanciero extends CustomComponent{
                       onChange={(event) => {
                         this.setState({
                           isFechaActive: event.target.checked,
-                          fechaIni: currentDate(),
-                          fechaFin: currentDate(),
-                          messageWarning: '',
+                          fechaInicio: currentDate(),
+                          fechaFinal: currentDate(),
                         });
                       }}
                     ></input>
@@ -201,29 +194,19 @@ class RepFinanciero extends CustomComponent{
               <div className="col">
                 <div className="form-group">
                   <label>
-                    Fecha inicial{' '}
-                    <i className="fa fa-asterisk text-danger small"></i>
+                    Fecha inicial: <i className="fa fa-asterisk text-danger small"></i>
                   </label>
                   <div className="input-group">
                     <input
                       type="date"
                       className="form-control"
                       disabled={!this.state.isFechaActive}
-                      ref={this.refFechaIni}
-                      value={this.state.fechaIni}
+                      ref={this.refFechaInicio}
+                      value={this.state.fechaInicio}
                       onChange={(event) => {
-                        if (event.target.value <= this.state.fechaFin) {
-                          this.setState({
-                            fechaIni: event.target.value,
-                            messageWarning: '',
-                          });
-                        } else {
-                          this.setState({
-                            fechaIni: event.target.value,
-                            messageWarning:
-                              'La Fecha inicial no puede ser mayor a la fecha final.',
-                          });
-                        }
+                        this.setState({
+                          fechaInicio: event.target.value,
+                        });
                       }}
                     />
                   </div>
@@ -233,17 +216,17 @@ class RepFinanciero extends CustomComponent{
               <div className="col">
                 <div className="form-group">
                   <label>
-                    Fecha final{' '}
-                    <i className="fa fa-asterisk text-danger small"></i>
+                    Fecha final: <i className="fa fa-asterisk text-danger small"></i>
                   </label>
                   <div className="input-group">
                     <input
                       type="date"
                       className="form-control"
                       disabled={!this.state.isFechaActive}
-                      value={this.state.fechaFin}
+                      ref={this.refFechaFinal}
+                      value={this.state.fechaFinal}
                       onChange={(event) =>
-                        this.setState({ fechaFin: event.target.value })
+                        this.setState({ fechaFinal: event.target.value })
                       }
                     />
                   </div>
@@ -254,7 +237,7 @@ class RepFinanciero extends CustomComponent{
             <div className="row">
               <div className="col">
                 <div className="form-group">
-                  <label>Detallado</label>
+                  <label className="col-form-label">Detallado: </label>
                   <div className="custom-control custom-switch">
                     <input
                       type="checkbox"
@@ -309,61 +292,9 @@ class RepFinanciero extends CustomComponent{
                             type="checkbox"
                             checked={this.state.sucursalCheck}
                             onChange={async (event) => {
-                              await this.setStateAsync({
+                              this.setStateAsync({
                                 sucursalCheck: event.target.checked,
                               });
-                              if (this.state.sucursalCheck) {
-                                await this.setStateAsync({ idSucursal: '' });
-                              }
-                            }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="col">
-                <div className="form-group">
-                  <label>Comprobante</label>
-                  <div className="input-group">
-                    <select
-                      title="Lista de usuarios"
-                      className="form-control"
-                      ref={this.refComprobante}
-                      value={this.state.idComprobante}
-                      disabled={this.state.comprobanteCheck}
-                      onChange={async (event) => {
-                        await this.setStateAsync({
-                          idComprobante: event.target.value,
-                        });
-                        if (this.state.idComprobante === '') {
-                          await this.setStateAsync({ comprobanteCheck: true });
-                        }
-                      }}
-                    >
-                      <option value="">-- Todos --</option>
-                      {this.state.comprobantes.map((item, index) => (
-                        <option key={index} value={item.idComprobante}>
-                          {item.nombre + ' (' + item.serie + ')'}
-                        </option>
-                      ))}
-                    </select>
-                    <div className="input-group-append">
-                      <div className="input-group-text">
-                        <div className="form-check form-check-inline m-0">
-                          <input
-                            className="form-check-input"
-                            type="checkbox"
-                            checked={this.state.comprobanteCheck}
-                            onChange={async (event) => {
-                              await this.setStateAsync({
-                                comprobanteCheck: event.target.checked,
-                              });
-                              if (this.state.comprobanteCheck) {
-                                await this.setStateAsync({ idComprobante: '' });
-                              }
                             }}
                           />
                         </div>
@@ -384,12 +315,9 @@ class RepFinanciero extends CustomComponent{
                       value={this.state.idUsuario}
                       disabled={this.state.usuarioCheck}
                       onChange={async (event) => {
-                        await this.setStateAsync({
+                        this.setState({
                           idUsuario: event.target.value,
                         });
-                        if (this.state.idUsuario === '') {
-                          await this.setStateAsync({ usuarioCheck: true });
-                        }
                       }}
                     >
                       <option value="">-- Todos --</option>
@@ -428,7 +356,7 @@ class RepFinanciero extends CustomComponent{
               <div className="col">
                 <button
                   className="btn btn-outline-warning btn-sm"
-                  onClick={() => this.onEventImpCobro()}
+                  onClick={() => this.handlePdf()}
                 >
                   <i className="bi bi-file-earmark-pdf-fill"></i> Reporte Pdf
                 </button>

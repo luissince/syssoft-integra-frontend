@@ -174,7 +174,7 @@ const ModalSale = (props) => {
           {/* Tipos de venta */}
           <div className="row">
             {/* Al contado */}
-            <div className="col-md-3 col-sm-3">
+            <div className="col-md-12 col-sm-12">
               <button
                 className={`btn ${formaPago === CONTADO ? 'btn-primary' : 'btn-light'
                   } btn-block`}
@@ -194,7 +194,7 @@ const ModalSale = (props) => {
             </div>
 
             {/* Crédito fijo*/}
-            <div className="col-md-3 col-sm-3">
+            {/* <div className="col-md-3 col-sm-3">
               <button
                 className={`btn ${formaPago === CREDITO_FIJO ? 'btn-primary' : 'btn-light'
                   } btn-block`}
@@ -211,10 +211,10 @@ const ModalSale = (props) => {
                   <label>Crédito fijo</label>
                 </div>
               </button>
-            </div>
+            </div> */}
 
             {/* Crédito variable */}
-            <div className="col-md-3 col-sm-3">
+            {/* <div className="col-md-3 col-sm-3">
               <button
                 className={`btn ${formaPago === CREDITO_VARIABLE ? 'btn-primary' : 'btn-light'
                   } btn-block`}
@@ -231,7 +231,7 @@ const ModalSale = (props) => {
                   <label>Crédito variable</label>
                 </div>
               </button>
-            </div>
+            </div> */}
 
             {/* Pago adelantado */}
             {/* <div className="col-md-3 col-sm-3">

@@ -56,7 +56,7 @@ class Principal extends CustomComponent {
     }
   }
 
-  handleFocused = (event) => {
+  handleFocused = () => {
     const userToken = window.localStorage.getItem('login');
     if (userToken === null) {
       this.props.restore();
@@ -75,7 +75,7 @@ class Principal extends CustomComponent {
     await this.setStateAsync({ filter: sucursales });
   };
 
-  handleSignIn = async (event) => {
+  handleSignIn = async () => {
     try {
       window.localStorage.removeItem('login');
       window.localStorage.removeItem('project');

@@ -499,34 +499,23 @@ class CompraCrear extends CustomComponent {
       bancosAgregados,
     } = this.state;
 
-    let metodoCobrosLista = [...bancosAgregados];
+    let metodoCobrosLista = bancosAgregados.map(item => ({ ...item }));
 
     if (isEmpty(metodoCobrosLista)) {
-      alertWarning(
-        'Compra',
-        'Tiene que agregar método de cobro para continuar.',
-        () => {
-          this.refMetodoContado.current.focus();
-        },
-      );
+      alertWarning('Compra', 'Tiene que agregar método de cobro para continuar.', () => {
+        this.refMetodoContado.current.focus();
+      });
       return;
     }
 
     if (metodoCobrosLista.filter((item) => !isNumeric(item.monto)).length !== 0) {
-      alertWarning(
-        'Compra',
-        'Hay montos del metodo de cobro que no tiene valor.',
-        () => {
-          validateNumericInputs(this.refMetodoPagoContenedor);
-        },
-      );
+      alertWarning('Compra', 'Hay montos del metodo de cobro que no tiene valor.', () => {
+        validateNumericInputs(this.refMetodoPagoContenedor);
+      });
       return;
     }
 
-    const metodoCobroTotal = metodoCobrosLista.reduce(
-      (accumulator, item) => (accumulator += parseFloat(item.monto)),
-      0,
-    );
+    const metodoCobroTotal = metodoCobrosLista.reduce((accumulator, item) => (accumulator += parseFloat(item.monto)), 0);
 
     if (metodoCobrosLista.length > 1) {
       if (metodoCobroTotal !== total) {
@@ -551,12 +540,9 @@ class CompraCrear extends CustomComponent {
           return;
         }
 
-        metodoCobrosLista.map((item) => {
-          item.descripcion = `Pago con ${rounded(
-            parseFloat(item.monto),
-          )} y su vuelto es ${rounded(parseFloat(item.monto) - total)}`;
+        metodoCobrosLista.forEach(item => {
+          item.descripcion = `Pago con ${rounded(parseFloat(item.monto))} y su vuelto es ${rounded(parseFloat(item.monto) - total)}`;
           item.monto = total;
-          return item;
         });
       } else {
         if (metodoCobroTotal !== total) {
@@ -586,7 +572,7 @@ class CompraCrear extends CustomComponent {
           estado: 1,
 
           idFormaCobro: selectTipoCobro,
-          metodoPago: bancosAgregados,
+          metodoPago: metodoCobrosLista,
 
           detalle: detalle,
         };
