@@ -91,3 +91,32 @@ jobs:
       
       - name: Creando y ejecutando contenedor
         run: docker compose up --build raices-services -d
+
+  build-and-deploy-app-felicitygirls-tiquepos:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: self-hosted
+    environment: felicitygirls-tiquepos
+      
+    env:  
+      VITE_APP_BACK_END: ${{ secrets.VITE_APP_BACK_END }}
+      VITE_APP_CPE_SUNAT: ${{ secrets.VITE_APP_CPE_SUNAT }}
+      VITE_APP_APIS_PERU: ${{ secrets.VITE_APP_APIS_PERU }}
+      VITE_APP_IMAGE: ${{ secrets.VITE_APP_IMAGE }}
+      VITE_APP_PDF: ${{ secrets.VITE_APP_PDF }}
+      
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v3
+      
+      - name: Crear archivo .env
+        run: |
+          cat > .env <<EOL
+          VITE_APP_BACK_END="${{env.VITE_APP_BACK_END}}"
+          VITE_APP_CPE_SUNAT="${{env.VITE_APP_CPE_SUNAT}}"
+          VITE_APP_APIS_PERU="${{env.VITE_APP_APIS_PERU}}"
+          VITE_APP_IMAGE="${{env.VITE_APP_IMAGE}}"
+          VITE_APP_PDF="${{env.VITE_APP_PDF}}"
+          EOL
+      
+      - name: Creando y ejecutando contenedor
+        run: docker compose up --build felicitygirls-tiquepos-services -d
