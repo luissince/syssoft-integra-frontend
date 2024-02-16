@@ -122,14 +122,14 @@ class EmpresaProceso extends CustomComponent {
         razonSocial: empresa.razonSocial,
         nombreEmpresa: empresa.nombreEmpresa,
 
-        usuarioSolSunat: empresa.usuarioSolSunat ? "" : empresa.usuarioSolSunat,
-        claveSolSunat: empresa.claveSolSunat ? "" : empresa.claveSolSunat,
+        usuarioSolSunat: !empresa.usuarioSolSunat ? "" : empresa.usuarioSolSunat,
+        claveSolSunat: !empresa.claveSolSunat ? "" : empresa.claveSolSunat,
 
-        idApiSunat: empresa.idApiSunat ? "" : empresa.idApiSunat,
-        claveApiSunat: empresa.claveApiSunat ? "" : empresa.claveApiSunat,
+        idApiSunat: !empresa.idApiSunat ? "" : empresa.idApiSunat,
+        claveApiSunat: !empresa.claveApiSunat ? "" : empresa.claveApiSunat,
 
-        usuarioEmail: empresa.usuarioEmail ? "" : empresa.usuarioEmail,
-        claveEmail: empresa.claveEmail ? "" : empresa.claveEmail,
+        usuarioEmail: !empresa.usuarioEmail ? "" : empresa.usuarioEmail,
+        claveEmail: !empresa.claveEmail ? "" : empresa.claveEmail,
 
         logo: empresa.rutaLogo ? empresa.rutaLogo : images.noImage,
         image: empresa.rutaImage ? empresa.rutaImage : images.noImage,
