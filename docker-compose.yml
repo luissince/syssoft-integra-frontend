@@ -28,7 +28,7 @@ services:
       context: .
       dockerfile: Dockerfile
     # Nombre de la imagen resultante
-    image: sysintegra-frontend-image
+    image: legrand-tiquepos-frontend-image
     # Conexión a la red llamada 'luis'
     networks:
       - luis
@@ -46,7 +46,7 @@ services:
       context: .
       dockerfile: Dockerfile
     # Nombre de la imagen resultante
-    image: sysintegra-frontend-image
+    image: raices-frontend-image
     # Conexión a la red llamada 'luis'
     networks:
       - luis
