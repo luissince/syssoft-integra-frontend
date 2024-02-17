@@ -162,11 +162,11 @@ class CuentasPorCobrar extends CustomComponent {
           <td>{numberFormat(item.total, item.codiso)}</td>
           <td className='text-success'>{numberFormat(item.pagado, item.codiso)}</td>
           <td className='text-danger'>{numberFormat(item.total - item.pagado, item.codiso)}</td>
-          <td>
+          <td className='text-center'>
             <button
               className="btn btn-outline-info btn-sm"
               title="Detalle"
-              onClick={() => this.handleCobrar(item.idCompra)}>
+              onClick={() => this.handleCobrar(item.idVenta)}>
               <i className="fa fa-calendar-check-o"></i>
             </button>
           </td>

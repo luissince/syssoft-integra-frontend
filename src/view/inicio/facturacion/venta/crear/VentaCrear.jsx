@@ -115,7 +115,7 @@ class VentaCrear extends CustomComponent {
       bancos: [],
       bancosAgregados: [],
 
-      numCuota: '',
+      numeroCuotas: '',
       frecuenciaPagoCredito: new Date().getDate() > 15 ? '30' : '15',
       frecuenciaPago: new Date().getDate() > 15 ? '30' : '15',
 
@@ -152,7 +152,7 @@ class VentaCrear extends CustomComponent {
     this.refSale = React.createRef();
     this.refMetodoContado = React.createRef();
     this.refFrecuenciaPago = React.createRef();
-    this.refNumCutoas = React.createRef();
+    this.refNumeroCuotas = React.createRef();
     this.refFrecuenciaPagoCredito = React.createRef();
 
     // Referencia al mmodal printer
@@ -1061,7 +1061,7 @@ class VentaCrear extends CustomComponent {
       formaPago: CONTADO,
 
       frecuenciaPagoCredito: new Date().getDate() > 15 ? '30' : '15',
-      numCuota: '',
+      numeroCuotas: '',
 
       frecuenciaPago: new Date().getDate() > 15 ? '30' : '15',
 
@@ -1082,7 +1082,7 @@ class VentaCrear extends CustomComponent {
   }
 
   handleSelectNumeroCuotas = (event) => {
-    this.setState({ numCuota: event.target.value });
+    this.setState({ numeroCuotas: event.target.value });
   }
 
   handleSelectFrecuenciaPagoCredito = (event) => {
@@ -1198,9 +1198,9 @@ class VentaCrear extends CustomComponent {
           return;
         }
 
-        metodoPagosLista.forEach(item => {         
-            item.descripcion = `Pago con ${rounded(parseFloat(item.monto))} y su vuelto es ${rounded(parseFloat(item.monto) - importeTotal)}`;
-            item.monto = importeTotal;          
+        metodoPagosLista.forEach(item => {
+          item.descripcion = `Pago con ${rounded(parseFloat(item.monto))} y su vuelto es ${rounded(parseFloat(item.monto) - importeTotal)}`;
+          item.monto = importeTotal;
         });
       } else {
         if (metodoCobroTotal !== importeTotal) {
@@ -1287,57 +1287,31 @@ class VentaCrear extends CustomComponent {
       comentario,
       nuevoCliente,
       detalleVenta,
-      bancosAgregados,
-      importeTotal,
+      numeroCuotas,
+      frecuenciaPagoCredito,
+      importeTotal
     } = this.state;
 
-    const metodoPagoLista = [...bancosAgregados];
-
-    /*
-
-
-    if (isEmpty(metodoPagoLista)) {
-      alertWarning('Venta', 'Tiene que agregar método de cobro para continuar.');
+    if (!isNumeric(numeroCuotas)) {
+      alertWarning("Venta", "Ingrese el número de cuotas", () => {
+        this.refNumeroCuotas.current.focus()
+      })
       return;
     }
 
-    if (metodoPagoLista.filter((item) => !isNumeric(item.monto)).length !== 0) {
-      alertWarning('Venta', 'Hay montos del metodo de cobro que no tiene valor.');
+    if (parseFloat(numeroCuotas) < 1) {
+      alertWarning("Venta", "El número de cuotas no puede menor a 0", () => {
+        this.refNumeroCuotas.current.focus()
+      })
       return;
     }
 
-    const metodoCobroTotal = metodoPagoLista.reduce((accumulator, item) => {
-      return (accumulator += parseFloat(item.monto));
-    }, 0);
-
-    if (metodoPagoLista.length > 1) {
-      if (metodoCobroTotal !== importeTotal) {
-        alertWarning('Venta', 'Al tener mas de 2 métodos de cobro el monto debe ser igual al total.');
-        return;
-      }
-    } else {
-      const metodo = metodoPagoLista[0];
-      if (metodo.vuelto === 1) {
-        if (metodoCobroTotal < importeTotal) {
-          alertWarning('Venta', 'El monto a cobrar es menor que el total.');
-          return;
-        }
-
-        metodoPagoLista.map((item) => {
-          item.descripcion = `Pago con ${rounded(parseFloat(item.monto))} y su vuelto es ${rounded(parseFloat(item.monto) - importeTotal)}`;
-          item.monto = importeTotal;
-          return item;
-        });
-      } else {
-        if (metodoCobroTotal !== importeTotal) {
-          alertWarning('Venta', 'El monto a cobrar debe ser igual al total.');
-          return;
-        }
-      }
+    if (isEmpty(frecuenciaPagoCredito)) {
+      alertWarning("Venta", "Selecciona la frecuencia de cobros.", () => {
+        this.refFrecuenciaPagoCredito.current.focus()
+      })
+      return;
     }
-
-
-    */
 
     alertDialog('Venta', '¿Estás seguro de continuar?', async (accept) => {
       if (accept) {
@@ -1353,7 +1327,9 @@ class VentaCrear extends CustomComponent {
           estado: 2,
           nuevoCliente: nuevoCliente,
           detalleVenta: detalleVenta,
-          bancosAgregados: bancosAgregados,
+          numCuotas: numeroCuotas,
+          frecuenciaPagoCredito: frecuenciaPagoCredito,
+          importeTotal: importeTotal
         };
 
         this.handleOnCloseModalSale();
@@ -1701,10 +1677,10 @@ class VentaCrear extends CustomComponent {
           formaPago={this.state.formaPago}
           handleSelectTipoPago={this.handleSelectTipoPago}
 
-          refMetodoContado={this.refMetodoContado}
-          refNumCutoas={this.refNumCutoas}
-          numCuota={this.state.numCuota}
+          refNumeroCuotas={this.refNumeroCuotas}
+          numeroCuotas={this.state.numeroCuotas}
           handleSelectNumeroCuotas={this.handleSelectNumeroCuotas}
+
           refFrecuenciaPagoCredito={this.refFrecuenciaPagoCredito}
           frecuenciaPagoCredito={this.state.frecuenciaPagoCredito}
           handleSelectFrecuenciaPagoCredito={this.handleSelectFrecuenciaPagoCredito}
@@ -1716,6 +1692,7 @@ class VentaCrear extends CustomComponent {
           codiso={this.state.codiso}
           importeTotal={this.state.importeTotal}
 
+          refMetodoContado={this.refMetodoContado}
           bancos={this.state.bancos}
           bancosAgregados={this.state.bancosAgregados}
           handleAddBancosAgregados={this.handleAddBancosAgregados}
@@ -1733,8 +1710,8 @@ class VentaCrear extends CustomComponent {
           titleHeader="SysSoft Integra"
           body={
             <>
-              <h5>Opciones de impresión</h5>
-              <div>
+              <h5 className='text-center'>Opciones de impresión</h5>
+              <div className='d-flex justify-content-center align-items-center gap-2_5 mt-3'>
                 <button type="button" className="btn btn-outline-info"
                   onClick={this.handlePrintA4}>
                   <i className="fa fa-file-pdf-o"></i> A4

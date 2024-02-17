@@ -18,7 +18,7 @@ import { CANCELED } from '../../../../../model/types/types';
 import { GUIA_DE_REMISION } from '../../../../../model/types/tipo-comprobante';
 import React from 'react';
 import SearchInput from '../../../../../components/SearchInput';
-import CustomModal from '../../../../../components/CustomModal';
+import CustomModal, { CustomModalContent } from '../../../../../components/CustomModal';
 import printJS from 'print-js';
 import { pdfA4GuiaRemision, pdfTicketGuiaRemision } from '../../../../../helper/lista-pdf.helper';
 
@@ -360,7 +360,7 @@ class GuiaRemisionCrear extends CustomComponent {
 
   handleClosePrint = async () => {
     const data = this.refPrinter.current;
-    data.classList.add("close")
+    data.classList.add("close-cm")
     data.addEventListener('animationend', () => {
       this.setState({ isOpen: false }, () => {
         this.setState(this.initial, async () => {
@@ -865,34 +865,16 @@ class GuiaRemisionCrear extends CustomComponent {
       <ContainerWrapper>
         {this.state.loading && spinnerLoading(this.state.msgLoading)}
 
-        <CustomModal
+        <CustomModalContent
           contentRef={(ref) => this.refPrinter.current = ref}
           isOpen={this.state.isOpen}
-          onOpen={() => {
-            console.log("onOpen")
-          }}
-          onHidden={() => {
-            console.log("onHidden")
-          }}
           onClose={this.handleClosePrint}
-          contentLabel="Modal de Impresión">
-
-          <div className='w-100'>
-            <div className='d-flex align-items-center justify-content-between py-2 px-3' style={{
-              backgroundColor: 'rgba(0, 0, 0, 0.07)',
-              borderBottom: '1px solid #dee2e6',
-            }}>
-              <p className='m-0'>SysSoft Integra</p>
-              <button type="button"
-                className='close'
-                onClick={this.handleClosePrint}>
-                <span aria-hidden="true">×</span>
-              </button>
-            </div>
-
-            <div className="d-flex flex-column align-items-center py-3 px-5">
-              <h5>Opciones de impresión</h5>
-              <div>
+          contentLabel="Modal de Impresión"
+          titleHeader="SysSoft Integra"
+          body={
+            <>
+              <h5 className='text-center'>Opciones de impresión</h5>
+              <div className='d-flex justify-content-center align-items-center gap-2_5 mt-3'>
                 <button type="button" className="btn btn-outline-info"
                   onClick={this.handlePrintA4}>
                   <i className="fa fa-file-pdf-o"></i> A4
@@ -903,19 +885,16 @@ class GuiaRemisionCrear extends CustomComponent {
                   <i className="fa fa-sticky-note"></i> Ticket
                 </button>
               </div>
-            </div>
-
-            <div className='d-flex justify-content-end my-3 mx-0 pt-2 px-3' style={{
-              borderTop: '1px solid #dee2e6',
-            }}>
-              <button type="button"
-                className="btn btn-danger"
-                onClick={this.handleClosePrint}>
-                <i className="fa fa-close"></i> Cerrar
-              </button>
-            </div>
-          </div>
-        </CustomModal>
+            </>
+          }
+          footer={
+            <button type="button"
+              className="btn btn-danger"
+              onClick={this.handleClosePrint}>
+              <i className="fa fa-close"></i> Cerrar
+            </button>
+          }
+        />
 
         <div className="row">
           <div className="col">

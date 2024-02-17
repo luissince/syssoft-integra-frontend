@@ -221,8 +221,8 @@ class Ventas extends CustomComponent {
             {item.serie + '-' + formatNumberWithZeros(item.numeracion)}
           </td>
           <td>{tipo}</td>
-          <td> {numberFormat(item.total, item.codiso)} </td>
           <td className="text-center">{estado}</td>
+          <td> {numberFormat(item.total, item.codiso)} </td>          
           <td className="text-center">
             <button
               className="btn btn-outline-primary btn-sm"
@@ -311,7 +311,7 @@ class Ventas extends CustomComponent {
                     <th width="10%">Fecha</th>
                     <th width="10%">Cliente</th>
                     <th width="10%">Comprobante</th>
-                    <th width="10%">Tipo</th>
+                    <th width="10%">Forma de Cobro</th>
                     <th width="10%" className="text-center">Estado</th>
                     <th width="10%">Total</th>
                     <th width="5%" className="text-center">

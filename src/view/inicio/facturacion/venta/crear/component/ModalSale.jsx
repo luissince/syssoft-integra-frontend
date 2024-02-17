@@ -19,16 +19,13 @@ const ModalSale = (props) => {
     onHidden,
     onClose,
 
-
     loading,
 
     formaPago,
     handleSelectTipoPago,
 
-    refMetodoContado,
-
-    refNumCutoas,
-    numCuota,
+    refNumeroCuotas,
+    numeroCuotas,
     handleSelectNumeroCuotas,
 
     refFrecuenciaPagoCredito,
@@ -42,6 +39,7 @@ const ModalSale = (props) => {
     codiso,
     importeTotal,
 
+    refMetodoContado,
     bancos,
     bancosAgregados,
     handleAddBancosAgregados,
@@ -129,8 +127,8 @@ const ModalSale = (props) => {
 
   const letraMensual = () => {
     const total = parseFloat(importeTotal);
-    if (!isNumeric(numCuota) || numCuota <= 0) return 0;
-    return total / numCuota;
+    if (!isNumeric(numeroCuotas) || numeroCuotas <= 0) return 0;
+    return total / numeroCuotas;
   }
 
 
@@ -194,7 +192,7 @@ const ModalSale = (props) => {
             </div>
 
             {/* Crédito fijo*/}
-            {/* <div className="col-md-3 col-sm-3">
+            {/* <div className="col-md-6 col-sm-12">
               <button
                 className={`btn ${formaPago === CREDITO_FIJO ? 'btn-primary' : 'btn-light'
                   } btn-block`}
@@ -354,8 +352,8 @@ const ModalSale = (props) => {
                       type="text"
                       className="form-control"
                       placeholder="Número de cuotas"
-                      ref={refNumCutoas}
-                      value={numCuota}
+                      ref={refNumeroCuotas}
+                      value={numeroCuotas}
                       onChange={handleSelectNumeroCuotas}
                       onKeyDown={keyNumberInteger}
                     />
@@ -530,8 +528,8 @@ ModalSale.propTypes = {
 
   refMetodoContado: PropTypes.object.isRequired,
 
-  refNumCutoas: PropTypes.object.isRequired,
-  numCuota: PropTypes.string.isRequired,
+  refNumeroCuotas: PropTypes.object.isRequired,
+  numeroCuotas: PropTypes.string.isRequired,
   handleSelectNumeroCuotas: PropTypes.func.isRequired,
 
   refFrecuenciaPagoCredito: PropTypes.object.isRequired,

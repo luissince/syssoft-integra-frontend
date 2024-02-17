@@ -299,7 +299,7 @@ class VentaDetalle extends CustomComponent {
                     </tr>
                     <tr>
                       <th className="table-secondary w-25 p-1 font-weight-normal ">
-                        Forma de venta
+                        Forma de Pago
                       </th>
                       <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                         {this.state.formaPago}

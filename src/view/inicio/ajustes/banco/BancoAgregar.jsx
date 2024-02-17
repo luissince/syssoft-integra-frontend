@@ -36,6 +36,7 @@ class BancoAgregar extends CustomComponent {
       loading: true,
       msgLoading: 'Cargando datos...',
 
+      idSucursal: this.props.token.project.idSucursal,
       idUsuario: this.props.token.userToken.idUsuario,
     };
 
@@ -110,6 +111,7 @@ class BancoAgregar extends CustomComponent {
           tipoCuenta: this.state.tipoCuenta,
           idMoneda: this.state.idMoneda.trim().toUpperCase(),
           numCuenta: this.state.numCuenta.trim().toUpperCase(),
+          idSucursal: this.state.idSucursal,
           cci: this.state.cci.trim().toUpperCase(),
           preferido: this.state.preferido,
           vuelto: this.state.vuelto,
