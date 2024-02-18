@@ -50,3 +50,11 @@ export async function senGuiaRemision(idGuiaRemision) {
   );
 }
 
+export async function consultarComprobante(data) {
+  return await Resolve.create(
+    instanceCpeSunat.get(`/api/consultar/${data.rucSol}/${data.userSol}/${data.passSol}/${data.tipo}/${data.serie}/${data.correlativo}`),
+  );
+}
+
+
+

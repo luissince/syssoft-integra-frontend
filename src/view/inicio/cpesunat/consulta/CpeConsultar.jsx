@@ -1,16 +1,19 @@
 import React from 'react';
 import {
   alertDialog,
+  alertInfo,
   alertSuccess,
   alertWarning,
+  isEmpty,
   spinnerLoading,
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../../components/Container';
-import { cdrStatus } from '../../../../network/rest/cpesunat.network';
+import { cdrStatus, consultarComprobante } from '../../../../network/rest/cpesunat.network';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
 import { loadEmpresa } from '../../../../network/rest/principal.network';
+
 
 class CpeElectronicos extends React.Component {
   constructor(props) {
@@ -22,7 +25,6 @@ class CpeElectronicos extends React.Component {
       messageWarning: '',
 
       ruc: '',
-      rucEmisor: '',
       usuario: '',
       clave: '',
       tipo: '',
@@ -35,9 +37,15 @@ class CpeElectronicos extends React.Component {
       file: '',
     };
 
+    this.refRuc = React.createRef();
+    this.refUsuario = React.createRef();
+    this.refClave = React.createRef();
+
     this.refTipo = React.createRef();
     this.refSerie = React.createRef();
     this.refCorrelativo = React.createRef();
+
+
   }
 
   setStateAsync(state) {
@@ -56,9 +64,8 @@ class CpeElectronicos extends React.Component {
     if (respsonse instanceof SuccessReponse) {
       await this.setStateAsync({
         ruc: respsonse.data.documento,
-        rucEmisor: respsonse.data.documento,
-        usuario: respsonse.data.useSol,
-        clave: respsonse.data.claveSol,
+        usuario: respsonse.data.usuarioSolSunat,
+        clave: respsonse.data.claveSolSunat,
 
         msgLoading: false,
       });
@@ -68,67 +75,68 @@ class CpeElectronicos extends React.Component {
   };
 
   async onEventConsultarEstado() {
-    if (this.state.ruc === '') {
-      await this.setStateAsync({
-        messageWarning: 'Ingrese el número ruc de la empresa.',
+
+    if (isEmpty(this.state.ruc)) {
+      alertWarning('Empressa', 'Ingrese el número ruc de la empresa.', () => {
+        this.refRuc.current.focus();
       });
       return;
     }
 
-    if (this.state.rucEmisor === '') {
-      await this.setStateAsync({
-        messageWarning: 'Ingrese el número ruc de la empresa.',
+    if (isEmpty(this.state.usuario)) {
+      alertWarning('Empressa', 'El campo usuario es requerido.', () => {
+        this.refUsuario.current.focus();
       });
       return;
     }
 
-    if (this.state.usuario === '') {
-      await this.setStateAsync({
-        messageWarning: 'El campo usuario es requerido.',
+    if (isEmpty(this.state.clave)) {
+      alertWarning('Empressa', 'El campo contraseña es requerido.', () => {
+        this.refClave.current.focus();
       });
       return;
+      
     }
+    
 
-    if (this.state.clave === '') {
-      await this.setStateAsync({
-        messageWarning: 'El campo contraseña es requerido.',
+    if (isEmpty(this.state.tipo)) {
+      alertWarning('Empressa', 'Seleccione tipo de documento.', () => {
+        this.refTipo.current.focus();
       });
       return;
+      
     }
 
-    if (this.state.tipo === '') {
-      await this.setStateAsync({
-        messageWarning: 'Seleccione tipo de documento.',
+    if (isEmpty(this.state.serie)) {
+      alertWarning('Empressa', 'Ingrese una serie correcta.', () => {
+        this.refSerie.current.focus();
       });
       return;
+
     }
 
-    if (this.state.serie === '') {
-      await this.setStateAsync({
-        messageWarning: 'Ingrese una serie correcta.',
+    if (isEmpty(this.state.correlativo)) {
+      alertWarning('Empressa', 'Ingrese un correlativo.', () => {
+        this.refCorrelativo.current.focus();
       });
-      return;
-    }
-
-    if (this.state.correlativo === '') {
-      await this.setStateAsync({ messageWarning: 'Ingrese un correlativo.' });
       return;
     }
 
     alertDialog('Consulta', '¿Está seguro de continuar?', async (value) => {
       if (value) {
+
         const data = {
           rucSol: this.state.ruc,
           userSol: this.state.usuario,
           passSol: this.state.clave,
-          ruc: this.state.rucEmisor,
           tipo: this.state.tipo,
-          serie: this.state.serie,
-          numero: this.state.correlativo,
-          cdr: '',
+          serie: this.state.serie.toUpperCase(),
+          correlativo: this.state.correlativo,
         };
 
-        const response = await cdrStatus(data);
+        alertInfo("Consulta","Precesanso...")
+
+        const response = await consultarComprobante(data);
 
         if (response instanceof SuccessReponse) {
           const result = response.data;
@@ -171,12 +179,6 @@ class CpeElectronicos extends React.Component {
       return;
     }
 
-    if (this.state.rucEmisor === '') {
-      await this.setStateAsync({
-        messageWarning: 'Ingrese el número ruc de la empresa.',
-      });
-      return;
-    }
 
     if (this.state.usuario === '') {
       await this.setStateAsync({
@@ -217,9 +219,9 @@ class CpeElectronicos extends React.Component {
           rucSol: this.state.ruc,
           userSol: this.state.usuario,
           passSol: this.state.clave,
-          ruc: this.state.rucEmisor,
+          ruc: this.state.ruc,
           tipo: this.state.tipo,
-          serie: this.state.serie,
+          serie: this.state.serie.toUpperCase(),
           numero: this.state.correlativo,
           cdr: 'cdr',
         };
@@ -324,39 +326,9 @@ class CpeElectronicos extends React.Component {
                 className="form-control"
                 type="text"
                 placeholder="Ingrese su RUC"
+                ref={this.refRuc}
                 value={this.state.ruc}
                 onChange={(value) => this.setState({ ruc: value.target.value })}
-              />
-            </div>
-          </div>
-          <div className="col-md-6 col-sm-12">
-            <label>Ruc Emisor: </label>
-            <div className="form-group">
-              <input
-                className="form-control"
-                type="text"
-                placeholder="Ingrese RUC"
-                value={this.state.rucEmisor}
-                onChange={(value) =>
-                  this.setState({ rucEmisor: value.target.value })
-                }
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="row">
-          <div className="col-md-6 col-sm-12">
-            <label>usuario: </label>
-            <div className="form-group">
-              <input
-                className="form-control"
-                type="text"
-                placeholder="Ingrese su Usuario"
-                value={this.state.usuario}
-                onChange={(value) =>
-                  this.setState({ usuario: value.target.value })
-                }
               />
             </div>
           </div>
@@ -387,19 +359,21 @@ class CpeElectronicos extends React.Component {
               </select>
             </div>
           </div>
+
         </div>
 
         <div className="row">
           <div className="col-md-6 col-sm-12">
-            <label>Contraseña: </label>
+            <label>usuario: </label>
             <div className="form-group">
               <input
                 className="form-control"
-                type="password"
-                placeholder="Ingrese Contraseña"
-                value={this.state.clave}
+                type="text"
+                placeholder="Ingrese su Usuario"
+                ref={this.refUsuario}
+                value={this.state.usuario}
                 onChange={(value) =>
-                  this.setState({ clave: value.target.value })
+                  this.setState({ usuario: value.target.value })
                 }
               />
             </div>
@@ -420,10 +394,26 @@ class CpeElectronicos extends React.Component {
               />
             </div>
           </div>
+
         </div>
 
         <div className="row">
-          <div className="col-md-6 col-sm-12"></div>
+          <div className="col-md-6 col-sm-12">
+            <label>Contraseña: </label>
+            <div className="form-group">
+              <input
+                className="form-control"
+                type="password"
+                placeholder="Ingrese Contraseña"
+                autoComplete="off"
+                ref={this.refClave}
+                value={this.state.clave}
+                onChange={(value) =>
+                  this.setState({ clave: value.target.value })
+                }
+              />
+            </div>
+          </div>
           <div className="col-md-6 col-sm-12">
             <label>Correlativo: </label>
             <div className="form-group">
@@ -439,6 +429,7 @@ class CpeElectronicos extends React.Component {
               />
             </div>
           </div>
+          
         </div>
 
         <div className="row">

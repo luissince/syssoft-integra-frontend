@@ -288,7 +288,7 @@ export function keyNumberInteger(event) {
   const key = event.key;
   const isDigit = /\d/.test(key);
 
-  if (!(isDigit || key === 'Backspace' || key === 'Delete' || key === 'ArrowLeft' || key === 'ArrowRight' || key === 'Tab')) {
+  if (!(isDigit || key === 'Backspace' || key === 'Delete' || key === 'ArrowLeft' || key === 'ArrowRight' || key === 'Tab' || (event.ctrlKey || event.metaKey) && key === 'c')) {
     event.preventDefault();
   }
 }
@@ -299,7 +299,7 @@ export function keyNumberFloat(event) {
   const isDot = key === '.';
   const hasDot = event.target.value.includes('.');
 
-  if (!(isDigit || isDot || key === 'Backspace' || key === 'Delete' || key === 'ArrowLeft' || key === 'ArrowRight' || key === 'Tab')) {
+  if (!(isDigit || isDot || key === 'Backspace' || key === 'Delete' || key === 'ArrowLeft' || key === 'ArrowRight' || key === 'Tab' || (event.ctrlKey || event.metaKey) && key === 'c')) {
     event.preventDefault();
   }
 
@@ -326,7 +326,7 @@ export function keyNumberPhone(event) {
     event.preventDefault();
   }
 
-  if (!(isDigitOrAllowedChar || key === 'Backspace' || key === 'Delete' || key === 'ArrowLeft' || key === 'ArrowRight' || key === 'Tab')) {
+  if (!(isDigitOrAllowedChar || key === 'Backspace' || key === 'Delete' || key === 'ArrowLeft' || key === 'ArrowRight' || key === 'Tab' || (event.ctrlKey || event.metaKey) && key === 'c')) {
     event.preventDefault();
   }
 }
@@ -601,24 +601,24 @@ export function alertInfo(title, message) {
   });
 }
 
-export function getPathNavigation(opcion, idComprobante){ 
-  if(opcion == "venta"){
+export function getPathNavigation(opcion, idComprobante) {
+  if (opcion == "venta") {
     return `/inicio/ventas/detalle?idVenta=${idComprobante}`
   }
 
-  if(opcion == "cobro"){
+  if (opcion == "cobro") {
     return `/inicio/cobros/detalle?idCobro=${idComprobante}`
   }
 
-  if(opcion == "compra"){
+  if (opcion == "compra") {
     return `/inicio/compras/detalle?idCompra=${idComprobante}`
   }
 
-  if(opcion == "gasto"){
+  if (opcion == "gasto") {
     return `/inicio/gastos/detalle?idGasto=${idComprobante}`
   }
 
-  if(opcion == "cpe"){
+  if (opcion == "cpe") {
     return `/inicio/cpeelectronicos?comprobante=${idComprobante}`
   }
 }
@@ -632,7 +632,7 @@ export function alertHTML(title, html) {
     cancelButtonColor: '#dc3545',
     allowOutsideClick: false,
     showCloseButton: true,
-  }).then((event)=>{
+  }).then((event) => {
     console.log(event)
   });
 }
