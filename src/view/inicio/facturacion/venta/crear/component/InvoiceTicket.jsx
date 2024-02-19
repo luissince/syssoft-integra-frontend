@@ -1,4 +1,5 @@
 import { images } from '../../../../../../helper';
+import PropTypes from 'prop-types';
 
 const InvoiceTicket = (props) => {
   const { handleOpenPrint, handleOpenOptions } = props;
@@ -32,5 +33,10 @@ const InvoiceTicket = (props) => {
     </div>
   );
 };
+
+InvoiceTicket.propTypes = {
+  handleOpenPrint: PropTypes.func.isRequired,
+  handleOpenOptions: PropTypes.func.isRequired,
+}
 
 export default InvoiceTicket;

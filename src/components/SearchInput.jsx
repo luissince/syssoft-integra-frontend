@@ -1,6 +1,7 @@
 import React from 'react';
 import '../recursos/css/searchbar.css';
 import { isEmpty } from '../helper/utils.helper';
+import PropTypes from 'prop-types';
 
 class SearchInput extends React.Component {
   constructor(props) {
@@ -196,5 +197,27 @@ class SearchInput extends React.Component {
     );
   }
 }
+
+SearchInput.propTypes = {
+  disabled: PropTypes.bool,
+  showLeftIcon: PropTypes.bool.isRequired,
+
+  autoFocus: PropTypes.bool,
+  value: PropTypes.string.isRequired,
+  data: PropTypes.array.isRequired,
+  placeholder: PropTypes.string.isRequired,
+  refValue: PropTypes.object.isRequired,
+
+  handleFilter: PropTypes.func.isRequired,
+  handleSelectItem: PropTypes.func.isRequired,
+  handleClearInput: PropTypes.func.isRequired,
+
+  renderItem: PropTypes.func,
+  renderIconLeft: PropTypes.func,
+  renderIconRight: PropTypes.func,
+
+  customButton: PropTypes.func.isRequired,
+}
+
 
 export default SearchInput;

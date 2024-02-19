@@ -1,7 +1,7 @@
 import { keyNumberInteger, keyNumberPhone, spinnerLoading } from "../../../../../../helper/utils.helper";
 import { CLIENTE_JURIDICO, CLIENTE_NATURAL } from "../../../../../../model/types/tipo-cliente";
+import PropTypes from 'prop-types';
 
-// Definir un componente funcional React llamado ModalCliente
 const ModalCliente = (props) => {
   // Desestructurar props para extraer valores específicos
   const { idModal, loading } = props;
@@ -212,8 +212,8 @@ const ModalCliente = (props) => {
                           <label>
                             Tipo Documento: <i className="fa fa-asterisk text-danger small"></i>{' '}
                           </label>
-                          <select 
-                          className="form-control"
+                          <select
+                            className="form-control"
                             ref={refIdTipoDocumentoPj}
                             value={idTipoDocumentoPj}
                             onChange={handleSelectIdTipoDocumentoPj}>
@@ -335,5 +335,57 @@ const ModalCliente = (props) => {
     </div>
   );
 };
+
+ModalCliente.propTypes = {
+  idModal: PropTypes.string.isRequired,
+  loading: PropTypes.bool.isRequired,
+
+  handleSave: PropTypes.func.isRequired,
+  handleClose: PropTypes.func.isRequired,
+  handleClickIdTipoCliente: PropTypes.func.isRequired,
+
+  tiposDocumentos: PropTypes.array.isRequired,
+
+  refIdTipoDocumentoPn: PropTypes.object.isRequired,
+  idTipoDocumentoPn: PropTypes.string.isRequired,
+  handleSelectIdTipoDocumentoPn: PropTypes.func.isRequired,
+
+  refNumeroDocumentoPn: PropTypes.object.isRequired,
+  numeroDocumentoPn: PropTypes.string.isRequired,
+  handleInputNumeroDocumentoPn: PropTypes.func.isRequired,
+
+  refInformacionPn: PropTypes.object.isRequired,
+  informacionPn: PropTypes.string.isRequired,
+  handleInputInformacionPn: PropTypes.func.isRequired,
+
+  refNumerCelularPn: PropTypes.object.isRequired,
+  numerCelularPn: PropTypes.string.isRequired,
+  handleInputNumeroCelularPn: PropTypes.func.isRequired,
+
+  refDireccionPn: PropTypes.object.isRequired,
+  direccionPn: PropTypes.string.isRequired,
+  handleInputDireccionPn: PropTypes.func.isRequired,
+
+  refIdTipoDocumentoPj: PropTypes.object.isRequired,
+  idTipoDocumentoPj: PropTypes.string.isRequired,
+  handleSelectIdTipoDocumentoPj: PropTypes.func.isRequired,
+
+  refNumeroDocumentoPj: PropTypes.object.isRequired,
+  numeroDocumentoPj: PropTypes.string.isRequired,
+  handleInputNumeroDocumentoPj: PropTypes.func.isRequired,
+
+  refInformacionPj: PropTypes.object.isRequired,
+  informacionPj: PropTypes.string.isRequired,
+  handleInputInformacionPj: PropTypes.func.isRequired,
+
+  refNumerCelularPj: PropTypes.object.isRequired,
+  numerCelularPj: PropTypes.string.isRequired,
+  handleInputNumeroCelularPj: PropTypes.func.isRequired,
+
+  refDireccionPj: PropTypes.object.isRequired,
+  direccionPj: PropTypes.string.isRequired,
+  handleInputDireccionPj: PropTypes.func.isRequired,
+}
+
 
 export default ModalCliente;

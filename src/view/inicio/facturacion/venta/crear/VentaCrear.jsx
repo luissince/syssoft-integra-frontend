@@ -83,8 +83,8 @@ class VentaCrear extends CustomComponent {
 
       // Filtrar producto
       producto: '',
-      sarchProducto: false,
-      filterProducto: false,
+      filtrarCodBar: false,
+      filtrarProducto: false,
 
       // Filtrar cliente
       idCliente: '',
@@ -433,6 +433,20 @@ class VentaCrear extends CustomComponent {
     }
   }
 
+  async fetchFiltrarVenta(params) {
+    const response = await filtrarProductoVenta(params);
+
+    if (response instanceof SuccessReponse) {
+      return response.data;
+    }
+
+    if (response instanceof ErrorResponse) {
+      if (response.getType() === CANCELED) return;
+
+      return [];
+    }
+  }
+
 
   reloadView() {
     this.setState(this.initial, async () => {
@@ -533,51 +547,74 @@ class VentaCrear extends CustomComponent {
     }
   }
 
-  //------------------------------------------------------------------------------------------
-  // Modal configuración
-  //------------------------------------------------------------------------------------------
+  handleCodBarProducto = () => {
+    this.setState({ filtrarCodBar: true }, () => {
+      this.refProducto.current.focus();
+    })
+  }
+
+  handleAllProducto = () => {
+    this.setState({ filtrarCodBar: false }, () => {
+      this.refProducto.current.focus();
+    })
+  }
 
   handleSelectComprobante = (event) => {
     this.setState({ idComprobante: event.target.value });
   }
 
-  handleFilterProducto = async (event) => {
+  handleFilterCodBarProducto = async (event) => {
     const searchWord = event.target.value;
-    await this.setStateAsync({ producto: searchWord });
+    this.setState({ producto: searchWord });
+  }
+
+  handleSearchCodBarProducto = async (event) => {
+    if (event.key === 'Enter') {
+      await this.setStateAsync({ filtrarProducto: true });
+
+      const params = {
+        codBar: this.state.filtrarCodBar ? 1 : 0,
+        filtrar: this.state.producto,
+        idSucursal: this.state.idSucursal,
+      };
+
+      const result = await this.fetchFiltrarVenta(params);
+
+      if (!isEmpty(result)) {
+        this.handleAddItem(result[0])
+      }
+
+      this.setState({
+        filtrarProducto: false,
+      });
+    }
+  }
+
+  handleFilterAllProducto = async (event) => {
+    const searchWord = event.target.value;
+    this.setState({ producto: searchWord });
 
     if (searchWord.length === 0) {
-      await this.setStateAsync({ productos: this.props.productos });
+      this.setState({ productos: this.props.productos });
       return;
     }
 
     if (searchWord.length <= 2) return;
 
-    if (this.state.filterProducto) return;
-
-    await this.setStateAsync({ filterProducto: true, sarchProducto: true });
+    await this.setStateAsync({ filtrarProducto: true });
 
     const params = {
+      codBar: this.state.filtrarCodBar ? 1 : 0,
       filtrar: searchWord,
       idSucursal: this.state.idSucursal,
     };
 
-    const response = await filtrarProductoVenta(params);
+    const result = await this.fetchFiltrarVenta(params);
 
-    if (response instanceof SuccessReponse) {
-      await this.setStateAsync({
-        filterProducto: false,
-        productos: response.data,
-        sarchProducto: false,
-      });
-    }
-
-    if (response instanceof ErrorResponse) {
-      await this.setStateAsync({
-        filterProducto: false,
-        productos: [],
-        sarchProducto: false,
-      });
-    }
+    this.setState({
+      productos: result,
+      filtrarProducto: false,
+    });
   }
 
   //------------------------------------------------------------------------------------------
@@ -668,7 +705,7 @@ class VentaCrear extends CustomComponent {
       idImpuesto: this.refImpuesto.current.value,
       comentario: this.refComentario.current.value,
       detalleVenta,
-    }, () => this.handleOpenOptions());
+    }, () => this.handleCloseOptions());
   }
 
   //------------------------------------------------------------------------------------------
@@ -1735,13 +1772,17 @@ class VentaCrear extends CustomComponent {
 
         <section className="invoice-left">
           <InvoiceView
-            producto={this.state.producto}
-            idSucursal={this.state.idSucursal}
-            filterProducto={this.state.filterProducto}
-            handleFilterProducto={this.handleFilterProducto}
-            sarchProducto={this.state.sarchProducto}
-            productos={this.state.productos}
+            codiso={this.state.codiso}
             refProducto={this.refProducto}
+            producto={this.state.producto}
+            productos={this.state.productos}
+            filtrarCodBar={this.state.filtrarCodBar}
+            filtrarProducto={this.state.filtrarProducto}
+            handleCodBarProducto={this.handleCodBarProducto}
+            handleAllProducto={this.handleAllProducto}
+            handleFilterCodBarProducto={this.handleFilterCodBarProducto}
+            handleSearchCodBarProducto={this.handleSearchCodBarProducto}
+            handleFilterAllProducto={this.handleFilterAllProducto}
             handleAddItem={this.handleAddItem}
             handleStarProduct={this.handleStarProduct}
           />
@@ -1772,9 +1813,9 @@ class VentaCrear extends CustomComponent {
             refCliente={this.refCliente}
             cliente={this.state.cliente}
             clientes={this.state.clientes}
-            onEventClearInput={this.handleClearInputClient}
+            handleClearInputClient={this.handleClearInputClient}
             handleFilter={this.handleFilterClient}
-            onEventSelectItem={this.handleSelectItemClient}
+            handleSelectItemClient={this.handleSelectItemClient}
           />
 
           <InvoiceDetail

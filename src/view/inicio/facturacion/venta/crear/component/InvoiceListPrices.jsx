@@ -1,3 +1,5 @@
+import PropTypes from 'prop-types';
+
 const InvoiceListPrices = (props) => {
   const {
     refComprobante,
@@ -30,5 +32,13 @@ const InvoiceListPrices = (props) => {
     </div>
   );
 };
+
+InvoiceListPrices.propTypes = {
+  refComprobante: PropTypes.object.isRequired,
+  idComprobante: PropTypes.string.isRequired,
+  comprobantes: PropTypes.array.isRequired,
+
+  handleSelectComprobante: PropTypes.func.isRequired,
+}
 
 export default InvoiceListPrices;

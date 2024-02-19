@@ -2,16 +2,21 @@ import { images } from '../../../../../../helper';
 import { isEmpty } from '../../../../../../helper/utils.helper';
 import ItemSearch from './ItemSearch';
 import ItemView from './ItemView';
+import PropTypes from 'prop-types';
 
 const InvoiceView = (props) => {
   const {
+    codiso,
     refProducto,
     producto,
     productos,
-    sarchProducto,
-    idSucursal,
-    filterProducto,
-    handleFilterProducto,
+    filtrarCodBar,
+    filtrarProducto,
+    handleCodBarProducto,
+    handleAllProducto,
+    handleFilterCodBarProducto,
+    handleSearchCodBarProducto,
+    handleFilterAllProducto,
     handleAddItem,
   } = props;
 
@@ -21,14 +26,18 @@ const InvoiceView = (props) => {
     <div className="h-100 d-flex flex-column items">
       <ItemSearch
         refProducto={refProducto}
-        producto={producto}
-        idSucursal={idSucursal}
-        filterProducto={filterProducto}
-        handleFilterProducto={handleFilterProducto}
+        producto={producto}         
+        filtrarCodBar={filtrarCodBar}
+        handleCodBarProducto={handleCodBarProducto}
+        handleAllProducto={handleAllProducto}
+        handleFilterCodBarProducto={handleFilterCodBarProducto}
+        handleSearchCodBarProducto={handleSearchCodBarProducto}
+        handleFilterAllProducto={handleFilterAllProducto}
       />
       <ListSearchItems
+        codiso={codiso}
         productos={productos}
-        sarchProducto={sarchProducto}
+        filtrarProducto={filtrarProducto}
         handleAddItem={handleAddItem}
         handleStarProduct={handleStarProduct}
       />
@@ -37,12 +46,13 @@ const InvoiceView = (props) => {
 };
 
 const ListSearchItems = ({
+  codiso,
   productos,
-  sarchProducto,
+  filtrarProducto,
   handleAddItem,
   handleStarProduct,
 }) => {
-  if (sarchProducto) {
+  if (filtrarProducto) {
     return (
       <div className="p-2 w-100 h-100 d-flex flex-column align-items-center justify-content-center">
         <span className="loader-one"></span>
@@ -69,6 +79,7 @@ const ListSearchItems = ({
           return (
             <ItemView
               key={index}
+              codiso={codiso}
               producto={item}
               handleAddItem={() => handleAddItem(item)}
               handleStarProduct={handleStarProduct}
@@ -79,5 +90,29 @@ const ListSearchItems = ({
     </div>
   );
 };
+
+InvoiceView.propTypes = {
+  codiso: PropTypes.string.isRequired,
+  refProducto: PropTypes.object.isRequired,
+  producto: PropTypes.string.isRequired,
+  productos: PropTypes.array.isRequired,
+  filtrarCodBar: PropTypes.bool.isRequired,
+  filtrarProducto: PropTypes.bool.isRequired,
+  handleCodBarProducto: PropTypes.func.isRequired,
+  handleAllProducto: PropTypes.func.isRequired,
+  handleFilterCodBarProducto: PropTypes.func.isRequired,
+  handleSearchCodBarProducto: PropTypes.func.isRequired,
+  handleFilterAllProducto: PropTypes.func.isRequired,
+  handleAddItem: PropTypes.func.isRequired,
+  handleStarProduct: PropTypes.func.isRequired,
+}
+
+ListSearchItems.propTypes = {
+  codiso: PropTypes.string.isRequired,
+  productos: PropTypes.array.isRequired,
+  filtrarProducto: PropTypes.bool.isRequired,
+  handleAddItem: PropTypes.func.isRequired,
+  handleStarProduct: PropTypes.func.isRequired,
+}
 
 export default InvoiceView;

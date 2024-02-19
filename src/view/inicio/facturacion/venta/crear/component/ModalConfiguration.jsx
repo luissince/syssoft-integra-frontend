@@ -1,3 +1,5 @@
+import PropTypes from 'prop-types';
+
 const ModalConfiguration = (props) => {
   const { idModalConfiguration } = props;
 
@@ -116,5 +118,21 @@ const ModalConfiguration = (props) => {
     </div>
   );
 };
+
+ModalConfiguration.propTypes = {
+  idModalConfiguration: PropTypes.string.isRequired,
+
+  refImpuesto: PropTypes.object.isRequired,
+  impuestos: PropTypes.array.isRequired,
+
+  refMoneda: PropTypes.object.isRequired,
+  monedas: PropTypes.array.isRequired,
+
+  refComentario: PropTypes.object.isRequired,
+
+  handleSaveOptions: PropTypes.func.isRequired,
+  handleCloseOptions: PropTypes.func.isRequired,
+}
+
 
 export default ModalConfiguration;

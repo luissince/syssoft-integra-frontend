@@ -1,4 +1,5 @@
 import Footer from './footer/Footer';
+import PropTypes from 'prop-types';
 
 const ContainerWrapper = ({ children }) => {
   return (
@@ -25,5 +26,13 @@ export const PosContainerWrapper = ({ children }) => {
     </main>
   );
 };
+
+ContainerWrapper.propTypes = {
+  children: PropTypes.array
+}
+
+PosContainerWrapper.propTypes = {
+  children: PropTypes.array
+}
 
 export default ContainerWrapper;

@@ -3,10 +3,16 @@ import {
   calculateTaxBruto,
   numberFormat,
 } from '../../../../../../helper/utils.helper';
+import PropTypes from 'prop-types';
 
 const InvoiceFooter = (props) => {
-  const { codiso, impuestos, detalleVenta, handleOpenSale, handleClearSale } =
-    props;
+  const {
+    codiso,
+    impuestos,
+    detalleVenta,
+    handleOpenSale,
+    handleClearSale
+  } = props;
 
   const totalQuantity =
     detalleVenta.length === 1
@@ -107,5 +113,13 @@ const InvoiceFooter = (props) => {
     </div>
   );
 };
+
+InvoiceFooter.propTypes = {
+  codiso: PropTypes.string.isRequired,
+  impuestos: PropTypes.array.isRequired,
+  detalleVenta: PropTypes.array.isRequired,
+  handleOpenSale: PropTypes.func.isRequired,
+  handleClearSale: PropTypes.func.isRequired,
+}
 
 export default InvoiceFooter;

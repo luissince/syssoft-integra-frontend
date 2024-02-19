@@ -1,5 +1,6 @@
 import { images } from '../../../../../../helper';
 import { numberFormat } from '../../../../../../helper/utils.helper';
+import PropTypes from 'prop-types';
 
 const InvoiceDetail = (props) => {
   const { codiso, detalleVenta } = props;
@@ -99,5 +100,15 @@ const InvoiceDetail = (props) => {
     </div>
   );
 };
+
+InvoiceDetail.propTypes = {
+  codiso: PropTypes.string.isRequired,
+  detalleVenta: PropTypes.array.isRequired,
+
+  handleEdit: PropTypes.func.isRequired,
+  handlePlus: PropTypes.func.isRequired,
+  handleMinus: PropTypes.func.isRequired,
+  handleRemove: PropTypes.func.isRequired,
+}
 
 export default InvoiceDetail;

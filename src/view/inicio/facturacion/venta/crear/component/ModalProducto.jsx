@@ -1,6 +1,8 @@
 import { spinnerLoading } from '../../../../../../helper/utils.helper';
+import PropTypes from 'prop-types';
 
 const ModalProducto = (props) => {
+
   const { idModal, loading, producto } = props;
 
   const { refPrecio, refBonificacion, refDescripcion } = props;
@@ -134,5 +136,19 @@ const ModalProducto = (props) => {
     </div>
   );
 };
+
+ModalProducto.propTypes = {
+  idModal: PropTypes.string.isRequired,
+  loading: PropTypes.bool.isRequired,
+  producto:  PropTypes.object,
+
+  refPrecio: PropTypes.object.isRequired,
+  refBonificacion: PropTypes.object.isRequired,
+  refDescripcion: PropTypes.object.isRequired,
+
+  listPrecio: PropTypes.any.isRequired,
+  handleSave: PropTypes.func.isRequired,
+  handleClose: PropTypes.func.isRequired,
+}
 
 export default ModalProducto;

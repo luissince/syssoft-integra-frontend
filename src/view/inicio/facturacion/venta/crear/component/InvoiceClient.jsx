@@ -1,10 +1,11 @@
 import SearchInput from '../../../../../../components/SearchInput';
 import { images } from '../../../../../../helper';
+import PropTypes from 'prop-types';
 
 const InvoiceClient = (props) => {
   const { placeholder, refCliente, cliente, clientes } = props;
 
-  const { onEventClearInput, handleFilter, onEventSelectItem } = props;
+  const { handleClearInputClient, handleFilter, handleSelectItemClient } = props;
 
   const { handleOpenCliente } = props;
 
@@ -16,9 +17,9 @@ const InvoiceClient = (props) => {
         refValue={refCliente}
         value={cliente}
         data={clientes}
-        handleClearInput={onEventClearInput}
+        handleClearInput={handleClearInputClient}
         handleFilter={handleFilter}
-        handleSelectItem={onEventSelectItem}
+        handleSelectItem={handleSelectItemClient}
         customButton={() => (
           <button
             className="btn btn-outline-success d-flex align-items-center"
@@ -36,5 +37,18 @@ const InvoiceClient = (props) => {
     </div>
   );
 };
+
+InvoiceClient.propTypes = {
+  placeholder: PropTypes.string.isRequired,
+  refCliente: PropTypes.object.isRequired,
+  cliente: PropTypes.string.isRequired,
+  clientes: PropTypes.array.isRequired,
+
+  handleClearInputClient: PropTypes.func.isRequired,
+  handleFilter: PropTypes.func.isRequired,
+  handleSelectItemClient: PropTypes.func.isRequired,
+
+  handleOpenCliente: PropTypes.func.isRequired,
+}
 
 export default InvoiceClient;
