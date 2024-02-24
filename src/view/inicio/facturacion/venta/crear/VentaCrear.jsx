@@ -248,7 +248,7 @@ class VentaCrear extends CustomComponent {
 
   async initData() {
     const productos = await this.fetchProductoPreferidos();
-    console.log(productos)
+    // console.log(productos)
     this.props.favoriteProducts(productos);
 
     await this.setStateAsync({ productos: productos });
