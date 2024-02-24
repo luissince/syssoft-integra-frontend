@@ -22,6 +22,8 @@ import {
 import { CANCELED } from '../../../../../model/types/types';
 import { connect } from 'react-redux';
 import SearchInput from '../../../../../components/SearchInput';
+import PropTypes from 'prop-types';
+import { DECREMENTO, INCREMENTO } from '../../../../../model/types/forma-ajuste';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -338,10 +340,12 @@ class AjusteCrear extends CustomComponent {
     if (event.key === 'Enter' && !isLastRow) {
       const nextInput = event.target.parentElement.parentElement.nextElementSibling.querySelector('input',);
       nextInput.focus();
+      nextInput.select();
     }
     if (event.key === 'Enter' && isLastRow) {
       const firstInput = event.target.parentElement.parentElement.parentElement.querySelector('input',);
       firstInput.focus();
+      firstInput.select();
     }
   }
 
@@ -435,7 +439,7 @@ class AjusteCrear extends CustomComponent {
 
       let diferencia = 0;
 
-      if (this.state.idTipoAjuste === 'TA0001') {
+      if (this.state.idTipoAjuste === INCREMENTO) {
         diferencia = item.actual + parseFloat(item.cantidad);
       } else {
         diferencia = item.actual - parseFloat(item.cantidad);
@@ -516,12 +520,12 @@ class AjusteCrear extends CustomComponent {
                       type="radio"
                       ref={this.refIdTipoAjuste}
                       name="tipoAjuste"
-                      id="TA0001"
-                      value="TA0001"
-                      checked={this.state.idTipoAjuste === 'TA0001'}
+                      id={INCREMENTO}
+                      value={INCREMENTO}
+                      checked={this.state.idTipoAjuste === INCREMENTO}
                       onChange={this.handleOptionTipoAjuste}
                     />
-                    <label className="form-check-label" htmlFor="TA0001">
+                    <label className="form-check-label" htmlFor={INCREMENTO}>
                       <i className="bi bi-plus-circle-fill text-success"></i>{' '}
                       Incremento
                     </label>
@@ -531,12 +535,12 @@ class AjusteCrear extends CustomComponent {
                       className="form-check-input"
                       type="radio"
                       name="tipoAjuste"
-                      id="TA0002"
-                      value="TA0002"
-                      checked={this.state.idTipoAjuste === 'TA0002'}
+                      id={DECREMENTO}
+                      value={DECREMENTO}
+                      checked={this.state.idTipoAjuste === DECREMENTO}
                       onChange={this.handleOptionTipoAjuste}
                     />
-                    <label className="form-check-label" htmlFor="TA0002">
+                    <label className="form-check-label" htmlFor={DECREMENTO}>
                       <i className="bi bi-dash-circle-fill text-danger"></i>{' '}
                       Decremento
                     </label>
@@ -628,7 +632,7 @@ class AjusteCrear extends CustomComponent {
                             Tipo de Ajuste:
                           </th>
                           <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                            {this.state.idTipoAjuste === 'TA0001' ? (
+                            {this.state.idTipoAjuste === INCREMENTO ? (
                               <span>
                                 <i className="bi bi-plus-circle-fill text-success"></i>{' '}
                                 Incremento
@@ -771,6 +775,20 @@ const mapStateToProps = (state) => {
     token: state.reducer,
   };
 };
+
+AjusteCrear.propTypes = {
+  history: PropTypes.shape({
+    goBack: PropTypes.func
+  }),
+  token: PropTypes.shape({
+    project: PropTypes.shape({
+      idSucursal: PropTypes.string
+    }),
+    userToken: PropTypes.shape({
+      idUsuario: PropTypes.string
+    }),
+  })
+}
 
 /**
  *

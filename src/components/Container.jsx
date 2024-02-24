@@ -28,11 +28,11 @@ export const PosContainerWrapper = ({ children }) => {
 };
 
 ContainerWrapper.propTypes = {
-  children: PropTypes.array
+  children: PropTypes.node.isRequired
 }
 
 PosContainerWrapper.propTypes = {
-  children: PropTypes.array
+  children: PropTypes.node.isRequired
 }
 
 export default ContainerWrapper;

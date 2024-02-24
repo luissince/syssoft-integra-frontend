@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 const InvoiceClient = (props) => {
   const { placeholder, refCliente, cliente, clientes } = props;
 
-  const { handleClearInputClient, handleFilter, handleSelectItemClient } = props;
+  const { handleClearInput, handleFilter, handleSelectItem } = props;
 
   const { handleOpenCliente } = props;
 
@@ -17,9 +17,9 @@ const InvoiceClient = (props) => {
         refValue={refCliente}
         value={cliente}
         data={clientes}
-        handleClearInput={handleClearInputClient}
+        handleClearInput={handleClearInput}
         handleFilter={handleFilter}
-        handleSelectItem={handleSelectItemClient}
+        handleSelectItem={handleSelectItem}
         customButton={() => (
           <button
             className="btn btn-outline-success d-flex align-items-center"
@@ -44,9 +44,9 @@ InvoiceClient.propTypes = {
   cliente: PropTypes.string.isRequired,
   clientes: PropTypes.array.isRequired,
 
-  handleClearInputClient: PropTypes.func.isRequired,
+  handleClearInput: PropTypes.func.isRequired,
   handleFilter: PropTypes.func.isRequired,
-  handleSelectItemClient: PropTypes.func.isRequired,
+  handleSelectItem: PropTypes.func.isRequired,
 
   handleOpenCliente: PropTypes.func.isRequired,
 }

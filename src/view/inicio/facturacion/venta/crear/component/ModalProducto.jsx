@@ -1,4 +1,4 @@
-import { spinnerLoading } from '../../../../../../helper/utils.helper';
+import { handlePasteFloat, keyNumberFloat, spinnerLoading } from '../../../../../../helper/utils.helper';
 import PropTypes from 'prop-types';
 
 const ModalProducto = (props) => {
@@ -54,6 +54,8 @@ const ModalProducto = (props) => {
                     autoFocus
                     placeholder="0.00"
                     ref={refPrecio}
+                    onKeyDown={keyNumberFloat}
+                    onPaste={handlePasteFloat}
                   />
                 </div>
               </div>
@@ -67,6 +69,8 @@ const ModalProducto = (props) => {
                     className="form-control"
                     placeholder="0"
                     ref={refBonificacion}
+                    onKeyDown={keyNumberFloat}
+                    onPaste={handlePasteFloat}
                   />
                 </div>
               </div>
@@ -140,7 +144,7 @@ const ModalProducto = (props) => {
 ModalProducto.propTypes = {
   idModal: PropTypes.string.isRequired,
   loading: PropTypes.bool.isRequired,
-  producto:  PropTypes.object,
+  producto: PropTypes.object,
 
   refPrecio: PropTypes.object.isRequired,
   refBonificacion: PropTypes.object.isRequired,

@@ -454,10 +454,10 @@ class CobroCrear extends CustomComponent {
           return;
         }
 
-        metodoPagoLista.forEach(item => {         
+        metodoPagoLista.forEach(item => {
           item.descripcion = `Pago con ${rounded(parseFloat(item.monto))} y su vuelto es ${rounded(parseFloat(item.monto) - total)}`;
-          item.monto = total;          
-      });
+          item.monto = total;
+        });
       } else {
         if (metodoCobroTotal !== total) {
           alertWarning('Cobro', 'El monto a cobrar debe ser igual al total.');
@@ -701,6 +701,8 @@ class CobroCrear extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
+        {this.state.loading && spinnerLoading(this.state.msgLoading)}
+
         <ModalSale
           refSale={this.refCustomModalSale}
           isOpen={this.state.isOpenSale}
@@ -745,8 +747,6 @@ class CobroCrear extends CustomComponent {
 
           handleSaveSale={this.handleSaveSale}
         />
-
-        {this.state.loading && spinnerLoading(this.state.msgLoading)}
 
         {/* Titulo */}
         <div className="row">

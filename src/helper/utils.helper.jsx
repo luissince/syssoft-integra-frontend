@@ -267,7 +267,7 @@ export function validateComboBox(comboBox) {
  */
 export function validateEmail(email) {
   // Expresión regular para validar direcciones de correo electrónico
-  const emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
   // Comprueba si el valor coincide con la expresión regular
   const isValid = emailRegex.test(email);
@@ -288,7 +288,14 @@ export function keyNumberInteger(event) {
   const key = event.key;
   const isDigit = /\d/.test(key);
 
-  if (!(isDigit || key === 'Backspace' || key === 'Delete' || key === 'ArrowLeft' || key === 'ArrowRight' || key === 'Tab' || (event.ctrlKey || event.metaKey) && key === 'c')) {
+  if (!(isDigit || key === 'Backspace' || key === 'Delete' || key === 'ArrowLeft' || key === 'ArrowRight' || key === 'Tab' || (event.ctrlKey || event.metaKey) && key === 'c' || (event.ctrlKey || event.metaKey) && key === 'v')) {
+    event.preventDefault();
+  }
+}
+
+export function handlePasteInteger(event) {
+  const pasteData = event.clipboardData.getData('text/plain');
+  if (!/^\d+$/.test(pasteData)) {
     event.preventDefault();
   }
 }
@@ -299,11 +306,26 @@ export function keyNumberFloat(event) {
   const isDot = key === '.';
   const hasDot = event.target.value.includes('.');
 
-  if (!(isDigit || isDot || key === 'Backspace' || key === 'Delete' || key === 'ArrowLeft' || key === 'ArrowRight' || key === 'Tab' || (event.ctrlKey || event.metaKey) && key === 'c')) {
+  if (!(isDigit || isDot || key === 'Backspace' || key === 'Delete' || key === 'ArrowLeft' || key === 'ArrowRight' || key === 'Tab' || (event.ctrlKey || event.metaKey) && key === 'c' || (event.ctrlKey || event.metaKey) && key === 'v')) {
     event.preventDefault();
   }
 
   if (isDot && hasDot) {
+    event.preventDefault();
+  }
+
+  // Permitir solo un punto al principio del número
+  if (event.target.selectionStart === 0 && isDot) {
+    event.preventDefault();
+  }
+}
+
+export function handlePasteFloat(event) {
+  const clipboardData = event.clipboardData || window.clipboardData;
+  const pastedData = clipboardData.getData('text');
+
+  // Verificar si el texto pegado es un número decimal válido
+  if (!/^(\d*\.?\d*)$/.test(pastedData)) {
     event.preventDefault();
   }
 }
@@ -326,7 +348,7 @@ export function keyNumberPhone(event) {
     event.preventDefault();
   }
 
-  if (!(isDigitOrAllowedChar || key === 'Backspace' || key === 'Delete' || key === 'ArrowLeft' || key === 'ArrowRight' || key === 'Tab' || (event.ctrlKey || event.metaKey) && key === 'c')) {
+  if (!(isDigitOrAllowedChar || key === 'Backspace' || key === 'Delete' || key === 'ArrowLeft' || key === 'ArrowRight' || key === 'Tab' || (event.ctrlKey || event.metaKey) && key === 'c' || (event.ctrlKey || event.metaKey) && key === 'v')) {
     event.preventDefault();
   }
 }

@@ -413,7 +413,7 @@ export async function listCpeSunat(params, signal) {
   );
 }
 
-export async function listFiltrar(params, signal) {
+export async function listFiltrarVenta(params, signal) {
   return await Resolve.create(
     instancePrincipal.get('/api/factura/filtrar', {
       signal: signal,
@@ -422,12 +422,12 @@ export async function listFiltrar(params, signal) {
   );
 }
 
-export async function createFactura(data) {
+export async function createVenta(data) {
   return await Resolve.create(
     instancePrincipal.post('/api/factura/create', data));
 }
 
-export async function detailFactura(params, signal) {
+export async function detailVenta(params, signal) {
   return await Resolve.create(
     instancePrincipal.get('/api/factura/detail', {
       signal: signal,
@@ -436,7 +436,7 @@ export async function detailFactura(params, signal) {
   );
 }
 
-export async function detailOnlyFactura(params, signal) {
+export async function detailOnlyVenta(params, signal) {
   return await Resolve.create(
     instancePrincipal.get('/api/factura/detail/only', {
       signal: signal,
@@ -453,14 +453,32 @@ export async function cancelVenta(params) {
   );
 }
 
-export async function accountsReceivableVenta(params, signal) {
+export async function listAccountsReceivableVenta(params, signal) {
   return await Resolve.create(
-    instancePrincipal.get('/api/factura/accounts/receivable', {
+    instancePrincipal.get('/api/factura/list/accounts/receivable', {
       signal: signal,
       params: params,
     }),
   );
 }
+
+export async function colletAccountsReceivableVenta(data, signal) {
+  return await Resolve.create(
+    instancePrincipal.post('/api/factura/collet/accounts/receivable', data, {
+      signal: signal,
+    }),
+  );
+}
+
+export async function detailAccountsReceivableVenta(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/factura/detail/accounts/receivable', {
+      signal: signal,
+      params: params,
+    }),
+  );
+}
+
 // ------------------------------------------------------------------------
 // FIN PARA VENTA
 // ------------------------------------------------------------------------
@@ -1758,7 +1776,7 @@ export async function listNotificacion(signal) {
   );
 }
 
-export async function detailNotifications(params,signal) {
+export async function detailNotifications(params, signal) {
   return await Resolve.create(
     instancePrincipal.get('/api/notificacion/detailt', {
       params: params,

@@ -26,7 +26,7 @@ const ItemView = (props) => {
   const cssNegativo =
     tipo !== 'PRODUCTO' ? '' : tipo === 'PRODUCTO' && negativo === 0 ? 'text-danger' : 'text-success';
   const detalleNegativo =
-    tipo !== 'PRODUCTO' ? '' : tipo === 'PRODUCTO' && negativo === 0 ? 'VENTA SIN NEGATIVO' : 'VENTA CON NEGATIVO';
+    tipo !== 'PRODUCTO' ? '' : tipo === 'PRODUCTO' && negativo === 0 ? 'VENTA SIN CONTROL DE STOCK' : 'VENTA CON CONTROL DE STOCK';
 
   return (
     <button
@@ -88,7 +88,7 @@ ItemView.propTypes = {
   codiso: PropTypes.string.isRequired,
   producto: PropTypes.shape({
     idProducto: PropTypes.string.isRequired,
-    codigo: PropTypes.string.isRequired,
+    codigo: PropTypes.string,
     nombreProducto: PropTypes.string.isRequired,
     cantidad: PropTypes.number.isRequired,
     precio: PropTypes.number.isRequired,

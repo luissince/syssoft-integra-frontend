@@ -277,8 +277,8 @@ class CpeElectronicos extends React.Component {
   }
 
   onEventDownload() {
-    let ruta_completa = `${process.env.REACT_APP_URL}/app/files/${this.state.file}`;
-    window.open(ruta_completa, 'Download');
+    // let ruta_completa = `${process.env.REACT_APP_URL}/app/files/${this.state.file}`;
+    // window.open(ruta_completa, 'Download');
   }
 
   render() {

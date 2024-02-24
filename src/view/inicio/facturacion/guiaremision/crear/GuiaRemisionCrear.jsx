@@ -11,14 +11,14 @@ import {
   alertSuccess,
 } from '../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
-import { comboComprobante, comboMotivoTraslado, comboTipoPeso, createGuiaRemision, detailOnlyFactura, filtrarPersona, filtrarVehiculo, getIdSucursal, getUbigeo, listFiltrar } from '../../../../../network/rest/principal.network';
+import { comboComprobante, comboMotivoTraslado, comboTipoPeso, createGuiaRemision, detailOnlyVenta, filtrarPersona, filtrarVehiculo, getIdSucursal, getUbigeo, listFiltrarVenta } from '../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
 import { GUIA_DE_REMISION } from '../../../../../model/types/tipo-comprobante';
 import React from 'react';
 import SearchInput from '../../../../../components/SearchInput';
-import CustomModal, { CustomModalContent } from '../../../../../components/CustomModal';
+import { CustomModalContent } from '../../../../../components/CustomModal';
 import printJS from 'print-js';
 import { pdfA4GuiaRemision, pdfTicketGuiaRemision } from '../../../../../helper/lista-pdf.helper';
 
@@ -96,8 +96,10 @@ class GuiaRemisionCrear extends CustomComponent {
 
     this.initial = { ...this.state }
 
+     // Referencia y variable del modal imprimir
     this.refPrinter = React.createRef();
 
+    // Referencia de los atributos principales
     this.refComprobante = React.createRef();
     this.refMotivoTraslado = React.createRef();
     this.refTipoPeso = React.createRef();
@@ -197,7 +199,7 @@ class GuiaRemisionCrear extends CustomComponent {
   }
 
   async fetchFiltrarVentas(params) {
-    const response = await listFiltrar(
+    const response = await listFiltrarVenta(
       params,
       this.abortController.signal,
     );
@@ -310,7 +312,7 @@ class GuiaRemisionCrear extends CustomComponent {
       idVenta: this.state.venta.idVenta
     }
 
-    const response = await detailOnlyFactura(params);
+    const response = await detailOnlyVenta(params);
 
     if (response instanceof SuccessReponse) {
       return response.data;

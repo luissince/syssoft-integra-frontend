@@ -18,7 +18,7 @@ const InvoiceVoucher = (props) => {
           value={idComprobante}
           onChange={handleSelectComprobante}
         >
-          <option>-- Comprobantes --</option>
+          <option value="">- Comprobantes -</option>
           {comprobantes.map((item, index) => (
             <option key={index} value={item.idComprobante}>
               {item.nombre} ({item.serie})

@@ -3,14 +3,14 @@ import {
   keyNumberFloat,
   spinnerLoading,
   numberFormat,
-  isEmpty,
+  handlePasteFloat,
 } from '../../../../../../helper/utils.helper';
 import PropTypes from 'prop-types';
 
 const ModalSale = (props) => {
 
   const {
-    refSale,
+    refModal,
     isOpen,
     onOpen,
     onHidden,
@@ -18,7 +18,7 @@ const ModalSale = (props) => {
 
     loading,
     refMetodoContado,
-    importeTotal,
+    monto,
 
     bancos,
     codISO,
@@ -31,84 +31,30 @@ const ModalSale = (props) => {
   } = props;
 
   const generarVuelto = () => {
-    const total = parseFloat(importeTotal);
-
-    if (isEmpty(bancosAgregados)) {
-      return <h5>Agrega algún método de pago.</h5>;
-    }
+    const total = parseFloat(monto);
 
     const currentAmount = bancosAgregados.reduce((accumulator, item) => {
       accumulator += item.monto ? parseFloat(item.monto) : 0;
       return accumulator;
     }, 0);
 
-    if (bancosAgregados.length > 1) {
-      if (currentAmount >= total) {
-        return (
-          <>
-            <h5>
-              RESTANTE: <span>{numberFormat(currentAmount - total, codISO)}</span>
-            </h5>
-            <h6 className="text-danger">
-              Más de dos metodos de pago no generan vuelto.
-            </h6>
-          </>
-        );
-      } else {
-        return (
-          <>
-            <h5>
-              POR COBRAR: <span>{numberFormat(total - currentAmount, codISO)}</span>
-            </h5>
-            <h6 className="text-danger">
-              Más de dos metodos de pago no generan vuelto.
-            </h6>
-          </>
-        );
-      }
-    }
-
-    const metodo = bancosAgregados[0];
-    if (metodo.vuelto === 1) {
-      if (currentAmount >= total) {
-        return (
-          <h5>
-            SU CAMBIO ES: <span>{numberFormat(currentAmount - total, codISO)}</span>
-          </h5>
-        );
-      } else {
-        return (
-          <h5 className="text-danger">
-            POR COBRAR: <span>{numberFormat(total - currentAmount, codISO)}</span>
-          </h5>
-        );
-      }
-    } else {
-      if (currentAmount >= total) {
-        return (
-          <>
-            <h5>
-              RESTANTE: <span>{numberFormat(currentAmount - total, codISO)}</span>
-            </h5>
-            <h6 className="text-danger">El método de pago no genera vuelto.</h6>
-          </>
-        );
-      } else {
-        return (
-          <>
-            <h5>
-              POR COBRAR: <span>{numberFormat(total - currentAmount, codISO)}</span>
-            </h5>
-            <h6 className="text-danger">El método de pago no genera vuelto.</h6>
-          </>
-        );
-      }
-    }
+    return (
+      <div className='row'>
+        <div className='col'>
+          <h6 className='text-left '>Total: {numberFormat(total, codISO)}</h6>
+          <h6 className='text-left '>- -</h6>
+        </div>
+        <div className='col'>
+          <h6 className='text-left text-success'>Cobrado: {numberFormat(currentAmount, codISO)}</h6>
+          <h6 className='text-left text-danger'>Por Cobrar: {numberFormat(total - currentAmount, codISO)}</h6>
+        </div>
+      </div>
+    );
   };
 
   return (
     <CustomModalContent
-      contentRef={(ref) => refSale.current = ref}
+      contentRef={(ref) => refModal.current = ref}
       isOpen={isOpen}
       onOpen={onOpen}
       onHidden={onHidden}
@@ -120,18 +66,18 @@ const ModalSale = (props) => {
           {loading && spinnerLoading('Cargando datos...')}
 
           {/* Titutlo del modal */}
-          <div className="row">
+          {/* <div className="row">
             <div className="col">
               <div className="text-center">
                 <h5>
-                  TOTAL A COBRAR: <span>{numberFormat(importeTotal, codISO)}</span>
+                  TOTAL A COBRAR: <span>{numberFormat(monto, codISO)}</span>
                 </h5>
               </div>
             </div>
-          </div>
+          </div> */}
 
           {/* Sub titulo */}
-          <div className="row">
+          {/* <div className="row">
             <div className="col-md-4 col-sm-4">
               <hr />
             </div>
@@ -141,7 +87,7 @@ const ModalSale = (props) => {
             <div className="col-md-4 col-sm-4">
               <hr />
             </div>
-          </div>
+          </div> */}
 
           <h6>Lista de métodos:</h6>
 
@@ -241,6 +187,7 @@ const MetodoPago = ({
         value={monto}
         onChange={(event) => handleInputMontoBancosAgregados(event, idBanco)}
         onKeyDown={keyNumberFloat}
+        onPaste={handlePasteFloat}
       />
       <div className="input-group-prepend">
         <div className="input-group-text">
@@ -261,7 +208,7 @@ const MetodoPago = ({
 };
 
 ModalSale.propTypes = {
-  refSale: PropTypes.object.isRequired,
+  refModal: PropTypes.object.isRequired,
   isOpen: PropTypes.bool.isRequired,
   onOpen: PropTypes.func.isRequired,
   onHidden: PropTypes.func.isRequired,
@@ -269,7 +216,7 @@ ModalSale.propTypes = {
 
   loading: PropTypes.bool.isRequired,
   refMetodoContado: PropTypes.object.isRequired,
-  importeTotal: PropTypes.number.isRequired,
+  monto: PropTypes.number.isRequired,
 
   bancos: PropTypes.array.isRequired,
   codISO: PropTypes.string.isRequired,

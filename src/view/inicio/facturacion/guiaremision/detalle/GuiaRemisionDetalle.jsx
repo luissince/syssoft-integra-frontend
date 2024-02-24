@@ -219,7 +219,7 @@ class GuiaRemisionDetalle extends CustomComponent {
         </div>
 
         <div className="row">
-          <div className="col-lg-6 col-md-6 col-sm-12 col-12">
+          <div className="col-lg-6 col-md-12">
             <div className="form-group">
               <div className="table-responsive">
                 <table width="100%">
@@ -301,7 +301,7 @@ class GuiaRemisionDetalle extends CustomComponent {
               </div>
             </div>
           </div>
-          <div className="col-lg-6 col-md-6 col-sm-12 col-12">
+          <div className="col-lg-6 col-md-12">
             <div className="form-group">
               <div className="table-responsive">
                 <table width="100%">

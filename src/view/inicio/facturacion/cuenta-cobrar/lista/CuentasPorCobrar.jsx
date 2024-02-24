@@ -4,14 +4,13 @@ import {
   isEmpty,
   keyUpSearch,
   numberFormat,
-  sleep,
   spinnerLoading,
 } from '../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import Paginacion from '../../../../../components/Paginacion';
 import ContainerWrapper from '../../../../../components/Container';
 import {
-  accountsReceivableVenta,
+  listAccountsReceivableVenta,
 } from '../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
@@ -25,6 +24,8 @@ class CuentasPorCobrar extends CustomComponent {
       loading: false,
       lista: [],
       restart: false,
+
+      tipo: 'only',
 
       opcion: 0,
       paginacion: 0,
@@ -94,13 +95,14 @@ class CuentasPorCobrar extends CustomComponent {
 
     const params = {
       opcion: opcion,
+      tipo: this.state.tipo,
       buscar: buscar,
       idSucursal: this.state.idSucursal,
       posicionPagina: (this.state.paginacion - 1) * this.state.filasPorPagina,
       filasPorPagina: this.state.filasPorPagina,
     };
 
-    const response = await accountsReceivableVenta(params, this.abortControllerTable.signal);
+    const response = await listAccountsReceivableVenta(params, this.abortControllerTable.signal);
 
     if (response instanceof SuccessReponse) {
       const totalPaginacion = parseInt(
@@ -132,6 +134,12 @@ class CuentasPorCobrar extends CustomComponent {
       pathname: `${this.props.location.pathname}/detalle`,
       search: '?idVenta=' + idVenta,
     });
+  }
+
+  handleSelecTipo = (event) => {
+    this.setState({ tipo: event.target.value }, () => {
+      this.loadInit()
+    })
   }
 
   generarBody() {
@@ -189,8 +197,9 @@ class CuentasPorCobrar extends CustomComponent {
         </div>
 
         <div className="row">
-          <div className="col-md-6 col-sm-12">
+          <div className="col-lg-6 col-md-6 col-sm-12">
             <div className="form-group">
+              <label>Buscar:</label>
               <div className="input-group mb-2">
                 <div className="input-group-prepend">
                   <div className="input-group-text">
@@ -200,7 +209,7 @@ class CuentasPorCobrar extends CustomComponent {
                 <input
                   type="text"
                   className="form-control"
-                  placeholder="Buscar..."
+                  placeholder="Ingrese datos del comprobante de referencia..."
                   ref={this.refTxtSearch}
                   onKeyUp={(event) =>
                     keyUpSearch(event, () =>
@@ -211,13 +220,28 @@ class CuentasPorCobrar extends CustomComponent {
               </div>
             </div>
           </div>
-          <div className="col-md-6 col-sm-12">
+
+          <div className="col-lg-3 col-md-6 col-sm-12">
+            <div className="form-group">
+              <label>Tipo:</label>
+              <select
+                className="form-control"
+                value={this.state.tipo}
+                onChange={this.handleSelecTipo}>
+                <option value="only">Mostrar ventas por cobrar</option>
+                <option value="all">Mostrar todas las ventas al crédito</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="col-lg-3 col-md-6 col-sm-12">
+            <label>Opciones:</label>
             <div className="form-group">
               <button
                 className="btn btn-outline-secondary"
                 onClick={this.loadInit}
               >
-                <i className="bi bi-arrow-clockwise"></i>
+                <i className="bi bi-arrow-clockwise"></i> Recargar
               </button>
             </div>
           </div>

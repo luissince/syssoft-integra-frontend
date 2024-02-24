@@ -6862,7 +6862,8 @@ a.badge-dark.focus {
   background-color: #d2d2d2;
 }
 
-.list-group-item-action:active {
+.list-group-item-action:active,
+.list-group-item-action:active > div {
   color: #212529;
   background-color: #e9ecef;
 }

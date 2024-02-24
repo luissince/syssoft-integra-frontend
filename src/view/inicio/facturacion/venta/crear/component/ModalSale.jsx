@@ -172,10 +172,9 @@ const ModalSale = (props) => {
           {/* Tipos de venta */}
           <div className="row">
             {/* Al contado */}
-            <div className="col-md-12 col-sm-12">
+            <div className="col-md-6 col-sm-12">
               <button
-                className={`btn ${formaPago === CONTADO ? 'btn-primary' : 'btn-light'
-                  } btn-block`}
+                className={`btn ${formaPago === CONTADO ? 'btn-primary' : 'btn-light'} btn-block`}
                 type="button"
                 title="Pago al contado"
                 onClick={() => handleSelectTipoPago(CONTADO)}
@@ -192,10 +191,9 @@ const ModalSale = (props) => {
             </div>
 
             {/* Crédito fijo*/}
-            {/* <div className="col-md-6 col-sm-12">
+            <div className="col-md-6 col-sm-12">
               <button
-                className={`btn ${formaPago === CREDITO_FIJO ? 'btn-primary' : 'btn-light'
-                  } btn-block`}
+                className={`btn ${formaPago === CREDITO_FIJO ? 'btn-primary' : 'btn-light'} btn-block`}
                 type="button"
                 title="Pago al credito"
                 onClick={() => handleSelectTipoPago(CREDITO_FIJO)}
@@ -209,7 +207,7 @@ const ModalSale = (props) => {
                   <label>Crédito fijo</label>
                 </div>
               </button>
-            </div> */}
+            </div>
 
             {/* Crédito variable */}
             {/* <div className="col-md-3 col-sm-3">

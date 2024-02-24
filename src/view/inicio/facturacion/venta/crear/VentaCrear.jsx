@@ -17,7 +17,7 @@ import { connect } from 'react-redux';
 import { PosContainerWrapper } from '../../../../../components/Container';
 import InvoiceTicket from './component/InvoiceTicket';
 import {
-  createFactura,
+  createVenta,
   getPersonaPredeterminado,
   comboComprobante,
   comboImpuesto,
@@ -52,6 +52,7 @@ import { CustomModalContent } from '../../../../../components/CustomModal';
 import { CLIENTE_NATURAL } from '../../../../../model/types/tipo-cliente';
 import { ADELANTADO, CONTADO, CREDITO_FIJO, CREDITO_VARIABLE } from '../../../../../model/types/forma-pago';
 import { pdfA4Venta, pdfTicketVenta } from '../../../../../helper/lista-pdf.helper';
+import InvoiceListPrices from './component/InvoiceListPrices';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -92,9 +93,14 @@ class VentaCrear extends CustomComponent {
       filterCliente: false,
       nuevoCliente: null,
 
+      // Filtrar producto mobile
+      productoMobile: '',
+      filterProductoMobile: false,
+
       // Lista de datos
       comprobantes: [],
       productos: [],
+      productosMobile: [],
       clientes: [],
       impuestos: [],
       monedas: [],
@@ -102,10 +108,11 @@ class VentaCrear extends CustomComponent {
       detalleVenta: [],
 
       // Atributos libres
+      nombreComporbante: '',
       codiso: '',
       importeTotal: 0.0,
 
-      // modal custom
+      // Atributos modal printer
       isOpenPrinter: false,
 
       // Atributos del modal sale
@@ -166,6 +173,11 @@ class VentaCrear extends CustomComponent {
 
     // Referencia al tipo de cliente
     this.refCliente = React.createRef();
+    this.selectItemCliente = false;
+
+    // Atributos para buscar productos el diseño mobil
+    this.refProductoMobile = React.createRef();
+    this.selectItemProductoMobile = false;
 
     // Atributos para el modal producto
     this.idModalProducto = 'idModalProducto';
@@ -236,7 +248,7 @@ class VentaCrear extends CustomComponent {
 
   async initData() {
     const productos = await this.fetchProductoPreferidos();
-
+    console.log(productos)
     this.props.favoriteProducts(productos);
 
     await this.setStateAsync({ productos: productos });
@@ -267,7 +279,7 @@ class VentaCrear extends CustomComponent {
     const comprobanteFilter = comprobantes.find((item) => item.preferida === 1);
 
     if (typeof predeterminado === 'object') {
-      this.handleSelectItemClient(predeterminado);
+      this.handleSelectItemCliente(predeterminado);
     }
 
     await this.setStateAsync({
@@ -277,6 +289,7 @@ class VentaCrear extends CustomComponent {
       bancos,
 
       idComprobante: comprobanteFilter ? comprobanteFilter.idComprobante : '',
+      nombreComporbante: !comprobanteFilter ? "Ninguno" : comprobanteFilter.nombre,
 
       idMoneda: monedaFilter ? monedaFilter.idMoneda : '',
       codiso: monedaFilter ? monedaFilter.codiso : 'PEN',
@@ -560,7 +573,12 @@ class VentaCrear extends CustomComponent {
   }
 
   handleSelectComprobante = (event) => {
-    this.setState({ idComprobante: event.target.value });
+    const comprobante = this.state.comprobantes.find(item => item.idComprobante == event.target.value);
+
+    this.setState({
+      idComprobante: event.target.value,
+      nombreComporbante: !comprobante ? "Ninguno" : comprobante.nombre
+    });
   }
 
   handleFilterCodBarProducto = async (event) => {
@@ -620,6 +638,7 @@ class VentaCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
   // Modal impresión
   //------------------------------------------------------------------------------------------
+  
   handleOpenPrint = (idVenta) => {
     this.setState({ isOpenPrinter: true, idVenta: idVenta })
   }
@@ -661,6 +680,7 @@ class VentaCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
   // Modal configuración
   //------------------------------------------------------------------------------------------
+  
   handleOpenOptions = () => {
     const invoice = document.getElementById(this.idModalConfiguration);
     this.refImpuesto.current.value = this.state.idImpuesto;
@@ -816,7 +836,7 @@ class VentaCrear extends CustomComponent {
     }
 
     this.setState({ nuevoCliente }, () => {
-      this.handleSelectItemClient(value);
+      this.handleSelectItemCliente(value);
       this.handleCloseCliente();
     })
   }
@@ -868,7 +888,7 @@ class VentaCrear extends CustomComponent {
     }
 
     this.setState({ nuevoCliente }, () => {
-      this.handleSelectItemClient(value);
+      this.handleSelectItemCliente(value);
       this.handleCloseCliente();
     })
   }
@@ -983,16 +1003,22 @@ class VentaCrear extends CustomComponent {
   // Filtrar cliente
   //------------------------------------------------------------------------------------------
 
-  handleClearInputClient = async () => {
-    await this.setStateAsync({ clientes: [], idCliente: '', cliente: '', nuevoCliente: null });
-    this.selectItemClient = false;
+  handleClearInputCliente = async () => {
+    await this.setStateAsync({
+      clientes: [],
+      idCliente: '',
+      cliente: '',
+      nuevoCliente: null,
+      filterCliente: false
+    });
+    this.selectItemCliente = false;
   }
 
-  handleFilterClient = async (event) => {
-    const searchWord = this.selectItemClient ? '' : event.target.value;
+  handleFilterCliente = async (event) => {
+    const searchWord = this.selectItemCliente ? '' : event.target.value;
     await this.setStateAsync({ idCliente: '', cliente: searchWord });
 
-    this.selectItemClient = false;
+    this.selectItemCliente = false;
     if (searchWord.length === 0) {
       await this.setStateAsync({ clientes: [] });
       return;
@@ -1017,13 +1043,64 @@ class VentaCrear extends CustomComponent {
 
   }
 
-  handleSelectItemClient = (value) => {
+  handleSelectItemCliente = (value) => {
     this.setState({
       cliente: value.documento + ' - ' + value.informacion,
       clientes: [],
       idCliente: value.idPersona,
-    }, () => this.selectItemClient = true);
+    }, () => this.selectItemCliente = true);
   }
+
+  //------------------------------------------------------------------------------------------
+  // Filtrar producto mobile
+  //------------------------------------------------------------------------------------------
+
+  // handleClearInputProductoMobile = async () => {
+  //   await this.setStateAsync({
+  //     productosMobile: [],
+  //     productoMobile: '',
+  //     filterProductoMobile: false
+  //   });
+  //   this.selectItemProductoMobile = false;
+  // }
+
+  // handleFilterProductoMobile = async (event) => {
+  //   const searchWord = this.selectItemProductoMobile ? '' : event.target.value;
+  //   await this.setStateAsync({ productoMobile: searchWord });
+
+  //   this.selectItemProductoMobile = false;
+  //   if (searchWord.length === 0) {
+  //     await this.setStateAsync({ productosMobile: [] });
+  //     return;
+  //   }
+
+  //   if (this.state.filterProductoMobile) return;
+
+  //   await this.setStateAsync({ filterProductoMobile: true });
+
+  //   const params = {
+  //     codBar: this.state.filtrarCodBar ? 1 : 0,
+  //     filtrar: searchWord,
+  //     idSucursal: this.state.idSucursal,
+  //   };
+
+  //   const result = await this.fetchFiltrarVenta(params);
+
+  //   this.setState({
+  //     productosMobile: result,
+  //     filterProductoMobile: false
+  //   });
+  // }
+
+  // handleSelectItemProductoMobile = (value) => {
+  //   this.setState({
+  //     //   cliente: value.documento + ' - ' + value.informacion,
+  //     clientes: [],
+  //     //   idCliente: value.idPersona,
+  //   }, () => {
+  //     console.log(value)
+  //   });
+  // }
 
   //------------------------------------------------------------------------------------------
   // Componente footer
@@ -1267,7 +1344,7 @@ class VentaCrear extends CustomComponent {
         this.handleOnCloseModalSale();
         alertInfo('Venta', 'Procesando venta...');
 
-        const response = await createFactura(data);
+        const response = await createVenta(data);
 
         if (response instanceof SuccessReponse) {
           alertSuccess('Venta', response.data.message, () => {
@@ -1372,7 +1449,7 @@ class VentaCrear extends CustomComponent {
         this.handleOnCloseModalSale();
         alertInfo('Venta', 'Procesando venta...');
 
-        const response = await createFactura(data);
+        const response = await createVenta(data);
 
         if (response instanceof SuccessReponse) {
           alertSuccess('Venta', response.data.message, () => {
@@ -1495,7 +1572,7 @@ class VentaCrear extends CustomComponent {
             this.handleOnCloseModalSale();
             alertInfo('Venta', 'Procesando venta...');
     
-            const response = await createFactura(data);
+            const response = await createVenta(data);
     
             if (response instanceof SuccessReponse) {
               alertSuccess('Venta', response.data.message, () => {
@@ -1618,7 +1695,7 @@ class VentaCrear extends CustomComponent {
             this.handleOnCloseModalSale();
             alertInfo('Venta', 'Procesando venta...');
     
-            const response = await createFactura(data);
+            const response = await createVenta(data);
     
             if (response instanceof SuccessReponse) {
               alertSuccess('Venta', response.data.message, () => {
@@ -1789,16 +1866,10 @@ class VentaCrear extends CustomComponent {
         </section>
         <section className="invoice-right">
           <InvoiceTicket
+            nombreComporbante={this.state.nombreComporbante}
             handleOpenPrint={this.handleOpenPrint}
             handleOpenOptions={this.handleOpenOptions}
           />
-
-          {/* <InvoiceListPrices
-                        refComprobante={this.refComprobante}
-                        idComprobante={this.state.idComprobante}
-                        comprobantes={this.state.comprobantes}
-                        handleSelectComprobante={this.handleSelectComprobante}
-                    /> */}
 
           <InvoiceVoucher
             refComprobante={this.refComprobante}
@@ -1813,10 +1884,21 @@ class VentaCrear extends CustomComponent {
             refCliente={this.refCliente}
             cliente={this.state.cliente}
             clientes={this.state.clientes}
-            handleClearInputClient={this.handleClearInputClient}
-            handleFilter={this.handleFilterClient}
-            handleSelectItemClient={this.handleSelectItemClient}
+            handleClearInput={this.handleClearInputCliente}
+            handleFilter={this.handleFilterCliente}
+            handleSelectItem={this.handleSelectItemCliente}
           />
+
+          {/* <InvoiceListPrices
+            codiso={this.state.codiso}
+            refProductoMobile={this.refProductoMobile}
+            placeholder="Filtrar productos..."
+            productoMobile={this.state.productoMobile}
+            productos={this.state.productosMobile}
+            handleClearInput={this.handleClearInputProductoMobile}
+            handleFilter={this.handleFilterProductoMobile}
+            handleSelectItem={this.handleSelectItemProductoMobile}
+          /> */}
 
           <InvoiceDetail
             codiso={this.state.codiso}

@@ -2,12 +2,13 @@ import { images } from '../../../../../../helper';
 import PropTypes from 'prop-types';
 
 const InvoiceTicket = (props) => {
+  const { nombreComporbante } = props;
   const { handleOpenPrint, handleOpenOptions } = props;
 
   return (
     <div className="invoice-ticket d-flex pl-3 align-items-center justify-content-between">
       <div className="py-3">
-        <p className="h5 m-0">Boleta de venta</p>
+        <p className="h5 m-0">{nombreComporbante}</p>
       </div>
       <div className="d-flex">
         {/* <span>
@@ -35,7 +36,8 @@ const InvoiceTicket = (props) => {
 };
 
 InvoiceTicket.propTypes = {
-  handleOpenPrint: PropTypes.func.isRequired,
+  nombreComporbante: PropTypes.string,
+  handleOpenPrint: PropTypes.func,
   handleOpenOptions: PropTypes.func.isRequired,
 }
 

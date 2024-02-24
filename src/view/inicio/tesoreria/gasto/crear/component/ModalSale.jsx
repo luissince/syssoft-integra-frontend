@@ -142,7 +142,7 @@ const ModalSale = (props) => {
                         </div>
                     </div>
 
-                    <h5>Lista de métodos:</h5>
+                    <h6>Lista de métodos:</h6>
 
                     {bancosAgregados.map((item, index) => (
                         <MetodoPago
@@ -206,14 +206,14 @@ const ModalSale = (props) => {
                         className="btn btn-primary"
                         onClick={handleSaveSale}
                     >
-                        Completar venta
+                        <i className='fa fa-save'></i> Procesar Gasto
                     </button>
                     <button
                         type="button"
                         className="btn btn-danger"
                         onClick={onClose}
                     >
-                        Cerrar
+                        <i className='fa fa-close'></i> Cerrar
                     </button>
                 </>
             }

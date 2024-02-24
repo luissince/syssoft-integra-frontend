@@ -179,7 +179,7 @@ class SearchInput extends React.Component {
                 data.map((value, index) => (
                   <button
                     key={index}
-                    className="list-group-item list-group-item-action border-0"
+                    className="list-group-item list-group-item-action"
                     onClick={() => {
                       handleSelectItem(value);
                       refValue.current.focus();
@@ -216,7 +216,7 @@ SearchInput.propTypes = {
   renderIconLeft: PropTypes.func,
   renderIconRight: PropTypes.func,
 
-  customButton: PropTypes.func.isRequired,
+  customButton: PropTypes.func,
 }
 
 

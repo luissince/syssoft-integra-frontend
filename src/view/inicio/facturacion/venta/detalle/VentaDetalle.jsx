@@ -10,7 +10,7 @@ import {
 } from '../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../../../components/Container';
-import { detailFactura } from '../../../../../network/rest/principal.network';
+import { detailVenta } from '../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
@@ -49,7 +49,7 @@ class VentaDetalle extends CustomComponent {
     const url = this.props.location.search;
     const idVenta = new URLSearchParams(url).get('idVenta');
     if (isText(idVenta)) {
-      this.loadingData(idVenta);
+      await this.loadingData(idVenta);
     } else {
       this.props.history.goBack();
     }
@@ -110,7 +110,7 @@ class VentaDetalle extends CustomComponent {
       idVenta: id,
     };
 
-    const response = await detailFactura(params, this.abortControllerView.signal);
+    const response = await detailVenta(params, this.abortControllerView.signal);
 
     if (response instanceof SuccessReponse) {
       return response.data;
@@ -382,8 +382,8 @@ class VentaDetalle extends CustomComponent {
         </div>
 
         <div className="row">
-          <div className="col-lg-8 col-md-8 col-sm-12 col-12"></div>
-          <div className="col-lg-4 col-md-4 col-sm-12 col-12">
+          <div className="col-lg-8 col-sm-12"></div>
+          <div className="col-lg-4 col-sm-12">
             <table width="100%">
               <thead>{this.renderTotal()}</thead>
             </table>

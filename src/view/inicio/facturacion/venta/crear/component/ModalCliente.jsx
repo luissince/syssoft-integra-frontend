@@ -1,4 +1,4 @@
-import { keyNumberInteger, keyNumberPhone, spinnerLoading } from "../../../../../../helper/utils.helper";
+import { handlePasteInteger, keyNumberInteger, keyNumberPhone, spinnerLoading } from "../../../../../../helper/utils.helper";
 import { CLIENTE_JURIDICO, CLIENTE_NATURAL } from "../../../../../../model/types/tipo-cliente";
 import PropTypes from 'prop-types';
 
@@ -135,6 +135,7 @@ const ModalCliente = (props) => {
                             value={numeroDocumentoPn}
                             onChange={handleInputNumeroDocumentoPn}
                             onKeyDown={keyNumberInteger}
+                            onPaste={handlePasteInteger}
                           />
                         </div>
                       </div>
@@ -242,6 +243,7 @@ const ModalCliente = (props) => {
                             value={numeroDocumentoPj}
                             onChange={handleInputNumeroDocumentoPj}
                             onKeyDown={keyNumberInteger}
+                            onPaste={handlePasteInteger}
                           />
                         </div>
                       </div>
