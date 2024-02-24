@@ -146,7 +146,7 @@ class CuentasPorCobrar extends CustomComponent {
     if (this.state.loading) {
       return (
         <tr>
-          <td className="text-center" colSpan="7">
+          <td className="text-center" colSpan="8">
             {spinnerLoading('Cargando información de la tabla...', true)}
           </td>
         </tr>
@@ -156,7 +156,7 @@ class CuentasPorCobrar extends CustomComponent {
     if (isEmpty(this.state.lista)) {
       return (
         <tr>
-          <td className="text-center" colSpan="7">¡No hay datos registrados!</td>
+          <td className="text-center" colSpan="8">¡No hay datos registrados!</td>
         </tr>
       );
     }
@@ -167,6 +167,11 @@ class CuentasPorCobrar extends CustomComponent {
           <td className={`text-center`}>{item.id}</td>
           <td>{item.comprobante} <br /> {item.serie}-{formatNumberWithZeros(item.numeracion)} </td>
           <td>{item.documento}<br />{item.informacion}</td>
+          <td>
+            {item.numeroCuota === 1 ? item.numeroCuota+" CUOTA": item.numeroCuota+" CUOTAS"}
+            <br/>
+            FACTURA DE {item.frecuenciaPago} DÍAS
+          </td>
           <td>{numberFormat(item.total, item.codiso)}</td>
           <td className='text-success'>{numberFormat(item.pagado, item.codiso)}</td>
           <td className='text-danger'>{numberFormat(item.total - item.pagado, item.codiso)}</td>
@@ -256,6 +261,7 @@ class CuentasPorCobrar extends CustomComponent {
                     <th width="5%" className="text-center">#</th>
                     <th width="10%">Comprobante</th>
                     <th width="20%">Cliente</th>
+                    <th width="15%">N° Cuotas / Frecuencia</th>
                     <th width="10%">Total</th>
                     <th width="10%">Cobrado</th>
                     <th width="10%">Por Cobrar</th>

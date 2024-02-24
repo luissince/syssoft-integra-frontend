@@ -28,6 +28,8 @@ class CuentasPorPagarAmbonar extends CustomComponent {
             fecha: '',
             notas: '',
             formaPago: '',
+            numeroCuota: 0,
+            frecuenciaPago: '',
             estado: '',
             codiso: '',
             simbolo: '',
@@ -94,8 +96,6 @@ class CuentasPorPagarAmbonar extends CustomComponent {
             await this.fetchComboBanco(),
         ]);
 
-        console.log(factura)
-
         const {
             comprobante,
             serie,
@@ -105,6 +105,8 @@ class CuentasPorPagarAmbonar extends CustomComponent {
             fecha,
             hora,
             idFormaPago,
+            numeroCuota,
+            frecuenciaPago,
             estado,
             simbolo,
             codiso,
@@ -122,6 +124,8 @@ class CuentasPorPagarAmbonar extends CustomComponent {
             fecha: fecha + ' ' + formatTime(hora),
             notas: '',
             formaPago: tipo,
+            numeroCuota: parseInt(numeroCuota),
+            frecuenciaPago: frecuenciaPago,
             estado: nuevoEstado,
             simbolo: simbolo,
             codiso: codiso,
@@ -571,6 +575,22 @@ class CuentasPorPagarAmbonar extends CustomComponent {
                             <div className="table-responsive">
                                 <table width="100%">
                                     <thead>
+                                        <tr>
+                                            <th className="table-secondary w-25 p-1 font-weight-normal ">
+                                                Numero de Cuotas
+                                            </th>
+                                            <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                                                {this.state.numeroCuota}
+                                            </th>
+                                        </tr>
+                                        <tr>
+                                            <th className="table-secondary w-25 p-1 font-weight-normal ">
+                                                Frecuencia
+                                            </th>
+                                            <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                                                {this.state.frecuenciaPago} DÍAS
+                                            </th>
+                                        </tr>
                                         <tr>
                                             <th className="table-secondary w-25 p-1 font-weight-normal ">
                                                 Total
