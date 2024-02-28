@@ -26,7 +26,6 @@ class ErrorResponse {
           : 'Algo salió mal, intente en un par de minutos.';
       }
     }
-    // console.log(error.response)
   }
 
   getMessage() {

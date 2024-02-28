@@ -222,7 +222,7 @@ class Ventas extends CustomComponent {
           </td>
           <td>{tipo}</td>
           <td className="text-center">{estado}</td>
-          <td> {numberFormat(item.total, item.codiso)} </td>          
+          <td> {numberFormat(item.total, item.codiso)} </td>
           <td className="text-center">
             <button
               className="btn btn-outline-primary btn-sm"
@@ -347,4 +347,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(Ventas);
+const ConnectedVentas = connect(mapStateToProps, null)(Ventas);
+
+export default ConnectedVentas;

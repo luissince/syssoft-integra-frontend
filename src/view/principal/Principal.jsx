@@ -35,31 +35,30 @@ class Principal extends CustomComponent {
 
   componentWillUnmount() {
     window.removeEventListener('focus', this.handleFocused);
-
     this.abortController.abort();
   }
 
   async loadingData() {
-    const [sucursales] = await Promise.all([await this.fetchSucursales()]);
-
-    this.setState({
-      sucursales: sucursales,
-      data: sucursales,
-      loading: false,
-    });
+    await this.fetchSucursales()
   }
 
   async fetchSucursales() {
     const response = await initSucursales(this.abortController.signal);
 
     if (response instanceof SuccessReponse) {
-      return response.data;
+      this.setState({
+        sucursales: response.data,
+        data: response.data,
+        loading: false,
+      });
     }
 
     if (response instanceof ErrorResponse) {
       if (response.getType() === CANCELED) return;
 
-      return [];
+      this.setState({
+        loadMessage: response.getMessage()
+      })
     }
   }
 
