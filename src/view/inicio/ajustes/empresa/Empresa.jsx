@@ -2,7 +2,6 @@ import React from 'react';
 import {
   isEmpty,
   spinnerLoading,
-  statePrivilegio,
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../../components/Container';
@@ -11,6 +10,8 @@ import { loadEmpresa } from '../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
 import { CANCELED } from '../../../../model/types/types';
+import Title from '../../../../components/Title';
+import PropTypes from 'prop-types';
 
 class Empresa extends React.Component {
   constructor(props) {
@@ -118,7 +119,7 @@ class Empresa extends React.Component {
               onClick={() =>
                 this.handleEdit(item.idEmpresa)
               }
-              // disabled={!this.state.edit}
+            // disabled={!this.state.edit}
             >
               <i className="bi bi-pencil"></i>
             </button>
@@ -131,15 +132,10 @@ class Empresa extends React.Component {
   render() {
     return (
       <ContainerWrapper>
-        <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <div className="form-group">
-              <h5>
-                Empresa <small className="text-secondary"></small>
-              </h5>
-            </div>
-          </div>
-        </div>
+        <Title
+          title='Empresa'
+          subTitle='Lista'
+        />
 
         <div className="row">
           <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
@@ -177,5 +173,13 @@ const mapStateToProps = (state) => {
     token: state.reducer,
   };
 };
+
+Empresa.propTypes = {
+  history: PropTypes.object,
+  location: PropTypes.shape({
+    pathname: PropTypes.string
+  })
+}
+
 
 export default connect(mapStateToProps, null)(Empresa);

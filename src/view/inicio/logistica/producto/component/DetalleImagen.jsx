@@ -1,4 +1,5 @@
 import { formatDecimal } from '../../../../../helper/utils.helper';
+import PropTypes from 'prop-types';
 
 const DetalleImagen = (props) => {
   const { tipo } = props;
@@ -224,5 +225,35 @@ const DetalleImagen = (props) => {
     </>
   );
 };
+
+DetalleImagen.propTypes = {
+  tipo: PropTypes.string,
+
+  imagen: PropTypes.string,
+  refFileImagen: PropTypes.object,
+  handleInputImagen: PropTypes.func,
+  handleRemoveImagen: PropTypes.func,
+
+  nombre: PropTypes.string,
+  precio: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+
+  publicar: PropTypes.oneOfType([PropTypes.bool, PropTypes.number]),
+  handleSelectPublico: PropTypes.func,
+
+  negativo: PropTypes.oneOfType([PropTypes.bool, PropTypes.number]),
+  handleSelectNegativo: PropTypes.func,
+
+  inventariado: PropTypes.oneOfType([PropTypes.bool, PropTypes.number]),
+  handleSelectInventariado: PropTypes.func,
+
+  preferido: PropTypes.oneOfType([PropTypes.bool, PropTypes.number]),
+  handleSelectPreferido: PropTypes.func,
+
+  estado: PropTypes.oneOfType([PropTypes.bool, PropTypes.number]),
+  handleSelectEstado: PropTypes.func,
+
+  handleRegistrar: PropTypes.func,
+  handleCerrar: PropTypes.func,
+}
 
 export default DetalleImagen;

@@ -17,6 +17,7 @@ import {
   editMoneda,
   getIdMoneda,
 } from '../../../../network/rest/principal.network';
+import Title from '../../../../components/Title';
 
 class MonedaEditar extends CustomComponent {
   constructor(props) {
@@ -139,18 +140,11 @@ class MonedaEditar extends CustomComponent {
       <ContainerWrapper>
         {this.state.loading && spinnerLoading(this.state.msgLoading)}
 
-        <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-12">
-            <div className="form-group">
-              <h5>
-                <span role="button" onClick={() => this.props.history.goBack()}>
-                  <i className="bi bi-arrow-left-short"></i>
-                </span>{' '}
-                Editar Moneda
-              </h5>
-            </div>
-          </div>
-        </div>
+        <Title
+          title='Moneda'
+          subTitle='Editar'
+          handleGoBack={() => this.props.history.goBack()}
+        />
 
         <div className="row">
           <div className="form-group col-md-6">

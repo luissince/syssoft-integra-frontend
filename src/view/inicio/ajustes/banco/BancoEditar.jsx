@@ -19,6 +19,7 @@ import {
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
 import { CANCELED } from '../../../../model/types/types';
+import Title from '../../../../components/Title';
 
 class BancoEditar extends CustomComponent {
   constructor(props) {
@@ -182,18 +183,11 @@ class BancoEditar extends CustomComponent {
       <ContainerWrapper>
         {this.state.loading && spinnerLoading(this.state.msgLoading)}
 
-        <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <section className="content-header">
-              <h5>
-                <span role="button" onClick={() => this.props.history.goBack()}>
-                  <i className="bi bi-arrow-left-short"></i>
-                </span>{' '}
-                Editar Banco
-              </h5>
-            </section>
-          </div>
-        </div>
+        <Title
+          title='Banco'
+          subTitle='Editar'
+          handleGoBack={() => this.props.history.goBack()}
+        />
 
         <div className="row">
           <div className="form-group col-md-6">

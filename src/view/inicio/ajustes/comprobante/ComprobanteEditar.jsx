@@ -20,6 +20,7 @@ import {
   editComprobante,
   getIdComprobante,
 } from '../../../../network/rest/principal.network';
+import Title from '../../../../components/Title';
 
 class ComporbanteEditar extends CustomComponent {
   constructor(props) {
@@ -89,7 +90,7 @@ class ComporbanteEditar extends CustomComponent {
       preferida: comprobante.preferida === 1 ? true : false,
       numeroCampo: comprobante.numeroCampo,
       facturado: comprobante.facturado === 1 ? true : false,
-      anulacion: comprobante.anulacion === 0 ? "" :  comprobante.anulacion === 1 ? "1": "2",
+      anulacion: comprobante.anulacion === 0 ? "" : comprobante.anulacion === 1 ? "1" : "2",
       loading: false,
     });
   }
@@ -156,53 +157,46 @@ class ComporbanteEditar extends CustomComponent {
     }
 
     if (this.state.numeroCampo < 0 || this.state.numeroCampo > 128) {
-      alertWarning(
-        'Comprobante',
-        'El número de campo no puede ser menor que 0.',
-        () => this.refNumeroCampo.current.focus(),
-      );
+      alertWarning('Comprobante', 'El número de campo no puede ser menor que 0.', () => this.refNumeroCampo.current.focus());
       return;
     }
 
-    alertDialog(
-      'Comprobante',
-      '¿Estás seguro de continuar?',
-      async (accept) => {
-        if (accept) {
-          alertInfo('Comprobante', 'Procesando información...');
+    alertDialog('Comprobante', '¿Estás seguro de continuar?', async (accept) => {
+      if (accept) {
+        alertInfo('Comprobante', 'Procesando información...');
 
-          const data = {
-            idTipoComprobante: this.state.idTipoComprobante,
-            nombre: this.state.nombre.trim().toUpperCase(),
-            serie: this.state.serie.trim().toUpperCase(),
-            numeracion: this.state.numeracion,
-            codigo: this.state.codigo,
-            impresion: this.state.impresion.trim(),
-            estado: this.state.estado,
-            preferida: this.state.preferida,
-            numeroCampo:
-              this.state.numeroCampo === '' ? 0 : this.state.numeroCampo,
-            idUsuario: this.state.idUsuario,
-            facturado: this.state.facturado,
-            anulacion: this.state.anulacion,
-            idComprobante: this.state.idComprobante,
-          };
+        const data = {
+          idTipoComprobante: this.state.idTipoComprobante,
+          nombre: this.state.nombre.trim().toUpperCase(),
+          serie: this.state.serie.trim().toUpperCase(),
+          numeracion: this.state.numeracion,
+          codigo: this.state.codigo,
+          impresion: this.state.impresion.trim(),
+          estado: this.state.estado,
+          preferida: this.state.preferida,
+          numeroCampo:
+            this.state.numeroCampo === '' ? 0 : this.state.numeroCampo,
+          idUsuario: this.state.idUsuario,
+          facturado: this.state.facturado,
+          anulacion: this.state.anulacion,
+          idComprobante: this.state.idComprobante,
+        };
 
-          const response = await editComprobante(data, this.abortController.signal);
+        const response = await editComprobante(data, this.abortController.signal);
 
-          if (response instanceof SuccessReponse) {
-            alertSuccess('Comprobante', response.data, () => {
-              this.props.history.goBack();
-            });
-          }
-
-          if (response instanceof ErrorResponse) {
-            if (response.getType() === CANCELED) return;
-
-            alertWarning('Comprobante', response.getMessage());
-          }
+        if (response instanceof SuccessReponse) {
+          alertSuccess('Comprobante', response.data, () => {
+            this.props.history.goBack();
+          });
         }
-      },
+
+        if (response instanceof ErrorResponse) {
+          if (response.getType() === CANCELED) return;
+
+          alertWarning('Comprobante', response.getMessage());
+        }
+      }
+    },
     );
   };
 
@@ -211,18 +205,11 @@ class ComporbanteEditar extends CustomComponent {
       <ContainerWrapper>
         {this.state.loading && spinnerLoading(this.state.msgLoading)}
 
-        <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-12">
-            <div className="form-group">
-              <h5>
-                <span role="button" onClick={() => this.props.history.goBack()}>
-                  <i className="bi bi-arrow-left-short"></i>
-                </span>{' '}
-                Editar Comprobante
-              </h5>
-            </div>
-          </div>
-        </div>
+        <Title
+          title='Comprobante'
+          subTitle='Editar'
+          handleGoBack={() => this.props.history.goBack()}
+        />
 
         <div className="row">
           <div className="col">
@@ -484,14 +471,14 @@ class ComporbanteEditar extends CustomComponent {
                 className="btn btn-warning"
                 onClick={this.handleGuardar}
               >
-              <i className='fa fa-edit'></i>  Guardar
+                <i className='fa fa-edit'></i>  Guardar
               </button>{' '}
               <button
                 type="button"
                 className="btn btn-danger"
                 onClick={() => this.props.history.goBack()}
               >
-              <i className='fa fa-close'></i>  Cerrar
+                <i className='fa fa-close'></i>  Cerrar
               </button>
             </div>
           </div>

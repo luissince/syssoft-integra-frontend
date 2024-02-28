@@ -188,7 +188,7 @@ class ProductoDetalle extends CustomComponent {
     );
   }
 
-  async onEventRestablecer(idPersona) {
+  async onEventRestablecer() {
     alertDialog(
       'Producto',
       '¿Está seguro de restablecer al socio, la operación no es reversible?',
@@ -568,9 +568,8 @@ class ProductoDetalle extends CustomComponent {
                       <td>{item.documento}</td>
                       <td>{item.informacion}</td>
                       <td
-                        className={`${
-                          item.estado === 1 ? 'text-success' : 'text-danger'
-                        }`}
+                        className={`${item.estado === 1 ? 'text-success' : 'text-danger'
+                          }`}
                       >
                         {item.estado === 1 ? 'ACTIVO' : 'ANULADO'}
                       </td>
@@ -663,4 +662,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(ProductoDetalle);
+const ConnectedProductoDetalle = connect(mapStateToProps, null)(ProductoDetalle);
+
+export default ConnectedProductoDetalle;

@@ -19,6 +19,7 @@ import {
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
 import { CANCELED } from '../../../../model/types/types';
+import Title from '../../../../components/Title';
 
 class Vehiculo extends CustomComponent {
 
@@ -234,15 +235,10 @@ class Vehiculo extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
-        <div className="row">
-          <div className="col-md-12">
-            <div className="form-group">
-              <h5>
-                Vehiculos <small className="text-secondary">LISTA</small>
-              </h5>
-            </div>
-          </div>
-        </div>
+        <Title
+          title='Vehiculos'
+          subTitle='Lista'
+        />
 
         <div className="row">
           <div className="col-md-6 col-sm-12">
@@ -267,6 +263,7 @@ class Vehiculo extends CustomComponent {
               </div>
             </div>
           </div>
+          
           <div className="col-md-6 col-sm-12">
             <div className="form-group">
               <button

@@ -20,6 +20,7 @@ import {
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
 import { CANCELED } from '../../../../model/types/types';
+import Title from '../../../../components/Title';
 
 class ImpuestoEditar extends CustomComponent {
   constructor(props) {
@@ -139,18 +140,11 @@ class ImpuestoEditar extends CustomComponent {
       <ContainerWrapper>
         {this.state.loading && spinnerLoading(this.state.msgLoading)}
 
-        <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-12">
-            <div className="form-group">
-              <h5>
-                <span role="button" onClick={() => this.props.history.goBack()}>
-                  <i className="bi bi-arrow-left-short"></i>
-                </span>{' '}
-                Agregar Impuesto
-              </h5>
-            </div>
-          </div>
-        </div>
+        <Title
+          title='Impuesto'
+          subTitle='Editar'
+          handleGoBack={() => this.props.history.goBack()}
+        />
 
         <div className="row">
           <div className="col">

@@ -200,7 +200,7 @@ class SearchInput extends React.Component {
 
 SearchInput.propTypes = {
   disabled: PropTypes.bool,
-  showLeftIcon: PropTypes.bool.isRequired,
+  showLeftIcon: PropTypes.bool,
 
   autoFocus: PropTypes.bool,
   value: PropTypes.string.isRequired,

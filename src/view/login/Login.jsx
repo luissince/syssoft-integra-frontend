@@ -36,7 +36,7 @@ class Login extends CustomComponent {
     window.removeEventListener('focus', this.onEventFocused);
   }
 
-  onEventFocused = (event) => {
+  onEventFocused = () => {
     let userToken = window.localStorage.getItem('login');
     if (userToken !== null) {
       let projectToken = window.localStorage.getItem('project');
@@ -82,7 +82,7 @@ class Login extends CustomComponent {
     const response = await loginApi(data);
 
     if (response instanceof SuccessReponse) {
-      const menus = response.data.menu.map((item, index) => {
+      const menus = response.data.menu.map((item) => {
         let submenu = [];
         for (let value of response.data.submenu) {
           let privilegio = [];

@@ -4,7 +4,6 @@ import {
   alertSuccess,
   alertWarning,
   alertDialog,
-  statePrivilegio,
   keyUpSearch,
   alertInfo,
   isEmpty,
@@ -20,6 +19,7 @@ import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
 import CustomComponent from '../../../../model/class/custom-component';
 import { CANCELED } from '../../../../model/types/types';
+import Title from '../../../../components/Title';
 
 class Sucursales extends CustomComponent {
   constructor(props) {
@@ -214,7 +214,7 @@ class Sucursales extends CustomComponent {
               className="btn btn-outline-warning btn-sm"
               title="Editar"
               onClick={() => this.handleEditar(item.idSucursal)}
-              // disabled={!this.state.edit}
+            // disabled={!this.state.edit}
             >
               <i className="bi bi-pencil"></i>
             </button>
@@ -224,7 +224,7 @@ class Sucursales extends CustomComponent {
               className="btn btn-outline-danger btn-sm"
               title="Eliminar"
               onClick={() => this.handleBorrar(item.idSucursal)}
-              // disabled={!this.state.remove}
+            // disabled={!this.state.remove}
             >
               <i className="bi bi-trash"></i>
             </button>
@@ -232,64 +232,15 @@ class Sucursales extends CustomComponent {
         </tr>
       );
     });
-
-    // this.state.loading ? (
-    //     <tr>
-    //         <td className="text-center" colSpan="6">
-    //             {spinnerLoading()}
-    //         </td>
-    //     </tr>
-    // ) : this.state.lista.length === 0 ? (
-    //     <tr className="text-center">
-    //         <td colSpan="6">¡No hay datos registrados!</td>
-    //     </tr>
-    // ) : (
-    //     this.state.lista.map((item, index) => {
-
-    //         const estado = item.estado === 1 ? <span className="badge badge-success">Habilitado</span> : <span className="badge badge-danger">Inhabilitado</span>;
-
-    //         return (
-    //             <tr key={index}>
-    //                 <td className="text-center">{item.id}</td>
-    //                 <td>{item.nombre}</td>
-    //                 <td>{item.direccion}</td>
-    //                 <td className='text-center'>{estado}</td>
-    //                 <td className="text-center">
-    //                     <button
-    //                         className="btn btn-outline-warning btn-sm"
-    //                         title="Editar"
-    //                         onClick={() => this.handleEditar(item.idSucursal)}
-    //                         disabled={!this.state.edit}>
-    //                         <i className="bi bi-pencil"></i>
-    //                     </button>
-    //                 </td>
-    //                 <td className="text-center">
-    //                     <button
-    //                         className="btn btn-outline-danger btn-sm"
-    //                         title="Eliminar"
-    //                         onClick={() => this.handleBorrar(item.idSucursal)}
-    //                         disabled={!this.state.remove}>
-    //                         <i className="bi bi-trash"></i>
-    //                     </button>
-    //                 </td>
-    //             </tr>
-    //         )
-    //     })
-    // )
   }
 
   render() {
     return (
       <ContainerWrapper>
-        <div className="row">
-          <div className="col">
-            <div className="form-group">
-              <h5>
-                Sucursales <small className="text-secondary">LISTA</small>
-              </h5>
-            </div>
-          </div>
-        </div>
+        <Title
+          title='Sucursales'
+          subTitle='Lista'
+        />
 
         <div className="row">
           <div className="col-md-6 col-sm-12">
@@ -320,7 +271,7 @@ class Sucursales extends CustomComponent {
               <button
                 className="btn btn-outline-info"
                 onClick={this.handleAgregar}
-                // disabled={!this.state.add}
+              // disabled={!this.state.add}
               >
                 <i className="bi bi-file-plus"></i> Nuevo Registro
               </button>{' '}
@@ -379,4 +330,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(Sucursales);
+const ConnectedSucursales = connect(mapStateToProps, null)(Sucursales);
+
+export default ConnectedSucursales;

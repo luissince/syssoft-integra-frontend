@@ -5,7 +5,6 @@ import {
   alertSuccess,
   alertWarning,
   spinnerLoading,
-  statePrivilegio,
   keyUpSearch,
   isEmpty,
 } from '../../../../helper/utils.helper';
@@ -20,6 +19,7 @@ import {
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
 import { CANCELED } from '../../../../model/types/types';
+import Title from '../../../../components/Title';
 
 class Impuestos extends CustomComponent {
   constructor(props) {
@@ -245,15 +245,10 @@ class Impuestos extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
-        <div className="row">
-          <div className="col-md-12">
-            <div className="form-group">
-              <h5>
-                Impuestos <small className="text-secondary">LISTA</small>
-              </h5>
-            </div>
-          </div>
-        </div>
+        <Title
+          title='Impuestos'
+          subTitle='Lista'
+        />
 
         <div className="row">
           <div className="col-md-6 col-sm-12">

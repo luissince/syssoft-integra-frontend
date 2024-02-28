@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  imageBase64,
   alertDialog,
   alertInfo,
   alertSuccess,
@@ -9,6 +8,7 @@ import {
   isText,
   isEmpty,
   keyNumberPhone,
+  imageBase64,
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../../components/Container';
@@ -23,8 +23,9 @@ import ErrorResponse from '../../../../model/class/error-response';
 import { CANCELED } from '../../../../model/types/types';
 import SearchInput from '../../../../components/SearchInput';
 import CustomComponent from '../../../../model/class/custom-component';
+import Title from '../../../../components/Title';
 
-class ProcesoSucursal extends CustomComponent {
+class SucursalEditar extends CustomComponent {
   constructor(props) {
     super(props);
     this.state = {
@@ -66,8 +67,6 @@ class ProcesoSucursal extends CustomComponent {
   }
 
   componentDidMount() {
-    this.refFileImagen.current.addEventListener('change', this.handleFileImage);
-
     const url = this.props.location.search;
     const idSucursal = new URLSearchParams(url).get('idSucursal');
     if (isText(idSucursal)) {
@@ -77,9 +76,9 @@ class ProcesoSucursal extends CustomComponent {
     }
   }
 
-  async loadingData(idSucursal) {
+  async loadingData(id) {
     const [sucursal] = await Promise.all([
-      await this.fetchIdSucursal(idSucursal),
+      await this.fetchIdSucursal(id),
     ]);
 
     const ubigeo = {
@@ -93,7 +92,7 @@ class ProcesoSucursal extends CustomComponent {
     this.handleSelectItemUbigeo(ubigeo);
 
     this.setState({
-      idSucursal: idSucursal,
+      idSucursal: id,
       nombre: sucursal.nombre,
       telefono: sucursal.telefono,
       celular: sucursal.celular,
@@ -102,13 +101,12 @@ class ProcesoSucursal extends CustomComponent {
       direcion: sucursal.direccion,
       estado: sucursal.estado === 1 ? true : false,
       idUbigeo: sucursal.idUbigeo.toString(),
-      imagen: sucursal.ruta ? '/' + sucursal.ruta : images.noImage,
+      imagen: isEmpty(sucursal.ruta) ? images.noImage : `${import.meta.env.VITE_APP_IMAGE}${sucursal.ruta}`,
       loading: false,
     });
   }
 
   componentWillUnmount() {
-    this.refFileImagen.current.removeEventListener('change', this.handleFileImage);
     this.abortController.abort();
   }
 
@@ -142,97 +140,22 @@ class ProcesoSucursal extends CustomComponent {
     }
   }
 
-  handleSave = async () => {
-    if (isEmpty(this.state.nombre)) {
-      alertWarning('Sucursal', 'Ingrese el nombre del sucursal.', () => {
-        this.refNombre.current.focus();
-      });
-      return;
-    }
-
-    if (isEmpty(this.state.direcion)) {
-      alertWarning('Sucursal', 'Ingrese la dirección del sucursal.', () => {
-        this.refDireccion.current.focus();
-      });
-      return;
-    }
-
-    if (isEmpty(this.state.idUbigeo)) {
-      alertWarning('Sucursal', 'Ingrese su ubigeo.', () => {
-        this.refIdUbigeo.current.focus();
-      });
-      return;
-    }
-
-    const imageSend = await imageBase64(this.refFileImagen.current.files);
-    if (imageSend) {
-      const { width, height } = imageSend;
-      if (width !== 1024 && height !== 629) {
-        alertWarning(
-          'Sucursal',
-          'La imagen a subir no tiene el tamaño establecido.',
-        );
-        return;
-      }
-    }
-
-    alertDialog('Sucursal', '¿Está seguro de continuar?', async (accept) => {
-      if (accept) {
-        alertInfo('Sucursal', 'Procesando información...');
-
-        const data = {
-          //datos
-          nombre: this.state.nombre.trim(),
-          telefono: this.state.telefono.trim(),
-          celular: this.state.celular.trim(),
-          email: this.state.email.trim(),
-          paginaWeb: this.state.paginaWeb.trim(),
-          direccion: this.state.direcion.trim(),
-          idUbigeo: this.state.idUbigeo,
-          estado: this.state.estado,
-          //imagen
-          imagen: !imageSend ? '' : imageSend.base64String,
-          extension: !imageSend ? '' : imageSend.extension,
-          idUsuario: this.state.idUsuario,
-          idSucursal: this.state.idSucursal,
-        };
-
-        const response = await updateSucursal(data);
-
-        if (response instanceof SuccessReponse) {
-          alertSuccess('Sucursal', response.data, () => {
-            this.props.history.goBack();
-          });
-        }
-
-        if (response instanceof ErrorResponse) {
-          if (response.getType() === CANCELED) return;
-
-          alertWarning('Sucursal', response.getMessage());
-        }
-      }
-    });
-  };
-
   //------------------------------------------------------------------------------------------
   // Eventos de la imagen
   //------------------------------------------------------------------------------------------
-
-  async handleClearImage() {
-    this.setState({ imagen: images.noImage }, () => {
-      this.refFileImagen.current.value = '';
-    });
-  }
-
-  handleFileImage = async (event) => {
+  handleFileImage = (event) => {
     if (!isEmpty(event.target.files)) {
       this.setState({ imagen: URL.createObjectURL(event.target.files[0]) });
     } else {
-      this.setState({ imagen: images.noImage }, () => {
-        this.refFileImagen.current.value = '';
-      });
+      this.setState({ imagen: images.noImage });
+      this.refFileImagen.current.value = ''
     }
-  };
+  }
+
+  handleClearImage = () => {
+    this.setState({ imagen: images.noImage });
+    this.refFileImagen.current.value = ''
+  }
 
   //------------------------------------------------------------------------------------------
   // Filtrar ubigeo
@@ -241,7 +164,7 @@ class ProcesoSucursal extends CustomComponent {
   handleClearInputaUbigeo = async () => {
     await this.setStateAsync({ ubigeos: [], idUbigeo: '', ubigeo: '' });
     this.selectItem = false;
-  };
+  }
 
   handleFilterUbigeo = async (event) => {
     const searchWord = this.selectItem ? '' : event.target.value;
@@ -283,22 +206,81 @@ class ProcesoSucursal extends CustomComponent {
     this.selectItem = true;
   }
 
+  handleSave = async () => {
+    if (isEmpty(this.state.nombre)) {
+      alertWarning('Sucursal', 'Ingrese el nombre del sucursal.', () => {
+        this.refNombre.current.focus();
+      });
+      return;
+    }
+
+    if (isEmpty(this.state.direcion)) {
+      alertWarning('Sucursal', 'Ingrese la dirección del sucursal.', () => {
+        this.refDireccion.current.focus();
+      });
+      return;
+    }
+
+    if (isEmpty(this.state.idUbigeo)) {
+      alertWarning('Sucursal', 'Ingrese su ubigeo.', () => {
+        this.refIdUbigeo.current.focus();
+      });
+      return;
+    }
+
+    alertDialog('Sucursal', '¿Está seguro de continuar?', async (accept) => {
+      if (accept) {
+        alertInfo('Sucursal', 'Procesando información...');
+
+        const logoSend = await imageBase64(this.refFileImagen.current.files);
+        const image = logoSend ? logoSend.base64String : '';
+        const ext = logoSend ? logoSend.extension : '';
+
+        const data = {
+          //datos
+          nombre: this.state.nombre.trim(),
+          telefono: this.state.telefono.trim(),
+          celular: this.state.celular.trim(),
+          email: this.state.email.trim(),
+          paginaWeb: this.state.paginaWeb.trim(),
+          direccion: this.state.direcion.trim(),
+          idUbigeo: this.state.idUbigeo,
+          estado: this.state.estado,
+          //imagen
+          imagen: image,
+          extension: ext,
+
+          idUsuario: this.state.idUsuario,
+          idSucursal: this.state.idSucursal,
+        };
+
+        const response = await updateSucursal(data);
+
+        if (response instanceof SuccessReponse) {
+          alertSuccess('Sucursal', response.data, () => {
+            this.props.history.goBack();
+          });
+        }
+
+        if (response instanceof ErrorResponse) {
+          if (response.getType() === CANCELED) return;
+
+          alertWarning('Sucursal', response.getMessage());
+        }
+      }
+    });
+  }
+
   render() {
     return (
       <ContainerWrapper>
         {this.state.loading && spinnerLoading(this.state.msgLoading)}
 
-        <div className="row">
-          <div className="col">
-            <div className="form-group">
-              <h5>
-                <span role="button" onClick={() => this.props.history.goBack()}>
-                  <i className="bi bi-arrow-left-short"></i>
-                </span> Sucursal <small className="text-secondary"> Editar</small>
-              </h5>
-            </div>
-          </div>
-        </div>
+        <Title
+          title='Sucursal'
+          subTitle='Editar'
+          handleGoBack={() => this.props.history.goBack()}
+        />
 
         <div className="row">
           <div className="form-group col">
@@ -308,6 +290,7 @@ class ProcesoSucursal extends CustomComponent {
             <input
               type="text"
               className="form-control"
+              autoFocus
               ref={this.refNombre}
               value={this.state.nombre}
               onChange={(event) =>
@@ -479,6 +462,7 @@ class ProcesoSucursal extends CustomComponent {
                 id="fileImage"
                 accept="image/png, image/jpeg, image/gif, image/svg"
                 ref={this.refFileImagen}
+                onChange={this.handleFileImage}
               />
               <label
                 htmlFor="fileImage"
@@ -503,10 +487,10 @@ class ProcesoSucursal extends CustomComponent {
           <div className="col">
             <button
               type="button"
-              className="btn btn-success"
+              className="btn btn-warning"
               onClick={this.handleSave}
             >
-              <i className="fa fa-save"></i> Guardar
+              <i className="fa fa-save"></i> Actualizar
             </button>
             <button
               type="button"
@@ -528,4 +512,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(ProcesoSucursal);
+const ConnectedSucursalEditar = connect(mapStateToProps, null)(SucursalEditar);
+
+export default ConnectedSucursalEditar;

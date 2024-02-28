@@ -428,25 +428,23 @@ export function convertNullText(value) {
 }
 
 export function isEmpty(object) {
-  if (object === null) {
+  if (object === null || typeof object === 'undefined') {
     return true;
   }
 
-  if (Array.isArray(object)) {
-    return object.length === 0 ? true : false;
+  if (Array.isArray(object) || object instanceof FileList) {
+    return object.length === 0;
   }
 
   if (typeof object === 'string') {
-    return object === '' ? true : false;
+    return object === '';
   }
 
   if (typeof object === 'object') {
-    return false;
+    return Object.keys(object).length === 0;
   }
 
-  if (typeof object === 'undefined') {
-    return true;
-  }
+  return false;
 }
 
 export function getCookie(cname) {
