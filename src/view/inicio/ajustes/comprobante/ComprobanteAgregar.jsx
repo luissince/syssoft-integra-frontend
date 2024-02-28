@@ -19,6 +19,7 @@ import {
   addComprobante,
   comboTipoComprobante,
 } from '../../../../network/rest/principal.network';
+import Title from '../../../../components/Title';
 
 class ComporbanteAgregar extends CustomComponent {
   constructor(props) {
@@ -164,18 +165,11 @@ class ComporbanteAgregar extends CustomComponent {
       <ContainerWrapper>
         {this.state.loading && spinnerLoading(this.state.msgLoading)}
 
-        <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-12">
-            <div className="form-group">
-              <h5>
-                <span role="button" onClick={() => this.props.history.goBack()}>
-                  <i className="bi bi-arrow-left-short"></i>
-                </span>{' '}
-                Agregar Comprobante
-              </h5>
-            </div>
-          </div>
-        </div>
+        <Title
+          title='Comprobante'
+          subTitle='Agregar'
+          handleGoBack={() => this.props.history.goBack()}
+        />
 
         <div className="row">
           <div className="col">
@@ -437,14 +431,14 @@ class ComporbanteAgregar extends CustomComponent {
                 className="btn btn-primary"
                 onClick={this.handleGuardar}
               >
-              <i className='fa fa-save'></i>  Guardar
+                <i className='fa fa-save'></i>  Guardar
               </button>{' '}
               <button
                 type="button"
                 className="btn btn-danger"
                 onClick={() => this.props.history.goBack()}
               >
-              <i className='fa fa-close'></i>  Cerrar
+                <i className='fa fa-close'></i>  Cerrar
               </button>
             </div>
           </div>

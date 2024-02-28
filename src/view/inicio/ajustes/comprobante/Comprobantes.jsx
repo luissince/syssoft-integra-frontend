@@ -1,12 +1,10 @@
 import React from 'react';
 import {
-  formatTime,
   alertDialog,
   alertInfo,
   alertSuccess,
   alertWarning,
   spinnerLoading,
-  statePrivilegio,
   keyUpSearch,
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
@@ -20,6 +18,7 @@ import {
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
 import { CANCELED } from '../../../../model/types/types';
+import Title from '../../../../components/Title';
 
 class Comprobantes extends CustomComponent {
   constructor(props) {
@@ -183,15 +182,10 @@ class Comprobantes extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
-        <div className="row">
-          <div className="col-md-12">
-            <div className="form-group">
-              <h5>
-                Comprobantes <small className="text-secondary">LISTA</small>
-              </h5>
-            </div>
-          </div>
-        </div>
+        <Title
+          title='Comprobantes'
+          subTitle='Lista'
+        />
 
         <div className="row">
           <div className="col-md-6 col-sm-12">
@@ -282,7 +276,7 @@ class Comprobantes extends CustomComponent {
                           <td>{item.tipo.toUpperCase()}</td>
                           <td>{item.nombre}</td>
                           <td>{item.serie}</td>
-                          <td>{item.numeracion}</td>                   
+                          <td>{item.numeracion}</td>
                           <td className="text-center">
                             <div className={`badge ${item.preferida === 1 ? 'badge-info' : 'badge-danger'}`}>{item.preferida === 1 ? 'Si' : 'No'}</div>
                           </td>

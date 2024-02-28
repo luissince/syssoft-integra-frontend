@@ -44,8 +44,6 @@ class UsuarioEditar extends CustomComponent {
       representante: '',
       estado: '1',
       usuario: '',
-      clave: '',
-      configClave: '',
       tipo: false,
       activeLogin: false,
     };
@@ -103,8 +101,6 @@ class UsuarioEditar extends CustomComponent {
       estado: usuario.estado,
       activeLogin: usuario.login,
       usuario: usuario.usuario,
-      clave: usuario.clave,
-      configClave: usuario.clave,
 
       idUsuario: usuario.idUsuario,
       tipo: false,
@@ -196,38 +192,6 @@ class UsuarioEditar extends CustomComponent {
       return;
     }
 
-    if (isEmpty(this.state.activeLogin && this.state.clave)) {
-      alertWarning(
-        'Usuario',
-        'Ingrese su clave para el inicio de sesión.',
-        () => {
-          this.onFocusTab('login-tab', 'login');
-          this.refClave.current.focus();
-        },
-      );
-      return;
-    }
-
-    if (this.state.activeLogin && isEmpty(this.state.configClave)) {
-      alertWarning(
-        'Usuario',
-        'Ingrese nuevamente su clave para el inicio de sesión.',
-        () => {
-          this.onFocusTab('login-tab', 'login');
-          this.refConfigClave.current.focus();
-        },
-      );
-      return;
-    }
-
-    if (this.state.activeLogin && this.state.clave !== this.state.configClave) {
-      alertWarning('Usuario', 'Las contraseñas con coinciden.', () => {
-        this.onFocusTab('login-tab', 'login');
-        this.refClave.current.focus();
-      });
-      return;
-    }
-
     alertDialog('Usuario', '¿Está seguro de continuar?', async (accept) => {
       if (accept) {
         const data = {
@@ -245,7 +209,6 @@ class UsuarioEditar extends CustomComponent {
           estado: this.state.estado,
           activeLogin: this.state.activeLogin,
           usuario: this.state.usuario.trim(),
-          clave: this.state.clave.trim(),
 
           //idUsuario
           idUsuario: this.state.idUsuario,
@@ -300,7 +263,7 @@ class UsuarioEditar extends CustomComponent {
         </div>
 
         <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+          <div className="col">
             <ul className="nav nav-tabs" id="myTab" role="tablist">
               <li className="nav-item" role="presentation">
                 <a
@@ -647,82 +610,32 @@ class UsuarioEditar extends CustomComponent {
                   />
                 </div>
 
-                {this.state.tipo ? (
-                  <div className="form-row">
-                    <div className="form-group col-md-6">
-                      <label htmlFor="contraseña">Contraseña</label>
-                      <input
-                        type="password"
-                        className="form-control"
-                        id="contraseña"
-                        value={this.state.clave}
-                        ref={this.refClave}
-                        onChange={(event) => {
-                          if (event.target.value.trim().length > 0) {
-                            this.setState({
-                              clave: event.target.value,
-                              messageWarning: '',
-                            });
-                          } else {
-                            this.setState({
-                              clave: event.target.value,
-                              messageWarning: 'Ingrese la contraseña',
-                            });
-                          }
-                        }}
-                        placeholder="Ingrese la contraseña"
-                        disabled={!this.state.activeLogin}
-                      />
-                    </div>
-                    <div className="form-group col-md-6">
-                      <label htmlFor="contraseña2">Confirmar Contraseña</label>
-                      <input
-                        type="password"
-                        className="form-control"
-                        id="contraseña2"
-                        value={this.state.configClave}
-                        ref={this.refConfigClave}
-                        onChange={(event) => {
-                          if (event.target.value.trim().length > 0) {
-                            this.setState({
-                              configClave: event.target.value,
-                              messageWarning: '',
-                            });
-                          } else {
-                            this.setState({
-                              configClave: event.target.value,
-                              messageWarning: 'Ingrese contraseña nuevamente',
-                            });
-                          }
-                        }}
-                        placeholder="Ingrese contraseña nuevamente"
-                        disabled={!this.state.activeLogin}
-                      />
-                    </div>
-                  </div>
-                ) : null}
-
                 {/* End Login */}
               </div>
             </div>
           </div>
         </div>
 
-        <div className="modal-footer">
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={() => this.handleGuardar()}
-          >
-            Aceptar
-          </button>
-          <button
-            type="button"
-            className="btn btn-danger"
-            onClick={() => this.props.history.goBack()}
-          >
-            Cerrar
-          </button>
+        <div className="row">
+          <div className="col">
+            <div className="form-group">
+              <button
+                type="button"
+                className="btn btn-warning"
+                onClick={() => this.handleGuardar()}
+              >
+                <i className='fa fa-edit'></i> Actualizar
+              </button>
+              {" "}
+              <button
+                type="button"
+                className="btn btn-danger"
+                onClick={() => this.props.history.goBack()}
+              >
+                <i className='fa fa-close'></i>  Cerrar
+              </button>
+            </div>
+          </div>
         </div>
       </ContainerWrapper>
     );

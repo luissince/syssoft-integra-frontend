@@ -16,6 +16,7 @@ import ErrorResponse from '../../../../model/class/error-response';
 import { CANCELED } from '../../../../model/types/types';
 import CustomComponent from '../../../../model/class/custom-component';
 import { Link } from 'react-router-dom/cjs/react-router-dom.min';
+import Title from '../../../../components/Title';
 
 class BancoDetalle extends CustomComponent {
 
@@ -218,20 +219,13 @@ class BancoDetalle extends CustomComponent {
     return (
       <ContainerWrapper>
         {this.state.initial && spinnerLoading(this.state.messageLoading)}
+        
+        <Title
+          title='Banco'
+          subTitle='detalle'
+          handleGoBack={() => this.props.history.goBack()}
+        />
 
-        <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <div className="form-group">
-              <h5>
-                <span role="button" onClick={() => this.props.history.goBack()}>
-                  <i className="bi bi-arrow-left-short"></i>
-                </span>{' '}
-                Banco
-                <small className="text-secondary"> detalle</small>
-              </h5>
-            </div>
-          </div>
-        </div>
 
         <div className="row">
           <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">

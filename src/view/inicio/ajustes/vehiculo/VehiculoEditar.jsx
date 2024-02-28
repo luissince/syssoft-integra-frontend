@@ -18,6 +18,7 @@ import {
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
 import { CANCELED } from '../../../../model/types/types';
+import Title from '../../../../components/Title';
 
 class VehiculoEditar extends CustomComponent {
 
@@ -134,19 +135,12 @@ class VehiculoEditar extends CustomComponent {
     return (
       <ContainerWrapper>
         {this.state.loading && spinnerLoading(this.state.msgLoading)}
-
-        <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-12">
-            <div className="form-group">
-              <h5>
-                <span role="button" onClick={() => this.props.history.goBack()}>
-                  <i className="bi bi-arrow-left-short"></i>
-                </span>{' '}
-                Editar Vehículo
-              </h5>
-            </div>
-          </div>
-        </div>
+        
+        <Title
+          title='Vehículo'
+          subTitle='Editar'
+          handleGoBack={() => this.props.history.goBack()}
+        />
 
         <div className="row">
           <div className="col-md-6 col-12">

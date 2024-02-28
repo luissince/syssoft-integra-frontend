@@ -24,6 +24,7 @@ import {
   comboProductos,
   comboCategoria,
 } from '../../../../../network/rest/principal.network';
+import PropTypes from 'prop-types';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import ModalInventario from '../component/ModalInventario';
@@ -35,6 +36,7 @@ import Combo from '../component/Combo';
 import DetalleImagen from '../component/DetalleImagen';
 import ModalProducto from '../component/ModalProducto';
 import { SERVICIO, UNIDADES } from '../../../../../model/types/tipo-tratamiento-producto';
+import Title from '../../../../../components/Title';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -104,9 +106,6 @@ class ProductoAgregar extends CustomComponent {
       precioCombo: '',
 
       inventarioCombo: [],
-
-      // imagen
-      fileImage: [],
 
       // lista libre
       medidas: [],
@@ -786,21 +785,20 @@ class ProductoAgregar extends CustomComponent {
     if (!isEmpty(event.target.files)) {
       this.setState({
         imagen: URL.createObjectURL(event.target.files[0]),
-        fileImage: event.target.files,
       });
     } else {
       this.setState({
         imagen: images.noImage,
-        fileImage: [],
       });
+      this.refFileImagen.current.value = ''
     }
   }
 
   handleRemoveImagen = () => {
     this.setState({
       imagen: images.noImage,
-      fileImage: [],
     });
+    this.refFileImagen.current.value = ''
   }
 
   handleSelectPreferido = (event) => {
@@ -1214,19 +1212,11 @@ class ProductoAgregar extends CustomComponent {
 
         {this.state.loading && spinnerLoading(this.state.msgLoading)}
 
-        <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <div className="form-group">
-              <h5>
-                <span role="button" onClick={() => this.props.history.goBack()}>
-                  <i className="bi bi-arrow-left-short"></i>
-                </span>{' '}
-                Producto
-                <small className="text-secondary"> Agregar</small>
-              </h5>
-            </div>
-          </div>
-        </div>
+        <Title
+          title='Producto'
+          subTitle='Agregar'
+          handleGoBack={() => this.props.history.goBack()}
+        />
 
         <div className="row">
           <div className="col-xl-8 col-lg-12 col-md-12 col-sm-12 col-12">
@@ -1454,8 +1444,21 @@ const mapStateToProps = (state) => {
   };
 };
 
+ProductoAgregar.propTypes = {
+  token: PropTypes.shape({
+    userToken: PropTypes.shape({
+      idUsuario: PropTypes.string
+    })
+  }),
+  history: PropTypes.shape({
+    goBack: PropTypes.func
+  })
+}
+
 /**
  *
  * Método encargado de conectar con redux y exportar la clase
  */
-export default connect(mapStateToProps, null)(ProductoAgregar);
+const ConnectedProductoAgregar = connect(mapStateToProps, null)(ProductoAgregar);
+
+export default ConnectedProductoAgregar;

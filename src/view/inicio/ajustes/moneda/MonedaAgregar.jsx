@@ -13,6 +13,7 @@ import { CANCELED } from '../../../../model/types/types';
 import ErrorResponse from '../../../../model/class/error-response';
 import SuccessReponse from '../../../../model/class/response';
 import { addMoneda } from '../../../../network/rest/principal.network';
+import Title from '../../../../components/Title';
 
 class MonedaAgregar extends CustomComponent {
   constructor(props) {
@@ -79,18 +80,12 @@ class MonedaAgregar extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
-        <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-12">
-            <div className="form-group">
-              <h5>
-                <span role="button" onClick={() => this.props.history.goBack()}>
-                  <i className="bi bi-arrow-left-short"></i>
-                </span>{' '}
-                Agregar Moneda
-              </h5>
-            </div>
-          </div>
-        </div>
+
+        <Title
+          title='Moneda'
+          subTitle='Agregar'
+          handleGoBack={() => this.props.history.goBack()}
+        />
 
         <div className="row">
           <div className="form-group col-md-6">

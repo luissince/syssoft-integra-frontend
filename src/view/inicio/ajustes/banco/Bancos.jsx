@@ -20,6 +20,7 @@ import SuccessReponse from '../../../../model/class/response';
 import { CANCELED } from '../../../../model/types/types';
 import ContainerWrapper from '../../../../components/Container';
 import CustomComponent from '../../../../model/class/custom-component';
+import Title from '../../../../components/Title';
 
 class Bancos extends CustomComponent {
 
@@ -253,15 +254,10 @@ class Bancos extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
-        <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-12">
-            <div className="form-group">
-              <h5>
-                Bancos <small className="text-secondary">LISTA</small>
-              </h5>
-            </div>
-          </div>
-        </div>
+        <Title
+          title='Bancos'
+          subTitle='Lista'
+        />
 
         <div className="row">
           <div className="col-md-6 col-sm-12">

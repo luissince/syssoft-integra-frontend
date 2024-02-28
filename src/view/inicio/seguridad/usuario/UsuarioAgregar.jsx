@@ -636,21 +636,26 @@ class UsuarioAgregar extends CustomComponent {
           </div>
         </div>
 
-        <div className="modal-footer">
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={() => this.handleGuardar()}
-          >
-            Aceptar
-          </button>
-          <button
-            type="button"
-            className="btn btn-danger"
-            onClick={() => this.props.history.goBack()}
-          >
-            Cerrar
-          </button>
+        <div className="row">
+          <div className="col">
+            <div className="form-group">
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => this.handleGuardar()}
+              >
+                <i className='fa fa-save'></i> Registrar
+              </button>
+              {" "}
+              <button
+                type="button"
+                className="btn btn-danger"
+                onClick={() => this.props.history.goBack()}
+              >
+                <i className='fa fa-close'></i>  Cerrar
+              </button>
+            </div>
+          </div>
         </div>
       </ContainerWrapper>
     );

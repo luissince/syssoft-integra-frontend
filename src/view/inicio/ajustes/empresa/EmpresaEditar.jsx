@@ -23,6 +23,7 @@ import ErrorResponse from '../../../../model/class/error-response';
 import { CANCELED } from '../../../../model/types/types';
 import { getRuc } from '../../../../network/rest/apisperu.network';
 import CustomComponent from '../../../../model/class/custom-component';
+import Title from '../../../../components/Title';
 
 class EmpresaProceso extends CustomComponent {
   constructor(props) {
@@ -216,6 +217,24 @@ class EmpresaProceso extends CustomComponent {
     window.open(url);
   }
 
+  handleLookPasswordEmail = () => {
+    this.setState({ lookPasswordEmail: !this.state.lookPasswordEmail }, () => {
+      this.refPasswordEmail.current.focus();
+    });
+  };
+
+  handleLookPasswordSol = () => {
+    this.setState({ refPasswordSol: !this.state.refPasswordSol }, () => {
+      this.refPasswordSol.current.focus();
+    });
+  };
+
+  handleLookPasswordApiSunat = () => {
+    this.setState({ lookPasswordClave: !this.state.lookPasswordClave }, () => {
+      this.refPasswordClave.current.focus();
+    });
+  };
+
   async handleGuardar() {
     if (isEmpty(this.state.documento)) {
       alertWarning('Empresa', 'Ingrese el número de documento.', () =>
@@ -282,41 +301,16 @@ class EmpresaProceso extends CustomComponent {
     });
   }
 
-  handleLookPasswordEmail = () => {
-    this.setState({ lookPasswordEmail: !this.state.lookPasswordEmail }, () => {
-      this.refPasswordEmail.current.focus();
-    });
-  };
-
-  handleLookPasswordSol = () => {
-    this.setState({ refPasswordSol: !this.state.refPasswordSol }, () => {
-      this.refPasswordSol.current.focus();
-    });
-  };
-
-  handleLookPasswordApiSunat = () => {
-    this.setState({ lookPasswordClave: !this.state.lookPasswordClave }, () => {
-      this.refPasswordClave.current.focus();
-    });
-  };
-
   render() {
     return (
       <ContainerWrapper>
         {this.state.loading && spinnerLoading(this.state.msgLoading)}
 
-        <div className="row">
-          <div className="col">
-            <div className="form-group">
-              <h5>
-                <span role="button" onClick={() => this.props.history.goBack()}>
-                  <i className="bi bi-arrow-left-short"></i>
-                </span>{' '}
-                Editar Empresa
-              </h5>
-            </div>
-          </div>
-        </div>
+        <Title
+          title='Empresa'
+          subTitle='Editar'
+          handleGoBack={() => this.props.history.goBack()}
+        />
 
         <div className="row">
           <div className="form-group col-md-6">

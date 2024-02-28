@@ -5,7 +5,6 @@ import {
   alertInfo,
   alertSuccess,
   alertWarning,
-  statePrivilegio,
   keyUpSearch,
   isEmpty,
 } from '../../../../helper/utils.helper';
@@ -20,6 +19,7 @@ import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
 import { CANCELED } from '../../../../model/types/types';
 import CustomComponent from '../../../../model/class/custom-component';
+import Title from '../../../../components/Title';
 
 class Monedas extends CustomComponent {
   constructor(props) {
@@ -231,7 +231,7 @@ class Monedas extends CustomComponent {
               className="btn btn-outline-warning btn-sm"
               title="Editar"
               onClick={() => this.handleEditar(item.idMoneda)}
-              // disabled={!this.state.edit}
+            // disabled={!this.state.edit}
             >
               <i className="bi bi-pencil"></i>
             </button>
@@ -241,7 +241,7 @@ class Monedas extends CustomComponent {
               className="btn btn-outline-danger btn-sm"
               title="Eliminar"
               onClick={() => this.handleBorrar(item.idMoneda)}
-              // disabled={!this.state.remove}
+            // disabled={!this.state.remove}
             >
               <i className="bi bi-trash"></i>
             </button>
@@ -254,15 +254,10 @@ class Monedas extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
-        <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <div className="form-group">
-              <h5>
-                Monedas <small className="text-secondary">LISTA</small>
-              </h5>
-            </div>
-          </div>
-        </div>
+        <Title
+          title='Monedas'
+          subTitle='Lista'
+        />
 
         <div className="row">
           <div className="col-md-6 col-sm-12">
@@ -292,7 +287,7 @@ class Monedas extends CustomComponent {
               <button
                 className="btn btn-outline-info"
                 onClick={this.handleAgregar}
-                // disabled={!this.state.add}
+              // disabled={!this.state.add}
               >
                 <i className="bi bi-file-plus"></i> Nuevo Registro
               </button>{' '}

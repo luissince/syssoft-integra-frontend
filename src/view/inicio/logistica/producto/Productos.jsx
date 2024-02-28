@@ -418,4 +418,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(Productos);
+const ConnectedProductos = connect(mapStateToProps, null)(Productos);
+
+export default ConnectedProductos;
