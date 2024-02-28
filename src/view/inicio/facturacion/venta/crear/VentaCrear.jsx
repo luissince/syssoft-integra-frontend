@@ -638,7 +638,7 @@ class VentaCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
   // Modal impresión
   //------------------------------------------------------------------------------------------
-  
+
   handleOpenPrint = (idVenta) => {
     this.setState({ isOpenPrinter: true, idVenta: idVenta })
   }
@@ -680,7 +680,7 @@ class VentaCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
   // Modal configuración
   //------------------------------------------------------------------------------------------
-  
+
   handleOpenOptions = () => {
     const invoice = document.getElementById(this.idModalConfiguration);
     this.refImpuesto.current.value = this.state.idImpuesto;
@@ -2034,4 +2034,7 @@ const mapDispatchToProps = (dispatch) => {
  *
  * Método encargado de conectar con redux y exportar la clase
  */
-export default connect(mapStateToProps, mapDispatchToProps)(VentaCrear);
+
+const ConnectedVentaCrear = connect(mapStateToProps, mapDispatchToProps)(VentaCrear);
+
+export default ConnectedVentaCrear;

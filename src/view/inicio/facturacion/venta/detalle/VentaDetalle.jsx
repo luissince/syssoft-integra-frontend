@@ -442,4 +442,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(VentaDetalle);
+const ConnectedVentaDetalle = connect(mapStateToProps, null)(VentaDetalle);
+
+export default ConnectedVentaDetalle;
