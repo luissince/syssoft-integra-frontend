@@ -1,4 +1,4 @@
-name: Docker Image CI - SysSoftIntegra FrontEnd
+name: Docker Staging CI - SysSoftIntegra FrontEnd
 
 # Definición de eventos desencadenadores
 on:
