@@ -59,7 +59,7 @@ class BancoAgregar extends CustomComponent {
   }
 
   async loadingData() {
-    const [monedas] = await Promise.all([await this.fetchMonedaCombo()]);
+    const [monedas] = await Promise.all([this.fetchMonedaCombo()]);
 
     this.setState({
       monedas,

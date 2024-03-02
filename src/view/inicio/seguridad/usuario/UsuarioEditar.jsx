@@ -82,8 +82,8 @@ class UsuarioEditar extends CustomComponent {
 
   loadDataId = async (id) => {
     const [perfiles, usuario] = await Promise.all([
-      await this.fetchComboPerfil(),
-      await this.fetchObtenerUsuario(id),
+      this.fetchComboPerfil(),
+      this.fetchObtenerUsuario(id),
     ]);
 
     this.setState({

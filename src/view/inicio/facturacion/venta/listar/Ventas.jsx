@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  spinnerLoading,
   numberFormat,
   formatTime,
   alertDialog,
@@ -24,6 +23,11 @@ import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
 import { CONTADO, CREDITO_FIJO, CREDITO_VARIABLE } from '../../../../../model/types/forma-pago';
+import Title from '../../../../../components/Title';
+import Row from '../../../../../components/Row';
+import Column from '../../../../../components/Column';
+import { TableResponsive } from '../../../../../components/Table';
+import { SpinnerTable } from '../../../../../components/Spinner';
 
 class Ventas extends CustomComponent {
   constructor(props) {
@@ -182,7 +186,9 @@ class Ventas extends CustomComponent {
       return (
         <tr>
           <td className="text-center" colSpan="10">
-            {spinnerLoading('Cargando información de la tabla...', true)}
+            <SpinnerTable
+              message='Cargando información de la tabla...'
+            />
           </td>
         </tr>
       );
@@ -205,20 +211,11 @@ class Ventas extends CustomComponent {
       return (
         <tr key={index}>
           <td className={`text-center`}>{item.id}</td>
-          <td>
-            {item.fecha}
-            <br />
-            {formatTime(item.hora)}
+          <td>{item.fecha}<br />{formatTime(item.hora)}
           </td>
-          <td>
-            {item.documento}
-            <br />
-            {item.informacion}
+          <td>{item.documento}<br />{item.informacion}
           </td>
-          <td>
-            {item.comprobante}
-            <br />
-            {item.serie + '-' + formatNumberWithZeros(item.numeracion)}
+          <td>{item.comprobante}<br />{item.serie + '-' + formatNumberWithZeros(item.numeracion)}
           </td>
           <td>{tipo}</td>
           <td className="text-center">{estado}</td>
@@ -249,18 +246,13 @@ class Ventas extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
-        <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <div className="form-group">
-              <h5>
-                Ventas <small className="text-secondary">LISTA</small>
-              </h5>
-            </div>
-          </div>
-        </div>
+        <Title
+          title='Ventas'
+          subTitle='LISTA'
+        />
 
-        <div className="row">
-          <div className="col-md-6 col-sm-12">
+        <Row>
+          <Column className="col-md-6 col-sm-12">
             <div className="form-group">
               <div className="input-group mb-2">
                 <div className="input-group-prepend">
@@ -282,9 +274,9 @@ class Ventas extends CustomComponent {
                 />
               </div>
             </div>
-          </div>
+          </Column>
 
-          <div className="col-md-6 col-sm-12">
+          <Column className="col-md-6 col-sm-12">
             <div className="form-group">
               <button
                 className="btn btn-outline-info"
@@ -298,35 +290,33 @@ class Ventas extends CustomComponent {
                 <i className="bi bi-arrow-clockwise"></i>
               </button>
             </div>
-          </div>
-        </div>
+          </Column>
+        </Row>
 
-        <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <div className="table-responsive">
-              <table className="table table-striped table-bordered rounded">
-                <thead>
-                  <tr>
-                    <th width="5%" className="text-center">#</th>
-                    <th width="10%">Fecha</th>
-                    <th width="10%">Cliente</th>
-                    <th width="10%">Comprobante</th>
-                    <th width="10%">Forma de Cobro</th>
-                    <th width="10%" className="text-center">Estado</th>
-                    <th width="10%">Total</th>
-                    <th width="5%" className="text-center">
-                      Detalle
-                    </th>
-                    <th width="5%" className="text-center">
-                      Anular
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>{this.generateBody()}</tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+        <Row>
+          <Column>
+            <TableResponsive
+              tHead={
+                <tr>
+                  <th width="5%" className="text-center">#</th>
+                  <th width="10%">Fecha</th>
+                  <th width="10%">Cliente</th>
+                  <th width="10%">Comprobante</th>
+                  <th width="10%">Forma de Cobro</th>
+                  <th width="10%" className="text-center">Estado</th>
+                  <th width="10%">Total</th>
+                  <th width="5%" className="text-center">
+                    Detalle
+                  </th>
+                  <th width="5%" className="text-center">
+                    Anular
+                  </th>
+                </tr>
+              }
+              tBody={this.generateBody()}
+            />
+          </Column>
+        </Row>
 
         <Paginacion
           loading={this.state.loading}

@@ -72,7 +72,9 @@ class Kardex extends CustomComponent {
   }
 
   async loadingData() {
-    const [almacenes] = await Promise.all([await this.fetchComboAlmacen({ idSucursal: this.state.idSucursal })]);
+    const [almacenes] = await Promise.all([
+      this.fetchComboAlmacen({ idSucursal: this.state.idSucursal })
+    ]);
 
     await this.setStateAsync({
       almacenes,

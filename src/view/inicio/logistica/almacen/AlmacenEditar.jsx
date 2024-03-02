@@ -14,7 +14,6 @@ import { connect } from 'react-redux';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
 import {
-  addAlmacen,
   getIdAlmacen,
   getUbigeo,
   updateAlmacen,
@@ -66,7 +65,9 @@ class AlmaceneEditar extends CustomComponent {
   }
 
   async loadingData(id) {
-    const [almacen] = await Promise.all([await this.fetchGetIdAlmacen(id)]);
+    const [almacen] = await Promise.all([
+      this.fetchGetIdAlmacen(id)
+    ]);
 
     const ubigeo = {
       idUbigeo: almacen.idUbigeo,

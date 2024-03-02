@@ -78,7 +78,7 @@ class SucursalEditar extends CustomComponent {
 
   async loadingData(id) {
     const [sucursal] = await Promise.all([
-      await this.fetchIdSucursal(id),
+      this.fetchIdSucursal(id),
     ]);
 
     const ubigeo = {

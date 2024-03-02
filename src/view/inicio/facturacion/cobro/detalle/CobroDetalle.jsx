@@ -1,5 +1,3 @@
-import React from 'react';
-import CryptoJS from 'crypto-js';
 import {
   rounded,
   numberFormat,
@@ -54,7 +52,9 @@ class CobroDetalle extends CustomComponent {
   }
 
   async loadDataId(id) {
-    const [cobro] = await Promise.all([await this.fetchDetailCobro(id)]);
+    const [cobro] = await Promise.all([
+      this.fetchDetailCobro(id)
+    ]);
 
     if (cobro === null) {
       this.props.history.goBack();

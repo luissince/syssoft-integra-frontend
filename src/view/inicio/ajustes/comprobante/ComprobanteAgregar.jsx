@@ -35,7 +35,7 @@ class ComporbanteAgregar extends CustomComponent {
       preferida: false,
       numeroCampo: '',
       facturado: false,
-      anulacion: '0',
+      anulacion: "0",
 
       tipoComprobante: [],
 
@@ -64,7 +64,7 @@ class ComporbanteAgregar extends CustomComponent {
 
   async loadingData() {
     const [tipoComprobante] = await Promise.all([
-      await this.fetchComboTipoComporbante(),
+      this.fetchComboTipoComporbante(),
     ]);
 
     this.setState({
@@ -141,7 +141,7 @@ class ComporbanteAgregar extends CustomComponent {
             anulacion: this.state.anulacion,
             idUsuario: this.state.idUsuario,
           };
-
+          console.log(data)
           const response = await addComprobante(data, this.abortController.signal);
 
           if (response instanceof SuccessReponse) {
@@ -348,16 +348,16 @@ class ComporbanteAgregar extends CustomComponent {
                     className="form-check-input checked"
                     type="radio"
                     name="inlineRadioOptions"
-                    id="1"
-                    value="1"
-                    checked={this.state.anulacion === '1'}
+                    id={"1"}
+                    value={"1"}
+                    checked={this.state.anulacion === "1"}
                     onChange={(event) => {
                       this.setState({
                         anulacion: event.target.value
                       })
                     }}
                   />
-                  <label className="form-check-label" htmlFor="1">
+                  <label className="form-check-label" htmlFor={"1"}>
                     {' '}
                     Comunicación de baja
                   </label>
@@ -370,16 +370,16 @@ class ComporbanteAgregar extends CustomComponent {
                     className="form-check-input"
                     type="radio"
                     name="inlineRadioOptions"
-                    id="2"
-                    value="2"
-                    checked={this.state.anulacion === '2'}
+                    id={"2"}
+                    value={"2"}
+                    checked={this.state.anulacion === "2"}
                     onChange={(event) => {
                       this.setState({
                         anulacion: event.target.value
                       })
                     }}
                   />
-                  <label className="form-check-label" htmlFor="2">
+                  <label className="form-check-label" htmlFor={"2"}>
                     {' '}
                     Resumen diario
                   </label>

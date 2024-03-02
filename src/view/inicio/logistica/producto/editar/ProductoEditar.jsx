@@ -218,9 +218,9 @@ class ProductoEditar extends CustomComponent {
    */
   loadingData = async (idProducto) => {
     const [medidas, categorias, producto] = await Promise.all([
-      await this.fetchComboMedida(),
-      await this.fetchComboCategoria(),
-      await this.fetchProducto(idProducto),
+      this.fetchComboMedida(),
+      this.fetchComboCategoria(),
+      this.fetchProducto(idProducto),
     ]);
 
     if (producto.idTipoProducto === 'TP0001') {
@@ -1316,6 +1316,6 @@ ProductoEditar.propTypes = {
  *
  * Método encargado de conectar con redux y exportar la clase
  */
-const ConnectedProductoEditar=  connect(mapStateToProps, null)(ProductoEditar);
+const ConnectedProductoEditar = connect(mapStateToProps, null)(ProductoEditar);
 
 export default ConnectedProductoEditar;

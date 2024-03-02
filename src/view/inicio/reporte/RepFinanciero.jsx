@@ -63,8 +63,8 @@ class RepFinanciero extends CustomComponent {
   loadData = async () => {
 
     const [sucursales, usuarios] = await Promise.all([
-      await this.fetchComboSucursal(),
-      await this.fetchComboUsuario(),
+      this.fetchComboSucursal(),
+      this.fetchComboUsuario(),
     ]);
 
     this.setState({

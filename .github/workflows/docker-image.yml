@@ -1,9 +1,11 @@
 name: Docker Image CI - SysSoftIntegra FrontEnd
 
+# Definición de eventos desencadenadores
 on:
   push:
     branches: [ "master", "test"]
 
+# Definición de trabajos
 jobs:
   build-and-deploy-app-test:
     if: github.event_name == 'push' && github.ref == 'refs/heads/test'

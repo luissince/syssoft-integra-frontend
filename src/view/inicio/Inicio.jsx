@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 // import { io } from "socket.io-client";
 // import { NotificationContainer, NotificationManager } from 'react-notifications';
 import { Switch, Route, Redirect } from 'react-router-dom';
@@ -22,10 +23,10 @@ import Cobros from './facturacion/cobro/lista/Cobros';
 import CobroCrear from './facturacion/cobro/crear/CobroCrear';
 import CobroDetalle from './facturacion/cobro/detalle/CobroDetalle';
 
-import Cotizaciones from './facturacion/cotizacion/Cotizaciones.jsx';
-import CotizacioneCrear from './facturacion/cotizacion/CotizacionCrear.jsx';
-import CotizacioneEditar from './facturacion/cotizacion/CotizacionEditar.jsx';
-import CotizacionDetalle from './facturacion/cotizacion/CotizacionDetalle.jsx';
+import Cotizaciones from './facturacion/cotizacion/lista/Cotizaciones.jsx';
+import CotizacioneCrear from './facturacion/cotizacion/crear/CotizacionCrear.jsx';
+import CotizacioneEditar from './facturacion/cotizacion/editar/CotizacionEditar.jsx';
+import CotizacionDetalle from './facturacion/cotizacion/detalle/CotizacionDetalle.jsx';
 
 import GuiaRemision from './facturacion/guiaremision/listar/GuiaRemision.jsx';
 import GuiaRemisionCrear from './facturacion/guiaremision/crear/GuiaRemisionCrear.jsx';
@@ -213,7 +214,7 @@ class Inicio extends React.Component {
     }
   };
 
-  onEventResize(event) {
+  onEventResize() {
     const { refSideBar } = this;
 
     if (!refSideBar || !refSideBar.current) return;
@@ -298,7 +299,8 @@ class Inicio extends React.Component {
           path={path}
           url={url}
           pathname={pathname}
-          {...this.props}
+          project={this.props.token.project}
+          userToken={this.props.token.userToken}
         />
 
         <Head
@@ -901,4 +903,20 @@ const mapDispatchToProps = (dispatch) => {
   };
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(Inicio);
+Inicio.propTypes = {
+  restore: PropTypes.func,
+  history: PropTypes.object,
+  token: PropTypes.shape({
+    userToken: PropTypes.object,
+    project: PropTypes.object,
+  }),
+  restoreProject: PropTypes.func,
+  match: PropTypes.object,
+  location: PropTypes.shape({
+    pathname: PropTypes.string
+  })
+};
+
+const ConnectedInicio = connect(mapStateToProps, mapDispatchToProps)(Inicio);;
+
+export default ConnectedInicio;

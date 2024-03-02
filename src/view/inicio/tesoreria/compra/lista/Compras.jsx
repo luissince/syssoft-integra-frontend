@@ -2,12 +2,17 @@ import React from 'react';
 import ContainerWrapper from '../../../../../components/Container';
 import CustomComponent from '../../../../../model/class/custom-component';
 import Paginacion from '../../../../../components/Paginacion';
-import { alertDialog, formatTime, formatNumberWithZeros, isEmpty, spinnerLoading, numberFormat, keyUpSearch, alertSuccess, alertWarning, alertInfo } from '../../../../../helper/utils.helper';
+import { alertDialog, formatTime, formatNumberWithZeros, isEmpty, numberFormat, keyUpSearch, alertSuccess, alertWarning, alertInfo } from '../../../../../helper/utils.helper';
 import ErrorResponse from '../../../../../model/class/error-response';
 import SuccessReponse from '../../../../../model/class/response';
 import { CANCELED } from '../../../../../model/types/types';
 import { cancelCompra, listCompra } from '../../../../../network/rest/principal.network';
 import { connect } from 'react-redux';
+import Title from '../../../../../components/Title';
+import Row from '../../../../../components/Row';
+import Column from '../../../../../components/Column';
+import { TableResponsive } from '../../../../../components/Table';
+import { SpinnerTable } from '../../../../../components/Spinner';
 
 class Compras extends CustomComponent {
   constructor(props) {
@@ -78,7 +83,7 @@ class Compras extends CustomComponent {
   };
 
   fillTable = async (opcion, buscar) => {
-    await this.setStateAsync({
+    this.setState({
       loading: true,
       lista: [],
       messageTable: 'Cargando información...',
@@ -99,7 +104,7 @@ class Compras extends CustomComponent {
         Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
       );
 
-      await this.setStateAsync({
+      this.setState({
         loading: false,
         lista: response.data.result,
         totalPaginacion: totalPaginacion,
@@ -109,7 +114,7 @@ class Compras extends CustomComponent {
     if (response instanceof ErrorResponse) {
       if (response.getType() === CANCELED) return;
 
-      await this.setStateAsync({
+      this.setState({
         loading: false,
         lista: [],
         totalPaginacion: 0,
@@ -158,12 +163,14 @@ class Compras extends CustomComponent {
     });
   }
 
-  generarBody() {
+  generateBody() {
     if (this.state.loading) {
       return (
         <tr>
           <td className="text-center" colSpan="9">
-            {spinnerLoading('Cargando información de la tabla...', true)}
+            <SpinnerTable
+              message='Cargando información de la tabla...'
+            />
           </td>
         </tr>
       );
@@ -179,7 +186,7 @@ class Compras extends CustomComponent {
 
     return this.state.lista.map((item, index) => {
 
-      const estado =  item.estado === 1 ? <span className="text-success">Pagado</span> : item.estado === 2 ? <span className="text-warning">Por Pagar</span>: <span className="text-danger">Anulado</span>;
+      const estado = item.estado === 1 ? <span className="text-success">Pagado</span> : item.estado === 2 ? <span className="text-warning">Por Pagar</span> : <span className="text-danger">Anulado</span>;
 
       return (
         <tr key={index}>
@@ -214,19 +221,13 @@ class Compras extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
-        <div className="row">
-          <div className="col">
-            <div className="form-group">
-              <h5>
-                {' '}
-                Compras <small className="text-secondary"> Lista </small>{' '}
-              </h5>
-            </div>
-          </div>
-        </div>
+        <Title
+          title='Compras'
+          subTitle='Lista'
+        />
 
-        <div className="row">
-          <div className="col-md-6 col-sm-12">
+        <Row>
+          <Column className="col-md-6 col-sm-12">
             <div className="form-group">
               <div className="input-group mb-2">
                 <div className="input-group-prepend">
@@ -248,9 +249,9 @@ class Compras extends CustomComponent {
                 />
               </div>
             </div>
-          </div>
+          </Column>
 
-          <div className="col-md-6 col-sm-12">
+          <Column className="col-md-6 col-sm-12">
             <div className="form-group">
               <button
                 className="btn btn-outline-info"
@@ -263,35 +264,33 @@ class Compras extends CustomComponent {
                 <i className="bi bi-arrow-clockwise"></i>
               </button>
             </div>
-          </div>
-        </div>
+          </Column>
+        </Row>
 
-        <div className="row">
-          <div className="col">
-            <div className="table-responsive">
-              <table className="table table-striped table-bordered rounded">
-                <thead>
-                  <tr>
-                    <th width="5%" className="text-center">#</th>
-                    <th width="10%">Fecha</th>
-                    <th width="15%">Proveedor</th>
-                    <th width="15%">Comprobante</th>
-                    <th width="10%">Tipo</th>
-                    <th width="10%" className="text-center">Estado</th>
-                    <th width="10%" className="text-center">Total</th>
-                    <th width="5%" className="text-center">
-                      Detalle
-                    </th>
-                    <th width="5%" className="text-center">
-                      Anular
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>{this.generarBody()}</tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+        <Row>
+          <Column>
+            <TableResponsive
+              tHead={
+                <tr>
+                  <th width="5%" className="text-center">#</th>
+                  <th width="10%">Fecha</th>
+                  <th width="15%">Proveedor</th>
+                  <th width="15%">Comprobante</th>
+                  <th width="10%">Tipo</th>
+                  <th width="10%" className="text-center">Estado</th>
+                  <th width="10%" className="text-center">Total</th>
+                  <th width="5%" className="text-center">
+                    Detalle
+                  </th>
+                  <th width="5%" className="text-center">
+                    Anular
+                  </th>
+                </tr>
+              }
+              tBody={this.generateBody()}
+            />
+          </Column>
+        </Row>
 
         <Paginacion
           loading={this.state.loading}
@@ -312,5 +311,6 @@ const mapStateToProps = (state) => {
   };
 };
 
+const ConnectedCompras = connect(mapStateToProps, null)(Compras);
 
-export default connect(mapStateToProps, null)(Compras);
+export default ConnectedCompras;

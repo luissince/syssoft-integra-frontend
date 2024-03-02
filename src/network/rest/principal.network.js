@@ -1483,7 +1483,9 @@ export async function addMedida(data) {
 }
 
 export async function updateMedida(data) {
-  return await Resolve.create(await instancePrincipal.put('/api/medida', data));
+  return await Resolve.create(
+    await instancePrincipal.put('/api/medida', data)
+  );
 }
 
 export async function removeMedida(params) {

@@ -59,7 +59,9 @@ class VehiculoEditar extends CustomComponent {
   }
 
   loadingData = async (id) => {
-    const [impuesto] = await Promise.all([await this.fetchGetIdVehiculo(id)]);
+    const [impuesto] = await Promise.all([
+      this.fetchGetIdVehiculo(id)
+    ]);
 
     this.setState({
       idVehiculo: impuesto.idVehiculo,
@@ -135,7 +137,7 @@ class VehiculoEditar extends CustomComponent {
     return (
       <ContainerWrapper>
         {this.state.loading && spinnerLoading(this.state.msgLoading)}
-        
+
         <Title
           title='Vehículo'
           subTitle='Editar'

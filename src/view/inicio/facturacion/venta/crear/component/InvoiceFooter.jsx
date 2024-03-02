@@ -95,7 +95,7 @@ const InvoiceFooter = (props) => {
               className="btn btn-success btn-lg w-100 d-flex align-items-center justify-content-between"
               onClick={handleOpenSale}
             >
-              <div>Vender</div>
+              <div>Vender (F1)</div>
               <div>{numberFormat(total, codiso)}</div>
             </button>
           </div>
@@ -105,7 +105,7 @@ const InvoiceFooter = (props) => {
               onClick={handleClearSale}
             >
               <div className="text-dark">{totalQuantity}</div>
-              <div className="text-success">Cancelar</div>
+              <div className="text-success">Cancelar (F2)</div>
             </button>
           </div>
         </div>

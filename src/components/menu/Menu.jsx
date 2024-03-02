@@ -1,14 +1,15 @@
-import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { images } from '../../helper';
 import { isEmpty } from '../../helper/utils.helper';
+import PropTypes from 'prop-types';
 
 const Menu = ({
   refSideBar,
   path,
   url,
   pathname,
-  token: { project, userToken },
+  project,
+  userToken
 }) => {
   const onEventOverlay = () => {
     const sidebar = document.getElementById('sidebar');
@@ -176,4 +177,15 @@ const Menu = ({
     </nav>
   );
 };
+
+Menu.propTypes = {
+  refSideBar: PropTypes.object,
+  path: PropTypes.string,
+  url: PropTypes.string,
+  pathname: PropTypes.string,
+  project: PropTypes.object,
+  userToken: PropTypes.object
+};
+
+
 export default Menu;

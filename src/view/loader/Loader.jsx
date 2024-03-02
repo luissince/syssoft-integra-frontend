@@ -1,5 +1,6 @@
 import React from 'react';
 import '../../recursos/css/loader.css';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { config, monedaNacional, restoreToken } from '../../redux/actions';
 import {
@@ -22,9 +23,9 @@ class Loader extends React.Component {
 
   async componentDidMount() {
     const [empresa, token, moneda] = await Promise.all([
-      await this.fetchObtenerEmpresa(),
-      await this.fetchValidarToken(),
-      await this.fetchMonedaNacional(),
+      this.fetchObtenerEmpresa(),
+      this.fetchValidarToken(),
+      this.fetchMonedaNacional(),
     ]);
 
     if (!Array.isArray(empresa)) {
@@ -145,6 +146,12 @@ class Loader extends React.Component {
   }
 }
 
+Loader.propTypes = {
+  monedaNacional: PropTypes.func,
+  restore: PropTypes.func,
+  config: PropTypes.func
+}
+
 const mapStateToProps = (state) => {
   return {
     token: state.reducer,
@@ -159,4 +166,6 @@ const mapDispatchToProps = (dispatch) => {
   };
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(Loader);
+const ConnectedLoader = connect(mapStateToProps, mapDispatchToProps)(Loader);
+
+export default ConnectedLoader;

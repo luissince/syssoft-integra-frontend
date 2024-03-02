@@ -92,8 +92,8 @@ class CuentasPorPagarAmbonar extends CustomComponent {
 
     async loadingData(id) {
         const [factura, bancos] = await Promise.all([
-            await this.fetchIdFactura(id),
-            await this.fetchComboBanco(),
+            this.fetchIdFactura(id),
+            this.fetchComboBanco(),
         ]);
 
         const {

@@ -57,7 +57,7 @@ class CategoriaEditar extends CustomComponent {
 
   async loadingData(id) {
     const [categoria] = await Promise.all([
-      await this.fetchObtenerCategoria(id),
+      this.fetchObtenerCategoria(id),
     ]);
 
     this.setState({

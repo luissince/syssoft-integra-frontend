@@ -295,5 +295,6 @@ const mapStateToProps = (state) => {
   };
 };
 
+const ConnectedSalidas = connect(mapStateToProps, null)(Salidas);
 
-export default connect(mapStateToProps, null)(Salidas);
+export default ConnectedSalidas;

@@ -65,7 +65,9 @@ class Ajuste extends CustomComponent {
   }
 
   async loadingData() {
-    const [tipoTraslado] = await Promise.all([await this.fetchComboTipoTraslado()]);
+    const [tipoTraslado] = await Promise.all([
+      this.fetchComboTipoTraslado()
+    ]);
 
     await this.setStateAsync({
       tipoTraslado,

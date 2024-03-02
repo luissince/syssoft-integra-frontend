@@ -21,6 +21,8 @@ import {
   getIdComprobante,
 } from '../../../../network/rest/principal.network';
 import Title from '../../../../components/Title';
+import Column from '../../../../components/Column';
+import Row from '../../../../components/Row';
 
 class ComporbanteEditar extends CustomComponent {
   constructor(props) {
@@ -37,7 +39,7 @@ class ComporbanteEditar extends CustomComponent {
       preferida: false,
       numeroCampo: '',
       facturado: false,
-      anulacion: '0',
+      anulacion: "0",
 
       tipoComprobante: [],
 
@@ -73,8 +75,8 @@ class ComporbanteEditar extends CustomComponent {
 
   async loadingData(idComprobante) {
     const [tipoComprobante, comprobante] = await Promise.all([
-      await this.fetchComboTipoComporbante(),
-      await this.fetchGetIdComprobante(idComprobante),
+      this.fetchComboTipoComporbante(),
+      this.fetchGetIdComprobante(idComprobante),
     ]);
 
     this.setState({
@@ -90,7 +92,7 @@ class ComporbanteEditar extends CustomComponent {
       preferida: comprobante.preferida === 1 ? true : false,
       numeroCampo: comprobante.numeroCampo,
       facturado: comprobante.facturado === 1 ? true : false,
-      anulacion: comprobante.anulacion === 0 ? "" : comprobante.anulacion === 1 ? "1" : "2",
+      anulacion: comprobante.anulacion.toString(),
       loading: false,
     });
   }
@@ -211,8 +213,8 @@ class ComporbanteEditar extends CustomComponent {
           handleGoBack={() => this.props.history.goBack()}
         />
 
-        <div className="row">
-          <div className="col">
+        <Row>
+          <Column>
             <div className="form-group">
               <label htmlFor="estado">
                 Tipo de Comprobante: <i className="fa fa-asterisk text-danger small"></i>
@@ -234,11 +236,11 @@ class ComporbanteEditar extends CustomComponent {
                 ))}
               </select>
             </div>
-          </div>
-        </div>
+          </Column>
+        </Row>
 
-        <div className="row">
-          <div className="col">
+        <Row>
+          <Column>
             <div className="form-group">
               <label htmlFor="nombre" className="col-form-label">
                 Nombre <i className="fa fa-asterisk text-danger small"></i>
@@ -255,216 +257,236 @@ class ComporbanteEditar extends CustomComponent {
                 }
               />
             </div>
-          </div>
-        </div>
+          </Column>
+        </Row>
 
-        <div className="row">
-          <div className="form-group col-md-6">
-            <label htmlFor="serie">
-              Serie <i className="fa fa-asterisk text-danger small"></i>
-            </label>
-            <input
-              type="text"
-              className="form-control"
-              id="serie"
-              placeholder={'B001, F001'}
-              ref={this.refSerie}
-              value={this.state.serie}
-              onChange={(event) => this.setState({ serie: event.target.value })}
-            />
-          </div>
-          <div className="form-group col-md-6">
-            <label htmlFor="numeracion">
-              Numeración <i className="fa fa-asterisk text-danger small"></i>
-            </label>
-            <input
-              type="text"
-              className="form-control"
-              id="numeracion"
-              placeholder={'1, 2, 3'}
-              ref={this.refNumeracion}
-              value={this.state.numeracion}
-              onChange={(event) =>
-                this.setState({ numeracion: event.target.value })
-              }
-              onKeyDown={keyNumberInteger}
-            />
-          </div>
-        </div>
-
-        <div className="row">
-          <div className="form-group col-md-6">
-            <label htmlFor="numeracion">Caracteres a Usar</label>
-            <input
-              ref={this.refNumeroCampo}
-              type="text"
-              className="form-control"
-              id="numeracion"
-              placeholder={'0, 8, 11'}
-              value={this.state.numeroCampo}
-              onChange={(event) =>
-                this.setState({ numeroCampo: event.target.value })
-              }
-              onKeyDown={keyNumberInteger}
-            />
-          </div>
-        </div>
-
-        <div className="row">
-          <div className="form-group col-md-6">
-            <label htmlFor="nombre" className="col-form-label">
-              Estado:
-            </label>
-            <div className="custom-control custom-switch">
-              <input
-                type="checkbox"
-                className="custom-control-input"
-                id="cbEstado"
-                checked={this.state.estado}
-                onChange={(value) =>
-                  this.setState({ estado: value.target.checked })
-                }
-              />
-              <label className="custom-control-label" htmlFor="cbEstado">
-                {this.state.estado ? 'Activo' : 'Inactivo'}
+        <Row>
+          <Column className={"col-md-6"}>
+            <div className="form-group">
+              <label htmlFor="serie">
+                Serie <i className="fa fa-asterisk text-danger small"></i>
               </label>
-            </div>
-          </div>
-
-          <div className="form-group col-md-6">
-            <label htmlFor="nombre" className="col-form-label">
-              Preferido:
-            </label>
-            <div className="custom-control custom-switch">
               <input
-                type="checkbox"
-                className="custom-control-input"
-                id="cbPreferido"
-                checked={this.state.preferida}
-                onChange={(value) =>
-                  this.setState({ preferida: value.target.checked })
-                }
+                type="text"
+                className="form-control"
+                id="serie"
+                placeholder={'B001, F001'}
+                ref={this.refSerie}
+                value={this.state.serie}
+                onChange={(event) => this.setState({ serie: event.target.value })}
               />
-              <label className="custom-control-label" htmlFor="cbPreferido">
-                {this.state.preferida ? "Si" : "No"}
-              </label>
             </div>
-          </div>
-        </div>
+          </Column>
+
+
+          <Column className={"col-md-6"}>
+            <div className="form-group">
+              <label htmlFor="numeracion">
+                Numeración <i className="fa fa-asterisk text-danger small"></i>
+              </label>
+              <input
+                type="text"
+                className="form-control"
+                id="numeracion"
+                placeholder={'1, 2, 3'}
+                ref={this.refNumeracion}
+                value={this.state.numeracion}
+                onChange={(event) =>
+                  this.setState({ numeracion: event.target.value })
+                }
+                onKeyDown={keyNumberInteger}
+              />
+            </div>
+          </Column>
+        </Row>
+
+        <Row>
+          <Column className={"col-md-6"}>
+            <div className="form-group">
+              <label htmlFor="numeracion">Caracteres a Usar</label>
+              <input
+                ref={this.refNumeroCampo}
+                type="text"
+                className="form-control"
+                id="numeracion"
+                placeholder={'0, 8, 11'}
+                value={this.state.numeroCampo}
+                onChange={(event) =>
+                  this.setState({ numeroCampo: event.target.value })
+                }
+                onKeyDown={keyNumberInteger}
+              />
+            </div>
+          </Column>
+        </Row>
+
+        <Row>
+          <Column className={"col-md-6"}>
+            <div className="form-group">
+              <label htmlFor="nombre" className="col-form-label">
+                Estado:
+              </label>
+              <div className="custom-control custom-switch">
+                <input
+                  type="checkbox"
+                  className="custom-control-input"
+                  id="cbEstado"
+                  checked={this.state.estado}
+                  onChange={(value) =>
+                    this.setState({ estado: value.target.checked })
+                  }
+                />
+                <label className="custom-control-label" htmlFor="cbEstado">
+                  {this.state.estado ? 'Activo' : 'Inactivo'}
+                </label>
+              </div>
+            </div>
+          </Column>
+
+          <Column className={"col-md-6"}>
+            <div className="form-group">
+              <label htmlFor="nombre" className="col-form-label">
+                Preferido:
+              </label>
+              <div className="custom-control custom-switch">
+                <input
+                  type="checkbox"
+                  className="custom-control-input"
+                  id="cbPreferido"
+                  checked={this.state.preferida}
+                  onChange={(value) =>
+                    this.setState({ preferida: value.target.checked })
+                  }
+                />
+                <label className="custom-control-label" htmlFor="cbPreferido">
+                  {this.state.preferida ? "Si" : "No"}
+                </label>
+              </div>
+            </div>
+          </Column>
+        </Row>
 
         <div className="dropdown-divider"></div>
 
         <h6>Opciones de Facturación</h6>
 
-        <div className="row">
-          <div className="form-group col-md-6">
-            <label htmlFor="nombre" className="col-form-label">
-              El comporbante va ser enviado a Sunat:
-            </label>
-            <div className="custom-control custom-switch">
+        <Row>
+          <Column className={"col-md-6"}>
+            <div className="form-group">
+              <label htmlFor="nombre" className="col-form-label">
+                El comporbante va ser enviado a Sunat:
+              </label>
+              <div className="custom-control custom-switch">
+                <input
+                  type="checkbox"
+                  className="custom-control-input"
+                  id="cbFacturado"
+                  checked={this.state.facturado}
+                  onChange={(value) =>
+                    this.setState({ facturado: value.target.checked })
+                  }
+                />
+                <label className="custom-control-label" htmlFor="cbFacturado">
+                  {this.state.facturado ? "Si" : "No"}
+                </label>
+              </div>
+            </div>
+          </Column>
+
+          <Column className={"col-md-6"}>
+            <div className="form-group">
+              <label htmlFor="nombre" className="col-form-label">
+                Formas de anulación:
+              </label>
+              <Row>
+                <Column>
+                  <div className="form-check form-check-inline pr-5">
+                    <input
+                      className="form-check-input checked"
+                      type="radio"
+                      name="inlineRadioOptions"
+                      id={"1"}
+                      value={"1"}
+                      checked={this.state.anulacion === "1"}
+                      onChange={(event) => {
+                        this.setState({
+                          anulacion: event.target.value
+                        })
+                      }}
+                    />
+                    <label className="form-check-label" htmlFor={"1"}>
+                      {' '}
+                      Comunicación de baja
+                    </label>
+                  </div>
+                </Column>
+
+                <Column>
+                  <div className="form-check form-check-inline">
+                    <input
+                      className="form-check-input"
+                      type="radio"
+                      name="inlineRadioOptions"
+                      id={"2"}
+                      value={"2"}
+                      checked={this.state.anulacion === "2"}
+                      onChange={(event) => {
+                        this.setState({
+                          anulacion: event.target.value
+                        })
+                      }}
+                    />
+                    <label className="form-check-label" htmlFor={"2"}>
+                      {' '}
+                      Resumen diario
+                    </label>
+                  </div>
+                </Column>
+              </Row>
+            </div>
+          </Column>
+        </Row>
+
+        <Row>
+          <Column className={"col-md-6"}>
+            <div className="form-group">
+              <label htmlFor="impresion" className="col-form-label">
+                Nombre de Impresión:
+              </label>
               <input
-                type="checkbox"
-                className="custom-control-input"
-                id="cbFacturado"
-                checked={this.state.facturado}
-                onChange={(value) =>
-                  this.setState({ facturado: value.target.checked })
+                type="text"
+                className="form-control"
+                id="impresion"
+                placeholder='Ejm: Boleta Electrónica, Factura Electrónica...'
+                value={this.state.impresion}
+                onChange={(event) =>
+                  this.setState({ impresion: event.target.value })
                 }
               />
-              <label className="custom-control-label" htmlFor="cbFacturado">
-                {this.state.facturado ? "Si" : "No"}
+            </div>
+          </Column>
+
+          <Column className={"col-md-6"}>
+            <div className="form-group">
+              <label htmlFor="codigo" className="col-form-label">
+                Código:
               </label>
+              <input
+                type="text"
+                className="form-control"
+                id="codigo"
+                placeholder='01, 06'
+                value={this.state.codigo}
+                onChange={(event) =>
+                  this.setState({ codigo: event.target.value })
+                }
+              />
             </div>
-          </div>
+          </Column>
+        </Row>
 
-          <div className="form-group col-md-6">
-            <label htmlFor="nombre" className="col-form-label">
-              Formas de anulación:
-            </label>
-            <div className="row">
-              <div className="col">
-                <div className="form-check form-check-inline pr-5">
-                  <input
-                    className="form-check-input checked"
-                    type="radio"
-                    name="inlineRadioOptions"
-                    id="1"
-                    value="1"
-                    checked={this.state.anulacion === '1'}
-                    onChange={(event) => {
-                      this.setState({
-                        anulacion: event.target.value
-                      })
-                    }}
-                  />
-                  <label className="form-check-label" htmlFor="1">
-                    {' '}
-                    Comunicación de baja
-                  </label>
-                </div>
-              </div>
-
-              <div className='col'>
-                <div className="form-check form-check-inline">
-                  <input
-                    className="form-check-input"
-                    type="radio"
-                    name="inlineRadioOptions"
-                    id="2"
-                    value="2"
-                    checked={this.state.anulacion === '2'}
-                    onChange={(event) => {
-                      this.setState({
-                        anulacion: event.target.value
-                      })
-                    }}
-                  />
-                  <label className="form-check-label" htmlFor="2">
-                    {' '}
-                    Resumen diario
-                  </label>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="row">
-          <div className="form-group col-md-6">
-            <label htmlFor="impresion" className="col-form-label">
-              Nombre de Impresión:
-            </label>
-            <input
-              type="text"
-              className="form-control"
-              id="impresion"
-              placeholder='Ejm: Boleta Electrónica, Factura Electrónica...'
-              value={this.state.impresion}
-              onChange={(event) =>
-                this.setState({ impresion: event.target.value })
-              }
-            />
-          </div>
-
-          <div className="form-group col-md-6">
-            <label htmlFor="codigo" className="col-form-label">
-              Código:
-            </label>
-            <input
-              type="text"
-              className="form-control"
-              id="codigo"
-              placeholder='01, 06'
-              value={this.state.codigo}
-              onChange={(event) =>
-                this.setState({ codigo: event.target.value })
-              }
-            />
-          </div>
-        </div>
-
-        <div className="row">
-          <div className="col-md-12">
+        <Row>
+          <Column>
             <div className="form-group">
               <button
                 type="button"
@@ -481,8 +503,8 @@ class ComporbanteEditar extends CustomComponent {
                 <i className='fa fa-close'></i>  Cerrar
               </button>
             </div>
-          </div>
-        </div>
+          </Column>
+        </Row>
       </ContainerWrapper>
     );
   }
@@ -494,4 +516,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(ComporbanteEditar);
+const ConnectedComporbanteEditar = connect(mapStateToProps, null)(ComporbanteEditar);
+
+export default ConnectedComporbanteEditar;

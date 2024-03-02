@@ -105,7 +105,9 @@ class Inventario extends CustomComponent {
   }
 
   async loadingData() {
-    const [almacenes] = await Promise.all([await this.fetchComboAlmacen({idSucursal: this.state.idSucursal})]);
+    const [almacenes] = await Promise.all([
+      this.fetchComboAlmacen({ idSucursal: this.state.idSucursal })
+    ]);
 
     await this.setStateAsync({
       almacenes,
@@ -198,7 +200,7 @@ class Inventario extends CustomComponent {
   };
 
   async fetchComboAlmacen(params) {
-    const response = await comboAlmacen(params,this.abortControllerTable.signal);
+    const response = await comboAlmacen(params, this.abortControllerTable.signal);
 
     if (response instanceof SuccessReponse) {
       return response.data;
