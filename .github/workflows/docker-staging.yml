@@ -34,4 +34,4 @@ jobs:
           EOL
 
       - name: Creando y ejecutando contenedor
-        run: docker compose -f docker-compose.yml up --build unnsgro-services -d
+        run: docker compose -f docker-compose.yml up --build unnagro-services -d
