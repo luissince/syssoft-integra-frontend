@@ -60,7 +60,9 @@ class MonedaEditar extends CustomComponent {
   }
 
   async loadingData(idMoneda) {
-    const [moneda] = await Promise.all([await this.fetchGetIdMoneda(idMoneda)]);
+    const [moneda] = await Promise.all([
+      this.fetchGetIdMoneda(idMoneda)
+    ]);
 
     this.setState({
       nombre: moneda.nombre,

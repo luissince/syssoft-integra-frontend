@@ -284,12 +284,17 @@ export function isText(value) {
   return typeof value === 'string' && value.trim().length > 0;
 }
 
-export function keyNumberInteger(event) {
+export function keyNumberInteger(event, enterCallback) {
   const key = event.key;
   const isDigit = /\d/.test(key);
 
   if (!(isDigit || key === 'Backspace' || key === 'Delete' || key === 'ArrowLeft' || key === 'ArrowRight' || key === 'Tab' || (event.ctrlKey || event.metaKey) && key === 'c' || (event.ctrlKey || event.metaKey) && key === 'v')) {
     event.preventDefault();
+  }
+
+  // Ejecutar el callback si la tecla presionada es "Enter"
+  if (key === "Enter" && typeof enterCallback === "function") {
+    enterCallback();
   }
 }
 
@@ -300,7 +305,7 @@ export function handlePasteInteger(event) {
   }
 }
 
-export function keyNumberFloat(event) {
+export function keyNumberFloat(event, enterCallback) {
   const key = event.key;
   const isDigit = /\d/.test(key);
   const isDot = key === '.';
@@ -318,6 +323,11 @@ export function keyNumberFloat(event) {
   if (event.target.selectionStart === 0 && isDot) {
     event.preventDefault();
   }
+
+  // Ejecutar el callback si la tecla presionada es "Enter"
+  if (key === "Enter" && typeof enterCallback === "function") {
+    enterCallback();
+  }
 }
 
 export function handlePasteFloat(event) {
@@ -330,7 +340,7 @@ export function handlePasteFloat(event) {
   }
 }
 
-export function keyNumberPhone(event) {
+export function keyNumberPhone(event, enterCallback) {
   const key = event.key;
   const inputValue = event.target.value;
 
@@ -350,6 +360,11 @@ export function keyNumberPhone(event) {
 
   if (!(isDigitOrAllowedChar || key === 'Backspace' || key === 'Delete' || key === 'ArrowLeft' || key === 'ArrowRight' || key === 'Tab' || (event.ctrlKey || event.metaKey) && key === 'c' || (event.ctrlKey || event.metaKey) && key === 'v')) {
     event.preventDefault();
+  }
+
+  // Ejecutar el callback si la tecla presionada es "Enter"
+  if (key === "Enter" && typeof enterCallback === "function") {
+    enterCallback();
   }
 }
 

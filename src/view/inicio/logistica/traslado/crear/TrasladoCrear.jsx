@@ -148,9 +148,9 @@ class AjusteCrear extends CustomComponent {
 
   async loadingData() {
     const [almacenes, motivoTraslado, sucursales] = await Promise.all([
-      await this.fetchComboAlmacen({ idSucursal: this.state.idSucursal }),
-      await this.fetchComboMotivoTraslado(),
-      await this.fetchComboSucursal()
+      this.fetchComboAlmacen({ idSucursal: this.state.idSucursal }),
+      this.fetchComboMotivoTraslado(),
+      this.fetchComboSucursal()
     ]);
 
     const newSucursal = sucursales.filter(item => item.idSucursal !== this.state.idSucursal)

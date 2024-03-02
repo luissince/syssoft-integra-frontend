@@ -52,14 +52,16 @@ class GastoDetalle extends CustomComponent {
   }
 
   async loadDataId(id) {
-    const [gasto] = await Promise.all([await this.fetchDetailGasto(id)]);
+    const [gasto] = await Promise.all([
+      this.fetchDetailGasto(id)
+    ]);
 
     if (gasto === null) {
       this.props.history.goBack();
       return;
     }
 
-    const suma =  gasto.detalle.reduce((acumulador, item) => acumulador + item.precio * item.cantidad, 0);
+    const suma = gasto.detalle.reduce((acumulador, item) => acumulador + item.precio * item.cantidad, 0);
 
     this.setState({
       comprobante: gasto.cabecera.comprobante + ' ' + gasto.cabecera.serie + '-' + gasto.cabecera.numeracion,

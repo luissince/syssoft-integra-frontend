@@ -23,7 +23,7 @@ class GuiaRemisionDetalle extends CustomComponent {
       loading: true,
       msgLoading: 'Cargando datos...',
 
-      idGuiaRemision:'',
+      idGuiaRemision: '',
       fecha: "",
       hora: "",
       comprobante: "",
@@ -71,7 +71,7 @@ class GuiaRemisionDetalle extends CustomComponent {
 
   async loadingData(id) {
     const [guiaRemision] = await Promise.all([
-      await this.fetchIdFactura(id)
+      this.fetchIdFactura(id)
     ]);
 
     const {
@@ -103,7 +103,7 @@ class GuiaRemisionDetalle extends CustomComponent {
 
 
     this.setState({
-      idGuiaRemision:id,
+      idGuiaRemision: id,
       fecha,
       hora,
       comprobante,
@@ -364,7 +364,7 @@ class GuiaRemisionDetalle extends CustomComponent {
                     <th>Descripción</th>
                     <th>Código</th>
                     <th>Und/Medida</th>
-                    <th>Cantidad</th>                 
+                    <th>Cantidad</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -375,7 +375,7 @@ class GuiaRemisionDetalle extends CustomComponent {
                         <td>{item.nombre}</td>
                         <td>{item.codigo}</td>
                         <td>{item.medida}</td>
-                        <td>{rounded(item.cantidad)}</td>                       
+                        <td>{rounded(item.cantidad)}</td>
                       </tr>
                     ))
                   }

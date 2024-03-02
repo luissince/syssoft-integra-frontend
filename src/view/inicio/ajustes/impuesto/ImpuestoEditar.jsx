@@ -62,7 +62,9 @@ class ImpuestoEditar extends CustomComponent {
   }
 
   loadingData = async (id) => {
-    const [impuesto] = await Promise.all([await this.fetchGetIdImpuesto(id)]);
+    const [impuesto] = await Promise.all([
+      this.fetchGetIdImpuesto(id)
+    ]);
 
     this.setState({
       idImpuesto: impuesto.idImpuesto,

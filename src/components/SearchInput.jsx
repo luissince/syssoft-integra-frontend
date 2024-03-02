@@ -180,10 +180,11 @@ class SearchInput extends React.Component {
                   <button
                     key={index}
                     className="list-group-item list-group-item-action"
-                    onClick={() => {
+                    onClick={(event) => {
                       handleSelectItem(value);
                       refValue.current.focus();
                       this.index = -1;
+                      event.stopPropagation();
                     }}
                   >
                     {renderItem(value)}

@@ -14,9 +14,9 @@ import {
   isText,
   numberFormat,
   rounded,
-  spinnerLoading,
   validateNumericInputs,
 } from '../../../../../helper/utils.helper';
+import Title from '../../../../../components/Title';
 import { connect } from 'react-redux';
 import { COMPRA } from '../../../../../model/types/tipo-comprobante';
 import {
@@ -37,6 +37,9 @@ import ModalSale from './component/ModalSale';
 import { CustomModalProduct } from './component/ModalProduct';
 import PropTypes from 'prop-types';
 import { CONTADO, CREDITO_FIJO, CREDITO_VARIABLE } from '../../../../../model/types/forma-cobro';
+import Row from '../../../../../components/Row';
+import Column from '../../../../../components/Column';
+import { SpinnerView } from '../../../../../components/Spinner';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -162,10 +165,14 @@ class CompraCrear extends CustomComponent {
     */
 
   async componentDidMount() {
+    document.addEventListener('keydown', this.handleDocumentKeyDown)
+
     await this.loadData();
   }
 
   componentWillUnmount() {
+    document.removeEventListener('keydown', this.handleDocumentKeyDown)
+
     this.abortController.abort();
   }
 
@@ -186,11 +193,11 @@ class CompraCrear extends CustomComponent {
   loadData = async () => {
     const [comprobantes, monedas, bancos, almacenes, impuestos] =
       await Promise.all([
-        await this.fetchComprobante(COMPRA),
-        await this.fetchMoneda(),
-        await this.fetchComboBanco(),
-        await this.fetchComboAlmacen({ idSucursal: this.state.idSucursal }),
-        await this.fetchImpuesto(),
+        this.fetchComprobante(COMPRA),
+        this.fetchMoneda(),
+        this.fetchComboBanco(),
+        this.fetchComboAlmacen({ idSucursal: this.state.idSucursal }),
+        this.fetchImpuesto(),
       ]);
 
     const comprobante = comprobantes.find((item) => item.preferida === 1);
@@ -330,6 +337,16 @@ class CompraCrear extends CustomComponent {
     | que describe el tipo de evento que maneja, como handleInputChange, handleClick, handleSubmission, entre otros. 
     |
     */
+
+  handleDocumentKeyDown = (event) => {
+    if (event.key === 'F1' && !this.state.isOpenProducto && !this.state.isOpenSale) {
+      this.handleGuardar();
+    }
+
+    if (event.key === 'F2' && !this.state.isOpenProducto && !this.state.isOpenSale) {
+      this.handleLimpiar();
+    }
+  }
 
   handleSelectComprobante = (event) => {
     this.setState({ idComprobante: event.target.value });
@@ -519,24 +536,18 @@ class CompraCrear extends CustomComponent {
 
     if (metodoCobrosLista.length > 1) {
       if (metodoCobroTotal !== total) {
-        alertWarning(
-          'Compra',
-          'Al tener mas de 2 métodos de pago el monto debe ser igual al total.', () => {
-            focusOnFirstInvalidInput(this.refMetodoPagoContenedor);
-          },
-        );
+        alertWarning('Compra', 'Al tener mas de 2 métodos de pago el monto debe ser igual al total.', () => {
+          focusOnFirstInvalidInput(this.refMetodoPagoContenedor);
+        });
         return;
       }
     } else {
       const metodo = metodoCobrosLista[0];
       if (metodo.vuelto === 1) {
         if (metodoCobroTotal < total) {
-          alertWarning(
-            'Compra',
-            'El monto a pago es menor que el total.', () => {
-              focusOnFirstInvalidInput(this.refMetodoPagoContenedor);
-            },
-          );
+          alertWarning('Compra', 'El monto a pago es menor que el total.', () => {
+            focusOnFirstInvalidInput(this.refMetodoPagoContenedor);
+          });
           return;
         }
 
@@ -546,12 +557,9 @@ class CompraCrear extends CustomComponent {
         });
       } else {
         if (metodoCobroTotal !== total) {
-          alertWarning(
-            'Compra',
-            'El monto a pagar debe ser igual al total.', () => {
-              focusOnFirstInvalidInput(this.refMetodoPagoContenedor);
-            },
-          );
+          alertWarning('Compra', 'El monto a pagar debe ser igual al total.', () => {
+            focusOnFirstInvalidInput(this.refMetodoPagoContenedor);
+          });
           return;
         }
       }
@@ -584,7 +592,7 @@ class CompraCrear extends CustomComponent {
 
         if (response instanceof SuccessReponse) {
           alertSuccess('Compra', response.data, () => {
-            this.handleLimpiar();
+            this.clearView();
           });
         }
 
@@ -659,7 +667,7 @@ class CompraCrear extends CustomComponent {
 
         if (response instanceof SuccessReponse) {
           alertSuccess('Compra', response.data, () => {
-            this.handleLimpiar();
+            this.clearView();
           });
         }
 
@@ -727,7 +735,7 @@ class CompraCrear extends CustomComponent {
 
         if (response instanceof SuccessReponse) {
           alertSuccess('Compra', response.data, () => {
-            this.handleLimpiar();
+            this.clearView();
           });
         }
 
@@ -766,8 +774,6 @@ class CompraCrear extends CustomComponent {
     this.setState({
       costoModalProducto: this.state.producto.costo,
       loadingModalProducto: false,
-    }, () => {
-      this.refCantidadModalProduct.current.focus();
     })
   }
 
@@ -783,12 +789,15 @@ class CompraCrear extends CustomComponent {
   }
 
   handleCloseProducto = async () => {
-    const data = this.refModalProducto.current;
-    data.classList.add("close-cm")
-    data.addEventListener('animationend', () => {
-      this.setState({ isOpenProducto: false }, () => {
+    return new Promise((resolve) => {
+      const data = this.refModalProducto.current;
+      data.classList.add("close-cm")
+      data.addEventListener('animationend', () => {
+        this.setState({ isOpenProducto: false }, () => {
+          resolve();
+        })
       })
-    })
+    });
   }
 
   handleInputCantidadModalProducto = (event) => {
@@ -799,11 +808,27 @@ class CompraCrear extends CustomComponent {
     this.setState({ costoModalProducto: event.target.value });
   };
 
-  handleAddProduct = async () => {
-    if (!isText(this.state.idImpuesto)) {
-      alertWarning('Compra', 'Seleccione un IGV para continuar.', () => {
-        this.handleCloseProducto();
+  handleAddProduct = () => {
+    const { cantidadModalProducto, costoModalProducto, detalle, idImpuesto } = this.state
+
+    if (isEmpty(idImpuesto)) {
+      alertWarning('Compra', 'Seleccione un IGV para continuar.', async () => {
+        await this.handleCloseProducto();
         this.refImpuesto.current.focus();
+      });
+      return;
+    }
+
+    if (!isNumeric(cantidadModalProducto)) {
+      alertWarning('Compra', 'Ingrese la cantidad.', () => {
+        this.refCantidadModalProduct.current.focus();
+      });
+      return;
+    }
+
+    if (!isNumeric(costoModalProducto)) {
+      alertWarning('Compra', 'Ingrese el costo.', () => {
+        this.refCostoModalProduct.current.focus();
       });
       return;
     }
@@ -812,13 +837,7 @@ class CompraCrear extends CustomComponent {
 
     const { idProducto, nombre } = this.state.producto;
 
-    const { cantidadModalProducto, costoModalProducto, detalle } = this.state;
-
-    if (!isNumeric(cantidadModalProducto)) return;
-
-    if (!isNumeric(costoModalProducto)) return;
-
-    const newDetalle = [...detalle];
+    const newDetalle = detalle.map(item => ({ ...item }));;
 
     const existeDetalle = newDetalle.find((item) => item.idProducto === idProducto);
 
@@ -1012,11 +1031,19 @@ class CompraCrear extends CustomComponent {
     this.handleOpenModalSale();
   };
 
-  handleLimpiar = async () => {
+  clearView = () => {
     this.setState(this.initial, async () => {
       await this.loadData();
       this.refProducto.current.focus();
     });
+  }
+
+  handleLimpiar = async () => {
+    alertDialog("Compra", "¿Está seguro de limpiar la cotización?", (accept) => {
+      if (accept) {
+        this.clearView();
+      }
+    })
   };
 
   handleCerrar = () => {
@@ -1201,27 +1228,22 @@ class CompraCrear extends CustomComponent {
           handleAdd={this.handleAddProduct}
         />
 
-        {this.state.loading && spinnerLoading(this.state.msgLoading)}
+        <SpinnerView
+          loading={this.state.loading}
+          message={this.state.msgLoading}
+        />
 
         {/* Titulo */}
-        <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <div className="form-group">
-              <h5>
-                <span role="button" onClick={this.handleCerrar}>
-                  <i className="bi bi-arrow-left-short"></i>
-                </span>{' '}
-                Compra
-                <small className="text-secondary"> crear</small>
-              </h5>
-            </div>
-          </div>
-        </div>
+        <Title
+          title='Compra'
+          subTitle='Crear'
+          handleGoBack={this.handleCerrar}
+        />
 
-        <div className="row">
-          <div className="col-xl-8 col-lg-8 col-md-8 col-sm-12 col-12">
+        <Row>
+          <Column className="col-xl-8 col-lg-8 col-md-8 col-sm-12 col-12">
             {/* Filtrar y agregar concepto */}
-            <div className="row">
+            <Row>
               {/* Filtrar */}
               <div className="col">
                 <SearchInput
@@ -1237,58 +1259,62 @@ class CompraCrear extends CustomComponent {
                   renderItem={(value) => <>{value.nombre}</>}
                 />
               </div>
-            </div>
+            </Row>
 
-            <div className="form-row">
-              <div className="table-responsive">
-                <table className="table table-striped table-bordered rounded">
-                  <thead>
-                    <tr>
-                      <th width="5%" className="text-center">
-                        #
-                      </th>
-                      <th width="15%">Producto</th>
-                      <th width="5%">Cantidad</th>
-                      <th width="5%">Costo</th>
-                      <th width="5%">Total</th>
-                      <th width="5%" className="text-center">
-                        Quitar
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>{this.generarBody()}</tbody>
-                </table>
-              </div>
-            </div>
+            <Row>
+              <Column>
+                <div className="table-responsive">
+                  <table className="table table-striped table-bordered rounded">
+                    <thead>
+                      <tr>
+                        <th width="5%" className="text-center">
+                          #
+                        </th>
+                        <th width="15%">Producto</th>
+                        <th width="5%">Cantidad</th>
+                        <th width="5%">Costo</th>
+                        <th width="5%">Total</th>
+                        <th width="5%" className="text-center">
+                          Quitar
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>{this.generarBody()}</tbody>
+                  </table>
+                </div>
+              </Column>
+            </Row>
 
-            <div className="form-row">
-              <div className="form-group">
-                <button
-                  type="button"
-                  className="btn btn-success"
-                  onClick={this.handleGuardar}
-                >
-                  <i className="fa fa-save"></i> Guardar
-                </button>{' '}
-                <button
-                  type="button"
-                  className="btn btn-outline-info"
-                  onClick={this.handleLimpiar}
-                >
-                  <i className="fa fa-trash"></i> Limpiar
-                </button>{' '}
-                <button
-                  type="button"
-                  className="btn btn-outline-danger"
-                  onClick={this.handleCerrar}
-                >
-                  <i className="fa fa-close"></i> Cerrar
-                </button>
-              </div>
-            </div>
-          </div>
+            <Row>
+              <Column>
+                <div className="form-group">
+                  <button
+                    type="button"
+                    className="btn btn-success"
+                    onClick={this.handleGuardar}
+                  >
+                    <i className="fa fa-save"></i> Guardar (F1)
+                  </button>{' '}
+                  <button
+                    type="button"
+                    className="btn btn-outline-info"
+                    onClick={this.handleLimpiar}
+                  >
+                    <i className="fa fa-trash"></i> Limpiar (F2)
+                  </button>{' '}
+                  <button
+                    type="button"
+                    className="btn btn-outline-danger"
+                    onClick={this.handleCerrar}
+                  >
+                    <i className="fa fa-close"></i> Cerrar
+                  </button>
+                </div>
+              </Column>
+            </Row>
+          </Column>
 
-          <div className="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12">
+          <Column className="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12">
             <div className="form-group">
               <div className="input-group">
                 <div className="input-group-prepend">
@@ -1418,8 +1444,8 @@ class CompraCrear extends CustomComponent {
                   ref={this.refObservacion}
                   value={this.state.observacion}
                   onChange={this.handleInputObservacion}
-                  placeholder="Ingrese alguna observación"
-                ></textarea>
+                  placeholder="Ingrese alguna observación">
+                </textarea>
               </div>
             </div>
 
@@ -1435,16 +1461,16 @@ class CompraCrear extends CustomComponent {
                   className="form-control"
                   value={this.state.nota}
                   onChange={this.handleInputNota}
-                  placeholder="Ingrese alguna nota"
-                ></textarea>
+                  placeholder="Ingrese alguna nota">
+                </textarea>
               </div>
             </div>
 
             <div className="form-group">
               <table width="100%">{this.renderTotal()}</table>
             </div>
-          </div>
-        </div>
+          </Column>
+        </Row>
       </ContainerWrapper>
     );
   }
@@ -1478,4 +1504,7 @@ const mapStateToProps = (state) => {
  *
  * Método encargado de conectar con redux y exportar la clase
  */
-export default connect(mapStateToProps, null)(CompraCrear);
+
+const ConnectedComprasCrear = connect(mapStateToProps, null)(CompraCrear);
+
+export default ConnectedComprasCrear;

@@ -1,13 +1,12 @@
-import { CustomModalContent } from '../../../../../../components/CustomModal';
+import { CustomModalForm } from '../../../../../../components/CustomModal';
 import {
-  keyNumberFloat,
   keyNumberInteger,
   spinnerLoading,
   numberFormat,
   isEmpty,
   isNumeric,
 } from '../../../../../../helper/utils.helper';
-import { ADELANTADO, CONTADO, CREDITO_FIJO, CREDITO_VARIABLE } from '../../../../../../model/types/forma-pago';
+import { CONTADO, CREDITO_FIJO, CREDITO_VARIABLE } from '../../../../../../model/types/forma-pago';
 import PropTypes from 'prop-types';
 
 const ModalSale = (props) => {
@@ -20,6 +19,7 @@ const ModalSale = (props) => {
     onClose,
 
     loading,
+    refMetodoPagoContenedor,
 
     formaPago,
     handleSelectTipoPago,
@@ -133,14 +133,15 @@ const ModalSale = (props) => {
 
 
   return (
-    <CustomModalContent
+    <CustomModalForm
       contentRef={(ref) => refModal.current = ref}
       isOpen={isOpen}
       onOpen={onOpen}
       onHidden={onHidden}
       onClose={onClose}
-      contentLabel="Modal de Compra"
-      titleHeader="Completar Compra"
+      contentLabel="Modal de Venta"
+      titleHeader="Completar Venta"
+      onSubmit={handleSaveSale}
       body={
         <>
           {loading && spinnerLoading('Cargando datos...')}
@@ -256,7 +257,7 @@ const ModalSale = (props) => {
             <>
               <h6>Lista de métodos:</h6>
 
-              <div className='row'>
+              <div className='row' ref={refMetodoPagoContenedor}>
                 <div className='col'>
                   <div className="form-group">
                     {bancosAgregados.map((item, index) => (
@@ -298,6 +299,7 @@ const ModalSale = (props) => {
                       </select>
                       <div className="input-group-append">
                         <button
+                          type='button'
                           className="btn btn-outline-success d-flex"
                           title="Agregar Pago"
                           onClick={handleAddBancosAgregados}
@@ -457,9 +459,9 @@ const ModalSale = (props) => {
       footer={
         <>
           <button
-            type="button"
+            type="submit"
             className="btn btn-primary"
-            onClick={handleSaveSale}
+          // onClick={handleSaveSale}
           >
             Completar venta
           </button>
@@ -488,11 +490,11 @@ const MetodoPago = ({
       <input
         autoFocus
         type="text"
+        role={"float"}
         className="form-control"
         placeholder="Monto"
         value={monto}
         onChange={(event) => handleInputMontoBancosAgregados(event, idBanco)}
-        onKeyDown={keyNumberFloat}
       />
       <div className="input-group-prepend">
         <div className="input-group-text">
@@ -501,6 +503,7 @@ const MetodoPago = ({
       </div>
       <div className="input-group-append">
         <button
+          type='button'
           className="btn btn-outline-danger d-flex"
           title="Agregar Pago"
           onClick={() => handleRemoveItemBancosAgregados(idBanco)}
@@ -520,6 +523,7 @@ ModalSale.propTypes = {
   onClose: PropTypes.func.isRequired,
 
   loading: PropTypes.bool.isRequired,
+  refMetodoPagoContenedor: PropTypes.object.isRequired,
 
   formaPago: PropTypes.string.isRequired,
   handleSelectTipoPago: PropTypes.func.isRequired,

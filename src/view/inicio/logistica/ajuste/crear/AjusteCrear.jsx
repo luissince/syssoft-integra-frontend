@@ -124,8 +124,8 @@ class AjusteCrear extends CustomComponent {
 
   async loadingData() {
     const [almacenes, motivoAjuste] = await Promise.all([
-      await this.fetchComboAlmacen({ idSucursal: this.state.idSucursal }),
-      await this.fetchComboMotivoAjuste(),
+      this.fetchComboAlmacen({ idSucursal: this.state.idSucursal }),
+      this.fetchComboMotivoAjuste(),
     ]);
 
     await this.setStateAsync({
@@ -794,4 +794,7 @@ AjusteCrear.propTypes = {
  *
  * Método encargado de conectar con redux y exportar la clase
  */
-export default connect(mapStateToProps, null)(AjusteCrear);
+
+const ConnectedAjusteCrear = connect(mapStateToProps, null)(AjusteCrear);
+
+export default ConnectedAjusteCrear;

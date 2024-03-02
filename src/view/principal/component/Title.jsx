@@ -52,5 +52,4 @@ Title.propTypes = {
     handleSignIn: PropTypes.func.isRequired,
 };
 
-
 export default Title;

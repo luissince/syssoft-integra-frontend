@@ -265,8 +265,8 @@ class ProductoAgregar extends CustomComponent {
    */
   loadingData = async () => {
     const [medidas, categorias] = await Promise.all([
-      await this.fetchComboMedida(),
-      await this.fetchComboCategoria(),
+      this.fetchComboMedida(),
+      this.fetchComboCategoria(),
     ]);
 
     await this.setStateAsync({

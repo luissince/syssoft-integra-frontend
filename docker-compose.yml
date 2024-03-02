@@ -94,6 +94,25 @@ services:
     # Configuración para reiniciar siempre el contenedor
     restart: always
 
+
+  unnsgro-services:
+    # Configuración para construir la imagen del contenedor
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # Nombre de la imagen resultante
+    image: unnsgro-frontend-image
+    # Conexión a la red llamada 'luis'
+    networks:
+      - luis
+    # Mapeo de puertos: Mapea el puerto 6000 del host al puerto 80 del contenedor
+    ports:
+      - 6026:80
+    # Nombre del contenedor
+    container_name: unnsgro-frontend
+    # Configuración para reiniciar siempre el contenedor
+    restart: always
+
 # Definición de redes
 networks:
   # Definición de la red llamada 'luis'

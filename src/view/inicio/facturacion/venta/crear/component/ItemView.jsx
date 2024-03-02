@@ -95,7 +95,7 @@ ItemView.propTypes = {
     tipo: PropTypes.string.isRequired,
     preferido: PropTypes.number.isRequired,
     negativo: PropTypes.number.isRequired,
-    imagen: PropTypes.string.isRequired,
+    imagen: PropTypes.string,
   }),
   handleAddItem: PropTypes.func.isRequired,
   handleStarProduct: PropTypes.func.isRequired,

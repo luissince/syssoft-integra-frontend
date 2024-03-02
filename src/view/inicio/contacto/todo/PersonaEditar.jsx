@@ -134,8 +134,8 @@ class PersonaEditar extends CustomComponent {
     };
 
     const [documentos, cliente] = await Promise.all([
-      await this.fetchTipoDocumento(),
-      await this.fetchIdPersona(params),
+      this.fetchTipoDocumento(),
+      this.fetchIdPersona(params),
     ]);
 
     if (cliente === null) {

@@ -150,9 +150,9 @@ class CobroCrear extends CustomComponent {
 
   loadData = async () => {
     const [comprobantes, monedas, bancos] = await Promise.all([
-      await this.fetchComprobante(COMPROBANTE_DE_INGRESO),
-      await this.fetchMoneda(),
-      await this.fetchComboBanco(),
+      this.fetchComprobante(COMPROBANTE_DE_INGRESO),
+      this.fetchMoneda(),
+      this.fetchComboBanco(),
     ]);
 
     const comprobante = comprobantes.find((item) => item.preferida === 1);

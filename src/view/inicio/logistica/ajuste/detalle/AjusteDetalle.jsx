@@ -52,7 +52,9 @@ class AjusteDetalle extends CustomComponent {
   }
 
   async loadDataId(id) {
-    const [ajuste] = await Promise.all([await this.fetchDetalleAjuste(id)]);
+    const [ajuste] = await Promise.all([
+      this.fetchDetalleAjuste(id)
+    ]);
 
     this.setState({
       tipo: ajuste.cabecera.tipo,
@@ -161,9 +163,8 @@ class AjusteDetalle extends CustomComponent {
                         Estado
                       </th>
                       <th
-                        className={`table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal ${
-                          estado === 1 ? 'text-success' : 'text-danger'
-                        }`}
+                        className={`table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal ${estado === 1 ? 'text-success' : 'text-danger'
+                          }`}
                       >
                         {estado === 1 ? 'ACTIVO' : 'ANULADO'}
                       </th>

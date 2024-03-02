@@ -50,7 +50,7 @@ class ConceptoEditar extends CustomComponent {
 
   async loadingData(idConcepto) {
     const [concepto] = await Promise.all([
-      await this.fetchGetIdConcepto(idConcepto),
+      this.fetchGetIdConcepto(idConcepto),
     ]);
 
     this.setState({

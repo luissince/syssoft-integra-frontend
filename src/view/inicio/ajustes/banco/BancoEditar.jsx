@@ -69,8 +69,8 @@ class BancoEditar extends CustomComponent {
 
   async loadingData(idBanco) {
     const [monedas, banco] = await Promise.all([
-      await this.fetchMonedaCombo(),
-      await this.fetchObtenerBanco(idBanco),
+      this.fetchMonedaCombo(),
+      this.fetchObtenerBanco(idBanco),
     ]);
 
     this.setState({
@@ -155,7 +155,7 @@ class BancoEditar extends CustomComponent {
           vuelto: this.state.vuelto,
           reporte: this.state.reporte,
           estado: this.state.estado,
-          
+
           idUsuario: this.state.idUsuario,
           idBanco: this.state.idBanco,
         };

@@ -1,11 +1,11 @@
 import React from 'react';
-import ContainerWrapper from '../../../../components/Container';
-import CustomComponent from '../../../../model/class/custom-component';
+import ContainerWrapper from '../../../../../components/Container';
+import CustomComponent from '../../../../../model/class/custom-component';
 import {
   keyUpSearch,
   currentDate,
   validateDate,
-} from '../../../../helper/utils.helper';
+} from '../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 
 class CotizacionEditar extends CustomComponent {

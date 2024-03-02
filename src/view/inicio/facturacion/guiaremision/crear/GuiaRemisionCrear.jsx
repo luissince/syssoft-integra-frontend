@@ -96,7 +96,7 @@ class GuiaRemisionCrear extends CustomComponent {
 
     this.initial = { ...this.state }
 
-     // Referencia y variable del modal imprimir
+    // Referencia y variable del modal imprimir
     this.refPrinter = React.createRef();
 
     // Referencia de los atributos principales
@@ -148,10 +148,10 @@ class GuiaRemisionCrear extends CustomComponent {
   loadData = async () => {
     const [comprobantes, motivoTraslado, tipoPeso, sucursal] =
       await Promise.all([
-        await this.fetchComprobante(GUIA_DE_REMISION),
-        await this.fetchComboMotivoTraslado(),
-        await this.fetchComboTipoPeso(),
-        await this.fetchObtenerSucursal()
+        this.fetchComprobante(GUIA_DE_REMISION),
+        this.fetchComboMotivoTraslado(),
+        this.fetchComboTipoPeso(),
+        this.fetchObtenerSucursal()
       ]);
 
     const ubigeo = {
@@ -791,30 +791,30 @@ class GuiaRemisionCrear extends CustomComponent {
       })
       return;
     }
-    
 
-    if(isEmpty(this.state.direccionPartida)){
+
+    if (isEmpty(this.state.direccionPartida)) {
       alertWarning("Guía de Remisión", "Ingrese la dirección de partida.", () => {
         this.refDireccionPartida.current.focus()
       })
       return;
     }
 
-    if(isEmpty(this.state.idUbigeoPartida)){
+    if (isEmpty(this.state.idUbigeoPartida)) {
       alertWarning("Guía de Remisión", "Selecciona el ubigeo de partida.", () => {
         this.refFiltrarUbigeoPartida.current.focus()
       })
       return;
     }
 
-    if(isEmpty(this.state.direccionLlegada)){
+    if (isEmpty(this.state.direccionLlegada)) {
       alertWarning("Guía de Remisión", "Ingrese la dirección de llegada.", () => {
         this.refDireccionPartida.current.focus()
       })
       return;
     }
 
-    if(isEmpty(this.state.idUbigeoLlegada)){
+    if (isEmpty(this.state.idUbigeoLlegada)) {
       alertWarning("Guía de Remisión", "Selecciona el ubigeo de llegada.", () => {
         this.refFiltrarUbigeoLlegada.current.focus()
       })

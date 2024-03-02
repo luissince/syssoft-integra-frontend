@@ -74,7 +74,9 @@ class UsuarioAgregar extends CustomComponent {
   }
 
   loadData = async () => {
-    const [perfiles] = await Promise.all([await this.fetchComboPerfil()]);
+    const [perfiles] = await Promise.all([
+      this.fetchComboPerfil()
+    ]);
 
     this.setState({
       perfiles,

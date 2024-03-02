@@ -14,7 +14,6 @@ import ErrorResponse from '../../../../model/class/error-response';
 import { CANCELED } from '../../../../model/types/types';
 import ContainerWrapper from '../../../../components/Container';
 import {
-  getIdCategoria,
   getIdMedida,
   updateMedida,
 } from '../../../../network/rest/principal.network';
@@ -58,7 +57,9 @@ class MedidaEditar extends CustomComponent {
   }
 
   async loadingData(id) {
-    const [medida] = await Promise.all([await this.fetchObtenerMedida(id)]);
+    const [medida] = await Promise.all([
+      this.fetchObtenerMedida(id)
+    ]);
 
     this.setState({
       idMedida: id,

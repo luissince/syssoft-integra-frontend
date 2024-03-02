@@ -65,7 +65,7 @@ class CuentasPorPagarAmoritzar extends CustomComponent {
 
     async loadingData(id) {
         const [compra] = await Promise.all([
-            await this.fetchDetailCompra(id)
+            this.fetchDetailCompra(id)
         ]);
 
         if (!compra) {

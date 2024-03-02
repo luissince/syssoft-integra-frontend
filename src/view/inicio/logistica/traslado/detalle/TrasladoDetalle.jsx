@@ -55,7 +55,9 @@ class TrasladoDetalle extends CustomComponent {
   }
 
   async loadDataId(id) {
-    const [traslado] = await Promise.all([await this.fetchDetalleTraslado(id)]);
+    const [traslado] = await Promise.all([
+      this.fetchDetalleTraslado(id)
+    ]);
 
     this.setState({
       fecha: traslado.cabecera.fecha,
@@ -92,7 +94,7 @@ class TrasladoDetalle extends CustomComponent {
   }
 
   render() {
-    const { tipo, motivo, almacenOrigen, almacenDestino,sucursalDestino, estado, fecha, hora, observacion } =
+    const { tipo, motivo, almacenOrigen, almacenDestino, sucursalDestino, estado, fecha, hora, observacion } =
       this.state;
 
     return (

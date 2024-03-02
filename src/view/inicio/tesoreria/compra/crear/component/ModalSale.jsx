@@ -1,6 +1,5 @@
-import { CustomModalContent } from '../../../../../../components/CustomModal';
+import { CustomModalForm } from '../../../../../../components/CustomModal';
 import {
-  keyNumberFloat,
   keyNumberInteger,
   spinnerLoading,
   numberFormat,
@@ -49,7 +48,7 @@ const ModalSale = (props) => {
 
     handleSaveSale,
   } = props;
-  
+
   const generarVuelto = () => {
     const total = parseFloat(importeTotal);
 
@@ -133,7 +132,7 @@ const ModalSale = (props) => {
   }
 
   return (
-    <CustomModalContent
+    <CustomModalForm
       contentRef={(ref) => refSale.current = ref}
       isOpen={isOpen}
       onOpen={onOpen}
@@ -141,6 +140,7 @@ const ModalSale = (props) => {
       onClose={onClose}
       contentLabel="Modal de Compra"
       titleHeader="Completar Compra"
+      onSubmit={handleSaveSale}
       body={
         <>
           {loading && spinnerLoading('Cargando datos...')}
@@ -273,6 +273,7 @@ const ModalSale = (props) => {
                       </select>
                       <div className="input-group-append">
                         <button
+                          type="button"
                           className="btn btn-outline-success d-flex"
                           title="Agregar Pago"
                           onClick={handleAddBancosAgregados}
@@ -430,11 +431,10 @@ const ModalSale = (props) => {
       footer={
         <>
           <button
-            type="button"
+            type="submit"
             className="btn btn-primary"
-            onClick={handleSaveSale}
           >
-            Completar venta
+            Completar compra
           </button>
           <button
             type="button"
@@ -461,11 +461,11 @@ const MetodoPago = ({
       <input
         autoFocus
         type="text"
+        role='float'
         className="form-control"
         placeholder="Monto"
         value={monto}
         onChange={(event) => handleInputMontoBancosAgregados(event, idBanco)}
-        onKeyDown={keyNumberFloat}
       />
       <div className="input-group-prepend">
         <div className="input-group-text">
@@ -474,6 +474,7 @@ const MetodoPago = ({
       </div>
       <div className="input-group-append">
         <button
+          type="button"
           className="btn btn-outline-danger d-flex"
           title="Agregar Pago"
           onClick={() => handleRemoveItemBancosAgregados(idBanco)}

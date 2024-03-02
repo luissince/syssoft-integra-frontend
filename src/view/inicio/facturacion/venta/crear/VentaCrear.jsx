@@ -11,7 +11,7 @@ import {
   isEmpty,
   isNumeric,
   rounded,
-  spinnerLoading,
+  validateNumericInputs,
 } from '../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import { PosContainerWrapper } from '../../../../../components/Container';
@@ -52,7 +52,9 @@ import { CustomModalContent } from '../../../../../components/CustomModal';
 import { CLIENTE_NATURAL } from '../../../../../model/types/tipo-cliente';
 import { ADELANTADO, CONTADO, CREDITO_FIJO, CREDITO_VARIABLE } from '../../../../../model/types/forma-pago';
 import { pdfA4Venta, pdfTicketVenta } from '../../../../../helper/lista-pdf.helper';
-import InvoiceListPrices from './component/InvoiceListPrices';
+import { SpinnerView } from '../../../../../components/Spinner';
+import { ModalAgregar } from './component/ModalAgregar';
+// import InvoiceListPrices from './component/InvoiceListPrices';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -112,7 +114,7 @@ class VentaCrear extends CustomComponent {
       codiso: '',
       importeTotal: 0.0,
 
-      // Atributos modal printer
+      // Atributos del modal printer
       isOpenPrinter: false,
 
       // Atributos del modal sale
@@ -121,10 +123,13 @@ class VentaCrear extends CustomComponent {
       formaPago: CONTADO,
       bancos: [],
       bancosAgregados: [],
-
       numeroCuotas: '',
       frecuenciaPagoCredito: new Date().getDate() > 15 ? '30' : '15',
       frecuenciaPago: new Date().getDate() > 15 ? '30' : '15',
+
+      // Atributos del modal agregar
+      isOpenAgregar: false,
+      cantidadAgregar: '',
 
       // Atributos del modal cliente
       loadingCliente: false,
@@ -157,6 +162,7 @@ class VentaCrear extends CustomComponent {
 
     // Referencia al mmodal sale
     this.refSale = React.createRef();
+    this.refMetodoPagoContenedor = React.createRef();
     this.refMetodoContado = React.createRef();
     this.refFrecuenciaPago = React.createRef();
     this.refNumeroCuotas = React.createRef();
@@ -178,6 +184,9 @@ class VentaCrear extends CustomComponent {
     // Atributos para buscar productos el diseño mobil
     this.refProductoMobile = React.createRef();
     this.selectItemProductoMobile = false;
+
+    // Referencia para el custom modal agregar
+    this.refModalAgregar = React.createRef();
 
     // Atributos para el modal producto
     this.idModalProducto = 'idModalProducto';
@@ -222,6 +231,8 @@ class VentaCrear extends CustomComponent {
    * @description Método que se ejecuta después de que el componente se haya montado en el DOM.
    */
   async componentDidMount() {
+    document.addEventListener('keydown', this.handleDocumentKeyDown)
+
     await this.initData();
   }
 
@@ -229,6 +240,8 @@ class VentaCrear extends CustomComponent {
    * @description Método que se ejecuta antes de que el componente se desmonte del DOM.
    */
   componentWillUnmount() {
+    document.removeEventListener('keydown', this.handleDocumentKeyDown)
+
     this.abortControllerView.abort();
   }
 
@@ -265,12 +278,12 @@ class VentaCrear extends CustomComponent {
       bancos,
       tiposDocumentos
     ] = await Promise.all([
-      await this.fetchComprobante(VENTA),
-      await this.fetchMoneda(),
-      await this.fetchImpuesto(),
-      await this.fetchClientePredeterminado(),
-      await this.fetchComboBanco(),
-      await this.fetchTipoDocumento(),
+      this.fetchComprobante(VENTA),
+      this.fetchMoneda(),
+      this.fetchImpuesto(),
+      this.fetchClientePredeterminado(),
+      this.fetchComboBanco(),
+      this.fetchTipoDocumento(),
     ]);
 
     const comprobantes = [...venta];
@@ -511,11 +524,23 @@ class VentaCrear extends CustomComponent {
     |
     */
 
+
+  handleDocumentKeyDown = (event) => {
+    if (event.key === 'F1' && !this.state.isOpenProducto) {
+      this.handleOpenSale();
+    }
+
+    if (event.key === 'F2' && !this.state.isOpenProducto) {
+      this.handleClearSale();
+    }
+  }
+
   //------------------------------------------------------------------------------------------
   // Componenente busqueda
   //------------------------------------------------------------------------------------------
 
   handleAddItem = async (producto) => {
+    console.log(producto)
     if (isEmpty(this.refImpuesto.current.value)) {
       alertWarning('Venta', 'Seleccione un impuesto.', () => {
         this.handleOpenOptions();
@@ -632,6 +657,43 @@ class VentaCrear extends CustomComponent {
     this.setState({
       productos: result,
       filtrarProducto: false,
+    });
+  }
+
+  //------------------------------------------------------------------------------------------
+  // Acciones del modal product
+  //------------------------------------------------------------------------------------------
+  handleOpenModalAgregar = () => {
+    this.setState({ loadingModalProducto: true, isOpenProducto: true })
+  }
+
+  handleOnOpenModalAgregar = () => {
+    this.setState({
+      costoModalProducto: this.state.producto.costo,
+      loadingModalProducto: false,
+    })
+  }
+
+  handleOnHiddenModalAgregar = async () => {
+    await this.setStateAsync({
+      productos: [],
+      filtrarProducto: '',
+      producto: null,
+      cantidadModalProducto: '',
+      costoModalProducto: '',
+    });
+    this.selectItemProducto = false;
+  }
+
+  handleCloseAgregar = async () => {
+    return new Promise((resolve) => {
+      const data = this.refModalProducto.current;
+      data.classList.add("close-cm")
+      data.addEventListener('animationend', () => {
+        this.setState({ isOpenProducto: false }, () => {
+          resolve();
+        })
+      })
     });
   }
 
@@ -1108,8 +1170,9 @@ class VentaCrear extends CustomComponent {
 
   handleOpenSale = async () => {
     if (isEmpty(this.state.detalleVenta)) {
-      alertWarning('Venta', 'La lista de productos esta vacía.');
-      this.refProducto.current.focus();
+      alertWarning('Venta', 'La lista de productos esta vacía.', () => {
+        this.refProducto.current.focus();
+      });
       return;
     }
 
@@ -1293,7 +1356,9 @@ class VentaCrear extends CustomComponent {
     }
 
     if (metodoPagosLista.some((item) => !isNumeric(item.monto))) {
-      alertWarning('Venta', 'Hay montos del metodo de cobro que no tiene valor.');
+      alertWarning('Venta', 'Hay montos del metodo de cobro que no tiene valor.', () => {
+        validateNumericInputs(this.refMetodoPagoContenedor);
+      });
       return;
     }
 
@@ -1301,14 +1366,18 @@ class VentaCrear extends CustomComponent {
 
     if (metodoPagosLista.length > 1) {
       if (metodoCobroTotal !== importeTotal) {
-        alertWarning('Venta', 'Al tener mas de 2 métodos de cobro el monto debe ser igual al total.');
+        alertWarning('Venta', 'Al tener mas de 2 métodos de cobro el monto debe ser igual al total.', () => {
+          validateNumericInputs(this.refMetodoPagoContenedor);
+        });
         return;
       }
     } else {
       const metodo = metodoPagosLista[0];
       if (metodo.vuelto === 1) {
         if (metodoCobroTotal < importeTotal) {
-          alertWarning('Venta', 'El monto a cobrar es menor que el total.');
+          alertWarning('Venta', 'El monto a cobrar es menor que el total.', () => {
+            validateNumericInputs(this.refMetodoPagoContenedor);
+          });
           return;
         }
 
@@ -1318,7 +1387,9 @@ class VentaCrear extends CustomComponent {
         });
       } else {
         if (metodoCobroTotal !== importeTotal) {
-          alertWarning('Venta', 'El monto a cobrar debe ser igual al total.');
+          alertWarning('Venta', 'El monto a cobrar debe ser igual al total.', () => {
+            validateNumericInputs(this.refMetodoPagoContenedor);
+          });
           return;
         }
       }
@@ -1495,20 +1566,20 @@ class VentaCrear extends CustomComponent {
   };
 
   handleProcessCreditoVariable = async () => {
-    const {
-      formaPago,
-      idComprobante,
-      idMoneda,
-      idImpuesto,
-      idCliente,
-      idSucursal,
-      idUsuario,
-      comentario,
-      nuevoCliente,
-      detalleVenta,
-      bancosAgregados,
-      importeTotal,
-    } = this.state;
+    // const {
+    //   formaPago,
+    //   idComprobante,
+    //   idMoneda,
+    //   idImpuesto,
+    //   idCliente,
+    //   idSucursal,
+    //   idUsuario,
+    //   comentario,
+    //   nuevoCliente,
+    //   detalleVenta,
+    //   bancosAgregados,
+    //   importeTotal,
+    // } = this.state;
     /*
         let metodoPagoLista = [...bancosAgregados];
     
@@ -1618,20 +1689,20 @@ class VentaCrear extends CustomComponent {
   };
 
   handleProcessAdelantado = async () => {
-    const {
-      formaPago,
-      idComprobante,
-      idMoneda,
-      idImpuesto,
-      idCliente,
-      idSucursal,
-      idUsuario,
-      comentario,
-      nuevoCliente,
-      detalleVenta,
-      bancosAgregados,
-      importeTotal,
-    } = this.state;
+    // const {
+    //   formaPago,
+    //   idComprobante,
+    //   idMoneda,
+    //   idImpuesto,
+    //   idCliente,
+    //   idSucursal,
+    //   idUsuario,
+    //   comentario,
+    //   nuevoCliente,
+    //   detalleVenta,
+    //   bancosAgregados,
+    //   importeTotal,
+    // } = this.state;
     /*
         let metodoPagoLista = [...bancosAgregados];
     
@@ -1777,7 +1848,10 @@ class VentaCrear extends CustomComponent {
   render() {
     return (
       <PosContainerWrapper>
-        {this.state.loading && spinnerLoading(this.state.msgLoading)}
+        <SpinnerView
+          loading={this.state.loading}
+          message={this.state.msgLoading}
+        />
 
         <ModalSale
           refModal={this.refSale}
@@ -1787,6 +1861,7 @@ class VentaCrear extends CustomComponent {
           onClose={this.handleOnCloseModalSale}
 
           loading={this.state.loadingModal}
+          refMetodoPagoContenedor={this.refMetodoPagoContenedor}
 
           formaPago={this.state.formaPago}
           handleSelectTipoPago={this.handleSelectTipoPago}
@@ -1990,6 +2065,14 @@ class VentaCrear extends CustomComponent {
           handleSave={this.handleSaveProducto}
           handleClose={this.handleCloseProducto}
         />
+
+        {/* <ModalAgregar
+          refModal={this.state.refModalAgregar}
+          isOpen={this.state.isOpenAgregar}
+          onOpen={this.handleOnOpenModalAgregar}
+          onHidden={this.handleOnHiddenModalAgregar}
+          onClose={this.handleCloseAgregar}
+        /> */}
       </PosContainerWrapper>
     );
   }

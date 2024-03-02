@@ -1,6 +1,9 @@
-import { CustomModalContent } from '../../../../../../components/CustomModal';
+import Column from '../../../../../../components/Column';
+import { CustomModalForm } from '../../../../../../components/CustomModal';
+import Input from '../../../../../../components/Input';
+import Row from '../../../../../../components/Row';
 import {
-  keyNumberFloat,
+  handlePasteFloat,
   spinnerLoading,
 } from '../../../../../../helper/utils.helper';
 import PropTypes from 'prop-types';
@@ -26,7 +29,7 @@ export const CustomModalProduct = ({
 }) => {
 
   return (
-    <CustomModalContent
+    <CustomModalForm
       contentRef={(ref) => refModal.current = ref}
       isOpen={isOpen}
       onOpen={onOpen}
@@ -34,68 +37,49 @@ export const CustomModalProduct = ({
       onClose={onClose}
       contentLabel="Modal Producto"
       titleHeader="Agregar Producto"
+      onSubmit={handleAdd}
       body={
         <>
           {loading && spinnerLoading('Cargando datos...')}
 
-          <h5>Detalle de la Compra</h5>
-
-          <div className="row">
-            <div className="col-md-4 col-sm-4">
-              <hr />
-            </div>
-            <div className="col-md-4 col-sm-4 d-flex align-items-center justify-content-center">
-              <h6 className="mb-0">Tipos de cobros</h6>
-            </div>
-            <div className="col-md-4 col-sm-4">
-              <hr />
-            </div>
-          </div>
-
-          <div className="row">
-            <div className="col">
+          <Row>
+            <Column>
               <div className="form-group">
                 <label>Cantidad:</label>
-                <input
-                  autoFocus
-                  type="text"
-                  className="form-control"
-                  placeholder="0.00"
-                  ref={refCantidad}
+                <Input
+                  autoFocus={true}
+                  placeholder={"0.00"}
+                  role={"float"}
+                  refInput={refCantidad}
                   value={cantidad}
                   onChange={handleInputCantidad}
-                  onKeyUp={(event) => {
-                    if (event.code === 'Enter') {
-                      handleAdd();
-                    }
-                  }}
-                  onKeyDown={keyNumberFloat}
+                  onPaste={handlePasteFloat}
                 />
               </div>
-            </div>
-            <div className="col">
+            </Column>
+
+            <Column>
               <div className="form-group">
                 <label>Costo:</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="0.00"
-                  ref={refCosto}
+                <Input
+                  placeholder={"0.00"}
+                  role={"float"}
+                  refInput={refCosto}
                   value={costo}
                   onChange={handleInputCosto}
-                  onKeyDown={keyNumberFloat}
+                  onPaste={handlePasteFloat}
                 />
               </div>
-            </div>
-          </div>
+            </Column>
+          </Row>
         </>
       }
 
       footer={
         <>
-          <button type="button"
-            className="btn btn-primary"
-            onClick={handleAdd}>
+          <button 
+            type="submit"
+            className="btn btn-primary">
             <i className="fa fa-plus"></i> Agregar
           </button>
           <button type="button"

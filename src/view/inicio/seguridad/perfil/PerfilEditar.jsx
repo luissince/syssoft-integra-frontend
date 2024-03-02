@@ -12,7 +12,6 @@ import {
   spinnerLoading,
 } from '../../../../helper/utils.helper';
 import {
-  updateBanco,
   getIdPerfil,
   updatePerfil,
 } from '../../../../network/rest/principal.network';
@@ -54,7 +53,9 @@ class BancoEditar extends CustomComponent {
   }
 
   async loadingData(id) {
-    const [perfil] = await Promise.all([await this.fetchObtenerPerfil(id)]);
+    const [perfil] = await Promise.all([
+      this.fetchObtenerPerfil(id)
+    ]);
 
     this.setState({
       descripcion: perfil.descripcion,
