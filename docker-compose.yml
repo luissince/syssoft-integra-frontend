@@ -95,13 +95,13 @@ services:
     restart: always
 
 
-  unnsgro-services:
+  unnagro-services:
     # Configuración para construir la imagen del contenedor
     build:
       context: .
       dockerfile: Dockerfile
     # Nombre de la imagen resultante
-    image: unnsgro-frontend-image
+    image: unnagro-frontend-image
     # Conexión a la red llamada 'luis'
     networks:
       - luis
@@ -109,7 +109,7 @@ services:
     ports:
       - 6026:80
     # Nombre del contenedor
-    container_name: unnsgro-frontend
+    container_name: unnagro-frontend
     # Configuración para reiniciar siempre el contenedor
     restart: always
 
