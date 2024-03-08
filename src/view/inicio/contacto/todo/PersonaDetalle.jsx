@@ -6,11 +6,12 @@ import {
   numberFormat,
   rounded,
   formatTime,
-  spinnerLoading,
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../../components/Container';
 import CustomComponent from '../../../../model/class/custom-component';
+import { SpinnerView } from '../../../../components/Spinner';
+import Title from '../../../../components/Title';
 
 class ClienteDetalle extends CustomComponent {
   constructor(props) {
@@ -96,21 +97,17 @@ class ClienteDetalle extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
-        {this.state.loading && spinnerLoading(this.state.msgLoading)}
 
-        <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <div className="form-group">
-              <h5>
-                <span role="button" onClick={() => this.props.history.goBack()}>
-                  <i className="bi bi-arrow-left-short"></i>
-                </span>{' '}
-                Cliente
-                <small className="text-secondary"> detalle</small>
-              </h5>
-            </div>
-          </div>
-        </div>
+        <SpinnerView
+          loading={this.state.loading}
+          message={this.state.msgLoading}
+        />
+
+        <Title
+          title="Persona"
+          subTitle="Detalle"
+          handleGoBack={() => this.props.history.goBack()}
+        />
 
         <div className="row">
           <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
@@ -282,4 +279,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(ClienteDetalle);
+const ConnectedClienteDetalle = connect(mapStateToProps, null)(ClienteDetalle)
+
+export default ConnectedClienteDetalle;

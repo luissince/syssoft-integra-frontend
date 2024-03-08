@@ -13,7 +13,6 @@ import {
   isEmpty,
   isNumeric,
   showModal,
-  spinnerLoading,
   validateNumericInputs,
   viewModal,
 } from '../../../../../helper/utils.helper';
@@ -37,6 +36,7 @@ import DetalleImagen from '../component/DetalleImagen';
 import ModalProducto from '../component/ModalProducto';
 import { SERVICIO, UNIDADES } from '../../../../../model/types/tipo-tratamiento-producto';
 import Title from '../../../../../components/Title';
+import { SpinnerView } from '../../../../../components/Spinner';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -1210,7 +1210,10 @@ class ProductoAgregar extends CustomComponent {
           handleSaveItemCombo={this.handleSaveItemCombo}
         />
 
-        {this.state.loading && spinnerLoading(this.state.msgLoading)}
+        <SpinnerView
+          loading={this.state.loading}
+          message={this.state.msgLoading}
+        />
 
         <Title
           title='Producto'

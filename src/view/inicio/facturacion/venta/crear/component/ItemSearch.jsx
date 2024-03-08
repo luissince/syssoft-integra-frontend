@@ -39,7 +39,7 @@ const ItemSearch = (props) => {
                 ref={refProducto}
                 value={producto}
                 onChange={handleFilterCodBarProducto}
-                onKeyUp={handleSearchCodBarProducto}
+                onKeyDown={handleSearchCodBarProducto}
                 autoFocus
               />
               :

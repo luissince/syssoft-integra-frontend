@@ -7,6 +7,8 @@ const ModalConfiguration = (props) => {
 
   const { refMoneda, monedas } = props;
 
+  const { refAlmacen, almacenes } = props;
+
   const { refComentario } = props;
 
   const { handleSaveOptions, handleCloseOptions } = props;
@@ -74,6 +76,28 @@ const ModalConfiguration = (props) => {
             <div className="row">
               <div className="col">
                 <div className="form-group">
+                  <label>
+                    Almacen: <i className="fa fa-asterisk text-danger small"></i>{' '}
+                  </label>
+                  <select
+                    title="Lista de Almacenes"
+                    className="form-control"
+                    ref={refAlmacen}
+                  >
+                    <option value="">-- Almacen --</option>
+                    {almacenes.map((item, index) => (
+                      <option key={index} value={item.idAlmacen}>
+                        {item.nombre}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div className="row">
+              <div className="col">
+                <div className="form-group">
                   <label>Comentario:</label>
                   <textarea
                     className="form-control"
@@ -127,6 +151,9 @@ ModalConfiguration.propTypes = {
 
   refMoneda: PropTypes.object.isRequired,
   monedas: PropTypes.array.isRequired,
+
+  refAlmacen: PropTypes.object.isRequired,
+  almacenes: PropTypes.array.isRequired,
 
   refComentario: PropTypes.object.isRequired,
 

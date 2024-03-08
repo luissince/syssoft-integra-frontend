@@ -4,8 +4,8 @@ import {
   alertInfo,
   alertSuccess,
   alertWarning,
-  spinnerLoading,
   keyUpSearch,
+  isEmpty,
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import Paginacion from '../../../../components/Paginacion';
@@ -19,6 +19,10 @@ import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
 import { CANCELED } from '../../../../model/types/types';
 import Title from '../../../../components/Title';
+import Row from '../../../../components/Row';
+import Column from '../../../../components/Column';
+import { TableResponsive } from '../../../../components/Table';
+import { SpinnerTable } from '../../../../components/Spinner';
 
 class Comprobantes extends CustomComponent {
   constructor(props) {
@@ -179,6 +183,74 @@ class Comprobantes extends CustomComponent {
     );
   }
 
+  generateBody() {
+    if (this.state.loading) {
+      return (
+        <tr>
+          <td className="text-center" colSpan="10">
+            <SpinnerTable
+              message='Cargando información de la tabla...'
+            />
+          </td>
+        </tr>
+      );
+    }
+
+    if (isEmpty(this.state.lista)) {
+      return (
+        <tr>
+          <td className="text-center" colSpan="10">
+            ¡No hay comprobantes registrados!
+          </td>
+        </tr>
+      );
+    }
+
+    return this.state.lista.map((item, index) => {
+      return (
+        <tr key={index}>
+          <td className="text-center">{item.id}</td>
+          <td>{item.tipo.toUpperCase()}</td>
+          <td>{item.nombre}</td>
+          <td>{item.serie}</td>
+          <td>{item.numeracion}</td>
+          <td className="text-center">
+            <div className={`badge ${item.preferida === 1 ? 'badge-info' : 'badge-danger'}`}>{item.preferida === 1 ? 'Si' : 'No'}</div>
+          </td>
+          <td className="text-center">
+            <div className={`badge ${item.estado === 1 ? 'badge-success' : 'badge-danger'}`}>
+              {item.estado === 1 ? 'ACTIVO' : 'INACTIVO'}
+            </div>
+          </td>
+          <td className="text-center">
+            <button
+              className="btn btn-outline-warning btn-sm"
+              title="Editar"
+              onClick={() =>
+                this.handleEditar(item.idComprobante)
+              }
+            // disabled={!this.state.edit}
+            >
+              <i className="bi bi-pencil"></i>
+            </button>
+          </td>
+          <td className="text-center">
+            <button
+              className="btn btn-outline-danger btn-sm"
+              title="Anular"
+              onClick={() =>
+                this.handleBorrar(item.idComprobante)
+              }
+            // disabled={!this.state.remove}
+            >
+              <i className="bi bi-trash"></i>
+            </button>
+          </td>
+        </tr>
+      );
+    });
+  }
+
   render() {
     return (
       <ContainerWrapper>
@@ -187,8 +259,8 @@ class Comprobantes extends CustomComponent {
           subTitle='Lista'
         />
 
-        <div className="row">
-          <div className="col-md-6 col-sm-12">
+        <Row>
+          <Column className="col-md-6 col-sm-12">
             <div className="form-group">
               <div className="input-group mb-2">
                 <div className="input-group-prepend">
@@ -209,8 +281,9 @@ class Comprobantes extends CustomComponent {
                 />
               </div>
             </div>
-          </div>
-          <div className="col-md-6 col-sm-12">
+          </Column>
+
+          <Column className="col-md-6 col-sm-12">
             <div className="form-group">
               <button
                 className="btn btn-outline-info"
@@ -226,98 +299,35 @@ class Comprobantes extends CustomComponent {
                 <i className="bi bi-arrow-clockwise"></i>
               </button>
             </div>
-          </div>
-        </div>
+          </Column>
+        </Row>
 
-        <div className="row">
-          <div className="col-md-12 col-sm-12">
-            <div className="table-responsive">
-              <table className="table table-striped table-bordered rounded">
-                <thead>
-                  <tr>
-                    <th width="5%" className="text-center">
-                      #
-                    </th>
-                    <th width="15%">Tipo Comprobante</th>
-                    <th width="20%">Nombre</th>
-                    <th width="15%">Serie</th>
-                    <th width="10%">Numeración</th>
-                    <th width="10%">Preferida</th>
-                    <th width="10%">Estado</th>
-                    <th width="5%" className="text-center">
-                      Edición
-                    </th>
-                    <th width="5%" className="text-center">
-                      Anular
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {this.state.loading ? (
-                    <tr>
-                      <td className="text-center" colSpan="10">
-                        {spinnerLoading(
-                          'Cargando información de la tabla...',
-                          true,
-                        )}
-                      </td>
-                    </tr>
-                  ) : this.state.lista.length === 0 ? (
-                    <tr>
-                      <td className="text-center" colSpan="10">
-                        ¡No hay comprobantes registrados!
-                      </td>
-                    </tr>
-                  ) : (
-                    this.state.lista.map((item, index) => {
-                      return (
-                        <tr key={index}>
-                          <td className="text-center">{item.id}</td>
-                          <td>{item.tipo.toUpperCase()}</td>
-                          <td>{item.nombre}</td>
-                          <td>{item.serie}</td>
-                          <td>{item.numeracion}</td>
-                          <td className="text-center">
-                            <div className={`badge ${item.preferida === 1 ? 'badge-info' : 'badge-danger'}`}>{item.preferida === 1 ? 'Si' : 'No'}</div>
-                          </td>
-                          <td className="text-center">
-                            <div className={`badge ${item.estado === 1 ? 'badge-success' : 'badge-danger'}`}>
-                              {item.estado === 1 ? 'ACTIVO' : 'INACTIVO'}
-                            </div>
-                          </td>
-                          <td className="text-center">
-                            <button
-                              className="btn btn-outline-warning btn-sm"
-                              title="Editar"
-                              onClick={() =>
-                                this.handleEditar(item.idComprobante)
-                              }
-                            // disabled={!this.state.edit}
-                            >
-                              <i className="bi bi-pencil"></i>
-                            </button>
-                          </td>
-                          <td className="text-center">
-                            <button
-                              className="btn btn-outline-danger btn-sm"
-                              title="Anular"
-                              onClick={() =>
-                                this.handleBorrar(item.idComprobante)
-                              }
-                            // disabled={!this.state.remove}
-                            >
-                              <i className="bi bi-trash"></i>
-                            </button>
-                          </td>
-                        </tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+        <Row>
+          <Column>
+            <TableResponsive
+              tHead={
+                <tr>
+                  <th width="5%" className="text-center">
+                    #
+                  </th>
+                  <th width="15%">Tipo Comprobante</th>
+                  <th width="20%">Nombre</th>
+                  <th width="15%">Serie</th>
+                  <th width="10%">Numeración</th>
+                  <th width="10%">Preferida</th>
+                  <th width="10%">Estado</th>
+                  <th width="5%" className="text-center">
+                    Edición
+                  </th>
+                  <th width="5%" className="text-center">
+                    Anular
+                  </th>
+                </tr>
+              }
+              tBody={this.generateBody()}
+            />
+          </Column>
+        </Row>
 
         <Paginacion
           loading={this.state.loading}
@@ -338,4 +348,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(Comprobantes);
+const ConnectedComprobantes = connect(mapStateToProps, null)(Comprobantes);
+
+export default ConnectedComprobantes;

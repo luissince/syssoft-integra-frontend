@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  spinnerLoading,
   alertDialog,
   alertInfo,
   alertSuccess,
@@ -19,6 +18,11 @@ import {
 } from '../../../../network/rest/principal.network';
 import { CANCELED } from '../../../../model/types/types';
 import { connect } from 'react-redux';
+import Title from '../../../../components/Title';
+import Row from '../../../../components/Row';
+import Column from '../../../../components/Column';
+import { TableResponsive } from '../../../../components/Table';
+import { SpinnerTable } from '../../../../components/Spinner';
 
 class Almacenes extends CustomComponent {
   constructor(props) {
@@ -238,12 +242,14 @@ class Almacenes extends CustomComponent {
     );
   };
 
-  generarBody() {
+  generateBody() {
     if (this.state.loading) {
       return (
         <tr>
-          <td className="text-center" colSpan="7">
-            {spinnerLoading('Cargando información de la tabla...', true)}
+          <td className="text-center" colSpan="8">
+            <SpinnerTable
+              message='Cargando información de la tabla...'
+            />
           </td>
         </tr>
       );
@@ -252,7 +258,7 @@ class Almacenes extends CustomComponent {
     if (isEmpty(this.state.lista)) {
       return (
         <tr className="text-center">
-          <td colSpan="7">¡No hay datos registrados!</td>
+          <td colSpan="8">¡No hay datos registrados!</td>
         </tr>
       );
     }
@@ -267,6 +273,13 @@ class Almacenes extends CustomComponent {
             {item.departamento + '-' + item.provincia + '-' + item.distrito}
           </td>
           <td>{item.codigoSunat}</td>
+          <td className='text-center'>
+            <div
+              className={`badge ${item.predefinido === 1 ? 'badge-success' : 'badge-warning'}`}
+            >
+              {item.predefinido === 1 ? 'SI' : 'NO'}
+            </div>
+          </td>
           <td className="text-center">
             <button
               className="btn btn-outline-warning btn-sm"
@@ -293,15 +306,10 @@ class Almacenes extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
-        <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <div className="form-group">
-              <h5>
-                Almacenes <small className="text-secondary">LISTA</small>
-              </h5>
-            </div>
-          </div>
-        </div>
+        <Title
+          title='Almacenes'
+          subTitle='LISTA'
+        />
 
         <div className="row">
           <div className="col-md-6 col-sm-12">
@@ -326,6 +334,7 @@ class Almacenes extends CustomComponent {
               </div>
             </div>
           </div>
+
           <div className="col-md-6 col-sm-12">
             <div className="form-group">
               <button
@@ -344,32 +353,31 @@ class Almacenes extends CustomComponent {
           </div>
         </div>
 
-        <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <div className="table-responsive">
-              <table className="table table-striped table-bordered rounded">
-                <thead>
-                  <tr>
-                    <th width="5%" className="text-center">
-                      #
-                    </th>
-                    <th width="15%">Nombre</th>
-                    <th width="25%">Dirección</th>
-                    <th width="20%">Distrito</th>
-                    <th width="20%">Código Sunat</th>
-                    <th width="5%" className="text-center">
-                      Editar
-                    </th>
-                    <th width="5%" className="text-center">
-                      Eliminar
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>{this.generarBody()}</tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+        <Row>
+          <Column>
+            <TableResponsive
+              tHead={
+                <tr>
+                  <th width="5%" className="text-center">
+                    #
+                  </th>
+                  <th width="15%">Nombre</th>
+                  <th width="25%">Dirección</th>
+                  <th width="20%">Distrito</th>
+                  <th width="10%">Código Sunat</th>
+                  <th width="10%">Predefinido</th>
+                  <th width="5%" className="text-center">
+                    Editar
+                  </th>
+                  <th width="5%" className="text-center">
+                    Eliminar
+                  </th>
+                </tr>
+              }
+              tBody={this.generateBody()}
+            />
+          </Column>
+        </Row>
 
         <Paginacion
           loading={this.state.loading}
@@ -398,4 +406,7 @@ const mapStateToProps = (state) => {
  *
  * Método encargado de conectar con redux y exportar la clase
  */
-export default connect(mapStateToProps, null)(Almacenes);
+
+const ConnectedAlmacenes = connect(mapStateToProps, null)(Almacenes);
+
+export default ConnectedAlmacenes;

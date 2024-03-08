@@ -9,7 +9,6 @@ import {
   isNumeric,
   isText,
   keyNumberInteger,
-  spinnerLoading,
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import { CANCELED } from '../../../../model/types/types';
@@ -20,6 +19,9 @@ import {
   comboTipoComprobante,
 } from '../../../../network/rest/principal.network';
 import Title from '../../../../components/Title';
+import { SpinnerView } from '../../../../components/Spinner';
+import Row from '../../../../components/Row';
+import Column from '../../../../components/Column';
 
 class ComporbanteAgregar extends CustomComponent {
   constructor(props) {
@@ -163,7 +165,10 @@ class ComporbanteAgregar extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
-        {this.state.loading && spinnerLoading(this.state.msgLoading)}
+        <SpinnerView
+          loading={this.state.loading}
+          message={this.state.msgLoading}
+        />
 
         <Title
           title='Comprobante'
@@ -171,8 +176,8 @@ class ComporbanteAgregar extends CustomComponent {
           handleGoBack={() => this.props.history.goBack()}
         />
 
-        <div className="row">
-          <div className="col">
+        <Row>
+          <Column>
             <div className="form-group">
               <label htmlFor="estado">
                 Tipo de Comprobante: <i className="fa fa-asterisk text-danger small"></i>
@@ -194,11 +199,11 @@ class ComporbanteAgregar extends CustomComponent {
                 ))}
               </select>
             </div>
-          </div>
-        </div>
+          </Column>
+        </Row>
 
-        <div className="row">
-          <div className="col">
+        <Row>
+          <Column>
             <div className="form-group">
               <label htmlFor="nombre" className="col-form-label">
                 Nombre <i className="fa fa-asterisk text-danger small"></i>
@@ -215,10 +220,10 @@ class ComporbanteAgregar extends CustomComponent {
                 }
               />
             </div>
-          </div>
-        </div>
+          </Column>
+        </Row>
 
-        <div className="row">
+        <Row>
           <div className="form-group col-md-6">
             <label htmlFor="serie">
               Serie <i className="fa fa-asterisk text-danger small"></i>
@@ -233,6 +238,7 @@ class ComporbanteAgregar extends CustomComponent {
               onChange={(event) => this.setState({ serie: event.target.value })}
             />
           </div>
+
           <div className="form-group col-md-6">
             <label htmlFor="numeracion">
               Numeración <i className="fa fa-asterisk text-danger small"></i>
@@ -250,9 +256,9 @@ class ComporbanteAgregar extends CustomComponent {
               onKeyDown={keyNumberInteger}
             />
           </div>
-        </div>
+        </Row>
 
-        <div className="row">
+        <Row>
           <div className="form-group col-md-6">
             <label htmlFor="numeracion">Caracteres a Usar</label>
             <input
@@ -268,9 +274,9 @@ class ComporbanteAgregar extends CustomComponent {
               onKeyDown={keyNumberInteger}
             />
           </div>
-        </div>
+        </Row>
 
-        <div className="row">
+        <Row>
           <div className="form-group col-md-6">
             <label htmlFor="nombre" className="col-form-label">
               Estado:
@@ -310,13 +316,13 @@ class ComporbanteAgregar extends CustomComponent {
               </label>
             </div>
           </div>
-        </div>
+        </Row>
 
         <div className="dropdown-divider"></div>
 
         <h6>Opciones de Facturación</h6>
 
-        <div className="row">
+        <Row>
           <div className="form-group col-md-6">
             <label htmlFor="nombre" className="col-form-label">
               El comporbante va ser enviado a Sunat:
@@ -341,8 +347,9 @@ class ComporbanteAgregar extends CustomComponent {
             <label htmlFor="nombre" className="col-form-label">
               Formas de anulación:
             </label>
-            <div className="row">
-              <div className="col">
+            
+            <Row>
+              <Column>
                 <div className="form-check form-check-inline pr-5">
                   <input
                     className="form-check-input checked"
@@ -362,9 +369,9 @@ class ComporbanteAgregar extends CustomComponent {
                     Comunicación de baja
                   </label>
                 </div>
-              </div>
+              </Column>
 
-              <div className='col'>
+              <Column>
                 <div className="form-check form-check-inline">
                   <input
                     className="form-check-input"
@@ -384,47 +391,51 @@ class ComporbanteAgregar extends CustomComponent {
                     Resumen diario
                   </label>
                 </div>
-              </div>
+              </Column>
+            </Row>
+          </div>
+        </Row>
+
+        <Row>
+          <Column className={"col-md-6"}>
+            <div className="form-group">
+              <label htmlFor="impresion" className="col-form-label">
+                Nombre de Impresión:
+              </label>
+              <input
+                type="text"
+                className="form-control"
+                id="impresion"
+                placeholder='Ejm: Boleta Electrónica, Factura Electrónica...'
+                value={this.state.impresion}
+                onChange={(event) =>
+                  this.setState({ impresion: event.target.value })
+                }
+              />
             </div>
-          </div>
-        </div>
+          </Column>
 
-        <div className="row">
-          <div className="form-group col-md-6">
-            <label htmlFor="impresion" className="col-form-label">
-              Nombre de Impresión:
-            </label>
-            <input
-              type="text"
-              className="form-control"
-              id="impresion"
-              placeholder='Ejm: Boleta Electrónica, Factura Electrónica...'
-              value={this.state.impresion}
-              onChange={(event) =>
-                this.setState({ impresion: event.target.value })
-              }
-            />
-          </div>
+          <Column className={"col-md-6"}>
+            <div className="form-group">
+              <label htmlFor="codigo" className="col-form-label">
+                Código:
+              </label>
+              <input
+                type="text"
+                className="form-control"
+                id="codigo"
+                placeholder='01, 06'
+                value={this.state.codigo}
+                onChange={(event) =>
+                  this.setState({ codigo: event.target.value })
+                }
+              />
+            </div>
+          </Column>
+        </Row>
 
-          <div className="form-group col-md-6">
-            <label htmlFor="codigo" className="col-form-label">
-              Código:
-            </label>
-            <input
-              type="text"
-              className="form-control"
-              id="codigo"
-              placeholder='01, 06'
-              value={this.state.codigo}
-              onChange={(event) =>
-                this.setState({ codigo: event.target.value })
-              }
-            />
-          </div>
-        </div>
-
-        <div className="row">
-          <div className="col-md-12">
+        <Row>
+          <Column>
             <div className="form-group">
               <button
                 type="button"
@@ -441,8 +452,8 @@ class ComporbanteAgregar extends CustomComponent {
                 <i className='fa fa-close'></i>  Cerrar
               </button>
             </div>
-          </div>
-        </div>
+          </Column>
+        </Row>
       </ContainerWrapper>
     );
   }
@@ -454,4 +465,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(ComporbanteAgregar);
+const ConnectedComporbanteAgregar = connect(mapStateToProps, null)(ComporbanteAgregar);
+
+export default ConnectedComporbanteAgregar;

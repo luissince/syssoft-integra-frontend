@@ -1,5 +1,6 @@
-import { handlePasteFloat, keyNumberFloat, spinnerLoading } from '../../../../../../helper/utils.helper';
+import { handlePasteFloat, keyNumberFloat, rounded, spinnerLoading } from '../../../../../../helper/utils.helper';
 import PropTypes from 'prop-types';
+import { UNIDADES } from '../../../../../../model/types/tipo-tratamiento-producto';
 
 const ModalProducto = (props) => {
 
@@ -110,6 +111,31 @@ const ModalProducto = (props) => {
                 </div>
               </div>
             </div>
+            {
+              producto && producto.idTipoTratamientoProducto === UNIDADES && (
+                <div className="row">
+                  <div className="col">
+                    <div className="form-group">
+                      <label>Cantidad por Almacen:</label>
+                      <ul className="list-group">
+                        {producto.inventarios.map((item, index) => (
+                          <li key={index} className="list-group-item">
+                            <div className='d-flex justify-content-between flex-row'>
+                              <div className=''>
+                                <span>{item.almacen}</span>
+                              </div>
+                              <div>
+                                <span>cantidad: {rounded(item.cantidad)}</span>
+                              </div>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              )
+            }
           </div>
 
           <div className="card-footer bg-white">
