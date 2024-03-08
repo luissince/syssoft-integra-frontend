@@ -1672,7 +1672,7 @@ class VentaCrear extends CustomComponent {
 
         if (response instanceof SuccessReponse) {
           alertSuccess('Venta', response.data.message, () => {
-            // this.handleOpenPrint(response.data.idVenta);
+            this.handleOpenPrint(response.data.idVenta);
           });
         }
 
