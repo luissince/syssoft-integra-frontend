@@ -6,7 +6,6 @@ import { config, monedaNacional, restoreToken } from '../../redux/actions';
 import {
   empresaConfig,
   nacionalMoneda,
-  preferidosProducto,
   validToken,
 } from '../../network/rest/principal.network';
 
@@ -99,20 +98,6 @@ class Loader extends React.Component {
       if (response.type === CANCELED) return;
 
       return null;
-    }
-  }
-
-  async fetchProductoPreferidos() {
-    const response = await preferidosProducto();
-
-    if (response instanceof SuccessReponse) {
-      return response.data;
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
-
-      return [];
     }
   }
 

@@ -9,7 +9,6 @@ import {
   isNumeric,
   isText,
   keyNumberInteger,
-  spinnerLoading,
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import { CANCELED } from '../../../../model/types/types';
@@ -23,6 +22,7 @@ import {
 import Title from '../../../../components/Title';
 import Column from '../../../../components/Column';
 import Row from '../../../../components/Row';
+import { SpinnerView } from '../../../../components/Spinner';
 
 class ComporbanteEditar extends CustomComponent {
   constructor(props) {
@@ -205,7 +205,10 @@ class ComporbanteEditar extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
-        {this.state.loading && spinnerLoading(this.state.msgLoading)}
+        <SpinnerView
+          loading={this.state.loading}
+          message={this.state.msgLoading}
+        />
 
         <Title
           title='Comprobante'

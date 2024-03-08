@@ -4,7 +4,6 @@ import {
   currentDate,
   keyNumberPhone,
   keyNumberInteger,
-  spinnerLoading,
   convertNullText,
   alertInfo,
   alertSuccess,
@@ -28,6 +27,10 @@ import { CANCELED } from '../../../../model/types/types';
 import CustomComponent from '../../../../model/class/custom-component';
 import { CLIENTE_JURIDICO, CLIENTE_NATURAL } from '../../../../model/types/tipo-cliente';
 import SearchInput from '../../../../components/SearchInput';
+import { SpinnerView } from '../../../../components/Spinner';
+import Title from '../../../../components/Title';
+import Row from '../../../../components/Row';
+import Column from '../../../../components/Column';
 
 class PersonaEditar extends CustomComponent {
 
@@ -692,23 +695,20 @@ class PersonaEditar extends CustomComponent {
 
     return (
       <ContainerWrapper>
-        {this.state.loading && spinnerLoading(this.state.msgLoading)}
 
-        <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <section className="content-header">
-              <h5>
-                <span role="button" onClick={() => this.props.history.goBack()}>
-                  <i className="bi bi-arrow-left-short"></i>
-                </span>{' '}
-                Editar Persona
-              </h5>
-            </section>
-          </div>
-        </div>
+        <SpinnerView
+          loading={this.state.loading}
+          message={this.state.msgLoading}
+        />
 
-        <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <Title 
+          title="Persona"
+          subTitle="Editar"
+          handleGoBack={()=>this.props.history.goBack()}
+        />
+
+        <Row>
+          <Column>
             <ul className="nav nav-tabs" id="myTab" role="tablist">
               {/* Persona Natural */}
               <li className="nav-item" role="presentation">
@@ -1340,11 +1340,11 @@ class PersonaEditar extends CustomComponent {
                 </div>
               </div>
             </div>
-          </div>
-        </div>
+          </Column>
+        </Row>
 
-        <div className="row">
-          <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
+        <Row>
+          <Column className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
             <button
               type="button"
               className="btn btn-warning mr-2"
@@ -1359,8 +1359,8 @@ class PersonaEditar extends CustomComponent {
             >
               <i className='fa fa-close'></i>  Cancelar
             </button>
-          </div>
-        </div>
+          </Column>
+        </Row>
       </ContainerWrapper>
     );
   }
@@ -1372,4 +1372,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(PersonaEditar);
+const ConnectedPersonaEditar = connect(mapStateToProps, null)(PersonaEditar);
+
+export default ConnectedPersonaEditar;

@@ -4,7 +4,6 @@ import {
   currentDate,
   keyNumberPhone,
   keyNumberInteger,
-  spinnerLoading,
   convertNullText,
   alertInfo,
   alertSuccess,
@@ -26,6 +25,10 @@ import { CANCELED } from '../../../../model/types/types';
 import CustomComponent from '../../../../model/class/custom-component';
 import { CLIENTE_JURIDICO, CLIENTE_NATURAL } from '../../../../model/types/tipo-cliente';
 import SearchInput from '../../../../components/SearchInput';
+import { SpinnerView } from '../../../../components/Spinner';
+import Row from '../../../../components/Row';
+import Column from '../../../../components/Column';
+import Title from '../../../../components/Title';
 
 class PersonaAgregar extends CustomComponent {
 
@@ -601,23 +604,20 @@ class PersonaAgregar extends CustomComponent {
 
     return (
       <ContainerWrapper>
-        {this.state.loading && spinnerLoading(this.state.msgLoading)}
 
-        <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <section className="content-header">
-              <h5>
-                <span role="button" onClick={() => this.props.history.goBack()}>
-                  <i className="bi bi-arrow-left-short"></i>
-                </span>{' '}
-                Registrar Persona
-              </h5>
-            </section>
-          </div>
-        </div>
+        <SpinnerView
+          loading={this.state.loading}
+          message={this.state.msgLoading}
+        />
 
-        <div className="row">
-          <div className="col">
+        <Title
+          title="Persona"
+          subTitle="Registrar"
+          handleGoBack={() => this.props.history.goBack()}
+        />
+
+        <Row>
+          <Column className="col">
             <ul className="nav nav-tabs" id="myTab" role="tablist">
               {/* Persona Natural */}
               <li className="nav-item" role="presentation">
@@ -1253,11 +1253,11 @@ class PersonaAgregar extends CustomComponent {
                 </div>
               </div>
             </div>
-          </div>
-        </div>
+          </Column>
+        </Row>
 
-        <div className="row">
-          <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
+        <Row className="row">
+          <Column className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
             <button
               type="button"
               className="btn btn-primary mr-2"
@@ -1272,8 +1272,8 @@ class PersonaAgregar extends CustomComponent {
             >
               <i className='fa fa-close'></i> Cancelar
             </button>
-          </div>
-        </div>
+          </Column>
+        </Row>
       </ContainerWrapper>
     );
   }
@@ -1285,4 +1285,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(PersonaAgregar);
+const ConnectedPersonaAgregar = connect(mapStateToProps, null)(PersonaAgregar);
+
+export default ConnectedPersonaAgregar;

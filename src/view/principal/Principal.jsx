@@ -2,7 +2,7 @@ import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { signOut, selectProject } from '../../redux/actions';
-import { isEmpty, spinnerLoading } from '../../helper/utils.helper';
+import { isEmpty } from '../../helper/utils.helper';
 import CustomComponent from '../../model/class/custom-component';
 import { initSucursales } from '../../network/rest/principal.network';
 import SuccessReponse from '../../model/class/response';
@@ -12,6 +12,7 @@ import Row from '../../components/Row';
 import ItemCard from './component/ItemCard';
 import Search from './component/Search';
 import Title from './component/Title';
+import { SpinnerView } from '../../components/Spinner';
 
 class Principal extends CustomComponent {
   constructor(props) {
@@ -120,7 +121,10 @@ class Principal extends CustomComponent {
 
     return (
       <div className="container pt-5">
-        {this.state.loading && spinnerLoading(this.state.loadMessage)}
+        <SpinnerView 
+          loading={this.state.loading}
+          message={this.state.loadMessage}
+        />
 
         <Title
           razonSocial={razonSocial}

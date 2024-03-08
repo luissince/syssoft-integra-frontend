@@ -19,6 +19,15 @@ const InvoiceTicket = (props) => {
             <img src={images.print} alt="Imprimir" />
           </button>
         </span> */}
+        {/* <span>
+          <button
+            className="btn btn-link rounded-circle"
+            onClick={handleOpenPrint}
+          >
+            <img src={images.document} alt="Cotización" />
+          </button>
+        </span> */}
+
         <span>
           <button
             className="btn btn-link rounded-circle"

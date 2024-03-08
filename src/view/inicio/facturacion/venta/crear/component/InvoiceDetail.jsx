@@ -1,6 +1,7 @@
 import { images } from '../../../../../../helper';
 import { numberFormat } from '../../../../../../helper/utils.helper';
 import PropTypes from 'prop-types';
+import { A_GRANEL, SERVICIO, UNIDADES, VALOR_MONETARIO } from '../../../../../../model/types/tipo-tratamiento-producto';
 
 const InvoiceDetail = (props) => {
   const { codiso, detalleVenta } = props;
@@ -28,6 +29,10 @@ const InvoiceDetail = (props) => {
     <div className="invoice-item">
       <div className="h-100">
         {detalleVenta.map((producto, index) => {
+          const cantidad = producto.idTipoTratamientoProducto === SERVICIO
+            ? producto.cantidad
+            : producto.inventarios.reduce((acc, current) => acc + current.cantidad, 0);
+
           return (
             <div
               key={index}
@@ -39,15 +44,16 @@ const InvoiceDetail = (props) => {
                     <div className="invoice-item_add-item-options">
                       <span>
                         <div
-                          className=" d-flex justify-content-center align-items-center h-100 invoice-item_add-item-options_button mr-1"
+                          className="d-flex justify-content-center align-items-center h-100 invoice-item_add-item-options_button mr-1"
                           onClick={() => handleEdit(producto)}
                         >
                           <img src={images.edit} alt="Editar" />
                         </div>
                       </span>
+
                       <span>
                         <div
-                          className=" d-flex justify-content-center align-items-center h-100 invoice-item_add-item-options_button"
+                          className="d-flex justify-content-center align-items-center h-100 invoice-item_add-item-options_button"
                           onClick={() => handleRemove(producto)}
                         >
                           <img src={images.remove} alt="Eliminar" />
@@ -59,35 +65,130 @@ const InvoiceDetail = (props) => {
                       <div className="invoice-item_add-item-describe-title text-truncate text-base">
                         {producto.nombreProducto}
                       </div>
-                      <div className="invoice-item_add-item-describe-price d-flex text-break text-truncate text-nowrap text-sm">
-                        {numberFormat(producto.precio, codiso)}
+                      <div className="invoice-item_add-item-describe-price d-flex align-items-center text-break text-truncate text-nowrap text-base">
+                        {
+                          producto.idTipoTratamientoProducto === VALOR_MONETARIO && (
+                            <>
+                              {numberFormat(producto.precio, codiso)}
+                            </>
+                          )
+                        }
+
+                        {
+                          producto.idTipoTratamientoProducto !== VALOR_MONETARIO && (
+                            <>
+                              {numberFormat(producto.precio, codiso)} <span className='text-xs ml-1'>x {producto.medida}</span>
+                            </>
+                          )
+                        }
                       </div>
                     </div>
 
-                    <div className="invoice-item_add-item-quantity-container d-none d-sm-flex align-items-center justify-content-center">
-                      <button
-                        className="btn m-0 d-flex justify-content-center align-items-center pointer"
-                        onClick={() => handleMinus(producto)}
-                      >
-                        <img src={images.minus} alt="Menorar" />
-                      </button>
-                      <div className="item_quantity d-flex justify-content-center align-items-center">
-                        {producto.cantidad}
-                      </div>
-                      <button
-                        className="btn m-0 d-flex justify-content-center align-items-center pointer"
-                        onClick={() => handlePlus(producto)}
-                      >
-                        <img src={images.plus} alt="Aumentar" />
-                      </button>
+                    <div className="invoice-item_add-item-quantity-container d-none d-sm-flex flex-column  align-items-center justify-content-center">
+                      {producto.idTipoTratamientoProducto === SERVICIO && (
+                        <div key={index} className="d-flex flex-column align-items-center">
+                          <div className="d-flex">
+                            <button
+                              className="btn m-0 d-flex justify-content-center align-items-center pointer"
+                              onClick={() => handleMinus(producto, 0)}
+                            >
+                              <img src={images.minus} alt="Menorar" />
+                            </button>
+                            <div className="item_quantity d-flex justify-content-center align-items-center">
+                              {producto.cantidad}
+                            </div>
+                            <button
+                              className="btn m-0 d-flex justify-content-center align-items-center pointer"
+                              onClick={() => handlePlus(producto, 0)}
+                            >
+                              <img src={images.plus} alt="Aumentar" />
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {producto.idTipoTratamientoProducto === UNIDADES && producto.inventarios.map((item, index) => (
+                        <div key={index} className="d-flex flex-column align-items-center">
+                          <div>
+                            <span className='text-secondary'>{item.almacen}</span>
+                          </div>
+
+                          <div className="d-flex">
+                            <button
+                              className="btn m-0 d-flex justify-content-center align-items-center pointer"
+                              onClick={() => handleMinus(producto, item.idInventario)}
+                            >
+                              <img src={images.minus} alt="Menorar" />
+                            </button>
+                            <div className="item_quantity d-flex justify-content-center align-items-center">
+                              {item.cantidad}
+                            </div>
+                            <button
+                              className="btn m-0 d-flex justify-content-center align-items-center pointer"
+                              onClick={() => handlePlus(producto, item.idInventario)}
+                            >
+                              <img src={images.plus} alt="Aumentar" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+
+                      {producto.idTipoTratamientoProducto === A_GRANEL && producto.inventarios.map((item, index) => (
+                        <div key={index} className="d-flex flex-column align-items-center">
+                          <div>
+                            <span className='text-secondary'>{item.almacen}</span>
+                          </div>
+
+                          <div className="d-flex">
+                            <button
+                              className="btn m-0 d-flex justify-content-center align-items-center pointer"
+                              onClick={() => handleMinus(producto, item.idInventario)}
+                            >
+                              <img src={images.minus} alt="Menorar" />
+                            </button>
+                            <div className="item_quantity d-flex justify-content-center align-items-center">
+                              {item.cantidad}
+                            </div>
+                            <button
+                              className="btn m-0 d-flex justify-content-center align-items-center pointer"
+                              onClick={() => handlePlus(producto, item.idInventario)}
+                            >
+                              <img src={images.plus} alt="Aumentar" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+
+                      {producto.idTipoTratamientoProducto === VALOR_MONETARIO && producto.inventarios.map((item, index) => (
+                        <div key={index} className="d-flex flex-column align-items-center">
+                          <div>
+                            <span className='text-secondary'>{item.almacen}</span>
+                          </div>
+
+                          {/* <div className="d-flex">
+                            <button
+                              className="btn m-0 d-flex justify-content-center align-items-center pointer"
+                              onClick={() => handleMinus(producto, item.idInventario)}
+                            >
+                              <img src={images.minus} alt="Menorar" />
+                            </button>
+                            <div className="item_quantity d-flex justify-content-center align-items-center">
+                              {item.cantidad}
+                            </div>
+                            <button
+                              className="btn m-0 d-flex justify-content-center align-items-center pointer"
+                              onClick={() => handlePlus(producto, item.idInventario)}
+                            >
+                              <img src={images.plus} alt="Aumentar" />
+                            </button>
+                          </div> */}
+                        </div>
+                      ))}
                     </div>
 
                     <div className="invoice-item_add-item-total">
                       <div className="h-100 d-flex justify-content-end align-items-center text-base">
-                        {numberFormat(
-                          producto.precio * producto.cantidad,
-                          codiso,
-                        )}
+                        {numberFormat(producto.precio * cantidad, codiso)}
                       </div>
                     </div>
                   </div>

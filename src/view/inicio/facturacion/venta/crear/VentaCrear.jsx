@@ -4,7 +4,6 @@ import {
   alertDialog,
   alertHTML,
   alertInfo,
-  alertInput,
   alertSuccess,
   alertWarning,
   formatDecimal,
@@ -28,6 +27,7 @@ import {
   obtenerListaPrecioProducto,
   listComboTipoDocumento,
   comboBanco,
+  comboAlmacen,
 } from '../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
@@ -80,8 +80,9 @@ class VentaCrear extends CustomComponent {
       // Atributos principales
       idVenta: '',
       idComprobante: '',
-      idMoneda: '',
       idImpuesto: '',
+      idMoneda: '',
+      idAlmacen: '',
       comentario: '',
 
       // Filtrar producto
@@ -106,6 +107,7 @@ class VentaCrear extends CustomComponent {
       clientes: [],
       impuestos: [],
       monedas: [],
+      almacenes: [],
       tiposDocumentos: [],
       detalleVenta: [],
 
@@ -129,6 +131,9 @@ class VentaCrear extends CustomComponent {
 
       // Atributos del modal agregar
       isOpenAgregar: false,
+      productoAgregar: null,
+      tituloAgregar: '',
+      subTituloAgregar: '',
       cantidadAgregar: '',
 
       // Atributos del modal cliente
@@ -158,6 +163,7 @@ class VentaCrear extends CustomComponent {
     this.idModalConfiguration = 'idModalConfiguration';
     this.refImpuesto = React.createRef();
     this.refMoneda = React.createRef();
+    this.refAlmacen = React.createRef();
     this.refComentario = React.createRef();
 
     // Referencia al mmodal sale
@@ -187,6 +193,7 @@ class VentaCrear extends CustomComponent {
 
     // Referencia para el custom modal agregar
     this.refModalAgregar = React.createRef();
+    this.refCantidadAgregar = React.createRef();
 
     // Atributos para el modal producto
     this.idModalProducto = 'idModalProducto';
@@ -260,12 +267,6 @@ class VentaCrear extends CustomComponent {
     */
 
   async initData() {
-    const productos = await this.fetchProductoPreferidos();
-    // console.log(productos)
-    this.props.favoriteProducts(productos);
-
-    await this.setStateAsync({ productos: productos });
-
     await this.loadingData();
   }
 
@@ -276,7 +277,8 @@ class VentaCrear extends CustomComponent {
       impuestos,
       predeterminado,
       bancos,
-      tiposDocumentos
+      tiposDocumentos,
+      almacenes
     ] = await Promise.all([
       this.fetchComprobante(VENTA),
       this.fetchMoneda(),
@@ -284,12 +286,14 @@ class VentaCrear extends CustomComponent {
       this.fetchClientePredeterminado(),
       this.fetchComboBanco(),
       this.fetchTipoDocumento(),
+      this.fetchAlmacen({ idSucursal: this.state.idSucursal })
     ]);
 
     const comprobantes = [...venta];
     const monedaFilter = monedas.find((item) => item.nacional === 1);
     const impuestoFilter = impuestos.find((item) => item.preferido === 1);
     const comprobanteFilter = comprobantes.find((item) => item.preferida === 1);
+    const almacenFilter = almacenes.find((item) => item.predefinido === 1);
 
     if (typeof predeterminado === 'object') {
       this.handleSelectItemCliente(predeterminado);
@@ -300,6 +304,7 @@ class VentaCrear extends CustomComponent {
       monedas,
       impuestos,
       bancos,
+      almacenes,
 
       idComprobante: comprobanteFilter ? comprobanteFilter.idComprobante : '',
       nombreComporbante: !comprobanteFilter ? "Ninguno" : comprobanteFilter.nombre,
@@ -309,17 +314,22 @@ class VentaCrear extends CustomComponent {
 
       idImpuesto: impuestoFilter ? impuestoFilter.idImpuesto : '',
 
+      idAlmacen: almacenFilter ? almacenFilter.idAlmacen : '',
+
       tiposDocumentos,
 
       loading: false,
     });
 
-    this.refImpuesto.current.value = impuestoFilter
-      ? impuestoFilter.idImpuesto
-      : '';
-
+    this.refImpuesto.current.value = impuestoFilter ? impuestoFilter.idImpuesto : '';
     this.refMoneda.current.value = monedaFilter ? monedaFilter.idMoneda : '';
+    this.refAlmacen.current.value = almacenFilter ? almacenFilter.idAlmacen : '';
+
+    const productos = await this.fetchProductoPreferidos({ idSucursal: this.state.idSucursal, idAlmacen: almacenFilter ? almacenFilter.idAlmacen : '' });
+    this.props.favoriteProducts(productos);
+    await this.setStateAsync({ productos: productos });
   };
+
 
   async fetchComprobante(tipo) {
     const params = {
@@ -398,8 +408,8 @@ class VentaCrear extends CustomComponent {
     }
   }
 
-  async fetchProductoPreferidos() {
-    const response = await preferidosProducto();
+  async fetchProductoPreferidos(params) {
+    const response = await preferidosProducto(params);
 
     if (response instanceof SuccessReponse) {
       return response.data;
@@ -473,10 +483,23 @@ class VentaCrear extends CustomComponent {
     }
   }
 
+  async fetchAlmacen(params) {
+    const response = await comboAlmacen(params);
+
+    if (response instanceof SuccessReponse) {
+      return response.data;
+    }
+
+    if (response instanceof ErrorResponse) {
+      if (response.getType() === CANCELED) return;
+
+      return [];
+    }
+  }
 
   reloadView() {
     this.setState(this.initial, async () => {
-      const productos = await this.fetchProductoPreferidos();
+      const productos = await this.fetchProductoPreferidos({ idSucursal: this.state.idSucursal, idAlmacen: this.state.idAlmacen });
       this.props.favoriteProducts(productos);
       await this.setStateAsync({ productos: productos });
       await this.loadingData();
@@ -485,27 +508,152 @@ class VentaCrear extends CustomComponent {
   }
 
   addItemDetalle = (producto, precio, cantidad) => {
-    const detalleVenta = [...this.state.detalleVenta];
-    const existingItem = detalleVenta.find((item) => item.idProducto === producto.idProducto)
+    const detalles = this.state.detalleVenta.map(item => ({ ...item }));
+    const existingItem = detalles.find((item) => item.idProducto === producto.idProducto)
+    const almacen = this.state.almacenes.find(item => item.idAlmacen == this.refAlmacen.current.value)
 
-    if (!existingItem) {
-      detalleVenta.push({
-        idProducto: producto.idProducto,
-        nombreProducto: producto.nombreProducto,
-        cantidad: cantidad ? cantidad : 1,
-        idImpuesto: this.refImpuesto.current.value,
-        precio: precio ? precio : producto.precio,
-        idInventario: producto.idInventario,
-        idTipoTratamientoProducto: producto.idTipoTratamientoProducto,
-        tipo: producto.tipo,
-      });
-    } else {
-      existingItem.cantidad += 1;
+    if (!almacen) {
+      alertWarning("Venta", "Selecciona un almacen para continuar.")
+      return;
     }
 
-    this.setState({
-      detalleVenta,
-    });
+    console.log(producto)
+
+    if (producto.idTipoTratamientoProducto === UNIDADES) {
+      if (!existingItem) {
+        const inventarios = [];
+
+        inventarios.push({
+          idAlmacen: almacen.idAlmacen,
+          almacen: almacen.nombre,
+          idInventario: producto.idInventario,
+          cantidad: 1,
+        });
+
+        detalles.push({
+          idProducto: producto.idProducto,
+          nombreProducto: producto.nombreProducto,
+          idImpuesto: this.refImpuesto.current.value,
+          precio: producto.precio,
+          medida: producto.medida,
+          idTipoTratamientoProducto: producto.idTipoTratamientoProducto,
+          tipo: producto.tipo,
+          inventarios: inventarios
+        });
+      } else {
+        const existingInventario = existingItem.inventarios.some(item => item.idInventario === producto.idInventario);
+        if (!existingInventario) {
+          existingItem.inventarios.push({
+            idAlmacen: almacen.idAlmacen,
+            almacen: almacen.nombre,
+            idInventario: producto.idInventario,
+            cantidad: 1,
+          });
+        } else {
+          for (const inventario of existingItem.inventarios) {
+            if (inventario.idInventario === producto.idInventario) {
+              inventario.cantidad += 1;
+            }
+          }
+        }
+      }
+
+      this.setState({ detalleVenta: detalles });
+    }
+
+    if (producto.idTipoTratamientoProducto === VALOR_MONETARIO) {
+      if (!existingItem) {
+        const inventarios = [];
+
+        inventarios.push({
+          idAlmacen: almacen.idAlmacen,
+          almacen: almacen.nombre,
+          idInventario: producto.idInventario,
+          cantidad: 1,
+        });
+
+        detalles.push({
+          idProducto: producto.idProducto,
+          nombreProducto: producto.nombreProducto,
+          idImpuesto: this.refImpuesto.current.value,
+          precio: precio,
+          medida: producto.medida,
+          idTipoTratamientoProducto: producto.idTipoTratamientoProducto,
+          tipo: producto.tipo,
+          inventarios: inventarios
+        });
+      } else {
+        const existingInventario = existingItem.inventarios.some(item => item.idInventario === producto.idInventario);
+        if (!existingInventario) {
+          alertWarning("Venta", "Los productos con valor monetario se trabajan son un solo almacen y sin unidades.")
+        } else {
+          existingItem.precio = precio;
+        }
+      }
+
+      this.setState({ detalleVenta: detalles });
+    }
+
+    if (producto.idTipoTratamientoProducto === A_GRANEL) {
+      if (!existingItem) {
+        const inventarios = [];
+
+        inventarios.push({
+          idAlmacen: almacen.idAlmacen,
+          almacen: almacen.nombre,
+          idInventario: producto.idInventario,
+          cantidad: cantidad,
+        });
+
+        detalles.push({
+          idProducto: producto.idProducto,
+          nombreProducto: producto.nombreProducto,
+          idImpuesto: this.refImpuesto.current.value,
+          precio: producto.precio,
+          medida: producto.medida,
+          idTipoTratamientoProducto: producto.idTipoTratamientoProducto,
+          tipo: producto.tipo,
+          inventarios: inventarios
+        });
+      } else {
+        const existingInventario = existingItem.inventarios.some(item => item.idInventario === producto.idInventario);
+        if (!existingInventario) {
+          existingItem.inventarios.push({
+            idAlmacen: almacen.idAlmacen,
+            almacen: almacen.nombre,
+            idInventario: producto.idInventario,
+            cantidad: cantidad,
+          });
+        } else {
+          for (const inventario of existingItem.inventarios) {
+            if (inventario.idInventario === producto.idInventario) {
+              inventario.cantidad = cantidad;
+            }
+          }
+        }
+      }
+
+      this.setState({ detalleVenta: detalles });
+    }
+
+    if (producto.idTipoTratamientoProducto === SERVICIO) {
+      if (!existingItem) {
+        detalles.push({
+          idProducto: producto.idProducto,
+          nombreProducto: producto.nombreProducto,
+          idImpuesto: this.refImpuesto.current.value,
+          precio: precio ? precio : producto.precio,
+          medida: producto.medida,
+          idTipoTratamientoProducto: producto.idTipoTratamientoProducto,
+          tipo: producto.tipo,
+          cantidad: 1,
+        });
+      } else {
+        existingItem.cantidad = existingItem.cantidad + 1;
+      }
+
+      this.setState({ detalleVenta: detalles });
+    }
   }
 
   /*
@@ -524,13 +672,12 @@ class VentaCrear extends CustomComponent {
     |
     */
 
-
   handleDocumentKeyDown = (event) => {
-    if (event.key === 'F1' && !this.state.isOpenProducto) {
+    if (event.key === 'F1' && !this.state.isOpenPrinter && !this.state.isOpenSale && !this.state.isOpenAgregar) {
       this.handleOpenSale();
     }
 
-    if (event.key === 'F2' && !this.state.isOpenProducto) {
+    if (event.key === 'F2' && !this.state.isOpenPrinter && !this.state.isOpenSale && !this.state.isOpenAgregar) {
       this.handleClearSale();
     }
   }
@@ -540,7 +687,6 @@ class VentaCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
 
   handleAddItem = async (producto) => {
-    console.log(producto)
     if (isEmpty(this.refImpuesto.current.value)) {
       alertWarning('Venta', 'Seleccione un impuesto.', () => {
         this.handleOpenOptions();
@@ -559,29 +705,11 @@ class VentaCrear extends CustomComponent {
     }
 
     if (producto.idTipoTratamientoProducto === VALOR_MONETARIO) {
-      alertInput("Venta", "Ingrese el valor monetario (S/, $ u otro) del producto o el total.", (accept, value) => {
-        if (accept) {
-          if (!isNumeric(value)) {
-            alertWarning('Venta', '¡El valor ingresado no es númerico!');
-            return;
-          }
-          this.addItemDetalle(producto, parseFloat(value), null);
-          this.refProducto.current.focus();
-        }
-      })
+      this.handleOpenModalAgregar("Ingrese el valor monetario (S/, $ u otro) del producto o el total.", "Monto:", producto);
     }
 
     if (producto.idTipoTratamientoProducto === A_GRANEL) {
-      alertInput("Venta", "Ingrese el peso del producto (KM, GM u otro).", (accept, value) => {
-        if (accept) {
-          if (!isNumeric(value)) {
-            alertWarning('Venta', '¡El valor ingresado no es númerico!');
-            return;
-          }
-          this.addItemDetalle(producto, null, parseFloat(value));
-          this.refProducto.current.focus();
-        }
-      })
+      this.handleOpenModalAgregar("Ingrese el peso del producto (KM, GM u otro).", "Peso:", producto);
     }
   }
 
@@ -619,6 +747,7 @@ class VentaCrear extends CustomComponent {
         codBar: this.state.filtrarCodBar ? 1 : 0,
         filtrar: this.state.producto,
         idSucursal: this.state.idSucursal,
+        idAlmacen: this.state.idAlmacen
       };
 
       const result = await this.fetchFiltrarVenta(params);
@@ -650,6 +779,7 @@ class VentaCrear extends CustomComponent {
       codBar: this.state.filtrarCodBar ? 1 : 0,
       filtrar: searchWord,
       idSucursal: this.state.idSucursal,
+      idAlmacen: this.state.idAlmacen
     };
 
     const result = await this.fetchFiltrarVenta(params);
@@ -663,38 +793,64 @@ class VentaCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
   // Acciones del modal product
   //------------------------------------------------------------------------------------------
-  handleOpenModalAgregar = () => {
-    this.setState({ loadingModalProducto: true, isOpenProducto: true })
-  }
-
-  handleOnOpenModalAgregar = () => {
+  handleOpenModalAgregar = (titulo, subTitulo, producto) => {
     this.setState({
-      costoModalProducto: this.state.producto.costo,
-      loadingModalProducto: false,
+      isOpenAgregar: true,
+      tituloAgregar: titulo,
+      subTituloAgregar: subTitulo,
+      productoAgregar: producto
     })
   }
 
+  handleOnOpenModalAgregar = () => {
+
+  }
+
   handleOnHiddenModalAgregar = async () => {
-    await this.setStateAsync({
-      productos: [],
-      filtrarProducto: '',
-      producto: null,
-      cantidadModalProducto: '',
-      costoModalProducto: '',
-    });
-    this.selectItemProducto = false;
+    this.setState({
+      tituloAgregar: '',
+      subTituloAgregar: '',
+      cantidadAgregar: '',
+      productoAgregar: null
+    })
   }
 
   handleCloseAgregar = async () => {
     return new Promise((resolve) => {
-      const data = this.refModalProducto.current;
+      const data = this.refModalAgregar.current;
       data.classList.add("close-cm")
       data.addEventListener('animationend', () => {
-        this.setState({ isOpenProducto: false }, () => {
+        this.setState({ isOpenAgregar: false }, () => {
           resolve();
         })
       })
     });
+  }
+
+  handleInputCantidad = (event) => {
+    this.setState({ cantidadAgregar: event.target.value })
+  }
+
+  handleSaveAgregar = async () => {
+    if (!isNumeric(this.state.cantidadAgregar)) {
+      alertWarning("Venta", "Ingrese el valor solicitado.", () => {
+        this.refCantidadAgregar.current.focus();
+      })
+      return;
+    }
+
+    if (this.state.productoAgregar.idTipoTratamientoProducto === VALOR_MONETARIO) {
+      this.addItemDetalle(this.state.productoAgregar, parseFloat(this.state.cantidadAgregar), null);
+      this.refProducto.current.focus()
+    }
+
+    if (this.state.productoAgregar.idTipoTratamientoProducto === A_GRANEL) {
+      this.addItemDetalle(this.state.productoAgregar, null, parseFloat(this.state.cantidadAgregar));
+      this.refProducto.current.focus()
+    }
+
+    await this.handleCloseAgregar();
+    this.refProducto.current.focus();
   }
 
   //------------------------------------------------------------------------------------------
@@ -747,6 +903,7 @@ class VentaCrear extends CustomComponent {
     const invoice = document.getElementById(this.idModalConfiguration);
     this.refImpuesto.current.value = this.state.idImpuesto;
     this.refMoneda.current.value = this.state.idMoneda;
+    this.refAlmacen.current.value = this.state.idAlmacen;
 
     invoice.classList.add('toggled');
   }
@@ -755,6 +912,7 @@ class VentaCrear extends CustomComponent {
     const invoice = document.getElementById(this.idModalConfiguration);
     this.refImpuesto.current.value = this.state.idImpuesto;
     this.refMoneda.current.value = this.state.idMoneda;
+    this.refAlmacen.current.value = this.state.idAlmacen;
 
     invoice.classList.remove('toggled');
   }
@@ -774,6 +932,13 @@ class VentaCrear extends CustomComponent {
       return;
     }
 
+    if (isEmpty(this.refAlmacen.current.value)) {
+      alertWarning('Venta', 'Seleccione un almacen.', () =>
+        this.refAlmacen.current.focus(),
+      );
+      return;
+    }
+
     const detalleVenta = this.state.detalleVenta.map((item) => ({
       ...item,
       idImpuesto: this.refImpuesto.current.value,
@@ -785,9 +950,18 @@ class VentaCrear extends CustomComponent {
       idMoneda: moneda.idMoneda,
       codiso: moneda.codiso,
       idImpuesto: this.refImpuesto.current.value,
+      idAlmacen: this.refAlmacen.current.value,
       comentario: this.refComentario.current.value,
       detalleVenta,
-    }, () => this.handleCloseOptions());
+    }, async () => {
+      this.handleCloseOptions();
+      const productos = await this.fetchProductoPreferidos({
+        idSucursal: this.state.idSucursal,
+        idAlmacen: this.refAlmacen.current.value
+      });
+      this.props.favoriteProducts(productos);
+      await this.setStateAsync({ productos: productos });
+    });
   }
 
   //------------------------------------------------------------------------------------------
@@ -967,29 +1141,98 @@ class VentaCrear extends CustomComponent {
   // Opciones del producto y modal
   //------------------------------------------------------------------------------------------
 
-  handleMinusProducto = async (producto) => {
-    const updatedDetalle = this.state.detalleVenta.map((item) =>
-      item.idProducto === producto.idProducto
-        ? { ...item, cantidad: Math.max(parseFloat(item.cantidad) - 1, 1) }
-        : item,
-    );
+  handleMinusProducto = async (producto, idInventario) => {
+    if (producto.idTipoTratamientoProducto === SERVICIO) {
+      const detalles = this.state.detalleVenta.map(item => ({ ...item }));
 
-    this.setState({
-      detalleVenta: updatedDetalle,
-    });
+      let remove = false;
+
+      for (const item of detalles) {
+        if (item.idProducto === producto.idProducto) {
+          if (parseFloat(item.cantidad) - 1 <= 0) {
+            remove = true;
+            break;
+          }
+          item.cantidad = Math.max(parseFloat(item.cantidad) - 1, 1)
+        }
+      }
+
+      if (remove) {
+        this.handleRemoveProducto(producto);
+      } else {
+        this.setState({ detalleVenta: detalles });
+      }
+    }
+
+    if (producto.idTipoTratamientoProducto === UNIDADES || producto.idTipoTratamientoProducto === A_GRANEL) {
+      const detalles = this.state.detalleVenta.map(item => ({ ...item }));
+
+      let remove = false;
+
+      for (const item of detalles) {
+        if (item.idProducto === producto.idProducto) {
+          if (item.inventarios.length === 1) {
+            const inventario = item.inventarios[0];
+            if (parseFloat(inventario.cantidad) - 1 <= 0) {
+              remove = true;
+              break;
+            }
+            inventario.cantidad = Math.max(parseFloat(inventario.cantidad) - 1, 1)
+          } else {
+            for (const inventario of item.inventarios) {
+              if (inventario.idInventario === idInventario) {
+                if (parseFloat(inventario.cantidad) - 1 <= 0) {
+                  const indice = item.inventarios.findIndex(objeto => objeto.idInventario === idInventario)
+                  item.inventarios.splice(indice, 1)
+                  break;
+                }
+
+                inventario.cantidad = Math.max(parseFloat(inventario.cantidad) - 1, 1);
+                break;
+              }
+            }
+          }
+        }
+      }
+
+      if (remove) {
+        this.handleRemoveProducto(producto);
+      } else {
+        this.setState({ detalleVenta: detalles });
+      }
+    }
   }
 
-  handlePlusProducto = async (producto) => {
-    const updatedDetalle = this.state.detalleVenta.map((item) => {
-      if (item.idProducto === producto.idProducto) {
-        return { ...item, cantidad: parseFloat(item.cantidad) + 1 };
-      }
-      return item;
-    });
+  handlePlusProducto = async (producto, idInventario) => {
+    if (producto.idTipoTratamientoProducto === SERVICIO) {
+      const detalles = this.state.detalleVenta.map(item => ({ ...item }));
 
-    this.setState({
-      detalleVenta: updatedDetalle,
-    });
+      for (const item of detalles) {
+        if (item.idProducto === producto.idProducto) {
+          item.cantidad = parseFloat(item.cantidad) + 1;
+          break;
+        }
+      }
+
+      this.setState({ detalleVenta: detalles });
+    }
+
+    if (producto.idTipoTratamientoProducto === UNIDADES || producto.idTipoTratamientoProducto === A_GRANEL) {
+      const detalles = this.state.detalleVenta.map(item => ({ ...item }));
+
+      for (const item of detalles) {
+        if (item.idProducto === producto.idProducto) {
+          for (const inventario of item.inventarios) {
+            if (inventario.idInventario === idInventario) {
+              inventario.cantidad = parseFloat(inventario.cantidad) + 1;
+              break;
+            }
+          }
+        }
+      }
+
+      this.setState({ detalleVenta: detalles });
+    }
   }
 
   handleEditProducto = async (producto) => {
@@ -1006,11 +1249,8 @@ class VentaCrear extends CustomComponent {
   };
 
   handleRemoveProducto = async (producto) => {
-    const updatedDetalle = this.state.detalleVenta.filter((item) => producto.idProducto !== item.idProducto);
-
-    this.setState({
-      detalleVenta: updatedDetalle,
-    });
+    const detalles = this.state.detalleVenta.filter((item) => producto.idProducto !== item.idProducto);
+    this.setState({ detalleVenta: detalles, });
   };
 
   handleCloseProducto = () => {
@@ -1044,20 +1284,33 @@ class VentaCrear extends CustomComponent {
       return;
     }
 
-    const updatedDetalle = this.state.detalleVenta.map((item) =>
-      item.idProducto === this.producto.idProducto
-        ? {
-          ...item,
-          nombreProducto: descripcionProducto,
-          precio: parseFloat(precioProducto),
-        }
-        : item,
-    );
+    const producto = this.state.detalleVenta.find(item => item.idProducto === this.producto.idProducto);
 
-    this.setState({
-      detalleVenta: updatedDetalle,
-    });
+    if (producto.precio !== parseFloat(precioProducto) && producto.idTipoTratamientoProducto === A_GRANEL) {
+      alertWarning('Venta', 'Los productos a granel no se puede cambia el precio.');
+      return;
+    }
 
+    const detalles = this.state.detalleVenta.map(item => ({ ...item }));
+
+    for (const item of detalles) {
+      if (item.idProducto === this.producto.idProducto) {
+        item.nombreProducto = descripcionProducto;
+        item.precio = parseFloat(precioProducto)
+      }
+    }
+
+    // const updatedDetalle = this.state.detalleVenta.map((item) =>
+    //   item.idProducto === this.producto.idProducto
+    //     ? {
+    //       ...item,
+    //       nombreProducto: descripcionProducto,
+    //       precio: parseFloat(precioProducto),
+    //     }
+    //     : item,
+    // );
+
+    this.setState({ detalleVenta: detalles });
     this.handleCloseProducto();
   }
 
@@ -1208,7 +1461,8 @@ class VentaCrear extends CustomComponent {
 
   handleOnOpenModalSale = () => {
     const importeTotal = this.state.detalleVenta.reduce((accumulator, item) => {
-      const totalProductPrice = item.precio * item.cantidad;
+      const cantidad = item.inventarios.reduce((acc, current) => acc + current.cantidad, 0);
+      const totalProductPrice = item.precio * cantidad;
       return accumulator + totalProductPrice;
     }, 0)
 
@@ -1270,7 +1524,6 @@ class VentaCrear extends CustomComponent {
     this.setState({ frecuenciaPago: event.target.value });
   }
 
-  //Metodos Modal Sale
   handleAddBancosAgregados = () => {
     const listAdd = this.state.bancosAgregados.find((item) => item.idBanco === this.refMetodoContado.current.value);
 
@@ -1419,7 +1672,7 @@ class VentaCrear extends CustomComponent {
 
         if (response instanceof SuccessReponse) {
           alertSuccess('Venta', response.data.message, () => {
-            this.handleOpenPrint(response.data.idVenta);
+            // this.handleOpenPrint(response.data.idVenta);
           });
         }
 
@@ -1999,6 +2252,8 @@ class VentaCrear extends CustomComponent {
           impuestos={this.state.impuestos}
           refMoneda={this.refMoneda}
           monedas={this.state.monedas}
+          refAlmacen={this.refAlmacen}
+          almacenes={this.state.almacenes}
           refComentario={this.refComentario}
           handleSaveOptions={this.handleSaveOptions}
           handleCloseOptions={this.handleCloseOptions}
@@ -2066,13 +2321,22 @@ class VentaCrear extends CustomComponent {
           handleClose={this.handleCloseProducto}
         />
 
-        {/* <ModalAgregar
-          refModal={this.state.refModalAgregar}
+        <ModalAgregar
+          refModal={this.refModalAgregar}
           isOpen={this.state.isOpenAgregar}
           onOpen={this.handleOnOpenModalAgregar}
           onHidden={this.handleOnHiddenModalAgregar}
           onClose={this.handleCloseAgregar}
-        /> */}
+
+          title={this.state.tituloAgregar}
+          subTitle={this.state.subTituloAgregar}
+
+          refCantidad={this.refCantidadAgregar}
+          cantidad={this.state.cantidadAgregar}
+          handleInputCantidad={this.handleInputCantidad}
+
+          handleAdd={this.handleSaveAgregar}
+        />
       </PosContainerWrapper>
     );
   }

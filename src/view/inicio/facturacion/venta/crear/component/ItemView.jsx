@@ -1,9 +1,9 @@
 import { images } from '../../../../../../helper';
 import { numberFormat } from '../../../../../../helper/utils.helper';
 import PropTypes from 'prop-types';
+import { A_GRANEL, UNIDADES, VALOR_MONETARIO } from '../../../../../../model/types/tipo-tratamiento-producto';
 
 const ItemView = (props) => {
-
   const { codiso } = props;
 
   const {
@@ -12,10 +12,13 @@ const ItemView = (props) => {
     nombreProducto,
     cantidad,
     precio,
+    medida,
     tipo,
     preferido,
     negativo,
-    imagen
+    imagen,
+    almacen,
+    idTipoTratamientoProducto
   } = props.producto;
 
   const {
@@ -24,9 +27,13 @@ const ItemView = (props) => {
   } = props;
 
   const cssNegativo =
-    tipo !== 'PRODUCTO' ? '' : tipo === 'PRODUCTO' && negativo === 0 ? 'text-danger' : 'text-success';
+    tipo !== 'PRODUCTO' ? '' : tipo === 'PRODUCTO' && negativo === 1 ? 'text-danger' : 'text-success';
   const detalleNegativo =
-    tipo !== 'PRODUCTO' ? '' : tipo === 'PRODUCTO' && negativo === 0 ? 'VENTA SIN CONTROL DE STOCK' : 'VENTA CON CONTROL DE STOCK';
+    tipo !== 'PRODUCTO' ? '' : tipo === 'PRODUCTO' && negativo === 1 ? 'VENTA SIN CONTROL DE STOCK' : 'VENTA CON CONTROL DE STOCK';
+
+  const tipoTratamiento = idTipoTratamientoProducto === UNIDADES ? "EN UNIDADES"
+    : idTipoTratamientoProducto === VALOR_MONETARIO ? "VALOR MONETARIO"
+      : idTipoTratamientoProducto === A_GRANEL ? "A GRANEL" : "SERVICIO"
 
   return (
     <button
@@ -34,6 +41,9 @@ const ItemView = (props) => {
       className={`item-view ${tipo === 'PRODUCTO' && cantidad <= 0 ? 'border border-danger' : ''}`}
       onClick={handleAddItem}
     >
+      <div className='position-absolute ml-1 mt-1 badge badge-danger'>
+        {tipoTratamiento}
+      </div>
       <div
         className="item-view_favorite btn px-1 py-1 position-absolute"
         onClick={(e) => {
@@ -77,8 +87,11 @@ const ItemView = (props) => {
       <span className={`text-center d-block w-100 my-1 text-xs ${cssNegativo}`}>
         {detalleNegativo}
       </span>
-      <span className="text-center d-block w-100 ml-1 mr-1 mt-1 mb-3 text-xl ">
-        {numberFormat(precio, codiso)}
+      <span className="text-center d-block w-100 ml-1 mr-1 mt-1 mb-3">
+        <span className='text-xl'>{numberFormat(precio, codiso)}</span> <span className='text-sm'>x {medida}</span>
+      </span>
+      <span className='text-left d-block w-100 ml-1 mr-1 mt-1 text-sm'>
+        Almacen: {almacen}
       </span>
     </button>
   );
@@ -92,10 +105,13 @@ ItemView.propTypes = {
     nombreProducto: PropTypes.string.isRequired,
     cantidad: PropTypes.number.isRequired,
     precio: PropTypes.number.isRequired,
+    medida: PropTypes.string.isRequired,
     tipo: PropTypes.string.isRequired,
     preferido: PropTypes.number.isRequired,
     negativo: PropTypes.number.isRequired,
     imagen: PropTypes.string,
+    almacen: PropTypes.string,
+    idTipoTratamientoProducto: PropTypes.string
   }),
   handleAddItem: PropTypes.func.isRequired,
   handleStarProduct: PropTypes.func.isRequired,

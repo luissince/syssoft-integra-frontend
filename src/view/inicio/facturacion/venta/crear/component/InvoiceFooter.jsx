@@ -4,6 +4,7 @@ import {
   numberFormat,
 } from '../../../../../../helper/utils.helper';
 import PropTypes from 'prop-types';
+import { SERVICIO } from '../../../../../../model/types/tipo-tratamiento-producto';
 
 const InvoiceFooter = (props) => {
   const {
@@ -20,11 +21,12 @@ const InvoiceFooter = (props) => {
       : detalleVenta.length + ' Productos';
 
   const subTotal = detalleVenta.reduce((accumulator, item) => {
-    const cantidad = item.cantidad;
+    const cantidad = item.idTipoTratamientoProducto === SERVICIO
+      ? item.cantidad
+      : item.inventarios.reduce((acc, current) => acc + current.cantidad, 0);
+
     const precio = item.precio;
-    const filter = impuestos.filter(
-      (imp) => imp.idImpuesto === item.idImpuesto,
-    );
+    const filter = impuestos.filter((imp) => imp.idImpuesto === item.idImpuesto);
     const impuesto = filter.length > 0 ? filter[0].porcentaje : 0;
 
     const total = cantidad * precio;
@@ -38,7 +40,11 @@ const InvoiceFooter = (props) => {
       );
 
       if (impuesto) {
-        const total = item.cantidad * item.precio;
+        const cantidad = item.idTipoTratamientoProducto === SERVICIO
+          ? item.cantidad
+          : item.inventarios.reduce((acc, current) => acc + current.cantidad, 0);
+
+        const total = cantidad * item.precio;
         const subTotal = calculateTaxBruto(impuesto.porcentaje, total);
         const impuestoTotal = calculateTax(impuesto.porcentaje, subTotal);
 
@@ -74,7 +80,11 @@ const InvoiceFooter = (props) => {
   };
 
   const total = detalleVenta.reduce((accumulator, item) => {
-    const totalProductPrice = item.precio * item.cantidad;
+    const cantidad = item.idTipoTratamientoProducto === SERVICIO
+      ? item.cantidad
+      : item.inventarios.reduce((acc, current) => acc + current.cantidad, 0);
+
+    const totalProductPrice = item.precio * cantidad;
     return accumulator + totalProductPrice;
   }, 0);
 

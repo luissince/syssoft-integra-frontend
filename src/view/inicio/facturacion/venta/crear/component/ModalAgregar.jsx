@@ -3,8 +3,7 @@ import { CustomModalForm } from '../../../../../../components/CustomModal';
 import Input from '../../../../../../components/Input';
 import Row from '../../../../../../components/Row';
 import {
-  handlePasteFloat,
-  spinnerLoading,
+  handlePasteFloat
 } from '../../../../../../helper/utils.helper';
 import PropTypes from 'prop-types';
 
@@ -15,7 +14,8 @@ export const ModalAgregar = ({
   onHidden,
   onClose,
 
-  loading,
+  title,
+  subTitle,
 
   refCantidad,
   cantidad,
@@ -36,12 +36,16 @@ export const ModalAgregar = ({
       onSubmit={handleAdd}
       body={
         <>
-          {loading && spinnerLoading('Cargando datos...')}
+          <Row>
+            <Column>
+              <h5>{title}</h5>
+            </Column>
+          </Row>
 
           <Row>
-            {/* <Column>
+            <Column>
               <div className="form-group">
-                <label>Cantidad:</label>
+                <label>{subTitle}</label>
                 <Input
                   autoFocus={true}
                   placeholder={"0.00"}
@@ -52,14 +56,14 @@ export const ModalAgregar = ({
                   onPaste={handlePasteFloat}
                 />
               </div>
-            </Column> */}
+            </Column>
           </Row>
         </>
       }
 
       footer={
         <>
-          <button 
+          <button
             type="submit"
             className="btn btn-primary">
             <i className="fa fa-plus"></i> Agregar
@@ -82,7 +86,8 @@ ModalAgregar.propTypes = {
   onHidden: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
 
-  loading: PropTypes.bool.isRequired,
+  title: PropTypes.string.isRequired,
+  subTitle: PropTypes.string.isRequired,
 
   refCantidad: PropTypes.object.isRequired,
   cantidad: PropTypes.string.isRequired,

@@ -1,12 +1,10 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import {
-  spinnerLoading,
   alertInfo,
   alertSuccess,
   alertWarning,
   alertDialog,
-  statePrivilegio,
   keyUpSearch,
   isEmpty,
 } from '../../../../helper/utils.helper';
@@ -20,9 +18,14 @@ import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
 import { CANCELED } from '../../../../model/types/types';
 import CustomComponent from '../../../../model/class/custom-component';
+import Title from '../../../../components/Title';
+import Row from '../../../../components/Row';
+import Column from '../../../../components/Column';
+import { TableResponsive } from '../../../../components/Table';
+import { SpinnerTable } from '../../../../components/Spinner';
 
 class Personas extends CustomComponent {
-  
+
   constructor(props) {
     super(props);
     this.state = {
@@ -38,7 +41,7 @@ class Personas extends CustomComponent {
       filasPorPagina: 10,
       messageTable: 'Cargando información...',
     };
-  
+
     this.refTxtSearch = React.createRef();
 
     this.idCodigo = '';
@@ -172,15 +175,14 @@ class Personas extends CustomComponent {
     );
   }
 
-  generarBody() {
+  generateBody() {
     if (this.state.loading) {
       return (
         <tr>
           <td className="text-center" colSpan="10">
-            {spinnerLoading(
-              'Cargando información de la tabla...',
-              true,
-            )}
+            <SpinnerTable
+              message='Cargando información de la tabla...'
+            />
           </td>
         </tr>
       );
@@ -265,15 +267,10 @@ class Personas extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
-        <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <div className="form-group">
-              <h5>
-                Contatos <small className="text-secondary">LISTA</small>
-              </h5>
-            </div>
-          </div>
-        </div>
+        <Title
+          title='Contatos'
+          subTitle='LISTA'
+        />
 
         <div className="row">
           <div className="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">
@@ -317,39 +314,35 @@ class Personas extends CustomComponent {
           </div>
         </div>
 
-        <div className="row">
-          <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
-            <div className="table-responsive">
-              <table className="table table-striped table-bordered rounded">
-                <thead>
-                  <tr>
-                    <th width="5%" className="text-center">
-                      #
-                    </th>
-                    <th width="10%">DNI / RUC</th>
-                    <th width="20%">Cliente</th>
-                    <th width="10%">Cel. / Tel.</th>
-                    <th width="15%">Dirección</th>
-                    <th width="7%">Predeterminado</th>
-                    <th width="7%">Estado</th>
-                    <th width="5%" className="text-center">
-                      Detalle
-                    </th>
-                    <th width="5%" className="text-center">
-                      Editar
-                    </th>
-                    <th width="5%" className="text-center">
-                      Eliminar
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {this.generarBody()}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+        <Row>
+          <Column>
+            <TableResponsive
+              tHead={
+                <tr>
+                  <th width="5%" className="text-center">
+                    #
+                  </th>
+                  <th width="10%">DNI / RUC</th>
+                  <th width="20%">Cliente</th>
+                  <th width="10%">Cel. / Tel.</th>
+                  <th width="15%">Dirección</th>
+                  <th width="7%">Predeterminado</th>
+                  <th width="7%">Estado</th>
+                  <th width="5%" className="text-center">
+                    Detalle
+                  </th>
+                  <th width="5%" className="text-center">
+                    Editar
+                  </th>
+                  <th width="5%" className="text-center">
+                    Eliminar
+                  </th>
+                </tr>
+              }
+              tBody={this.generateBody()}
+            />
+          </Column>
+        </Row>
 
         <Paginacion
           loading={this.state.loading}
@@ -370,4 +363,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(Personas);
+const ConnectedPersonas = connect(mapStateToProps, null)(Personas);
+
+export default ConnectedPersonas;

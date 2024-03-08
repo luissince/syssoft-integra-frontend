@@ -539,6 +539,7 @@ class CotizaciónCrear extends CustomComponent {
   };
 
   handleSelectItemProducto = async (value) => {
+    console.log(value)
     await this.setStateAsync({
       producto: value,
       filtrarProducto: value.nombre,

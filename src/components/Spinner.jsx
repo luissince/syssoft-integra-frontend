@@ -32,11 +32,9 @@ const SpinnerView = ({ loading, message }) => {
     );
 }
 
-
 SpinnerTable.propTypes = {
     message: PropTypes.string.isRequired,
 };
-
 
 SpinnerView.propTypes = {
     loading: PropTypes.bool.isRequired,
