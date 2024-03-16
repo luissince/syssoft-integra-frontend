@@ -10,6 +10,10 @@ class Menu extends React.Component {
     this.state = {};
   }
 
+  irACrearVenta = () => {
+    this.props.history.push('/inicio/ventas/crear');
+  };
+
   onEventSignIn = async (event) => {
     try {
       window.localStorage.removeItem('login');
@@ -54,6 +58,19 @@ class Menu extends React.Component {
             <a
               className="app-nav__item"
               href=""
+              onClick={this.irACrearVenta}
+              aria-label="Abrir Perfil"
+              aria-expanded={false}
+            >
+              <i className="fast-sale fa fa-shopping-cart fa-lg"></i> Nueva venta {/* Icono de Font Awesome */}
+            </a>
+
+
+          </div>
+          <div className="dropdown">
+            <a
+              className="app-nav__item"
+              href=""
               data-bs-toggle="dropdown"
               aria-label="Abrir Notificaciones"
               aria-expanded={false}
@@ -67,25 +84,25 @@ class Menu extends React.Component {
               <div className="app-notification__content">
                 {this.props.notificaciones.length !== 0
                   ? this.props.notificaciones.map((item, index) => (
-                      <li key={index}>
-                        <div className="app-notification__item">
-                          <span className="app-notification__icon">
-                            <span className="fa-stack fa-lg">
-                              <i className="fa fa-circle fa-stack-2x text-primary"></i>
-                              <i className="fa fa-warning fa-stack-1x fa-inverse"></i>
-                            </span>
+                    <li key={index}>
+                      <div className="app-notification__item">
+                        <span className="app-notification__icon">
+                          <span className="fa-stack fa-lg">
+                            <i className="fa fa-circle fa-stack-2x text-primary"></i>
+                            <i className="fa fa-warning fa-stack-1x fa-inverse"></i>
                           </span>
-                          <div>
-                            <p className="app-notification__message">
-                              {item.cantidad} {item.nombre}
-                            </p>
-                            <p className="app-notification__meta">
-                              {item.estado}
-                            </p>
-                          </div>
+                        </span>
+                        <div>
+                          <p className="app-notification__message">
+                            {item.cantidad} {item.nombre}
+                          </p>
+                          <p className="app-notification__meta">
+                            {item.estado}
+                          </p>
                         </div>
-                      </li>
-                    ))
+                      </div>
+                    </li>
+                  ))
                   : null}
               </div>
               {this.props.notificaciones.length == 0 ? (
