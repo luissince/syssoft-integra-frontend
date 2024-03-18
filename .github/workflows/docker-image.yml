@@ -153,6 +153,7 @@ jobs:
         run: docker compose up --build bodega-modelo-services -d
 
   build-and-deploy-app-unnagro:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     runs-on: self-hosted
     environment: unnagro
 
