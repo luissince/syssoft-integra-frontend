@@ -8,9 +8,9 @@ on:
 
 # Definición de trabajos
 jobs:
-  build-and-deploy-app-unnagro:
+  build-and-deploy-app-leatsac:
     runs-on: self-hosted
-    environment: unnagro
+    environment: leatsac
 
     env:  
       VITE_APP_BACK_END: ${{ secrets.VITE_APP_BACK_END }}
@@ -34,4 +34,4 @@ jobs:
           EOL
 
       - name: Creando y ejecutando contenedor
-        run: docker compose -f docker-compose.yml up --build unnagro-services -d
+        run: docker compose -f docker-compose.yml up --build leatsac-services -d
