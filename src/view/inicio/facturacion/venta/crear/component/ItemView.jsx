@@ -103,7 +103,7 @@ ItemView.propTypes = {
     idProducto: PropTypes.string.isRequired,
     codigo: PropTypes.string,
     nombreProducto: PropTypes.string.isRequired,
-    cantidad: PropTypes.number.isRequired,
+    cantidad: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     precio: PropTypes.number.isRequired,
     medida: PropTypes.string.isRequired,
     tipo: PropTypes.string.isRequired,

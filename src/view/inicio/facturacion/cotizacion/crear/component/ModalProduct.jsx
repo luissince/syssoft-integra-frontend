@@ -5,9 +5,9 @@ import Input from '../../../../../../components/Input';
 import Row from '../../../../../../components/Row';
 import {
   handlePasteFloat,
-  spinnerLoading,
 } from '../../../../../../helper/utils.helper';
 import PropTypes from 'prop-types';
+import { SpinnerView } from '../../../../../../components/Spinner';
 
 export const CustomModalProduct = ({
   refModal,
@@ -48,7 +48,10 @@ export const CustomModalProduct = ({
       onSubmit={handleAdd}
       body={
         <>
-          {loading && spinnerLoading('Cargando datos...')}
+          <SpinnerView
+            loading={loading}
+            message={"Cargando datos..."}
+          />
 
           <Row>
             <Column>
@@ -100,8 +103,6 @@ export const CustomModalProduct = ({
               </div>
             </Column>
           </Row>
-
-
         </>
       }
 

@@ -393,4 +393,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(BancoEditar);
+const ConnectedBancoAgregar = connect(mapStateToProps, null)(BancoEditar);
+
+export default ConnectedBancoAgregar;

@@ -5,11 +5,11 @@ import {
   alertInfo,
   alertSuccess,
   alertWarning,
-  spinnerLoading,
   keyNumberInteger,
   imageBase64,
   isText,
   isEmpty,
+  // convertFileBase64,
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../../components/Container';
@@ -24,6 +24,10 @@ import { CANCELED } from '../../../../model/types/types';
 import { getRuc } from '../../../../network/rest/apisperu.network';
 import CustomComponent from '../../../../model/class/custom-component';
 import Title from '../../../../components/Title';
+import { SpinnerView } from '../../../../components/Spinner';
+import Row from '../../../../components/Row';
+import Column from '../../../../components/Column';
+import Image from '../../../../components/Image';
 
 class EmpresaProceso extends CustomComponent {
   constructor(props) {
@@ -35,13 +39,17 @@ class EmpresaProceso extends CustomComponent {
       razonSocial: '',
       nombreEmpresa: '',
 
+      usuarioEmail: '',
+      claveEmail: '',
+
       usuarioSolSunat: '',
       claveSolSunat: '',
+
       idApiSunat: '',
       claveApiSunat: '',
 
-      usuarioEmail: '',
-      claveEmail: '',
+      // certificado: 'Hacer click para seleccionar su archivo.',
+      // claveCertificado: '',
 
       logo: images.noImage,
       image: images.noImage,
@@ -49,6 +57,7 @@ class EmpresaProceso extends CustomComponent {
       lookPasswordEmail: false,
       lookPasswordSol: false,
       lookPasswordClave: false,
+      lookPasswordClaveCertificado: false,
 
       loading: true,
       messageWarning: '',
@@ -60,9 +69,12 @@ class EmpresaProceso extends CustomComponent {
     this.refDocumento = React.createRef();
     this.refRazonSocial = React.createRef();
 
+    this.refFileCertificado = React.createRef();
+
     this.refPasswordEmail = React.createRef();
     this.refPasswordSol = React.createRef();
     this.refPasswordClave = React.createRef();
+    this.refPasswordClaveCertificado = React.createRef();
 
     this.refFileLogo = React.createRef();
     this.refFileImagen = React.createRef();
@@ -80,16 +92,10 @@ class EmpresaProceso extends CustomComponent {
     }
 
     this.refDocumento.current.focus();
-
-    this.refFileLogo.current.addEventListener('change', this.handleFileLogo);
-    this.refFileImagen.current.addEventListener('change', this.handleFileImage);
   }
 
   componentWillUnmount() {
     this.abortController.abort();
-
-    this.refFileLogo.current.removeEventListener('change', this.handleFileLogo);
-    this.refFileImagen.current.removeEventListener('change', this.handleFileImage);
   }
 
   async clearLogo() {
@@ -123,17 +129,20 @@ class EmpresaProceso extends CustomComponent {
         razonSocial: empresa.razonSocial,
         nombreEmpresa: empresa.nombreEmpresa,
 
-        usuarioSolSunat: !empresa.usuarioSolSunat ? "" : empresa.usuarioSolSunat,
-        claveSolSunat: !empresa.claveSolSunat ? "" : empresa.claveSolSunat,
+        usuarioSolSunat: empresa.usuarioSolSunat ?? "",
+        claveSolSunat: empresa.claveSolSunat ?? "",
 
-        idApiSunat: !empresa.idApiSunat ? "" : empresa.idApiSunat,
-        claveApiSunat: !empresa.claveApiSunat ? "" : empresa.claveApiSunat,
+        idApiSunat: empresa.idApiSunat ?? "",
+        claveApiSunat: empresa.claveApiSunat ?? "",
 
-        usuarioEmail: !empresa.usuarioEmail ? "" : empresa.usuarioEmail,
-        claveEmail: !empresa.claveEmail ? "" : empresa.claveEmail,
+        // certificado: empresa.certificadoSunat ?? "Hacer click para seleccionar su archivo.",
+        // claveCertificado: empresa.claveCertificadoSunat ?? "",
 
-        logo: empresa.rutaLogo ? empresa.rutaLogo : images.noImage,
-        image: empresa.rutaImage ? empresa.rutaImage : images.noImage,
+        usuarioEmail: empresa.usuarioEmail ?? "",
+        claveEmail: empresa.claveEmail ?? "",
+
+        logo: empresa.rutaLogo,
+        image: empresa.rutaImage,
 
         loading: false,
       });
@@ -148,29 +157,35 @@ class EmpresaProceso extends CustomComponent {
     }
   };
 
-  handleFileLogo = async (event) => {
-    if (event.target.files.length !== 0) {
-      await this.setStateAsync({
-        logo: URL.createObjectURL(event.target.files[0]),
-      });
+  handleFileLogo = (event) => {
+    if (!isEmpty(event.target.files)) {
+      this.setState({ logo: URL.createObjectURL(event.target.files[0]) });
     } else {
-      await this.setStateAsync({ logo: images.noImage });
-      this.refFileLogo.current.value = '';
+      this.setState({ logo: images.noImage }, () => {
+        this.refFileLogo.current.value = '';
+      });
     }
   };
 
-  handleFileImage = async (event) => {
-    if (event.target.files.length !== 0) {
-      await this.setStateAsync({
-        image: URL.createObjectURL(event.target.files[0]),
-      });
+  handleFileImage = (event) => {
+    if (!isEmpty(event.target.files)) {
+      this.setState({ image: URL.createObjectURL(event.target.files[0]) });
     } else {
-      await this.setStateAsync({
-        image: images.noImage,
+      this.setState({ image: images.noImage, }, () => {
+        this.refFileImagen.current.value = '';
       });
-      this.refFileImagen.current.value = '';
     }
   };
+
+  // handleFileCertificado = (event) => {
+  //   if (!isEmpty(event.target.files)) {
+  //     this.setState({ certificado: event.target.files[0].name });
+  //   } else {
+  //     this.setState({ certificado: 'Hacer click para seleccionar su archivo.' }, () => {
+  //       this.refFileCertificado.current.value = '';
+  //     });
+  //   }
+  // };
 
   async handleGetApiSunat() {
     if (isEmpty(this.state.documento)) {
@@ -235,6 +250,12 @@ class EmpresaProceso extends CustomComponent {
     });
   };
 
+  handleLookPasswordCertificado = () => {
+    this.setState({ lookPasswordClaveCertificado: !this.state.lookPasswordClaveCertificado }, () => {
+      this.refPasswordClaveCertificado.current.focus();
+    });
+  };
+
   async handleGuardar() {
     if (isEmpty(this.state.documento)) {
       alertWarning('Empresa', 'Ingrese el número de documento.', () =>
@@ -254,12 +275,10 @@ class EmpresaProceso extends CustomComponent {
       alertInfo('Empresa', 'Procesando información...');
 
       const logoSend = await imageBase64(this.refFileLogo.current.files);
-      const baseLogo = logoSend ? logoSend.base64String : '';
-      const extLogo = logoSend ? logoSend.extension : '';
 
       const imageSend = await imageBase64(this.refFileImagen.current.files);
-      const baseImage = imageSend ? imageSend.base64String : '';
-      const extImage = imageSend ? imageSend.extension : '';
+
+      // const certificadoSend = await convertFileBase64(this.refFileCertificado.current.files);
 
       const data = {
         documento: this.state.documento.trim(),
@@ -275,15 +294,19 @@ class EmpresaProceso extends CustomComponent {
         usuarioEmail: this.state.usuarioEmail.trim(),
         claveEmail: this.state.claveEmail.trim(),
 
-        logo: baseLogo,
-        image: baseImage,
-        extlogo: extLogo,
-        extimage: extImage,
+        // certificado: certificadoSend.data ?? "",
+        // extCertificado: certificadoSend.extension ?? "",
+        // claveCertificado: this.state.claveCertificado,
+
+        logo: logoSend.base64String ?? "",
+        extlogo: logoSend.extension ?? "",
+
+        image: imageSend.base64String ?? "",
+        extimage: imageSend.extension ?? "",
 
         idUsuario: this.state.idUsuario,
         idEmpresa: this.state.idEmpresa,
       };
-
 
       const response = await updateEmpresa(data);
 
@@ -304,7 +327,10 @@ class EmpresaProceso extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
-        {this.state.loading && spinnerLoading(this.state.msgLoading)}
+        <SpinnerView
+          loading={this.state.loading}
+          message={this.state.msgLoading}
+        />
 
         <Title
           title='Empresa'
@@ -312,299 +338,378 @@ class EmpresaProceso extends CustomComponent {
           handleGoBack={() => this.props.history.goBack()}
         />
 
-        <div className="row">
-          <div className="form-group col-md-6">
-            <label>
-              Ruc ({this.state.documento.length}): <i className="fa fa-asterisk text-danger small"></i>
-            </label>
-            <div className="input-group">
+        <Row>
+          <Column className={"col-md-6"}>
+            <div className="form-group">
+              <label>
+                Ruc ({this.state.documento.length}): <i className="fa fa-asterisk text-danger small"></i>
+              </label>
+              <div className="input-group">
+                <input
+                  type="text"
+                  className="form-control"
+                  onKeyDown={keyNumberInteger}
+                  ref={this.refDocumento}
+                  value={this.state.documento}
+                  onChange={(event) =>
+                    this.setState({ documento: event.target.value })
+                  }
+                  placeholder="10909000223"
+                />
+                <div className="input-group-append">
+                  <button
+                    className="btn btn-outline-secondary"
+                    type="button"
+                    title="Sunat"
+                    onClick={() => this.handleGetApiSunat()}
+                  >
+                    <img src={images.sunat} alt="Sunat" width="12" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </Column>
+
+          <Column className={"col-md-6"}>
+            <div className="form-group">
+              <label>
+                Razón Social: <i className="fa fa-asterisk text-danger small"></i>
+              </label>
               <input
                 type="text"
                 className="form-control"
-                onKeyDown={keyNumberInteger}
-                ref={this.refDocumento}
-                value={this.state.documento}
+                ref={this.refRazonSocial}
+                value={this.state.razonSocial}
                 onChange={(event) =>
-                  this.setState({ documento: event.target.value })
+                  this.setState({ razonSocial: event.target.value })
                 }
-                placeholder="10909000223"
+                placeholder="Ingrese la razón social"
               />
-              <div className="input-group-append">
-                <button
-                  className="btn btn-outline-secondary"
-                  type="button"
-                  title="Sunat"
-                  onClick={() => this.handleGetApiSunat()}
-                >
-                  <img src={images.sunat} alt="Sunat" width="12" />
-                </button>
-              </div>
             </div>
-          </div>
+          </Column>
+        </Row>
 
-          <div className="form-group col-md-6">
-            <label>
-              Razón Social: <i className="fa fa-asterisk text-danger small"></i>
-            </label>
-            <input
-              type="text"
-              className="form-control"
-              ref={this.refRazonSocial}
-              value={this.state.razonSocial}
-              onChange={(event) =>
-                this.setState({ razonSocial: event.target.value })
-              }
-              placeholder="Ingrese la razón social"
-            />
-          </div>
-        </div>
-
-        <div className="row">
-          <div className="form-group col-md-6">
-            <label>Nombre Comercial: </label>
-            <input
-              type="text"
-              className="form-control"
-              value={this.state.nombreEmpresa}
-              onChange={(event) =>
-                this.setState({ nombreEmpresa: event.target.value })
-              }
-              placeholder="Ingrese el nombre comercial"
-            />
-          </div>
-
-          <div className="form-group col-md-6">
-            <label>Url de Configuración Sunat: </label>
-            <div className="input-group">
+        <Row>
+          <Column className={"col-md-6"}>
+            <div className="form-group">
+              <label>Nombre Comercial: </label>
               <input
                 type="text"
                 className="form-control"
-                defaultValue={isEmpty(import.meta.env.VITE_APP_CPE_SUNAT) ? "" : import.meta.env.VITE_APP_CPE_SUNAT}
-                placeholder="http://192.168.101.2"
-                disabled
-              />
-              <div className="input-group-append">
-                <button
-                  className="btn btn-outline-secondary"
-                  type="button"
-                  title="Open Link"
-                  onClick={() => this.handleOpenLink()}
-                >
-                  <i className='fa fa-external-link'></i>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="row">
-          <div className="form-group col-md-6">
-            <label>
-              Usuario Email (<small>Para el envío del correo</small>):{' '}
-            </label>
-            <input
-              type="text"
-              className="form-control"
-              value={this.state.usuarioEmail}
-              onChange={(event) =>
-                this.setState({ usuarioEmail: event.target.value })
-              }
-              placeholder="Email de Envío"
-            />
-          </div>
-
-          <div className="form-group col-md-6">
-            <label>
-              Contraseña Email (<small>Para el envío del correo</small>):{' '}
-            </label>
-            <div className="input-group">
-              <input
-                ref={this.refPasswordEmail}
-                type={this.state.lookPasswordEmail ? 'text' : 'password'}
-                className="form-control"
-                value={this.state.claveEmail}
+                value={this.state.nombreEmpresa}
                 onChange={(event) =>
-                  this.setState({ claveEmail: event.target.value })
+                  this.setState({ nombreEmpresa: event.target.value })
                 }
-                placeholder="********"
+                placeholder="Ingrese el nombre comercial"
               />
-              <div className="input-group-append">
-                <button
-                  className="btn btn-outline-secondary"
-                  type="button"
-                  title="Email"
-                  onClick={this.handleLookPasswordEmail}
-                >
-                  <i className={this.state.lookPasswordEmail ? 'fa fa-eye' : 'fa fa-eye-slash'}></i>
-                </button>
+            </div>
+          </Column>
+
+          <Column className={"col-md-6"}>
+            <div className="form-group ">
+              <label>Url de Configuración Sunat: </label>
+              <div className="input-group">
+                <input
+                  type="text"
+                  className="form-control"
+                  defaultValue={isEmpty(import.meta.env.VITE_APP_CPE_SUNAT) ? "" : import.meta.env.VITE_APP_CPE_SUNAT}
+                  placeholder="http://192.168.101.2"
+                  disabled
+                />
+                <div className="input-group-append">
+                  <button
+                    className="btn btn-outline-secondary"
+                    type="button"
+                    title="Open Link"
+                    onClick={() => this.handleOpenLink()}
+                  >
+                    <i className='fa fa-external-link'></i>
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
+          </Column>
+        </Row>
 
-        <div className="row">
-          <div className="form-group col-md-6">
-            <label>
-              Usuario Sol(<small>Para el envío a Sunat</small>):{' '}
-            </label>
-            <input
-              type="text"
-              className="form-control"
-              value={this.state.usuarioSolSunat}
-              onChange={(event) =>
-                this.setState({ usuarioSolSunat: event.target.value })
-              }
-              placeholder="usuario"
-            />
-          </div>
-
-          <div className="form-group col-md-6">
-            <label>
-              Clave Sol(<small>Para el envío a Sunat</small>):{' '}
-            </label>
-            <div className="input-group">
+        <Row>
+          <Column className={"col-md-6"}>
+            <div className="form-group ">
+              <label>
+                Usuario Email (<small>Para el envío del correo</small>):{' '}
+              </label>
               <input
-                ref={this.refPasswordSol}
-                type={this.state.refPasswordSol ? 'text' : 'password'}
+                type="text"
                 className="form-control"
-                value={this.state.claveSolSunat}
+                value={this.state.usuarioEmail}
                 onChange={(event) =>
-                  this.setState({ claveSolSunat: event.target.value })
+                  this.setState({ usuarioEmail: event.target.value })
                 }
-                placeholder="********"
+                placeholder="Email de Envío"
               />
-              <div className="input-group-append">
-                <button
-                  className="btn btn-outline-secondary"
-                  type="button"
-                  title="Sunat"
-                  onClick={this.handleLookPasswordSol}
-                >
-                  <i className={this.state.refPasswordSol ? 'fa fa-eye' : 'fa fa-eye-slash'}></i>
-                </button>
+            </div>
+          </Column>
+
+          <Column className={"col-md-6"}>
+            <div className="form-group">
+              <label>
+                Contraseña Email (<small>Para el envío del correo</small>):{' '}
+              </label>
+              <div className="input-group">
+                <input
+                  ref={this.refPasswordEmail}
+                  type={this.state.lookPasswordEmail ? 'text' : 'password'}
+                  className="form-control"
+                  value={this.state.claveEmail}
+                  onChange={(event) =>
+                    this.setState({ claveEmail: event.target.value })
+                  }
+                  placeholder="********"
+                />
+                <div className="input-group-append">
+                  <button
+                    className="btn btn-outline-secondary"
+                    type="button"
+                    title="Email"
+                    onClick={this.handleLookPasswordEmail}
+                  >
+                    <i className={this.state.lookPasswordEmail ? 'fa fa-eye' : 'fa fa-eye-slash'}></i>
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
+          </Column>
+        </Row>
 
-        <div className="row">
-          <div className="form-group col-md-6">
-            <label>
-              Id Api Sunat(<small>Para el envío de guía de remisión</small>):{' '}
-            </label>
-            <input
-              type="text"
-              className="form-control"
-              value={this.state.idApiSunat}
-              onChange={(event) =>
-                this.setState({ idApiSunat: event.target.value })
-              }
-              placeholder="usuario"
-            />
-          </div>
-
-          <div className="form-group col-md-6">
-            <label>
-              Clave Api Sunat(<small>Para el envío de guía de remisión</small>):{' '}
-            </label>
-            <div className="input-group">
+        <Row>
+          <Column className={"col-md-6"}>
+            <div className="form-group">
+              <label>
+                Usuario Sol(<small>Para el envío a Sunat</small>):{' '}
+              </label>
               <input
-                ref={this.refPasswordClave}
-                type={this.state.lookPasswordClave ? 'text' : 'password'}
+                type="text"
                 className="form-control"
-                value={this.state.claveApiSunat}
+                value={this.state.usuarioSolSunat}
                 onChange={(event) =>
-                  this.setState({ claveApiSunat: event.target.value })
+                  this.setState({ usuarioSolSunat: event.target.value })
                 }
-                placeholder="********"
-              />
-              <div className="input-group-append">
-                <button
-                  className="btn btn-outline-secondary"
-                  type="button"
-                  title="Sunat"
-                  onClick={this.handleLookPasswordApiSunat}
-                >
-                  <i className={this.state.lookPasswordClave ? 'fa fa-eye' : 'fa fa-eye-slash'}></i>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="row">
-          <div className="form-group col-md-6 text-center">
-            <label>Logo</label>
-            <br />
-            <small>Usuado para los reportes</small>
-            <div className="text-center mb-2 ">
-              <img
-                src={this.state.logo}
-                alt=""
-                className="img-fluid border border-primary rounded"
-                width={250}
+                placeholder="usuario"
               />
             </div>
-            <input
-              type="file"
-              id="fileLogo"
-              accept="image/png, image/jpeg, image/gif, image/svg, image/webp"
-              className="display-none"
-              ref={this.refFileLogo}
-            />
-            <label htmlFor="fileLogo" className="btn btn-outline-secondary m-0">
-              <div className="content-button">
-                <i className="bi bi-image"></i>
-                <span></span>
-              </div>
-            </label>{' '}
-            <button
-              className="btn btn-outline-secondary"
-              onClick={() => this.clearLogo()}
-            >
-              <i className="bi bi-trash"></i>
-            </button>
-          </div>
+          </Column>
 
-          <div className="form-group col-md-6 text-center">
-            <label>Imagen</label>
-            <br />
-            <small>Usuado para mostrar el logo en sistema</small>
-            <div className="text-center mb-2 ">
-              <img
-                src={this.state.image}
-                alt="Logo de la empresa"
-                className="img-fluid border border-primary rounded"
-                width={250}
+          <Column className={"col-md-6"}>
+            <div className="form-group">
+              <label>
+                Clave Sol(<small>Para el envío a Sunat</small>):{' '}
+              </label>
+              <div className="input-group">
+                <input
+                  ref={this.refPasswordSol}
+                  type={this.state.refPasswordSol ? 'text' : 'password'}
+                  className="form-control"
+                  value={this.state.claveSolSunat}
+                  onChange={(event) =>
+                    this.setState({ claveSolSunat: event.target.value })
+                  }
+                  placeholder="********"
+                />
+                <div className="input-group-append">
+                  <button
+                    className="btn btn-outline-secondary"
+                    type="button"
+                    title="Sunat"
+                    onClick={this.handleLookPasswordSol}
+                  >
+                    <i className={this.state.refPasswordSol ? 'fa fa-eye' : 'fa fa-eye-slash'}></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </Column>
+        </Row>
+
+        <Row>
+          <Column className={"col-md-6"}>
+            <div className="form-group">
+              <label>
+                Id Api Sunat(<small>Para el envío de guía de remisión</small>):{' '}
+              </label>
+              <input
+                type="text"
+                className="form-control"
+                value={this.state.idApiSunat}
+                onChange={(event) =>
+                  this.setState({ idApiSunat: event.target.value })
+                }
+                placeholder="usuario"
               />
             </div>
-            <input
-              type="file"
-              id="fileImage"
-              accept="image/png, image/jpeg, image/gif, image/svg"
-              className="display-none"
-              ref={this.refFileImagen}
-            />
-            <label
-              htmlFor="fileImage"
-              className="btn btn-outline-secondary m-0"
-            >
-              <div className="content-button">
-                <i className="bi bi-image"></i>
-                <span></span>
-              </div>
-            </label>{' '}
-            <button
-              className="btn btn-outline-secondary"
-              onClick={() => this.clearImage()}
-            >
-              <i className="bi bi-trash"></i>
-            </button>
-          </div>
-        </div>
+          </Column>
 
-        <div className="row">
-          <div className="col-md-12">
+          <Column className={"col-md-6"}>
+            <div className="form-group">
+              <label>
+                Clave Api Sunat(<small>Para el envío de guía de remisión</small>):{' '}
+              </label>
+              <div className="input-group">
+                <input
+                  ref={this.refPasswordClave}
+                  type={this.state.lookPasswordClave ? 'text' : 'password'}
+                  className="form-control"
+                  value={this.state.claveApiSunat}
+                  onChange={(event) =>
+                    this.setState({ claveApiSunat: event.target.value })
+                  }
+                  placeholder="********"
+                />
+                <div className="input-group-append">
+                  <button
+                    className="btn btn-outline-secondary"
+                    type="button"
+                    title="Sunat"
+                    onClick={this.handleLookPasswordApiSunat}
+                  >
+                    <i className={this.state.lookPasswordClave ? 'fa fa-eye' : 'fa fa-eye-slash'}></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </Column>
+        </Row>
+
+        {/* <Row>
+          <Column>
+            <div className="form-group ">
+              <label>
+                Seleccionar Archivo (.p12, .pfx u otros):
+              </label>
+              <input
+                type="file"
+                id="fileCertificado"
+                accept=".p12,.pfx"
+                className="display-none"
+                ref={this.refFileCertificado}
+                onChange={this.handleFileCertificado}
+              />
+              <label htmlFor={"fileCertificado"} className='form-control cursor-pointer '>
+                {this.state.certificado}
+              </label>
+            </div>
+          </Column>
+
+          <Column className={"col-md-6"}>
+            <div className="form-group">
+              <label>
+                Contraseña de tu Certificado:
+              </label>
+              <div className="input-group">
+                <input
+                  ref={this.refPasswordClaveCertificado}
+                  type={this.state.lookPasswordClaveCertificado ? 'text' : 'password'}
+                  className="form-control"
+                  value={this.state.claveCertificado}
+                  onChange={(event) =>
+                    this.setState({ claveCertificado: event.target.value })
+                  }
+                  placeholder="********"
+                />
+                <div className="input-group-append">
+                  <button
+                    className="btn btn-outline-secondary"
+                    type="button"
+                    title="Email"
+                    onClick={this.handleLookPasswordCertificado}
+                  >
+                    <i className={this.state.lookPasswordClaveCertificado ? 'fa fa-eye' : 'fa fa-eye-slash'}></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </Column>
+        </Row> */}
+
+        <Row>
+          <Column className={"col-md-6"}>
+            <div className="form-group text-center">
+              <label>Logo</label>
+              <br />
+              <small>Usuado para los reportes</small>
+              <div className="text-center mb-2">
+                <Image
+                  src={this.state.logo}
+                  alt={"Logo de la empresa"}
+                  className={"img-fluid border border-primary rounded"}
+                  width={250}
+                />
+              </div>
+
+              <input
+                type="file"
+                id="fileLogo"
+                accept="image/png, image/jpeg, image/gif, image/svg, image/webp"
+                className="display-none"
+                ref={this.refFileLogo}
+                onChange={this.handleFileLogo}
+              />
+              <label htmlFor="fileLogo" className="btn btn-outline-secondary m-0">
+                <div className="content-button">
+                  <i className="bi bi-image"></i>
+                  <span></span>
+                </div>
+              </label>{' '}
+              <button
+                className="btn btn-outline-secondary"
+                onClick={() => this.clearLogo()}
+              >
+                <i className="bi bi-trash"></i>
+              </button>
+            </div>
+          </Column>
+
+          <Column className={"col-md-6"}>
+            <div className="form-group text-center">
+              <label>Imagen</label>
+              <br />
+              <small>Usuado para mostrar el logo en sistema</small>
+              <div className="text-center mb-2">
+                <Image
+                  src={this.state.image}
+                  alt={"Logo de la empresa"}
+                  className={"img-fluid border border-primary rounded"}
+                  width={250}
+                />
+              </div>
+
+              <input
+                type="file"
+                id="fileImage"
+                accept="image/png, image/jpeg, image/gif, image/svg"
+                className="display-none"
+                ref={this.refFileImagen}
+                onChange={this.handleFileImage}
+              />
+              <label
+                htmlFor="fileImage"
+                className="btn btn-outline-secondary m-0"
+              >
+                <div className="content-button">
+                  <i className="bi bi-image"></i>
+                  <span></span>
+                </div>
+              </label>{' '}
+              <button
+                className="btn btn-outline-secondary"
+                onClick={() => this.clearImage()}
+              >
+                <i className="bi bi-trash"></i>
+              </button>
+            </div>
+          </Column>
+        </Row>
+
+        <Row>
+          <Column>
             <div className="form-group">
               <button
                 type="button"
@@ -621,8 +726,8 @@ class EmpresaProceso extends CustomComponent {
                 Cerrar
               </button>
             </div>
-          </div>
-        </div>
+          </Column>
+        </Row>
       </ContainerWrapper>
     );
   }
@@ -634,4 +739,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(EmpresaProceso);
+const ConnectedEmpresaProceso = connect(mapStateToProps, null)(EmpresaProceso);
+
+export default ConnectedEmpresaProceso;

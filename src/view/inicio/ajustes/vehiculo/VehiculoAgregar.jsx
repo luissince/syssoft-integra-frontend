@@ -200,4 +200,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(VehiculoAgregar);
+const ConnectedVehiculoAgregar = connect(mapStateToProps, null)(VehiculoAgregar);
+
+export default ConnectedVehiculoAgregar;

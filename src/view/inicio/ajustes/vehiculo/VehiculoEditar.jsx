@@ -257,4 +257,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(VehiculoEditar);
+const ConnectedVehiculoEditar = connect(mapStateToProps, null)(VehiculoEditar);
+
+export default ConnectedVehiculoEditar;

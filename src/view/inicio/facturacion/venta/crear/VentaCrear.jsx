@@ -1461,7 +1461,10 @@ class VentaCrear extends CustomComponent {
 
   handleOnOpenModalSale = () => {
     const importeTotal = this.state.detalleVenta.reduce((accumulator, item) => {
-      const cantidad = item.inventarios.reduce((acc, current) => acc + current.cantidad, 0);
+      const cantidad = item.idTipoTratamientoProducto === SERVICIO
+        ? item.cantidad
+        : item.inventarios.reduce((acc, current) => acc + current.cantidad, 0);
+
       const totalProductPrice = item.precio * cantidad;
       return accumulator + totalProductPrice;
     }, 0)

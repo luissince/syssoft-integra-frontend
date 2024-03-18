@@ -1,5 +1,6 @@
 import icono from '../recursos/images/logo.png';
 import noImage from '../recursos/images/noimage.jpg';
+import imagen from '../recursos/images/imagen.png';
 import sunat from '../recursos/images/sunat.png';
 import reniec from '../recursos/images/reniec.png';
 import reuse from '../recursos/images/reuse.svg';
@@ -31,6 +32,7 @@ import document from '../recursos/images/document.svg';
 export {
   icono,
   noImage,
+  imagen,
   sunat,
   reniec,
   reuse,

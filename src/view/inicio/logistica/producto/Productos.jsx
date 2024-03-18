@@ -4,7 +4,6 @@ import {
   alertInfo,
   alertSuccess,
   alertWarning,
-  spinnerLoading,
   statePrivilegio,
   keyUpSearch,
   isEmpty,
@@ -23,6 +22,11 @@ import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
 import { CANCELED } from '../../../../model/types/types';
 import { images } from '../../../../helper';
+import Title from '../../../../components/Title';
+import { SpinnerTable } from '../../../../components/Spinner';
+import Row from '../../../../components/Row';
+import Column from '../../../../components/Column';
+import { TableResponsive } from '../../../../components/Table';
 
 class Productos extends CustomComponent {
   constructor(props) {
@@ -198,12 +202,14 @@ class Productos extends CustomComponent {
     );
   };
 
-  generarBody() {
+  generateBody() {
     if (this.state.loading) {
       return (
         <tr>
           <td className="text-center" colSpan="10">
-            {spinnerLoading('Cargando información de la tabla...', true)}
+            <SpinnerTable
+              message='Cargando información de la tabla...'
+            />
           </td>
         </tr>
       );
@@ -278,7 +284,7 @@ class Productos extends CustomComponent {
           <td>{item.categoria}</td>
           <td className="text-center">{estado}</td>
           <td>
-          <img
+            <img
               src={item.imagen ? item.imagen : images.noImage}
               alt="Logo"
               width="100"
@@ -312,15 +318,10 @@ class Productos extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
-        <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <div className="form-group">
-              <h5>
-                Productos <small className="text-secondary">LISTA</small>
-              </h5>
-            </div>
-          </div>
-        </div>
+        <Title
+          title='Productos'
+          subTitle='Lista'
+        />
 
         <div className="row">
           <div className="col-md-6 col-sm-12">
@@ -364,39 +365,37 @@ class Productos extends CustomComponent {
           </div>
         </div>
 
-        <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <div className="table-responsive">
-              <table className="table table-striped table-bordered rounded">
-                <thead>
-                  <tr>
-                    <th width="5%" className="text-center">
-                      #
-                    </th>
-                    <th width="15%">Tipo/Venta</th>
-                    <th width="25%">Nombre</th>
-                    <th width="15%">Precio</th>
-                    <th width="10%">Medida</th>
-                    <th width="10%">Categoría</th>
-                    <th width="10%" className="text-center">
-                      Estado
-                    </th>
-                    <th width="10%" className="text-center">
-                      Imagen
-                    </th>
-                    <th width="5%" className="text-center">
-                      Editar
-                    </th>
-                    <th width="5%" className="text-center">
-                      Eliminar
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>{this.generarBody()}</tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+        <Row>
+          <Column>
+            <TableResponsive
+              tHead={
+                <tr>
+                  <th width="5%" className="text-center">
+                    #
+                  </th>
+                  <th width="15%">Tipo/Venta</th>
+                  <th width="25%">Nombre</th>
+                  <th width="15%">Precio</th>
+                  <th width="10%">Medida</th>
+                  <th width="10%">Categoría</th>
+                  <th width="10%" className="text-center">
+                    Estado
+                  </th>
+                  <th width="10%" className="text-center">
+                    Imagen
+                  </th>
+                  <th width="5%" className="text-center">
+                    Editar
+                  </th>
+                  <th width="5%" className="text-center">
+                    Eliminar
+                  </th>
+                </tr>
+              }
+              tBody={this.generateBody()}
+            />
+          </Column>
+        </Row>
 
         <Paginacion
           loading={this.state.loading}

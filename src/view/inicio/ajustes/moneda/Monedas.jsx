@@ -348,4 +348,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(Monedas);
+const ConnectedMonedas = connect(mapStateToProps, null)(Monedas);
+
+export default ConnectedMonedas;

@@ -1,101 +1,131 @@
-import {
-  keyNumberFloat,
-  spinnerLoading,
-} from '../../../../../helper/utils.helper';
+import Column from '../../../../../components/Column';
+import { CustomModalForm } from '../../../../../components/CustomModal';
+import Input from '../../../../../components/Input';
+import Row from '../../../../../components/Row';
+import { SpinnerView } from '../../../../../components/Spinner';
+import PropTypes from 'prop-types';
 
-const ModalStock = (props) => {
-  const { idModalStock } = props;
+const CustomModalStock = ({
+  refModal,
+  isOpen,
+  onOpen,
+  onHidden,
+  onClose,
 
-  const { loading } = props;
+  loading,
 
-  const { refStockMinimo, stockMinimo, handleInputStockMinimo } = props;
+  refStockMinimo,
+  stockMinimo,
+  handleInputStockMinimo,
 
-  const { refStockMaximo, stockMaximo, handleInputStockMaximo } = props;
+  refStockMaximo,
+  stockMaximo,
+  handleInputStockMaximo,
 
-  const { handleSave } = props;
-
+  handleSave
+}) => {
   return (
-    <div
-      className="modal fade"
-      id={idModalStock}
-      tabIndex="-1"
-      aria-labelledby="modalStockLabel"
-      aria-hidden={true}
-      data-bs-backdrop="static"
-    >
-      <div className="modal-dialog modal-dialog-centered">
-        <div className="modal-content">
-          <div className="modal-header">
-            <h5 className="modal-title">Actualizar stock</h5>
-            <button
-              type="button"
-              className="close"
-              data-bs-dismiss="modal"
-              aria-label="Close"
-            >
-              <span aria-hidden={true}>&times;</span>
-            </button>
-          </div>
+    <CustomModalForm
+      contentRef={(ref) => refModal.current = ref}
+      isOpen={isOpen}
+      onOpen={onOpen}
+      onHidden={onHidden}
+      onClose={onClose}
+      contentLabel="Modal Stock"
+      titleHeader="SysSoft Integra"
+      onSubmit={handleSave}
+      body={
+        <>
+          <SpinnerView
+            loading={loading}
+            message={"Cargando datos..."}
+          />
 
-          <div className="modal-body">
-            {loading && spinnerLoading('Cargando información...')}
+          <Row>
+            <Column>
+              <div className="form-group">
+                <h6>Actualizar stock</h6>
+              </div>
+            </Column>
+          </Row>
 
-            <div className="row">
-              <div className="form-group col-sm-6  col-12">
+          <Row>
+            <Column className={"col-sm-6 col-12"}>
+              <div className="form-group">
                 <label>
                   Stock Máximo
                   <i className="fa fa-asterisk text-danger small"></i>
                 </label>
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="ingrese..."
-                  ref={refStockMaximo}
+                <Input
+                  autoFocus={true}
+                  placeholder={"ingrese..."}
+                  role={"float"}
+                  refInput={refStockMaximo}
                   value={stockMaximo}
                   onChange={handleInputStockMaximo}
-                  onKeyDown={keyNumberFloat}
+
                 />
               </div>
+            </Column>
 
-              <div className="form-group col-sm-6 col-12">
+            <Column className={"col-sm-6  col-12"}>
+              <div className="form-group">
                 <label>
                   Stock Mínimo
                   <i className="fa fa-asterisk text-danger small"></i>
                 </label>
-                <input
-                  autoFocus
-                  type="text"
-                  className="form-control "
+                <Input
+                  autoFocus={false}
                   placeholder="ingrese..."
-                  ref={refStockMinimo}
+                  role={"float"}
+                  refInput={refStockMinimo}
                   value={stockMinimo}
                   onChange={handleInputStockMinimo}
-                  onKeyDown={keyNumberFloat}
                 />
               </div>
-            </div>
-          </div>
-
-          <div className="modal-footer">
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={handleSave}
-            >
-              Aceptar
-            </button>
-            <button
-              type="button"
-              className="btn btn-danger"
-              data-bs-dismiss="modal"
-            >
-              Cerrar
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+            </Column>
+          </Row>
+        </>
+      }
+      footer={
+        <>
+          <button
+            type="submit"
+            className="btn btn-primary"
+          >
+            Aceptar
+          </button>
+          <button
+            type="button"
+            className="btn btn-danger"
+            onClick={onClose}
+          >
+            Cerrar
+          </button>
+        </>
+      }
+    />
   );
 };
 
-export default ModalStock;
+CustomModalStock.propTypes = {
+  refModal: PropTypes.object.isRequired,
+  isOpen: PropTypes.bool.isRequired,
+  onOpen: PropTypes.func.isRequired,
+  onHidden: PropTypes.func.isRequired,
+  onClose: PropTypes.func.isRequired,
+
+  loading: PropTypes.bool.isRequired,
+
+  refStockMinimo: PropTypes.object.isRequired,
+  stockMinimo: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  handleInputStockMinimo: PropTypes.func.isRequired,
+
+  refStockMaximo: PropTypes.object.isRequired,
+  stockMaximo: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  handleInputStockMaximo: PropTypes.func.isRequired,
+
+  handleSave: PropTypes.func.isRequired,
+}
+
+export default CustomModalStock;

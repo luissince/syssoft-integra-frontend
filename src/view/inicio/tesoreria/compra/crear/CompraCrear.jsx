@@ -912,9 +912,7 @@ class CompraCrear extends CustomComponent {
     const productos = await this.fetchFiltrarProductos(params);
 
     // Filtrar productos por tipoProducto !== "SERVICIO"
-    const filteredProductos = productos.filter(
-      (item) => item.tipoProducto !== 'SERVICIO',
-    );
+    const filteredProductos = productos.filter((item) => item.tipoProducto !== 'SERVICIO');
 
     this.setState({
       productos: filteredProductos,
