@@ -354,4 +354,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(Bancos);
+const ConnectedBancos = connect(mapStateToProps, null)(Bancos);
+
+export default ConnectedBancos;

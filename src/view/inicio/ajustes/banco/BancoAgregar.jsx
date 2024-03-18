@@ -353,4 +353,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(BancoAgregar);
+const ConnectedBancoAgregar = connect(mapStateToProps, null)(BancoAgregar);
+
+export default ConnectedBancoAgregar;

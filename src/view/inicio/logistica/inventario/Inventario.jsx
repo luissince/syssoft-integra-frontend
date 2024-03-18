@@ -1,17 +1,12 @@
 import React from 'react';
 import {
-  spinnerLoading,
   isEmpty,
   rounded,
   convertNullText,
   numberFormat,
-  showModal,
-  viewModal,
-  clearModal,
   alertWarning,
   alertDialog,
   alertInfo,
-  hideModal,
   isNumeric,
   alertSuccess,
 } from '../../../../helper/utils.helper';
@@ -29,7 +24,13 @@ import {
 } from '../../../../network/rest/principal.network';
 import { CANCELED } from '../../../../model/types/types';
 import { connect } from 'react-redux';
-import ModalStock from './component/ModalStock';
+import Title from '../../../../components/Title';
+import { SpinnerTable, SpinnerView } from '../../../../components/Spinner';
+import Row from '../../../../components/Row';
+import Column from '../../../../components/Column';
+import { TableResponsive } from '../../../../components/Table';
+import CustomModalStock from './component/ModalStock';
+import Select from '../../../../components/Select';
 
 class Inventario extends CustomComponent {
   constructor(props) {
@@ -39,7 +40,8 @@ class Inventario extends CustomComponent {
       initialLoad: true,
       initialMessage: 'Cargando datos...',
 
-      loadingModal: true,
+      isOpenStock: false,
+      loadingModal: false,
       stockMinimo: '',
       stockMaximo: '',
 
@@ -62,11 +64,7 @@ class Inventario extends CustomComponent {
       idUsuario: this.props.token.userToken.idUsuario,
     };
 
-    /**
-     * Identificador del modal de inventario.
-     * @type {string}
-     */
-    this.idModalStock = 'modalStock';
+    this.refModalStock = React.createRef();
 
     this.idInventario = '';
 
@@ -79,25 +77,25 @@ class Inventario extends CustomComponent {
   async componentDidMount() {
     await this.loadingData();
 
-    viewModal(this.idModalStock, async () => {
-      this.refStockMinimo.current.focus();
+    // viewModal(this.idModalStock, async () => {
+    //   this.refStockMinimo.current.focus();
 
-      const stock = await this.fetchObtenerStockInvetario();
+    //   const stock = await this.fetchObtenerStockInvetario();
 
-      this.setState({
-        stockMinimo: stock.cantidadMinima,
-        stockMaximo: stock.cantidadMaxima,
-        loadingModal: false,
-      });
-    });
+    //   this.setState({
+    //     stockMinimo: stock.cantidadMinima,
+    //     stockMaximo: stock.cantidadMaxima,
+    //     loadingModal: false,
+    //   });
+    // });
 
-    clearModal(this.idModalStock, async () => {
-      this.setState({
-        stockMinimo: '',
-        stockMaximo: '',
-        loadingModal: true,
-      });
-    });
+    // clearModal(this.idModalStock, async () => {
+    //   this.setState({
+    //     stockMinimo: '',
+    //     stockMaximo: '',
+    //     loadingModal: true,
+    //   });
+    // });
   }
 
   componentWillUnmount() {
@@ -109,11 +107,9 @@ class Inventario extends CustomComponent {
       this.fetchComboAlmacen({ idSucursal: this.state.idSucursal })
     ]);
 
-    await this.setStateAsync({
-      almacenes,
-      initialLoad: false,
+    this.setState({ almacenes, initialLoad: false }, async () => {
+      await this.loadInit();
     });
-    this.loadInit();
   }
 
   loadInit = async () => {
@@ -153,7 +149,7 @@ class Inventario extends CustomComponent {
   }
 
   fillTable = async (opcion, buscar) => {
-    await this.setStateAsync({
+    this.setState({
       loading: true,
       lista: [],
       messageTable: 'Cargando información...',
@@ -168,19 +164,14 @@ class Inventario extends CustomComponent {
       filasPorPagina: this.state.filasPorPagina,
     };
 
-    const response = await listInventario(
-      params,
-      this.abortControllerTable.signal,
-    );
+    const response = await listInventario(params, this.abortControllerTable.signal);
 
     if (response instanceof SuccessReponse) {
       const result = response.data.result;
       const total = response.data.total;
-      const totalPaginacion = parseInt(
-        Math.ceil(parseFloat(total) / this.state.filasPorPagina),
-      );
+      const totalPaginacion = parseInt(Math.ceil(parseFloat(total) / this.state.filasPorPagina));
 
-      await this.setStateAsync({
+      this.setState({
         loading: false,
         lista: result,
         totalPaginacion: totalPaginacion,
@@ -190,7 +181,7 @@ class Inventario extends CustomComponent {
     if (response instanceof ErrorResponse) {
       if (response.getType() === CANCELED) return;
 
-      await this.setStateAsync({
+      this.setState({
         loading: false,
         lista: [],
         totalPaginacion: 0,
@@ -240,8 +231,37 @@ class Inventario extends CustomComponent {
 
   handleOpenModal = (inventario) => {
     this.idInventario = inventario.idInventario;
-    showModal(this.idModalStock);
+    this.setState({
+      isOpenStock: true,
+      loadingModal: true,
+    })
   };
+
+  handleOnOpen = async () => {
+    const stock = await this.fetchObtenerStockInvetario();
+
+    this.setState({
+      stockMinimo: stock.cantidadMinima,
+      stockMaximo: stock.cantidadMaxima,
+      loadingModal: false,
+    });
+  }
+
+  handleCloseModal = () => {
+    const data = this.refModalStock.current;
+    data.classList.add("close-cm")
+    data.addEventListener('animationend', () => {
+      this.setState({ isOpenStock: false })
+    })
+  }
+
+  handleHiddenModal = () => {
+    this.setState({
+      stockMinimo: '',
+      stockMaximo: '',
+      loadingModal: false,
+    });
+  }
 
   handleInputStockMinimo = (event) => {
     this.setState({ stockMinimo: event.target.value });
@@ -268,14 +288,15 @@ class Inventario extends CustomComponent {
 
     alertDialog('Inventario', '¿Estas seguro de continar?', async (accept) => {
       if (accept) {
-        hideModal(this.idModalStock);
-        alertInfo('Inventario', 'Procesando información...');
 
         const data = {
           stockMinimo: this.state.stockMinimo,
           stockMaximo: this.state.stockMaximo,
           idInventario: this.idInventario,
         };
+
+        this.handleCloseModal()
+        alertInfo('Inventario', 'Procesando información...');
 
         const response = await actualizarStockInventario(data);
 
@@ -307,7 +328,9 @@ class Inventario extends CustomComponent {
       return (
         <tr>
           <td className="text-center" colSpan="8">
-            {spinnerLoading('Cargando información de la tabla...', true)}
+            <SpinnerTable
+              message='Cargando información de la tabla...'
+            />
           </td>
         </tr>
       );
@@ -362,32 +385,38 @@ class Inventario extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
-        {this.state.initialLoad && spinnerLoading(this.state.initialMessage)}
+        <SpinnerView
+          loading={this.state.initialLoad}
+          message={this.state.initialMessage}
+        />
 
-        <ModalStock
-          idModalStock={this.idModalStock}
+        <CustomModalStock
+          refModal={this.refModalStock}
+          isOpen={this.state.isOpenStock}
+          onOpen={this.handleOnOpen}
+          onHidden={this.handleHiddenModal}
+          onClose={this.handleCloseModal}
+
           loading={this.state.loadingModal}
+
           refStockMinimo={this.refStockMinimo}
           stockMinimo={this.state.stockMinimo}
           handleInputStockMinimo={this.handleInputStockMinimo}
+
           refStockMaximo={this.refStockMaximo}
           stockMaximo={this.state.stockMaximo}
           handleInputStockMaximo={this.handleInputStockMaximo}
+
           handleSave={this.handleSave}
         />
 
-        <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <div className="form-group">
-              <h5>
-                Inventario <small className="text-secondary">INICIAL</small>
-              </h5>
-            </div>
-          </div>
-        </div>
+        <Title
+          title='Inventario'
+          subTitle='INICIAL'
+        />
 
-        <div className="row">
-          <div className="col-md-6 col-sm-12">
+        <Row>
+          <Column className="col-md-6 col-sm-12">
             <div className="form-group">
               <div className="input-group">
                 <div className="input-group-prepend">
@@ -408,9 +437,9 @@ class Inventario extends CustomComponent {
                 />
               </div>
             </div>
-          </div>
+          </Column>
 
-          <div className="col-md-3 col-sm-12">
+          <Column className="col-md-3 col-sm-12">
             <div className="form-group">
               <div className="input-group">
                 <div className="input-group-prepend">
@@ -418,11 +447,9 @@ class Inventario extends CustomComponent {
                     <i className="fa fa-building"></i>
                   </div>
                 </div>
-                <select
-                  className="form-control"
+                <Select
                   value={this.state.idAlmacen}
-                  onChange={this.handleSelectAlmacen}
-                >
+                  onChange={this.handleSelectAlmacen}>
                   <option value={''}>-- Almacen --</option>
                   {this.state.almacenes.map((item, index) => {
                     return (
@@ -431,12 +458,12 @@ class Inventario extends CustomComponent {
                       </option>
                     );
                   })}
-                </select>
+                </Select>
               </div>
             </div>
-          </div>
+          </Column>
 
-          <div className="col-md-3 col-sm-12">
+          <Column className="col-md-3 col-sm-12">
             <div className="form-group">
               <button
                 className="btn btn-outline-secondary"
@@ -445,46 +472,44 @@ class Inventario extends CustomComponent {
                 <i className="bi bi-arrow-clockwise"></i>
               </button>
             </div>
-          </div>
-        </div>
+          </Column>
+        </Row>
 
-        <div className="row">
-          <div className="col-md-3 col-sm-12">
+        <Row>
+          <Column className="col-md-3 col-sm-12">
             <div className="form-group">
               <span>Cantidad de Items: </span>
             </div>
-          </div>
+          </Column>
 
-          <div className="col-md-3 col-sm-12 text-success">
+          <Column className="col-md-3 col-sm-12">
             <div className="form-group">
-              <span>Valor de Inventario: </span>
+              <span className="text-success">Valor de Inventario: </span>
             </div>
-          </div>
-        </div>
+          </Column>
+        </Row>
 
-        <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-12">
-            <div className="table-responsive">
-              <table className="table table-striped table-bordered rounded">
-                <thead>
-                  <tr>
-                    <th width="5%" className="text-center">
-                      #
-                    </th>
-                    <th width="30%">Producto</th>
-                    <th width="15%">Almacen</th>
-                    <th width="10%">Stock Máx.</th>
-                    <th width="10%">Stock Mín.</th>
-                    <th width="15%">Cantidad Actual</th>
-                    <th width="10%">Costo</th>
-                    <th width="5%">Editar</th>
-                  </tr>
-                </thead>
-                <tbody>{this.generarBody()}</tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+        <Row>
+          <Column>
+            <TableResponsive
+              tHead={
+                <tr>
+                  <th width="5%" className="text-center">
+                    #
+                  </th>
+                  <th width="30%">Producto</th>
+                  <th width="15%">Almacen</th>
+                  <th width="10%">Stock Máx.</th>
+                  <th width="10%">Stock Mín.</th>
+                  <th width="15%">Cantidad Actual</th>
+                  <th width="10%">Costo</th>
+                  <th width="5%">Editar</th>
+                </tr>
+              }
+              tBody={this.generarBody()}
+            />
+          </Column>
+        </Row>
 
         <Paginacion
           loading={this.state.loading}
@@ -514,4 +539,6 @@ const mapStateToProps = (state) => {
  *
  * Método encargado de conectar con redux y exportar la clase
  */
-export default connect(mapStateToProps, null)(Inventario);
+const ConnectedInventario = connect(mapStateToProps, null)(Inventario);
+
+export default ConnectedInventario;

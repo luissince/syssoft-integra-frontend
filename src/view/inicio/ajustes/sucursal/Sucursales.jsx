@@ -20,6 +20,9 @@ import ErrorResponse from '../../../../model/class/error-response';
 import CustomComponent from '../../../../model/class/custom-component';
 import { CANCELED } from '../../../../model/types/types';
 import Title from '../../../../components/Title';
+import Row from '../../../../components/Row';
+import Column from '../../../../components/Column';
+import { TableResponsive } from '../../../../components/Table';
 
 class Sucursales extends CustomComponent {
   constructor(props) {
@@ -242,8 +245,8 @@ class Sucursales extends CustomComponent {
           subTitle='Lista'
         />
 
-        <div className="row">
-          <div className="col-md-6 col-sm-12">
+        <Row>
+          <Column className={"col-md-6 col-sm-12"}>
             <div className="form-group">
               <div className="input-group mb-2">
                 <div className="input-group-prepend">
@@ -264,9 +267,9 @@ class Sucursales extends CustomComponent {
                 />
               </div>
             </div>
-          </div>
+          </Column>
 
-          <div className="col-md-6 col-sm-12">
+          <Column className={"col-md-6 col-sm-12"}>
             <div className="form-group">
               <button
                 className="btn btn-outline-info"
@@ -282,34 +285,32 @@ class Sucursales extends CustomComponent {
                 <i className="bi bi-arrow-clockwise"></i>
               </button>
             </div>
-          </div>
-        </div>
+          </Column>
+        </Row>
 
-        <div className="row">
-          <div className="col">
-            <div className="table-responsive">
-              <table className="table table-striped table-bordered rounded">
-                <thead>
-                  <tr>
-                    <th width="5%" className="text-center">
-                      #
-                    </th>
-                    <th width="20%">Nombre</th>
-                    <th width="30%">Dirección</th>
-                    <th width="10%">Estado</th>
-                    <th width="5%" className="text-center">
-                      Editar
-                    </th>
-                    <th width="5%" className="text-center">
-                      Eliminar
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>{this.generarBody()}</tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+        <Row>
+          <Column>
+            <TableResponsive
+              tHead={
+                <tr>
+                  <th width="5%" className="text-center">
+                    #
+                  </th>
+                  <th width="20%">Nombre</th>
+                  <th width="30%">Dirección</th>
+                  <th width="10%">Estado</th>
+                  <th width="5%" className="text-center">
+                    Editar
+                  </th>
+                  <th width="5%" className="text-center">
+                    Eliminar
+                  </th>
+                </tr>
+              }
+              tBody={this.generarBody()}
+            />
+          </Column>
+        </Row>
 
         <Paginacion
           loading={this.state.loading}

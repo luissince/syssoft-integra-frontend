@@ -234,6 +234,7 @@ class VentaDetalle extends CustomComponent {
         <Title
           title='Venta'
           subTitle='detalle'
+          handleGoBack={() => this.props.history.goBack()}
         />
 
         <Row>

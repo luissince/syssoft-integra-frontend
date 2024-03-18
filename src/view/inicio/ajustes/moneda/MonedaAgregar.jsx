@@ -186,4 +186,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(MonedaAgregar);
+const ConnectedMonedaAgregar = connect(mapStateToProps, null)(MonedaAgregar);
+
+export default ConnectedMonedaAgregar;

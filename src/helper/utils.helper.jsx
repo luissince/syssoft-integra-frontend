@@ -43,6 +43,17 @@ export async function imageBase64(files) {
   return false;
 }
 
+export async function convertFileBase64(files) {
+  if (files.length !== 0) {
+    const file = files[0];
+    const data = await readDataFile(file);
+    const extension = getExtension(file.name);
+    return { data, extension };
+  }
+
+  return false;
+}
+
 /**
  * Formatea un número como una cantidad de dinero con opciones personalizables.
  *
@@ -591,6 +602,18 @@ export function readDataBlob(blob) {
     };
     reader.onerror = reject;
     reader.readAsText(blob);
+  });
+}
+
+export function readDataFile(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      const base64 = reader.result.split(",")[1];
+      resolve(base64);
+    };
+    reader.onerror = error => reject(error);
   });
 }
 
