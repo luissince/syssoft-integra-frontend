@@ -1,3 +1,5 @@
+import PropTypes from 'prop-types';
+
 const ItemAlmacen = (props) => {
   const { idAlmacen, nombreAlmacen } = props;
   const { cantidad, cantidadMinima, cantidadMaxima } = props;
@@ -63,5 +65,9 @@ const ItemAlmacen = (props) => {
     </div>
   );
 };
+
+ItemAlmacen.propTypes = {
+  
+}
 
 export default ItemAlmacen;
