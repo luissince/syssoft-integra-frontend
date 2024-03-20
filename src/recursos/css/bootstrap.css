@@ -315,6 +315,12 @@ header.app-header .app-nav .app-nav__item:hover {
   background-color: #6d7fcc;
 }
 
+header.app-header .app-nav .app-nav__itemm {
+  color: #fff;
+  background-color: #6d7fcc;
+}
+
+
 .app-nav__item .icon-absolute {
   position: absolute;
   top: 9px;
@@ -395,6 +401,11 @@ header.app-header .app-nav .app-nav__item:hover {
   width: 25px;
   height: 25px;
   border-radius: 50%;
+}
+.fast-sale {
+  width: 30px;
+  height: 20px;
+
 }
 
 .app-nav .dropdown-menu {

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { signOut, closeProject, addNotification } from '../../redux/actions';
 import { images } from '../../helper';
+import PropTypes from 'prop-types';
 
 class Menu extends React.Component {
   constructor(props) {
@@ -10,7 +11,11 @@ class Menu extends React.Component {
     this.state = {};
   }
 
-  onEventSignIn = async (event) => {
+  handleCrearVenta = () => {
+    this.props.history.push('/inicio/ventas/crear');
+  };
+
+  handleSignIn = () => {
     try {
       window.localStorage.removeItem('login');
       window.localStorage.removeItem('project');
@@ -22,19 +27,9 @@ class Menu extends React.Component {
     }
   };
 
-  onEventCloseProject() {
+  handleoCloseSucursal() {
     window.localStorage.removeItem('project');
     this.props.close();
-  }
-
-  componentDidMount() {
-    // this.intervalId = setInterval(() => {
-    //     this.props.addNotification({ "id": "100" });
-    // }, 5000);
-  }
-
-  componentWillUnmount() {
-    // clearInterval(this.intervalId);
   }
 
   render() {
@@ -54,6 +49,19 @@ class Menu extends React.Component {
             <a
               className="app-nav__item"
               href=""
+              onClick={this.handleCrearVenta}
+              aria-label="Abrir Perfil"
+              aria-expanded={false}
+            >
+              <i className="fast-sale fa fa-shopping-cart fa-lg"></i> Nueva venta {/* Icono de Font Awesome */}
+            </a>
+
+
+          </div>
+          <div className="dropdown">
+            <a
+              className="app-nav__item"
+              href=""
               data-bs-toggle="dropdown"
               aria-label="Abrir Notificaciones"
               aria-expanded={false}
@@ -67,25 +75,25 @@ class Menu extends React.Component {
               <div className="app-notification__content">
                 {this.props.notificaciones.length !== 0
                   ? this.props.notificaciones.map((item, index) => (
-                      <li key={index}>
-                        <div className="app-notification__item">
-                          <span className="app-notification__icon">
-                            <span className="fa-stack fa-lg">
-                              <i className="fa fa-circle fa-stack-2x text-primary"></i>
-                              <i className="fa fa-warning fa-stack-1x fa-inverse"></i>
-                            </span>
+                    <li key={index}>
+                      <div className="app-notification__item">
+                        <span className="app-notification__icon">
+                          <span className="fa-stack fa-lg">
+                            <i className="fa fa-circle fa-stack-2x text-primary"></i>
+                            <i className="fa fa-warning fa-stack-1x fa-inverse"></i>
                           </span>
-                          <div>
-                            <p className="app-notification__message">
-                              {item.cantidad} {item.nombre}
-                            </p>
-                            <p className="app-notification__meta">
-                              {item.estado}
-                            </p>
-                          </div>
+                        </span>
+                        <div>
+                          <p className="app-notification__message">
+                            {item.cantidad} {item.nombre}
+                          </p>
+                          <p className="app-notification__meta">
+                            {item.estado}
+                          </p>
                         </div>
-                      </li>
-                    ))
+                      </div>
+                    </li>
+                  ))
                   : null}
               </div>
               {this.props.notificaciones.length == 0 ? (
@@ -134,14 +142,14 @@ class Menu extends React.Component {
               <li className="user-footer">
                 <button
                   className="btn btn-secondary"
-                  onClick={() => this.onEventCloseProject()}
+                  onClick={this.handleoCloseSucursal}
                 >
                   <i className="fa fa-sign-out fa-sm"></i> Cerrar sucursal
                 </button>
 
                 <button
                   className="btn btn-secondary"
-                  onClick={() => this.onEventSignIn()}
+                  onClick={this.handleSignIn}
                 >
                   <i className="fa fa-window-close fa-sm"></i> Cerrar Sesión
                 </button>
@@ -152,6 +160,26 @@ class Menu extends React.Component {
       </header>
     );
   }
+}
+
+Menu.propTypes = {
+  history: PropTypes.shape({
+    push: PropTypes.func
+  }),
+  restore: PropTypes.func,
+  close: PropTypes.func,
+  openAndClose: PropTypes.func,
+  notificaciones: PropTypes.array,
+  match: PropTypes.shape({
+    url: PropTypes.string
+  }),
+  token: PropTypes.shape({
+    userToken: PropTypes.shape({
+      nombres: PropTypes.string,
+      apellidos: PropTypes.string,
+      rol: PropTypes.string,
+    })
+  })
 }
 
 const mapStateToProps = (state) => {
@@ -169,4 +197,6 @@ const mapDispatchToProps = (dispatch) => {
   };
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(Menu);
+const ConnectedMenu = connect(mapStateToProps, mapDispatchToProps)(Menu);
+
+export default ConnectedMenu;
