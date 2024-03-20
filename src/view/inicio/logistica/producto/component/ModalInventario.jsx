@@ -2,6 +2,7 @@ import {
   keyNumberFloat,
   spinnerLoading,
 } from '../../../../../helper/utils.helper';
+import PropTypes from 'prop-types';
 
 const ModalInventario = (props) => {
   const { idModalInventario } = props;
@@ -47,7 +48,7 @@ const ModalInventario = (props) => {
                 <option value={''}>-- Seleccione --</option>
                 {almacenes.map((item, index) => (
                   <option key={index} value={item.idAlmacen}>
-                    {item.nombre}
+                    {item.nombre} / {item.sucursal}
                   </option>
                 ))}
               </select>
@@ -119,5 +120,9 @@ const ModalInventario = (props) => {
     </div>
   );
 };
+
+ModalInventario.propTypes = {
+  
+}
 
 export default ModalInventario;

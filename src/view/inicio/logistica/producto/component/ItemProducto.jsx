@@ -1,4 +1,5 @@
 import { keyNumberFloat } from '../../../../../helper/utils.helper';
+import PropTypes from 'prop-types';
 
 const ItemProducto = (props) => {
   const { item } = props;
@@ -75,5 +76,9 @@ const ItemProducto = (props) => {
     </div>
   );
 };
+
+ItemProducto.propTypes = {
+  
+}
 
 export default ItemProducto;

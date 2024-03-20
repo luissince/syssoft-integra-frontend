@@ -2,6 +2,7 @@ import {
   keyNumberFloat,
   spinnerLoading,
 } from '../../../../../helper/utils.helper';
+import PropTypes from 'prop-types';
 
 const ModalProducto = (props) => {
   const { idModalProducto } = props;
@@ -125,5 +126,9 @@ const ModalProducto = (props) => {
     </div>
   );
 };
+
+ModalProducto.propTypes = {
+  
+}
 
 export default ModalProducto;
