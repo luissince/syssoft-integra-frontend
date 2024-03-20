@@ -324,4 +324,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(GuiaRemision);
+const ConnectedGuiaRemision = connect(mapStateToProps, null)(GuiaRemision);
+
+export default ConnectedGuiaRemision;

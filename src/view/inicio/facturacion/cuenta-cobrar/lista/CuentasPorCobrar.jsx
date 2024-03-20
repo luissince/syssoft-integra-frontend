@@ -168,8 +168,8 @@ class CuentasPorCobrar extends CustomComponent {
           <td>{item.comprobante} <br /> {item.serie}-{formatNumberWithZeros(item.numeracion)} </td>
           <td>{item.documento}<br />{item.informacion}</td>
           <td>
-            {item.numeroCuota === 1 ? item.numeroCuota+" CUOTA": item.numeroCuota+" CUOTAS"}
-            <br/>
+            {item.numeroCuota === 1 ? item.numeroCuota + " CUOTA" : item.numeroCuota + " CUOTAS"}
+            <br />
             FACTURA DE {item.frecuenciaPago} DÍAS
           </td>
           <td>{numberFormat(item.total, item.codiso)}</td>
@@ -293,4 +293,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(CuentasPorCobrar);
+const ConnectedCuentasPorCobrar = connect(mapStateToProps, null)(CuentasPorCobrar);;
+
+export default ConnectedCuentasPorCobrar;

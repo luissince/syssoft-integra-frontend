@@ -771,11 +771,12 @@ class CuentasPorPagarAmbonar extends CustomComponent {
     }
 }
 
-
 const mapStateToProps = (state) => {
     return {
         token: state.reducer,
     };
 };
 
-export default connect(mapStateToProps, null)(CuentasPorPagarAmbonar);
+const ConnectedCuentasPorPagarAmbonar = connect(mapStateToProps, null)(CuentasPorPagarAmbonar);
+
+export default ConnectedCuentasPorPagarAmbonar;

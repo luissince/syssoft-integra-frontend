@@ -403,4 +403,6 @@ const mapStateToProps = (state) => {
  *
  * Método encargado de conectar con redux y exportar la clase
  */
-export default connect(mapStateToProps, null)(GuiaRemisionDetalle);
+const ConnectedGuiaRemisionDetalle = connect(mapStateToProps, null)(GuiaRemisionDetalle);
+
+export default ConnectedGuiaRemisionDetalle;

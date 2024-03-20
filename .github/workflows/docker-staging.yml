@@ -8,9 +8,9 @@ on:
 
 # Definición de trabajos
 jobs:
-  build-and-deploy-app-felicitygirls-tiquepos:
+  build-and-deploy-app-legrand-tiquepos:
     runs-on: self-hosted
-    environment: felicitygirls-tiquepos
+    environment: legrand-tiquepos
       
     env:  
       VITE_APP_BACK_END: ${{ secrets.VITE_APP_BACK_END }}
@@ -34,4 +34,4 @@ jobs:
           EOL
       
       - name: Creando y ejecutando contenedor
-        run: docker compose up --build felicitygirls-tiquepos-services -d
+        run: docker compose up --build legrand-tiquepos-services -d
