@@ -209,7 +209,7 @@ const DetalleImagen = (props) => {
             className="btn btn-primary btn-block"
             onClick={handleRegistrar}
           >
-            Guardar
+            <i className='fa fa-save'></i>  Guardar
           </button>
         </div>
         <div className="form-group col-md-6">
@@ -218,7 +218,7 @@ const DetalleImagen = (props) => {
             className="btn btn-secondary btn-block"
             onClick={handleCerrar}
           >
-            Cerrar
+            <i className='fa fa-close'></i>  Cerrar
           </button>
         </div>
       </div>

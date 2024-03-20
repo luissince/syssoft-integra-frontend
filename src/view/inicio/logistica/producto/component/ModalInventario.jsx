@@ -9,8 +9,7 @@ const ModalInventario = (props) => {
 
   const { loadModal, almacenes } = props;
 
-  const { refIdAlmacen, refCantidad, refCantidadMaxima, refCantidadMinima } =
-    props;
+  const { refIdAlmacen, refCantidad, refCantidadMaxima, refCantidadMinima } = props;
 
   const { handleSaveAlmacen } = props;
 
@@ -122,7 +121,16 @@ const ModalInventario = (props) => {
 };
 
 ModalInventario.propTypes = {
-  
+  idModalInventario: PropTypes.string,
+  loadModal: PropTypes.bool,
+  almacenes: PropTypes.array,
+
+  refIdAlmacen: PropTypes.object,
+  refCantidad: PropTypes.object,
+  refCantidadMaxima: PropTypes.object,
+  refCantidadMinima: PropTypes.object,
+
+  handleSaveAlmacen: PropTypes.func
 }
 
 export default ModalInventario;

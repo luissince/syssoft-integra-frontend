@@ -1,6 +1,7 @@
 import { keyNumberFloat, rounded } from '../../../../../helper/utils.helper';
 import ItemAlmacen from './ItemAlmacen';
 import ItemProducto from './ItemProducto';
+import PropTypes from 'prop-types';
 
 const Combo = (props) => {
   const { nombre, refNombre, handleSelectNombre } = props;
@@ -11,8 +12,7 @@ const Combo = (props) => {
 
   const { idMedida, refIdMedida, handleSelectIdMedida, medidas } = props;
 
-  const { idCategoria, refIdCategoria, handleSelectIdCategoria, categorias } =
-    props;
+  const { idCategoria, refIdCategoria, handleSelectIdCategoria, categorias } = props;
 
   const { descripcion, refDescripcion, handleInputDescripcion } = props;
 
@@ -371,5 +371,47 @@ const Combo = (props) => {
     </div>
   );
 };
+
+Combo.propTypes = {
+  nombre: PropTypes.string,
+  refNombre: PropTypes.object,
+  handleSelectNombre: PropTypes.func,
+
+  codigo: PropTypes.string,
+  refCodigo: PropTypes.object,
+  handleInputCodigo: PropTypes.func,
+
+  codigoSunat: PropTypes.string,
+  refCodigoSunat: PropTypes.object,
+  handleSelectCodigoSunat: PropTypes.func,
+
+  idMedida: PropTypes.string,
+  refIdMedida: PropTypes.object,
+  handleSelectIdMedida: PropTypes.func,
+  medidas: PropTypes.array,
+
+  idCategoria: PropTypes.string,
+  refIdCategoria: PropTypes.object,
+  handleSelectIdCategoria: PropTypes.func,
+  categorias: PropTypes.array,
+
+  descripcion: PropTypes.string,
+  refDescripcion: PropTypes.object,
+  handleInputDescripcion: PropTypes.func,
+
+  precio: PropTypes.string,
+  refPrecio: PropTypes.object,
+  handleInputPrecio: PropTypes.func,
+
+  combos: PropTypes.array,
+  handleAddItemCombo: PropTypes.func,
+  handleInputCantidadCombos: PropTypes.func,
+  handleRemoveItemCombo: PropTypes.func,
+
+  activarInventario: PropTypes.bool,
+  inventario: PropTypes.array,
+  handleAddItemInventario: PropTypes.func,
+  handleRemoveItemInventario: PropTypes.func,
+}
 
 export default Combo;

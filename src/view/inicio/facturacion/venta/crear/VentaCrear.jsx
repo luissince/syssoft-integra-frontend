@@ -517,8 +517,6 @@ class VentaCrear extends CustomComponent {
       return;
     }
 
-    console.log(producto)
-
     if (producto.idTipoTratamientoProducto === UNIDADES) {
       if (!existingItem) {
         const inventarios = [];
@@ -756,9 +754,7 @@ class VentaCrear extends CustomComponent {
         this.handleAddItem(result[0])
       }
 
-      this.setState({
-        filtrarProducto: false,
-      });
+      this.setState({filtrarProducto: false, producto : ''});
     }
   }
 

@@ -19,6 +19,8 @@ import {
 import { connect } from 'react-redux';
 import SearchInput from '../../../../components/SearchInput';
 import { CANCELED } from '../../../../model/types/types';
+import Title from '../../../../components/Title';
+import { SpinnerView } from '../../../../components/Spinner';
 
 class Kardex extends CustomComponent {
   constructor(props) {
@@ -311,17 +313,15 @@ class Kardex extends CustomComponent {
 
     return (
       <ContainerWrapper>
-        {this.state.initialLoad && spinnerLoading(this.state.initialMessage)}
+        <SpinnerView
+          loading={this.state.initialLoad}
+          message={this.state.initialMessage}
+        />
 
-        <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-12">
-            <div className="form-group">
-              <h5>
-                Kardex <small className="text-secondary">LISTA</small>
-              </h5>
-            </div>
-          </div>
-        </div>
+        <Title
+          title='Kardex'
+          subTitle='LISTA'
+        />
 
         <div className="row">
           <div className="col-md-9 col-12">
@@ -465,16 +465,6 @@ class Kardex extends CustomComponent {
             </div>
           </div>
         </div>
-
-        {/*
-                                    <Paginacion
-                                        loading={this.state.loading}
-                                        totalPaginacion={this.state.totalPaginacion}
-                                        paginacion={this.state.paginacion}
-                                        fillTable={() => { }}
-                                        restart={this.state.restart}
-                                    />
-                            */}
       </ContainerWrapper>
     );
   }
@@ -495,4 +485,6 @@ const mapStateToProps = (state) => {
  *
  * Método encargado de conectar con redux y exportar la clase
  */
-export default connect(mapStateToProps, null)(Kardex);
+const ConnectedKardex = connect(mapStateToProps, null)(Kardex);
+
+export default ConnectedKardex;

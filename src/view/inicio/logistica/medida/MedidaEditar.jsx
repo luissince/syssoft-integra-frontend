@@ -3,7 +3,6 @@ import {
   alertInfo,
   alertSuccess,
   alertWarning,
-  spinnerLoading,
   isText,
   isEmpty,
   alertDialog,
@@ -18,6 +17,9 @@ import {
   updateMedida,
 } from '../../../../network/rest/principal.network';
 import CustomComponent from '../../../../model/class/custom-component';
+import PropTypes from 'prop-types';
+import { SpinnerView } from '../../../../components/Spinner';
+import Title from '../../../../components/Title';
 
 class MedidaEditar extends CustomComponent {
   constructor(props) {
@@ -151,20 +153,19 @@ class MedidaEditar extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
-        {this.state.loading && spinnerLoading(this.state.loadingMessage)}
+        <SpinnerView
+          loading={this.state.loading}
+          message={this.state.loadingMessage}
+        />
 
-        <div className="row">
-          <div className="col">
-            <div className="form-group">
-              <h5>
-                <span role="button" onClick={() => this.props.history.goBack()}>
-                  <i className="bi bi-arrow-left-short"></i>
-                </span>{' '}
-                Editar categoría <i className="fa fa-edit"></i>
-              </h5>
-            </div>
-          </div>
-        </div>
+        <Title
+          title='Medida'
+          subTitle='Editar'
+          icon={() => (
+            <i className="fa fa-edit"></i>
+          )}
+          handleGoBack={() => this.props.history.goBack()}
+        />
 
         <div className="row">
           <div className="col">
@@ -265,10 +266,23 @@ class MedidaEditar extends CustomComponent {
   }
 }
 
+MedidaEditar.propTypes = {
+  token: PropTypes.shape({
+    userToken: PropTypes.shape({
+      idUsuario: PropTypes.string
+    })
+  }),
+  history: PropTypes.shape({
+    goBack: PropTypes.func
+  })
+}
+
 const mapStateToProps = (state) => {
   return {
     token: state.reducer,
   };
 };
 
-export default connect(mapStateToProps, null)(MedidaEditar);
+const ConnectedMedidaEditar = connect(mapStateToProps, null)(MedidaEditar);
+
+export default ConnectedMedidaEditar;

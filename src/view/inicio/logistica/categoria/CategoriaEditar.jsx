@@ -3,7 +3,6 @@ import {
   alertInfo,
   alertSuccess,
   alertWarning,
-  spinnerLoading,
   isText,
   isEmpty,
   alertDialog,
@@ -18,6 +17,9 @@ import {
   updateCategoria,
 } from '../../../../network/rest/principal.network';
 import CustomComponent from '../../../../model/class/custom-component';
+import Title from '../../../../components/Title';
+import { SpinnerView } from '../../../../components/Spinner';
+import PropTypes from 'prop-types';
 
 class CategoriaEditar extends CustomComponent {
   constructor(props) {
@@ -137,21 +139,20 @@ class CategoriaEditar extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
-        {this.state.loading && spinnerLoading(this.state.loadingMessage)}
+        <SpinnerView
+          loading={this.state.loading}
+          message={this.state.loadingMessage}
+        />
 
-        <div className="row">
-          <div className="col">
-            <div className="form-group">
-              <h5>
-                <span role="button" onClick={() => this.props.history.goBack()}>
-                  {' '}
-                  <i className="bi bi-arrow-left-short"></i>{' '}
-                </span>
-                Editar <small>categoría</small> <i className="fa fa-edit"></i>
-              </h5>
-            </div>
-          </div>
-        </div>
+        <Title
+          title='Categoría'
+          subTitle='Editar'
+          icon={() => (
+            <i className="fa fa-edit"></i>
+          )}
+          handleGoBack={() => this.props.history.goBack()}
+        />
+
 
         <div className="row">
           <div className="col">
@@ -214,17 +215,17 @@ class CategoriaEditar extends CustomComponent {
             <div className="form-group">
               <button
                 type="button"
-                className="btn btn-warning"
+                className="btn btn-primary"
                 onClick={() => this.handleEditar()}
               >
-                Editar
+                <i className='fa fa-save'></i>  Guardar
               </button>{' '}
               <button
                 type="button"
                 className="btn btn-danger"
                 onClick={() => this.props.history.goBack()}
               >
-                Cerrar
+                <i className='fa fa-close'></i> Cerrar
               </button>
             </div>
           </div>
@@ -234,10 +235,23 @@ class CategoriaEditar extends CustomComponent {
   }
 }
 
+CategoriaEditar.propTypes = {
+  token: PropTypes.shape({
+    userToken: PropTypes.shape({
+      idUsuario: PropTypes.string
+    })
+  }),
+  history: PropTypes.shape({
+    goBack: PropTypes.func
+  })
+}
+
 const mapStateToProps = (state) => {
   return {
     token: state.reducer,
   };
 };
 
-export default connect(mapStateToProps, null)(CategoriaEditar);
+const ConnectedCategoriaEditar = connect(mapStateToProps, null)(CategoriaEditar);
+
+export default ConnectedCategoriaEditar;

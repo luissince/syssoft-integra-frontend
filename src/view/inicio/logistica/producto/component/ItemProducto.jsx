@@ -78,7 +78,10 @@ const ItemProducto = (props) => {
 };
 
 ItemProducto.propTypes = {
-  
+  item: PropTypes.object,
+
+  handleInputCantidadCombos: PropTypes.func,
+  handleRemoveItemCombo: PropTypes.func,
 }
 
 export default ItemProducto;

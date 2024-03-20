@@ -1,6 +1,7 @@
 import { keyNumberFloat } from '../../../../../helper/utils.helper';
 import { A_GRANEL, UNIDADES, VALOR_MONETARIO } from '../../../../../model/types/tipo-tratamiento-producto';
 import ItemAlmacen from './ItemAlmacen';
+import PropTypes from 'prop-types';
 
 const Producto = (props) => {
   const { nombre, refNombre, handleSelectNombre } = props;
@@ -511,5 +512,61 @@ const Producto = (props) => {
     </div>
   );
 };
+
+Producto.propTypes = {
+  nombre: PropTypes.string,
+  refNombre: PropTypes.object,
+  handleSelectNombre: PropTypes.func,
+
+  codigo: PropTypes.string,
+  refCodigo: PropTypes.object,
+  handleInputCodigo: PropTypes.func,
+
+  codigoSunat: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  refCodigoSunat: PropTypes.object,
+  handleSelectCodigoSunat: PropTypes.func,
+
+  idMedida: PropTypes.string,
+  refIdMedida: PropTypes.object,
+  handleSelectIdMedida: PropTypes.func,
+  medidas: PropTypes.array,
+
+  idCategoria: PropTypes.string,
+  refIdCategoria: PropTypes.object,
+  handleSelectIdCategoria: PropTypes.func,
+  categorias: PropTypes.array,
+
+  descripcion: PropTypes.string,
+  refDescripcion: PropTypes.object,
+  handleInputDescripcion: PropTypes.func,
+
+  idTipoTratamientoProducto: PropTypes.string,
+  handleOptionTipoTratamientoProducto: PropTypes.func,
+
+  precio: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  refPrecio: PropTypes.object,
+  handleInputPrecio: PropTypes.func,
+
+  precios: PropTypes.array,
+  refPrecios: PropTypes.object,
+  handleInputNombrePrecios: PropTypes.func,
+  handleInputPrecioPrecios: PropTypes.func,
+  handleAddPrecio: PropTypes.func,
+  handleRemovePrecio: PropTypes.func,
+
+  combos: PropTypes.array,
+  handleAddItemCombo: PropTypes.func,
+  handleInputCantidadCombos: PropTypes.func,
+  handleRemoveItemCombo: PropTypes.func,
+
+  costo: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  refCosto: PropTypes.object,
+  handleInputCosto: PropTypes.func,
+
+  activarInventario: PropTypes.bool,
+  inventario: PropTypes.oneOfType([PropTypes.array, PropTypes.object]),
+  handleAddItemInventario: PropTypes.func,
+  handleRemoveItemInventario: PropTypes.func,
+}
 
 export default Producto;

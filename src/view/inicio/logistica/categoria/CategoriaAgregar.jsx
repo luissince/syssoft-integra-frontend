@@ -11,6 +11,8 @@ import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
 import ContainerWrapper from '../../../../components/Container';
 import { addCategoria } from '../../../../network/rest/principal.network';
+import Title from '../../../../components/Title';
+import PropTypes from 'prop-types';
 
 class CategoriaAgregar extends React.Component {
   constructor(props) {
@@ -75,19 +77,14 @@ class CategoriaAgregar extends React.Component {
   render() {
     return (
       <ContainerWrapper>
-        <div className="row">
-          <div className="col">
-            <div className="form-group">
-              <h5>
-                <span role="button" onClick={() => this.props.history.goBack()}>
-                  {' '}
-                  <i className="bi bi-arrow-left-short"></i>{' '}
-                </span>
-                Agregar <small>categoría</small> <i className="fa fa-plus"></i>
-              </h5>
-            </div>
-          </div>
-        </div>
+        <Title
+          title='Categoría'
+          subTitle='Agregar'
+          icon={() => (
+            <i className="fa fa-plus"></i>
+          )}
+          handleGoBack={() => this.props.history.goBack()}
+        />
 
         <div className="row">
           <div className="col">
@@ -153,14 +150,14 @@ class CategoriaAgregar extends React.Component {
                 className="btn btn-primary"
                 onClick={() => this.handleGuardar()}
               >
-                Guardar
+                <i className='fa fa-save'></i>   Guardar
               </button>{' '}
               <button
                 type="button"
                 className="btn btn-danger"
                 onClick={() => this.props.history.goBack()}
               >
-                Cerrar
+                <i className='fa fa-close'></i>  Cerrar
               </button>
             </div>
           </div>
@@ -170,10 +167,24 @@ class CategoriaAgregar extends React.Component {
   }
 }
 
+
+CategoriaAgregar.propTypes = {
+  token: PropTypes.shape({
+    userToken: PropTypes.shape({
+      idUsuario: PropTypes.string
+    })
+  }),
+  history: PropTypes.shape({
+    goBack: PropTypes.func
+  })
+}
+
 const mapStateToProps = (state) => {
   return {
     token: state.reducer,
   };
 };
 
-export default connect(mapStateToProps, null)(CategoriaAgregar);
+const ConnectedCategoriaAgregar = connect(mapStateToProps, null)(CategoriaAgregar);
+
+export default ConnectedCategoriaAgregar;

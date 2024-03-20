@@ -36,6 +36,8 @@ import Combo from '../component/Combo';
 import DetalleImagen from '../component/DetalleImagen';
 import ModalProducto from '../component/ModalProducto';
 import { SERVICIO, UNIDADES } from '../../../../../model/types/tipo-tratamiento-producto';
+import Row from '../../../../../components/Row';
+import Column from '../../../../../components/Column';
 import Title from '../../../../../components/Title';
 
 /**
@@ -1074,13 +1076,16 @@ class ProductoEditar extends CustomComponent {
         <Title
           title='Producto'
           subTitle='Editar'
+          icon={() => (
+            <i className='fa fa-edit'></i>
+          )}
           handleGoBack={() => this.props.history.goBack()}
         />
 
-        <div className="row">
-          <div className="col-xl-8 col-lg-12 col-md-12 col-sm-12 col-12">
-            <div className="row">
-              <div className="col-lg-12 col-md-12 col-sm-12 col-12">
+        <Row>
+          <Column className="col-xl-8 col-lg-12 col-md-12 col-sm-12 col-12">
+            <Row>
+              <Column className="col-lg-12 col-md-12 col-sm-12 col-12">
                 <ul className="nav nav-tabs" id="myTab" role="tablist">
                   <li className="nav-item" role="presentation">
                     <button
@@ -1243,11 +1248,11 @@ class ProductoEditar extends CustomComponent {
                     handleRemoveItemInventario={() => { }}
                   />
                 </div>
-              </div>
-            </div>
-          </div>
+              </Column>
+            </Row>
+          </Column>
 
-          <div className="col-xl-4 col-lg-12 col-md-12 col-sm-12 col-12">
+          <Column className="col-xl-4 col-lg-12 col-md-12 col-sm-12 col-12">
             <DetalleImagen
               tipo={tipo}
               imagen={imagen}
@@ -1281,8 +1286,8 @@ class ProductoEditar extends CustomComponent {
               handleRegistrar={this.handleRegistrar}
               handleCerrar={this.handleCerrar}
             />
-          </div>
-        </div>
+          </Column>
+        </Row>
       </ContainerWrapper>
     );
   }

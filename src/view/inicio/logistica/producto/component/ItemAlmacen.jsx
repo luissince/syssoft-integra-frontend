@@ -67,7 +67,14 @@ const ItemAlmacen = (props) => {
 };
 
 ItemAlmacen.propTypes = {
-  
+  idAlmacen: PropTypes.string,
+  nombreAlmacen: PropTypes.string,
+
+  cantidad: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  cantidadMinima: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  cantidadMaxima: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+
+  handleRemoveItemInventario: PropTypes.func
 }
 
 export default ItemAlmacen;

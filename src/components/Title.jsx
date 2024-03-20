@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 
-const Title = ({ title, subTitle, handleGoBack }) => {
-    
+const Title = ({ title, subTitle, icon, handleGoBack }) => {
+
     return (
         <div className="row">
             <div className="col">
@@ -13,7 +13,7 @@ const Title = ({ title, subTitle, handleGoBack }) => {
                                 <i className="bi bi-arrow-left-short"></i>
                             </span>}
                         {title}
-                        <small className="text-secondary"> {subTitle}</small>
+                        <small className="text-secondary"> {subTitle} {icon && icon()}</small>
                     </h5>
                 </div>
             </div>
@@ -24,6 +24,7 @@ const Title = ({ title, subTitle, handleGoBack }) => {
 Title.propTypes = {
     title: PropTypes.string.isRequired,
     subTitle: PropTypes.string.isRequired,
+    icon: PropTypes.func,
     handleGoBack: PropTypes.func
 }
 

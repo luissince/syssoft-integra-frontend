@@ -35,27 +35,6 @@ a:focus {
   z-index: 101;
 }
 
-#sidebar .pro-sidebar-inner > .pro-sidebar-layout::-webkit-scrollbar {
-  width: 12px; /* Ancho del scrollbar */
-
-}
-
-#sidebar .pro-sidebar-inner > .pro-sidebar-layout::-webkit-scrollbar-track {
-  background: #7386d5; /* Color de fondo del track */
-
-}
-
-#sidebar .pro-sidebar-inner > .pro-sidebar-layout::-webkit-scrollbar-thumb {
-  background: #ccc; /* Color del thumb */
-  border-radius: 10px;
-}
-
-#sidebar .pro-sidebar-inner > .pro-sidebar-layout::-webkit-scrollbar-thumb:hover {
-  background: rgb(186, 186, 186); /* Color del thumb al pasar el ratón */
-}
-
-
-
 #sidebar.active {
   margin-left: -270px;
 }

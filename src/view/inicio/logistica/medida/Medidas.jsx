@@ -12,7 +12,6 @@ import {
 import { connect } from 'react-redux';
 import Paginacion from '../../../../components/Paginacion';
 import {
-  listarCategoria,
   listarMedida,
   removeMedida,
 } from '../../../../network/rest/principal.network';
@@ -20,8 +19,8 @@ import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
 import { CANCELED } from '../../../../model/types/types';
 import ContainerWrapper from '../../../../components/Container';
-import { removeCategoria } from '../../../../network/rest/principal.network';
 import CustomComponent from '../../../../model/class/custom-component';
+import Title from '../../../../components/Title';
 
 class Medidas extends CustomComponent {
   constructor(props) {
@@ -265,15 +264,10 @@ class Medidas extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
-        <div className="row">
-          <div className="col">
-            <div className="form-group">
-              <h5>
-                Categorias <small className="text-secondary">LISTA</small>
-              </h5>
-            </div>
-          </div>
-        </div>
+        <Title
+          title='Medida'
+          subTitle='LISTA'
+        />
 
         <div className="row">
           <div className="col-md-6 col-sm-12">
@@ -365,4 +359,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(Medidas);
+const ConnectedMedidas = connect(mapStateToProps, null)(Medidas);
+
+export default ConnectedMedidas;

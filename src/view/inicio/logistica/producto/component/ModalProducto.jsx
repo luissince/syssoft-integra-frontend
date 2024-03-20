@@ -128,7 +128,18 @@ const ModalProducto = (props) => {
 };
 
 ModalProducto.propTypes = {
-  
+  idModalProducto: PropTypes.string,
+
+  loadModal: PropTypes.bool,
+  productos: PropTypes.array,
+
+  refIdProductoCombo: PropTypes.object,
+  refCantidadCombo: PropTypes.object,
+  refUnidadCombo: PropTypes.object,
+  refCostoCombo: PropTypes.object,
+
+  handleSelectProductoCombo: PropTypes.func,
+  handleSaveItemCombo: PropTypes.func,
 }
 
 export default ModalProducto;

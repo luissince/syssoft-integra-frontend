@@ -11,6 +11,8 @@ import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
 import ContainerWrapper from '../../../../components/Container';
 import { addMedida } from '../../../../network/rest/principal.network';
+import PropTypes from 'prop-types';
+import Title from '../../../../components/Title';
 
 class MedidaAgregar extends React.Component {
   constructor(props) {
@@ -90,18 +92,15 @@ class MedidaAgregar extends React.Component {
   render() {
     return (
       <ContainerWrapper>
-        <div className="row">
-          <div className="col">
-            <div className="form-group">
-              <h5>
-                <span role="button" onClick={() => this.props.history.goBack()}>
-                  <i className="bi bi-arrow-left-short"></i>
-                </span>{' '}
-                Agregar <small>medida</small> <i className="fa fa-plus"></i>
-              </h5>
-            </div>
-          </div>
-        </div>
+        <Title
+          title='Medida'
+          subTitle='Agregar'
+          icon={() => (
+            <i className="fa fa-plus"></i>
+          )}
+          handleGoBack={() => this.props.history.goBack()}
+        />
+
 
         <div className="row">
           <div className="col">
@@ -202,10 +201,23 @@ class MedidaAgregar extends React.Component {
   }
 }
 
+MedidaAgregar.propTypes = {
+  token: PropTypes.shape({
+    userToken: PropTypes.shape({
+      idUsuario: PropTypes.string
+    })
+  }),
+  history: PropTypes.shape({
+    goBack: PropTypes.func
+  })
+}
+
 const mapStateToProps = (state) => {
   return {
     token: state.reducer,
   };
 };
 
-export default connect(mapStateToProps, null)(MedidaAgregar);
+const ConnectedMedidaAgregar = connect(mapStateToProps, null)(MedidaAgregar);
+
+export default ConnectedMedidaAgregar;
