@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 // import { NotificationContainer, NotificationManager } from 'react-notifications';
 import { Switch, Route, Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { signOut, closeProject } from '../../redux/actions';
+import { signOut, closeProject, addNotification} from '../../redux/actions';
 
 import Bienvenido from './bienvenido/Bienvenido.jsx';
 import NotFoundMain from '../../components/errors/NotFoundMain.jsx';
@@ -893,6 +893,7 @@ class Inicio extends React.Component {
 const mapStateToProps = (state) => {
   return {
     token: state.reducer,
+    notification: state.notiReducer,
   };
 };
 
@@ -900,6 +901,7 @@ const mapDispatchToProps = (dispatch) => {
   return {
     restore: () => dispatch(signOut()),
     restoreProject: () => dispatch(closeProject()),
+    addNotification: (value) => dispatch(addNotification(value)),
   };
 };
 

@@ -1,165 +1,156 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
-import { connect } from 'react-redux';
-import { signOut, closeProject, addNotification } from '../../redux/actions';
 import { images } from '../../helper';
 import PropTypes from 'prop-types';
 
-class Menu extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {};
-  }
+const Menu = (props) => {
 
-  handleCrearVenta = () => {
-    this.props.history.push('/inicio/ventas/crear');
+  const handleCrearVenta = () => {
+    props.history.push('/inicio/ventas/crear');
   };
 
-  handleSignIn = () => {
+  const handleSignIn = () => {
     try {
       window.localStorage.removeItem('login');
       window.localStorage.removeItem('project');
-      this.props.restore();
-      this.props.history.push('login');
+      props.restore();
+      props.history.push('login');
     } catch (e) {
-      this.props.restore();
-      this.props.history.push('login');
+      props.restore();
+      props.history.push('login');
     }
   };
 
-  handleoCloseSucursal() {
+  const handleCloseSucursal = () => {
     window.localStorage.removeItem('project');
-    this.props.close();
+    props.restoreProject();
   }
 
-  render() {
-    return (
-      <header className="app-header">
-        <div className="app-sidebar__title">
-          <img src={images.logo} alt="logo" />
-          <p>SYSSOFT INTEGRA</p>
+  return (
+    <header className="app-header">
+      <div className="app-sidebar__title">
+        <img src={images.logo} alt="logo" />
+        <p>SYSSOFT INTEGRA</p>
+      </div>
+      <span
+        className="app-sidebar__toggle"
+        onClick={props.openAndClose}
+      ></span>
+
+      <ul className="app-nav">
+        <div className="dropdown">
+          <a
+            className="app-nav__item"
+            href=""
+            onClick={handleCrearVenta}
+            aria-label="Abrir Perfil"
+            aria-expanded={false}
+          >
+            <i className="fast-sale fa fa-shopping-cart fa-lg"></i> Nueva venta {/* Icono de Font Awesome */}
+          </a>
+
+
         </div>
-        <span
-          className="app-sidebar__toggle"
-          onClick={this.props.openAndClose}
-        ></span>
-
-        <ul className="app-nav">
-          <div className="dropdown">
-            <a
-              className="app-nav__item"
-              href=""
-              onClick={this.handleCrearVenta}
-              aria-label="Abrir Perfil"
-              aria-expanded={false}
-            >
-              <i className="fast-sale fa fa-shopping-cart fa-lg"></i> Nueva venta {/* Icono de Font Awesome */}
-            </a>
-
-
-          </div>
-          <div className="dropdown">
-            <a
-              className="app-nav__item"
-              href=""
-              data-bs-toggle="dropdown"
-              aria-label="Abrir Notificaciones"
-              aria-expanded={false}
-            >
-              <i className="fa fa-bell-o fa-sm  fa-sm"></i>
-              <span className="pl-1 pr-1 badge-warning rounded h7 icon-absolute ">
-                {this.props.notificaciones.length}
-              </span>
-            </a>
-            <ul className="app-notification dropdown-menu dropdown-menu-right">
-              <div className="app-notification__content">
-                {this.props.notificaciones.length !== 0
-                  ? this.props.notificaciones.map((item, index) => (
-                    <li key={index}>
-                      <div className="app-notification__item">
-                        <span className="app-notification__icon">
-                          <span className="fa-stack fa-lg">
-                            <i className="fa fa-circle fa-stack-2x text-primary"></i>
-                            <i className="fa fa-warning fa-stack-1x fa-inverse"></i>
-                          </span>
+        <div className="dropdown">
+          <a
+            className="app-nav__item"
+            href=""
+            data-bs-toggle="dropdown"
+            aria-label="Abrir Notificaciones"
+            aria-expanded={false}
+          >
+            <i className="fa fa-bell-o fa-sm  fa-sm"></i>
+            <span className="pl-1 pr-1 badge-warning rounded h7 icon-absolute ">
+              {props.notificaciones.length}
+            </span>
+          </a>
+          <ul className="app-notification dropdown-menu dropdown-menu-right">
+            <div className="app-notification__content">
+              {props.notificaciones.length !== 0
+                ? props.notificaciones.map((item, index) => (
+                  <li key={index}>
+                    <div className="app-notification__item">
+                      <span className="app-notification__icon">
+                        <span className="fa-stack fa-lg">
+                          <i className="fa fa-circle fa-stack-2x text-primary"></i>
+                          <i className="fa fa-warning fa-stack-1x fa-inverse"></i>
                         </span>
-                        <div>
-                          <p className="app-notification__message">
-                            {item.cantidad} {item.nombre}
-                          </p>
-                          <p className="app-notification__meta">
-                            {item.estado}
-                          </p>
-                        </div>
+                      </span>
+                      <div>
+                        <p className="app-notification__message">
+                          {item.cantidad} {item.nombre}
+                        </p>
+                        <p className="app-notification__meta">
+                          {item.estado}
+                        </p>
                       </div>
-                    </li>
-                  ))
-                  : null}
-              </div>
-              {this.props.notificaciones.length == 0 ? (
-                <li className="app-notification__footer">
-                  No hay notificaciones para mostrar.
-                </li>
-              ) : (
-                <li className="app-notification__footer">
-                  <Link to={`${this.props.match.url}/notifications`}>
-                    {' '}
-                    Mostrar mas a detalle
-                  </Link>
-                </li>
-              )}
-            </ul>
-          </div>
-          <div className="dropdown">
-            <a
-              className="app-nav__item"
-              href=""
-              data-bs-toggle="dropdown"
-              aria-label="Abrir Perfil"
-              aria-expanded={false}
-            >
-              <img src={images.usuario} className="user-image" alt="Usuario" />
-            </a>
-            <ul className="dropdown-menu settings-menu dropdown-menu-right">
-              <li className="user-header">
-                <img
-                  src={images.usuario}
-                  className="img-circle"
-                  alt="Usuario"
-                />
-                <p>
-                  <span>
-                    {this.props.token.userToken.nombres +
-                      ' ' +
-                      this.props.token.userToken.apellidos}
-                  </span>
-                  <small>
-                    {' '}
-                    <i>{this.props.token.userToken.rol}</i>{' '}
-                  </small>
-                </p>
+                    </div>
+                  </li>
+                ))
+                : null}
+            </div>
+            {props.notificaciones.length == 0 ? (
+              <li className="app-notification__footer">
+                No hay notificaciones para mostrar.
               </li>
-              <li className="user-footer">
-                <button
-                  className="btn btn-secondary"
-                  onClick={this.handleoCloseSucursal}
-                >
-                  <i className="fa fa-sign-out fa-sm"></i> Cerrar sucursal
-                </button>
+            ) : (
+              <li className="app-notification__footer">
+                <Link to={`${props.match.url}/notifications`}>
+                  {' '}
+                  Mostrar mas a detalle
+                </Link>
+              </li>
+            )}
+          </ul>
+        </div>
+        <div className="dropdown">
+          <a
+            className="app-nav__item"
+            href=""
+            data-bs-toggle="dropdown"
+            aria-label="Abrir Perfil"
+            aria-expanded={false}
+          >
+            <img src={images.usuario} className="user-image" alt="Usuario" />
+          </a>
+          <ul className="dropdown-menu settings-menu dropdown-menu-right">
+            <li className="user-header">
+              <img
+                src={images.usuario}
+                className="img-circle"
+                alt="Usuario"
+              />
+              <p>
+                <span>
+                  {props.token.userToken.nombres +
+                    ' ' +
+                    props.token.userToken.apellidos}
+                </span>
+                <small>
+                  {' '}
+                  <i>{props.token.userToken.rol}</i>{' '}
+                </small>
+              </p>
+            </li>
+            <li className="user-footer">
+              <button
+                className="btn btn-secondary"
+                onClick={handleCloseSucursal}
+              >
+                <i className="fa fa-sign-out fa-sm"></i> Cerrar sucursal
+              </button>
 
-                <button
-                  className="btn btn-secondary"
-                  onClick={this.handleSignIn}
-                >
-                  <i className="fa fa-window-close fa-sm"></i> Cerrar Sesión
-                </button>
-              </li>
-            </ul>
-          </div>
-        </ul>
-      </header>
-    );
-  }
+              <button
+                className="btn btn-secondary"
+                onClick={handleSignIn}
+              >
+                <i className="fa fa-window-close fa-sm"></i> Cerrar Sesión
+              </button>
+            </li>
+          </ul>
+        </div>
+      </ul>
+    </header>
+  );
 }
 
 Menu.propTypes = {
@@ -167,7 +158,7 @@ Menu.propTypes = {
     push: PropTypes.func
   }),
   restore: PropTypes.func,
-  close: PropTypes.func,
+  restoreProject: PropTypes.func,
   openAndClose: PropTypes.func,
   notificaciones: PropTypes.array,
   match: PropTypes.shape({
@@ -182,21 +173,4 @@ Menu.propTypes = {
   })
 }
 
-const mapStateToProps = (state) => {
-  return {
-    token: state.reducer,
-    notification: state.notiReducer,
-  };
-};
-
-const mapDispatchToProps = (dispatch) => {
-  return {
-    restore: () => dispatch(signOut()),
-    close: () => dispatch(closeProject()),
-    addNotification: (value) => dispatch(addNotification(value)),
-  };
-};
-
-const ConnectedMenu = connect(mapStateToProps, mapDispatchToProps)(Menu);
-
-export default ConnectedMenu;
+export default Menu;
