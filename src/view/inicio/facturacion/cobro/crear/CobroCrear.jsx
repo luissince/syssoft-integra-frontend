@@ -4,7 +4,6 @@ import {
   numberFormat,
   keyNumberFloat,
   isNumeric,
-  spinnerLoading,
   alertDialog,
   alertInfo,
   alertSuccess,
@@ -30,6 +29,8 @@ import { CANCELED } from '../../../../../model/types/types';
 import ModalSale from './component/ModalSale';
 import { COMPROBANTE_DE_INGRESO } from '../../../../../model/types/tipo-comprobante';
 import PropTypes from 'prop-types';
+import { SpinnerView } from '../../../../../components/Spinner';
+import Title from '../../../../../components/Title';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -352,6 +353,34 @@ class CobroCrear extends CustomComponent {
     this.setState({ loadingModal: true, isOpenSale: true })
   }
 
+  handleOnOpenModalSale = () => {
+    const metodo = this.state.bancos.find((item) => item.preferido === 1);
+
+    this.refMetodoContado.current.value = metodo ? metodo.idBanco : '';
+
+    if (metodo) {
+      const item = {
+        idBanco: metodo.idBanco,
+        nombre: metodo.nombre,
+        monto: '',
+        vuelto: metodo.vuelto,
+        descripcion: '',
+      };
+
+      this.setState((prevState) => ({
+        bancosAgregados: [...prevState.bancosAgregados, item],
+      }));
+    }
+
+    this.setState({ loadingModal: false });
+  }
+
+  handleHiddenModalSale = () => {
+    this.setState({
+      bancosAgregados: [],
+    });
+  }
+
   handleCloseModalSale = () => {
     const data = this.refCustomModalSale.current;
     data.classList.add("close-cm")
@@ -418,32 +447,20 @@ class CobroCrear extends CustomComponent {
     let metodoPagoLista = bancosAgregados.map(item => ({ ...item }));
 
     if (isEmpty(metodoPagoLista)) {
-      alertWarning(
-        'Cobro',
-        'Tiene que agregar método de cobro para continuar.',
-      );
+      alertWarning('Cobro', 'Tiene que agregar método de cobro para continuar.');
       return;
     }
 
     if (metodoPagoLista.filter((item) => !isNumeric(item.monto)).length !== 0) {
-      alertWarning(
-        'Cobro',
-        'Hay montos del metodo de cobro que no tiene valor.',
-      );
+      alertWarning('Cobro', 'Hay montos del metodo de cobro que no tiene valor.');
       return;
     }
 
-    const metodoCobroTotal = metodoPagoLista.reduce(
-      (accumulator, item) => (accumulator += parseFloat(item.monto)),
-      0,
-    );
+    const metodoCobroTotal = metodoPagoLista.reduce((accumulator, item) => (accumulator += parseFloat(item.monto)), 0);
 
     if (metodoPagoLista.length > 1) {
       if (metodoCobroTotal !== total) {
-        alertWarning(
-          'Cobro',
-          'Al tener mas de 2 métodos de cobro el monto debe ser igual al total.',
-        );
+        alertWarning('Cobro', 'Al tener mas de 2 métodos de cobro el monto debe ser igual al total.');
         return;
       }
     } else {
@@ -701,37 +718,16 @@ class CobroCrear extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
-        {this.state.loading && spinnerLoading(this.state.msgLoading)}
+        <SpinnerView
+          loading={this.state.loading}
+          message={this.state.msgLoading}
+        />
 
         <ModalSale
           refSale={this.refCustomModalSale}
           isOpen={this.state.isOpenSale}
-          onOpen={() => {
-            const metodo = this.state.bancos.find((item) => item.preferido === 1);
-
-            this.refMetodoContado.current.value = metodo ? metodo.idBanco : '';
-
-            if (metodo) {
-              const item = {
-                idBanco: metodo.idBanco,
-                nombre: metodo.nombre,
-                monto: '',
-                vuelto: metodo.vuelto,
-                descripcion: '',
-              };
-
-              this.setState((prevState) => ({
-                bancosAgregados: [...prevState.bancosAgregados, item],
-              }));
-            }
-
-            this.setState({ loadingModal: false });
-          }}
-          onHidden={() => {
-            this.setState({
-              bancosAgregados: [],
-            });
-          }}
+          onOpen={this.handleOnOpenModalSale}
+          onHidden={this.handleHiddenModalSale}
           onClose={this.handleCloseModalSale}
 
           loading={this.state.loadingModal}
@@ -749,19 +745,11 @@ class CobroCrear extends CustomComponent {
         />
 
         {/* Titulo */}
-        <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <div className="form-group">
-              <h5>
-                <span role="button" onClick={() => this.props.history.goBack()}>
-                  <i className="bi bi-arrow-left-short"></i>
-                </span>{' '}
-                Cobro
-                <small className="text-secondary"> crear</small>
-              </h5>
-            </div>
-          </div>
-        </div>
+        <Title
+          title='Cobro'
+          subTitle='Crear'
+          handleGoBack={() => this.props.history.goBack()}
+        />
 
         <div className="row">
           <div className="col-xl-8 col-lg-8 col-md-8 col-sm-12 col-12">
@@ -797,7 +785,7 @@ class CobroCrear extends CustomComponent {
                     ref={this.refMonto}
                     value={this.state.precio}
                     onChange={this.handleInputPrecio}
-                    placeholder="Ingrese el precio"
+                    placeholder="Ingrese el monto"
                     onKeyUp={(event) => {
                       if (event.code === 'Enter') {
                         this.agregarCobro();
@@ -827,11 +815,9 @@ class CobroCrear extends CustomComponent {
                       <th width="5%" className="text-center">
                         #
                       </th>
-                      <th width="15%">Concepto</th>
+                      <th width="15%">Categoría</th>
                       <th width="25%">Descripción</th>
-                      <th width="5%">Cantidad</th>
                       <th width="5%">Precio</th>
-                      <th width="5%">Total</th>
                       <th width="5%">Quitar</th>
                     </tr>
                   </thead>
@@ -992,4 +978,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(CobroCrear);
+const ConnectedCobroCrear = connect(mapStateToProps, null)(CobroCrear);
+
+export default ConnectedCobroCrear;

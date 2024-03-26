@@ -4,7 +4,6 @@ import {
   isEmpty,
   keyUpSearch,
   numberFormat,
-  spinnerLoading,
 } from '../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import Paginacion from '../../../../../components/Paginacion';
@@ -16,6 +15,11 @@ import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
 import CustomComponent from '../../../../../model/class/custom-component';
+import { SpinnerTable } from '../../../../../components/Spinner';
+import Title from '../../../../../components/Title';
+import Row from '../../../../../components/Row';
+import Column from '../../../../../components/Column';
+import { TableResponsive } from '../../../../../components/Table';
 
 class CuentasPorCobrar extends CustomComponent {
   constructor(props) {
@@ -147,7 +151,9 @@ class CuentasPorCobrar extends CustomComponent {
       return (
         <tr>
           <td className="text-center" colSpan="8">
-            {spinnerLoading('Cargando información de la tabla...', true)}
+            <SpinnerTable
+              message='Cargando información de la tabla...'
+            />
           </td>
         </tr>
       );
@@ -191,18 +197,13 @@ class CuentasPorCobrar extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
-        <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <div className="form-group">
-              <h5>
-                Cuentas por Cobrar <small className="text-secondary">LISTA</small>
-              </h5>
-            </div>
-          </div>
-        </div>
+        <Title
+          title=' Cuentas por Cobrar '
+          subTitle='LISTA'
+        />
 
-        <div className="row">
-          <div className="col-lg-6 col-md-6 col-sm-12">
+        <Row>
+          <Column className="col-lg-6 col-md-6 col-sm-12">
             <div className="form-group">
               <label>Buscar:</label>
               <div className="input-group mb-2">
@@ -224,9 +225,9 @@ class CuentasPorCobrar extends CustomComponent {
                 />
               </div>
             </div>
-          </div>
+          </Column>
 
-          <div className="col-lg-3 col-md-6 col-sm-12">
+          <Column className="col-lg-3 col-md-6 col-sm-12">
             <div className="form-group">
               <label>Tipo:</label>
               <select
@@ -237,9 +238,9 @@ class CuentasPorCobrar extends CustomComponent {
                 <option value="all">Mostrar todas las ventas al crédito</option>
               </select>
             </div>
-          </div>
+          </Column>
 
-          <div className="col-lg-3 col-md-6 col-sm-12">
+          <Column className="col-lg-3 col-md-6 col-sm-12">
             <label>Opciones:</label>
             <div className="form-group">
               <button
@@ -249,30 +250,28 @@ class CuentasPorCobrar extends CustomComponent {
                 <i className="bi bi-arrow-clockwise"></i> Recargar
               </button>
             </div>
-          </div>
-        </div>
+          </Column>
+        </Row>
 
-        <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <div className="table-responsive">
-              <table className="table table-striped table-bordered rounded">
-                <thead>
-                  <tr>
-                    <th width="5%" className="text-center">#</th>
-                    <th width="10%">Comprobante</th>
-                    <th width="20%">Cliente</th>
-                    <th width="15%">N° Cuotas / Frecuencia</th>
-                    <th width="10%">Total</th>
-                    <th width="10%">Cobrado</th>
-                    <th width="10%">Por Cobrar</th>
-                    <th width="5%" className="text-center">Cobrar</th>
-                  </tr>
-                </thead>
-                <tbody>{this.generarBody()}</tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+        <Row>
+          <Column>
+            <TableResponsive
+              tHead={
+                <tr>
+                <th width="5%" className="text-center">#</th>
+                <th width="10%">Comprobante</th>
+                <th width="20%">Cliente</th>
+                <th width="15%">N° Cuotas / Frecuencia</th>
+                <th width="10%">Total</th>
+                <th width="10%">Cobrado</th>
+                <th width="10%">Por Cobrar</th>
+                <th width="5%" className="text-center">Cobrar</th>
+              </tr>
+              }
+              tBody={this.generarBody()}
+            />
+          </Column>
+        </Row>
 
         <Paginacion
           loading={this.state.loading}

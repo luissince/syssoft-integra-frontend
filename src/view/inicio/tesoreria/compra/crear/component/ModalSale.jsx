@@ -1,7 +1,9 @@
+import Column from '../../../../../../components/Column';
 import { CustomModalForm } from '../../../../../../components/CustomModal';
+import Row from '../../../../../../components/Row';
+import { SpinnerView } from '../../../../../../components/Spinner';
 import {
   keyNumberInteger,
-  spinnerLoading,
   numberFormat,
   isNumeric,
   isEmpty,
@@ -143,36 +145,39 @@ const ModalSale = (props) => {
       onSubmit={handleSaveSale}
       body={
         <>
-          {loading && spinnerLoading('Cargando datos...')}
+          <SpinnerView
+            loading={loading}
+            message={'Cargando datos...'}
+          />
 
           {/* Titutlo del modal */}
-          <div className="row">
-            <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+          <Row>
+            <Column className="col-12">
               <div className="text-center">
                 <h5>
                   TOTAL A PAGAR: <span>{numberFormat(importeTotal, codISO)}</span>
                 </h5>
               </div>
-            </div>
-          </div>
+            </Column>
+          </Row>
 
           {/* Sun titulo */}
-          <div className="row">
-            <div className="col-md-4 col-sm-4">
+          <Row>
+            <Column className="col-md-4 col-sm-4">
               <hr />
-            </div>
+            </Column>
             <div className="col-md-4 col-sm-4 d-flex align-items-center justify-content-center">
               <h6 className="mb-0">Tipos de cobros</h6>
             </div>
             <div className="col-md-4 col-sm-4">
               <hr />
             </div>
-          </div>
+          </Row>
 
           {/* Tipos de venta */}
-          <div className="row">
+          <Row>
             {/* Al contado */}
-            <div className="col">
+            <Column>
               <button
                 className={`btn ${selectTipoCobro === CONTADO ? 'btn-primary' : 'btn-light'} btn-block`}
                 type="button"
@@ -188,7 +193,7 @@ const ModalSale = (props) => {
                   <label>Contado</label>
                 </div>
               </button>
-            </div>
+            </Column>
 
             {/* Crédito fijo*/}
             {/* <div className="col">
@@ -228,79 +233,77 @@ const ModalSale = (props) => {
                 </div>
               </button>
             </div> */}
-          </div>
+          </Row>
 
           <br />
           {/* contado detalle */}
           {selectTipoCobro === CONTADO && (
-            <div className="row">
-              <div className="col" ref={refMetodoPagoContenedor}>
+            <Row>
+              <Column refChildren={refMetodoPagoContenedor}>
+                <div className="form-group">
+                  <h6>Lista de métodos:</h6>
+                  {bancosAgregados.map((item, index) => (
+                    <MetodoPago
+                      key={index}
+                      idBanco={item.idBanco}
+                      name={item.nombre}
+                      monto={item.monto}
+                      handleInputMontoBancosAgregados={handleInputMontoBancosAgregados}
+                      handleRemoveItemBancosAgregados={handleRemoveItemBancosAgregados}
+                    />
+                  ))}
+                </div>
+              </Column>
 
-                <h6>Lista de métodos:</h6>
-
-                {bancosAgregados.map((item, index) => (
-                  <MetodoPago
-                    key={index}
-                    idBanco={item.idBanco}
-                    name={item.nombre}
-                    monto={item.monto}
-                    handleInputMontoBancosAgregados={handleInputMontoBancosAgregados}
-                    handleRemoveItemBancosAgregados={handleRemoveItemBancosAgregados}
-                  />
-                ))}
-
-                <br />
-
-                <div className="form-row">
-                  <div className="form-group col-md-12">
-                    <label>Agregar método de cobro:</label>
-                    <div className="input-group">
-                      <div className="input-group-prepend">
-                        <div className="input-group-text">
-                          <i className="bi bi-tag-fill"></i>
-                        </div>
+              <Column className="col-12">
+                <div className="form-group">
+                  <label>Agregar método de cobro:</label>
+                  <div className="input-group">
+                    <div className="input-group-prepend">
+                      <div className="input-group-text">
+                        <i className="bi bi-tag-fill"></i>
                       </div>
-                      <select
-                        title="Lista metodo de cobro"
-                        className="form-control"
-                        ref={refMetodoContado}
+                    </div>
+                    <select
+                      title="Lista metodo de cobro"
+                      className="form-control"
+                      ref={refMetodoContado}
+                    >
+                      {bancos.map((item, index) => (
+                        <option key={index} value={item.idBanco}>
+                          {item.nombre}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="input-group-append">
+                      <button
+                        type="button"
+                        className="btn btn-outline-success d-flex"
+                        title="Agregar Pago"
+                        onClick={handleAddBancosAgregados}
                       >
-                        {bancos.map((item, index) => (
-                          <option key={index} value={item.idBanco}>
-                            {item.nombre}
-                          </option>
-                        ))}
-                      </select>
-                      <div className="input-group-append">
-                        <button
-                          type="button"
-                          className="btn btn-outline-success d-flex"
-                          title="Agregar Pago"
-                          onClick={handleAddBancosAgregados}
-                        >
-                          <i className="bi bi-plus-circle-fill"></i>
-                        </button>
-                      </div>
+                        <i className="bi bi-plus-circle-fill"></i>
+                      </button>
                     </div>
                   </div>
                 </div>
-              </div>
+              </Column>
 
-              <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+              <Column className="col-12">
                 <br />
-              </div>
+              </Column>
 
-              <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+              <Column className="col-12">
                 <div className="text-center">{generarVuelto()}</div>
-              </div>
-            </div>
+              </Column>
+            </Row>
           )}
 
           {/* crédito fijo */}
           {selectTipoCobro === CREDITO_FIJO && (
             <>
-              <div className="row">
-                <div className="col">
+              <Row>
+                <Column>
                   <div className="form-group">
                     <span className="text-md">
                       <i className="bi bi-info-circle text-success text-lg"></i>{' '}
@@ -309,11 +312,11 @@ const ModalSale = (props) => {
                       los pagos.
                     </span>
                   </div>
-                </div>
-              </div>
+                </Column>
+              </Row>
 
-              <div className="row">
-                <div className="col">
+              <Row>
+                <Column>
                   <div className="form-group">
                     <div className="input-group">
                       <div className="input-group-prepend">
@@ -333,11 +336,11 @@ const ModalSale = (props) => {
                       />
                     </div>
                   </div>
-                </div>
-              </div>
+                </Column>
+              </Row>
 
-              <div className="row">
-                <div className="col">
+              <Row>
+                <Column>
                   <div className="form-group">
                     <div className="input-group">
                       <div className="input-group-prepend">
@@ -358,11 +361,11 @@ const ModalSale = (props) => {
                       </select>
                     </div>
                   </div>
-                </div>
-              </div>
+                </Column>
+              </Row>
 
-              <div className="row">
-                <div className="col">
+              <Row>
+                <Column>
                   <div className="form-group">
                     <div className="input-group">
                       <div className="input-group-prepend">
@@ -379,16 +382,16 @@ const ModalSale = (props) => {
                       />
                     </div>
                   </div>
-                </div>
-              </div>
+                </Column>
+              </Row>
             </>
           )}
 
           {/* crédito variable */}
           {selectTipoCobro === CREDITO_VARIABLE && (
             <>
-              <div className="row">
-                <div className="col">
+              <Row>
+                <Column>
                   <div className="form-group">
                     <span className="text-md">
                       <i className="bi bi-info-circle text-success text-lg"></i>{' '}
@@ -397,11 +400,11 @@ const ModalSale = (props) => {
                       las fechas de pago.
                     </span>
                   </div>
-                </div>
-              </div>
+                </Column>
+              </Row>
 
-              <div className="row">
-                <div className="col">
+              <Row>
+                <Column>
                   <div className="form-group">
                     <div className="input-group">
                       <div className="input-group-prepend">
@@ -422,8 +425,8 @@ const ModalSale = (props) => {
                       </select>
                     </div>
                   </div>
-                </div>
-              </div>
+                </Column>
+              </Row>
             </>
           )}
         </>

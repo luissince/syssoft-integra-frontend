@@ -1,11 +1,13 @@
 import { CustomModalContent } from '../../../../../../components/CustomModal';
+import Row from '../../../../../../components/Row';
+import Column from '../../../../../../components/Column';
 import {
   keyNumberFloat,
-  spinnerLoading,
   numberFormat,
   isEmpty,
 } from '../../../../../../helper/utils.helper';
 import PropTypes from 'prop-types';
+import { SpinnerView } from '../../../../../../components/Spinner';
 
 const ModalSale = (props) => {
 
@@ -117,49 +119,54 @@ const ModalSale = (props) => {
       titleHeader="Completar Cobro"
       body={
         <>
-          {loading && spinnerLoading('Cargando datos...')}
+          <SpinnerView
+            loading={loading}
+            message={'Cargando datos...'}
+          />
 
-          {/* Titutlo del modal */}
-          <div className="row">
-            <div className="col">
+          <Row>
+            <Column>
               <div className="text-center">
                 <h5>
                   TOTAL A COBRAR: <span>{numberFormat(importeTotal, codISO)}</span>
                 </h5>
               </div>
-            </div>
-          </div>
+            </Column>
+          </Row>
 
-          {/* Sub titulo */}
-          <div className="row">
-            <div className="col-md-4 col-sm-4">
+          <Row>
+            <Column className="col-md-4 col-sm-4">
               <hr />
-            </div>
-            <div className="col-md-4 col-sm-4 d-flex align-items-center justify-content-center">
+            </Column>
+            <Column className="col-md-4 col-sm-4 d-flex align-items-center justify-content-center">
               <h6 className="mb-0">-*-</h6>
-            </div>
-            <div className="col-md-4 col-sm-4">
+            </Column>
+            <Column className="col-md-4 col-sm-4">
               <hr />
-            </div>
-          </div>
+            </Column>
+          </Row>
 
-          <h6>Lista de métodos:</h6>
+          <Row>
+            <Column>
+              <div className='form-group'>
+                <h6>Lista de métodos:</h6>
+                {bancosAgregados.map((item, index) => (
+                  <MetodoPago
+                    key={index}
+                    idBanco={item.idBanco}
+                    name={item.nombre}
+                    monto={item.monto}
+                    handleInputMontoBancosAgregados={handleInputMontoBancosAgregados}
+                    handleRemoveItemBancosAgregados={handleRemoveItemBancosAgregados}
+                  />
+                ))}
 
-          {bancosAgregados.map((item, index) => (
-            <MetodoPago
-              key={index}
-              idBanco={item.idBanco}
-              name={item.nombre}
-              monto={item.monto}
-              handleInputMontoBancosAgregados={handleInputMontoBancosAgregados}
-              handleRemoveItemBancosAgregados={handleRemoveItemBancosAgregados}
-            />
-          ))}
+              </div>
+            </Column>
+          </Row>
 
-          <br />
-
-          <div className="row">
-            <div className='col-12'>
+          <Row>
+            <Column className='col-12'>
               <div className="form-group ">
                 <label>Metodo de cobro:</label>
                 <div className="input-group">
@@ -190,16 +197,14 @@ const ModalSale = (props) => {
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
+            </Column>
+          </Row>
 
-
-          <div className='row'>
-            <div className="col-12">
+          <Row>
+            <Column className="col-12">
               <div className="text-center">{generarVuelto()}</div>
-            </div>
-          </div>
-
+            </Column>
+          </Row>
         </>
       }
       footer={

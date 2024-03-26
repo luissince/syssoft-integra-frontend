@@ -2,6 +2,7 @@ import PropTypes from 'prop-types';
 
 const Input = ({
     autoFocus,
+    type,
     placeholder,
     disabled,
     role,
@@ -15,7 +16,7 @@ const Input = ({
     return (
         <input
             autoFocus={autoFocus}
-            type="text"
+            type={type ? type : "text"}
             className="form-control"
             placeholder={placeholder}
             disabled={disabled}
@@ -32,6 +33,7 @@ const Input = ({
 
 Input.propTypes = {
     autoFocus: PropTypes.bool,
+    type: PropTypes.string,
     placeholder: PropTypes.string,
     disabled: PropTypes.bool,
     role: PropTypes.string,

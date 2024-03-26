@@ -1,9 +1,9 @@
 import PropTypes from 'prop-types';
 
-const Column = ({ className, children }) => {
+const Column = ({ className, refChildren, children }) => {
 
     return (
-        <div className={className ? className : "col"}>
+        <div ref={refChildren} className={className ? className : "col"}>
             {children}
         </div>
     );
@@ -11,6 +11,7 @@ const Column = ({ className, children }) => {
 
 Column.propTypes = {
     className: PropTypes.string,
+    refChildren: PropTypes.object,
     children: PropTypes.node,
 };
 

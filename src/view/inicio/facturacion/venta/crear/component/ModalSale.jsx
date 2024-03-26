@@ -1,7 +1,9 @@
+import Column from '../../../../../../components/Column';
 import { CustomModalForm } from '../../../../../../components/CustomModal';
+import Row from '../../../../../../components/Row';
+import { SpinnerView } from '../../../../../../components/Spinner';
 import {
   keyNumberInteger,
-  spinnerLoading,
   numberFormat,
   isEmpty,
   isNumeric,
@@ -144,36 +146,39 @@ const ModalSale = (props) => {
       onSubmit={handleSaveSale}
       body={
         <>
-          {loading && spinnerLoading('Cargando datos...')}
+          <SpinnerView
+            loading={loading}
+            message={'Cargando datos...'}
+          />
 
           {/* Titutlo del modal */}
-          <div className="row">
-            <div className="col">
+          <Row>
+            <Column>
               <div className="text-center">
                 <h5>
                   TOTAL A COBRAR: <span>{numberFormat(importeTotal, codiso)}</span>
                 </h5>
               </div>
-            </div>
-          </div>
+            </Column>
+          </Row>
 
           {/* Sun titulo */}
-          <div className="row">
-            <div className="col-md-4 col-sm-4">
+          <Row>
+            <Column className="col-md-4 col-sm-4">
               <hr />
-            </div>
-            <div className="col-md-4 col-sm-4 d-flex align-items-center justify-content-center">
+            </Column>
+            <Column className="col-md-4 col-sm-4 d-flex align-items-center justify-content-center">
               <h6 className="mb-0">Tipos de cobros</h6>
-            </div>
-            <div className="col-md-4 col-sm-4">
+            </Column>
+            <Column className="col-md-4 col-sm-4">
               <hr />
-            </div>
-          </div>
+            </Column>
+          </Row>
 
           {/* Tipos de venta */}
-          <div className="row">
+          <Row>
             {/* Al contado */}
-            <div className="col-md-6 col-sm-12">
+            <Column className="col-md-6 col-sm-12">
               <button
                 className={`btn ${formaPago === CONTADO ? 'btn-primary' : 'btn-light'} btn-block`}
                 type="button"
@@ -189,26 +194,26 @@ const ModalSale = (props) => {
                   <label>Contado</label>
                 </div>
               </button>
-            </div>
+            </Column>
 
             {/* Crédito fijo*/}
-            <div className="col-md-6 col-sm-12">
+            <Column className="col-md-6 col-sm-12">
               <button
                 className={`btn ${formaPago === CREDITO_FIJO ? 'btn-primary' : 'btn-light'} btn-block`}
                 type="button"
                 title="Pago al credito"
                 onClick={() => handleSelectTipoPago(CREDITO_FIJO)}
               >
-                <div className="row">
-                  <div className="col-md-12">
+                <Row>
+                  <Column className="col-md-12">
                     <i className="bi bi-boxes fa-2x"></i>
-                  </div>
-                </div>
+                  </Column>
+                </Row>
                 <div className="text-center">
                   <label>Crédito fijo</label>
                 </div>
               </button>
-            </div>
+            </Column>
 
             {/* Crédito variable */}
             {/* <div className="col-md-3 col-sm-3">
@@ -249,87 +254,76 @@ const ModalSale = (props) => {
                 </div>
               </button>
             </div> */}
-          </div>
+          </Row>
 
           <br />
           {/* contado detalle */}
           {formaPago === CONTADO && (
-            <>
-              <h6>Lista de métodos:</h6>
-
-              <div className='row' ref={refMetodoPagoContenedor}>
-                <div className='col'>
-                  <div className="form-group">
-                    {bancosAgregados.map((item, index) => (
-                      <MetodoPago
-                        key={index}
-                        idBanco={item.idBanco}
-                        name={item.nombre}
-                        monto={item.monto}
-                        handleInputMontoBancosAgregados={handleInputMontoBancosAgregados}
-                        handleRemoveItemBancosAgregados={handleRemoveItemBancosAgregados}
-                      />
-                    ))}
-                  </div>
+            <Row >
+              <Column ref={refMetodoPagoContenedor}>
+                <div className="form-group">
+                  <h6>Lista de métodos:</h6>
+                  {bancosAgregados.map((item, index) => (
+                    <MetodoPago
+                      key={index}
+                      idBanco={item.idBanco}
+                      name={item.nombre}
+                      monto={item.monto}
+                      handleInputMontoBancosAgregados={handleInputMontoBancosAgregados}
+                      handleRemoveItemBancosAgregados={handleRemoveItemBancosAgregados}
+                    />
+                  ))}
                 </div>
-              </div>
+              </Column>
 
-              <br />
-
-              <div className="row">
-                <div className="col">
-                  <div className="form-group">
-                    <label>Agregar método de cobro:</label>
-                    <div className="input-group">
-                      <div className="input-group-prepend">
-                        <div className="input-group-text">
-                          <i className="bi bi-tag-fill"></i>
-                        </div>
+              <Column className="col-12">
+                <div className="form-group">
+                  <label>Agregar método de cobro:</label>
+                  <div className="input-group">
+                    <div className="input-group-prepend">
+                      <div className="input-group-text">
+                        <i className="bi bi-tag-fill"></i>
                       </div>
-                      <select
-                        title="Lista metodo de cobro"
-                        className="form-control"
-                        ref={refMetodoContado}
+                    </div>
+                    <select
+                      title="Lista metodo de cobro"
+                      className="form-control"
+                      ref={refMetodoContado}
+                    >
+                      {bancos.map((item, index) => (
+                        <option key={index} value={item.idBanco}>
+                          {item.nombre}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="input-group-append">
+                      <button
+                        type='button'
+                        className="btn btn-outline-success d-flex"
+                        title="Agregar Pago"
+                        onClick={handleAddBancosAgregados}
                       >
-                        {bancos.map((item, index) => (
-                          <option key={index} value={item.idBanco}>
-                            {item.nombre}
-                          </option>
-                        ))}
-                      </select>
-                      <div className="input-group-append">
-                        <button
-                          type='button'
-                          className="btn btn-outline-success d-flex"
-                          title="Agregar Pago"
-                          onClick={handleAddBancosAgregados}
-                        >
-                          <i className="bi bi-plus-circle-fill"></i>
-                        </button>
-                      </div>
+                        <i className="bi bi-plus-circle-fill"></i>
+                      </button>
                     </div>
                   </div>
                 </div>
-              </div>
+              </Column>
 
-              <div className='row'>
-                <div className="col-12">
-                  <br />
-                </div>
-              </div>
+              <Column className="col-12">
+                <br />
+              </Column>
 
-              <div className='row'>
-                <div className="col-12">
-                  <div className="text-center">{generarVuelto()}</div>
-                </div>
-              </div>
-            </>
+              <Column className="col-12">
+                <div className="text-center">{generarVuelto()}</div>
+              </Column>
+            </Row>
           )}
 
           {/* crédito fijo */}
           {formaPago === CREDITO_FIJO && (
-            <div className={`row`}>
-              <div className="col">
+            <Row>
+              <Column>
 
                 <div className="form-group">
                   <span className="text-md">
@@ -397,15 +391,14 @@ const ModalSale = (props) => {
                     />
                   </div>
                 </div>
-              </div>
-            </div>
+              </Column>
+            </Row>
           )}
 
           {/* crédito variable */}
           {formaPago === CREDITO_VARIABLE && (
-            <div className="row">
-              <div className="col">
-
+            <Row>
+              <Column>
                 <div className="form-group">
                   <span className="text-md">
                     <i className="bi bi-info-circle text-success text-lg"></i>{' '}
@@ -435,8 +428,8 @@ const ModalSale = (props) => {
                     </select>
                   </div>
                 </div>
-              </div>
-            </div>
+              </Column>
+            </Row>
           )}
 
           {/* pago adelantado */}

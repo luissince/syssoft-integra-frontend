@@ -1,7 +1,21 @@
 import { connect } from "react-redux";
 import ContainerWrapper from "../../../../../components/Container";
 import CustomComponent from "../../../../../model/class/custom-component";
-import { alertDialog, alertInfo, alertSuccess, alertWarning, calculateTax, calculateTaxBruto, formatTime, isEmpty, isNumeric, isText, numberFormat, rounded, spinnerLoading } from "../../../../../helper/utils.helper";
+import {
+    alertDialog,
+    alertInfo,
+    alertSuccess,
+    alertWarning,
+    calculateTax,
+    calculateTaxBruto,
+    formatTime,
+    isEmpty,
+    isNumeric,
+    isText,
+    numberFormat,
+    rounded,
+    validateNumericInputs
+} from "../../../../../helper/utils.helper";
 import { colletAccountsReceivableVenta, comboBanco, detailAccountsReceivableVenta } from "../../../../../network/rest/principal.network";
 import SuccessReponse from "../../../../../model/class/response";
 import ErrorResponse from "../../../../../model/class/error-response";
@@ -11,6 +25,10 @@ import React from "react";
 import ModalSale from "./component/ModalSale";
 import printJS from "print-js";
 import { pdfA4Venta, pdfTicketVenta } from "../../../../../helper/lista-pdf.helper";
+import { SpinnerView } from "../../../../../components/Spinner";
+import Row from "../../../../../components/Row";
+import Column from "../../../../../components/Column";
+import { TableResponsive } from "../../../../../components/Table";
 
 class CuentasPorPagarAmbonar extends CustomComponent {
 
@@ -44,10 +62,13 @@ class CuentasPorPagarAmbonar extends CustomComponent {
             // Atributos del mdaol de cobro
             isOpenModalCobro: false,
             loadingModalCobro: false,
-            idPlazo: '',
+            nextModalCobro: false,
+            idPlazo: 0,
+            cobrar: '',
             monto: 0,
             bancos: [],
             bancosAgregados: [],
+            observacion: '',
 
             // Id principales
             idSucursal: this.props.token.project.idSucursal,
@@ -55,6 +76,8 @@ class CuentasPorPagarAmbonar extends CustomComponent {
         };
 
         // Referencia y variable del modal cobro
+        this.refCobrar = React.createRef();
+        this.refMetodoPagoContenedor = React.createRef();
         this.refModalCobro = React.createRef();
         this.refMetodoContado = React.createRef();
 
@@ -162,7 +185,7 @@ class CuentasPorPagarAmbonar extends CustomComponent {
     }
 
     async fetchComboBanco() {
-        const response = await comboBanco();
+        const response = await comboBanco(this.abortControllerView.signal);
 
         if (response instanceof SuccessReponse) {
             return response.data;
@@ -190,7 +213,6 @@ class CuentasPorPagarAmbonar extends CustomComponent {
     | que describe el tipo de evento que maneja, como handleInputChange, handleClick, handleSubmission, entre otros. 
     |
     */
-
 
     handlePrintA4 = () => {
         printJS({
@@ -222,6 +244,26 @@ class CuentasPorPagarAmbonar extends CustomComponent {
 
     handleOpenModalCobro = (plazo) => {
         this.setState({ isOpenModalCobro: true, idPlazo: plazo.idPlazo, monto: plazo.monto })
+    }
+
+    handleOnOpenModalCobro = () => {
+        let cobrado = 0;
+        const plazo = this.state.plazos.find(item => item.idPlazo === this.state.idPlazo)
+        if (plazo) {
+            cobrado = plazo.ingresos.reduce((acc, item) => acc + item.monto, 0)
+        }
+
+        this.setState({ cobrar: this.state.monto - cobrado, loadingModalCobro: false });
+    }
+
+    handleOnHidden = () => {
+        this.setState({
+            nextModalCobro: false,
+            cobrar: '',
+            bancosAgregados: [],
+            idPlazo: 0,
+            observacion: '',
+        });
     }
 
     handleCloseModalCobro = () => {
@@ -273,60 +315,146 @@ class CuentasPorPagarAmbonar extends CustomComponent {
         this.setState({ bancosAgregados });
     };
 
-    handleSaveSale = () => {
-        const {
-            idVenta,
-            idUsuario,
-            idPlazo,
-            bancosAgregados,
-        } = this.state;
+    handleNextModalCobro = () => {
+        this.setState({ nextModalCobro: true }, () => {
+            const metodo = this.state.bancos.find((item) => item.preferido === 1);
 
-        let metodoPagoLista = bancosAgregados.map(item => ({ ...item }));
+            this.refMetodoContado.current.value = metodo ? metodo.idBanco : '';
 
-        if (isEmpty(metodoPagoLista)) {
-            alertWarning('Cobro', 'Tiene que agregar método de cobro para continuar.');
-            return;
-        }
-
-        if (metodoPagoLista.filter((item) => !isNumeric(item.monto)).length !== 0) {
-            alertWarning('Cobro', 'Hay montos del metodo de cobro que no tiene valor.');
-            return;
-        }
-
-        alertDialog('Cobro', '¿Está seguro de continuar?', async (accept) => {
-            if (accept) {
-                const data = {
-                    // idPersona: cliente.idPersona,
-                    idVenta: idVenta,
-                    idUsuario: idUsuario,
-                    idPlazo: idPlazo,
-                    // idMoneda: idMoneda,
-                    // idSucursal: idSucursal,
-                    // idComprobante: idComprobante,
-                    estado: 1,
-                    // observacion: observacion,
-                    // detalle: detalle,
-                    bancosAgregados: metodoPagoLista,
+            if (metodo) {
+                const item = {
+                    idBanco: metodo.idBanco,
+                    nombre: metodo.nombre,
+                    monto: '',
+                    vuelto: metodo.vuelto,
+                    descripcion: '',
                 };
 
-                this.handleCloseModalCobro();
-                alertInfo('Cobro', 'Procesando información...');
+                this.setState((prevState) => ({
+                    bancosAgregados: [...prevState.bancosAgregados, item],
+                }));
+            }
+        })
+    }
 
-                const response = await colletAccountsReceivableVenta(data);
+    handleInputCobrar = (event) => {
+        this.setState({ cobrar: event.target.value })
+    }
 
-                if (response instanceof SuccessReponse) {
-                    alertSuccess('Cobro', response.data, () => {
-                        // this.handleLimpiar();
+    handleInputObservacion = (event) => {
+        this.setState({ observacion: event.target.value })
+    }
+
+    handleSaveSale = async () => {
+        if (!this.state.nextModalCobro) {
+            if (!isNumeric(this.state.cobrar)) {
+                alertWarning("Cobro", "Ingrese el monto a cobrar", () => {
+                    this.refCobrar.current.focus();
+                })
+                return;
+            }
+            this.handleNextModalCobro();
+        } else {
+            const {
+                idVenta,
+                idUsuario,
+                idPlazo,
+                cobrar,
+                bancosAgregados,
+                observacion
+            } = this.state;
+
+
+            // if (isEmpty(metodoPagoLista)) {
+            //     alertWarning('Cobro', 'Tiene que agregar método de cobro para continuar.');
+            //     return;
+            // }
+
+            // if (metodoPagoLista.filter((item) => !isNumeric(item.monto)).length !== 0) {
+            //     alertWarning('Cobro', 'Hay montos del metodo de cobro que no tiene valor.', () => {
+            //         validateNumericInputs(this.refMetodoPagoContenedor);
+            //     });
+            //     return;
+            // }
+
+            let metodoPagoLista = bancosAgregados.map(item => ({ ...item }));
+
+            if (isEmpty(metodoPagoLista)) {
+                alertWarning('Cobro', 'Tiene que agregar método de cobro para continuar.');
+                return;
+            }
+
+            if (metodoPagoLista.filter((item) => !isNumeric(item.monto)).length !== 0) {
+                alertWarning('Cobro', 'Hay montos del metodo de cobro que no tiene valor.', () => {
+                    validateNumericInputs(this.refMetodoPagoContenedor);
+                });
+                return;
+            }
+
+            const metodoCobroTotal = metodoPagoLista.reduce((accumulator, item) => (accumulator += parseFloat(item.monto)), 0);
+
+            if (metodoPagoLista.length > 1) {
+                if (metodoCobroTotal !== cobrar) {
+                    alertWarning('Cobro', 'Al tener mas de 2 métodos de cobro el monto debe ser igual al total.',()=>{
+                        validateNumericInputs(this.refMetodoPagoContenedor);
                     });
+                    return;
                 }
+            } else {
+                const metodo = metodoPagoLista[0];
+                if (metodo.vuelto === 1) {
+                    if (metodoCobroTotal < cobrar) {
+                        alertWarning('Cobro', 'El monto a cobrar es menor que el total.',()=>{
+                            validateNumericInputs(this.refMetodoPagoContenedor);
+                        });
+                        return;
+                    }
 
-                if (response instanceof ErrorResponse) {
-                    if (response.getType() === CANCELED) return;
-
-                    alertWarning('Cobro', response.getMessage());
+                    metodoPagoLista.forEach(item => {
+                        item.descripcion = `Pago con ${rounded(parseFloat(item.monto))} y su vuelto es ${rounded(parseFloat(item.monto) - cobrar)}`;
+                        item.monto = cobrar;
+                    });
+                } else {
+                    if (metodoCobroTotal !== cobrar) {
+                        alertWarning('Cobro', 'El monto a cobrar debe ser igual al total.',()=>{
+                            validateNumericInputs(this.refMetodoPagoContenedor);
+                        });
+                        return;
+                    }
                 }
             }
-        });
+
+            alertDialog('Cobro', '¿Está seguro de continuar?', async (accept) => {
+                if (accept) {
+                    const data = {
+                        idVenta: idVenta,
+                        idUsuario: idUsuario,
+                        idPlazo: idPlazo,
+                        // idSucursal: idSucursal,
+                        estado: 1,
+                        observacion: observacion,
+                        bancosAgregados: metodoPagoLista,
+                    };
+
+                    this.handleCloseModalCobro();
+                    alertInfo('Cobro', 'Procesando información...');
+
+                    const response = await colletAccountsReceivableVenta(data);
+
+                    if (response instanceof SuccessReponse) {
+                        alertSuccess('Cobro', response.data, () => {
+                            // this.handleLimpiar();
+                        });
+                    }
+
+                    if (response instanceof ErrorResponse) {
+                        if (response.getType() === CANCELED) return;
+
+                        alertWarning('Cobro', response.getMessage());
+                    }
+                }
+            });
+        }
     };
 
     /*
@@ -420,42 +548,35 @@ class CuentasPorPagarAmbonar extends CustomComponent {
     render() {
         return (
             <ContainerWrapper>
-                {this.state.loading && spinnerLoading(this.state.msgLoading)}
+                <SpinnerView
+                    loading={this.state.loading}
+                    message={this.state.msgLoading}
+                />
 
                 <ModalSale
                     refModal={this.refModalCobro}
                     isOpen={this.state.isOpenModalCobro}
-                    onOpen={() => {
-                        const metodo = this.state.bancos.find((item) => item.preferido === 1);
-
-                        this.refMetodoContado.current.value = metodo ? metodo.idBanco : '';
-
-                        if (metodo) {
-                            const item = {
-                                idBanco: metodo.idBanco,
-                                nombre: metodo.nombre,
-                                monto: '',
-                                vuelto: metodo.vuelto,
-                                descripcion: '',
-                            };
-
-                            this.setState((prevState) => ({
-                                bancosAgregados: [...prevState.bancosAgregados, item],
-                            }));
-                        }
-
-                        this.setState({ loadingModalCobro: false });
-                    }}
-                    onHidden={() => {
-                        this.setState({
-                            bancosAgregados: [],
-                        });
-                    }}
+                    onOpen={this.handleOnOpenModalCobro}
+                    onHidden={this.handleOnHidden}
                     onClose={this.handleCloseModalCobro}
 
                     loading={this.state.loadingModalCobro}
+
+                    refCobrar={this.refCobrar}
+                    cobrar={this.state.cobrar}
+                    handleInputCobrar={this.handleInputCobrar}
+
+                    nextModalCobro={this.state.nextModalCobro}
+
+                    refMetodoPagoContenedor={this.refMetodoPagoContenedor}
                     refMetodoContado={this.refMetodoContado}
                     monto={this.state.monto}
+
+                    observacion={this.state.observacion}
+                    handleInputObservacion={this.handleInputObservacion}
+
+                    idPlazo={this.state.idPlazo}
+                    plazos={this.state.plazos}
 
                     bancos={this.state.bancos}
                     codISO={this.state.codiso}
@@ -467,8 +588,8 @@ class CuentasPorPagarAmbonar extends CustomComponent {
                     handleSaveSale={this.handleSaveSale}
                 />
 
-                <div className="row">
-                    <div className="col">
+                <Row>
+                    <Column>
                         <div className="form-group">
                             <h5>
                                 <span role="button" onClick={() => this.props.history.goBack()}>
@@ -478,11 +599,11 @@ class CuentasPorPagarAmbonar extends CustomComponent {
                                 <small className="text-secondary"> detalles</small>
                             </h5>
                         </div>
-                    </div>
-                </div>
+                    </Column>
+                </Row>
 
-                <div className="row">
-                    <div className="col">
+                <Row>
+                    <Column>
                         <div className="form-group">
                             <button
                                 type="button"
@@ -499,11 +620,11 @@ class CuentasPorPagarAmbonar extends CustomComponent {
                                 <i className="fa fa-print"></i> Ticket
                             </button>
                         </div>
-                    </div>
-                </div>
+                    </Column>
+                </Row>
 
-                <div className="row">
-                    <div className="col-lg-6 col-md-12">
+                <Row>
+                    <Column className="col-lg-6 col-md-12">
                         <div className="form-group">
                             <div className="table-responsive">
                                 <table width="100%">
@@ -568,9 +689,9 @@ class CuentasPorPagarAmbonar extends CustomComponent {
                                 </table>
                             </div>
                         </div>
-                    </div>
+                    </Column>
 
-                    <div className="col-lg-6 col-md-12">
+                    <Column className="col-lg-6 col-md-12">
                         <div className="form-group">
                             <div className="table-responsive">
                                 <table width="100%">
@@ -619,153 +740,144 @@ class CuentasPorPagarAmbonar extends CustomComponent {
                                 </table>
                             </div>
                         </div>
-                    </div>
-                </div>
+                    </Column>
+                </Row>
 
-                <div className="row">
-                    <div className="col">
-                        <div className="form-group">
-                            <p className="lead">Detalle</p>
-                            <div className="table-responsive">
-                                <table className="table table-light table-striped">
-                                    <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>Concepto</th>
-                                            <th>Unidad</th>
-                                            <th>Categoría</th>
-                                            <th>Cantidad</th>
-                                            <th>Impuesto</th>
-                                            <th>Precio</th>
-                                            <th>Monto</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {this.state.detalles.map((item, index) => (
-                                            <tr key={index}>
-                                                <td>{++index}</td>
-                                                <td>{item.producto}</td>
-                                                <td>{item.medida}</td>
-                                                <td>{item.categoria}</td>
-                                                <td className="text-right">{rounded(item.cantidad)}</td>
-                                                <td className="text-right">{item.impuesto}</td>
-                                                <td className="text-right">
-                                                    {numberFormat(item.precio, this.state.codiso)}
-                                                </td>
-                                                <td className="text-right">
-                                                    {numberFormat(
-                                                        item.cantidad * item.precio,
-                                                        this.state.codiso,
-                                                    )}
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <Row>
+                    <Column>
+                        <TableResponsive
+                            title={"Detalle"}
+                            className={"table table-light table-striped"}
+                            tHead={
+                                <tr>
+                                    <th>#</th>
+                                    <th>Concepto</th>
+                                    <th>Unidad</th>
+                                    <th>Categoría</th>
+                                    <th>Cantidad</th>
+                                    <th>Impuesto</th>
+                                    <th>Precio</th>
+                                    <th>Monto</th>
+                                </tr>
+                            }
+                            tBody={this.state.detalles.map((item, index) => (
+                                <tr key={index}>
+                                    <td>{++index}</td>
+                                    <td>{item.producto}</td>
+                                    <td>{item.medida}</td>
+                                    <td>{item.categoria}</td>
+                                    <td className="text-right">{rounded(item.cantidad)}</td>
+                                    <td className="text-right">{item.impuesto}</td>
+                                    <td className="text-right">
+                                        {numberFormat(item.precio, this.state.codiso)}
+                                    </td>
+                                    <td className="text-right">
+                                        {numberFormat(
+                                            item.cantidad * item.precio,
+                                            this.state.codiso,
+                                        )}
+                                    </td>
+                                </tr>
+                            ))}
+                        />
+                    </Column>
+                </Row>
 
-                <div className="row">
-                    <div className="col-lg-8 col-sm-12"></div>
-                    <div className="col-lg-4 col-sm-12">
+                <Row>
+                    <Column className="col-lg-8 col-sm-12"></Column>
+                    <Column className="col-lg-4 col-sm-12">
                         <table width="100%">
                             <thead>{this.renderTotal()}</thead>
                         </table>
-                    </div>
-                </div>
+                    </Column>
+                </Row>
 
-                <div className="row">
-                    <div className="col">
-                        <p className="lead">Cuotas</p>
-                        <div className="table-responsive">
-                            <table className="table table-light">
-                                <thead>
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Fecha de Cobro</th>
-                                        <th>Cuota</th>
-                                        <th>Estado</th>
-                                        <th>Monto</th>
-                                        <th>Cobrar</th>
-                                        <th>Imprimir</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {
-                                        this.state.plazos.map((plazo, index) => {
-                                            let montoActual = plazo.monto;
+                <Row>
+                    <Column>
+                        <TableResponsive
+                            title={"Cuotas"}
+                            className={"table table-light"}
+                            tHead={
+                                <tr>
+                                    <th>#</th>
+                                    <th>Fecha de Cobro</th>
+                                    <th>Cuota</th>
+                                    <th>Estado</th>
+                                    <th>Monto</th>
+                                    <th>Cobrar</th>
+                                    <th>Imprimir</th>
+                                </tr>
+                            }
+                            tBody={
+                                this.state.plazos.map((plazo, index) => {
+                                    let montoActual = plazo.monto;
 
-                                            return <React.Fragment key={index}>
-                                                <tr className="table-success">
-                                                    <td className="text-center">{index + 1}</td>
-                                                    <td>{plazo.fecha}</td>
-                                                    <td>{"CUOTA " + plazo.cuota}</td>
-                                                    <td className={`${plazo.estado === 0 ? "text-danger" : "text-success"}`}>{plazo.estado === 0 ? "Por Cobrar" : "Cobrado"}</td>
-                                                    <td>{numberFormat(plazo.monto, this.state.codiso)}</td>
-                                                    <td className="text-center">
-                                                        <button
-                                                            type="button"
-                                                            className="btn btn-warning btn-sm"
-                                                            onClick={() => this.handleOpenModalCobro(plazo)}
-                                                            disabled={plazo.estado === 1 ? true : false}
-                                                        >
-                                                            <i className="fa fa-money"></i>
-                                                        </button>
-                                                    </td>
-                                                    <td className="text-center">
-                                                        <button
-                                                            type="button"
-                                                            className="btn btn-light btn-sm"
-                                                        >
-                                                            <i className="fa fa-print"></i>
-                                                        </button>
-                                                    </td>
-                                                </tr>
+                                    return <React.Fragment key={index}>
+                                        <tr className="table-success">
+                                            <td className="text-center">{index + 1}</td>
+                                            <td>{plazo.fecha}</td>
+                                            <td>{"CUOTA " + plazo.cuota}</td>
+                                            <td className={`${plazo.estado === 0 ? "text-danger" : "text-success"}`}>{plazo.estado === 0 ? "Por Cobrar" : "Cobrado"}</td>
+                                            <td>{numberFormat(plazo.monto, this.state.codiso)}</td>
+                                            <td className="text-center">
+                                                <button
+                                                    type="button"
+                                                    className="btn btn-warning btn-sm"
+                                                    onClick={() => this.handleOpenModalCobro(plazo)}
+                                                    disabled={plazo.estado === 1 ? true : false}
+                                                >
+                                                    <i className="fa fa-money"></i>
+                                                </button>
+                                            </td>
+                                            <td className="text-center">
+                                                <button
+                                                    type="button"
+                                                    className="btn btn-light btn-sm"
+                                                >
+                                                    <i className="fa fa-print"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
 
-                                                <tr><td colSpan="7" className="pb-0">Cobros Asociados</td></tr>
-                                                <tr>
-                                                    <td className="pb-0 text-center">#</td>
-                                                    <td className="pb-0">Banco</td>
-                                                    <td className="pb-0">Fecha</td>
-                                                    <td className="pb-0">Cobrado</td>
-                                                    <td className="pb-0">Restante</td>
-                                                    <td className="pb-0">Observación</td>
-                                                </tr>
-                                                {
-                                                    plazo.ingresos.map((ingreso, index) => {
-                                                        montoActual = montoActual - ingreso.monto;
-                                                        return (
-                                                            <tr key={index}>
-                                                                <td className="text-center">{index + 1}</td>
-                                                                <td>{ingreso.nombre}</td>
-                                                                <td>
-                                                                    {ingreso.fecha}
-                                                                    <br />
-                                                                    {formatTime(ingreso.hora)}
-                                                                </td>
-                                                                <td>{numberFormat(ingreso.monto, this.state.codiso)}</td>
-                                                                <td>{numberFormat(montoActual, this.state.codiso)}</td>
-                                                                <td>{ingreso.descripcion}</td>
-                                                            </tr>
-                                                        );
-                                                    })
-                                                }
-                                                <tr>
-                                                    <td colSpan="9">
-                                                        <hr />
-                                                    </td>
-                                                </tr>
-                                            </React.Fragment>
-                                        })
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
+                                        <tr><td colSpan="7" className="pb-0">Cobros Asociados</td></tr>
+                                        <tr>
+                                            <td className="pb-0 text-center">#</td>
+                                            <td className="pb-0">Banco</td>
+                                            <td className="pb-0">Fecha</td>
+                                            <td className="pb-0">Cobrado</td>
+                                            <td className="pb-0">Restante</td>
+                                            <td className="pb-0">Observación</td>
+                                        </tr>
+                                        {
+                                            plazo.ingresos.map((ingreso, index) => {
+                                                montoActual = montoActual - ingreso.monto;
+                                                return (
+                                                    <tr key={index}>
+                                                        <td className="text-center">{index + 1}</td>
+                                                        <td>{ingreso.nombre}</td>
+                                                        <td>
+                                                            {ingreso.fecha}
+                                                            <br />
+                                                            {formatTime(ingreso.hora)}
+                                                        </td>
+                                                        <td>{numberFormat(ingreso.monto, this.state.codiso)}</td>
+                                                        <td>{numberFormat(montoActual, this.state.codiso)}</td>
+                                                        <td>{ingreso.descripcion}</td>
+                                                    </tr>
+                                                );
+                                            })
+                                        }
+                                        <tr>
+                                            <td colSpan="9">
+                                                <hr />
+                                            </td>
+                                        </tr>
+                                    </React.Fragment>
+                                })
+                            }
+                        />
+                    </Column>
+                </Row>
             </ContainerWrapper>
         );
     }

@@ -5,7 +5,6 @@ import {
   alertInfo,
   alertSuccess,
   alertWarning,
-  spinnerLoading,
   keyUpSearch,
   isEmpty,
 } from '../../../../helper/utils.helper';
@@ -21,6 +20,10 @@ import { CANCELED } from '../../../../model/types/types';
 import ContainerWrapper from '../../../../components/Container';
 import CustomComponent from '../../../../model/class/custom-component';
 import Title from '../../../../components/Title';
+import Row from '../../../../components/Row';
+import Column from '../../../../components/Column';
+import { TableResponsive } from '../../../../components/Table';
+import { SpinnerTable } from '../../../../components/Spinner';
 
 class Bancos extends CustomComponent {
 
@@ -172,7 +175,7 @@ class Bancos extends CustomComponent {
 
         if (response instanceof SuccessReponse) {
           alertSuccess('Banco', response.data, () => {
-            this.loadInit();
+            this.loadingData();
           });
         }
 
@@ -189,7 +192,9 @@ class Bancos extends CustomComponent {
       return (
         <tr>
           <td className="text-center" colSpan="9">
-            {spinnerLoading('Cargando información de la tabla...', true)}
+            <SpinnerTable
+              message={'Cargando información de la tabla...'}
+            />
           </td>
         </tr>
       );
@@ -259,8 +264,8 @@ class Bancos extends CustomComponent {
           subTitle='Lista'
         />
 
-        <div className="row">
-          <div className="col-md-6 col-sm-12">
+        <Row>
+          <Column className="col-md-6 col-sm-12">
             <div className="form-group">
               <div className="input-group mb-2">
                 <div className="input-group-prepend">
@@ -282,9 +287,9 @@ class Bancos extends CustomComponent {
                 />
               </div>
             </div>
-          </div>
+          </Column>
 
-          <div className="col-md-6 col-sm-12">
+          <Column className="col-md-6 col-sm-12">
             <div className="form-group">
               <button
                 className="btn btn-outline-info"
@@ -300,40 +305,29 @@ class Bancos extends CustomComponent {
                 <i className="bi bi-arrow-clockwise"></i>
               </button>
             </div>
-          </div>
-        </div>
+          </Column>
+        </Row>
 
-        <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <div className="table-responsive">
-              <table className="table table-striped table-bordered rounded">
-                <thead>
-                  <tr>
-                    <th width="5%" className="text-center">
-                      {' '}
-                      #
-                    </th>
-                    <th width="10%">Nombre</th>
-                    <th width="15%">Tipo Cuenta</th>
-                    <th width="10%">Moneda</th>
-                    <th width="20%">Número Cuenta</th>
-                    <th width="10%">Saldo</th>
-                    <th width="5%" className="text-center">
-                      Detalle
-                    </th>
-                    <th width="5%" className="text-center">
-                      Editar
-                    </th>
-                    <th width="5%" className="text-center">
-                      Eliminar
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>{this.generarBody()}</tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+        <Row>
+          <Column>
+            <TableResponsive
+              tHead={
+                <tr>
+                  <th width="5%" className="text-center">#</th>
+                  <th width="10%">Nombre</th>
+                  <th width="15%">Tipo Cuenta</th>
+                  <th width="10%">Moneda</th>
+                  <th width="20%">Número Cuenta</th>
+                  <th width="10%">Saldo</th>
+                  <th width="5%" className="text-center"> Detalle </th>
+                  <th width="5%" className="text-center">Editar </th>
+                  <th width="5%" className="text-center">Eliminar</th>
+                </tr>
+              }
+              tBody={this.generarBody()}
+            />
+          </Column>
+        </Row>
 
         <Paginacion
           loading={this.state.loading}

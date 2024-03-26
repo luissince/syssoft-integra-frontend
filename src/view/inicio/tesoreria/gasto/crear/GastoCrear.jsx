@@ -4,7 +4,6 @@ import {
     numberFormat,
     keyNumberFloat,
     isNumeric,
-    spinnerLoading,
     alertDialog,
     alertInfo,
     alertSuccess,
@@ -30,6 +29,8 @@ import SearchInput from '../../../../../components/SearchInput';
 import { COMPROBANTE_DE_SALIDA } from '../../../../../model/types/tipo-comprobante';
 import CustomComponent from '../../../../../model/class/custom-component';
 import PropTypes from 'prop-types';
+import { SpinnerView } from '../../../../../components/Spinner';
+import Title from '../../../../../components/Title';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -352,6 +353,34 @@ class GastoCrear extends CustomComponent {
         this.setState({ loadingModal: true, isOpenSale: true })
     }
 
+    handleOnOpenModalSale = () => {
+        const metodo = this.state.bancos.find((item) => item.preferido === 1);
+
+        this.refMetodoContado.current.value = metodo ? metodo.idBanco : '';
+
+        if (metodo) {
+            const item = {
+                idBanco: metodo.idBanco,
+                nombre: metodo.nombre,
+                monto: '',
+                vuelto: metodo.vuelto,
+                descripcion: '',
+            };
+
+            this.setState((prevState) => ({
+                bancosAgregados: [...prevState.bancosAgregados, item],
+            }));
+        }
+
+        this.setState({ loadingModal: false });
+    }
+
+    handleOnHidden = () => {
+        this.setState({
+            bancosAgregados: [],
+        });
+    }
+
     handleCloseModalSale = () => {
         const data = this.refCustomModalSale.current;
         data.classList.add("close-cm")
@@ -643,20 +672,20 @@ class GastoCrear extends CustomComponent {
     };
 
     /*
-          |--------------------------------------------------------------------------
-          | Método de renderización
-          |--------------------------------------------------------------------------
-          |
-          | El método render() es esencial en los componentes de React y se encarga de determinar
-          | qué debe mostrarse en la interfaz de usuario basado en el estado y las propiedades actuales
-          | del componente. Este método devuelve un elemento React que describe lo que debe renderizarse
-          | en la interfaz de usuario. La salida del método render() puede incluir otros componentes
-          | de React, elementos HTML o una combinación de ambos. Es importante que el método render()
-          | sea una función pura, es decir, no debe modificar el estado del componente ni interactuar
-          | directamente con el DOM. En su lugar, debe basarse únicamente en los props y el estado
-          | actuales del componente para determinar lo que se mostrará.
-          |
-          */
+        |--------------------------------------------------------------------------
+        | Método de renderización
+        |--------------------------------------------------------------------------
+        |
+        | El método render() es esencial en los componentes de React y se encarga de determinar
+        | qué debe mostrarse en la interfaz de usuario basado en el estado y las propiedades actuales
+        | del componente. Este método devuelve un elemento React que describe lo que debe renderizarse
+        | en la interfaz de usuario. La salida del método render() puede incluir otros componentes
+        | de React, elementos HTML o una combinación de ambos. Es importante que el método render()
+        | sea una función pura, es decir, no debe modificar el estado del componente ni interactuar
+        | directamente con el DOM. En su lugar, debe basarse únicamente en los props y el estado
+        | actuales del componente para determinar lo que se mostrará.
+        |
+        */
 
     generarBody() {
         const { detalle } = this.state;
@@ -701,35 +730,17 @@ class GastoCrear extends CustomComponent {
     render() {
         return (
             <ContainerWrapper>
+                <SpinnerView
+                    loading={this.state.loading}
+                    message={this.state.msgLoading}
+                />
+
+
                 <ModalSale
                     refSale={this.refCustomModalSale}
                     isOpen={this.state.isOpenSale}
-                    onOpen={() => {
-                        const metodo = this.state.bancos.find((item) => item.preferido === 1);
-
-                        this.refMetodoContado.current.value = metodo ? metodo.idBanco : '';
-
-                        if (metodo) {
-                            const item = {
-                                idBanco: metodo.idBanco,
-                                nombre: metodo.nombre,
-                                monto: '',
-                                vuelto: metodo.vuelto,
-                                descripcion: '',
-                            };
-
-                            this.setState((prevState) => ({
-                                bancosAgregados: [...prevState.bancosAgregados, item],
-                            }));
-                        }
-
-                        this.setState({ loadingModal: false });
-                    }}
-                    onHidden={() => {
-                        this.setState({
-                            bancosAgregados: [],
-                        });
-                    }}
+                    onOpen={this.handleOnOpenModalSale}
+                    onHidden={this.handleOnHidden}
                     onClose={this.handleCloseModalSale}
 
                     loading={this.state.loadingModal}
@@ -746,22 +757,13 @@ class GastoCrear extends CustomComponent {
                     handleSaveSale={this.handleSaveSale}
                 />
 
-                {this.state.loading && spinnerLoading(this.state.msgLoading)}
 
                 {/* Titulo */}
-                <div className="row">
-                    <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                        <div className="form-group">
-                            <h5>
-                                <span role="button" onClick={() => this.props.history.goBack()}>
-                                    <i className="bi bi-arrow-left-short"></i>
-                                </span>{' '}
-                                Gasto
-                                <small className="text-secondary"> crear</small>
-                            </h5>
-                        </div>
-                    </div>
-                </div>
+                <Title
+                    title='Gasto'
+                    subTitle='Crear'
+                    handleGoBack={() => this.props.history.goBack()}
+                />
 
                 <div className="row">
                     <div className="col-xl-8 col-lg-8 col-md-8 col-sm-12 col-12">
@@ -797,7 +799,7 @@ class GastoCrear extends CustomComponent {
                                         ref={this.refMonto}
                                         value={this.state.precio}
                                         onChange={this.handleInputPrecio}
-                                        placeholder="Ingrese el precio"
+                                        placeholder="Ingrese el monto"
                                         onKeyUp={(event) => {
                                             if (event.code === 'Enter') {
                                                 this.agregarGasto();
@@ -827,11 +829,9 @@ class GastoCrear extends CustomComponent {
                                             <th width="5%" className="text-center">
                                                 #
                                             </th>
-                                            <th width="15%">Concepto</th>
+                                            <th width="15%">Categoría</th>
                                             <th width="25%">Descripción</th>
-                                            <th width="5%">Cantidad</th>
                                             <th width="5%">Precio</th>
-                                            <th width="5%">Total</th>
                                             <th width="5%">Quitar</th>
                                         </tr>
                                     </thead>
@@ -991,4 +991,6 @@ const mapStateToProps = (state) => {
     };
 };
 
-export default connect(mapStateToProps, null)(GastoCrear);
+const ConnectedGastoCrear = connect(mapStateToProps, null)(GastoCrear);
+
+export default ConnectedGastoCrear;

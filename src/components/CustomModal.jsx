@@ -67,7 +67,7 @@ export const CustomModalContent = ({ contentRef, isOpen, onOpen, onHidden, onClo
     );
 }
 
-export const CustomModalForm = ({ contentRef, isOpen, onOpen, onHidden, onClose, contentLabel, onSubmit, titleHeader, body, footer }) => {
+export const CustomModalForm = ({ contentRef, isOpen, onOpen, onHidden, onClose, contentLabel, onSubmit, titleHeader, body, footer, classNameFooter }) => {
     return (
         <CustomModal
             contentRef={contentRef}
@@ -113,7 +113,7 @@ export const CustomModalForm = ({ contentRef, isOpen, onOpen, onHidden, onClose,
                 <div className="body-cm">
                     {body}
                 </div>
-                <div className="footer-cm">
+                <div className={`${classNameFooter ? classNameFooter : "footer-cm"}`}>
                     {footer}
                 </div>
             </form>
@@ -154,6 +154,7 @@ CustomModalForm.propTypes = {
     onSubmit: PropTypes.func,
     body: PropTypes.oneOfType([PropTypes.element, PropTypes.arrayOf(PropTypes.element)]).isRequired,
     footer: PropTypes.oneOfType([PropTypes.element, PropTypes.arrayOf(PropTypes.element)]).isRequired,
+    classNameFooter: PropTypes.string
 }
 
 export default CustomModal;

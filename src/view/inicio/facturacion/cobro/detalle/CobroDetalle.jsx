@@ -357,4 +357,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(CobroDetalle);
+const ConnectedCobroDetalle = connect(mapStateToProps, null)(CobroDetalle);
+
+export default ConnectedCobroDetalle;
