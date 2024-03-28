@@ -9,13 +9,12 @@ import {
 } from '../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../../../components/Container';
-import { detailVenta } from '../../../../../network/rest/principal.network';
+import { detailVenta, obtenerFacturacionPdfVenta } from '../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
 import CustomComponent from '../../../../../model/class/custom-component';
 import { CONTADO, CREDITO_FIJO, CREDITO_VARIABLE } from '../../../../../model/types/forma-pago';
-import { pdfA4Venta, pdfTicketVenta } from '../../../../../helper/lista-pdf.helper';
 import Title from '../../../../../components/Title';
 import { SpinnerView } from '../../../../../components/Spinner';
 import Row from '../../../../../components/Row';
@@ -129,7 +128,7 @@ class VentaDetalle extends CustomComponent {
 
   handlePrintA4 = () => {
     printJS({
-      printable: pdfA4Venta(this.state.idVenta),
+      printable: obtenerFacturacionPdfVenta(this.state.idVenta, "a4"),
       type: 'pdf',
       showModal: true,
       modalMessage: "Recuperando documento...",
@@ -141,7 +140,7 @@ class VentaDetalle extends CustomComponent {
 
   handlePrintTicket = () => {
     printJS({
-      printable: pdfTicketVenta(this.state.idVenta),
+      printable: obtenerFacturacionPdfVenta(this.state.idVenta, "ticket"),
       type: 'pdf',
       showModal: true,
       modalMessage: "Recuperando documento...",

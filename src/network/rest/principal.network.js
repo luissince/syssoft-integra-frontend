@@ -1790,3 +1790,32 @@ export async function detailNotifications(params, signal) {
 // FIN PARA NOTIFICACION
 // ------------------------------------------------------------------------
 
+/*
+|--------------------------------------------------------------------------
+| ENDPOINTS DE DECLARAR COMPROBANTES
+|--------------------------------------------------------------------------
+*/
+
+export async function facturarCpeSunat(idVenta) {
+  return await Resolve.create(
+    instancePrincipal.get(`/api/sunat/facturar/${idVenta}`),
+  );
+}
+
+// ------------------------------------------------------------------------
+// FIN PARA REPORTES PDF, EXCEL
+// ------------------------------------------------------------------------
+
+/*
+|--------------------------------------------------------------------------
+| ENDPOINTS DE REPORTES PDF, EXCEL
+|--------------------------------------------------------------------------
+*/
+
+export function obtenerFacturacionPdfVenta(idVenta, tipo) {
+  return `${import.meta.env.VITE_APP_BACK_END}/api/reporte/facturacion/venta/pdf/${tipo}/${idVenta}`
+}
+
+// ------------------------------------------------------------------------
+// FIN PARA REPORTES PDF, EXCEL
+// ------------------------------------------------------------------------

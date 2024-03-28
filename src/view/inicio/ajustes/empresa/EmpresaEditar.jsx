@@ -9,7 +9,7 @@ import {
   imageBase64,
   isText,
   isEmpty,
-  // convertFileBase64,
+  convertFileBase64,
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../../components/Container';
@@ -48,8 +48,8 @@ class EmpresaProceso extends CustomComponent {
       idApiSunat: '',
       claveApiSunat: '',
 
-      // certificado: 'Hacer click para seleccionar su archivo.',
-      // claveCertificado: '',
+      certificado: 'Hacer click para seleccionar su archivo.',
+      claveCertificado: '',
 
       logo: images.noImage,
       image: images.noImage,
@@ -135,8 +135,8 @@ class EmpresaProceso extends CustomComponent {
         idApiSunat: empresa.idApiSunat ?? "",
         claveApiSunat: empresa.claveApiSunat ?? "",
 
-        // certificado: empresa.certificadoSunat ?? "Hacer click para seleccionar su archivo.",
-        // claveCertificado: empresa.claveCertificadoSunat ?? "",
+        certificado: empresa.certificadoSunat ?? "Hacer click para seleccionar su archivo.",
+        claveCertificado: empresa.claveCertificadoSunat ?? "",
 
         usuarioEmail: empresa.usuarioEmail ?? "",
         claveEmail: empresa.claveEmail ?? "",
@@ -177,15 +177,15 @@ class EmpresaProceso extends CustomComponent {
     }
   };
 
-  // handleFileCertificado = (event) => {
-  //   if (!isEmpty(event.target.files)) {
-  //     this.setState({ certificado: event.target.files[0].name });
-  //   } else {
-  //     this.setState({ certificado: 'Hacer click para seleccionar su archivo.' }, () => {
-  //       this.refFileCertificado.current.value = '';
-  //     });
-  //   }
-  // };
+  handleFileCertificado = (event) => {
+    if (!isEmpty(event.target.files)) {
+      this.setState({ certificado: event.target.files[0].name });
+    } else {
+      this.setState({ certificado: 'Hacer click para seleccionar su archivo.' }, () => {
+        this.refFileCertificado.current.value = '';
+      });
+    }
+  };
 
   async handleGetApiSunat() {
     if (isEmpty(this.state.documento)) {
@@ -224,13 +224,13 @@ class EmpresaProceso extends CustomComponent {
     }
   }
 
-  handleOpenLink() {
-    // URL que deseas abrir
-    var url = import.meta.env.VITE_APP_CPE_SUNAT;
-    if (isEmpty(url)) return;
-    // Abrir la URL en una nueva ventana
-    window.open(url);
-  }
+  // handleOpenLink() {
+  //   // URL que deseas abrir
+  //   var url = import.meta.env.VITE_APP_CPE_SUNAT;
+  //   if (isEmpty(url)) return;
+  //   // Abrir la URL en una nueva ventana
+  //   window.open(url);
+  // }
 
   handleLookPasswordEmail = () => {
     this.setState({ lookPasswordEmail: !this.state.lookPasswordEmail }, () => {
@@ -278,7 +278,7 @@ class EmpresaProceso extends CustomComponent {
 
       const imageSend = await imageBase64(this.refFileImagen.current.files);
 
-      // const certificadoSend = await convertFileBase64(this.refFileCertificado.current.files);
+      const certificadoSend = await convertFileBase64(this.refFileCertificado.current.files);
 
       const data = {
         documento: this.state.documento.trim(),
@@ -294,9 +294,9 @@ class EmpresaProceso extends CustomComponent {
         usuarioEmail: this.state.usuarioEmail.trim(),
         claveEmail: this.state.claveEmail.trim(),
 
-        // certificado: certificadoSend.data ?? "",
-        // extCertificado: certificadoSend.extension ?? "",
-        // claveCertificado: this.state.claveCertificado,
+        certificado: certificadoSend.data ?? "",
+        extCertificado: certificadoSend.extension ?? "",
+        claveCertificado: this.state.claveCertificado,
 
         logo: logoSend.base64String ?? "",
         extlogo: logoSend.extension ?? "",
@@ -405,7 +405,7 @@ class EmpresaProceso extends CustomComponent {
             </div>
           </Column>
 
-          <Column className={"col-md-6"}>
+          {/* <Column className={"col-md-6"}>
             <div className="form-group ">
               <label>Url de Configuración Sunat: </label>
               <div className="input-group">
@@ -428,7 +428,7 @@ class EmpresaProceso extends CustomComponent {
                 </div>
               </div>
             </div>
-          </Column>
+          </Column> */}
         </Row>
 
         <Row>
@@ -578,7 +578,7 @@ class EmpresaProceso extends CustomComponent {
           </Column>
         </Row>
 
-        {/* <Row>
+        <Row>
           <Column>
             <div className="form-group ">
               <label>
@@ -627,7 +627,7 @@ class EmpresaProceso extends CustomComponent {
               </div>
             </div>
           </Column>
-        </Row> */}
+        </Row>
 
         <Row>
           <Column className={"col-md-6"}>

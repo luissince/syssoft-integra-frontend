@@ -26,13 +26,15 @@ import ErrorResponse from '../../../../model/class/error-response';
 import {
   comboComprobante,
   comboSucursal,
+  facturarCpeSunat,
   listCpeSunat,
+  obtenerFacturacionPdfVenta,
 } from '../../../../network/rest/principal.network';
 import { CANCELED } from '../../../../model/types/types';
 import CustomComponent from '../../../../model/class/custom-component';
 import { VENTA, GUIA_DE_REMISION, NOTA_DE_CREDITO } from '../../../../model/types/tipo-comprobante';
-import { pdfA4GuiaRemision, pdfA4Venta, pdfTicketGuiaRemision, pdfTicketVenta } from '../../../../helper/lista-pdf.helper';
-import { senFactura, senGuiaRemision, sendComunicacionDeBaja, sendResumenDiario } from '../../../../network/rest/cpesunat.network';
+import { pdfA4GuiaRemision, pdfTicketGuiaRemision } from '../../../../helper/lista-pdf.helper';
+import { senGuiaRemision, sendComunicacionDeBaja, sendResumenDiario } from '../../../../network/rest/cpesunat.network';
 
 class CpeElectronicos extends CustomComponent {
 
@@ -160,32 +162,6 @@ class CpeElectronicos extends CustomComponent {
     }
   }
 
-  async fetchEnviarFactura() {
-    const response = await senFactura();
-    if (response instanceof SuccessReponse) {
-      return response.data;
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
-
-      return null;
-    }
-  }
-
-  async fetchResumenDiario() {
-    const response = await sendResumenDiario();
-    if (response instanceof SuccessReponse) {
-      return response.data;
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
-
-      return null;
-    }
-  }
-
   loadInit = async () => {
     if (this.state.loading) return;
 
@@ -290,7 +266,7 @@ class CpeElectronicos extends CustomComponent {
       if (accept) {
         alertInfo("Cpe Sunat", "Firmando xml y enviando a sunat.")
 
-        const response = await senFactura(idVenta);
+        const response = await facturarCpeSunat(idVenta);
 
         if (response instanceof SuccessReponse) {
           const { state, accept, code, description } = response.data;
@@ -421,7 +397,7 @@ class CpeElectronicos extends CustomComponent {
 
   handleOpenPdfA4 = (idComprobante, tipo) => {
     if (tipo === "fac") {
-      window.open(pdfA4Venta(idComprobante), '_blank');
+      window.open(obtenerFacturacionPdfVenta(idComprobante, "a4"), '_blank');
     } else {
       window.open(pdfA4GuiaRemision(idComprobante), '_blank');
     }
@@ -429,7 +405,7 @@ class CpeElectronicos extends CustomComponent {
 
   handleOpenPdfTicket = (idComprobante, tipo) => {
     if (tipo === "fac") {
-      window.open(pdfTicketVenta(idComprobante), '_blank');
+      window.open(obtenerFacturacionPdfVenta(idComprobante, "ticket"), '_blank');
     } else {
       window.open(pdfTicketGuiaRemision(idComprobante), '_blank');
     }
@@ -813,4 +789,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(CpeElectronicos);
+const ConnectedCpeElectronicos = connect(mapStateToProps, null)(CpeElectronicos);
+
+export default ConnectedCpeElectronicos;

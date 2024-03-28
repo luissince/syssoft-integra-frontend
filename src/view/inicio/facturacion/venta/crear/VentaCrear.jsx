@@ -28,6 +28,7 @@ import {
   listComboTipoDocumento,
   comboBanco,
   comboAlmacen,
+  obtenerFacturacionPdfVenta,
 } from '../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
@@ -51,7 +52,6 @@ import { A_GRANEL, SERVICIO, UNIDADES, VALOR_MONETARIO } from '../../../../../mo
 import { CustomModalContent } from '../../../../../components/CustomModal';
 import { CLIENTE_NATURAL } from '../../../../../model/types/tipo-cliente';
 import { ADELANTADO, CONTADO, CREDITO_FIJO, CREDITO_VARIABLE } from '../../../../../model/types/forma-pago';
-import { pdfA4Venta, pdfTicketVenta } from '../../../../../helper/lista-pdf.helper';
 import { SpinnerView } from '../../../../../components/Spinner';
 import { ModalAgregar } from './component/ModalAgregar';
 // import InvoiceListPrices from './component/InvoiceListPrices';
@@ -754,7 +754,7 @@ class VentaCrear extends CustomComponent {
         this.handleAddItem(result[0])
       }
 
-      this.setState({filtrarProducto: false, producto : ''});
+      this.setState({ filtrarProducto: false, producto: '' });
     }
   }
 
@@ -867,7 +867,7 @@ class VentaCrear extends CustomComponent {
 
   handlePrintA4 = () => {
     printJS({
-      printable: pdfA4Venta(this.state.idVenta),
+      printable: obtenerFacturacionPdfVenta(this.state.idVenta, "a4"),
       type: 'pdf',
       showModal: true,
       modalMessage: "Recuperando documento...",
@@ -880,7 +880,7 @@ class VentaCrear extends CustomComponent {
 
   handlePrintTicket = () => {
     printJS({
-      printable: pdfTicketVenta(this.state.idVenta),
+      printable: obtenerFacturacionPdfVenta(this.state.idVenta, "ticket"),
       type: 'pdf',
       showModal: true,
       modalMessage: "Recuperando documento...",

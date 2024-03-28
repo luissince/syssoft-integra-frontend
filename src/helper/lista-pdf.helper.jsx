@@ -1,10 +1,4 @@
-export function pdfA4Venta(idVenta) {
-    return `${import.meta.env.VITE_APP_PDF}/api/v1/venta/a4/${idVenta}`;
-}
 
-export function pdfTicketVenta(idVenta) {
-    return `${import.meta.env.VITE_APP_PDF}/api/v1/venta/ticket/${idVenta}`;
-}
 
 export function pdfA4Compra(idCompra) {
     return `${import.meta.env.VITE_APP_PDF}/api/v1/compra/a4/${idCompra}`;

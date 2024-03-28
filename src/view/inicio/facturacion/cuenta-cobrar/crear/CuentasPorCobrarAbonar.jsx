@@ -16,7 +16,7 @@ import {
     rounded,
     validateNumericInputs
 } from "../../../../../helper/utils.helper";
-import { colletAccountsReceivableVenta, comboBanco, detailAccountsReceivableVenta } from "../../../../../network/rest/principal.network";
+import { colletAccountsReceivableVenta, comboBanco, detailAccountsReceivableVenta, obtenerFacturacionPdfVenta } from "../../../../../network/rest/principal.network";
 import SuccessReponse from "../../../../../model/class/response";
 import ErrorResponse from "../../../../../model/class/error-response";
 import { CANCELED } from "../../../../../model/types/types";
@@ -24,7 +24,6 @@ import { CONTADO, CREDITO_FIJO, CREDITO_VARIABLE } from '../../../../../model/ty
 import React from "react";
 import ModalSale from "./component/ModalSale";
 import printJS from "print-js";
-import { pdfA4Venta, pdfTicketVenta } from "../../../../../helper/lista-pdf.helper";
 import { SpinnerView } from "../../../../../components/Spinner";
 import Row from "../../../../../components/Row";
 import Column from "../../../../../components/Column";
@@ -216,7 +215,7 @@ class CuentasPorPagarAmbonar extends CustomComponent {
 
     handlePrintA4 = () => {
         printJS({
-            printable: pdfA4Venta(this.state.idVenta),
+            printable: obtenerFacturacionPdfVenta(this.state.idVenta, "a4"),
             type: 'pdf',
             showModal: true,
             modalMessage: "Recuperando documento...",
@@ -228,7 +227,7 @@ class CuentasPorPagarAmbonar extends CustomComponent {
 
     handlePrintTicket = () => {
         printJS({
-            printable: pdfTicketVenta(this.state.idVenta),
+            printable: obtenerFacturacionPdfVenta(this.state.idVenta, "ticket"),
             type: 'pdf',
             showModal: true,
             modalMessage: "Recuperando documento...",
