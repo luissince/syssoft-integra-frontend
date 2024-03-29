@@ -34,7 +34,7 @@ jobs:
           EOL
 
       - name: Creando y ejecutando contenedor
-        run: docker compose -f docker-compose.yml up --build test-services -d
+        run: docker compose -f docker-compose.yml up --build sysintegra-services -d
 
   build-and-deploy-app-legrand-tiquepos:
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'

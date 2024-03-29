@@ -3,8 +3,7 @@ version: '3'
 
 # Definición de servicios
 services:
-  # Servicio llamado 'next-app'
-  test-services:
+  sysintegra-services:
     # Configuración para construir la imagen del contenedor
     build:
       context: .
