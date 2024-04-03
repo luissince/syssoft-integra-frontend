@@ -26,35 +26,5 @@ export async function cdrStatus(data) {
   );
 }
 
-export async function senFactura(idVenta) {
-  return await Resolve.create(
-    instanceCpeSunat.get(`/api/boleta/${idVenta}`),
-  );
-}
-
-export async function sendResumenDiario(idVenta) {
-  return await Resolve.create(
-    instanceCpeSunat.get(`/api/resumen/${idVenta}`),
-  );
-}
-
-export async function sendComunicacionDeBaja(idVenta) {
-  return await Resolve.create(
-    instanceCpeSunat.get(`/api/comunicaciondebaja/${idVenta}`),
-  );
-}
-
-export async function senGuiaRemision(idGuiaRemision) {
-  return await Resolve.create(
-    instanceCpeSunat.get(`/api/guiaremision/${idGuiaRemision}`),
-  );
-}
-
-export async function consultarComprobante(data) {
-  return await Resolve.create(
-    instanceCpeSunat.get(`/api/consultar/${data.rucSol}/${data.userSol}/${data.passSol}/${data.tipo}/${data.serie}/${data.correlativo}`),
-  );
-}
-
 
 

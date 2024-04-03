@@ -1806,6 +1806,31 @@ export async function facturarCpeSunat(idVenta) {
   );
 }
 
+export async function anularBoletaCpeSunat(idVenta) {
+  return await Resolve.create(
+    instancePrincipal.get(`/api/sunat/anular/boleta/${idVenta}`),
+  );
+}
+
+export async function anularFacturaCpeSunat(idVenta) {
+  return await Resolve.create(
+    instancePrincipal.get(`/api/sunat/anular/factura/${idVenta}`),
+  );
+}
+
+export async function guiaRemisionCpeSunat(idGuiaRemision) {
+  return await Resolve.create(
+    instancePrincipal.get(`/api/sunat/guia/remision/${idGuiaRemision}`),
+  );
+}
+
+export async function consultarCpeSunat(ruc, usuario, clave, tipoComprobante, serie, numeracion) {
+  return await Resolve.create(
+    instancePrincipal.get(`/api/sunat/consultar/${ruc}/${usuario}/${clave}/${tipoComprobante}/${serie}/${numeracion}`),
+  );
+}
+
+
 // ------------------------------------------------------------------------
 // FIN PARA REPORTES PDF, EXCEL
 // ------------------------------------------------------------------------

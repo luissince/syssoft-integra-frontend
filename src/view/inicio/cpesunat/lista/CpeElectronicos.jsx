@@ -23,9 +23,12 @@ import { images } from '../../../../helper';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
 import {
+  anularBoletaCpeSunat,
+  anularFacturaCpeSunat,
   comboComprobante,
   comboSucursal,
   facturarCpeSunat,
+  guiaRemisionCpeSunat,
   listCpeSunat,
   obtenerFacturacionPdfVenta,
 } from '../../../../network/rest/principal.network';
@@ -33,7 +36,6 @@ import { CANCELED } from '../../../../model/types/types';
 import CustomComponent from '../../../../model/class/custom-component';
 import { VENTA, GUIA_DE_REMISION, NOTA_DE_CREDITO } from '../../../../model/types/tipo-comprobante';
 import { pdfA4GuiaRemision, pdfTicketGuiaRemision } from '../../../../helper/lista-pdf.helper';
-import { senGuiaRemision, sendComunicacionDeBaja, sendResumenDiario } from '../../../../network/rest/cpesunat.network';
 import { SpinnerTable, SpinnerView } from '../../../../components/Spinner';
 import Title from '../../../../components/Title';
 import Row from '../../../../components/Row';
@@ -299,7 +301,7 @@ class CpeElectronicos extends CustomComponent {
 
         alertInfo("Cpe Sunat", "Firmando xml y enviando a sunat.")
 
-        const response = await sendResumenDiario(idVenta);
+        const response = await anularBoletaCpeSunat(idVenta);
 
         if (response instanceof SuccessReponse) {
           const { state, accept, code, description } = response.data;
@@ -333,7 +335,7 @@ class CpeElectronicos extends CustomComponent {
 
         alertInfo("Cpe Sunat", "Firmando xml y enviando a sunat.")
 
-        const response = await sendComunicacionDeBaja(idVenta);
+        const response = await anularFacturaCpeSunat(idVenta);
 
         if (response instanceof SuccessReponse) {
           const { state, accept, code, description } = response.data;
@@ -367,7 +369,7 @@ class CpeElectronicos extends CustomComponent {
 
         alertInfo("Cpe Sunat", "Firmando xml y enviando a sunat.")
 
-        const response = await senGuiaRemision(idGuiaRemision);
+        const response = await guiaRemisionCpeSunat(idGuiaRemision);
 
         if (response instanceof SuccessReponse) {
           const { state, accept, code, description } = response.data;

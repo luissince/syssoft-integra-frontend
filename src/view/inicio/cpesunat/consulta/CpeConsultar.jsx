@@ -9,10 +9,10 @@ import {
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../../components/Container';
-import { cdrStatus, consultarComprobante } from '../../../../network/rest/cpesunat.network';
+import { cdrStatus } from '../../../../network/rest/cpesunat.network';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
-import { loadEmpresa } from '../../../../network/rest/principal.network';
+import { consultarCpeSunat, loadEmpresa } from '../../../../network/rest/principal.network';
 
 
 class CpeElectronicos extends React.Component {
@@ -95,16 +95,16 @@ class CpeElectronicos extends React.Component {
         this.refClave.current.focus();
       });
       return;
-      
+
     }
-    
+
 
     if (isEmpty(this.state.tipo)) {
       alertWarning('Empressa', 'Seleccione tipo de documento.', () => {
         this.refTipo.current.focus();
       });
       return;
-      
+
     }
 
     if (isEmpty(this.state.serie)) {
@@ -125,18 +125,25 @@ class CpeElectronicos extends React.Component {
     alertDialog('Consulta', '¿Está seguro de continuar?', async (value) => {
       if (value) {
 
-        const data = {
-          rucSol: this.state.ruc,
-          userSol: this.state.usuario,
-          passSol: this.state.clave,
-          tipo: this.state.tipo,
-          serie: this.state.serie.toUpperCase(),
-          correlativo: this.state.correlativo,
-        };
+        // const data = {
+        //   rucSol: this.state.ruc,
+        //   userSol: this.state.usuario,
+        //   passSol: this.state.clave,
+        //   tipo: this.state.tipo,
+        //   serie: this.state.serie.toUpperCase(),
+        //   correlativo: this.state.correlativo,
+        // };
 
-        alertInfo("Consulta","Precesanso...")
+        alertInfo("Consulta", "Precesanso...")
 
-        const response = await consultarComprobante(data);
+        const response = await consultarCpeSunat(
+          this.state.ruc,
+          this.state.usuario,
+          this.state.clave,
+          this.state.tipo,
+          this.state.serie.toUpperCase(),
+          this.state.correlativo,
+        );
 
         if (response instanceof SuccessReponse) {
           const result = response.data;
@@ -178,7 +185,6 @@ class CpeElectronicos extends React.Component {
       });
       return;
     }
-
 
     if (this.state.usuario === '') {
       await this.setStateAsync({
@@ -429,7 +435,7 @@ class CpeElectronicos extends React.Component {
               />
             </div>
           </div>
-          
+
         </div>
 
         <div className="row">
@@ -501,4 +507,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(CpeElectronicos);
+const ConnectedCpeElectronicos = connect(mapStateToProps, null)(CpeElectronicos);
+
+export default ConnectedCpeElectronicos;
