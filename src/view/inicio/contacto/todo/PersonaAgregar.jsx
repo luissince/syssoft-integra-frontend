@@ -18,7 +18,7 @@ import ErrorResponse from '../../../../model/class/error-response';
 import {
   createPersona,
   getUbigeo,
-  listComboTipoDocumento,
+  comboTipoDocumento,
 } from '../../../../network/rest/principal.network';
 import { getDni, getRuc } from '../../../../network/rest/apisperu.network';
 import { CANCELED } from '../../../../model/types/types';
@@ -141,7 +141,7 @@ class PersonaAgregar extends CustomComponent {
   };
 
   async fetchTipoDocumento() {
-    const response = await listComboTipoDocumento(
+    const response = await comboTipoDocumento(
       this.abortControllerTable.signal,
     );
 

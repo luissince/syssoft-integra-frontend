@@ -1,4 +1,4 @@
-import { CustomModalContent } from '../../../../../../components/CustomModal';
+import { CustomModalForm } from '../../../../../../components/CustomModal';
 import Row from '../../../../../../components/Row';
 import Column from '../../../../../../components/Column';
 import {
@@ -109,7 +109,7 @@ const ModalSale = (props) => {
   };
 
   return (
-    <CustomModalContent
+    <CustomModalForm
       contentRef={(ref) => refSale.current = ref}
       isOpen={isOpen}
       onOpen={onOpen}
@@ -117,6 +117,7 @@ const ModalSale = (props) => {
       onClose={onClose}
       contentLabel="Modal de Cobro"
       titleHeader="Completar Cobro"
+      onSubmit={handleSaveSale}
       body={
         <>
           <SpinnerView
@@ -188,6 +189,7 @@ const ModalSale = (props) => {
                   </select>
                   <div className="input-group-append">
                     <button
+                      type="button"
                       className="btn btn-outline-success d-flex"
                       title="Agregar Pago"
                       onClick={handleAddBancosAgregados}
@@ -210,9 +212,8 @@ const ModalSale = (props) => {
       footer={
         <>
           <button
-            type="button"
+            type="submit"
             className="btn btn-primary"
-            onClick={handleSaveSale}
           >
             <i className='fa fa-save'></i> Procesar Cobro
           </button>
@@ -241,6 +242,7 @@ const MetodoPago = ({
       <input
         autoFocus
         type="text"
+        role='float'
         className="form-control"
         placeholder="Monto"
         value={monto}
@@ -254,6 +256,7 @@ const MetodoPago = ({
       </div>
       <div className="input-group-append">
         <button
+          type="button"
           className="btn btn-outline-danger d-flex"
           title="Agregar Pago"
           onClick={() => handleRemoveItemBancosAgregados(idBanco)}

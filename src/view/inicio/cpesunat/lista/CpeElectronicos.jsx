@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  spinnerLoading,
   numberFormat,
   formatTime,
   currentDate,
@@ -35,6 +34,11 @@ import CustomComponent from '../../../../model/class/custom-component';
 import { VENTA, GUIA_DE_REMISION, NOTA_DE_CREDITO } from '../../../../model/types/tipo-comprobante';
 import { pdfA4GuiaRemision, pdfTicketGuiaRemision } from '../../../../helper/lista-pdf.helper';
 import { senGuiaRemision, sendComunicacionDeBaja, sendResumenDiario } from '../../../../network/rest/cpesunat.network';
+import { SpinnerTable, SpinnerView } from '../../../../components/Spinner';
+import Title from '../../../../components/Title';
+import Row from '../../../../components/Row';
+import Column from '../../../../components/Column';
+import { TableResponsive } from '../../../../components/Table';
 
 class CpeElectronicos extends CustomComponent {
 
@@ -65,9 +69,12 @@ class CpeElectronicos extends CustomComponent {
       // ),
 
       fechaInicio: currentDate(),
-      fetchaFinal: currentDate(),
+      fechaFinal: currentDate(),
+
       idComprobante: '',
+
       idSucursal: '',
+
       comprobantes: [],
       sucursales: [],
 
@@ -77,7 +84,6 @@ class CpeElectronicos extends CustomComponent {
       filasPorPagina: 10,
       messageTable: 'Cargando información...',
 
-      // idSucursal: this.props.token.project.idSucursal,
       idUsuario: this.props.token.userToken.idUsuario,
     };
 
@@ -240,17 +246,11 @@ class CpeElectronicos extends CustomComponent {
   }
 
   handleInputFechaInicio = (event) => {
-    const { value } = event.target;
-    if (value !== this.state.fechaInicio) {
-      this.setState({ fechaInicio: event.target.value })
-    }
+    this.setState({ fechaInicio: event.target.value })
   }
 
   handleInputFechaFinal = (event) => {
-    const { value } = event.target;
-    if (value !== this.state.fetchaFinal) {
-      this.setState({ fetchaFinal: event.target.value })
-    }
+    this.setState({ fechaFinal: event.target.value })
   }
 
   handleSelectComprobante = (event) => {
@@ -431,8 +431,7 @@ class CpeElectronicos extends CustomComponent {
             src={image}
             width={width}
             alt={alt}
-          />{" "}
-          {title}
+          />{" "} {title}
         </button>
       </li>
     );
@@ -442,8 +441,7 @@ class CpeElectronicos extends CustomComponent {
     return (
       <button
         className="btn btn-light btn-sm"
-        onClick={onClick}
-      >
+        onClick={onClick}>
         <img src={image} alt={alt} width="22" />
       </button>
     );
@@ -501,7 +499,9 @@ class CpeElectronicos extends CustomComponent {
       return (
         <tr>
           <td className="text-center" colSpan="9">
-            {spinnerLoading('Cargando información de la tabla...', true)}
+            <SpinnerTable
+              message='Cargando información de la tabla...'
+            />
           </td>
         </tr>
       );
@@ -539,13 +539,15 @@ class CpeElectronicos extends CustomComponent {
                 {this.opcionButtonOpcion(images.invoice, 'Archivo Pdf 80mm', 22, 'Pdf Ticket', () => this.handleOpenPdfTicket(item.idComprobante, item.tipo))}
                 {this.opcionButtonOpcion(images.xml, 'Archivo Xml', 22, 'Xml', () => this.handleDownloadXml(item.idComprobante))}
                 {this.opcionButtonOpcion(images.email, 'Enviar Correo', 22, 'Email', () => this.handleSendEmail(item.idComprobante))}
-                {item.tipo === "fac" && item.anulacion !== 0 && this.opcionButtonOpcion(images.error, item.anulacion === 1 ? 'Comunicación de Baja' : 'Resumen Diario', 22, 'Error', () => {
-                  if (item.anulacion === 1) {
-                    this.handleSendComunicacionDeBaja(item.idComprobante, item.serie + '-' + formatNumberWithZeros(item.numeracion))
-                  } else {
-                    this.handleSendResumenDiario(item.idComprobante, item.serie + '-' + formatNumberWithZeros(item.numeracion))
-                  }
-                })}
+                {
+                  item.tipo === "fac" && item.anulacion !== 0 && this.opcionButtonOpcion(images.error, item.anulacion === 1 ? 'Comunicación de Baja' : 'Resumen Diario', 22, 'Error', () => {
+                    if (item.anulacion === 1) {
+                      this.handleSendComunicacionDeBaja(item.idComprobante, item.serie + '-' + formatNumberWithZeros(item.numeracion))
+                    } else {
+                      this.handleSendResumenDiario(item.idComprobante, item.serie + '-' + formatNumberWithZeros(item.numeracion))
+                    }
+                  })
+                }
               </ul>
             </div>
           </td>
@@ -579,80 +581,83 @@ class CpeElectronicos extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
-        {this.state.initialLoad && spinnerLoading(this.state.initialMessage)}
 
-        <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <div className="form-group">
-              <h5>
-                Comprobante de Pago Electrónico{' '}
-                <small className="text-secondary">LISTA</small>
-              </h5>
-            </div>
-          </div>
-        </div>
+        <SpinnerView
+          loading={this.state.initialLoad}
+          message={this.state.initialMessage}
+        />
 
-        <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <Title
+          title='Comprobante de Pago Electrónico'
+          subTitle='LISTA'
+        />
+
+        <Row>
+          <Column>
             <div className="form-group">
               <span>Resumen de Boletas/Facturas/Nota Crédito/Nota Débito</span>
             </div>
-          </div>
-        </div>
+          </Column>
+        </Row>
 
-        <div className="row">
-          <div className="col-lg-2 col-md-2 col-sm-12 col-xs-12">
+        <Row>
+          <Column className="col-lg-2 col-md-2 col-sm-12 col-xs-12">
             <div className="form-group">
               <img src={images.sunat} alt="Estado Sunat" width="24" />{' '}
               <span>Estados SUNAT:</span>
             </div>
-          </div>
-          <div className="col-lg-2 col-md-2 col-sm-12 col-xs-12">
+          </Column>
+
+          <Column className="col-lg-2 col-md-2 col-sm-12 col-xs-12">
             <div className="form-group">
               <img src={images.accept} alt="Aceptado" width="24" />{' '}
               <span>Aceptado</span>
             </div>
-          </div>
-          <div className="col-lg-2 col-md-2 col-sm-12 col-xs-12">
+          </Column>
+
+          <Column className="col-lg-2 col-md-2 col-sm-12 col-xs-12">
             <div className="form-group">
               <img src={images.unable} alt="Rechazo" width="24" />{' '}
               <span>Rechazado</span>
             </div>
-          </div>
-          <div className="col-lg-2 col-md-2 col-sm-12 col-xs-12">
+          </Column>
+
+          <Column className="col-lg-2 col-md-2 col-sm-12 col-xs-12">
             <div className="form-group">
               <img src={images.reuse} alt="Pendiende de envío" width="24" />{' '}
               <span>Pendiente de Envío</span>
             </div>
-          </div>
-          <div className="col-lg-2 col-md-2 col-sm-12 col-xs-12">
+          </Column>
+
+          <Column className="col-lg-2 col-md-2 col-sm-12 col-xs-12">
             <div className="form-group">
               <img src={images.error} alt="Comunicación de baja" width="24" />{' '}
               <span> Comunicación de Baja (Anulado)</span>
             </div>
-          </div>
-        </div>
+          </Column>
+        </Row>
 
-        <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <Row>
+          <Column>
             <div className="form-group">
               <button
                 className="btn btn-outline-light"
                 onClick={this.loadInit}
               >
                 <i className="bi bi-arrow-clockwise"></i> Recargar Vista
-              </button>{' '}
+              </button>
+              {" "}
               <button
                 className="btn btn-outline-success"
               >
                 <i className="bi bi-file-earmark-excel-fill"></i> Generar Excel
               </button>
             </div>
-          </div>
-        </div>
+          </Column>
+        </Row>
 
-        <div className="row">
-          <div className="col-lg-3 col-md-3 col-sm-12 col-xs-12">
+        <Row>
+          <Column className="col-lg-3 col-md-3 col-sm-12 col-12">
             <div className="form-group">
               <label>Fecha de Inicio:</label>
               <input
@@ -662,19 +667,21 @@ class CpeElectronicos extends CustomComponent {
                 onChange={this.handleInputFechaInicio}
               />
             </div>
-          </div>
-          <div className="col-lg-3 col-md-3 col-sm-12 col-xs-12">
+          </Column>
+
+          <Column className="col-lg-3 col-md-3 col-sm-12 col-12">
             <div className="form-group">
               <label>Fecha de Fin:</label>
               <input
                 className="form-control"
                 type="date"
-                value={this.state.fetchaFinal}
+                value={this.state.fechaFinal}
                 onChange={this.handleInputFechaFinal}
               />
             </div>
-          </div>
-          <div className="col-lg-3 col-md-3 col-sm-12 col-xs-12">
+          </Column>
+
+          <Column className="col-lg-3 col-md-3 col-sm-12 col-12">
             <div className="form-group">
               <label>Comprobantes:</label>
               <select
@@ -690,23 +697,24 @@ class CpeElectronicos extends CustomComponent {
                 }
               </select>
             </div>
-          </div>
-          <div className="col-lg-3 col-md-3 col-sm-12 col-xs-12">
+          </Column>
+
+          <Column className="col-lg-3 col-md-3 col-sm-12 col-12">
             <div className="form-group">
               <label>Estados:</label>
               <select
                 className="form-control"
               >
-                <option value={'0'}>TODOS</option>
-                <option value={'1'}>POR DECLARAR</option>
-                <option value={'2'}>POR ANULAR</option>
+                <option value='0'>TODOS</option>
+                <option value='1'>POR DECLARAR</option>
+                <option value='2'>POR ANULAR</option>
               </select>
             </div>
-          </div>
-        </div>
+          </Column>
+        </Row>
 
-        <div className="row">
-          <div className="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+        <Row>
+          <Column className="col-md-6 col-sm-12">
             <div className="form-group">
               <label>Buscar:</label>
               <div className="input-group mb-2">
@@ -724,8 +732,9 @@ class CpeElectronicos extends CustomComponent {
                 />
               </div>
             </div>
-          </div>
-          <div className="col-lg-3 col-md-6 col-sm-12 col-xs-12">
+          </Column>
+
+          <Column className="col-md-6 col-sm-12">
             <div className="form-group">
               <label>Sucursal:</label>
               <select
@@ -740,33 +749,30 @@ class CpeElectronicos extends CustomComponent {
                 }
               </select>
             </div>
-          </div>
-        </div>
+          </Column>
+        </Row>
 
-        <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <div className="table-responsive">
-              <table className="table table-striped table-bordered rounded">
-                <thead>
-                  <tr>
-                    <th width="5%" className="text-center">
-                      #
-                    </th>
-                    <th width="5%">Opciones</th>
-                    <th width="10%">Fecha</th>
-                    <th width="10%">Comprobante</th>
-                    <th width="15%">Cliente</th>
-                    <th width="10%">Estado</th>
-                    <th width="10%">Total</th>
-                    <th width="10%">Estado Sunat</th>
-                    <th width="10%">Observación SUNAT</th>
-                  </tr>
-                </thead>
-                <tbody>{this.generateBody()}</tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+        <Row>
+          <Column>
+            <TableResponsive
+              className={"table table-striped table-bordered rounded"}
+              tHead={
+                <tr>
+                  <th width="5%" className="text-center">#</th>
+                  <th width="5%">Opciones</th>
+                  <th width="10%">Fecha</th>
+                  <th width="10%">Comprobante</th>
+                  <th width="15%">Cliente</th>
+                  <th width="10%">Estado</th>
+                  <th width="10%">Total</th>
+                  <th width="10%">Estado Sunat</th>
+                  <th width="10%">Observación SUNAT</th>
+                </tr>
+              }
+              tBody={this.generateBody()}
+            />
+          </Column>
+        </Row>
 
         <Paginacion
           loading={this.state.loading}

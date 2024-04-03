@@ -184,7 +184,7 @@ class CuentasPorPagarAmbonar extends CustomComponent {
     }
 
     async fetchComboBanco() {
-        const response = await comboBanco(this.abortControllerView.signal);
+        const response = await comboBanco(this.state.idSucursal, this.abortControllerView.signal);
 
         if (response instanceof SuccessReponse) {
             return response.data;
@@ -394,7 +394,7 @@ class CuentasPorPagarAmbonar extends CustomComponent {
 
             if (metodoPagoLista.length > 1) {
                 if (metodoCobroTotal !== cobrar) {
-                    alertWarning('Cobro', 'Al tener mas de 2 métodos de cobro el monto debe ser igual al total.',()=>{
+                    alertWarning('Cobro', 'Al tener mas de 2 métodos de cobro el monto debe ser igual al total.', () => {
                         validateNumericInputs(this.refMetodoPagoContenedor);
                     });
                     return;
@@ -403,7 +403,7 @@ class CuentasPorPagarAmbonar extends CustomComponent {
                 const metodo = metodoPagoLista[0];
                 if (metodo.vuelto === 1) {
                     if (metodoCobroTotal < cobrar) {
-                        alertWarning('Cobro', 'El monto a cobrar es menor que el total.',()=>{
+                        alertWarning('Cobro', 'El monto a cobrar es menor que el total.', () => {
                             validateNumericInputs(this.refMetodoPagoContenedor);
                         });
                         return;
@@ -415,7 +415,7 @@ class CuentasPorPagarAmbonar extends CustomComponent {
                     });
                 } else {
                     if (metodoCobroTotal !== cobrar) {
-                        alertWarning('Cobro', 'El monto a cobrar debe ser igual al total.',()=>{
+                        alertWarning('Cobro', 'El monto a cobrar debe ser igual al total.', () => {
                             validateNumericInputs(this.refMetodoPagoContenedor);
                         });
                         return;

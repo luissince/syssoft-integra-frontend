@@ -47,9 +47,9 @@ import { SpinnerView } from '../../../../../components/Spinner';
  */
 class CompraCrear extends CustomComponent {
   /**
-   *
-   * Constructor
-   */
+    *
+    * Constructor
+    */
   constructor(props) {
     super(props);
     this.state = {
@@ -108,8 +108,8 @@ class CompraCrear extends CustomComponent {
       costoModalProducto: '',
 
       // Id principales
-      idUsuario: this.props.token.userToken.idUsuario,
       idSucursal: this.props.token.project.idSucursal,
+      idUsuario: this.props.token.userToken.idUsuario,
     };
 
     this.initial = { ...this.state };
@@ -130,6 +130,7 @@ class CompraCrear extends CustomComponent {
     this.selectItemCliente = false;
 
     // Referencia para el modal sale
+    this.refModalSale = React.createRef();
     this.refMetodoPagoContenedor = React.createRef();
     this.refMetodoContado = React.createRef();
     this.refNumeroCuotas = React.createRef();
@@ -143,8 +144,6 @@ class CompraCrear extends CustomComponent {
     // Referencia para el custom modal producto
     this.refModalProducto = React.createRef();
 
-    // Referencia para el custom modal producto
-    this.refCustomModalSale = React.createRef();
 
     //Anular las peticiones
     this.abortController = new AbortController();
@@ -281,7 +280,7 @@ class CompraCrear extends CustomComponent {
     }
   }
   async fetchComboBanco() {
-    const response = await comboBanco();
+    const response = await comboBanco(this.state.idSucursal, this.abortController.signal);
 
     if (response instanceof SuccessReponse) {
       return response.data;
@@ -295,7 +294,7 @@ class CompraCrear extends CustomComponent {
   }
 
   async fetchComboAlmacen(params) {
-    const response = await comboAlmacen(params);
+    const response = await comboAlmacen(params, this.abortController.signal);
 
     if (response instanceof SuccessReponse) {
       return response.data;
@@ -309,7 +308,7 @@ class CompraCrear extends CustomComponent {
   }
 
   async fetchImpuesto() {
-    const response = await comboImpuesto();
+    const response = await comboImpuesto(this.abortController.signal);
 
     if (response instanceof SuccessReponse) {
       return response.data;
@@ -432,7 +431,7 @@ class CompraCrear extends CustomComponent {
   }
 
   handleCloseModalSale = () => {
-    const data = this.refCustomModalSale.current;
+    const data = this.refModalSale.current;
     data.classList.add("close-cm")
     data.addEventListener('animationend', () => {
       this.setState({ isOpenSale: false }, () => {
@@ -1171,7 +1170,7 @@ class CompraCrear extends CustomComponent {
     return (
       <ContainerWrapper>
         <ModalSale
-          refSale={this.refCustomModalSale}
+          refSale={this.refModalSale}
           isOpen={this.state.isOpenSale}
           onOpen={this.handleOnOpenModalSale}
           onHidden={this.handleOnHiddenModalSale}

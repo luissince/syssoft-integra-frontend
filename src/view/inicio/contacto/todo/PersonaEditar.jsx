@@ -20,7 +20,7 @@ import {
   editPersona,
   getIdPersona,
   getUbigeo,
-  listComboTipoDocumento,
+  comboTipoDocumento,
 } from '../../../../network/rest/principal.network';
 import { getDni, getRuc } from '../../../../network/rest/apisperu.network';
 import { CANCELED } from '../../../../model/types/types';
@@ -213,7 +213,7 @@ class PersonaEditar extends CustomComponent {
   };
 
   async fetchTipoDocumento() {
-    const response = await listComboTipoDocumento(
+    const response = await comboTipoDocumento(
       this.abortControllerTable.signal,
     );
 

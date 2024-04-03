@@ -152,7 +152,7 @@ const ModalSale = (props) => {
 
           {/* Titutlo del modal */}
           <Row>
-            <Column className="col-12">
+            <Column>
               <div className="text-center">
                 <h5>
                   TOTAL A PAGAR: <span>{numberFormat(importeTotal, codISO)}</span>
@@ -166,33 +166,37 @@ const ModalSale = (props) => {
             <Column className="col-md-4 col-sm-4">
               <hr />
             </Column>
-            <div className="col-md-4 col-sm-4 d-flex align-items-center justify-content-center">
+
+            <Column className="col-md-4 col-sm-4 d-flex align-items-center justify-content-center">
               <h6 className="mb-0">Tipos de cobros</h6>
-            </div>
-            <div className="col-md-4 col-sm-4">
+            </Column>
+
+            <Column className="col-md-4 col-sm-4">
               <hr />
-            </div>
+            </Column>
           </Row>
 
           {/* Tipos de venta */}
           <Row>
             {/* Al contado */}
             <Column>
-              <button
-                className={`btn ${selectTipoCobro === CONTADO ? 'btn-primary' : 'btn-light'} btn-block`}
-                type="button"
-                title="Pago al contado"
-                onClick={() => handleSelectTipoCobro(CONTADO)}
-              >
-                <div className="row">
-                  <div className="col-md-12">
-                    <i className="bi bi-cash-coin fa-2x"></i>
+              <div className="form-group">
+                <button
+                  className={`btn ${selectTipoCobro === CONTADO ? 'btn-primary' : 'btn-light'} btn-block`}
+                  type="button"
+                  title="Pago al contado"
+                  onClick={() => handleSelectTipoCobro(CONTADO)}
+                >
+                  <Row>
+                    <Column className="col-md-12">
+                      <i className="bi bi-cash-coin fa-2x"></i>
+                    </Column>
+                  </Row>
+                  <div className="text-center">
+                    <label>Contado</label>
                   </div>
-                </div>
-                <div className="text-center">
-                  <label>Contado</label>
-                </div>
-              </button>
+                </button>
+              </div>
             </Column>
 
             {/* Crédito fijo*/}
@@ -235,7 +239,6 @@ const ModalSale = (props) => {
             </div> */}
           </Row>
 
-          <br />
           {/* contado detalle */}
           {selectTipoCobro === CONTADO && (
             <Row>
@@ -257,7 +260,7 @@ const ModalSale = (props) => {
 
               <Column className="col-12">
                 <div className="form-group">
-                  <label>Agregar método de cobro:</label>
+                  <label>Agregar metodo de pago:</label>
                   <div className="input-group">
                     <div className="input-group-prepend">
                       <div className="input-group-text">
@@ -287,10 +290,6 @@ const ModalSale = (props) => {
                     </div>
                   </div>
                 </div>
-              </Column>
-
-              <Column className="col-12">
-                <br />
               </Column>
 
               <Column className="col-12">

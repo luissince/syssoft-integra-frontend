@@ -1,559 +1,322 @@
 import React from 'react';
-import CryptoJS from 'crypto-js';
 import FileDownloader from '../../../components/FileDownloader';
-// import { apiComprobanteListcombo } from '../../../network/api';
-import { spinnerLoading, currentDate } from '../../../helper/utils.helper';
+import { currentDate, isEmpty } from '../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../components/Container';
+import CustomComponent from '../../../model/class/custom-component';
+import { SpinnerView } from '../../../components/Spinner';
+import Title from '../../../components/Title';
+import Row from '../../../components/Row';
+import Column from '../../../components/Column';
+import { comboComprobante, comboSucursal, comboUsuario, obtenerReporteVentaExcel, obtenerReporteVentaPdf } from '../../../network/rest/principal.network';
+import SuccessReponse from '../../../model/class/response';
+import ErrorResponse from '../../../model/class/error-response';
+import { CANCELED } from '../../../model/types/types';
+import { VENTA } from '../../../model/types/tipo-comprobante';
 
-class RepVentas extends React.Component {
+class RepVentas extends CustomComponent {
+
   constructor(props) {
     super(props);
-    this.state = {
-      idSucursal: this.props.token.project.idSucursal,
 
-      fechaIni: '',
-      fechaFin: '',
-      isFechaActive: false,
+    this.state = {
+      loading: true,
+      msgLoading: "Cargando información...",
+
+      fechaInicial: currentDate(),
+      fechaFinal: currentDate(),
 
       idComprobante: '',
       comprobantes: [],
-      comprobanteCheck: true,
-
-      idPersona: '',
-      clientes: [],
-      clienteCheck: true,
 
       idUsuario: '',
       usuarios: [],
-      usuarioCheck: true,
 
-      tipoVenta: '',
-      tipoVentaCheck: true,
-
-      loading: true,
-      messageWarning: '',
-      msgLoading: '',
+      idSucursal: this.props.token.project.idSucursal,
+      sucursales: [],
     };
 
-    this.refFechaIni = React.createRef();
-    this.refFechaFin = React.createRef();
+    this.refFechaInicial = React.createRef();
+    this.refFechaFinal = React.createRef();
     this.refComprobante = React.createRef();
-    this.refCliente = React.createRef();
     this.refUsuario = React.createRef();
-    this.refTipoVenta = React.createRef();
+    this.refIdSucursal = React.createRef();
     this.refUseFile = React.createRef();
 
     this.abortControllerView = new AbortController();
   }
 
-  setStateAsync(state) {
-    return new Promise((resolve) => {
-      this.setState(state, resolve);
-    });
-  }
-
-  componentDidMount() {
-    this.loadData();
+  async componentDidMount() {
+    await this.loadingData();
   }
 
   componentWillUnmount() {
     this.abortControllerView.abort();
   }
 
-  loadData = async () => {
-    // try {
-    //     const comprobante = await apiComprobanteListcombo(this.abortControllerView.signal, {
-    //         "tipo": "1"
-    //     });
-    //     const cliente = await axios.get("/api/cliente/listcombo", {
-    //         signal: this.abortControllerView.signal
-    //     });
-    //     const usuario = await axios.get("/api/usuario/listcombo", {
-    //         signal: this.abortControllerView.signal
-    //     });
-    //     await this.setStateAsync({
-    //         clientes: cliente.data,
-    //         usuarios: usuario.data,
-    //         comprobantes: comprobante.data,
-    //         fechaIni: currentDate(),
-    //         fechaFin: currentDate(),
-    //         loading: false,
-    //     });
-    // } catch (error) {
-    //     if (error.message !== "canceled") {
-    //         await this.setStateAsync({
-    //             msgLoading: "Se produjo un error interno, intente nuevamente."
-    //         });
-    //     }
-    // }
-  };
+  loadingData = async () => {
+    const [comprobantes, sucursales, usuarios] = await Promise.all([
+      this.fetchComboComprobante(VENTA),
+      this.fetchComboSucursal(),
+      this.fetchComboUsuario(),
+    ]);
 
-  async onEventImprimir() {
-    if (this.state.fechaFin < this.state.fechaIni) {
-      await this.setStateAsync({
-        messageWarning: 'La Fecha inicial no puede ser mayor a la fecha final.',
-      });
-      this.FechaIni.current.focus();
-      return;
-    }
-
-    if (!this.state.comprobanteCheck && this.state.idComprobante === '') {
-      await this.setStateAsync({
-        messageWarning: 'Seleccione un comprobante.',
-      });
-      this.refComprobante.current.focus();
-      return;
-    }
-
-    if (!this.state.clienteCheck && this.state.idPersona === '') {
-      await this.setStateAsync({ messageWarning: 'Seleccione un cliente.' });
-      this.refCliente.current.focus();
-      return;
-    }
-
-    if (!this.state.tipoVentaCheck && this.state.tipoVenta === '') {
-      await this.setStateAsync({
-        messageWarning: 'Seleccione el tipo de venta.',
-      });
-      this.refTipoVenta.current.focus();
-      return;
-    }
-
-    const data = {
-      idEmpresa: 'EM0001',
-      fechaIni: this.state.fechaIni,
-      fechaFin: this.state.fechaFin,
-      idComprobante:
-        this.state.idComprobante === '' ? '' : this.state.idComprobante,
-      idPersona: this.state.idPersona === '' ? '' : this.state.idPersona,
-      idUsuario: this.state.idUsuario === '' ? '' : this.state.idUsuario,
-      tipoVenta: this.state.tipoVenta === '' ? 0 : this.state.tipoVenta,
-      comprobante:
-        this.refComprobante.current.options[
-          this.refComprobante.current.options.selectedIndex
-        ].innerHTML,
-      cliente:
-        this.refCliente.current.options[
-          this.refCliente.current.options.selectedIndex
-        ].innerHTML,
-      usuario:
-        this.refUsuario.current.options[
-          this.refUsuario.current.options.selectedIndex
-        ].innerHTML,
-      tipo: this.refTipoVenta.current.options[
-        this.refTipoVenta.current.options.selectedIndex
-      ].innerHTML,
-    };
-
-    let ciphertext = CryptoJS.AES.encrypt(
-      JSON.stringify(data),
-      'key-report-inmobiliaria',
-    ).toString();
-    let params = new URLSearchParams({ params: ciphertext });
-    window.open('/api/factura/repgeneralventas?' + params, '_blank');
+    this.setState({
+      comprobantes,
+      sucursales,
+      usuarios
+      , loading: false
+    })
   }
 
-  async onEventExcel() {
-    if (this.state.fechaFin < this.state.fechaIni) {
-      await this.setStateAsync({
-        messageWarning: 'La Fecha inicial no puede ser mayor a la fecha final.',
-      });
-      this.FechaIni.current.focus();
-      return;
-    }
-
-    if (!this.state.comprobanteCheck && this.state.idComprobante === '') {
-      await this.setStateAsync({
-        messageWarning: 'Seleccione un comprobante.',
-      });
-      this.refComprobante.current.focus();
-      return;
-    }
-
-    if (!this.state.clienteCheck && this.state.idPersona === '') {
-      await this.setStateAsync({ messageWarning: 'Seleccione un cliente.' });
-      this.refCliente.current.focus();
-      return;
-    }
-
-    if (!this.state.tipoVentaCheck && this.state.tipoVenta === '') {
-      await this.setStateAsync({
-        messageWarning: 'Seleccione el tipo de venta.',
-      });
-      this.refTipoVenta.current.focus();
-      return;
-    }
-
-    const data = {
-      idEmpresa: 'EM0001',
-      fechaIni: this.state.fechaIni,
-      fechaFin: this.state.fechaFin,
-      idComprobante:
-        this.state.idComprobante === '' ? '' : this.state.idComprobante,
-      idPersona: this.state.idPersona === '' ? '' : this.state.idPersona,
-      idUsuario: this.state.idUsuario === '' ? '' : this.state.idUsuario,
-      tipoVenta: this.state.tipoVenta === '' ? 0 : this.state.tipoVenta,
-      comprobante:
-        this.refComprobante.current.options[
-          this.refComprobante.current.options.selectedIndex
-        ].innerHTML,
-      cliente:
-        this.refCliente.current.options[
-          this.refCliente.current.options.selectedIndex
-        ].innerHTML,
-      usuario:
-        this.refUsuario.current.options[
-          this.refUsuario.current.options.selectedIndex
-        ].innerHTML,
-      tipo: this.refTipoVenta.current.options[
-        this.refTipoVenta.current.options.selectedIndex
-      ].innerHTML,
+  async fetchComboComprobante(tipo) {
+    const params = {
+      tipo: tipo,
     };
 
-    let ciphertext = CryptoJS.AES.encrypt(
-      JSON.stringify(data),
-      'key-report-inmobiliaria',
-    ).toString();
+    const response = await comboComprobante(
+      params,
+      this.abortControllerView.signal,
+    );
+
+    if (response instanceof SuccessReponse) {
+      return response.data;
+    }
+
+    if (response instanceof ErrorResponse) {
+      if (response.getType() === CANCELED) return;
+
+      return [];
+    }
+  }
+
+
+  async fetchComboSucursal() {
+    const response = await comboSucursal(
+      this.abortControllerView.signal,
+    );
+
+    if (response instanceof SuccessReponse) {
+      return response.data;
+    }
+
+    if (response instanceof ErrorResponse) {
+      if (response.getType() === CANCELED) return;
+
+      return [];
+    }
+  }
+
+  async fetchComboUsuario() {
+    const response = await comboUsuario(
+      this.abortControllerView.signal,
+    );
+
+    if (response instanceof SuccessReponse) {
+      return response.data;
+    }
+
+    if (response instanceof ErrorResponse) {
+      if (response.getType() === CANCELED) return;
+
+      return [];
+    }
+  }
+
+
+  handleDateFechaInicial = (event) => {
+    this.setState({ fechaInicial: event.target.value });
+  }
+
+  handleDateFechaFinal = (event) => {
+    this.setState({ fechaFinal: event.target.value, });
+  }
+
+  handleSelectComprobante = (event) => {
+    this.setState({ idComprobante: event.target.value, });
+  }
+
+  handleSelectSucursal = (event) => {
+    this.setState({ idSucursal: event.target.value, });
+  }
+
+  handleSelectUsuario = (event) => {
+    this.setState({ idUsuario: event.target.value, });
+  }
+
+  handlePdf = async () => {
+
+    window.open(obtenerReporteVentaPdf(
+      this.props.token.project.idSucursal,
+      this.state.fechaInicial,
+      this.state.fechaFinal,
+      isEmpty(this.state.idComprobante) ? "-" : this.state.idComprobante,
+      isEmpty(this.state.idSucursal) ? "-" : this.state.idSucursal,
+      isEmpty(this.state.idUsuario) ? "-" : this.state.idUsuario
+    ), '_blank');
+  }
+
+  handleExcel = async () => {
+
 
     this.refUseFile.current.download({
       name: 'Reporte de Ventas',
-      file: '/api/factura/excelgeneralventas',
-      filename: 'Reporte de Ventas.xlsx',
-      params: ciphertext,
+      url: obtenerReporteVentaExcel(
+        this.props.token.project.idSucursal,
+        this.state.fechaInicial,
+        this.state.fechaFinal,
+        isEmpty(this.state.idComprobante) ? "-" : this.state.idComprobante,
+        isEmpty(this.state.idSucursal) ? "-" : this.state.idSucursal,
+        isEmpty(this.state.idUsuario) ? "-" : this.state.idUsuario
+      ),
+      filename: 'ReporteVentas.xlsx',
     });
   }
 
   render() {
     return (
       <ContainerWrapper>
-        {this.state.loading && spinnerLoading(this.state.msgLoading)}
+        <SpinnerView
+          loading={this.state.loading}
+          message={this.state.msgLoading}
+        />
 
-        {this.state.messageWarning === '' ? null : (
-          <div className="alert alert-warning" role="alert">
-            <i className="bi bi-exclamation-diamond-fill"></i>{' '}
-            {this.state.messageWarning}
-          </div>
-        )}
+        <Title
+          title='Reporte General de Ventas'
+          subTitle='FILTRAR'
+        />
 
-        <div className="card my-1">
-          <h6 className="card-header">Filtros Generales</h6>
-          <div className="card-body">
-            <div className="row">
-              <div className="col">
-                <div className="form-group">
-                  <label>Filtro por fechas</label>
-                  <div className="custom-control custom-switch">
-                    <input
-                      type="checkbox"
-                      className="custom-control-input"
-                      id="customSwitch1"
-                      checked={this.state.isFechaActive}
-                      onChange={(event) => {
-                        this.setState({
-                          isFechaActive: event.target.checked,
-                          fechaIni: currentDate(),
-                          fechaFin: currentDate(),
-                          messageWarning: '',
-                        });
-                      }}
-                    ></input>
-                    <label
-                      className="custom-control-label"
-                      htmlFor="customSwitch1"
-                    >
-                      {this.state.isFechaActive ? 'Activo' : 'Inactivo'}
-                    </label>
-                  </div>
+        <div className='border rounded p-3'>
+          <Row>
+            <Column className={"col-lg-6 col-md-6 col-sm-6 col-12"}>
+              <div className="form-group">
+                <label>
+                  Fecha Inicial: <i className="fa fa-asterisk text-danger small"></i>
+                </label>
+                <div className="input-group">
+                  <input
+                    type="date"
+                    className="form-control"
+                    ref={this.refFechaInicial}
+                    value={this.state.fechaInicial}
+                    onChange={this.handleDateFechaInicial}
+                  />
                 </div>
               </div>
-              <div className="col">
-                <div className="form-group">
-                  <label>
-                    Fecha inicial{' '}
-                    <i className="fa fa-asterisk text-danger small"></i>
-                  </label>
-                  <div className="input-group">
-                    <input
-                      type="date"
-                      className="form-control"
-                      disabled={!this.state.isFechaActive}
-                      ref={this.refFechaIni}
-                      value={this.state.fechaIni}
-                      onChange={(event) => {
-                        if (event.target.value <= this.state.fechaIni) {
-                          this.setState({
-                            fechaIni: event.target.value,
-                            messageWarning: '',
-                          });
-                        } else {
-                          this.setState({
-                            fechaIni: event.target.value,
-                            messageWarning:
-                              'La Fecha inicial no puede ser mayor a la fecha final.',
-                          });
-                        }
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className="col">
-                <div className="form-group">
-                  <label>
-                    Fecha final{' '}
-                    <i className="fa fa-asterisk text-danger small"></i>
-                  </label>
-                  <div className="input-group">
-                    <input
-                      type="date"
-                      className="form-control"
-                      disabled={!this.state.isFechaActive}
-                      ref={this.refFechaFin}
-                      value={this.state.fechaFin}
-                      onChange={(event) => {
-                        if (event.target.value <= this.state.fechaFin) {
-                          this.setState({
-                            fechaFin: event.target.value,
-                            messageWarning: '',
-                          });
-                        } else {
-                          this.setState({
-                            fechaFin: event.target.value,
-                            messageWarning:
-                              'La Fecha fin no puede ser mayor a la fecha final.',
-                          });
-                        }
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
+            </Column>
+          </Row>
 
-            <div className="row">
-              <div className="col">
-                <div className="form-group">
-                  <label>Comprobante(s)</label>
-                  <div className="input-group">
-                    <select
-                      title="Lista de comprobantes"
-                      className="form-control"
-                      ref={this.refComprobante}
-                      value={this.state.idComprobante}
-                      disabled={this.state.comprobanteCheck}
-                      onChange={async (event) => {
-                        await this.setStateAsync({
-                          idComprobante: event.target.value,
-                        });
-                        if (this.state.idComprobante === '') {
-                          await this.setStateAsync({ comprobanteCheck: true });
-                        }
-                      }}
-                    >
-                      <option value="">-- Todos --</option>
-                      {this.state.comprobantes.map((item, index) => (
+          <Row>
+            <Column className={"col-lg-6 col-md-6 col-sm-6 col-12"}>
+              <div className="form-group">
+                <label>
+                  Fecha Final: <i className="fa fa-asterisk text-danger small"></i>
+                </label>
+                <div className="input-group">
+                  <input
+                    type="date"
+                    className="form-control"
+                    ref={this.refFechaFinal}
+                    value={this.state.fechaFinal}
+                    onChange={this.handleDateFechaFinal}
+                  />
+                </div>
+              </div>
+            </Column>
+          </Row>
+
+          <Row>
+            <Column className={"col-lg-6 col-md-6 col-sm-6 col-12"}>
+              <div className="form-group">
+                <label>Comprobante(s):</label>
+                <div className="input-group">
+                  <select
+                    title="Lista de comprobantes"
+                    className="form-control"
+                    ref={this.refComprobante}
+                    value={this.state.idComprobante}
+                    onChange={this.handleSelectComprobante}>
+                    <option value="">-- Todos --</option>
+                    {
+                      this.state.comprobantes.map((item, index) => (
                         <option key={index} value={item.idComprobante}>
                           {item.nombre + ' (' + item.serie + ')'}
                         </option>
-                      ))}
-                    </select>
-                    <div className="input-group-append">
-                      <div className="input-group-text">
-                        <div className="form-check form-check-inline m-0">
-                          <input
-                            className="form-check-input"
-                            type="checkbox"
-                            checked={this.state.comprobanteCheck}
-                            onChange={async (event) => {
-                              await this.setStateAsync({
-                                comprobanteCheck: event.target.checked,
-                              });
-                              if (this.state.comprobanteCheck) {
-                                await this.setStateAsync({ idComprobante: '' });
-                              }
-                            }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                      ))
+                    }
+                  </select>
                 </div>
               </div>
-              <div className="col">
-                <div className="form-group">
-                  <label>Cliente(s)</label>
-                  <div className="input-group">
-                    {/* <div className="input-group-prepend">
-                                                        <div className="input-group-text"><i className="bi bi-people-fill"></i></div>
-                                                    </div> */}
-                    <select
-                      title="Lista de clientes"
-                      className="form-control"
-                      ref={this.refCliente}
-                      value={this.state.idPersona}
-                      disabled={this.state.clienteCheck}
-                      onChange={async (event) => {
-                        await this.setStateAsync({
-                          idPersona: event.target.value,
-                        });
-                        if (this.state.idPersona === '') {
-                          await this.setStateAsync({ clienteCheck: true });
-                        }
-                      }}
-                    >
-                      <option value="">-- Todos --</option>
-                      {this.state.clientes.map((item, index) => (
-                        <option key={index} value={item.idPersona}>
-                          {item.informacion}
+            </Column>
+          </Row>
+
+          <Row>
+            <Column className={"col-lg-6 col-md-6 col-sm-6 col-12"}>
+              <div className="form-group">
+                <label>Sucursal(s):</label>
+                <div className="input-group">
+                  <select
+                    title="Lista de comprobantes"
+                    className="form-control"
+                    ref={this.refIdSucursal}
+                    value={this.state.idSucursal}
+                    onChange={this.handleSelectSucursal}>
+                    <option value="">-- Todos --</option>
+                    {
+                      this.state.sucursales.map((item, index) => (
+                        <option key={index} value={item.idSucursal}>
+                          {index + 1 + '.- ' + item.nombre}
                         </option>
-                      ))}
-                    </select>
-                    <div className="input-group-append">
-                      <div className="input-group-text">
-                        <div className="form-check form-check-inline m-0">
-                          <input
-                            className="form-check-input"
-                            type="checkbox"
-                            // value={this.state.clienteCheck}
-                            checked={this.state.clienteCheck}
-                            onChange={async (event) => {
-                              await this.setStateAsync({
-                                clienteCheck: event.target.checked,
-                              });
-                              if (this.state.clienteCheck) {
-                                await this.setStateAsync({ idPersona: '' });
-                              }
-                            }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                      ))
+                    }
+                  </select>
                 </div>
               </div>
-              <div className="col">
-                <div className="form-group">
-                  <label>Usuario(s)</label>
-                  <div className="input-group">
-                    <select
-                      title="Lista de usuarios"
-                      className="form-control"
-                      ref={this.refUsuario}
-                      value={this.state.idUsuario}
-                      disabled={this.state.usuarioCheck}
-                      onChange={async (event) => {
-                        await this.setStateAsync({
-                          idUsuario: event.target.value,
-                        });
-                        if (this.state.idUsuario === '') {
-                          await this.setStateAsync({ usuarioCheck: true });
-                        }
-                      }}
-                    >
-                      <option value="">-- Todos --</option>
-                      {this.state.usuarios.map((item, index) => (
+            </Column>
+          </Row>
+
+          <Row>
+            <Column className={"col-lg-6 col-md-6 col-sm-6 col-12"}>
+              <div className="form-group">
+                <label>Usuario(s):</label>
+                <div className="input-group">
+                  <select
+                    title="Lista de usuarios"
+                    className="form-control"
+                    ref={this.refUsuario}
+                    value={this.state.idUsuario}
+                    onChange={this.handleSelectUsuario}>
+                    <option value="">-- Todos --</option>
+                    {
+                      this.state.usuarios.map((item, index) => (
                         <option key={index} value={item.idUsuario}>
                           {item.nombres + ' ' + item.apellidos}
                         </option>
-                      ))}
-                    </select>
-                    <div className="input-group-append">
-                      <div className="input-group-text">
-                        <div className="form-check form-check-inline m-0">
-                          <input
-                            className="form-check-input"
-                            type="checkbox"
-                            checked={this.state.usuarioCheck}
-                            onChange={async (event) => {
-                              await this.setStateAsync({
-                                usuarioCheck: event.target.checked,
-                              });
-                              if (this.state.usuarioCheck) {
-                                await this.setStateAsync({ idUsuario: '' });
-                              }
-                            }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                      ))
+                    }
+                  </select>
                 </div>
               </div>
-            </div>
+            </Column>
+          </Row>
 
-            <div className="row">
-              <div className="col">
-                <div className="form-group">
-                  <label>Tipo de venta(s)</label>
-                  <div className="input-group">
-                    <select
-                      title="Lista tipos de venta"
-                      className="form-control"
-                      ref={this.refTipoVenta}
-                      value={this.state.tipoVenta}
-                      disabled={this.state.tipoVentaCheck}
-                      onChange={async (event) => {
-                        await this.setStateAsync({
-                          tipoVenta: event.target.value,
-                        });
-                        if (this.state.tipoVenta === '') {
-                          await this.setStateAsync({ tipoVentaCheck: true });
-                        }
-                      }}
-                    >
-                      <option value="">-- Todos --</option>
-                      <option value="1">AL CONTADO</option>
-                      <option value="2">AL CREDITO</option>
-                    </select>
-                    <div className="input-group-append">
-                      <div className="input-group-text">
-                        <div className="form-check form-check-inline m-0">
-                          <input
-                            className="form-check-input"
-                            type="checkbox"
-                            checked={this.state.tipoVentaCheck}
-                            onChange={async (event) => {
-                              await this.setStateAsync({
-                                tipoVentaCheck: event.target.checked,
-                              });
-                              if (this.state.tipoVentaCheck) {
-                                await this.setStateAsync({ tipoVenta: '' });
-                              }
-                            }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="col" />
-              <div className="col" />
-            </div>
-
-            <div className="row">
-              <div className="col"></div>
-              <div className="col">
-                <button
-                  className="btn btn-outline-warning btn-sm"
-                  onClick={() => this.onEventImprimir()}
-                >
-                  <i className="bi bi-file-earmark-pdf-fill"></i> Reporte Pdf
-                </button>
-              </div>
-              <div className="col">
-                <button
-                  className="btn btn-outline-success btn-sm"
-                  onClick={() => this.onEventExcel()}
-                >
-                  <i className="bi bi-file-earmark-excel-fill"></i> Reporte
-                  Excel
-                </button>
-              </div>
-              <div className="col"></div>
-            </div>
-          </div>
+          <Row>
+            <Column>
+              <button
+                className="btn btn-outline-warning"
+                onClick={this.handlePdf}
+              >
+                <i className="bi bi-file-earmark-pdf-fill"></i> Generar PDF
+              </button>
+              {" "}
+              <button
+                className="btn btn-outline-success"
+                onClick={this.handleExcel}
+              >
+                <i className="bi bi-file-earmark-excel-fill"></i> Generar Excel
+              </button>
+            </Column>
+          </Row>
         </div>
 
         <FileDownloader ref={this.refUseFile} />
@@ -568,4 +331,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(RepVentas);
+const ConnectedRepVentas = connect(mapStateToProps, null)(RepVentas);
+
+export default ConnectedRepVentas;

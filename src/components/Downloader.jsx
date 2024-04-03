@@ -1,5 +1,6 @@
 import React from 'react';
 import '../recursos/css/download.css';
+import PropTypes from 'prop-types';
 import { readDataBlob } from '../helper/utils.helper';
 import Axios from 'axios';
 
@@ -22,6 +23,12 @@ const Downloader = ({ files = [], remove }) => {
   );
 };
 
+Downloader.propTypes = {
+  files: PropTypes.array,
+  remove: PropTypes.func
+};
+
+
 class DownloadItem extends React.Component {
   constructor(props) {
     super(props);
@@ -35,9 +42,6 @@ class DownloadItem extends React.Component {
 
   componentDidMount() {
     const options = {
-      params: {
-        params: this.props.file.params,
-      },
       onDownloadProgress: (progressEvent) => {
         const { loaded, total } = progressEvent;
 
@@ -50,13 +54,13 @@ class DownloadItem extends React.Component {
       },
     };
 
-    Axios.get(this.props.file.file, {
+    Axios.get(this.props.file.url, {
       responseType: 'blob',
       ...options,
     })
       .then(async (response) => {
         if (this.props.file.filename == undefined) {
-          let result = await readDataBlob(response.data);
+          const result = await readDataBlob(response.data);
 
           const url = window.URL.createObjectURL(
             new Blob([result.data], { type: 'text/xml' }),
@@ -86,7 +90,7 @@ class DownloadItem extends React.Component {
           this.props.removeFile();
         }, 4000);
       })
-      .catch((error) => {
+      .catch(() => {
         this.props.removeFile();
       });
   }
@@ -140,5 +144,10 @@ class DownloadItem extends React.Component {
     );
   }
 }
+
+DownloadItem.propTypes = {
+  file: PropTypes.object,
+  removeFile: PropTypes.func
+};
 
 export default Downloader;

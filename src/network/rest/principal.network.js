@@ -142,7 +142,7 @@ export async function listPersonasConductor(params, signal) {
   );
 }
 
-export async function comboPersona(signal = null) {
+export async function comboPersona(signal) {
   return await Resolve.create(
     instancePrincipal.get('/api/persona/combo', {
       signal: signal,
@@ -150,10 +150,11 @@ export async function comboPersona(signal = null) {
   );
 }
 
-export async function filtrarPersona(params) {
+export async function filtrarPersona(params, signal) {
   return await Resolve.create(
     instancePrincipal.get('/api/persona/filtrar', {
       params: params,
+      signal: signal
     }),
   );
 }
@@ -280,10 +281,11 @@ export async function filtrarProductoVenta(params) {
   );
 }
 
-export async function filtrarProducto(params) {
+export async function filtrarProducto(params, signal) {
   return await Resolve.create(
     instancePrincipal.get('/api/producto/filter', {
       params: params,
+      signal: signal
     }),
   );
 }
@@ -296,18 +298,20 @@ export async function filtrarAlmacenProducto(params) {
   );
 }
 
-export async function preferidosProducto(params) {
+export async function preferidosProducto(params, signal) {
   return await Resolve.create(
     instancePrincipal.get('/api/producto/preferidos', {
       params: params,
+      signal: signal,
     }),
   );
 }
 
-export async function obtenerListaPrecioProducto(params) {
+export async function obtenerListaPrecioProducto(params, signal) {
   return await Resolve.create(
     instancePrincipal.get('/api/producto/lista/precios', {
       params: params,
+      signal: signal
     }),
   );
 }
@@ -1377,9 +1381,9 @@ export async function detailtListBanco(params, signal) {
 }
 
 
-export async function comboBanco(signal) {
+export async function comboBanco(idSucursal, signal) {
   return await Resolve.create(
-    instancePrincipal.get('/api/banco/combo', {
+    instancePrincipal.get(`/api/banco/combo/${idSucursal}`, {
       signal: signal,
     }),
   );
@@ -1442,7 +1446,7 @@ export async function getUbigeo(params) {
 | ENDPOINTS DE TIPO DE DOCUMENTO
 |--------------------------------------------------------------------------
 */
-export async function listComboTipoDocumento(signal) {
+export async function comboTipoDocumento(signal) {
   return await Resolve.create(
     instancePrincipal.get('/api/tipodocumento/combo', {
       signal: signal,
@@ -1816,6 +1820,21 @@ export function obtenerFacturacionPdfVenta(idVenta, tipo) {
   return `${import.meta.env.VITE_APP_BACK_END}/api/reporte/facturacion/venta/pdf/${tipo}/${idVenta}`
 }
 
+export function obtenerReporteVentaPdf(idSucursalGenerado, fechaInicio, fechaFinal, idComprobante, idSucursal, idUsuario) {
+  return `${import.meta.env.VITE_APP_BACK_END}/api/reporte/venta/pdf/${idSucursalGenerado}/${fechaInicio}/${fechaFinal}/${idComprobante}/${idSucursal}/${idUsuario}`
+}
+
+export function obtenerReporteVentaExcel(idSucursalGenerado, fechaInicio, fechaFinal, idComprobante, idSucursal, idUsuario) {
+  return `${import.meta.env.VITE_APP_BACK_END}/api/reporte/venta/excel/${idSucursalGenerado}/${fechaInicio}/${fechaFinal}/${idComprobante}/${idSucursal}/${idUsuario}`
+}
+
+export function obtenerReporteFinanzaPdf(idSucursalGenerado, fechaInicio, fechaFinal, idSucursal, idUsuario) {
+  return `${import.meta.env.VITE_APP_BACK_END}/api/reporte/financiero/pdf/${idSucursalGenerado}/${fechaInicio}/${fechaFinal}/${idSucursal}/${idUsuario}`
+}
+
+export function obtenerReporteFinanzaExcel(idSucursalGenerado, fechaInicio, fechaFinal, idSucursal, idUsuario) {
+  return `${import.meta.env.VITE_APP_BACK_END}/api/reporte/financiero/excel/${idSucursalGenerado}/${fechaInicio}/${fechaFinal}/${idSucursal}/${idUsuario}`
+}
 // ------------------------------------------------------------------------
 // FIN PARA REPORTES PDF, EXCEL
 // ------------------------------------------------------------------------

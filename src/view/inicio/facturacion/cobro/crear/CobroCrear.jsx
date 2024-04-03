@@ -85,8 +85,8 @@ class CobroCrear extends CustomComponent {
       bancosAgregados: [],
 
       // Id principales
-      idUsuario: this.props.token.userToken.idUsuario,
       idSucursal: this.props.token.project.idSucursal,
+      idUsuario: this.props.token.userToken.idUsuario,
     };
 
     this.initial = { ...this.state }
@@ -234,7 +234,7 @@ class CobroCrear extends CustomComponent {
   }
 
   async fetchComboBanco() {
-    const response = await comboBanco();
+    const response = await comboBanco(this.state.idSucursal, this.abortController.signal);
 
     if (response instanceof SuccessReponse) {
       return response.data;

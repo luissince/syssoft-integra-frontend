@@ -179,21 +179,22 @@ const ModalSale = (props) => {
           <Row>
             {/* Al contado */}
             <Column className="col-md-6 col-sm-12">
-              <button
-                className={`btn ${formaPago === CONTADO ? 'btn-primary' : 'btn-light'} btn-block`}
-                type="button"
-                title="Pago al contado"
-                onClick={() => handleSelectTipoPago(CONTADO)}
-              >
-                <div className="row">
-                  <div className="col-md-12">
-                    <i className="bi bi-cash-coin fa-2x"></i>
+              <div className="form-group">
+                <button
+                  className={`btn ${formaPago === CONTADO ? 'btn-primary' : 'btn-light'} btn-block`}
+                  type="button"
+                  title="Pago al contado"
+                  onClick={() => handleSelectTipoPago(CONTADO)}>
+                  <div className="row">
+                    <div className="col-md-12">
+                      <i className="bi bi-cash-coin fa-2x"></i>
+                    </div>
                   </div>
-                </div>
-                <div className="text-center">
-                  <label>Contado</label>
-                </div>
-              </button>
+                  <div className="text-center">
+                    <label>Contado</label>
+                  </div>
+                </button>
+              </div>
             </Column>
 
             {/* Crédito fijo*/}
@@ -256,11 +257,10 @@ const ModalSale = (props) => {
             </div> */}
           </Row>
 
-          <br />
           {/* contado detalle */}
           {formaPago === CONTADO && (
             <Row >
-              <Column ref={refMetodoPagoContenedor}>
+              <Column refChildren={refMetodoPagoContenedor}>
                 <div className="form-group">
                   <h6>Lista de métodos:</h6>
                   {bancosAgregados.map((item, index) => (

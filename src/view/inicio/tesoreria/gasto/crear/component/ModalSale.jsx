@@ -1,6 +1,9 @@
-import { CustomModalContent } from '../../../../../../components/CustomModal';
-import { keyNumberFloat, spinnerLoading, numberFormat, isEmpty, } from '../../../../../../helper/utils.helper';
+import { CustomModalForm } from '../../../../../../components/CustomModal';
+import Row from '../../../../../../components/Row';
+import Column from '../../../../../../components/Column';
+import { keyNumberFloat, numberFormat, isEmpty, } from '../../../../../../helper/utils.helper';
 import PropTypes from 'prop-types';
+import { SpinnerView } from '../../../../../../components/Spinner';
 
 const ModalSale = (props) => {
 
@@ -10,11 +13,17 @@ const ModalSale = (props) => {
     onOpen,
     onHidden,
     onClose,
+
     loading,
+
+    refMetodoPagoContenedor,
     refMetodoContado,
-    importeTotal,
-    bancos,
+
     codISO,
+    importeTotal,
+
+    bancos,
+
     bancosAgregados,
     handleAddBancosAgregados,
     handleInputMontoBancosAgregados,
@@ -95,7 +104,7 @@ const ModalSale = (props) => {
   };
 
   return (
-    <CustomModalContent
+    <CustomModalForm
       contentRef={(ref) => refSale.current = ref}
       isOpen={isOpen}
       onOpen={onOpen}
@@ -103,47 +112,63 @@ const ModalSale = (props) => {
       onClose={onClose}
       contentLabel="Modal de Gasto"
       titleHeader="Completar Gasto"
+      onSubmit={handleSaveSale}
       body={
         <>
-          {loading && spinnerLoading('Cargando datos...')}
+          <SpinnerView
+            loading={loading}
+            message={'Cargando datos...'}
+          />
+
           {/* Titutlo del modal */}
-          <div className="row">
-            <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+          <Row>
+            <Column>
               <div className="text-center">
                 <h5>
                   TOTAL A PAGAR: <span>{numberFormat(importeTotal, codISO)}</span>
                 </h5>
               </div>
-            </div>
-          </div>
+            </Column>
+          </Row>
+
           {/* Sub titulo */}
-          <div className="row">
-            <div className="col-md-4 col-sm-4">
+          <Row>
+            <Column className="col-md-4 col-sm-4">
               <hr />
-            </div>
-            <div className="col-md-4 col-sm-4 d-flex align-items-center justify-content-center">
+            </Column>
+
+            <Column className="col-md-4 col-sm-4 d-flex align-items-center justify-content-center">
               <h6 className="mb-0">-*-</h6>
-            </div>
-            <div className="col-md-4 col-sm-4">
+            </Column>
+
+            <Column className="col-md-4 col-sm-4">
               <hr />
-            </div>
-          </div>
-          <h6>Lista de métodos:</h6>
-          {bancosAgregados.map((item, index) => (
-            <MetodoPago
-              key={index}
-              idBanco={item.idBanco}
-              name={item.nombre}
-              monto={item.monto}
-              handleInputMontoBancosAgregados={handleInputMontoBancosAgregados}
-              handleRemoveItemBancosAgregados={handleRemoveItemBancosAgregados}
-            />
-          ))}
-          <br />
-          <div className="row">
-            <div className='col-md-12'>
+            </Column>
+          </Row>
+
+          <Row>
+            <Column refChildren={refMetodoPagoContenedor}>
               <div className="form-group">
-                <label>Metodo de cobro:</label>
+                <h6>Lista de métodos:</h6>
+
+                {bancosAgregados.map((item, index) => (
+                  <MetodoPago
+                    key={index}
+                    idBanco={item.idBanco}
+                    name={item.nombre}
+                    monto={item.monto}
+                    handleInputMontoBancosAgregados={handleInputMontoBancosAgregados}
+                    handleRemoveItemBancosAgregados={handleRemoveItemBancosAgregados}
+                  />
+                ))}
+              </div>
+            </Column>
+          </Row>
+
+          <Row>
+            <Column>
+              <div className="form-group">
+                <label>Agregar metodo de pago:</label>
                 <div className="input-group">
                   <div className="input-group-prepend">
                     <div className="input-group-text">
@@ -163,6 +188,7 @@ const ModalSale = (props) => {
                   </select>
                   <div className="input-group-append">
                     <button
+                      type="button"
                       className="btn btn-outline-success d-flex"
                       title="Agregar Pago"
                       onClick={handleAddBancosAgregados}
@@ -172,21 +198,21 @@ const ModalSale = (props) => {
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-          <div className="row">
-            <div className='col-md-12'>
+            </Column>
+          </Row>
+
+          <Row>
+            <Column className='col-12'>
               <div className="text-center">{generarVuelto()}</div>
-            </div>
-          </div>
+            </Column>
+          </Row>
         </>
       }
       footer={
         <>
           <button
-            type="button"
+            type="submit"
             className="btn btn-primary"
-            onClick={handleSaveSale}
           >
             <i className='fa fa-save'></i> Procesar Gasto
           </button>
@@ -215,6 +241,7 @@ const MetodoPago = ({
       <input
         autoFocus
         type="text"
+        role='float'
         className="form-control"
         placeholder="Monto"
         value={monto}
@@ -228,6 +255,7 @@ const MetodoPago = ({
       </div>
       <div className="input-group-append">
         <button
+          type="button"
           className="btn btn-outline-danger d-flex"
           title="Agregar Pago"
           onClick={() => handleRemoveItemBancosAgregados(idBanco)}
@@ -245,11 +273,16 @@ ModalSale.propTypes = {
   onOpen: PropTypes.func.isRequired,
   onHidden: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
+
   loading: PropTypes.bool.isRequired,
+
+  refMetodoPagoContenedor: PropTypes.object.isRequired,
   refMetodoContado: PropTypes.object.isRequired,
-  importeTotal: PropTypes.number.isRequired,
-  bancos: PropTypes.array.isRequired,
+
   codISO: PropTypes.string.isRequired,
+  importeTotal: PropTypes.number.isRequired,
+
+  bancos: PropTypes.array.isRequired,
   bancosAgregados: PropTypes.array.isRequired,
   handleAddBancosAgregados: PropTypes.func.isRequired,
   handleInputMontoBancosAgregados: PropTypes.func.isRequired,

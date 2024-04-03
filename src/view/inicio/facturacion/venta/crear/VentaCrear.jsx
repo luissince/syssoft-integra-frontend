@@ -25,7 +25,7 @@ import {
   filtrarProductoVenta,
   preferidosProducto,
   obtenerListaPrecioProducto,
-  listComboTipoDocumento,
+  comboTipoDocumento,
   comboBanco,
   comboAlmacen,
   obtenerFacturacionPdfVenta,
@@ -395,7 +395,10 @@ class VentaCrear extends CustomComponent {
   }
 
   async fetchComboBanco() {
-    const response = await comboBanco();
+    const response = await comboBanco(
+      this.state.idSucursal,
+      this.abortControllerView.signal
+    );
 
     if (response instanceof SuccessReponse) {
       return response.data;
@@ -409,7 +412,10 @@ class VentaCrear extends CustomComponent {
   }
 
   async fetchProductoPreferidos(params) {
-    const response = await preferidosProducto(params);
+    const response = await preferidosProducto(
+      params,
+      this.abortControllerView.signal
+    );
 
     if (response instanceof SuccessReponse) {
       return response.data;
@@ -426,7 +432,11 @@ class VentaCrear extends CustomComponent {
     const params = {
       idProducto: id,
     };
-    const response = await obtenerListaPrecioProducto(params);
+
+    const response = await obtenerListaPrecioProducto(
+      params,
+      this.abortControllerView.signal
+    );
 
     if (response instanceof SuccessReponse) {
       return response.data;
@@ -440,7 +450,7 @@ class VentaCrear extends CustomComponent {
   }
 
   async fetchTipoDocumento() {
-    const response = await listComboTipoDocumento(
+    const response = await comboTipoDocumento(
       this.abortControllerView.signal,
     );
 
@@ -484,7 +494,10 @@ class VentaCrear extends CustomComponent {
   }
 
   async fetchAlmacen(params) {
-    const response = await comboAlmacen(params);
+    const response = await comboAlmacen(
+      params,
+      this.abortControllerView.signal
+    );
 
     if (response instanceof SuccessReponse) {
       return response.data;

@@ -38,9 +38,9 @@ import Title from '../../../../../components/Title';
  */
 class GastoCrear extends CustomComponent {
   /**
-     *
-     * Constructor
-     */
+    *
+    * Constructor
+    */
   constructor(props) {
     super(props);
     this.state = {
@@ -85,8 +85,8 @@ class GastoCrear extends CustomComponent {
       bancosAgregados: [],
 
       // Id principales
-      idUsuario: this.props.token.userToken.idUsuario,
       idSucursal: this.props.token.project.idSucursal,
+      idUsuario: this.props.token.userToken.idUsuario
     };
 
     this.initial = { ...this.state }
@@ -106,7 +106,8 @@ class GastoCrear extends CustomComponent {
     this.selectItemCliente = false;
 
     // Referencia para el modal
-    this.refCustomModalSale = React.createRef();
+    this.refModalSale = React.createRef();
+    this.refMetodoPagoContenedor = React.createRef();
     this.refMetodoContado = React.createRef();
 
     //Anular las peticiones
@@ -136,17 +137,17 @@ class GastoCrear extends CustomComponent {
   }
 
   /*
-   |--------------------------------------------------------------------------
-   | Métodos de acción
-   |--------------------------------------------------------------------------
-   |
-   | Carga los datos iniciales necesarios para inicializar el componente. Este método se utiliza típicamente
-   | para obtener datos desde un servicio externo, como una API o una base de datos, y actualizar el estado del
-   | componente en consecuencia. El método loadingData puede ser responsable de realizar peticiones asíncronas
-   | para obtener los datos iniciales y luego actualizar el estado del componente una vez que los datos han sido
-   | recuperados. La función loadingData puede ser invocada en el montaje inicial del componente para asegurarse
-   | de que los datos requeridos estén disponibles antes de renderizar el componente en la interfaz de usuario.
-   |
+    |--------------------------------------------------------------------------
+    | Métodos de acción
+    |--------------------------------------------------------------------------
+    |
+    | Carga los datos iniciales necesarios para inicializar el componente. Este método se utiliza típicamente
+    | para obtener datos desde un servicio externo, como una API o una base de datos, y actualizar el estado del
+    | componente en consecuencia. El método loadingData puede ser responsable de realizar peticiones asíncronas
+    | para obtener los datos iniciales y luego actualizar el estado del componente una vez que los datos han sido
+    | recuperados. La función loadingData puede ser invocada en el montaje inicial del componente para asegurarse
+    | de que los datos requeridos estén disponibles antes de renderizar el componente en la interfaz de usuario.
+    |
    */
 
   loadData = async () => {
@@ -234,7 +235,7 @@ class GastoCrear extends CustomComponent {
   }
 
   async fetchComboBanco() {
-    const response = await comboBanco();
+    const response = await comboBanco(this.state.idSucursal, this.abortController.signal);
 
     if (response instanceof SuccessReponse) {
       return response.data;
@@ -382,7 +383,7 @@ class GastoCrear extends CustomComponent {
   }
 
   handleCloseModalSale = () => {
-    const data = this.refCustomModalSale.current;
+    const data = this.refModalSale.current;
     data.classList.add("close-cm")
     data.addEventListener('animationend', () => {
       this.setState({ isOpenSale: false }, () => {
@@ -737,7 +738,7 @@ class GastoCrear extends CustomComponent {
 
 
         <ModalSale
-          refSale={this.refCustomModalSale}
+          refSale={this.refModalSale}
           isOpen={this.state.isOpenSale}
           onOpen={this.handleOnOpenModalSale}
           onHidden={this.handleOnHidden}

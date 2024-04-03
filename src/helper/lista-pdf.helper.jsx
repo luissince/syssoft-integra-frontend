@@ -15,8 +15,3 @@ export function pdfA4GuiaRemision(idGuiaRemision) {
 export function pdfTicketGuiaRemision(idGuiaRemision) {
     return `${import.meta.env.VITE_APP_PDF}/api/v1/guiaremision/ticket/${idGuiaRemision}`;
 }
-
-export function pdfFinanzas(fechaInicio, fechaFinal, idSucursal, idUsuario) {
-    // return `${import.meta.env.VITE_APP_PDF}/api/v1/finanzas/?fecha_inicio=${fechaInicio}&fecha_final=${fechaFinal}&id_sucursal=${idSucursal}&id_usuario=${idUsuario}`;
-    return `${import.meta.env.VITE_APP_BACK_END}/api/reporte/financiero/pdf/`;
-}
