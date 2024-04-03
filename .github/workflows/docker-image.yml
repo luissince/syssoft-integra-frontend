@@ -63,7 +63,7 @@ jobs:
           EOL
       
       - name: Creando y ejecutando contenedor
-        run: docker compose up --build legrand-tiquepos-services -d
+        run: docker compose -f docker-compose.yml  up --build legrand-tiquepos-services -d
 
   # build-and-deploy-app-raices:
   #   if: github.event_name == 'push' && github.ref == 'refs/heads/master'
@@ -121,7 +121,7 @@ jobs:
           EOL
       
       - name: Creando y ejecutando contenedor
-        run: docker compose up --build felicitygirls-tiquepos-services -d
+        run: docker compose -f docker-compose.yml  up --build felicitygirls-tiquepos-services -d
 
   # build-and-deploy-app-bodega-modelo:
   #   if: github.event_name == 'push' && github.ref == 'refs/heads/master'
