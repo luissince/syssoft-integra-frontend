@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  numberFormat,
   formatTime,
   currentDate,
   limitarCadena,
@@ -324,7 +323,6 @@ class CpeElectronicos extends CustomComponent {
 
           alertError("Cpe Sunat", response.getMessage())
         }
-
       }
     });
   }
@@ -358,7 +356,6 @@ class CpeElectronicos extends CustomComponent {
 
           alertError("Cpe Sunat", response.getMessage())
         }
-
       }
     });
   }
@@ -392,7 +389,6 @@ class CpeElectronicos extends CustomComponent {
 
           alertError("Cpe Sunat", response.getMessage())
         }
-
       }
     });
   }
@@ -500,7 +496,7 @@ class CpeElectronicos extends CustomComponent {
     if (loading) {
       return (
         <tr>
-          <td className="text-center" colSpan="9">
+          <td className="text-center" colSpan="8">
             <SpinnerTable
               message='Cargando información de la tabla...'
             />
@@ -512,7 +508,7 @@ class CpeElectronicos extends CustomComponent {
     if (isEmpty(lista)) {
       return (
         <tr>
-          <td className="text-center" colSpan="9">¡No hay datos registrados!</td>
+          <td className="text-center" colSpan="8">¡No hay datos registrados!</td>
         </tr>
       );
     }
@@ -568,9 +564,9 @@ class CpeElectronicos extends CustomComponent {
               : <span className="text-success">DECLARAR</span>
             }
           </td>
-          <td className='text-right'>
+          {/* <td className='text-right'>
             {numberFormat(item.total, item.codiso)}
-          </td>
+          </td> */}
           <td className="text-center">
             {this.renderEstado(item)}
           </td>
@@ -631,7 +627,7 @@ class CpeElectronicos extends CustomComponent {
             </div>
           </Column>
 
-          <Column className="col-lg-2 col-md-2 col-sm-12 col-xs-12">
+          <Column className="col-lg-3 col-md-3 col-sm-12 col-xs-12">
             <div className="form-group">
               <img src={images.error} alt="Comunicación de baja" width="24" />{' '}
               <span> Comunicación de Baja (Anulado)</span>
@@ -647,13 +643,7 @@ class CpeElectronicos extends CustomComponent {
                 onClick={this.loadInit}
               >
                 <i className="bi bi-arrow-clockwise"></i> Recargar Vista
-              </button>
-              {" "}
-              <button
-                className="btn btn-outline-success"
-              >
-                <i className="bi bi-file-earmark-excel-fill"></i> Generar Excel
-              </button>
+              </button>            
             </div>
           </Column>
         </Row>
@@ -766,9 +756,9 @@ class CpeElectronicos extends CustomComponent {
                   <th width="10%">Comprobante</th>
                   <th width="15%">Cliente</th>
                   <th width="10%">Estado</th>
-                  <th width="10%">Total</th>
-                  <th width="10%">Estado Sunat</th>
-                  <th width="10%">Observación SUNAT</th>
+                  {/* <th width="10%">Total</th> */}
+                  <th width="5%">Estado </th>
+                  <th width="15%">Observación SUNAT</th>
                 </tr>
               }
               tBody={this.generateBody()}

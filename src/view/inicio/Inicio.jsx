@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 // import { NotificationContainer, NotificationManager } from 'react-notifications';
 import { Switch, Route, Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { signOut, closeProject, addNotification} from '../../redux/actions';
+import { signOut, closeProject, addNotification } from '../../redux/actions';
 
 import Bienvenido from './bienvenido/Bienvenido.jsx';
 import NotFoundMain from '../../components/errors/NotFoundMain.jsx';
@@ -659,22 +659,6 @@ class Inicio extends React.Component {
           */}
 
           <Route
-            path={`${path}/conceptos`}
-            exact={true}
-            render={(props) => <Conceptos {...props} />}
-          />
-          <Route
-            path={`${path}/conceptos/agregar`}
-            exact={true}
-            render={(props) => <ConceptoAgregar {...props} />}
-          />
-          <Route
-            path={`${path}/conceptos/editar`}
-            exact={true}
-            render={(props) => <ConceptoEditar {...props} />}
-          />
-
-          <Route
             path={`${path}/gastos`}
             exact={true}
             render={(props) => <Gastos {...props} />}
@@ -840,6 +824,22 @@ class Inicio extends React.Component {
             path={`${path}/vehiculo/editar`}
             exact={true}
             render={(props) => <VehiculoEditar {...props} />}
+          />
+
+          <Route
+            path={`${path}/conceptos`}
+            exact={true}
+            render={(props) => <Conceptos {...props} />}
+          />
+          <Route
+            path={`${path}/conceptos/agregar`}
+            exact={true}
+            render={(props) => <ConceptoAgregar {...props} />}
+          />
+          <Route
+            path={`${path}/conceptos/editar`}
+            exact={true}
+            render={(props) => <ConceptoEditar {...props} />}
           />
 
           {/* 
