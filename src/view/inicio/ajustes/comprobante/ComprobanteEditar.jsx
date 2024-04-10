@@ -46,6 +46,7 @@ class ComporbanteEditar extends CustomComponent {
       loading: true,
       msgLoading: 'Cargando datos...',
 
+      idSucursal: this.props.token.project.idSucursal,
       idUsuario: this.props.token.userToken.idUsuario,
     };
 
@@ -178,9 +179,11 @@ class ComporbanteEditar extends CustomComponent {
           preferida: this.state.preferida,
           numeroCampo:
             this.state.numeroCampo === '' ? 0 : this.state.numeroCampo,
-          idUsuario: this.state.idUsuario,
           facturado: this.state.facturado,
           anulacion: this.state.anulacion,
+          idSucursal: this.state.idSucursal,
+          idUsuario: this.state.idUsuario,
+
           idComprobante: this.state.idComprobante,
         };
 

@@ -1860,6 +1860,10 @@ export function obtenerReporteFinanzaPdf(idSucursalGenerado, fechaInicio, fechaF
 export function obtenerReporteFinanzaExcel(idSucursalGenerado, fechaInicio, fechaFinal, idSucursal, idUsuario) {
   return `${import.meta.env.VITE_APP_BACK_END}/api/reporte/financiero/excel/${idSucursalGenerado}/${fechaInicio}/${fechaFinal}/${idSucursal}/${idUsuario}`
 }
+
+export function obtenerReporteCpeSunatExcel(idSucursalGenerado, fechaInicio, fechaFinal, idSucursal) {
+  return `${import.meta.env.VITE_APP_BACK_END}/api/reporte/cpesunat/excel/${idSucursalGenerado}/${fechaInicio}/${fechaFinal}/${idSucursal}`
+}
 // ------------------------------------------------------------------------
 // FIN PARA REPORTES PDF, EXCEL
 // ------------------------------------------------------------------------

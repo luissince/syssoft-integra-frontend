@@ -262,7 +262,7 @@ class CpeElectronicos extends CustomComponent {
     this.setState({ idSucursal: event.target.value })
   }
 
-  handleSendFactura = (idVenta) => {
+  handleSendFacturar = (idVenta) => {
     alertDialog("Cpe Sunat", "¿Está seguro de enviar el comprobante electrónico?", async (accept) => {
       if (accept) {
         alertInfo("Cpe Sunat", "Firmando xml y enviando a sunat.")
@@ -448,14 +448,14 @@ class CpeElectronicos extends CustomComponent {
   renderEstado(item) {
     if (item.tipo === "fac") {
       if (item.estado === 0) {
-        return this.opcionButtonEnvio(images.error, 'Error', () => {
-          this.handleSendFactura(item.idComprobante);
+        return this.opcionButtonEnvio(images.unable, 'Error', () => {
+          this.handleSendFacturar(item.idComprobante);
         });
       }
 
       if (isEmpty(item.xmlSunat)) {
         return this.opcionButtonEnvio(images.reuse, 'Reutilizar', () => {
-          this.handleSendFactura(item.idComprobante);
+          this.handleSendFacturar(item.idComprobante);
         });
       }
 
@@ -463,12 +463,16 @@ class CpeElectronicos extends CustomComponent {
         return this.opcionButtonEnvio(images.accept, 'Aceptar');
       }
 
+      if(item.xmlSunat === '2987' || item.xmlSunat === '1032'){
+        return this.opcionButtonEnvio(images.error, 'Anulado');
+      }
+
       return this.opcionButtonEnvio(images.unable, 'Incapaz', () => {
-        this.handleSendFactura(item.idComprobante);
+        this.handleSendFacturar(item.idComprobante);
       });
     } else {
       if (item.estado === 0) {
-        return this.opcionButtonEnvio(images.error, 'Error', () => {
+        return this.opcionButtonEnvio(images.unable, 'Error', () => {
           this.handleSendGuiaRemision(item.idComprobante);
         });
       }
@@ -559,9 +563,9 @@ class CpeElectronicos extends CustomComponent {
             {`${item.tipoDocumento} - ${item.documento}`}<br />{item.informacion}
           </td>
           <td className="text-center">
-            {item.estado === 0
-              ? <span className="text-danger">DAR DE BAJA</span>
-              : <span className="text-success">DECLARAR</span>
+            {item.estado !== 3
+              ? <span className="text-success">DECLARAR</span> 
+              : <span className="text-danger">DAR DE BAJA</span>
             }
           </td>
           {/* <td className='text-right'>

@@ -132,6 +132,7 @@ import RepVentas from './reporte/RepVentas';
 import RepFinanciero from './reporte/RepFinanciero';
 import RepProductos from './reporte/RepProductos';
 import RepClientes from './reporte/RepClientes';
+import RepCpeSunat from './reporte/RepCpeSunat';
 
 import CpeElectronicos from './cpesunat/lista/CpeElectronicos.jsx';
 import CpeConsultar from './cpesunat/consulta/CpeConsultar.jsx';
@@ -865,7 +866,10 @@ class Inicio extends React.Component {
             path={`${path}/repclientes`}
             render={(props) => <RepClientes {...props} />}
           />
-
+          <Route
+            path={`${path}/repcepsunat`}
+            render={(props) => <RepCpeSunat {...props} />}
+          />
 
           {/* 
           --------------------------------------------------------

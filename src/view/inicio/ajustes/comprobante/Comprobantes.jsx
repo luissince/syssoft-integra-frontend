@@ -48,6 +48,7 @@ class Comprobantes extends CustomComponent {
       filasPorPagina: 10,
       messageTable: 'Cargando información...',
 
+      idSucursal: this.props.token.project.idSucursal,
       idUsuario: this.props.token.userToken.idUsuario,
     };
 
@@ -109,6 +110,7 @@ class Comprobantes extends CustomComponent {
 
     const params = {
       opcion: opcion,
+      idSucursal: this.state.idSucursal,
       buscar: buscar,
       posicionPagina: (this.state.paginacion - 1) * this.state.filasPorPagina,
       filasPorPagina: this.state.filasPorPagina,

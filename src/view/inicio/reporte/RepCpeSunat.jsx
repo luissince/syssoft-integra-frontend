@@ -1,6 +1,6 @@
 import React from 'react';
 import FileDownloader from '../../../components/FileDownloader';
-import { currentDate, isEmpty } from '../../../helper/utils.helper';
+import { getFirstDayOfTheMonth, getLastDayOfTheMonth, isEmpty } from '../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../components/Container';
 import CustomComponent from '../../../model/class/custom-component';
@@ -8,13 +8,13 @@ import { SpinnerView } from '../../../components/Spinner';
 import Title from '../../../components/Title';
 import Row from '../../../components/Row';
 import Column from '../../../components/Column';
-import { comboComprobante, comboSucursal, comboUsuario, obtenerReporteVentaExcel, obtenerReporteVentaPdf } from '../../../network/rest/principal.network';
+import { comboSucursal, obtenerReporteCpeSunatExcel } from '../../../network/rest/principal.network';
 import SuccessReponse from '../../../model/class/response';
 import ErrorResponse from '../../../model/class/error-response';
 import { CANCELED } from '../../../model/types/types';
 import { VENTA } from '../../../model/types/tipo-comprobante';
 
-class RepVentas extends CustomComponent {
+class RepCpeSunat extends CustomComponent {
 
   constructor(props) {
     super(props);
@@ -23,14 +23,8 @@ class RepVentas extends CustomComponent {
       loading: true,
       msgLoading: "Cargando información...",
 
-      fechaInicial: currentDate(),
-      fechaFinal: currentDate(),
-
-      idComprobante: '',
-      comprobantes: [],
-
-      idUsuario: '',
-      usuarios: [],
+      fechaInicial: getFirstDayOfTheMonth(),
+      fechaFinal: getLastDayOfTheMonth(),
 
       idSucursal: this.props.token.project.idSucursal,
       sucursales: [],
@@ -39,7 +33,6 @@ class RepVentas extends CustomComponent {
     this.refFechaInicial = React.createRef();
     this.refFechaFinal = React.createRef();
     this.refComprobante = React.createRef();
-    this.refUsuario = React.createRef();
     this.refIdSucursal = React.createRef();
     this.refUseFile = React.createRef();
 
@@ -55,60 +48,18 @@ class RepVentas extends CustomComponent {
   }
 
   loadingData = async () => {
-    const [comprobantes, sucursales, usuarios] = await Promise.all([
-      this.fetchComboComprobante(VENTA),
-      this.fetchComboSucursal(),
-      this.fetchComboUsuario(),
+    const [sucursales] = await Promise.all([
+      this.fetchComboSucursal(VENTA)
     ]);
 
     this.setState({
-      comprobantes,
       sucursales,
-      usuarios,
       loading: false
     })
   }
 
-  async fetchComboComprobante(tipo) {
-    const params = {
-      tipo: tipo,
-    };
-
-    const response = await comboComprobante(
-      params,
-      this.abortControllerView.signal,
-    );
-
-    if (response instanceof SuccessReponse) {
-      return response.data;
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
-
-      return [];
-    }
-  }
-
-
   async fetchComboSucursal() {
     const response = await comboSucursal(
-      this.abortControllerView.signal,
-    );
-
-    if (response instanceof SuccessReponse) {
-      return response.data;
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
-
-      return [];
-    }
-  }
-
-  async fetchComboUsuario() {
-    const response = await comboUsuario(
       this.abortControllerView.signal,
     );
 
@@ -132,44 +83,20 @@ class RepVentas extends CustomComponent {
     this.setState({ fechaFinal: event.target.value, });
   }
 
-  handleSelectComprobante = (event) => {
-    this.setState({ idComprobante: event.target.value, });
-  }
-
   handleSelectSucursal = (event) => {
     this.setState({ idSucursal: event.target.value, });
   }
 
-  handleSelectUsuario = (event) => {
-    this.setState({ idUsuario: event.target.value, });
-  }
-
-  handlePdf = async () => {
-
-    window.open(obtenerReporteVentaPdf(
-      this.props.token.project.idSucursal,
-      this.state.fechaInicial,
-      this.state.fechaFinal,
-      isEmpty(this.state.idComprobante) ? "-" : this.state.idComprobante,
-      isEmpty(this.state.idSucursal) ? "-" : this.state.idSucursal,
-      isEmpty(this.state.idUsuario) ? "-" : this.state.idUsuario
-    ), '_blank');
-  }
-
   handleExcel = async () => {
-
-
     this.refUseFile.current.download({
-      name: 'Reporte de Ventas',
-      url: obtenerReporteVentaExcel(
+      name: 'Reporte CPE Sunat',
+      url: obtenerReporteCpeSunatExcel(
         this.props.token.project.idSucursal,
         this.state.fechaInicial,
         this.state.fechaFinal,
-        isEmpty(this.state.idComprobante) ? "-" : this.state.idComprobante,
         isEmpty(this.state.idSucursal) ? "-" : this.state.idSucursal,
-        isEmpty(this.state.idUsuario) ? "-" : this.state.idUsuario
       ),
-      filename: 'ReporteVentas.xlsx',
+      filename: 'ReporteCPESunat.xlsx',
     });
   }
 
@@ -182,7 +109,7 @@ class RepVentas extends CustomComponent {
         />
 
         <Title
-          title='Reporte General de Ventas'
+          title='Reporte de Comprobantes Electrónicos'
           subTitle='FILTRAR'
         />
 
@@ -228,31 +155,6 @@ class RepVentas extends CustomComponent {
           <Row>
             <Column className={"col-lg-6 col-md-6 col-sm-6 col-12"}>
               <div className="form-group">
-                <label>Comprobante(s):</label>
-                <div className="input-group">
-                  <select
-                    title="Lista de comprobantes"
-                    className="form-control"
-                    ref={this.refComprobante}
-                    value={this.state.idComprobante}
-                    onChange={this.handleSelectComprobante}>
-                    <option value="">-- Todos --</option>
-                    {
-                      this.state.comprobantes.map((item, index) => (
-                        <option key={index} value={item.idComprobante}>
-                          {item.nombre + ' (' + item.serie + ')'}
-                        </option>
-                      ))
-                    }
-                  </select>
-                </div>
-              </div>
-            </Column>
-          </Row>
-
-          <Row>
-            <Column className={"col-lg-6 col-md-6 col-sm-6 col-12"}>
-              <div className="form-group">
                 <label>Sucursal(s):</label>
                 <div className="input-group">
                   <select
@@ -276,39 +178,7 @@ class RepVentas extends CustomComponent {
           </Row>
 
           <Row>
-            <Column className={"col-lg-6 col-md-6 col-sm-6 col-12"}>
-              <div className="form-group">
-                <label>Usuario(s):</label>
-                <div className="input-group">
-                  <select
-                    title="Lista de usuarios"
-                    className="form-control"
-                    ref={this.refUsuario}
-                    value={this.state.idUsuario}
-                    onChange={this.handleSelectUsuario}>
-                    <option value="">-- Todos --</option>
-                    {
-                      this.state.usuarios.map((item, index) => (
-                        <option key={index} value={item.idUsuario}>
-                          {item.nombres + ' ' + item.apellidos}
-                        </option>
-                      ))
-                    }
-                  </select>
-                </div>
-              </div>
-            </Column>
-          </Row>
-
-          <Row>
             <Column>
-              <button
-                className="btn btn-outline-warning"
-                onClick={this.handlePdf}
-              >
-                <i className="bi bi-file-earmark-pdf-fill"></i> Generar PDF
-              </button>
-              {" "}
               <button
                 className="btn btn-outline-success"
                 onClick={this.handleExcel}
@@ -331,6 +201,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-const ConnectedRepVentas = connect(mapStateToProps, null)(RepVentas);
+const ConnectedRepCpeSunat = connect(mapStateToProps, null)(RepCpeSunat);
 
-export default ConnectedRepVentas;
+export default ConnectedRepCpeSunat;

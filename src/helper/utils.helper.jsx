@@ -198,12 +198,7 @@ export function formatNumberWithZeros(numero) {
  */
 export function currentDate() {
   const date = new Date();
-  const year = date.getFullYear();
-  const month =
-    date.getMonth() + 1 > 9 ? date.getMonth() + 1 : '0' + (date.getMonth() + 1);
-  const day = date.getDate() > 9 ? date.getDate() : '0' + date.getDate();
-  const formatted_date = `${year}-${month}-${day}`;
-  return formatted_date;
+  return parseFormatDate(date);
 }
 
 /**
@@ -229,6 +224,29 @@ export function getCurrentMonth() {
 export function getCurrentYear() {
   const today = new Date();
   return today.getFullYear();
+}
+
+export function getFirstDayOfTheMonth() {
+  const date = new Date();
+  const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
+  return parseFormatDate(firstDay);
+}
+
+export function getLastDayOfTheMonth() {
+  const date = new Date();
+  const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+  return parseFormatDate(lastDay);
+}
+
+function parseFormatDate(date) {
+  const year = date.getFullYear();
+  const month = padZeroes(date.getMonth() + 1);
+  const day = padZeroes(date.getDate());
+  return `${year}-${month}-${day}`;
+}
+
+function padZeroes(num) {
+  return num > 9 ? num : '0' + num;
 }
 
 export function monthName(month) {

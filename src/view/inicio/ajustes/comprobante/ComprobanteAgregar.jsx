@@ -44,6 +44,7 @@ class ComporbanteAgregar extends CustomComponent {
       loading: true,
       msgLoading: 'Cargando datos...',
 
+      idSucursal: this.props.token.project.idSucursal,
       idUsuario: this.props.token.userToken.idUsuario,
     };
 
@@ -141,9 +142,10 @@ class ComporbanteAgregar extends CustomComponent {
               this.state.numeroCampo === '' ? 0 : this.state.numeroCampo,
             facturado: this.state.facturado,
             anulacion: this.state.anulacion,
+            idSucursal: this.state.idSucursal,
             idUsuario: this.state.idUsuario,
           };
-          console.log(data)
+
           const response = await addComprobante(data, this.abortController.signal);
 
           if (response instanceof SuccessReponse) {
