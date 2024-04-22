@@ -199,17 +199,15 @@ class Paginacion extends React.Component {
       <div className="row">
         <div className="col-sm-12 col-md-5">
           <div
-            className="dataTables_info mt-2"
-            role="status"
-            aria-live="polite"
+            className="d-flex h-100 align-items-center"
           >
             {this.messagePaginacion}
           </div>
         </div>
         <div className="col-sm-12 col-md-7">
-          <div className="dataTables_paginate paging_simple_numbers">
-            <nav aria-label="Page navigation example">
-              <ul className="pagination justify-content-end">
+          <div className="d-flex justify-content-end">
+            <nav aria-label="Page">
+              <ul className="pagination m-0">
                 {renderPrevBtn}
                 {pageDecrementBtn}
                 {renderPageNumbers}

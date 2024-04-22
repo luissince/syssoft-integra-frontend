@@ -12,6 +12,7 @@ import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
 import { TableResponsive } from '../../../../../components/Table';
 import { SpinnerTable } from '../../../../../components/Spinner';
+import Paginacion from '../../../../../components/Paginacion';
 
 class Cotizaciones extends CustomComponent {
   constructor(props) {
@@ -190,7 +191,7 @@ class Cotizaciones extends CustomComponent {
 
     return this.state.lista.map((item, index) => {
 
-      const estado = item.estado === 1 ? <span className="text-success">Activo</span> : <span className="text-danger">Anulado</span>;
+      const estado = item.estado === 1 ? <span className="text-success">ACTIVO</span> : <span className="text-danger">ANULADO</span>;
 
       return (
         <tr key={index}>
@@ -199,7 +200,7 @@ class Cotizaciones extends CustomComponent {
           <td>{item.documento}<br />{item.informacion}</td>
           <td>{item.comprobante}<br />{item.serie}-{formatNumberWithZeros(item.numeracion)}</td>
           <td className='text-center'>{estado}</td>
-          <td className='text-right'>{numberFormat(item.total, item.codiso)} </td>
+          <td className='text-center'>{numberFormat(item.total, item.codiso)} </td>
           <td className="text-center">
             <button
               className="btn btn-outline-primary btn-sm"
@@ -277,7 +278,7 @@ class Cotizaciones extends CustomComponent {
                 <tr>
                   <th width="5%" className="text-center">#</th>
                   <th width="10%">Fecha</th>
-                  <th width="15%">Cliente</th>
+                  <th width="20%">Cliente</th>
                   <th width="15%">Comprobante</th>
                   <th width="10%" className="text-center">Estado</th>
                   <th width="10%" className="text-center">Total</th>
@@ -294,6 +295,14 @@ class Cotizaciones extends CustomComponent {
           </Column>
         </Row>
 
+        <Paginacion
+          loading={this.state.loading}
+          data={this.state.lista}
+          totalPaginacion={this.state.totalPaginacion}
+          paginacion={this.state.paginacion}
+          fillTable={this.paginacionContext}
+          restart={this.state.restart}
+        />
       </ContainerWrapper>
     );
   }

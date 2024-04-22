@@ -1,6 +1,7 @@
-import { handlePasteFloat, keyNumberFloat, rounded, spinnerLoading } from '../../../../../../helper/utils.helper';
+import { handlePasteFloat, keyNumberFloat, rounded } from '../../../../../../helper/utils.helper';
 import PropTypes from 'prop-types';
 import { UNIDADES } from '../../../../../../model/types/tipo-tratamiento-producto';
+import { SpinnerView } from '../../../../../../components/Spinner';
 
 const ModalProducto = (props) => {
 
@@ -31,7 +32,10 @@ const ModalProducto = (props) => {
           </button>
 
           <div className="card-body h-100 overflow-y-auto">
-            {loading && spinnerLoading()}
+            <SpinnerView
+              loading={loading}
+              message={"Cargando datos..."}
+            />
 
             <div className="row">
               <div className="col">

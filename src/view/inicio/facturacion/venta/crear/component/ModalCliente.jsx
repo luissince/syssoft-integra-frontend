@@ -1,3 +1,6 @@
+import Column from "../../../../../../components/Column";
+import Row from "../../../../../../components/Row";
+import { images } from "../../../../../../helper";
 import { handlePasteInteger, keyNumberInteger, keyNumberPhone, spinnerLoading } from "../../../../../../helper/utils.helper";
 import { CLIENTE_JURIDICO, CLIENTE_NATURAL } from "../../../../../../model/types/tipo-cliente";
 import PropTypes from 'prop-types';
@@ -12,7 +15,7 @@ const ModalCliente = (props) => {
 
   const { refIdTipoDocumentoPn, idTipoDocumentoPn, handleSelectIdTipoDocumentoPn } = props;
 
-  const { refNumeroDocumentoPn, numeroDocumentoPn, handleInputNumeroDocumentoPn } = props;
+  const { refNumeroDocumentoPn, numeroDocumentoPn, handleInputNumeroDocumentoPn, handleApiReniec } = props;
 
   const { refInformacionPn, informacionPn, handleInputInformacionPn } = props;
 
@@ -22,7 +25,7 @@ const ModalCliente = (props) => {
 
   const { refIdTipoDocumentoPj, idTipoDocumentoPj, handleSelectIdTipoDocumentoPj } = props;
 
-  const { refNumeroDocumentoPj, numeroDocumentoPj, handleInputNumeroDocumentoPj } = props;
+  const { refNumeroDocumentoPj, numeroDocumentoPj, handleInputNumeroDocumentoPj, handleApiSunat } = props;
 
   const { refInformacionPj, informacionPj, handleInputInformacionPj } = props;
 
@@ -53,8 +56,8 @@ const ModalCliente = (props) => {
             {loading && spinnerLoading()}
 
             {/* Navegación por pestañas para Persona Natural y Persona Jurídica */}
-            <div className="row">
-              <div className="col">
+            <Row>
+              <Column>
                 <ul className="nav nav-tabs" id="myTab" role="tablist">
                   {/* Pestaña para Persona Natural */}
                   <li className="nav-item" role="presentation">
@@ -99,8 +102,8 @@ const ModalCliente = (props) => {
                   >
                     {/* Campos del formulario para Persona Natural */}
                     {/* Agregar comentarios para cada grupo de formulario describiendo el propósito */}
-                    <div className="row">
-                      <div className="col">
+                    <Row>
+                      <Column>
                         <div className="form-group">
                           <label>
                             Tipo Documento: <i className="fa fa-asterisk text-danger small"></i>{' '}
@@ -118,31 +121,43 @@ const ModalCliente = (props) => {
                             ))}
                           </select>
                         </div>
-                      </div>
-                    </div>
+                      </Column>
+                    </Row>
 
-                    <div className="row">
-                      <div className="col">
+                    <Row>
+                      <Column>
                         <div className="form-group">
                           <label>
                             N° de documento ({numeroDocumentoPn.length}): <i className="fa fa-asterisk text-danger small"></i>
                           </label>
-                          <input
-                            className="form-control"
-                            autoFocus
-                            placeholder="00000000"
-                            ref={refNumeroDocumentoPn}
-                            value={numeroDocumentoPn}
-                            onChange={handleInputNumeroDocumentoPn}
-                            onKeyDown={keyNumberInteger}
-                            onPaste={handlePasteInteger}
-                          />
+                          <div className="input-group is-invalid">
+                            <input
+                              className="form-control"
+                              autoFocus
+                              placeholder="00000000"
+                              ref={refNumeroDocumentoPn}
+                              value={numeroDocumentoPn}
+                              onChange={handleInputNumeroDocumentoPn}
+                              onKeyDown={keyNumberInteger}
+                              onPaste={handlePasteInteger}
+                            />
+                            <div className="input-group-append">
+                              <button
+                                className="btn btn-outline-secondary"
+                                type="button"
+                                title="Reniec"
+                                onClick={handleApiReniec}
+                              >
+                                <img src={images.reniec} alt="Reniec" width="12" />
+                              </button>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
+                      </Column>
+                    </Row>
 
-                    <div className="row">
-                      <div className="col">
+                    <Row>
+                      <Column>
                         <div className="form-group">
                           <label>
                             Apellidos y Nombres: <i className="fa fa-asterisk text-danger small"></i>{' '}
@@ -156,11 +171,11 @@ const ModalCliente = (props) => {
                             onChange={handleInputInformacionPn}
                           />
                         </div>
-                      </div>
-                    </div>
+                      </Column>
+                    </Row>
 
-                    <div className="row">
-                      <div className="col">
+                    <Row>
+                      <Column>
                         <div className="form-group">
                           <label>
                             N° de Celular:
@@ -175,11 +190,11 @@ const ModalCliente = (props) => {
                             onChange={handleInputNumeroCelularPn}
                           />
                         </div>
-                      </div>
-                    </div>
+                      </Column>
+                    </Row>
 
-                    <div className="row">
-                      <div className="col">
+                    <Row>
+                      <Column>
                         <div className="form-group">
                           <label>
                             Dirección:
@@ -193,8 +208,8 @@ const ModalCliente = (props) => {
                             onChange={handleInputDireccionPn}
                           />
                         </div>
-                      </div>
-                    </div>
+                      </Column>
+                    </Row>
 
                   </div>
 
@@ -207,8 +222,8 @@ const ModalCliente = (props) => {
                   >
                     {/* Campos del formulario para Persona Natural */}
                     {/* Agregar comentarios para cada grupo de formulario describiendo el propósito */}
-                    <div className="row">
-                      <div className="col">
+                    <Row>
+                      <Column>
                         <div className="form-group">
                           <label>
                             Tipo Documento: <i className="fa fa-asterisk text-danger small"></i>{' '}
@@ -226,31 +241,43 @@ const ModalCliente = (props) => {
                             ))}
                           </select>
                         </div>
-                      </div>
-                    </div>
+                      </Column>
+                    </Row>
 
-                    <div className="row">
-                      <div className="col">
+                    <Row>
+                      <Column>
                         <div className="form-group">
                           <label>
                             N° de documento ({numeroDocumentoPj.length}): <i className="fa fa-asterisk text-danger small"></i>
                           </label>
-                          <input
-                            className="form-control"
-                            autoFocus
-                            placeholder="00000000"
-                            ref={refNumeroDocumentoPj}
-                            value={numeroDocumentoPj}
-                            onChange={handleInputNumeroDocumentoPj}
-                            onKeyDown={keyNumberInteger}
-                            onPaste={handlePasteInteger}
-                          />
+                          <div className="input-group is-invalid">
+                            <input
+                              className="form-control"
+                              autoFocus
+                              placeholder="00000000"
+                              ref={refNumeroDocumentoPj}
+                              value={numeroDocumentoPj}
+                              onChange={handleInputNumeroDocumentoPj}
+                              onKeyDown={keyNumberInteger}
+                              onPaste={handlePasteInteger}
+                            />
+                            <div className="input-group-append">
+                              <button
+                                className="btn btn-outline-secondary"
+                                type="button"
+                                title="Reniec"
+                                onClick={handleApiSunat}
+                              >
+                                <img src={images.sunat} alt="Reniec" width="12" />
+                              </button>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
+                      </Column>
+                    </Row>
 
-                    <div className="row">
-                      <div className="col">
+                    <Row>
+                      <Column>
                         <div className="form-group">
                           <label>
                             Razón Social: <i className="fa fa-asterisk text-danger small"></i>{' '}
@@ -264,11 +291,11 @@ const ModalCliente = (props) => {
                             onChange={handleInputInformacionPj}
                           />
                         </div>
-                      </div>
-                    </div>
+                      </Column>
+                    </Row>
 
-                    <div className="row">
-                      <div className="col">
+                    <Row>
+                      <Column>
                         <div className="form-group">
                           <label>
                             N° de Celular:
@@ -283,11 +310,11 @@ const ModalCliente = (props) => {
                             onChange={handleInputNumeroCelularPj}
                           />
                         </div>
-                      </div>
-                    </div>
+                      </Column>
+                    </Row>
 
-                    <div className="row">
-                      <div className="col">
+                    <Row>
+                      <Column>
                         <div className="form-group">
                           <label>
                             Dirección:
@@ -301,12 +328,12 @@ const ModalCliente = (props) => {
                             onChange={handleInputDireccionPj}
                           />
                         </div>
-                      </div>
-                    </div>
+                      </Column>
+                    </Row>
                   </div>
                 </div>
-              </div>
-            </div>
+              </Column>
+            </Row>
           </div>
 
           {/* Pie de la tarjeta que contiene botones para Guardar y Cancelar */}
@@ -356,6 +383,8 @@ ModalCliente.propTypes = {
   numeroDocumentoPn: PropTypes.string.isRequired,
   handleInputNumeroDocumentoPn: PropTypes.func.isRequired,
 
+  handleApiReniec: PropTypes.func.isRequired,
+
   refInformacionPn: PropTypes.object.isRequired,
   informacionPn: PropTypes.string.isRequired,
   handleInputInformacionPn: PropTypes.func.isRequired,
@@ -375,6 +404,8 @@ ModalCliente.propTypes = {
   refNumeroDocumentoPj: PropTypes.object.isRequired,
   numeroDocumentoPj: PropTypes.string.isRequired,
   handleInputNumeroDocumentoPj: PropTypes.func.isRequired,
+
+  handleApiSunat: PropTypes.func.isRequired,
 
   refInformacionPj: PropTypes.object.isRequired,
   informacionPj: PropTypes.string.isRequired,

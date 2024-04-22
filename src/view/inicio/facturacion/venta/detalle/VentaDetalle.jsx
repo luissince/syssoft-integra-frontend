@@ -9,7 +9,7 @@ import {
 } from '../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../../../components/Container';
-import { detailVenta, obtenerFacturacionPdfVenta } from '../../../../../network/rest/principal.network';
+import { detailVenta, obtenerVentaPdf } from '../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
@@ -47,6 +47,20 @@ class VentaDetalle extends CustomComponent {
 
     this.abortControllerView = new AbortController();
   }
+
+  /*
+  |--------------------------------------------------------------------------
+  | Método de cliclo de vida
+  |--------------------------------------------------------------------------
+  |
+  | El ciclo de vida de un componente en React consta de varios métodos que se ejecutan en diferentes momentos durante la vida útil
+  | del componente. Estos métodos proporcionan puntos de entrada para realizar acciones específicas en cada etapa del ciclo de vida,
+  | como inicializar el estado, montar el componente, actualizar el estado y desmontar el componente. Estos métodos permiten a los
+  | desarrolladores controlar y realizar acciones específicas en respuesta a eventos de ciclo de vida, como la creación, actualización
+  | o eliminación del componente. Entender y utilizar el ciclo de vida de React es fundamental para implementar correctamente la lógica
+  | de la aplicación y optimizar el rendimiento del componente.
+  |
+  */
 
   async componentDidMount() {
     const url = this.props.location.search;
@@ -126,9 +140,24 @@ class VentaDetalle extends CustomComponent {
     }
   }
 
+  /*
+  |--------------------------------------------------------------------------
+  | Métodos de acción
+  |--------------------------------------------------------------------------
+  |
+  | Carga los datos iniciales necesarios para inicializar el componente. Este método se utiliza típicamente
+  | para obtener datos desde un servicio externo, como una API o una base de datos, y actualizar el estado del
+  | componente en consecuencia. El método loadingData puede ser responsable de realizar peticiones asíncronas
+  | para obtener los datos iniciales y luego actualizar el estado del componente una vez que los datos han sido
+  | recuperados. La función loadingData puede ser invocada en el montaje inicial del componente para asegurarse
+  | de que los datos requeridos estén disponibles antes de renderizar el componente en la interfaz de usuario.
+  |
+   */
+
+
   handlePrintA4 = () => {
     printJS({
-      printable: obtenerFacturacionPdfVenta(this.state.idVenta, "a4"),
+      printable: obtenerVentaPdf(this.state.idVenta, "a4"),
       type: 'pdf',
       showModal: true,
       modalMessage: "Recuperando documento...",
@@ -140,7 +169,7 @@ class VentaDetalle extends CustomComponent {
 
   handlePrintTicket = () => {
     printJS({
-      printable: obtenerFacturacionPdfVenta(this.state.idVenta, "ticket"),
+      printable: obtenerVentaPdf(this.state.idVenta, "ticket"),
       type: 'pdf',
       showModal: true,
       modalMessage: "Recuperando documento...",
@@ -149,6 +178,23 @@ class VentaDetalle extends CustomComponent {
       }
     })
   }
+
+  /*
+  |--------------------------------------------------------------------------
+  | Método de renderización
+  |--------------------------------------------------------------------------
+  |
+  | El método render() es esencial en los componentes de React y se encarga de determinar
+  | qué debe mostrarse en la interfaz de usuario basado en el estado y las propiedades actuales
+  | del componente. Este método devuelve un elemento React que describe lo que debe renderizarse
+  | en la interfaz de usuario. La salida del método render() puede incluir otros componentes
+  | de React, elementos HTML o una combinación de ambos. Es importante que el método render()
+  | sea una función pura, es decir, no debe modificar el estado del componente ni interactuar
+  | directamente con el DOM. En su lugar, debe basarse únicamente en los props y el estado
+  | actuales del componente para determinar lo que se mostrará.
+  |
+   */
+
 
   renderTotal() {
     let subTotal = 0;
@@ -246,6 +292,7 @@ class VentaDetalle extends CustomComponent {
               >
                 <i className="fa fa-print"></i> A4
               </button>
+              {' '}
               <button
                 type="button"
                 className="btn btn-light"

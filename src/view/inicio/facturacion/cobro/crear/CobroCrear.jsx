@@ -353,6 +353,10 @@ class CobroCrear extends CustomComponent {
     this.setState({ loadingModal: true, isOpenSale: true })
   }
 
+  handleCloseModalSale = () => {
+    this.setState({ isOpenSale: false })
+  }
+
   handleOnOpenModalSale = () => {
     const metodo = this.state.bancos.find((item) => item.preferido === 1);
 
@@ -379,15 +383,6 @@ class CobroCrear extends CustomComponent {
     this.setState({
       bancosAgregados: [],
     });
-  }
-
-  handleCloseModalSale = () => {
-    const data = this.refCustomModalSale.current;
-    data.classList.add("close-cm")
-    data.addEventListener('animationend', () => {
-      this.setState({ isOpenSale: false }, () => {
-      })
-    })
   }
 
   handleAddBancosAgregados = () => {
@@ -724,7 +719,7 @@ class CobroCrear extends CustomComponent {
         />
 
         <ModalSale
-          refSale={this.refCustomModalSale}
+          refModal={this.refCustomModalSale}
           isOpen={this.state.isOpenSale}
           onOpen={this.handleOnOpenModalSale}
           onHidden={this.handleHiddenModalSale}

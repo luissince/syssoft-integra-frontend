@@ -34,7 +34,7 @@ import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
 import SearchInput from '../../../../../components/SearchInput';
 import ModalSale from './component/ModalSale';
-import { CustomModalProduct } from './component/ModalProduct';
+import { ModalProduct } from './component/ModalProduct';
 import PropTypes from 'prop-types';
 import { CONTADO, CREDITO_FIJO, CREDITO_VARIABLE } from '../../../../../model/types/forma-cobro';
 import Row from '../../../../../components/Row';
@@ -431,12 +431,7 @@ class CompraCrear extends CustomComponent {
   }
 
   handleCloseModalSale = () => {
-    const data = this.refModalSale.current;
-    data.classList.add("close-cm")
-    data.addEventListener('animationend', () => {
-      this.setState({ isOpenSale: false }, () => {
-      })
-    })
+    this.setState({ isOpenSale: false })
   }
 
   handleSelectTipoCobro = (tipo) => {
@@ -788,15 +783,7 @@ class CompraCrear extends CustomComponent {
   }
 
   handleCloseProducto = async () => {
-    return new Promise((resolve) => {
-      const data = this.refModalProducto.current;
-      data.classList.add("close-cm")
-      data.addEventListener('animationend', () => {
-        this.setState({ isOpenProducto: false }, () => {
-          resolve();
-        })
-      })
-    });
+    this.setState({ isOpenProducto: false })
   }
 
   handleInputCantidadModalProducto = (event) => {
@@ -1170,7 +1157,7 @@ class CompraCrear extends CustomComponent {
     return (
       <ContainerWrapper>
         <ModalSale
-          refSale={this.refModalSale}
+          refModal={this.refModalSale}
           isOpen={this.state.isOpenSale}
           onOpen={this.handleOnOpenModalSale}
           onHidden={this.handleOnHiddenModalSale}
@@ -1207,7 +1194,7 @@ class CompraCrear extends CustomComponent {
           handleSaveSale={this.handleSaveSale}
         />
 
-        <CustomModalProduct
+        <ModalProduct
           refModal={this.refModalProducto}
           isOpen={this.state.isOpenProducto}
           onOpen={this.handleOnOpenModalProducto}

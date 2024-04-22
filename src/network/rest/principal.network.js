@@ -5,7 +5,7 @@ const instancePrincipal = axios.create({
   baseURL: import.meta.env.VITE_APP_BACK_END,
   timeout: 50000,
   headers: {
-    Accept: 'application/json',
+    'Accept': 'application/json',
     'Content-Type': 'application/json',
   },
 });
@@ -443,6 +443,15 @@ export async function detailVenta(params, signal) {
 export async function detailOnlyVenta(params, signal) {
   return await Resolve.create(
     instancePrincipal.get('/api/factura/detail/only', {
+      signal: signal,
+      params: params,
+    }),
+  );
+}
+
+export async function detailOnlyVentaVenta(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/factura/detail/venta', {
       signal: signal,
       params: params,
     }),
@@ -939,6 +948,15 @@ export async function detailCotizacion(params, signal) {
   );
 }
 
+export async function detailCotizacionVenta(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/cotizacion/detail/venta', {
+      params: params,
+      signal: signal,
+    }),
+  );
+}
+
 export async function createCotizacion(data, signal) {
   return await Resolve.create(
     instancePrincipal.post('/api/cotizacion/create', data, {
@@ -1379,7 +1397,6 @@ export async function detailtListBanco(params, signal) {
     }),
   );
 }
-
 
 export async function comboBanco(idSucursal, signal) {
   return await Resolve.create(
@@ -1841,9 +1858,65 @@ export async function consultarCpeSunat(ruc, usuario, clave, tipoComprobante, se
 |--------------------------------------------------------------------------
 */
 
-export function obtenerFacturacionPdfVenta(idVenta, tipo) {
+// Funciones relacionadas con la generación de PDF de documentos de facturación
+
+export function obtenerVentaPdf(idVenta, tipo) {
   return `${import.meta.env.VITE_APP_BACK_END}/api/reporte/facturacion/venta/pdf/${tipo}/${idVenta}`
 }
+
+export async function obtenerPreVentaPdf(data, tipo) {
+  return await Resolve.create(
+    instancePrincipal.post(`/api/reporte/facturacion/venta/pre/pdf/${tipo}`, data, {
+      responseType: 'blob'
+    })
+  );
+}
+
+export function obtenerCotizacionPdf(idCotizacion, tipo) {
+  return `${import.meta.env.VITE_APP_BACK_END}/api/reporte/facturacion/cotizacion/pdf/${tipo}/${idCotizacion}`
+}
+
+export async function obtenerPreCotizacionPdf(data, tipo) {
+  return await Resolve.create(
+    instancePrincipal.post(`/api/reporte/facturacion/cotizacion/pre/pdf/${tipo}`, data, {
+      responseType: 'blob'
+    })
+  );
+}
+
+export function obtenerGuiaRemisionPdf(idCotizacion, tipo) {
+  return `${import.meta.env.VITE_APP_BACK_END}/api/reporte/facturacion/guiaremision/pdf/${tipo}/${idCotizacion}`
+}
+
+export function obtenerPreGuiaRemisionPdf(idCotizacion, tipo) {
+  return `${import.meta.env.VITE_APP_BACK_END}/api/reporte/facturacion/guiaremision/pdf/${tipo}/${idCotizacion}`
+}
+
+export function obtenerCompraPdf(idCotizacion, tipo) {
+  return `${import.meta.env.VITE_APP_BACK_END}/api/reporte/facturacion/compra/pdf/${tipo}/${idCotizacion}`
+}
+
+export function obtenerPreCompraPdf(idCotizacion, tipo) {
+  return `${import.meta.env.VITE_APP_BACK_END}/api/reporte/facturacion/compra/pdf/${tipo}/${idCotizacion}`
+}
+
+export function obtenerCobroPdf(idCotizacion, tipo) {
+  return `${import.meta.env.VITE_APP_BACK_END}/api/reporte/facturacion/cobro/pdf/${tipo}/${idCotizacion}`
+}
+
+export function obtenerPreCobroPdf(idCotizacion, tipo) {
+  return `${import.meta.env.VITE_APP_BACK_END}/api/reporte/facturacion/cobro/pdf/${tipo}/${idCotizacion}`
+}
+
+export function obtenerGastoPdf(idCotizacion, tipo) {
+  return `${import.meta.env.VITE_APP_BACK_END}/api/reporte/facturacion/gasto/pdf/${tipo}/${idCotizacion}`
+}
+
+export function obtenerPreGastoPdf(idCotizacion, tipo) {
+  return `${import.meta.env.VITE_APP_BACK_END}/api/reporte/facturacion/gasto/pdf/${tipo}/${idCotizacion}`
+}
+
+// Funciones relacionadas con la generación y descarga de reportes financieros
 
 export function obtenerReporteVentaPdf(idSucursalGenerado, fechaInicio, fechaFinal, idComprobante, idSucursal, idUsuario) {
   return `${import.meta.env.VITE_APP_BACK_END}/api/reporte/venta/pdf/${idSucursalGenerado}/${fechaInicio}/${fechaFinal}/${idComprobante}/${idSucursal}/${idUsuario}`
@@ -1864,6 +1937,7 @@ export function obtenerReporteFinanzaExcel(idSucursalGenerado, fechaInicio, fech
 export function obtenerReporteCpeSunatExcel(idSucursalGenerado, fechaInicio, fechaFinal, idSucursal) {
   return `${import.meta.env.VITE_APP_BACK_END}/api/reporte/cpesunat/excel/${idSucursalGenerado}/${fechaInicio}/${fechaFinal}/${idSucursal}`
 }
+
 // ------------------------------------------------------------------------
 // FIN PARA REPORTES PDF, EXCEL
 // ------------------------------------------------------------------------

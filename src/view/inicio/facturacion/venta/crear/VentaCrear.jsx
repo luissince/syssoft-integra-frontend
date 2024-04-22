@@ -6,9 +6,12 @@ import {
   alertInfo,
   alertSuccess,
   alertWarning,
+  convertNullText,
+  currentDate,
   formatDecimal,
   isEmpty,
   isNumeric,
+  readDataFile,
   rounded,
   validateNumericInputs,
 } from '../../../../../helper/utils.helper';
@@ -28,7 +31,12 @@ import {
   comboTipoDocumento,
   comboBanco,
   comboAlmacen,
-  obtenerFacturacionPdfVenta,
+  obtenerVentaPdf,
+  obtenerPreVentaPdf,
+  listCotizacion,
+  detailCotizacionVenta,
+  listVenta,
+  detailOnlyVentaVenta,
 } from '../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
@@ -49,11 +57,15 @@ import { starProduct, favoriteProducts } from '../../../../../redux/actions';
 import PropTypes from 'prop-types';
 import ModalProducto from './component/ModalProducto';
 import { A_GRANEL, SERVICIO, UNIDADES, VALOR_MONETARIO } from '../../../../../model/types/tipo-tratamiento-producto';
-import { CustomModalContent } from '../../../../../components/CustomModal';
 import { CLIENTE_NATURAL } from '../../../../../model/types/tipo-cliente';
 import { ADELANTADO, CONTADO, CREDITO_FIJO, CREDITO_VARIABLE } from '../../../../../model/types/forma-pago';
 import { SpinnerView } from '../../../../../components/Spinner';
 import { ModalAgregar } from './component/ModalAgregar';
+import ModalImpresion from './component/ModalImpresion';
+import ModalPreImpresion from './component/ModalPreImpresion';
+import ModalCotizacion from './component/ModalCotizacion';
+import ModalVenta from './component/ModalVenta';
+import { getDni, getRuc } from '../../../../../network/rest/apisperu.network';
 // import InvoiceListPrices from './component/InvoiceListPrices';
 
 /**
@@ -68,10 +80,6 @@ class VentaCrear extends CustomComponent {
   constructor(props) {
     super(props);
 
-    /**
-     * Estado inicial del componente.
-     * @type {Object}
-     */
     this.state = {
       // Atributos de carga
       loading: true,
@@ -116,8 +124,39 @@ class VentaCrear extends CustomComponent {
       codiso: '',
       importeTotal: 0.0,
 
-      // Atributos del modal printer
-      isOpenPrinter: false,
+      // Atributos del modal impresión
+      isOpenImpresion: false,
+
+      // Atributos del modal pre impresión
+      isOpenPreImpresion: false,
+      loadingPreImpresion: false,
+      messagePreImpresion: '',
+
+      // Atributos del modal cotización
+      isOpenCotizacion: false,
+      loadingCotizacion: false,
+      listaCotizacion: [],
+      restartCotizacion: false,
+      opcionCotizacion: 0,
+      paginacionCotizacion: 0,
+      totalPaginacionCotizacion: 0,
+      filasPorPaginaCotizacion: 10,
+      messageTableCotizacion: 'Cargando información...',
+      fechaInicioCotizacion: currentDate(),
+      fechaFinalCotizacion: currentDate(),
+
+      // Atributos del modal venta
+      isOpenVenta: false,
+      loadingVenta: false,
+      listaVenta: [],
+      restartVenta: false,
+      opcionVenta: 0,
+      paginacionVenta: 0,
+      totalPaginacionVenta: 0,
+      filasPorPaginaVenta: 10,
+      messageTableVenta: 'Cargando información...',
+      fechaInicioVenta: currentDate(),
+      fechaFinalVenta: currentDate(),
 
       // Atributos del modal sale
       isOpenSale: false,
@@ -166,7 +205,7 @@ class VentaCrear extends CustomComponent {
     this.refAlmacen = React.createRef();
     this.refComentario = React.createRef();
 
-    // Referencia al mmodal sale
+    // Referencia al modal sale
     this.refSale = React.createRef();
     this.refMetodoPagoContenedor = React.createRef();
     this.refMetodoContado = React.createRef();
@@ -174,8 +213,17 @@ class VentaCrear extends CustomComponent {
     this.refNumeroCuotas = React.createRef();
     this.refFrecuenciaPagoCredito = React.createRef();
 
-    // Referencia al mmodal printer
-    this.refPrinter = React.createRef();
+    // Referencia al modal impresión
+    this.refModalImpresion = React.createRef();
+
+    // Referencia al modal pre impresión
+    this.refModalPreImpresion = React.createRef();
+
+    // Referencia al modal de cotización
+    this.refModalCotizacion = React.createRef();
+
+    // Referencia al modal de cotización
+    this.refModalVenta = React.createRef();
 
     // Referencia a la busqueda de productos
     this.refProducto = React.createRef();
@@ -218,6 +266,10 @@ class VentaCrear extends CustomComponent {
     this.refDireccionPj = React.createRef();
 
     this.abortControllerView = new AbortController();
+
+    this.abortControllerCotizacion = new AbortController();
+
+    this.abortControllerVenta = new AbortController();
   }
 
   /*
@@ -250,6 +302,8 @@ class VentaCrear extends CustomComponent {
     document.removeEventListener('keydown', this.handleDocumentKeyDown)
 
     this.abortControllerView.abort();
+    this.abortControllerCotizacion.abort();
+    this.abortControllerVenta.abort();
   }
 
   /*
@@ -538,7 +592,7 @@ class VentaCrear extends CustomComponent {
           idAlmacen: almacen.idAlmacen,
           almacen: almacen.nombre,
           idInventario: producto.idInventario,
-          cantidad: 1,
+          cantidad: cantidad ? producto.cantidad : 1,
         });
 
         detalles.push({
@@ -558,7 +612,7 @@ class VentaCrear extends CustomComponent {
             idAlmacen: almacen.idAlmacen,
             almacen: almacen.nombre,
             idInventario: producto.idInventario,
-            cantidad: 1,
+            cantidad: cantidad ? producto.cantidad : 1,
           });
         } else {
           for (const inventario of existingItem.inventarios) {
@@ -684,11 +738,11 @@ class VentaCrear extends CustomComponent {
     */
 
   handleDocumentKeyDown = (event) => {
-    if (event.key === 'F1' && !this.state.isOpenPrinter && !this.state.isOpenSale && !this.state.isOpenAgregar) {
+    if (event.key === 'F1' && !this.state.isOpenImpresion && !this.state.isOpenSale && !this.state.isOpenAgregar) {
       this.handleOpenSale();
     }
 
-    if (event.key === 'F2' && !this.state.isOpenPrinter && !this.state.isOpenSale && !this.state.isOpenAgregar) {
+    if (event.key === 'F2' && !this.state.isOpenImpresion && !this.state.isOpenSale && !this.state.isOpenAgregar) {
       this.handleClearSale();
     }
   }
@@ -800,7 +854,7 @@ class VentaCrear extends CustomComponent {
   }
 
   //------------------------------------------------------------------------------------------
-  // Acciones del modal product
+  // Acciones del modal producto
   //------------------------------------------------------------------------------------------
   handleOpenModalAgregar = (titulo, subTitulo, producto) => {
     this.setState({
@@ -809,6 +863,10 @@ class VentaCrear extends CustomComponent {
       subTituloAgregar: subTitulo,
       productoAgregar: producto
     })
+  }
+
+  handleCloseAgregar = async () => {
+    this.setState({ isOpenAgregar: false })
   }
 
   handleOnOpenModalAgregar = () => {
@@ -822,18 +880,6 @@ class VentaCrear extends CustomComponent {
       cantidadAgregar: '',
       productoAgregar: null
     })
-  }
-
-  handleCloseAgregar = async () => {
-    return new Promise((resolve) => {
-      const data = this.refModalAgregar.current;
-      data.classList.add("close-cm")
-      data.addEventListener('animationend', () => {
-        this.setState({ isOpenAgregar: false }, () => {
-          resolve();
-        })
-      })
-    });
   }
 
   handleInputCantidad = (event) => {
@@ -863,49 +909,7 @@ class VentaCrear extends CustomComponent {
   }
 
   //------------------------------------------------------------------------------------------
-  // Modal impresión
-  //------------------------------------------------------------------------------------------
-
-  handleOpenPrint = (idVenta) => {
-    this.setState({ isOpenPrinter: true, idVenta: idVenta })
-  }
-
-  handleClosePrint = async () => {
-    const data = this.refPrinter.current;
-    data.classList.add("close-cm")
-    data.addEventListener('animationend', () => {
-      this.setState({ isOpenPrinter: false }, () => this.reloadView())
-    })
-  }
-
-  handlePrintA4 = () => {
-    printJS({
-      printable: obtenerFacturacionPdfVenta(this.state.idVenta, "a4"),
-      type: 'pdf',
-      showModal: true,
-      modalMessage: "Recuperando documento...",
-      onPrintDialogClose: () => {
-        console.log("onPrintDialogClose")
-        this.handleClosePrint()
-      }
-    })
-  }
-
-  handlePrintTicket = () => {
-    printJS({
-      printable: obtenerFacturacionPdfVenta(this.state.idVenta, "ticket"),
-      type: 'pdf',
-      showModal: true,
-      modalMessage: "Recuperando documento...",
-      onPrintDialogClose: () => {
-        console.log("onPrintDialogClose")
-        this.handleClosePrint()
-      }
-    })
-  }
-
-  //------------------------------------------------------------------------------------------
-  // Modal configuración
+  // Opciones de configuración
   //------------------------------------------------------------------------------------------
 
   handleOpenOptions = () => {
@@ -974,8 +978,570 @@ class VentaCrear extends CustomComponent {
   }
 
   //------------------------------------------------------------------------------------------
+  // Modal impresión
+  //------------------------------------------------------------------------------------------
+
+  handleOpenImpresion = (idVenta) => {
+    this.setState({ isOpenImpresion: true, idVenta: idVenta })
+  }
+
+  handleCloseImpresion = async () => {
+    this.setState({ isOpenImpresion: false }, () => {
+      this.reloadView()
+    })
+  }
+
+  handleOpenImpresionA4 = () => {
+    printJS({
+      printable: obtenerVentaPdf(this.state.idVenta, "a4"),
+      type: 'pdf',
+      showModal: true,
+      modalMessage: "Recuperando documento...",
+      onPrintDialogClose: () => {
+        this.handleCloseImpresion()
+      }
+    })
+  }
+
+  handleOpenImpresionTicket = () => {
+    printJS({
+      printable: obtenerVentaPdf(this.state.idVenta, "ticket"),
+      type: 'pdf',
+      showModal: true,
+      modalMessage: "Recuperando documento...",
+      onPrintDialogClose: () => {
+        this.handleCloseImpresion()
+      }
+    })
+  }
+
+  //------------------------------------------------------------------------------------------
+  // Opciones de pre impresión
+  //------------------------------------------------------------------------------------------
+
+  handleOpenPreImpresion = () => {
+    this.setState({ isOpenPreImpresion: true })
+  }
+
+  handleClosePreImpresion = () => {
+    if (this.state.loadingPreImpresion) return;
+
+    this.setState({ isOpenPreImpresion: false })
+  }
+
+  handleOpenPreImpresionA4 = async () => {
+    const { idComprobante, idCliente, idMoneda, idImpuesto, detalleVenta } = this.state;
+
+    if (isEmpty(idComprobante)) {
+      alertWarning('Venta', 'Seleccione su comprobante.', () =>
+        this.refComprobante.current.focus(),
+      );
+      return;
+    }
+
+    if (isEmpty(idCliente)) {
+      alertWarning('Venta', 'Seleccione un cliente.', () =>
+        this.refCliente.current.focus(),
+      );
+      return;
+    }
+
+    if (isEmpty(idMoneda)) {
+      alertWarning('Venta', 'Seleccione su moneda.', () =>
+        this.refMoneda.current.focus(),
+      );
+      return;
+    }
+
+    if (isEmpty(idImpuesto)) {
+      alertWarning('Venta', 'Seleccione el impuesto', () =>
+        this.refMoneda.current.focus(),
+      );
+      return;
+    }
+
+    if (isEmpty(detalleVenta)) {
+      alertWarning('Venta', 'Agregar algún producto a la lista.', () =>
+        this.refProducto.current.focus(),
+      );
+      return;
+    }
+
+    this.setState({
+      loadingPreImpresion: true,
+      messagePreImpresion: 'Generando pre impresión...'
+    })
+
+    const response = await obtenerPreVentaPdf({
+      idComprobante: this.state.idComprobante,
+      idCliente: idCliente,
+
+      idMoneda: idMoneda,
+      idUsuario: this.state.idUsuario,
+      idSucursal: this.state.idSucursal,
+
+      detalle: detalleVenta
+    }, "a4");
+
+    if (response instanceof SuccessReponse) {
+      const base64 = await readDataFile(response.data);
+
+      this.setState({
+        loadingPreImpresion: false
+      })
+
+      printJS({
+        printable: base64,
+        type: 'pdf',
+        base64: true,
+        onPrintDialogClose: () => {
+          this.handleClosePreImpresion()
+        }
+      })
+    }
+
+    if (response instanceof ErrorResponse) {
+      if (response.getType() === CANCELED) return;
+
+      this.setState({
+        loadingPreImpresion: false
+      })
+
+      alertWarning("Venta", response.getMessage())
+    }
+  }
+
+  handleOpenPreImpresionTicket = async () => {
+    const { idComprobante, idCliente, idMoneda, idImpuesto, detalleVenta } = this.state;
+
+    if (isEmpty(idComprobante)) {
+      alertWarning('Venta', 'Seleccione su comprobante.', () =>
+        this.refComprobante.current.focus(),
+      );
+      return;
+    }
+
+    if (isEmpty(idCliente)) {
+      alertWarning('Venta', 'Seleccione un cliente.', () =>
+        this.refCliente.current.focus(),
+      );
+      return;
+    }
+
+    if (isEmpty(idMoneda)) {
+      alertWarning('Venta', 'Seleccione su moneda.', () =>
+        this.refMoneda.current.focus(),
+      );
+      return;
+    }
+
+    if (isEmpty(idImpuesto)) {
+      alertWarning('Venta', 'Seleccione el impuesto', () =>
+        this.refMoneda.current.focus(),
+      );
+      return;
+    }
+
+    if (isEmpty(detalleVenta)) {
+      alertWarning('Venta', 'Agregar algún producto a la lista.', () =>
+        this.refProducto.current.focus(),
+      );
+      return;
+    }
+
+    this.setState({
+      loadingPreImpresion: true,
+      messagePreImpresion: 'Generando pre impresión...'
+    })
+
+    const response = await obtenerPreVentaPdf({
+      idComprobante: this.state.idComprobante,
+      idCliente: idCliente,
+
+      idMoneda: idMoneda,
+      idUsuario: this.state.idUsuario,
+      idSucursal: this.state.idSucursal,
+
+      detalle: detalleVenta
+    }, "ticket");
+
+    if (response instanceof SuccessReponse) {
+      const base64 = await readDataFile(response.data);
+
+      this.setState({
+        loadingPreImpresion: false
+      })
+
+      printJS({
+        printable: base64,
+        type: 'pdf',
+        base64: true,
+        onPrintDialogClose: () => {
+          this.handleClosePreImpresion()
+        }
+      })
+    }
+
+    if (response instanceof ErrorResponse) {
+      if (response.getType() === CANCELED) return;
+
+      this.setState({
+        loadingPreImpresion: false
+      })
+
+      alertWarning("Venta", response.getMessage())
+    }
+  }
+
+  //------------------------------------------------------------------------------------------
+  // Opciones de cotización
+  //------------------------------------------------------------------------------------------
+
+  handleOpenCotizacion = () => {
+    this.setState({ isOpenCotizacion: true })
+  }
+
+  handleCloseCotizacion = () => {
+    this.setState({ isOpenCotizacion: false })
+  }
+
+  handleOnOpenCotizacion = async () => {
+    await this.loadInitCotizacion()
+  }
+
+  loadInitCotizacion = async () => {
+    if (this.state.loadingCotizacion) return;
+
+    await this.setStateAsync({ paginacionCotizacion: 1, restartCotizacion: true });
+    this.fillTableCotizacion(0);
+    await this.setStateAsync({ opcionCotizacion: 0 });
+  };
+
+  handleSearchTextCotizacion = async (text) => {
+    if (this.state.loadingCotizacion) return;
+
+    if (text.trim().length === 0) return;
+
+    await this.setStateAsync({ paginacionCotizacion: 1, restartCotizacion: false });
+    this.fillTableCotizacion(1, text.trim());
+    await this.setStateAsync({ opcionCotizacion: 1 });
+  }
+
+  handleSearchFechaCotizacion = async () => {
+    if (this.state.loadingCotizacion) return;
+
+    if (this.state.fechaInicioCotizacion > this.state.fechaFinalCotizacion) return;
+
+    await this.setStateAsync({ paginacionCotizacion: 1, restartCotizacion: false });
+    this.fillTableCotizacion(2, '', this.state.fechaInicioCotizacion, this.state.fechaFinalCotizacion);
+    await this.setStateAsync({ opcionCotizacion: 1 });
+  }
+
+  handlePaginacionCotizacion = async (listid) => {
+    await this.setStateAsync({ paginacionCotizacion: listid, restartCotizacion: false });
+    this.handlPaginacionCotizacion();
+  };
+
+  handlPaginacionCotizacion = () => {
+    switch (this.state.opcionCotizacion) {
+      case 0:
+        this.fillTableCotizacion(0);
+        break;
+      case 1:
+        this.fillTableCotizacion(1, '');
+        break;
+      case 2:
+        this.fillTableCotizacion(2, '', this.state.fechaInicioCotizacion, this.state.fechaFinalCotizacion);
+        break;
+      default:
+        this.fillTableCotizacion(0);
+    }
+  };
+
+  fillTableCotizacion = async (opcion, buscar = '', fechaInicio = '', fechaFinal = '') => {
+    this.setState({
+      loadingCotizacion: true,
+      listaCotizacion: [],
+      messageTableCotizacion: 'Cargando información...',
+    });
+
+    const params = {
+      opcion: opcion,
+      buscar: buscar,
+      fechaInicio: fechaInicio,
+      fechaFinal: fechaFinal,
+      idSucursal: this.state.idSucursal,
+      posicionPagina: (this.state.paginacionCotizacion - 1) * this.state.filasPorPaginaCotizacion,
+      filasPorPagina: this.state.filasPorPaginaCotizacion,
+    };
+    const response = await listCotizacion(params, this.abortControllerCotizacion.signal);
+
+    if (response instanceof SuccessReponse) {
+      const totalPaginacion = parseInt(
+        Math.ceil(parseFloat(response.data.total) / this.state.filasPorPaginaCotizacion),
+      );
+
+      this.setState({
+        loadingCotizacion: false,
+        listaCotizacion: response.data.result,
+        totalPaginacionCotizacion: totalPaginacion,
+      });
+    }
+
+    if (response instanceof ErrorResponse) {
+      if (response.getType() === CANCELED) return;
+
+      this.setState({
+        loadingCotizacion: false,
+        listaCotizacion: [],
+        totalPaginacionCotizacion: 0,
+        messageTableCotizacion: response.getMessage(),
+      });
+    }
+  }
+
+  handleOnHiddenCotizacion = () => {
+    this.setState({ listaCotizacion: [] });
+  }
+
+  handleFechaInicioCotizacion = (event) => {
+    this.setState({
+      fechaInicioCotizacion: event.target.value
+    }, () => {
+      this.handleSearchFechaCotizacion()
+    })
+  }
+
+  handleFechaFinalCotizacion = (event) => {
+    this.setState({
+      fechaFinalCotizacion: event.target.value
+    }, () => {
+      this.handleSearchFechaCotizacion()
+    })
+  }
+
+  handleSeleccionarCotizacion = async (idCotizacion) => {
+    this.handleCloseCotizacion();
+
+    this.setState({ loading: true, msgLoading: "Obteniendos datos de la cotización." });
+
+    const params = {
+      idCotizacion: idCotizacion,
+      idAlmacen: this.state.idAlmacen
+    };
+
+    const response = await detailCotizacionVenta(params, this.abortControllerCotizacion.signal);
+
+    if (response instanceof SuccessReponse) {
+      this.handleSelectItemCliente(response.data.cliente);
+
+      for (const producto of response.data.productos) {
+        if (producto.idTipoTratamientoProducto === UNIDADES || producto.idTipoTratamientoProducto === SERVICIO) {
+          this.addItemDetalle(producto, null, producto.cantidad);
+        }
+        if (producto.idTipoTratamientoProducto === VALOR_MONETARIO) {
+          this.addItemDetalle(producto, producto.cantidad * producto.precio, null);
+        }
+        if (producto.idTipoTratamientoProducto === A_GRANEL) {
+          this.addItemDetalle(producto, null, producto.cantidad);
+        }
+      }
+
+      this.setState({ loading: false })
+    }
+
+    if (response instanceof ErrorResponse) {
+      if (response.getType() === CANCELED) return;
+
+      this.setState({ loading: false });
+      alertWarning("Venta", response.getMessage())
+    }
+  }
+
+  //------------------------------------------------------------------------------------------
+  // Opciones de venta
+  //------------------------------------------------------------------------------------------
+
+  handleOpenVenta = () => {
+    this.setState({ isOpenVenta: true })
+  }
+
+  handleCloseVenta = () => {
+    this.setState({ isOpenVenta: false })
+  }
+
+  handleOnOpenVenta = async () => {
+    await this.loadInitVenta()
+  }
+
+  loadInitVenta = async () => {
+    if (this.state.loadingVenta) return;
+
+    await this.setStateAsync({ paginacionVenta: 1, restartVenta: true });
+    this.fillTableVenta(0);
+    await this.setStateAsync({ opcionVenta: 0 });
+  };
+
+  handleSearchTextVenta = async (text) => {
+    if (this.state.loadingVenta) return;
+
+    if (text.trim().length === 0) return;
+
+    await this.setStateAsync({ paginacionVenta: 1, restartVenta: false });
+    this.fillTableVenta(1, text.trim());
+    await this.setStateAsync({ opcionVenta: 1 });
+  }
+
+  handleSearchFechaVenta = async () => {
+    if (this.state.loadingVenta) return;
+
+    if (this.state.fechaInicioVenta > this.state.fechaFinalVenta) return;
+
+    await this.setStateAsync({ paginacionVenta: 1, restartVenta: false });
+    this.fillTableVenta(2, '', this.state.fechaInicioVenta, this.state.fechaFinalVenta);
+    await this.setStateAsync({ opcionVenta: 2 });
+  }
+
+  handlePaginacionVenta = async (listid) => {
+    await this.setStateAsync({ paginacionVenta: listid, restartVenta: false });
+    this.handlPaginacionVenta();
+  };
+
+  handlPaginacionVenta = () => {
+    switch (this.state.opcionVenta) {
+      case 0:
+        this.fillTableVenta(0);
+        break;
+      case 1:
+        this.fillTableVenta(1, '',);
+        break;
+      case 2:
+        this.fillTableVenta(2, '', this.state.fechaInicioCotizacion, this.state.fechaFinalCotizacion);
+        break;
+      default:
+        this.fillTableVenta(0);
+    }
+  };
+
+  fillTableVenta = async (opcion, buscar = '', fechaInicio = '', fechaFinal = '') => {
+    this.setState({
+      loadingVenta: true,
+      listaVenta: [],
+      messageTableVenta: 'Cargando información...',
+    });
+
+    const params = {
+      opcion: opcion,
+      buscar: buscar,
+      fechaInicio: fechaInicio,
+      fechaFinal: fechaFinal,
+      idComprobante: '',
+      estado: '0',
+      idSucursal: this.state.idSucursal,
+      posicionPagina: (this.state.paginacionVenta - 1) * this.state.filasPorPaginaVenta,
+      filasPorPagina: this.state.filasPorPaginaVenta,
+    };
+    const response = await listVenta(params, this.abortControllerVenta.signal);
+
+    if (response instanceof SuccessReponse) {
+      const totalPaginacion = parseInt(
+        Math.ceil(parseFloat(response.data.total) / this.state.filasPorPaginaVenta),
+      );
+
+      this.setState({
+        loadingVenta: false,
+        listaVenta: response.data.result,
+        totalPaginacionVenta: totalPaginacion,
+      });
+    }
+
+    if (response instanceof ErrorResponse) {
+      if (response.getType() === CANCELED) return;
+
+      this.setState({
+        loadingVenta: false,
+        listaVenta: [],
+        totalPaginacionVenta: 0,
+        messageTableVenta: response.getMessage(),
+      });
+    }
+  }
+
+  handleOnHiddenVenta = () => {
+    this.setState({ listaVenta: [] });
+  }
+
+  handleFechaInicioVenta = (event) => {
+    this.setState({
+      fechaInicioVenta: event.target.value
+    }, () => {
+      this.handleSearchFechaVenta()
+    })
+  }
+
+  handleFechaFinalVenta = (event) => {
+    this.setState({
+      fechaFinalVenta: event.target.value
+    }, () => {
+      this.handleSearchFechaVenta()
+    })
+  }
+
+  handleSeleccionarVenta = async (idVenta) => {
+    this.handleCloseVenta();
+
+    this.setState({ loading: true, msgLoading: "Obteniendos datos de la venta." });
+
+    const params = {
+      idVenta: idVenta,
+      idAlmacen: this.state.idAlmacen
+    };
+
+    const response = await detailOnlyVentaVenta(params, this.abortControllerCotizacion.signal);
+
+    if (response instanceof SuccessReponse) {
+      this.handleSelectItemCliente(response.data.cliente);
+
+      for (const producto of response.data.productos) {
+
+        if (producto.idTipoTratamientoProducto === UNIDADES || producto.idTipoTratamientoProducto === SERVICIO) {
+          this.addItemDetalle(producto, null, producto.cantidad);
+        }
+        if (producto.idTipoTratamientoProducto === VALOR_MONETARIO) {
+          this.addItemDetalle(producto, producto.cantidad * producto.precio, null);
+        }
+        if (producto.idTipoTratamientoProducto === A_GRANEL) {
+          this.addItemDetalle(producto, null, producto.cantidad);
+        }
+      }
+
+      this.setState({ loading: false })
+    }
+
+    if (response instanceof ErrorResponse) {
+      if (response.getType() === CANCELED) return;
+
+      this.setState({ loading: false });
+      alertWarning("Venta", response.getMessage())
+    }
+  }
+
+  //------------------------------------------------------------------------------------------
   // Modal cliente
   //------------------------------------------------------------------------------------------
+
+  handleOpenCliente = () => {
+    const invoice = document.getElementById(this.idModalCliente);
+    invoice.classList.add('toggled');
+  }
+
+  handleCloseCliente = () => {
+    const invoice = document.getElementById(this.idModalCliente);
+
+    if (this.state.loadingCliente) return;
+
+    invoice.classList.remove('toggled');
+  }
 
   handleClickIdTipoCliente = (tipo) => {
     this.setState({ idTipoCliente: tipo })
@@ -1021,18 +1587,70 @@ class VentaCrear extends CustomComponent {
     this.setState({ direccionPj: event.target.value })
   }
 
-  handleOpenCliente = () => {
-    const invoice = document.getElementById(this.idModalCliente);
-    invoice.classList.add('toggled');
-  }
+  handleGetApiReniec = async () => {
+    if (this.state.numeroDocumentoPn.length !== 8) {
+      alertWarning("Venta", 'Para iniciar la busqueda en número dni debe tener 8 caracteres.', () => {
+        this.refNumeroDocumentoPn.current.focus();
+      })
+      return;
+    }
 
-  handleCloseCliente = () => {
-    const invoice = document.getElementById(this.idModalCliente);
+    this.setState({
+      loadingCliente: true,
+      msgLoading: 'Consultando número de DNI...',
+    });
 
-    if (this.state.loadingCliente) return;
+    const response = await getDni(this.state.numeroDocumentoPn);
 
-    invoice.classList.remove('toggled');
-  }
+    if (response instanceof SuccessReponse) {
+      this.setState({
+        numeroDocumentoPn: convertNullText(response.data.dni),
+        informacionPn: convertNullText(response.data.apellidoPaterno) + ' ' + convertNullText(response.data.apellidoMaterno) + ' ' + convertNullText(response.data.nombres),
+        loadingCliente: false,
+      });
+    }
+
+    if (response instanceof ErrorResponse) {
+      alertWarning('Venta', response.getMessage(), () => {
+        this.setState({
+          loadingCliente: false,
+        });
+      });
+    }
+  };
+
+  handleGetApiSunat = async () => {
+    if (this.state.numeroDocumentoPj.length !== 11) {
+      alertWarning("Venta", 'Para iniciar la busqueda en número ruc debe tener 11 caracteres.', () => {
+        this.refNumeroDocumentoPj.current.focus();
+      })
+      return;
+    }
+
+    this.setState({
+      loadingCliente: true,
+      msgLoading: 'Consultando número de RUC...',
+    });
+
+    const response = await getRuc(this.state.numeroDocumentoPj);
+
+    if (response instanceof SuccessReponse) {
+      this.setState({
+        numeroDocumentoPj: convertNullText(response.data.ruc),
+        informacionPj: convertNullText(response.data.razonSocial),
+        direccionPj: convertNullText(response.data.direccion),
+        loadingCliente: false,
+      });
+    }
+
+    if (response instanceof ErrorResponse) {
+      alertWarning('Venta', response.getMessage(), () => {
+        this.setState({
+          loadingCliente: false,
+        });
+      });
+    }
+  };
 
   handleSaveClienteNatural = () => {
     const tipoDocumento = this.state.tiposDocumentos.find(item => item.idTipoDocumento === this.state.idTipoDocumentoPn);
@@ -1468,6 +2086,10 @@ class VentaCrear extends CustomComponent {
     this.setState({ loadingModal: true, isOpenSale: true })
   }
 
+  handleCloseModalSale = async () => {
+    this.setState({ isOpenSale: false })
+  }
+
   handleOnOpenModalSale = () => {
     const importeTotal = this.state.detalleVenta.reduce((accumulator, item) => {
       const cantidad = item.idTipoTratamientoProducto === SERVICIO
@@ -1509,14 +2131,6 @@ class VentaCrear extends CustomComponent {
       frecuenciaPago: new Date().getDate() > 15 ? '30' : '15',
 
       bancosAgregados: [],
-    })
-  }
-
-  handleOnCloseModalSale = async () => {
-    const data = this.refSale.current;
-    data.classList.add("close-cm")
-    data.addEventListener('animationend', () => {
-      this.setState({ isOpenSale: false })
     })
   }
 
@@ -1677,14 +2291,14 @@ class VentaCrear extends CustomComponent {
           bancosAgregados: metodoPagosLista,
         };
 
-        this.handleOnCloseModalSale();
+        this.handleCloseModalSale();
         alertInfo('Venta', 'Procesando venta...');
 
         const response = await createVenta(data);
 
         if (response instanceof SuccessReponse) {
           alertSuccess('Venta', response.data.message, () => {
-            this.handleOpenPrint(response.data.idVenta);
+            this.handleOpenImpresion(response.data.idVenta);
           });
         }
 
@@ -1782,14 +2396,14 @@ class VentaCrear extends CustomComponent {
           importeTotal: importeTotal
         };
 
-        this.handleOnCloseModalSale();
+        this.handleCloseModalSale();
         alertInfo('Venta', 'Procesando venta...');
 
         const response = await createVenta(data);
 
         if (response instanceof SuccessReponse) {
           alertSuccess('Venta', response.data.message, () => {
-            this.handleOpenPrint(response.data.idVenta);
+            this.handleOpenImpresion(response.data.idVenta);
           });
         }
 
@@ -1905,14 +2519,14 @@ class VentaCrear extends CustomComponent {
               bancosAgregados: bancosAgregados,
             };
     
-            this.handleOnCloseModalSale();
+            this.handleCloseModalSale();
             alertInfo('Venta', 'Procesando venta...');
     
             const response = await createVenta(data);
     
             if (response instanceof SuccessReponse) {
               alertSuccess('Venta', response.data.message, () => {
-                this.handleOpenPrint(response.data.idVenta);
+                this.handleOpenImpresion(response.data.idVenta);
               });
             }
     
@@ -2028,14 +2642,14 @@ class VentaCrear extends CustomComponent {
               bancosAgregados: bancosAgregados,
             };
     
-            this.handleOnCloseModalSale();
+            this.handleCloseModalSale();
             alertInfo('Venta', 'Procesando venta...');
     
             const response = await createVenta(data);
     
             if (response instanceof SuccessReponse) {
               alertSuccess('Venta', response.data.message, () => {
-                this.handleOpenPrint(response.data.idVenta);
+                this.handleOpenImpresion(response.data.idVenta);
               });
             }
     
@@ -2123,7 +2737,7 @@ class VentaCrear extends CustomComponent {
           isOpen={this.state.isOpenSale}
           onOpen={this.handleOnOpenModalSale}
           onHidden={this.handleOnHiddenModalSale}
-          onClose={this.handleOnCloseModalSale}
+          onClose={this.handleCloseModalSale}
 
           loading={this.state.loadingModal}
           refMetodoPagoContenedor={this.refMetodoPagoContenedor}
@@ -2156,35 +2770,69 @@ class VentaCrear extends CustomComponent {
           handleSaveSale={this.handleSaveSale}
         />
 
-        <CustomModalContent
-          contentRef={(ref) => this.refPrinter.current = ref}
-          isOpen={this.state.isOpenPrinter}
-          onClose={this.handleClosePrint}
-          contentLabel="Modal de Impresión"
-          titleHeader="SysSoft Integra"
-          body={
-            <>
-              <h5 className='text-center'>Opciones de impresión</h5>
-              <div className='d-flex justify-content-center align-items-center gap-2_5 mt-3'>
-                <button type="button" className="btn btn-outline-info"
-                  onClick={this.handlePrintA4}>
-                  <i className="fa fa-file-pdf-o"></i> A4
-                </button>
-                {" "}
-                <button type="button" className="btn btn-outline-info"
-                  onClick={this.handlePrintTicket}>
-                  <i className="fa fa-sticky-note"></i> Ticket
-                </button>
-              </div>
-            </>
-          }
-          footer={
-            <button type="button"
-              className="btn btn-danger"
-              onClick={this.handleClosePrint}>
-              <i className="fa fa-close"></i> Cerrar
-            </button>
-          }
+        <ModalImpresion
+          refModal={this.refModalImpresion}
+          isOpen={this.state.isOpenImpresion}
+          handleClose={this.handleCloseImpresion}
+
+          handlePrintA4={this.handleOpenImpresionA4}
+          handlePrintTicket={this.handleOpenImpresionTicket}
+        />
+
+        <ModalPreImpresion
+          refModal={this.refModalPreImpresion}
+          isOpen={this.state.isOpenPreImpresion}
+          handleClose={this.handleClosePreImpresion}
+
+          loading={this.state.loadingPreImpresion}
+          message={this.state.messagePreImpresion}
+
+          handlePrintA4={this.handleOpenPreImpresionA4}
+          handlePrintTicket={this.handleOpenPreImpresionTicket}
+        />
+
+        <ModalVenta
+          refModal={this.refModalVenta}
+          isOpen={this.state.isOpenVenta}
+          handleOpen={this.handleOnOpenVenta}
+          handleHidden={this.handleOnHiddenVenta}
+          handleClose={this.handleCloseVenta}
+
+          loading={this.state.loadingVenta}
+          lista={this.state.listaVenta}
+          totalPaginacion={this.state.totalPaginacionVenta}
+          paginacion={this.state.paginacionVenta}
+          fillTable={this.handlePaginacionVenta}
+          restart={this.state.restartVenta}
+          fechaInicio={this.state.fechaInicioVenta}
+          fechaFinal={this.state.fechaFinalVenta}
+          searchText={this.handleSearchTextVenta}
+          handleRestart={this.loadInitVenta}
+          handleFechaInicio={this.handleFechaInicioVenta}
+          handleFechaFinal={this.handleFechaFinalVenta}
+          handleSeleccionar={this.handleSeleccionarVenta}
+        />
+
+        <ModalCotizacion
+          refModal={this.refModalCotizacion}
+          isOpen={this.state.isOpenCotizacion}
+          handleOpen={this.handleOnOpenCotizacion}
+          handleHidden={this.handleOnHiddenCotizacion}
+          handleClose={this.handleCloseCotizacion}
+
+          loading={this.state.loadingCotizacion}
+          lista={this.state.listaCotizacion}
+          totalPaginacion={this.state.totalPaginacionCotizacion}
+          paginacion={this.state.paginacionCotizacion}
+          fillTable={this.handlePaginacionCotizacion}
+          restart={this.state.restartCotizacion}
+          fechaInicio={this.state.fechaInicioCotizacion}
+          fechaFinal={this.state.fechaFinalCotizacion}
+          searchText={this.handleSearchTextCotizacion}
+          handleRestart={this.loadInitCotizacion}
+          handleFechaInicio={this.handleFechaInicioCotizacion}
+          handleFechaFinal={this.handleFechaFinalCotizacion}
+          handleSeleccionar={this.handleSeleccionarCotizacion}
         />
 
         <section className="invoice-left">
@@ -2207,7 +2855,9 @@ class VentaCrear extends CustomComponent {
         <section className="invoice-right">
           <InvoiceTicket
             nombreComporbante={this.state.nombreComporbante}
-            handleOpenPrint={this.handleOpenPrint}
+            handleOpenPreImpresion={this.handleOpenPreImpresion}
+            handleOpenVenta={this.handleOpenVenta}
+            handleOpenCotizacion={this.handleOpenCotizacion}
             handleOpenOptions={this.handleOpenOptions}
           />
 
@@ -2284,6 +2934,8 @@ class VentaCrear extends CustomComponent {
           numeroDocumentoPn={this.state.numeroDocumentoPn}
           handleInputNumeroDocumentoPn={this.handleInputNumeroDocumentoPn}
 
+          handleApiReniec={this.handleGetApiReniec}
+
           refInformacionPn={this.refInformacionPn}
           informacionPn={this.state.informacionPn}
           handleInputInformacionPn={this.handleInputInformacionPn}
@@ -2303,6 +2955,8 @@ class VentaCrear extends CustomComponent {
           refNumeroDocumentoPj={this.refNumeroDocumentoPj}
           numeroDocumentoPj={this.state.numeroDocumentoPj}
           handleInputNumeroDocumentoPj={this.handleInputNumeroDocumentoPj}
+
+          handleApiSunat={this.handleGetApiSunat}
 
           refInformacionPj={this.refInformacionPj}
           informacionPj={this.state.informacionPj}

@@ -15,7 +15,6 @@ import CustomComponent from '../../../../../model/class/custom-component';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import {
-  cancelAjuste,
   cancelTraslado,
   comboTipoTraslado,
   listTraslado,
@@ -23,7 +22,7 @@ import {
 import { CANCELED } from '../../../../../model/types/types';
 import { connect } from 'react-redux';
 
-class Ajuste extends CustomComponent {
+class Traslado extends CustomComponent {
   constructor(props) {
     super(props);
 
@@ -451,4 +450,7 @@ const mapStateToProps = (state) => {
  *
  * Método encargado de conectar con redux y exportar la clase
  */
-export default connect(mapStateToProps, null)(Ajuste);
+
+const ConnectedTraslado= connect(mapStateToProps, null)(Traslado);
+
+export default ConnectedTraslado;

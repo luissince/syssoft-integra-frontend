@@ -9,6 +9,7 @@ import {
   rounded,
   spinnerLoading,
 } from '../../../../../helper/utils.helper';
+import PropTypes from 'prop-types';
 import ContainerWrapper from '../../../../../components/Container';
 import CustomComponent from '../../../../../model/class/custom-component';
 import SuccessReponse from '../../../../../model/class/response';
@@ -28,7 +29,7 @@ import SearchInput from '../../../../../components/SearchInput';
  * Componente que representa una funcionalidad específica.
  * @extends React.Component
  */
-class AjusteCrear extends CustomComponent {
+class TrasladorCrear extends CustomComponent {
   /**
    * Inicializa un nuevo componente.
    * @param {Object} props - Las propiedades pasadas al componente.
@@ -36,10 +37,6 @@ class AjusteCrear extends CustomComponent {
   constructor(props) {
     super(props);
 
-    /**
-     * Estado inicial del componente.
-     * @type {Object}
-     */
     this.state = {
       initialLoad: true,
       initialMessage: 'Cargando datos...',
@@ -1091,8 +1088,27 @@ const mapStateToProps = (state) => {
   };
 };
 
+
+TrasladorCrear.propTypes = {
+  token: PropTypes.shape({
+    project: PropTypes.shape({
+      idSucursal: PropTypes.string
+    }),
+    userToken: PropTypes.shape({
+      idUsuario: PropTypes.string
+    })
+  }),
+  history: PropTypes.shape({
+    goBack: PropTypes.func
+  })
+}
+
+
 /**
  *
  * Método encargado de conectar con redux y exportar la clase
  */
-export default connect(mapStateToProps, null)(AjusteCrear);
+
+const ConnectedAjusteCrear = connect(mapStateToProps, null)(TrasladorCrear);
+
+export default ConnectedAjusteCrear;

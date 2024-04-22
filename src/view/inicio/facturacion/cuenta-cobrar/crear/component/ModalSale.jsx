@@ -144,9 +144,9 @@ const ModalSale = (props) => {
         <Column>
           <div className='form-group'>
             <p className='text-left text-info  m-0'>Monto a Cobrar: {numberFormat(cobrar, codISO)}</p>
-            <p className='text-left text-info  m-0'>Monto por Cobrar: {numberFormat(total  - cobrado, codISO)}</p>
+            <p className='text-left text-info  m-0'>Monto por Cobrar: {numberFormat(total - cobrado, codISO)}</p>
             <hr className='m-0' />
-            <p className='text-left text-danger  m-0'>Saldo Restante: {numberFormat(total  - cobrado - cobrar, codISO)}</p>
+            <p className='text-left text-danger  m-0'>Saldo Restante: {numberFormat(total - cobrado - cobrar, codISO)}</p>
           </div>
         </Column>
       </Row>
@@ -155,7 +155,7 @@ const ModalSale = (props) => {
 
   return (
     <CustomModalForm
-      contentRef={(ref) => refModal.current = ref}
+      contentRef={refModal}
       isOpen={isOpen}
       onOpen={onOpen}
       onHidden={onHidden}
@@ -305,9 +305,6 @@ const ModalSale = (props) => {
       }
       footer={
         <>
-
-
-
           {
             !nextModalCobro && (
               <>
@@ -337,7 +334,7 @@ const ModalSale = (props) => {
                 <button
                   type="button"
                   className="btn btn-danger"
-                  onClick={onClose}
+                  onClick={async () => await refModal.current.handleOnClose()}
                 >
                   <i className='fa fa-close'></i> Cerrar
                 </button>

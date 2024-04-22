@@ -248,4 +248,6 @@ const mapStateToProps = (state) => {
  *
  * Método encargado de conectar con redux y exportar la clase
  */
-export default connect(mapStateToProps, null)(TrasladoDetalle);
+const ConnectedTrasladoDetalle = connect(mapStateToProps, null)(TrasladoDetalle);
+
+export default ConnectedTrasladoDetalle;

@@ -6,8 +6,7 @@ import {
   alertWarning,
   isEmpty,
   keyNumberFloat,
-  rounded,
-  spinnerLoading,
+  rounded
 } from '../../../../../helper/utils.helper';
 import ContainerWrapper from '../../../../../components/Container';
 import CustomComponent from '../../../../../model/class/custom-component';
@@ -24,12 +23,17 @@ import { connect } from 'react-redux';
 import SearchInput from '../../../../../components/SearchInput';
 import PropTypes from 'prop-types';
 import { DECREMENTO, INCREMENTO } from '../../../../../model/types/forma-ajuste';
+import { SpinnerView } from '../../../../../components/Spinner';
+import Title from '../../../../../components/Title';
+import Row from '../../../../../components/Row';
+import Column from '../../../../../components/Column';
 
 /**
  * Componente que representa una funcionalidad específica.
  * @extends React.Component
  */
 class AjusteCrear extends CustomComponent {
+
   /**
    * Inicializa un nuevo componente.
    * @param {Object} props - Las propiedades pasadas al componente.
@@ -37,10 +41,6 @@ class AjusteCrear extends CustomComponent {
   constructor(props) {
     super(props);
 
-    /**
-     * Estado inicial del componente.
-     * @type {Object}
-     */
     this.state = {
       initialLoad: true,
       initialMessage: 'Cargando datos...',
@@ -176,9 +176,8 @@ class AjusteCrear extends CustomComponent {
   }
 
   agregarProducto(producto) {
-    const exists = this.state.detalle.find(
-      (item) => item.idProducto === producto.idProducto,
-    );
+    const exists = this.state.detalle.find((item) => item.idProducto === producto.idProducto);
+
     if (exists) {
       alertWarning('Ajuste', 'El producto ya existe en la lista.');
       return;
@@ -252,11 +251,9 @@ class AjusteCrear extends CustomComponent {
     const productos = await this.fetchFiltrarProducto(params);
 
     // Filtrar productos por tipoProducto !== "SERVICIO"
-    const filteredProductos = productos.filter(
-      (item) => item.tipoProducto !== 'SERVICIO',
-    );
+    const filteredProductos = productos.filter((item) => item.tipoProducto !== 'SERVICIO');
 
-    await this.setStateAsync({
+    this.setState({
       productos: filteredProductos,
       loadingProducto: false,
     });
@@ -268,6 +265,7 @@ class AjusteCrear extends CustomComponent {
       filtrar: value.nombre,
       productos: [],
     });
+
     this.selectItemProducto = true;
 
     this.agregarProducto(value);
@@ -480,38 +478,33 @@ class AjusteCrear extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
-        {this.state.initialLoad && spinnerLoading(this.state.initialMessage)}
+        <SpinnerView
+          loading={this.state.initialLoad}
+          message={this.state.initialMessage}
+        />
 
-        <div className="row">
-          <div className="col">
-            <div className="form-group">
-              <h5>
-                <span role="button" onClick={() => this.props.history.goBack()}>
-                  <i className="bi bi-arrow-left-short"></i>
-                </span>{' '}
-                Ajuste de iventario
-                <small className="text-secondary"> CREAR</small>
-              </h5>
-            </div>
-          </div>
-        </div>
+        <Title
+          title={"Ajuste de inventario"}
+          subTitle={"CREAR"}
+          handleGoBack={() => this.props.history.goBack()}
+        />
 
         {/* Primero paso */}
         {this.state.paso === 1 && (
           <>
-            <div className="row">
-              <div className="col">
+            <Row>
+              <Column>
                 <div className="form-group">
                   <p>
                     <i className="bi bi-card-list"></i> Defína alguna opciones
                     antes de continuar.
                   </p>
                 </div>
-              </div>
-            </div>
+              </Column>
+            </Row>
 
-            <div className="row">
-              <div className="col">
+            <Row>
+              <Column>
                 <div className="form-group">
                   <label>Seleccione el tipo de ajuste:</label>
                   <div className="form-check ">
@@ -546,11 +539,11 @@ class AjusteCrear extends CustomComponent {
                     </label>
                   </div>
                 </div>
-              </div>
-            </div>
+              </Column>
+            </Row>
 
-            <div className="row">
-              <div className="col">
+            <Row>
+              <Column>
                 <div className="form-group">
                   <label>Seleccione el motivo del ajuste:</label>
                   <select
@@ -569,11 +562,11 @@ class AjusteCrear extends CustomComponent {
                     })}
                   </select>
                 </div>
-              </div>
-            </div>
+              </Column>
+            </Row>
 
-            <div className="row">
-              <div className="col">
+            <Row>
+              <Column>
                 <div className="form-group">
                   <label>Seleccione el almacen:</label>
                   <select
@@ -592,11 +585,11 @@ class AjusteCrear extends CustomComponent {
                     })}
                   </select>
                 </div>
-              </div>
-            </div>
+              </Column>
+            </Row>
 
-            <div className="row">
-              <div className="col">
+            <Row>
+              <Column>
                 <div className="form-group">
                   <button
                     type="button"
@@ -613,16 +606,16 @@ class AjusteCrear extends CustomComponent {
                     <i className="fa fa-close"></i> Cancelar
                   </button>
                 </div>
-              </div>
-            </div>
+              </Column>
+            </Row>
           </>
         )}
 
         {/* Segundo paso */}
         {this.state.paso === 2 && (
           <>
-            <div className="row">
-              <div className="col">
+            <Row>
+              <Column>
                 <div className="form-group">
                   <div className="table-responsive">
                     <table width="100%">
@@ -666,10 +659,11 @@ class AjusteCrear extends CustomComponent {
                     </table>
                   </div>
                 </div>
-              </div>
-            </div>
-            <div className="row">
-              <div className="col">
+              </Column>
+            </Row>
+
+            <Row>
+              <Column>
                 <label>Filtrar por el código o nombre del producto::</label>
                 <SearchInput
                   autoFocus={true}
@@ -687,11 +681,11 @@ class AjusteCrear extends CustomComponent {
                     </>
                   )}
                 />
-              </div>
-            </div>
+              </Column>
+            </Row>
 
-            <div className="row">
-              <div className="col">
+            <Row>
+              <Column>
                 <label>
                   Ingrese alguna descripción para saber el motivo del ajuste:
                 </label>
@@ -704,11 +698,11 @@ class AjusteCrear extends CustomComponent {
                     onChange={this.handleInputObservacion}
                   />
                 </div>
-              </div>
-            </div>
+              </Column>
+            </Row>
 
-            <div className="row">
-              <div className="col">
+            <Row>
+              <Column>
                 <label>Lista de productos:</label>
                 <div className="table-responsive">
                   <table className="table table-striped table-bordered rounded">
@@ -725,11 +719,11 @@ class AjusteCrear extends CustomComponent {
                     <tbody>{this.generarBody()}</tbody>
                   </table>
                 </div>
-              </div>
-            </div>
+              </Column>
+            </Row>
 
-            <div className="row">
-              <div className="col">
+            <Row>
+              <Column>
                 <button
                   type="button"
                   className="btn btn-success"
@@ -757,8 +751,8 @@ class AjusteCrear extends CustomComponent {
                   onClick={() => this.props.history.goBack()}>
                   <i className="fa fa-close"></i> Cancelar
                 </button>
-              </div>
-            </div>
+              </Column>
+            </Row>
           </>
         )}
       </ContainerWrapper>

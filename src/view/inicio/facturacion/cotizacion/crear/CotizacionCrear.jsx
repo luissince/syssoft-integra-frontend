@@ -11,8 +11,8 @@ import {
   isEmpty,
   isNumeric,
   numberFormat,
+  readDataFile,
   rounded,
-  spinnerLoading,
 } from '../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import { COTIZACION } from '../../../../../model/types/tipo-comprobante';
@@ -24,6 +24,8 @@ import {
   createCotizacion,
   filtrarPersona,
   filtrarProducto,
+  obtenerCotizacionPdf,
+  obtenerPreCotizacionPdf,
 } from '../../../../../network/rest/principal.network';
 import Title from '../../../../../components/Title';
 import Row from '../../../../../components/Row';
@@ -33,8 +35,12 @@ import { CANCELED } from '../../../../../model/types/types';
 import SearchInput from '../../../../../components/SearchInput';
 // import ModalSale from './component/ModalSale';
 import PropTypes from 'prop-types';
-import { CustomModalProduct } from './component/ModalProduct';
+import ModalProducto from './component/ModalProducto';
+import ModalImpresion from './component/ModalImpresion';
+import ModalPreImpresion from './component/ModalPreImpresion';
 import Column from '../../../../../components/Column';
+import { SpinnerView } from '../../../../../components/Spinner';
+import printJS from 'print-js';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -51,6 +57,9 @@ class CotizaciónCrear extends CustomComponent {
       // Atributos de carga
       loading: true,
       msgLoading: 'Cargando datos...',
+
+      // Atributo principal
+      idCotizacion: '',
 
       // Atributos principales
       idComprobante: '',
@@ -92,6 +101,14 @@ class CotizaciónCrear extends CustomComponent {
       idMedidaMondalProducto: '',
       tipoProducto: '',
 
+      // Atributos del modal impresión
+      isOpenImpresion: false,
+
+      // Atributos del model pre impresión
+      isOpenPreImpresion: false,
+      loadingPreImpresion: false,
+      messagePreImpresion: '',
+
       // Id principales
       idUsuario: this.props.token.userToken.idUsuario,
       idSucursal: this.props.token.project.idSucursal,
@@ -118,34 +135,37 @@ class CotizaciónCrear extends CustomComponent {
     this.refPrecioModalProduct = React.createRef();
     this.refMedidaModalProduct = React.createRef();
 
-    // Referencia para el custom modal producto
+    // Referencia para el modal producto
     this.refModalProducto = React.createRef();
 
-    // Referencia para el custom modal producto
-    this.refCustomModalSale = React.createRef();
+    // Referencia para el modal impresión
+    this.refModalImpresion = React.createRef();
+
+    // Referencia para el modal pre impresión
+    this.refModalPreImpresion = React.createRef();
 
     //Anular las peticiones
     this.abortController = new AbortController();
   }
 
   /*
-    |--------------------------------------------------------------------------
-    | Método de cliclo de vida
-    |--------------------------------------------------------------------------
-    |
-    | El ciclo de vida de un componente en React consta de varios métodos que se ejecutan en diferentes momentos durante la vida útil
-    | del componente. Estos métodos proporcionan puntos de entrada para realizar acciones específicas en cada etapa del ciclo de vida,
-    | como inicializar el estado, montar el componente, actualizar el estado y desmontar el componente. Estos métodos permiten a los
-    | desarrolladores controlar y realizar acciones específicas en respuesta a eventos de ciclo de vida, como la creación, actualización
-    | o eliminación del componente. Entender y utilizar el ciclo de vida de React es fundamental para implementar correctamente la lógica
-    | de la aplicación y optimizar el rendimiento del componente.
-    |
-    */
+  |--------------------------------------------------------------------------
+  | Método de cliclo de vida
+  |--------------------------------------------------------------------------
+  |
+  | El ciclo de vida de un componente en React consta de varios métodos que se ejecutan en diferentes momentos durante la vida útil
+  | del componente. Estos métodos proporcionan puntos de entrada para realizar acciones específicas en cada etapa del ciclo de vida,
+  | como inicializar el estado, montar el componente, actualizar el estado y desmontar el componente. Estos métodos permiten a los
+  | desarrolladores controlar y realizar acciones específicas en respuesta a eventos de ciclo de vida, como la creación, actualización
+  | o eliminación del componente. Entender y utilizar el ciclo de vida de React es fundamental para implementar correctamente la lógica
+  | de la aplicación y optimizar el rendimiento del componente.
+  |
+  */
 
   async componentDidMount() {
     document.addEventListener('keydown', this.handleDocumentKeyDown)
 
-    await this.loadData();
+    await this.loadingData();
   }
 
   componentWillUnmount() {
@@ -155,20 +175,20 @@ class CotizaciónCrear extends CustomComponent {
   }
 
   /*
-    |--------------------------------------------------------------------------
-    | Métodos de acción
-    |--------------------------------------------------------------------------
-    |
-    | Carga los datos iniciales necesarios para inicializar el componente. Este método se utiliza típicamente
-    | para obtener datos desde un servicio externo, como una API o una base de datos, y actualizar el estado del
-    | componente en consecuencia. El método loadingData puede ser responsable de realizar peticiones asíncronas
-    | para obtener los datos iniciales y luego actualizar el estado del componente una vez que los datos han sido
-    | recuperados. La función loadingData puede ser invocada en el montaje inicial del componente para asegurarse
-    | de que los datos requeridos estén disponibles antes de renderizar el componente en la interfaz de usuario.
-    |
-    */
+  |--------------------------------------------------------------------------
+  | Métodos de acción
+  |--------------------------------------------------------------------------
+  |
+  | Carga los datos iniciales necesarios para inicializar el componente. Este método se utiliza típicamente
+  | para obtener datos desde un servicio externo, como una API o una base de datos, y actualizar el estado del
+  | componente en consecuencia. El método loadingData puede ser responsable de realizar peticiones asíncronas
+  | para obtener los datos iniciales y luego actualizar el estado del componente una vez que los datos han sido
+  | recuperados. La función loadingData puede ser invocada en el montaje inicial del componente para asegurarse
+  | de que los datos requeridos estén disponibles antes de renderizar el componente en la interfaz de usuario.
+  |
+  */
 
-  loadData = async () => {
+  loadingData = async () => {
     const [comprobantes, monedas, impuestos, medidas] =
       await Promise.all([
         this.fetchComprobante(COTIZACION),
@@ -287,26 +307,26 @@ class CotizaciónCrear extends CustomComponent {
 
   clearView = () => {
     this.setState(this.initial, async () => {
-      await this.loadData();
+      await this.loadingData();
       this.refProducto.current.focus();
     });
   }
 
   /*
-    |--------------------------------------------------------------------------
-    | Método de eventos
-    |--------------------------------------------------------------------------
-    |
-    | El método handle es una convención utilizada para denominar funciones que manejan eventos específicos
-    | en los componentes de React. Estas funciones se utilizan comúnmente para realizar tareas o actualizaciones
-    | en el estado del componente cuando ocurre un evento determinado, como hacer clic en un botón, cambiar el valor
-    | de un campo de entrada, o cualquier otra interacción del usuario. Los métodos handle suelen recibir el evento
-    | como parámetro y se encargan de realizar las operaciones necesarias en función de la lógica de la aplicación.
-    | Por ejemplo, un método handle para un evento de clic puede actualizar el estado del componente o llamar a
-    | otra función específica de la lógica de negocio. La convención de nombres handle suele combinarse con un prefijo
-    | que describe el tipo de evento que maneja, como handleInputChange, handleClick, handleSubmission, entre otros. 
-    |
-    */
+  |--------------------------------------------------------------------------
+  | Método de eventos
+  |--------------------------------------------------------------------------
+  |
+  | El método handle es una convención utilizada para denominar funciones que manejan eventos específicos
+  | en los componentes de React. Estas funciones se utilizan comúnmente para realizar tareas o actualizaciones
+  | en el estado del componente cuando ocurre un evento determinado, como hacer clic en un botón, cambiar el valor
+  | de un campo de entrada, o cualquier otra interacción del usuario. Los métodos handle suelen recibir el evento
+  | como parámetro y se encargan de realizar las operaciones necesarias en función de la lógica de la aplicación.
+  | Por ejemplo, un método handle para un evento de clic puede actualizar el estado del componente o llamar a
+  | otra función específica de la lógica de negocio. La convención de nombres handle suele combinarse con un prefijo
+  | que describe el tipo de evento que maneja, como handleInputChange, handleClick, handleSubmission, entre otros. 
+  |
+  */
 
   handleDocumentKeyDown = (event) => {
     if (event.key === 'F1') {
@@ -364,6 +384,10 @@ class CotizaciónCrear extends CustomComponent {
     this.setState({ loadingModalProducto: true, isOpenProducto: true })
   }
 
+  handleCloseProducto = async () => {
+    this.setState({ isOpenProducto: false });
+  }
+
   handleOnOpenModalProducto = async () => {
     await this.setStateAsync({
       cantidadModalProducto: this.state.producto.tipoProducto === "SERVICIO" ? '1' : '',
@@ -391,19 +415,6 @@ class CotizaciónCrear extends CustomComponent {
     });
     this.selectItemProducto = false;
   }
-
-  handleCloseProducto = async () => {
-    return new Promise((resolve) => {
-      const data = this.refModalProducto.current;
-      data.classList.add("close-cm");
-      data.addEventListener('animationend', async () => {
-        this.setState({ isOpenProducto: false }, () => {
-          resolve();
-        });
-      });
-    });
-  }
-
 
   handleInputCantidadModalProducto = (event) => {
     this.setState({ cantidadModalProducto: event.target.value });
@@ -459,6 +470,8 @@ class CotizaciónCrear extends CustomComponent {
 
     const impuesto = this.state.impuestos.find((item) => item.idImpuesto === this.state.idImpuesto);
 
+    const medida = this.state.medidas.find((item) => item.idMedida == idMedidaMondalProducto);
+
     if (existeDetalle) {
       if (tipoProducto === "SERVICIO") {
         existeDetalle.precio = parseFloat(precioModalProducto);
@@ -471,7 +484,8 @@ class CotizaciónCrear extends CustomComponent {
         nombre: nombre,
         cantidad: parseFloat(cantidadModalProducto),
         precio: parseFloat(precioModalProducto),
-        idMedida: idMedidaMondalProducto,
+        idMedida: medida.idMedida,
+        nombreMedida: medida.nombre,
         idImpuesto: impuesto.idImpuesto,
         nombreImpuesto: impuesto.nombre,
         porcentajeImpuesto: impuesto.porcentaje,
@@ -482,10 +496,7 @@ class CotizaciónCrear extends CustomComponent {
 
     const total = newDetalle.reduce((accumulate, item) => (accumulate += item.cantidad * item.costo), 0);
 
-    this.setState({
-      detalle: newDetalle,
-      total,
-    });
+    this.setState({ detalle: newDetalle, total });
 
     this.handleCloseProducto();
 
@@ -539,7 +550,6 @@ class CotizaciónCrear extends CustomComponent {
   };
 
   handleSelectItemProducto = async (value) => {
-    console.log(value)
     await this.setStateAsync({
       producto: value,
       filtrarProducto: value.nombre,
@@ -598,7 +608,7 @@ class CotizaciónCrear extends CustomComponent {
   };
 
   //------------------------------------------------------------------------------------------
-  // Procesos guardar, limpiar y cerrar
+  // Procesos guardar
   //------------------------------------------------------------------------------------------
 
   handleGuardar = async () => {
@@ -658,8 +668,8 @@ class CotizaciónCrear extends CustomComponent {
         const response = await createCotizacion(data);
 
         if (response instanceof SuccessReponse) {
-          alertSuccess('Cotización', response.data, () => {
-            this.clearView();
+          alertSuccess('Cotización', response.data.message, () => {
+            this.handleOpenImpresion(response.data.idCotizacion)
           });
         }
 
@@ -672,6 +682,10 @@ class CotizaciónCrear extends CustomComponent {
     });
   };
 
+  //------------------------------------------------------------------------------------------
+  // Procesos limpiar
+  //------------------------------------------------------------------------------------------
+
   handleLimpiar = async () => {
     alertDialog("Cotización", "¿Está seguro de limpiar la cotización?", (accept) => {
       if (accept) {
@@ -680,25 +694,236 @@ class CotizaciónCrear extends CustomComponent {
     })
   };
 
+  //------------------------------------------------------------------------------------------
+  // Procesos impresión
+  //------------------------------------------------------------------------------------------
+
+  handleOpenImpresion = (idCotizacion) => {
+    this.setState({ isOpenImpresion: true, idCotizacion: idCotizacion })
+  }
+
+  handleCloseImpresion = () => {
+    this.setState({ isOpenImpresion: false }, () => {
+      this.clearView();
+    });
+  }
+
+  handleOpenImpresionA4 = () => {
+    printJS({
+      printable: obtenerCotizacionPdf(this.state.idCotizacion, "a4"),
+      type: 'pdf',
+      showModal: true,
+      modalMessage: "Recuperando documento...",
+      onPrintDialogClose: () => {
+        this.handleCloseImpresion()
+      }
+    })
+  }
+
+  handleOpenImpresionTicket = () => {
+    printJS({
+      printable: obtenerCotizacionPdf(this.state.idCotizacion, "ticket"),
+      type: 'pdf',
+      showModal: true,
+      modalMessage: "Recuperando documento...",
+      onPrintDialogClose: () => {
+        this.handleCloseImpresion()
+      }
+    })
+  }
+
+  //------------------------------------------------------------------------------------------
+  // Opciones de pre impresión
+  //------------------------------------------------------------------------------------------
+
+  handleOpenPreImpresion = () => {
+    this.setState({ isOpenPreImpresion: true })
+  }
+
+  handleClosePreImpresion = () => {
+    if (this.state.loadingPreImpresion) return;
+
+
+    this.setState({ isOpenPreImpresion: false })
+  }
+
+  handleOpenPreImpresionA4 = async () => {
+    const { idComprobante, cliente, idMoneda, idImpuesto, detalle } = this.state;
+
+    if (isEmpty(idComprobante)) {
+      alertWarning('Cotización', 'Seleccione su comprobante.', () =>
+        this.refComprobante.current.focus(),
+      );
+      return;
+    }
+
+    if (isEmpty(cliente)) {
+      alertWarning('Cotización', 'Seleccione un cliente.', () =>
+        this.refCliente.current.focus(),
+      );
+      return;
+    }
+
+    if (isEmpty(idMoneda)) {
+      alertWarning('Cotización', 'Seleccione su moneda.', () =>
+        this.refMoneda.current.focus(),
+      );
+      return;
+    }
+
+    if (isEmpty(idImpuesto)) {
+      alertWarning('Cotización', 'Seleccione el impuesto', () =>
+        this.refMoneda.current.focus(),
+      );
+      return;
+    }
+
+    if (isEmpty(detalle)) {
+      alertWarning('Cotización', 'Agregar algún producto a la lista.', () =>
+        this.refProducto.current.focus(),
+      );
+      return;
+    }
+
+    this.setState({
+      loadingPreImpresion: true,
+      messagePreImpresion: 'Generando pre impresión...'
+    })
+
+    const response = await obtenerPreCotizacionPdf({
+      idComprobante: this.state.idComprobante,
+      idCliente: cliente.idPersona,
+
+      idMoneda: idMoneda,
+      idUsuario: this.state.idUsuario,
+      idSucursal: this.state.idSucursal,
+
+      detalle: detalle
+    }, "a4");
+
+    if (response instanceof SuccessReponse) {
+      const base64 = await readDataFile(response.data);
+
+      this.setState({
+        loadingPreImpresion: false
+      })
+
+      printJS({
+        printable: base64,
+        type: 'pdf',
+        base64: true,
+        onPrintDialogClose: () => {
+          this.handleClosePreImpresion()
+        }
+      })
+    }
+
+    if (response instanceof ErrorResponse) {
+      if (response.getType() === CANCELED) return;
+
+      this.setState({
+        loadingPreImpresion: false
+      })
+
+      alertWarning("Cotización", response.getMessage())
+    }
+  }
+
+  handleOpenPreImpresionTicket = async () => {
+    const { idComprobante, cliente, idMoneda, idImpuesto, detalle } = this.state;
+
+    if (isEmpty(idComprobante)) {
+      alertWarning('Cotización', 'Seleccione su comprobante.', () => this.refComprobante.current.focus());
+      return;
+    }
+
+    if (isEmpty(cliente)) {
+      alertWarning('Cotización', 'Seleccione un cliente.', () => this.refCliente.current.focus());
+      return;
+    }
+
+    if (isEmpty(idMoneda)) {
+      alertWarning('Cotización', 'Seleccione su moneda.', () => this.refMoneda.current.focus());
+      return;
+    }
+
+    if (isEmpty(idImpuesto)) {
+      alertWarning('Cotización', 'Seleccione el impuesto', () => this.refMoneda.current.focus());
+      return;
+    }
+
+    if (isEmpty(detalle)) {
+      alertWarning('Cotización', 'Agregar algún producto a la lista.', () => this.refProducto.current.focus());
+      return;
+    }
+
+    this.setState({
+      loadingPreImpresion: true,
+      messagePreImpresion: 'Generando pre impresión...'
+    })
+
+    const response = await obtenerPreCotizacionPdf({
+      idComprobante: this.state.idComprobante,
+      idCliente: cliente.idPersona,
+
+      idMoneda: idMoneda,
+      idUsuario: this.state.idUsuario,
+      idSucursal: this.state.idSucursal,
+
+      detalle: detalle
+    }, "ticket");
+
+    if (response instanceof SuccessReponse) {
+      const base64 = await readDataFile(response.data);
+
+      this.setState({
+        loadingPreImpresion: false
+      })
+
+      printJS({
+        printable: base64,
+        type: 'pdf',
+        base64: true,
+        onPrintDialogClose: () => {
+          this.handleClosePreImpresion()
+        }
+      })
+    }
+
+    if (response instanceof ErrorResponse) {
+      if (response.getType() === CANCELED) return;
+
+      this.setState({
+        loadingPreImpresion: false
+      })
+
+      alertWarning("Cotización", response.getMessage())
+    }
+  }
+
+  //------------------------------------------------------------------------------------------
+  // Procesos cerrar
+  //------------------------------------------------------------------------------------------
+
   handleCerrar = () => {
     this.props.history.goBack();
   };
 
   /*
-    |--------------------------------------------------------------------------
-    | Método de renderización
-    |--------------------------------------------------------------------------
-    |
-    | El método render() es esencial en los componentes de React y se encarga de determinar
-    | qué debe mostrarse en la interfaz de usuario basado en el estado y las propiedades actuales
-    | del componente. Este método devuelve un elemento React que describe lo que debe renderizarse
-    | en la interfaz de usuario. La salida del método render() puede incluir otros componentes
-    | de React, elementos HTML o una combinación de ambos. Es importante que el método render()
-    | sea una función pura, es decir, no debe modificar el estado del componente ni interactuar
-    | directamente con el DOM. En su lugar, debe basarse únicamente en los props y el estado
-    | actuales del componente para determinar lo que se mostrará.
-    |
-    */
+  |--------------------------------------------------------------------------
+  | Método de renderización
+  |--------------------------------------------------------------------------
+  |
+  | El método render() es esencial en los componentes de React y se encarga de determinar
+  | qué debe mostrarse en la interfaz de usuario basado en el estado y las propiedades actuales
+  | del componente. Este método devuelve un elemento React que describe lo que debe renderizarse
+  | en la interfaz de usuario. La salida del método render() puede incluir otros componentes
+  | de React, elementos HTML o una combinación de ambos. Es importante que el método render()
+  | sea una función pura, es decir, no debe modificar el estado del componente ni interactuar
+  | directamente con el DOM. En su lugar, debe basarse únicamente en los props y el estado
+  | actuales del componente para determinar lo que se mostrará.
+  |
+  */
 
   generarBody() {
     const { detalle } = this.state;
@@ -706,7 +931,7 @@ class CotizaciónCrear extends CustomComponent {
     if (isEmpty(detalle)) {
       return (
         <tr className="text-center">
-          <td colSpan="6"> Agregar datos a la tabla </td>
+          <td colSpan="7"> Agregar datos a la tabla </td>
         </tr>
       );
     }
@@ -716,14 +941,14 @@ class CotizaciónCrear extends CustomComponent {
         <td className="text-center">{++index}</td>
         <td>{item.nombre}</td>
         <td>{rounded(item.cantidad)}</td>
+        <td>{item.nombreMedida}</td>
         <td>{numberFormat(item.precio, this.state.codISO)}</td>
         <td>{numberFormat(item.cantidad * item.precio, this.state.codISO)}</td>
         <td className="text-center">
           <button
             className="btn btn-outline-danger btn-sm"
             title="Eliminar"
-            onClick={() => this.handleRemoverProduct(item.idProducto)}
-          >
+            onClick={() => this.handleRemoverProduct(item.idProducto)}>
             <i className="bi bi-trash"></i>
           </button>
         </td>
@@ -806,7 +1031,18 @@ class CotizaciónCrear extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
-        <CustomModalProduct
+        <SpinnerView
+          loading={this.state.loading}
+          message={this.state.msgLoading}
+        />
+
+        <Title
+          title='Cotización'
+          subTitle='Crear'
+          handleGoBack={this.handleCerrar}
+        />
+
+        <ModalProducto
           refModal={this.refModalProducto}
           isOpen={this.state.isOpenProducto}
           onOpen={this.handleOnOpenModalProducto}
@@ -833,14 +1069,27 @@ class CotizaciónCrear extends CustomComponent {
           handleAdd={this.handleAddProduct}
         />
 
-        {this.state.loading && spinnerLoading(this.state.msgLoading)}
+        <ModalImpresion
+          refModal={this.refModalImpresion}
+          isOpen={this.state.isOpenImpresion}
+          handleClose={this.handleCloseImpresion}
 
-        {/* Titulo */}
-        <Title
-          title='Cotización'
-          subTitle='Crear'
-          handleGoBack={this.handleCerrar}
+          handlePrintA4={this.handleOpenImpresionA4}
+          handlePrintTicket={this.handleOpenImpresionTicket}
         />
+
+        <ModalPreImpresion
+          refModal={this.refModalPreImpresion}
+          isOpen={this.state.isOpenPreImpresion}
+          handleClose={this.handleClosePreImpresion}
+
+          loading={this.state.loadingPreImpresion}
+          message={this.state.messagePreImpresion}
+
+          handlePrintA4={this.handleOpenPreImpresionA4}
+          handlePrintTicket={this.handleOpenPreImpresionTicket}
+        />
+
 
         <Row>
           <Column className="col-xl-8 col-lg-8 col-md-8 col-sm-12 col-12">
@@ -874,6 +1123,7 @@ class CotizaciónCrear extends CustomComponent {
                         </th>
                         <th width="15%">Producto</th>
                         <th width="5%">Cantidad</th>
+                        <th width="5%">Medida</th>
                         <th width="5%">Precio</th>
                         <th width="5%">Total</th>
                         <th width="5%" className="text-center">
@@ -899,10 +1149,17 @@ class CotizaciónCrear extends CustomComponent {
                   </button>{' '}
                   <button
                     type="button"
-                    className="btn btn-outline-info"
+                    className="btn btn-outline-warning"
                     onClick={this.handleLimpiar}
                   >
                     <i className="fa fa-trash"></i> Limpiar (F2)
+                  </button>{' '}
+                  <button
+                    type="button"
+                    className="btn btn-outline-primary"
+                    onClick={this.handleOpenPreImpresion}
+                  >
+                    <i className="bi bi-printer"></i> Pre Impresión (F3)
                   </button>{' '}
                   <button
                     type="button"

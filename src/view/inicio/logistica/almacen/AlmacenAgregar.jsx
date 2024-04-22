@@ -160,151 +160,152 @@ class AlmacenAgregar extends CustomComponent {
       <ContainerWrapper>
 
         <Title
-          title='Producto'
-          subTitle='Agregar'
+          title='Almacen'
+          subTitle='AGREGAR'
           handleGoBack={() => this.props.history.goBack()}
         />
 
-        <div className="dropdown-divider"></div>
-
-        <div className="form-group pb-2">
-          <label>
-            Crea los puntos de almacenamiento y distribución de tus productos
-          </label>
-        </div>
-
         <Row>
-          <div className="form-group col-md-12">
-            <label>
-              Nombre del Almacén:{' '}
-              <i className="fa fa-asterisk text-danger small"></i>
-            </label>
-            <input
-              type="text"
-              className="form-control"
-              ref={this.refNombre}
-              value={this.state.nombre}
-              onChange={(event) => {
-                this.setState({
-                  nombre: event.target.value,
-                });
-              }}
-              placeholder="Ingrese el nombre del almacen"
-            />
-          </div>
-        </Row>
-
-        <Row>
-          <div className="form-group col-md-12">
-            <label>
-              Dirección:{' '}
-              <i className="fa fa-asterisk text-danger small"></i>
-            </label>
-            <input
-              type="text"
-              className="form-control"
-              ref={this.refDireccion}
-              value={this.state.direccion}
-              onChange={(event) => {
-                this.setState({
-                  direccion: event.target.value,
-                });
-              }}
-              placeholder="Ingrese una dirección"
-            />
-          </div>
-        </Row>
-
-        <Row>
-          <div className="form-group col-md-12">
-            <label>
-              Ubigeo: <i className="fa fa-asterisk text-danger small"></i>
-            </label>
-            <SearchInput
-              placeholder="Filtrar productos..."
-              refValue={this.refIdUbigeo}
-              value={this.state.ubigeo}
-              data={this.state.filteredData}
-              handleClearInput={this.handleClearInputaUbigeo}
-              handleFilter={this.handleFilterUbigeo}
-              handleSelectItem={this.handleSelectItemUbigeo}
-              renderItem={(value) => (
-                <>
-                  {value.departamento +
-                    '-' +
-                    value.provincia +
-                    '-' +
-                    value.distrito +
-                    ' (' +
-                    value.ubigeo +
-                    ')'}
-                </>
-              )}
-            />
-          </div>
-        </Row>
-
-        <Row>
-          <div className="form-group col-md-6">
-            <label>Código SUNAT:</label>
-            <input
-              type="text"
-              className="form-control"
-              value={this.state.codigoSunat}
-              onChange={(event) => {
-                this.setState({
-                  codigoSunat: event.target.value,
-                });
-              }}
-              placeholder=""
-            />
-          </div>
-
-          <div className="form-group col-md-6">
-            <label htmlFor="nombre" className="col-form-label">
-              Preferido:
-            </label>
-            <div className="custom-control custom-switch">
+          <Column className="col-md-12">
+            <div className='form-group'>
+              <label>
+                Nombre del Almacén:{' '}<i className="fa fa-asterisk text-danger small"></i>
+              </label>
               <input
-                type="checkbox"
-                className="custom-control-input"
-                id="cbPreferido"
-                checked={this.state.predefinido}
-                onChange={(value) =>
-                  this.setState({ predefinido: value.target.checked })
-                }
+                type="text"
+                className="form-control"
+                ref={this.refNombre}
+                value={this.state.nombre}
+                onChange={(event) => {
+                  this.setState({
+                    nombre: event.target.value,
+                  });
+                }}
+                placeholder="Ingrese el nombre del almacen"
               />
-              <label className="custom-control-label" htmlFor="cbPreferido">
-                {this.state.predefinido ? "Si" : "No"}
+            </div>
+          </Column>
+        </Row>
+
+        <Row>
+          <Column className='col-md-12'>
+            <div className="form-group">
+              <label>
+                Dirección:{' '}
+                <i className="fa fa-asterisk text-danger small"></i>
+              </label>
+              <input
+                type="text"
+                className="form-control"
+                ref={this.refDireccion}
+                value={this.state.direccion}
+                onChange={(event) => {
+                  this.setState({ direccion: event.target.value });
+                }}
+                placeholder="Ingrese una dirección"
+              />
+            </div>
+          </Column>
+        </Row>
+
+        <Row>
+          <Column className='col-md-12'>
+            <div className="form-group">
+              <label>
+                Ubigeo: <i className="fa fa-asterisk text-danger small"></i>
+              </label>
+              <SearchInput
+                placeholder="Filtrar productos..."
+                refValue={this.refIdUbigeo}
+                value={this.state.ubigeo}
+                data={this.state.filteredData}
+                handleClearInput={this.handleClearInputaUbigeo}
+                handleFilter={this.handleFilterUbigeo}
+                handleSelectItem={this.handleSelectItemUbigeo}
+                renderItem={(value) => (
+                  <>
+                    {value.departamento +
+                      '-' +
+                      value.provincia +
+                      '-' +
+                      value.distrito +
+                      ' (' +
+                      value.ubigeo +
+                      ')'}
+                  </>
+                )}
+              />
+            </div>
+          </Column>
+        </Row>
+
+        <Row>
+          <Column className='col-md-6'>
+            <div className="form-group">
+              <label>Código SUNAT:</label>
+              <input
+                type="text"
+                className="form-control"
+                value={this.state.codigoSunat}
+                onChange={(event) => {
+                  this.setState({ codigoSunat: event.target.value });
+                }}
+                placeholder=""
+              />
+            </div>
+          </Column>
+
+          <Column className='col-md-6'>
+            <div className="form-group">
+              <label htmlFor="nombre" className="col-form-label">
+                Preferido:
+              </label>
+              <div className="custom-control custom-switch">
+                <input
+                  type="checkbox"
+                  className="custom-control-input"
+                  id="cbPreferido"
+                  checked={this.state.predefinido}
+                  onChange={(value) =>
+                    this.setState({ predefinido: value.target.checked })
+                  }
+                />
+                <label className="custom-control-label" htmlFor="cbPreferido">
+                  {this.state.predefinido ? "Si" : "No"}
+                </label>
+              </div>
+            </div>
+          </Column>
+        </Row>
+
+        <Row>
+          <Column>
+            <div className="form-group">
+              <label>Observaciones: </label>
+              <textarea
+                className="form-control "
+                id="exampleFormControlTextarea1"
+                rows="3"
+                value={this.state.observacion}
+                onChange={(event) =>
+                  this.setState({
+                    observacion: event.target.value,
+                  })
+                }>
+              </textarea>
+            </div>
+          </Column>
+        </Row>
+
+        <Row>
+          <Column className='col-md-12'>
+            <div className="form-group">
+              <label>
+                Los campos marcados con{' '}
+                <i className="fa fa-asterisk text-danger small"></i> son obligatorios
               </label>
             </div>
-          </div>
-        </Row>
-
-        <Row>
-          <div className="form-group col">
-            <label>Observaciones: </label>
-            <textarea
-              className="form-control "
-              id="exampleFormControlTextarea1"
-              rows="3"
-              value={this.state.observacion}
-              onChange={(event) =>
-                this.setState({
-                  observacion: event.target.value,
-                })
-              }>
-            </textarea>
-          </div>
-        </Row>
-
-        <Row>
-          <div className="form-group col-md-12">
-            <label>
-              Los campos marcados con{' '}
-              <i className="fa fa-asterisk text-danger small"></i> son obligatorios
-            </label>
-          </div>
+          </Column>
         </Row>
 
         <Row>

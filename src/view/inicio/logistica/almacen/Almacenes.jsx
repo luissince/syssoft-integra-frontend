@@ -311,8 +311,8 @@ class Almacenes extends CustomComponent {
           subTitle='LISTA'
         />
 
-        <div className="row">
-          <div className="col-md-6 col-sm-12">
+        <Row>
+          <Column className="col-md-6 col-sm-12">
             <div className="form-group">
               <div className="input-group mb-2">
                 <div className="input-group-prepend">
@@ -333,9 +333,9 @@ class Almacenes extends CustomComponent {
                 />
               </div>
             </div>
-          </div>
+          </Column>
 
-          <div className="col-md-6 col-sm-12">
+          <Column className="col-md-6 col-sm-12">
             <div className="form-group">
               <button
                 className="btn btn-outline-info"
@@ -350,8 +350,8 @@ class Almacenes extends CustomComponent {
                 <i className="bi bi-arrow-clockwise"></i>
               </button>
             </div>
-          </div>
-        </div>
+          </Column>
+        </Row>
 
         <Row>
           <Column>

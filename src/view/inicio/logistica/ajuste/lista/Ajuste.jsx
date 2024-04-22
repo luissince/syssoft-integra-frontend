@@ -21,6 +21,11 @@ import {
 } from '../../../../../network/rest/principal.network';
 import { CANCELED } from '../../../../../model/types/types';
 import { connect } from 'react-redux';
+import Title from '../../../../../components/Title';
+import Row from '../../../../../components/Row';
+import Column from '../../../../../components/Column';
+import { SpinnerView } from '../../../../../components/Spinner';
+import { TableResponsive } from '../../../../../components/Table';
 
 class Ajuste extends CustomComponent {
   constructor(props) {
@@ -305,20 +310,19 @@ class Ajuste extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
-        {this.state.initialLoad && spinnerLoading(this.state.initialMessage)}
+        <SpinnerView
+          loading={this.state.initialLoad}
+          message={this.state.initialMessage}
+        />
 
-        <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <div className="form-group">
-              <h5>
-                Ajustes <small className="text-secondary">REALIZADOS</small>
-              </h5>
-            </div>
-          </div>
-        </div>
+        <Title
+          title={"Ajustes"}
+          subTitle={"REALIZADOS"}
+          handleGoBack={() => this.props.history.goBack()}
+        />
 
-        <div className="row">
-          <div className="col-md-6 col-sm-12">
+        <Row>
+          <Column className="col-md-6 col-sm-12">
             <div className="form-group">
               <div className="input-group mb-2">
                 <div className="input-group-prepend">
@@ -335,9 +339,9 @@ class Ajuste extends CustomComponent {
                 />
               </div>
             </div>
-          </div>
+          </Column>
 
-          <div className="col-md-6 col-sm-12">
+          <Column className="col-md-6 col-sm-12">
             <div className="form-group">
               <button
                 className="btn btn-outline-info"
@@ -352,11 +356,11 @@ class Ajuste extends CustomComponent {
                 <i className="bi bi-arrow-clockwise"></i>
               </button>
             </div>
-          </div>
-        </div>
+          </Column>
+        </Row>
 
-        <div className="row">
-          <div className="col-md-3">
+        <Row>
+          <Column className="col-md-3">
             <div className="form-group">
               <label>Tipo:</label>
               <div className="input-group">
@@ -374,9 +378,9 @@ class Ajuste extends CustomComponent {
                 </select>
               </div>
             </div>
-          </div>
+          </Column>
 
-          <div className="col-xl-3 col-lg-3 col-md-12 col-sm-12 col-12">
+          <Column className="col-xl-3 col-lg-3 col-md-12 col-sm-12 col-12">
             <div className="form-group">
               <label>Fecha Inicio:</label>
               <input
@@ -386,9 +390,9 @@ class Ajuste extends CustomComponent {
                 onChange={this.handleInputFechaInicio}
               />
             </div>
-          </div>
+          </Column>
 
-          <div className="col-xl-3 col-lg-3 col-md-12 col-sm-12 col-12">
+          <Column className="col-xl-3 col-lg-3 col-md-12 col-sm-12 col-12">
             <div className="form-group">
               <label>Fecha Final:</label>
               <input
@@ -398,36 +402,34 @@ class Ajuste extends CustomComponent {
                 onChange={this.handleInputFechaFinal}
               />
             </div>
-          </div>
-        </div>
+          </Column>
+        </Row>
 
-        <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <div className="table-responsive">
-              <table className="table table-striped table-bordered rounded">
-                <thead>
-                  <tr>
-                    <th width="5%" className="text-center">
-                      #
-                    </th>
-                    <th width="15%">Fecha y Hora</th>
-                    <th width="15%">Tipo de Movimiento</th>
-                    <th width="20%">Observación</th>
-                    <th width="15%">Almacen</th>
-                    <th width="10%">Estado</th>
-                    <th width="5%" className="text-center">
-                      Detalle
-                    </th>
-                    <th width="5%" className="text-center">
-                      Anular
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>{this.generarBody()}</tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+        <Row>
+          <Column>
+            <TableResponsive
+              tHead={
+                <tr>
+                <th width="5%" className="text-center">
+                  #
+                </th>
+                <th width="15%">Fecha y Hora</th>
+                <th width="15%">Tipo de Movimiento</th>
+                <th width="20%">Observación</th>
+                <th width="15%">Almacen</th>
+                <th width="10%">Estado</th>
+                <th width="5%" className="text-center">
+                  Detalle
+                </th>
+                <th width="5%" className="text-center">
+                  Anular
+                </th>
+              </tr>
+              }
+              tBody={this.generarBody()}
+            />
+          </Column>
+        </Row>
 
         <Paginacion
           loading={this.state.loading}
@@ -456,4 +458,6 @@ const mapStateToProps = (state) => {
  *
  * Método encargado de conectar con redux y exportar la clase
  */
-export default connect(mapStateToProps, null)(Ajuste);
+const ConnectedAjuste = connect(mapStateToProps, null)(Ajuste);
+
+export default ConnectedAjuste;

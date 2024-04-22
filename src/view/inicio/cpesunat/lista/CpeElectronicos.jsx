@@ -29,7 +29,7 @@ import {
   facturarCpeSunat,
   guiaRemisionCpeSunat,
   listCpeSunat,
-  obtenerFacturacionPdfVenta,
+  obtenerVentaPdf,
 } from '../../../../network/rest/principal.network';
 import { CANCELED } from '../../../../model/types/types';
 import CustomComponent from '../../../../model/class/custom-component';
@@ -71,8 +71,8 @@ class CpeElectronicos extends CustomComponent {
 
       fechaInicio: currentDate(),
       fechaFinal: currentDate(),
-
       idComprobante: '',
+      estado: '0',
 
       idSucursal: '',
 
@@ -130,7 +130,7 @@ class CpeElectronicos extends CustomComponent {
       sucursales: sucursales,
       initialLoad: false,
     }, () => {
-      this.loadInit()
+      this.loadingInit()
     })
   }
 
@@ -169,11 +169,11 @@ class CpeElectronicos extends CustomComponent {
     }
   }
 
-  loadInit = async () => {
+  loadingInit = async () => {
     if (this.state.loading) return;
 
     await this.setStateAsync({ paginacion: 1, restart: true });
-    this.fillTable(0, '');
+    this.fillTable(0);
     await this.setStateAsync({ opcion: 0 });
   }
 
@@ -187,6 +187,22 @@ class CpeElectronicos extends CustomComponent {
     await this.setStateAsync({ opcion: 1 });
   }
 
+  async searchOpciones() {
+    if (this.state.loading) return;
+
+    if (this.state.fechaInicio > this.state.fechaFinal) return;
+
+    await this.setStateAsync({ paginacion: 1, restart: false });
+    this.fillTable(
+      2,
+      '',
+      this.state.fechaInicio,
+      this.state.fechaFinal,
+      this.state.idComprobante,
+      this.state.estado);
+    await this.setStateAsync({ opcion: 2 });
+  }
+
   paginacionContext = async (listid) => {
     await this.setStateAsync({ paginacion: listid, restart: false });
     this.onEventPaginacion();
@@ -195,17 +211,20 @@ class CpeElectronicos extends CustomComponent {
   onEventPaginacion = () => {
     switch (this.state.opcion) {
       case 0:
-        this.fillTable(0, '');
+        this.fillTable(0);
         break;
       case 1:
         this.fillTable(1, this.refTxtSearch.current.value);
         break;
+      case 2:
+        this.fillTable(2, '', this.state.fechaInicio, this.state.fechaFinal, this.state.idComprobante, this.state.estado);
+        break;
       default:
-        this.fillTable(0, '');
+        this.fillTable(0);
     }
   }
 
-  fillTable = async (opcion, buscar) => {
+  fillTable = async (opcion, buscar = '', fechaInicio = '', fechaFinal = '', idComprobante = '', estado = '0') => {
     this.setState({
       loading: true,
       lista: [],
@@ -215,6 +234,10 @@ class CpeElectronicos extends CustomComponent {
     const params = {
       opcion: opcion,
       buscar: buscar,
+      fechaInicio: fechaInicio,
+      fechaFinal: fechaFinal,
+      idComprobante: idComprobante,
+      estado: estado,
       idSucursal: this.state.idSucursal,
       posicionPagina: (this.state.paginacion - 1) * this.state.filasPorPagina,
       filasPorPagina: this.state.filasPorPagina,
@@ -247,19 +270,33 @@ class CpeElectronicos extends CustomComponent {
   }
 
   handleInputFechaInicio = (event) => {
-    this.setState({ fechaInicio: event.target.value })
+    this.setState({ fechaInicio: event.target.value }, () => {
+      this.searchOpciones();
+    })
   }
 
   handleInputFechaFinal = (event) => {
-    this.setState({ fechaFinal: event.target.value })
+    this.setState({ fechaFinal: event.target.value }, () => {
+      this.searchOpciones();
+    })
   }
 
   handleSelectComprobante = (event) => {
-    this.setState({ idComprobante: event.target.value })
+    this.setState({ idComprobante: event.target.value }, () => {
+      this.searchOpciones();
+    })
+  }
+
+  handleSelectEstado = (event) => {
+    this.setState({ estado: event.target.value }, () => {
+      this.searchOpciones();
+    })
   }
 
   handleSelectSucursal = (event) => {
-    this.setState({ idSucursal: event.target.value })
+    this.setState({ idSucursal: event.target.value }, () => {
+      this.loadingInit();
+    })
   }
 
   handleSendFacturar = (idVenta) => {
@@ -395,7 +432,7 @@ class CpeElectronicos extends CustomComponent {
 
   handleOpenPdfA4 = (idComprobante, tipo) => {
     if (tipo === "fac") {
-      window.open(obtenerFacturacionPdfVenta(idComprobante, "a4"), '_blank');
+      window.open(obtenerVentaPdf(idComprobante, "a4"), '_blank');
     } else {
       window.open(pdfA4GuiaRemision(idComprobante), '_blank');
     }
@@ -403,7 +440,7 @@ class CpeElectronicos extends CustomComponent {
 
   handleOpenPdfTicket = (idComprobante, tipo) => {
     if (tipo === "fac") {
-      window.open(obtenerFacturacionPdfVenta(idComprobante, "ticket"), '_blank');
+      window.open(obtenerVentaPdf(idComprobante, "ticket"), '_blank');
     } else {
       window.open(pdfTicketGuiaRemision(idComprobante), '_blank');
     }
@@ -463,7 +500,7 @@ class CpeElectronicos extends CustomComponent {
         return this.opcionButtonEnvio(images.accept, 'Aceptar');
       }
 
-      if(item.xmlSunat === '2987' || item.xmlSunat === '1032'){
+      if (item.xmlSunat === '2987' || item.xmlSunat === '1032') {
         return this.opcionButtonEnvio(images.error, 'Anulado');
       }
 
@@ -564,13 +601,10 @@ class CpeElectronicos extends CustomComponent {
           </td>
           <td className="text-center">
             {item.estado !== 3
-              ? <span className="text-success">DECLARAR</span> 
+              ? <span className="text-success">DECLARAR</span>
               : <span className="text-danger">DAR DE BAJA</span>
             }
           </td>
-          {/* <td className='text-right'>
-            {numberFormat(item.total, item.codiso)}
-          </td> */}
           <td className="text-center">
             {this.renderEstado(item)}
           </td>
@@ -644,10 +678,10 @@ class CpeElectronicos extends CustomComponent {
             <div className="form-group">
               <button
                 className="btn btn-outline-light"
-                onClick={this.loadInit}
+                onClick={this.loadingInit}
               >
                 <i className="bi bi-arrow-clockwise"></i> Recargar Vista
-              </button>            
+              </button>
             </div>
           </Column>
         </Row>
@@ -667,7 +701,7 @@ class CpeElectronicos extends CustomComponent {
 
           <Column className="col-lg-3 col-md-3 col-sm-12 col-12">
             <div className="form-group">
-              <label>Fecha de Fin:</label>
+              <label>Fecha de Final:</label>
               <input
                 className="form-control"
                 type="date"
@@ -700,6 +734,8 @@ class CpeElectronicos extends CustomComponent {
               <label>Estados:</label>
               <select
                 className="form-control"
+                value={this.state.estado}
+                onChange={this.handleSelectEstado}
               >
                 <option value='0'>TODOS</option>
                 <option value='1'>POR DECLARAR</option>
@@ -760,7 +796,6 @@ class CpeElectronicos extends CustomComponent {
                   <th width="10%">Comprobante</th>
                   <th width="15%">Cliente</th>
                   <th width="10%">Estado</th>
-                  {/* <th width="10%">Total</th> */}
                   <th width="5%">Estado </th>
                   <th width="15%">Observación SUNAT</th>
                 </tr>

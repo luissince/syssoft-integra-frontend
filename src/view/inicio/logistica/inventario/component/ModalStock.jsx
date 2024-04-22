@@ -26,7 +26,7 @@ const CustomModalStock = ({
 }) => {
   return (
     <CustomModalForm
-      contentRef={(ref) => refModal.current = ref}
+    contentRef={refModal}
       isOpen={isOpen}
       onOpen={onOpen}
       onHidden={onHidden}
@@ -98,7 +98,7 @@ const CustomModalStock = ({
           <button
             type="button"
             className="btn btn-danger"
-            onClick={onClose}
+            onClick={async () => await refModal.current.handleOnClose()}
           >
             Cerrar
           </button>

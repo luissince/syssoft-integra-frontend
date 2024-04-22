@@ -228,24 +228,17 @@ class AlmacenEditar extends CustomComponent {
         />
 
         <Title
-          title='Producto'
-          subTitle='Editar'
+          title='Almacen'
+          subTitle='EDITAR'
           handleGoBack={() => this.props.history.goBack()}
         />
-
-        <div className="dropdown-divider"></div>
-
-        <div className="form-group pb-2">
-          <label>
-            Crea los puntos de almacenamiento y distribución de tus productos
-          </label>
-        </div>
-
+        
         <Row>
+          <Column className=''>
+          </Column>
           <div className="form-group col-md-12">
             <label>
-              Nombre del Almacén:{' '}
-              <i className="fa fa-asterisk text-danger small"></i>
+              Nombre del Almacén:{' '}<i className="fa fa-asterisk text-danger small"></i>
             </label>
             <input
               type="text"
@@ -253,9 +246,7 @@ class AlmacenEditar extends CustomComponent {
               ref={this.refNombre}
               value={this.state.nombre}
               onChange={(event) => {
-                this.setState({
-                  nombre: event.target.value,
-                });
+                this.setState({ nombre: event.target.value });
               }}
               placeholder="Ingrese el nombre del almacen"
             />
@@ -263,10 +254,11 @@ class AlmacenEditar extends CustomComponent {
         </Row>
 
         <Row>
+          <Column className=''>
+          </Column>
           <div className="form-group col-md-12">
             <label>
-              Dirección:{' '}
-              <i className="fa fa-asterisk text-danger small"></i>
+              Dirección:{' '}<i className="fa fa-asterisk text-danger small"></i>
             </label>
             <input
               type="text"
@@ -274,9 +266,7 @@ class AlmacenEditar extends CustomComponent {
               ref={this.refDireccion}
               value={this.state.direccion}
               onChange={(event) => {
-                this.setState({
-                  direccion: event.target.value,
-                });
+                this.setState({ direccion: event.target.value });
               }}
               placeholder="Ingrese una dirección"
             />
@@ -284,6 +274,8 @@ class AlmacenEditar extends CustomComponent {
         </Row>
 
         <Row>
+          <Column className=''>
+          </Column>
           <div className="form-group col-md-12">
             <label>
               Ubigeo: <i className="fa fa-asterisk text-danger small"></i>
@@ -313,66 +305,67 @@ class AlmacenEditar extends CustomComponent {
         </Row>
 
         <Row>
-          <div className="form-group col-md-6">
-            <label>Código SUNAT:</label>
-            <input
-              type="text"
-              className="form-control"
-              value={this.state.codigoSunat}
-              onChange={(event) => {
-                this.setState({
-                  codigoSunat: event.target.value,
-                });
-              }}
-              placeholder=""
-            />
-          </div>
-
-          <div className="form-group col-md-6">
-            <label htmlFor="nombre" className="col-form-label">
-              Preferido:
-            </label>
-            <div className="custom-control custom-switch">
+          <Column className='col-md-6'>
+            <div className="form-group">
+              <label>Código SUNAT:</label>
               <input
-                type="checkbox"
-                className="custom-control-input"
-                id="cbPreferido"
-                checked={this.state.predefinido}
-                onChange={(value) =>
-                  this.setState({ predefinido: value.target.checked })
-                }
+                type="text"
+                className="form-control"
+                value={this.state.codigoSunat}
+                onChange={(event) => {
+                  this.setState({ codigoSunat: event.target.value });
+                }}
+                placeholder=""
               />
-              <label className="custom-control-label" htmlFor="cbPreferido">
-                {this.state.predefinido ? "Si" : "No"}
+            </div>
+          </Column>
+
+          <Column className='col-md-6'>
+            <div className="form-group">
+              <label htmlFor="nombre" className="col-form-label">
+                Preferido:
+              </label>
+              <div className="custom-control custom-switch">
+                <input
+                  type="checkbox"
+                  className="custom-control-input"
+                  id="cbPreferido"
+                  checked={this.state.predefinido}
+                  onChange={(value) =>
+                    this.setState({ predefinido: value.target.checked })
+                  }
+                />
+                <label className="custom-control-label" htmlFor="cbPreferido">
+                  {this.state.predefinido ? "Si" : "No"}
+                </label>
+              </div>
+            </div>
+          </Column>
+        </Row>
+
+        <Row>
+          <Column>
+            <div className="form-group">
+              <label>Observaciones: </label>
+              <textarea
+                className="form-control "
+                id="exampleFormControlTextarea1"
+                rows="3"
+                value={this.state.observacion}
+                onChange={(event) => this.setState({ observacion: event.target.value })}>
+              </textarea>
+            </div>
+          </Column>
+        </Row>
+
+        <Row>
+          <Column className='col-md-12'>
+            <div className="form-group">
+              <label>
+                Los campos marcados con{' '}<i className="fa fa-asterisk text-danger small"></i> son obligatorios
               </label>
             </div>
-          </div>
-        </Row>
-
-        <Row>
-          <div className="form-group col">
-            <label>Observaciones: </label>
-            <textarea
-              className="form-control "
-              id="exampleFormControlTextarea1"
-              rows="3"
-              value={this.state.observacion}
-              onChange={(event) =>
-                this.setState({
-                  observacion: event.target.value,
-                })
-              }>
-            </textarea>
-          </div>
-        </Row>
-
-        <Row>
-          <div className="form-group col-md-12">
-            <label>
-              Los campos marcados con{' '}
-              <i className="fa fa-asterisk text-danger small"></i> son obligatorios
-            </label>
-          </div>
+          </Column>
         </Row>
 
         <Row>

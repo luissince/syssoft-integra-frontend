@@ -1,5 +1,4 @@
 import {
-  spinnerLoading,
   formatTime,
   rounded,
 } from '../../../../../helper/utils.helper';
@@ -10,6 +9,11 @@ import ErrorResponse from '../../../../../model/class/error-response';
 import { detailAjuste } from '../../../../../network/rest/principal.network';
 import { CANCELED } from '../../../../../model/types/types';
 import { connect } from 'react-redux';
+import Title from '../../../../../components/Title';
+import Row from '../../../../../components/Row';
+import Column from '../../../../../components/Column';
+import { SpinnerView } from '../../../../../components/Spinner';
+import { TableResponsive } from '../../../../../components/Table';
 
 class AjusteDetalle extends CustomComponent {
   constructor(props) {
@@ -97,23 +101,19 @@ class AjusteDetalle extends CustomComponent {
 
     return (
       <ContainerWrapper>
-        {this.state.loading && spinnerLoading(this.state.msgLoading)}
+        <SpinnerView
+          loading={this.state.loading}
+          message={this.state.msgLoading}
+        />
 
-        <div className="row">
-          <div className="col">
-            <div className="form-group">
-              <h5>
-                <span role="button" onClick={() => this.props.history.goBack()}>
-                  <i className="bi bi-arrow-left-short"></i>
-                </span>
-                Ajuste <small className="text-secondary">detalle</small>
-              </h5>
-            </div>
-          </div>
-        </div>
+        <Title
+          title={"Ajuste"}
+          subTitle={"DETALLE"}
+          handleGoBack={() => this.props.history.goBack()}
+        />
 
-        <div className="row">
-          <div className="col">
+        <Row>
+          <Column>
             <div className="form-group">
               <div className="table-responsive">
                 <table width="100%">
@@ -173,24 +173,26 @@ class AjusteDetalle extends CustomComponent {
                 </table>
               </div>
             </div>
-          </div>
-        </div>
+          </Column>
+        </Row>
 
-        <div className="row">
-          <div className="col">
-            <p className="lead">Detalle</p>
-            <div className="table-responsive">
-              <table className="table table-light table-striped">
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Producto</th>
-                    <th>Categoría</th>
-                    <th>Cantidad</th>
-                    <th>Unidad</th>
-                  </tr>
-                </thead>
-                <tbody>
+        <Row>
+          <Column>
+            <TableResponsive
+              className={"table table-light table-striped"}
+              title={"Detalle"}
+              tHead={
+                <tr>
+                  <th>#</th>
+                  <th>Producto</th>
+                  <th>Categoría</th>
+                  <th>Cantidad</th>
+                  <th>Unidad</th>
+                </tr>
+              }
+
+              tBody={
+                <>
                   {this.state.detalle.map((item, index) => {
                     return (
                       <tr key={index}>
@@ -206,11 +208,11 @@ class AjusteDetalle extends CustomComponent {
                       </tr>
                     );
                   })}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+                </>
+              }
+            />
+          </Column>
+        </Row>
       </ContainerWrapper>
     );
   }
@@ -230,4 +232,6 @@ const mapStateToProps = (state) => {
  *
  * Método encargado de conectar con redux y exportar la clase
  */
-export default connect(mapStateToProps, null)(AjusteDetalle);
+const ConnectedAjusteDetalle = connect(mapStateToProps, null)(AjusteDetalle);
+
+export default ConnectedAjusteDetalle;

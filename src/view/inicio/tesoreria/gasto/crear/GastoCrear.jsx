@@ -354,6 +354,10 @@ class GastoCrear extends CustomComponent {
     this.setState({ loadingModal: true, isOpenSale: true })
   }
 
+  handleCloseModalSale = () => {
+    this.setState({ isOpenSale: false })
+  }
+
   handleOnOpenModalSale = () => {
     const metodo = this.state.bancos.find((item) => item.preferido === 1);
 
@@ -380,15 +384,6 @@ class GastoCrear extends CustomComponent {
     this.setState({
       bancosAgregados: [],
     });
-  }
-
-  handleCloseModalSale = () => {
-    const data = this.refModalSale.current;
-    data.classList.add("close-cm")
-    data.addEventListener('animationend', () => {
-      this.setState({ isOpenSale: false }, () => {
-      })
-    })
   }
 
   handleAddBancosAgregados = () => {
@@ -738,7 +733,7 @@ class GastoCrear extends CustomComponent {
 
 
         <ModalSale
-          refSale={this.refModalSale}
+          refModal={this.refModalSale}
           isOpen={this.state.isOpenSale}
           onOpen={this.handleOnOpenModalSale}
           onHidden={this.handleOnHidden}

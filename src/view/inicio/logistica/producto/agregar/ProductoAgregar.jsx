@@ -52,10 +52,6 @@ class ProductoAgregar extends CustomComponent {
   constructor(props) {
     super(props);
 
-    /**
-     * Estado inicial del componente.
-     * @type {Object}
-     */
     this.state = {
       tipo: 'TP0001',
       imagen: images.noImage,

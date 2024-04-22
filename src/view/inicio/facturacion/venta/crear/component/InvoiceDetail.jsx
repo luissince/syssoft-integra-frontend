@@ -88,21 +88,6 @@ const InvoiceDetail = (props) => {
                       {producto.idTipoTratamientoProducto === SERVICIO && (
                         <div key={index} className="d-flex flex-column align-items-center">
                           <div className="d-flex">
-                            <button
-                              className="btn m-0 d-flex justify-content-center align-items-center pointer"
-                              onClick={() => handleMinus(producto, 0)}
-                            >
-                              <img src={images.minus} alt="Menorar" />
-                            </button>
-                            <div className="item_quantity d-flex justify-content-center align-items-center">
-                              {producto.cantidad}
-                            </div>
-                            <button
-                              className="btn m-0 d-flex justify-content-center align-items-center pointer"
-                              onClick={() => handlePlus(producto, 0)}
-                            >
-                              <img src={images.plus} alt="Aumentar" />
-                            </button>
                           </div>
                         </div>
                       )}
@@ -164,24 +149,6 @@ const InvoiceDetail = (props) => {
                           <div>
                             <span className='text-secondary'>{item.almacen}</span>
                           </div>
-
-                          {/* <div className="d-flex">
-                            <button
-                              className="btn m-0 d-flex justify-content-center align-items-center pointer"
-                              onClick={() => handleMinus(producto, item.idInventario)}
-                            >
-                              <img src={images.minus} alt="Menorar" />
-                            </button>
-                            <div className="item_quantity d-flex justify-content-center align-items-center">
-                              {item.cantidad}
-                            </div>
-                            <button
-                              className="btn m-0 d-flex justify-content-center align-items-center pointer"
-                              onClick={() => handlePlus(producto, item.idInventario)}
-                            >
-                              <img src={images.plus} alt="Aumentar" />
-                            </button>
-                          </div> */}
                         </div>
                       ))}
                     </div>

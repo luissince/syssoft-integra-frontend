@@ -9,7 +9,7 @@ import {
 import PropTypes from 'prop-types';
 import { SpinnerView } from '../../../../../../components/Spinner';
 
-export const CustomModalProduct = ({
+const ModalProducto = ({
   refModal,
   isOpen,
   onOpen,
@@ -38,7 +38,7 @@ export const CustomModalProduct = ({
 
   return (
     <CustomModalForm
-      contentRef={(ref) => refModal.current = ref}
+      contentRef={refModal}
       isOpen={isOpen}
       onOpen={onOpen}
       onHidden={onHidden}
@@ -116,7 +116,7 @@ export const CustomModalProduct = ({
           <button
             type="button"
             className="btn btn-danger"
-            onClick={onClose}>
+            onClick={async () => await refModal.current.handleOnClose()}>
             <i className="fa fa-close"></i> Cerrar
           </button>
         </>
@@ -125,7 +125,7 @@ export const CustomModalProduct = ({
   );
 }
 
-CustomModalProduct.propTypes = {
+ModalProducto.propTypes = {
   refModal: PropTypes.object.isRequired,
   isOpen: PropTypes.bool.isRequired,
   onOpen: PropTypes.func.isRequired,
@@ -151,3 +151,5 @@ CustomModalProduct.propTypes = {
 
   handleAdd: PropTypes.func.isRequired,
 }
+
+export default ModalProducto;

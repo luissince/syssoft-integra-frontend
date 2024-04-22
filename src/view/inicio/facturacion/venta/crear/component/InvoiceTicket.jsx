@@ -2,8 +2,9 @@ import { images } from '../../../../../../helper';
 import PropTypes from 'prop-types';
 
 const InvoiceTicket = (props) => {
+
   const { nombreComporbante } = props;
-  const { handleOpenPrint, handleOpenOptions } = props;
+  const { handleOpenPreImpresion, handleOpenVenta, handleOpenCotizacion, handleOpenOptions } = props;
 
   return (
     <div className="invoice-ticket d-flex pl-3 align-items-center justify-content-between">
@@ -11,26 +12,36 @@ const InvoiceTicket = (props) => {
         <p className="h5 m-0">{nombreComporbante}</p>
       </div>
       <div className="d-flex">
-        {/* <span>
+        <span>
           <button
-            className="btn btn-link rounded-circle"
-            onClick={handleOpenPrint}
+            className="btn btn-link rounded-circle h-100"
+            onClick={handleOpenPreImpresion}
           >
             <img src={images.print} alt="Imprimir" />
           </button>
-        </span> */}
-        {/* <span>
-          <button
-            className="btn btn-link rounded-circle"
-            onClick={handleOpenPrint}
-          >
-            <img src={images.document} alt="Cotización" />
-          </button>
-        </span> */}
+        </span>
 
         <span>
           <button
-            className="btn btn-link rounded-circle"
+            className="btn btn-link rounded-circle h-100"
+          onClick={handleOpenVenta}
+          >
+            <img src={images.basket} alt="Venta" />
+          </button>
+        </span>
+
+        <span>
+          <button
+            className="btn btn-link rounded-circle h-100"
+            onClick={handleOpenCotizacion}
+          >
+            <img src={images.document} alt="Cotización" />
+          </button>
+        </span>
+
+        <span>
+          <button
+            className="btn btn-link rounded-circle h-100"
             data-bs-toggle="tooltip"
             data-bs-placement="bottom"
             title="Tooltip on bottom"
@@ -46,7 +57,9 @@ const InvoiceTicket = (props) => {
 
 InvoiceTicket.propTypes = {
   nombreComporbante: PropTypes.string,
-  handleOpenPrint: PropTypes.func,
+  handleOpenPreImpresion: PropTypes.func,
+  handleOpenVenta: PropTypes.func,
+  handleOpenCotizacion: PropTypes.func,
   handleOpenOptions: PropTypes.func.isRequired,
 }
 

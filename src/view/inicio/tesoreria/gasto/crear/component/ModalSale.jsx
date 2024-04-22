@@ -8,7 +8,7 @@ import { SpinnerView } from '../../../../../../components/Spinner';
 const ModalSale = (props) => {
 
   const {
-    refSale,
+    refModal,
     isOpen,
     onOpen,
     onHidden,
@@ -105,7 +105,7 @@ const ModalSale = (props) => {
 
   return (
     <CustomModalForm
-      contentRef={(ref) => refSale.current = ref}
+      contentRef={refModal}
       isOpen={isOpen}
       onOpen={onOpen}
       onHidden={onHidden}
@@ -219,7 +219,7 @@ const ModalSale = (props) => {
           <button
             type="button"
             className="btn btn-danger"
-            onClick={onClose}
+            onClick={async () => await refModal.current.handleOnClose()}
           >
             <i className='fa fa-close'></i> Cerrar
           </button>
@@ -268,7 +268,7 @@ const MetodoPago = ({
 };
 
 ModalSale.propTypes = {
-  refSale: PropTypes.object.isRequired,
+  refModal: PropTypes.object.isRequired,
   isOpen: PropTypes.bool.isRequired,
   onOpen: PropTypes.func.isRequired,
   onHidden: PropTypes.func.isRequired,

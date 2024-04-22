@@ -2,7 +2,6 @@ import ContainerWrapper from '../../../../../components/Container';
 import CustomComponent from '../../../../../model/class/custom-component';
 import {
   currentDate,
-  spinnerLoading,
   alertDialog,
   alertWarning,
   keyNumberFloat,
@@ -18,9 +17,13 @@ import { CANCELED } from '../../../../../model/types/types';
 import { GUIA_DE_REMISION } from '../../../../../model/types/tipo-comprobante';
 import React from 'react';
 import SearchInput from '../../../../../components/SearchInput';
-import { CustomModalContent } from '../../../../../components/CustomModal';
+import { SpinnerView } from '../../../../../components/Spinner';
+import Row from '../../../../../components/Row';
+import Column from '../../../../../components/Column';
 import printJS from 'print-js';
 import { pdfA4GuiaRemision, pdfTicketGuiaRemision } from '../../../../../helper/lista-pdf.helper';
+import ModalImpresion from './componente/ModalImpresion';
+import { TableResponsive } from '../../../../../components/Table';
 
 class GuiaRemisionCrear extends CustomComponent {
   constructor(props) {
@@ -326,6 +329,23 @@ class GuiaRemisionCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
   // Eventos para traer el modald de venta
   //------------------------------------------------------------------------------------------
+
+  handleOpenPrint = (idGuiaRemision) => {
+    this.setState({ isOpen: true, idGuiaRemision: idGuiaRemision })
+  }
+
+  handleClosePrint = async () => {
+    const data = this.refPrinter.current;
+    data.classList.add("close-cm")
+    data.addEventListener('animationend', () => {
+      this.setState({ isOpen: false }, () => {
+        this.setState(this.initial, async () => {
+          await this.loadData()
+        })
+      })
+    })
+  }
+
   handlePrintA4 = () => {
     printJS({
       printable: pdfA4GuiaRemision(this.state.idGuiaRemision),
@@ -353,22 +373,6 @@ class GuiaRemisionCrear extends CustomComponent {
           await this.loadData()
         })
       }
-    })
-  }
-
-  handleOpenPrint = (idGuiaRemision) => {
-    this.setState({ isOpen: true, idGuiaRemision: idGuiaRemision })
-  }
-
-  handleClosePrint = async () => {
-    const data = this.refPrinter.current;
-    data.classList.add("close-cm")
-    data.addEventListener('animationend', () => {
-      this.setState({ isOpen: false }, () => {
-        this.setState(this.initial, async () => {
-          await this.loadData()
-        })
-      })
     })
   }
 
@@ -865,41 +869,24 @@ class GuiaRemisionCrear extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
-        {this.state.loading && spinnerLoading(this.state.msgLoading)}
 
-        <CustomModalContent
-          contentRef={(ref) => this.refPrinter.current = ref}
-          isOpen={this.state.isOpen}
-          onClose={this.handleClosePrint}
-          contentLabel="Modal de Impresión"
-          titleHeader="SysSoft Integra"
-          body={
-            <>
-              <h5 className='text-center'>Opciones de impresión</h5>
-              <div className='d-flex justify-content-center align-items-center gap-2_5 mt-3'>
-                <button type="button" className="btn btn-outline-info"
-                  onClick={this.handlePrintA4}>
-                  <i className="fa fa-file-pdf-o"></i> A4
-                </button>
-                {" "}
-                <button type="button" className="btn btn-outline-info"
-                  onClick={this.handlePrintTicket}>
-                  <i className="fa fa-sticky-note"></i> Ticket
-                </button>
-              </div>
-            </>
-          }
-          footer={
-            <button type="button"
-              className="btn btn-danger"
-              onClick={this.handleClosePrint}>
-              <i className="fa fa-close"></i> Cerrar
-            </button>
-          }
+        <SpinnerView
+          loading={this.state.loading}
+          message={this.state.msgLoading}
         />
 
-        <div className="row">
-          <div className="col">
+        <ModalImpresion
+          refModal={this.refPrinter}
+          isOpen={this.state.isOpen}
+          handleClose={this.handleClosePrint}
+
+          handlePrintA4={this.handlePrintA4}
+          handlePrintTicket={this.handlePrintTicket}
+        />
+
+
+        <Row>
+          <Column>
             <div className="form-group">
               <h5>
                 <span role="button" onClick={() => this.handleBack()}>
@@ -909,11 +896,11 @@ class GuiaRemisionCrear extends CustomComponent {
                 <small className="text-secondary"> Crear </small>
               </h5>
             </div>
-          </div>
-        </div>
+          </Column>
+        </Row>
 
-        <div className="row">
-          <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
+        <Row>
+          <Column className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
             <button
               type="button"
               className="btn btn-primary"
@@ -934,18 +921,18 @@ class GuiaRemisionCrear extends CustomComponent {
               onClick={() => this.handleBack()}>
               <i className='fa fa-close'></i>  Cancelar
             </button>
-          </div>
-        </div>
+          </Column>
+        </Row>
 
         <br />
 
-        {/* Seleccione la venta */}
+        {/* Seleccione la venta */ }
         <h6><span className='badge badge-primary'>1</span> Venta y Guía</h6>
 
         <div className="dropdown-divider"></div>
 
-        <div className='row'>
-          <div className='col'>
+        <Row>
+          <Column>
             <label>
               Filtrar Venta: <i className="fa fa-asterisk text-danger small"></i>
             </label>
@@ -968,42 +955,42 @@ class GuiaRemisionCrear extends CustomComponent {
                 </>
               }
             />
+          </Column>
+        </Row>
+
+    {/* Sección del comprobante */ }
+    <Row>
+      <Column>
+        <div className="form-group">
+          <label>
+            Comprobante: <i className="fa fa-asterisk text-danger small"></i>
+          </label>
+
+          <div className="input-group">
+            <select
+              className="form-control"
+              ref={this.refComprobante}
+              value={this.state.idComprobante}
+              onChange={this.handleSelectComprobante}>
+              <option value="">-- Seleccione --</option>
+              {
+                this.state.comprobantes.map((item, index) => (
+                  <option key={index} value={item.idComprobante}>{item.nombre}</option>
+                ))
+              }
+            </select>
           </div>
         </div>
+      </Column>
+    </Row>
 
-        {/* Sección del comprobante */}
-        <div className="row">
-          <div className="col">
-            <div className="form-group">
-              <label>
-                Comprobante: <i className="fa fa-asterisk text-danger small"></i>
-              </label>
-
-              <div className="input-group">
-                <select
-                  className="form-control"
-                  ref={this.refComprobante}
-                  value={this.state.idComprobante}
-                  onChange={this.handleSelectComprobante}>
-                  <option value="">-- Seleccione --</option>
-                  {
-                    this.state.comprobantes.map((item, index) => (
-                      <option key={index} value={item.idComprobante}>{item.nombre}</option>
-                    ))
-                  }
-                </select>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Sección de los datos del cliente */}
+    {/* Sección de los datos del cliente */ }
         <h6><span className='badge badge-primary'>2</span> Cliente</h6>
 
         <div className="dropdown-divider"></div>
 
-        <div className="row">
-          <div className="col">
+        <Row>
+          <Column>
             <div className="form-group">
               <label>
                 Selecciona un Cliente: <i className="fa fa-asterisk text-danger small"></i>
@@ -1014,16 +1001,16 @@ class GuiaRemisionCrear extends CustomComponent {
                 value={this.state.venta ? `${this.state.venta.documento} - ${this.state.venta.informacion}` : ''}
                 disabled />
             </div>
-          </div>
-        </div>
+          </Column>
+        </Row>
 
-        {/* Sección para modalidad traslado */}
+    {/* Sección para modalidad traslado */ }
         <h6><span className='badge badge-primary'>3</span> Modalidad de Traslado</h6>
 
         <div className="dropdown-divider"></div>
 
-        <div className="row">
-          <div className="col">
+        <Row>
+          <Column>
             <div className="form-group">
               <div>
                 <div className="form-check form-check-inline pr-5">
@@ -1043,9 +1030,9 @@ class GuiaRemisionCrear extends CustomComponent {
                 </div>
               </div>
             </div>
-          </div>
+          </Column>
 
-          <div className='col'>
+          <Column>
             <div className="form-group">
               <div className="form-check form-check-inline">
                 <input
@@ -1063,16 +1050,16 @@ class GuiaRemisionCrear extends CustomComponent {
                 </label>
               </div>
             </div>
-          </div>
-        </div>
+          </Column>
+        </Row>
 
-        {/* Sección para datos del traslado */}
+    {/* Sección para datos del traslado */ }
         <h6><span className='badge badge-primary'>4</span> Datos del Traslado</h6>
 
         <div className="dropdown-divider"></div>
 
-        <div className='row'>
-          <div className='col-md-6 col-12'>
+        <Row>
+          <Column className='col-md-6 col-12'>
             <div className="form-group">
               <label>
                 Motivo del traslado: <i className="fa fa-asterisk text-danger small"></i>
@@ -1094,9 +1081,9 @@ class GuiaRemisionCrear extends CustomComponent {
                 </select>
               </div>
             </div>
-          </div>
+          </Column>
 
-          <div className='col-md-6 col-12'>
+          <Column className='col-md-6 col-12'>
             <div className="form-group">
               <label>
                 Fecha traslado:{' '}<i className="fa fa-asterisk text-danger small"></i>
@@ -1110,11 +1097,11 @@ class GuiaRemisionCrear extends CustomComponent {
                 }}
               />
             </div>
-          </div>
-        </div>
+          </Column>
+        </Row>
 
-        <div className="row">
-          <div className="col-md-6 col-12">
+        <Row>
+          <Column className="col-md-6 col-12">
             <div className="form-group">
               <label>
                 Tipo Peso de Carga: <i className="fa fa-asterisk text-danger small" />
@@ -1136,9 +1123,9 @@ class GuiaRemisionCrear extends CustomComponent {
                 </select>
               </div>
             </div>
-          </div>
+          </Column>
 
-          <div className="col-md-6 col-12">
+          <Column className="col-md-6 col-12">
             <div className="form-group">
               <label>Peso de la Carga:{' '}<i className="fa fa-asterisk text-danger small"></i></label>
               <div className="input-group">
@@ -1155,16 +1142,16 @@ class GuiaRemisionCrear extends CustomComponent {
                 />
               </div>
             </div>
-          </div>
-        </div>
+          </Column>
+        </Row>
 
-        {/* Sección de datos del vehículo */}
+    {/* Sección de datos del vehículo */ }
         <h6><span className='badge badge-primary'>5</span> Datos del Transporte Privado</h6>
 
         <div className="dropdown-divider"></div>
 
-        <div className='row'>
-          <div className='col'>
+        <Row>
+          <Column className='col'>
             <label>
               Filtrar un vehículo: <i className="fa fa-asterisk text-danger small"></i>
             </label>
@@ -1184,16 +1171,16 @@ class GuiaRemisionCrear extends CustomComponent {
                 </>
               }
             />
-          </div>
-        </div>
+          </Column>
+        </Row>
 
-        {/* Sección de datos del conductor */}
+    {/* Sección de datos del conductor */ }
         <h6><span className='badge badge-primary'>6</span> Datos del Conductor Privado</h6>
 
         <div className="dropdown-divider"></div>
 
-        <div className='row'>
-          <div className='col'>
+        <Row>
+          <Column>
             <label>
               Filtrar un Conductor (DNI): <i className="fa fa-asterisk text-danger small"></i>
             </label>
@@ -1213,15 +1200,15 @@ class GuiaRemisionCrear extends CustomComponent {
                 </>
               }
             />
-          </div>
-        </div>
+          </Column>
+        </Row>
 
         <h6><span className='badge badge-primary'>7</span> Datos de la Empresa a Transportar - Pública</h6>
 
         <div className="dropdown-divider"></div>
 
-        <div className="row">
-          <div className="col">
+        <Row>
+          <Column>
             {/* <div className="form-group"> */}
             <label>
               Selecciona una Empresa (RUC): <i className="fa fa-asterisk text-danger small"></i>
@@ -1243,14 +1230,13 @@ class GuiaRemisionCrear extends CustomComponent {
                 </>
               }
             />
-          </div>
-        </div>
+          </Column>
+        </Row>
 
         <div className="dropdown-divider"></div>
 
-        <div className="row">
-          <div className="col-md-6 col-12">
-
+        <Row>
+          <Column className="col-md-6 col-12">
             <h6><span className='badge badge-primary'>8</span> Punto de partida</h6>
 
             <div className="dropdown-divider"></div>
@@ -1302,10 +1288,9 @@ class GuiaRemisionCrear extends CustomComponent {
                 }
               />
             </div>
-          </div>
+          </Column>
 
-          <div className="col-md-6 col12">
-
+          <Column className="col-md-6 col12">
             <h6><span className='badge badge-primary'>9</span> Punto de llegada</h6>
 
             <div className="dropdown-divider"></div>
@@ -1357,45 +1342,40 @@ class GuiaRemisionCrear extends CustomComponent {
                 }
               />
             </div>
-          </div>
-        </div>
-
+          </Column>
+        </Row>
 
         <h6><span className='badge badge-primary'>10</span> Detalle de Guía de Remisión</h6>
 
-        <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <div className="table-responsive">
-              <table className="table table-striped table-bordered rounded">
-                <thead>
-                  <tr>
-                    <th width="5%" className="text-center">
-                      #
-                    </th>
-                    <th width="10%">Código</th>
-                    <th width="35%">Descripción</th>
-                    <th width="15%">Und/Medida</th>
-                    <th width="15%">Cantidad</th>
+        <Row>
+          <Column>
+            <TableResponsive
+              tHead={
+                <tr>
+                <th width="5%" className="text-center">
+                  #
+                </th>
+                <th width="10%">Código</th>
+                <th width="35%">Descripción</th>
+                <th width="15%">Und/Medida</th>
+                <th width="15%">Cantidad</th>
+              </tr>
+              }
+              tBody= {
+                this.state.detalle.map((item, index) => (
+                  <tr key={index}>
+                    <td className="text-center">{++index}</td>
+                    <td>{item.codigo}</td>
+                    <td>{item.producto}</td>
+                    <td>{item.medida}</td>
+                    <td>{item.cantidad}</td>
                   </tr>
-                </thead>
-                <tbody>
-                  {
-                    this.state.detalle.map((item, index) => (
-                      <tr key={index}>
-                        <td className="text-center">{++index}</td>
-                        <td>{item.codigo}</td>
-                        <td>{item.producto}</td>
-                        <td>{item.medida}</td>
-                        <td>{item.cantidad}</td>
-                      </tr>
-                    ))
-                  }
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </ContainerWrapper>
+                ))
+              }
+            />
+          </Column>
+        </Row>
+      </ContainerWrapper >
     );
   }
 }

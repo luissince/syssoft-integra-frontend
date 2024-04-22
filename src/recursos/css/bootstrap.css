@@ -12665,7 +12665,7 @@ a.text-dark:focus {
   position: absolute;
   top: 0;
   right: 0;
-  width: 550px;
+  width: 100%;
   max-width: 550px;
   background-color: #ffffff;
   height: 100%;
@@ -12709,5 +12709,3 @@ a.text-dark:focus {
     max-width: 100%;
   }
 }
-
-/*# sourceMappingURL=bootstrap.css.map */

@@ -237,6 +237,10 @@ class Inventario extends CustomComponent {
     })
   };
 
+  handleCloseModal = () => {
+    this.setState({ isOpenStock: false })
+  }
+
   handleOnOpen = async () => {
     const stock = await this.fetchObtenerStockInvetario();
 
@@ -245,14 +249,6 @@ class Inventario extends CustomComponent {
       stockMaximo: stock.cantidadMaxima,
       loadingModal: false,
     });
-  }
-
-  handleCloseModal = () => {
-    const data = this.refModalStock.current;
-    data.classList.add("close-cm")
-    data.addEventListener('animationend', () => {
-      this.setState({ isOpenStock: false })
-    })
   }
 
   handleHiddenModal = () => {

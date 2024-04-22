@@ -210,14 +210,14 @@ class Cobros extends CustomComponent {
             {formatTime(item.hora)}
           </td>
           <td>
-            {item.comprobante}
-            {<br />}
-            {item.serie + '-' + formatNumberWithZeros(item.numeracion)}
-          </td>
-          <td>
             {item.documento}
             {<br />}
             {item.informacion}
+          </td>
+          <td>
+            {item.comprobante}
+            {<br />}
+            {item.serie + '-' + formatNumberWithZeros(item.numeracion)}
           </td>
           <td className="text-center">
             {item.estado === 1 ? (
@@ -226,7 +226,7 @@ class Cobros extends CustomComponent {
               <span className="text-danger">ANULADO</span>
             )}
           </td>
-          <td className="text-right">
+          <td className="text-center">
             {numberFormat(item.monto, item.codiso)}
           </td>
           <td className="text-center">
@@ -319,10 +319,10 @@ class Cobros extends CustomComponent {
                       #
                     </th>
                     <th width="10%">Fecha</th>
-                    <th width="10%">Comprobante</th>
-                    <th width="20%">Cliente</th>
+                    <th width="15%">Cliente</th>
+                    <th width="15%">Comprobante</th>
                     <th width="10%">Estado</th>
-                    <th width="10%">Monto</th>
+                    <th width="10%" className="text-center">Monto</th>
                     <th width="5%" className="text-center">
                       Detalle
                     </th>
