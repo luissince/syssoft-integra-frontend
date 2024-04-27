@@ -294,4 +294,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(Clientes);
+const ConnectedClientes = connect(mapStateToProps, null)(Clientes);
+
+export default ConnectedClientes;

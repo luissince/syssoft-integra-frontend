@@ -648,4 +648,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(UsuarioEditar);
+const ConnectedUsuarioEditar = connect(mapStateToProps, null)(UsuarioEditar);
+
+export default ConnectedUsuarioEditar;

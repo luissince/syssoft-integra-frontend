@@ -186,4 +186,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(ConceptoAgregar);
+const ConnectedConceptoAgregar =connect(mapStateToProps, null)(ConceptoAgregar);
+
+export default ConnectedConceptoAgregar;

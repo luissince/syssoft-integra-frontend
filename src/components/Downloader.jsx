@@ -1,8 +1,9 @@
 import React from 'react';
 import '../recursos/css/download.css';
 import PropTypes from 'prop-types';
-import { readDataBlob } from '../helper/utils.helper';
 import Axios from 'axios';
+import toast from 'react-hot-toast';
+import ErrorResponse from '../model/class/error-response';
 
 const Downloader = ({ files = [], remove }) => {
   return (
@@ -27,7 +28,6 @@ Downloader.propTypes = {
   files: PropTypes.array,
   remove: PropTypes.func
 };
-
 
 class DownloadItem extends React.Component {
   constructor(props) {
@@ -54,43 +54,52 @@ class DownloadItem extends React.Component {
       },
     };
 
-    Axios.get(this.props.file.url, {
-      responseType: 'blob',
-      ...options,
-    })
+    Axios.get(this.props.file.url, { ...options, })
       .then(async (response) => {
+        const result = response.data;
+
+        // const url = window.URL.createObjectURL(
+        //   // new Blob([result.data], { type: 'text/xml' }),
+        //   new Blob([result.data], { type: 'application/octet-stream' }),
+        // );
+
+        const byteArray = result.buffer.data;
+        const uint8Array = new Uint8Array(byteArray);
+        const blob = new Blob([uint8Array], { type: 'application/octet-stream' });
+        const url = window.URL.createObjectURL(blob);
+
+        const link = document.createElement('a');
+        link.href = url;
+
         if (this.props.file.filename == undefined) {
-          const result = await readDataBlob(response.data);
-
-          const url = window.URL.createObjectURL(
-            new Blob([result.data], { type: 'text/xml' }),
-          );
-
-          const link = document.createElement('a');
-          link.href = url;
           link.setAttribute('download', result.name);
-          document.body.appendChild(link);
-          link.click();
         } else {
-          const url = window.URL.createObjectURL(response.data);
-
-          const link = document.createElement('a');
-          link.href = url;
           link.setAttribute('download', this.props.file.filename);
-          document.body.appendChild(link);
-          link.click();
         }
 
-        this.setState({
-          ...this.state,
-          completed: true,
-        });
+        document.body.appendChild(link);
+        link.click();
 
-        setTimeout(() => {
+        this.setState({ ...this.state, completed: true, }, () => {
           this.props.removeFile();
-        }, 4000);
+        });
       })
-      .catch(() => {
+      .catch((error) => {
+        let errorResponse = new ErrorResponse(error);
+
+        toast.custom((t) => (
+          <>
+            <div className="alert alert-warning" role="alert">
+              <button type="button" className="close"
+                onClick={() => toast.remove(t.id)}>
+                <span aria-hidden="true">&times;</span>
+              </button>
+
+              <h5 className="alert-heading">Se generó un problema!</h5>
+              <p>{errorResponse.getMessage()}</p>
+            </div>
+          </>
+        ))
         this.props.removeFile();
       });
   }

@@ -339,4 +339,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(Conceptos);
+const ConnectedConceptos =connect(mapStateToProps, null)(Conceptos);
+
+export default ConnectedConceptos;

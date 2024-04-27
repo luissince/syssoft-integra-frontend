@@ -25,7 +25,7 @@ class CotizacionEditar extends CustomComponent {
     this.loadInit();
   }
 
-  componentWillUnmount() {}
+  componentWillUnmount() { }
 
   loadInit = async () => {
     // if (this.state.loading) return;
@@ -263,4 +263,7 @@ const mapStateToProps = (state) => {
  *
  * Método encargado de conectar con redux y exportar la clase
  */
-export default connect(mapStateToProps, null)(CotizacionEditar);
+
+const ConnectedCotizacionEditar = connect(mapStateToProps, null)(CotizacionEditar);
+
+export default ConnectedCotizacionEditar;

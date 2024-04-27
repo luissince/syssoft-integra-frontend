@@ -474,4 +474,6 @@ const mapDispatchToProps = (dispatch) => {
   };
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(Configurar);
+const ConnectedConfigurar = connect(mapStateToProps, mapDispatchToProps)(Configurar);
+
+export default ConnectedConfigurar;

@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { Toaster } from 'react-hot-toast';
 // import { io } from "socket.io-client";
 // import { NotificationContainer, NotificationManager } from 'react-notifications';
 import { Switch, Route, Redirect } from 'react-router-dom';
@@ -150,6 +151,7 @@ import { listNotificacion } from '../../network/rest/principal.network.js';
 import SuccessReponse from '../../model/class/response.js';
 import ErrorResponse from '../../model/class/error-response.js';
 import { CANCELED } from '../../model/types/types.js';
+
 
 class Inicio extends React.Component {
   constructor(props) {
@@ -889,6 +891,11 @@ class Inicio extends React.Component {
           <Route component={NotFoundMain} />
         </Switch>
         {/* <NotificationContainer /> */}
+        <Toaster
+          position="top-right"
+          reverseOrder={false}
+        />
+
       </div>
     );
   }

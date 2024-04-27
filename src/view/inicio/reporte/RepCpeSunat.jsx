@@ -96,7 +96,7 @@ class RepCpeSunat extends CustomComponent {
         this.state.fechaFinal,
         isEmpty(this.state.idSucursal) ? "-" : this.state.idSucursal,
       ),
-      filename: 'ReporteCPESunat.xlsx',
+      filename: 'ReporteCPESunat ' + this.state.fechaInicial + ' al ' + this.state.fechaFinal + '.xlsx',
     });
   }
 

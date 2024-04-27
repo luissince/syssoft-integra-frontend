@@ -624,4 +624,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(Dashboard);
+const ConnectedDashboard = connect(mapStateToProps, null)(Dashboard);
+
+export default ConnectedDashboard;

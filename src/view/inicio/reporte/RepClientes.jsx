@@ -626,4 +626,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(RepClientes);
+const ConnectedRepClientes = connect(mapStateToProps, null)(RepClientes);;
+
+export default ConnectedRepClientes;

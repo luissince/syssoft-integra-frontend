@@ -276,4 +276,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(RepProductos);
+const ConnectedRepProductos = connect(mapStateToProps, null)(RepProductos);
+
+export default ConnectedRepProductos;

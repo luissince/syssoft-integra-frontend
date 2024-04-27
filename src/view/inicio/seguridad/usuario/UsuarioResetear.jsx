@@ -135,4 +135,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(UsuarioResetear);
+const ConnectedUsuarioResetear = connect(mapStateToProps, null)(UsuarioResetear);
+
+export default ConnectedUsuarioResetear;

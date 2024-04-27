@@ -419,4 +419,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(Accesos);
+const ConnectedAccesos = connect(mapStateToProps, null)(Accesos);
+
+export default ConnectedAccesos;

@@ -497,4 +497,6 @@ const mapStateToProps = (state) => {
     };
 };
 
-export default connect(mapStateToProps, null)(CuentasPorPagarAmoritzar);
+const ConnectedCuentasPorPagarAmoritzar =connect(mapStateToProps, null)(CuentasPorPagarAmoritzar);
+
+export default ConnectedCuentasPorPagarAmoritzar;

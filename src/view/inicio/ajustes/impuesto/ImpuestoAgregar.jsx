@@ -214,4 +214,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(ImpuestoAgregar);
+const ConnectedImpuestoAgregar = connect(mapStateToProps, null)(ImpuestoAgregar);
+
+export default ConnectedImpuestoAgregar;

@@ -237,4 +237,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(ConceptoEditar);
+const ConnectedConceptoEditar = connect(mapStateToProps, null)(ConceptoEditar);
+
+export default ConnectedConceptoEditar;

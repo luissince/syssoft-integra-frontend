@@ -260,4 +260,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(CuentasPorPagar);
+const ConnectedCuentasPorPagar =connect(mapStateToProps, null)(CuentasPorPagar);
+
+export default ConnectedCuentasPorPagar;

@@ -8,12 +8,11 @@ import {
   spinnerLoading,
 } from '../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
-import { detailGuiaRemision } from '../../../../../network/rest/principal.network';
+import { detailGuiaRemision, obtenerGuiaRemisionPdf } from '../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
 import printJS from 'print-js';
-import { pdfA4GuiaRemision, pdfTicketGuiaRemision } from '../../../../../helper/lista-pdf.helper';
 
 class GuiaRemisionDetalle extends CustomComponent {
 
@@ -155,7 +154,7 @@ class GuiaRemisionDetalle extends CustomComponent {
 
   handlePrintA4 = () => {
     printJS({
-      printable: pdfA4GuiaRemision(this.state.idGuiaRemision),
+      printable: obtenerGuiaRemisionPdf(this.state.idGuiaRemision,"a4"),
       type: 'pdf',
       showModal: true,
       modalMessage: "Recuperando documento...",
@@ -167,7 +166,7 @@ class GuiaRemisionDetalle extends CustomComponent {
 
   handlePrintTicket = () => {
     printJS({
-      printable: pdfTicketGuiaRemision(this.state.idGuiaRemision),
+      printable: obtenerGuiaRemisionPdf(this.state.idGuiaRemision,"ticket"),
       type: 'pdf',
       showModal: true,
       modalMessage: "Recuperando documento...",

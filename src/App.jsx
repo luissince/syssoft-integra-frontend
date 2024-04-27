@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import Loader from './view/loader/Loader';
 import Configurar from './view/empresa/Configurar';
 import Login from './view/login/Login';
@@ -52,6 +53,13 @@ class App extends React.Component {
   }
 }
 
+App.propTypes = {
+  token: PropTypes.shape({
+    isLoading: PropTypes.bool,
+    isConfig: PropTypes.bool
+  })
+};
+
 const mapStateToProps = (state) => {
   return {
     token: state.reducer,
@@ -65,4 +73,6 @@ const mapDispatchToProps = (dispatch) => {
   };
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(App);
+const ConnectedApp = connect(mapStateToProps, mapDispatchToProps)(App);
+
+export default ConnectedApp;

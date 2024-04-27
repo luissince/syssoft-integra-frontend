@@ -354,4 +354,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(GastoDetalle);
+const ConnectedGastoDetalle = connect(mapStateToProps, null)(GastoDetalle);
+
+export default ConnectedGastoDetalle;

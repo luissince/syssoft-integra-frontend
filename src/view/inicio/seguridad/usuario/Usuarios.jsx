@@ -366,4 +366,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(Usuarios);
+const ConnectedUsuarios = connect(mapStateToProps, null)(Usuarios);
+
+export default ConnectedUsuarios;

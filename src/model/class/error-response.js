@@ -7,7 +7,20 @@ class ErrorResponse {
   status = 400;
 
   constructor(error) {
-    if (error.response) {
+    this.init(error)
+  }
+
+  init(error) {
+    if (error.response && error.response.data instanceof Blob) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.type = 'RESPONSE';
+        this.status = error.response.status;
+        this.message = reader.result;
+        this.body = error.response.data.body || '';
+      };
+      reader.readAsText(error.response.data);
+    } else if (error.response) {
       this.type = RESPOSE;
       this.status = error.response.status;
       this.message = error.response.data.message || error.response.data;

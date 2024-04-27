@@ -670,4 +670,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(UsuarioAgregar);
+const ConnectedUsuarioAgregar = connect(mapStateToProps, null)(UsuarioAgregar);
+
+export default ConnectedUsuarioAgregar;

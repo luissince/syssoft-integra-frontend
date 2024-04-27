@@ -29,12 +29,13 @@ import {
   facturarCpeSunat,
   guiaRemisionCpeSunat,
   listCpeSunat,
+  obtenerGuiaRemisionPdf,
   obtenerVentaPdf,
+  obtenerXmlSunat,
 } from '../../../../network/rest/principal.network';
 import { CANCELED } from '../../../../model/types/types';
 import CustomComponent from '../../../../model/class/custom-component';
 import { VENTA, GUIA_DE_REMISION, NOTA_DE_CREDITO } from '../../../../model/types/tipo-comprobante';
-import { pdfA4GuiaRemision, pdfTicketGuiaRemision } from '../../../../helper/lista-pdf.helper';
 import { SpinnerTable, SpinnerView } from '../../../../components/Spinner';
 import Title from '../../../../components/Title';
 import Row from '../../../../components/Row';
@@ -89,6 +90,8 @@ class CpeElectronicos extends CustomComponent {
     };
 
     this.refTxtSearch = React.createRef();
+    this.refUseFile = React.createRef();
+
 
     this.abortControllerTable = new AbortController();
   }
@@ -434,7 +437,7 @@ class CpeElectronicos extends CustomComponent {
     if (tipo === "fac") {
       window.open(obtenerVentaPdf(idComprobante, "a4"), '_blank');
     } else {
-      window.open(pdfA4GuiaRemision(idComprobante), '_blank');
+      window.open(obtenerGuiaRemisionPdf(idComprobante, "a4"), '_blank');
     }
   }
 
@@ -442,13 +445,16 @@ class CpeElectronicos extends CustomComponent {
     if (tipo === "fac") {
       window.open(obtenerVentaPdf(idComprobante, "ticket"), '_blank');
     } else {
-      window.open(pdfTicketGuiaRemision(idComprobante), '_blank');
+      window.open(obtenerGuiaRemisionPdf(idComprobante, "ticket"), '_blank');
     }
 
   }
 
-  handleDownloadXml = () => {
-    alertWarning("Cpe Sunet", "Opción en matenimiento")
+  handleDownloadXml = (idComprobante) => {
+    this.refUseFile.current.download({
+      name: 'Xml Sunat',
+      url: obtenerXmlSunat(idComprobante)
+    });
   }
 
   handleSendEmail = () => {
@@ -814,7 +820,7 @@ class CpeElectronicos extends CustomComponent {
           restart={this.state.restart}
         />
 
-        <FileDownloader ref={this.refUseFileXml} />
+        <FileDownloader ref={this.refUseFile} />
       </ContainerWrapper>
     );
   }

@@ -14,7 +14,7 @@ import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
 import { CANCELED } from '../../../../model/types/types';
 
-class BancoAgregar extends CustomComponent {
+class PerfilAgregar extends CustomComponent {
   constructor(props) {
     super(props);
     this.state = {
@@ -128,4 +128,7 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(BancoAgregar);
+
+const ConnectedPerfilAgregar = connect(mapStateToProps, null)(PerfilAgregar);
+
+export default ConnectedPerfilAgregar;

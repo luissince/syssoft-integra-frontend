@@ -9,8 +9,9 @@ import {
   alertInfo,
   alertSuccess,
 } from '../../../../../helper/utils.helper';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { comboComprobante, comboMotivoTraslado, comboTipoPeso, createGuiaRemision, detailOnlyVenta, filtrarPersona, filtrarVehiculo, getIdSucursal, getUbigeo, listFiltrarVenta } from '../../../../../network/rest/principal.network';
+import { comboComprobante, comboMotivoTraslado, comboTipoPeso, createGuiaRemision, detailOnlyVenta, filtrarPersona, filtrarVehiculo, getIdSucursal, getUbigeo, listFiltrarVenta, obtenerGuiaRemisionPdf } from '../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
@@ -21,11 +22,18 @@ import { SpinnerView } from '../../../../../components/Spinner';
 import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
 import printJS from 'print-js';
-import { pdfA4GuiaRemision, pdfTicketGuiaRemision } from '../../../../../helper/lista-pdf.helper';
 import ModalImpresion from './componente/ModalImpresion';
 import { TableResponsive } from '../../../../../components/Table';
 
+/**
+ * Componente que representa una funcionalidad específica.
+ * @extends React.Component
+ */
 class GuiaRemisionCrear extends CustomComponent {
+  /**
+   *
+   * Constructor
+   */
   constructor(props) {
     super(props);
 
@@ -140,15 +148,43 @@ class GuiaRemisionCrear extends CustomComponent {
     this.abortController = new AbortController();
   }
 
+  /*
+  |--------------------------------------------------------------------------
+  | Método de cliclo de vida
+  |--------------------------------------------------------------------------
+  |
+  | El ciclo de vida de un componente en React consta de varios métodos que se ejecutan en diferentes momentos durante la vida útil
+  | del componente. Estos métodos proporcionan puntos de entrada para realizar acciones específicas en cada etapa del ciclo de vida,
+  | como inicializar el estado, montar el componente, actualizar el estado y desmontar el componente. Estos métodos permiten a los
+  | desarrolladores controlar y realizar acciones específicas en respuesta a eventos de ciclo de vida, como la creación, actualización
+  | o eliminación del componente. Entender y utilizar el ciclo de vida de React es fundamental para implementar correctamente la lógica
+  | de la aplicación y optimizar el rendimiento del componente.
+  |
+  */
+
   async componentDidMount() {
-    await this.loadData()
+    await this.loadingData()
   }
 
   componentWillUnmount() {
     this.abortController.abort();
   }
 
-  loadData = async () => {
+  /*
+  |--------------------------------------------------------------------------
+  | Métodos de acción
+  |--------------------------------------------------------------------------
+  |
+  | Carga los datos iniciales necesarios para inicializar el componente. Este método se utiliza típicamente
+  | para obtener datos desde un servicio externo, como una API o una base de datos, y actualizar el estado del
+  | componente en consecuencia. El método loadingData puede ser responsable de realizar peticiones asíncronas
+  | para obtener los datos iniciales y luego actualizar el estado del componente una vez que los datos han sido
+  | recuperados. La función loadingData puede ser invocada en el montaje inicial del componente para asegurarse
+  | de que los datos requeridos estén disponibles antes de renderizar el componente en la interfaz de usuario.
+  |
+  */
+
+  loadingData = async () => {
     const [comprobantes, motivoTraslado, tipoPeso, sucursal] =
       await Promise.all([
         this.fetchComprobante(GUIA_DE_REMISION),
@@ -326,6 +362,29 @@ class GuiaRemisionCrear extends CustomComponent {
     }
   }
 
+  clearView = () => {
+    this.setState(this.initial, async () => {
+      await this.loadingData();
+      this.refComprobante.current.focus();
+    });
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | Método de eventos
+  |--------------------------------------------------------------------------
+  |
+  | El método handle es una convención utilizada para denominar funciones que manejan eventos específicos
+  | en los componentes de React. Estas funciones se utilizan comúnmente para realizar tareas o actualizaciones
+  | en el estado del componente cuando ocurre un evento determinado, como hacer clic en un botón, cambiar el valor
+  | de un campo de entrada, o cualquier otra interacción del usuario. Los métodos handle suelen recibir el evento
+  | como parámetro y se encargan de realizar las operaciones necesarias en función de la lógica de la aplicación.
+  | Por ejemplo, un método handle para un evento de clic puede actualizar el estado del componente o llamar a
+  | otra función específica de la lógica de negocio. La convención de nombres handle suele combinarse con un prefijo
+  | que describe el tipo de evento que maneja, como handleInputChange, handleClick, handleSubmission, entre otros. 
+  |
+  */
+
   //------------------------------------------------------------------------------------------
   // Eventos para traer el modald de venta
   //------------------------------------------------------------------------------------------
@@ -335,43 +394,31 @@ class GuiaRemisionCrear extends CustomComponent {
   }
 
   handleClosePrint = async () => {
-    const data = this.refPrinter.current;
-    data.classList.add("close-cm")
-    data.addEventListener('animationend', () => {
-      this.setState({ isOpen: false }, () => {
-        this.setState(this.initial, async () => {
-          await this.loadData()
-        })
-      })
+    this.setState({ isOpen: false }, () => {
+      this.clearView()
     })
   }
 
   handlePrintA4 = () => {
     printJS({
-      printable: pdfA4GuiaRemision(this.state.idGuiaRemision),
+      printable: obtenerGuiaRemisionPdf(this.state.idGuiaRemision, "a4"),
       type: 'pdf',
       showModal: true,
       modalMessage: "Recuperando documento...",
       onPrintDialogClose: () => {
-        console.log("onPrintDialogClose")
-        this.setState(this.initial, async () => {
-          await this.loadData()
-        })
+        this.handleClosePrint()
       }
     })
   }
 
   handlePrintTicket = () => {
     printJS({
-      printable: pdfTicketGuiaRemision(this.state.idGuiaRemision),
+      printable: obtenerGuiaRemisionPdf(this.state.idGuiaRemision, "ticket"),
       type: 'pdf',
       showModal: true,
       modalMessage: "Recuperando documento...",
       onPrintDialogClose: () => {
-        console.log("onPrintDialogClose")
-        this.setState(this.initial, async () => {
-          await this.loadData()
-        })
+        this.this.handleClosePrint()
       }
     })
   }
@@ -420,9 +467,20 @@ class GuiaRemisionCrear extends CustomComponent {
     await this.setStateAsync({
       venta: value,
       filtrarVenta: `${value.nombreComprobante} ${value.serie}-${value.numeracion}`,
+      direccionLlegada: value.direccion,
       ventas: [],
     });
     this.selectItemVenta = true;
+
+    const ubigeo = {
+      idUbigeo: value.idUbigeo,
+      departamento: value.departamento,
+      provincia: value.provincia,
+      distrito: value.distrito,
+      ubigeo: value.ubigeo,
+    };
+
+    this.handleSelectItemUbigeoLlegada(ubigeo);
 
     this.setState({
       loading: true
@@ -732,7 +790,7 @@ class GuiaRemisionCrear extends CustomComponent {
     alertDialog("Guía de Remisión", "¿Está seguro de limpiar todo el contenido?", (accept) => {
       if (accept) {
         this.setState(this.initial, async () => {
-          await this.loadData()
+          await this.loadingData()
         })
       }
     })
@@ -866,6 +924,22 @@ class GuiaRemisionCrear extends CustomComponent {
     })
   }
 
+  /*
+  |--------------------------------------------------------------------------
+  | Método de renderización
+  |--------------------------------------------------------------------------
+  |
+  | El método render() es esencial en los componentes de React y se encarga de determinar
+  | qué debe mostrarse en la interfaz de usuario basado en el estado y las propiedades actuales
+  | del componente. Este método devuelve un elemento React que describe lo que debe renderizarse
+  | en la interfaz de usuario. La salida del método render() puede incluir otros componentes
+  | de React, elementos HTML o una combinación de ambos. Es importante que el método render()
+  | sea una función pura, es decir, no debe modificar el estado del componente ni interactuar
+  | directamente con el DOM. En su lugar, debe basarse únicamente en los props y el estado
+  | actuales del componente para determinar lo que se mostrará.
+  |
+  */
+
   render() {
     return (
       <ContainerWrapper>
@@ -926,7 +1000,7 @@ class GuiaRemisionCrear extends CustomComponent {
 
         <br />
 
-        {/* Seleccione la venta */ }
+        {/* Seleccione la venta */}
         <h6><span className='badge badge-primary'>1</span> Venta y Guía</h6>
 
         <div className="dropdown-divider"></div>
@@ -958,33 +1032,33 @@ class GuiaRemisionCrear extends CustomComponent {
           </Column>
         </Row>
 
-    {/* Sección del comprobante */ }
-    <Row>
-      <Column>
-        <div className="form-group">
-          <label>
-            Comprobante: <i className="fa fa-asterisk text-danger small"></i>
-          </label>
+        {/* Sección del comprobante */}
+        <Row>
+          <Column>
+            <div className="form-group">
+              <label>
+                Comprobante: <i className="fa fa-asterisk text-danger small"></i>
+              </label>
 
-          <div className="input-group">
-            <select
-              className="form-control"
-              ref={this.refComprobante}
-              value={this.state.idComprobante}
-              onChange={this.handleSelectComprobante}>
-              <option value="">-- Seleccione --</option>
-              {
-                this.state.comprobantes.map((item, index) => (
-                  <option key={index} value={item.idComprobante}>{item.nombre}</option>
-                ))
-              }
-            </select>
-          </div>
-        </div>
-      </Column>
-    </Row>
+              <div className="input-group">
+                <select
+                  className="form-control"
+                  ref={this.refComprobante}
+                  value={this.state.idComprobante}
+                  onChange={this.handleSelectComprobante}>
+                  <option value="">-- Seleccione --</option>
+                  {
+                    this.state.comprobantes.map((item, index) => (
+                      <option key={index} value={item.idComprobante}>{item.nombre}</option>
+                    ))
+                  }
+                </select>
+              </div>
+            </div>
+          </Column>
+        </Row>
 
-    {/* Sección de los datos del cliente */ }
+        {/* Sección de los datos del cliente */}
         <h6><span className='badge badge-primary'>2</span> Cliente</h6>
 
         <div className="dropdown-divider"></div>
@@ -1004,7 +1078,7 @@ class GuiaRemisionCrear extends CustomComponent {
           </Column>
         </Row>
 
-    {/* Sección para modalidad traslado */ }
+        {/* Sección para modalidad traslado */}
         <h6><span className='badge badge-primary'>3</span> Modalidad de Traslado</h6>
 
         <div className="dropdown-divider"></div>
@@ -1053,7 +1127,7 @@ class GuiaRemisionCrear extends CustomComponent {
           </Column>
         </Row>
 
-    {/* Sección para datos del traslado */ }
+        {/* Sección para datos del traslado */}
         <h6><span className='badge badge-primary'>4</span> Datos del Traslado</h6>
 
         <div className="dropdown-divider"></div>
@@ -1145,7 +1219,7 @@ class GuiaRemisionCrear extends CustomComponent {
           </Column>
         </Row>
 
-    {/* Sección de datos del vehículo */ }
+        {/* Sección de datos del vehículo */}
         <h6><span className='badge badge-primary'>5</span> Datos del Transporte Privado</h6>
 
         <div className="dropdown-divider"></div>
@@ -1174,7 +1248,7 @@ class GuiaRemisionCrear extends CustomComponent {
           </Column>
         </Row>
 
-    {/* Sección de datos del conductor */ }
+        {/* Sección de datos del conductor */}
         <h6><span className='badge badge-primary'>6</span> Datos del Conductor Privado</h6>
 
         <div className="dropdown-divider"></div>
@@ -1352,16 +1426,16 @@ class GuiaRemisionCrear extends CustomComponent {
             <TableResponsive
               tHead={
                 <tr>
-                <th width="5%" className="text-center">
-                  #
-                </th>
-                <th width="10%">Código</th>
-                <th width="35%">Descripción</th>
-                <th width="15%">Und/Medida</th>
-                <th width="15%">Cantidad</th>
-              </tr>
+                  <th width="5%" className="text-center">
+                    #
+                  </th>
+                  <th width="10%">Código</th>
+                  <th width="35%">Descripción</th>
+                  <th width="15%">Und/Medida</th>
+                  <th width="15%">Cantidad</th>
+                </tr>
               }
-              tBody= {
+              tBody={
                 this.state.detalle.map((item, index) => (
                   <tr key={index}>
                     <td className="text-center">{++index}</td>
@@ -1379,6 +1453,21 @@ class GuiaRemisionCrear extends CustomComponent {
     );
   }
 }
+
+GuiaRemisionCrear.propTypes = {
+  token: PropTypes.shape({
+    userToken: PropTypes.shape({
+      idUsuario: PropTypes.string.isRequired,
+    }).isRequired,
+    project: PropTypes.shape({
+      idSucursal: PropTypes.string.isRequired,
+    }).isRequired,
+  }).isRequired,
+  history: PropTypes.shape({
+    goBack: PropTypes.func.isRequired,
+  }).isRequired,
+};
+
 
 /**
  *

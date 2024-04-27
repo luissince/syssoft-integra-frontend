@@ -6,7 +6,6 @@ import {
   alertInfo,
   alertSuccess,
   alertWarning,
-  statePrivilegio,
   keyUpSearch,
   isEmpty,
   formatNumberWithZeros,
@@ -348,4 +347,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(Gastos);
+const ConnectedGastos =connect(mapStateToProps, null)(Gastos);
+
+export default ConnectedGastos;

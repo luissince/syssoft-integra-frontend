@@ -887,6 +887,15 @@ export async function detailGuiaRemision(params, signal) {
   );
 }
 
+export async function detailUpdateGuiaRemision(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/guiaremision/detail/update', {
+      params: params,
+      signal: signal,
+    }),
+  );
+}
+
 export async function createGuiaRemision(data, signal) {
   return await Resolve.create(
     instancePrincipal.post('/api/guiaremision/create', data, {
@@ -1884,12 +1893,8 @@ export async function obtenerPreCotizacionPdf(data, tipo) {
   );
 }
 
-export function obtenerGuiaRemisionPdf(idCotizacion, tipo) {
-  return `${import.meta.env.VITE_APP_BACK_END}/api/reporte/facturacion/guiaremision/pdf/${tipo}/${idCotizacion}`
-}
-
-export function obtenerPreGuiaRemisionPdf(idCotizacion, tipo) {
-  return `${import.meta.env.VITE_APP_BACK_END}/api/reporte/facturacion/guiaremision/pdf/${tipo}/${idCotizacion}`
+export function obtenerGuiaRemisionPdf(idGuiaRemision, tipo) {
+  return `${import.meta.env.VITE_APP_BACK_END}/api/reporte/facturacion/guiaremision/pdf/${tipo}/${idGuiaRemision}`
 }
 
 export function obtenerCompraPdf(idCotizacion, tipo) {
@@ -1938,6 +1943,9 @@ export function obtenerReporteCpeSunatExcel(idSucursalGenerado, fechaInicio, fec
   return `${import.meta.env.VITE_APP_BACK_END}/api/reporte/cpesunat/excel/${idSucursalGenerado}/${fechaInicio}/${fechaFinal}/${idSucursal}`
 }
 
+export function obtenerXmlSunat(idComprobante) {
+  return `${import.meta.env.VITE_APP_BACK_END}/api/reporte/cpesunat/xml/${idComprobante}`
+}
 // ------------------------------------------------------------------------
 // FIN PARA REPORTES PDF, EXCEL
 // ------------------------------------------------------------------------

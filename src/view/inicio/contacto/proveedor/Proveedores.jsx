@@ -292,4 +292,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(Proveedores);
+const ConnectedProveedores = connect(mapStateToProps, null)(Proveedores);
+
+export default ConnectedProveedores;

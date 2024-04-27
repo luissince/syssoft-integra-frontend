@@ -293,4 +293,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(Conductores);
+const ConnectedConductores = connect(mapStateToProps, null)(Conductores);
+
+export default ConnectedConductores;

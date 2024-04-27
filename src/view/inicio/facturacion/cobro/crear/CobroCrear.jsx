@@ -31,6 +31,8 @@ import { COMPROBANTE_DE_INGRESO } from '../../../../../model/types/tipo-comproba
 import PropTypes from 'prop-types';
 import { SpinnerView } from '../../../../../components/Spinner';
 import Title from '../../../../../components/Title';
+import Row from '../../../../../components/Row';
+import Column from '../../../../../components/Column';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -739,19 +741,18 @@ class CobroCrear extends CustomComponent {
           handleSaveSale={this.handleSaveSale}
         />
 
-        {/* Titulo */}
         <Title
           title='Cobro'
           subTitle='Crear'
           handleGoBack={() => this.props.history.goBack()}
         />
 
-        <div className="row">
-          <div className="col-xl-8 col-lg-8 col-md-8 col-sm-12 col-12">
+        <Row>
+          <Column className="col-xl-8 col-lg-8 col-md-8 col-sm-12 col-12">
             {/* Filtrar y agregar concepto */}
-            <div className="row">
+            <Row>
               {/* Filtrar */}
-              <div className="col-md-6">
+              <Column className="col-md-6">
                 <SearchInput
                   showLeftIcon={true}
                   autoFocus={true}
@@ -764,7 +765,7 @@ class CobroCrear extends CustomComponent {
                   handleSelectItem={this.handleSelectItemConcepto}
                   renderItem={(value) => <>{value.nombre}</>}
                 />
-              </div>
+              </Column>
               {/* Precio */}
               <div className="form-group col-md-6">
                 <div className="input-group">
@@ -800,28 +801,30 @@ class CobroCrear extends CustomComponent {
                   </div>
                 </div>
               </div>
-            </div>
+            </Row>
 
-            <div className="form-row">
-              <div className="table-responsive">
-                <table className="table table-striped table-bordered rounded">
-                  <thead>
-                    <tr>
-                      <th width="5%" className="text-center">
-                        #
-                      </th>
-                      <th width="15%">Categoría</th>
-                      <th width="25%">Descripción</th>
-                      <th width="5%">Precio</th>
-                      <th width="5%">Quitar</th>
-                    </tr>
-                  </thead>
-                  <tbody>{this.generarBody()}</tbody>
-                </table>
-              </div>
-            </div>
+            <Row>
+              <Column>
+                <div className="table-responsive">
+                  <table className="table table-striped table-bordered rounded">
+                    <thead>
+                      <tr>
+                        <th width="5%" className="text-center">
+                          #
+                        </th>
+                        <th width="15%">Categoría</th>
+                        <th width="25%">Descripción</th>
+                        <th width="5%">Precio</th>
+                        <th width="5%">Quitar</th>
+                      </tr>
+                    </thead>
+                    <tbody>{this.generarBody()}</tbody>
+                  </table>
+                </div>
+              </Column>
+            </Row>
 
-            <div className="form-row">
+            <Row>
               <div className="form-group">
                 <button
                   type="button"
@@ -845,10 +848,10 @@ class CobroCrear extends CustomComponent {
                   <i className="fa fa-close"></i> Cerrar
                 </button>
               </div>
-            </div>
-          </div>
+            </Row>
+          </Column>
 
-          <div className="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12">
+          <Column className="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12">
             <div className="form-group">
               <div className="input-group">
                 <div className="input-group-prepend">
@@ -945,8 +948,8 @@ class CobroCrear extends CustomComponent {
                 </tbody>
               </table>
             </div>
-          </div>
-        </div>
+          </Column>
+        </Row>
       </ContainerWrapper>
     );
   }

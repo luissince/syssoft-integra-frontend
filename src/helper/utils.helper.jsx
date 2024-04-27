@@ -249,6 +249,22 @@ function padZeroes(num) {
   return num > 9 ? num : '0' + num;
 }
 
+export function text(value) {
+  if (value === null || value === undefined) {
+    return "";
+  }
+
+  if (typeof value === 'number') {
+    return value.toString();
+  }
+
+  if (typeof value === 'string') {
+    return value.trim();
+  }
+
+  return "";
+}
+
 export function monthName(month) {
   const months = [
     'Enero',
