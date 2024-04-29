@@ -31,6 +31,7 @@ import Column from '../../../../../components/Column';
 import { TableResponsive } from '../../../../../components/Table';
 import { SpinnerTable, SpinnerView } from '../../../../../components/Spinner';
 import { VENTA } from '../../../../../model/types/tipo-comprobante';
+import ModalElegirInterfaz from './component/ModalElejirInterfaz';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -72,9 +73,15 @@ class Ventas extends CustomComponent {
 
       idSucursal: this.props.token.project.idSucursal,
       idUsuario: this.props.token.userToken.idUsuario,
+
+      // Atributos del modal Elegir Interfaz
+      isOpenElegirInterfaz: false,
     };
 
     this.refTxtSearch = React.createRef();
+
+     // Referencia para el modal elegir interfaz
+     this.refModalElegirInterfaz = React.createRef();
 
     this.abortControllerTable = new AbortController();
   }
@@ -275,7 +282,7 @@ class Ventas extends CustomComponent {
   |
   */
 
-  handleCrear = () => {
+  handleCrearClasico = () => {
     this.props.history.push(`${this.props.location.pathname}/crear`);
   }
 
@@ -418,6 +425,35 @@ class Ventas extends CustomComponent {
     });
   }
 
+    //------------------------------------------------------------------------------------------
+  // Procesos Elegir Interfaz
+  //------------------------------------------------------------------------------------------
+
+  handleOpenElegirInterfaz = () => {
+    this.setState({ isOpenElegirInterfaz: true})
+  }
+
+  handleCloseElegirInterfaz = () => {
+    this.setState({ isOpenElegirInterfaz: false });
+
+    /*
+    this.setState({ ElegirInterfaz: false }, () => {
+      this.clearView();
+    });
+    */
+  }
+
+  handleInterfazClasico = () => {
+    //console.log("CLASICA")
+    this.props.history.push(`${this.props.location.pathname}/crear-clasico`);
+  }
+
+  handleInterfazModerno = () => {
+    //console.log("MODERNO")
+    this.props.history.push(`${this.props.location.pathname}/crear`);
+  }
+
+
   render() {
     return (
       <ContainerWrapper>
@@ -432,16 +468,28 @@ class Ventas extends CustomComponent {
           subTitle='LISTA'
         />
 
+
+        <ModalElegirInterfaz
+          refModal={this.refModalElegirInterfaz }
+          isOpen={this.state.isOpenElegirInterfaz}
+          handleClose={this.handleCloseElegirInterfaz}
+
+          handleInterfazClasico={this.handleInterfazClasico}
+          handleInterfazModerno={this.handleInterfazModerno}
+
+        />
+
         <Row>
           <Column>
             <div className="form-group">
               <button
                 className="btn btn-outline-info"
-                onClick={this.handleCrear}
+                onClick={this.handleOpenElegirInterfaz}
               // disabled={!this.state.add}
               >
                 <i className="bi bi-file-plus"></i> Nuevo Registro
               </button>
+
               {' '}
               <button
                 className="btn btn-outline-secondary"

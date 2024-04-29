@@ -18,6 +18,8 @@ import Dashboard from './dashboard/Dashboard.jsx';
 
 import Ventas from './facturacion/venta/listar/Ventas.jsx';
 import VentaCrear from './facturacion/venta/crear/VentaCrear.jsx';
+import VentaCrearEscritorio from './facturacion/venta/crear/VentaCrearEscritorio.jsx';
+
 import VentaDetalle from './facturacion/venta/detalle/VentaDetalle.jsx';
 
 import Cobros from './facturacion/cobro/lista/Cobros';
@@ -398,6 +400,12 @@ class Inicio extends React.Component {
             exact={true}
             render={(props) => <VentaCrear {...props} />}
           />
+          <Route
+            path={`${path}/ventas/crear-clasico`}
+            exact={true}
+            render={(props) => <VentaCrearEscritorio {...props} />}
+          />
+
           <Route
             path={`${path}/ventas/detalle`}
             exact={true}
