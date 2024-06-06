@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import Row from "../../../components/Row";
+import Input from '../../../components/Input';
 
 const Search = ({ refTxtSearch, handleSearch }) => {
   return (
@@ -7,12 +8,11 @@ const Search = ({ refTxtSearch, handleSearch }) => {
       <div className="col-md-12 col-sm-12 col-12">
         <div className="form-group">
           <div className="input-group">
-            <input
-              className="form-control bg-transparent"
+            <Input
+              className="bg-transparent"
               type="search"
               placeholder="filtar por sucursal o nombre del sucursal"
-              aria-label="Search"
-              ref={refTxtSearch}
+              refInput={refTxtSearch}
               onKeyUp={(event) => handleSearch(event.target.value)}
             />
             <div className="input-group-append">

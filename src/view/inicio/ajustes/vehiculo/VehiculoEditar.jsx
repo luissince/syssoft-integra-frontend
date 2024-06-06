@@ -253,7 +253,7 @@ class VehiculoEditar extends CustomComponent {
 
 const mapStateToProps = (state) => {
   return {
-    token: state.reducer,
+    token: state.principal,
   };
 };
 

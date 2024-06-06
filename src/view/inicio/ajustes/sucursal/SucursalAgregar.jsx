@@ -22,6 +22,7 @@ import { CANCELED } from '../../../../model/types/types';
 import Title from '../../../../components/Title';
 import Row from '../../../../components/Row';
 import Column from '../../../../components/Column';
+import Button from '../../../../components/Button';
 
 class SucursalAgregar extends CustomComponent {
   constructor(props) {
@@ -413,32 +414,30 @@ class SucursalAgregar extends CustomComponent {
                   <span></span>
                 </div>
               </label>{' '}
-              <button
-                className="btn btn-outline-secondary"
+              <Button
+                className='btn-outline-secondary'
                 onClick={this.handleClearImage}
-              >
-                <i className="bi bi-trash"></i>
-              </button>
+                icono={<i className="bi bi-trash"></i>}
+              />
             </div>
           </Column>
         </Row>
 
         <Row>
           <Column>
-            <button
-              type="button"
-              className="btn btn-primary"
+            <Button
+              className='btn-primary'
               onClick={this.handleSave}
-            >
-              <i className="fa fa-save"></i> Guardar
-            </button>
-            <button
-              type="button"
-              className="btn btn-danger ml-2"
+              icono={<i className="fa fa-save"></i>}
+              text={"Guardar"}
+            />
+
+            <Button
+              className='btn-danger ml-2'
               onClick={() => this.props.history.goBack()}
-            >
-              <i className="fa fa-close"></i> Cerrar
-            </button>
+              icono={<i className="fa fa-close"></i>}
+              text={"Cerrar"}
+            />
           </Column>
         </Row>
       </ContainerWrapper>
@@ -448,7 +447,7 @@ class SucursalAgregar extends CustomComponent {
 
 const mapStateToProps = (state) => {
   return {
-    token: state.reducer,
+    token: state.principal,
   };
 };
 

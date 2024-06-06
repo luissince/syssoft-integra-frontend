@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import Tree from '../../../../recursos/js/treeone.js';
 import {
@@ -8,7 +9,6 @@ import {
   alertWarning,
   isEmpty,
   spinnerLoading,
-  statePrivilegio,
 } from '../../../../helper/utils.helper.jsx';
 import ContainerWrapper from '../../../../components/Container.jsx';
 import {
@@ -22,7 +22,13 @@ import ErrorResponse from '../../../../model/class/error-response.js';
 import { CANCELED } from '../../../../model/types/types.js';
 import CustomComponent from '../../../../model/class/custom-component.js';
 
+
+/**
+ * Componente que representa una funcionalidad específica.
+ * @extends React.Component
+ */
 class Accesos extends CustomComponent {
+
   constructor(props) {
     super(props);
     this.state = {
@@ -34,12 +40,12 @@ class Accesos extends CustomComponent {
       loading: true,
       msgLoading: 'Cargando datos...',
 
-      save: statePrivilegio(
-        this.props.token.userToken.menus[1].submenu[2].privilegio[0].estado,
-      ),
-      update: statePrivilegio(
-        this.props.token.userToken.menus[1].submenu[2].privilegio[1].estado,
-      ),
+      // save: statePrivilegio(
+      //   this.props.token.userToken.menus[1].submenu[2].privilegio[0].estado,
+      // ),
+      // update: statePrivilegio(
+      //   this.props.token.userToken.menus[1].submenu[2].privilegio[1].estado,
+      // ),
 
       messageWarning: '',
     };
@@ -95,7 +101,7 @@ class Accesos extends CustomComponent {
     const response = await getAccesos(params, this.abortControllerView.signal);
 
     if (response instanceof SuccessReponse) {
-      const menus = response.data.menu.map((item, index) => {
+      const menus = response.data.menu.map((item) => {
         let submenu = [];
         for (const value of response.data.submenu) {
           let privilegio = [];
@@ -324,7 +330,7 @@ class Accesos extends CustomComponent {
               type="button"
               className="btn btn-primary"
               onClick={() => this.onEventGuardar()}
-              disabled={!this.state.save}
+              // disabled={!this.state.save}
             >
               <i className="fa fa-save"></i> Guardar
             </button>{' '}
@@ -332,7 +338,7 @@ class Accesos extends CustomComponent {
               type="button"
               className="btn btn-info"
               onClick={() => this.onEventUpdateData()}
-              disabled={!this.state.update}
+              // disabled={!this.state.update}
             >
               <i className="fa fa-refresh"></i> Actualizar
             </button>{' '}
@@ -413,9 +419,14 @@ const OptionsList = ({ options, handleCheck }) => {
   );
 };
 
+OptionsList.propTypes = {
+  options: PropTypes.array,
+  handleCheck: PropTypes.func
+}
+
 const mapStateToProps = (state) => {
   return {
-    token: state.reducer,
+    token: state.principal,
   };
 };
 

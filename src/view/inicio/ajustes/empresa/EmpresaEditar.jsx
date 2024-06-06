@@ -224,14 +224,6 @@ class EmpresaProceso extends CustomComponent {
     }
   }
 
-  // handleOpenLink() {
-  //   // URL que deseas abrir
-  //   var url = import.meta.env.VITE_APP_CPE_SUNAT;
-  //   if (isEmpty(url)) return;
-  //   // Abrir la URL en una nueva ventana
-  //   window.open(url);
-  // }
-
   handleLookPasswordEmail = () => {
     this.setState({ lookPasswordEmail: !this.state.lookPasswordEmail }, () => {
       this.refPasswordEmail.current.focus();
@@ -404,31 +396,6 @@ class EmpresaProceso extends CustomComponent {
               />
             </div>
           </Column>
-
-          {/* <Column className={"col-md-6"}>
-            <div className="form-group ">
-              <label>Url de Configuración Sunat: </label>
-              <div className="input-group">
-                <input
-                  type="text"
-                  className="form-control"
-                  defaultValue={isEmpty(import.meta.env.VITE_APP_CPE_SUNAT) ? "" : import.meta.env.VITE_APP_CPE_SUNAT}
-                  placeholder="http://192.168.101.2"
-                  disabled
-                />
-                <div className="input-group-append">
-                  <button
-                    className="btn btn-outline-secondary"
-                    type="button"
-                    title="Open Link"
-                    onClick={() => this.handleOpenLink()}
-                  >
-                    <i className='fa fa-external-link'></i>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </Column> */}
         </Row>
 
         <Row>
@@ -735,7 +702,7 @@ class EmpresaProceso extends CustomComponent {
 
 const mapStateToProps = (state) => {
   return {
-    token: state.reducer,
+    token: state.principal,
   };
 };
 

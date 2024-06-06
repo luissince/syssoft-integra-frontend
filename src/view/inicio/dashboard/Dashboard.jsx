@@ -620,7 +620,7 @@ class Dashboard extends React.Component {
 
 const mapStateToProps = (state) => {
   return {
-    token: state.reducer,
+    token: state.principal,
   };
 };
 

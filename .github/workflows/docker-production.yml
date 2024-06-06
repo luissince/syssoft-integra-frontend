@@ -12,10 +12,7 @@ jobs:
       
     env:  
       VITE_APP_BACK_END: ${{ secrets.VITE_APP_BACK_END }}
-      VITE_APP_CPE_SUNAT: ${{ secrets.VITE_APP_CPE_SUNAT }}
       VITE_APP_APIS_PERU: ${{ secrets.VITE_APP_APIS_PERU }}
-      VITE_APP_IMAGE: ${{ secrets.VITE_APP_IMAGE }}
-      VITE_APP_PDF: ${{ secrets.VITE_APP_PDF }}
       
     steps:
       - name: Checkout código
@@ -25,10 +22,7 @@ jobs:
         run: |
           cat > .env <<EOL
           VITE_APP_BACK_END="${{env.VITE_APP_BACK_END}}"
-          VITE_APP_CPE_SUNAT="${{env.VITE_APP_CPE_SUNAT}}"
           VITE_APP_APIS_PERU="${{env.VITE_APP_APIS_PERU}}"
-          VITE_APP_IMAGE="${{env.VITE_APP_IMAGE}}"
-          VITE_APP_PDF="${{env.VITE_APP_PDF}}"
           EOL
       
       - name: Creando y ejecutando contenedor
@@ -40,10 +34,7 @@ jobs:
       
   #   env:  
   #     VITE_APP_BACK_END: ${{ secrets.VITE_APP_BACK_END }}
-  #     VITE_APP_CPE_SUNAT: ${{ secrets.VITE_APP_CPE_SUNAT }}
   #     VITE_APP_APIS_PERU: ${{ secrets.VITE_APP_APIS_PERU }}
-  #     VITE_APP_IMAGE: ${{ secrets.VITE_APP_IMAGE }}
-  #     VITE_APP_PDF: ${{ secrets.VITE_APP_PDF }}
       
   #   steps:
   #     - name: Checkout código
@@ -53,10 +44,7 @@ jobs:
   #       run: |
   #         cat > .env <<EOL
   #         VITE_APP_BACK_END="${{env.VITE_APP_BACK_END}}"
-  #         VITE_APP_CPE_SUNAT="${{env.VITE_APP_CPE_SUNAT}}"
   #         VITE_APP_APIS_PERU="${{env.VITE_APP_APIS_PERU}}"
-  #         VITE_APP_IMAGE="${{env.VITE_APP_IMAGE}}"
-  #         VITE_APP_PDF="${{env.VITE_APP_PDF}}"
   #         EOL
       
   #     - name: Creando y ejecutando contenedor
@@ -68,10 +56,7 @@ jobs:
       
     env:  
       VITE_APP_BACK_END: ${{ secrets.VITE_APP_BACK_END }}
-      VITE_APP_CPE_SUNAT: ${{ secrets.VITE_APP_CPE_SUNAT }}
       VITE_APP_APIS_PERU: ${{ secrets.VITE_APP_APIS_PERU }}
-      VITE_APP_IMAGE: ${{ secrets.VITE_APP_IMAGE }}
-      VITE_APP_PDF: ${{ secrets.VITE_APP_PDF }}
       
     steps:
       - name: Checkout código
@@ -81,10 +66,7 @@ jobs:
         run: |
           cat > .env <<EOL
           VITE_APP_BACK_END="${{env.VITE_APP_BACK_END}}"
-          VITE_APP_CPE_SUNAT="${{env.VITE_APP_CPE_SUNAT}}"
           VITE_APP_APIS_PERU="${{env.VITE_APP_APIS_PERU}}"
-          VITE_APP_IMAGE="${{env.VITE_APP_IMAGE}}"
-          VITE_APP_PDF="${{env.VITE_APP_PDF}}"
           EOL
       
       - name: Creando y ejecutando contenedor
@@ -96,10 +78,7 @@ jobs:
       
   #   env:  
   #     VITE_APP_BACK_END: ${{ secrets.VITE_APP_BACK_END }}
-  #     VITE_APP_CPE_SUNAT: ${{ secrets.VITE_APP_CPE_SUNAT }}
   #     VITE_APP_APIS_PERU: ${{ secrets.VITE_APP_APIS_PERU }}
-  #     VITE_APP_IMAGE: ${{ secrets.VITE_APP_IMAGE }}
-  #     VITE_APP_PDF: ${{ secrets.VITE_APP_PDF }}
       
   #   steps:
   #     - name: Checkout código
@@ -109,10 +88,7 @@ jobs:
   #       run: |
   #         cat > .env <<EOL
   #         VITE_APP_BACK_END="${{env.VITE_APP_BACK_END}}"
-  #         VITE_APP_CPE_SUNAT="${{env.VITE_APP_CPE_SUNAT}}"
   #         VITE_APP_APIS_PERU="${{env.VITE_APP_APIS_PERU}}"
-  #         VITE_APP_IMAGE="${{env.VITE_APP_IMAGE}}"
-  #         VITE_APP_PDF="${{env.VITE_APP_PDF}}"
   #         EOL
       
   #     - name: Creando y ejecutando contenedor
@@ -124,10 +100,7 @@ jobs:
 
     env:  
       VITE_APP_BACK_END: ${{ secrets.VITE_APP_BACK_END }}
-      VITE_APP_CPE_SUNAT: ${{ secrets.VITE_APP_CPE_SUNAT }}
       VITE_APP_APIS_PERU: ${{ secrets.VITE_APP_APIS_PERU }}
-      VITE_APP_IMAGE: ${{ secrets.VITE_APP_IMAGE }}
-      VITE_APP_PDF: ${{ secrets.VITE_APP_PDF }}
 
     steps:
       - name: Checkout código
@@ -137,10 +110,7 @@ jobs:
         run: |
           cat > .env <<EOL
           VITE_APP_BACK_END="${{env.VITE_APP_BACK_END}}"
-          VITE_APP_CPE_SUNAT="${{env.VITE_APP_CPE_SUNAT}}"
           VITE_APP_APIS_PERU="${{env.VITE_APP_APIS_PERU}}"
-          VITE_APP_IMAGE="${{env.VITE_APP_IMAGE}}"
-          VITE_APP_PDF="${{env.VITE_APP_PDF}}"
           EOL
 
       - name: Creando y ejecutando contenedor
@@ -153,10 +123,7 @@ jobs:
 
     env:  
       VITE_APP_BACK_END: ${{ secrets.VITE_APP_BACK_END }}
-      VITE_APP_CPE_SUNAT: ${{ secrets.VITE_APP_CPE_SUNAT }}
       VITE_APP_APIS_PERU: ${{ secrets.VITE_APP_APIS_PERU }}
-      VITE_APP_IMAGE: ${{ secrets.VITE_APP_IMAGE }}
-      VITE_APP_PDF: ${{ secrets.VITE_APP_PDF }}
 
     steps:
       - name: Checkout código
@@ -166,10 +133,7 @@ jobs:
         run: |
           cat > .env <<EOL
           VITE_APP_BACK_END="${{env.VITE_APP_BACK_END}}"
-          VITE_APP_CPE_SUNAT="${{env.VITE_APP_CPE_SUNAT}}"
           VITE_APP_APIS_PERU="${{env.VITE_APP_APIS_PERU}}"
-          VITE_APP_IMAGE="${{env.VITE_APP_IMAGE}}"
-          VITE_APP_PDF="${{env.VITE_APP_PDF}}"
           EOL
 
       - name: Creando y ejecutando contenedor
@@ -181,10 +145,7 @@ jobs:
       
     env:  
       VITE_APP_BACK_END: ${{ secrets.VITE_APP_BACK_END }}
-      VITE_APP_CPE_SUNAT: ${{ secrets.VITE_APP_CPE_SUNAT }}
       VITE_APP_APIS_PERU: ${{ secrets.VITE_APP_APIS_PERU }}
-      VITE_APP_IMAGE: ${{ secrets.VITE_APP_IMAGE }}
-      VITE_APP_PDF: ${{ secrets.VITE_APP_PDF }}
       
     steps:
       - name: Checkout código
@@ -194,10 +155,7 @@ jobs:
         run: |
           cat > .env <<EOL
           VITE_APP_BACK_END="${{env.VITE_APP_BACK_END}}"
-          VITE_APP_CPE_SUNAT="${{env.VITE_APP_CPE_SUNAT}}"
           VITE_APP_APIS_PERU="${{env.VITE_APP_APIS_PERU}}"
-          VITE_APP_IMAGE="${{env.VITE_APP_IMAGE}}"
-          VITE_APP_PDF="${{env.VITE_APP_PDF}}"
           EOL
       
       - name: Creando y ejecutando contenedor

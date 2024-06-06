@@ -15,7 +15,7 @@ const SpinnerTable = ({ message }) => {
     );
 }
 
-const SpinnerView = ({ loading, message }) => {
+const SpinnerView = ({ loading, message, body }) => {
     return (
         <div className={`${loading ? 'd-block ' : 'd-none'} clearfix absolute-all bg-white`}>
             <div className="d-flex flex-column justify-content-center align-items-center h-100">
@@ -27,6 +27,7 @@ const SpinnerView = ({ loading, message }) => {
                 <div>
                     <strong>{message}</strong>
                 </div>
+                {body}
             </div>
         </div>
     );
@@ -39,6 +40,7 @@ SpinnerTable.propTypes = {
 SpinnerView.propTypes = {
     loading: PropTypes.bool.isRequired,
     message: PropTypes.string.isRequired,
+    body: PropTypes.element,
 };
 
 export {

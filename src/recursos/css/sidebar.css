@@ -15,7 +15,7 @@ a:focus {
   color: #fff;
   transition: all 0.3s;
   z-index: 1000;
-  margin-top: 55px;
+  margin-top: 60px;
 }
 
 #sidebar .pro-sidebar-inner {
@@ -179,7 +179,7 @@ a:focus {
 } */
 
 .sidebar-footer {
-  padding: 20px;
+  padding: 10px 20px 0px 20px;
 }
 
 .sidebar-footer .article {

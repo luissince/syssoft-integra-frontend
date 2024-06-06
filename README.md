@@ -116,10 +116,7 @@ A continuación, se presenta la configuración de las variables de entorno utili
 
 ```bash
 VITE_APP_BACK_END=http://localhost:3002
-VITE_APP_CPE_SUNAT=http://localhost:3002
 VITE_APP_APIS_PERU=http://localhost:3002
-VITE_APP_IMAGE=http://localhost:3002
-VITE_APP_PDF=http://localhost:3002
 ```
 
 ### 6.  Ejecute **npm run dev** para iniciar el Front-end

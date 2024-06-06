@@ -2,7 +2,6 @@ import React from 'react';
 import '../../recursos/css/loader.css';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { config, monedaNacional, restoreToken } from '../../redux/actions';
 import {
   empresaConfig,
   nacionalMoneda,
@@ -12,7 +11,13 @@ import {
 import { CANCELED } from '../../model/types/types';
 import ErrorResponse from '../../model/class/error-response';
 import SuccessReponse from '../../model/class/response';
+import { config, restoreToken } from '../../redux/principalSlice';
+import { setEmpresa, setMonedaNacional } from '../../redux/predeterminadoSlice';
 
+/**
+ * Componente que representa una funcionalidad específica.
+ * @extends React.Component
+ */
 class Loader extends React.Component {
   constructor(props) {
     super(props);
@@ -21,56 +26,39 @@ class Loader extends React.Component {
   }
 
   async componentDidMount() {
-    const [empresa, token, moneda] = await Promise.all([
+    const [empresa, moneda, session] = await Promise.all([
       this.fetchObtenerEmpresa(),
-      this.fetchValidarToken(),
       this.fetchMonedaNacional(),
+      this.fetchValidarToken(),
     ]);
 
-    if (!Array.isArray(empresa)) {
-      if (moneda) this.props.monedaNacional(moneda);
-
-      if (token) {
-        const userToken = window.localStorage.getItem('login');
-        const login = JSON.parse(userToken);
-        const project = JSON.parse(window.localStorage.getItem('project'));
-
-        const user = {
-          ...login,
-          project: project,
-        };
-
-        this.props.restore(user, empresa);
-      } else {
-        this.clearLocalStorage();
-        this.props.restore(null, empresa);
-      }
-    } else {
-      if (empresa[0] === 400) {
-        this.props.config();
-      } else {
-        this.clearLocalStorage();
-        this.props.restore(null, null);
-      }
+    if (empresa === null) {
+      this.handleSignOut()
     }
+
+    this.props.setMonedaNacional(moneda);
+    this.props.setEmpresa(empresa)
+
+    if (session) {
+      const login = JSON.parse(window.localStorage.getItem('login'));
+      const project = JSON.parse(window.localStorage.getItem('project'));
+
+      this.props.restoreToken({
+        token: login,
+        project: project
+      });
+    } else {
+      this.clearLocalStorage();
+      this.props.restoreToken({
+        token: null,
+        project: null
+      });
+    }
+    // this.props.config();
   }
 
   componentWillUnmount() {
     this.abortController.abort();
-  }
-
-  async fetchObtenerEmpresa() {
-    const response = await empresaConfig();
-
-    if (response instanceof SuccessReponse) {
-      return response.data;
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.type === CANCELED) return;
-
-      return [response.status];
-    }
   }
 
   async fetchValidarToken() {
@@ -100,6 +88,22 @@ class Loader extends React.Component {
       return null;
     }
   }
+
+  async fetchObtenerEmpresa() {
+    const response = await empresaConfig();
+
+    if (response instanceof SuccessReponse) {
+      return response.data;
+    }
+
+    if (response instanceof ErrorResponse) {
+      if (response.type === CANCELED) return;
+
+      return null;
+    }
+  }
+
+
 
   clearLocalStorage() {
     window.localStorage.removeItem('login');
@@ -132,24 +136,19 @@ class Loader extends React.Component {
 }
 
 Loader.propTypes = {
-  monedaNacional: PropTypes.func,
-  restore: PropTypes.func,
-  config: PropTypes.func
+  restoreToken: PropTypes.func,
+  config: PropTypes.func,
+  setMonedaNacional: PropTypes.func,
+  setEmpresa: PropTypes.func
 }
 
 const mapStateToProps = (state) => {
   return {
-    token: state.reducer,
+    token: state.principal,
   };
 };
 
-const mapDispatchToProps = (dispatch) => {
-  return {
-    config: () => dispatch(config()),
-    monedaNacional: (moneda) => dispatch(monedaNacional(moneda)),
-    restore: (user, empresa) => dispatch(restoreToken(user, empresa)),
-  };
-};
+const mapDispatchToProps = { config, restoreToken, setMonedaNacional, setEmpresa };
 
 const ConnectedLoader = connect(mapStateToProps, mapDispatchToProps)(Loader);
 

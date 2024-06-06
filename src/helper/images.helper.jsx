@@ -29,6 +29,27 @@ import minus from '../recursos/images/minus.svg';
 import invoice from '../recursos/images/invoice.svg';
 import document from '../recursos/images/document.svg';
 
+import producto from '../recursos/images/producto.png';
+import prices from '../recursos/images/prices.png';
+import plus_color from '../recursos/images/plus.png';
+import moneda from '../recursos/images/moneda.png';
+import linea from '../recursos/images/linea.png';
+import money from '../recursos/images/money.png';
+import cash_movement from '../recursos/images/cash_movement.png';
+import ticket from '../recursos/images/ticket.png';
+import escoba from '../recursos/images/escoba.png';
+import view from '../recursos/images/view.png';
+import cotizacion from '../recursos/images/cotizacion.png';
+import barcode from '../recursos/images/barcode.png';
+import recibo from '../recursos/images/recibo.png';
+// import options from '../recursos/images/options.png';
+import search_color from '../recursos/images/search.png';
+import client from '../recursos/images/client.png';
+import phone from '../recursos/images/phone.png';
+// import email from '../recursos/images/email.png';
+import directory from '../recursos/images/directory.png';
+import configuracion from '../recursos/images/configuracion.png';
+
 export {
   icono,
   noImage,
@@ -59,5 +80,23 @@ export {
   plus,
   minus,
   invoice,
-  document
+  document,
+  producto,
+  prices,
+  plus_color,
+  moneda,
+  linea,
+  money,
+  cash_movement,
+  ticket,
+  escoba,
+  view,
+  cotizacion,
+  barcode,
+  recibo,
+  search_color,
+  client,
+  phone,
+  directory,
+  configuracion
 };

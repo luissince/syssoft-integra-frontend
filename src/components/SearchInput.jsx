@@ -2,6 +2,8 @@ import React from 'react';
 import '../recursos/css/searchbar.css';
 import { isEmpty } from '../helper/utils.helper';
 import PropTypes from 'prop-types';
+import Input from './Input';
+import Button from './Button';
 
 class SearchInput extends React.Component {
   constructor(props) {
@@ -104,7 +106,7 @@ class SearchInput extends React.Component {
 
   render() {
 
-    const { disabled } = this.props;
+    const { classNameContainer, disabled } = this.props;
 
     const { showLeftIcon } = this.props;
 
@@ -117,7 +119,7 @@ class SearchInput extends React.Component {
     const { customButton } = this.props;
 
     return (
-      <div className="form-group position-relative">
+      <div className={`${classNameContainer ? classNameContainer : "form-group position-relative"}`}>
         <div className="input-group">
           {showLeftIcon && (
             <div className="input-group-prepend">
@@ -131,12 +133,12 @@ class SearchInput extends React.Component {
             </div>
           )}
 
-          <input
+          <Input
             autoFocus={autoFocus}
             type="text"
             className="form-control"
             placeholder={placeholder}
-            ref={refValue}
+            refInput={refValue}
             value={value}
             onChange={handleFilter}
             onKeyUp={(event) => this.handleKeyUp(event)}
@@ -148,9 +150,8 @@ class SearchInput extends React.Component {
               customButton && customButton()
             }
 
-            <button
-              className="btn btn-outline-secondary"
-              type="button"
+            <Button
+              className="btn-outline-secondary"
               onClick={() => {
                 handleClearInput();
                 refValue.current.focus();
@@ -163,7 +164,7 @@ class SearchInput extends React.Component {
               ) : (
                 <i className="fa fa-close"></i>
               )}
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -177,9 +178,9 @@ class SearchInput extends React.Component {
             >
               {
                 data.map((value, index) => (
-                  <button
+                  <Button
                     key={index}
-                    className="list-group-item list-group-item-action"
+                    contentClassName="list-group-item list-group-item-action"
                     onClick={(event) => {
                       handleSelectItem(value);
                       refValue.current.focus();
@@ -188,7 +189,7 @@ class SearchInput extends React.Component {
                     }}
                   >
                     {renderItem(value)}
-                  </button>
+                  </Button>
                 ))
               }
             </div>
@@ -200,6 +201,7 @@ class SearchInput extends React.Component {
 }
 
 SearchInput.propTypes = {
+  classNameContainer: PropTypes.string,
   disabled: PropTypes.bool,
   showLeftIcon: PropTypes.bool,
 

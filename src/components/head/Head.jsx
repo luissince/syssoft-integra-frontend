@@ -3,26 +3,17 @@ import { images } from '../../helper';
 import PropTypes from 'prop-types';
 
 const Menu = (props) => {
-
-  const handleCrearVenta = () => {
-    props.history.push('/inicio/ventas/crear');
-  };
-
   const handleSignIn = () => {
-    try {
-      window.localStorage.removeItem('login');
-      window.localStorage.removeItem('project');
-      props.restore();
-      props.history.push('login');
-    } catch (e) {
-      props.restore();
-      props.history.push('login');
-    }
+    window.localStorage.removeItem('login');
+    window.localStorage.removeItem('project');
+    window.location.href = '/';
   };
 
   const handleCloseSucursal = () => {
     window.localStorage.removeItem('project');
-    props.restoreProject();
+    props.clearListaVenta();
+    props.clearNoticacion();
+    props.projectClose();
   }
 
   return (
@@ -38,15 +29,22 @@ const Menu = (props) => {
 
       <ul className="app-nav">
         <div className="dropdown">
-          <a
+          {/* <a
             className="app-nav__item"
             href=""
             onClick={handleCrearVenta}
             aria-label="Abrir Perfil"
             aria-expanded={false}
           >
-            <i className="fast-sale fa fa-shopping-cart fa-lg"></i> Nueva venta {/* Icono de Font Awesome */}
-          </a>
+            <i className="fast-sale fa fa-shopping-cart fa-lg"></i> Nueva venta
+          </a> */}
+
+          <Link
+            className="app-nav__item"
+            to={`${props.match.url}/ventas/crear`}>
+            {' '}
+            <i className="fast-sale fa fa-shopping-cart fa-lg"></i> Nueva venta
+          </Link>
 
 
         </div>
@@ -157,8 +155,10 @@ Menu.propTypes = {
   history: PropTypes.shape({
     push: PropTypes.func
   }),
-  restore: PropTypes.func,
-  restoreProject: PropTypes.func,
+  signOut: PropTypes.func,
+  clearListaVenta: PropTypes.func,
+  clearNoticacion: PropTypes.func,
+  projectClose: PropTypes.func,
   openAndClose: PropTypes.func,
   notificaciones: PropTypes.array,
   match: PropTypes.shape({

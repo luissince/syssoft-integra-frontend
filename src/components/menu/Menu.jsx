@@ -2,6 +2,7 @@ import { NavLink } from 'react-router-dom';
 import { images } from '../../helper';
 import { isEmpty } from '../../helper/utils.helper';
 import PropTypes from 'prop-types';
+import Image from '../Image';
 
 const Menu = ({
   refSideBar,
@@ -9,7 +10,8 @@ const Menu = ({
   url,
   pathname,
   project,
-  userToken
+  userToken,
+  empresa
 }) => {
   const onEventOverlay = () => {
     const sidebar = document.getElementById('sidebar');
@@ -21,13 +23,20 @@ const Menu = ({
       <div className="pro-sidebar-inner">
         <div className="pro-sidebar-layout">
           <div className="sidebar-header">
-            <img
+            {/* <img
               className="d-block mx-auto m-1"
               src={images.icono}
               alt="logo"
-              width="150"
+              width="130"
+            /> */}
+            <Image
+              default={images.icono}
+              src={`${empresa.rutaImage}`}
+              className="d-block mx-auto mb-2"
+              alt={"Logo"}
+              width={130}
             />
-            <h5 className="m-0">GESTIONA TU EMPRESA</h5>
+            <h6 className="m-0">GESTIONA TU EMPRESA</h6>
           </div>
 
           <ul className="list-unstyled components">
@@ -163,6 +172,9 @@ const Menu = ({
                 {userToken.nombres + ' ' + userToken.apellidos}
               </span>
             </li>
+            <li className='text-center mt-3'>
+              <span>VERSIÓN {import.meta.env.VITE_APP_VERSION}</span>
+            </li>
           </ul>
         </div>
       </div>
@@ -184,7 +196,8 @@ Menu.propTypes = {
   url: PropTypes.string,
   pathname: PropTypes.string,
   project: PropTypes.object,
-  userToken: PropTypes.object
+  userToken: PropTypes.object,
+  empresa: PropTypes.object,
 };
 
 

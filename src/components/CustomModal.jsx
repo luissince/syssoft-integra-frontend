@@ -91,7 +91,20 @@ class CustomModal extends Component {
     }
 }
 
-export const CustomModalContent = ({ contentRef, isOpen, onOpen, onHidden, onClose, contentLabel, titleHeader, className, body, footer }) => {
+export const CustomModalContent = ({
+    contentRef,
+    isOpen,
+    onOpen,
+    onHidden,
+    onClose,
+    contentLabel,
+    titleHeader,
+    className,
+    body,
+    classNameBody,
+    footer,
+    classNameFooter
+}) => {
     return (
         <CustomModal
             ref={contentRef}
@@ -102,20 +115,34 @@ export const CustomModalContent = ({ contentRef, isOpen, onOpen, onHidden, onClo
             contentLabel={contentLabel}
             className={className}
         >
-            <div className="header-cm" onMouseDown={(event) => contentRef.current.handleMouseDown(event)}>
-                <p className='m-0 h6'>{titleHeader}</p>
-                <button
-                    type="button"
-                    className='close'
-                    onClick={async () => await contentRef.current.handleOnClose()}>
-                    <span aria-hidden="true">×</span>
-                </button>
-            </div>
-            <div className="body-cm">
-                {body}
-            </div>
-            <div className="footer-cm">
-                {footer}
+            <div className='d-flex flex-column h-100'>
+                <div className="header-cm" onMouseDown={(event) => contentRef.current.handleMouseDown(event)}>
+                    <p className='m-0 h6'>{titleHeader}</p>
+                    <button
+                        type="button"
+                        className='close'
+                        onClick={async () => await contentRef.current.handleOnClose()}>
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div className={`body-cm ${classNameBody}`}>
+                    <div className='d-flex w-100 h-100'>
+                        <div className='d-flex flex-column' style={{ flex: "1 1 0%" }}>
+                            <div className='h-100 overflow-auto'>
+                                <div className='h-100'>
+                                    {body}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {
+                    footer && (
+                        <div className={`${classNameFooter ? classNameFooter : "footer-cm"}`}>
+                            {footer}
+                        </div>
+                    )
+                }
             </div>
         </CustomModal>
     );
@@ -133,6 +160,7 @@ export const CustomModalForm = ({ contentRef, isOpen, onOpen, onHidden, onClose,
             className={className}
         >
             <form
+                style={{ display: "flex", flexDirection: "column", height: "100%" }}
                 onSubmit={(event) => {
                     event.preventDefault();
                     onSubmit();
@@ -202,7 +230,9 @@ CustomModalContent.propTypes = {
     titleHeader: PropTypes.string.isRequired,
     className: PropTypes.string,
     body: PropTypes.oneOfType([PropTypes.element, PropTypes.arrayOf(PropTypes.element)]).isRequired,
-    footer: PropTypes.oneOfType([PropTypes.element, PropTypes.arrayOf(PropTypes.element)]).isRequired
+    classNameBody: PropTypes.string,
+    footer: PropTypes.oneOfType([PropTypes.element, PropTypes.arrayOf(PropTypes.element)]),
+    classNameFooter: PropTypes.string
 }
 
 CustomModalForm.propTypes = {

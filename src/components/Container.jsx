@@ -5,7 +5,7 @@ const ContainerWrapper = ({ children }) => {
   return (
     <main>
       <div className="container-xl mt-3">
-        <div className="bg-white p-3 border border-light-purple rounded position-relative">
+        <div className="bg-white p-3  rounded position-relative">
           {children}
         </div>
       </div>
@@ -15,11 +15,11 @@ const ContainerWrapper = ({ children }) => {
   );
 };
 
-export const PosContainerWrapper = ({ children }) => {
+export const PosContainerWrapper = ({ children, className = '' }) => {
   return (
     <main className="main-pos">
       <div className="h-100">
-        <div className="d-flex border border-light-purple rounded position-relative h-100">
+        <div className={`d-flex position-relative h-100 ${className}`}>
           {children}
         </div>
       </div>
@@ -32,7 +32,8 @@ ContainerWrapper.propTypes = {
 }
 
 PosContainerWrapper.propTypes = {
-  children: PropTypes.node.isRequired
+  children: PropTypes.node,
+  className: PropTypes.string,
 }
 
 export default ContainerWrapper;

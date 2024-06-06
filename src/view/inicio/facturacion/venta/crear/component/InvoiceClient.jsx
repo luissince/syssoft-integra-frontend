@@ -1,5 +1,4 @@
 import SearchInput from '../../../../../../components/SearchInput';
-import { images } from '../../../../../../helper';
 import PropTypes from 'prop-types';
 
 const InvoiceClient = (props) => {
@@ -24,7 +23,7 @@ const InvoiceClient = (props) => {
           <button
             className="btn btn-outline-success d-flex align-items-center"
             onClick={handleOpenCliente}>
-            <img src={images.addclient} alt="Nuevo cliente" />
+              <i className='fa fa-user-plus'></i>
             <div className="ml-2">Nuevo</div>
           </button>
         )}

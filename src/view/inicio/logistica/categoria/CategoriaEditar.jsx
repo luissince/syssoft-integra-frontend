@@ -147,9 +147,7 @@ class CategoriaEditar extends CustomComponent {
         <Title
           title='Categoría'
           subTitle='Editar'
-          icon={() => (
-            <i className="fa fa-edit"></i>
-          )}
+          icon={<i className="fa fa-edit"></i>}
           handleGoBack={() => this.props.history.goBack()}
         />
 
@@ -248,7 +246,7 @@ CategoriaEditar.propTypes = {
 
 const mapStateToProps = (state) => {
   return {
-    token: state.reducer,
+    token: state.principal,
   };
 };
 

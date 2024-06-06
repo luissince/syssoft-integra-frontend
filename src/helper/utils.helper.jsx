@@ -265,25 +265,6 @@ export function text(value) {
   return "";
 }
 
-export function monthName(month) {
-  const months = [
-    'Enero',
-    'Febrero',
-    'Marzo',
-    'Abril',
-    'Mayo',
-    'Junio',
-    'Julio',
-    'Agosto',
-    'Septiembre',
-    'Octubre',
-    'Noviembre',
-    'Diciembre',
-  ];
-
-  return months[month - 1];
-}
-
 export function validateDate(date) {
   const regex = new RegExp(
     '([0-9]{4}[-](0[1-9]|1[0-2])[-]([0-2]{1}[0-9]{1}|3[0-1]{1})|([0-2]{1}[0-9]{1}|3[0-1]{1})[-](0[1-9]|1[0-2])[-][0-9]{4})',
@@ -416,6 +397,7 @@ export function keyNumberPhone(event, enterCallback) {
 export function keyUpSearch(event, callback) {
   if (
     event.key !== 'Tab' &&
+    event.key !== 'Enter' &&
     event.key !== 'Backspace' &&
     event.key !== 'Control' &&
     event.key !== 'AltRight' &&
@@ -478,6 +460,17 @@ export function formatTime(time, addSeconds = false) {
   return `${formattedHour}:${mm} ${ampm}`;
 }
 
+export function getRowIndex(event) {
+  const target = event.target;
+  const row = target.closest('tr');
+  const tBody = row.parentElement;
+  if (row && tBody.tagName.toLowerCase() === 'tbody') {
+    const index = Array.from(row.parentElement.children).indexOf(row);
+    return { index, tBody };
+  }
+  return -1;
+}
+
 export function getExtension(filename) {
   return filename.split('?')[0].split('#')[0].split('.').pop();
 }
@@ -497,7 +490,7 @@ export function isEmpty(object) {
   }
 
   if (typeof object === 'string') {
-    return object === '';
+    return object.trim() === '';
   }
 
   if (typeof object === 'object') {
@@ -699,7 +692,7 @@ export function getPathNavigation(opcion, idComprobante) {
   }
 }
 
-export function alertHTML(title, html) {
+export function alertHTML(title, html, callback = function () { }) {
   Swal({
     html: html,
     showConfirmButton: false,
@@ -709,7 +702,7 @@ export function alertHTML(title, html) {
     allowOutsideClick: false,
     showCloseButton: true,
   }).then((event) => {
-    console.log(event)
+    callback(event);
   });
 }
 
@@ -733,6 +726,7 @@ export function alertWarning(title, message, callback = function () { }) {
     title: title,
     text: message,
     type: 'warning',
+    focusConfirm: true,
     confirmButtonText: 'Aceptar',
     cancelButtonText: 'Cancelar',
     showConfirmButton: true,

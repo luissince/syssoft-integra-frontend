@@ -79,13 +79,12 @@ class Paginacion extends React.Component {
   };
 
   render() {
-    const { restart, totalPaginacion, paginacion, data } = this.props;
+    const { className = "", restart, totalPaginacion, paginacion, data } = this.props;
 
-    this.messagePaginacion = `Mostrando ${data.length} de ${
-      totalPaginacion === 1
-        ? totalPaginacion + ' Página'
-        : totalPaginacion + ' Páginas'
-    }`;
+    this.messagePaginacion = `Mostrando ${data.length} de ${totalPaginacion === 1
+      ? totalPaginacion + ' Página'
+      : totalPaginacion + ' Páginas'
+      }`;
 
     if (restart) {
       this.upperPageBound = 3;
@@ -196,7 +195,7 @@ class Paginacion extends React.Component {
     }
 
     return (
-      <div className="row">
+      <div className={`row ${className}`}>
         <div className="col-sm-12 col-md-5">
           <div
             className="d-flex h-100 align-items-center"
@@ -223,6 +222,7 @@ class Paginacion extends React.Component {
 }
 
 Paginacion.propTypes = {
+  className: PropTypes.string,
   totalPaginacion: PropTypes.number.isRequired,
   fillTable: PropTypes.func.isRequired,
 
@@ -230,7 +230,9 @@ Paginacion.propTypes = {
   paginacion: PropTypes.number.isRequired,
 
   restart: PropTypes.bool.isRequired,
-  data: PropTypes.any.isRequired
+  data: PropTypes.any.isRequired,
+
+  setListaVentaPaginacion: PropTypes.func
 }
 
 export default Paginacion;

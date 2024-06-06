@@ -1,4 +1,5 @@
 import PropTypes from 'prop-types';
+import Select from '../../../../../../components/Select';
 
 const InvoiceVoucher = (props) => {
   const {
@@ -11,10 +12,9 @@ const InvoiceVoucher = (props) => {
   return (
     <div className="invoice-voucher px-3 pt-3">
       <div className="form-group">
-        <select
+        <Select
           title="Comprobantes de venta"
-          className="form-control"
-          ref={refComprobante}
+          refSelect={refComprobante}
           value={idComprobante}
           onChange={handleSelectComprobante}
         >
@@ -24,7 +24,7 @@ const InvoiceVoucher = (props) => {
               {item.nombre} ({item.serie})
             </option>
           ))}
-        </select>
+        </Select>
       </div>
     </div>
   );

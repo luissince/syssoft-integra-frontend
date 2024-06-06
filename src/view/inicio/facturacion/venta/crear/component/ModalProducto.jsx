@@ -2,6 +2,11 @@ import { handlePasteFloat, keyNumberFloat, rounded } from '../../../../../../hel
 import PropTypes from 'prop-types';
 import { UNIDADES } from '../../../../../../model/types/tipo-tratamiento-producto';
 import { SpinnerView } from '../../../../../../components/Spinner';
+import Input from '../../../../../../components/Input';
+import TextArea from '../../../../../../components/TextArea';
+import Button from '../../../../../../components/Button';
+import Row from '../../../../../../components/Row';
+import Column from '../../../../../../components/Column';
 
 const ModalProducto = (props) => {
 
@@ -22,14 +27,13 @@ const ModalProducto = (props) => {
       <div className="side-modal_wrapper">
         <div className="card h-100 border-0 rounded-0">
           <div className="card-header">Editar producto</div>
-          <button
-            type="button"
-            className="close"
+          <Button
+            contentClassName="close"
             aria-label="Close"
             onClick={handleClose}
           >
             <span aria-hidden="true">&times;</span>
-          </button>
+          </Button>
 
           <div className="card-body h-100 overflow-y-auto">
             <SpinnerView
@@ -37,88 +41,85 @@ const ModalProducto = (props) => {
               message={"Cargando datos..."}
             />
 
-            <div className="row">
-              <div className="col">
+            <Row>
+              <Column>
                 <div className="form-group">
                   <h5>
                     <i className="fa fa-pencil"></i>{' '}
                     {producto && producto.nombreProducto}
                   </h5>
                 </div>
-              </div>
-            </div>
+              </Column>
+            </Row>
 
-            <div className="row">
-              <div className="col">
+            <Row>
+              <Column>
                 <div className="form-group">
                   <label>
                     Precio: <i className="fa fa-asterisk text-danger small"></i>{' '}
                   </label>
-                  <input
-                    className="form-control"
-                    autoFocus
+                  <Input
+                    autoFocus={true}
                     placeholder="0.00"
-                    ref={refPrecio}
+                    refInput={refPrecio}
                     onKeyDown={keyNumberFloat}
                     onPaste={handlePasteFloat}
                   />
                 </div>
-              </div>
-            </div>
+              </Column>
+            </Row>
 
-            <div className="row">
-              <div className="col">
+            <Row>
+              <Column>
                 <div className="form-group">
                   <label>Bonificación:</label>
-                  <input
-                    className="form-control"
+                  <Input
                     placeholder="0"
-                    ref={refBonificacion}
+                    refInput={refBonificacion}
                     onKeyDown={keyNumberFloat}
                     onPaste={handlePasteFloat}
                   />
                 </div>
-              </div>
-            </div>
+              </Column>
+            </Row>
 
-            <div className="row">
-              <div className="col">
+            <Row>
+              <Column>
                 <div className="form-group">
                   <label>
                     Descripción:{' '}
                     <i className="fa fa-asterisk text-danger small"></i>
                   </label>
-                  <textarea
-                    className="form-control"
+                  <TextArea
                     placeholder="Ingrese los datos del producto"
-                    ref={refDescripcion}
-                  ></textarea>
+                    refInput={refDescripcion}
+                  ></TextArea>
                 </div>
-              </div>
-            </div>
+              </Column>
+            </Row>
 
-            <div className="row">
-              <div className="col">
+            <Row>
+              <Column>
                 <div className="form-group">
                   <label>Lista de Precios:</label>
                   <ul className="list-group">
                     {listPrecio.map((item, index) => (
-                      <button
+                      <Button
                         key={index}
-                        className="list-group-item list-group-item-action"
+                        contentClassName="list-group-item list-group-item-action"
                         onClick={() => handleSeleccionar(item)}
                       >
                         {item.nombre} - {item.valor}
-                      </button>
+                      </Button>
                     ))}
                   </ul>
                 </div>
-              </div>
-            </div>
+              </Column>
+            </Row>
             {
               producto && producto.idTipoTratamientoProducto === UNIDADES && (
-                <div className="row">
-                  <div className="col">
+                <Row>
+                  <Column>
                     <div className="form-group">
                       <label>Cantidad por Almacen:</label>
                       <ul className="list-group">
@@ -136,8 +137,8 @@ const ModalProducto = (props) => {
                         ))}
                       </ul>
                     </div>
-                  </div>
-                </div>
+                  </Column>
+                </Row>
               )
             }
           </div>
@@ -149,18 +150,18 @@ const ModalProducto = (props) => {
                 <i className="fa fa-asterisk text-danger small"></i>
               </span>
               <div>
-                <button
-                  className="btn btn-outline-success mr-2"
+                <Button
+                  className="btn-outline-success mr-2"
                   onClick={handleSave}
                 >
                   Aceptar
-                </button>
-                <button
-                  className="btn btn-outline-secondary "
+                </Button>
+                <Button
+                  className="btn-outline-secondary "
                   onClick={handleClose}
                 >
                   Cancelar
-                </button>
+                </Button>
               </div>
             </div>
           </div>

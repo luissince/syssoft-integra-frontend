@@ -526,8 +526,8 @@ class Inventario extends CustomComponent {
  */
 const mapStateToProps = (state) => {
   return {
-    token: state.reducer,
-    moneda: state.predeterminadoReducer.moneda,
+    token: state.principal,
+    moneda: state.predeterminado.moneda,
   };
 };
 

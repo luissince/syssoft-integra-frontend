@@ -195,7 +195,6 @@ class GuiaRemisionEditar extends CustomComponent {
         this.fetchObtenerDetalle(idGuiaRemision)
       ]);
 
-    console.log(guiaRemision.cabecera)
 
     const cabecera = guiaRemision.cabecera;
 
@@ -559,7 +558,6 @@ class GuiaRemisionEditar extends CustomComponent {
   };
 
   handleSelectItemVehiculo = async (value) => {
-    console.log(value)
     await this.setStateAsync({
       vehiculo: value,
       filtrarVehiculo: `${value.marca}-${value.numeroPlaca}`,
@@ -610,7 +608,6 @@ class GuiaRemisionEditar extends CustomComponent {
   };
 
   handleSelectItemConductor = async (value) => {
-    console.log(value)
     await this.setStateAsync({
       conductor: value,
       filtrarConductor: `${value.documento}, ${value.informacion}`,
@@ -1452,7 +1449,7 @@ GuiaRemisionEditar.propTypes = {
  */
 const mapStateToProps = (state) => {
   return {
-    token: state.reducer,
+    token: state.principal,
   };
 };
 

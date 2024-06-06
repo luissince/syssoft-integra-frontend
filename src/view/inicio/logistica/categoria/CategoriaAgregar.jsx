@@ -80,9 +80,7 @@ class CategoriaAgregar extends React.Component {
         <Title
           title='Categoría'
           subTitle='Agregar'
-          icon={() => (
-            <i className="fa fa-plus"></i>
-          )}
+          icon={<i className="fa fa-plus"></i>}
           handleGoBack={() => this.props.history.goBack()}
         />
 
@@ -181,7 +179,7 @@ CategoriaAgregar.propTypes = {
 
 const mapStateToProps = (state) => {
   return {
-    token: state.reducer,
+    token: state.principal,
   };
 };
 

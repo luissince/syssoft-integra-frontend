@@ -35,12 +35,16 @@ import { CANCELED } from '../../../../../model/types/types';
 import SearchInput from '../../../../../components/SearchInput';
 // import ModalSale from './component/ModalSale';
 import PropTypes from 'prop-types';
-import ModalProducto from './component/ModalProducto';
-import ModalImpresion from './component/ModalImpresion';
-import ModalPreImpresion from './component/ModalPreImpresion';
+import ModalProducto from '../common/ModalProducto';
+import ModalImpresion from '../common/ModalImpresion';
+import ModalPreImpresion from '../common/ModalPreImpresion';
 import Column from '../../../../../components/Column';
 import { SpinnerView } from '../../../../../components/Spinner';
 import printJS from 'print-js';
+import Button from '../../../../../components/Button';
+import Select from '../../../../../components/Select';
+import TextArea from '../../../../../components/TextArea';
+import { Table, TableResponsive } from '../../../../../components/Table';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -1009,7 +1013,7 @@ class CotizaciónCrear extends CustomComponent {
     };
 
     return (
-      <thead>
+      <>
         <tr>
           <th className="text-right mb-2">SUB TOTAL :</th>
           <th className="text-right mb-2">
@@ -1024,7 +1028,7 @@ class CotizaciónCrear extends CustomComponent {
             {numberFormat(total, this.state.codISO)}
           </th>
         </tr>
-      </thead>
+      </>
     );
   }
 
@@ -1090,12 +1094,9 @@ class CotizaciónCrear extends CustomComponent {
           handlePrintTicket={this.handleOpenPreImpresionTicket}
         />
 
-
         <Row>
           <Column className="col-xl-8 col-lg-8 col-md-8 col-sm-12 col-12">
-            {/* Filtrar y agregar concepto */}
             <Row>
-              {/* Filtrar */}
               <Column>
                 <SearchInput
                   showLeftIcon={true}
@@ -1114,60 +1115,53 @@ class CotizaciónCrear extends CustomComponent {
 
             <Row>
               <Column>
-                <div className="table-responsive">
-                  <table className="table table-striped table-bordered rounded">
-                    <thead>
-                      <tr>
-                        <th width="5%" className="text-center">
-                          #
-                        </th>
-                        <th width="15%">Producto</th>
-                        <th width="5%">Cantidad</th>
-                        <th width="5%">Medida</th>
-                        <th width="5%">Precio</th>
-                        <th width="5%">Total</th>
-                        <th width="5%" className="text-center">
-                          Quitar
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>{this.generarBody()}</tbody>
-                  </table>
-                </div>
+                <TableResponsive
+                  tHead={
+                    <tr>
+                      <th width="5%" className="text-center">
+                        #
+                      </th>
+                      <th width="15%">Producto</th>
+                      <th width="5%">Cantidad</th>
+                      <th width="5%">Medida</th>
+                      <th width="5%">Precio</th>
+                      <th width="5%">Total</th>
+                      <th width="5%" className="text-center">
+                        Quitar
+                      </th>
+                    </tr>
+                  }
+                  tBody={this.generarBody()}
+                />
               </Column>
             </Row>
 
             <Row>
               <Column>
                 <div className="form-group">
-                  <button
-                    type="button"
-                    className="btn btn-success"
-                    onClick={this.handleGuardar}
-                  >
+                  <Button
+                    className='btn-success'
+                    onClick={this.handleGuardar}>
                     <i className="fa fa-save"></i> Guardar (F1)
-                  </button>{' '}
-                  <button
-                    type="button"
-                    className="btn btn-outline-warning"
-                    onClick={this.handleLimpiar}
-                  >
+                  </Button>
+                  {' '}
+                  <Button
+                    className='btn-outline-info'
+                    onClick={this.handleLimpiar}>
                     <i className="fa fa-trash"></i> Limpiar (F2)
-                  </button>{' '}
-                  <button
-                    type="button"
-                    className="btn btn-outline-primary"
-                    onClick={this.handleOpenPreImpresion}
-                  >
+                  </Button>
+                  {' '}
+                  <Button
+                    className=" btn-outline-primary"
+                    onClick={this.handleOpenPreImpresion}>
                     <i className="bi bi-printer"></i> Pre Impresión (F3)
-                  </button>{' '}
-                  <button
-                    type="button"
-                    className="btn btn-outline-danger"
-                    onClick={this.handleCerrar}
-                  >
+                  </Button>
+                  {' '}
+                  <Button
+                    className=" btn-outline-danger"
+                    onClick={this.handleCerrar}>
                     <i className="fa fa-close"></i> Cerrar
-                  </button>
+                  </Button>
                 </div>
               </Column>
             </Row>
@@ -1182,10 +1176,9 @@ class CotizaciónCrear extends CustomComponent {
                   </div>
                 </div>
 
-                <select
+                <Select
                   title="Comprobantes de venta"
-                  className="form-control"
-                  ref={this.refComprobante}
+                  refSelect={this.refComprobante}
                   value={this.state.idComprobante}
                   onChange={this.handleSelectComprobante}
                 >
@@ -1195,7 +1188,7 @@ class CotizaciónCrear extends CustomComponent {
                       {item.nombre + ' (' + item.serie + ')'}
                     </option>
                   ))}
-                </select>
+                </Select>
               </div>
             </div>
 
@@ -1223,21 +1216,19 @@ class CotizaciónCrear extends CustomComponent {
                     <i className="bi bi-percent"></i>
                   </div>
                 </div>
-                <select
-                  className="form-control"
-                  ref={this.refImpuesto}
+                <Select
+                  refSelect={this.refImpuesto}
                   value={this.state.idImpuesto}
                   onChange={this.handleSelectImpuesto}
                 >
                   <option value={''}>-- Impuesto --</option>
-                  {this.state.impuestos.map((item, index) => {
-                    return (
-                      <option key={index} value={item.idImpuesto}>
-                        {item.nombre}
-                      </option>
-                    );
-                  })}
-                </select>
+                  {this.state.impuestos.map((item, index) => (
+                    <option key={index} value={item.idImpuesto}>
+                      {item.nombre}
+                    </option>
+                  )
+                  )}
+                </Select>
               </div>
             </div>
 
@@ -1248,10 +1239,9 @@ class CotizaciónCrear extends CustomComponent {
                     <i className="bi bi-cash"></i>
                   </div>
                 </div>
-                <select
+                <Select
                   title="Lista metodo de pago"
-                  className="form-control"
-                  ref={this.refMoneda}
+                  refSelect={this.refMoneda}
                   value={this.state.idMoneda}
                   onChange={this.handleSelectMoneda}
                 >
@@ -1261,7 +1251,7 @@ class CotizaciónCrear extends CustomComponent {
                       {item.nombre}
                     </option>
                   ))}
-                </select>
+                </Select>
               </div>
             </div>
 
@@ -1272,14 +1262,13 @@ class CotizaciónCrear extends CustomComponent {
                     <i className="bi bi-chat-dots-fill"></i>
                   </div>
                 </div>
-                <textarea
+                <TextArea
                   title="Observaciones..."
-                  className="form-control"
-                  ref={this.refObservacion}
+                  refInput={this.refObservacion}
                   value={this.state.observacion}
                   onChange={this.handleInputObservacion}
                   placeholder="Ingrese alguna observación"
-                ></textarea>
+                ></TextArea>
               </div>
             </div>
 
@@ -1290,18 +1279,19 @@ class CotizaciónCrear extends CustomComponent {
                     <i className="bi bi-card-text"></i>
                   </div>
                 </div>
-                <textarea
+                <TextArea
                   title="Observaciones..."
-                  className="form-control"
                   value={this.state.nota}
                   onChange={this.handleInputNota}
                   placeholder="Ingrese alguna nota"
-                ></textarea>
+                ></TextArea>
               </div>
             </div>
 
             <div className="form-group">
-              <table width="100%">{this.renderTotal()}</table>
+              <Table
+                tHead={this.renderTotal()}
+              />
             </div>
           </Column>
         </Row>
@@ -1330,7 +1320,7 @@ CotizaciónCrear.propTypes = {
  */
 const mapStateToProps = (state) => {
   return {
-    token: state.reducer,
+    token: state.principal,
   };
 };
 

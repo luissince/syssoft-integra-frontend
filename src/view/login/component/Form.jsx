@@ -1,4 +1,7 @@
+import Button from '../../../components/Button';
+import Input from '../../../components/Input';
 import { images } from '../../../helper';
+import PropTypes from 'prop-types';
 
 const Form = (props) => {
   const {
@@ -12,14 +15,14 @@ const Form = (props) => {
     handleChangePassword,
     lookPassword,
     handleViewPassword,
-    onEventForm,
+    handleSendForm,
   } = props;
 
   return (
     <div className="col-lg-6 mb-5 mb-lg-0">
       <div className="card">
         <div className="card-body py-5 px-md-5">
-          <form onSubmit={onEventForm}>
+          <form onSubmit={handleSendForm}>
             <img
               className="mb-4"
               // src={`${rutaImage !== "" ? "/" + rutaImage : noimage}`}
@@ -48,7 +51,14 @@ const Form = (props) => {
             )}
 
             <div className="form-outline mb-4">
-              <input
+              <Input
+                refInput={usuarioInput}
+                onChange={handleChangeUsuario}
+                value={usuario}
+                placeholder="Ingrese su usuario"
+                autoFocus={true}
+              />
+              {/* <input
                 ref={usuarioInput}
                 onChange={handleChangeUsuario}
                 value={usuario}
@@ -57,12 +67,19 @@ const Form = (props) => {
                 placeholder="Ingrese su usuario"
                 autoFocus
                 className="form-control"
-              />
+              /> */}
             </div>
 
             <div className="form-outline mb-4">
               <div className="input-group">
-                <input
+                <Input
+                  refInput={passwordInput}
+                  onChange={handleChangePassword}
+                  value={password}
+                  type={lookPassword ? 'text' : 'password'}
+                  placeholder="Ingrese su contraseña"
+                />
+                {/* <input
                   ref={passwordInput}
                   onChange={handleChangePassword}
                   value={password}
@@ -70,28 +87,31 @@ const Form = (props) => {
                   type={lookPassword ? 'text' : 'password'}
                   className="form-control"
                   placeholder="Ingrese su contraseña"
-                />
+                /> */}
                 <div className="input-group-append">
-                  <button
-                    className="btn btn-outline-secondary"
-                    type="button"
-                    title="Mostrar"
+                  <Button
+                    className={"btn-outline-secondary"}
+                    icono={
+                      <i className={lookPassword ? 'fa fa-eye' : 'fa fa-eye-slash'} ></i>
+                    }
                     onClick={handleViewPassword}
-                  >
-                    <i
-                      className={lookPassword ? 'fa fa-eye' : 'fa fa-eye-slash'}
-                    ></i>
-                  </button>
+                  />
                 </div>
               </div>
             </div>
 
-            <button type="submit" className="btn btn-primary btn-block mb-4">
-              Iniciar Sesión <i className="fa fa-arrow-right"></i>
-            </button>
+            <Button
+              type={"submit"}
+              className={"btn-primary btn-block mb-3"}
+              text={" Iniciar Sesión"}
+              icono={
+                <i className="fa fa-arrow-right"></i>
+              }
+            />
 
             <div className="text-center">
               <p>SysSoft Integra © {new Date().getFullYear()}</p>
+              <p className='my-0'>VERSIÓN {import.meta.env.VITE_APP_VERSION}</p>
             </div>
           </form>
         </div>
@@ -99,5 +119,20 @@ const Form = (props) => {
     </div>
   );
 };
+
+Form.propTypes = {
+  message: PropTypes.string,
+  usuario: PropTypes.string,
+  password: PropTypes.string,
+  loading: PropTypes.bool,
+  usuarioInput: PropTypes.object,
+  handleChangeUsuario: PropTypes.func,
+  passwordInput: PropTypes.object,
+  handleChangePassword: PropTypes.func,
+  lookPassword: PropTypes.bool,
+  handleViewPassword: PropTypes.func,
+  handleSendForm: PropTypes.func,
+};
+
 
 export default Form;

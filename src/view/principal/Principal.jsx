@@ -1,7 +1,6 @@
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { signOut, selectProject } from '../../redux/actions';
 import { isEmpty } from '../../helper/utils.helper';
 import CustomComponent from '../../model/class/custom-component';
 import { initSucursales } from '../../network/rest/principal.network';
@@ -13,11 +12,22 @@ import ItemCard from './component/ItemCard';
 import Search from './component/Search';
 import Title from './component/Title';
 import { SpinnerView } from '../../components/Spinner';
+import { projectActive, signOut } from '../../redux/principalSlice';
+import PropTypes from 'prop-types';
+import { clearNoticacion } from '../../redux/noticacionSlice';
+import { clearPredeterminado } from '../../redux/predeterminadoSlice';
 
+/**
+ * Componente que representa una funcionalidad específica.
+ * @extends React.Component
+ */
 class Principal extends CustomComponent {
   constructor(props) {
     super(props);
     this.state = {
+      documento: '',
+      razonSocial: '',
+      nombreEmpresa: '',
       sucursales: [],
       data: [],
       loading: true,
@@ -40,37 +50,41 @@ class Principal extends CustomComponent {
   }
 
   async loadingData() {
-    await this.fetchSucursales()
+    const [sucursales] = await Promise.all([
+      this.fetchSucursales(),
+    ]);
+
+    this.setState({
+      sucursales: sucursales,
+      data: sucursales,
+      loading: false,
+    });
   }
 
   async fetchSucursales() {
     const response = await initSucursales(this.abortController.signal);
 
     if (response instanceof SuccessReponse) {
-      this.setState({
-        sucursales: response.data,
-        data: response.data,
-        loading: false,
-      });
+      return response.data;
     }
 
     if (response instanceof ErrorResponse) {
       if (response.getType() === CANCELED) return;
 
-      this.setState({
-        loadMessage: response.getMessage()
-      })
+      return [];
     }
   }
 
   handleFocused = () => {
     const userToken = window.localStorage.getItem('login');
     if (userToken === null) {
-      this.props.restore();
+      this.props.signOut();
     } else {
       const projectToken = window.localStorage.getItem('project');
       if (projectToken !== null) {
-        this.props.project(JSON.parse(projectToken));
+        this.props.projectActive({
+          project: JSON.parse(projectToken)
+        });
       }
     }
   };
@@ -85,16 +99,10 @@ class Principal extends CustomComponent {
     this.setState({ data: sucursales });
   }
 
-  handleSignIn = async () => {
-    try {
-      window.localStorage.removeItem('login');
-      window.localStorage.removeItem('project');
-      this.props.restore();
-      this.props.history.push('login');
-    } catch (e) {
-      this.props.restore();
-      this.props.history.push('login');
-    }
+  handleSignOut = async () => {
+    window.localStorage.removeItem('login');
+    window.localStorage.removeItem('project');
+    window.location.href = '/';
   };
 
   handleIngresar = (item) => {
@@ -105,32 +113,35 @@ class Principal extends CustomComponent {
     };
 
     window.localStorage.setItem('project', JSON.stringify(proyect));
-    this.props.project(JSON.parse(window.localStorage.getItem('project')));
+    this.props.projectActive({
+      project: JSON.parse(window.localStorage.getItem('project'))
+    });
   }
 
   render() {
-    if (this.props.token.userToken == null) {
+    const { token, empresa: { rutaImage, documento, razonSocial, nombreEmpresa } } = this.props;
+
+    if (token.userToken == null) {
       return <Redirect to="/login" />;
     }
 
-    if (this.props.token.project !== null) {
+    if (token.project !== null) {
       return <Redirect to="/inicio" />;
     }
 
-    const { documento, razonSocial, nombreEmpresa } = this.props.token.empresa;
-
     return (
       <div className="container pt-5">
-        <SpinnerView 
+        <SpinnerView
           loading={this.state.loading}
           message={this.state.loadMessage}
         />
 
         <Title
+          rutaImage={rutaImage}
           razonSocial={razonSocial}
           nombreEmpresa={nombreEmpresa}
           documento={documento}
-          handleSignIn={this.handleSignIn}
+          handleSignOut={this.handleSignOut}
         />
 
         <Search
@@ -152,18 +163,31 @@ class Principal extends CustomComponent {
   }
 }
 
+Principal.propTypes = {
+  token: PropTypes.shape({
+    userToken: PropTypes.object,
+    project: PropTypes.object,
+  }),
+  empresa: PropTypes.shape({
+    rutaImage: PropTypes.string,
+    documento: PropTypes.string,
+    razonSocial: PropTypes.string,
+    nombreEmpresa: PropTypes.string
+  }),
+  signOut: PropTypes.func,
+  projectActive: PropTypes.func,
+  clearPredeterminado: PropTypes.func,
+  clearNoticacion: PropTypes.func,
+}
+
 const mapStateToProps = (state) => {
   return {
-    token: state.reducer,
+    token: state.principal,
+    empresa: state.predeterminado.empresa
   };
 };
 
-const mapDispatchToProps = (dispatch) => {
-  return {
-    restore: () => dispatch(signOut()),
-    project: (idSucursal) => dispatch(selectProject(idSucursal)),
-  };
-};
+const mapDispatchToProps = { signOut, projectActive, clearPredeterminado, clearNoticacion };
 
 const ConnectedPrincipal = connect(mapStateToProps, mapDispatchToProps)(Principal);
 

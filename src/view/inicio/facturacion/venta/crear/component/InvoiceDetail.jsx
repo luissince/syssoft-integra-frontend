@@ -92,33 +92,7 @@ const InvoiceDetail = (props) => {
                         </div>
                       )}
 
-                      {producto.idTipoTratamientoProducto === UNIDADES && producto.inventarios.map((item, index) => (
-                        <div key={index} className="d-flex flex-column align-items-center">
-                          <div>
-                            <span className='text-secondary'>{item.almacen}</span>
-                          </div>
-
-                          <div className="d-flex">
-                            <button
-                              className="btn m-0 d-flex justify-content-center align-items-center pointer"
-                              onClick={() => handleMinus(producto, item.idInventario)}
-                            >
-                              <img src={images.minus} alt="Menorar" />
-                            </button>
-                            <div className="item_quantity d-flex justify-content-center align-items-center">
-                              {item.cantidad}
-                            </div>
-                            <button
-                              className="btn m-0 d-flex justify-content-center align-items-center pointer"
-                              onClick={() => handlePlus(producto, item.idInventario)}
-                            >
-                              <img src={images.plus} alt="Aumentar" />
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-
-                      {producto.idTipoTratamientoProducto === A_GRANEL && producto.inventarios.map((item, index) => (
+                      {(producto.idTipoTratamientoProducto === UNIDADES || producto.idTipoTratamientoProducto === A_GRANEL) && producto.inventarios.map((item, index) => (
                         <div key={index} className="d-flex flex-column align-items-center">
                           <div>
                             <span className='text-secondary'>{item.almacen}</span>

@@ -1,12 +1,14 @@
 import PropTypes from 'prop-types';
 
-const Select = ({ className, refSelect, value, onChange, children }) => {
+const Select = ({ title, className, refSelect, value, disabled, onChange, children }) => {
 
     return (
         <select
-            className={className ? className : "form-control"}
+            title={title}
+            className={`form-control ${className}`}
             ref={refSelect}
             value={value}
+            disabled={disabled}
             onChange={onChange}>
             {children}
         </select>
@@ -14,9 +16,11 @@ const Select = ({ className, refSelect, value, onChange, children }) => {
 }
 
 Select.propTypes = {
+    title: PropTypes.string,
     className: PropTypes.string,
     refSelect: PropTypes.object,
     value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    disabled: PropTypes.bool,
     onChange: PropTypes.func,
     children: PropTypes.node,
 };

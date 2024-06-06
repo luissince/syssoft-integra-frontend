@@ -95,9 +95,7 @@ class MedidaAgregar extends React.Component {
         <Title
           title='Medida'
           subTitle='Agregar'
-          icon={() => (
-            <i className="fa fa-plus"></i>
-          )}
+          icon={<i className="fa fa-plus"></i>}
           handleGoBack={() => this.props.history.goBack()}
         />
 
@@ -214,7 +212,7 @@ MedidaAgregar.propTypes = {
 
 const mapStateToProps = (state) => {
   return {
-    token: state.reducer,
+    token: state.principal,
   };
 };
 

@@ -5,7 +5,9 @@ import { Toaster } from 'react-hot-toast';
 // import { NotificationContainer, NotificationManager } from 'react-notifications';
 import { Switch, Route, Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { signOut, closeProject, addNotification } from '../../redux/actions';
+import { addNotification, clearNoticacion } from '../../redux/noticacionSlice.js';
+import { projectClose, signOut } from '../../redux/principalSlice.js';
+import { clearListaVenta } from '../../redux/predeterminadoSlice.js';
 
 import Bienvenido from './bienvenido/Bienvenido.jsx';
 import NotFoundMain from '../../components/errors/NotFoundMain.jsx';
@@ -18,7 +20,7 @@ import Dashboard from './dashboard/Dashboard.jsx';
 
 import Ventas from './facturacion/venta/listar/Ventas.jsx';
 import VentaCrear from './facturacion/venta/crear/VentaCrear.jsx';
-import VentaCrearEscritorio from './facturacion/venta/crear/VentaCrearEscritorio.jsx';
+import VentaCrearEscritorio from './facturacion/venta/crear-clasico/VentaCrearEscritorio.jsx';
 
 import VentaDetalle from './facturacion/venta/detalle/VentaDetalle.jsx';
 
@@ -81,7 +83,7 @@ import Medidas from './logistica/medida/Medidas.jsx';
 import MedidaAgregar from './logistica/medida/MedidaAgregar.jsx';
 import MedidaEditar from './logistica/medida/MedidaEditar.jsx';
 
-import Productos from './logistica/producto/Productos';
+import Productos from './logistica/producto/lista/Productos';
 import ProductoAgregar from './logistica/producto/agregar/ProductoAgregar';
 import ProductoEditar from './logistica/producto/editar/ProductoEditar';
 import ProductoDetalle from './logistica/producto/detalle/ProductoDetalle';
@@ -101,7 +103,6 @@ import TrasladoDetalle from './logistica/traslado/detalle/TrasladoDetalle.jsx';
 import Inventario from './logistica/inventario/Inventario.jsx';
 
 import Kardex from './logistica/kardex/Kardex.jsx';
-
 
 import Conceptos from './tesoreria/concepto/Conceptos.jsx';
 import ConceptoAgregar from './tesoreria/concepto/ConceptoAgregar.jsx';
@@ -141,10 +142,9 @@ import CpeElectronicos from './cpesunat/lista/CpeElectronicos.jsx';
 import CpeConsultar from './cpesunat/consulta/CpeConsultar.jsx';
 
 import Personas from './contacto/todo/Personas.jsx';
-import PersonaAgregar from './contacto/todo/PersonaAgregar.jsx';
-import PersonaEditar from './contacto/todo/PersonaEditar.jsx';
-import PersonaDetalle from './contacto/todo/PersonaDetalle.jsx';
-
+import PersonaAgregar from './contacto/agregar/PersonaAgregar.jsx';
+import PersonaEditar from './contacto/editar/PersonaEditar.jsx';
+import PersonaDetalle from './contacto/detalle/PersonaDetalle.jsx';
 import Clientes from './contacto/cliente/Clientes.jsx';
 import Proveedores from './contacto/proveedor/Proveedores.jsx';
 import Conductores from './contacto/conductor/Conductores.jsx';
@@ -154,7 +154,10 @@ import SuccessReponse from '../../model/class/response.js';
 import ErrorResponse from '../../model/class/error-response.js';
 import { CANCELED } from '../../model/types/types.js';
 
-
+/**
+ * Componente que representa una funcionalidad específica.
+ * @extends React.Component
+ */
 class Inicio extends React.Component {
   constructor(props) {
     super(props);
@@ -191,32 +194,33 @@ class Inicio extends React.Component {
   }
 
   onEventFocused = () => {
-    let userToken = window.localStorage.getItem('login');
+    const userToken = window.localStorage.getItem('login');
     if (userToken === null) {
-      this.props.restore();
-      this.props.history.push('login');
-    } else {
-      let tokenCurrent = JSON.parse(userToken);
-      let tokenOld = this.props.token.userToken;
-      if (tokenCurrent.token !== tokenOld.token) {
-        window.location.href = '/';
-        return;
-      }
-
-      let projectToken = window.localStorage.getItem('project');
-
-      let projectCurrent = JSON.parse(projectToken);
-      let projectOld = this.props.token.project;
-
-      if (JSON.stringify(projectCurrent) !== JSON.stringify(projectOld)) {
-        window.location.href = '/';
-        return;
-      }
-
-      if (projectToken === null) {
-        this.props.restoreProject();
-      }
+      this.props.signOut();
+      return;
     }
+
+    const tokenCurrent = JSON.parse(userToken);
+    const tokenOld = this.props.token.userToken;
+    if (tokenCurrent.token !== tokenOld.token) {
+      window.location.href = '/';
+      return;
+    }
+
+    const projectToken = window.localStorage.getItem('project');
+
+    const projectCurrent = JSON.parse(projectToken);
+    const projectOld = this.props.token.project;
+
+    if (JSON.stringify(projectCurrent) !== JSON.stringify(projectOld)) {
+      window.location.href = '/';
+      return;
+    }
+
+    if (projectToken === null) {
+      this.props.projectClose();
+    }
+
   };
 
   onEventResize() {
@@ -252,9 +256,7 @@ class Inicio extends React.Component {
 
     if (!refSideBar || !refSideBar.current) return;
 
-    const collapsibleItems = refSideBar.current.querySelectorAll(
-      'ul li .pro-inner-item[data-bs-toggle="collapse"]',
-    );
+    const collapsibleItems = refSideBar.current.querySelectorAll('ul li .pro-inner-item[data-bs-toggle="collapse"]',);
 
     collapsibleItems.forEach((element) => {
       element.parentNode
@@ -306,6 +308,7 @@ class Inicio extends React.Component {
           pathname={pathname}
           project={this.props.token.project}
           userToken={this.props.token.userToken}
+          empresa={this.props.empresa}
         />
 
         <Head
@@ -909,34 +912,32 @@ class Inicio extends React.Component {
   }
 }
 
-const mapStateToProps = (state) => {
-  return {
-    token: state.reducer,
-    notification: state.notiReducer,
-  };
-};
-
-const mapDispatchToProps = (dispatch) => {
-  return {
-    restore: () => dispatch(signOut()),
-    restoreProject: () => dispatch(closeProject()),
-    addNotification: (value) => dispatch(addNotification(value)),
-  };
-};
-
 Inicio.propTypes = {
-  restore: PropTypes.func,
+  signOut: PropTypes.func,
   history: PropTypes.object,
   token: PropTypes.shape({
     userToken: PropTypes.object,
     project: PropTypes.object,
   }),
-  restoreProject: PropTypes.func,
+  empresa: PropTypes.object,
+  projectClose: PropTypes.func,
   match: PropTypes.object,
   location: PropTypes.shape({
     pathname: PropTypes.string
-  })
+  }),
+  clearListaVenta: PropTypes.func,
+  clearNoticacion: PropTypes.func,
 };
+
+const mapStateToProps = (state) => {
+  return {
+    token: state.principal,
+    empresa: state.predeterminado.empresa,
+    notification: state.notification,
+  };
+};
+
+const mapDispatchToProps = { signOut, projectClose, addNotification, clearListaVenta, clearNoticacion }
 
 const ConnectedInicio = connect(mapStateToProps, mapDispatchToProps)(Inicio);;
 

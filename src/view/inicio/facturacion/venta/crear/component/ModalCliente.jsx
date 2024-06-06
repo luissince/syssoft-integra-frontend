@@ -1,7 +1,12 @@
+import Button from "../../../../../../components/Button";
 import Column from "../../../../../../components/Column";
+import Input from "../../../../../../components/Input";
+import RadioButton from "../../../../../../components/RadioButton";
 import Row from "../../../../../../components/Row";
+import Select from "../../../../../../components/Select";
+import { SpinnerView } from "../../../../../../components/Spinner";
 import { images } from "../../../../../../helper";
-import { handlePasteInteger, keyNumberInteger, keyNumberPhone, spinnerLoading } from "../../../../../../helper/utils.helper";
+import { handlePasteInteger, keyNumberInteger, keyNumberPhone } from "../../../../../../helper/utils.helper";
 import { CLIENTE_JURIDICO, CLIENTE_NATURAL } from "../../../../../../model/types/tipo-cliente";
 import PropTypes from 'prop-types';
 
@@ -9,29 +14,22 @@ const ModalCliente = (props) => {
   // Desestructurar props para extraer valores específicos
   const { idModal, loading } = props;
 
-  const { handleSave, handleClose, handleClickIdTipoCliente } = props;
+  const { handleSave, handleClose } = props;
+
+  const { idTipoCliente, handleClickIdTipoCliente } = props;
 
   const { tiposDocumentos } = props;
 
-  const { refIdTipoDocumentoPn, idTipoDocumentoPn, handleSelectIdTipoDocumentoPn } = props;
+  const { refIdTipoDocumento, idTipoDocumento, handleSelectIdTipoDocumento } = props;
 
-  const { refNumeroDocumentoPn, numeroDocumentoPn, handleInputNumeroDocumentoPn, handleApiReniec } = props;
+  const { refNumeroDocumento, numeroDocumento, handleInputNumeroDocumento, handleApiReniec, handleApiSunat } = props;
 
-  const { refInformacionPn, informacionPn, handleInputInformacionPn } = props;
+  const { refInformacion, informacion, handleInputInformacion } = props;
 
-  const { refNumerCelularPn, numerCelularPn, handleInputNumeroCelularPn } = props;
+  const { refNumeroCelular, numeroCelular, handleInputNumeroCelular } = props;
 
-  const { refDireccionPn, direccionPn, handleInputDireccionPn } = props;
+  const { refDireccion, direccion, handleInputDireccion } = props;
 
-  const { refIdTipoDocumentoPj, idTipoDocumentoPj, handleSelectIdTipoDocumentoPj } = props;
-
-  const { refNumeroDocumentoPj, numeroDocumentoPj, handleInputNumeroDocumentoPj, handleApiSunat } = props;
-
-  const { refInformacionPj, informacionPj, handleInputInformacionPj } = props;
-
-  const { refNumerCelularPj, numerCelularPj, handleInputNumeroCelularPj } = props;
-
-  const { refDireccionPj, direccionPj, handleInputDireccionPj } = props;
 
   // Renderizar el componente modal
   return (
@@ -53,284 +51,171 @@ const ModalCliente = (props) => {
 
           {/* Cuerpo de la tarjeta que contiene el contenido principal del modal */}
           <div className="card-body h-100 overflow-y-auto">
-            {loading && spinnerLoading()}
+            <SpinnerView
+              loading={loading}
+              message={"Cargando datos..."}
+            />
 
             {/* Navegación por pestañas para Persona Natural y Persona Jurídica */}
             <Row>
               <Column>
-                <ul className="nav nav-tabs" id="myTab" role="tablist">
-                  {/* Pestaña para Persona Natural */}
-                  <li className="nav-item" role="presentation">
-                    <a
-                      className="nav-link active"
-                      id="datos-tab"
-                      data-bs-toggle="tab"
-                      href="#datos"
-                      role="tab"
-                      aria-controls="datos"
-                      aria-selected={true}
-                      onClick={() => handleClickIdTipoCliente(CLIENTE_NATURAL)}
-                    >
-                      <i className="bi bi-person"></i> Persona Natural
-                    </a>
-                  </li>
-                  {/* Pestaña para Persona Jurídica */}
-                  <li className="nav-item" role="presentation">
-                    <a
-                      className="nav-link"
-                      id="contacto-tab"
-                      data-bs-toggle="tab"
-                      href="#contacto"
-                      role="tab"
-                      aria-controls="contacto"
-                      aria-selected={false}
-                      onClick={() => handleClickIdTipoCliente(CLIENTE_JURIDICO)}
-                    >
-                      <i className="bi bi-building"></i> Persona Juridica
-                    </a>
-                  </li>
-                </ul>
+                <label>
+                  Tipo de Cliente: <i className="fa fa-asterisk text-danger small"></i>
+                </label>
 
-                {/* Contenido de la pestaña para Persona Natural y Persona Jurídica */}
-                <div className="tab-content pt-2" id="myTabContent">
-                  {/* Contenido de la pestaña Persona Natural */}
-                  <div
-                    className="tab-pane fade show active"
-                    id="datos"
-                    role="tabpanel"
-                    aria-labelledby="datos-tab"
+                <div className="form-group">
+                  <RadioButton
+                    className='form-check-inline'
+                    id={CLIENTE_NATURAL}
+                    value={CLIENTE_NATURAL}
+                    checked={idTipoCliente === CLIENTE_NATURAL}
+                    onChange={handleClickIdTipoCliente}
                   >
-                    {/* Campos del formulario para Persona Natural */}
-                    {/* Agregar comentarios para cada grupo de formulario describiendo el propósito */}
-                    <Row>
-                      <Column>
-                        <div className="form-group">
-                          <label>
-                            Tipo Documento: <i className="fa fa-asterisk text-danger small"></i>{' '}
-                          </label>
-                          <select
-                            className="form-control"
-                            ref={refIdTipoDocumentoPn}
-                            value={idTipoDocumentoPn}
-                            onChange={handleSelectIdTipoDocumentoPn}>
-                            <option value={""}>- Seleccione -</option>
-                            {tiposDocumentos.filter((item) => item.idTipoDocumento !== 'TD0003').map((item, index) => (
-                              <option key={index} value={item.idTipoDocumento}>
-                                {item.nombre}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      </Column>
-                    </Row>
+                    <i className="bi bi-person"></i> Persona Natural
+                  </RadioButton>
 
-                    <Row>
-                      <Column>
-                        <div className="form-group">
-                          <label>
-                            N° de documento ({numeroDocumentoPn.length}): <i className="fa fa-asterisk text-danger small"></i>
-                          </label>
-                          <div className="input-group is-invalid">
-                            <input
-                              className="form-control"
-                              autoFocus
-                              placeholder="00000000"
-                              ref={refNumeroDocumentoPn}
-                              value={numeroDocumentoPn}
-                              onChange={handleInputNumeroDocumentoPn}
-                              onKeyDown={keyNumberInteger}
-                              onPaste={handlePasteInteger}
-                            />
-                            <div className="input-group-append">
-                              <button
-                                className="btn btn-outline-secondary"
-                                type="button"
-                                title="Reniec"
-                                onClick={handleApiReniec}
-                              >
-                                <img src={images.reniec} alt="Reniec" width="12" />
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      </Column>
-                    </Row>
-
-                    <Row>
-                      <Column>
-                        <div className="form-group">
-                          <label>
-                            Apellidos y Nombres: <i className="fa fa-asterisk text-danger small"></i>{' '}
-                          </label>
-                          <input
-                            className="form-control"
-                            autoFocus
-                            placeholder="Ingrese sus apellidos y nombres."
-                            ref={refInformacionPn}
-                            value={informacionPn}
-                            onChange={handleInputInformacionPn}
-                          />
-                        </div>
-                      </Column>
-                    </Row>
-
-                    <Row>
-                      <Column>
-                        <div className="form-group">
-                          <label>
-                            N° de Celular:
-                          </label>
-                          <input
-                            className="form-control"
-                            autoFocus
-                            placeholder="Ingrese el número de celular."
-                            onKeyDown={keyNumberPhone}
-                            ref={refNumerCelularPn}
-                            value={numerCelularPn}
-                            onChange={handleInputNumeroCelularPn}
-                          />
-                        </div>
-                      </Column>
-                    </Row>
-
-                    <Row>
-                      <Column>
-                        <div className="form-group">
-                          <label>
-                            Dirección:
-                          </label>
-                          <input
-                            className="form-control"
-                            autoFocus
-                            placeholder="Ingrese la dirección"
-                            ref={refDireccionPn}
-                            value={direccionPn}
-                            onChange={handleInputDireccionPn}
-                          />
-                        </div>
-                      </Column>
-                    </Row>
-
-                  </div>
-
-                  {/* Contenido de la pestaña Persona Jurídica */}
-                  <div
-                    className="tab-pane fade"
-                    id="contacto"
-                    role="tabpanel"
-                    aria-labelledby="contacto-tab"
+                  <RadioButton
+                    className='form-check-inline'
+                    id={CLIENTE_JURIDICO}
+                    value={CLIENTE_JURIDICO}
+                    checked={idTipoCliente === CLIENTE_JURIDICO}
+                    onChange={handleClickIdTipoCliente}
                   >
-                    {/* Campos del formulario para Persona Natural */}
-                    {/* Agregar comentarios para cada grupo de formulario describiendo el propósito */}
-                    <Row>
-                      <Column>
-                        <div className="form-group">
-                          <label>
-                            Tipo Documento: <i className="fa fa-asterisk text-danger small"></i>{' '}
-                          </label>
-                          <select
-                            className="form-control"
-                            ref={refIdTipoDocumentoPj}
-                            value={idTipoDocumentoPj}
-                            onChange={handleSelectIdTipoDocumentoPj}>
-                            <option value={""}>- Seleccione -</option>
-                            {tiposDocumentos.filter((item) => item.idTipoDocumento === 'TD0003').map((item, index) => (
-                              <option key={index} value={item.idTipoDocumento}>
-                                {item.nombre}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      </Column>
-                    </Row>
+                    <i className="bi bi-building"></i> Persona Juridica
+                  </RadioButton>
+                </div>
+              </Column>
+            </Row>
 
-                    <Row>
-                      <Column>
-                        <div className="form-group">
-                          <label>
-                            N° de documento ({numeroDocumentoPj.length}): <i className="fa fa-asterisk text-danger small"></i>
-                          </label>
-                          <div className="input-group is-invalid">
-                            <input
-                              className="form-control"
-                              autoFocus
-                              placeholder="00000000"
-                              ref={refNumeroDocumentoPj}
-                              value={numeroDocumentoPj}
-                              onChange={handleInputNumeroDocumentoPj}
-                              onKeyDown={keyNumberInteger}
-                              onPaste={handlePasteInteger}
-                            />
-                            <div className="input-group-append">
-                              <button
-                                className="btn btn-outline-secondary"
-                                type="button"
-                                title="Reniec"
-                                onClick={handleApiSunat}
-                              >
-                                <img src={images.sunat} alt="Reniec" width="12" />
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      </Column>
-                    </Row>
+            <Row>
+              <Column>
+                <div className="form-group">
+                  <label>
+                    Tipo Documento: <i className="fa fa-asterisk text-danger small"></i>{' '}
+                  </label>
+                  <Select
+                    refSelect={refIdTipoDocumento}
+                    value={idTipoDocumento}
+                    onChange={handleSelectIdTipoDocumento}>
+                    <option value={""}>- Seleccione -</option>
+                    {
+                      idTipoCliente === CLIENTE_NATURAL && (
+                        tiposDocumentos.filter((item) => item.idTipoDocumento !== 'TD0003').map((item, index) => (
+                          <option key={index} value={item.idTipoDocumento}>
+                            {item.nombre}
+                          </option>
+                        ))
+                      )
+                    }
+                    {
+                      idTipoCliente === CLIENTE_JURIDICO && (
+                        tiposDocumentos.filter((item) => item.idTipoDocumento === 'TD0003').map((item, index) => (
+                          <option key={index} value={item.idTipoDocumento}>
+                            {item.nombre}
+                          </option>
+                        ))
+                      )
+                    }
+                  </Select>
+                </div>
+              </Column>
+            </Row>
 
-                    <Row>
-                      <Column>
-                        <div className="form-group">
-                          <label>
-                            Razón Social: <i className="fa fa-asterisk text-danger small"></i>{' '}
-                          </label>
-                          <input
-                            className="form-control"
-                            autoFocus
-                            placeholder="Ingrese su razón social."
-                            ref={refInformacionPj}
-                            value={informacionPj}
-                            onChange={handleInputInformacionPj}
-                          />
-                        </div>
-                      </Column>
-                    </Row>
-
-                    <Row>
-                      <Column>
-                        <div className="form-group">
-                          <label>
-                            N° de Celular:
-                          </label>
-                          <input
-                            className="form-control"
-                            autoFocus
-                            placeholder="Ingrese el número de celular."
-                            onKeyDown={keyNumberPhone}
-                            ref={refNumerCelularPj}
-                            value={numerCelularPj}
-                            onChange={handleInputNumeroCelularPj}
-                          />
-                        </div>
-                      </Column>
-                    </Row>
-
-                    <Row>
-                      <Column>
-                        <div className="form-group">
-                          <label>
-                            Dirección:
-                          </label>
-                          <input
-                            className="form-control"
-                            autoFocus
-                            placeholder="Ingrese la dirección"
-                            ref={refDireccionPj}
-                            value={direccionPj}
-                            onChange={handleInputDireccionPj}
-                          />
-                        </div>
-                      </Column>
-                    </Row>
+            <Row>
+              <Column>
+                <div className="form-group">
+                  <label>
+                    N° de documento ({numeroDocumento.length}): <i className="fa fa-asterisk text-danger small"></i>
+                  </label>
+                  <div className="input-group is-invalid">
+                    <Input
+                      autoFocus={true}
+                      placeholder="00000000"
+                      refInput={refNumeroDocumento}
+                      value={numeroDocumento}
+                      onChange={handleInputNumeroDocumento}
+                      onKeyDown={keyNumberInteger}
+                      onPaste={handlePasteInteger}
+                    />
+                    <div className="input-group-append">
+                      {
+                        idTipoCliente === CLIENTE_NATURAL && (
+                          <Button
+                            className="btn-outline-secondary"
+                            title="Reniec"
+                            onClick={handleApiReniec}
+                          >
+                            <img src={images.reniec} alt="Reniec" width="12" />
+                          </Button>
+                        )
+                      }
+                      {
+                        idTipoCliente === CLIENTE_JURIDICO && (
+                          <Button
+                            className="btn-outline-secondary"
+                            title="Sunat"
+                            onClick={handleApiSunat}
+                          >
+                            <img src={images.sunat} alt="Sunat" width="12" />
+                          </Button>
+                        )
+                      }
+                    </div>
                   </div>
+                </div>
+              </Column>
+            </Row>
+
+            <Row>
+              <Column>
+                <div className="form-group">
+                  <label>
+                    {idTipoCliente === CLIENTE_NATURAL && 'Apellidos y Nombres:'}
+                    {idTipoCliente === CLIENTE_JURIDICO && 'Razón Social:'}
+                    <i className="fa fa-asterisk text-danger small"></i>{' '}
+                  </label>
+                  <Input
+                    placeholder={
+                      idTipoCliente === CLIENTE_NATURAL ? 'Ingrese sus Apellidos y Nombres' : 'Ingrese su Razón Social'
+                    }
+                    refInput={refInformacion}
+                    value={informacion}
+                    onChange={handleInputInformacion}
+                  />
+                </div>
+              </Column>
+            </Row>
+
+
+            <Row>
+              <Column>
+                <div className="form-group">
+                  <label>
+                    N° de Celular:
+                  </label>
+                  <Input
+                    placeholder="Ingrese el número de celular."
+                    onKeyDown={keyNumberPhone}
+                    refInput={refNumeroCelular}
+                    value={numeroCelular}
+                    onChange={handleInputNumeroCelular}
+                  />
+                </div>
+              </Column>
+            </Row>
+
+            <Row>
+              <Column>
+                <div className="form-group">
+                  <label>
+                    Dirección:
+                  </label>
+                  <Input
+                    placeholder="Ingrese la dirección"
+                    refInput={refDireccion}
+                    value={direccion}
+                    onChange={handleInputDireccion}
+                  />
                 </div>
               </Column>
             </Row>
@@ -343,18 +228,16 @@ const ModalCliente = (props) => {
                 Campos obligatorios <i className="fa fa-asterisk text-danger small"></i>
               </span>
               <div>
-                <button
-                  className="btn btn-outline-success mr-2"
+                <Button
+                  className="btn-outline-success mr-2"
                   onClick={handleSave}
-                >
-                  Aceptar
-                </button>
-                <button
-                  className="btn btn-outline-secondary "
+                  text={"Aceptar"}
+                />
+                <Button
+                  className="btn-outline-secondary"
                   onClick={handleClose}
-                >
-                  Cancelar
-                </button>
+                  text={"Cancelar"}
+                />
               </div>
             </div>
           </div>
@@ -369,55 +252,36 @@ ModalCliente.propTypes = {
   idModal: PropTypes.string.isRequired,
   loading: PropTypes.bool.isRequired,
 
-  handleSave: PropTypes.func.isRequired,
-  handleClose: PropTypes.func.isRequired,
-  handleClickIdTipoCliente: PropTypes.func.isRequired,
-
   tiposDocumentos: PropTypes.array.isRequired,
 
-  refIdTipoDocumentoPn: PropTypes.object.isRequired,
-  idTipoDocumentoPn: PropTypes.string.isRequired,
-  handleSelectIdTipoDocumentoPn: PropTypes.func.isRequired,
+  idTipoCliente: PropTypes.string.isRequired,
+  handleClickIdTipoCliente: PropTypes.func.isRequired,
 
-  refNumeroDocumentoPn: PropTypes.object.isRequired,
-  numeroDocumentoPn: PropTypes.string.isRequired,
-  handleInputNumeroDocumentoPn: PropTypes.func.isRequired,
+  refIdTipoDocumento: PropTypes.object.isRequired,
+  idTipoDocumento: PropTypes.string.isRequired,
+  handleSelectIdTipoDocumento: PropTypes.func.isRequired,
+
+  refNumeroDocumento: PropTypes.object.isRequired,
+  numeroDocumento: PropTypes.string.isRequired,
+  handleInputNumeroDocumento: PropTypes.func.isRequired,
 
   handleApiReniec: PropTypes.func.isRequired,
-
-  refInformacionPn: PropTypes.object.isRequired,
-  informacionPn: PropTypes.string.isRequired,
-  handleInputInformacionPn: PropTypes.func.isRequired,
-
-  refNumerCelularPn: PropTypes.object.isRequired,
-  numerCelularPn: PropTypes.string.isRequired,
-  handleInputNumeroCelularPn: PropTypes.func.isRequired,
-
-  refDireccionPn: PropTypes.object.isRequired,
-  direccionPn: PropTypes.string.isRequired,
-  handleInputDireccionPn: PropTypes.func.isRequired,
-
-  refIdTipoDocumentoPj: PropTypes.object.isRequired,
-  idTipoDocumentoPj: PropTypes.string.isRequired,
-  handleSelectIdTipoDocumentoPj: PropTypes.func.isRequired,
-
-  refNumeroDocumentoPj: PropTypes.object.isRequired,
-  numeroDocumentoPj: PropTypes.string.isRequired,
-  handleInputNumeroDocumentoPj: PropTypes.func.isRequired,
-
   handleApiSunat: PropTypes.func.isRequired,
 
-  refInformacionPj: PropTypes.object.isRequired,
-  informacionPj: PropTypes.string.isRequired,
-  handleInputInformacionPj: PropTypes.func.isRequired,
+  refInformacion: PropTypes.object.isRequired,
+  informacion: PropTypes.string.isRequired,
+  handleInputInformacion: PropTypes.func.isRequired,
 
-  refNumerCelularPj: PropTypes.object.isRequired,
-  numerCelularPj: PropTypes.string.isRequired,
-  handleInputNumeroCelularPj: PropTypes.func.isRequired,
+  refNumeroCelular: PropTypes.object.isRequired,
+  numeroCelular: PropTypes.string.isRequired,
+  handleInputNumeroCelular: PropTypes.func.isRequired,
 
-  refDireccionPj: PropTypes.object.isRequired,
-  direccionPj: PropTypes.string.isRequired,
-  handleInputDireccionPj: PropTypes.func.isRequired,
+  refDireccion: PropTypes.object.isRequired,
+  direccion: PropTypes.string.isRequired,
+  handleInputDireccion: PropTypes.func.isRequired,
+
+  handleSave: PropTypes.func.isRequired,
+  handleClose: PropTypes.func.isRequired,
 }
 
 

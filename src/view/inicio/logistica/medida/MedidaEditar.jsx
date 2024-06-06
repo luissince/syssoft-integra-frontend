@@ -161,9 +161,7 @@ class MedidaEditar extends CustomComponent {
         <Title
           title='Medida'
           subTitle='Editar'
-          icon={() => (
-            <i className="fa fa-edit"></i>
-          )}
+          icon={<i className="fa fa-edit"></i>}
           handleGoBack={() => this.props.history.goBack()}
         />
 
@@ -279,7 +277,7 @@ MedidaEditar.propTypes = {
 
 const mapStateToProps = (state) => {
   return {
-    token: state.reducer,
+    token: state.principal,
   };
 };
 

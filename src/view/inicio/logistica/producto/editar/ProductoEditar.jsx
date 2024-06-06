@@ -1076,9 +1076,7 @@ class ProductoEditar extends CustomComponent {
         <Title
           title='Producto'
           subTitle='Editar'
-          icon={() => (
-            <i className='fa fa-edit'></i>
-          )}
+          icon={<i className='fa fa-edit'></i>}
           handleGoBack={() => this.props.history.goBack()}
         />
 
@@ -1299,7 +1297,7 @@ class ProductoEditar extends CustomComponent {
  */
 const mapStateToProps = (state) => {
   return {
-    token: state.reducer,
+    token: state.principal,
   };
 };
 

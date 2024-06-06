@@ -11,7 +11,7 @@ class Bienvenido extends React.Component {
             className="d-block mx-auto mb-4"
             src={images.icono}
             alt="Logo"
-            width="240"
+            width="200"
           />
 
           <div className="col-lg-6 mx-auto">

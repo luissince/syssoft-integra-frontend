@@ -95,7 +95,6 @@ const InvoiceFooter = (props) => {
           <div>Sub Total:</div>
           <div>{numberFormat(subTotal, codiso)}</div>
         </div>
-
         {impuestosTotal()}
       </div>
       <div className="px-3 mb-2">
@@ -105,7 +104,7 @@ const InvoiceFooter = (props) => {
               className="btn btn-success btn-lg w-100 d-flex align-items-center justify-content-between"
               onClick={handleOpenSale}
             >
-              <div>Vender (F1)</div>
+              <div>Cobrar (F1)</div>
               <div>{numberFormat(total, codiso)}</div>
             </button>
           </div>

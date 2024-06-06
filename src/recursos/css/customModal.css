@@ -22,7 +22,6 @@
     max-width: 1024px;
     width: 80%;
     height: 80%;
-    overflow-y: auto;
 }
 
 .modal-custom.close-cm {
@@ -42,7 +41,10 @@
 
 .modal-custom .body-cm {
     position: relative;
+    -ms-flex: 1 1 auto;
+    flex: 1 1 auto;
     padding: 1rem;
+    overflow: auto;
 }
 
 .modal-custom .footer-cm {
@@ -60,6 +62,13 @@
     /* margin-top: 1rem; */
     margin-right: 0;
     padding: 0.75rem;
+    border-top: 1px solid #dee2e6;
+}
+
+.modal-custom .footer-cm-table {
+    display: flex;
+    justify-content: space-evenly;
+    padding: 0.75rem 0rem 0.75rem 0rem;
     border-top: 1px solid #dee2e6;
 }
 

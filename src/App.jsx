@@ -7,7 +7,6 @@ import Principal from './view/principal/Principal';
 import Inicio from './view/inicio/Inicio';
 import NotFoundInitial from './components/errors/NotFoundInitial';
 import { connect } from 'react-redux';
-import { config, restoreToken } from './redux/actions';
 import { BrowserRouter, Switch, Route, Redirect } from 'react-router-dom';
 
 class App extends React.Component {
@@ -62,17 +61,10 @@ App.propTypes = {
 
 const mapStateToProps = (state) => {
   return {
-    token: state.reducer,
+    token: state.principal,
   };
 };
 
-const mapDispatchToProps = (dispatch) => {
-  return {
-    config: () => dispatch(config()),
-    restore: (user) => dispatch(restoreToken(user)),
-  };
-};
-
-const ConnectedApp = connect(mapStateToProps, mapDispatchToProps)(App);
+const ConnectedApp = connect(mapStateToProps, null)(App);
 
 export default ConnectedApp;

@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
  * @param {Object} props - Propiedades del componente.
  * @param {string} props.title - Título principal.
  * @param {string} props.subTitle - Subtítulo.
- * @param {Function} props.icon - Función que devuelve un icono opcional.
+ * @param {Element} props.icon - Elemento que devuelve un icono opcional.
  * @param {Function} props.handleGoBack - Función de devolución de llamada para manejar el evento de retroceso.
  * @returns {JSX.Element} Componente de título.
  */
@@ -23,7 +23,7 @@ const Title = ({ title, subTitle, icon, handleGoBack }) => {
                         {/* Título principal */}
                         {title}
                         {/* Renderiza el subtítulo y el icono si se proporciona */}
-                        <small className="text-secondary"> {subTitle} {icon && icon()}</small>
+                        <small className="text-secondary"> {subTitle} {icon}</small>
                     </h5>
                 </div>
             </div>
@@ -35,7 +35,7 @@ const Title = ({ title, subTitle, icon, handleGoBack }) => {
 Title.propTypes = {
     title: PropTypes.string.isRequired, // Título es requerido y debe ser una cadena
     subTitle: PropTypes.string.isRequired, // Subtítulo es requerido y debe ser una cadena
-    icon: PropTypes.func, // Icono es opcional y debe ser una función
+    icon: PropTypes.element, // Icono es opcional y debe ser una función
     handleGoBack: PropTypes.func // handleGoBack es opcional y debe ser una función
 }
 

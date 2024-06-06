@@ -32,6 +32,10 @@ import { TableResponsive } from '../../../../../components/Table';
 import { SpinnerTable, SpinnerView } from '../../../../../components/Spinner';
 import { VENTA } from '../../../../../model/types/tipo-comprobante';
 import ModalElegirInterfaz from './component/ModalElejirInterfaz';
+import Button from '../../../../../components/Button';
+import { setListaVentaData, setListaVentaPaginacion } from '../../../../../redux/predeterminadoSlice';
+import Input from '../../../../../components/Input';
+import Select from '../../../../../components/Select';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -61,6 +65,8 @@ class Ventas extends CustomComponent {
 
       comprobantes: [],
 
+      buscar: '',
+
       opcion: 0,
       paginacion: 0,
       totalPaginacion: 0,
@@ -78,10 +84,10 @@ class Ventas extends CustomComponent {
       isOpenElegirInterfaz: false,
     };
 
-    this.refTxtSearch = React.createRef();
+    this.refPaginacion = React.createRef();
 
-     // Referencia para el modal elegir interfaz
-     this.refModalElegirInterfaz = React.createRef();
+    // Referencia para el modal elegir interfaz
+    this.refModalElegirInterfaz = React.createRef();
 
     this.abortControllerTable = new AbortController();
   }
@@ -129,20 +135,38 @@ class Ventas extends CustomComponent {
   |
   */
   loadingData = async () => {
-    const [
-      comprobantes
-    ] = await Promise.all([
-      this.fetchComprobante(VENTA),
-    ]);
+    if (this.props.listaVenta && this.props.listaVenta.data && this.props.listaVenta.paginacion) {
+      this.setState(this.props.listaVenta.data)
+      this.refPaginacion.current.upperPageBound = this.props.listaVenta.paginacion.upperPageBound;
+      this.refPaginacion.current.lowerPageBound = this.props.listaVenta.paginacion.lowerPageBound;
+      this.refPaginacion.current.isPrevBtnActive = this.props.listaVenta.paginacion.isPrevBtnActive;
+      this.refPaginacion.current.isNextBtnActive = this.props.listaVenta.paginacion.isNextBtnActive;
+      this.refPaginacion.current.pageBound = this.props.listaVenta.paginacion.pageBound;
+      this.refPaginacion.current.messagePaginacion = this.props.listaVenta.paginacion.messagePaginacion;
+    } else {
+      const [comprobantes] = await Promise.all([this.fetchComprobante(VENTA)]);
 
-    this.setState({
-      comprobantes: comprobantes,
-      initialLoad: false,
-    }, () => {
-      this.loadingInit()
-    })
+      this.setState({
+        comprobantes,
+        initialLoad: false,
+      }, () => {
+        this.loadingInit();
+        this.updateReduxState();
+      });
+    }
   }
 
+  updateReduxState() {
+    this.props.setListaVentaData(this.state)
+    this.props.setListaVentaPaginacion({
+      upperPageBound: this.refPaginacion.current.upperPageBound,
+      lowerPageBound: this.refPaginacion.current.lowerPageBound,
+      isPrevBtnActive: this.refPaginacion.current.isPrevBtnActive,
+      isNextBtnActive: this.refPaginacion.current.isNextBtnActive,
+      pageBound: this.refPaginacion.current.pageBound,
+      messagePaginacion: this.refPaginacion.current.messagePaginacion,
+    });
+  }
 
   async fetchComprobante(tipo) {
     const params = {
@@ -211,7 +235,7 @@ class Ventas extends CustomComponent {
         this.fillTable(0);
         break;
       case 1:
-        this.fillTable(1, this.refTxtSearch.current.value);
+        this.fillTable(1, this.state.buscar);
         break;
       case 2:
         this.fillTable(2, '', this.state.fechaInicio, this.state.fechaFinal, this.state.idComprobante, this.state.estado);
@@ -251,6 +275,8 @@ class Ventas extends CustomComponent {
         loading: false,
         lista: response.data.result,
         totalPaginacion: totalPaginacion,
+      }, () => {
+        this.updateReduxState();
       });
     }
 
@@ -308,6 +334,10 @@ class Ventas extends CustomComponent {
     this.setState({ estado: event.target.value }, () => {
       this.searchOpciones();
     })
+  }
+
+  handleInputBuscar = (event) => {
+    this.setState({ buscar: event.target.value })
   }
 
   handleDetalle = (idVenta) => {
@@ -425,12 +455,12 @@ class Ventas extends CustomComponent {
     });
   }
 
-    //------------------------------------------------------------------------------------------
+  //------------------------------------------------------------------------------------------
   // Procesos Elegir Interfaz
   //------------------------------------------------------------------------------------------
 
   handleOpenElegirInterfaz = () => {
-    this.setState({ isOpenElegirInterfaz: true})
+    this.setState({ isOpenElegirInterfaz: true })
   }
 
   handleCloseElegirInterfaz = () => {
@@ -468,38 +498,34 @@ class Ventas extends CustomComponent {
           subTitle='LISTA'
         />
 
-
         <ModalElegirInterfaz
-          refModal={this.refModalElegirInterfaz }
+          refModal={this.refModalElegirInterfaz}
           isOpen={this.state.isOpenElegirInterfaz}
           handleClose={this.handleCloseElegirInterfaz}
 
           handleInterfazClasico={this.handleInterfazClasico}
           handleInterfazModerno={this.handleInterfazModerno}
-
         />
 
         <Row>
           <Column>
             <div className="form-group">
-              <button
-                className="btn btn-outline-info"
+              <Button
+                className='btn-outline-info'
                 onClick={this.handleOpenElegirInterfaz}
-              // disabled={!this.state.add}
               >
                 <i className="bi bi-file-plus"></i> Nuevo Registro
-              </button>
-
+              </Button>
               {' '}
-              <button
-                className="btn btn-outline-secondary"
-                onClick={this.loadingInit}>
+              <Button
+                className='btn-outline-secondary'
+                onClick={this.loadingInit}
+              >
                 <i className="bi bi-arrow-clockwise"></i> Recargar Vista
-              </button>
+              </Button>
             </div>
           </Column>
         </Row>
-
 
         <Row>
           <Column className="col-lg-3 col-md-3 col-sm-12 col-12">
@@ -517,8 +543,7 @@ class Ventas extends CustomComponent {
           <Column className="col-lg-3 col-md-3 col-sm-12 col-12">
             <div className="form-group">
               <label>Fecha de Final:</label>
-              <input
-                className="form-control"
+              <Input
                 type="date"
                 value={this.state.fechaFinal}
                 onChange={this.handleInputFechaFinal}
@@ -529,8 +554,7 @@ class Ventas extends CustomComponent {
           <Column className="col-lg-3 col-md-3 col-sm-12 col-12">
             <div className="form-group">
               <label>Comprobantes:</label>
-              <select
-                className="form-control"
+              <Select
                 value={this.state.idComprobante}
                 onChange={this.handleSelectComprobante}
               >
@@ -540,15 +564,14 @@ class Ventas extends CustomComponent {
                     <option key={index} value={item.idComprobante}>{item.nombre}</option>
                   ))
                 }
-              </select>
+              </Select>
             </div>
           </Column>
 
           <Column className="col-lg-3 col-md-3 col-sm-12 col-12">
             <div className="form-group">
               <label>Estados:</label>
-              <select
-                className="form-control"
+              <Select
                 value={this.state.estado}
                 onChange={this.handleSelectEstado}
               >
@@ -556,7 +579,7 @@ class Ventas extends CustomComponent {
                 <option value='1'>COBRADO</option>
                 <option value='2'>POR COBRAR</option>
                 <option value='3'>ANULADO</option>
-              </select>
+              </Select>
             </div>
           </Column>
         </Row>
@@ -571,17 +594,11 @@ class Ventas extends CustomComponent {
                     <i className="bi bi-search"></i>
                   </div>
                 </div>
-
-                <input
-                  type="text"
-                  className="form-control"
+                <Input
                   placeholder="Buscar por comprobante o cliente..."
-                  ref={this.refTxtSearch}
-                  onKeyUp={(event) =>
-                    keyUpSearch(event, () =>
-                      this.searchText(event.target.value),
-                    )
-                  }
+                  value={this.state.buscar}
+                  onChange={this.handleInputBuscar}
+                  onKeyUp={(event) => keyUpSearch(event, () => this.searchText(this.state.buscar))}
                 />
               </div>
             </div>
@@ -614,12 +631,15 @@ class Ventas extends CustomComponent {
         </Row>
 
         <Paginacion
+          ref={this.refPaginacion}
           loading={this.state.loading}
           data={this.state.lista}
           totalPaginacion={this.state.totalPaginacion}
           paginacion={this.state.paginacion}
           fillTable={this.paginacionContext}
           restart={this.state.restart}
+
+          setListaVentaPaginacion={this.props.setListaVentaPaginacion}
         />
       </ContainerWrapper>
     );
@@ -635,26 +655,29 @@ Ventas.propTypes = {
       idSucursal: PropTypes.string.isRequired,
     }).isRequired,
   }).isRequired,
+  listaVenta: PropTypes.shape({
+    data: PropTypes.object,
+    paginacion: PropTypes.object
+  }),
+  setListaVentaData: PropTypes.func,
+  setListaVentaPaginacion: PropTypes.func,
   history: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
   location: PropTypes.object
 };
 
-
-/**
- *
- * Método encargado de traer la información de redux
- */
 const mapStateToProps = (state) => {
   return {
-    token: state.reducer,
+    token: state.principal,
+    listaVenta: state.predeterminado.listaVenta
   };
 };
 
+const mapDispatchToProps = { setListaVentaData, setListaVentaPaginacion }
 
 /**
  *
  * Método encargado de conectar con redux y exportar la clase
  */
-const ConnectedVentas = connect(mapStateToProps, null)(Ventas);
+const ConnectedVentas = connect(mapStateToProps, mapDispatchToProps)(Ventas);
 
 export default ConnectedVentas;

@@ -2,7 +2,8 @@ import PropTypes from 'prop-types';
 
 const Input = ({
     autoFocus,
-    type,
+    type = "text",
+    className = "",
     placeholder,
     disabled,
     role,
@@ -16,8 +17,8 @@ const Input = ({
     return (
         <input
             autoFocus={autoFocus}
-            type={type ? type : "text"}
-            className="form-control"
+            type={type}
+            className={`form-control ${className}`}
             placeholder={placeholder}
             disabled={disabled}
             role={role}
@@ -33,7 +34,8 @@ const Input = ({
 
 Input.propTypes = {
     autoFocus: PropTypes.bool,
-    type: PropTypes.string,
+    type: PropTypes.oneOf(["text", "password", "search", "date"]),
+    className: PropTypes.string,
     placeholder: PropTypes.string,
     disabled: PropTypes.bool,
     role: PropTypes.string,

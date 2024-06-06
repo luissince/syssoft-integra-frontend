@@ -6,7 +6,8 @@ class Image extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            image: props.src,
+            default: props.default || images.noImage,
+            image: props.src || props.default,
             alt: props.alt,
             className: props.className,
             width: props.width,
@@ -14,28 +15,31 @@ class Image extends Component {
         };
     }
 
-    componentDidUpdate(prevProps){
+    componentDidUpdate(prevProps) {
         if (prevProps.src !== this.props.src) {
             this.setState({
-                image: this.props.src,
+                image: this.props.src || this.state.default,
             });
         }
     }
 
     handleImageError = () => {
         this.setState({
-            image: images.noImage,
+            image: this.state.default,
         });
-    };
+    }
 
     render() {
+        const { alt, className, width, height } = this.props;
+        const { image } = this.state;
+
         return (
             <img
-                src={this.state.image}
-                alt={this.state.alt}
-                className={this.state.className}
-                width={this.state.width}
-                height={this.state.height}
+                src={image}
+                alt={alt}
+                className={className}
+                width={width}
+                height={height}
                 onError={this.handleImageError}
             />
         );
@@ -43,6 +47,7 @@ class Image extends Component {
 }
 
 Image.propTypes = {
+    default: PropTypes.string,
     src: PropTypes.string,
     alt: PropTypes.string.isRequired,
     className: PropTypes.string,

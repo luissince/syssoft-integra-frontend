@@ -1,14 +1,19 @@
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { signIn } from '../../redux/actions';
 import { loginApi } from '../../network/rest/principal.network';
 import SuccessReponse from '../../model/class/response';
 import ErrorResponse from '../../model/class/error-response';
 import CustomComponent from '../../model/class/custom-component';
 import Title from './component/Title';
 import Form from './component/Form';
+import { signIn } from '../../redux/principalSlice';
+import PropTypes from 'prop-types';
 
+/**
+ * Componente que representa una funcionalidad específica.
+ * @extends React.Component
+ */
 class Login extends CustomComponent {
   constructor(props) {
     super(props);
@@ -41,15 +46,20 @@ class Login extends CustomComponent {
     if (userToken !== null) {
       let projectToken = window.localStorage.getItem('project');
       if (projectToken !== null) {
-        this.props.restore(JSON.parse(userToken), JSON.parse(projectToken));
+        this.props.signIn({
+          token: JSON.parse(userToken),
+          project: JSON.parse(projectToken)
+        });
       } else {
-        this.props.restore(JSON.parse(userToken));
-        this.props.history.push('principal');
+        this.props.signIn({
+          token: JSON.parse(userToken),
+          project: null
+        });
       }
     }
   };
 
-  onEventForm = async (event) => {
+  handleSendForm = async (event) => {
     event.preventDefault();
 
     if (this.state.loading) return;
@@ -130,8 +140,10 @@ class Login extends CustomComponent {
       };
 
       window.localStorage.setItem('login', JSON.stringify(user));
-      this.props.restore(JSON.parse(window.localStorage.getItem('login')));
-      this.props.history.push('principal');
+      this.props.signIn({
+        token: user,
+        project: null
+      });
     }
 
     if (response instanceof ErrorResponse) {
@@ -142,10 +154,6 @@ class Login extends CustomComponent {
 
       this.usuarioInput.current.focus();
     }
-  };
-
-  onEventRecuperar = () => {
-    window.open('/api/login/report', '_blank');
   };
 
   handleChangeUsuario = (event) => {
@@ -210,7 +218,7 @@ class Login extends CustomComponent {
               handleChangePassword={this.handleChangePassword}
               lookPassword={this.state.lookPassword}
               handleViewPassword={this.handleViewPassword}
-              onEventForm={this.onEventForm}
+              handleSendForm={this.handleSendForm}
             />
           </div>
         </div>
@@ -219,17 +227,20 @@ class Login extends CustomComponent {
   }
 }
 
+Login.propTypes = {
+  signIn: PropTypes.func,
+  token: PropTypes.shape({
+    userToken: PropTypes.object
+  })
+}
+
 const mapStateToProps = (state) => {
   return {
-    token: state.reducer,
+    token: state.principal,
   };
 };
 
-const mapDispatchToProps = (dispatch) => {
-  return {
-    restore: (user, project = null) => dispatch(signIn(user, project)),
-  };
-};
+const mapDispatchToProps = { signIn }
 
 const ConnectedLogin = connect(mapStateToProps, mapDispatchToProps)(Login);
 

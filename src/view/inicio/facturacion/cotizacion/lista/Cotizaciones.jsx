@@ -13,6 +13,7 @@ import Column from '../../../../../components/Column';
 import { TableResponsive } from '../../../../../components/Table';
 import { SpinnerTable } from '../../../../../components/Spinner';
 import Paginacion from '../../../../../components/Paginacion';
+import Button from '../../../../../components/Button';
 
 class Cotizaciones extends CustomComponent {
   constructor(props) {
@@ -93,6 +94,7 @@ class Cotizaciones extends CustomComponent {
       opcion: opcion,
       buscar: buscar,
       idSucursal: this.state.idSucursal,
+      estado: -1,
       posicionPagina: (this.state.paginacion - 1) * this.state.filasPorPagina,
       filasPorPagina: this.state.filasPorPagina,
     };
@@ -172,7 +174,7 @@ class Cotizaciones extends CustomComponent {
     if (this.state.loading) {
       return (
         <tr>
-          <td className="text-center" colSpan="8">
+          <td className="text-center" colSpan="9">
             <SpinnerTable
               message='Cargando información de la tabla...'
             />
@@ -184,7 +186,7 @@ class Cotizaciones extends CustomComponent {
     if (isEmpty(this.state.lista)) {
       return (
         <tr>
-          <td className="text-center" colSpan="8">¡No hay datos registrados!</td>
+          <td className="text-center" colSpan="9">¡No hay datos registrados!</td>
         </tr>
       );
     }
@@ -207,6 +209,14 @@ class Cotizaciones extends CustomComponent {
               title="Detalle"
               onClick={() => this.handleDetalle(item.idCotizacion)}>
               <i className="fa fa-eye"></i>
+            </button>
+          </td>
+          <td className="text-center">
+            <button
+              className="btn btn-outline-warning btn-sm"
+              title="Editar"
+              onClick={() => this.handleEditar(item.idCotizacion)}>
+              <i className="fa fa-edit"></i>
             </button>
           </td>
           <td className="text-center">
@@ -256,17 +266,17 @@ class Cotizaciones extends CustomComponent {
 
           <Column className="col-md-6 col-sm-12">
             <div className="form-group">
-              <button
-                className="btn btn-outline-info"
-                onClick={this.handleCrear}
-              >
+              <Button
+                className="btn-outline-info"
+                onClick={this.handleCrear}>
                 <i className="bi bi-file-plus"></i> Crear cotización
-              </button>{' '}
-              <button
-                className="btn btn-outline-secondary"
+              </Button>
+              {' '}
+              <Button
+                className="btn-outline-secondary"
                 onClick={this.loadInit}>
                 <i className="bi bi-arrow-clockwise"></i>
-              </button>
+              </Button>
             </div>
           </Column>
         </Row>
@@ -284,6 +294,9 @@ class Cotizaciones extends CustomComponent {
                   <th width="10%" className="text-center">Total</th>
                   <th width="5%" className="text-center">
                     Detalle
+                  </th>
+                  <th width="5%" className="text-center">
+                    Editar
                   </th>
                   <th width="5%" className="text-center">
                     Anular
@@ -310,7 +323,7 @@ class Cotizaciones extends CustomComponent {
 
 const mapStateToProps = (state) => {
   return {
-    token: state.reducer,
+    token: state.principal,
   };
 };
 

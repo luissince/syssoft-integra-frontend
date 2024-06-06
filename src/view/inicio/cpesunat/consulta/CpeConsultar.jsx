@@ -9,7 +9,6 @@ import {
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../../components/Container';
-import { cdrStatus } from '../../../../network/rest/cpesunat.network';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
 import { consultarCpeSunat, loadEmpresa } from '../../../../network/rest/principal.network';
@@ -179,92 +178,92 @@ class CpeElectronicos extends React.Component {
   }
 
   async onEventConsultarCdr() {
-    if (this.state.ruc === '') {
-      await this.setStateAsync({
-        messageWarning: 'Ingrese el número ruc de la empresa.',
-      });
-      return;
-    }
+    // if (this.state.ruc === '') {
+    //   await this.setStateAsync({
+    //     messageWarning: 'Ingrese el número ruc de la empresa.',
+    //   });
+    //   return;
+    // }
 
-    if (this.state.usuario === '') {
-      await this.setStateAsync({
-        messageWarning: 'El campo usuario es requerido.',
-      });
-      return;
-    }
+    // if (this.state.usuario === '') {
+    //   await this.setStateAsync({
+    //     messageWarning: 'El campo usuario es requerido.',
+    //   });
+    //   return;
+    // }
 
-    if (this.state.clave === '') {
-      await this.setStateAsync({
-        messageWarning: 'El campo contraseña es requerido.',
-      });
-      return;
-    }
+    // if (this.state.clave === '') {
+    //   await this.setStateAsync({
+    //     messageWarning: 'El campo contraseña es requerido.',
+    //   });
+    //   return;
+    // }
 
-    if (this.state.tipo === '') {
-      await this.setStateAsync({
-        messageWarning: 'Seleccione tipo de documento.',
-      });
-      return;
-    }
+    // if (this.state.tipo === '') {
+    //   await this.setStateAsync({
+    //     messageWarning: 'Seleccione tipo de documento.',
+    //   });
+    //   return;
+    // }
 
-    if (this.state.serie === '') {
-      await this.setStateAsync({
-        messageWarning: 'Ingrese una serie correcta.',
-      });
-      return;
-    }
+    // if (this.state.serie === '') {
+    //   await this.setStateAsync({
+    //     messageWarning: 'Ingrese una serie correcta.',
+    //   });
+    //   return;
+    // }
 
-    if (this.state.correlativo === '') {
-      await this.setStateAsync({ messageWarning: 'Ingrese un correlativo.' });
-      return;
-    }
+    // if (this.state.correlativo === '') {
+    //   await this.setStateAsync({ messageWarning: 'Ingrese un correlativo.' });
+    //   return;
+    // }
 
-    alertDialog('Consulta', '¿Está seguro de continuar?', async (value) => {
-      if (value) {
-        const data = {
-          rucSol: this.state.ruc,
-          userSol: this.state.usuario,
-          passSol: this.state.clave,
-          ruc: this.state.ruc,
-          tipo: this.state.tipo,
-          serie: this.state.serie.toUpperCase(),
-          numero: this.state.correlativo,
-          cdr: 'cdr',
-        };
+    // alertDialog('Consulta', '¿Está seguro de continuar?', async (value) => {
+    //   if (value) {
+    //     const data = {
+    //       rucSol: this.state.ruc,
+    //       userSol: this.state.usuario,
+    //       passSol: this.state.clave,
+    //       ruc: this.state.ruc,
+    //       tipo: this.state.tipo,
+    //       serie: this.state.serie.toUpperCase(),
+    //       numero: this.state.correlativo,
+    //       cdr: 'cdr',
+    //     };
 
-        const response = await cdrStatus(data);
+    //     const response = await cdrStatus(data);
 
-        if (response instanceof SuccessReponse) {
-          const result = response.data;
+    //     if (response instanceof SuccessReponse) {
+    //       const result = response.data;
 
-          if (result.state === true) {
-            if (result.accepted === true) {
-              alertSuccess(
-                'Consultar Comprobante',
-                'Resultado: Código ' + result.code + ' ' + result.message,
-              );
-              // if (cdr != "") {
-              //     // $("#lblRutaDescarga").append('<a onclick="descargarCdr(\'' + result.file + '\')"" style="cursor:pointer">' + result.file + '</a>');
-              // }
-            } else {
-              alertWarning(
-                'Consultar Comprobante',
-                'Resultado: Código ' + result.code + ' ' + result.message,
-              );
-            }
-          } else {
-            alertWarning(
-              'Consultar Comprobante',
-              'Resultado: Código ' + result.code + ' ' + result.message,
-            );
-          }
-        }
+    //       if (result.state === true) {
+    //         if (result.accepted === true) {
+    //           alertSuccess(
+    //             'Consultar Comprobante',
+    //             'Resultado: Código ' + result.code + ' ' + result.message,
+    //           );
+    //           // if (cdr != "") {
+    //           //     // $("#lblRutaDescarga").append('<a onclick="descargarCdr(\'' + result.file + '\')"" style="cursor:pointer">' + result.file + '</a>');
+    //           // }
+    //         } else {
+    //           alertWarning(
+    //             'Consultar Comprobante',
+    //             'Resultado: Código ' + result.code + ' ' + result.message,
+    //           );
+    //         }
+    //       } else {
+    //         alertWarning(
+    //           'Consultar Comprobante',
+    //           'Resultado: Código ' + result.code + ' ' + result.message,
+    //         );
+    //       }
+    //     }
 
-        if (response instanceof ErrorResponse) {
-          alertWarning('Consultar Comprobante', response.getMessage());
-        }
-      }
-    });
+    //     if (response instanceof ErrorResponse) {
+    //       alertWarning('Consultar Comprobante', response.getMessage());
+    //     }
+    //   }
+    // });
   }
 
   async onEventLimpiar() {
@@ -503,7 +502,7 @@ class CpeElectronicos extends React.Component {
 
 const mapStateToProps = (state) => {
   return {
-    token: state.reducer,
+    token: state.principal,
   };
 };
 

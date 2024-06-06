@@ -10,18 +10,24 @@ const instanceApisPeru = axios.create({
   },
 });
 
-export async function getDni(documento) {
+export async function getDni(documento, signal) {
   return await Resolve.create(
     instanceApisPeru.get(
       `/api/v1/dni/${documento}?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6ImFsZXhhbmRlcl9keF8xMEBob3RtYWlsLmNvbSJ9.6TLycBwcRyW1d-f_hhCoWK1yOWG_HJvXo8b-EoS5MhE`,
+      {
+        signal
+      }
     ),
   );
 }
 
-export async function getRuc(documento) {
+export async function getRuc(documento, signal) {
   return await Resolve.create(
     instanceApisPeru.get(
       `/api/v1/ruc/${documento}?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6ImFsZXhhbmRlcl9keF8xMEBob3RtYWlsLmNvbSJ9.6TLycBwcRyW1d-f_hhCoWK1yOWG_HJvXo8b-EoS5MhE`,
+      {
+        signal
+      }
     ),
   );
 }

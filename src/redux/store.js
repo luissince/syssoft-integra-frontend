@@ -1,19 +1,19 @@
-import { createStore, combineReducers, applyMiddleware } from 'redux';
-import reducer from './reducer-principal';
-import notiReducer from './reducer-notifications';
-import predeterminadoReducer from './reducer-predeterminado';
-import { composeWithDevTools } from 'redux-devtools-extension';
-import thunk from 'redux-thunk';
+import { configureStore } from '@reduxjs/toolkit';
+import principalReduce from './principalSlice';
+import noticacionReducer from './noticacionSlice';
+import predeterminadoReducer from './predeterminadoSlice';
+import { combineReducers } from '@reduxjs/toolkit';
 
-const rootReducer = combineReducers({
-  reducer,
-  notiReducer,
-  predeterminadoReducer,
+const reducer = combineReducers({
+  notification: noticacionReducer,
+  predeterminado: predeterminadoReducer,
+  principal: principalReduce
+})
+
+const store = configureStore({
+  reducer: reducer,
+  devTools: import.meta.env.VITE_APP_ENV === "development"
 });
 
-export default createStore(
-  rootReducer,
-  composeWithDevTools(
-    applyMiddleware(thunk)
-  )
-);
+
+export default store;

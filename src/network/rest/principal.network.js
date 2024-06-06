@@ -238,6 +238,10 @@ export async function actualizarStockInventario(data, signal) {
 | ENDPOINTS DE PRODUCTO
 |--------------------------------------------------------------------------
 */
+export function filtrarStreamProductoVenta(params) {
+  return `${instancePrincipal.defaults.baseURL}/api/producto/filtrar/venta?${params.toString()}`
+}
+
 export async function listProducto(params, signal) {
   return await Resolve.create(
     instancePrincipal.get('/api/producto/list', {
@@ -869,7 +873,6 @@ export async function listGuiaRemision(params, signal) {
 }
 
 export async function idGuiaRemision(params, signal) {
-  console.log(params);
   return await Resolve.create(
     instancePrincipal.get('/api/guiaremision/id', {
       params: params,
@@ -939,7 +942,6 @@ export async function listCotizacion(params, signal) {
 }
 
 export async function idCotizacion(params, signal) {
-  console.log(params);
   return await Resolve.create(
     instancePrincipal.get('/api/cotizacion/id', {
       params: params,
@@ -969,6 +971,14 @@ export async function detailCotizacionVenta(params, signal) {
 export async function createCotizacion(data, signal) {
   return await Resolve.create(
     instancePrincipal.post('/api/cotizacion/create', data, {
+      signal: signal,
+    }),
+  );
+}
+
+export async function updateCotizacion(data, signal) {
+  return await Resolve.create(
+    instancePrincipal.put('/api/cotizacion/update', data, {
       signal: signal,
     }),
   );
@@ -1873,10 +1883,11 @@ export function obtenerVentaPdf(idVenta, tipo) {
   return `${import.meta.env.VITE_APP_BACK_END}/api/reporte/facturacion/venta/pdf/${tipo}/${idVenta}`
 }
 
-export async function obtenerPreVentaPdf(data, tipo) {
+export async function obtenerPreVentaPdf(data, tipo, signal) {
   return await Resolve.create(
     instancePrincipal.post(`/api/reporte/facturacion/venta/pre/pdf/${tipo}`, data, {
-      responseType: 'blob'
+      responseType: 'blob',
+      signal: signal,
     })
   );
 }
@@ -1885,10 +1896,11 @@ export function obtenerCotizacionPdf(idCotizacion, tipo) {
   return `${import.meta.env.VITE_APP_BACK_END}/api/reporte/facturacion/cotizacion/pdf/${tipo}/${idCotizacion}`
 }
 
-export async function obtenerPreCotizacionPdf(data, tipo) {
+export async function obtenerPreCotizacionPdf(data, tipo, signal) {
   return await Resolve.create(
     instancePrincipal.post(`/api/reporte/facturacion/cotizacion/pre/pdf/${tipo}`, data, {
-      responseType: 'blob'
+      responseType: 'blob',
+      signal: signal,
     })
   );
 }

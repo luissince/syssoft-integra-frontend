@@ -11,8 +11,8 @@ import {
   alertWarning,
   isText,
 } from '../../helper/utils.helper';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { configSave } from '../../redux/actions';
 import { images } from '../../helper';
 import { saveEmpresa } from '../../network/rest/principal.network';
 import SuccessReponse from '../../model/class/response';
@@ -20,8 +20,14 @@ import ErrorResponse from '../../model/class/error-response';
 import { CANCELED } from '../../model/types/types';
 import { getRuc } from '../../network/rest/apisperu.network';
 import CustomComponent from '../../model/class/custom-component';
+import { configSave } from '../../redux/principalSlice';
 
+/**
+ * Componente que representa una funcionalidad específica.
+ * @extends React.Component
+ */
 class Configurar extends CustomComponent {
+  
   constructor(props) {
     super(props);
     this.state = {
@@ -462,17 +468,19 @@ class Configurar extends CustomComponent {
   }
 }
 
+
+Configurar.propTypes = {
+  configSave: PropTypes.func
+}
+
 const mapStateToProps = (state) => {
   return {
-    token: state.reducer,
+    token: state.principal,
   };
 };
 
-const mapDispatchToProps = (dispatch) => {
-  return {
-    configSave: () => dispatch(configSave()),
-  };
-};
+const mapDispatchToProps = { configSave };
+
 
 const ConnectedConfigurar = connect(mapStateToProps, mapDispatchToProps)(Configurar);
 

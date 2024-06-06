@@ -27,6 +27,7 @@ import { SpinnerView } from '../../../../components/Spinner';
 import Row from '../../../../components/Row';
 import Column from '../../../../components/Column';
 import Image from '../../../../components/Image';
+import Button from '../../../../components/Button';
 
 class SucursalEditar extends CustomComponent {
   constructor(props) {
@@ -104,7 +105,7 @@ class SucursalEditar extends CustomComponent {
       direcion: sucursal.direccion,
       estado: sucursal.estado === 1 ? true : false,
       idUbigeo: sucursal.idUbigeo.toString(),
-      imagen: isEmpty(sucursal.ruta) ? images.noImage : `${import.meta.env.VITE_APP_IMAGE}${sucursal.ruta}`,
+      imagen: sucursal.ruta,
       loading: false,
     });
   }
@@ -496,32 +497,31 @@ class SucursalEditar extends CustomComponent {
                   <span></span>
                 </div>
               </label>{' '}
-              <button
-                className="btn btn-outline-secondary"
+
+              <Button
+                className='btn-outline-secondary'
                 onClick={this.handleClearImage}
-              >
-                <i className="bi bi-trash"></i>
-              </button>
+                icono={<i className="bi bi-trash"></i>}
+              />
             </div>
           </Column>
         </Row>
 
         <Row>
           <Column>
-            <button
-              type="button"
-              className="btn btn-warning"
+            <Button
+              className='btn-warning'
               onClick={this.handleSave}
-            >
-              <i className="fa fa-save"></i> Actualizar
-            </button>
-            <button
-              type="button"
-              className="btn btn-danger ml-2"
+              icono={<i className="fa fa-save"></i>}
+              text={"Actualizar"}
+            />
+
+            <Button
+              className='btn-danger ml-2'
               onClick={() => this.props.history.goBack()}
-            >
-              <i className="fa fa-close"></i> Cerrar
-            </button>
+              icono={<i className="fa fa-close"></i>}
+              text={"Cerrar"}
+            />
           </Column>
         </Row>
       </ContainerWrapper>
@@ -531,7 +531,7 @@ class SucursalEditar extends CustomComponent {
 
 const mapStateToProps = (state) => {
   return {
-    token: state.reducer,
+    token: state.principal,
   };
 };
 
