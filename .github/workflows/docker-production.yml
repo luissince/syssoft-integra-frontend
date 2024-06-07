@@ -13,6 +13,8 @@ jobs:
     env:  
       VITE_APP_BACK_END: ${{ secrets.VITE_APP_BACK_END }}
       VITE_APP_APIS_PERU: ${{ secrets.VITE_APP_APIS_PERU }}
+      VITE_APP_ENV: ${{ vars.VITE_APP_ENV }}
+      VITE_APP_VERSION: ${{ vars.VITE_APP_VERSION }}
       
     steps:
       - name: Checkout código
@@ -23,6 +25,8 @@ jobs:
           cat > .env <<EOL
           VITE_APP_BACK_END="${{env.VITE_APP_BACK_END}}"
           VITE_APP_APIS_PERU="${{env.VITE_APP_APIS_PERU}}"
+          VITE_APP_ENV="${{env.VITE_APP_ENV}}"
+          VITE_APP_VERSION="${{env.VITE_APP_VERSION}}"
           EOL
       
       - name: Creando y ejecutando contenedor
@@ -57,6 +61,8 @@ jobs:
     env:  
       VITE_APP_BACK_END: ${{ secrets.VITE_APP_BACK_END }}
       VITE_APP_APIS_PERU: ${{ secrets.VITE_APP_APIS_PERU }}
+      VITE_APP_ENV: ${{ vars.VITE_APP_ENV }}
+      VITE_APP_VERSION: ${{ vars.VITE_APP_VERSION }}
       
     steps:
       - name: Checkout código
@@ -67,6 +73,8 @@ jobs:
           cat > .env <<EOL
           VITE_APP_BACK_END="${{env.VITE_APP_BACK_END}}"
           VITE_APP_APIS_PERU="${{env.VITE_APP_APIS_PERU}}"
+          VITE_APP_ENV="${{env.VITE_APP_ENV}}"
+          VITE_APP_VERSION="${{env.VITE_APP_VERSION}}"
           EOL
       
       - name: Creando y ejecutando contenedor
@@ -101,6 +109,8 @@ jobs:
     env:  
       VITE_APP_BACK_END: ${{ secrets.VITE_APP_BACK_END }}
       VITE_APP_APIS_PERU: ${{ secrets.VITE_APP_APIS_PERU }}
+      VITE_APP_ENV: ${{ vars.VITE_APP_ENV }}
+      VITE_APP_VERSION: ${{ vars.VITE_APP_VERSION }}
 
     steps:
       - name: Checkout código
@@ -111,6 +121,8 @@ jobs:
           cat > .env <<EOL
           VITE_APP_BACK_END="${{env.VITE_APP_BACK_END}}"
           VITE_APP_APIS_PERU="${{env.VITE_APP_APIS_PERU}}"
+          VITE_APP_ENV="${{env.VITE_APP_ENV}}"
+          VITE_APP_VERSION="${{env.VITE_APP_VERSION}}"
           EOL
 
       - name: Creando y ejecutando contenedor
@@ -124,6 +136,8 @@ jobs:
     env:  
       VITE_APP_BACK_END: ${{ secrets.VITE_APP_BACK_END }}
       VITE_APP_APIS_PERU: ${{ secrets.VITE_APP_APIS_PERU }}
+      VITE_APP_ENV: ${{ vars.VITE_APP_ENV }}
+      VITE_APP_VERSION: ${{ vars.VITE_APP_VERSION }}
 
     steps:
       - name: Checkout código
@@ -134,6 +148,8 @@ jobs:
           cat > .env <<EOL
           VITE_APP_BACK_END="${{env.VITE_APP_BACK_END}}"
           VITE_APP_APIS_PERU="${{env.VITE_APP_APIS_PERU}}"
+          VITE_APP_ENV="${{env.VITE_APP_ENV}}"
+          VITE_APP_VERSION="${{env.VITE_APP_VERSION}}"
           EOL
 
       - name: Creando y ejecutando contenedor
@@ -146,6 +162,8 @@ jobs:
     env:  
       VITE_APP_BACK_END: ${{ secrets.VITE_APP_BACK_END }}
       VITE_APP_APIS_PERU: ${{ secrets.VITE_APP_APIS_PERU }}
+      VITE_APP_ENV: ${{ vars.VITE_APP_ENV }}
+      VITE_APP_VERSION: ${{ vars.VITE_APP_VERSION }}
       
     steps:
       - name: Checkout código
@@ -156,6 +174,8 @@ jobs:
           cat > .env <<EOL
           VITE_APP_BACK_END="${{env.VITE_APP_BACK_END}}"
           VITE_APP_APIS_PERU="${{env.VITE_APP_APIS_PERU}}"
+          VITE_APP_ENV="${{env.VITE_APP_ENV}}"
+          VITE_APP_VERSION="${{env.VITE_APP_VERSION}}"
           EOL
       
       - name: Creando y ejecutando contenedor
