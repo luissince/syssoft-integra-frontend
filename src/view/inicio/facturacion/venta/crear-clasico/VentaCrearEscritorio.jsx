@@ -27,6 +27,7 @@ import {
   detailOnlyVentaVenta,
   comboImpuesto,
   obtenerVentaPdf,
+  filtrarProductoVenta,
 } from '../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
@@ -813,6 +814,44 @@ class VentaCrearEscritorio extends CustomComponent {
 
   handleInputCodigoBarras = (event) => {
     this.setState({ codigoBarras: event.target.value })
+  }
+
+  handleOnKeyDownCodigoBarras = async (event) => {
+    if (event.key === 'Enter') {
+
+      this.setState({
+        loading: true,
+        msgLoading: 'Buscando producto...',
+      });
+
+      const params = {
+        tipo: 1,
+        filtrar: this.state.codigoBarras,
+        idSucursal: this.state.idSucursal,
+        idAlmacen: this.state.idAlmacen,
+        posicionPagina: 0,
+        filasPorPagina: 1,
+      };
+
+      const response = await filtrarProductoVenta(params);
+      if (response instanceof SuccessReponse) {
+        if (!isEmpty(response.data.lists)) {
+          this.handleAddItem(response.data.lists[0])
+        }
+
+        this.setState({
+          loading: false,
+        });
+      }
+
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        this.setState({
+          loading: false,
+        });
+      }
+    }
   }
 
   handleOpenSale = async () => {
@@ -1709,6 +1748,7 @@ class VentaCrearEscritorio extends CustomComponent {
                     refInput={this.redCodigoBarras}
                     value={this.state.codigoBarras}
                     onChange={this.handleInputCodigoBarras}
+                    onKeyDown={this.handleOnKeyDownCodigoBarras}
                     placeholder='Ingrese el código de barras o clave alterna... '
                   />
                 </div>

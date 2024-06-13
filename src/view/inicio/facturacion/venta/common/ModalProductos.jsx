@@ -9,7 +9,7 @@ import Button from '../../../../../components/Button';
 import Input from '../../../../../components/Input';
 import CustomComponent from "../../../../../model/class/custom-component";
 import React from 'react';
-import { filtrarProductoVenta, filtrarStreamProductoVenta } from '../../../../../network/rest/principal.network';
+import { filtrarProductoVenta } from '../../../../../network/rest/principal.network';
 import { Table } from '../../../../../components/Table';
 import { A_GRANEL, UNIDADES, VALOR_MONETARIO } from '../../../../../model/types/tipo-tratamiento-producto';
 import ErrorResponse from '../../../../../model/class/error-response';

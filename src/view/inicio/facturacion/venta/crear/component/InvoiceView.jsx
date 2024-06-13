@@ -6,7 +6,7 @@ import { isEmpty, keyUpSearch, numberFormat } from '../../../../../../helper/uti
 import CustomComponent from '../../../../../../model/class/custom-component';
 import { A_GRANEL, UNIDADES, VALOR_MONETARIO } from '../../../../../../model/types/tipo-tratamiento-producto';
 import PropTypes from 'prop-types';
-import { filtrarProductoVenta, filtrarStreamProductoVenta } from '../../../../../../network/rest/principal.network';
+import { filtrarProductoVenta } from '../../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../../model/class/response';
 import ErrorResponse from '../../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../../model/types/types';
@@ -50,7 +50,38 @@ class InvoiceView extends CustomComponent {
 
   handleSearchCodBar = async (event) => {
     if (event.key === 'Enter') {
-      // await this.setStateAsync({ loading: true });
+
+      this.setState({
+        loading: true,
+      });
+
+      const params = {
+        tipo: 1,
+        filtrar: this.state.buscar,
+        idSucursal: this.props.idSucursal,
+        idAlmacen: this.props.idAlmacen,
+        posicionPagina: 0,
+        filasPorPagina: 1,
+      };
+
+      const response = await filtrarProductoVenta(params);
+      if (response instanceof SuccessReponse) {
+        if (!isEmpty(response.data.lists)) {
+          this.props.handleAddItem(response.data.lists[0])
+        }
+
+        this.setState({
+          loading: false,
+        });
+      }
+
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        this.setState({
+          loading: false,
+        });
+      }
 
       // const params = {
       //   tipo: 1,
@@ -199,8 +230,6 @@ class InvoiceView extends CustomComponent {
       loading,
       totalPaginacion
     } = this.state;
-
-    console.log(productos)
 
     return (
       <div className="h-100 d-flex flex-column items">
