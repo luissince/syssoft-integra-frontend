@@ -486,6 +486,19 @@ class VentaCrearEscritorio extends CustomComponent {
     })
   }
 
+  calculateTotal = () => {
+    this.setState(prevState => ({
+      importeTotal: prevState.detalleVenta.reduce((accumulator, item) => {
+        const cantidad = item.idTipoTratamientoProducto === SERVICIO
+          ? item.cantidad
+          : item.inventarios.reduce((acc, current) => acc + current.cantidad, 0);
+
+        const totalProductPrice = item.precio * cantidad;
+        return accumulator + totalProductPrice;
+      }, 0)
+    }));
+  }
+
   addItemDetalle = (producto, precio, cantidad) => {
     const almacen = this.state.almacenes.find(item => item.idAlmacen == this.state.idAlmacen);
 
@@ -647,16 +660,7 @@ class VentaCrearEscritorio extends CustomComponent {
       }
     }
 
-    this.setState(prevState => ({
-      importeTotal: prevState.detalleVenta.reduce((accumulator, item) => {
-        const cantidad = item.idTipoTratamientoProducto === SERVICIO
-          ? item.cantidad
-          : item.inventarios.reduce((acc, current) => acc + current.cantidad, 0);
-
-        const totalProductPrice = item.precio * cantidad;
-        return accumulator + totalProductPrice;
-      }, 0)
-    }))
+    this.calculateTotal();
   }
 
   generateTotals = () => {
@@ -803,6 +807,8 @@ class VentaCrearEscritorio extends CustomComponent {
         this.index = -1;
       }
     });
+
+    this.calculateTotal();
   }
 
   handleInputCodigoBarras = (event) => {
@@ -1584,6 +1590,7 @@ class VentaCrearEscritorio extends CustomComponent {
           idImpuesto={this.state.idImpuesto}
           idUsuario={this.state.idUsuario}
           idSucursal={this.state.idSucursal}
+          comentario={this.state.comentario}
           detalleVenta={this.state.detalleVenta}
 
           handleClose={this.handleClosePreImpresion}
@@ -1779,7 +1786,7 @@ class VentaCrearEscritorio extends CustomComponent {
                   className={"btn-primary btn-lg w-100 d-flex align-items-center justify-content-between py-3"}
                   onClick={this.handleOpenSale}
                 >
-                  <div>Cobrar(F1)</div>
+                  <div>Cobrar (F1)</div>
                   <div>{numberFormat(this.state.importeTotal, this.state.codiso)}</div>
                 </Button>
               </div>

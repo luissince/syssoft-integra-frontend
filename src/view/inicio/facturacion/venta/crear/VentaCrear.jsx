@@ -1627,6 +1627,7 @@ class VentaCrear extends CustomComponent {
           idImpuesto={this.state.idImpuesto}
           idUsuario={this.state.idUsuario}
           idSucursal={this.state.idSucursal}
+          comentario={this.state.comentario}
           detalleVenta={this.state.detalleVenta}
 
           handleClose={this.handleClosePreImpresion}

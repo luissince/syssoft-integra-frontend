@@ -33,13 +33,13 @@ class VentaDetalle extends CustomComponent {
       comprobante: '',
       cliente: '',
       fecha: '',
-      notas: '',
       formaPago: '',
       estado: '',
       codiso: '',
       simbolo: '',
       total: '',
       usuario: '',
+      comentario: '',
 
       detalle: [],
       ingresos: [],
@@ -94,6 +94,7 @@ class VentaDetalle extends CustomComponent {
       simbolo,
       codiso,
       usuario,
+      comentario,
     } = factura.cabecera;
 
     const monto = factura.ingresos.reduce((accumlate, item) => accumlate + item.monto, 0,);
@@ -107,12 +108,12 @@ class VentaDetalle extends CustomComponent {
       comprobante: comprobante + '  ' + serie + '-' + numeracion,
       cliente: documento + ' - ' + informacion,
       fecha: fecha + ' ' + formatTime(hora),
-      notas: '',
       formaPago: tipo,
       estado: nuevoEstado,
       simbolo: simbolo,
       codiso: codiso,
       usuario: usuario,
+      comentario: comentario,
       total: rounded(monto),
       detalle: factura.detalle,
 
@@ -336,10 +337,10 @@ class VentaDetalle extends CustomComponent {
                   </tr>
                   <tr>
                     <th className="table-secondary w-25 p-1 font-weight-normal ">
-                      Notas
+                      Comentario
                     </th>
                     <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.notas}
+                      {this.state.comentario}
                     </th>
                   </tr>
                   <tr>

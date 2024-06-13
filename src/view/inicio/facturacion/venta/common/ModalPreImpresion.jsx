@@ -81,7 +81,7 @@ class ModalPreImpresion extends Component {
             return;
         }
 
-        const { idComprobante, idCliente, idMoneda, idUsuario, idSucursal, detalleVenta } = this.props;
+        const { idComprobante, idCliente, idMoneda, idUsuario, idSucursal, comentario,detalleVenta } = this.props;
 
         this.abortController = new AbortController();
 
@@ -96,6 +96,7 @@ class ModalPreImpresion extends Component {
             idMoneda: idMoneda,
             idUsuario: idUsuario,
             idSucursal: idSucursal,
+            comentario: comentario,
             detalle: detalleVenta
         }, type, this.abortController.signal);
 
@@ -196,6 +197,7 @@ ModalPreImpresion.propTypes = {
     idImpuesto: PropTypes.string.isRequired,
     idUsuario: PropTypes.string.isRequired,
     idSucursal: PropTypes.string.isRequired,
+    comentario: PropTypes.string,
     detalleVenta: PropTypes.array.isRequired,
 
     handleClose: PropTypes.func.isRequired,
