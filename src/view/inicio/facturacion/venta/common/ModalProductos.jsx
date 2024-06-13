@@ -9,9 +9,12 @@ import Button from '../../../../../components/Button';
 import Input from '../../../../../components/Input';
 import CustomComponent from "../../../../../model/class/custom-component";
 import React from 'react';
-import { filtrarStreamProductoVenta } from '../../../../../network/rest/principal.network';
+import { filtrarProductoVenta, filtrarStreamProductoVenta } from '../../../../../network/rest/principal.network';
 import { Table } from '../../../../../components/Table';
 import { A_GRANEL, UNIDADES, VALOR_MONETARIO } from '../../../../../model/types/tipo-tratamiento-producto';
+import ErrorResponse from '../../../../../model/class/error-response';
+import { CANCELED } from '../../../../../model/types/types';
+import SuccessReponse from '../../../../../model/class/response';
 
 class ModalProductos extends CustomComponent {
 
@@ -81,102 +84,106 @@ class ModalProductos extends CustomComponent {
     }
 
     fillTable = async (opcion, buscar = '') => {
-        this.setState({
-            loading: true,
-            show: false,
-            lista: [],
-            messageTable: 'Cargando información...',
-        });
-
-        this.index = 0;
-
-        const searchParams = new URLSearchParams();
-        searchParams.append("tipo", opcion);
-        searchParams.append("filtrar", buscar);
-        searchParams.append("idSucursal", this.props.idSucursal);
-        searchParams.append("idAlmacen", this.props.idAlmacen);
-        searchParams.append("posicionPagina", (this.state.paginacion - 1) * this.state.filasPorPagina);
-        searchParams.append("filasPorPagina", this.state.filasPorPagina);
-
-        this.eventSource = new EventSource(filtrarStreamProductoVenta(searchParams.toString()));
-
-        this.eventSource.onopen = () => {
-            this.setState({
-                show: true,
-            });
-        }
-
-        this.eventSource.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            if (data === "__END__") {
-                this.setState({
-                    loading: false,
-                });
-
-                this.eventSource.close()
-                return
-            }
-
-            if (typeof data === 'object') {
-                this.setState(prevState => ({
-                    lista: [...prevState.lista, data],
-                }));
-            }
-
-            if (typeof data === 'number') {
-                const totalPaginacion = parseInt(
-                    Math.ceil(parseFloat(data) / this.state.filasPorPagina),
-                );
-
-                this.setState({
-                    totalPaginacion: totalPaginacion,
-                });
-            }
-        };
-
-        this.eventSource.onerror = () => {
-            this.setState({
-                loading: false,
-            });
-        };
-
         // this.setState({
         //     loading: true,
+        //     show: false,
         //     lista: [],
         //     messageTable: 'Cargando información...',
         // });
 
-        // const params = {
-        //     opcion: opcion,
-        //     buscar: buscar.trim(),
-        //     posicionPagina: (this.state.paginacion - 1) * this.state.filasPorPagina,
-        //     filasPorPagina: this.state.filasPorPagina,
+        // this.index = 0;
+
+        // const searchParams = new URLSearchParams();
+        // searchParams.append("tipo", opcion);
+        // searchParams.append("filtrar", buscar);
+        // searchParams.append("idSucursal", this.props.idSucursal);
+        // searchParams.append("idAlmacen", this.props.idAlmacen);
+        // searchParams.append("posicionPagina", (this.state.paginacion - 1) * this.state.filasPorPagina);
+        // searchParams.append("filasPorPagina", this.state.filasPorPagina);
+
+        // this.eventSource = new EventSource(filtrarStreamProductoVenta(searchParams.toString()));
+
+        // this.eventSource.onopen = () => {
+        //     this.setState({
+        //         show: true,
+        //     });
+        // }
+
+        // this.eventSource.onmessage = (event) => {
+        //     const data = JSON.parse(event.data);
+        //     if (data === "__END__") {
+        //         this.setState({
+        //             loading: false,
+        //         });
+
+        //         this.eventSource.close()
+        //         return
+        //     }
+
+        //     if (typeof data === 'object') {
+        //         this.setState(prevState => ({
+        //             lista: [...prevState.lista, data],
+        //         }));
+        //     }
+
+        //     if (typeof data === 'number') {
+        //         const totalPaginacion = parseInt(
+        //             Math.ceil(parseFloat(data) / this.state.filasPorPagina),
+        //         );
+
+        //         this.setState({
+        //             totalPaginacion: totalPaginacion,
+        //         });
+        //     }
         // };
 
-        // const response = await listProducto(params, this.abortController.signal);
-
-        // if (response instanceof SuccessReponse) {
-        //     const totalPaginacion = parseInt(
-        //         Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
-        //     );
-
+        // this.eventSource.onerror = () => {
         //     this.setState({
         //         loading: false,
-        //         lista: response.data.result,
-        //         totalPaginacion: totalPaginacion,
         //     });
-        // }
+        // };
 
-        // if (response instanceof ErrorResponse) {
-        //     if (response.getType() === CANCELED) return;
+        this.index = 0;
 
-        //     this.setState({
-        //         loading: false,
-        //         lista: [],
-        //         totalPaginacion: 0,
-        //         messageTable: response.getMessage(),
-        //     });
-        // }
+        this.setState({
+            loading: true,
+            lista: [],
+            messageTable: 'Cargando información...',
+        });
+
+        const params = {
+            tipo: opcion,
+            filtrar: buscar.trim(),
+            idSucursal: this.props.idSucursal,
+            idAlmacen: this.props.idAlmacen,
+            posicionPagina: (this.state.paginacion - 1) * this.state.filasPorPagina,
+            filasPorPagina: this.state.filasPorPagina,
+        };
+
+        const response = await filtrarProductoVenta(params, this.abortController.signal);
+
+        if (response instanceof SuccessReponse) {
+            const totalPaginacion = parseInt(
+                Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
+            );
+
+            this.setState({
+                loading: false,
+                lista: response.data.lists,
+                totalPaginacion: totalPaginacion,
+            });
+        }
+
+        if (response instanceof ErrorResponse) {
+            if (response.getType() === CANCELED) return;
+
+            this.setState({
+                loading: false,
+                lista: [],
+                totalPaginacion: 0,
+                messageTable: response.getMessage(),
+            });
+        }
     }
 
     handleOnHidden = () => {
@@ -358,7 +365,7 @@ class ModalProductos extends CustomComponent {
                     </td>
                     <td>{item.medida}</td>
                     <td>{item.categoria}</td>
-                    <td className={`${item.tipo === 'PRODUCTO' && item.cantidad <= 0 ? 'text-danger' : ''}`}> 
+                    <td className={`${item.tipo === 'PRODUCTO' && item.cantidad <= 0 ? 'text-danger' : ''}`}>
                         {item.tipo === 'PRODUCTO' ? (
                             <>
                                 {item.almacen}

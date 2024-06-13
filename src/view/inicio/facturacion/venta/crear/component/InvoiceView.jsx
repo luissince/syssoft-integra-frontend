@@ -6,7 +6,10 @@ import { isEmpty, keyUpSearch, numberFormat } from '../../../../../../helper/uti
 import CustomComponent from '../../../../../../model/class/custom-component';
 import { A_GRANEL, UNIDADES, VALOR_MONETARIO } from '../../../../../../model/types/tipo-tratamiento-producto';
 import PropTypes from 'prop-types';
-import { filtrarStreamProductoVenta } from '../../../../../../network/rest/principal.network';
+import { filtrarProductoVenta, filtrarStreamProductoVenta } from '../../../../../../network/rest/principal.network';
+import SuccessReponse from '../../../../../../model/class/response';
+import ErrorResponse from '../../../../../../model/class/error-response';
+import { CANCELED } from '../../../../../../model/types/types';
 
 class InvoiceView extends CustomComponent {
   constructor(props) {
@@ -91,88 +94,95 @@ class InvoiceView extends CustomComponent {
   }
 
   fillTable = async (tipo, buscar) => {
+    // this.setState({
+    //   loading: true,
+    // });
+
+    // const searchParams = new URLSearchParams();
+    // searchParams.append("tipo", tipo);
+    // searchParams.append("filtrar", buscar);
+    // searchParams.append("idSucursal", this.props.idSucursal);
+    // searchParams.append("idAlmacen", this.props.idAlmacen);
+    // searchParams.append("posicionPagina", (this.state.paginacion - 1) * this.state.filasPorPagina);
+    // searchParams.append("filasPorPagina", this.state.filasPorPagina);
+
+    // this.eventSource = new EventSource(filtrarStreamProductoVenta(searchParams.toString()));
+
+    // this.eventSource.onmessage = (event) => {
+    //   const data = JSON.parse(event.data);
+    //   if (data === "__END__") {
+    //     this.setState({
+    //       loading: false,
+    //     });
+
+    //     this.eventSource.close()
+    //     return
+    //   }
+
+    //   if (typeof data === 'object') {
+    //     this.props.handleUpdateProductos(data);
+    //   }
+
+    //   if (typeof data === 'number') {
+    //     const totalPaginacion = parseInt(
+    //       Math.ceil(parseFloat(data) / this.state.filasPorPagina),
+    //     );
+
+    //     this.setState({
+    //       totalPaginacion: totalPaginacion,
+    //     });
+    //   }
+    // };
+
+    // this.eventSource.onerror = () => {
+    //   this.setState({
+    //     loading: false,
+    //   });
+    // };
+
     this.setState({
       loading: true,
+      // productos: []
     });
 
-    const searchParams = new URLSearchParams();
-    searchParams.append("tipo", tipo);
-    searchParams.append("filtrar", buscar);
-    searchParams.append("idSucursal", this.props.idSucursal);
-    searchParams.append("idAlmacen", this.props.idAlmacen);
-    searchParams.append("posicionPagina", (this.state.paginacion - 1) * this.state.filasPorPagina);
-    searchParams.append("filasPorPagina", this.state.filasPorPagina);
-
-    this.eventSource = new EventSource(filtrarStreamProductoVenta(searchParams.toString()));
-
-    this.eventSource.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data === "__END__") {
-        this.setState({
-          loading: false,
-        });
-
-        this.eventSource.close()
-        return
-      }
-
-      if (typeof data === 'object') {
-        this.props.handleUpdateProductos(data);
-      }
-
-      if (typeof data === 'number') {
-        const totalPaginacion = parseInt(
-          Math.ceil(parseFloat(data) / this.state.filasPorPagina),
-        );
-
-        this.setState({
-          totalPaginacion: totalPaginacion,
-        });
-      }
+    const params = {
+      tipo: tipo,
+      filtrar: buscar,
+      idSucursal: this.props.idSucursal,
+      idAlmacen: this.props.idAlmacen,
+      posicionPagina: (this.state.paginacion - 1) * this.state.filasPorPagina,
+      filasPorPagina: this.state.filasPorPagina,
     };
 
-    this.eventSource.onerror = () => {
+    const response = await filtrarProductoVenta(params);
+    if (response instanceof SuccessReponse) {
+      const totalPaginacion = parseInt(
+        Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
+      );
+
+      // this.setState(prevState => ({
+      //   loading: false,
+      //   productos: [...prevState.productos, ...response.data.lists],
+      //   totalPaginacion: totalPaginacion,
+      // }));
+
+      for (const item of response.data.lists) {
+        this.props.handleUpdateProductos(item);
+      }
+
+      this.setState({
+        loading: false,
+        totalPaginacion: totalPaginacion,
+      });
+    }
+
+    if (response instanceof ErrorResponse) {
+      if (response.getType() === CANCELED) return;
+
       this.setState({
         loading: false,
       });
-    };
-
-    // this.setState({
-    //   loading: true,
-    //   // productos: []
-    // });
-
-    // const params = {
-    //   tipo: tipo,
-    //   filtrar: buscar,
-    //   idSucursal: this.props.idSucursal,
-    //   idAlmacen: this.props.idAlmacen,
-    //   posicionPagina: (this.state.paginacion - 1) * this.state.filasPorPagina,
-    //   filasPorPagina: this.state.filasPorPagina,
-    // };
-
-    // const response = await filtrarProductoVenta(params);
-    // if (response instanceof SuccessReponse) {
-    //   const totalPaginacion = parseInt(
-    //     Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
-    //   );
-
-    //   this.setState(prevState => ({
-    //     loading: false,
-    //     productos: [...prevState.productos, ...response.data.result],
-    //     totalPaginacion: totalPaginacion,
-    //   }));
-    // }
-
-    // if (response instanceof ErrorResponse) {
-    //   if (response.getType() === CANCELED) return;
-
-    //   this.setState({
-    //     loading: false,
-    //     productos: [],
-    //     totalPaginacion: 0,
-    //   });
-    // }
+    }
   }
 
   render() {
@@ -189,6 +199,8 @@ class InvoiceView extends CustomComponent {
       loading,
       totalPaginacion
     } = this.state;
+
+    console.log(productos)
 
     return (
       <div className="h-100 d-flex flex-column items">
