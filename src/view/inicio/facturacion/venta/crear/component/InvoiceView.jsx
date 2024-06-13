@@ -72,7 +72,9 @@ class InvoiceView extends CustomComponent {
 
         this.setState({
           loading: false,
+          buscar: ''
         });
+        this.refProducto.current.focus();
       }
 
       if (response instanceof ErrorResponse) {
@@ -80,7 +82,9 @@ class InvoiceView extends CustomComponent {
 
         this.setState({
           loading: false,
+          buscar: ''
         });
+        this.refProducto.current.focus();
       }
 
       // const params = {

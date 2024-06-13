@@ -841,7 +841,9 @@ class VentaCrearEscritorio extends CustomComponent {
 
         this.setState({
           loading: false,
+          codigoBarras: '',
         });
+        this.redCodigoBarras.current.focus();
       }
 
       if (response instanceof ErrorResponse) {
@@ -849,7 +851,9 @@ class VentaCrearEscritorio extends CustomComponent {
 
         this.setState({
           loading: false,
+          codigoBarras: '',
         });
+        this.redCodigoBarras.current.focus();
       }
     }
   }
