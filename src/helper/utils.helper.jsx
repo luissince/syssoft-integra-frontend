@@ -460,15 +460,34 @@ export function formatTime(time, addSeconds = false) {
   return `${formattedHour}:${mm} ${ampm}`;
 }
 
-export function getRowIndex(event) {
+export function reorder(list, startIndex, endIndex) {
+  const result = [...list];
+  const [removed] = result.splice(startIndex, 1);
+  result.splice(endIndex, 0, removed);
+
+  return result;
+}
+
+export function getRowCellIndex(event) {
   const target = event.target;
-  const row = target.closest('tr');
-  const tBody = row.parentElement;
-  if (row && tBody.tagName.toLowerCase() === 'tbody') {
-    const index = Array.from(row.parentElement.children).indexOf(row);
-    return { index, tBody };
+  const cell = target.closest('td, th');
+
+  if (!cell) {
+    return -1;
   }
-  return -1;
+
+  const row = cell.parentElement;
+  const tBody = row.parentElement;
+
+  if (!row || !tBody || tBody.tagName.toLowerCase() !== 'tbody') {
+    return -1;
+  }
+
+  const rowIndex = Array.from(tBody.children).indexOf(row);
+  const cellIndex = Array.from(row.children).indexOf(cell);
+
+  return { rowIndex, cellIndex, tBody };
+
 }
 
 export function getExtension(filename) {
@@ -600,9 +619,9 @@ export function validateNumericInputs(ref, type = 'number') {
 export function focusOnFirstInvalidInput(ref) {
   if (!ref || !ref.current) return;
 
-  const inputs = ref.current.querySelectorAll('input');
+  const inputs = Array.from(ref.current.querySelectorAll('input'));
 
-  if (inputs.length === 0) return;
+  if (isEmpty(inputs)) return;
 
   const input = inputs[0];
   input.focus();

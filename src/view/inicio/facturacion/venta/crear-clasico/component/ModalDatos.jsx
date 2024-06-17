@@ -30,11 +30,11 @@ class ModalDatos extends Component {
     })
   }
 
-  handleOpenModal = () => {
+  handleOnOpen = () => {
     this.refInformacion.current.select();
   }
 
-  handleOnHiddenModal = async () => {
+  handleOnHidden = async () => {
     this.setState({
       informacion: '',
       producto: null
@@ -66,8 +66,8 @@ class ModalDatos extends Component {
       <CustomModalForm
         contentRef={this.refModal}
         isOpen={isOpen}
-        onOpen={this.handleOpenModal}
-        onHidden={this.handleOnHiddenModal}
+        onOpen={this.handleOnOpen}
+        onHidden={this.handleOnHidden}
         onClose={onClose}
         contentLabel="Modal Producto"
         titleHeader="Editar descripción Producto"

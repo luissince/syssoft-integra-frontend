@@ -142,6 +142,9 @@ class VentaCrear extends CustomComponent {
     this.initial = { ...this.state }
 
     // Referencia al modal cobrar
+    this.refInvoiceView = React.createRef();
+
+    // Referencia al modal cobrar
     this.refCobrar = React.createRef();
 
     // Referencia al modal impresión
@@ -448,9 +451,19 @@ class VentaCrear extends CustomComponent {
     }
   }
 
+  async reloadProductoPreferidos() {
+    const productos = await this.fetchProductoPreferidos({
+      idSucursal: this.state.idSucursal,
+      idAlmacen: this.state.idAlmacen
+    });
+    this.props.setProductosFavoritos(productos);
+    await this.setStateAsync({ productos: productos });
+  }
+
   reloadView() {
     this.setState(this.initial, async () => {
       await this.loadingData();
+      this.refInvoiceView.current.componentClear();
     })
   }
 
@@ -838,14 +851,7 @@ class VentaCrear extends CustomComponent {
       codiso: moneda.codiso,
       detalleVenta,
     }, async () => {
-      const productos = await this.fetchProductoPreferidos({
-        idSucursal: this.state.idSucursal,
-        idAlmacen: this.state.idAlmacen
-      });
-
-      this.props.setProductosFavoritos(productos);
-
-      await this.setStateAsync({ productos: productos });
+      this.reloadProductoPreferidos();
 
       const invoice = document.getElementById(this.idModalConfiguration);
       invoice.classList.remove('toggled');
@@ -895,6 +901,41 @@ class VentaCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
 
   handleOpenPreImpresion = () => {
+    const { idComprobante, idCliente, idMoneda, idImpuesto, detalleVenta } = this.state;
+
+    if (isEmpty(idComprobante)) {
+      alertWarning('Venta', 'Seleccione su comprobante.', () =>
+        this.refComprobante.current.focus()
+      );
+      return;
+    }
+
+    if (isEmpty(idCliente)) {
+      alertWarning('Venta', 'Seleccione un cliente.', () =>
+        this.refCliente.current.focus()
+      );
+      return;
+    }
+
+    if (isEmpty(idMoneda)) {
+      alertWarning('Venta', 'Seleccione su moneda.', () =>
+        this.refMoneda.current.focus()
+      );
+      return;
+    }
+
+    if (isEmpty(idImpuesto)) {
+      alertWarning('Venta', 'Seleccione el impuesto', () =>
+        this.refImpuesto.current.focus()
+      );
+      return;
+    }
+
+    if (isEmpty(detalleVenta)) {
+      alertWarning('Venta', 'Agregar algún producto a la lista.', () => { });
+      return;
+    }
+
     this.setState({ isOpenPreImpresion: true })
   }
 
@@ -1527,6 +1568,7 @@ class VentaCrear extends CustomComponent {
 
         <section className="invoice-left">
           <InvoiceView
+            ref={this.refInvoiceView}
             idSucursal={this.state.idSucursal}
             idAlmacen={this.state.idAlmacen}
             codiso={this.state.codiso}

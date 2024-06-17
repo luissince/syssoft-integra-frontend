@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { CustomModalContent } from "../../../../../components/CustomModal";
 import PropTypes from 'prop-types';
 import { SpinnerView } from "../../../../../components/Spinner";
-import { alertWarning, isEmpty, readDataFile } from "../../../../../helper/utils.helper";
+import { alertWarning, readDataFile } from "../../../../../helper/utils.helper";
 import { CANCELED } from "../../../../../model/types/types";
 import ErrorResponse from "../../../../../model/class/error-response";
 import SuccessReponse from "../../../../../model/class/response";
@@ -24,8 +24,6 @@ class ModalPreImpresion extends Component {
     }
 
     handleOnHidden = async () => {
-        console.log(this.peticion)
-        console.log(this.abortController)
         if (!this.peticion) {
             if (this.abortController) {
                 this.abortController.abort();
@@ -37,50 +35,7 @@ class ModalPreImpresion extends Component {
         this.abortController = null;
     }
 
-    validateFields = () => {
-        const { idComprobante, idCliente, idMoneda, idImpuesto, detalleVenta } = this.props;
-
-        if (isEmpty(idComprobante)) {
-            alertWarning('Venta', 'Seleccione su comprobante.', () =>
-                this.refComprobante.current.focus()
-            );
-            return false;
-        }
-
-        if (isEmpty(idCliente)) {
-            alertWarning('Venta', 'Seleccione un cliente.', () =>
-                this.refCliente.current.focus()
-            );
-            return false;
-        }
-
-        if (isEmpty(idMoneda)) {
-            alertWarning('Venta', 'Seleccione su moneda.', () =>
-                this.refMoneda.current.focus()
-            );
-            return false;
-        }
-
-        if (isEmpty(idImpuesto)) {
-            alertWarning('Venta', 'Seleccione el impuesto', () =>
-                this.refImpuesto.current.focus()
-            );
-            return false;
-        }
-
-        if (isEmpty(detalleVenta)) {
-            alertWarning('Venta', 'Agregar algún producto a la lista.', () => { });
-            return false;
-        }
-
-        return true;
-    };
-
-    handlePrint = async (type) => {
-        if (!this.validateFields()) {
-            return;
-        }
-
+    handlePrint = async (type) => {        
         const { idComprobante, idCliente, idMoneda, idUsuario, idSucursal, comentario,detalleVenta } = this.props;
 
         this.abortController = new AbortController();
@@ -111,7 +66,7 @@ class ModalPreImpresion extends Component {
                 printable: base64,
                 type: 'pdf',
                 base64: true,
-                onPrintDialogClose: this.handleClosePreImpresion
+                onPrintDialogClose: this.props.handleClose
             });
         }
 

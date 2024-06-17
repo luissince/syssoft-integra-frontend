@@ -5,10 +5,11 @@ import {
   calculateTax,
   calculateTaxBruto,
   convertNullText,
-  getRowIndex,
+  getRowCellIndex,
   isEmpty,
   keyNumberPhone,
   numberFormat,
+  reorder,
   rounded,
   text,
 } from '../../../../../helper/utils.helper';
@@ -61,8 +62,8 @@ import ButtonsOpciones from './component/ButtonsOpciones';
 import ModalPrecios from './component/ModalPrecios';
 import ModalCantidad from './component/ModalCantidad';
 import ModalDatos from './component/ModalDatos';
-import { Table } from '../../../../../components/Table';
 import ModalPreImpresion from '../common/ModalPreImpresion';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -212,8 +213,10 @@ class VentaCrearEscritorio extends CustomComponent {
     this.refEmail = React.createRef();
     this.refDireccion = React.createRef();
 
-    this.refTale = React.createRef();
+    this.refTable = React.createRef();
+    this.refTableBody = React.createRef();
     this.index = -1;
+    this.cells = [];
 
     this.abortControllerView = new AbortController();
     this.abortControllerCotizacion = new AbortController();
@@ -481,9 +484,21 @@ class VentaCrearEscritorio extends CustomComponent {
     }
   }
 
+  async reloadProductoPreferidos(callback = function () { }) {
+    const productos = await this.fetchProductoPreferidos({
+      idSucursal: this.state.idSucursal,
+      idAlmacen: this.state.idAlmacen
+    });
+    this.props.setProductosFavoritos(productos);
+    await this.setStateAsync({ productos: productos });
+    callback();
+  }
+
   reloadView() {
     this.setState(this.initial, async () => {
       await this.loadingData();
+      this.index = -1;
+      this.cells = [];
     })
   }
 
@@ -500,7 +515,7 @@ class VentaCrearEscritorio extends CustomComponent {
     }));
   }
 
-  addItemDetalle = (producto, precio, cantidad) => {
+  addItemDetalle = (producto, precio, cantidad, index = -1) => {
     const almacen = this.state.almacenes.find(item => item.idAlmacen == this.state.idAlmacen);
 
     const existingItem = this.state.detalleVenta.find((item) => item.idProducto === producto.idProducto);
@@ -517,6 +532,7 @@ class VentaCrearEscritorio extends CustomComponent {
         });
 
         const newItem = {
+          id: index === -1 ? this.state.detalleVenta.length + 1 : index,
           idProducto: producto.idProducto,
           nombreProducto: producto.nombreProducto,
           idImpuesto: this.state.idImpuesto,
@@ -568,6 +584,7 @@ class VentaCrearEscritorio extends CustomComponent {
         });
 
         const newItem = {
+          id: index === -1 ? this.state.detalleVenta.length + 1 : index,
           idProducto: producto.idProducto,
           nombreProducto: producto.nombreProducto,
           idImpuesto: this.state.idImpuesto,
@@ -604,6 +621,7 @@ class VentaCrearEscritorio extends CustomComponent {
         });
 
         const newItem = {
+          id: index === -1 ? this.state.detalleVenta.length + 1 : index,
           idProducto: producto.idProducto,
           nombreProducto: producto.nombreProducto,
           idImpuesto: this.state.idImpuesto,
@@ -645,6 +663,7 @@ class VentaCrearEscritorio extends CustomComponent {
     if (producto.idTipoTratamientoProducto === SERVICIO) {
       if (!existingItem) {
         const newItem = {
+          id: index === -1 ? this.state.detalleVenta.length + 1 : index,
           idProducto: producto.idProducto,
           nombreProducto: producto.nombreProducto,
           idImpuesto: this.state.idImpuesto,
@@ -802,10 +821,14 @@ class VentaCrearEscritorio extends CustomComponent {
 
   handleRemoveItem = (producto) => {
     this.setState(prevState => ({
-      detalleVenta: prevState.detalleVenta.filter(item => item.idProducto !== producto.idProducto)
+      detalleVenta: prevState.detalleVenta.filter(item => item.idProducto !== producto.idProducto).map((item, index) => ({
+        ...item,
+        id: ++index,
+      }))
     }), () => {
       if (isEmpty(this.state.detalleVenta)) {
         this.index = -1;
+        this.cells = [];
       }
     });
 
@@ -1039,16 +1062,27 @@ class VentaCrearEscritorio extends CustomComponent {
       this.setState({ isOpenCantidad: true });
       this.refModalCantidad.current.loadDatos(item);
     }
-
-    // this.refModalAgregar.current.loadDatos(titulo, subTitulo, producto);
   }
 
   handleCloseCantidad = () => {
     this.setState({ isOpenCantidad: false });
   }
 
-  handleSaveCantidad = async (producto, cantidad) => {
-    console.log(producto, cantidad)
+  handleSaveCantidad = async (idProducto, inventarios) => {
+    this.setState((prevState) => ({
+      detalleVenta: prevState.detalleVenta.map((item) => {
+        if (item.idProducto === idProducto) {
+          return {
+            ...item,
+            inventarios: inventarios
+          }
+        } else {
+          return {
+            ...item
+          }
+        }
+      })
+    }));
   }
 
   //------------------------------------------------------------------------------------------
@@ -1097,7 +1131,7 @@ class VentaCrearEscritorio extends CustomComponent {
   handleSeleccionarCotizacion = async (idCotizacion) => {
     this.handleCloseCotizacion();
 
-    this.setState({ loading: true, msgLoading: "Obteniendos datos de la cotización." });
+    this.setState({ loading: true, msgLoading: "Obteniendos datos de la cotización.", detalleVenta: [] });
 
     const params = {
       idCotizacion: idCotizacion,
@@ -1108,16 +1142,17 @@ class VentaCrearEscritorio extends CustomComponent {
 
     if (response instanceof SuccessReponse) {
       this.handleSelectItemCliente(response.data.cliente);
-
+      let index = 0;
       for (const producto of response.data.productos) {
+        index++;
         if (producto.idTipoTratamientoProducto === UNIDADES || producto.idTipoTratamientoProducto === SERVICIO) {
-          this.addItemDetalle(producto, null, producto.cantidad);
+          this.addItemDetalle(producto, null, producto.cantidad, index);
         }
         if (producto.idTipoTratamientoProducto === VALOR_MONETARIO) {
-          this.addItemDetalle(producto, producto.cantidad * producto.precio, null);
+          this.addItemDetalle(producto, producto.cantidad * producto.precio, null, index);
         }
         if (producto.idTipoTratamientoProducto === A_GRANEL) {
-          this.addItemDetalle(producto, null, producto.cantidad);
+          this.addItemDetalle(producto, null, producto.cantidad, index);
         }
       }
 
@@ -1147,7 +1182,7 @@ class VentaCrearEscritorio extends CustomComponent {
   handleSeleccionarVenta = async (idVenta) => {
     this.handleCloseVenta();
 
-    this.setState({ loading: true, msgLoading: "Obteniendos datos de la venta." });
+    this.setState({ loading: true, msgLoading: "Obteniendos datos de la venta.", detalleVenta: [] });
 
     const params = {
       idVenta: idVenta,
@@ -1158,16 +1193,17 @@ class VentaCrearEscritorio extends CustomComponent {
 
     if (response instanceof SuccessReponse) {
       this.handleSelectItemCliente(response.data.cliente);
-
+      let index = 0;
       for (const producto of response.data.productos) {
+        index++;
         if (producto.idTipoTratamientoProducto === UNIDADES || producto.idTipoTratamientoProducto === SERVICIO) {
-          this.addItemDetalle(producto, null, producto.cantidad);
+          this.addItemDetalle(producto, null, producto.cantidad, index);
         }
         if (producto.idTipoTratamientoProducto === VALOR_MONETARIO) {
-          this.addItemDetalle(producto, producto.cantidad * producto.precio, null);
+          this.addItemDetalle(producto, producto.cantidad * producto.precio, null, index);
         }
         if (producto.idTipoTratamientoProducto === A_GRANEL) {
-          this.addItemDetalle(producto, null, producto.cantidad);
+          this.addItemDetalle(producto, null, producto.cantidad, index);
         }
       }
 
@@ -1188,7 +1224,6 @@ class VentaCrearEscritorio extends CustomComponent {
   //------------------------------------------------------------------------------------------
 
   handleOpenImpresion = (idVenta) => {
-    console.log("dd")
     this.setState({ isOpenImpresion: true, idVenta: idVenta })
   }
 
@@ -1227,13 +1262,47 @@ class VentaCrearEscritorio extends CustomComponent {
   //------------------------------------------------------------------------------------------
 
   handleOpenPreImpresion = () => {
+    const { idComprobante, idCliente, idMoneda, idImpuesto, detalleVenta } = this.state;
+
+    if (isEmpty(idComprobante)) {
+      alertWarning('Venta', 'Seleccione su comprobante.', () =>
+        this.refComprobante.current.focus()
+      );
+      return;
+    }
+
+    if (isEmpty(idCliente)) {
+      alertWarning('Venta', 'Seleccione un cliente.', () =>
+        this.refCliente.current.focus()
+      );
+      return;
+    }
+
+    if (isEmpty(idMoneda)) {
+      alertWarning('Venta', 'Seleccione su moneda.', () =>
+        this.refMoneda.current.focus()
+      );
+      return;
+    }
+
+    if (isEmpty(idImpuesto)) {
+      alertWarning('Venta', 'Seleccione el impuesto', () =>
+        this.refImpuesto.current.focus()
+      );
+      return;
+    }
+
+    if (isEmpty(detalleVenta)) {
+      alertWarning('Venta', 'Agregar algún producto a la lista.', () => { });
+      return;
+    }
+
     this.setState({ isOpenPreImpresion: true })
   }
 
   handleClosePreImpresion = () => {
     this.setState({ isOpenPreImpresion: false })
   }
-
 
   //------------------------------------------------------------------------------------------
   // Modal cliente
@@ -1443,12 +1512,16 @@ class VentaCrearEscritorio extends CustomComponent {
     this.setState({ idMoneda: event.target.value })
   }
 
-  handleSelectIdIdAlmacen = (event) => {
-    this.setState({ idAlmacen: event.target.value })
+  handleSelectIdIdAlmacen = async (event, active = false, callback = function () { }) => {
+    this.setState({ idAlmacen: event.target.value }, () => {
+      if (active) {
+        this.reloadProductoPreferidos(callback);
+      }
+    })
   }
 
-  handleInputComentario = (event) => {
-    this.setState({ comentario: event.target.value })
+  handleInputComentario = async (event) => {
+    this.setState({ comentario: event.target.value });
   }
 
   handleSaveOptions = () => {
@@ -1485,12 +1558,7 @@ class VentaCrearEscritorio extends CustomComponent {
       codiso: moneda.codiso,
       detalleVenta,
     }, async () => {
-      const productos = await this.fetchProductoPreferidos({
-        idSucursal: this.state.idSucursal,
-        idAlmacen: this.state.idAlmacen
-      });
-      this.props.setProductosFavoritos(productos);
-      await this.setStateAsync({ productos: productos });
+      this.reloadProductoPreferidos();
 
       const invoice = document.getElementById(this.idModalConfiguration);
       invoice.classList.remove('toggled');
@@ -1501,19 +1569,106 @@ class VentaCrearEscritorio extends CustomComponent {
   //------------------------------------------------------------------------------------------
   // Eventos de la tabla
   //------------------------------------------------------------------------------------------
+  handleKeyDownTable = (event) => {
+    const table = this.refTable.current;
+    if (!table) return;
+
+    const children = table.tBodies[0].children;
+    if (children.length === 0) return;
+
+    if (event.key === 'ArrowUp') {
+      if (this.index > 0) {
+        this.index--;
+        this.updateSelection(children);
+      }
+    }
+
+    if (event.key === 'ArrowDown') {
+      if (this.index < children.length - 1) {
+        this.index++;
+        this.updateSelection(children);
+      }
+    }
+
+    if (event.key === 'Enter') {
+      if (this.index >= 0) {
+        this.handleOpenDatos()
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    }
+  }
+
   handleOnClick = async (event) => {
-    const { index, tBody } = getRowIndex(event);
+    const { rowIndex, tBody } = getRowCellIndex(event);
 
-    if (!index && !tBody) return;
+    if (rowIndex === -1 || !tBody || !tBody.children) return;
 
-    this.index = index;
+    this.index = rowIndex;
     this.updateSelection(tBody.children);
+  }
+
+  handleOnDbClick = async (event) => {
+    const { rowIndex, cellIndex, tBody } = getRowCellIndex(event);
+
+    if (rowIndex === -1 || !tBody || !tBody.children) return;
+
+    this.index = rowIndex;
+    this.updateSelection(tBody.children);
+
+    if (cellIndex === 2) {
+      this.handleOpenCantidad();
+    }
+
+    if (cellIndex === 3) {
+      this.handleOpenDatos();
+    }
+
+    if (cellIndex === 4) {
+      this.handleOpenPrecios();
+    }
+  }
+
+  handleOnDragEndTable = async (result) => {
+    const { source, destination } = result;
+    if (!destination) {
+      return;
+    }
+
+    if (source.index === destination.index &&
+      source.droppableId === destination.droppableId
+    ) {
+      return;
+    }
+
+    await this.setStateAsync(prevState => ({
+      detalleVenta: reorder(prevState.detalleVenta, source.index, destination.index).map((item, index) => ({ ...item, id: ++index }))
+    }))
+
+    this.index = destination.index;
+    this.cells = [];
+    if (this.refTableBody.current) {
+      const tbody = this.refTableBody.current;
+      this.updateSelection(tbody.children);
+    }
+  }
+
+  handleOnBeforeDragStartTable = (before) => {
+    const sourceIndex = before.source.index;
+
+    if (this.refTableBody.current) {
+      const tbody = this.refTableBody.current;
+      const rows = tbody.children;
+      const row = rows[sourceIndex]
+      this.cells = row.children;
+    }
   }
 
   updateSelection = (children) => {
     for (const child of children) {
       child.classList.remove("table-active");
     }
+
     const selectedChild = children[this.index];
     selectedChild.classList.add("table-active");
     selectedChild.scrollIntoView({ block: 'center' });
@@ -1538,54 +1693,73 @@ class VentaCrearEscritorio extends CustomComponent {
 
   generateBody() {
     const { detalleVenta, codiso } = this.state;
-
     return detalleVenta.map((producto, key) => {
+
       const cantidad = producto.idTipoTratamientoProducto === SERVICIO
         ? producto.cantidad
         : producto.inventarios.reduce((acc, current) => acc + current.cantidad, 0);
 
+      const widthCell1 = isEmpty(this.cells) ? "auto" : this.cells[0].offsetWidth + "px";
+      const widthCell2 = isEmpty(this.cells) ? "auto" : this.cells[1].offsetWidth + "px";
+      const widthCell3 = isEmpty(this.cells) ? "auto" : this.cells[2].offsetWidth + "px";
+      const widthCell4 = isEmpty(this.cells) ? "auto" : this.cells[3].offsetWidth + "px";
+      const widthCell5 = isEmpty(this.cells) ? "auto" : this.cells[4].offsetWidth + "px";
+      const widthCell6 = isEmpty(this.cells) ? "auto" : this.cells[5].offsetWidth + "px";
+
       return (
-        <tr key={key}>
-          <td className='text-center'>{++key}</td>
-          <td className='text-center'>
-            <Button
-              className='btn-danger'
-              icono={<i className='fa fa-remove'></i>}
-              onClick={() => this.handleRemoveItem(producto)} />
-          </td>
-          <td className='text-center'>
+        <Draggable key={producto.idProducto} draggableId={producto.idProducto} index={key}>
+          {(provided) => {
+            return (
+              <tr
+                {...provided.draggableProps}
+                ref={provided.innerRef}
+                {...provided.dragHandleProps}
+                className='bg-white'
+              >
+                <td className='text-center' style={{ width: widthCell1 }}>{producto.id}</td>
+                <td className='text-center' style={{ width: widthCell2 }}>
+                  <Button
+                    className='btn-outline-danger'
+                    icono={<i className="bi bi-trash"></i>}
+                    onClick={() => this.handleRemoveItem(producto)} />
+                </td>
+                <td className='text-center' style={{ width: widthCell3 }}>
 
-            {producto.idTipoTratamientoProducto === SERVICIO && (
-              <p key={key}>{rounded(producto.cantidad)}</p>
-            )}
+                  {producto.idTipoTratamientoProducto === SERVICIO && (
+                    <p>{rounded(producto.cantidad)}</p>
+                  )}
 
-            {(producto.idTipoTratamientoProducto === UNIDADES || producto.idTipoTratamientoProducto === A_GRANEL) && producto.inventarios.map((item, index) => (
-              <div key={index} className={`${producto.inventarios.length - 1 === index ? "" : " border-bottom  mb-2"} `}>
-                <span>{item.almacen}</span>
-                <p className='my-1'>{rounded(item.cantidad)}</p>
-              </div>
-            ))}
+                  {(producto.idTipoTratamientoProducto === UNIDADES || producto.idTipoTratamientoProducto === A_GRANEL) && producto.inventarios.map((item, index) => (
+                    <div key={index} className={`${producto.inventarios.length - 1 === index ? "" : " border-bottom  mb-2"} `}>
+                      <span>{item.almacen}</span>
+                      <p className='my-1'>{rounded(item.cantidad)}</p>
+                    </div>
+                  ))}
 
-            {producto.idTipoTratamientoProducto === VALOR_MONETARIO && producto.inventarios.map((item, index) => (
-              <div key={index}>
-                <span>{item.almacen}</span>
-                <p className='my-1'>{rounded(item.cantidad)}</p>
-              </div>
-            ))}
-            {/* {
-            producto.idTipoTratamientoProducto === SERVICIO ?
-              <span key={key}>{rounded(producto.cantidad)}</span>
-              :
-              producto.inventarios.map((inventario, key) => (
-                <span key={key}>{rounded(inventario.cantidad)}</span>
-              ))
-          } */}
-          </td>
-          <td className='text-left'>{producto.nombreProducto}</td>
-          <td className='text-center'>{numberFormat(producto.precio, codiso)}</td>
-          {/* <td className='text-center'>0%</td> */}
-          <td className='text-center'>{numberFormat(producto.precio * cantidad, codiso)}</td>
-        </tr>
+                  {producto.idTipoTratamientoProducto === VALOR_MONETARIO && producto.inventarios.map((item, index) => (
+                    <div key={index}>
+                      <span>{item.almacen}</span>
+                      <p className='my-1'>{rounded(item.cantidad)}</p>
+                    </div>
+                  ))}
+                  {/* {
+              producto.idTipoTratamientoProducto === SERVICIO ?
+                <span key={key}>{rounded(producto.cantidad)}</span>
+                :
+                producto.inventarios.map((inventario, key) => (
+                  <span key={key}>{rounded(inventario.cantidad)}</span>
+                ))
+            } */}
+                </td>
+                <td className='text-left' style={{ width: widthCell4 }}>{producto.nombreProducto}</td>
+                <td className='text-center' style={{ width: widthCell5 }}>{numberFormat(producto.precio, codiso)}</td>
+                {/* <td className='text-center'>0%</td> */}
+                <td className='text-center' style={{ width: widthCell6 }}>{numberFormat(producto.precio * cantidad, codiso)}</td>
+              </tr>
+            );
+          }}
+        </Draggable>
+
       );
     });
   }
@@ -1645,7 +1819,12 @@ class VentaCrearEscritorio extends CustomComponent {
           productos={this.props.productos}
           codiso={this.state.codiso}
           idSucursal={this.state.idSucursal}
+
+          almacenes={this.state.almacenes}
+          refAlmacen={this.refAlmacen}
           idAlmacen={this.state.idAlmacen}
+          handleSelectIdIdAlmacen={this.handleSelectIdIdAlmacen}
+
           handleClose={this.handleCloseProductos}
           handleSeleccionar={this.handleAddItem}
         />
@@ -1778,24 +1957,44 @@ class VentaCrearEscritorio extends CustomComponent {
 
               {
                 !isEmpty(this.state.detalleVenta) && (
-                  <div className='h-100 overflow-auto pt-0 pr-3 pb-3 pl-3'>
-                    <Table
-                      refTable={this.refTale}
+                  <div
+                    className='h-100 overflow-auto pt-0 pr-3 pb-3 pl-3'
+                    onKeyDown={this.handleKeyDownTable}>
+                    <table
+                      ref={this.refTable}
                       onClick={this.handleOnClick}
-                      className="table table-bordered table-hover table-sticky"
-                      tHead={
+                      onDoubleClick={this.handleOnDbClick}
+                      className={"table table-bordered table-hover table-sticky w-100"}>
+                      <thead>
                         <tr>
                           <th width="5%">#</th>
                           <th width="5%">Quitar</th>
-                          <th width="10%">Cantidad</th>
+                          <th width="10%">Almacen/Cantidad</th>
                           <th width="20%">Descripción</th>
                           <th width="10%">Precio</th>
                           {/* <th width="10%">Descuento</th> */}
                           <th width="10%">Importe</th>
                         </tr>
-                      }
-                      tBody={this.generateBody()}
-                    />
+                      </thead>
+                      <DragDropContext
+                        onDragEnd={this.handleOnDragEndTable}
+                        onBeforeDragStart={this.handleOnBeforeDragStartTable}
+                      >
+                        <Droppable droppableId="table-body">
+                          {(provided) => (
+                            <tbody
+                              ref={(el) => {
+                                provided.innerRef(el)
+                                this.refTableBody.current = el;
+                              }}
+                              {...provided.droppableProps}>
+                              {this.generateBody()}
+                              {provided.placeholder}
+                            </tbody>
+                          )}
+                        </Droppable>
+                      </DragDropContext>
+                    </table>
                   </div>
                 )
               }

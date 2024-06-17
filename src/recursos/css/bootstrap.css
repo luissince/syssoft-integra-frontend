@@ -801,18 +801,6 @@ table {
   cursor: pointer;
 }
 
-table:focus-within {
-  border-color: #80bdff;
-  outline: 2px solid #80bdff;
-  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-}
-
-tr[tabindex="0"]:focus {
-  background-color: #e0e0e0;
-  outline: 1px solid #80bdff;
-}
-
-
 caption {
   padding-top: 0.75rem;
   padding-bottom: 0.75rem;
@@ -13026,11 +13014,23 @@ a.text-dark:focus {
 
 /*  */
 
-.table-sticky {
+/* .table-sticky { */
   /* width: 100%; */
   /* height: 100%; */
   /* table-layout: fixed; */
+/* } */
+
+.table-sticky:focus-within {
+  border-color: #80bdff;
+  outline: 1px solid #80bdff;
+  /* box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); */
 }
+
+.table-sticky tr[tabindex="0"]:focus {
+  background-color: #e0e0e0;
+  outline: 1px solid #80bdff;
+}
+
 
 .table-sticky>thead>tr>th {
   text-align: center;

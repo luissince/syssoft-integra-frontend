@@ -4,8 +4,10 @@ import Input from '../../../../../../components/Input';
 import Row from '../../../../../../components/Row';
 import {
   alertWarning,
+  focusOnFirstInvalidInput,
   handlePasteFloat,
-  isNumeric
+  isNumeric,
+  validateNumericInputs
 } from '../../../../../../helper/utils.helper';
 import PropTypes from 'prop-types';
 import Button from '../../../../../../components/Button';
@@ -16,49 +18,66 @@ class ModalCantidad extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      cantidad: '',
-      producto: null
+      idProducto: '',
+      inventarios: []
     }
 
     this.refModal = React.createRef();
-    this.refCantidad = React.createRef();
+    this.refContenedor = React.createRef();
   }
 
   loadDatos = (producto) => {
     this.setState({
-      producto
+      idProducto: producto.idProducto,
+      inventarios: producto && producto.inventarios || []
+    }, () => {
+
     })
   }
 
   handleOpenModal = () => {
-
+    focusOnFirstInvalidInput(this.refContenedor)
   }
 
   handleOnHiddenModal = async () => {
     this.setState({
-      cantidad: '',
       producto: null
     })
   }
 
-  handleInputCantidad = (event) => {
-    this.setState({ cantidad: event.target.value })
-  }
+  handleInputChange = (event, idAlmacen) => {
+    const { value } = event.target;
+    this.setState((prevState) => ({
+      inventarios: prevState.inventarios.map((item) =>
+        item.idAlmacen === idAlmacen ? { ...item, cantidad: value } : item,
+      ),
+    }));
+  };
 
   handleOnSubmit = async () => {
-    if (!isNumeric(this.state.cantidad)) {
-      alertWarning("Venta", "Ingrese el valor solicitado.", () => {
-        this.refCantidad.current.focus();
-      })
+    const { inventarios, idProducto } = this.state;
+
+    // Verificar si algún inventario tiene una cantidad no numérica o menor o igual a cero
+    const invalidInventories = inventarios.some(
+      inventario => !isNumeric(inventario.cantidad) || parseFloat(inventario.cantidad) <= 0
+    );
+
+    if (invalidInventories) {
+      alertWarning("Venta", "Ingrese la cantidad de cada almacen.", () => {
+        validateNumericInputs(this.refContenedor);
+      });
       return;
     }
 
-    this.props.handleSave(this.state.producto, this.state.cantidad);
-    await this.refModal.current.handleOnClose()
+    // Guardar los inventarios válidos
+    this.props.handleSave(idProducto, inventarios);
+
+    // Cerrar el modal
+    await this.refModal.current.handleOnClose();
   }
 
   render() {
-    const {  cantidad, producto } = this.state;
+    const { producto, inventarios } = this.state;
 
     const { isOpen, onClose } = this.props;
 
@@ -76,26 +95,33 @@ class ModalCantidad extends Component {
           <>
             <Row>
               <Column>
-              <h5>{producto && producto.nombreProducto}</h5>
+                <h5>{producto && producto.nombreProducto}</h5>
               </Column>
             </Row>
 
-            <Row>
-              <Column>
-                <div className="form-group">
-                  <label>Ingrese su nueva cantidad:</label>
-                  <Input
-                    autoFocus={true}
-                    placeholder={"0.00"}
-                    role={"float"}
-                    refInput={this.refCantidad}
-                    value={cantidad}
-                    onChange={this.handleInputCantidad}
-                    onPaste={handlePasteFloat}
-                  />
-                </div>
-              </Column>
-            </Row>
+            <div
+              ref={this.refContenedor}>
+              {
+                inventarios.map((inventario, index) => {
+                  return (
+                    <Row key={index}>
+                      <Column>
+                        <div className="form-group">
+                          <label>Ingrese su nueva cantidad del almacen ({inventario.almacen}):</label>
+                          <Input
+                            placeholder={"0.00"}
+                            role={"float"}
+                            value={inventario.cantidad}
+                            onChange={(event) => this.handleInputChange(event, inventario.idAlmacen)}
+                            onPaste={handlePasteFloat}
+                          />
+                        </div>
+                      </Column>
+                    </Row>
+                  );
+                })
+              }
+            </div>
           </>
         }
 
@@ -106,7 +132,7 @@ class ModalCantidad extends Component {
               className="btn-primary">
               <i className="fa fa-save"></i> Guardar
             </Button>
-            <Button 
+            <Button
               className="btn-danger"
               onClick={async () => await this.refModal.current.handleOnClose()}>
               <i className="fa fa-close"></i> Cerrar

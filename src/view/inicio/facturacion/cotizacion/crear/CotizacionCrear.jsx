@@ -8,10 +8,10 @@ import {
   alertWarning,
   calculateTax,
   calculateTaxBruto,
+  getRowCellIndex,
   isEmpty,
-  isNumeric,
   numberFormat,
-  readDataFile,
+  reorder,
   rounded,
 } from '../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
@@ -19,13 +19,11 @@ import { COTIZACION } from '../../../../../model/types/tipo-comprobante';
 import {
   comboComprobante,
   comboImpuesto,
-  comboMedida,
   comboMoneda,
   createCotizacion,
   filtrarPersona,
   filtrarProducto,
   obtenerCotizacionPdf,
-  obtenerPreCotizacionPdf,
 } from '../../../../../network/rest/principal.network';
 import Title from '../../../../../components/Title';
 import Row from '../../../../../components/Row';
@@ -33,7 +31,6 @@ import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
 import SearchInput from '../../../../../components/SearchInput';
-// import ModalSale from './component/ModalSale';
 import PropTypes from 'prop-types';
 import ModalProducto from '../common/ModalProducto';
 import ModalImpresion from '../common/ModalImpresion';
@@ -44,7 +41,10 @@ import printJS from 'print-js';
 import Button from '../../../../../components/Button';
 import Select from '../../../../../components/Select';
 import TextArea from '../../../../../components/TextArea';
-import { Table, TableResponsive } from '../../../../../components/Table';
+import { Table } from '../../../../../components/Table';
+import { Draggable } from 'react-beautiful-dnd';
+import { DragDropContext } from 'react-beautiful-dnd';
+import { Droppable } from 'react-beautiful-dnd';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -73,7 +73,7 @@ class CotizaciónCrear extends CustomComponent {
       nota: '',
 
       // Detalle del gasto
-      detalle: [],
+      detalles: [],
 
       // Lista de datos
       comprobantes: [],
@@ -84,7 +84,6 @@ class CotizaciónCrear extends CustomComponent {
       // Filtrar producto
       filtrarProducto: '',
       loadingProducto: false,
-      producto: null,
       productos: [],
 
       // Filtrar cliente
@@ -99,19 +98,12 @@ class CotizaciónCrear extends CustomComponent {
 
       // Atributos del modal producto
       isOpenProducto: false,
-      loadingModalProducto: true,
-      cantidadModalProducto: '',
-      precioModalProducto: '',
-      idMedidaMondalProducto: '',
-      tipoProducto: '',
 
       // Atributos del modal impresión
       isOpenImpresion: false,
 
       // Atributos del model pre impresión
       isOpenPreImpresion: false,
-      loadingPreImpresion: false,
-      messagePreImpresion: '',
 
       // Id principales
       idUsuario: this.props.token.userToken.idUsuario,
@@ -122,8 +114,8 @@ class CotizaciónCrear extends CustomComponent {
 
     // Referencia principales
     this.refComprobante = React.createRef();
-    this.refMoneda = React.createRef();
-    this.refImpuesto = React.createRef();
+    this.refIdMoneda = React.createRef();
+    this.refIdImpuesto = React.createRef();
     this.refObservacion = React.createRef();
 
     // Filtrar producto
@@ -133,11 +125,6 @@ class CotizaciónCrear extends CustomComponent {
     // Filtrar cliente
     this.refCliente = React.createRef();
     this.selectItemCliente = false;
-
-    // Referencia para el modal producto
-    this.refCantidadModalProduct = React.createRef();
-    this.refPrecioModalProduct = React.createRef();
-    this.refMedidaModalProduct = React.createRef();
 
     // Referencia para el modal producto
     this.refModalProducto = React.createRef();
@@ -150,6 +137,11 @@ class CotizaciónCrear extends CustomComponent {
 
     //Anular las peticiones
     this.abortController = new AbortController();
+
+    this.refTable = React.createRef();
+    this.refTaleBody = React.createRef();
+    this.index = -1;
+    this.cells = [];
   }
 
   /*
@@ -193,12 +185,11 @@ class CotizaciónCrear extends CustomComponent {
   */
 
   loadingData = async () => {
-    const [comprobantes, monedas, impuestos, medidas] =
+    const [comprobantes, monedas, impuestos] =
       await Promise.all([
         this.fetchComprobante(COTIZACION),
         this.fetchMoneda(),
         this.fetchImpuesto(),
-        this.fetchMedida()
       ]);
 
     const comprobante = comprobantes.find((item) => item.preferida === 1);
@@ -209,7 +200,6 @@ class CotizaciónCrear extends CustomComponent {
       comprobantes,
       monedas,
       impuestos,
-      medidas,
       idImpuesto: isEmpty(impuesto) ? '' : impuesto.idImpuesto,
       idComprobante: isEmpty(comprobante) ? '' : comprobante.idComprobante,
       idMoneda: isEmpty(moneda) ? '' : moneda.idMoneda,
@@ -295,24 +285,12 @@ class CotizaciónCrear extends CustomComponent {
     }
   }
 
-  async fetchMedida() {
-    const response = await comboMedida();
-
-    if (response instanceof SuccessReponse) {
-      return response.data;
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
-
-      return [];
-    }
-  }
-
   clearView = () => {
     this.setState(this.initial, async () => {
       await this.loadingData();
       this.refProducto.current.focus();
+      this.index = -1;
+      this.cells = [];
     });
   }
 
@@ -366,7 +344,7 @@ class CotizaciónCrear extends CustomComponent {
     this.setState({ idImpuesto: event.target.value });
 
     if (idImpuesto !== "") {
-      const newDetalle = [...this.state.detalle].map((item) => (
+      const newDetalle = [...this.state.detalles].map((item) => (
         {
           ...item,
           idImpuesto: impuesto.idImpuesto,
@@ -380,139 +358,150 @@ class CotizaciónCrear extends CustomComponent {
     }
   };
 
+  handleRemoverProducto = (idProducto) => {
+    const detalles = this.state.detalles.filter((item) => item.idProducto !== idProducto).map((item, index) => ({
+      ...item,
+      id: ++index
+    }), () => {
+      if (isEmpty(this.state.detalles)) {
+        this.index = -1;
+      }
+    });
+
+    const total = detalles.reduce((accumulate, item) => (accumulate += item.cantidad * item.costo), 0);
+    this.setState({ detalles, total });
+  };
+
   //------------------------------------------------------------------------------------------
-  // Acciones del modal product
+  // Acciones de la tabla
+  //------------------------------------------------------------------------------------------
+  handleKeyDownTable = (event) => {
+    const table = this.refTable.current;
+    if (!table) return;
+
+    const children = table.tBodies[0].children;
+    if (children.length === 0) return;
+
+    if (event.key === 'ArrowUp') {
+      if (this.index > 0) {
+        this.index--;
+        this.updateSelection(children);
+      }
+    }
+
+    if (event.key === 'ArrowDown') {
+      if (this.index < children.length - 1) {
+        this.index++;
+        this.updateSelection(children);
+      }
+    }
+
+    if (event.key === 'Enter') {
+      if (this.index >= 0) {
+        this.handleOpenModalProducto()
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    }
+  }
+
+  handleOnClickTable = async (event) => {
+    const { rowIndex, tBody } = getRowCellIndex(event);
+
+    if (rowIndex === -1 || !tBody || !tBody.children) return;
+
+    this.index = rowIndex;
+    this.updateSelection(tBody.children);
+  }
+
+  handleOnDbClickTable = async (event) => {
+    const { rowIndex, tBody } = getRowCellIndex(event);
+
+    if (rowIndex === -1 || !tBody || !tBody.children) return;
+
+    this.index = rowIndex;
+    this.updateSelection(tBody.children);
+    this.handleOpenModalProducto();
+
+  }
+
+  handleOnDragEndTable = async (result) => {
+    const { source, destination } = result;
+    if (!destination) {
+      return;
+    }
+
+    if (source.index === destination.index &&
+      source.droppableId === destination.droppableId
+    ) {
+      return;
+    }
+
+    await this.setStateAsync(prevState => ({
+      detalles: reorder(prevState.detalles, source.index, destination.index).map((item, index) => ({ ...item, id: ++index }))
+    }))
+
+    this.index = destination.index;
+    this.cells = [];
+    if (this.refTaleBody.current) {
+      const tbody = this.refTaleBody.current;
+      this.updateSelection(tbody.children);
+    }
+  }
+
+  handleOnBeforeDragStartTable = (before) => {
+    const sourceIndex = before.source.index;
+
+    if (this.refTaleBody.current) {
+      const tbody = this.refTaleBody.current;
+      const rows = tbody.children;
+      const row = rows[sourceIndex]
+      this.cells = row.children;
+    }
+  }
+
+  updateSelection = (children) => {
+    for (const child of children) {
+      child.classList.remove("table-active");
+    }
+
+    const selectedChild = children[this.index];
+    selectedChild.classList.add("table-active");
+    selectedChild.scrollIntoView({ block: 'center' });
+    selectedChild.focus();
+  }
+
+
+  //------------------------------------------------------------------------------------------
+  // Acciones del modal producto
   //------------------------------------------------------------------------------------------
 
-  handleOpenModalProducto = () => {
-    this.setState({ loadingModalProducto: true, isOpenProducto: true })
+  handleOpenModalProducto = (producto) => {
+    const { idImpuesto, detalles } = this.state;
+
+    if (isEmpty(idImpuesto)) {
+      alertWarning('Cotización', 'Seleccione un impuesto para continuar.', () => {
+        this.refIdImpuesto.current.focus();
+      });
+      return;
+    }
+
+    const item = producto ?? detalles[this.index];
+    if (item) {
+      this.setState({ isOpenProducto: true })
+      this.refModalProducto.current.loadDatos(item);
+    }
   }
 
   handleCloseProducto = async () => {
     this.setState({ isOpenProducto: false });
   }
 
-  handleOnOpenModalProducto = async () => {
-    await this.setStateAsync({
-      cantidadModalProducto: this.state.producto.tipoProducto === "SERVICIO" ? '1' : '',
-      precioModalProducto: this.state.producto.precio,
-      idMedidaMondalProducto: this.state.producto.idMedida,
-      tipoProducto: this.state.producto.tipoProducto,
-      loadingModalProducto: false,
-    })
-
-    if (this.state.producto.tipoProducto === "SERVICIO") {
-      this.refPrecioModalProduct.current.focus();
-    } else {
-      this.refCantidadModalProduct.current.focus();
-    }
-  }
-
-  handleOnHiddenModalProducto = async () => {
-    await this.setStateAsync({
-      productos: [],
-      filtrarProducto: '',
-      producto: null,
-      cantidadModalProducto: '',
-      precioModalProducto: '',
-      tipoProducto: ''
-    });
-    this.selectItemProducto = false;
-  }
-
-  handleInputCantidadModalProducto = (event) => {
-    this.setState({ cantidadModalProducto: event.target.value });
-  };
-
-  handleInputPrecioModalProducto = (event) => {
-    this.setState({ precioModalProducto: event.target.value });
-  };
-
-  handleSelectMedida = (event) => {
-    this.setState({ idMedidaMondalProducto: event.target.value });
-  }
-
-  handleAddProduct = async () => {
-    const { cantidadModalProducto, precioModalProducto, idMedidaMondalProducto, detalle, idImpuesto } = this.state;
-
-    if (isEmpty(idImpuesto)) {
-      alertWarning('Cotización', 'Seleccione un IGV para continuar.', async () => {
-        await this.handleCloseProducto();
-        this.refImpuesto.current.focus();
-      });
-      return;
-    }
-
-    if (!isNumeric(cantidadModalProducto)) {
-      alertWarning('Cotización', 'Ingrese la cantidad.', () => {
-        this.refCantidadModalProduct.current.focus();
-      });
-      return;
-    }
-
-    if (!isNumeric(precioModalProducto)) {
-      alertWarning('Cotización', 'Ingrese el precio.', () => {
-        this.refPrecioModalProduct.current.focus();
-      });
-      return;
-    }
-
-    if (isEmpty(idMedidaMondalProducto)) {
-      alertWarning('Cotización', 'Ingrese la unidad de medida', () => {
-        this.refMedidaModalProduct.current.focus();
-      });
-      return;
-    }
-
-    if (!this.state.producto) return;
-
-    const { idProducto, nombre, tipoProducto } = this.state.producto;
-
-    const newDetalle = detalle.map(item => ({ ...item }));
-
-    const existeDetalle = newDetalle.find((item) => item.idProducto === idProducto);
-
-    const impuesto = this.state.impuestos.find((item) => item.idImpuesto === this.state.idImpuesto);
-
-    const medida = this.state.medidas.find((item) => item.idMedida == idMedidaMondalProducto);
-
-    if (existeDetalle) {
-      if (tipoProducto === "SERVICIO") {
-        existeDetalle.precio = parseFloat(precioModalProducto);
-      } else {
-        existeDetalle.cantidad += parseFloat(cantidadModalProducto);
-      }
-    } else {
-      const data = {
-        idProducto: idProducto,
-        nombre: nombre,
-        cantidad: parseFloat(cantidadModalProducto),
-        precio: parseFloat(precioModalProducto),
-        idMedida: medida.idMedida,
-        nombreMedida: medida.nombre,
-        idImpuesto: impuesto.idImpuesto,
-        nombreImpuesto: impuesto.nombre,
-        porcentajeImpuesto: impuesto.porcentaje,
-      };
-
-      newDetalle.push(data);
-    }
-
-    const total = newDetalle.reduce((accumulate, item) => (accumulate += item.cantidad * item.costo), 0);
-
-    this.setState({ detalle: newDetalle, total });
-
-    this.handleCloseProducto();
-
+  handleSaveProducto = (detalles) => {
+    const total = detalles.reduce((accumulate, item) => (accumulate += item.cantidad * item.costo), 0);
+    this.setState({ detalles, total });
     this.refProducto.current.focus();
-  };
-
-  handleRemoverProduct = (idProducto) => {
-    const detalle = this.state.detalle.filter((item) => item.idProducto !== idProducto);
-
-    const total = detalle.reduce((accumulate, item) => (accumulate += item.cantidad * item.costo), 0);
-    this.setState({ detalle, total });
-  };
+  }
 
   //------------------------------------------------------------------------------------------
   // Filtrar productos
@@ -522,14 +511,13 @@ class CotizaciónCrear extends CustomComponent {
     await this.setStateAsync({
       productos: [],
       filtrarProducto: '',
-      producto: null,
     });
     this.selectItemProducto = false;
   };
 
   handleFilterProducto = async (event) => {
     const searchWord = this.selectItemProducto ? '' : event.target.value;
-    await this.setStateAsync({ producto: null, filtrarProducto: searchWord });
+    await this.setStateAsync({ filtrarProducto: searchWord });
 
     this.selectItemProducto = false;
     if (searchWord.length === 0) {
@@ -555,13 +543,12 @@ class CotizaciónCrear extends CustomComponent {
 
   handleSelectItemProducto = async (value) => {
     await this.setStateAsync({
-      producto: value,
       filtrarProducto: value.nombre,
       productos: [],
     });
     this.selectItemProducto = true;
 
-    this.handleOpenModalProducto();
+    this.handleOpenModalProducto(value);
   };
 
   //------------------------------------------------------------------------------------------
@@ -616,7 +603,7 @@ class CotizaciónCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
 
   handleGuardar = async () => {
-    const { idComprobante, cliente, idMoneda, idImpuesto, observacion, nota, detalle } = this.state;
+    const { idComprobante, cliente, idMoneda, idImpuesto, observacion, nota, detalles } = this.state;
 
     if (isEmpty(idComprobante)) {
       alertWarning('Cotización', 'Seleccione su comprobante.', () =>
@@ -634,19 +621,19 @@ class CotizaciónCrear extends CustomComponent {
 
     if (isEmpty(idMoneda)) {
       alertWarning('Cotización', 'Seleccione su moneda.', () =>
-        this.refMoneda.current.focus(),
+        this.refIdMoneda.current.focus(),
       );
       return;
     }
 
     if (isEmpty(idImpuesto)) {
       alertWarning('Cotización', 'Seleccione el impuesto', () =>
-        this.refMoneda.current.focus(),
+        this.refIdImpuesto.current.focus(),
       );
       return;
     }
 
-    if (isEmpty(detalle)) {
+    if (isEmpty(detalles)) {
       alertWarning('Cotización', 'Agregar algún producto a la lista.', () =>
         this.refProducto.current.focus(),
       );
@@ -664,7 +651,7 @@ class CotizaciónCrear extends CustomComponent {
           estado: 1,
           observacion: observacion,
           nota: nota,
-          detalle: detalle
+          detalle: detalles
         };
 
         alertInfo('Cotización', 'Procesando información...');
@@ -741,18 +728,7 @@ class CotizaciónCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
 
   handleOpenPreImpresion = () => {
-    this.setState({ isOpenPreImpresion: true })
-  }
-
-  handleClosePreImpresion = () => {
-    if (this.state.loadingPreImpresion) return;
-
-
-    this.setState({ isOpenPreImpresion: false })
-  }
-
-  handleOpenPreImpresionA4 = async () => {
-    const { idComprobante, cliente, idMoneda, idImpuesto, detalle } = this.state;
+    const { idComprobante, cliente, idMoneda, idImpuesto, detalles } = this.state;
 
     if (isEmpty(idComprobante)) {
       alertWarning('Cotización', 'Seleccione su comprobante.', () =>
@@ -770,139 +746,33 @@ class CotizaciónCrear extends CustomComponent {
 
     if (isEmpty(idMoneda)) {
       alertWarning('Cotización', 'Seleccione su moneda.', () =>
-        this.refMoneda.current.focus(),
+        this.refIdMoneda.current.focus(),
       );
       return;
     }
 
     if (isEmpty(idImpuesto)) {
-      alertWarning('Cotización', 'Seleccione el impuesto', () =>
-        this.refMoneda.current.focus(),
+      alertWarning('Cotización', 'Seleccione un impuesto', () =>
+        this.refIdImpuesto.current.focus(),
       );
       return;
     }
 
-    if (isEmpty(detalle)) {
+    if (isEmpty(detalles)) {
       alertWarning('Cotización', 'Agregar algún producto a la lista.', () =>
         this.refProducto.current.focus(),
       );
       return;
     }
 
-    this.setState({
-      loadingPreImpresion: true,
-      messagePreImpresion: 'Generando pre impresión...'
-    })
-
-    const response = await obtenerPreCotizacionPdf({
-      idComprobante: this.state.idComprobante,
-      idCliente: cliente.idPersona,
-
-      idMoneda: idMoneda,
-      idUsuario: this.state.idUsuario,
-      idSucursal: this.state.idSucursal,
-
-      detalle: detalle
-    }, "a4");
-
-    if (response instanceof SuccessReponse) {
-      const base64 = await readDataFile(response.data);
-
-      this.setState({
-        loadingPreImpresion: false
-      })
-
-      printJS({
-        printable: base64,
-        type: 'pdf',
-        base64: true,
-        onPrintDialogClose: () => {
-          this.handleClosePreImpresion()
-        }
-      })
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
-
-      this.setState({
-        loadingPreImpresion: false
-      })
-
-      alertWarning("Cotización", response.getMessage())
-    }
+    this.setState({ isOpenPreImpresion: true })
   }
 
-  handleOpenPreImpresionTicket = async () => {
-    const { idComprobante, cliente, idMoneda, idImpuesto, detalle } = this.state;
+  handleClosePreImpresion = () => {
+    if (this.state.loadingPreImpresion) return;
 
-    if (isEmpty(idComprobante)) {
-      alertWarning('Cotización', 'Seleccione su comprobante.', () => this.refComprobante.current.focus());
-      return;
-    }
 
-    if (isEmpty(cliente)) {
-      alertWarning('Cotización', 'Seleccione un cliente.', () => this.refCliente.current.focus());
-      return;
-    }
-
-    if (isEmpty(idMoneda)) {
-      alertWarning('Cotización', 'Seleccione su moneda.', () => this.refMoneda.current.focus());
-      return;
-    }
-
-    if (isEmpty(idImpuesto)) {
-      alertWarning('Cotización', 'Seleccione el impuesto', () => this.refMoneda.current.focus());
-      return;
-    }
-
-    if (isEmpty(detalle)) {
-      alertWarning('Cotización', 'Agregar algún producto a la lista.', () => this.refProducto.current.focus());
-      return;
-    }
-
-    this.setState({
-      loadingPreImpresion: true,
-      messagePreImpresion: 'Generando pre impresión...'
-    })
-
-    const response = await obtenerPreCotizacionPdf({
-      idComprobante: this.state.idComprobante,
-      idCliente: cliente.idPersona,
-
-      idMoneda: idMoneda,
-      idUsuario: this.state.idUsuario,
-      idSucursal: this.state.idSucursal,
-
-      detalle: detalle
-    }, "ticket");
-
-    if (response instanceof SuccessReponse) {
-      const base64 = await readDataFile(response.data);
-
-      this.setState({
-        loadingPreImpresion: false
-      })
-
-      printJS({
-        printable: base64,
-        type: 'pdf',
-        base64: true,
-        onPrintDialogClose: () => {
-          this.handleClosePreImpresion()
-        }
-      })
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
-
-      this.setState({
-        loadingPreImpresion: false
-      })
-
-      alertWarning("Cotización", response.getMessage())
-    }
+    this.setState({ isOpenPreImpresion: false })
   }
 
   //------------------------------------------------------------------------------------------
@@ -929,10 +799,10 @@ class CotizaciónCrear extends CustomComponent {
   |
   */
 
-  generarBody() {
-    const { detalle } = this.state;
+  generateBody() {
+    const { detalles } = this.state;
 
-    if (isEmpty(detalle)) {
+    if (isEmpty(detalles)) {
       return (
         <tr className="text-center">
           <td colSpan="7"> Agregar datos a la tabla </td>
@@ -940,23 +810,41 @@ class CotizaciónCrear extends CustomComponent {
       );
     }
 
-    return detalle.map((item, index) => (
-      <tr key={index}>
-        <td className="text-center">{++index}</td>
-        <td>{item.nombre}</td>
-        <td>{rounded(item.cantidad)}</td>
-        <td>{item.nombreMedida}</td>
-        <td>{numberFormat(item.precio, this.state.codISO)}</td>
-        <td>{numberFormat(item.cantidad * item.precio, this.state.codISO)}</td>
-        <td className="text-center">
-          <button
-            className="btn btn-outline-danger btn-sm"
-            title="Eliminar"
-            onClick={() => this.handleRemoverProduct(item.idProducto)}>
-            <i className="bi bi-trash"></i>
-          </button>
-        </td>
-      </tr>
+    const widthCell1 = isEmpty(this.cells) ? "auto" : this.cells[0].offsetWidth + "px";
+    const widthCell2 = isEmpty(this.cells) ? "auto" : this.cells[1].offsetWidth + "px";
+    const widthCell3 = isEmpty(this.cells) ? "auto" : this.cells[2].offsetWidth + "px";
+    const widthCell4 = isEmpty(this.cells) ? "auto" : this.cells[3].offsetWidth + "px";
+    const widthCell5 = isEmpty(this.cells) ? "auto" : this.cells[4].offsetWidth + "px";
+    const widthCell6 = isEmpty(this.cells) ? "auto" : this.cells[5].offsetWidth + "px";
+    const widthCell7 = isEmpty(this.cells) ? "auto" : this.cells[6].offsetWidth + "px";
+
+    return detalles.map((item, index) => (
+      <Draggable key={item.idProducto} draggableId={item.idProducto} index={index}>
+        {(provided) => {
+          return (
+            <tr
+              {...provided.draggableProps}
+              ref={provided.innerRef}
+              {...provided.dragHandleProps}
+              className='bg-white'>
+              <td className="text-center" style={{ width: widthCell1 }}>{item.id}</td>
+              <td style={{ width: widthCell2 }}>{item.nombre}</td>
+              <td style={{ width: widthCell3 }}>{rounded(item.cantidad)}</td>
+              <td style={{ width: widthCell4 }}>{item.nombreMedida}</td>
+              <td style={{ width: widthCell5 }}>{numberFormat(item.precio, this.state.codISO)}</td>
+              <td style={{ width: widthCell6 }}>{numberFormat(item.cantidad * item.precio, this.state.codISO)}</td>
+              <td className="text-center" style={{ width: widthCell7 }}>
+                <button
+                  className="btn btn-outline-danger btn-sm"
+                  title="Eliminar"
+                  onClick={() => this.handleRemoverProduct(item.idProducto)}>
+                  <i className="bi bi-trash"></i>
+                </button>
+              </td>
+            </tr>
+          );
+        }}
+      </Draggable>
     ));
   }
 
@@ -964,7 +852,7 @@ class CotizaciónCrear extends CustomComponent {
     let subTotal = 0;
     let total = 0;
 
-    for (const item of this.state.detalle) {
+    for (const item of this.state.detalles) {
       const cantidad = item.cantidad;
       const valor = item.precio;
 
@@ -980,7 +868,7 @@ class CotizaciónCrear extends CustomComponent {
     }
 
     const impuestosGenerado = () => {
-      const resultado = this.state.detalle.reduce((acc, item) => {
+      const resultado = this.state.detalles.reduce((acc, item) => {
         const total = item.cantidad * item.precio;
         const subTotal = calculateTaxBruto(item.porcentajeImpuesto, total);
         const impuestoTotal = calculateTax(item.porcentajeImpuesto, subTotal);
@@ -1047,30 +935,15 @@ class CotizaciónCrear extends CustomComponent {
         />
 
         <ModalProducto
-          refModal={this.refModalProducto}
+          ref={this.refModalProducto}
           isOpen={this.state.isOpenProducto}
-          onOpen={this.handleOnOpenModalProducto}
-          onHidden={this.handleOnHiddenModalProducto}
           onClose={this.handleCloseProducto}
 
-          loading={this.state.loadingModalProducto}
+          idImpuesto={this.state.idImpuesto}
+          impuestos={this.state.impuestos}
+          detalles={this.state.detalles}
 
-          tipoProducto={this.state.tipoProducto}
-
-          refCantidad={this.refCantidadModalProduct}
-          cantidad={this.state.cantidadModalProducto}
-          handleInputCantidad={this.handleInputCantidadModalProducto}
-
-          refPrecio={this.refPrecioModalProduct}
-          precio={this.state.precioModalProducto}
-          handleInputPrecio={this.handleInputPrecioModalProducto}
-
-          medidas={this.state.medidas}
-          refMedida={this.refMedidaModalProduct}
-          idMedida={this.state.idMedidaMondalProducto}
-          handleSelectMedida={this.handleSelectMedida}
-
-          handleAdd={this.handleAddProduct}
+          handleSave={this.handleSaveProducto}
         />
 
         <ModalImpresion
@@ -1083,15 +956,17 @@ class CotizaciónCrear extends CustomComponent {
         />
 
         <ModalPreImpresion
-          refModal={this.refModalPreImpresion}
           isOpen={this.state.isOpenPreImpresion}
+
+          idComprobante={this.state.idComprobante}
+          idCliente={this.state.cliente === null ? '' : this.state.cliente.idPersona}
+          idMoneda={this.state.idMoneda}
+          idUsuario={this.state.idUsuario}
+          idSucursal={this.state.idSucursal}
+          nota={this.state.nota}
+          detalles={this.state.detalles}
+
           handleClose={this.handleClosePreImpresion}
-
-          loading={this.state.loadingPreImpresion}
-          message={this.state.messagePreImpresion}
-
-          handlePrintA4={this.handleOpenPreImpresionA4}
-          handlePrintTicket={this.handleOpenPreImpresionTicket}
         />
 
         <Row>
@@ -1115,7 +990,48 @@ class CotizaciónCrear extends CustomComponent {
 
             <Row>
               <Column>
-                <TableResponsive
+                <div
+                  className="table-responsive"
+                  onKeyDown={this.handleKeyDownTable}>
+                  <table
+                    ref={this.refTable}
+                    onClick={this.handleOnClickTable}
+                    onDoubleClick={this.handleOnDbClickTable}
+                    className={"table table-bordered table-hover table-sticky w-100"}>
+                    <thead>
+                      <tr>
+                        <th width="5%" className="text-center">#</th>
+                        <th width="15%">Producto</th>
+                        <th width="5%">Cantidad</th>
+                        <th width="5%">Medida</th>
+                        <th width="5%">Precio</th>
+                        <th width="5%">Total</th>
+                        <th width="5%" className="text-center">
+                          Quitar
+                        </th>
+                      </tr>
+                    </thead>
+                    <DragDropContext
+                      onDragEnd={this.handleOnDragEndTable}
+                      onBeforeDragStart={this.handleOnBeforeDragStartTable}
+                    >
+                      <Droppable droppableId="table-body">
+                        {(provided) => (
+                          <tbody
+                            ref={(el) => {
+                              provided.innerRef(el)
+                              this.refTaleBody.current = el;
+                            }}
+                            {...provided.droppableProps}>
+                            {this.generateBody()}
+                            {provided.placeholder}
+                          </tbody>
+                        )}
+                      </Droppable>
+                    </DragDropContext>
+                  </table>
+                </div>
+                {/* <TableResponsive
                   tHead={
                     <tr>
                       <th width="5%" className="text-center">
@@ -1132,7 +1048,7 @@ class CotizaciónCrear extends CustomComponent {
                     </tr>
                   }
                   tBody={this.generarBody()}
-                />
+                /> */}
               </Column>
             </Row>
 
@@ -1162,6 +1078,15 @@ class CotizaciónCrear extends CustomComponent {
                     onClick={this.handleCerrar}>
                     <i className="fa fa-close"></i> Cerrar
                   </Button>
+                </div>
+              </Column>
+            </Row>
+
+            <Row>
+              <Column>
+                <div className="form-group">
+                  <p><span className='text-danger'>*</span> <i className="bi bi-chat-dots-fill text-danger"></i> Observación, se utiliza para agregar información importante. No son visible en la impresión.</p>
+                  <p><span className='text-danger'>*</span> <i className="bi bi-card-text text-danger"></i> Nota, visible en la impresión del documento.</p>
                 </div>
               </Column>
             </Row>
@@ -1217,7 +1142,7 @@ class CotizaciónCrear extends CustomComponent {
                   </div>
                 </div>
                 <Select
-                  refSelect={this.refImpuesto}
+                  refSelect={this.refIdImpuesto}
                   value={this.state.idImpuesto}
                   onChange={this.handleSelectImpuesto}
                 >
@@ -1241,7 +1166,7 @@ class CotizaciónCrear extends CustomComponent {
                 </div>
                 <Select
                   title="Lista metodo de pago"
-                  refSelect={this.refMoneda}
+                  refSelect={this.refIdMoneda}
                   value={this.state.idMoneda}
                   onChange={this.handleSelectMoneda}
                 >

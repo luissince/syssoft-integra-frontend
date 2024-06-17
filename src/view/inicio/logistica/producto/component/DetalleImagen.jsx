@@ -162,13 +162,13 @@ const DetalleImagen = (props) => {
             <input
               type="checkbox"
               className="custom-control-input"
-              id="customSwitchEstado"
+              id="customSwitchPreferido"
               checked={preferido}
               onChange={handleSelectPreferido}
             ></input>
             <label
               className="custom-control-label"
-              htmlFor="customSwitchEstado"
+              htmlFor="customSwitchPreferido"
             >
               <div className="font-weight-bold text-black-50 ">Preferido</div>
               <div className="text-black-50">

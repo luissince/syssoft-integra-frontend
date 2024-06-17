@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 import {
   empresaConfig,
   nacionalMoneda,
-  validToken,
+  validTokenApi,
 } from '../../network/rest/principal.network';
 
 import { CANCELED } from '../../model/types/types';
@@ -62,7 +62,7 @@ class Loader extends React.Component {
   }
 
   async fetchValidarToken() {
-    const response = await validToken();
+    const response = await validTokenApi();
 
     if (response instanceof SuccessReponse) {
       return response.data;

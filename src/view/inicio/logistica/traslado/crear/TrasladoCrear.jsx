@@ -24,6 +24,10 @@ import {
 import { CANCELED } from '../../../../../model/types/types';
 import { connect } from 'react-redux';
 import SearchInput from '../../../../../components/SearchInput';
+import Row from '../../../../../components/Row';
+import Column from '../../../../../components/Column';
+import Button from '../../../../../components/Button';
+import Input from '../../../../../components/Input';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -555,7 +559,7 @@ class TrasladorCrear extends CustomComponent {
     |
     */
 
-  generarBody() {
+  generateBody() {
     if (isEmpty(this.state.detalle)) {
       return (
         <tr className="text-center">
@@ -573,19 +577,17 @@ class TrasladorCrear extends CustomComponent {
       return (
         <tr key={index}>
           <td>
-            <button
-              className="btn btn-outline-danger btn-sm"
+            <Button
+              className="btn-outline-danger btn-sm"
               title="Anular"
               onClick={() => this.handleRemoveDetalle(item.idProducto)}
             >
               <i className="bi bi-trash"></i>
-            </button>
+            </Button>
           </td>
           <td>{item.nombre}</td>
           <td>
-            <input
-              type="text"
-              className="form-control"
+            <Input
               value={item.cantidad}
               onChange={(event) =>
                 this.handleInputDetalle(event, item.idProducto)
@@ -613,8 +615,8 @@ class TrasladorCrear extends CustomComponent {
         {this.state.initialLoad && spinnerLoading(this.state.initialMessage)}
 
         {/* Encabezado de la página */}
-        <div className="row">
-          <div className="col">
+        <Row>
+          <Column>
             <div className="form-group">
               <h5>
                 <span role="button" onClick={() => this.props.history.goBack()}>
@@ -624,27 +626,27 @@ class TrasladorCrear extends CustomComponent {
                 <small className="text-secondary"> CREAR</small>
               </h5>
             </div>
-          </div>
-        </div>
+          </Column>
+        </Row>
 
         {/* Condición para renderizar contenido específico según el estado 'paso' */}
         {this.state.paso === 1 && (
           <>
             {/* Mensaje y opciones para el primer paso */}
-            <div className="row">
-              <div className="col">
+            <Column>
+              <Column>
                 <div className="form-group">
                   <p>
                     <i className="bi bi-card-list"></i> Defína alguna opciones
                     antes de continuar.
                   </p>
                 </div>
-              </div>
-            </div>
+              </Column>
+            </Column>
 
             {/* Selección del tipo de traslado */}
-            <div className="row">
-              <div className="col">
+            <Row>
+              <Column>
                 <div className="form-group">
                   <label>Seleccione el tipo de traslado:</label>
                   <div className="form-check ">
@@ -677,13 +679,13 @@ class TrasladorCrear extends CustomComponent {
                     </label>
                   </div>
                 </div>
-              </div>
-            </div>
+              </Column>
+            </Row>
 
 
             {/* Selección el motivo de traslado */}
-            <div className="row">
-              <div className="col">
+            <Row>
+              <Column>
                 <div className="form-group">
                   <label>Seleccione el motivo del traslado:</label>
                   <select
@@ -702,8 +704,8 @@ class TrasladorCrear extends CustomComponent {
                     }
                   </select>
                 </div>
-              </div>
-            </div>
+              </Column>
+            </Row>
 
             {
               // Verificar si el tipo de ajuste es 'TT0001'
@@ -711,8 +713,8 @@ class TrasladorCrear extends CustomComponent {
                 <>
 
                   {/* Selección el almacen de origen */}
-                  <div className="row">
-                    <div className="col">
+                  <Row>
+                    <Column>
                       <div className="form-group">
                         <label>Seleccione el almacen de origen:</label>
                         <select
@@ -731,12 +733,12 @@ class TrasladorCrear extends CustomComponent {
                           })}
                         </select>
                       </div>
-                    </div>
-                  </div>
+                    </Column>
+                  </Row>
 
                   {/* Selección el almacen de destino */}
-                  <div className="row">
-                    <div className="col">
+                  <Row>
+                    <Column>
                       <div className="form-group">
                         <label>Seleccione el almacen de destino:</label>
                         <select
@@ -756,8 +758,8 @@ class TrasladorCrear extends CustomComponent {
                           })}
                         </select>
                       </div>
-                    </div>
-                  </div>
+                    </Column>
+                  </Row>
                 </>
               )
             }
@@ -766,19 +768,19 @@ class TrasladorCrear extends CustomComponent {
               // Verificar si el tipo de ajuste es 'TT0002'
               this.state.idTipoTraslado === 'TT0002' && (
                 <>
-                  <div className="row">
-                    <div className="col">
+                  <Row>
+                    <Column>
                       <div className="form-group">
                         <p>
                           <i className="bi bi-arrow-bar-down"></i> Almacen de origin
                         </p>
                       </div>
-                    </div>
-                  </div>
+                    </Column>
+                  </Row>
 
                   {/* Selección el almacen de origen */}
-                  <div className="row">
-                    <div className="col">
+                  <Row>
+                    <Column>
                       <div className="form-group">
                         <label>Seleccione el almacen:</label>
                         <select
@@ -797,22 +799,22 @@ class TrasladorCrear extends CustomComponent {
                           }
                         </select>
                       </div>
-                    </div>
-                  </div>
+                    </Column>
+                  </Row>
 
-                  <div className="row">
-                    <div className="col">
+                  <Row>
+                    <Column>
                       <div className="form-group">
                         <p>
                           <i className="bi bi-arrow-bar-right"></i> Sucural y almacen de destino
                         </p>
                       </div>
-                    </div>
-                  </div>
+                    </Column>
+                  </Row>
 
                   {/* Selección la sucursal */}
-                  <div className="row">
-                    <div className="col-md-6 col-12">
+                  <Row>
+                    <Column className="col-md-6 col-12">
                       <div className="form-group">
                         <label>Seleccione la sucursal:</label>
                         <select
@@ -830,9 +832,9 @@ class TrasladorCrear extends CustomComponent {
                           }
                         </select>
                       </div>
-                    </div>
+                    </Column>
 
-                    <div className="col-md-6 col-12">
+                    <Column className="col-md-6 col-12">
                       <div className="form-group">
                         <label>Seleccione el almacen:</label>
                         <select
@@ -851,32 +853,30 @@ class TrasladorCrear extends CustomComponent {
                           }
                         </select>
                       </div>
-                    </div>
-                  </div>
+                    </Column>
+                  </Row>
                 </>
               )
             }
 
 
             {/* Botones de navegación */}
-            <div className="row">
-              <div className="col">
+            <Row>
+              <Column>
                 <div className="form-group">
-                  <button
-                    type="button"
-                    className="btn btn-primary"
+                  <Button
+                    className="btn-primary"
                     onClick={this.handleSiguiente}>
                     <i className="fa fa-arrow-right"></i> Siguiente
-                  </button>{' '}
-                  <button
-                    type="button"
-                    className="btn btn-outline-danger"
+                  </Button>{' '}
+                  <Button
+                    className="btn-outline-danger"
                     onClick={() => this.props.history.goBack()}>
                     <i className="fa fa-close"></i> Cancelar
-                  </button>
+                  </Button>
                 </div>
-              </div>
-            </div>
+              </Column>
+            </Row>
           </>
         )}
 
@@ -884,8 +884,8 @@ class TrasladorCrear extends CustomComponent {
         {
           this.state.paso === 2 && (
             <>
-              <div className="row">
-                <div className="col">
+              <Row>
+                <Column>
                   <div className="form-group">
                     <div className="table-responsive">
                       <table width="100%">
@@ -974,11 +974,11 @@ class TrasladorCrear extends CustomComponent {
                       </table>
                     </div>
                   </div>
-                </div>
-              </div>
+                </Column>
+              </Row>
 
-              <div className="row">
-                <div className="col">
+              <Row>
+                <Column>
                   <label>Filtrar por el código o nombre del producto::</label>
                   <SearchInput
                     autoFocus={true}
@@ -996,28 +996,26 @@ class TrasladorCrear extends CustomComponent {
                       </>
                     )}
                   />
-                </div>
-              </div>
+                </Column>
+              </Row>
 
-              <div className="row">
-                <div className="col">
+              <Row>
+                <Column>
                   <label>
                     Ingrese alguna descripción para saber el motivo del ajuste:
                   </label>
                   <div className="form-group">
-                    <input
-                      type="text"
-                      className="form-control"
+                    <Input
                       placeholder="Ingrese una observación"
                       value={this.state.observacion}
                       onChange={this.handleInputObservacion}
                     />
                   </div>
-                </div>
-              </div>
+                </Column>
+              </Row>
 
-              <div className="row">
-                <div className="col">
+              <Row>
+                <Column>
                   <label>Lista de productos:</label>
                   <div className="table-responsive">
                     <table className="table table-striped table-bordered rounded">
@@ -1031,45 +1029,41 @@ class TrasladorCrear extends CustomComponent {
                           <th width="15%">Medida</th>
                         </tr>
                       </thead>
-                      <tbody>{this.generarBody()}</tbody>
+                      <tbody>{this.generateBody()}</tbody>
                     </table>
                   </div>
-                </div>
-              </div>
+                </Column>
+              </Row>
 
               {/* Sección de botones de acción */}
-              <div className="row">
-                <div className="col">
-                  <button
-                    type="button"
-                    className="btn btn-success"
+              <Row>
+                <Column>
+                  <Button
+                    className="btn-success"
                     onClick={this.handleSave}
                   >
                     <i className="fa fa-save"></i> Guardar
-                  </button>{' '}
-                  <button
-                    type="button"
-                    className="btn btn-outline-warning"
+                  </Button>{' '}
+                  <Button
+                    className="btn-outline-warning"
                     onClick={this.handleBack}
                   >
                     <i className="fa fa-arrow-left"></i> Atras
-                  </button>{' '}
-                  <button
-                    type="button"
-                    className="btn btn-outline-info"
+                  </Button>{' '}
+                  <Button
+                    className="btn-outline-info"
                     onClick={this.handleClear}
                   >
                     <i className="fa fa-trash"></i> Limpiar
-                  </button>{' '}
-                  <button
-                    type="button"
-                    className="btn btn-outline-danger"
+                  </Button>{' '}
+                  <Button
+                    className="btn-outline-danger"
                     onClick={() => this.props.history.goBack()}
                   >
                     <i className="fa fa-close"></i> Cancelar
-                  </button>
-                </div>
-              </div>
+                  </Button>
+                </Column>
+              </Row>
             </>
           )
         }

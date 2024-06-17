@@ -27,9 +27,9 @@ export async function loginApi(params, signal = null) {
   );
 }
 
-export async function validToken() {
+export async function validTokenApi() {
   return await Resolve.create(
-    instancePrincipal.get('/api/login/validtoken', {}),
+    instancePrincipal.get('/api/login/validtoken'),
   );
 }
 

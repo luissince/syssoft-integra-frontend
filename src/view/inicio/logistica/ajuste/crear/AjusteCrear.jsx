@@ -27,6 +27,9 @@ import { SpinnerView } from '../../../../../components/Spinner';
 import Title from '../../../../../components/Title';
 import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
+import Select from '../../../../../components/Select';
+import Button from '../../../../../components/Button';
+import Input from '../../../../../components/Input';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -173,6 +176,13 @@ class AjusteCrear extends CustomComponent {
 
       return [];
     }
+  }
+
+  clearView() {
+    this.setState(this.initial, async () => {
+      await this.loadingData();
+      this.refIdTipoAjuste.current.focus();
+    });
   }
 
   agregarProducto(producto) {
@@ -373,10 +383,7 @@ class AjusteCrear extends CustomComponent {
 
         if (response instanceof SuccessReponse) {
           alertSuccess('Ajuste', response.data, () => {
-            this.setState(this.initial, async () => {
-              await this.loadingData();
-              this.refIdTipoAjuste.current.focus();
-            });
+            this.clearView();
           });
         }
 
@@ -399,10 +406,7 @@ class AjusteCrear extends CustomComponent {
   handleClear = () => {
     alertDialog('Ajuste', '¿Está seguro de continuar, se va limpiar toda la información?', async (accept) => {
       if (accept) {
-        this.setState(this.initial, async () => {
-          await this.loadingData();
-          this.refIdTipoAjuste.current.focus();
-        });
+        this.clearView();
       }
     });
   }
@@ -423,7 +427,7 @@ class AjusteCrear extends CustomComponent {
     |
     */
 
-  generarBody() {
+  generateBody() {
     if (isEmpty(this.state.detalle)) {
       return (
         <tr className="text-center">
@@ -446,19 +450,17 @@ class AjusteCrear extends CustomComponent {
       return (
         <tr key={index}>
           <td>
-            <button
-              className="btn btn-outline-danger btn-sm"
+            <Button
+              className="btn-outline-danger btn-sm"
               title="Anular"
               onClick={() => this.handleRemoveDetalle(item.idProducto)}
             >
               <i className="bi bi-trash"></i>
-            </button>
+            </Button>
           </td>
           <td>{item.nombre}</td>
           <td>
-            <input
-              type="text"
-              className="form-control"
+            <Input
               value={item.cantidad}
               onChange={(event) =>
                 this.handleInputDetalle(event, item.idProducto)
@@ -496,8 +498,7 @@ class AjusteCrear extends CustomComponent {
               <Column>
                 <div className="form-group">
                   <p>
-                    <i className="bi bi-card-list"></i> Defína alguna opciones
-                    antes de continuar.
+                    <i className="bi bi-card-list"></i> Defína alguna opciones antes de continuar.
                   </p>
                 </div>
               </Column>
@@ -546,9 +547,8 @@ class AjusteCrear extends CustomComponent {
               <Column>
                 <div className="form-group">
                   <label>Seleccione el motivo del ajuste:</label>
-                  <select
-                    className="form-control"
-                    ref={this.refIdMotivoAjuste}
+                  <Select
+                    refSelect={this.refIdMotivoAjuste}
                     value={this.state.idMotivoAjuste}
                     onChange={this.handleSelectMetodoAjuste}
                   >
@@ -560,7 +560,7 @@ class AjusteCrear extends CustomComponent {
                         </option>
                       );
                     })}
-                  </select>
+                  </Select>
                 </div>
               </Column>
             </Row>
@@ -569,9 +569,8 @@ class AjusteCrear extends CustomComponent {
               <Column>
                 <div className="form-group">
                   <label>Seleccione el almacen:</label>
-                  <select
-                    className="form-control"
-                    ref={this.refIdAlmacen}
+                  <Select
+                    refSelect={this.refIdAlmacen}
                     value={this.state.idAlmacen}
                     onChange={this.handleSelectAlmacen}
                   >
@@ -583,7 +582,7 @@ class AjusteCrear extends CustomComponent {
                         </option>
                       );
                     })}
-                  </select>
+                  </Select>
                 </div>
               </Column>
             </Row>
@@ -591,20 +590,18 @@ class AjusteCrear extends CustomComponent {
             <Row>
               <Column>
                 <div className="form-group">
-                  <button
-                    type="button"
-                    className="btn btn-primary"
+                  <Button
+                    className="btn-primary"
                     onClick={this.handleSiguiente}
                   >
                     <i className="fa fa-arrow-right"></i> Siguiente
-                  </button>{' '}
-                  <button
-                    type="button"
-                    className="btn btn-outline-danger"
+                  </Button>{' '}
+                  <Button
+                    className="btn-outline-danger"
                     onClick={() => this.props.history.goBack()}
                   >
                     <i className="fa fa-close"></i> Cancelar
-                  </button>
+                  </Button>
                 </div>
               </Column>
             </Row>
@@ -690,9 +687,7 @@ class AjusteCrear extends CustomComponent {
                   Ingrese alguna descripción para saber el motivo del ajuste:
                 </label>
                 <div className="form-group">
-                  <input
-                    type="text"
-                    className="form-control"
+                  <Input
                     placeholder="Ingrese una observación"
                     value={this.state.observacion}
                     onChange={this.handleInputObservacion}
@@ -716,7 +711,7 @@ class AjusteCrear extends CustomComponent {
                         <th width="15%">Medida</th>
                       </tr>
                     </thead>
-                    <tbody>{this.generarBody()}</tbody>
+                    <tbody>{this.generateBody()}</tbody>
                   </table>
                 </div>
               </Column>
@@ -724,33 +719,29 @@ class AjusteCrear extends CustomComponent {
 
             <Row>
               <Column>
-                <button
-                  type="button"
-                  className="btn btn-success"
+                <Button
+                  className="btn-success"
                   onClick={this.handleSave}>
                   <i className="fa fa-save"></i> Guardar
-                </button>
+                </Button>
                 {' '}
-                <button
-                  type="button"
-                  className="btn btn-outline-warning"
+                <Button
+                  className="btn-outline-warning"
                   onClick={this.handleBack}>
                   <i className="fa fa-arrow-left"></i> Atras
-                </button>
+                </Button>
                 {' '}
-                <button
-                  type="button"
-                  className="btn btn-outline-info"
+                <Button
+                  className="btn-outline-info"
                   onClick={this.handleClear}>
                   <i className="fa fa-trash"></i> Limpiar
-                </button>
+                </Button>
                 {' '}
-                <button
-                  type="button"
-                  className="btn btn-outline-danger"
+                <Button
+                  className="btn-outline-danger"
                   onClick={() => this.props.history.goBack()}>
                   <i className="fa fa-close"></i> Cancelar
-                </button>
+                </Button>
               </Column>
             </Row>
           </>

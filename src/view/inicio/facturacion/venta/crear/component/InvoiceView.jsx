@@ -25,6 +25,8 @@ class InvoiceView extends CustomComponent {
       filasPorPagina: 10,
     }
 
+    this.initial = { ...this.state }
+
     this.refProducto = React.createRef();
     this.eventSource = null;
   }
@@ -33,6 +35,12 @@ class InvoiceView extends CustomComponent {
     if (this.eventSource) {
       this.eventSource.close();
     }
+  }
+
+  componentClear = () => {
+    this.setState(this.initial, () => {
+      this.refProducto.current.focus();
+    })
   }
 
   handleSelectTipo = (tipo) => {

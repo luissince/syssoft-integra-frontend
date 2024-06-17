@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import Paginacion from "../../../../../components/Paginacion";
 import { CustomModalContent } from '../../../../../components/CustomModal';
 import { SpinnerTable } from '../../../../../components/Spinner';
-import { getRowIndex, isEmpty, keyUpSearch, numberFormat, rounded } from '../../../../../helper/utils.helper';
+import { getRowCellIndex, isEmpty, keyUpSearch, numberFormat, rounded } from '../../../../../helper/utils.helper';
 import Image from '../../../../../components/Image';
 import { images } from '../../../../../helper';
 import Button from '../../../../../components/Button';
@@ -15,6 +15,9 @@ import { A_GRANEL, UNIDADES, VALOR_MONETARIO } from '../../../../../model/types/
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
 import SuccessReponse from '../../../../../model/class/response';
+import Row from '../../../../../components/Row';
+import Column from '../../../../../components/Column';
+import Select from '../../../../../components/Select';
 
 class ModalProductos extends CustomComponent {
 
@@ -35,7 +38,7 @@ class ModalProductos extends CustomComponent {
 
         this.abortController = new AbortController();
         this.refInputBuscar = React.createRef();
-        this.refTale = React.createRef();
+        this.refTable = React.createRef();
         this.eventSource = null;
         this.index = 0;
     }
@@ -207,9 +210,9 @@ class ModalProductos extends CustomComponent {
 
     handleInputKeyDown = (event) => {
         if (event.key === 'Enter' || event.keyCode === 13) {
-            this.refTale.current.focus()
+            this.refTable.current.focus()
             if (!isEmpty(this.state.lista)) {
-                const table = this.refTale.current;
+                const table = this.refTable.current;
                 if (!table) return;
 
                 const children = table.tBodies[0].children;
@@ -222,7 +225,7 @@ class ModalProductos extends CustomComponent {
     }
 
     handleKeyDown = (event) => {
-        const table = this.refTale.current;
+        const table = this.refTable.current;
         if (!table) return;
 
         const children = table.tBodies[0].children;
@@ -258,13 +261,13 @@ class ModalProductos extends CustomComponent {
     }
 
     handleOnClick = async (event) => {
-        const { index, tBody } = getRowIndex(event);
+        const { rowIndex, tBody } = getRowCellIndex(event);
 
-        if (index === -1) return;
+        if (rowIndex === -1) return;
 
-        const item = this.state.lista[index];
+        const item = this.state.lista[rowIndex];
         if (item) {
-            this.index = index;
+            this.index = rowIndex;
             this.updateSelection(tBody.children);
             this.props.handleSeleccionar(item);
             this.refInputBuscar.current.focus();
@@ -402,6 +405,10 @@ class ModalProductos extends CustomComponent {
         const {
             refModal,
             isOpen,
+            almacenes,
+            refAlmacen,
+            idAlmacen,
+            handleSelectIdIdAlmacen,
             handleClose
         } = this.props;
 
@@ -420,34 +427,58 @@ class ModalProductos extends CustomComponent {
                         <div className='w-100 h-100 d-flex'>
                             <div className='w-100 d-flex flex-column position-relative'>
                                 <div className="px-3 py-3">
-                                    <label><i className="fa fa-search"></i> Buscar por código o nombres:</label>
-                                    <div className="input-group">
-                                        <Input
-                                            placeholder="Buscar..."
-                                            refInput={this.refInputBuscar}
-                                            value={buscar}
-                                            onChange={this.handleInputBuscar}
-                                            onKeyUp={(event) => {
-                                                keyUpSearch(event, () => this.handleSearchText(buscar))
-                                            }}
-                                            onKeyDown={this.handleInputKeyDown}
-                                        />
-                                        <div className="input-group-append">
-                                            <Button
-                                                className="btn-outline-secondary"
-                                                title="Recargar"
-                                                icono={<i className="bi bi-arrow-clockwise"></i>}
-                                                onClick={this.loadInit}
-                                            />
-                                        </div>
-                                    </div>
+                                    <Row>
+                                        <Column className='col-8'>
+                                            <label><i className="fa fa-search"></i> Buscar por código o nombres:</label>
+                                            <div className="input-group">
+                                                <Input
+                                                    placeholder="Buscar..."
+                                                    refInput={this.refInputBuscar}
+                                                    value={buscar}
+                                                    onChange={this.handleInputBuscar}
+                                                    onKeyUp={(event) => {
+                                                        keyUpSearch(event, () => this.handleSearchText(buscar))
+                                                    }}
+                                                    onKeyDown={this.handleInputKeyDown}
+                                                />
+                                                <div className="input-group-append">
+                                                    <Button
+                                                        className="btn-outline-secondary"
+                                                        title="Recargar"
+                                                        icono={<i className="bi bi-arrow-clockwise"></i>}
+                                                        onClick={this.loadInit}
+                                                    />
+                                                </div>
+                                            </div>
+                                        </Column>
+
+                                        <Column className='col-4'>
+                                            <label>
+                                                Almacen: <i className="fa fa-asterisk text-danger small"></i>{' '}
+                                            </label>
+                                            <div className="input-group">
+                                                <Select
+                                                    title="Lista de Almacenes"
+                                                    refSelect={refAlmacen}
+                                                    value={idAlmacen}
+                                                    onChange={async (event) => handleSelectIdIdAlmacen(event, true, () => this.handleOnOpen())}>
+                                                    <option value="">-- Almacen --</option>
+                                                    {almacenes.map((item, index) => (
+                                                        <option key={index} value={item.idAlmacen}>
+                                                            {item.nombre}
+                                                        </option>
+                                                    ))}
+                                                </Select>
+                                            </div>
+                                        </Column>
+                                    </Row>
                                 </div>
 
                                 <div
                                     className='ml-3 mr-3 h-100 overflow-auto'
                                     onKeyDown={this.handleKeyDown}>
                                     <Table
-                                        refTable={this.refTale}
+                                        refTable={this.refTable}
                                         onClick={this.handleOnClick}
                                         className="table table-bordered table-hover table-sticky"
                                         tHead={
@@ -493,7 +524,12 @@ ModalProductos.propTypes = {
     productos: PropTypes.array,
     codiso: PropTypes.string.isRequired,
     idSucursal: PropTypes.string.isRequired,
+
+    almacenes: PropTypes.array,
     idAlmacen: PropTypes.string.isRequired,
+    refAlmacen: PropTypes.object,
+    handleSelectIdIdAlmacen: PropTypes.func,
+
     handleClose: PropTypes.func.isRequired,
     handleSeleccionar: PropTypes.func.isRequired,
 }
