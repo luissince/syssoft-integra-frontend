@@ -637,15 +637,15 @@ class CpeElectronicos extends CustomComponent {
         <SpinnerView
           loading={this.state.initialLoad}
           message={this.state.initialMessage}
-          body={<>
-            <div className='d-flex flex-column align-items-center'>
-              <p>No se pudo obtener los datos requeridos, comuníquese con su proveedor del sistema.</p>
-              <Button
-                className='btn-danger'>
-                <i className='fa fa-refresh'></i> Recargar
-              </Button>
-            </div>
-          </>}
+          // body={<>
+          //   <div className='d-flex flex-column align-items-center'>
+          //     <p>No se pudo obtener los datos requeridos, comuníquese con su proveedor del sistema.</p>
+          //     <Button
+          //       className='btn-danger'>
+          //       <i className='fa fa-refresh'></i> Recargar
+          //     </Button>
+          //   </div>
+          // </>}
         />
 
         <Title
