@@ -25,40 +25,40 @@ class Loader extends React.Component {
     this.abortController = new AbortController();
   }
 
-  async componentDidMount() {
-    const [empresa, moneda, session] = await Promise.all([
-      this.fetchObtenerEmpresa(),
-      this.fetchMonedaNacional(),
-      this.fetchValidarToken(),
-    ]);
+  // async componentDidMount() {
+  //   const [empresa, moneda, session] = await Promise.all([
+  //     this.fetchObtenerEmpresa(),
+  //     this.fetchMonedaNacional(),
+  //     this.fetchValidarToken(),
+  //   ]);
 
-    if (empresa === null) {
-      this.handleSignOut()
-    }
+  //   if (empresa === null) {
+  //     this.handleSignOut()
+  //   }
 
-    this.props.setMonedaNacional(moneda);
-    this.props.setEmpresa(empresa)
+  //   this.props.setMonedaNacional(moneda);
+  //   this.props.setEmpresa(empresa)
 
-    if (session) {
-      // TO DO:
-      // la variable session trae datos que rempleza al window.localStorage.getItem('login')
-      // console.log(session)
-      const login = JSON.parse(window.localStorage.getItem('login'));
-      const project = JSON.parse(window.localStorage.getItem('project'));
+  //   if (session) {
+  //     // TO DO:
+  //     // la variable session trae datos que rempleza al window.localStorage.getItem('login')
+  //     // console.log(session)
+  //     const login = JSON.parse(window.localStorage.getItem('login'));
+  //     const project = JSON.parse(window.localStorage.getItem('project'));
 
-      this.props.restoreToken({
-        token: login,
-        project: project
-      });
-    } else {
-      this.clearLocalStorage();
-      this.props.restoreToken({
-        token: null,
-        project: null
-      });
-    }
-    // this.props.config();
-  }
+  //     this.props.restoreToken({
+  //       token: login,
+  //       project: project
+  //     });
+  //   } else {
+  //     this.clearLocalStorage();
+  //     this.props.restoreToken({
+  //       token: null,
+  //       project: null
+  //     });
+  //   }
+  //   // this.props.config();
+  // }
 
   componentWillUnmount() {
     this.abortController.abort();
@@ -113,7 +113,7 @@ class Loader extends React.Component {
 
   render() {
     return (
-      <div className="loader text-center">
+      <div className="loader-content text-center">
         <div className="loader-inner">
           <div className="lds-roller mb-3">
             <div></div>
