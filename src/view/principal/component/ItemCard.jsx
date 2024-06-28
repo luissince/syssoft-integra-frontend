@@ -13,10 +13,10 @@ const ItemCard = ({ item, handleIngresar }) => {
             className={"card-img-top"}
           />
           <div className="card-body m-2">
-            <h6 className="text-primary font-weight-bold">
+            <h6 className="text-primary font-weight-bold text-center">
               {item.nombre}
             </h6>
-            <h6 className="text-secondary">{item.direccion}</h6>
+            <h6 className="text-secondary text-center">{item.direccion}</h6>
             <Button
               className='btn-block btn-outline-primary'
               onClick={() => handleIngresar(item)}
@@ -24,7 +24,6 @@ const ItemCard = ({ item, handleIngresar }) => {
               <i className="bi bi-arrow-right-circle-fill"></i> Ingresar
             </Button>
           </div>
-          <hr className="m-0" />
         </div>
       </div>
     </div>

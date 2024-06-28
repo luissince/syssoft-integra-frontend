@@ -22,6 +22,7 @@ import { clearPredeterminado } from '../../redux/predeterminadoSlice';
  * @extends React.Component
  */
 class Principal extends CustomComponent {
+
   constructor(props) {
     super(props);
     this.state = {
@@ -29,9 +30,10 @@ class Principal extends CustomComponent {
       razonSocial: '',
       nombreEmpresa: '',
       sucursales: [],
-      data: [],
+      cache: [],
+
       loading: true,
-      loadMessage: 'Cargando sucursales...',
+      loadingMessage: 'Cargando sucursales...',
     };
 
     this.refTxtSearch = React.createRef();
@@ -50,28 +52,20 @@ class Principal extends CustomComponent {
   }
 
   async loadingData() {
-    const [sucursales] = await Promise.all([
-      this.fetchSucursales(),
-    ]);
-
-    this.setState({
-      sucursales: sucursales,
-      data: sucursales,
-      loading: false,
-    });
-  }
-
-  async fetchSucursales() {
     const response = await initSucursales(this.abortController.signal);
 
     if (response instanceof SuccessReponse) {
-      return response.data;
+      this.setState({
+        sucursales: response.data,
+        cache: response.data,
+        loading: false,
+      });
     }
 
     if (response instanceof ErrorResponse) {
       if (response.getType() === CANCELED) return;
 
-      return [];
+      console.log(response)
     }
   }
 
@@ -91,12 +85,12 @@ class Principal extends CustomComponent {
 
   handleSearch = (value) => {
     if (isEmpty(value)) {
-      this.setState({ data: this.state.sucursales });
+      this.setState({ sucursales: this.state.cache });
       return;
     }
 
-    const sucursales = this.state.data.filter((item) => item.nombre.toUpperCase().indexOf(value.toUpperCase()) > -1,);
-    this.setState({ data: sucursales });
+    const sucursales = this.state.cache.filter((item) => item.nombre.toUpperCase().includes(value.toUpperCase()),);
+    this.setState({ sucursales });
   }
 
   handleSignOut = async () => {
@@ -133,14 +127,14 @@ class Principal extends CustomComponent {
       <div className="container pt-5">
         <SpinnerView
           loading={this.state.loading}
-          message={this.state.loadMessage}
+          message={this.state.loadingMessage}
         />
 
         <Title
           rutaImage={rutaImage}
           razonSocial={razonSocial}
           nombreEmpresa={nombreEmpresa}
-          documento={documento}
+          documento={"RUC: " + documento}
           handleSignOut={this.handleSignOut}
         />
 
@@ -150,7 +144,7 @@ class Principal extends CustomComponent {
         />
 
         <Row>
-          {this.state.data.map((item, index) => (
+          {this.state.sucursales.map((item, index) => (
             <ItemCard
               key={index}
               item={item}

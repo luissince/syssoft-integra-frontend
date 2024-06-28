@@ -219,7 +219,10 @@ class GuiaRemisionCrear extends CustomComponent {
 
 
   async fetchComprobante(tipo) {
-    const params = { tipo: tipo };
+    const params = {
+      "tipo": tipo,
+      "idSucursal": this.state.idSucursal
+    };
 
     const response = await comboComprobante(
       params,

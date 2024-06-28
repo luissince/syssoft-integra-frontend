@@ -201,7 +201,8 @@ class GastoCrear extends CustomComponent {
 
   async fetchComprobante(tipo) {
     const params = {
-      tipo: tipo,
+      "tipo": tipo,
+      "idSucursal": this.state.idSucursal
     };
 
     const response = await comboComprobante(

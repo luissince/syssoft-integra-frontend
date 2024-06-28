@@ -134,7 +134,7 @@ const Menu = (props) => {
                 className="btn btn-secondary"
                 onClick={handleCloseSucursal}
               >
-                <i className="fa fa-sign-out fa-sm"></i> Cerrar sucursal
+                <i className="fa fa-sign-out fa-sm"></i> Cerrar Sucursal
               </button>
 
               <button

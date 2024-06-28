@@ -4,7 +4,6 @@ import {
   alertSuccess,
   alertWarning,
   spinnerLoading,
-  statePrivilegio,
   keyUpSearch,
   alertInfo,
   isEmpty,
@@ -25,18 +24,18 @@ class Categorias extends CustomComponent {
     super(props);
 
     this.state = {
-      add: statePrivilegio(
-        this.props.token.userToken.menus[3].submenu[0].privilegio[0].estado,
-      ),
-      edit: statePrivilegio(
-        this.props.token.userToken.menus[3].submenu[0].privilegio[1].estado,
-      ),
-      remove: statePrivilegio(
-        this.props.token.userToken.menus[3].submenu[0].privilegio[2].estado,
-      ),
-      move: statePrivilegio(
-        this.props.token.userToken.menus[3].submenu[0].privilegio[3].estado,
-      ),
+      // add: statePrivilegio(
+      //   this.props.token.userToken.menus[3].submenu[0].privilegio[0].estado,
+      // ),
+      // edit: statePrivilegio(
+      //   this.props.token.userToken.menus[3].submenu[0].privilegio[1].estado,
+      // ),
+      // remove: statePrivilegio(
+      //   this.props.token.userToken.menus[3].submenu[0].privilegio[2].estado,
+      // ),
+      // move: statePrivilegio(
+      //   this.props.token.userToken.menus[3].submenu[0].privilegio[3].estado,
+      // ),
 
       loading: false,
       lista: [],
@@ -238,7 +237,7 @@ class Categorias extends CustomComponent {
               className="btn btn-outline-warning btn-sm"
               title="Editar"
               onClick={() => this.handleEditar(item.idCategoria)}
-              disabled={!this.state.edit}
+              // disabled={!this.state.edit}
             >
               <i className="bi bi-pencil"></i>
             </button>
@@ -248,7 +247,7 @@ class Categorias extends CustomComponent {
               className="btn btn-outline-danger btn-sm"
               title="Anular"
               onClick={() => this.handleDelete(item.idCategoria)}
-              disabled={!this.state.remove}
+              // disabled={!this.state.remove}
             >
               <i className="bi bi-trash"></i>
             </button>
@@ -294,7 +293,7 @@ class Categorias extends CustomComponent {
               <button
                 className="btn btn-outline-info"
                 onClick={this.handleAgregar}
-                disabled={!this.state.add}
+                // disabled={!this.state.add}
               >
                 <i className="bi bi-file-plus"></i> Nuevo Registro
               </button>{' '}

@@ -11,7 +11,7 @@ const Search = ({ refTxtSearch, handleSearch }) => {
             <Input
               className="bg-transparent"
               type="search"
-              placeholder="filtar por sucursal o nombre del sucursal"
+              placeholder="Filtar por nombre de sucursal"
               refInput={refTxtSearch}
               onKeyUp={(event) => handleSearch(event.target.value)}
             />

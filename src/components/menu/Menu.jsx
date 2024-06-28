@@ -44,7 +44,7 @@ const Menu = ({
             <div className="line"></div>
             {userToken.menus.map((menu, index) => {
 
-              if (isEmpty(menu.submenu) && menu.estado === 1) {
+              if (isEmpty(menu.subMenus) && menu.estado === 1) {
                 return (
                   <li key={index}>
                     <NavLink
@@ -65,7 +65,7 @@ const Menu = ({
                 );
               }
 
-              if (menu.submenu.filter((submenu) => submenu.estado === 1).length !== 0) {
+              if (menu.subMenus.filter((submenu) => submenu.estado === 1).length !== 0) {
                 return (
                   <li key={index}>
                     <a
@@ -84,7 +84,7 @@ const Menu = ({
                       <span className="suffix-wrapper">
                         <span className="badge yellow">
                           {
-                            menu.submenu.filter(
+                            menu.subMenus.filter(
                               (submenu) => submenu.estado === 1,
                             ).length
                           }
@@ -99,7 +99,7 @@ const Menu = ({
                       className="collapse list-unstyled transition-03"
                       id={'mn' + index}
                     >
-                      {menu.submenu.map((submenu, indexm) => {
+                      {menu.subMenus.map((submenu, indexm) => {
                         const rutaCompleta = pathname;
                         const rutaBase = `${path}/${submenu.ruta}`;
 

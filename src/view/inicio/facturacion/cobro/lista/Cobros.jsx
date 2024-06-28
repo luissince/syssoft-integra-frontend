@@ -1,11 +1,9 @@
 import React from 'react';
-// import axios from 'axios';
 import {
   numberFormat,
   formatTime,
   spinnerLoading,
   alertDialog,
-  statePrivilegio,
   keyUpSearch,
   isEmpty,
   formatNumberWithZeros,
@@ -29,9 +27,9 @@ class Cobros extends CustomComponent {
   constructor(props) {
     super(props);
     this.state = {
-      add: statePrivilegio(this.props.token.userToken.menus[2].submenu[1].privilegio[0].estado),
-      view: statePrivilegio(this.props.token.userToken.menus[2].submenu[1].privilegio[1].estado),
-      remove: statePrivilegio(this.props.token.userToken.menus[2].submenu[1].privilegio[2].estado),
+      // add: statePrivilegio(this.props.token.userToken.menus[2].submenu[1].privilegio[0].estado),
+      // view: statePrivilegio(this.props.token.userToken.menus[2].submenu[1].privilegio[1].estado),
+      // remove: statePrivilegio(this.props.token.userToken.menus[2].submenu[1].privilegio[2].estado),
 
       loading: false,
       lista: [],
@@ -234,7 +232,7 @@ class Cobros extends CustomComponent {
               className="btn btn-outline-info btn-sm"
               title="Detalle"
               onClick={() => this.handleDetalle(item.idCobro)}
-              disabled={!this.state.view}
+              // disabled={!this.state.view}
             >
               <i className="fa fa-eye"></i>
             </button>
@@ -244,7 +242,7 @@ class Cobros extends CustomComponent {
               className="btn btn-outline-danger btn-sm"
               title="Eliminar"
               onClick={() => this.handleAnular(item.idCobro)}
-              disabled={!this.state.remove}
+              // disabled={!this.state.remove}
             >
               <i className="fa fa-remove"></i>
             </button>
@@ -295,7 +293,7 @@ class Cobros extends CustomComponent {
               <button
                 className="btn btn-outline-info"
                 onClick={this.handleCrear}
-                disabled={!this.state.add}
+                // disabled={!this.state.add}
               >
                 <i className="bi bi-file-plus"></i> Nuevo Registro
               </button>{' '}

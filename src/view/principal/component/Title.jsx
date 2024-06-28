@@ -27,7 +27,7 @@ const Title = ({ rutaImage, razonSocial, nombreEmpresa, documento, handleSignOut
           <div className="form-group text-center">
             <h4 className="text-dark">{razonSocial}</h4>
             <h5 className="text-dark">{nombreEmpresa}</h5>
-            <h5 className="text-secondary">Ruc: {documento}</h5>
+            <h5 className="text-secondary">{documento}</h5>
           </div>
         </div>
       </Column>

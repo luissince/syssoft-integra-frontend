@@ -4,7 +4,6 @@ import {
   alertSuccess,
   alertWarning,
   spinnerLoading,
-  statePrivilegio,
   keyUpSearch,
   alertInfo,
   isEmpty,
@@ -27,18 +26,18 @@ class Medidas extends CustomComponent {
     super(props);
 
     this.state = {
-      add: statePrivilegio(
-        this.props.token.userToken.menus[3].submenu[0].privilegio[0].estado,
-      ),
-      edit: statePrivilegio(
-        this.props.token.userToken.menus[3].submenu[0].privilegio[1].estado,
-      ),
-      remove: statePrivilegio(
-        this.props.token.userToken.menus[3].submenu[0].privilegio[2].estado,
-      ),
-      move: statePrivilegio(
-        this.props.token.userToken.menus[3].submenu[0].privilegio[3].estado,
-      ),
+      // add: statePrivilegio(
+      //   this.props.token.userToken.menus[3].submenu[0].privilegio[0].estado,
+      // ),
+      // edit: statePrivilegio(
+      //   this.props.token.userToken.menus[3].submenu[0].privilegio[1].estado,
+      // ),
+      // remove: statePrivilegio(
+      //   this.props.token.userToken.menus[3].submenu[0].privilegio[2].estado,
+      // ),
+      // move: statePrivilegio(
+      //   this.props.token.userToken.menus[3].submenu[0].privilegio[3].estado,
+      // ),
 
       loading: false,
       lista: [],

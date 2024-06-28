@@ -71,7 +71,8 @@ class RepVentas extends CustomComponent {
 
   async fetchComboComprobante(tipo) {
     const params = {
-      tipo: tipo,
+      "tipo": tipo,
+      "idSucursal": this.state.idSucursal
     };
 
     const response = await comboComprobante(

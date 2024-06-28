@@ -41,6 +41,9 @@ import Title from '../../../../components/Title';
 import Row from '../../../../components/Row';
 import Column from '../../../../components/Column';
 import { TableResponsive } from '../../../../components/Table';
+import Select from '../../../../components/Select';
+import Button from '../../../../components/Button';
+import Input from '../../../../components/Input';
 
 class CpeElectronicos extends CustomComponent {
 
@@ -75,8 +78,6 @@ class CpeElectronicos extends CustomComponent {
       idComprobante: '',
       estado: '0',
 
-      idSucursal: '',
-
       comprobantes: [],
       sucursales: [],
 
@@ -86,6 +87,7 @@ class CpeElectronicos extends CustomComponent {
       filasPorPagina: 10,
       messageTable: 'Cargando información...',
 
+      idSucursal: this.props.token.project.idSucursal,
       idUsuario: this.props.token.userToken.idUsuario,
     };
 
@@ -139,7 +141,8 @@ class CpeElectronicos extends CustomComponent {
 
   async fetchComprobante(tipo) {
     const params = {
-      tipo: tipo,
+      "tipo": tipo,
+      "idSucursal": this.state.idSucursal
     };
 
     const response = await comboComprobante(
@@ -297,7 +300,14 @@ class CpeElectronicos extends CustomComponent {
   }
 
   handleSelectSucursal = (event) => {
-    this.setState({ idSucursal: event.target.value }, () => {
+    this.setState({ idSucursal: event.target.value }, async () => {
+      const facturado = await this.fetchComprobante(VENTA);
+      const notaCredito = await this.fetchComprobante(NOTA_DE_CREDITO);
+      const guiaRemision = await this.fetchComprobante(GUIA_DE_REMISION);
+
+      const comprobantes = [...facturado, ...notaCredito, ...guiaRemision];
+
+      this.setState({ comprobantes })
       this.loadingInit();
     })
   }
@@ -627,6 +637,15 @@ class CpeElectronicos extends CustomComponent {
         <SpinnerView
           loading={this.state.initialLoad}
           message={this.state.initialMessage}
+          body={<>
+            <div className='d-flex flex-column align-items-center'>
+              <p>No se pudo obtener los datos requeridos, comuníquese con su proveedor del sistema.</p>
+              <Button
+                className='btn-danger'>
+                <i className='fa fa-refresh'></i> Recargar
+              </Button>
+            </div>
+          </>}
         />
 
         <Title
@@ -682,12 +701,12 @@ class CpeElectronicos extends CustomComponent {
         <Row>
           <Column>
             <div className="form-group">
-              <button
-                className="btn btn-outline-light"
+              <Button
+                className="btn-outline-light"
                 onClick={this.loadingInit}
               >
                 <i className="bi bi-arrow-clockwise"></i> Recargar Vista
-              </button>
+              </Button>
             </div>
           </Column>
         </Row>
@@ -696,8 +715,7 @@ class CpeElectronicos extends CustomComponent {
           <Column className="col-lg-3 col-md-3 col-sm-12 col-12">
             <div className="form-group">
               <label>Fecha de Inicio:</label>
-              <input
-                className="form-control"
+              <Input
                 type="date"
                 value={this.state.fechaInicio}
                 onChange={this.handleInputFechaInicio}
@@ -708,8 +726,7 @@ class CpeElectronicos extends CustomComponent {
           <Column className="col-lg-3 col-md-3 col-sm-12 col-12">
             <div className="form-group">
               <label>Fecha de Final:</label>
-              <input
-                className="form-control"
+              <Input
                 type="date"
                 value={this.state.fechaFinal}
                 onChange={this.handleInputFechaFinal}
@@ -720,33 +737,31 @@ class CpeElectronicos extends CustomComponent {
           <Column className="col-lg-3 col-md-3 col-sm-12 col-12">
             <div className="form-group">
               <label>Comprobantes:</label>
-              <select
-                className="form-control"
+              <Select
                 value={this.state.idComprobante}
                 onChange={this.handleSelectComprobante}
               >
                 <option value="">TODOS</option>
                 {
                   this.state.comprobantes.map((item, index) => (
-                    <option key={index} value={item.idComprobante}>{item.nombre}</option>
+                    <option key={index} value={item.idComprobante}>{item.nombre} - {item.serie}</option>
                   ))
                 }
-              </select>
+              </Select>
             </div>
           </Column>
 
           <Column className="col-lg-3 col-md-3 col-sm-12 col-12">
             <div className="form-group">
               <label>Estados:</label>
-              <select
-                className="form-control"
+              <Select
                 value={this.state.estado}
                 onChange={this.handleSelectEstado}
               >
                 <option value='0'>TODOS</option>
                 <option value='1'>POR DECLARAR</option>
                 <option value='2'>POR ANULAR</option>
-              </select>
+              </Select>
             </div>
           </Column>
         </Row>
@@ -761,11 +776,9 @@ class CpeElectronicos extends CustomComponent {
                     <i className="bi bi-search"></i>
                   </div>
                 </div>
-                <input
-                  type="text"
-                  className="form-control"
+                <Input
                   placeholder="Ingrese los datos requeridos..."
-                  ref={this.refTxtSearch}
+                  refInput={this.refTxtSearch}
                   onKeyUp={(event) => keyUpSearch(event, () => this.searchText(event.target.value))}
                 />
               </div>
@@ -775,8 +788,7 @@ class CpeElectronicos extends CustomComponent {
           <Column className="col-md-6 col-sm-12">
             <div className="form-group">
               <label>Sucursal:</label>
-              <select
-                className="form-control"
+              <Select
                 value={this.state.idSucursal}
                 onChange={this.handleSelectSucursal}
               >
@@ -785,7 +797,7 @@ class CpeElectronicos extends CustomComponent {
                     <option key={index} value={item.idSucursal}>{item.nombre}</option>
                   ))
                 }
-              </select>
+              </Select>
             </div>
           </Column>
         </Row>

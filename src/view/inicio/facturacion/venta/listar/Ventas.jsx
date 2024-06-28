@@ -170,7 +170,8 @@ class Ventas extends CustomComponent {
 
   async fetchComprobante(tipo) {
     const params = {
-      tipo: tipo,
+      "tipo": tipo,
+      "idSucursal": this.state.idSucursal
     };
 
     const response = await comboComprobante(
@@ -561,7 +562,7 @@ class Ventas extends CustomComponent {
                 <option value="">TODOS</option>
                 {
                   this.state.comprobantes.map((item, index) => (
-                    <option key={index} value={item.idComprobante}>{item.nombre}</option>
+                    <option key={index} value={item.idComprobante}>{item.nombre} - {item.serie}</option>
                   ))
                 }
               </Select>

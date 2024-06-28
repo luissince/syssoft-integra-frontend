@@ -31,7 +31,7 @@ services:
     # Conexión a la red llamada 'luis'
     networks:
       - luis
-    # Mapeo de puertos: Mapea el puerto 6000 del host al puerto 80 del contenedor
+    # Mapeo de puertos: Mapea el puerto 6010 del host al puerto 80 del contenedor
     ports:
       - 6010:80
     # Nombre del contenedor
@@ -49,7 +49,7 @@ services:
     # Conexión a la red llamada 'luis'
     networks:
       - luis
-    # Mapeo de puertos: Mapea el puerto 6000 del host al puerto 80 del contenedor
+    # Mapeo de puertos: Mapea el puerto 6014 del host al puerto 80 del contenedor
     ports:
       - 6014:80
     # Nombre del contenedor
@@ -67,7 +67,7 @@ services:
     # Conexión a la red llamada 'luis'
     networks:
       - luis
-    # Mapeo de puertos: Mapea el puerto 6000 del host al puerto 80 del contenedor
+    # Mapeo de puertos: Mapea el puerto 6018 del host al puerto 80 del contenedor
     ports:
       - 6018:80
     # Nombre del contenedor
@@ -85,7 +85,7 @@ services:
     # Conexión a la red llamada 'luis'
     networks:
       - luis
-    # Mapeo de puertos: Mapea el puerto 6000 del host al puerto 80 del contenedor
+    # Mapeo de puertos: Mapea el puerto 6022 del host al puerto 80 del contenedor
     ports:
       - 6022:80
     # Nombre del contenedor
@@ -103,7 +103,7 @@ services:
     # Conexión a la red llamada 'luis'
     networks:
       - luis
-    # Mapeo de puertos: Mapea el puerto 6000 del host al puerto 80 del contenedor
+    # Mapeo de puertos: Mapea el puerto 6026 del host al puerto 80 del contenedor
     ports:
       - 6026:80
     # Nombre del contenedor
@@ -121,7 +121,7 @@ services:
     # Conexión a la red llamada 'luis'
     networks:
       - luis
-    # Mapeo de puertos: Mapea el puerto 6000 del host al puerto 80 del contenedor
+    # Mapeo de puertos: Mapea el puerto 6030 del host al puerto 80 del contenedor
     ports:
       - 6030:80
     # Nombre del contenedor
@@ -139,11 +139,29 @@ services:
     # Conexión a la red llamada 'luis'
     networks:
       - luis
-    # Mapeo de puertos: Mapea el puerto 6000 del host al puerto 80 del contenedor
+    # Mapeo de puertos: Mapea el puerto 6034 del host al puerto 80 del contenedor
     ports:
       - 6034:80
     # Nombre del contenedor
     container_name: ferreteria-rym-frontend
+    # Configuración para reiniciar siempre el contenedor
+    restart: always
+
+  asiaticos-pcl-services:
+    # Configuración para construir la imagen del contenedor
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # Nombre de la imagen resultante
+    image: asiaticos-pcl-frontend-image
+    # Conexión a la red llamada 'luis'
+    networks:
+      - luis
+    # Mapeo de puertos: Mapea el puerto 6036 del host al puerto 80 del contenedor
+    ports:
+      - 6036:80
+    # Nombre del contenedor
+    container_name: asiaticos-pcl-frontend
     # Configuración para reiniciar siempre el contenedor
     restart: always
 

@@ -32,27 +32,31 @@ jobs:
       - name: Creando y ejecutando contenedor
         run: docker compose -f docker-compose.yml  up --build legrand-tiquepos-services -d
 
-  # build-and-deploy-app-raices:
-  #   runs-on: self-hosted
-  #   environment: raices
+  build-and-deploy-app-raices:
+    runs-on: self-hosted
+    environment: raices
       
-  #   env:  
-  #     VITE_APP_BACK_END: ${{ secrets.VITE_APP_BACK_END }}
-  #     VITE_APP_APIS_PERU: ${{ secrets.VITE_APP_APIS_PERU }}
+    env:  
+      VITE_APP_BACK_END: ${{ secrets.VITE_APP_BACK_END }}
+      VITE_APP_APIS_PERU: ${{ secrets.VITE_APP_APIS_PERU }}
+      VITE_APP_ENV: ${{ vars.VITE_APP_ENV }}
+      VITE_APP_VERSION: ${{ vars.VITE_APP_VERSION }}
       
-  #   steps:
-  #     - name: Checkout código
-  #       uses: actions/checkout@v3
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v3
       
-  #     - name: Crear archivo .env
-  #       run: |
-  #         cat > .env <<EOL
-  #         VITE_APP_BACK_END="${{env.VITE_APP_BACK_END}}"
-  #         VITE_APP_APIS_PERU="${{env.VITE_APP_APIS_PERU}}"
-  #         EOL
+      - name: Crear archivo .env
+        run: |
+          cat > .env <<EOL
+          VITE_APP_BACK_END="${{env.VITE_APP_BACK_END}}"
+          VITE_APP_APIS_PERU="${{env.VITE_APP_APIS_PERU}}"
+          VITE_APP_ENV="${{env.VITE_APP_ENV}}"
+          VITE_APP_VERSION="${{env.VITE_APP_VERSION}}"
+          EOL
       
-  #     - name: Creando y ejecutando contenedor
-  #       run: docker compose up --build raices-services -d
+      - name: Creando y ejecutando contenedor
+        run: docker compose up --build raices-services -d
 
   build-and-deploy-app-felicitygirls-tiquepos:
     runs-on: self-hosted
@@ -180,3 +184,29 @@ jobs:
       
       - name: Creando y ejecutando contenedor
         run: docker compose -f docker-compose.yml up --build ferreteria-rym-services -d
+
+  build-and-deploy-app-asiaticos-pcl:
+    runs-on: self-hosted
+    environment: asiaticos-pcl
+      
+    env:  
+      VITE_APP_BACK_END: ${{ secrets.VITE_APP_BACK_END }}
+      VITE_APP_APIS_PERU: ${{ secrets.VITE_APP_APIS_PERU }}
+      VITE_APP_ENV: ${{ vars.VITE_APP_ENV }}
+      VITE_APP_VERSION: ${{ vars.VITE_APP_VERSION }}
+      
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v3
+      
+      - name: Crear archivo .env
+        run: |
+          cat > .env <<EOL
+          VITE_APP_BACK_END="${{env.VITE_APP_BACK_END}}"
+          VITE_APP_APIS_PERU="${{env.VITE_APP_APIS_PERU}}"
+          VITE_APP_ENV="${{env.VITE_APP_ENV}}"
+          VITE_APP_VERSION="${{env.VITE_APP_VERSION}}"
+          EOL
+      
+      - name: Creando y ejecutando contenedor
+        run: docker compose -f docker-compose.yml up --build asiaticos-pcl-services -d

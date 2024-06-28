@@ -570,7 +570,7 @@ export async function deleteMoneda(params, signal) {
 | ENDPOINTS DE EMPRESA
 |--------------------------------------------------------------------------
 */
-export async function empresaConfig() {
+export async function configEmpresa() {
   return await Resolve.create(instancePrincipal.get('/api/empresa/config'));
 }
 

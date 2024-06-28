@@ -3,7 +3,6 @@ import {
   alertInfo,
   alertSuccess,
   alertWarning,
-  statePrivilegio,
   keyUpSearch,
   isEmpty,
   convertNullText,
@@ -34,18 +33,18 @@ class Productos extends CustomComponent {
   constructor(props) {
     super(props);
     this.state = {
-      add: statePrivilegio(
-        this.props.token.userToken.menus[3].submenu[1].privilegio[0].estado,
-      ),
-      view: statePrivilegio(
-        this.props.token.userToken.menus[3].submenu[1].privilegio[1].estado,
-      ),
-      edit: statePrivilegio(
-        this.props.token.userToken.menus[3].submenu[1].privilegio[2].estado,
-      ),
-      remove: statePrivilegio(
-        this.props.token.userToken.menus[3].submenu[1].privilegio[3].estado,
-      ),
+      // add: statePrivilegio(
+      //   this.props.token.userToken.menus[3].submenu[1].privilegio[0].estado,
+      // ),
+      // view: statePrivilegio(
+      //   this.props.token.userToken.menus[3].submenu[1].privilegio[1].estado,
+      // ),
+      // edit: statePrivilegio(
+      //   this.props.token.userToken.menus[3].submenu[1].privilegio[2].estado,
+      // ),
+      // remove: statePrivilegio(
+      //   this.props.token.userToken.menus[3].submenu[1].privilegio[3].estado,
+      // ),
 
       loading: false,
       lista: [],
@@ -301,7 +300,7 @@ class Productos extends CustomComponent {
               className='btn-outline-warning btn-sm'
               title="Editar"
               icono={<i className="bi bi-pencil"></i>}
-              disabled={!this.state.edit}
+              // disabled={!this.state.edit}
               onClick={() => this.handleEditar(item.idProducto)}
             />
           </td>
@@ -310,7 +309,7 @@ class Productos extends CustomComponent {
               className='btn-outline-danger btn-sm'
               title="Anular"
               icono={<i className="bi bi-trash"></i>}
-              disabled={!this.state.remove}
+              // disabled={!this.state.remove}
               onClick={() => this.handleEliminar(item.idProducto)}
             />
           </td>
@@ -350,7 +349,7 @@ class Productos extends CustomComponent {
               <button
                 className="btn btn-outline-info"
                 onClick={this.handleAgregar}
-                disabled={!this.state.add}
+                // disabled={!this.state.add}
               >
                 <i className="bi bi-file-plus"></i> Nuevo Registro
               </button>{' '}

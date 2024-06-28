@@ -6,7 +6,6 @@ import {
   alertSuccess,
   alertWarning,
   spinnerLoading,
-  statePrivilegio,
   keyUpSearch,
   isEmpty,
 } from '../../../../helper/utils.helper';
@@ -25,18 +24,18 @@ class Usuarios extends CustomComponent {
   constructor(props) {
     super(props);
     this.state = {
-      add: statePrivilegio(
-        this.props.token.userToken.menus[1].submenu[1].privilegio[0].estado,
-      ),
-      edit: statePrivilegio(
-        this.props.token.userToken.menus[1].submenu[1].privilegio[1].estado,
-      ),
-      remove: statePrivilegio(
-        this.props.token.userToken.menus[1].submenu[1].privilegio[2].estado,
-      ),
-      reset: statePrivilegio(
-        this.props.token.userToken.menus[1].submenu[1].privilegio[3].estado,
-      ),
+      // add: statePrivilegio(
+      //   this.props.token.userToken.menus[1].submenu[1].privilegio[0].estado,
+      // ),
+      // edit: statePrivilegio(
+      //   this.props.token.userToken.menus[1].submenu[1].privilegio[1].estado,
+      // ),
+      // remove: statePrivilegio(
+      //   this.props.token.userToken.menus[1].submenu[1].privilegio[2].estado,
+      // ),
+      // reset: statePrivilegio(
+      //   this.props.token.userToken.menus[1].submenu[1].privilegio[3].estado,
+      // ),
 
       loading: false,
       lista: [],
@@ -236,7 +235,7 @@ class Usuarios extends CustomComponent {
               className="btn btn-outline-warning btn-sm"
               title="Editar"
               onClick={() => this.handleEditar(item.idUsuario)}
-              disabled={!this.state.edit}
+              // disabled={!this.state.edit}
             >
               <i className="bi bi-pencil"></i>
             </button>
@@ -246,7 +245,7 @@ class Usuarios extends CustomComponent {
               className="btn btn-outline-danger btn-sm"
               title="Editar"
               onClick={() => this.handleBorrar(item.idUsuario)}
-              disabled={!this.state.remove}
+              // disabled={!this.state.remove}
             >
               <i className="bi bi-trash"></i>
             </button>
@@ -256,7 +255,7 @@ class Usuarios extends CustomComponent {
               className="btn btn-outline-info btn-sm"
               title="Resetear"
               onClick={() => this.handleResetear(item.idUsuario)}
-              disabled={!this.state.reset}
+              // disabled={!this.state.reset}
             >
               <i className="bi bi-key"></i>
             </button>
@@ -307,7 +306,7 @@ class Usuarios extends CustomComponent {
               <button
                 className="btn btn-outline-info"
                 onClick={this.handleAgregar}
-                disabled={!this.state.add}
+                // disabled={!this.state.add}
               >
                 <i className="bi bi-file-plus"></i> Nuevo Registro
               </button>{' '}

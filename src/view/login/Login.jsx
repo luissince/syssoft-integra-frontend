@@ -9,6 +9,7 @@ import Title from './component/Title';
 import Form from './component/Form';
 import { signIn } from '../../redux/principalSlice';
 import PropTypes from 'prop-types';
+import { isEmpty } from '../../helper/utils.helper';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -64,7 +65,7 @@ class Login extends CustomComponent {
 
     if (this.state.loading) return;
 
-    if (this.state.usuario === '') {
+    if (isEmpty(this.state.usuario)) {
       this.usuarioInput.current.focus();
       await this.setStateAsync({
         message: 'Ingrese su usuario para iniciar sesión.',
@@ -72,7 +73,7 @@ class Login extends CustomComponent {
       return;
     }
 
-    if (this.state.password === '') {
+    if (isEmpty(this.state.password)) {
       this.passwordInput.current.focus();
       await this.setStateAsync({
         message: 'Ingrese su contraseña para iniciar sesión.',
@@ -91,57 +92,10 @@ class Login extends CustomComponent {
 
     const response = await loginApi(data);
 
-    if (response instanceof SuccessReponse) {
-      const menus = response.data.menu.map((item) => {
-        let submenu = [];
-        for (let value of response.data.submenu) {
-          let privilegio = [];
-          if (item.idMenu === value.idMenu) {
-            for (let content of response.data.privilegio) {
-              if (
-                content.idSubMenu === value.idSubMenu &&
-                item.idMenu === content.idMenu
-              ) {
-                privilegio.push({
-                  estado: content.estado,
-                  idMenu: content.idMenu,
-                  idPrivilegio: content.idPrivilegio,
-                  idSubMenu: content.idSubMenu,
-                  nombre: content.nombre,
-                });
-              }
-            }
-
-            submenu.push({
-              estado: value.estado,
-              idMenu: value.idMenu,
-              idSubMenu: value.idSubMenu,
-              nombre: value.nombre,
-              ruta: value.ruta,
-              privilegio: privilegio,
-            });
-          }
-        }
-
-        return {
-          ...item,
-          submenu,
-        };
-      });
-
-      const user = {
-        apellidos: response.data.apellidos,
-        estado: response.data.estado,
-        idUsuario: response.data.idUsuario,
-        nombres: response.data.nombres,
-        rol: response.data.rol,
-        token: response.data.token,
-        menus,
-      };
-
-      window.localStorage.setItem('login', JSON.stringify(user));
+    if (response instanceof SuccessReponse) {   
+      window.localStorage.setItem('login', JSON.stringify(response.data));
       this.props.signIn({
-        token: user,
+        token: response.data,
         project: null
       });
     }

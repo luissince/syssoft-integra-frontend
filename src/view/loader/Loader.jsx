@@ -3,7 +3,7 @@ import '../../recursos/css/loader.css';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import {
-  empresaConfig,
+  configEmpresa,
   nacionalMoneda,
   validTokenApi,
 } from '../../network/rest/principal.network';
@@ -40,6 +40,9 @@ class Loader extends React.Component {
     this.props.setEmpresa(empresa)
 
     if (session) {
+      // TO DO:
+      // la variable session trae datos que rempleza al window.localStorage.getItem('login')
+      // console.log(session)
       const login = JSON.parse(window.localStorage.getItem('login'));
       const project = JSON.parse(window.localStorage.getItem('project'));
 
@@ -90,7 +93,7 @@ class Loader extends React.Component {
   }
 
   async fetchObtenerEmpresa() {
-    const response = await empresaConfig();
+    const response = await configEmpresa();
 
     if (response instanceof SuccessReponse) {
       return response.data;
@@ -102,8 +105,6 @@ class Loader extends React.Component {
       return null;
     }
   }
-
-
 
   clearLocalStorage() {
     window.localStorage.removeItem('login');
