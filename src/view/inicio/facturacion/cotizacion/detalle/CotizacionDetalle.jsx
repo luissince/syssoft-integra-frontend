@@ -1,6 +1,6 @@
 import ContainerWrapper from '../../../../../components/Container';
 import CustomComponent from '../../../../../model/class/custom-component';
-import { calculateTax, calculateTaxBruto, formatNumberWithZeros, formatTime, isText, numberFormat, rounded } from '../../../../../helper/utils.helper';
+import { calculateTax, calculateTaxBruto, formatNumberWithZeros, formatTime, getPathNavigation, isText, numberFormat, rounded } from '../../../../../helper/utils.helper';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
@@ -11,6 +11,8 @@ import { Table, TableResponsive } from '../../../../../components/Table';
 import Title from '../../../../../components/Title';
 import { SpinnerView } from '../../../../../components/Spinner';
 import printJS from 'print-js';
+import React from 'react';
+import { Link } from 'react-router-dom';
 
 class CotizacionDetalle extends CustomComponent {
 
@@ -41,8 +43,8 @@ class CotizacionDetalle extends CustomComponent {
       codiso: '',
       total: 0,
 
-      detalle: [],
-      salidas: []
+      detalles: [],
+      ventas: []
     };
 
     this.abortControllerView = new AbortController();
@@ -118,7 +120,7 @@ class CotizacionDetalle extends CustomComponent {
 
     } = cotizacion.cabecera;
 
-    const monto = cotizacion.detalle.reduce((accumlate, item) => accumlate + (item.precio * item.cantidad), 0,);
+    const monto = cotizacion.detalles.reduce((accumlate, item) => accumlate + (item.precio * item.cantidad), 0,);
 
     this.setState({
       idCotizacion: id,
@@ -139,8 +141,8 @@ class CotizacionDetalle extends CustomComponent {
       codiso: codiso,
       total: monto,
 
-      detalle: cotizacion.detalle,
-
+      detalles: cotizacion.detalles,
+      ventas: cotizacion.ventas,
       loading: false,
     });
   }
@@ -221,7 +223,7 @@ class CotizacionDetalle extends CustomComponent {
     let subTotal = 0;
     let total = 0;
 
-    for (const item of this.state.detalle) {
+    for (const item of this.state.detalles) {
       const cantidad = item.cantidad;
       const valor = item.precio;
 
@@ -237,7 +239,7 @@ class CotizacionDetalle extends CustomComponent {
     }
 
     const impuestosGenerado = () => {
-      const resultado = this.state.detalle.reduce((acc, item) => {
+      const resultado = this.state.detalles.reduce((acc, item) => {
         const total = item.cantidad * item.precio;
         const subTotal = calculateTaxBruto(item.porcentaje, total);
         const impuestoTotal = calculateTax(item.porcentaje, subTotal);
@@ -463,9 +465,9 @@ class CotizacionDetalle extends CustomComponent {
               }
               tBody={
                 <>
-                  {this.state.detalle.map((item, index) => (
+                  {this.state.detalles.map((item, index) => (
                     <tr key={index}>
-                      <td>{++index}</td>
+                      <td>{item.id}</td>
                       <td>{item.producto}</td>
                       <td className="text-right">
                         {numberFormat(item.precio, this.state.codiso)}
@@ -498,6 +500,47 @@ class CotizacionDetalle extends CustomComponent {
             />
           </Column>
         </Row>
+
+        <Row>
+          <Column>
+            <TableResponsive
+              className="table table-light table-striped"
+              title={"Ventas Asociadas"}
+              tHead={
+                <tr>
+                  <th>#</th>
+                  <th>Fecha</th>
+                  <th>Comprobante</th>
+                  <th>Estado</th>
+                </tr>
+              }
+              tBody={
+                <>
+                  {this.state.ventas.map((item, index) => (
+                    <tr key={index}>
+                      <td>{item.id}</td>
+                      <td>{item.fecha} <br /> {formatTime(item.hora)} </td>
+                      <td>
+                        <Link className="btn-link" to={getPathNavigation("venta", item.idVenta)}>
+                          {item.comprobante} <br /> {item.serie}-{formatNumberWithZeros(item.numeracion)}
+                        </Link>
+                      </td>
+                      <td>
+                        <React.Fragment>
+                          {item.estado === 1 && <span className="text-success">COBRADO</span>}
+                          {item.estado === 2 && <span className="text-warning">POR COBRAR</span>}
+                          {item.estado === 3 && <span className="text-danger">ANULADO</span>}
+                          {item.estado !== 1 && item.estado !== 2 && item.estado !== 3 && <span className="text-primary">POR LLEVAR</span>}
+                        </React.Fragment>
+                      </td>
+                    </tr>
+                  ))}
+                </>
+              }
+            />
+          </Column>
+        </Row>
+
       </ContainerWrapper>
     );
   }

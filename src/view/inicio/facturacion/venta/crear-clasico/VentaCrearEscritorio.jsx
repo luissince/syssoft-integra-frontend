@@ -112,6 +112,7 @@ class VentaCrearEscritorio extends CustomComponent {
 
       // Atributos del modal cotización
       isOpenCotizacion: false,
+      idCotizacion: "",
 
       // Atributos del modal venta
       isOpenVenta: false,
@@ -1157,7 +1158,7 @@ class VentaCrearEscritorio extends CustomComponent {
         }
       }
 
-      this.setState({ loading: false })
+      this.setState({ idCotizacion,loading: false })
     }
 
     if (response instanceof ErrorResponse) {
@@ -1786,6 +1787,7 @@ class VentaCrearEscritorio extends CustomComponent {
           idMoneda={this.state.idMoneda}
           idComprobante={this.state.idComprobante}
           codiso={this.state.codiso}
+          idCotizacion={this.state.idCotizacion}
           detalleVenta={this.state.detalleVenta}
           handleOpenImpresion={this.handleOpenImpresion}
         />

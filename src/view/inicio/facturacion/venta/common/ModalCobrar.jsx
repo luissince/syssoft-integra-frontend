@@ -242,6 +242,7 @@ class ModalCobrar extends CustomComponent {
       idImpuesto,
       idMoneda,
       idComprobante,
+      idCotizacion,
       detalleVenta
     } = this.props;
 
@@ -305,6 +306,7 @@ class ModalCobrar extends CustomComponent {
           idUsuario: idUsuario,
           estado: 1,
           nuevoCliente: nuevoCliente,
+          idCotizacion: idCotizacion,
           detalleVenta: detalleVenta,
           bancosAgregados: metodoPagosLista,
         };
@@ -1222,6 +1224,7 @@ ModalCobrar.propTypes = {
   idMoneda: PropTypes.string.isRequired,
   idComprobante: PropTypes.string.isRequired,
   codiso: PropTypes.string.isRequired,
+  idCotizacion: PropTypes.string,
   detalleVenta: PropTypes.array.isRequired,
   handleOpenImpresion: PropTypes.func.isRequired
 }
