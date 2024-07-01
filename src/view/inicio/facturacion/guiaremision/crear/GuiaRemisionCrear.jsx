@@ -874,7 +874,7 @@ class GuiaRemisionCrear extends CustomComponent {
 
     if (isEmpty(this.state.direccionLlegada)) {
       alertWarning("Guía de Remisión", "Ingrese la dirección de llegada.", () => {
-        this.refDireccionPartida.current.focus()
+        this.refDireccionLlegada.current.focus()
       })
       return;
     }
