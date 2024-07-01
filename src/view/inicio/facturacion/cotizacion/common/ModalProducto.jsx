@@ -178,6 +178,7 @@ class ModalProducto extends Component {
         existeDetalle.precio = parseFloat(precio);
       } else {
         existeDetalle.cantidad = parseFloat(cantidad);
+        existeDetalle.precio = parseFloat(precio);
       }
 
       existeDetalle.nombre = descripcion;
