@@ -1,6 +1,6 @@
 import ContainerWrapper from '../../../../../components/Container';
 import CustomComponent from '../../../../../model/class/custom-component';
-import { calculateTax, calculateTaxBruto, formatNumberWithZeros, formatTime, getPathNavigation, isText, numberFormat, rounded } from '../../../../../helper/utils.helper';
+import { calculateTax, calculateTaxBruto, formatNumberWithZeros, formatTime, getPathNavigation, isEmpty, isText, numberFormat, rounded } from '../../../../../helper/utils.helper';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
@@ -516,6 +516,12 @@ class CotizacionDetalle extends CustomComponent {
               }
               tBody={
                 <>
+                  {isEmpty(this.state.ventas) && (
+                    <tr>
+                      <td className="text-center" colSpan="4">¡No hay ventas asociadas!</td>
+                    </tr>
+                  )}
+
                   {this.state.ventas.map((item, index) => (
                     <tr key={index}>
                       <td>{item.id}</td>
