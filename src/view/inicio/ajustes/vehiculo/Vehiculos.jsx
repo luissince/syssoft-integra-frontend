@@ -204,7 +204,7 @@ class Vehiculo extends CustomComponent {
             <div
               className={`badge ${item.preferido == 1 ? 'badge-success' : 'badge-warning'}`}
             >
-              {item.preferida ? 'SI' : 'NO'}
+              {item.preferido === 1 ? 'SI' : 'NO'}
             </div>
           </td>
           <td className="text-center">

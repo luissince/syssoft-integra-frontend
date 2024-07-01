@@ -72,6 +72,8 @@ class GuiaRemisionDetalle extends CustomComponent {
     const [guiaRemision] = await Promise.all([
       this.fetchIdFactura(id)
     ]);
+    
+    console.log(guiaRemision)
 
     const {
       fecha,

@@ -865,7 +865,7 @@ class GuiaRemisionCrear extends CustomComponent {
       return;
     }
 
-    if (isEmpty(this.state.idUbigeoPartida)) {
+    if (isEmpty(this.state.idUbigeoPartida) || this.state.idUbigeoLlegada <= 0) {
       alertWarning("Guía de Remisión", "Selecciona el ubigeo de partida.", () => {
         this.refFiltrarUbigeoPartida.current.focus()
       })
@@ -879,7 +879,7 @@ class GuiaRemisionCrear extends CustomComponent {
       return;
     }
 
-    if (isEmpty(this.state.idUbigeoLlegada)) {
+    if (isEmpty(this.state.idUbigeoLlegada) || this.state.idUbigeoLlegada <= 0) {
       alertWarning("Guía de Remisión", "Selecciona el ubigeo de llegada.", () => {
         this.refFiltrarUbigeoLlegada.current.focus()
       })
