@@ -865,7 +865,7 @@ class GuiaRemisionCrear extends CustomComponent {
       return;
     }
 
-    if (isEmpty(this.state.idUbigeoPartida) || this.state.idUbigeoLlegada <= 0) {
+    if (isEmpty(this.state.idUbigeoPartida) || this.state.idUbigeoPartida <= 0) {
       alertWarning("Guía de Remisión", "Selecciona el ubigeo de partida.", () => {
         this.refFiltrarUbigeoPartida.current.focus()
       })
