@@ -391,7 +391,7 @@ class VentaDetalle extends CustomComponent {
               tHead={
                 <tr>
                   <th>#</th>
-                  <th>Concepto</th>
+                  <th>Descripción</th>
                   <th>Unidad</th>
                   <th>Categoría</th>
                   <th>Cantidad</th>
@@ -405,7 +405,11 @@ class VentaDetalle extends CustomComponent {
                   {this.state.detalle.map((item, index) => (
                     <tr key={index}>
                       <td>{++index}</td>
-                      <td>{item.producto}</td>
+                      <td>
+                        {item.codigo}
+                        <br />
+                        {item.producto}
+                      </td>
                       <td>{item.medida}</td>
                       <td>{item.categoria}</td>
                       <td className="text-right">{rounded(item.cantidad)}</td>

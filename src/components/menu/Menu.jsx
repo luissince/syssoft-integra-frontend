@@ -32,7 +32,7 @@ const Menu = ({
             <Image
               default={images.icono}
               src={`${empresa.rutaImage}`}
-              className="d-block mx-auto mb-2"
+              className="rounded-circle d-block mx-auto mb-2"
               alt={"Logo"}
               width={130}
             />

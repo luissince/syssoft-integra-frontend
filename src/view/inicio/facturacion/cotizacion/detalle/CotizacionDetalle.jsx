@@ -468,7 +468,11 @@ class CotizacionDetalle extends CustomComponent {
                   {this.state.detalles.map((item, index) => (
                     <tr key={index}>
                       <td>{item.id}</td>
-                      <td>{item.producto}</td>
+                      <td>
+                        {item.codigo}
+                        <br />
+                        {item.producto}
+                      </td>
                       <td className="text-right">
                         {numberFormat(item.precio, this.state.codiso)}
                       </td>
