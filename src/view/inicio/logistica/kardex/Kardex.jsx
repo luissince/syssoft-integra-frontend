@@ -5,6 +5,7 @@ import {
   rounded,
   convertNullText,
   numberFormat,
+  getPathNavigation,
 } from '../../../../helper/utils.helper';
 import ContainerWrapper from '../../../../components/Container';
 import CustomComponent from '../../../../model/class/custom-component';
@@ -20,8 +21,22 @@ import SearchInput from '../../../../components/SearchInput';
 import { CANCELED } from '../../../../model/types/types';
 import Title from '../../../../components/Title';
 import { SpinnerTable, SpinnerView } from '../../../../components/Spinner';
+import Row from '../../../../components/Row';
+import Column from '../../../../components/Column';
+import { Link } from 'react-router-dom';
+import PropTypes from 'prop-types';
+import { setKardexData, setKardexPaginacion } from '../../../../redux/predeterminadoSlice';
 
+/**
+ * Componente que representa una funcionalidad específica.
+ * @extends React.Component
+ */
 class Kardex extends CustomComponent {
+
+  /**
+   *
+   * Constructor
+   */
   constructor(props) {
     super(props);
 
@@ -72,16 +87,37 @@ class Kardex extends CustomComponent {
     this.abortControllerTable.abort();
   }
 
-  async loadingData() {
-    const [almacenes] = await Promise.all([
-      this.fetchComboAlmacen({ idSucursal: this.state.idSucursal })
-    ]);
 
-    await this.setStateAsync({
-      almacenes,
-      initialLoad: false,
-    });
+  loadingData = async () => {
+    if (this.props.kardex && this.props.kardex.data) {
+      this.setState(this.props.kardex.data)
+    } else {
+      const [almacenes] = await Promise.all([
+        this.fetchComboAlmacen({ idSucursal: this.state.idSucursal })
+      ]);
+
+      this.setState({
+        almacenes,
+        initialLoad: false,
+      }, () => {
+        this.updateReduxState();
+      });
+    }
+
   }
+
+  updateReduxState() {
+    this.props.setKardexData(this.state)
+    // this.props.setKardexPaginacion({
+    //   upperPageBound: this.refPaginacion.current.upperPageBound,
+    //   lowerPageBound: this.refPaginacion.current.lowerPageBound,
+    //   isPrevBtnActive: this.refPaginacion.current.isPrevBtnActive,
+    //   isNextBtnActive: this.refPaginacion.current.isNextBtnActive,
+    //   pageBound: this.refPaginacion.current.pageBound,
+    //   messagePaginacion: this.refPaginacion.current.messagePaginacion,
+    // });
+  }
+
 
   async fetchComboAlmacen(params) {
     const response = await comboAlmacen(params, this.abortControllerTable.signal);
@@ -160,6 +196,8 @@ class Kardex extends CustomComponent {
       cantidad: cantidad,
       costo: costo,
       loading: false,
+    },()=>{
+      this.updateReduxState();
     });
   }
 
@@ -225,7 +263,7 @@ class Kardex extends CustomComponent {
   // Generar Body HTML
   //------------------------------------------------------------------------------------------
 
-  bodyTable() {
+  generateBody() {
     const { loading, lista, messageTable } = this.state;
 
     if (loading) {
@@ -268,7 +306,11 @@ class Kardex extends CustomComponent {
             <br />
             {formatTime(item.hora)}
           </td>
-          <td>{item.detalle}</td>
+          <td>
+            <Link className="btn-link" to={getPathNavigation(item.opcion, item.idNavegacion)}>
+              {item.detalle} <i className='bi bi-hand-index-fill'></i>
+            </Link>
+          </td>
 
           <td className="bg-success text-white">
             {item.tipo === 'INGRESO' ? '+' + rounded(item.cantidad) : ''}
@@ -321,8 +363,8 @@ class Kardex extends CustomComponent {
           subTitle='LISTA'
         />
 
-        <div className="row">
-          <div className="col-md-9 col-12">
+        <Row>
+          <Column className="col-md-9 col-12">
             <label>Filtrar los productos por código o nombre:</label>
             <SearchInput
               showLeftIcon={true}
@@ -340,39 +382,37 @@ class Kardex extends CustomComponent {
                 </>
               )}
             />
-          </div>
+          </Column>
 
-          <div className="col-md-3 col-12">
+          <Column className="col-md-3 col-12" formGroup={true}>
             <label>Almacen:</label>
-            <div className="form-group">
-              <div className="input-group">
-                <div className="input-group-prepend">
-                  <div className="input-group-text">
-                    <i className="fa fa-building"></i>
-                  </div>
+            <div className="input-group">
+              <div className="input-group-prepend">
+                <div className="input-group-text">
+                  <i className="fa fa-building"></i>
                 </div>
-                <select
-                  className="form-control"
-                  ref={this.refIdAlmacen}
-                  value={this.state.idAlmacen}
-                  onChange={this.handleSelectAlmacen}
-                >
-                  <option value="">-- Almacen --</option>
-                  {this.state.almacenes.map((item, index) => {
-                    return (
-                      <option key={index} value={item.idAlmacen}>
-                        {item.nombre}
-                      </option>
-                    );
-                  })}
-                </select>
               </div>
+              <select
+                className="form-control"
+                ref={this.refIdAlmacen}
+                value={this.state.idAlmacen}
+                onChange={this.handleSelectAlmacen}
+              >
+                <option value="">-- Almacen --</option>
+                {this.state.almacenes.map((item, index) => {
+                  return (
+                    <option key={index} value={item.idAlmacen}>
+                      {item.nombre}
+                    </option>
+                  );
+                })}
+              </select>
             </div>
-          </div>
-        </div>
+          </Column>
+        </Row>
 
-        <div className="row mb-1">
-          <div className="col">
+        <Row>
+          <Column formGroup={true}>
             <h5>Información del Producto</h5>
             <p>
               <strong>Nombre del Producto:</strong>{' '}
@@ -389,11 +429,11 @@ class Kardex extends CustomComponent {
               <strong>Valor del Producto:</strong>{' '}
               {numberFormat(costo, this.state.codISO)}
             </p>
-          </div>
-        </div>
+          </Column>
+        </Row>
 
-        <div className="row">
-          <div className="col">
+        <Row>
+          <Column>
             <div className="table-responsive">
               <table className="table table-bordered rounded">
                 <thead>
@@ -458,14 +498,33 @@ class Kardex extends CustomComponent {
                   </tr>
                 </thead>
 
-                <tbody>{this.bodyTable()}</tbody>
+                <tbody>{this.generateBody()}</tbody>
               </table>
             </div>
-          </div>
-        </div>
+          </Column>
+        </Row>
       </ContainerWrapper>
     );
   }
+}
+
+Kardex.propTypes = {
+  token: PropTypes.shape({
+    userToken: PropTypes.shape({
+      idUsuario: PropTypes.string.isRequired,
+    }).isRequired,
+    project: PropTypes.shape({
+      idSucursal: PropTypes.string.isRequired,
+    }).isRequired,
+  }).isRequired,
+  kardex: PropTypes.shape({
+    data: PropTypes.object,
+    paginacion: PropTypes.object
+  }),
+  setKardexData: PropTypes.func,
+  setKardexPaginacion: PropTypes.func,
+  moneda: PropTypes.object,
+  history: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
 }
 
 /**
@@ -476,13 +535,16 @@ const mapStateToProps = (state) => {
   return {
     token: state.principal,
     moneda: state.predeterminado.moneda,
+    kardex: state.predeterminado.kardex
   };
 };
+
+const mapDispatchToProps = { setKardexData, setKardexPaginacion }
 
 /**
  *
  * Método encargado de conectar con redux y exportar la clase
  */
-const ConnectedKardex = connect(mapStateToProps, null)(Kardex);
+const ConnectedKardex = connect(mapStateToProps, mapDispatchToProps)(Kardex);
 
 export default ConnectedKardex;

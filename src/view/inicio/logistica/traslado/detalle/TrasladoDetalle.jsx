@@ -1,5 +1,4 @@
 import {
-  spinnerLoading,
   formatTime,
   rounded,
   isText,
@@ -11,6 +10,10 @@ import ErrorResponse from '../../../../../model/class/error-response';
 import { detailTraslado } from '../../../../../network/rest/principal.network';
 import { CANCELED } from '../../../../../model/types/types';
 import { connect } from 'react-redux';
+import { SpinnerView } from '../../../../../components/Spinner';
+import Title from '../../../../../components/Title';
+import Row from '../../../../../components/Row';
+import Column from '../../../../../components/Column';
 
 class TrasladoDetalle extends CustomComponent {
   constructor(props) {
@@ -99,24 +102,19 @@ class TrasladoDetalle extends CustomComponent {
 
     return (
       <ContainerWrapper>
-        {this.state.loading && spinnerLoading(this.state.msgLoading)}
+        <SpinnerView
+          loading={this.state.loading}
+          message={this.state.msgLoading}
+        />
 
-        <div className="row">
-          <div className="col">
-            <div className="form-group">
-              <h5>
-                <span role="button" onClick={() => this.props.history.goBack()}>
-                  <i className="bi bi-arrow-left-short"></i>
-                </span>
-                Ajuste <small className="text-secondary">detalle</small>
-              </h5>
-            </div>
-          </div>
-        </div>
+        <Title
+          title={"Traslado"}
+          subTitle={"DETALLE"}
+          handleGoBack={() => this.props.history.goBack()}
+        />
 
-        <div className="row">
-          <div className="col">
-            <div className="form-group">
+        <Row>
+          <Column formGroup={true}>
               <div className="table-responsive">
                 <table width="100%">
                   <thead>
@@ -190,12 +188,11 @@ class TrasladoDetalle extends CustomComponent {
                   </thead>
                 </table>
               </div>
-            </div>
-          </div>
-        </div>
+          </Column>
+        </Row>
 
-        <div className="row">
-          <div className="col">
+        <Row>
+          <Column>
             <p className="lead">Detalle</p>
             <div className="table-responsive">
               <table className="table table-light table-striped">
@@ -227,8 +224,8 @@ class TrasladoDetalle extends CustomComponent {
                 </tbody>
               </table>
             </div>
-          </div>
-        </div>
+          </Column>
+        </Row>
       </ContainerWrapper>
     );
   }

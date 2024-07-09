@@ -291,7 +291,7 @@ class ModalVenta extends CustomComponent {
                                             <th width="5%">Estado</th>
                                             <th width="10%" className="text-center">Total</th>
                                             <th width="5%" className="text-center">
-                                                Usar
+                                                Seleccionar
                                             </th>
                                         </tr>
                                     }

@@ -13,6 +13,7 @@ import { currentDate } from '../../../../../helper/utils.helper';
 import CustomComponent from '../../../../../model/class/custom-component';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
+import PropTypes from 'prop-types';
 import {
   cancelTraslado,
   comboSucursal,
@@ -30,8 +31,18 @@ import Button from '../../../../../components/Button';
 import { TableResponsive } from '../../../../../components/Table';
 import Title from '../../../../../components/Title';
 import Search from '../../../../../components/Search';
+import { setListaTrasladoData, setListaTrasladoPaginacion } from '../../../../../redux/predeterminadoSlice';
 
+/**
+ * Componente que representa una funcionalidad específica.
+ * @extends React.Component
+ */
 class Traslado extends CustomComponent {
+
+  /**
+   *
+   * Constructor
+   */
   constructor(props) {
     super(props);
 
@@ -62,34 +73,58 @@ class Traslado extends CustomComponent {
       idUsuario: this.props.token.userToken.idUsuario,
     };
 
-    this.refTxtSearch = React.createRef();
+    this.refPaginacion = React.createRef();
 
     this.abortControllerTable = new AbortController();
   }
 
   async componentDidMount() {
-    this.loadingData();
+    await this.loadingData();
   }
 
   componentWillUnmount() {
     this.abortControllerTable.abort();
   }
 
-  async loadingData() {
-    const [tipoTraslado, sucursales] = await Promise.all([
-      this.fetchComboTipoTraslado(),
-      this.fetchSucursal(),
-    ]);
+  loadingData = async () => {
+    if (this.props.trasladoLista && this.props.trasladoLista.data && this.props.trasladoLista.paginacion) {
+      this.setState(this.props.trasladoLista.data)
+      this.refPaginacion.current.upperPageBound = this.props.trasladoLista.paginacion.upperPageBound;
+      this.refPaginacion.current.lowerPageBound = this.props.trasladoLista.paginacion.lowerPageBound;
+      this.refPaginacion.current.isPrevBtnActive = this.props.trasladoLista.paginacion.isPrevBtnActive;
+      this.refPaginacion.current.isNextBtnActive = this.props.trasladoLista.paginacion.isNextBtnActive;
+      this.refPaginacion.current.pageBound = this.props.trasladoLista.paginacion.pageBound;
+      this.refPaginacion.current.messagePaginacion = this.props.trasladoLista.paginacion.messagePaginacion;
+    } else {
+      const [tipoTraslado, sucursales] = await Promise.all([
+        this.fetchComboTipoTraslado(),
+        this.fetchSucursal(),
+      ]);
 
-    await this.setStateAsync({
-      tipoTraslado,
-      sucursales,
-      initialLoad: false,
-    });
-    this.loadInit();
+      this.setState({
+        tipoTraslado,
+        sucursales,
+        initialLoad: false,
+      }, async () => {
+        await this.loadingInit();
+        this.updateReduxState();
+      });
+    }
   }
 
-  loadInit = async () => {
+  updateReduxState() {
+    this.props.setListaTrasladoData(this.state)
+    this.props.setListaTrasladoPaginacion({
+      upperPageBound: this.refPaginacion.current.upperPageBound,
+      lowerPageBound: this.refPaginacion.current.lowerPageBound,
+      isPrevBtnActive: this.refPaginacion.current.isPrevBtnActive,
+      isNextBtnActive: this.refPaginacion.current.isNextBtnActive,
+      pageBound: this.refPaginacion.current.pageBound,
+      messagePaginacion: this.refPaginacion.current.messagePaginacion,
+    });
+  }
+
+  loadingInit = async () => {
     if (this.state.loading) return;
 
     await this.setStateAsync({ paginacion: 1, restart: true });
@@ -186,6 +221,8 @@ class Traslado extends CustomComponent {
         loading: false,
         lista: response.data.result,
         totalPaginacion: totalPaginacion,
+      },()=>{
+        this.updateReduxState();
       });
     }
 
@@ -280,7 +317,7 @@ class Traslado extends CustomComponent {
 
         if (response instanceof SuccessReponse) {
           alertSuccess('Ajuste', response.data, () => {
-            this.loadInit();
+            this.loadingInit();
           });
         }
 
@@ -385,13 +422,6 @@ class Traslado extends CustomComponent {
 
         <Row>
           <Column className="col-md-6 col-sm-12" formGroup={true}>
-            <Search
-              onSearch={this.searchText}
-              placeholder="Buscar..."
-            />
-          </Column>
-
-          <Column className="col-md-6 col-sm-12" formGroup={true}>
             <Button
               className="btn-outline-info"
               onClick={this.handleAgregar}
@@ -400,7 +430,7 @@ class Traslado extends CustomComponent {
             </Button>{' '}
             <Button
               className="btn-outline-secondary"
-              onClick={this.loadInit}
+              onClick={this.loadingInit}
             >
               <i className="bi bi-arrow-clockwise"></i>
             </Button>
@@ -457,6 +487,15 @@ class Traslado extends CustomComponent {
         </Row>
 
         <Row>
+          <Column className="col-md-6 col-sm-12" formGroup={true}>
+            <Search
+              onSearch={this.searchText}
+              placeholder="Buscar..."
+            />
+          </Column>
+        </Row>
+
+        <Row>
           <Column>
             <TableResponsive
               className={"table table-striped table-bordered rounded"}
@@ -485,6 +524,7 @@ class Traslado extends CustomComponent {
         </Row>
 
         <Paginacion
+          ref={this.refPaginacion}
           loading={this.state.loading}
           data={this.state.lista}
           totalPaginacion={this.state.totalPaginacion}
@@ -497,6 +537,25 @@ class Traslado extends CustomComponent {
   }
 }
 
+Traslado.propTypes = {
+  token: PropTypes.shape({
+    userToken: PropTypes.shape({
+      idUsuario: PropTypes.string.isRequired,
+    }).isRequired,
+    project: PropTypes.shape({
+      idSucursal: PropTypes.string.isRequired,
+    }).isRequired,
+  }).isRequired,
+  trasladoLista: PropTypes.shape({
+    data: PropTypes.object,
+    paginacion: PropTypes.object
+  }),
+  setListaTrasladoData: PropTypes.func,
+  setListaTrasladoPaginacion: PropTypes.func,
+  history: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
+  location: PropTypes.object
+}
+
 /**
  *
  * Método encargado de traer la información de redux
@@ -504,14 +563,17 @@ class Traslado extends CustomComponent {
 const mapStateToProps = (state) => {
   return {
     token: state.principal,
+    trasladoLista: state.predeterminado.trasladoLista
   };
 };
+
+const mapDispatchToProps = { setListaTrasladoData, setListaTrasladoPaginacion }
 
 /**
  *
  * Método encargado de conectar con redux y exportar la clase
  */
 
-const ConnectedTraslado = connect(mapStateToProps, null)(Traslado);
+const ConnectedTraslado = connect(mapStateToProps, mapDispatchToProps)(Traslado);
 
 export default ConnectedTraslado;

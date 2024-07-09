@@ -12,6 +12,12 @@ const Menu = (props) => {
   const handleCloseSucursal = () => {
     window.localStorage.removeItem('project');
     props.clearListaVenta();
+    props.clearListaCotizacion();
+    props.clearListaAjuste();
+    props.clearListaProducto();
+    props.clearListaInventario();
+    props.clearKardex();
+    props.clearListaTraslado();
     props.clearNoticacion();
     props.projectClose();
   }
@@ -156,8 +162,16 @@ Menu.propTypes = {
     push: PropTypes.func
   }),
   signOut: PropTypes.func,
+
   clearListaVenta: PropTypes.func,
+  clearListaCotizacion: PropTypes.func,
+  clearListaAjuste: PropTypes.func,
+  clearListaProducto: PropTypes.func,
+  clearListaInventario: PropTypes.func,
+  clearKardex: PropTypes.func,
+  clearListaTraslado: PropTypes.func,
   clearNoticacion: PropTypes.func,
+
   projectClose: PropTypes.func,
   openAndClose: PropTypes.func,
   notificaciones: PropTypes.array,

@@ -78,17 +78,17 @@ class ModalCotizacion extends CustomComponent {
                 this.fillTable(0);
                 break;
             case 1:
-                this.fillTable(1, '');
+                this.fillTable(1, this.state.buscar);
                 break;
             case 2:
-                this.fillTable(2, '', this.state.fechaInicio, this.state.fechaFinal);
+                this.fillTable(2);
                 break;
             default:
                 this.fillTable(0);
         }
     };
 
-    fillTable = async (opcion, buscar = '', fechaInicio = '', fechaFinal = '') => {
+    fillTable = async (opcion, buscar = '') => {
         this.setState({
             loading: true,
             lista: [],
@@ -98,9 +98,10 @@ class ModalCotizacion extends CustomComponent {
         const params = {
             opcion: opcion,
             buscar: buscar,
-            fechaInicio: fechaInicio,
-            fechaFinal: fechaFinal,
+            fechaInicio: this.state.fechaInicio,
+            fechaFinal: this.state.fechaFinal,
             idSucursal: this.props.idSucursal,
+            ligado: -1,
             estado: 1,
             posicionPagina: (this.state.paginacion - 1) * this.state.filasPorPagina,
             filasPorPagina: this.state.filasPorPagina,
@@ -188,7 +189,9 @@ class ModalCotizacion extends CustomComponent {
                     <td>{item.comprobante}<br />{item.serie}-{formatNumberWithZeros(item.numeracion)}</td>
                     <td className='text-center'>{estado}</td>
                     <td className='text-center'>
-                        <span className={item.ligado == 0 ? 'badge badge-secondary' : 'badge badge-success'}>{item.ligado}</span>
+                        <span className={item.ligado == 0 ? 'badge badge-secondary' : 'badge badge-success'}>
+                            {item.ligado}
+                        </span>
                     </td>
                     <td className='text-center'>{numberFormat(item.total, item.codiso)} </td>
                     <td className="text-center">
@@ -235,48 +238,42 @@ class ModalCotizacion extends CustomComponent {
                 body={
                     <div className='p-3'>
                         <Row>
-                            <Column className={"col-md-6 col-12"}>
-                                <div className="form-group">
-                                    <label><i className="fa fa-search"></i> Buscar por N° de Cotización o Cliente:</label>
-                                    <div className="input-group">
-                                        <Input
-                                            placeholder="Buscar..."
-                                            value={buscar}
-                                            onChange={this.handleInputBuscar}
-                                            onKeyUp={(event) => keyUpSearch(event, () => this.handleSearchText(buscar))}
+                            <Column className={"col-md-6 col-12"} formGroup={true}>
+                                <label><i className="fa fa-search"></i> Buscar por N° de Cotización o Cliente:</label>
+                                <div className="input-group">
+                                    <Input
+                                        placeholder="Buscar..."
+                                        value={buscar}
+                                        onChange={this.handleInputBuscar}
+                                        onKeyUp={(event) => keyUpSearch(event, () => this.handleSearchText(buscar))}
+                                    />
+                                    <div className="input-group-append">
+                                        <Button
+                                            className="btn-outline-secondary"
+                                            title="Recargar"
+                                            icono={<i className="bi bi-arrow-clockwise"></i>}
+                                            onClick={this.loadInit}
                                         />
-                                        <div className="input-group-append">
-                                            <Button
-                                                className="btn-outline-secondary"
-                                                title="Recargar"
-                                                icono={<i className="bi bi-arrow-clockwise"></i>}
-                                                onClick={this.loadInit}
-                                            />
-                                        </div>
                                     </div>
                                 </div>
                             </Column>
 
-                            <Column>
-                                <div className="form-group">
-                                    <label><i className="fa fa-calendar"></i> Fecha Inicio:</label>
-                                    <Input
-                                        type='date'
-                                        value={fechaInicio}
-                                        onChange={this.handleFechaInicio}
-                                    />
-                                </div>
+                            <Column formGroup={true}>
+                                <label><i className="fa fa-calendar"></i> Fecha Inicio:</label>
+                                <Input
+                                    type='date'
+                                    value={fechaInicio}
+                                    onChange={this.handleFechaInicio}
+                                />
                             </Column>
 
-                            <Column>
-                                <div className="form-group">
-                                    <label><i className="fa fa-calendar"></i> Fecha  Final:</label>
-                                    <Input
-                                        type='date'
-                                        value={fechaFinal}
-                                        onChange={this.handleFechaFinal}
-                                    />
-                                </div>
+                            <Column formGroup={true}>
+                                <label><i className="fa fa-calendar"></i> Fecha Final:</label>
+                                <Input
+                                    type='date'
+                                    value={fechaFinal}
+                                    onChange={this.handleFechaFinal}
+                                />
                             </Column>
                         </Row>
 
@@ -293,7 +290,7 @@ class ModalCotizacion extends CustomComponent {
                                             <th width="5%">Ligado</th>
                                             <th width="10%" className="text-center">Total</th>
                                             <th width="5%" className="text-center">
-                                                Usar
+                                                Seleccionar
                                             </th>
                                         </tr>
                                     }

@@ -107,8 +107,8 @@ class Ventas extends CustomComponent {
   */
 
   /**
-* @description Método que se ejecuta después de que el componente se haya montado en el DOM.
-*/
+  * @description Método que se ejecuta después de que el componente se haya montado en el DOM.
+  */
   async componentDidMount() {
     await this.loadingData();
   }
@@ -149,8 +149,8 @@ class Ventas extends CustomComponent {
       this.setState({
         comprobantes,
         initialLoad: false,
-      }, () => {
-        this.loadingInit();
+      }, async () => {
+        await this.loadingInit();
         this.updateReduxState();
       });
     }

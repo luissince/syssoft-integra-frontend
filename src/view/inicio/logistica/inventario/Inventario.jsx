@@ -10,9 +10,9 @@ import {
   isNumeric,
   alertSuccess,
 } from '../../../../helper/utils.helper';
+import PropTypes from 'prop-types';
 import ContainerWrapper from '../../../../components/Container';
 import Paginacion from '../../../../components/Paginacion';
-import { keyUpSearch } from '../../../../helper/utils.helper';
 import CustomComponent from '../../../../model/class/custom-component';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
@@ -31,8 +31,19 @@ import Column from '../../../../components/Column';
 import { TableResponsive } from '../../../../components/Table';
 import CustomModalStock from './component/ModalStock';
 import Select from '../../../../components/Select';
+import Search from '../../../../components/Search';
+import { setListaInventarioData, setListaInventarioPaginacion } from '../../../../redux/predeterminadoSlice';
 
+/**
+ * Componente que representa una funcionalidad específica.
+ * @extends React.Component
+ */
 class Inventario extends CustomComponent {
+
+  /**
+   *
+   * Constructor
+   */
   constructor(props) {
     super(props);
 
@@ -52,6 +63,8 @@ class Inventario extends CustomComponent {
       idAlmacen: '',
       almacenes: [],
 
+      buscar: '',
+
       opcion: 0,
       paginacion: 0,
       totalPaginacion: 0,
@@ -63,6 +76,8 @@ class Inventario extends CustomComponent {
       idSucursal: this.props.token.project.idSucursal,
       idUsuario: this.props.token.userToken.idUsuario,
     };
+
+    this.refPaginacion = React.createRef();
 
     this.refModalStock = React.createRef();
 
@@ -76,26 +91,6 @@ class Inventario extends CustomComponent {
 
   async componentDidMount() {
     await this.loadingData();
-
-    // viewModal(this.idModalStock, async () => {
-    //   this.refStockMinimo.current.focus();
-
-    //   const stock = await this.fetchObtenerStockInvetario();
-
-    //   this.setState({
-    //     stockMinimo: stock.cantidadMinima,
-    //     stockMaximo: stock.cantidadMaxima,
-    //     loadingModal: false,
-    //   });
-    // });
-
-    // clearModal(this.idModalStock, async () => {
-    //   this.setState({
-    //     stockMinimo: '',
-    //     stockMaximo: '',
-    //     loadingModal: true,
-    //   });
-    // });
   }
 
   componentWillUnmount() {
@@ -103,16 +98,42 @@ class Inventario extends CustomComponent {
   }
 
   async loadingData() {
-    const [almacenes] = await Promise.all([
-      this.fetchComboAlmacen({ idSucursal: this.state.idSucursal })
-    ]);
+    if (this.props.inventarioLista && this.props.inventarioLista.data && this.props.inventarioLista.paginacion) {
+      this.setState(this.props.inventarioLista.data)
+      this.refPaginacion.current.upperPageBound = this.props.inventarioLista.paginacion.upperPageBound;
+      this.refPaginacion.current.lowerPageBound = this.props.inventarioLista.paginacion.lowerPageBound;
+      this.refPaginacion.current.isPrevBtnActive = this.props.inventarioLista.paginacion.isPrevBtnActive;
+      this.refPaginacion.current.isNextBtnActive = this.props.inventarioLista.paginacion.isNextBtnActive;
+      this.refPaginacion.current.pageBound = this.props.inventarioLista.paginacion.pageBound;
+      this.refPaginacion.current.messagePaginacion = this.props.inventarioLista.paginacion.messagePaginacion;
+    } else {
+      const [almacenes] = await Promise.all([
+        this.fetchComboAlmacen({ idSucursal: this.state.idSucursal })
+      ]);
 
-    this.setState({ almacenes, initialLoad: false }, async () => {
-      await this.loadInit();
+      this.setState({
+        almacenes,
+        initialLoad: false
+      }, async () => {
+        await this.loadingInit();
+        this.updateReduxState();
+      });
+    }
+  }
+
+  updateReduxState() {
+    this.props.setListaInventarioData(this.state)
+    this.props.setListaInventarioPaginacion({
+      upperPageBound: this.refPaginacion.current.upperPageBound,
+      lowerPageBound: this.refPaginacion.current.lowerPageBound,
+      isPrevBtnActive: this.refPaginacion.current.isPrevBtnActive,
+      isNextBtnActive: this.refPaginacion.current.isNextBtnActive,
+      pageBound: this.refPaginacion.current.pageBound,
+      messagePaginacion: this.refPaginacion.current.messagePaginacion,
     });
   }
 
-  loadInit = async () => {
+  loadingInit = async () => {
     if (this.state.loading) return;
 
     await this.setStateAsync({ paginacion: 1, restart: true });
@@ -128,13 +149,13 @@ class Inventario extends CustomComponent {
   onEventPaginacion = () => {
     switch (this.state.opcion) {
       case 0:
-        this.fillTable(0, '');
+        this.fillTable(0);
         break;
       case 1:
-        this.fillTable(1, this.refTxtSearch.current.value);
+        this.fillTable(1, this.state.buscar);
         break;
       default:
-        this.fillTable(0, '');
+        this.fillTable(0);
     }
   };
 
@@ -143,12 +164,12 @@ class Inventario extends CustomComponent {
 
     if (text.trim().length === 0) return;
 
-    await this.setStateAsync({ paginacion: 1, restart: false });
+    await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
     this.fillTable(1, text.trim());
     await this.setStateAsync({ opcion: 1 });
   }
 
-  fillTable = async (opcion, buscar) => {
+  fillTable = async (opcion, buscar = '') => {
     this.setState({
       loading: true,
       lista: [],
@@ -175,6 +196,8 @@ class Inventario extends CustomComponent {
         loading: false,
         lista: result,
         totalPaginacion: totalPaginacion,
+      },()=>{
+        this.updateReduxState();
       });
     }
 
@@ -298,7 +321,7 @@ class Inventario extends CustomComponent {
 
         if (response instanceof SuccessReponse) {
           alertSuccess('Inventario', response.data, () => {
-            this.loadInit();
+            this.loadingInit();
           });
         }
 
@@ -312,7 +335,7 @@ class Inventario extends CustomComponent {
   };
 
   handleSelectAlmacen = (event) => {
-    this.setState({ idAlmacen: event.target.value }, () => this.loadInit());
+    this.setState({ idAlmacen: event.target.value }, () => this.loadingInit());
   };
 
   //------------------------------------------------------------------------------------------
@@ -409,76 +432,52 @@ class Inventario extends CustomComponent {
         />
 
         <Row>
-          <Column className="col-md-6 col-sm-12">
-            <div className="form-group">
-              <div className="input-group">
-                <div className="input-group-prepend">
-                  <div className="input-group-text">
-                    <i className="bi bi-search"></i>
-                  </div>
+          <Column className="col-md-6 col-sm-12" formGroup={true}>
+            <Search
+              onSearch={this.searchText}
+              placeholder="Buscar..."
+            />
+          </Column>
+
+          <Column className="col-md-3 col-sm-12" formGroup={true}>
+            <div className="input-group">
+              <div className="input-group-prepend">
+                <div className="input-group-text">
+                  <i className="fa fa-building"></i>
                 </div>
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Filtre por datos del producto..."
-                  ref={this.refTxtSearch}
-                  onKeyUp={(event) =>
-                    keyUpSearch(event, () =>
-                      this.searchText(event.target.value),
-                    )
-                  }
-                />
               </div>
+              <Select
+                value={this.state.idAlmacen}
+                onChange={this.handleSelectAlmacen}>
+                <option value={''}>-- Almacen --</option>
+                {this.state.almacenes.map((item, index) => {
+                  return (
+                    <option key={index} value={item.idAlmacen}>
+                      {item.nombre}
+                    </option>
+                  );
+                })}
+              </Select>
             </div>
           </Column>
 
-          <Column className="col-md-3 col-sm-12">
-            <div className="form-group">
-              <div className="input-group">
-                <div className="input-group-prepend">
-                  <div className="input-group-text">
-                    <i className="fa fa-building"></i>
-                  </div>
-                </div>
-                <Select
-                  value={this.state.idAlmacen}
-                  onChange={this.handleSelectAlmacen}>
-                  <option value={''}>-- Almacen --</option>
-                  {this.state.almacenes.map((item, index) => {
-                    return (
-                      <option key={index} value={item.idAlmacen}>
-                        {item.nombre}
-                      </option>
-                    );
-                  })}
-                </Select>
-              </div>
-            </div>
-          </Column>
-
-          <Column className="col-md-3 col-sm-12">
-            <div className="form-group">
-              <button
-                className="btn btn-outline-secondary"
-                onClick={() => this.loadInit()}
-              >
-                <i className="bi bi-arrow-clockwise"></i>
-              </button>
-            </div>
+          <Column className="col-md-3 col-sm-12" formGroup={true}>
+            <button
+              className="btn btn-outline-secondary"
+              onClick={() => this.loadingInit()}
+            >
+              <i className="bi bi-arrow-clockwise"></i>
+            </button>
           </Column>
         </Row>
 
         <Row>
-          <Column className="col-md-3 col-sm-12">
-            <div className="form-group">
-              <span>Cantidad de Items: </span>
-            </div>
+          <Column className="col-md-3 col-sm-12" formGroup={true}>
+            <span>Cantidad de Items: </span>
           </Column>
 
-          <Column className="col-md-3 col-sm-12">
-            <div className="form-group">
-              <span className="text-success">Valor de Inventario: </span>
-            </div>
+          <Column className="col-md-3 col-sm-12" formGroup={true}>
+            <span className="text-success">Valor de Inventario: </span>
           </Column>
         </Row>
 
@@ -505,6 +504,7 @@ class Inventario extends CustomComponent {
         </Row>
 
         <Paginacion
+          ref={this.refPaginacion}
           loading={this.state.loading}
           data={this.state.lista}
           totalPaginacion={this.state.totalPaginacion}
@@ -517,6 +517,26 @@ class Inventario extends CustomComponent {
   }
 }
 
+Inventario.propTypes = {
+  token: PropTypes.shape({
+    userToken: PropTypes.shape({
+      idUsuario: PropTypes.string.isRequired,
+    }).isRequired,
+    project: PropTypes.shape({
+      idSucursal: PropTypes.string.isRequired,
+    }).isRequired,
+  }).isRequired,
+  moneda: PropTypes.object,
+  inventarioLista: PropTypes.shape({
+    data: PropTypes.object,
+    paginacion: PropTypes.object
+  }),
+  setListaInventarioData: PropTypes.func,
+  setListaInventarioPaginacion: PropTypes.func,
+  history: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
+  location: PropTypes.object
+}
+
 /**
  *
  * Método encargado de traer la información de redux
@@ -525,13 +545,16 @@ const mapStateToProps = (state) => {
   return {
     token: state.principal,
     moneda: state.predeterminado.moneda,
+    inventarioLista: state.predeterminado.inventarioLista
   };
 };
+
+const mapDispatchToProps = { setListaInventarioData, setListaInventarioPaginacion }
 
 /**
  *
  * Método encargado de conectar con redux y exportar la clase
  */
-const ConnectedInventario = connect(mapStateToProps, null)(Inventario);
+const ConnectedInventario = connect(mapStateToProps, mapDispatchToProps)(Inventario);
 
 export default ConnectedInventario;
