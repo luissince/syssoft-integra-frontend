@@ -139,12 +139,12 @@ class Inventario extends CustomComponent {
     await this.setStateAsync({ paginacion: 1, restart: true });
     this.fillTable(0, '');
     await this.setStateAsync({ opcion: 0 });
-  };
+  }
 
   paginacionContext = async (listid) => {
     await this.setStateAsync({ paginacion: listid, restart: false });
     this.onEventPaginacion();
-  };
+  }
 
   onEventPaginacion = () => {
     switch (this.state.opcion) {
@@ -157,9 +157,9 @@ class Inventario extends CustomComponent {
       default:
         this.fillTable(0);
     }
-  };
+  }
 
-  async searchText(text) {
+  searchText = async (text) => {
     if (this.state.loading) return;
 
     if (text.trim().length === 0) return;
@@ -196,7 +196,7 @@ class Inventario extends CustomComponent {
         loading: false,
         lista: result,
         totalPaginacion: totalPaginacion,
-      },()=>{
+      }, () => {
         this.updateReduxState();
       });
     }
