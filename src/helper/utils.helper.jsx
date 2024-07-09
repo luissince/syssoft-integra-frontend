@@ -700,25 +700,33 @@ export function alertInfo(title, message) {
   });
 }
 
-export function getPathNavigation(opcion, idComprobante) {
+export function getPathNavigation(opcion, idNavegacion) {
   if (opcion == "venta") {
-    return `/inicio/ventas/detalle?idVenta=${idComprobante}`
+    return `/inicio/ventas/detalle?idVenta=${idNavegacion}`
   }
 
   if (opcion == "cobro") {
-    return `/inicio/cobros/detalle?idCobro=${idComprobante}`
+    return `/inicio/cobros/detalle?idCobro=${idNavegacion}`
   }
 
   if (opcion == "compra") {
-    return `/inicio/compras/detalle?idCompra=${idComprobante}`
+    return `/inicio/compras/detalle?idCompra=${idNavegacion}`
   }
 
   if (opcion == "gasto") {
-    return `/inicio/gastos/detalle?idGasto=${idComprobante}`
+    return `/inicio/gastos/detalle?idGasto=${idNavegacion}`
+  }
+
+  if (opcion == "ajuste") {
+    return `/inicio/ajuste/detalle?idAjuste=${idNavegacion}`
+  }
+
+  if (opcion == "traslado") {
+    return `/inicio/traslado/detalle?idTraslado=${idNavegacion}`
   }
 
   if (opcion == "cpe") {
-    return `/inicio/cpeelectronicos?comprobante=${idComprobante}`
+    return `/inicio/cpeelectronicos?comprobante=${idNavegacion}`
   }
 }
 

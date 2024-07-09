@@ -1,4 +1,4 @@
-import { spinnerLoading, formatTime, isEmpty, formatNumberWithZeros, getPathNavigation } from '../../../helper/utils.helper';
+import { formatTime, isEmpty, formatNumberWithZeros, getPathNavigation } from '../../../helper/utils.helper';
 import Paginacion from '../../../components/Paginacion';
 import ContainerWrapper from '../../../components/Container';
 import CustomComponent from '../../../model/class/custom-component';
@@ -7,6 +7,7 @@ import SuccessReponse from '../../../model/class/response';
 import ErrorResponse from '../../../model/class/error-response';
 import { CANCELED } from '../../../model/types/types';
 import { Link } from 'react-router-dom/cjs/react-router-dom.min';
+import { SpinnerTable } from '../../../components/Spinner';
 
 class Notications extends CustomComponent {
   constructor(props) {
@@ -100,14 +101,10 @@ class Notications extends CustomComponent {
   generateBody() {
     if (this.state.loading) {
       return (
-        <tr>
-          <td className="text-center" colSpan="4">
-            {spinnerLoading(
-              'Cargando información de la tabla...',
-              true,
-            )}
-          </td>
-        </tr>
+        <SpinnerTable
+          colSpan='4'
+          message={ 'Cargando información de la tabla...'}
+        />
       );
     }
 

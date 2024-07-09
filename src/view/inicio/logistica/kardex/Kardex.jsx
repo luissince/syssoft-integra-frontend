@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  spinnerLoading,
   isEmpty,
   formatTime,
   rounded,
@@ -20,7 +19,7 @@ import { connect } from 'react-redux';
 import SearchInput from '../../../../components/SearchInput';
 import { CANCELED } from '../../../../model/types/types';
 import Title from '../../../../components/Title';
-import { SpinnerView } from '../../../../components/Spinner';
+import { SpinnerTable, SpinnerView } from '../../../../components/Spinner';
 
 class Kardex extends CustomComponent {
   constructor(props) {
@@ -231,11 +230,10 @@ class Kardex extends CustomComponent {
 
     if (loading) {
       return (
-        <tr>
-          <td className="text-center" colSpan="12">
-            {spinnerLoading(messageTable, true)}
-          </td>
-        </tr>
+        <SpinnerTable
+          colSpan='12'
+          message={messageTable}
+        />
       );
     }
 
