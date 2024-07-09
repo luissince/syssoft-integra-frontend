@@ -71,7 +71,7 @@ TableResponsive.propTypes = {
     className: PropTypes.string,
     title: PropTypes.string,
     formGroup: PropTypes.bool,
-    tHead: PropTypes.node,
+    tHead: PropTypes.element,
     tBody: PropTypes.node,
     onKeyDown: PropTypes.func,
     onClick: PropTypes.func,

@@ -1,6 +1,6 @@
 import React from 'react';
 import ContainerWrapper from '../../../../../components/Container';
-import { alertDialog, alertInfo, alertSuccess, alertWarning, formatNumberWithZeros, formatTime, isEmpty, keyUpSearch, numberFormat } from '../../../../../helper/utils.helper';
+import { alertDialog, alertInfo, alertSuccess, alertWarning, formatNumberWithZeros, formatTime, isEmpty, numberFormat } from '../../../../../helper/utils.helper';
 import CustomComponent from '../../../../../model/class/custom-component';
 import { cancelCotizacion, listCotizacion } from '../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../model/class/response';
@@ -14,6 +14,7 @@ import { TableResponsive } from '../../../../../components/Table';
 import { SpinnerTable } from '../../../../../components/Spinner';
 import Paginacion from '../../../../../components/Paginacion';
 import Button from '../../../../../components/Button';
+import Search from '../../../../../components/Search';
 
 class Cotizaciones extends CustomComponent {
   constructor(props) {
@@ -173,20 +174,17 @@ class Cotizaciones extends CustomComponent {
   generateBody() {
     if (this.state.loading) {
       return (
-        <tr>
-          <td className="text-center" colSpan="9">
-            <SpinnerTable
-              message='Cargando información de la tabla...'
-            />
-          </td>
-        </tr>
+        <SpinnerTable
+          colSpan='10'
+          message='Cargando información de la tabla...'
+        />
       );
     }
 
     if (isEmpty(this.state.lista)) {
       return (
         <tr>
-          <td className="text-center" colSpan="9">¡No hay datos registrados!</td>
+          <td className="text-center" colSpan="10">¡No hay datos registrados!</td>
         </tr>
       );
     }
@@ -202,6 +200,9 @@ class Cotizaciones extends CustomComponent {
           <td>{item.documento}<br />{item.informacion}</td>
           <td>{item.comprobante}<br />{item.serie}-{formatNumberWithZeros(item.numeracion)}</td>
           <td className='text-center'>{estado}</td>
+          <td className='text-center'>
+            <span className={item.ligado == 0 ? 'badge badge-secondary' : 'badge badge-success'}>{item.ligado}</span>
+          </td>
           <td className='text-center'>{numberFormat(item.total, item.codiso)} </td>
           <td className="text-center">
             <button
@@ -241,43 +242,25 @@ class Cotizaciones extends CustomComponent {
         />
 
         <Row>
-          <Column className="col-md-6 col-sm-12">
-            <div className="form-group">
-              <div className="input-group mb-2">
-                <div className="input-group-prepend">
-                  <div className="input-group-text">
-                    <i className="bi bi-search"></i>
-                  </div>
-                </div>
-
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Buscar..."
-                  onKeyUp={(event) =>
-                    keyUpSearch(event, () =>
-                      this.searchText(event.target.value),
-                    )
-                  }
-                />
-              </div>
-            </div>
+          <Column className="col-md-6 col-sm-12" formGroup={true}>
+            <Search
+              onSearch={this.searchText}
+              placeholder="Buscar..."
+            />
           </Column>
 
-          <Column className="col-md-6 col-sm-12">
-            <div className="form-group">
-              <Button
-                className="btn-outline-info"
-                onClick={this.handleCrear}>
-                <i className="bi bi-file-plus"></i> Crear cotización
-              </Button>
-              {' '}
-              <Button
-                className="btn-outline-secondary"
-                onClick={this.loadInit}>
-                <i className="bi bi-arrow-clockwise"></i>
-              </Button>
-            </div>
+          <Column className="col-md-6 col-sm-12" formGroup={true}>
+            <Button
+              className="btn-outline-info"
+              onClick={this.handleCrear}>
+              <i className="bi bi-file-plus"></i> Crear cotización
+            </Button>
+            {' '}
+            <Button
+              className="btn-outline-secondary"
+              onClick={this.loadInit}>
+              <i className="bi bi-arrow-clockwise"></i>
+            </Button>
           </Column>
         </Row>
 
@@ -291,6 +274,7 @@ class Cotizaciones extends CustomComponent {
                   <th width="20%">Cliente</th>
                   <th width="15%">Comprobante</th>
                   <th width="10%" className="text-center">Estado</th>
+                  <th width="10%" className="text-center">Ligado</th>
                   <th width="10%" className="text-center">Total</th>
                   <th width="5%" className="text-center">
                     Detalle

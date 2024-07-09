@@ -76,13 +76,10 @@ class Empresa extends React.Component {
   generarBody() {
     if (this.state.loading) {
       return (
-        <tr>
-          <td className="text-center" colSpan="7">
-            <SpinnerTable
-              message='Cargando información de la tabla...'
-            />
-          </td>
-        </tr>
+        <SpinnerTable
+          colSpan='7'
+          message='Cargando información de la tabla...'
+        />
       );
     }
     if (isEmpty(this.state.empresa)) {

@@ -3,7 +3,6 @@ import {
   alertInfo,
   alertSuccess,
   alertWarning,
-  keyUpSearch,
   isEmpty,
   convertNullText,
   numberFormat,
@@ -25,9 +24,9 @@ import { SpinnerTable } from '../../../../../components/Spinner';
 import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
 import { TableResponsive } from '../../../../../components/Table';
-import Input from '../../../../../components/Input';
 import Image from '../../../../../components/Image';
 import Button from '../../../../../components/Button';
+import Search from '../../../../../components/Search';
 
 class Productos extends CustomComponent {
   constructor(props) {
@@ -79,16 +78,16 @@ class Productos extends CustomComponent {
     if (this.state.loading) return;
 
     await this.setStateAsync({ paginacion: 1, restart: true });
-    this.fillTable(0, '');
+    this.fillTable(0);
     await this.setStateAsync({ opcion: 0 });
   };
 
-  async searchText(text) {
+  searchText = async (text) => {
     if (this.state.loading) return;
 
     if (text.trim().length === 0) return;
 
-    await this.setStateAsync({ paginacion: 1, restart: false });
+    await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
     this.fillTable(1, text.trim());
     await this.setStateAsync({ opcion: 1 });
   }
@@ -101,17 +100,17 @@ class Productos extends CustomComponent {
   onEventPaginacion = () => {
     switch (this.state.opcion) {
       case 0:
-        this.fillTable(0, '');
+        this.fillTable(0);
         break;
       case 1:
         this.fillTable(1, this.state.buscar);
         break;
       default:
-        this.fillTable(0, '');
+        this.fillTable(0);
     }
   };
 
-  fillTable = async (opcion, buscar) => {
+  fillTable = async (opcion, buscar = '') => {
     await this.setStateAsync({
       loading: true,
       lista: [],
@@ -154,10 +153,6 @@ class Productos extends CustomComponent {
       });
     }
   };
-
-  handleInputBuscar = (event) => {
-    this.setState({ buscar: event.target.value })
-  }
 
   handleAgregar = async () => {
     this.props.history.push({
@@ -209,13 +204,10 @@ class Productos extends CustomComponent {
   generateBody() {
     if (this.state.loading) {
       return (
-        <tr>
-          <td className="text-center" colSpan="10">
-            <SpinnerTable
-              message='Cargando información de la tabla...'
-            />
-          </td>
-        </tr>
+        <SpinnerTable
+          colSpan='10'
+          message='Cargando información de la tabla...'
+        />
       );
     }
 
@@ -326,42 +318,30 @@ class Productos extends CustomComponent {
           subTitle='Lista'
         />
 
-        <div className="row">
-          <div className="col-md-6 col-sm-12">
-            <div className="form-group">
-              <div className="input-group mb-2">
-                <div className="input-group-prepend">
-                  <div className="input-group-text">
-                    <i className="bi bi-search"></i>
-                  </div>
-                </div>
-                <Input
-                  placeholder="Buscar por comprobante o cliente..."
-                  value={this.state.buscar}
-                  onChange={this.handleInputBuscar}
-                  onKeyUp={(event) => keyUpSearch(event, () => this.searchText(this.state.buscar))}
-                />
-              </div>
-            </div>
-          </div>
-          <div className="col-md-6 col-sm-12">
-            <div className="form-group">
-              <button
-                className="btn btn-outline-info"
-                onClick={this.handleAgregar}
-                // disabled={!this.state.add}
-              >
-                <i className="bi bi-file-plus"></i> Nuevo Registro
-              </button>{' '}
-              <button
-                className="btn btn-outline-secondary"
-                onClick={() => this.loadInit()}
-              >
-                <i className="bi bi-arrow-clockwise"></i>
-              </button>
-            </div>
-          </div>
-        </div>
+        <Row>
+          <Column className="col-md-6 col-sm-12" formGroup={true}>
+            <Search
+              onSearch={this.searchText}
+              placeholder="Buscar por código y descripción..."
+            />
+          </Column>
+
+          <Column className="col-md-6 col-sm-12" formGroup={true}>
+            <Button
+              className="btn btn-outline-info"
+              onClick={this.handleAgregar}
+            // disabled={!this.state.add}
+            >
+              <i className="bi bi-file-plus"></i> Nuevo Registro
+            </Button>{' '}
+            <Button
+              className="btn btn-outline-secondary"
+              onClick={() => this.loadInit()}
+            >
+              <i className="bi bi-arrow-clockwise"></i>
+            </Button>
+          </Column>
+        </Row>
 
         <Row>
           <Column>

@@ -5,7 +5,6 @@ import {
   alertDialog,
   alertSuccess,
   alertWarning,
-  keyUpSearch,
   isEmpty,
   formatNumberWithZeros,
   alertInfo,
@@ -36,6 +35,7 @@ import Button from '../../../../../components/Button';
 import { setListaVentaData, setListaVentaPaginacion } from '../../../../../redux/predeterminadoSlice';
 import Input from '../../../../../components/Input';
 import Select from '../../../../../components/Select';
+import Search from '../../../../../components/Search';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -190,7 +190,6 @@ class Ventas extends CustomComponent {
     }
   }
 
-
   loadingInit = async () => {
     if (this.state.loading) return;
 
@@ -199,12 +198,12 @@ class Ventas extends CustomComponent {
     await this.setStateAsync({ opcion: 0 });
   }
 
-  async searchText(text) {
+  searchText = async (text) => {
     if (this.state.loading) return;
 
     if (text.trim().length === 0) return;
 
-    await this.setStateAsync({ paginacion: 1, restart: false });
+    await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
     this.fillTable(1, text.trim());
     await this.setStateAsync({ opcion: 1 });
   }
@@ -215,13 +214,8 @@ class Ventas extends CustomComponent {
     if (this.state.fechaInicio > this.state.fechaFinal) return;
 
     await this.setStateAsync({ paginacion: 1, restart: false });
-    this.fillTable(
-      2,
-      '',
-      this.state.fechaInicio,
-      this.state.fechaFinal,
-      this.state.idComprobante,
-      this.state.estado);
+
+    this.fillTable(2);
     await this.setStateAsync({ opcion: 2 });
   }
 
@@ -239,14 +233,14 @@ class Ventas extends CustomComponent {
         this.fillTable(1, this.state.buscar);
         break;
       case 2:
-        this.fillTable(2, '', this.state.fechaInicio, this.state.fechaFinal, this.state.idComprobante, this.state.estado);
+        this.fillTable(2);
         break;
       default:
         this.fillTable(0);
     }
   }
 
-  fillTable = async (opcion, buscar = '', fechaInicio = '', fechaFinal = '', idComprobante = '', estado = '0') => {
+  fillTable = async (opcion, buscar = '') => {
     this.setState({
       loading: true,
       lista: [],
@@ -255,11 +249,11 @@ class Ventas extends CustomComponent {
 
     const params = {
       opcion,
-      buscar,
-      fechaInicio: fechaInicio,
-      fechaFinal: fechaFinal,
-      idComprobante: idComprobante,
-      estado: estado,
+      buscar: buscar.trim(),
+      fechaInicio: this.state.fechaInicio,
+      fechaFinal: this.state.fechaFinal,
+      idComprobante: this.state.idComprobante,
+      estado: this.state.estado,
       idSucursal: this.state.idSucursal,
       posicionPagina: (this.state.paginacion - 1) * this.state.filasPorPagina,
       filasPorPagina: this.state.filasPorPagina,
@@ -337,10 +331,6 @@ class Ventas extends CustomComponent {
     })
   }
 
-  handleInputBuscar = (event) => {
-    this.setState({ buscar: event.target.value })
-  }
-
   handleDetalle = (idVenta) => {
     this.props.history.push({
       pathname: `${this.props.location.pathname}/detalle`,
@@ -395,13 +385,10 @@ class Ventas extends CustomComponent {
   generateBody() {
     if (this.state.loading) {
       return (
-        <tr>
-          <td className="text-center" colSpan="10">
-            <SpinnerTable
-              message='Cargando información de la tabla...'
-            />
-          </td>
-        </tr>
+        <SpinnerTable
+          colSpan='10'
+          message='Cargando información de la tabla...'
+        />
       );
     }
 
@@ -466,24 +453,15 @@ class Ventas extends CustomComponent {
 
   handleCloseElegirInterfaz = () => {
     this.setState({ isOpenElegirInterfaz: false });
-
-    /*
-    this.setState({ ElegirInterfaz: false }, () => {
-      this.clearView();
-    });
-    */
   }
 
   handleInterfazClasico = () => {
-    //console.log("CLASICA")
     this.props.history.push(`${this.props.location.pathname}/crear-clasico`);
   }
 
   handleInterfazModerno = () => {
-    //console.log("MODERNO")
     this.props.history.push(`${this.props.location.pathname}/crear`);
   }
-
 
   render() {
     return (
@@ -509,100 +487,77 @@ class Ventas extends CustomComponent {
         />
 
         <Row>
-          <Column>
-            <div className="form-group">
-              <Button
-                className='btn-outline-info'
-                onClick={this.handleOpenElegirInterfaz}
-              >
-                <i className="bi bi-file-plus"></i> Nuevo Registro
-              </Button>
-              {' '}
-              <Button
-                className='btn-outline-secondary'
-                onClick={this.loadingInit}
-              >
-                <i className="bi bi-arrow-clockwise"></i> Recargar Vista
-              </Button>
-            </div>
+          <Column formGroup={true}>
+            <Button
+              className='btn-outline-info'
+              onClick={this.handleOpenElegirInterfaz}
+            >
+              <i className="bi bi-file-plus"></i> Nuevo Registro
+            </Button>
+            {' '}
+            <Button
+              className='btn-outline-secondary'
+              onClick={this.loadingInit}
+            >
+              <i className="bi bi-arrow-clockwise"></i> Recargar Vista
+            </Button>
           </Column>
         </Row>
 
         <Row>
-          <Column className="col-lg-3 col-md-3 col-sm-12 col-12">
-            <div className="form-group">
-              <label>Fecha de Inicio:</label>
-              <input
-                className="form-control"
-                type="date"
-                value={this.state.fechaInicio}
-                onChange={this.handleInputFechaInico}
-              />
-            </div>
+          <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
+            <label>Fecha de Inicio:</label>
+            <Input
+              type="date"
+              value={this.state.fechaInicio}
+              onChange={this.handleInputFechaInico}
+            />
           </Column>
 
-          <Column className="col-lg-3 col-md-3 col-sm-12 col-12">
-            <div className="form-group">
-              <label>Fecha de Final:</label>
-              <Input
-                type="date"
-                value={this.state.fechaFinal}
-                onChange={this.handleInputFechaFinal}
-              />
-            </div>
+          <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
+            <label>Fecha de Final:</label>
+            <Input
+              type="date"
+              value={this.state.fechaFinal}
+              onChange={this.handleInputFechaFinal}
+            />
           </Column>
 
-          <Column className="col-lg-3 col-md-3 col-sm-12 col-12">
-            <div className="form-group">
-              <label>Comprobantes:</label>
-              <Select
-                value={this.state.idComprobante}
-                onChange={this.handleSelectComprobante}
-              >
-                <option value="">TODOS</option>
-                {
-                  this.state.comprobantes.map((item, index) => (
-                    <option key={index} value={item.idComprobante}>{item.nombre} - {item.serie}</option>
-                  ))
-                }
-              </Select>
-            </div>
+          <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
+            <label>Comprobantes:</label>
+            <Select
+              value={this.state.idComprobante}
+              onChange={this.handleSelectComprobante}
+            >
+              <option value="">TODOS</option>
+              {
+                this.state.comprobantes.map((item, index) => (
+                  <option key={index} value={item.idComprobante}>{item.nombre} - {item.serie}</option>
+                ))
+              }
+            </Select>
           </Column>
 
-          <Column className="col-lg-3 col-md-3 col-sm-12 col-12">
-            <div className="form-group">
-              <label>Estados:</label>
-              <Select
-                value={this.state.estado}
-                onChange={this.handleSelectEstado}
-              >
-                <option value='0'>TODOS</option>
-                <option value='1'>COBRADO</option>
-                <option value='2'>POR COBRAR</option>
-                <option value='3'>ANULADO</option>
-              </Select>
-            </div>
+          <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
+            <label>Estados:</label>
+            <Select
+              value={this.state.estado}
+              onChange={this.handleSelectEstado}
+            >
+              <option value='0'>TODOS</option>
+              <option value='1'>COBRADO</option>
+              <option value='2'>POR COBRAR</option>
+              <option value='3'>ANULADO</option>
+            </Select>
           </Column>
         </Row>
 
         <Row>
-          <Column className="col-md-6 col-sm-12">
-            <div className="form-group">
-              <label>Buscar:</label>
-              <div className="input-group mb-2">
-                <div className="input-group-prepend">
-                  <div className="input-group-text">
-                    <i className="bi bi-search"></i>
-                  </div>
-                </div>
-                <Input
-                  placeholder="Buscar por comprobante o cliente..."
-                  value={this.state.buscar}
-                  onChange={this.handleInputBuscar}
-                  onKeyUp={(event) => keyUpSearch(event, () => this.searchText(this.state.buscar))}
-                />
-              </div>
-            </div>
+          <Column className="col-md-6 col-sm-12" formGroup={true}>
+            <Search
+              onSearch={this.searchText}
+              placeholder="Buscar por comprobante o cliente..."
+            />
           </Column>
         </Row>
 

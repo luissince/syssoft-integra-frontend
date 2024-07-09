@@ -2,6 +2,7 @@ import PropTypes from 'prop-types';
 
 const Input = ({
     autoFocus,
+    iconLeft,
     type = "text",
     className = "",
     placeholder,
@@ -14,6 +15,32 @@ const Input = ({
     onKeyDown,
     onPaste
 }) => {
+    if (iconLeft) {
+        return (
+            <div className="input-group mb-2">
+                <div className="input-group-prepend">
+                    <div className="input-group-text">
+                        {iconLeft}
+                    </div>
+                </div>
+
+                <input
+                    autoFocus={autoFocus}
+                    type={type}
+                    className={`form-control ${className}`}
+                    placeholder={placeholder}
+                    disabled={disabled}
+                    role={role}
+                    ref={refInput}
+                    value={value}
+                    onChange={onChange}
+                    onKeyUp={onKeyUp}
+                    onKeyDown={onKeyDown}
+                    onPaste={onPaste}
+                />
+            </div>
+        );
+    }
     return (
         <input
             autoFocus={autoFocus}
@@ -34,6 +61,7 @@ const Input = ({
 
 Input.propTypes = {
     autoFocus: PropTypes.bool,
+    iconLeft: PropTypes.element,
     type: PropTypes.oneOf(["text", "password", "search", "date"]),
     className: PropTypes.string,
     placeholder: PropTypes.string,

@@ -4,7 +4,6 @@ import {
   currentDate,
   limitarCadena,
   alertWarning,
-  keyUpSearch,
   isEmpty,
   formatNumberWithZeros,
   alertDialog,
@@ -44,6 +43,7 @@ import { TableResponsive } from '../../../../components/Table';
 import Select from '../../../../components/Select';
 import Button from '../../../../components/Button';
 import Input from '../../../../components/Input';
+import Search from '../../../../components/Search';
 
 class CpeElectronicos extends CustomComponent {
 
@@ -81,6 +81,8 @@ class CpeElectronicos extends CustomComponent {
       comprobantes: [],
       sucursales: [],
 
+      buscar: '',
+
       opcion: 0,
       paginacion: 0,
       totalPaginacion: 0,
@@ -91,9 +93,7 @@ class CpeElectronicos extends CustomComponent {
       idUsuario: this.props.token.userToken.idUsuario,
     };
 
-    this.refTxtSearch = React.createRef();
     this.refUseFile = React.createRef();
-
 
     this.abortControllerTable = new AbortController();
   }
@@ -102,7 +102,7 @@ class CpeElectronicos extends CustomComponent {
     const url = this.props.location.search;
     const comprobante = new URLSearchParams(url).get('comprobante');
     if (isText(comprobante)) {
-      this.refTxtSearch.current.value = comprobante
+      this.setState({ buscar: comprobante });
     }
 
     await this.loadingData();
@@ -183,12 +183,12 @@ class CpeElectronicos extends CustomComponent {
     await this.setStateAsync({ opcion: 0 });
   }
 
-  async searchText(text) {
+  searchText = async (text) => {
     if (this.state.loading) return;
 
     if (text.trim().length === 0) return;
 
-    await this.setStateAsync({ paginacion: 1, restart: false });
+    await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
     this.fillTable(1, text.trim());
     await this.setStateAsync({ opcion: 1 });
   }
@@ -199,13 +199,7 @@ class CpeElectronicos extends CustomComponent {
     if (this.state.fechaInicio > this.state.fechaFinal) return;
 
     await this.setStateAsync({ paginacion: 1, restart: false });
-    this.fillTable(
-      2,
-      '',
-      this.state.fechaInicio,
-      this.state.fechaFinal,
-      this.state.idComprobante,
-      this.state.estado);
+    this.fillTable(2);
     await this.setStateAsync({ opcion: 2 });
   }
 
@@ -220,17 +214,17 @@ class CpeElectronicos extends CustomComponent {
         this.fillTable(0);
         break;
       case 1:
-        this.fillTable(1, this.refTxtSearch.current.value);
+        this.fillTable(1, this.state.buscar);
         break;
       case 2:
-        this.fillTable(2, '', this.state.fechaInicio, this.state.fechaFinal, this.state.idComprobante, this.state.estado);
+        this.fillTable(2);
         break;
       default:
         this.fillTable(0);
     }
   }
 
-  fillTable = async (opcion, buscar = '', fechaInicio = '', fechaFinal = '', idComprobante = '', estado = '0') => {
+  fillTable = async (opcion, buscar = '') => {
     this.setState({
       loading: true,
       lista: [],
@@ -240,10 +234,10 @@ class CpeElectronicos extends CustomComponent {
     const params = {
       opcion: opcion,
       buscar: buscar,
-      fechaInicio: fechaInicio,
-      fechaFinal: fechaFinal,
-      idComprobante: idComprobante,
-      estado: estado,
+      fechaInicio: this.state.fechaInicio,
+      fechaFinal: this.state.fechaFinal,
+      idComprobante: this.state.idComprobante,
+      estado: this.state.estado,
       idSucursal: this.state.idSucursal,
       posicionPagina: (this.state.paginacion - 1) * this.state.filasPorPagina,
       filasPorPagina: this.state.filasPorPagina,
@@ -552,13 +546,10 @@ class CpeElectronicos extends CustomComponent {
 
     if (loading) {
       return (
-        <tr>
-          <td className="text-center" colSpan="8">
-            <SpinnerTable
-              message='Cargando información de la tabla...'
-            />
-          </td>
-        </tr>
+        <SpinnerTable
+          colSpan='8'
+          message='Cargando información de la tabla...'
+        />
       );
     }
 
@@ -637,15 +628,15 @@ class CpeElectronicos extends CustomComponent {
         <SpinnerView
           loading={this.state.initialLoad}
           message={this.state.initialMessage}
-          // body={<>
-          //   <div className='d-flex flex-column align-items-center'>
-          //     <p>No se pudo obtener los datos requeridos, comuníquese con su proveedor del sistema.</p>
-          //     <Button
-          //       className='btn-danger'>
-          //       <i className='fa fa-refresh'></i> Recargar
-          //     </Button>
-          //   </div>
-          // </>}
+        // body={<>
+        //   <div className='d-flex flex-column align-items-center'>
+        //     <p>No se pudo obtener los datos requeridos, comuníquese con su proveedor del sistema.</p>
+        //     <Button
+        //       className='btn-danger'>
+        //       <i className='fa fa-refresh'></i> Recargar
+        //     </Button>
+        //   </div>
+        // </>}
         />
 
         <Title
@@ -654,151 +645,117 @@ class CpeElectronicos extends CustomComponent {
         />
 
         <Row>
-          <Column>
-            <div className="form-group">
-              <span>Resumen de Boletas/Facturas/Nota Crédito/Nota Débito</span>
-            </div>
+          <Column formGroup={true}>
+            <span>Resumen de Boletas/Facturas/Nota Crédito/Nota Débito</span>
           </Column>
         </Row>
 
         <Row>
-          <Column className="col-lg-2 col-md-2 col-sm-12 col-xs-12">
-            <div className="form-group">
-              <img src={images.sunat} alt="Estado Sunat" width="24" />{' '}
-              <span>Estados SUNAT:</span>
-            </div>
+          <Column className="col-lg-2 col-md-2 col-sm-12 col-xs-12" formGroup={true}>
+            <img src={images.sunat} alt="Estado Sunat" width="24" />{' '}
+            <span>Estados SUNAT:</span>
           </Column>
 
-          <Column className="col-lg-2 col-md-2 col-sm-12 col-xs-12">
-            <div className="form-group">
-              <img src={images.accept} alt="Aceptado" width="24" />{' '}
-              <span>Aceptado</span>
-            </div>
+          <Column className="col-lg-2 col-md-2 col-sm-12 col-xs-12" formGroup={true}>
+            <img src={images.accept} alt="Aceptado" width="24" />{' '}
+            <span>Aceptado</span>
           </Column>
 
-          <Column className="col-lg-2 col-md-2 col-sm-12 col-xs-12">
-            <div className="form-group">
-              <img src={images.unable} alt="Rechazo" width="24" />{' '}
-              <span>Rechazado</span>
-            </div>
+          <Column className="col-lg-2 col-md-2 col-sm-12 col-xs-12" formGroup={true}>
+            <img src={images.unable} alt="Rechazo" width="24" />{' '}
+            <span>Rechazado</span>
           </Column>
 
-          <Column className="col-lg-2 col-md-2 col-sm-12 col-xs-12">
-            <div className="form-group">
-              <img src={images.reuse} alt="Pendiende de envío" width="24" />{' '}
-              <span>Pendiente de Envío</span>
-            </div>
+          <Column className="col-lg-2 col-md-2 col-sm-12 col-xs-12" formGroup={true}>
+            <img src={images.reuse} alt="Pendiende de envío" width="24" />{' '}
+            <span>Pendiente de Envío</span>
           </Column>
 
-          <Column className="col-lg-3 col-md-3 col-sm-12 col-xs-12">
-            <div className="form-group">
-              <img src={images.error} alt="Comunicación de baja" width="24" />{' '}
-              <span> Comunicación de Baja (Anulado)</span>
-            </div>
+          <Column className="col-lg-3 col-md-3 col-sm-12 col-xs-12" formGroup={true}>
+            <img src={images.error} alt="Comunicación de baja" width="24" />{' '}
+            <span> Comunicación de Baja (Anulado)</span>
           </Column>
         </Row>
 
         <Row>
-          <Column>
-            <div className="form-group">
-              <Button
-                className="btn-outline-light"
-                onClick={this.loadingInit}
-              >
-                <i className="bi bi-arrow-clockwise"></i> Recargar Vista
-              </Button>
-            </div>
+          <Column formGroup={true}>
+            <Button
+              className="btn-outline-light"
+              onClick={this.loadingInit}
+            >
+              <i className="bi bi-arrow-clockwise"></i> Recargar Vista
+            </Button>
           </Column>
         </Row>
 
         <Row>
-          <Column className="col-lg-3 col-md-3 col-sm-12 col-12">
-            <div className="form-group">
-              <label>Fecha de Inicio:</label>
-              <Input
-                type="date"
-                value={this.state.fechaInicio}
-                onChange={this.handleInputFechaInicio}
-              />
-            </div>
+          <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
+            <label>Fecha de Inicio:</label>
+            <Input
+              type="date"
+              value={this.state.fechaInicio}
+              onChange={this.handleInputFechaInicio}
+            />
           </Column>
 
-          <Column className="col-lg-3 col-md-3 col-sm-12 col-12">
-            <div className="form-group">
-              <label>Fecha de Final:</label>
-              <Input
-                type="date"
-                value={this.state.fechaFinal}
-                onChange={this.handleInputFechaFinal}
-              />
-            </div>
+          <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
+            <label>Fecha de Final:</label>
+            <Input
+              type="date"
+              value={this.state.fechaFinal}
+              onChange={this.handleInputFechaFinal}
+            />
           </Column>
 
-          <Column className="col-lg-3 col-md-3 col-sm-12 col-12">
-            <div className="form-group">
-              <label>Comprobantes:</label>
-              <Select
-                value={this.state.idComprobante}
-                onChange={this.handleSelectComprobante}
-              >
-                <option value="">TODOS</option>
-                {
-                  this.state.comprobantes.map((item, index) => (
-                    <option key={index} value={item.idComprobante}>{item.nombre} - {item.serie}</option>
-                  ))
-                }
-              </Select>
-            </div>
+          <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
+            <label>Comprobantes:</label>
+            <Select
+              value={this.state.idComprobante}
+              onChange={this.handleSelectComprobante}
+            >
+              <option value="">TODOS</option>
+              {
+                this.state.comprobantes.map((item, index) => (
+                  <option key={index} value={item.idComprobante}>{item.nombre} - {item.serie}</option>
+                ))
+              }
+            </Select>
           </Column>
 
-          <Column className="col-lg-3 col-md-3 col-sm-12 col-12">
-            <div className="form-group">
-              <label>Estados:</label>
-              <Select
-                value={this.state.estado}
-                onChange={this.handleSelectEstado}
-              >
-                <option value='0'>TODOS</option>
-                <option value='1'>POR DECLARAR</option>
-                <option value='2'>POR ANULAR</option>
-              </Select>
-            </div>
+          <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
+            <label>Estados:</label>
+            <Select
+              value={this.state.estado}
+              onChange={this.handleSelectEstado}
+            >
+              <option value='0'>TODOS</option>
+              <option value='1'>POR DECLARAR</option>
+              <option value='2'>POR ANULAR</option>
+            </Select>
           </Column>
         </Row>
 
         <Row>
-          <Column className="col-md-6 col-sm-12">
-            <div className="form-group">
-              <label>Buscar:</label>
-              <div className="input-group mb-2">
-                <div className="input-group-prepend">
-                  <div className="input-group-text">
-                    <i className="bi bi-search"></i>
-                  </div>
-                </div>
-                <Input
-                  placeholder="Ingrese los datos requeridos..."
-                  refInput={this.refTxtSearch}
-                  onKeyUp={(event) => keyUpSearch(event, () => this.searchText(event.target.value))}
-                />
-              </div>
-            </div>
+          <Column className="col-md-6 col-sm-12" formGroup={true}>
+            <label>Buscar:</label>
+            <Search
+              onSearch={this.searchText}
+              placeholder="Ingrese los datos requeridos...."
+            />
           </Column>
 
-          <Column className="col-md-6 col-sm-12">
-            <div className="form-group">
-              <label>Sucursal:</label>
-              <Select
-                value={this.state.idSucursal}
-                onChange={this.handleSelectSucursal}
-              >
-                {
-                  this.state.sucursales.map((item, index) => (
-                    <option key={index} value={item.idSucursal}>{item.nombre}</option>
-                  ))
-                }
-              </Select>
-            </div>
+          <Column className="col-md-6 col-sm-12" formGroup={true}>
+            <label>Sucursal:</label>
+            <Select
+              value={this.state.idSucursal}
+              onChange={this.handleSelectSucursal}
+            >
+              {
+                this.state.sucursales.map((item, index) => (
+                  <option key={index} value={item.idSucursal}>{item.nombre}</option>
+                ))
+              }
+            </Select>
           </Column>
         </Row>
 

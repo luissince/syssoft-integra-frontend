@@ -149,13 +149,10 @@ class CuentasPorCobrar extends CustomComponent {
   generarBody() {
     if (this.state.loading) {
       return (
-        <tr>
-          <td className="text-center" colSpan="8">
-            <SpinnerTable
-              message='Cargando información de la tabla...'
-            />
-          </td>
-        </tr>
+        <SpinnerTable
+          colSpan='8'
+          message='Cargando información de la tabla...'
+        />
       );
     }
 
@@ -258,15 +255,15 @@ class CuentasPorCobrar extends CustomComponent {
             <TableResponsive
               tHead={
                 <tr>
-                <th width="5%" className="text-center">#</th>
-                <th width="10%">Comprobante</th>
-                <th width="20%">Cliente</th>
-                <th width="15%">N° Cuotas / Frecuencia</th>
-                <th width="10%">Total</th>
-                <th width="10%">Cobrado</th>
-                <th width="10%">Por Cobrar</th>
-                <th width="5%" className="text-center">Cobrar</th>
-              </tr>
+                  <th width="5%" className="text-center">#</th>
+                  <th width="10%">Comprobante</th>
+                  <th width="20%">Cliente</th>
+                  <th width="15%">N° Cuotas / Frecuencia</th>
+                  <th width="10%">Total</th>
+                  <th width="10%">Cobrado</th>
+                  <th width="10%">Por Cobrar</th>
+                  <th width="5%" className="text-center">Cobrar</th>
+                </tr>
               }
               tBody={this.generarBody()}
             />

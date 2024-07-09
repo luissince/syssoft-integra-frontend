@@ -161,20 +161,17 @@ class ModalCotizacion extends CustomComponent {
 
         if (loading) {
             return (
-                <tr>
-                    <td className="text-center" colSpan="8">
-                        <SpinnerTable
-                            message='Cargando información de la tabla...'
-                        />
-                    </td>
-                </tr>
+                <SpinnerTable
+                    colSpan='9'
+                    message='Cargando información de la tabla...'
+                />
             );
         }
 
         if (isEmpty(lista)) {
             return (
                 <tr>
-                    <td className="text-center" colSpan="8">¡No hay datos registrados!</td>
+                    <td className="text-center" colSpan="9">¡No hay datos registrados!</td>
                 </tr>
             );
         }
@@ -190,6 +187,9 @@ class ModalCotizacion extends CustomComponent {
                     <td>{item.documento}<br />{item.informacion}</td>
                     <td>{item.comprobante}<br />{item.serie}-{formatNumberWithZeros(item.numeracion)}</td>
                     <td className='text-center'>{estado}</td>
+                    <td className='text-center'>
+                        <span className={item.ligado == 0 ? 'badge badge-secondary' : 'badge badge-success'}>{item.ligado}</span>
+                    </td>
                     <td className='text-center'>{numberFormat(item.total, item.codiso)} </td>
                     <td className="text-center">
                         <Button
@@ -290,6 +290,7 @@ class ModalCotizacion extends CustomComponent {
                                             <th width="15%">Comprobante</th>
                                             <th width="15%">Cliente</th>
                                             <th width="5%">Estado</th>
+                                            <th width="5%">Ligado</th>
                                             <th width="10%" className="text-center">Total</th>
                                             <th width="5%" className="text-center">
                                                 Usar

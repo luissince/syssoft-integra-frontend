@@ -4,7 +4,6 @@ import {
   alertInfo,
   alertSuccess,
   alertWarning,
-  keyUpSearch,
   isEmpty,
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
@@ -23,6 +22,8 @@ import Row from '../../../../components/Row';
 import Column from '../../../../components/Column';
 import { TableResponsive } from '../../../../components/Table';
 import { SpinnerTable } from '../../../../components/Spinner';
+import Search from '../../../../components/Search';
+import Button from '../../../../components/Button';
 
 class Comprobantes extends CustomComponent {
   constructor(props) {
@@ -73,7 +74,7 @@ class Comprobantes extends CustomComponent {
     await this.setStateAsync({ opcion: 0 });
   };
 
-  async searchText(text) {
+  searchText = async (text) => {
     if (this.state.loading) return;
 
     if (text.trim().length === 0) return;
@@ -188,13 +189,10 @@ class Comprobantes extends CustomComponent {
   generateBody() {
     if (this.state.loading) {
       return (
-        <tr>
-          <td className="text-center" colSpan="10">
-            <SpinnerTable
-              message='Cargando información de la tabla...'
-            />
-          </td>
-        </tr>
+        <SpinnerTable
+          colSpan='10'
+          message='Cargando información de la tabla...'
+        />
       );
     }
 
@@ -262,45 +260,28 @@ class Comprobantes extends CustomComponent {
         />
 
         <Row>
-          <Column className="col-md-6 col-sm-12">
-            <div className="form-group">
-              <div className="input-group mb-2">
-                <div className="input-group-prepend">
-                  <div className="input-group-text">
-                    <i className="bi bi-search"></i>
-                  </div>
-                </div>
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Buscar..."
-                  ref={this.refTxtSearch}
-                  onKeyUp={(event) =>
-                    keyUpSearch(event, () =>
-                      this.searchText(event.target.value),
-                    )
-                  }
-                />
-              </div>
-            </div>
+          <Column className="col-md-6 col-sm-12" formGroup={true}>
+            <Search
+              refInput={this.refTxtSearch}
+              onSearch={this.searchText}
+              placeholder="Buscar..."
+            />
           </Column>
 
-          <Column className="col-md-6 col-sm-12">
-            <div className="form-group">
-              <button
-                className="btn btn-outline-info"
-                onClick={this.handleAgregar}
-              // disabled={!this.state.add}
-              >
-                <i className="bi bi-file-plus"></i> Nuevo Registro
-              </button>{' '}
-              <button
-                className="btn btn-outline-secondary"
-                onClick={this.loadInit}
-              >
-                <i className="bi bi-arrow-clockwise"></i>
-              </button>
-            </div>
+          <Column className="col-md-6 col-sm-12" formGroup={true}>
+            <Button
+              className="btn-outline-info"
+              onClick={this.handleAgregar}
+            // disabled={!this.state.add}
+            >
+              <i className="bi bi-file-plus"></i> Nuevo Registro
+            </Button>{' '}
+            <Button
+              className="btn-outline-secondary"
+              onClick={this.loadInit}
+            >
+              <i className="bi bi-arrow-clockwise"></i>
+            </Button>
           </Column>
         </Row>
 

@@ -174,13 +174,10 @@ class Vehiculo extends CustomComponent {
   generarBody() {
     if (this.state.loading) {
       return (
-        <tr>
-          <td className="text-center" colSpan="8">
-            <SpinnerTable
-              message='Cargando información de la tabla...'
-            />
-          </td>
-        </tr>
+        <SpinnerTable
+          colSpan='8'
+          message='Cargando información de la tabla...'
+        />
       );
     }
 

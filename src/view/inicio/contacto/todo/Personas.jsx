@@ -178,13 +178,10 @@ class Personas extends CustomComponent {
   generateBody() {
     if (this.state.loading) {
       return (
-        <tr>
-          <td className="text-center" colSpan="10">
-            <SpinnerTable
-              message='Cargando información de la tabla...'
-            />
-          </td>
-        </tr>
+        <SpinnerTable
+          colSpan='10'
+          message='Cargando información de la tabla...'
+        />
       );
     }
 

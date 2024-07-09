@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  spinnerLoading,
   alertDialog,
   alertInfo,
   alertSuccess,
@@ -16,11 +15,21 @@ import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import {
   cancelTraslado,
+  comboSucursal,
   comboTipoTraslado,
   listTraslado,
 } from '../../../../../network/rest/principal.network';
 import { CANCELED } from '../../../../../model/types/types';
 import { connect } from 'react-redux';
+import Column from '../../../../../components/Column';
+import Select from '../../../../../components/Select';
+import Row from '../../../../../components/Row';
+import { SpinnerTable, SpinnerView } from '../../../../../components/Spinner';
+import Input from '../../../../../components/Input';
+import Button from '../../../../../components/Button';
+import { TableResponsive } from '../../../../../components/Table';
+import Title from '../../../../../components/Title';
+import Search from '../../../../../components/Search';
 
 class Traslado extends CustomComponent {
   constructor(props) {
@@ -35,10 +44,13 @@ class Traslado extends CustomComponent {
       fechaFinal: currentDate(),
 
       tipoTraslado: [],
+      sucursales: [],
 
       loading: false,
       lista: [],
       restart: false,
+
+      buscar: '',
 
       opcion: 0,
       paginacion: 0,
@@ -64,12 +76,14 @@ class Traslado extends CustomComponent {
   }
 
   async loadingData() {
-    const [tipoTraslado] = await Promise.all([
-      this.fetchComboTipoTraslado()
+    const [tipoTraslado, sucursales] = await Promise.all([
+      this.fetchComboTipoTraslado(),
+      this.fetchSucursal(),
     ]);
 
     await this.setStateAsync({
       tipoTraslado,
+      sucursales,
       initialLoad: false,
     });
     this.loadInit();
@@ -79,18 +93,44 @@ class Traslado extends CustomComponent {
     if (this.state.loading) return;
 
     await this.setStateAsync({ paginacion: 1, restart: true });
-    this.fillTable(0, '');
+    this.fillTable(0);
     await this.setStateAsync({ opcion: 0 });
-  };
+  }
 
-  async searchText(text) {
+  async searchSucursal() {
+    if (this.state.loading) return;
+
+    await this.setStateAsync({ paginacion: 1, restart: false });
+    this.fillTable(0);
+    await this.setStateAsync({ opcion: 0 });
+  }
+
+  searchText = async (text) => {
     if (this.state.loading) return;
 
     if (text.trim().length === 0) return;
 
-    await this.setStateAsync({ paginacion: 1, restart: false });
+    await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
     this.fillTable(1, text.trim());
     await this.setStateAsync({ opcion: 1 });
+  }
+
+  async searchFechas() {
+    if (this.state.loading) return;
+
+    if (this.state.fechaInicio > this.state.fechaFinal) return;
+
+    await this.setStateAsync({ paginacion: 1, restart: false });
+    this.fillTable(2);
+    await this.setStateAsync({ opcion: 2 });
+  }
+
+  async searchTipoTraslado() {
+    if (this.state.loading) return;
+
+    await this.setStateAsync({ paginacion: 1, restart: false });
+    this.fillTable(3);
+    await this.setStateAsync({ opcion: 3 });
   }
 
   paginacionContext = async (listid) => {
@@ -101,23 +141,23 @@ class Traslado extends CustomComponent {
   onEventPaginacion = () => {
     switch (this.state.opcion) {
       case 0:
-        this.fillTable(0, '');
+        this.fillTable(0);
         break;
       case 1:
-        this.fillTable(1, this.refTxtSearch.current.value);
+        this.fillTable(1, this.state.buscar);
         break;
       case 2:
-        this.fillTable(2, this.refTxtSearch.current.value);
+        this.fillTable(2);
         break;
       case 3:
-        this.fillTable(3, this.refTxtSearch.current.value);
+        this.fillTable(3);
         break;
       default:
-        this.fillTable(0, '');
+        this.fillTable(0);
     }
   };
 
-  fillTable = async (opcion, buscar) => {
+  fillTable = async (opcion, buscar = '') => {
     this.setState({
       loading: true,
       lista: [],
@@ -175,17 +215,43 @@ class Traslado extends CustomComponent {
     }
   }
 
+  async fetchSucursal() {
+    const response = await comboSucursal(this.abortControllerTable.signal);
+
+    if (response instanceof SuccessReponse) {
+      return response.data;
+    }
+
+    if (response instanceof ErrorResponse) {
+      if (response.getType() === CANCELED) return;
+
+      return [];
+    }
+  }
+
   handleSelectTipoTraslado = (event) => {
-    this.setState({ idTipoTraslado: event.target.value });
+    this.setState({ idTipoTraslado: event.target.value }, () => {
+      this.searchTipoTraslado();
+    });
   };
 
   handleInputFechaInicio = (event) => {
-    this.setState({ fechaInicio: event.target.value });
+    this.setState({ fechaInicio: event.target.value }, () => {
+      this.searchFechas();
+    });
   };
 
   handleInputFechaFinal = (event) => {
-    this.setState({ fechaFinal: event.target.value });
+    this.setState({ fechaFinal: event.target.value }, () => {
+      this.searchFechas();
+    });
   };
+
+  handleSelectSucursal = (event) => {
+    this.setState({ idSucursal: event.target.value }, async () => {
+      this.searchSucursal();
+    })
+  }
 
   handleAgregar = () => {
     this.props.history.push({
@@ -226,14 +292,13 @@ class Traslado extends CustomComponent {
     );
   };
 
-  generarBody = () => {
+  generateBody = () => {
     if (this.state.loading) {
       return (
-        <tr>
-          <td className="text-center" colSpan="9">
-            {spinnerLoading('Cargando información de la tabla...', true)}
-          </td>
-        </tr>
+        <SpinnerTable
+          colSpan='9'
+          message='Cargando información de la tabla...'
+        />
       );
     }
 
@@ -298,130 +363,126 @@ class Traslado extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
-        {this.state.initialLoad && spinnerLoading(this.state.initialMessage)}
 
-        <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <div className="form-group">
-              <h5>
-                Traslado <small className="text-secondary">REALIZADOS</small>
-              </h5>
-            </div>
-          </div>
-        </div>
+        <SpinnerView
+          loading={this.state.initialLoad}
+          message={this.state.initialMessage}
+        // body={<>
+        //   <div className='d-flex flex-column align-items-center'>
+        //     <p>No se pudo obtener los datos requeridos, comuníquese con su proveedor del sistema.</p>
+        //     <Button
+        //       className='btn-danger'>
+        //       <i className='fa fa-refresh'></i> Recargar
+        //     </Button>
+        //   </div>
+        // </>}
+        />
 
-        <div className="row">
-          <div className="col-md-6 col-sm-12">
-            <div className="form-group">
-              <div className="input-group mb-2">
-                <div className="input-group-prepend">
-                  <div className="input-group-text">
-                    <i className="bi bi-search"></i>
-                  </div>
-                </div>
+        <Title
+          title='Traslado'
+          subTitle='LISTA'
+        />
 
-                <input
-                  autoFocus
-                  type="text"
-                  className="form-control"
-                  placeholder="Buscar..."
-                />
-              </div>
-            </div>
-          </div>
+        <Row>
+          <Column className="col-md-6 col-sm-12" formGroup={true}>
+            <Search
+              onSearch={this.searchText}
+              placeholder="Buscar..."
+            />
+          </Column>
 
-          <div className="col-md-6 col-sm-12">
-            <div className="form-group">
-              <button
-                className="btn btn-outline-info"
-                onClick={this.handleAgregar}
-              >
-                <i className="bi bi-file-plus"></i> Nuevo Registro
-              </button>{' '}
-              <button
-                className="btn btn-outline-secondary"
-                onClick={this.loadInit}
-              >
-                <i className="bi bi-arrow-clockwise"></i>
-              </button>
-            </div>
-          </div>
-        </div>
+          <Column className="col-md-6 col-sm-12" formGroup={true}>
+            <Button
+              className="btn-outline-info"
+              onClick={this.handleAgregar}
+            >
+              <i className="bi bi-file-plus"></i> Nuevo Registro
+            </Button>{' '}
+            <Button
+              className="btn-outline-secondary"
+              onClick={this.loadInit}
+            >
+              <i className="bi bi-arrow-clockwise"></i>
+            </Button>
+          </Column>
+        </Row>
 
-        <div className="row">
-          <div className="col-md-3">
-            <div className="form-group">
-              <label>Tipo:</label>
-              <div className="input-group">
-                <select
-                  className="form-control"
-                  value={this.state.idTipoTraslado}
-                  onChange={this.handleSelectTipoTraslado}
-                >
-                  <option value="0">-- Selecciona --</option>
-                  {this.state.tipoTraslado.map((item, index) => (
-                    <option key={index} value={item.idTipoTraslado}>
-                      {item.nombre}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </div>
+        <Row>
+          <Column className="col-md-3" formGroup={true}>
+            <label>Tipo:</label>
+            <Select
+              value={this.state.idTipoTraslado}
+              onChange={this.handleSelectTipoTraslado}
+            >
+              <option value="0">-- Selecciona --</option>
+              {this.state.tipoTraslado.map((item, index) => (
+                <option key={index} value={item.idTipoTraslado}>
+                  {item.nombre}
+                </option>
+              ))}
+            </Select>
+          </Column>
 
-          <div className="col-xl-3 col-lg-3 col-md-12 col-sm-12 col-12">
-            <div className="form-group">
-              <label>Fecha Inicio:</label>
-              <input
-                className="form-control"
-                type="date"
-                value={this.state.fechaInicio}
-                onChange={this.handleInputFechaInicio}
-              />
-            </div>
-          </div>
+          <Column className="col-md-3 col-sm-12" formGroup={true}>
+            <label>Fecha Inicio:</label>
+            <Input
+              type="date"
+              value={this.state.fechaInicio}
+              onChange={this.handleInputFechaInicio}
+            />
+          </Column>
 
-          <div className="col-xl-3 col-lg-3 col-md-12 col-sm-12 col-12">
-            <div className="form-group">
-              <label>Fecha Final:</label>
-              <input
-                className="form-control"
-                type="date"
-                value={this.state.fechaFinal}
-                onChange={this.handleInputFechaFinal}
-              />
-            </div>
-          </div>
-        </div>
+          <Column className="col-md-3 col-sm-12" formGroup={true}>
+            <label>Fecha Final:</label>
+            <Input
+              type="date"
+              value={this.state.fechaFinal}
+              onChange={this.handleInputFechaFinal}
+            />
+          </Column>
 
-        <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <div className="table-responsive">
-              <table className="table table-striped table-bordered rounded">
-                <thead>
-                  <tr>
-                    <th width="5%" className="text-center">
-                      #
-                    </th>
-                    <th width="15%">Fecha y Hora</th>
-                    <th width="15%">Tipo / Motivo</th>
-                    <th width="15%">Almacen Origen</th>
-                    <th width="15%">Almacen Destino</th>
-                    <th width="20%">Observación</th>
-                    <th width="10%">Estado</th>
-                    <th width="5%" className="text-center">
-                      Detalle
-                    </th>
-                    <th width="5%" className="text-center">
-                      Anular
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>{this.generarBody()}</tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+          <Column className="col-md-3 col-sm-12" formGroup={true}>
+            <label>Sucursal:</label>
+            <Select
+              value={this.state.idSucursal}
+              onChange={this.handleSelectSucursal}
+            >
+              {
+                this.state.sucursales.map((item, index) => (
+                  <option key={index} value={item.idSucursal}>{item.nombre}</option>
+                ))
+              }
+            </Select>
+          </Column>
+        </Row>
+
+        <Row>
+          <Column>
+            <TableResponsive
+              className={"table table-striped table-bordered rounded"}
+              tHead={
+                <tr>
+                  <th width="5%" className="text-center">
+                    #
+                  </th>
+                  <th width="15%">Fecha y Hora</th>
+                  <th width="15%">Tipo / Motivo</th>
+                  <th width="15%">Almacen Origen</th>
+                  <th width="15%">Almacen Destino</th>
+                  <th width="20%">Observación</th>
+                  <th width="10%">Estado</th>
+                  <th width="5%" className="text-center">
+                    Detalle
+                  </th>
+                  <th width="5%" className="text-center">
+                    Anular
+                  </th>
+                </tr>
+              }
+              tBody={this.generateBody()}
+            />
+          </Column>
+        </Row>
 
         <Paginacion
           loading={this.state.loading}
@@ -451,6 +512,6 @@ const mapStateToProps = (state) => {
  * Método encargado de conectar con redux y exportar la clase
  */
 
-const ConnectedTraslado= connect(mapStateToProps, null)(Traslado);
+const ConnectedTraslado = connect(mapStateToProps, null)(Traslado);
 
 export default ConnectedTraslado;

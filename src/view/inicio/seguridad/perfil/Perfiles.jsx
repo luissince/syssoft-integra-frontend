@@ -185,13 +185,10 @@ class Perfiles extends CustomComponent {
   generarBody() {
     if (this.state.loading) {
       return (
-        <tr>
-          <td className="text-center" colSpan="6">
-            <SpinnerTable
-              message='Cargando información de la tabla...'
-            />
-          </td>
-        </tr>
+        <SpinnerTable
+          colSpan='6'
+          message='Cargando información de la tabla...'
+        />
       );
     }
 
@@ -219,7 +216,7 @@ class Perfiles extends CustomComponent {
               className="btn btn-outline-warning btn-sm"
               title="Editar"
               onClick={() => this.handleEditar(item.idPerfil)}
-              // disabled={!this.state.edit}
+            // disabled={!this.state.edit}
             >
               <i className="bi bi-pencil"></i>
             </button>
@@ -229,7 +226,7 @@ class Perfiles extends CustomComponent {
               className="btn btn-outline-danger btn-sm"
               title="Anular"
               onClick={() => this.handleBorrar(item.idPerfil)}
-              // disabled={!this.state.remove}
+            // disabled={!this.state.remove}
             >
               <i className="bi bi-trash"></i>
             </button>
@@ -275,7 +272,7 @@ class Perfiles extends CustomComponent {
               <button
                 className="btn btn-outline-info"
                 onClick={this.handleAgregar}
-                // disabled={!this.state.add}
+              // disabled={!this.state.add}
               >
                 <i className="bi bi-file-plus"></i> Nuevo Registro
               </button>{' '}
@@ -294,19 +291,19 @@ class Perfiles extends CustomComponent {
             <TableResponsive
               tHead={
                 <tr>
-                <th width="5%" className="text-center">
-                  #
-                </th>
-                <th width="30%">Descripción</th>
-                <th width="30%">Empresa</th>
-                <th width="20%">Creación</th>
-                <th width="5%" className="text-center">
-                  Editar
-                </th>
-                <th width="5%" className="text-center">
-                  Eliminar
-                </th>
-              </tr>
+                  <th width="5%" className="text-center">
+                    #
+                  </th>
+                  <th width="30%">Descripción</th>
+                  <th width="30%">Empresa</th>
+                  <th width="20%">Creación</th>
+                  <th width="5%" className="text-center">
+                    Editar
+                  </th>
+                  <th width="5%" className="text-center">
+                    Eliminar
+                  </th>
+                </tr>
               }
               tBody={this.generarBody()}
             />
