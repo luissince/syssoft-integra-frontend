@@ -18,6 +18,7 @@ const Menu = (props) => {
     props.clearListaInventario();
     props.clearKardex();
     props.clearListaTraslado();
+    props.clearListaCpeSunat();
     props.clearNoticacion();
     props.projectClose();
   }
@@ -170,6 +171,7 @@ Menu.propTypes = {
   clearListaInventario: PropTypes.func,
   clearKardex: PropTypes.func,
   clearListaTraslado: PropTypes.func,
+  clearListaCpeSunat: PropTypes.func,
   clearNoticacion: PropTypes.func,
 
   projectClose: PropTypes.func,

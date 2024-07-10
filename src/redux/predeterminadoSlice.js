@@ -15,6 +15,10 @@ const initialState = {
     data: null,
     paginacion: null
   },
+  productoLista: {
+    data: null,
+    paginacion: null
+  },
   ajusteLista: {
     data: null,
     paginacion: null
@@ -23,15 +27,15 @@ const initialState = {
     data: null,
     paginacion: null
   },
-  productoLista: {
-    data: null,
-    paginacion: null
-  },
   kardex: {
     data: null,
     paginacion: null
   },
   trasladoLista: {
+    data: null,
+    paginacion: null
+  },
+  cpeSunatLista: {
     data: null,
     paginacion: null
   },
@@ -156,6 +160,19 @@ const predeterminadoSlice = createSlice({
       };
     },
 
+    setListaCpeSunatData: (state, action) => {
+      state.cpeSunatLista.data = action.payload;
+    },
+    setListaCpeSunatPaginacion: (state, action) => {
+      state.cpeSunatLista.paginacion = action.payload;
+    },
+    clearListaCpeSunat: (state) => {
+      state.cpeSunatLista = {
+        data: null,
+        paginacion: null
+      };
+    },
+
     clearPredeterminado: (state) => {
       state.moneda = null;
       state.empresa = null;
@@ -168,6 +185,10 @@ const predeterminadoSlice = createSlice({
         data: null,
         paginacion: null
       };
+      state.productoLista = {
+        data: null,
+        paginacion: null
+      };
       state.ajusteLista = {
         data: null,
         paginacion: null
@@ -176,15 +197,15 @@ const predeterminadoSlice = createSlice({
         data: null,
         paginacion: null
       };
-      state.productoLista = {
-        data: null,
-        paginacion: null
-      };
       state.kardex = {
         data: null,
         paginacion: null
       };
       state.trasladoLista = {
+        data: null,
+        paginacion: null
+      };
+      state.cpeSunatLista = {
         data: null,
         paginacion: null
       };
@@ -218,13 +239,13 @@ export const { setMonedaNacional,
   setListaCotizacionPaginacion,
   clearListaCotizacion,
 
-  setListaAjusteData,
-  setListaAjustePaginacion,
-  clearListaAjuste,
-
   setListaProductoData,
   setListaProductoPaginacion,
   clearListaProducto,
+
+  setListaAjusteData,
+  setListaAjustePaginacion,
+  clearListaAjuste,
 
   setListaInventarioData,
   setListaInventarioPaginacion,
@@ -237,6 +258,10 @@ export const { setMonedaNacional,
   setListaTrasladoData,
   setListaTrasladoPaginacion,
   clearListaTraslado,
+
+  setListaCpeSunatData,
+  setListaCpeSunatPaginacion,
+  clearListaCpeSunat,
 
   clearPredeterminado
 } = predeterminadoSlice.actions;

@@ -7,7 +7,7 @@ import { Switch, Route, Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { addNotification, clearNoticacion } from '../../redux/noticacionSlice.js';
 import { projectClose, signOut } from '../../redux/principalSlice.js';
-import { clearKardex, clearListaAjuste, clearListaCotizacion, clearListaInventario, clearListaProducto, clearListaTraslado, clearListaVenta } from '../../redux/predeterminadoSlice.js';
+import { clearKardex, clearListaAjuste, clearListaCotizacion, clearListaCpeSunat, clearListaInventario, clearListaProducto, clearListaTraslado, clearListaVenta } from '../../redux/predeterminadoSlice.js';
 
 import Bienvenido from './bienvenido/Bienvenido.jsx';
 import NotFoundMain from '../../components/errors/NotFoundMain.jsx';
@@ -931,8 +931,9 @@ Inicio.propTypes = {
   clearListaProducto: PropTypes.func,
   clearListaInventario: PropTypes.func,
   clearKardex: PropTypes.func,
-  clearNoticacion: PropTypes.func,
   clearListaTraslado: PropTypes.func,
+  clearListaCpeSunat: PropTypes.func,
+  clearNoticacion: PropTypes.func,
 };
 
 const mapStateToProps = (state) => {
@@ -954,6 +955,7 @@ const mapDispatchToProps = {
   clearListaInventario,
   clearKardex,
   clearListaTraslado,
+  clearListaCpeSunat,
   clearNoticacion
 }
 

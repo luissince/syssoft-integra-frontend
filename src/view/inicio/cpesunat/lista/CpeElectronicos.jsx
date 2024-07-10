@@ -12,7 +12,7 @@ import {
   alertInfo,
   isText,
 } from '../../../../helper/utils.helper';
-
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import FileDownloader from '../../../../components/FileDownloader';
 import Paginacion from '../../../../components/Paginacion';
@@ -44,9 +44,18 @@ import Select from '../../../../components/Select';
 import Button from '../../../../components/Button';
 import Input from '../../../../components/Input';
 import Search from '../../../../components/Search';
+import { setListaCpeSunatData, setListaCpeSunatPaginacion } from '../../../../redux/predeterminadoSlice';
 
+/**
+ * Componente que representa una funcionalidad específica.
+ * @extends React.Component
+ */
 class CpeElectronicos extends CustomComponent {
 
+  /**
+   *
+   * Constructor
+   */
   constructor(props) {
     super(props);
     this.state = {
@@ -93,6 +102,8 @@ class CpeElectronicos extends CustomComponent {
       idUsuario: this.props.token.userToken.idUsuario,
     };
 
+    this.refPaginacion = React.createRef();
+
     this.refUseFile = React.createRef();
 
     this.abortControllerTable = new AbortController();
@@ -113,31 +124,55 @@ class CpeElectronicos extends CustomComponent {
   }
 
   loadingData = async () => {
-    const [
-      facturado,
-      notaCredito,
-      guiaRemision,
-      sucursales
-    ] = await Promise.all([
-      this.fetchComprobante(VENTA),
-      this.fetchComprobante(NOTA_DE_CREDITO),
-      this.fetchComprobante(GUIA_DE_REMISION),
-      this.fetchSucursal(),
-    ]);
+    if (this.props.cpeSunatLista && this.props.cpeSunatLista.data && this.props.cpeSunatLista.paginacion) {
+      this.setState(this.props.cpeSunatLista.data)
+      this.refPaginacion.current.upperPageBound = this.props.cpeSunatLista.paginacion.upperPageBound;
+      this.refPaginacion.current.lowerPageBound = this.props.cpeSunatLista.paginacion.lowerPageBound;
+      this.refPaginacion.current.isPrevBtnActive = this.props.cpeSunatLista.paginacion.isPrevBtnActive;
+      this.refPaginacion.current.isNextBtnActive = this.props.cpeSunatLista.paginacion.isNextBtnActive;
+      this.refPaginacion.current.pageBound = this.props.cpeSunatLista.paginacion.pageBound;
+      this.refPaginacion.current.messagePaginacion = this.props.cpeSunatLista.paginacion.messagePaginacion;
+    } else {
+      const [
+        facturado,
+        notaCredito,
+        guiaRemision,
+        sucursales
+      ] = await Promise.all([
+        this.fetchComprobante(VENTA),
+        this.fetchComprobante(NOTA_DE_CREDITO),
+        this.fetchComprobante(GUIA_DE_REMISION),
+        this.fetchSucursal(),
+      ]);
 
-    const comprobantes = [...facturado, ...notaCredito, ...guiaRemision];
+      const comprobantes = [...facturado, ...notaCredito, ...guiaRemision];
 
-    const sucursal = sucursales.find(item => item.idSucursal === this.props.token.project.idSucursal)
+      const sucursal = sucursales.find(item => item.idSucursal === this.props.token.project.idSucursal)
 
-    this.setState({
-      idSucursal: sucursal.idSucursal,
-      comprobantes: comprobantes,
-      sucursales: sucursales,
-      initialLoad: false,
-    }, () => {
-      this.loadingInit()
-    })
+      this.setState({
+        idSucursal: sucursal.idSucursal,
+        comprobantes: comprobantes,
+        sucursales: sucursales,
+        initialLoad: false,
+      }, async () => {
+        this.loadingInit()
+        this.updateReduxState();
+      });
+    }
   }
+
+  updateReduxState() {
+    this.props.setListaCpeSunatData(this.state)
+    this.props.setListaCpeSunatPaginacion({
+      upperPageBound: this.refPaginacion.current.upperPageBound,
+      lowerPageBound: this.refPaginacion.current.lowerPageBound,
+      isPrevBtnActive: this.refPaginacion.current.isPrevBtnActive,
+      isNextBtnActive: this.refPaginacion.current.isNextBtnActive,
+      pageBound: this.refPaginacion.current.pageBound,
+      messagePaginacion: this.refPaginacion.current.messagePaginacion,
+    });
+  }
+
 
   async fetchComprobante(tipo) {
     const params = {
@@ -254,6 +289,8 @@ class CpeElectronicos extends CustomComponent {
         loading: false,
         lista: response.data.result,
         totalPaginacion: totalPaginacion,
+      }, () => {
+        this.updateReduxState();
       });
     }
 
@@ -781,6 +818,7 @@ class CpeElectronicos extends CustomComponent {
         </Row>
 
         <Paginacion
+          ref={this.refPaginacion}
           loading={this.state.loading}
           data={this.state.lista}
           totalPaginacion={this.state.totalPaginacion}
@@ -795,12 +833,34 @@ class CpeElectronicos extends CustomComponent {
   }
 }
 
+CpeElectronicos.propTypes = {
+  token: PropTypes.shape({
+    userToken: PropTypes.shape({
+      idUsuario: PropTypes.string.isRequired,
+    }).isRequired,
+    project: PropTypes.shape({
+      idSucursal: PropTypes.string.isRequired,
+    }).isRequired,
+  }).isRequired,
+  cpeSunatLista: PropTypes.shape({
+    data: PropTypes.object,
+    paginacion: PropTypes.object
+  }),
+  setListaCpeSunatData: PropTypes.func,
+  setListaCpeSunatPaginacion: PropTypes.func,
+  history: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
+  location: PropTypes.object
+}
+
 const mapStateToProps = (state) => {
   return {
     token: state.principal,
+    cpeSunatLista: state.predeterminado.cpeSunatLista
   };
 };
 
-const ConnectedCpeElectronicos = connect(mapStateToProps, null)(CpeElectronicos);
+const mapDispatchToProps = { setListaCpeSunatData, setListaCpeSunatPaginacion }
+
+const ConnectedCpeElectronicos = connect(mapStateToProps, mapDispatchToProps)(CpeElectronicos);
 
 export default ConnectedCpeElectronicos;

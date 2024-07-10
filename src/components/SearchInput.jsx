@@ -222,5 +222,4 @@ SearchInput.propTypes = {
   customButton: PropTypes.func,
 }
 
-
 export default SearchInput;

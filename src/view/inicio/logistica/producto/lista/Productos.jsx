@@ -7,6 +7,7 @@ import {
   convertNullText,
   numberFormat,
 } from '../../../../../helper/utils.helper';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import Paginacion from '../../../../../components/Paginacion';
 import ContainerWrapper from '../../../../../components/Container';
@@ -27,8 +28,19 @@ import { TableResponsive } from '../../../../../components/Table';
 import Image from '../../../../../components/Image';
 import Button from '../../../../../components/Button';
 import Search from '../../../../../components/Search';
+import { setListaProductoData, setListaProductoPaginacion } from '../../../../../redux/predeterminadoSlice';
+import React from 'react';
 
+/**
+ * Componente que representa una funcionalidad específica.
+ * @extends React.Component
+ */
 class Productos extends CustomComponent {
+
+  /**
+   *
+   * Constructor
+   */
   constructor(props) {
     super(props);
     this.state = {
@@ -63,18 +75,47 @@ class Productos extends CustomComponent {
       idUsuario: this.props.token.userToken.idUsuario,
     };
 
+    this.refPaginacion = React.createRef();
+
     this.abortControllerTable = new AbortController();
   }
 
   async componentDidMount() {
-    this.loadInit();
+    await this.loadingData();
   }
 
   componentWillUnmount() {
     this.abortControllerTable.abort();
   }
 
-  loadInit = async () => {
+  async loadingData() {
+    if (this.props.productoLista && this.props.productoLista.data && this.props.productoLista.paginacion) {
+      this.setState(this.props.productoLista.data)
+      this.refPaginacion.current.upperPageBound = this.props.productoLista.paginacion.upperPageBound;
+      this.refPaginacion.current.lowerPageBound = this.props.productoLista.paginacion.lowerPageBound;
+      this.refPaginacion.current.isPrevBtnActive = this.props.productoLista.paginacion.isPrevBtnActive;
+      this.refPaginacion.current.isNextBtnActive = this.props.productoLista.paginacion.isNextBtnActive;
+      this.refPaginacion.current.pageBound = this.props.productoLista.paginacion.pageBound;
+      this.refPaginacion.current.messagePaginacion = this.props.productoLista.paginacion.messagePaginacion;
+    } else {
+      await this.loadingInit();
+      this.updateReduxState();
+    }
+  }
+
+  updateReduxState() {
+    this.props.setListaProductoData(this.state)
+    this.props.setListaProductoPaginacion({
+      upperPageBound: this.refPaginacion.current.upperPageBound,
+      lowerPageBound: this.refPaginacion.current.lowerPageBound,
+      isPrevBtnActive: this.refPaginacion.current.isPrevBtnActive,
+      isNextBtnActive: this.refPaginacion.current.isNextBtnActive,
+      pageBound: this.refPaginacion.current.pageBound,
+      messagePaginacion: this.refPaginacion.current.messagePaginacion,
+    });
+  }
+
+  loadingInit = async () => {
     if (this.state.loading) return;
 
     await this.setStateAsync({ paginacion: 1, restart: true });
@@ -134,17 +175,19 @@ class Productos extends CustomComponent {
         Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
       );
 
-      await this.setStateAsync({
+      this.setState({
         loading: false,
         lista: response.data.result,
         totalPaginacion: totalPaginacion,
+      }, () => {
+        this.updateReduxState();
       });
     }
 
     if (response instanceof ErrorResponse) {
       if (response.getType() === CANCELED) return;
 
-      await this.setStateAsync({
+      this.setState({
         loading: false,
         lista: [],
         totalPaginacion: 0,
@@ -189,7 +232,7 @@ class Productos extends CustomComponent {
           const response = await deleteProducto(params);
           if (response instanceof SuccessReponse) {
             alertSuccess('Producto', response.data, () => {
-              this.loadInit();
+              this.loadingInit();
             });
           }
 
@@ -336,7 +379,7 @@ class Productos extends CustomComponent {
             </Button>{' '}
             <Button
               className="btn btn-outline-secondary"
-              onClick={() => this.loadInit()}
+              onClick={() => this.loadingInit()}
             >
               <i className="bi bi-arrow-clockwise"></i>
             </Button>
@@ -376,6 +419,7 @@ class Productos extends CustomComponent {
         </Row>
 
         <Paginacion
+          ref={this.refPaginacion}
           loading={this.state.loading}
           data={this.state.lista}
           totalPaginacion={this.state.totalPaginacion}
@@ -388,13 +432,36 @@ class Productos extends CustomComponent {
   }
 }
 
+Productos.propTypes = {
+  token: PropTypes.shape({
+    userToken: PropTypes.shape({
+      idUsuario: PropTypes.string.isRequired,
+    }).isRequired,
+    project: PropTypes.shape({
+      idSucursal: PropTypes.string.isRequired,
+    }).isRequired,
+  }).isRequired,
+  moneda: PropTypes.object,
+  productoLista: PropTypes.shape({
+    data: PropTypes.object,
+    paginacion: PropTypes.object
+  }),
+  setListaProductoData: PropTypes.func,
+  setListaProductoPaginacion: PropTypes.func,
+  history: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
+  location: PropTypes.object
+}
+
 const mapStateToProps = (state) => {
   return {
     token: state.principal,
     moneda: state.predeterminado.moneda,
+    productoLista: state.predeterminado.productoLista
   };
 };
 
-const ConnectedProductos = connect(mapStateToProps, null)(Productos);
+const mapDispatchToProps = { setListaProductoData, setListaProductoPaginacion }
+
+const ConnectedProductos = connect(mapStateToProps, mapDispatchToProps)(Productos);
 
 export default ConnectedProductos;
