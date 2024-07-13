@@ -103,7 +103,7 @@ class Cotizaciones extends CustomComponent {
     await this.setStateAsync({ opcion: 0 });
   };
 
-  async searchText(text) {
+  searchText = async (text) => {
     if (this.state.loading) return;
 
     if (text.trim().length === 0) return;
@@ -123,7 +123,6 @@ class Cotizaciones extends CustomComponent {
     await this.setStateAsync({ opcion: 2 });
   }
 
-
   paginacionContext = async (listid) => {
     await this.setStateAsync({ paginacion: listid, restart: false });
     this.onEventPaginacion();
@@ -138,7 +137,7 @@ class Cotizaciones extends CustomComponent {
         this.fillTable(1, this.state.buscar);
         break;
       case 2:
-        this.fillTable(2, this.state.buscar);
+        this.fillTable(2);
         break;
       default:
         this.fillTable(0);
@@ -295,28 +294,28 @@ class Cotizaciones extends CustomComponent {
           </td>
           <td className='text-center'>{numberFormat(item.total, item.codiso)} </td>
           <td className="text-center">
-            <button
-              className="btn btn-outline-primary btn-sm"
+            <Button
+              className="btn-outline-primary btn-sm"
               title="Detalle"
               onClick={() => this.handleDetalle(item.idCotizacion)}>
               <i className="fa fa-eye"></i>
-            </button>
+            </Button>
           </td>
           <td className="text-center">
-            <button
-              className="btn btn-outline-warning btn-sm"
+            <Button
+              className="btn-outline-warning btn-sm"
               title="Editar"
               onClick={() => this.handleEditar(item.idCotizacion)}>
               <i className="fa fa-edit"></i>
-            </button>
+            </Button>
           </td>
           <td className="text-center">
-            <button
-              className="btn btn-outline-danger btn-sm"
+            <Button
+              className="btn-outline-danger btn-sm"
               title="Anular"
               onClick={() => this.handleAnular(item.idCotizacion)}>
               <i className="fa fa-remove"></i>
-            </button>
+            </Button>
           </td>
         </tr>
       );

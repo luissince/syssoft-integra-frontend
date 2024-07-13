@@ -195,6 +195,7 @@ class AjusteCrear extends CustomComponent {
 
     const data = {
       idProducto: producto.idProducto,
+      codigo: producto.codigo,
       nombre: producto.nombre,
       cantidad: 0,
       actual: producto.cantidad,
@@ -458,7 +459,11 @@ class AjusteCrear extends CustomComponent {
               <i className="bi bi-trash"></i>
             </Button>
           </td>
-          <td>{item.nombre}</td>
+          <td>
+            {item.codigo}
+            <br />
+            {item.nombre}
+          </td>
           <td>
             <Input
               value={item.cantidad}
@@ -664,7 +669,6 @@ class AjusteCrear extends CustomComponent {
                 <label>Filtrar por el código o nombre del producto::</label>
                 <SearchInput
                   autoFocus={true}
-                  showLeftIcon={false}
                   placeholder="Filtrar productos..."
                   refValue={this.refProducto}
                   value={this.state.filtrar}
@@ -674,9 +678,10 @@ class AjusteCrear extends CustomComponent {
                   handleSelectItem={this.handleSelectItemProducto}
                   renderItem={(value) => (
                     <>
-                      {value.nombre} / <small>{value.categoria}</small>
+                      {value.codigo} / {value.nombre}  <small>({value.categoria})</small>
                     </>
                   )}
+                  renderIconLeft={<i className="bi bi-cart4"></i>}
                 />
               </Column>
             </Row>

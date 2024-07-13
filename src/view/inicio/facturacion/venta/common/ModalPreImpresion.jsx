@@ -9,6 +9,10 @@ import SuccessReponse from "../../../../../model/class/response";
 import printJS from "print-js";
 import { obtenerPreVentaPdf } from "../../../../../network/rest/principal.network";
 
+/**
+ * Componente que representa una funcionalidad específica.
+ * @extends React.Component
+ */
 class ModalPreImpresion extends Component {
     constructor(props) {
         super(props);

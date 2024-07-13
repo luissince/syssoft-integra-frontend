@@ -1015,7 +1015,6 @@ class GuiaRemisionCrear extends CustomComponent {
             </label>
 
             <SearchInput
-              showLeftIcon={false}
               autoFocus={true}
               placeholder="Ejm: B001, 1, F001..."
               refValue={this.refFiltrarVenta}
@@ -1234,7 +1233,6 @@ class GuiaRemisionCrear extends CustomComponent {
             </label>
             <SearchInput
               disabled={this.state.disabledPublica}
-              showLeftIcon={false}
               placeholder="Filtrar por marca o número de placa..."
               refValue={this.refFiltrarVehiculo}
               value={this.state.filtrarVehiculo}
@@ -1263,7 +1261,6 @@ class GuiaRemisionCrear extends CustomComponent {
             </label>
             <SearchInput
               disabled={this.state.disabledPublica}
-              showLeftIcon={false}
               placeholder="Por número de documento o apellidos y nombres..."
               refValue={this.refFiltrarConductor}
               value={this.state.filtrarConductor}
@@ -1293,7 +1290,6 @@ class GuiaRemisionCrear extends CustomComponent {
 
             <SearchInput
               disabled={this.state.disabledPrivado}
-              showLeftIcon={false}
               placeholder="Por número de documento o ruc..."
               refValue={this.refFiltrarConductorPublico}
               value={this.state.filtrarConductorPublico}
@@ -1346,8 +1342,6 @@ class GuiaRemisionCrear extends CustomComponent {
                 Ubigeo Partida: <i className="fa fa-asterisk text-danger small"></i>
               </label>
               <SearchInput
-                showLeftIcon={true}
-                renderIconLeft={() => <i className="bi bi-search"></i>}
                 placeholder="Filtrar departamento, distrito o provincia..."
                 refValue={this.refFiltrarUbigeoPartida}
                 value={this.state.filterUbigeoPartida}
@@ -1363,6 +1357,7 @@ class GuiaRemisionCrear extends CustomComponent {
                     ({value.ubigeo})
                   </>
                 }
+                renderIconLeft={<i className="bi bi-search"></i>}
               />
             </div>
           </Column>
@@ -1400,8 +1395,6 @@ class GuiaRemisionCrear extends CustomComponent {
                 Ubigeo Llegada: <i className="fa fa-asterisk text-danger small"></i>
               </label>
               <SearchInput
-                showLeftIcon={true}
-                renderIconLeft={() => <i className="bi bi-search"></i>}
                 placeholder="Filtrar departamento, distrito o provincia..."
                 refValue={this.refFiltrarUbigeoLlegada}
                 value={this.state.filterUbigeoLlegada}
@@ -1417,6 +1410,7 @@ class GuiaRemisionCrear extends CustomComponent {
                     ({value.ubigeo})
                   </>
                 }
+                renderIconLeft={<i className="bi bi-search"></i>}
               />
             </div>
           </Column>

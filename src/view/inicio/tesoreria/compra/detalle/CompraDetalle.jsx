@@ -10,9 +10,18 @@ import Column from '../../../../../components/Column';
 import { Table, TableResponsive } from '../../../../../components/Table';
 import Title from '../../../../../components/Title';
 import { SpinnerView } from '../../../../../components/Spinner';
+import PropTypes from 'prop-types';
 
+/**
+ * Componente que representa una funcionalidad específica.
+ * @extends React.Component
+ */
 class CompraDetalle extends CustomComponent {
 
+  /**
+    *
+    * Constructor
+    */
   constructor(props) {
     super(props);
 
@@ -491,5 +500,14 @@ class CompraDetalle extends CustomComponent {
     );
   }
 }
+
+CompraDetalle.propTypes = {
+  history: PropTypes.shape({
+    goBack: PropTypes.func.isRequired,
+  }).isRequired,
+  location: PropTypes.shape({
+    search: PropTypes.string
+  })
+};
 
 export default CompraDetalle;

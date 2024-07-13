@@ -732,7 +732,6 @@ class GastoCrear extends CustomComponent {
           message={this.state.msgLoading}
         />
 
-
         <ModalSale
           refModal={this.refModalSale}
           isOpen={this.state.isOpenSale}
@@ -741,6 +740,7 @@ class GastoCrear extends CustomComponent {
           onClose={this.handleCloseModalSale}
 
           loading={this.state.loadingModal}
+          refMetodoPagoContenedor={this.refMetodoPagoContenedor}
           refMetodoContado={this.refMetodoContado}
           importeTotal={this.state.total}
 
@@ -769,7 +769,6 @@ class GastoCrear extends CustomComponent {
               {/* Filtrar */}
               <div className="col-md-6">
                 <SearchInput
-                  showLeftIcon={true}
                   autoFocus={true}
                   placeholder="Filtrar conceptos..."
                   refValue={this.refConcepto}
@@ -779,6 +778,7 @@ class GastoCrear extends CustomComponent {
                   handleFilter={this.handleFilterConcepto}
                   handleSelectItem={this.handleSelectItemConcepto}
                   renderItem={(value) => <>{value.nombre}</>}
+                  renderIconLeft={<i className="bi bi-cart4"></i>}
                 />
               </div>
               {/* Precio */}
@@ -892,7 +892,6 @@ class GastoCrear extends CustomComponent {
 
             <div className="form-group">
               <SearchInput
-                showLeftIcon={true}
                 placeholder="Filtrar clientes..."
                 refValue={this.refCliente}
                 value={this.state.filtrarCliente}
@@ -900,10 +899,8 @@ class GastoCrear extends CustomComponent {
                 handleClearInput={this.handleClearInputCliente}
                 handleFilter={this.handleFilterCliente}
                 handleSelectItem={this.handleSelectItemCliente}
-                renderItem={(value) => (
-                  <>{`${value.documento} - ${value.informacion}`}</>
-                )}
-                renderIconLeft={() => <i className="bi bi-person-circle"></i>}
+                renderItem={(value) => <>{`${value.documento} - ${value.informacion}`}</>}
+                renderIconLeft={<i className="bi bi-person-circle"></i>}
               />
             </div>
 

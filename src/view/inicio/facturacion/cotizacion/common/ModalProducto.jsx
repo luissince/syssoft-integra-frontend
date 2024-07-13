@@ -13,13 +13,19 @@ import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
 
+/**
+ * Componente que representa una funcionalidad específica.
+ * @extends React.Component
+ */
 class ModalProducto extends Component {
+
   constructor(props) {
     super(props);
 
     this.state = {
       loading: true,
       idProducto: '',
+      codigo: '',
       cantidad: '',
       precio: '',
       descripcion: '',
@@ -37,8 +43,8 @@ class ModalProducto extends Component {
 
     this.peticion = false;
     this.abortController = null;
-
   }
+
   loadDatos = async (producto) => {
     this.abortController = new AbortController();
 
@@ -51,6 +57,7 @@ class ModalProducto extends Component {
       this.setState({
         medidas: response.data,
         idProducto: producto.idProducto,
+        codigo: producto.codigo,
         cantidad: producto.cantidad ?? 0,
         precio: producto.precio,
         descripcion: producto.nombre,
@@ -90,6 +97,7 @@ class ModalProducto extends Component {
     this.setState({
       loading: true,
       idProducto: '',
+      codigo: '',
       cantidad: '',
       precio: '',
       descripcion: '',
@@ -119,7 +127,7 @@ class ModalProducto extends Component {
   }
 
   handleOnSubmit = async () => {
-    const { idProducto, descripcion, cantidad, tipoProducto, precio, idMedida } = this.state;
+    const { idProducto, codigo, descripcion, cantidad, tipoProducto, precio, idMedida } = this.state;
 
     const { detalles, idImpuesto, impuestos } = this.props;
 
@@ -188,6 +196,7 @@ class ModalProducto extends Component {
       const data = {
         id: detalles.length + 1,
         idProducto: idProducto,
+        codigo: codigo,
         nombre: descripcion,
         cantidad: parseFloat(cantidad),
         precio: parseFloat(precio),
@@ -322,14 +331,13 @@ class ModalProducto extends Component {
 }
 
 ModalProducto.propTypes = {
-  refModal: PropTypes.object,
   isOpen: PropTypes.bool,
-  onOpen: PropTypes.func,
-  onHidden: PropTypes.func,
   onClose: PropTypes.func,
+
   idImpuesto: PropTypes.string,
   impuestos: PropTypes.array,
   detalles: PropTypes.array,
+
   handleSave: PropTypes.func
 };
 

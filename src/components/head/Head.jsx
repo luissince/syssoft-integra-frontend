@@ -13,6 +13,7 @@ const Menu = (props) => {
     window.localStorage.removeItem('project');
     props.clearListaVenta();
     props.clearListaCotizacion();
+    props.clearListaGuiaRemision();
     props.clearListaAjuste();
     props.clearListaProducto();
     props.clearListaInventario();
@@ -166,6 +167,7 @@ Menu.propTypes = {
 
   clearListaVenta: PropTypes.func,
   clearListaCotizacion: PropTypes.func,
+  clearListaGuiaRemision: PropTypes.func,
   clearListaAjuste: PropTypes.func,
   clearListaProducto: PropTypes.func,
   clearListaInventario: PropTypes.func,

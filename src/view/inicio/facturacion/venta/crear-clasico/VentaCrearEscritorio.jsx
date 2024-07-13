@@ -536,6 +536,7 @@ class VentaCrearEscritorio extends CustomComponent {
         const newItem = {
           id: index === -1 ? this.state.detalleVenta.length + 1 : index,
           idProducto: producto.idProducto,
+          codigo: producto.codigo,
           nombreProducto: producto.nombreProducto,
           idImpuesto: this.state.idImpuesto,
           precio: producto.precio,
@@ -588,6 +589,7 @@ class VentaCrearEscritorio extends CustomComponent {
         const newItem = {
           id: index === -1 ? this.state.detalleVenta.length + 1 : index,
           idProducto: producto.idProducto,
+          codigo: producto.codigo,
           nombreProducto: producto.nombreProducto,
           idImpuesto: this.state.idImpuesto,
           precio: precio,
@@ -625,6 +627,7 @@ class VentaCrearEscritorio extends CustomComponent {
         const newItem = {
           id: index === -1 ? this.state.detalleVenta.length + 1 : index,
           idProducto: producto.idProducto,
+          codigo: producto.codigo,
           nombreProducto: producto.nombreProducto,
           idImpuesto: this.state.idImpuesto,
           precio: producto.precio,
@@ -667,6 +670,7 @@ class VentaCrearEscritorio extends CustomComponent {
         const newItem = {
           id: index === -1 ? this.state.detalleVenta.length + 1 : index,
           idProducto: producto.idProducto,
+          codigo: producto.codigo,
           nombreProducto: producto.nombreProducto,
           idImpuesto: this.state.idImpuesto,
           precio: precio ? precio : producto.precio,
@@ -1158,7 +1162,7 @@ class VentaCrearEscritorio extends CustomComponent {
         }
       }
 
-      this.setState({ idCotizacion,loading: false })
+      this.setState({ idCotizacion, loading: false })
     }
 
     if (response instanceof ErrorResponse) {
@@ -1753,7 +1757,11 @@ class VentaCrearEscritorio extends CustomComponent {
                 ))
             } */}
                 </td>
-                <td className='text-left' style={{ width: widthCell4 }}>{producto.nombreProducto}</td>
+                <td className='text-left' style={{ width: widthCell4 }}>
+                  {producto.codigo}
+                  <br />
+                  {producto.nombreProducto}
+                </td>
                 <td className='text-center' style={{ width: widthCell5 }}>{numberFormat(producto.precio, codiso)}</td>
                 {/* <td className='text-center'>0%</td> */}
                 <td className='text-center' style={{ width: widthCell6 }}>{numberFormat(producto.precio * cantidad, codiso)}</td>
@@ -2128,7 +2136,6 @@ class VentaCrearEscritorio extends CustomComponent {
                   <div className="invoice-client w-100">
                     <SearchInput
                       classNameContainer="position-relative"
-                      showLeftIcon={false}
                       placeholder={'N° de documento'}
                       refValue={this.refNumeroDocumento}
                       value={this.state.numeroDocumento}
@@ -2136,7 +2143,7 @@ class VentaCrearEscritorio extends CustomComponent {
                       handleClearInput={this.handleClearInputCliente}
                       handleFilter={this.handleFilterCliente}
                       handleSelectItem={this.handleSelectItemCliente}
-                      customButton={() => (
+                      customButton={
                         <>
                           {
                             this.state.idTipoCliente === CLIENTE_NATURAL && (
@@ -2161,7 +2168,7 @@ class VentaCrearEscritorio extends CustomComponent {
                             )
                           }
                         </>
-                      )}
+                      }
                       renderItem={(value) =>
                         <>
                           {value.documento + " - " + value.informacion}

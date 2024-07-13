@@ -5,6 +5,10 @@ import PropTypes from 'prop-types';
 import Input from './Input';
 import Button from './Button';
 
+/**
+ * Componente que representa una funcionalidad específica.
+ * @extends React.Component
+ */
 class SearchInput extends React.Component {
   constructor(props) {
     super(props);
@@ -108,8 +112,6 @@ class SearchInput extends React.Component {
 
     const { classNameContainer, disabled } = this.props;
 
-    const { showLeftIcon } = this.props;
-
     const { autoFocus, value, data, placeholder, refValue } = this.props;
 
     const { handleFilter, handleSelectItem, handleClearInput } = this.props;
@@ -121,14 +123,10 @@ class SearchInput extends React.Component {
     return (
       <div className={`${classNameContainer ? classNameContainer : "form-group position-relative"}`}>
         <div className="input-group">
-          {showLeftIcon && (
+          {renderIconLeft && (
             <div className="input-group-prepend">
               <div className="input-group-text">
-                {renderIconLeft ? (
-                  renderIconLeft()
-                ) : (
-                  <i className="bi bi-cart4"></i>
-                )}
+                {renderIconLeft}
               </div>
             </div>
           )}
@@ -146,9 +144,7 @@ class SearchInput extends React.Component {
           />
 
           <div className="input-group-append">
-            {
-              customButton && customButton()
-            }
+            {customButton}
 
             <Button
               className="btn-outline-secondary"
@@ -159,11 +155,7 @@ class SearchInput extends React.Component {
               }}
               disabled={disabled}
             >
-              {renderIconRight ? (
-                renderIconRight()
-              ) : (
-                <i className="fa fa-close"></i>
-              )}
+              {renderIconRight || <i className="fa fa-close"></i>}
             </Button>
           </div>
         </div>
@@ -203,7 +195,6 @@ class SearchInput extends React.Component {
 SearchInput.propTypes = {
   classNameContainer: PropTypes.string,
   disabled: PropTypes.bool,
-  showLeftIcon: PropTypes.bool,
 
   autoFocus: PropTypes.bool,
   value: PropTypes.string.isRequired,
@@ -216,10 +207,11 @@ SearchInput.propTypes = {
   handleClearInput: PropTypes.func.isRequired,
 
   renderItem: PropTypes.func,
-  renderIconLeft: PropTypes.func,
-  renderIconRight: PropTypes.func,
+  renderIconLeft: PropTypes.element,
+  renderIconRight: PropTypes.element,
 
-  customButton: PropTypes.func,
+  customButton: PropTypes.element,
 }
+
 
 export default SearchInput;

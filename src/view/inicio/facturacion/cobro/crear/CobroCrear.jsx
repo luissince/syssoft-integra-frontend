@@ -755,7 +755,6 @@ class CobroCrear extends CustomComponent {
               {/* Filtrar */}
               <Column className="col-md-6">
                 <SearchInput
-                  showLeftIcon={true}
                   autoFocus={true}
                   placeholder="Filtrar conceptos..."
                   refValue={this.refConcepto}
@@ -765,6 +764,7 @@ class CobroCrear extends CustomComponent {
                   handleFilter={this.handleFilterConcepto}
                   handleSelectItem={this.handleSelectItemConcepto}
                   renderItem={(value) => <>{value.nombre}</>}
+                  renderIconLeft={<i className="bi bi-cart4"></i>}
                 />
               </Column>
               {/* Precio */}
@@ -880,7 +880,6 @@ class CobroCrear extends CustomComponent {
 
             <div className="form-group">
               <SearchInput
-                showLeftIcon={true}
                 placeholder="Filtrar clientes..."
                 refValue={this.refCliente}
                 value={this.state.filtrarCliente}
@@ -888,10 +887,8 @@ class CobroCrear extends CustomComponent {
                 handleClearInput={this.handleClearInputCliente}
                 handleFilter={this.handleFilterCliente}
                 handleSelectItem={this.handleSelectItemCliente}
-                renderItem={(value) => (
-                  <>{value.documento + ' - ' + value.informacion}</>
-                )}
-                renderIconLeft={() => <i className="bi bi-person-circle"></i>}
+                renderItem={(value) => <>{value.documento + ' - ' + value.informacion}</>}
+                renderIconLeft={<i className="bi bi-person-circle"></i>}
               />
             </div>
 

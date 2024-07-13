@@ -11,7 +11,6 @@ const InvoiceClient = (props) => {
   return (
     <div className="invoice-client px-3 pb-3">
       <SearchInput
-        showLeftIcon={false}
         placeholder={placeholder}
         refValue={refCliente}
         value={cliente}
@@ -19,14 +18,14 @@ const InvoiceClient = (props) => {
         handleClearInput={handleClearInput}
         handleFilter={handleFilter}
         handleSelectItem={handleSelectItem}
-        customButton={() => (
+        customButton={
           <button
             className="btn btn-outline-success d-flex align-items-center"
             onClick={handleOpenCliente}>
-              <i className='fa fa-user-plus'></i>
+            <i className='fa fa-user-plus'></i>
             <div className="ml-2">Nuevo</div>
           </button>
-        )}
+        }
         renderItem={(value) =>
           <>
             {value.documento + ' - ' + value.informacion}

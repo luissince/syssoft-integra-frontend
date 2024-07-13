@@ -4,6 +4,8 @@ import Column from '../../../../../../components/Column';
 import { keyNumberFloat, numberFormat, isEmpty, } from '../../../../../../helper/utils.helper';
 import PropTypes from 'prop-types';
 import { SpinnerView } from '../../../../../../components/Spinner';
+import Select from '../../../../../../components/Select';
+import Button from '../../../../../../components/Button';
 
 const ModalSale = (props) => {
 
@@ -175,17 +177,16 @@ const ModalSale = (props) => {
                       <i className="bi bi-tag-fill"></i>
                     </div>
                   </div>
-                  <select
+                  <Select
                     title="Lista metodo de cobro"
-                    className="form-control"
-                    ref={refMetodoContado}
+                    refSelect={refMetodoContado}
                   >
                     {bancos.map((item, index) => (
                       <option key={index} value={item.idBanco}>
                         {item.nombre}
                       </option>
                     ))}
-                  </select>
+                  </Select>
                   <div className="input-group-append">
                     <button
                       type="button"
@@ -210,19 +211,18 @@ const ModalSale = (props) => {
       }
       footer={
         <>
-          <button
+          <Button
             type="submit"
-            className="btn btn-primary"
+            className="btn-primary"
           >
             <i className='fa fa-save'></i> Procesar Gasto
-          </button>
-          <button
-            type="button"
-            className="btn btn-danger"
+          </Button>
+          <Button
+            className="btn-danger"
             onClick={async () => await refModal.current.handleOnClose()}
           >
             <i className='fa fa-close'></i> Cerrar
-          </button>
+          </Button>
         </>
       }
     />

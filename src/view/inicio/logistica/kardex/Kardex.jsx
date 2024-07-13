@@ -196,7 +196,7 @@ class Kardex extends CustomComponent {
       cantidad: cantidad,
       costo: costo,
       loading: false,
-    },()=>{
+    }, () => {
       this.updateReduxState();
     });
   }
@@ -367,7 +367,6 @@ class Kardex extends CustomComponent {
           <Column className="col-md-9 col-12">
             <label>Filtrar los productos por código o nombre:</label>
             <SearchInput
-              showLeftIcon={true}
               placeholder="Filtrar productos..."
               refValue={this.refProducto}
               value={this.state.filtrar}
@@ -375,12 +374,12 @@ class Kardex extends CustomComponent {
               handleClearInput={this.handleClearInputProducto}
               handleFilter={this.handleFilterProducto}
               handleSelectItem={this.handleSelectItemProducto}
-              renderIconLeft={() => <i className="bi bi-search"></i>}
               renderItem={(value) => (
                 <>
-                  {value.nombre} / <small>{value.categoria}</small>
+                  {value.codigo} / {value.nombre} <small>({value.categoria})</small>
                 </>
               )}
+              renderIconLeft={<i className="bi bi-search"></i>}
             />
           </Column>
 
@@ -414,6 +413,10 @@ class Kardex extends CustomComponent {
         <Row>
           <Column formGroup={true}>
             <h5>Información del Producto</h5>
+            <p>
+              <strong>Código del Producto:</strong>{' '}
+              {producto && producto.codigo}
+            </p>
             <p>
               <strong>Nombre del Producto:</strong>{' '}
               {producto && producto.nombre}

@@ -19,7 +19,6 @@ const InvoiceListPrices = (props) => {
   return (
     <div className="px-3 pb-3">
       <SearchInput
-        showLeftIcon={false}
         placeholder={placeholder}
         refValue={refProductoMobile}
         value={productoMobile}
@@ -27,18 +26,8 @@ const InvoiceListPrices = (props) => {
         handleClearInput={handleClearInput}
         handleFilter={handleFilter}
         handleSelectItem={handleSelectItem}
-        // customButton={() => (
-        //   <button
-        //     className="btn btn-outline-success d-flex align-items-center"
-        //     onClick={handleOpenCliente}>
-        //     <img src={images.addclient} alt="Nuevo cliente" />
-        //     <div className="ml-2">Nuevo</div>
-        //   </button>
-        // )}
         renderItem={(value) => {
-
           const cantidad = value.tipo === 'PRODUCTO' ? `INV. ${value.cantidad}` : `SERVICIO`;
-
           return (
             <div>
               <div className='d-flex align-items-center'>
@@ -54,9 +43,7 @@ const InvoiceListPrices = (props) => {
                 >{cantidad}</p>
                 <p >{numberFormat(value.precio, codiso)} </p>
               </div>
-              {/* {value.nombreProducto} - {numberFormat(value.precio, codiso)} */}
             </div>
-
           );
         }}
       />

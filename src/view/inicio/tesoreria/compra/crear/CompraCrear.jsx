@@ -34,18 +34,24 @@ import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
 import SearchInput from '../../../../../components/SearchInput';
 import ModalSale from './component/ModalSale';
-import { ModalProduct } from './component/ModalProduct';
 import PropTypes from 'prop-types';
 import { CONTADO, CREDITO_FIJO, CREDITO_VARIABLE } from '../../../../../model/types/forma-cobro';
 import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
 import { SpinnerView } from '../../../../../components/Spinner';
+import Button from '../../../../../components/Button';
+import Select from '../../../../../components/Select';
+import TextArea from '../../../../../components/TextArea';
+import { Table } from '../../../../../components/Table';
+import ModalProducto from './component/ModalProducto';
+import ModalProveedor from './component/ModalProveedor';
 
 /**
  * Componente que representa una funcionalidad específica.
  * @extends React.Component
  */
 class CompraCrear extends CustomComponent {
+
   /**
     *
     * Constructor
@@ -66,7 +72,7 @@ class CompraCrear extends CustomComponent {
       nota: '',
 
       // Detalle del gasto
-      detalle: [],
+      detalles: [],
 
       // Lista de datos
       comprobantes: [],
@@ -80,11 +86,11 @@ class CompraCrear extends CustomComponent {
       producto: null,
       productos: [],
 
-      // Filtrar cliente
-      filtrarCliente: '',
-      loadingCliente: false,
-      cliente: null,
-      clientes: [],
+      // Filtrar persona
+      filtrarPersona: '',
+      loadingPersona: false,
+      persona: null,
+      personas: [],
 
       // Atributos libres
       codISO: '',
@@ -103,9 +109,9 @@ class CompraCrear extends CustomComponent {
 
       // Atributos del modal producto
       isOpenProducto: false,
-      loadingModalProducto: false,
-      cantidadModalProducto: '',
-      costoModalProducto: '',
+
+      // Atributos del modal persona
+      isOpenCliente: false,
 
       // Id principales
       idSucursal: this.props.token.project.idSucursal,
@@ -125,9 +131,12 @@ class CompraCrear extends CustomComponent {
     this.refProducto = React.createRef();
     this.selectItemProducto = false;
 
-    // Filtrar cliente
-    this.refCliente = React.createRef();
-    this.selectItemCliente = false;
+    // Filtrar persona
+    this.refFilerPersona = React.createRef();
+    this.selectItemPersona = false;
+
+    // Referencia para el modal persona
+    this.refModalCliente = React.createRef();
 
     // Referencia para el modal sale
     this.refModalSale = React.createRef();
@@ -137,13 +146,8 @@ class CompraCrear extends CustomComponent {
     this.refFrecuenciaPagoFijo = React.createRef();
     this.refFrecuenciaPagoVariable = React.createRef();
 
-    // Referencia para el modal producto
-    this.refCantidadModalProduct = React.createRef();
-    this.refCostoModalProduct = React.createRef();
-
     // Referencia para el custom modal producto
     this.refModalProducto = React.createRef();
-
 
     //Anular las peticiones
     this.abortController = new AbortController();
@@ -376,7 +380,7 @@ class CompraCrear extends CustomComponent {
     this.setState({ idImpuesto: event.target.value });
 
     if (idImpuesto !== "") {
-      const newDetalle = [...this.state.detalle].map((item) => (
+      const newDetalle = [...this.state.detalles].map((item) => (
         {
           ...item,
           idImpuesto: impuesto.idImpuesto,
@@ -385,15 +389,22 @@ class CompraCrear extends CustomComponent {
         }
       ));
       this.setState({
-        detalle: newDetalle,
+        detalles: newDetalle,
       })
     }
   };
 
+  handleRemoverProducto = (idProducto) => {
+    const detalles = this.state.detalles.filter((item) => item.idProducto !== idProducto);
+
+    const total = detalles.reduce((accumulate, item) => (accumulate += item.cantidad * item.costo), 0);
+    this.setState({ detalles, total });
+  };
+
+
   //------------------------------------------------------------------------------------------
   // Acciones del modal sale
   //------------------------------------------------------------------------------------------
-
   handleOpenModalSale = () => {
     this.setState({ loadingModalSale: true, isOpenSale: true })
   }
@@ -497,13 +508,13 @@ class CompraCrear extends CustomComponent {
       selectTipoCobro,
 
       idComprobante,
-      cliente,
+      persona,
       idImpuesto,
       idAlmacen,
       idMoneda,
       observacion,
       nota,
-      detalle,
+      detalles,
       idUsuario,
       idSucursal,
 
@@ -564,7 +575,7 @@ class CompraCrear extends CustomComponent {
       if (accept) {
         const data = {
           idComprobante: idComprobante,
-          idProveedor: cliente.idPersona,
+          idProveedor: persona.idPersona,
           idImpuesto: idImpuesto,
           idAlmacen: idAlmacen,
           idMoneda: idMoneda,
@@ -577,7 +588,7 @@ class CompraCrear extends CustomComponent {
           idFormaCobro: selectTipoCobro,
           metodoPago: metodoCobrosLista,
 
-          detalle: detalle,
+          detalles: detalles,
         };
 
         this.handleCloseModalSale();
@@ -609,13 +620,13 @@ class CompraCrear extends CustomComponent {
       numeroCuotas,
 
       idComprobante,
-      cliente,
+      persona,
       idImpuesto,
       idAlmacen,
       idMoneda,
       observacion,
       nota,
-      detalle,
+      detalles,
       idUsuario,
       idSucursal,
     } = this.state;
@@ -638,7 +649,7 @@ class CompraCrear extends CustomComponent {
       if (accept) {
         const data = {
           idComprobante: idComprobante,
-          idProveedor: cliente.idPersona,
+          idProveedor: persona.idPersona,
           idImpuesto: idImpuesto,
           idAlmacen: idAlmacen,
           idMoneda: idMoneda,
@@ -652,7 +663,7 @@ class CompraCrear extends CustomComponent {
           frecuenciaPago: selectTipoCobro === CREDITO_FIJO ? frecuenciaPagoFijo : frecuenciaPagoVariable,
           numeroCuotas: numeroCuotas,
 
-          detalle: detalle,
+          detalles: detalles,
         };
 
         this.handleCloseModalSale();
@@ -684,13 +695,13 @@ class CompraCrear extends CustomComponent {
       numeroCuotas,
 
       idComprobante,
-      cliente,
+      persona,
       idImpuesto,
       idAlmacen,
       idMoneda,
       observacion,
       nota,
-      detalle,
+      detalles,
       idUsuario,
       idSucursal,
     } = this.state;
@@ -706,7 +717,7 @@ class CompraCrear extends CustomComponent {
       if (accept) {
         const data = {
           idComprobante: idComprobante,
-          idProveedor: cliente.idPersona,
+          idProveedor: persona.idPersona,
           idImpuesto: idImpuesto,
           idAlmacen: idAlmacen,
           idMoneda: idMoneda,
@@ -720,7 +731,7 @@ class CompraCrear extends CustomComponent {
           frecuenciaPago: selectTipoCobro === CREDITO_FIJO ? frecuenciaPagoFijo : frecuenciaPagoVariable,
           numeroCuotas: numeroCuotas,
 
-          detalle: detalle,
+          detalles: detalles,
         };
 
         this.handleCloseModalSale();
@@ -758,112 +769,45 @@ class CompraCrear extends CustomComponent {
   };
 
   //------------------------------------------------------------------------------------------
-  // Acciones del modal product
+  // Acciones del modal producto
   //------------------------------------------------------------------------------------------
+  handleOpenModalProducto = (producto) => {
+    const { idImpuesto, detalles } = this.state;
 
-  handleOpenModalProducto = () => {
-    this.setState({ loadingModalProducto: true, isOpenProducto: true })
-  }
+    if (isEmpty(idImpuesto)) {
+      alertWarning('Compra', 'Seleccione un impuesto para continuar.', async () => {
+        this.refImpuesto.current.focus();
+      });
+      return;
+    }
 
-  handleOnOpenModalProducto = () => {
-    this.setState({
-      costoModalProducto: this.state.producto.costo,
-      loadingModalProducto: false,
-    })
-  }
-
-  handleOnHiddenModalProducto = async () => {
-    await this.setStateAsync({
-      productos: [],
-      filtrarProducto: '',
-      producto: null,
-      cantidadModalProducto: '',
-      costoModalProducto: '',
-    });
-    this.selectItemProducto = false;
+    const item = producto ?? detalles[this.index];
+    if (item) {
+      this.setState({ isOpenProducto: true })
+      this.refModalProducto.current.loadDatos(item);
+    }
   }
 
   handleCloseProducto = async () => {
     this.setState({ isOpenProducto: false })
   }
 
-  handleInputCantidadModalProducto = (event) => {
-    this.setState({ cantidadModalProducto: event.target.value });
-  };
-
-  handleInputCostoModalProducto = (event) => {
-    this.setState({ costoModalProducto: event.target.value });
-  };
-
-  handleAddProduct = () => {
-    const { cantidadModalProducto, costoModalProducto, detalle, idImpuesto } = this.state
-
-    if (isEmpty(idImpuesto)) {
-      alertWarning('Compra', 'Seleccione un IGV para continuar.', async () => {
-        await this.handleCloseProducto();
-        this.refImpuesto.current.focus();
-      });
-      return;
-    }
-
-    if (!isNumeric(cantidadModalProducto)) {
-      alertWarning('Compra', 'Ingrese la cantidad.', () => {
-        this.refCantidadModalProduct.current.focus();
-      });
-      return;
-    }
-
-    if (!isNumeric(costoModalProducto)) {
-      alertWarning('Compra', 'Ingrese el costo.', () => {
-        this.refCostoModalProduct.current.focus();
-      });
-      return;
-    }
-
-    if (!this.state.producto) return;
-
-    const { idProducto, nombre } = this.state.producto;
-
-    const newDetalle = detalle.map(item => ({ ...item }));;
-
-    const existeDetalle = newDetalle.find((item) => item.idProducto === idProducto);
-
-    const impuesto = this.state.impuestos.find((item) => item.idImpuesto === this.state.idImpuesto);
-
-    if (existeDetalle) {
-      existeDetalle.cantidad += parseFloat(cantidadModalProducto);
-    } else {
-      const data = {
-        idProducto: idProducto,
-        nombre: nombre,
-        cantidad: parseFloat(cantidadModalProducto),
-        costo: parseFloat(costoModalProducto),
-        idImpuesto: impuesto.idImpuesto,
-        nombreImpuesto: impuesto.nombre,
-        porcentajeImpuesto: impuesto.porcentaje,
-      };
-
-      newDetalle.push(data);
-    }
-
-    const total = newDetalle.reduce((accumulate, item) => (accumulate += item.cantidad * item.costo), 0);
-
-    this.setState({
-      detalle: newDetalle,
-      total,
-    });
-
-    this.handleCloseProducto();
-
+  handleSaveProducto = (detalles) => {
+    const total = detalles.reduce((accumulate, item) => (accumulate += item.cantidad * item.costo), 0);
+    this.setState({ detalles, total });
     this.refProducto.current.focus();
-  };
+  }
 
-  handleRemoverProduct = (idProducto) => {
-    const detalle = this.state.detalle.filter((item) => item.idProducto !== idProducto);
+  //------------------------------------------------------------------------------------------
+  // Acciones del modal persona
+  //------------------------------------------------------------------------------------------
+  handleOpenModalCliente = () => {
+    this.setState({ isOpenCliente: true });
+  }
 
-    const total = detalle.reduce((accumulate, item) => (accumulate += item.cantidad * item.costo), 0);
-    this.setState({ detalle, total });
-  };
+  handleCloseCliente = async () => {
+    this.setState({ isOpenCliente: false });
+  }
 
   //------------------------------------------------------------------------------------------
   // Filtrar productos
@@ -915,35 +859,34 @@ class CompraCrear extends CustomComponent {
     });
     this.selectItemProducto = true;
 
-    this.handleOpenModalProducto();
+    this.handleOpenModalProducto(value);
   };
 
   //------------------------------------------------------------------------------------------
-  // Filtrar cliente
+  // Filtrar persona
   //------------------------------------------------------------------------------------------
-
-  handleClearInputCliente = async () => {
+  handleClearInputPersona = async () => {
     await this.setStateAsync({
-      clientes: [],
-      filtrarCliente: '',
-      cliente: null,
+      personas: [],
+      filtrarPersona: '',
+      persona: null,
     });
-    this.selectItemCliente = false;
+    this.selectItemPersona = false;
   };
 
-  handleFilterCliente = async (event) => {
-    const searchWord = this.selectItemCliente ? '' : event.target.value;
-    await this.setStateAsync({ cliente: null, filtrarCliente: searchWord });
+  handleFilterPersona = async (event) => {
+    const searchWord = this.selectItemPersona ? '' : event.target.value;
+    await this.setStateAsync({ persona: null, filtrarPersona: searchWord });
 
-    this.selectItemCliente = false;
+    this.selectItemPersona = false;
     if (searchWord.length === 0) {
-      await this.setStateAsync({ clientes: [] });
+      await this.setStateAsync({ personas: [] });
       return;
     }
 
-    if (this.state.loadingCliente) return;
+    if (this.state.loadingPersona) return;
 
-    await this.setStateAsync({ loadingCliente: true });
+    await this.setStateAsync({ loadingPersona: true });
 
     const params = {
       opcion: 1,
@@ -951,18 +894,18 @@ class CompraCrear extends CustomComponent {
       proveedor: 1,
     };
 
-    const clientes = await this.fetchFiltrarCliente(params);
+    const personas = await this.fetchFiltrarCliente(params);
 
-    await this.setStateAsync({ loadingCliente: false, clientes });
+    await this.setStateAsync({ loadingPersona: false, personas });
   };
 
-  handleSelectItemCliente = async (value) => {
+  handleSelectItemPersona = async (value) => {
     await this.setStateAsync({
-      cliente: value,
-      filtrarCliente: value.documento + ' - ' + value.informacion,
-      clientes: [],
+      persona: value,
+      filtrarPersona: value.documento + ' - ' + value.informacion,
+      personas: [],
     });
-    this.selectItemCliente = true;
+    this.selectItemPersona = true;
   };
 
   //------------------------------------------------------------------------------------------
@@ -970,7 +913,7 @@ class CompraCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
 
   handleGuardar = async () => {
-    const { idComprobante, cliente, idMoneda, idImpuesto, idAlmacen, detalle } = this.state;
+    const { idComprobante, persona, idMoneda, idImpuesto, idAlmacen, detalles } = this.state;
 
     if (!isText(idComprobante)) {
       alertWarning('Compra', 'Seleccione su comprobante.', () =>
@@ -979,9 +922,9 @@ class CompraCrear extends CustomComponent {
       return;
     }
 
-    if (isEmpty(cliente)) {
-      alertWarning('Compra', 'Seleccione un cliente.', () =>
-        this.refCliente.current.focus(),
+    if (isEmpty(persona)) {
+      alertWarning('Compra', 'Seleccione un proveedor.', () =>
+        this.refFilerPersona.current.focus(),
       );
       return;
     }
@@ -1006,7 +949,7 @@ class CompraCrear extends CustomComponent {
       return;
     }
 
-    if (isEmpty(detalle)) {
+    if (isEmpty(detalles)) {
       alertWarning('Compra', 'Agregar algún producto a la lista.', () =>
         this.refProducto.current.focus(),
       );
@@ -1052,9 +995,9 @@ class CompraCrear extends CustomComponent {
     */
 
   generarBody() {
-    const { detalle } = this.state;
+    const { detalles } = this.state;
 
-    if (isEmpty(detalle)) {
+    if (isEmpty(detalles)) {
       return (
         <tr className="text-center">
           <td colSpan="6"> Agregar datos a la tabla </td>
@@ -1062,21 +1005,25 @@ class CompraCrear extends CustomComponent {
       );
     }
 
-    return detalle.map((item, index) => (
+    return detalles.map((item, index) => (
       <tr key={index}>
-        <td className="text-center">{++index}</td>
-        <td>{item.nombre}</td>
+        <td className="text-center">{item.id}</td>
+        <td>
+          {item.codigo}
+          <br />
+          {item.nombre}
+        </td>
         <td>{rounded(item.cantidad)}</td>
         <td>{numberFormat(item.costo, this.state.codISO)}</td>
         <td>{numberFormat(item.cantidad * item.costo, this.state.codISO)}</td>
         <td className="text-center">
-          <button
-            className="btn btn-outline-danger btn-sm"
+          <Button
+            className="btn-outline-danger btn-sm"
             title="Eliminar"
-            onClick={() => this.handleRemoverProduct(item.idProducto)}
+            onClick={() => this.handleRemoverProducto(item.idProducto)}
           >
             <i className="bi bi-trash"></i>
-          </button>
+          </Button>
         </td>
       </tr>
     ));
@@ -1086,7 +1033,7 @@ class CompraCrear extends CustomComponent {
     let subTotal = 0;
     let total = 0;
 
-    for (const item of this.state.detalle) {
+    for (const item of this.state.detalles) {
       const cantidad = item.cantidad;
       const valor = item.costo;
 
@@ -1102,7 +1049,7 @@ class CompraCrear extends CustomComponent {
     }
 
     const impuestosGenerado = () => {
-      const resultado = this.state.detalle.reduce((acc, item) => {
+      const resultado = this.state.detalles.reduce((acc, item) => {
         const total = item.cantidad * item.costo;
         const subTotal = calculateTaxBruto(item.porcentajeImpuesto, total);
         const impuestoTotal = calculateTax(item.porcentajeImpuesto, subTotal);
@@ -1135,7 +1082,7 @@ class CompraCrear extends CustomComponent {
     };
 
     return (
-      <thead>
+      <>
         <tr>
           <th className="text-right mb-2">SUB TOTAL :</th>
           <th className="text-right mb-2">
@@ -1150,7 +1097,7 @@ class CompraCrear extends CustomComponent {
             {numberFormat(total, this.state.codISO)}
           </th>
         </tr>
-      </thead>
+      </>
     );
   }
 
@@ -1195,22 +1142,24 @@ class CompraCrear extends CustomComponent {
           handleSaveSale={this.handleSaveSale}
         />
 
-        <ModalProduct
-          refModal={this.refModalProducto}
+        <ModalProducto
+          ref={this.refModalProducto}
           isOpen={this.state.isOpenProducto}
-          onOpen={this.handleOnOpenModalProducto}
-          onHidden={this.handleOnHiddenModalProducto}
           onClose={this.handleCloseProducto}
 
-          loading={this.state.loadingModalProducto}
-          refCantidad={this.refCantidadModalProduct}
-          cantidad={this.state.cantidadModalProducto}
-          handleInputCantidad={this.handleInputCantidadModalProducto}
-          refCosto={this.refCostoModalProduct}
-          costo={this.state.costoModalProducto}
-          handleInputCosto={this.handleInputCostoModalProducto}
+          idImpuesto={this.state.idImpuesto}
+          impuestos={this.state.impuestos}
+          detalles={this.state.detalles}
 
-          handleAdd={this.handleAddProduct}
+          handleSave={this.handleSaveProducto}
+        />
+
+        <ModalProveedor
+          ref={this.refModalCliente}
+          isOpen={this.state.isOpenCliente}
+          onClose={this.handleCloseCliente}
+
+          idUsuario={this.state.idUsuario}
         />
 
         <SpinnerView
@@ -1227,12 +1176,9 @@ class CompraCrear extends CustomComponent {
 
         <Row>
           <Column className="col-xl-8 col-lg-8 col-md-8 col-sm-12 col-12">
-            {/* Filtrar y agregar concepto */}
             <Row>
-              {/* Filtrar */}
-              <div className="col">
+              <Column>
                 <SearchInput
-                  showLeftIcon={true}
                   autoFocus={true}
                   placeholder="Filtrar productos..."
                   refValue={this.refProducto}
@@ -1241,9 +1187,10 @@ class CompraCrear extends CustomComponent {
                   handleClearInput={this.handleClearInputProducto}
                   handleFilter={this.handleFilterProducto}
                   handleSelectItem={this.handleSelectItemProducto}
-                  renderItem={(value) => <>{value.nombre}</>}
+                  renderItem={(value) => <>{value.codigo} / {value.nombre}</>}
+                  renderIconLeft={<i className="bi bi-cart4"></i>}
                 />
-              </div>
+              </Column>
             </Row>
 
             <Row>
@@ -1271,30 +1218,25 @@ class CompraCrear extends CustomComponent {
             </Row>
 
             <Row>
-              <Column>
-                <div className="form-group">
-                  <button
-                    type="button"
-                    className="btn btn-success"
-                    onClick={this.handleGuardar}
-                  >
-                    <i className="fa fa-save"></i> Guardar (F1)
-                  </button>{' '}
-                  <button
-                    type="button"
-                    className="btn btn-outline-info"
-                    onClick={this.handleLimpiar}
-                  >
-                    <i className="fa fa-trash"></i> Limpiar (F2)
-                  </button>{' '}
-                  <button
-                    type="button"
-                    className="btn btn-outline-danger"
-                    onClick={this.handleCerrar}
-                  >
-                    <i className="fa fa-close"></i> Cerrar
-                  </button>
-                </div>
+              <Column formGroup={true}>
+                <Button
+                  className="btn-success"
+                  onClick={this.handleGuardar}
+                >
+                  <i className="fa fa-save"></i> Guardar (F1)
+                </Button>{' '}
+                <Button
+                  className="btn-outline-info"
+                  onClick={this.handleLimpiar}
+                >
+                  <i className="fa fa-trash"></i> Limpiar (F2)
+                </Button>{' '}
+                <Button
+                  className="btn-outline-danger"
+                  onClick={this.handleCerrar}
+                >
+                  <i className="fa fa-close"></i> Cerrar
+                </Button>
               </Column>
             </Row>
           </Column>
@@ -1308,10 +1250,9 @@ class CompraCrear extends CustomComponent {
                   </div>
                 </div>
 
-                <select
+                <Select
                   title="Comprobantes de venta"
-                  className="form-control"
-                  ref={this.refComprobante}
+                  refSelect={this.refComprobante}
                   value={this.state.idComprobante}
                   onChange={this.handleSelectComprobante}
                 >
@@ -1321,24 +1262,29 @@ class CompraCrear extends CustomComponent {
                       {item.nombre + ' (' + item.serie + ')'}
                     </option>
                   ))}
-                </select>
+                </Select>
               </div>
             </div>
 
             <div className="form-group">
               <SearchInput
-                showLeftIcon={true}
-                placeholder="Filtrar clientes..."
-                refValue={this.refCliente}
-                value={this.state.filtrarCliente}
-                data={this.state.clientes}
-                handleClearInput={this.handleClearInputCliente}
-                handleFilter={this.handleFilterCliente}
-                handleSelectItem={this.handleSelectItemCliente}
-                renderItem={(value) => (
-                  <>{value.documento + ' - ' + value.informacion}</>
-                )}
-                renderIconLeft={() => <i className="bi bi-person-circle"></i>}
+                placeholder="Filtrar proveedores..."
+                refValue={this.refFilerPersona}
+                value={this.state.filtrarPersona}
+                data={this.state.personas}
+                handleClearInput={this.handleClearInputPersona}
+                handleFilter={this.handleFilterPersona}
+                handleSelectItem={this.handleSelectItemPersona}
+                renderItem={(value) => <>{value.documento + ' - ' + value.informacion}</>}
+                renderIconLeft={<i className="bi bi-person-circle"></i>}
+                customButton={
+                  <Button
+                    className="btn-outline-success d-flex align-items-center"
+                    onClick={this.handleOpenModalCliente}>
+                    <i className='fa fa-plus'></i>
+                    <span className="ml-2">Nuevo</span>
+                  </Button>
+                }
               />
             </div>
 
@@ -1349,9 +1295,8 @@ class CompraCrear extends CustomComponent {
                     <i className="bi bi-percent"></i>
                   </div>
                 </div>
-                <select
-                  className="form-control"
-                  ref={this.refImpuesto}
+                <Select
+                  refSelect={this.refImpuesto}
                   value={this.state.idImpuesto}
                   onChange={this.handleSelectImpuesto}
                 >
@@ -1363,7 +1308,7 @@ class CompraCrear extends CustomComponent {
                       </option>
                     );
                   })}
-                </select>
+                </Select>
               </div>
             </div>
 
@@ -1374,9 +1319,8 @@ class CompraCrear extends CustomComponent {
                     <i className="fa fa-building"></i>
                   </div>
                 </div>
-                <select
-                  className="form-control"
-                  ref={this.refAlmacen}
+                <Select
+                  refSelect={this.refAlmacen}
                   value={this.state.idAlmacen}
                   onChange={this.handleSelectAlmacen}
                 >
@@ -1388,7 +1332,7 @@ class CompraCrear extends CustomComponent {
                       </option>
                     );
                   })}
-                </select>
+                </Select>
               </div>
             </div>
 
@@ -1399,10 +1343,9 @@ class CompraCrear extends CustomComponent {
                     <i className="bi bi-cash"></i>
                   </div>
                 </div>
-                <select
+                <Select
                   title="Lista metodo de pago"
-                  className="form-control"
-                  ref={this.refMoneda}
+                  refSelect={this.refMoneda}
                   value={this.state.idMoneda}
                   onChange={this.handleSelectMoneda}
                 >
@@ -1412,7 +1355,7 @@ class CompraCrear extends CustomComponent {
                       {item.nombre}
                     </option>
                   ))}
-                </select>
+                </Select>
               </div>
             </div>
 
@@ -1423,14 +1366,13 @@ class CompraCrear extends CustomComponent {
                     <i className="bi bi-chat-dots-fill"></i>
                   </div>
                 </div>
-                <textarea
+                <TextArea
                   title="Observaciones..."
-                  className="form-control"
-                  ref={this.refObservacion}
+                  refInput={this.refObservacion}
                   value={this.state.observacion}
                   onChange={this.handleInputObservacion}
                   placeholder="Ingrese alguna observación">
-                </textarea>
+                </TextArea>
               </div>
             </div>
 
@@ -1441,18 +1383,19 @@ class CompraCrear extends CustomComponent {
                     <i className="bi bi-card-text"></i>
                   </div>
                 </div>
-                <textarea
+                <TextArea
                   title="Observaciones..."
-                  className="form-control"
                   value={this.state.nota}
                   onChange={this.handleInputNota}
                   placeholder="Ingrese alguna nota">
-                </textarea>
+                </TextArea>
               </div>
             </div>
 
             <div className="form-group">
-              <table width="100%">{this.renderTotal()}</table>
+              <Table
+                tHead={this.renderTotal()}
+              />
             </div>
           </Column>
         </Row>

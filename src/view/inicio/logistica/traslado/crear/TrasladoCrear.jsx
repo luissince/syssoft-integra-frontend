@@ -7,7 +7,6 @@ import {
   isEmpty,
   keyNumberFloat,
   rounded,
-  spinnerLoading,
 } from '../../../../../helper/utils.helper';
 import PropTypes from 'prop-types';
 import ContainerWrapper from '../../../../../components/Container';
@@ -28,6 +27,8 @@ import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
 import Button from '../../../../../components/Button';
 import Input from '../../../../../components/Input';
+import Select from '../../../../../components/Select';
+import { SpinnerView } from '../../../../../components/Spinner';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -228,6 +229,7 @@ class TrasladorCrear extends CustomComponent {
 
     const data = {
       idProducto: producto.idProducto,
+      codigo: producto.codigo,
       nombre: producto.nombre,
       cantidad: 0,
       actual: producto.cantidad,
@@ -585,7 +587,11 @@ class TrasladorCrear extends CustomComponent {
               <i className="bi bi-trash"></i>
             </Button>
           </td>
-          <td>{item.nombre}</td>
+          <td>
+            {item.codigo}
+            <br />
+            {item.nombre}
+          </td>
           <td>
             <Input
               value={item.cantidad}
@@ -611,21 +617,21 @@ class TrasladorCrear extends CustomComponent {
       <ContainerWrapper>
 
         {/* Mostrar un spinner de carga si initialLoad es verdadero */}
-
-        {this.state.initialLoad && spinnerLoading(this.state.initialMessage)}
+        <SpinnerView
+          loading={this.state.initialLoad}
+          message={this.state.initialMessage}
+        />
 
         {/* Encabezado de la página */}
         <Row>
-          <Column>
-            <div className="form-group">
-              <h5>
-                <span role="button" onClick={() => this.props.history.goBack()}>
-                  <i className="bi bi-arrow-left-short"></i>
-                </span>{' '}
-                Traslado
-                <small className="text-secondary"> CREAR</small>
-              </h5>
-            </div>
+          <Column formGroup={true}>
+            <h5>
+              <span role="button" onClick={() => this.props.history.goBack()}>
+                <i className="bi bi-arrow-left-short"></i>
+              </span>{' '}
+              Traslado
+              <small className="text-secondary"> CREAR</small>
+            </h5>
           </Column>
         </Row>
 
@@ -633,51 +639,48 @@ class TrasladorCrear extends CustomComponent {
         {this.state.paso === 1 && (
           <>
             {/* Mensaje y opciones para el primer paso */}
-            <Column>
-              <Column>
-                <div className="form-group">
-                  <p>
-                    <i className="bi bi-card-list"></i> Defína alguna opciones
-                    antes de continuar.
-                  </p>
-                </div>
+            <Row>
+              <Column formGroup={true}>
+                <p>
+                  <i className="bi bi-card-list"></i> Defína alguna opciones
+                  antes de continuar.
+                </p>
               </Column>
-            </Column>
+            </Row>
 
             {/* Selección del tipo de traslado */}
             <Row>
-              <Column>
-                <div className="form-group">
-                  <label>Seleccione el tipo de traslado:</label>
-                  <div className="form-check ">
-                    <input
-                      className="form-check-input"
-                      type="radio"
-                      ref={this.refIdTipoTraslado}
-                      name="tipoAjuste"
-                      id="TT0001"
-                      value="TT0001"
-                      checked={this.state.idTipoTraslado === 'TT0001'}
-                      onChange={this.handleOptionTipoTraslado}
-                    />
-                    <label className="form-check-label" htmlFor="TT0001">
-                      Entre almacenes
-                    </label>
-                  </div>
-                  <div className="form-check">
-                    <input
-                      className="form-check-input"
-                      type="radio"
-                      name="tipoAjuste"
-                      id="TT0002"
-                      value="TT0002"
-                      checked={this.state.idTipoTraslado === 'TT0002'}
-                      onChange={this.handleOptionTipoTraslado}
-                    />
-                    <label className="form-check-label" htmlFor="TT0002">
-                      Entre sucursales
-                    </label>
-                  </div>
+              <Column formGroup={true}>
+                <label>Seleccione el tipo de traslado:</label>
+                <div className="form-check ">
+                  <input
+                    className="form-check-input"
+                    type="radio"
+                    ref={this.refIdTipoTraslado}
+                    name="tipoAjuste"
+                    id="TT0001"
+                    value="TT0001"
+                    checked={this.state.idTipoTraslado === 'TT0001'}
+                    onChange={this.handleOptionTipoTraslado}
+                  />
+                  <label className="form-check-label" htmlFor="TT0001">
+                    Entre almacenes
+                  </label>
+                </div>
+
+                <div className="form-check">
+                  <input
+                    className="form-check-input"
+                    type="radio"
+                    name="tipoAjuste"
+                    id="TT0002"
+                    value="TT0002"
+                    checked={this.state.idTipoTraslado === 'TT0002'}
+                    onChange={this.handleOptionTipoTraslado}
+                  />
+                  <label className="form-check-label" htmlFor="TT0002">
+                    Entre sucursales
+                  </label>
                 </div>
               </Column>
             </Row>
@@ -834,25 +837,22 @@ class TrasladorCrear extends CustomComponent {
                       </div>
                     </Column>
 
-                    <Column className="col-md-6 col-12">
-                      <div className="form-group">
-                        <label>Seleccione el almacen:</label>
-                        <select
-                          className="form-control"
-                          ref={this.refIdAlmacenDestinoExterno}
-                          value={this.state.idAlmacenDestinoExterno}
-                          onChange={this.handleSelectAlmacenDestinoExterno}
-                          disabled>
-                          <option value="">-- Almacen --</option>
-                          {
-                            this.state.almacenesExterno.map((item, index) => (
-                              <option key={index} value={item.idAlmacen}>
-                                {item.nombre}
-                              </option>
-                            ))
-                          }
-                        </select>
-                      </div>
+                    <Column className="col-md-6 col-12" formGroup={true}>
+                      <label>Seleccione el almacen:</label>
+                      <Select
+                        refSelect={this.refIdAlmacenDestinoExterno}
+                        value={this.state.idAlmacenDestinoExterno}
+                        onChange={this.handleSelectAlmacenDestinoExterno}
+                        disabled>
+                        <option value="">-- Almacen --</option>
+                        {
+                          this.state.almacenesExterno.map((item, index) => (
+                            <option key={index} value={item.idAlmacen}>
+                              {item.nombre}
+                            </option>
+                          ))
+                        }
+                      </Select>
                     </Column>
                   </Row>
                 </>
@@ -862,19 +862,17 @@ class TrasladorCrear extends CustomComponent {
 
             {/* Botones de navegación */}
             <Row>
-              <Column>
-                <div className="form-group">
-                  <Button
-                    className="btn-primary"
-                    onClick={this.handleSiguiente}>
-                    <i className="fa fa-arrow-right"></i> Siguiente
-                  </Button>{' '}
-                  <Button
-                    className="btn-outline-danger"
-                    onClick={() => this.props.history.goBack()}>
-                    <i className="fa fa-close"></i> Cancelar
-                  </Button>
-                </div>
+              <Column formGroup={true}>
+                <Button
+                  className="btn-primary"
+                  onClick={this.handleSiguiente}>
+                  <i className="fa fa-arrow-right"></i> Siguiente
+                </Button>{' '}
+                <Button
+                  className="btn-outline-danger"
+                  onClick={() => this.props.history.goBack()}>
+                  <i className="fa fa-close"></i> Cancelar
+                </Button>
               </Column>
             </Row>
           </>
@@ -885,94 +883,92 @@ class TrasladorCrear extends CustomComponent {
           this.state.paso === 2 && (
             <>
               <Row>
-                <Column>
-                  <div className="form-group">
-                    <div className="table-responsive">
-                      <table width="100%">
-                        <thead>
-                          <tr>
-                            <th className="table-secondary w-20 p-1 font-weight-normal ">
-                              Tipo de Traslado:
-                            </th>
-                            <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                              {this.state.idTipoTraslado === 'TT0001' ? (
-                                <span>
-                                  Entre almacenes
-                                </span>
-                              ) : (
-                                <span>
-                                  Entre sucursales
-                                </span>
-                              )}
-                            </th>
-                          </tr>
-                          {
-                            this.state.idTipoTraslado === 'TT0001' && (
-                              <>
-                                <tr>
-                                  <th className="table-secondary w-20 p-1 font-weight-normal ">
-                                    Motivo ajuste:
-                                  </th>
-                                  <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                                    {this.state.nombreMotivoAjuste}
-                                  </th>
-                                </tr>
+                <Column formGroup={true}>
+                  <div className="table-responsive">
+                    <table width="100%">
+                      <thead>
+                        <tr>
+                          <th className="table-secondary w-20 p-1 font-weight-normal ">
+                            Tipo de Traslado:
+                          </th>
+                          <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                            {this.state.idTipoTraslado === 'TT0001' ? (
+                              <span>
+                                Entre almacenes
+                              </span>
+                            ) : (
+                              <span>
+                                Entre sucursales
+                              </span>
+                            )}
+                          </th>
+                        </tr>
+                        {
+                          this.state.idTipoTraslado === 'TT0001' && (
+                            <>
+                              <tr>
+                                <th className="table-secondary w-20 p-1 font-weight-normal ">
+                                  Motivo ajuste:
+                                </th>
+                                <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                                  {this.state.nombreMotivoAjuste}
+                                </th>
+                              </tr>
 
-                                <tr>
-                                  <th className="table-secondary w-20 p-1 font-weight-normal ">
-                                    Almacen de Origen:
-                                  </th>
-                                  <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                                    {this.state.nombreAlmacenOrigenInterno}
-                                  </th>
-                                </tr>
+                              <tr>
+                                <th className="table-secondary w-20 p-1 font-weight-normal ">
+                                  Almacen de Origen:
+                                </th>
+                                <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                                  {this.state.nombreAlmacenOrigenInterno}
+                                </th>
+                              </tr>
 
-                                <tr>
-                                  <th className="table-secondary w-20 p-1 font-weight-normal ">
-                                    Almacen de Destino:
-                                  </th>
-                                  <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                                    {this.state.nombreAlmacenDestinoInterno}
-                                  </th>
-                                </tr>
-                              </>
-                            )
-                          }
-                          {
-                            this.state.idTipoTraslado === 'TT0002' && (
-                              <>
-                                <tr>
-                                  <th className="table-secondary w-20 p-1 font-weight-normal ">
-                                    Almacen de Origen:
-                                  </th>
-                                  <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                                    {this.state.nombreAlmacenOriginExterno}
-                                  </th>
-                                </tr>
+                              <tr>
+                                <th className="table-secondary w-20 p-1 font-weight-normal ">
+                                  Almacen de Destino:
+                                </th>
+                                <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                                  {this.state.nombreAlmacenDestinoInterno}
+                                </th>
+                              </tr>
+                            </>
+                          )
+                        }
+                        {
+                          this.state.idTipoTraslado === 'TT0002' && (
+                            <>
+                              <tr>
+                                <th className="table-secondary w-20 p-1 font-weight-normal ">
+                                  Almacen de Origen:
+                                </th>
+                                <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                                  {this.state.nombreAlmacenOriginExterno}
+                                </th>
+                              </tr>
 
-                                <tr>
-                                  <th className="table-secondary w-20 p-1 font-weight-normal ">
-                                    Sucursal de Destino:
-                                  </th>
-                                  <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                                    {this.state.nombreSucursalExterno}
-                                  </th>
-                                </tr>
+                              <tr>
+                                <th className="table-secondary w-20 p-1 font-weight-normal ">
+                                  Sucursal de Destino:
+                                </th>
+                                <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                                  {this.state.nombreSucursalExterno}
+                                </th>
+                              </tr>
 
-                                <tr>
-                                  <th className="table-secondary w-20 p-1 font-weight-normal ">
-                                    Almacen de Destino:
-                                  </th>
-                                  <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                                    {this.state.nombreAlmacenDestinoExterno}
-                                  </th>
-                                </tr>
-                              </>
-                            )
-                          }
-                        </thead>
-                      </table>
-                    </div>
+                              <tr>
+                                <th className="table-secondary w-20 p-1 font-weight-normal ">
+                                  Almacen de Destino:
+                                </th>
+                                <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                                  {this.state.nombreAlmacenDestinoExterno}
+                                </th>
+                              </tr>
+                            </>
+                          )
+                        }
+                      </thead>
+                    </table>
                   </div>
                 </Column>
               </Row>
@@ -982,7 +978,6 @@ class TrasladorCrear extends CustomComponent {
                   <label>Filtrar por el código o nombre del producto::</label>
                   <SearchInput
                     autoFocus={true}
-                    showLeftIcon={false}
                     placeholder="Filtrar productos..."
                     refValue={this.refProducto}
                     value={this.state.filtrar}
@@ -992,7 +987,7 @@ class TrasladorCrear extends CustomComponent {
                     handleSelectItem={this.handleSelectItemProducto}
                     renderItem={(value) => (
                       <>
-                        {value.nombre} / <small>{value.categoria}</small>
+                        {value.codigo} / {value.nombre}  <small>({value.categoria})</small>
                       </>
                     )}
                   />
@@ -1000,17 +995,15 @@ class TrasladorCrear extends CustomComponent {
               </Row>
 
               <Row>
-                <Column>
+                <Column formGroup={true}>
                   <label>
                     Ingrese alguna descripción para saber el motivo del ajuste:
                   </label>
-                  <div className="form-group">
-                    <Input
-                      placeholder="Ingrese una observación"
-                      value={this.state.observacion}
-                      onChange={this.handleInputObservacion}
-                    />
-                  </div>
+                  <Input
+                    placeholder="Ingrese una observación"
+                    value={this.state.observacion}
+                    onChange={this.handleInputObservacion}
+                  />
                 </Column>
               </Row>
 

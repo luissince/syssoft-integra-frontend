@@ -487,6 +487,7 @@ class VentaCrear extends CustomComponent {
 
         const newItem = {
           idProducto: producto.idProducto,
+          codigo: producto.codigo,
           nombreProducto: producto.nombreProducto,
           idImpuesto: this.state.idImpuesto,
           precio: producto.precio,
@@ -538,6 +539,7 @@ class VentaCrear extends CustomComponent {
 
         const newItem = {
           idProducto: producto.idProducto,
+          codigo: producto.codigo,
           nombreProducto: producto.nombreProducto,
           idImpuesto: this.state.idImpuesto,
           precio: precio,
@@ -574,6 +576,7 @@ class VentaCrear extends CustomComponent {
 
         const newItem = {
           idProducto: producto.idProducto,
+          codigo: producto.codigo,
           nombreProducto: producto.nombreProducto,
           idImpuesto: this.state.idImpuesto,
           precio: producto.precio,
@@ -615,6 +618,7 @@ class VentaCrear extends CustomComponent {
       if (!existingItem) {
         const newItem = {
           idProducto: producto.idProducto,
+          codigo: producto.codigo,
           nombreProducto: producto.nombreProducto,
           idImpuesto: this.state.idImpuesto,
           precio: precio ? precio : producto.precio,

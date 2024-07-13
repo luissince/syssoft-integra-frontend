@@ -1,9 +1,18 @@
 import PropTypes from 'prop-types';
 
-const Select = ({ title, className, refSelect, value, disabled, onChange, children }) => {
-
+const Select = ({
+    autoFocus = false,
+    title,
+    className,
+    refSelect,
+    value,
+    disabled,
+    onChange,
+    children
+}) => {
     return (
         <select
+            autoFocus={autoFocus}
             title={title}
             className={`form-control ${className}`}
             ref={refSelect}
@@ -16,6 +25,7 @@ const Select = ({ title, className, refSelect, value, disabled, onChange, childr
 }
 
 Select.propTypes = {
+    autoFocus: PropTypes.bool,
     title: PropTypes.string,
     className: PropTypes.string,
     refSelect: PropTypes.object,

@@ -9,7 +9,12 @@ import printJS from 'print-js';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
 
+/**
+ * Componente que representa una funcionalidad específica.
+ * @extends React.Component
+ */
 class ModalPreImpresion extends Component {
+    
     constructor(props) {
         super(props);
         this.state = {

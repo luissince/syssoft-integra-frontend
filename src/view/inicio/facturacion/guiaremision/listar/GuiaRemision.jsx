@@ -1,14 +1,35 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import ContainerWrapper from '../../../../../components/Container';
 import CustomComponent from '../../../../../model/class/custom-component';
-import { alertDialog, formatNumberWithZeros, formatTime, isEmpty, spinnerLoading } from '../../../../../helper/utils.helper';
+import { alertDialog, alertInfo, alertSuccess, alertWarning, currentDate, formatNumberWithZeros, formatTime, isEmpty } from '../../../../../helper/utils.helper';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
 import SuccessReponse from '../../../../../model/class/response';
-import { listGuiaRemision } from '../../../../../network/rest/principal.network';
+import { cancelGuiaRemision, listGuiaRemision } from '../../../../../network/rest/principal.network';
 import { connect } from 'react-redux';
+import { SpinnerTable } from '../../../../../components/Spinner';
+import Title from '../../../../../components/Title';
+import Row from '../../../../../components/Row';
+import Column from '../../../../../components/Column';
+import Search from '../../../../../components/Search';
+import Button from '../../../../../components/Button';
+import { TableResponsive } from '../../../../../components/Table';
+import Paginacion from '../../../../../components/Paginacion';
+import { setListaGuiaRemisionData, setListaGuiaRemisionPaginacion } from '../../../../../redux/predeterminadoSlice';
+import Select from '../../../../../components/Select';
+import Input from '../../../../../components/Input';
 
+/**
+ * Componente que representa una funcionalidad específica.
+ * @extends React.Component
+ */
 class GuiaRemision extends CustomComponent {
+
+  /**
+   *
+   * Constructor
+   */
   constructor(props) {
     super(props);
 
@@ -16,6 +37,12 @@ class GuiaRemision extends CustomComponent {
       loading: false,
       lista: [],
       restart: false,
+
+      fechaInicio: currentDate(),
+      fechaFinal: currentDate(),
+      estado: '-1',
+
+      buscar: '',
 
       opcion: 0,
       paginacion: 0,
@@ -27,35 +54,74 @@ class GuiaRemision extends CustomComponent {
       idUsuario: this.props.token.userToken.idUsuario,
     };
 
+    this.refPaginacion = React.createRef();
+
     this.refTxtSearch = React.createRef();
 
     this.abortControllerTable = new AbortController();
   }
 
   async componentDidMount() {
-    await this.loadInit();
+    await this.loadingData();
   }
 
   componentWillUnmount() {
     this.abortControllerTable.abort();
   }
 
-  loadInit = async () => {
+  loadingData = async () => {
+    if (this.props.guiaRemisionLista && this.props.guiaRemisionLista.data && this.props.guiaRemisionLista.paginacion) {
+      this.setState(this.props.guiaRemisionLista.data)
+      this.refPaginacion.current.upperPageBound = this.props.guiaRemisionLista.paginacion.upperPageBound;
+      this.refPaginacion.current.lowerPageBound = this.props.guiaRemisionLista.paginacion.lowerPageBound;
+      this.refPaginacion.current.isPrevBtnActive = this.props.guiaRemisionLista.paginacion.isPrevBtnActive;
+      this.refPaginacion.current.isNextBtnActive = this.props.guiaRemisionLista.paginacion.isNextBtnActive;
+      this.refPaginacion.current.pageBound = this.props.guiaRemisionLista.paginacion.pageBound;
+      this.refPaginacion.current.messagePaginacion = this.props.guiaRemisionLista.paginacion.messagePaginacion;
+    } else {
+      await this.loadingInit();
+      this.updateReduxState();
+    }
+  }
+
+  updateReduxState() {
+    this.props.setListaGuiaRemisionData(this.state)
+    this.props.setListaGuiaRemisionPaginacion({
+      upperPageBound: this.refPaginacion.current.upperPageBound,
+      lowerPageBound: this.refPaginacion.current.lowerPageBound,
+      isPrevBtnActive: this.refPaginacion.current.isPrevBtnActive,
+      isNextBtnActive: this.refPaginacion.current.isNextBtnActive,
+      pageBound: this.refPaginacion.current.pageBound,
+      messagePaginacion: this.refPaginacion.current.messagePaginacion,
+    });
+  }
+
+  loadingInit = async () => {
     if (this.state.loading) return;
 
     await this.setStateAsync({ paginacion: 1, restart: true });
-    this.fillTable(0, '');
+    this.fillTable(0);
     await this.setStateAsync({ opcion: 0 });
   }
 
-  async searchText(text) {
+  searchText = async (text) => {
     if (this.state.loading) return;
 
     if (text.trim().length === 0) return;
 
-    await this.setStateAsync({ paginacion: 1, restart: false });
+    await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
     this.fillTable(1, text.trim());
     await this.setStateAsync({ opcion: 1 });
+  }
+
+  async searchOpciones() {
+    if (this.state.loading) return;
+
+    if (this.state.fechaInicio > this.state.fechaFinal) return;
+
+    await this.setStateAsync({ paginacion: 1, restart: false });
+    this.fillTable(2);
+    await this.setStateAsync({ opcion: 2 });
   }
 
   paginacionContext = async (listid) => {
@@ -66,17 +132,20 @@ class GuiaRemision extends CustomComponent {
   onEventPaginacion = () => {
     switch (this.state.opcion) {
       case 0:
-        this.fillTable(0, '');
+        this.fillTable(0,);
         break;
       case 1:
-        this.fillTable(1, this.refTxtSearch.current.value);
+        this.fillTable(1, this.state.buscar);
+        break;
+      case 2:
+        this.fillTable(2);
         break;
       default:
-        this.fillTable(0, '');
+        this.fillTable(0);
     }
   }
 
-  fillTable = async (opcion, buscar) => {
+  fillTable = async (opcion, buscar = '') => {
     this.setState({
       loading: true,
       lista: [],
@@ -87,6 +156,9 @@ class GuiaRemision extends CustomComponent {
       opcion: opcion,
       buscar: buscar,
       idSucursal: this.state.idSucursal,
+      fechaInicio: this.state.fechaInicio,
+      fechaFinal: this.state.fechaFinal,
+      estado: this.state.estado,
       posicionPagina: (this.state.paginacion - 1) * this.state.filasPorPagina,
       filasPorPagina: this.state.filasPorPagina,
     };
@@ -102,6 +174,8 @@ class GuiaRemision extends CustomComponent {
         loading: false,
         lista: response.data.result,
         totalPaginacion: totalPaginacion,
+      }, () => {
+        this.updateReduxState();
       });
     }
 
@@ -144,19 +218,49 @@ class GuiaRemision extends CustomComponent {
           idGuiaRemision: idGuiaRemision
         }
 
+        alertInfo("Guia Remisión", "Procesando petición...")
 
+        const response = await cancelGuiaRemision(params);
+
+        if (response instanceof SuccessReponse) {
+          alertSuccess("Guia Remisión", response.data, async () => {
+            await this.loadingInit()
+          })
+        }
+
+        if (response instanceof ErrorResponse) {
+          alertWarning("Guia Remisión", response.getMessage())
+        }
       }
     });
+  }
+
+  handleInputFechaInico = (event) => {
+    this.setState({ fechaInicio: event.target.value }, () => {
+      this.searchOpciones();
+    })
+  }
+
+  handleInputFechaFinal = (event) => {
+    this.setState({ fechaFinal: event.target.value }, () => {
+      this.searchOpciones();
+    })
+  }
+
+
+  handleSelectEstado = (event) => {
+    this.setState({ estado: event.target.value }, () => {
+      this.searchOpciones();
+    })
   }
 
   generateBody() {
     if (this.state.loading) {
       return (
-        <tr>
-          <td className="text-center" colSpan="9">
-            {spinnerLoading('Cargando información de la tabla...', true)}
-          </td>
-        </tr>
+        <SpinnerTable
+          colSpan='9'
+          message='Cargando información de la tabla...'
+        />
       );
     }
 
@@ -195,7 +299,7 @@ class GuiaRemision extends CustomComponent {
             {item.comprobanteRef}
             <br />
             {item.serieRef}-{formatNumberWithZeros(item.numeracionRef)}
-          </td>        
+          </td>
           <td className="text-center">
             {estado}
           </td>
@@ -234,96 +338,141 @@ class GuiaRemision extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
-        <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-12">
-            <div className="form-group">
-              <h5>
-                {' '}
-                Guía de Remisión{' '}
-                <small className="text-secondary"> Lista </small>{' '}
-              </h5>
-            </div>
-          </div>
-        </div>
+        <Title
+          title='Guía de Remisión'
+          subTitle='LISTA'
+        />
 
-        <div className="row">
-          <div className="col-md-6 col-sm-12">
-            <div className="form-group">
-              <div className="input-group mb-2">
-                <div className="input-group-prepend">
-                  <div className="input-group-text">
-                    <i className="bi bi-search"></i>
-                  </div>
-                </div>
+        <Row>
+          <Column formGroup={true}>
+            <Button
+              className='btn-outline-info'
+              onClick={this.handleCrear}
+            >
+              <i className="bi bi-file-plus"></i> Nuevo Registro
+            </Button>
+            {' '}
+            <Button
+              className='btn-outline-secondary'
+              onClick={this.loadingInit}
+            >
+              <i className="bi bi-arrow-clockwise"></i> Recargar Vista
+            </Button>
+          </Column>
+        </Row>
 
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Buscar..."
-                />
-              </div>
-            </div>
-          </div>
+        <Row>
+          <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
+            <label>Fecha de Inicio:</label>
+            <Input
+              type="date"
+              value={this.state.fechaInicio}
+              onChange={this.handleInputFechaInico}
+            />
+          </Column>
 
-          <div className="col-md-6 col-sm-12">
-            <div className="form-group">
-              <button
-                className="btn btn-outline-info"
-                onClick={this.handleCrear}
-              >
-                <i className="bi bi-file-plus"></i> Crear guía
-              </button>{' '}
-              <button className="btn btn-outline-secondary" onClick={this.loadInit}>
-                <i className="bi bi-arrow-clockwise"></i>
-              </button>
-            </div>
-          </div>
-        </div>
+          <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
+            <label>Fecha de Final:</label>
+            <Input
+              type="date"
+              value={this.state.fechaFinal}
+              onChange={this.handleInputFechaFinal}
+            />
+          </Column>
 
-        <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <div className="table-responsive">
-              <table className="table table-striped table-bordered rounded">
-                <thead>
-                  <tr>
-                    <th width="5%" className="text-center">
-                      {' '}
-                      #
-                    </th>
-                    <th width="10%">Fecha</th>
-                    <th width="20%">Comprobante</th>
-                    <th width="15%">Cliente</th>
-                    <th width="15%">referencia</th>                   
-                    <th width="10%" className="text-center">Estado</th>
-                    <th width="5%" className="text-center">
-                      Mostrar
-                    </th>
-                    <th width="5%" className="text-center">
-                      Editar
-                    </th>
-                    <th width="5%" className="text-center">
-                      Anular
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {this.generateBody()}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+          <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
+            <label>Estados:</label>
+            <Select
+              value={this.state.estado}
+              onChange={this.handleSelectEstado}
+            >
+              <option value='-1'>TODOS</option>
+              <option value='1'>ACTIVO</option>
+              <option value='0'>ANULADO</option>
+            </Select>
+          </Column>
+        </Row>
+
+        <Row>
+          <Column className="col-md-6 col-sm-12" formGroup={true}>
+            <Search
+              onSearch={this.searchText}
+              placeholder="Buscar por comprobante o cliente..."
+            />
+          </Column>
+        </Row>
+
+        <Row>
+          <Column>
+            <TableResponsive
+              tHead={
+                <tr>
+                  <th width="5%" className="text-center">#</th>
+                  <th width="10%">Fecha</th>
+                  <th width="20%">Comprobante</th>
+                  <th width="15%">Cliente</th>
+                  <th width="15%">referencia</th>
+                  <th width="10%" className="text-center">Estado</th>
+                  <th width="5%" className="text-center">
+                    Mostrar
+                  </th>
+                  <th width="5%" className="text-center">
+                    Editar
+                  </th>
+                  <th width="5%" className="text-center">
+                    Anular
+                  </th>
+                </tr>
+              }
+              tBody={this.generateBody()}
+            />
+          </Column>
+        </Row>
+
+        <Paginacion
+          ref={this.refPaginacion}
+          loading={this.state.loading}
+          data={this.state.lista}
+          totalPaginacion={this.state.totalPaginacion}
+          paginacion={this.state.paginacion}
+          fillTable={this.paginacionContext}
+          restart={this.state.restart}
+
+          setListaVentaPaginacion={this.props.setListaGuiaRemisionPaginacion}
+        />
       </ContainerWrapper>
     );
   }
 }
 
+GuiaRemision.propTypes = {
+  token: PropTypes.shape({
+    userToken: PropTypes.shape({
+      idUsuario: PropTypes.string.isRequired,
+    }).isRequired,
+    project: PropTypes.shape({
+      idSucursal: PropTypes.string.isRequired,
+    }).isRequired,
+  }).isRequired,
+  guiaRemisionLista: PropTypes.shape({
+    data: PropTypes.object,
+    paginacion: PropTypes.object
+  }),
+  setListaGuiaRemisionData: PropTypes.func,
+  setListaGuiaRemisionPaginacion: PropTypes.func,
+  history: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
+  location: PropTypes.object
+};
+
 const mapStateToProps = (state) => {
   return {
     token: state.principal,
+    guiaRemisionLista: state.predeterminado.guiaRemisionLista
   };
 };
 
-const ConnectedGuiaRemision = connect(mapStateToProps, null)(GuiaRemision);
+const mapDispatchToProps = { setListaGuiaRemisionData, setListaGuiaRemisionPaginacion }
+
+const ConnectedGuiaRemision = connect(mapStateToProps, mapDispatchToProps)(GuiaRemision);
 
 export default ConnectedGuiaRemision;

@@ -14,6 +14,10 @@ import { CANCELED } from '../../../../../model/types/types';
 import Input from '../../../../../components/Input';
 import Button from '../../../../../components/Button';
 
+/**
+ * Componente que representa una funcionalidad específica.
+ * @extends React.Component
+ */
 class ModalVenta extends CustomComponent {
 
     constructor(props) {

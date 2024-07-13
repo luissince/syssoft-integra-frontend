@@ -15,6 +15,10 @@ const initialState = {
     data: null,
     paginacion: null
   },
+  guiaRemisionLista: {
+    data: null,
+    paginacion: null
+  },
   productoLista: {
     data: null,
     paginacion: null
@@ -90,6 +94,19 @@ const predeterminadoSlice = createSlice({
     },
     clearListaCotizacion: (state) => {
       state.cotizacionLista = {
+        data: null,
+        paginacion: null
+      };
+    },
+
+    setListaGuiaRemisionData: (state, action) => {
+      state.guiaRemisionLista.data = action.payload;
+    },
+    setListaGuiaRemisionPaginacion: (state, action) => {
+      state.guiaRemisionLista.paginacion = action.payload;
+    },
+    clearListaGuiaRemision: (state) => {
+      state.guiaRemisionLista = {
         data: null,
         paginacion: null
       };
@@ -185,6 +202,10 @@ const predeterminadoSlice = createSlice({
         data: null,
         paginacion: null
       };
+      state.guiaRemisionLista = {
+        data: null,
+        paginacion: null
+      };
       state.productoLista = {
         data: null,
         paginacion: null
@@ -238,6 +259,10 @@ export const { setMonedaNacional,
   setListaCotizacionData,
   setListaCotizacionPaginacion,
   clearListaCotizacion,
+
+  setListaGuiaRemisionData,
+  setListaGuiaRemisionPaginacion,
+  clearListaGuiaRemision,
 
   setListaProductoData,
   setListaProductoPaginacion,

@@ -15,6 +15,7 @@ import ContainerWrapper from '../../../../components/Container';
 import { images } from '../../../../helper';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
+import PropTypes from 'prop-types';
 import {
   createPersona,
   getUbigeo,
@@ -30,7 +31,14 @@ import Row from '../../../../components/Row';
 import Column from '../../../../components/Column';
 import Title from '../../../../components/Title';
 import Button from '../../../../components/Button';
+import Select from '../../../../components/Select';
+import Input from '../../../../components/Input';
+import RadioButton from '../../../../components/RadioButton';
 
+/**
+ * Componente que representa una funcionalidad específica.
+ * @extends React.Component
+ */
 class PersonaAgregar extends CustomComponent {
 
   constructor(props) {
@@ -99,16 +107,16 @@ class PersonaAgregar extends CustomComponent {
     const documentos = await this.fetchTipoDocumento();
 
     if (documentos.length !== 0) {
-      await this.setStateAsync({
+      this.setState({
         tiposDocumentos: documentos,
         loading: false,
       });
     } else {
-      await this.setStateAsync({
+      this.setState({
         msgLoading: 'Se produjo un error un interno, intente nuevamente.',
       });
     }
-  };
+  }
 
   async fetchTipoDocumento() {
     const response = await comboTipoDocumento(
@@ -415,234 +423,220 @@ class PersonaAgregar extends CustomComponent {
             <label>
               Tipo de Persona: <i className="fa fa-asterisk text-danger small"></i>
             </label>
-
-            <div className="form-group">
-              <div className="form-check form-check-inline">
-                <input className="form-check-input"
-                  type="radio"
-                  id={CLIENTE_NATURAL}
-                  value={CLIENTE_NATURAL}
-                  checked={idTipoCliente === CLIENTE_NATURAL}
-                  onChange={this.handleTipoCliente}
-                />
-                <label className="form-check-label" htmlFor={CLIENTE_NATURAL}>
-                  <i className="bi bi-person"></i> Persona Natural
-                </label>
-              </div>
-
-              <div className="form-check form-check-inline">
-                <input className="form-check-input"
-                  type="radio"
-                  id={CLIENTE_JURIDICO}
-                  value={CLIENTE_JURIDICO}
-                  checked={idTipoCliente === CLIENTE_JURIDICO}
-                  onChange={this.handleTipoCliente}
-                />
-                <label className="form-check-label" htmlFor={CLIENTE_JURIDICO}>
-                  <i className="bi bi-building"></i> Persona Juridica
-                </label>
-              </div>
-            </div>
           </Column>
         </Row>
 
         <Row>
-          <Column className='col-md-6 col-12'>
-            <div className="form-group">
-              <label>
-                Tipo Documento: <i className="fa fa-asterisk text-danger small"></i>
-              </label>
-              <select
-                className={`form-control ${idTipoDocumento ? '' : 'is-invalid'}`}
-                value={idTipoDocumento}
-                ref={this.refTipoDocumento}
-                onChange={this.handleSelectTipoDocumento}
-              >
-                <option value="">-- Seleccione --</option>
+          <Column formGroup={true}>
+            <RadioButton
+              className='form-check-inline'
+              id={CLIENTE_NATURAL}
+              value={CLIENTE_NATURAL}
+              checked={idTipoCliente === CLIENTE_NATURAL}
+              onChange={this.handleTipoCliente}
+            >
+              <i className="bi bi-person"></i> Persona Natural
+            </RadioButton>
+
+            <RadioButton
+              className='form-check-inline'
+              id={CLIENTE_JURIDICO}
+              value={CLIENTE_JURIDICO}
+              checked={idTipoCliente === CLIENTE_JURIDICO}
+              onChange={this.handleTipoCliente}
+            >
+              <i className="bi bi-building"></i> Persona Juridica
+            </RadioButton>
+          </Column>
+        </Row>
+
+        <Row>
+          <Column className='col-md-6 col-12' formGroup={true}>
+            <label>
+              Tipo Documento: <i className="fa fa-asterisk text-danger small"></i>
+            </label>
+            <Select
+              className={`${idTipoDocumento ? '' : 'is-invalid'}`}
+              value={idTipoDocumento}
+              refSelect={this.refTipoDocumento}
+              onChange={this.handleSelectTipoDocumento}
+            >
+              <option value="">-- Seleccione --</option>
+              {
+                idTipoCliente === CLIENTE_NATURAL && (
+                  this.state.tiposDocumentos.filter((item) => item.idTipoDocumento !== 'TD0003').map((item, index) => (
+                    <option key={index} value={item.idTipoDocumento}>
+                      {item.nombre}
+                    </option>
+                  ))
+                )
+              }
+              {
+                idTipoCliente === CLIENTE_JURIDICO && (
+                  this.state.tiposDocumentos.filter((item) => item.idTipoDocumento === 'TD0003').map((item, index) => (
+                    <option key={index} value={item.idTipoDocumento}>
+                      {item.nombre}
+                    </option>
+                  ))
+                )
+              }
+            </Select>
+            {idTipoDocumento === '' && (
+              <div className="invalid-feedback">
+                Seleccione un valor.
+              </div>
+            )}
+          </Column>
+
+          <Column className='col-md-6 col-12' formGroup={true}>
+            <label>
+              N° de documento ({documento.length}):{' '}
+              <i className="fa fa-asterisk text-danger small"></i>
+            </label>
+
+            <div className="input-group is-invalid">
+              <Input
+                className={`${documento ? '' : 'is-invalid'}`}
+                refInput={this.refDocumento}
+                value={documento}
+                onChange={this.handleInputNumeroDocumento}
+                onKeyDown={keyNumberInteger}
+                placeholder="00000000"
+              />
+              <div className="input-group-append">
                 {
                   idTipoCliente === CLIENTE_NATURAL && (
-                    this.state.tiposDocumentos.filter((item) => item.idTipoDocumento !== 'TD0003').map((item, index) => (
-                      <option key={index} value={item.idTipoDocumento}>
-                        {item.nombre}
-                      </option>
-                    ))
+                    <Button
+                      className="btn-outline-secondary"
+                      title="Reniec"
+                      onClick={this.handleGetApiReniec}
+                    >
+                      <img src={images.reniec} alt="Reniec" width="12" />
+                    </Button>
                   )
                 }
                 {
                   idTipoCliente === CLIENTE_JURIDICO && (
-                    this.state.tiposDocumentos.filter((item) => item.idTipoDocumento === 'TD0003').map((item, index) => (
-                      <option key={index} value={item.idTipoDocumento}>
-                        {item.nombre}
-                      </option>
-                    ))
+                    <Button
+                      className="btn-outline-secondary"
+                      title="Sunat"
+                      onClick={this.handleGetApiSunat}
+                    >
+                      <img src={images.sunat} alt="Sunat" width="12" />
+                    </Button>
                   )
                 }
-              </select>
-              {idTipoDocumento === '' && (
-                <div className="invalid-feedback">
-                  Seleccione un valor.
-                </div>
-              )}
-            </div>
-          </Column>
-
-          <Column className='col-md-6 col-12'>
-            <div className="form-group ">
-
-              <label>
-                N° de documento ({documento.length}):{' '}
-                <i className="fa fa-asterisk text-danger small"></i>
-              </label>
-              <div className="input-group is-invalid">
-                <input
-                  type="text"
-                  className={`form-control ${documento ? '' : 'is-invalid'}`}
-                  ref={this.refDocumento}
-                  value={documento}
-                  onChange={this.handleInputNumeroDocumento}
-                  onKeyDown={keyNumberInteger}
-                  placeholder="00000000"
-                />
-                <div className="input-group-append">
-                  {
-                    idTipoCliente === CLIENTE_NATURAL && (
-                      <Button
-                        className="btn-outline-secondary"
-                        title="Reniec"
-                        onClick={this.handleGetApiReniec}
-                      >
-                        <img src={images.reniec} alt="Reniec" width="12" />
-                      </Button>
-                    )
-                  }
-                  {
-                    idTipoCliente === CLIENTE_JURIDICO && (
-                      <Button
-                        className="btn-outline-secondary"
-                        title="Sunat"
-                        onClick={this.handleGetApiSunat}
-                      >
-                        <img src={images.sunat} alt="Sunat" width="12" />
-                      </Button>
-                    )
-                  }
-                </div>
               </div>
-              {documento === '' && (
-                <div className="invalid-feedback">
-                  Ingrese un valor.
-                </div>
-              )}
             </div>
+            {documento === '' && (
+              <div className="invalid-feedback">
+                Ingrese un valor.
+              </div>
+            )}
           </Column>
         </Row>
 
         <Row>
-          <Column>
-            <div className="form-group">
-              <label>
-                {idTipoCliente === CLIENTE_NATURAL && 'Apellidos y Nombres:'}
-                {idTipoCliente === CLIENTE_JURIDICO && 'Razón Social:'}
-                <i className="fa fa-asterisk text-danger small"></i>
-              </label>
-              <input
-                type="text"
-                className={`form-control ${informacion ? '' : 'is-invalid'}`}
-                ref={this.refInformacion}
-                value={informacion}
-                onChange={this.handleInputInformacion}
-                placeholder={
-                  idTipoCliente === CLIENTE_NATURAL
-                    ? 'Ingrese sus Apellidos y Nombres'
-                    : 'Ingrese su Razón Social'
-                }
-              />
-              {informacion === '' && (
-                <div className="invalid-feedback">Ingrese un valor.</div>
-              )}
-            </div>
+          <Column formGroup={true}>
+            <label>
+              {idTipoCliente === CLIENTE_NATURAL && 'Apellidos y Nombres:'}
+              {idTipoCliente === CLIENTE_JURIDICO && 'Razón Social:'}
+              <i className="fa fa-asterisk text-danger small"></i>
+            </label>
+
+            <Input
+              className={`${informacion ? '' : 'is-invalid'}`}
+              refInput={this.refInformacion}
+              value={informacion}
+              onChange={this.handleInputInformacion}
+              placeholder={
+                idTipoCliente === CLIENTE_NATURAL
+                  ? 'Ingrese sus Apellidos y Nombres'
+                  : 'Ingrese su Razón Social'
+              }
+            />
+            {informacion === '' && (
+              <div className="invalid-feedback">Ingrese un valor.</div>
+            )}
           </Column>
         </Row>
 
         <Row>
-          <Column>
+          <Column formGroup={true}>
             <label>
               Tipo de Roles: <i className="fa fa-asterisk text-danger small"></i>
             </label>
-            <div className="form-group">
-              <div className="form-check form-check">
-                <input className="form-check-input"
-                  type="checkbox"
-                  id="checkboxPnCliente"
-                  checked={this.state.cliente}
-                  onChange={(event) => {
-                    this.setState({ cliente: event.target.checked })
-                  }} />
-                <label className="form-check-label" htmlFor="checkboxPnCliente"> Cliente</label>
-              </div>
-              <div className="form-check form-check">
-                <input className="form-check-input"
-                  type="checkbox"
-                  id="checkboxPnProveedor"
-                  checked={this.state.proveedor}
-                  onChange={(event) => {
-                    this.setState({ proveedor: event.target.checked })
-                  }} />
-                <label className="form-check-label" htmlFor="checkboxPnProveedor"> Proveedor</label>
-              </div>
-              <div className="form-check form-check">
-                <input className="form-check-input"
-                  type="checkbox"
-                  id="checkboxPnConductor"
-                  checked={this.state.conductor}
-                  onChange={(event) => {
-                    this.setState({ conductor: event.target.checked })
-                  }} />
-                <label className="form-check-label" htmlFor="checkboxPnConductor"> Conductor</label>
-              </div>
-              {
-                this.state.conductor && (
-                  <div className='row'>
-                    <div className='col'>
-                      <input
-                        type='text'
-                        className='form-control'
-                        placeholder='Número de licencia de conducir'
-                        ref={this.refLicenciaConducir}
-                        value={this.state.licenciaConductir}
-                        onChange={(event) => {
-                          this.setState({ licenciaConductir: event.target.value })
-                        }} />
-                    </div>
-                  </div>
-                )
-              }
+            <div className="form-check form-check">
+              <input className="form-check-input"
+                type="checkbox"
+                id="checkboxPnCliente"
+                checked={this.state.cliente}
+                onChange={(event) => {
+                  this.setState({ cliente: event.target.checked })
+                }} />
+              <label className="form-check-label" htmlFor="checkboxPnCliente"> Cliente</label>
             </div>
+
+            <div className="form-check form-check">
+              <input className="form-check-input"
+                type="checkbox"
+                id="checkboxPnProveedor"
+                checked={this.state.proveedor}
+                onChange={(event) => {
+                  this.setState({ proveedor: event.target.checked })
+                }} />
+              <label className="form-check-label" htmlFor="checkboxPnProveedor"> Proveedor</label>
+            </div>
+
+            <div className="form-check form-check">
+              <input className="form-check-input"
+                type="checkbox"
+                id="checkboxPnConductor"
+                checked={this.state.conductor}
+                onChange={(event) => {
+                  this.setState({ conductor: event.target.checked })
+                }} />
+              <label className="form-check-label" htmlFor="checkboxPnConductor"> Conductor</label>
+            </div>
+            {
+              this.state.conductor && (
+                <Row>
+                  <Column>
+                    <input
+                      type='text'
+                      className='form-control'
+                      placeholder='Número de licencia de conducir'
+                      ref={this.refLicenciaConducir}
+                      value={this.state.licenciaConductir}
+                      onChange={(event) => {
+                        this.setState({ licenciaConductir: event.target.value })
+                      }} />
+                  </Column>
+                </Row>
+              )
+            }
           </Column>
         </Row>
 
-        {idTipoCliente === 'TC0001' && <Row>
-          <Column className='col-md-4'>
-            <div className="form-group">
+        {idTipoCliente === 'TC0001' &&
+          <Row>
+            <Column className='col-md-4' formGroup={true}>
               <label>Genero: </label>
-              <select
-                className="form-control"
-                ref={this.refGenero}
+
+              <Select
+                refSelect={this.refGenero}
                 value={genero}
                 onChange={this.handleSelectGenero}
               >
                 <option value="">-- Seleccione --</option>
                 <option value="1">Masculino</option>
                 <option value="2">Femenino</option>
-              </select>
-            </div>
-          </Column>
+              </Select>
+            </Column>
 
-          <Column className='col-md-4'>
-            <div className="form-group">
+            <Column className='col-md-4' formGroup={true}>
               <label>Estado Civil:</label>
-              <select
-                className="form-control"
+              <Select
                 value={estadoCivil}
                 onChange={this.handleSelectEstadoCvil}
               >
@@ -651,12 +645,10 @@ class PersonaAgregar extends CustomComponent {
                 <option value="2">Casado(a)</option>
                 <option value="3">Viudo(a)</option>
                 <option value="4">Divorciado(a)</option>
-              </select>
-            </div>
-          </Column>
+              </Select>
+            </Column>
 
-          <Column className='col-md-4'>
-            <div className="form-group">
+            <Column className='col-md-4' formGroup={true}>
               <label>Fecha de Nacimiento:</label>
               <input
                 type="date"
@@ -665,152 +657,133 @@ class PersonaAgregar extends CustomComponent {
                 value={fechaNacimiento}
                 onChange={this.handleInputFechaNacimiento}
               />
-            </div>
-          </Column>
-        </Row>}
+            </Column>
+          </Row>
+        }
 
         <Row>
-          <Column>
-            <div className="form-group">
-              <label>Observación:</label>
-              <input
-                type="text"
-                className="form-control"
-                value={observacion}
-                onChange={this.handleInputObservacion}
-                placeholder="Ingrese alguna observación"
-              />
-            </div>
+          <Column formGroup={true}>
+            <label>Observación:</label>
+
+            <Input
+              value={observacion}
+              onChange={this.handleInputObservacion}
+              placeholder="Ingrese alguna observación"
+            />
           </Column>
         </Row>
 
         <Row>
-          <Column className='col-md-6 col-12'>
-            <div className="form-group ">
-              <label>N° de Celular:</label>
-              <input
-                type="text"
-                className="form-control"
-                value={celular}
-                ref={this.refCelular}
-                onChange={this.handleInputCelular}
-                onKeyDown={keyNumberPhone}
-                placeholder="Ingrese el número de celular."
-              />
-            </div>
+          <Column className='col-md-6 col-12' formGroup={true}>
+            <label>N° de Celular:</label>
+
+            <Input
+              value={celular}
+              refInput={this.refCelular}
+              onChange={this.handleInputCelular}
+              onKeyDown={keyNumberPhone}
+              placeholder="Ingrese el número de celular."
+            />
           </Column>
 
-          <Column className='col-md-6 col-12'>
-            <div className="form-group">
-              <label>N° de Telefono:</label>
-              <input
-                type="text"
-                className="form-control"
-                value={telefono}
-                ref={this.refTelefono}
-                onChange={this.handleInputTelefono}
-                onKeyDown={keyNumberPhone}
-                placeholder="Ingrese el número de telefono."
-              />
-            </div>
+          <Column className='col-md-6 col-12' formGroup={true}>
+            <label>N° de Telefono:</label>
+
+            <Input
+              value={telefono}
+              refInput={this.refTelefono}
+              onChange={this.handleInputTelefono}
+              onKeyDown={keyNumberPhone}
+              placeholder="Ingrese el número de telefono."
+            />
           </Column>
         </Row>
 
         <Row>
-          <Column>
-            <div className="form-group">
-              <label>E-Mail:</label>
+          <Column formGroup={true}>
+            <label>E-Mail:</label>
+
+            <Input
+              type="email"
+              value={email}
+              onChange={this.handleInputEmail}
+              placeholder="Ingrese el email"
+            />
+          </Column>
+        </Row>
+
+        <Row>
+          <Column formGroup={true}>
+            <label>Dirección:</label>
+
+            <Input
+              refInput={this.refDireccion}
+              value={direccion}
+              onChange={this.handleInputDireccion}
+              placeholder="Ingrese la dirección"
+            />
+          </Column>
+        </Row>
+
+        <Row>
+          <Column formGroup={true}>
+            <label>Ubigeo:</label>
+            <SearchInput
+              placeholder="Escribe para iniciar a filtrar..."
+              refValue={this.refUbigeo}
+              value={ubigeo}
+              data={this.state.filteredData}
+              handleClearInput={this.handleClearInput}
+              handleFilter={this.handleFilter}
+              handleSelectItem={this.handleSelectItem}
+              renderItem={(value) =>
+                <>
+                  {value.departamento +
+                    '-' +
+                    value.provincia +
+                    '-' +
+                    value.distrito +
+                    ' (' +
+                    value.ubigeo +
+                    ')'}
+                </>
+              }
+            />
+          </Column>
+        </Row>
+
+        <Row>
+          <Column className='col-md-6 col-12' formGroup={true}>
+            <label>Estado:</label>
+
+            <div className="custom-control custom-switch">
               <input
-                type="email"
-                className="form-control"
-                value={email}
-                onChange={this.handleInputEmail}
-                placeholder="Ingrese el email"
+                type="checkbox"
+                className="custom-control-input"
+                id="switch1"
+                checked={estado}
+                onChange={this.handleInputEstado}
               />
+              <label className="custom-control-label" htmlFor="switch1">
+                {estado ? 'Activo' : 'Inactivo'}
+              </label>
             </div>
           </Column>
-        </Row>
 
-        <Row>
-          <Column>
-            <div className="form-group">
-              <label>Dirección:</label>
+          <Column className='col-md-6 col-12' formGroup={true}>
+            <label>Predeterminado:</label>
+
+            <div className="custom-control custom-switch">
               <input
-                type="text"
-                className="form-control"
-                ref={this.refDireccion}
-                value={direccion}
-                onChange={this.handleInputDireccion}
-                placeholder="Ingrese la dirección"
+                type="checkbox"
+                className="custom-control-input"
+                id="switch2"
+                checked={predeterminado}
+                onChange={this.handleInputPredeterminado}
               />
-            </div>
-          </Column>
-        </Row>
-
-        <Row>
-          <Column>
-            <div className="form-group">
-              <label>Ubigeo:</label>
-              <SearchInput
-                showLeftIcon={false}
-                placeholder="Escribe para iniciar a filtrar..."
-                refValue={this.refUbigeo}
-                value={ubigeo}
-                data={this.state.filteredData}
-                handleClearInput={this.handleClearInput}
-                handleFilter={this.handleFilter}
-                handleSelectItem={this.handleSelectItem}
-                renderItem={(value) =>
-                  <>
-                    {value.departamento +
-                      '-' +
-                      value.provincia +
-                      '-' +
-                      value.distrito +
-                      ' (' +
-                      value.ubigeo +
-                      ')'}
-                  </>
-                }
-              />
-            </div>
-          </Column>
-        </Row>
-
-        <Row>
-          <Column className='col-md-6 col-12'>
-            <div className="form-group">
-              <label>Estado:</label>
-              <div className="custom-control custom-switch">
-                <input
-                  type="checkbox"
-                  className="custom-control-input"
-                  id="switch1"
-                  checked={estado}
-                  onChange={this.handleInputEstado}
-                />
-                <label className="custom-control-label" htmlFor="switch1">
-                  {estado ? 'Activo' : 'Inactivo'}
-                </label>
-              </div>
-            </div>
-          </Column>
-
-          <Column className='col-md-6 col-12'>
-            <div className="form-group">
-              <label>Predeterminado:</label>
-              <div className="custom-control custom-switch">
-                <input
-                  type="checkbox"
-                  className="custom-control-input"
-                  id="switch2"
-                  checked={predeterminado}
-                  onChange={this.handleInputPredeterminado}
-                />
-                <label className="custom-control-label" htmlFor="switch2">
-                  {predeterminado ? 'Si' : 'No'}
-                </label>
-              </div>
+              <label className="custom-control-label" htmlFor="switch2">
+                {predeterminado ? 'Si' : 'No'}
+              </label>
             </div>
           </Column>
         </Row>
@@ -836,6 +809,20 @@ class PersonaAgregar extends CustomComponent {
     );
   }
 }
+
+PersonaAgregar.propTypes = {
+  token: PropTypes.shape({
+    userToken: PropTypes.shape({
+      idUsuario: PropTypes.string.isRequired,
+    }).isRequired,
+    project: PropTypes.shape({
+      idSucursal: PropTypes.string.isRequired,
+    }).isRequired,
+  }).isRequired,
+  history: PropTypes.shape({
+    goBack: PropTypes.func.isRequired,
+  }).isRequired,
+};
 
 const mapStateToProps = (state) => {
   return {

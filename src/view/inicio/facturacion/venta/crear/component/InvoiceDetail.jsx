@@ -2,6 +2,7 @@ import { images } from '../../../../../../helper';
 import { numberFormat } from '../../../../../../helper/utils.helper';
 import PropTypes from 'prop-types';
 import { A_GRANEL, SERVICIO, UNIDADES, VALOR_MONETARIO } from '../../../../../../model/types/tipo-tratamiento-producto';
+import Button from '../../../../../../components/Button';
 
 const InvoiceDetail = (props) => {
   const { codiso, detalleVenta } = props;
@@ -63,6 +64,8 @@ const InvoiceDetail = (props) => {
 
                     <div className="invoice-item_add-item-describe d-flex flex-column text-break text-truncate text-nowrap">
                       <div className="invoice-item_add-item-describe-title text-truncate text-base">
+                        <small>{producto.codigo}</small>
+                        <br />
                         {producto.nombreProducto}
                       </div>
                       <div className="invoice-item_add-item-describe-price d-flex align-items-center text-break text-truncate text-nowrap text-base">
@@ -99,21 +102,21 @@ const InvoiceDetail = (props) => {
                           </div>
 
                           <div className="d-flex">
-                            <button
-                              className="btn m-0 d-flex justify-content-center align-items-center pointer"
+                            <Button
+                              className="m-0 d-flex justify-content-center align-items-center pointer"
                               onClick={() => handleMinus(producto, item.idInventario)}
                             >
                               <img src={images.minus} alt="Menorar" />
-                            </button>
+                            </Button>
                             <div className="item_quantity d-flex justify-content-center align-items-center">
                               {item.cantidad}
                             </div>
-                            <button
-                              className="btn m-0 d-flex justify-content-center align-items-center pointer"
+                            <Button
+                              className="m-0 d-flex justify-content-center align-items-center pointer"
                               onClick={() => handlePlus(producto, item.idInventario)}
                             >
                               <img src={images.plus} alt="Aumentar" />
-                            </button>
+                            </Button>
                           </div>
                         </div>
                       ))}

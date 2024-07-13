@@ -45,6 +45,7 @@ import { Table } from '../../../../../components/Table';
 import { Draggable } from 'react-beautiful-dnd';
 import { DragDropContext } from 'react-beautiful-dnd';
 import { Droppable } from 'react-beautiful-dnd';
+import ModalCliente from '../common/ModalCliente';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -99,6 +100,9 @@ class CotizaciónCrear extends CustomComponent {
       // Atributos del modal producto
       isOpenProducto: false,
 
+      // Atributos del modal cliente
+      isOpenCliente: false,
+
       // Atributos del modal impresión
       isOpenImpresion: false,
 
@@ -128,6 +132,9 @@ class CotizaciónCrear extends CustomComponent {
 
     // Referencia para el modal producto
     this.refModalProducto = React.createRef();
+
+    // Referencia para el modal cliente
+    this.refModalCliente = React.createRef();
 
     // Referencia para el modal impresión
     this.refModalImpresion = React.createRef();
@@ -369,7 +376,7 @@ class CotizaciónCrear extends CustomComponent {
       }
     });
 
-    const total = detalles.reduce((accumulate, item) => (accumulate += item.cantidad * item.costo), 0);
+    const total = detalles.reduce((accumulate, item) => (accumulate += item.cantidad * item.precio), 0);
     this.setState({ detalles, total });
   };
 
@@ -476,7 +483,6 @@ class CotizaciónCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
   // Acciones del modal producto
   //------------------------------------------------------------------------------------------
-
   handleOpenModalProducto = (producto) => {
     const { idImpuesto, detalles } = this.state;
 
@@ -499,15 +505,26 @@ class CotizaciónCrear extends CustomComponent {
   }
 
   handleSaveProducto = (detalles) => {
-    const total = detalles.reduce((accumulate, item) => (accumulate += item.cantidad * item.costo), 0);
+    const total = detalles.reduce((accumulate, item) => (accumulate += item.cantidad * item.precio), 0);
     this.setState({ detalles, total });
     this.refProducto.current.focus();
   }
 
   //------------------------------------------------------------------------------------------
-  // Filtrar productos
+  // Acciones del modal cliente
   //------------------------------------------------------------------------------------------
 
+  handleOpenModalCliente = () => {
+    this.setState({ isOpenCliente: true });
+  }
+
+  handleCloseCliente = async () => {
+    this.setState({ isOpenCliente: false });
+  }
+
+  //------------------------------------------------------------------------------------------
+  // Filtrar productos
+  //------------------------------------------------------------------------------------------
   handleClearInputProducto = async () => {
     await this.setStateAsync({
       productos: [],
@@ -555,7 +572,6 @@ class CotizaciónCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
   // Filtrar cliente
   //------------------------------------------------------------------------------------------
-
   handleClearInputCliente = async () => {
     await this.setStateAsync({
       clientes: [],
@@ -602,7 +618,6 @@ class CotizaciónCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
   // Procesos guardar
   //------------------------------------------------------------------------------------------
-
   handleGuardar = async () => {
     const { idComprobante, cliente, idMoneda, idImpuesto, observacion, nota, detalles } = this.state;
 
@@ -677,7 +692,6 @@ class CotizaciónCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
   // Procesos limpiar
   //------------------------------------------------------------------------------------------
-
   handleLimpiar = async () => {
     alertDialog("Cotización", "¿Está seguro de limpiar la cotización?", (accept) => {
       if (accept) {
@@ -689,7 +703,6 @@ class CotizaciónCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
   // Procesos impresión
   //------------------------------------------------------------------------------------------
-
   handleOpenImpresion = (idCotizacion) => {
     this.setState({ isOpenImpresion: true, idCotizacion: idCotizacion })
   }
@@ -772,7 +785,6 @@ class CotizaciónCrear extends CustomComponent {
   handleClosePreImpresion = () => {
     if (this.state.loadingPreImpresion) return;
 
-
     this.setState({ isOpenPreImpresion: false })
   }
 
@@ -829,18 +841,22 @@ class CotizaciónCrear extends CustomComponent {
               {...provided.dragHandleProps}
               className='bg-white'>
               <td className="text-center" style={{ width: widthCell1 }}>{item.id}</td>
-              <td style={{ width: widthCell2 }}>{item.nombre}</td>
+              <td style={{ width: widthCell2 }}>
+                {item.codigo}
+                <br />
+                {item.nombre}
+              </td>
               <td style={{ width: widthCell3 }}>{rounded(item.cantidad)}</td>
               <td style={{ width: widthCell4 }}>{item.nombreMedida}</td>
               <td style={{ width: widthCell5 }}>{numberFormat(item.precio, this.state.codISO)}</td>
               <td style={{ width: widthCell6 }}>{numberFormat(item.cantidad * item.precio, this.state.codISO)}</td>
               <td className="text-center" style={{ width: widthCell7 }}>
-                <button
-                  className="btn btn-outline-danger btn-sm"
+                <Button
+                  className="btn-outline-danger btn-sm"
                   title="Eliminar"
-                  onClick={() => this.handleRemoverProduct(item.idProducto)}>
+                  onClick={() => this.handleRemoverProducto(item.idProducto)}>
                   <i className="bi bi-trash"></i>
-                </button>
+                </Button>
               </td>
             </tr>
           );
@@ -947,6 +963,14 @@ class CotizaciónCrear extends CustomComponent {
           handleSave={this.handleSaveProducto}
         />
 
+        <ModalCliente
+          ref={this.refModalCliente}
+          isOpen={this.state.isOpenCliente}
+          onClose={this.handleCloseCliente}
+
+          idUsuario={this.state.idUsuario}
+        />
+
         <ModalImpresion
           refModal={this.refModalImpresion}
           isOpen={this.state.isOpenImpresion}
@@ -975,7 +999,6 @@ class CotizaciónCrear extends CustomComponent {
             <Row>
               <Column>
                 <SearchInput
-                  showLeftIcon={true}
                   autoFocus={true}
                   placeholder="Filtrar productos..."
                   refValue={this.refProducto}
@@ -984,7 +1007,8 @@ class CotizaciónCrear extends CustomComponent {
                   handleClearInput={this.handleClearInputProducto}
                   handleFilter={this.handleFilterProducto}
                   handleSelectItem={this.handleSelectItemProducto}
-                  renderItem={(value) => <>{value.nombre}</>}
+                  renderItem={(value) => <>{value.codigo} / {value.nombre}</>}
+                  renderIconLeft={<i className="bi bi-cart4"></i>}
                 />
               </Column>
             </Row>
@@ -1032,24 +1056,6 @@ class CotizaciónCrear extends CustomComponent {
                     </DragDropContext>
                   </table>
                 </div>
-                {/* <TableResponsive
-                  tHead={
-                    <tr>
-                      <th width="5%" className="text-center">
-                        #
-                      </th>
-                      <th width="15%">Producto</th>
-                      <th width="5%">Cantidad</th>
-                      <th width="5%">Medida</th>
-                      <th width="5%">Precio</th>
-                      <th width="5%">Total</th>
-                      <th width="5%" className="text-center">
-                        Quitar
-                      </th>
-                    </tr>
-                  }
-                  tBody={this.generarBody()}
-                /> */}
               </Column>
             </Row>
 
@@ -1120,7 +1126,6 @@ class CotizaciónCrear extends CustomComponent {
 
             <div className="form-group">
               <SearchInput
-                showLeftIcon={true}
                 placeholder="Filtrar clientes..."
                 refValue={this.refCliente}
                 value={this.state.filtrarCliente}
@@ -1128,10 +1133,16 @@ class CotizaciónCrear extends CustomComponent {
                 handleClearInput={this.handleClearInputCliente}
                 handleFilter={this.handleFilterCliente}
                 handleSelectItem={this.handleSelectItemCliente}
-                renderItem={(value) => (
-                  <>{value.documento + ' - ' + value.informacion}</>
-                )}
-                renderIconLeft={() => <i className="bi bi-person-circle"></i>}
+                renderItem={(value) => <>{value.documento + ' - ' + value.informacion}</>}
+                renderIconLeft={<i className="bi bi-person-circle"></i>}
+                customButton={
+                  <Button
+                    className="btn-outline-success d-flex align-items-center"
+                    onClick={this.handleOpenModalCliente}>
+                    <i className='fa fa-plus'></i>
+                    <span className="ml-2">Nuevo</span>
+                  </Button>
+                }
               />
             </div>
 

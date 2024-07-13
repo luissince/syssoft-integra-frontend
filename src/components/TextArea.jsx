@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 
 const TextArea = ({
-    autoFocus,
+    autoFocus = false,
     title,
     className = "",
     placeholder,

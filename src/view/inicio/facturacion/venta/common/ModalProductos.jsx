@@ -19,6 +19,10 @@ import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
 import Select from '../../../../../components/Select';
 
+/**
+ * Componente que representa una funcionalidad específica.
+ * @extends React.Component
+ */
 class ModalProductos extends CustomComponent {
 
     constructor(props) {

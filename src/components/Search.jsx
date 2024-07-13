@@ -2,6 +2,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Input from './Input';
 
+/**
+ * Componente que representa una funcionalidad específica.
+ * @extends React.Component
+ */
 class Search extends React.Component {
   constructor(props) {
     super(props);

@@ -1,8 +1,7 @@
-import React from 'react';
 import ContainerWrapper from '../../../../../components/Container';
 import CustomComponent from '../../../../../model/class/custom-component';
 import Paginacion from '../../../../../components/Paginacion';
-import { alertDialog, formatTime, formatNumberWithZeros, isEmpty, numberFormat, keyUpSearch, alertSuccess, alertWarning, alertInfo } from '../../../../../helper/utils.helper';
+import { alertDialog, formatTime, formatNumberWithZeros, isEmpty, numberFormat, alertSuccess, alertWarning, alertInfo } from '../../../../../helper/utils.helper';
 import ErrorResponse from '../../../../../model/class/error-response';
 import SuccessReponse from '../../../../../model/class/response';
 import { CANCELED } from '../../../../../model/types/types';
@@ -13,8 +12,20 @@ import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
 import { TableResponsive } from '../../../../../components/Table';
 import { SpinnerTable } from '../../../../../components/Spinner';
+import PropTypes from 'prop-types';
+import Button from '../../../../../components/Button';
+import Search from '../../../../../components/Search';
 
+/**
+ * Componente que representa una funcionalidad específica.
+ * @extends React.Component
+ */
 class Compras extends CustomComponent {
+
+  /**
+    *
+    * Constructor
+    */
   constructor(props) {
     super(props);
 
@@ -22,6 +33,8 @@ class Compras extends CustomComponent {
       loading: false,
       lista: [],
       restart: false,
+
+      buscar: '',
 
       opcion: 0,
       paginacion: 0,
@@ -33,7 +46,6 @@ class Compras extends CustomComponent {
       idUsuario: this.props.token.userToken.idUsuario,
     };
 
-    this.refTxtSearch = React.createRef();
 
     this.abortControllerTable = new AbortController();
   }
@@ -50,16 +62,16 @@ class Compras extends CustomComponent {
     if (this.state.loading) return;
 
     await this.setStateAsync({ paginacion: 1, restart: true });
-    this.fillTable(0, '');
+    this.fillTable(0);
     await this.setStateAsync({ opcion: 0 });
   };
 
-  async searchText(text) {
+  searchText = async (text) => {
     if (this.state.loading) return;
 
     if (text.trim().length === 0) return;
 
-    await this.setStateAsync({ paginacion: 1, restart: false });
+    await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
     this.fillTable(1, text.trim());
     await this.setStateAsync({ opcion: 1 });
   }
@@ -72,17 +84,17 @@ class Compras extends CustomComponent {
   onEventPaginacion = () => {
     switch (this.state.opcion) {
       case 0:
-        this.fillTable(0, '');
+        this.fillTable(0);
         break;
       case 1:
-        this.fillTable(1, this.refTxtSearch.current.value);
+        this.fillTable(1, this.state.buscar);
         break;
       default:
-        this.fillTable(0, '');
+        this.fillTable(0);
     }
   };
 
-  fillTable = async (opcion, buscar) => {
+  fillTable = async (opcion, buscar = '') => {
     this.setState({
       loading: true,
       lista: [],
@@ -158,7 +170,6 @@ class Compras extends CustomComponent {
         if (response instanceof ErrorResponse) {
           alertWarning("Compra", response.getMessage())
         }
-
       }
     });
   }
@@ -183,7 +194,7 @@ class Compras extends CustomComponent {
 
     return this.state.lista.map((item, index) => {
 
-      const estado = item.estado === 1 ? <span className="text-success">Pagado</span> : item.estado === 2 ? <span className="text-warning">Por Pagar</span> : <span className="text-danger">Anulado</span>;
+      const estado = item.estado === 1 ? <span className="text-success">PAGADO</span> : item.estado === 2 ? <span className="text-warning">POR PAGAR</span> : <span className="text-danger">ANULADO</span>;
 
       return (
         <tr key={index}>
@@ -195,20 +206,20 @@ class Compras extends CustomComponent {
           <td className='text-center'>{estado}</td>
           <td className='text-right'>{numberFormat(item.total, item.codiso)} </td>
           <td className="text-center">
-            <button
-              className="btn btn-outline-primary btn-sm"
+            <Button
+              className="btn-outline-primary btn-sm"
               title="Detalle"
               onClick={() => this.handleDetalle(item.idCompra)}>
               <i className="fa fa-eye"></i>
-            </button>
+            </Button>
           </td>
           <td className="text-center">
-            <button
-              className="btn btn-outline-danger btn-sm"
+            <Button
+              className="btn-outline-danger btn-sm"
               title="Anular"
               onClick={() => this.handleAnular(item.idCompra)}>
               <i className="fa fa-remove"></i>
-            </button>
+            </Button>
           </td>
         </tr>
       );
@@ -225,27 +236,10 @@ class Compras extends CustomComponent {
 
         <Row>
           <Column className="col-md-6 col-sm-12">
-            <div className="form-group">
-              <div className="input-group mb-2">
-                <div className="input-group-prepend">
-                  <div className="input-group-text">
-                    <i className="bi bi-search"></i>
-                  </div>
-                </div>
-
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Buscar..."
-                  ref={this.refTxtSearch}
-                  onKeyUp={(event) =>
-                    keyUpSearch(event, () =>
-                      this.searchText(event.target.value),
-                    )
-                  }
-                />
-              </div>
-            </div>
+            <Search
+              onSearch={this.searchText}
+              placeholder="Buscar..."
+            />
           </Column>
 
           <Column className="col-md-6 col-sm-12">
@@ -301,6 +295,21 @@ class Compras extends CustomComponent {
     );
   }
 }
+
+Compras.propTypes = {
+  token: PropTypes.shape({
+    userToken: PropTypes.shape({
+      idUsuario: PropTypes.string.isRequired,
+    }).isRequired,
+    project: PropTypes.shape({
+      idSucursal: PropTypes.string.isRequired,
+    }).isRequired,
+  }).isRequired,
+  history: PropTypes.object,
+  location: PropTypes.shape({
+    pathname: PropTypes.string
+  })
+};
 
 const mapStateToProps = (state) => {
   return {

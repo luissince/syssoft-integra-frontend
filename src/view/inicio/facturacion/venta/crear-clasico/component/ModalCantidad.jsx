@@ -30,8 +30,6 @@ class ModalCantidad extends Component {
     this.setState({
       idProducto: producto.idProducto,
       inventarios: producto && producto.inventarios || []
-    }, () => {
-
     })
   }
 

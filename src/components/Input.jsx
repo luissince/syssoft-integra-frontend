@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 
 const Input = ({
-    autoFocus,
+    autoFocus = false,
     iconLeft,
     type = "text",
     className = "",
@@ -62,7 +62,7 @@ const Input = ({
 Input.propTypes = {
     autoFocus: PropTypes.bool,
     iconLeft: PropTypes.element,
-    type: PropTypes.oneOf(["text", "password", "search", "date"]),
+    type: PropTypes.oneOf(["text", "password", "search", "date", "email"]),
     className: PropTypes.string,
     placeholder: PropTypes.string,
     disabled: PropTypes.bool,

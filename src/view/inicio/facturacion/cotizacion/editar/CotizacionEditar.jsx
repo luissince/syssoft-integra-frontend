@@ -408,7 +408,7 @@ class CotizaciónEditar extends CustomComponent {
       }
     });
 
-    const total = detalles.reduce((accumulate, item) => (accumulate += item.cantidad * item.costo), 0);
+    const total = detalles.reduce((accumulate, item) => (accumulate += item.cantidad * item.precio), 0);
     this.setState({ detalles, total });
   };
 
@@ -537,7 +537,7 @@ class CotizaciónEditar extends CustomComponent {
   }
 
   handleSaveProducto = (detalles) => {
-    const total = detalles.reduce((accumulate, item) => (accumulate += item.cantidad * item.costo), 0);
+    const total = detalles.reduce((accumulate, item) => (accumulate += item.cantidad * item.precio), 0);
     this.setState({ detalles, total });
     this.refProducto.current.focus();
   }
@@ -864,7 +864,11 @@ class CotizaciónEditar extends CustomComponent {
               className='bg-white'
               tabIndex="0">
               <td className="text-center" style={{ width: widthCell1 }}>{item.id}</td>
-              <td style={{ width: widthCell2 }}>{item.nombre}</td>
+              <td style={{ width: widthCell2 }}>
+                {item.codigo}
+                <br />
+                {item.nombre}
+              </td>
               <td style={{ width: widthCell3 }}>{rounded(item.cantidad)}</td>
               <td style={{ width: widthCell4 }}>{item.nombreMedida}</td>
               <td style={{ width: widthCell5 }}>{numberFormat(item.precio, this.state.codISO)}</td>
@@ -1011,7 +1015,6 @@ class CotizaciónEditar extends CustomComponent {
             <Row>
               <Column>
                 <SearchInput
-                  showLeftIcon={true}
                   autoFocus={true}
                   placeholder="Filtrar productos..."
                   refValue={this.refProducto}
@@ -1020,7 +1023,8 @@ class CotizaciónEditar extends CustomComponent {
                   handleClearInput={this.handleClearInputProducto}
                   handleFilter={this.handleFilterProducto}
                   handleSelectItem={this.handleSelectItemProducto}
-                  renderItem={(value) => <>{value.nombre}</>}
+                  renderItem={(value) => <>{value.codigo} / {value.nombre}</>}
+                  renderIconLeft={<i className="bi bi-cart4"></i>}
                 />
               </Column>
             </Row>
@@ -1158,7 +1162,6 @@ class CotizaciónEditar extends CustomComponent {
 
             <div className="form-group">
               <SearchInput
-                showLeftIcon={true}
                 placeholder="Filtrar clientes..."
                 refValue={this.refCliente}
                 value={this.state.filtrarCliente}
@@ -1169,7 +1172,7 @@ class CotizaciónEditar extends CustomComponent {
                 renderItem={(value) => (
                   <>{value.documento + ' - ' + value.informacion}</>
                 )}
-                renderIconLeft={() => <i className="bi bi-person-circle"></i>}
+                renderIconLeft={<i className="bi bi-person-circle"></i>}
               />
             </div>
 

@@ -12,6 +12,10 @@ import PropTypes from 'prop-types';
 import Button from '../../../../../components/Button';
 import { VALOR_MONETARIO } from '../../../../../model/types/tipo-tratamiento-producto';
 
+/**
+ * Componente que representa una funcionalidad específica.
+ * @extends React.Component
+ */
 class ModalAgregar extends Component {
 
   constructor(props) {
