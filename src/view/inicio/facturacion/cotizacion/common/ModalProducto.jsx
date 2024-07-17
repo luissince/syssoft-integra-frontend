@@ -183,10 +183,10 @@ class ModalProducto extends Component {
 
     if (existeDetalle) {
       if (tipoProducto === "SERVICIO") {
-        existeDetalle.precio = parseFloat(precio);
+        existeDetalle.precio = Number(precio);
       } else {
-        existeDetalle.cantidad = parseFloat(cantidad);
-        existeDetalle.precio = parseFloat(precio);
+        existeDetalle.cantidad = Number(cantidad);
+        existeDetalle.precio = Number(precio);
       }
 
       existeDetalle.nombre = descripcion;
@@ -198,8 +198,8 @@ class ModalProducto extends Component {
         idProducto: idProducto,
         codigo: codigo,
         nombre: descripcion,
-        cantidad: parseFloat(cantidad),
-        precio: parseFloat(precio),
+        cantidad: Number(cantidad),
+        precio: Number(precio),
         idMedida: medida.idMedida,
         nombreMedida: medida.nombre,
         idImpuesto: impuesto.idImpuesto,
@@ -210,8 +210,7 @@ class ModalProducto extends Component {
       nuevoDetalles.push(data);
     }
 
-    this.props.handleSave(nuevoDetalles);
-    await this.refModal.current.handleOnClose()
+    this.props.handleSave(nuevoDetalles, await this.refModal.current.handleOnClose());
   };
 
   render() {

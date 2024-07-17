@@ -11,15 +11,7 @@ const Menu = (props) => {
 
   const handleCloseSucursal = () => {
     window.localStorage.removeItem('project');
-    props.clearListaVenta();
-    props.clearListaCotizacion();
-    props.clearListaGuiaRemision();
-    props.clearListaAjuste();
-    props.clearListaProducto();
-    props.clearListaInventario();
-    props.clearKardex();
-    props.clearListaTraslado();
-    props.clearListaCpeSunat();
+    props.clearSucursal();
     props.clearNoticacion();
     props.projectClose();
   }
@@ -53,7 +45,6 @@ const Menu = (props) => {
             {' '}
             <i className="fast-sale fa fa-shopping-cart fa-lg"></i> Nueva venta
           </Link>
-
 
         </div>
         <div className="dropdown">
@@ -165,15 +156,7 @@ Menu.propTypes = {
   }),
   signOut: PropTypes.func,
 
-  clearListaVenta: PropTypes.func,
-  clearListaCotizacion: PropTypes.func,
-  clearListaGuiaRemision: PropTypes.func,
-  clearListaAjuste: PropTypes.func,
-  clearListaProducto: PropTypes.func,
-  clearListaInventario: PropTypes.func,
-  clearKardex: PropTypes.func,
-  clearListaTraslado: PropTypes.func,
-  clearListaCpeSunat: PropTypes.func,
+  clearSucursal: PropTypes.func,
   clearNoticacion: PropTypes.func,
 
   projectClose: PropTypes.func,

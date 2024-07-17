@@ -2,8 +2,12 @@ import React from 'react';
 import printJS from 'print-js';
 import {
   alertDialog,
+  alertHTML,
+  alertInfo,
+  alertSuccess,
   alertWarning,
   convertNullText,
+  formatDecimal,
   isEmpty,
   isNumeric,
   text,
@@ -24,6 +28,7 @@ import {
   obtenerVentaPdf,
   detailCotizacionVenta,
   detailOnlyVentaVenta,
+  createVenta,
 } from '../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
@@ -33,7 +38,6 @@ import InvoiceClient from './component/InvoiceClient';
 import InvoiceVoucher from './component/InvoiceVoucher';
 import InvoiceFooter from './component/InvoiceFooter';
 import InvoiceView from './component/InvoiceView';
-import ModalCobrar from '../common/ModalCobrar';
 import CustomComponent from '../../../../../model/class/custom-component';
 import ModalCliente from './component/ModalCliente';
 import {
@@ -52,7 +56,7 @@ import ModalVenta from '../common/ModalVenta';
 import { getDni, getRuc } from '../../../../../network/rest/apisperu.network';
 import { setProductosFavoritos, starProduct } from '../../../../../redux/predeterminadoSlice';
 import ModalConfiguration from '../common/ModalConfiguration';
-// import InvoiceListPrices from './component/InvoiceListPrices';
+import ModalTransaccion from '../../../../../components/ModalTransaccion';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -78,14 +82,9 @@ class VentaCrear extends CustomComponent {
       filterCliente: false,
       nuevoCliente: null,
 
-      // Filtrar producto mobile
-      productoMobile: '',
-      filterProductoMobile: false,
-
       // Lista de datos
       comprobantes: [],
       productos: [],
-      productosMobile: [],
       clientes: [],
       impuestos: [],
       monedas: [],
@@ -111,7 +110,7 @@ class VentaCrear extends CustomComponent {
       isOpenVenta: false,
 
       // Atributos del modal cobrar
-      isOpenCobrar: false,
+      isOpenTerminal: false,
 
       // Atributos del modal configuración
       idImpuesto: '',
@@ -145,9 +144,6 @@ class VentaCrear extends CustomComponent {
     // Referencia al modal cobrar
     this.refInvoiceView = React.createRef();
 
-    // Referencia al modal cobrar
-    this.refCobrar = React.createRef();
-
     // Referencia al modal impresión
     this.refModalImpresion = React.createRef();
 
@@ -166,10 +162,6 @@ class VentaCrear extends CustomComponent {
     // Referencia al tipo de cliente
     this.refCliente = React.createRef();
     this.selectItemCliente = false;
-
-    // Atributos para buscar productos el diseño mobil
-    this.refProductoMobile = React.createRef();
-    this.selectItemProductoMobile = false;
 
     // Atributos para el modal configuración
     this.idModalConfiguration = 'idModalConfiguration';
@@ -482,7 +474,7 @@ class VentaCrear extends CustomComponent {
           idAlmacen: almacen.idAlmacen,
           almacen: almacen.nombre,
           idInventario: producto.idInventario,
-          cantidad: cantidad ? producto.cantidad : 1,
+          cantidad: cantidad ? Number(producto.cantidad) : 1,
         });
 
         const newItem = {
@@ -490,7 +482,7 @@ class VentaCrear extends CustomComponent {
           codigo: producto.codigo,
           nombreProducto: producto.nombreProducto,
           idImpuesto: this.state.idImpuesto,
-          precio: producto.precio,
+          precio: Number(producto.precio),
           medida: producto.medida,
           idTipoTratamientoProducto: producto.idTipoTratamientoProducto,
           tipo: producto.tipo,
@@ -508,12 +500,13 @@ class VentaCrear extends CustomComponent {
             idAlmacen: almacen.idAlmacen,
             almacen: almacen.nombre,
             idInventario: producto.idInventario,
-            cantidad: cantidad ? producto.cantidad : 1,
+            cantidad: cantidad ? Number(producto.cantidad) : 1,
           });
         } else {
           for (const inventario of existingItem.inventarios) {
             if (inventario.idInventario === producto.idInventario) {
               inventario.cantidad += 1;
+              break;
             }
           }
         }
@@ -542,7 +535,7 @@ class VentaCrear extends CustomComponent {
           codigo: producto.codigo,
           nombreProducto: producto.nombreProducto,
           idImpuesto: this.state.idImpuesto,
-          precio: precio,
+          precio: Number(precio),
           medida: producto.medida,
           idTipoTratamientoProducto: producto.idTipoTratamientoProducto,
           tipo: producto.tipo,
@@ -553,7 +546,7 @@ class VentaCrear extends CustomComponent {
           detalleVenta: [...prevState.detalleVenta, newItem]
         }));
       } else {
-        existingItem.precio = precio;
+        existingItem.precio = Number(precio);
 
         this.setState(prevState => ({
           detalleVenta: prevState.detalleVenta.map(item =>
@@ -571,7 +564,7 @@ class VentaCrear extends CustomComponent {
           idAlmacen: almacen.idAlmacen,
           almacen: almacen.nombre,
           idInventario: producto.idInventario,
-          cantidad: cantidad,
+          cantidad: Number(cantidad),
         });
 
         const newItem = {
@@ -579,7 +572,7 @@ class VentaCrear extends CustomComponent {
           codigo: producto.codigo,
           nombreProducto: producto.nombreProducto,
           idImpuesto: this.state.idImpuesto,
-          precio: producto.precio,
+          precio: Number(producto.precio),
           medida: producto.medida,
           idTipoTratamientoProducto: producto.idTipoTratamientoProducto,
           tipo: producto.tipo,
@@ -596,12 +589,12 @@ class VentaCrear extends CustomComponent {
             idAlmacen: almacen.idAlmacen,
             almacen: almacen.nombre,
             idInventario: producto.idInventario,
-            cantidad: cantidad,
+            cantidad: Number(cantidad),
           });
         } else {
           for (const inventario of existingItem.inventarios) {
             if (inventario.idInventario === producto.idInventario) {
-              inventario.cantidad = cantidad;
+              inventario.cantidad = Number(cantidad);
             }
           }
         }
@@ -621,7 +614,7 @@ class VentaCrear extends CustomComponent {
           codigo: producto.codigo,
           nombreProducto: producto.nombreProducto,
           idImpuesto: this.state.idImpuesto,
-          precio: precio ? precio : producto.precio,
+          precio: precio ? Number(precio) : Number(producto.precio),
           medida: producto.medida,
           idTipoTratamientoProducto: producto.idTipoTratamientoProducto,
           tipo: producto.tipo,
@@ -633,6 +626,17 @@ class VentaCrear extends CustomComponent {
         }));
       }
     }
+  }
+
+  importeTotal = () => {
+    return this.state.detalleVenta.reduce((accumulator, item) => {
+      const cantidad = item.idTipoTratamientoProducto === SERVICIO
+        ? item.cantidad
+        : item.inventarios.reduce((acc, current) => acc + current.cantidad, 0);
+
+      const totalProductPrice = item.precio * cantidad;
+      return accumulator + totalProductPrice;
+    }, 0);
   }
 
   /*
@@ -652,11 +656,11 @@ class VentaCrear extends CustomComponent {
   */
 
   handleDocumentKeyDown = (event) => {
-    if (event.key === 'F1' && !this.state.isOpenImpresion && !this.state.isOpenCobrar && !this.state.isOpenAgregar && !this.state.isOpenCotizacion && !this.state.isOpenVenta) {
+    if (event.key === 'F1' && !this.state.isOpenImpresion && !this.state.isOpenTerminal && !this.state.isOpenAgregar && !this.state.isOpenCotizacion && !this.state.isOpenVenta) {
       this.handleOpenSale();
     }
 
-    if (event.key === 'F2' && !this.state.isOpenImpresion && !this.state.isOpenCobrar && !this.state.isOpenAgregar && !this.state.isOpenCotizacion && !this.state.isOpenVenta) {
+    if (event.key === 'F2' && !this.state.isOpenImpresion && !this.state.isOpenTerminal && !this.state.isOpenAgregar && !this.state.isOpenCotizacion && !this.state.isOpenVenta) {
       this.handleClearSale();
     }
   }
@@ -722,7 +726,7 @@ class VentaCrear extends CustomComponent {
       return;
     }
 
-    if (producto.precio <= 0) {
+    if (Number(producto.precio) <= 0) {
       alertWarning('Venta', '¡El precio no puede tener un valor de 0!');
       return;
     }
@@ -1361,7 +1365,7 @@ class VentaCrear extends CustomComponent {
     const descripcionProducto = this.refDescripcionProducto.current.value;
     const productoActual = this.producto;
 
-    if (!isNumeric(precioProducto) || parseFloat(precioProducto) <= 0) {
+    if (!isNumeric(precioProducto) || Number(precioProducto) <= 0) {
       alertWarning('Venta', 'El precio del producto tiene un valor no admitido o es menor o igual a 0.', () => {
         this.refPrecioProducto.current.focus();
       });
@@ -1377,7 +1381,7 @@ class VentaCrear extends CustomComponent {
 
     const producto = this.state.detalleVenta.find(item => item.idProducto === productoActual.idProducto);
 
-    if (producto.precio !== parseFloat(precioProducto) && producto.idTipoTratamientoProducto === VALOR_MONETARIO) {
+    if (producto.precio !== Number(precioProducto) && producto.idTipoTratamientoProducto === VALOR_MONETARIO) {
       alertWarning('Venta', 'Los productos a granel no se puede cambia el precio.');
       return;
     }
@@ -1388,7 +1392,7 @@ class VentaCrear extends CustomComponent {
           return {
             ...item,
             nombreProducto: descripcionProducto,
-            precio: parseFloat(precioProducto)
+            precio: Number(precioProducto)
           }
         }
 
@@ -1452,57 +1456,6 @@ class VentaCrear extends CustomComponent {
   }
 
   //------------------------------------------------------------------------------------------
-  // Filtrar producto mobile
-  //------------------------------------------------------------------------------------------
-
-  // handleClearInputProductoMobile = async () => {
-  //   await this.setStateAsync({
-  //     productosMobile: [],
-  //     productoMobile: '',
-  //     filterProductoMobile: false
-  //   });
-  //   this.selectItemProductoMobile = false;
-  // }
-
-  // handleFilterProductoMobile = async (event) => {
-  //   const searchWord = this.selectItemProductoMobile ? '' : event.target.value;
-  //   await this.setStateAsync({ productoMobile: searchWord });
-
-  //   this.selectItemProductoMobile = false;
-  //   if (searchWord.length === 0) {
-  //     await this.setStateAsync({ productosMobile: [] });
-  //     return;
-  //   }
-
-  //   if (this.state.filterProductoMobile) return;
-
-  //   await this.setStateAsync({ filterProductoMobile: true });
-
-  //   const params = {
-  //     codBar: this.state.filtrarCodBar ? 1 : 0,
-  //     filtrar: searchWord,
-  //     idSucursal: this.state.idSucursal,
-  //   };
-
-  //   const result = await this.fetchFiltrarVenta(params);
-
-  //   this.setState({
-  //     productosMobile: result,
-  //     filterProductoMobile: false
-  //   });
-  // }
-
-  // handleSelectItemProductoMobile = (value) => {
-  //   this.setState({
-  //     //   cliente: value.documento + ' - ' + value.informacion,
-  //     clientes: [],
-  //     //   idCliente: value.idPersona,
-  //   }, () => {
-  //     console.log(value)
-  //   });
-  // }
-
-  //------------------------------------------------------------------------------------------
   // Componente footer
   //------------------------------------------------------------------------------------------
 
@@ -1526,7 +1479,7 @@ class VentaCrear extends CustomComponent {
       return;
     }
 
-    this.handleOpenModalCobrar();
+    this.handleOpenModalTerminal();
   }
 
   handleClearSale = async () => {
@@ -1538,14 +1491,175 @@ class VentaCrear extends CustomComponent {
   }
 
   //------------------------------------------------------------------------------------------
-  // Modal Cobrar
+  // Acciones del modal terminal
   //------------------------------------------------------------------------------------------
-  handleOpenModalCobrar = () => {
-    this.setState({ isOpenCobrar: true })
+  handleOpenModalTerminal = () => {
+    this.setState({ isOpenTerminal: true })
   }
 
-  handleCloseModalCobrar = async () => {
-    this.setState({ isOpenCobrar: false })
+  handleProcessContado = (idFormaPago, metodoPagosLista, callback = async function () { }) => {
+    const {
+      nuevoCliente,
+      comentario,
+      idUsuario,
+      idSucursal,
+      idCliente,
+      idImpuesto,
+      idMoneda,
+      idComprobante,
+      idCotizacion,
+      detalleVenta
+    } = this.state;
+
+    alertDialog('Venta', '¿Estás seguro de continuar?', async (accept) => {
+      if (accept) {
+        const data = {
+          idFormaPago: idFormaPago,
+          idComprobante: idComprobante,
+          idMoneda: idMoneda,
+          idImpuesto: idImpuesto,
+          idCliente: idCliente,
+          idSucursal: idSucursal,
+          comentario: comentario,
+          idUsuario: idUsuario,
+          estado: 1,
+          nuevoCliente: nuevoCliente,
+          idCotizacion: idCotizacion,
+          detalleVenta: detalleVenta,
+          bancosAgregados: metodoPagosLista,
+        };
+
+        await callback();
+        alertInfo('Venta', 'Procesando venta...');
+
+        const response = await createVenta(data);
+
+        if (response instanceof SuccessReponse) {
+          alertSuccess('Venta', response.data.message, () => {
+            this.handleOpenImpresion(response.data.idVenta);
+          });
+        }
+
+        if (response instanceof ErrorResponse) {
+          if (response.getBody() !== '') {
+            const body = response.getBody().map((item) =>
+              `<tr>
+                  <td>${item.nombre}</td>
+                  <td>${formatDecimal(item.cantidadActual)}</td>
+                  <td>${formatDecimal(item.cantidadReal)}</td>
+                  <td>${formatDecimal(item.cantidadActual - item.cantidadReal)}</td>
+                </tr>`,
+            );
+
+            alertHTML('Venta',
+              `<div class="d-flex flex-column align-items-center">
+                    <h5>Productos con cantidades faltantes</h5>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Cantidad a Vender</th>
+                                <th>Cantidad de Inventario</th>
+                                <th>Cantidad Faltante</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        ${body}
+                        </tbody>
+                    </table>
+                </div>`,
+            );
+          } else {
+            alertWarning('Venta', response.getMessage());
+          }
+        }
+      }
+    });
+  }
+
+  handleProcessCredito = (idFormaPago, numeroCuotas, frecuenciaPagoCredito, importeTotal, callback = async function () { }) => {
+    const {
+      nuevoCliente,
+      comentario,
+      idUsuario,
+      idSucursal,
+      idCliente,
+      idImpuesto,
+      idMoneda,
+      idComprobante,
+      detalleVenta
+    } = this.state;
+
+
+    alertDialog('Venta', '¿Estás seguro de continuar?', async (accept) => {
+      if (accept) {
+        const data = {
+          idFormaPago: idFormaPago,
+          idComprobante: idComprobante,
+          idMoneda: idMoneda,
+          idImpuesto: idImpuesto,
+          idCliente: idCliente,
+          idSucursal: idSucursal,
+          comentario: comentario,
+          idUsuario: idUsuario,
+          estado: 2,
+          nuevoCliente: nuevoCliente,
+          detalleVenta: detalleVenta,
+          numCuotas: numeroCuotas,
+          frecuenciaPagoCredito: frecuenciaPagoCredito,
+          importeTotal: importeTotal
+        };
+
+        await callback();
+        alertInfo('Venta', 'Procesando venta...');
+
+        const response = await createVenta(data);
+
+        if (response instanceof SuccessReponse) {
+          alertSuccess('Venta', response.data.message, () => {
+            this.handleOpenImpresion(response.data.idVenta);
+          });
+        }
+
+        if (response instanceof ErrorResponse) {
+          if (response.getBody() !== '') {
+            const body = response.getBody().map((item) =>
+              `<tr>
+                  <td>${item.nombre}</td>
+                  <td>${formatDecimal(item.cantidadActual)}</td>
+                  <td>${formatDecimal(item.cantidadReal)}</td>
+                  <td>${formatDecimal(item.cantidadActual - item.cantidadReal)}</td>
+                </tr>`,
+            );
+
+            alertHTML('Venta',
+              `<div class="d-flex flex-column align-items-center">
+                    <h5>Productos con cantidades faltantes</h5>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Cantidad a Vender</th>
+                                <th>Cantidad de Inventario</th>
+                                <th>Cantidad Faltante</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        ${body}
+                        </tbody>
+                    </table>
+                </div>`,
+            );
+          } else {
+            alertWarning('Venta', response.getMessage());
+          }
+        }
+      }
+    });
+  }
+
+  handleCloseModalTerminal = async () => {
+    this.setState({ isOpenTerminal: false })
   }
 
   /*
@@ -1611,17 +1725,6 @@ class VentaCrear extends CustomComponent {
             handleSelectItem={this.handleSelectItemCliente}
           />
 
-          {/* <InvoiceListPrices
-            codiso={this.state.codiso}
-            refProductoMobile={this.refProductoMobile}
-            placeholder="Filtrar productos..."
-            productoMobile={this.state.productoMobile}
-            productos={this.state.productosMobile}
-            handleClearInput={this.handleClearInputProductoMobile}
-            handleFilter={this.handleFilterProductoMobile}
-            handleSelectItem={this.handleSelectItemProductoMobile}
-          /> */}
-
           <InvoiceDetail
             codiso={this.state.codiso}
             detalleVenta={this.state.detalleVenta}
@@ -1640,22 +1743,16 @@ class VentaCrear extends CustomComponent {
           />
         </section>
 
-        <ModalCobrar
-          refModal={this.refCobrar}
-          isOpen={this.state.isOpenCobrar}
-          onClose={this.handleCloseModalCobrar}
+        <ModalTransaccion
+          isOpen={this.state.isOpenTerminal}
+
           idSucursal={this.state.idSucursal}
-          nuevoCliente={this.state.nuevoCliente}
-          comentario={this.state.comentario}
-          idUsuario={this.state.idUsuario}
-          idCliente={this.state.idCliente}
-          idImpuesto={this.state.idImpuesto}
-          idMoneda={this.state.idMoneda}
-          idComprobante={this.state.idComprobante}
           codiso={this.state.codiso}
-          idCotizacion={this.state.idCotizacion}
-          detalleVenta={this.state.detalleVenta}
-          handleOpenImpresion={this.handleOpenImpresion}
+          importeTotal={this.importeTotal()}
+
+          onClose={this.handleCloseModalTerminal}
+          handleProcessContado={this.handleProcessContado}
+          handleProcessCredito={this.handleProcessCredito}
         />
 
         <ModalImpresion

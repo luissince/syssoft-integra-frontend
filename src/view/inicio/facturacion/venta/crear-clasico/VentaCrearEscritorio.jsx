@@ -1,10 +1,14 @@
 import React from 'react';
 import {
   alertDialog,
+  alertHTML,
+  alertInfo,
+  alertSuccess,
   alertWarning,
   calculateTax,
   calculateTaxBruto,
   convertNullText,
+  formatDecimal,
   getRowCellIndex,
   isEmpty,
   keyNumberPhone,
@@ -29,6 +33,7 @@ import {
   comboImpuesto,
   obtenerVentaPdf,
   filtrarProductoVenta,
+  createVenta,
 } from '../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
@@ -55,7 +60,6 @@ import ModalCotizacion from '../common/ModalCotizacion';
 import { SpinnerView } from '../../../../../components/Spinner';
 import ModalConfiguration from '../common/ModalConfiguration';
 import ModalAgregar from '../common/ModalAgregar';
-import ModalCobrar from '../common/ModalCobrar';
 import printJS from 'print-js';
 import ModalImpresion from '../common/ModalImpresion';
 import ButtonsOpciones from './component/ButtonsOpciones';
@@ -64,6 +68,7 @@ import ModalCantidad from './component/ModalCantidad';
 import ModalDatos from './component/ModalDatos';
 import ModalPreImpresion from '../common/ModalPreImpresion';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import ModalTransaccion from '../../../../../components/ModalTransaccion';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -118,7 +123,7 @@ class VentaCrearEscritorio extends CustomComponent {
       isOpenVenta: false,
 
       // Atributos del modal cobrar
-      isOpenCobrar: false,
+      isOpenTerminal: false,
 
       // Atributos del modal precios
       isOpenPrecios: false,
@@ -161,9 +166,6 @@ class VentaCrearEscritorio extends CustomComponent {
     };
 
     this.initial = { ...this.state }
-
-    // Referencia al modal cobrar
-    this.refCobrar = React.createRef();
 
     // Referencia al modal impresión
     this.refModalImpresion = React.createRef();
@@ -530,7 +532,7 @@ class VentaCrearEscritorio extends CustomComponent {
           idAlmacen: almacen.idAlmacen,
           almacen: almacen.nombre,
           idInventario: producto.idInventario,
-          cantidad: cantidad ? producto.cantidad : 1,
+          cantidad: cantidad ? Number(producto.cantidad) : 1,
         });
 
         const newItem = {
@@ -539,7 +541,7 @@ class VentaCrearEscritorio extends CustomComponent {
           codigo: producto.codigo,
           nombreProducto: producto.nombreProducto,
           idImpuesto: this.state.idImpuesto,
-          precio: producto.precio,
+          precio: Number(producto.precio),
           medida: producto.medida,
           idTipoTratamientoProducto: producto.idTipoTratamientoProducto,
           tipo: producto.tipo,
@@ -557,12 +559,13 @@ class VentaCrearEscritorio extends CustomComponent {
             idAlmacen: almacen.idAlmacen,
             almacen: almacen.nombre,
             idInventario: producto.idInventario,
-            cantidad: cantidad ? producto.cantidad : 1,
+            cantidad: cantidad ? Number(producto.cantidad) : 1,
           });
         } else {
           for (const inventario of existingItem.inventarios) {
             if (inventario.idInventario === producto.idInventario) {
               inventario.cantidad += 1;
+              break;
             }
           }
         }
@@ -592,7 +595,7 @@ class VentaCrearEscritorio extends CustomComponent {
           codigo: producto.codigo,
           nombreProducto: producto.nombreProducto,
           idImpuesto: this.state.idImpuesto,
-          precio: precio,
+          precio: Number(precio),
           medida: producto.medida,
           idTipoTratamientoProducto: producto.idTipoTratamientoProducto,
           tipo: producto.tipo,
@@ -603,7 +606,7 @@ class VentaCrearEscritorio extends CustomComponent {
           detalleVenta: [...prevState.detalleVenta, newItem],
         }));
       } else {
-        existingItem.precio = precio;
+        existingItem.precio = Number(precio);
 
         this.setState(prevState => ({
           detalleVenta: prevState.detalleVenta.map(item =>
@@ -621,7 +624,7 @@ class VentaCrearEscritorio extends CustomComponent {
           idAlmacen: almacen.idAlmacen,
           almacen: almacen.nombre,
           idInventario: producto.idInventario,
-          cantidad: cantidad,
+          cantidad: Number(cantidad),
         });
 
         const newItem = {
@@ -630,7 +633,7 @@ class VentaCrearEscritorio extends CustomComponent {
           codigo: producto.codigo,
           nombreProducto: producto.nombreProducto,
           idImpuesto: this.state.idImpuesto,
-          precio: producto.precio,
+          precio: Number(producto.precio),
           medida: producto.medida,
           idTipoTratamientoProducto: producto.idTipoTratamientoProducto,
           tipo: producto.tipo,
@@ -647,12 +650,13 @@ class VentaCrearEscritorio extends CustomComponent {
             idAlmacen: almacen.idAlmacen,
             almacen: almacen.nombre,
             idInventario: producto.idInventario,
-            cantidad: cantidad,
+            cantidad: Number(cantidad),
           });
         } else {
           for (const inventario of existingItem.inventarios) {
             if (inventario.idInventario === producto.idInventario) {
               inventario.cantidad = cantidad;
+              break;
             }
           }
         }
@@ -673,7 +677,7 @@ class VentaCrearEscritorio extends CustomComponent {
           codigo: producto.codigo,
           nombreProducto: producto.nombreProducto,
           idImpuesto: this.state.idImpuesto,
-          precio: precio ? precio : producto.precio,
+          precio: precio ? Number(precio) : Number(producto.precio),
           medida: producto.medida,
           idTipoTratamientoProducto: producto.idTipoTratamientoProducto,
           tipo: producto.tipo,
@@ -793,11 +797,11 @@ class VentaCrearEscritorio extends CustomComponent {
   */
 
   handleDocumentKeyDown = (event) => {
-    if (event.key === 'F1' && !this.state.isOpenProductos && !this.state.isOpenImpresion && !this.state.isOpenCobrar && !this.state.isOpenAgregar && !this.state.isOpenCotizacion && !this.state.isOpenVenta) {
+    if (event.key === 'F1' && !this.state.isOpenProductos && !this.state.isOpenImpresion && !this.state.isOpenTerminal && !this.state.isOpenAgregar && !this.state.isOpenCotizacion && !this.state.isOpenVenta) {
       this.handleOpenSale();
     }
 
-    if (event.key === 'F2' && !this.state.isOpenProductos && !this.state.isOpenImpresion && !this.state.isOpenCobrar && !this.state.isOpenAgregar && !this.state.isOpenCotizacion && !this.state.isOpenVenta) {
+    if (event.key === 'F2' && !this.state.isOpenProductos && !this.state.isOpenImpresion && !this.state.isOpenTerminal && !this.state.isOpenAgregar && !this.state.isOpenCotizacion && !this.state.isOpenVenta) {
       this.handleOpenProductos();
     }
 
@@ -944,7 +948,7 @@ class VentaCrearEscritorio extends CustomComponent {
       }
     });
 
-    this.handleOpenModalCobrar();
+    this.handleOpenModalTerminal();
   }
 
   handleClearSale = async () => {
@@ -965,14 +969,175 @@ class VentaCrearEscritorio extends CustomComponent {
   }
 
   //------------------------------------------------------------------------------------------
-  // Modal Cobrar
+  // Acciones del modal terminal
   //------------------------------------------------------------------------------------------
-  handleOpenModalCobrar = () => {
-    this.setState({ isOpenCobrar: true })
+  handleOpenModalTerminal = () => {
+    this.setState({ isOpenTerminal: true })
   }
 
-  handleCloseModalCobrar = async () => {
-    this.setState({ isOpenCobrar: false })
+  handleProcessContado = (idFormaPago, metodoPagosLista, callback = async function () { }) => {
+    const {
+      nuevoCliente,
+      comentario,
+      idUsuario,
+      idSucursal,
+      idCliente,
+      idImpuesto,
+      idMoneda,
+      idComprobante,
+      idCotizacion,
+      detalleVenta
+    } = this.state;
+
+    alertDialog('Venta', '¿Estás seguro de continuar?', async (accept) => {
+      if (accept) {
+        const data = {
+          idFormaPago: idFormaPago,
+          idComprobante: idComprobante,
+          idMoneda: idMoneda,
+          idImpuesto: idImpuesto,
+          idCliente: idCliente,
+          idSucursal: idSucursal,
+          comentario: comentario,
+          idUsuario: idUsuario,
+          estado: 1,
+          nuevoCliente: nuevoCliente,
+          idCotizacion: idCotizacion,
+          detalleVenta: detalleVenta,
+          bancosAgregados: metodoPagosLista,
+        };
+
+        await callback();
+        alertInfo('Venta', 'Procesando venta...');
+
+        const response = await createVenta(data);
+
+        if (response instanceof SuccessReponse) {
+          alertSuccess('Venta', response.data.message, () => {
+            this.handleOpenImpresion(response.data.idVenta);
+          });
+        }
+
+        if (response instanceof ErrorResponse) {
+          if (response.getBody() !== '') {
+            const body = response.getBody().map((item) =>
+              `<tr>
+                  <td>${item.nombre}</td>
+                  <td>${formatDecimal(item.cantidadActual)}</td>
+                  <td>${formatDecimal(item.cantidadReal)}</td>
+                  <td>${formatDecimal(item.cantidadActual - item.cantidadReal)}</td>
+                </tr>`,
+            );
+
+            alertHTML('Venta',
+              `<div class="d-flex flex-column align-items-center">
+                    <h5>Productos con cantidades faltantes</h5>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Cantidad a Vender</th>
+                                <th>Cantidad de Inventario</th>
+                                <th>Cantidad Faltante</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        ${body}
+                        </tbody>
+                    </table>
+                </div>`,
+            );
+          } else {
+            alertWarning('Venta', response.getMessage());
+          }
+        }
+      }
+    });
+  }
+
+  handleProcessCredito = (idFormaPago, numeroCuotas, frecuenciaPagoCredito, importeTotal, callback = async function () { }) => {
+    const {
+      nuevoCliente,
+      comentario,
+      idUsuario,
+      idSucursal,
+      idCliente,
+      idImpuesto,
+      idMoneda,
+      idComprobante,
+      detalleVenta
+    } = this.state;
+
+
+    alertDialog('Venta', '¿Estás seguro de continuar?', async (accept) => {
+      if (accept) {
+        const data = {
+          idFormaPago: idFormaPago,
+          idComprobante: idComprobante,
+          idMoneda: idMoneda,
+          idImpuesto: idImpuesto,
+          idCliente: idCliente,
+          idSucursal: idSucursal,
+          comentario: comentario,
+          idUsuario: idUsuario,
+          estado: 2,
+          nuevoCliente: nuevoCliente,
+          detalleVenta: detalleVenta,
+          numCuotas: numeroCuotas,
+          frecuenciaPagoCredito: frecuenciaPagoCredito,
+          importeTotal: importeTotal
+        };
+
+        await callback();
+        alertInfo('Venta', 'Procesando venta...');
+
+        const response = await createVenta(data);
+
+        if (response instanceof SuccessReponse) {
+          alertSuccess('Venta', response.data.message, () => {
+            this.handleOpenImpresion(response.data.idVenta);
+          });
+        }
+
+        if (response instanceof ErrorResponse) {
+          if (response.getBody() !== '') {
+            const body = response.getBody().map((item) =>
+              `<tr>
+                  <td>${item.nombre}</td>
+                  <td>${formatDecimal(item.cantidadActual)}</td>
+                  <td>${formatDecimal(item.cantidadReal)}</td>
+                  <td>${formatDecimal(item.cantidadActual - item.cantidadReal)}</td>
+                </tr>`,
+            );
+
+            alertHTML('Venta',
+              `<div class="d-flex flex-column align-items-center">
+                    <h5>Productos con cantidades faltantes</h5>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Cantidad a Vender</th>
+                                <th>Cantidad de Inventario</th>
+                                <th>Cantidad Faltante</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        ${body}
+                        </tbody>
+                    </table>
+                </div>`,
+            );
+          } else {
+            alertWarning('Venta', response.getMessage());
+          }
+        }
+      }
+    });
+  }
+
+  handleCloseModalTerminal = async () => {
+    this.setState({ isOpenTerminal: false })
   }
 
   //------------------------------------------------------------------------------------------
@@ -1057,6 +1222,8 @@ class VentaCrearEscritorio extends CustomComponent {
         return item
       })
     }));
+
+    this.calculateTotal();
   }
 
   //------------------------------------------------------------------------------------------
@@ -1089,6 +1256,8 @@ class VentaCrearEscritorio extends CustomComponent {
         }
       })
     }));
+
+    this.calculateTotal();
   }
 
   //------------------------------------------------------------------------------------------
@@ -1120,6 +1289,8 @@ class VentaCrearEscritorio extends CustomComponent {
         return item
       })
     }));
+
+    this.calculateTotal();
   }
 
   //------------------------------------------------------------------------------------------
@@ -1782,29 +1953,23 @@ class VentaCrearEscritorio extends CustomComponent {
           message={this.state.msgLoading}
         />
 
-        <ModalCobrar
-          refModal={this.refCobrar}
-          isOpen={this.state.isOpenCobrar}
-          onClose={this.handleCloseModalCobrar}
+        <ModalTransaccion
+          isOpen={this.state.isOpenTerminal}
+
           idSucursal={this.state.idSucursal}
-          nuevoCliente={this.state.nuevoCliente}
-          comentario={this.state.comentario}
-          idUsuario={this.state.idUsuario}
-          idCliente={this.state.idCliente}
-          idImpuesto={this.state.idImpuesto}
-          idMoneda={this.state.idMoneda}
-          idComprobante={this.state.idComprobante}
           codiso={this.state.codiso}
-          idCotizacion={this.state.idCotizacion}
-          detalleVenta={this.state.detalleVenta}
-          handleOpenImpresion={this.handleOpenImpresion}
+          importeTotal={this.state.importeTotal}
+
+          onClose={this.handleCloseModalTerminal}
+          handleProcessContado={this.handleProcessContado}
+          handleProcessCredito={this.handleProcessCredito}
         />
 
         <ModalImpresion
           refModal={this.refModalImpresion}
           isOpen={this.state.isOpenImpresion}
-          handleClose={this.handleCloseImpresion}
 
+          handleClose={this.handleCloseImpresion}
           handlePrintA4={this.handleOpenImpresionA4}
           handlePrintTicket={this.handleOpenImpresionTicket}
         />

@@ -54,21 +54,30 @@ class ModalCantidad extends Component {
 
   handleOnSubmit = async () => {
     const { inventarios, idProducto } = this.state;
+    const { handleSave } = this.props;
 
-    // Verificar si algún inventario tiene una cantidad no numérica o menor o igual a cero
-    const invalidInventories = inventarios.some(
-      inventario => !isNumeric(inventario.cantidad) || parseFloat(inventario.cantidad) <= 0
-    );
+    // Función para validar la cantidad de un inventario
+    const isValidInventory = inventario =>
+      isNumeric(inventario.cantidad) && Number(inventario.cantidad) > 0;
 
-    if (invalidInventories) {
+    // Verificar si todos los inventarios tienen cantidades válidas
+    const allValid = inventarios.every(isValidInventory);
+
+    if (!allValid) {
       alertWarning("Venta", "Ingrese la cantidad de cada almacen.", () => {
         validateNumericInputs(this.refContenedor);
       });
       return;
     }
 
+    // Convertir la cantidad de cada inventario a número
+    const newInventarios = inventarios.map(inventario => ({
+      ...inventario,
+      cantidad: Number(inventario.cantidad)
+    }));
+
     // Guardar los inventarios válidos
-    this.props.handleSave(idProducto, inventarios);
+    handleSave(idProducto, newInventarios);
 
     // Cerrar el modal
     await this.refModal.current.handleOnClose();

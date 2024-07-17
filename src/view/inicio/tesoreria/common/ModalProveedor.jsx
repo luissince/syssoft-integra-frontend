@@ -1,23 +1,23 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { CustomModalForm } from '../../../../../../components/CustomModal';
-import Button from '../../../../../../components/Button';
-import Row from '../../../../../../components/Row';
-import Column from '../../../../../../components/Column';
-import Select from '../../../../../../components/Select';
-import { comboTipoDocumento, createPersona, getUbigeo } from '../../../../../../network/rest/principal.network';
-import SuccessReponse from '../../../../../../model/class/response';
-import ErrorResponse from '../../../../../../model/class/error-response';
-import { CANCELED } from '../../../../../../model/types/types';
-import { SpinnerView } from '../../../../../../components/Spinner';
-import { CLIENTE_JURIDICO, CLIENTE_NATURAL } from '../../../../../../model/types/tipo-cliente';
-import { alertDialog, alertInfo, alertSuccess, alertWarning, convertNullText, currentDate, isEmpty } from '../../../../../../helper/utils.helper';
-import Input from '../../../../../../components/Input';
-import { images } from '../../../../../../helper';
-import { getDni, getRuc } from '../../../../../../network/rest/apisperu.network';
-import SearchInput from '../../../../../../components/SearchInput';
-import CustomComponent from '../../../../../../model/class/custom-component';
-import RadioButton from '../../../../../../components/RadioButton';
+import { CustomModalForm } from '../../../../components/CustomModal';
+import Button from '../../../../components/Button';
+import Row from '../../../../components/Row';
+import Column from '../../../../components/Column';
+import Select from '../../../../components/Select';
+import { comboTipoDocumento, createPersona, getUbigeo } from '../../../../network/rest/principal.network';
+import SuccessReponse from '../../../../model/class/response';
+import ErrorResponse from '../../../../model/class/error-response';
+import { CANCELED } from '../../../../model/types/types';
+import { SpinnerView } from '../../../../components/Spinner';
+import { CLIENTE_JURIDICO, CLIENTE_NATURAL } from '../../../../model/types/tipo-cliente';
+import { alertDialog, alertInfo, alertSuccess, alertWarning, convertNullText, currentDate, isEmpty } from '../../../../helper/utils.helper';
+import Input from '../../../../components/Input';
+import { images } from '../../../../helper';
+import { getDni, getRuc } from '../../../../network/rest/apisperu.network';
+import SearchInput from '../../../../components/SearchInput';
+import CustomComponent from '../../../../model/class/custom-component';
+import RadioButton from '../../../../components/RadioButton';
 
 /**
  * CustomComponent que representa una funcionalidad específica.

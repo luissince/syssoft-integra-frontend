@@ -86,6 +86,8 @@ class Ventas extends CustomComponent {
 
     this.refPaginacion = React.createRef();
 
+    this.refSearch = React.createRef();
+
     // Referencia para el modal elegir interfaz
     this.refModalElegirInterfaz = React.createRef();
 
@@ -135,14 +137,16 @@ class Ventas extends CustomComponent {
   |
   */
   loadingData = async () => {
-    if (this.props.listaVenta && this.props.listaVenta.data && this.props.listaVenta.paginacion) {
-      this.setState(this.props.listaVenta.data)
-      this.refPaginacion.current.upperPageBound = this.props.listaVenta.paginacion.upperPageBound;
-      this.refPaginacion.current.lowerPageBound = this.props.listaVenta.paginacion.lowerPageBound;
-      this.refPaginacion.current.isPrevBtnActive = this.props.listaVenta.paginacion.isPrevBtnActive;
-      this.refPaginacion.current.isNextBtnActive = this.props.listaVenta.paginacion.isNextBtnActive;
-      this.refPaginacion.current.pageBound = this.props.listaVenta.paginacion.pageBound;
-      this.refPaginacion.current.messagePaginacion = this.props.listaVenta.paginacion.messagePaginacion;
+    if (this.props.ventaLista && this.props.ventaLista.data && this.props.ventaLista.paginacion) {
+      this.setState(this.props.ventaLista.data)
+      this.refPaginacion.current.upperPageBound = this.props.ventaLista.paginacion.upperPageBound;
+      this.refPaginacion.current.lowerPageBound = this.props.ventaLista.paginacion.lowerPageBound;
+      this.refPaginacion.current.isPrevBtnActive = this.props.ventaLista.paginacion.isPrevBtnActive;
+      this.refPaginacion.current.isNextBtnActive = this.props.ventaLista.paginacion.isNextBtnActive;
+      this.refPaginacion.current.pageBound = this.props.ventaLista.paginacion.pageBound;
+      this.refPaginacion.current.messagePaginacion = this.props.ventaLista.paginacion.messagePaginacion;
+
+      this.refSearch.current.initialize(this.props.ventaLista.data.buscar);
     } else {
       const [comprobantes] = await Promise.all([this.fetchComprobante(VENTA)]);
 
@@ -419,24 +423,24 @@ class Ventas extends CustomComponent {
           <td className="text-center">{estado}</td>
           <td className="text-center"> {numberFormat(item.total, item.codiso)} </td>
           <td className="text-center">
-            <button
-              className="btn btn-outline-primary btn-sm"
+            <Button
+              className="btn-outline-primary btn-sm"
               title="Detalle"
               onClick={() => this.handleDetalle(item.idVenta)}
             // disabled={!this.state.view}
             >
               <i className="fa fa-eye"></i>
-            </button>
+            </Button>
           </td>
           <td className="text-center">
-            <button
-              className="btn btn-outline-danger btn-sm"
+            <Button
+              className="btn-outline-danger btn-sm"
               title="Anular"
               onClick={() => this.handleCancelar(item.idVenta)}
             // disabled={!this.state.remove}
             >
               <i className="fa fa-remove"></i>
-            </button>
+            </Button>
           </td>
         </tr>
       );
@@ -555,6 +559,7 @@ class Ventas extends CustomComponent {
         <Row>
           <Column className="col-md-6 col-sm-12" formGroup={true}>
             <Search
+              ref={this.refSearch}
               onSearch={this.searchText}
               placeholder="Buscar por comprobante o cliente..."
             />
@@ -611,7 +616,7 @@ Ventas.propTypes = {
       idSucursal: PropTypes.string.isRequired,
     }).isRequired,
   }).isRequired,
-  listaVenta: PropTypes.shape({
+  ventaLista: PropTypes.shape({
     data: PropTypes.object,
     paginacion: PropTypes.object
   }),
@@ -624,7 +629,7 @@ Ventas.propTypes = {
 const mapStateToProps = (state) => {
   return {
     token: state.principal,
-    listaVenta: state.predeterminado.listaVenta
+    ventaLista: state.predeterminado.ventaLista
   };
 };
 

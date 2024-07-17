@@ -148,7 +148,20 @@ export const CustomModalContent = ({
     );
 }
 
-export const CustomModalForm = ({ contentRef, isOpen, onOpen, onHidden, onClose, contentLabel, onSubmit, titleHeader, className, body, footer, classNameFooter }) => {
+export const CustomModalForm = ({
+    contentRef,
+    isOpen,
+    onOpen,
+    onHidden,
+    onClose,
+    contentLabel,
+    onSubmit,
+    titleHeader,
+    className,
+    body,
+    footer,
+    classNameFooter
+}) => {
     return (
         <CustomModal
             ref={contentRef}

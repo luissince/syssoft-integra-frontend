@@ -15,6 +15,8 @@ import { SpinnerTable } from '../../../../../components/Spinner';
 import PropTypes from 'prop-types';
 import Button from '../../../../../components/Button';
 import Search from '../../../../../components/Search';
+import { setListaCompraData, setListaCompraPaginacion } from '../../../../../redux/predeterminadoSlice';
+import React from 'react';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -46,19 +48,47 @@ class Compras extends CustomComponent {
       idUsuario: this.props.token.userToken.idUsuario,
     };
 
+    this.refPaginacion = React.createRef();
 
     this.abortControllerTable = new AbortController();
   }
 
   async componentDidMount() {
-    await this.loadInit();
+    await this.loadingData();
   }
 
   componentWillUnmount() {
     this.abortControllerTable.abort();
   }
 
-  loadInit = async () => {
+  loadingData = async () => {
+    if (this.props.compraLista && this.props.compraLista.data && this.props.compraLista.paginacion) {
+      this.setState(this.props.compraLista.data)
+      this.refPaginacion.current.upperPageBound = this.props.compraLista.paginacion.upperPageBound;
+      this.refPaginacion.current.lowerPageBound = this.props.compraLista.paginacion.lowerPageBound;
+      this.refPaginacion.current.isPrevBtnActive = this.props.compraLista.paginacion.isPrevBtnActive;
+      this.refPaginacion.current.isNextBtnActive = this.props.compraLista.paginacion.isNextBtnActive;
+      this.refPaginacion.current.pageBound = this.props.compraLista.paginacion.pageBound;
+      this.refPaginacion.current.messagePaginacion = this.props.compraLista.paginacion.messagePaginacion;
+    } else {
+      await this.loadingInit();
+      this.updateReduxState();
+    }
+  }
+
+  updateReduxState() {
+    this.props.setListaCompraData(this.state)
+    this.props.setListaCompraPaginacion({
+      upperPageBound: this.refPaginacion.current.upperPageBound,
+      lowerPageBound: this.refPaginacion.current.lowerPageBound,
+      isPrevBtnActive: this.refPaginacion.current.isPrevBtnActive,
+      isNextBtnActive: this.refPaginacion.current.isNextBtnActive,
+      pageBound: this.refPaginacion.current.pageBound,
+      messagePaginacion: this.refPaginacion.current.messagePaginacion,
+    });
+  }
+
+  loadingInit = async () => {
     if (this.state.loading) return;
 
     await this.setStateAsync({ paginacion: 1, restart: true });
@@ -120,6 +150,8 @@ class Compras extends CustomComponent {
         loading: false,
         lista: response.data.result,
         totalPaginacion: totalPaginacion,
+      }, () => {
+        this.updateReduxState();
       });
     }
 
@@ -163,7 +195,7 @@ class Compras extends CustomComponent {
 
         if (response instanceof SuccessReponse) {
           alertSuccess("Compra", response.data, async () => {
-            await this.loadInit()
+            await this.loadingInit()
           })
         }
 
@@ -242,19 +274,18 @@ class Compras extends CustomComponent {
             />
           </Column>
 
-          <Column className="col-md-6 col-sm-12">
-            <div className="form-group">
-              <button
-                className="btn btn-outline-info"
-                onClick={this.handleCrear}>
-                <i className="bi bi-file-plus"></i> Crear compra
-              </button>
-              {' '}
-              <button className="btn btn-outline-secondary"
-                onClick={this.loadInit}>
-                <i className="bi bi-arrow-clockwise"></i>
-              </button>
-            </div>
+          <Column className="col-md-6 col-sm-12" formGroup={true}>
+            <Button
+              className="btn-outline-info"
+              onClick={this.handleCrear}>
+              <i className="bi bi-file-plus"></i> Crear compra
+            </Button>
+            {' '}
+            <Button
+              className="btn-outline-secondary"
+              onClick={this.loadingInit}>
+              <i className="bi bi-arrow-clockwise"></i>
+            </Button>
           </Column>
         </Row>
 
@@ -284,6 +315,7 @@ class Compras extends CustomComponent {
         </Row>
 
         <Paginacion
+          ref={this.refPaginacion}
           loading={this.state.loading}
           data={this.state.lista}
           totalPaginacion={this.state.totalPaginacion}
@@ -305,6 +337,12 @@ Compras.propTypes = {
       idSucursal: PropTypes.string.isRequired,
     }).isRequired,
   }).isRequired,
+  compraLista: PropTypes.shape({
+    data: PropTypes.object,
+    paginacion: PropTypes.object
+  }),
+  setListaCompraData: PropTypes.func,
+  setListaCompraPaginacion: PropTypes.func,
   history: PropTypes.object,
   location: PropTypes.shape({
     pathname: PropTypes.string
@@ -314,9 +352,12 @@ Compras.propTypes = {
 const mapStateToProps = (state) => {
   return {
     token: state.principal,
+    compraLista: state.predeterminado.compraLista
   };
 };
 
-const ConnectedCompras = connect(mapStateToProps, null)(Compras);
+const mapDispatchToProps = { setListaCompraData, setListaCompraPaginacion }
+
+const ConnectedCompras = connect(mapStateToProps, mapDispatchToProps)(Compras);
 
 export default ConnectedCompras;

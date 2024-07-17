@@ -10,6 +10,7 @@ const Input = ({
     role,
     refInput,
     value,
+    buttonRight,
     onChange,
     onKeyUp,
     onKeyDown,
@@ -38,6 +39,10 @@ const Input = ({
                     onKeyDown={onKeyDown}
                     onPaste={onPaste}
                 />
+
+                <div className="input-group-append">
+                    {buttonRight}
+                </div>
             </div>
         );
     }
@@ -69,6 +74,7 @@ Input.propTypes = {
     role: PropTypes.string,
     refInput: PropTypes.object,
     value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    buttonRight: PropTypes.element,
     onChange: PropTypes.func,
     onKeyUp: PropTypes.func,
     onKeyDown: PropTypes.func,

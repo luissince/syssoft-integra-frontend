@@ -46,6 +46,7 @@ import { Draggable } from 'react-beautiful-dnd';
 import { DragDropContext } from 'react-beautiful-dnd';
 import { Droppable } from 'react-beautiful-dnd';
 import ModalCliente from '../common/ModalCliente';
+import { clearCrearCotizacion, setCrearCotizacionLocal, setCrearCotizacionState } from '../../../../../redux/predeterminadoSlice';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -192,28 +193,64 @@ class CotizaciónCrear extends CustomComponent {
   */
 
   loadingData = async () => {
-    const [comprobantes, monedas, impuestos] =
-      await Promise.all([
-        this.fetchComprobante(COTIZACION),
-        this.fetchMoneda(),
-        this.fetchImpuesto(),
-      ]);
+    if (this.props.cotizacionCrear && this.props.cotizacionCrear.state && this.props.cotizacionCrear.local) {
+      this.setState(this.props.cotizacionCrear.state)
+      this.selectItemProducto = this.props.cotizacionCrear.local.selectItemProducto;
+      this.selectItemCliente = this.props.cotizacionCrear.local.selectItemCliente;
+      this.index = this.props.cotizacionCrear.local.index;
+      this.cells = this.props.cotizacionCrear.local.cells;
+    } else {
+      const [comprobantes, monedas, impuestos] =
+        await Promise.all([
+          this.fetchComprobante(COTIZACION),
+          this.fetchMoneda(),
+          this.fetchImpuesto(),
+        ]);
 
-    const comprobante = comprobantes.find((item) => item.preferida === 1);
-    const moneda = monedas.find((item) => item.nacional === 1);
-    const impuesto = impuestos.find((item) => item.preferido === 1);
+      const comprobante = comprobantes.find((item) => item.preferida === 1);
+      const moneda = monedas.find((item) => item.nacional === 1);
+      const impuesto = impuestos.find((item) => item.preferido === 1);
 
-    this.setState({
-      comprobantes,
-      monedas,
-      impuestos,
-      idImpuesto: isEmpty(impuesto) ? '' : impuesto.idImpuesto,
-      idComprobante: isEmpty(comprobante) ? '' : comprobante.idComprobante,
-      idMoneda: isEmpty(moneda) ? '' : moneda.idMoneda,
-      codISO: isEmpty(moneda) ? '' : moneda.codiso,
-      loading: false,
-    });
+      this.setState({
+        comprobantes,
+        monedas,
+        impuestos,
+        idImpuesto: isEmpty(impuesto) ? '' : impuesto.idImpuesto,
+        idComprobante: isEmpty(comprobante) ? '' : comprobante.idComprobante,
+        idMoneda: isEmpty(moneda) ? '' : moneda.idMoneda,
+        codISO: isEmpty(moneda) ? '' : moneda.codiso,
+        loading: false,
+      }, () => {
+        this.updateReduxState();
+      });
+    }
   };
+
+  updateReduxState() {
+    this.props.setCrearCotizacionState(this.state)
+    this.props.setCrearCotizacionLocal({
+      selectItemProducto: this.selectItemProducto,
+      selectItemCliente: this.selectItemCliente,
+      index: this.index,
+      cells: this.cells,
+    })
+  }
+
+  clearView = () => {
+    this.setState(this.initial, async () => {
+      await this.props.clearCrearCotizacion();
+      await this.loadingData();
+
+      this.selectItemProducto = false;
+      this.selectItemCliente = false;
+
+      this.refProducto.current.focus();
+      this.index = -1;
+      this.cells = [];
+
+      this.updateReduxState();
+    });
+  }
 
   //------------------------------------------------------------------------------------------
   // Peticiones HTTP
@@ -292,16 +329,6 @@ class CotizaciónCrear extends CustomComponent {
       return [];
     }
   }
-
-  clearView = () => {
-    this.setState(this.initial, async () => {
-      await this.loadingData();
-      this.refProducto.current.focus();
-      this.index = -1;
-      this.cells = [];
-    });
-  }
-
   /*
   |--------------------------------------------------------------------------
   | Método de eventos
@@ -329,19 +356,27 @@ class CotizaciónCrear extends CustomComponent {
   }
 
   handleSelectComprobante = (event) => {
-    this.setState({ idComprobante: event.target.value });
+    this.setState({ idComprobante: event.target.value }, () => {
+      this.updateReduxState();
+    });
   };
 
   handleSelectMoneda = (event) => {
-    this.setState({ idMoneda: event.target.value });
+    this.setState({ idMoneda: event.target.value }, () => {
+      this.updateReduxState();
+    });
   };
 
   handleInputObservacion = (event) => {
-    this.setState({ observacion: event.target.value });
+    this.setState({ observacion: event.target.value }, () => {
+      this.updateReduxState();
+    });
   };
 
   handleInputNota = (event) => {
-    this.setState({ nota: event.target.value });
+    this.setState({ nota: event.target.value }, () => {
+      this.updateReduxState();
+    });
   };
 
   handleSelectImpuesto = (event) => {
@@ -349,20 +384,21 @@ class CotizaciónCrear extends CustomComponent {
 
     const impuesto = this.state.impuestos.find((item) => item.idImpuesto === idImpuesto);
 
-    this.setState({ idImpuesto: event.target.value });
+    this.setState({ idImpuesto: event.target.value }, () => {
+      this.updateReduxState();
+    });
 
     if (idImpuesto !== "") {
-      const newDetalle = [...this.state.detalles].map((item) => (
-        {
+      this.setState(prevState => ({
+        detalles: prevState.detalles.map(item => ({
           ...item,
           idImpuesto: impuesto.idImpuesto,
           nombreImpuesto: impuesto.nombre,
           porcentajeImpuesto: impuesto.porcentaje,
-        }
-      ));
-      this.setState({
-        detalle: newDetalle,
-      })
+        }))
+      }),()=>{
+        this.updateReduxState();
+      });
     }
   };
 
@@ -377,7 +413,9 @@ class CotizaciónCrear extends CustomComponent {
     });
 
     const total = detalles.reduce((accumulate, item) => (accumulate += item.cantidad * item.precio), 0);
-    this.setState({ detalles, total });
+    this.setState({ detalles, total }, () => {
+      this.updateReduxState();
+    });
   };
 
   //------------------------------------------------------------------------------------------
@@ -449,12 +487,15 @@ class CotizaciónCrear extends CustomComponent {
       detalles: reorder(prevState.detalles, source.index, destination.index).map((item, index) => ({ ...item, id: ++index }))
     }))
 
+
     this.index = destination.index;
     this.cells = [];
     if (this.refTaleBody.current) {
       const tbody = this.refTaleBody.current;
       this.updateSelection(tbody.children);
     }
+
+    this.updateReduxState();
   }
 
   handleOnBeforeDragStartTable = (before) => {
@@ -504,9 +545,12 @@ class CotizaciónCrear extends CustomComponent {
     this.setState({ isOpenProducto: false });
   }
 
-  handleSaveProducto = (detalles) => {
+  handleSaveProducto = async (detalles, callback = async function () { }) => {
     const total = detalles.reduce((accumulate, item) => (accumulate += item.cantidad * item.precio), 0);
-    this.setState({ detalles, total });
+    this.setState({ detalles, total }, () => {
+      this.updateReduxState();
+    });
+    await callback();
     this.refProducto.current.focus();
   }
 
@@ -531,6 +575,8 @@ class CotizaciónCrear extends CustomComponent {
       filtrarProducto: '',
     });
     this.selectItemProducto = false;
+
+    this.updateReduxState();
   };
 
   handleFilterProducto = async (event) => {
@@ -565,6 +611,7 @@ class CotizaciónCrear extends CustomComponent {
       productos: [],
     });
     this.selectItemProducto = true;
+    this.updateReduxState();
 
     this.handleOpenModalProducto(value);
   };
@@ -579,6 +626,8 @@ class CotizaciónCrear extends CustomComponent {
       cliente: null,
     });
     this.selectItemCliente = false;
+
+    this.updateReduxState();
   };
 
   handleFilterCliente = async (event) => {
@@ -613,6 +662,7 @@ class CotizaciónCrear extends CustomComponent {
       clientes: [],
     });
     this.selectItemCliente = true;
+    this.updateReduxState();
   };
 
   //------------------------------------------------------------------------------------------
@@ -1249,6 +1299,13 @@ CotizaciónCrear.propTypes = {
   history: PropTypes.shape({
     goBack: PropTypes.func.isRequired,
   }).isRequired,
+  cotizacionCrear: PropTypes.shape({
+    state: PropTypes.object,
+    local: PropTypes.object,
+  }),
+  setCrearCotizacionState: PropTypes.func,
+  setCrearCotizacionLocal: PropTypes.func,
+  clearCrearCotizacion: PropTypes.func,
 };
 
 /**
@@ -1258,14 +1315,17 @@ CotizaciónCrear.propTypes = {
 const mapStateToProps = (state) => {
   return {
     token: state.principal,
+    cotizacionCrear: state.predeterminado.cotizacionCrear
   };
 };
+
+const mapDispatchToProps = { setCrearCotizacionState, setCrearCotizacionLocal, clearCrearCotizacion }
 
 /**
  *
  * Método encargado de conectar con redux y exportar la clase
  */
 
-const ConnectedCotizaciónCrear = connect(mapStateToProps, null)(CotizaciónCrear);
+const ConnectedCotizaciónCrear = connect(mapStateToProps, mapDispatchToProps)(CotizaciónCrear);
 
 export default ConnectedCotizaciónCrear;

@@ -2,11 +2,10 @@ import PropTypes from 'prop-types';
 import Paginacion from "../../../../../components/Paginacion";
 import { CustomModalContent } from '../../../../../components/CustomModal';
 import { SpinnerTable } from '../../../../../components/Spinner';
-import { getRowCellIndex, isEmpty, keyUpSearch, numberFormat, rounded } from '../../../../../helper/utils.helper';
+import { getRowCellIndex, isEmpty, numberFormat, rounded } from '../../../../../helper/utils.helper';
 import Image from '../../../../../components/Image';
 import { images } from '../../../../../helper';
 import Button from '../../../../../components/Button';
-import Input from '../../../../../components/Input';
 import CustomComponent from "../../../../../model/class/custom-component";
 import React from 'react';
 import { filtrarProductoVenta } from '../../../../../network/rest/principal.network';
@@ -18,6 +17,7 @@ import SuccessReponse from '../../../../../model/class/response';
 import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
 import Select from '../../../../../components/Select';
+import Search from '../../../../../components/Search';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -57,17 +57,22 @@ class ModalProductos extends CustomComponent {
     loadInit = async () => {
         if (this.state.loading) return;
 
-        await this.setStateAsync({ paginacion: 1, restart: true });
-        this.fillTable(0);
-        await this.setStateAsync({ opcion: 0 });
+        this.setState({ lista: this.props.productos });
+
+        // await this.setStateAsync({ paginacion: 1, restart: true });
+        // this.fillTable(0);
+        // await this.setStateAsync({ opcion: 0 });
     }
 
     handleSearchText = async (text) => {
         if (this.state.loading) return;
 
-        if (text.trim().length === 0) return;
+        if (isEmpty(text)) {
+            this.setState({ lista: this.props.productos });
+            return;
+        }
 
-        await this.setStateAsync({ paginacion: 1, restart: false });
+        await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
         this.fillTable(0, text.trim());
         await this.setStateAsync({ opcion: 0 });
     }
@@ -80,7 +85,7 @@ class ModalProductos extends CustomComponent {
     handleSelectPaginacion = () => {
         switch (this.state.opcion) {
             case 0:
-                this.fillTable(0, this.state.buscar);
+                this.fillTable(0);
                 break;
             case 1:
                 this.fillTable(1, this.state.buscar);
@@ -206,10 +211,6 @@ class ModalProductos extends CustomComponent {
             filasPorPagina: 10,
             messageTable: 'Cargando información...',
         });
-    }
-
-    handleInputBuscar = (event) => {
-        this.setState({ buscar: event.target.value })
     }
 
     handleInputKeyDown = (event) => {
@@ -369,7 +370,7 @@ class ModalProductos extends CustomComponent {
                     </td>
                     <td>{item.medida}</td>
                     <td>{item.categoria}</td>
-                    <td className={`${item.tipo === 'PRODUCTO' && item.cantidad <= 0 ? 'text-danger' : ''}`}>
+                    <td className={`${item.tipo === 'PRODUCTO' && item.cantidad <= 0 ? 'text-danger' : 'text-success'}`}>
                         {item.tipo === 'PRODUCTO' ? (
                             <>
                                 {item.almacen}
@@ -396,7 +397,6 @@ class ModalProductos extends CustomComponent {
     render() {
         const {
             loading,
-            buscar,
             lista,
             totalPaginacion,
             paginacion,
@@ -431,33 +431,27 @@ class ModalProductos extends CustomComponent {
                                     <Row>
                                         <Column className='col-8'>
                                             <label><i className="fa fa-search"></i> Buscar por código o nombres:</label>
-                                            <div className="input-group">
-                                                <Input
-                                                    placeholder="Buscar..."
-                                                    refInput={this.refInputBuscar}
-                                                    value={buscar}
-                                                    onChange={this.handleInputBuscar}
-                                                    onKeyUp={(event) => {
-                                                        keyUpSearch(event, () => this.handleSearchText(buscar))
-                                                    }}
-                                                    onKeyDown={this.handleInputKeyDown}
-                                                />
-                                                <div className="input-group-append">
+
+                                            <Search
+                                                placeholder={`Buscar por código, nombres...`}
+                                                refInput={this.refInputBuscar}
+                                                onSearch={this.handleSearchText}
+                                                buttonRight={
                                                     <Button
                                                         className="btn-outline-secondary"
                                                         title="Recargar"
                                                         icono={<i className="bi bi-arrow-clockwise"></i>}
                                                         onClick={this.loadInit}
                                                     />
-                                                </div>
-                                            </div>
+                                                }
+                                                onKeyDown={this.handleInputKeyDown}
+                                            />
                                         </Column>
 
                                         <Column className='col-4'>
                                             <label>
                                                 Almacen: <i className="fa fa-asterisk text-danger small"></i>{' '}
                                             </label>
-                                            <div className="input-group">
                                                 <Select
                                                     title="Lista de Almacenes"
                                                     refSelect={refAlmacen}
@@ -470,7 +464,6 @@ class ModalProductos extends CustomComponent {
                                                         </option>
                                                     ))}
                                                 </Select>
-                                            </div>
                                         </Column>
                                     </Row>
                                 </div>

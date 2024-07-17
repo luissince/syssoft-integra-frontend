@@ -24,13 +24,13 @@ import {
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
-import ModalSale from './component/ModalSale';
 import SearchInput from '../../../../../components/SearchInput';
 import { COMPROBANTE_DE_SALIDA } from '../../../../../model/types/tipo-comprobante';
 import CustomComponent from '../../../../../model/class/custom-component';
 import PropTypes from 'prop-types';
 import { SpinnerView } from '../../../../../components/Spinner';
 import Title from '../../../../../components/Title';
+import ModalTransaccion from '../../../../../components/ModalTransaccion';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -56,7 +56,7 @@ class GastoCrear extends CustomComponent {
       precio: '',
 
       // Detalle del gasto
-      detalle: [],
+      detalles: [],
 
       // Lista de datos
       comprobantes: [],
@@ -75,7 +75,7 @@ class GastoCrear extends CustomComponent {
       clientes: [],
 
       // Atributos libres
-      codISO: '',
+      codiso: '',
       total: 0,
 
       // Atributos del modal
@@ -106,7 +106,6 @@ class GastoCrear extends CustomComponent {
     this.selectItemCliente = false;
 
     // Referencia para el modal
-    this.refModalSale = React.createRef();
     this.refMetodoPagoContenedor = React.createRef();
     this.refMetodoContado = React.createRef();
 
@@ -166,7 +165,7 @@ class GastoCrear extends CustomComponent {
       bancos,
       idComprobante: isEmpty(comprobante) ? '' : comprobante.idComprobante,
       idMoneda: isEmpty(moneda) ? '' : moneda.idMoneda,
-      codISO: isEmpty(moneda) ? '' : moneda.codiso,
+      codiso: isEmpty(moneda) ? '' : moneda.codiso,
       loading: false,
     });
   };
@@ -250,17 +249,17 @@ class GastoCrear extends CustomComponent {
   }
 
   //------------------------------------------------------------------------------------------
-  // Funciones para agregar y quitar el detalle
+  // Funciones para agregar y quitar el detalles
   //------------------------------------------------------------------------------------------
 
   agregarGasto = async () => {
-    const { concepto, precio, detalle } = this.state;
+    const { concepto, precio, detalles } = this.state;
 
     if (!concepto) return;
 
     if (!isNumeric(precio)) return;
 
-    const newDetalle = [...detalle];
+    const newDetalle = [...detalles];
     const existeDetalle = newDetalle.find(
       (item) => item.idConcepto === concepto.idConcepto,
     );
@@ -285,7 +284,7 @@ class GastoCrear extends CustomComponent {
     );
 
     this.setState({
-      detalle: newDetalle,
+      detalles: newDetalle,
       total,
       precio: '',
     });
@@ -296,10 +295,10 @@ class GastoCrear extends CustomComponent {
   };
 
   removerGasto = (idConcepto) => {
-    const detalle = this.state.detalle.filter(
+    const detalles = this.state.detalles.filter(
       (item) => item.idConcepto !== idConcepto,
     );
-    this.setState({ detalle });
+    this.setState({ detalles });
   };
 
   /*
@@ -338,7 +337,7 @@ class GastoCrear extends CustomComponent {
     const { value } = event.target;
 
     this.setState((prevState) => ({
-      detalle: prevState.detalle.map((item) => {
+      detalles: prevState.detalles.map((item) => {
         if (item.idConcepto === idConcepto) {
           return { ...item, comentario: value };
         } else {
@@ -436,7 +435,7 @@ class GastoCrear extends CustomComponent {
       idSucursal,
       idComprobante,
       observacion,
-      detalle,
+      detalles,
       total,
       bancosAgregados,
     } = this.state;
@@ -502,7 +501,7 @@ class GastoCrear extends CustomComponent {
           idComprobante: idComprobante,
           estado: 1,
           observacion: observacion,
-          detalle: detalle,
+          detalles: detalles,
           metodoPago: metodoPagoLista,
         };
 
@@ -625,7 +624,7 @@ class GastoCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
 
   handleGuardar = async () => {
-    const { idComprobante, cliente, idMoneda, detalle } = this.state;
+    const { idComprobante, cliente, idMoneda, detalles } = this.state;
 
     if (!isText(idComprobante)) {
       alertWarning('Gasto', 'Seleccione su comprobante.', () =>
@@ -648,7 +647,7 @@ class GastoCrear extends CustomComponent {
       return;
     }
 
-    if (isEmpty(detalle)) {
+    if (isEmpty(detalles)) {
       alertWarning('Gasto', 'Agregar algún concepto a la lista.', () =>
         this.refConcepto.current.focus(),
       );
@@ -685,9 +684,9 @@ class GastoCrear extends CustomComponent {
       */
 
   generarBody() {
-    const { detalle } = this.state;
+    const { detalles } = this.state;
 
-    if (isEmpty(detalle)) {
+    if (isEmpty(detalles)) {
       return (
         <tr className="text-center">
           <td colSpan="7"> Agregar datos a la tabla </td>
@@ -695,7 +694,7 @@ class GastoCrear extends CustomComponent {
       );
     }
 
-    return detalle.map((item, index) => (
+    return detalles.map((item, index) => (
       <tr key={index}>
         <td className="text-center">{++index}</td>
         <td>{item.nombre}</td>
@@ -709,8 +708,8 @@ class GastoCrear extends CustomComponent {
           />
         </td>
         <td>{rounded(item.cantidad)}</td>
-        <td>{numberFormat(item.precio, this.state.codISO)}</td>
-        <td>{numberFormat(item.cantidad * item.precio, this.state.codISO)}</td>
+        <td>{numberFormat(item.precio, this.state.codiso)}</td>
+        <td>{numberFormat(item.cantidad * item.precio, this.state.codiso)}</td>
         <td>
           <button
             className="btn btn-outline-danger btn-sm"
@@ -732,8 +731,7 @@ class GastoCrear extends CustomComponent {
           message={this.state.msgLoading}
         />
 
-        <ModalSale
-          refModal={this.refModalSale}
+        {/* <ModalTerminal
           isOpen={this.state.isOpenSale}
           onOpen={this.handleOnOpenModalSale}
           onHidden={this.handleOnHidden}
@@ -745,14 +743,14 @@ class GastoCrear extends CustomComponent {
           importeTotal={this.state.total}
 
           bancos={this.state.bancos}
-          codISO={this.state.codISO}
+          codiso={this.state.codiso}
           bancosAgregados={this.state.bancosAgregados}
           handleAddBancosAgregados={this.handleAddBancosAgregados}
           handleInputMontoBancosAgregados={this.handleInputMontoBancosAgregados}
           handleRemoveItemBancosAgregados={this.handleRemoveItemBancosAgregados}
 
           handleSaveSale={this.handleSaveSale}
-        />
+        /> */}
 
 
         {/* Titulo */}
@@ -952,7 +950,7 @@ class GastoCrear extends CustomComponent {
                   <tr>
                     <td className="text-left h4">Total:</td>
                     <td className="text-right h4">
-                      {numberFormat(this.state.total, this.state.codISO)}
+                      {numberFormat(this.state.total, this.state.codiso)}
                     </td>
                   </tr>
                 </tbody>

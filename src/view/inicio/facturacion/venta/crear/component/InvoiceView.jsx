@@ -2,7 +2,7 @@ import React from 'react';
 import Button from '../../../../../../components/Button';
 import Input from '../../../../../../components/Input';
 import { images } from '../../../../../../helper';
-import { isEmpty, keyUpSearch, numberFormat } from '../../../../../../helper/utils.helper';
+import { isEmpty, numberFormat } from '../../../../../../helper/utils.helper';
 import CustomComponent from '../../../../../../model/class/custom-component';
 import { A_GRANEL, UNIDADES, VALOR_MONETARIO } from '../../../../../../model/types/tipo-tratamiento-producto';
 import PropTypes from 'prop-types';
@@ -10,8 +10,14 @@ import { filtrarProductoVenta } from '../../../../../../network/rest/principal.n
 import SuccessReponse from '../../../../../../model/class/response';
 import ErrorResponse from '../../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../../model/types/types';
+import Search from '../../../../../../components/Search';
 
+/**
+ * Componente que representa una funcionalidad específica.
+ * @extends React.Component
+ */
 class InvoiceView extends CustomComponent {
+
   constructor(props) {
     super(props);
 
@@ -27,6 +33,8 @@ class InvoiceView extends CustomComponent {
 
     this.initial = { ...this.state }
 
+    this.refSearch = React.createRef();
+
     this.refProducto = React.createRef();
     this.eventSource = null;
   }
@@ -39,6 +47,7 @@ class InvoiceView extends CustomComponent {
 
   componentClear = () => {
     this.setState(this.initial, () => {
+      this.refSearch.current.restart();
       this.refProducto.current.focus();
     })
   }
@@ -115,10 +124,13 @@ class InvoiceView extends CustomComponent {
   handleSearchText = async (text) => {
     if (this.state.loading) return;
 
-    if (text.length <= 2) return;
+    if (isEmpty(text)) {
+      this.props.handleUpdateProductos([], false, true);
+      return;
+    };
 
     this.props.handleUpdateProductos([], true);
-    await this.setStateAsync({ paginacion: 1 });
+    await this.setStateAsync({ paginacion: 1, buscar: text });
     this.fillTable(0, text.trim());
     await this.setStateAsync({ tipo: 0 });
   }
@@ -247,10 +259,11 @@ class InvoiceView extends CustomComponent {
       <div className="h-100 d-flex flex-column items">
         <ItemSearch
           refProducto={this.refProducto}
+          refSearch={ this.refSearch}
           buscar={buscar}
           tipo={tipo}
           handleSelectTipo={this.handleSelectTipo}
-
+          
           handleInputBuscar={this.handleInputBuscar}
           handleSearchCodBar={this.handleSearchCodBar}
           handleSearchText={this.handleSearchText}
@@ -273,6 +286,7 @@ class InvoiceView extends CustomComponent {
 const ItemSearch = (props) => {
   const {
     refProducto,
+    refSearch,
     buscar,
     tipo,
     handleSelectTipo,
@@ -302,7 +316,7 @@ const ItemSearch = (props) => {
             tipo === 1 ?
               <Input
                 className="border border-success"
-                placeholder={`Buscar código de barras.`}
+                placeholder={`Buscar código de barras...`}
                 refInput={refProducto}
                 value={buscar}
                 onChange={handleInputBuscar}
@@ -310,15 +324,23 @@ const ItemSearch = (props) => {
                 autoFocus={true}
               />
               :
-              <Input
+              <Search
+                ref={refSearch}
                 className="border border-success"
-                placeholder={`Buscar por código, nombres.`}
+                placeholder={`Buscar por código, nombres...`}
+                iconLeft={null}
                 refInput={refProducto}
-                value={buscar}
-                onChange={handleInputBuscar}
-                onKeyUp={(event) => keyUpSearch(event, () => handleSearchText(buscar))}
-                autoFocus={true}
+                onSearch={handleSearchText}
               />
+            // <Input
+            //   className="border border-success"
+            //   placeholder={`Buscar por código, nombres.`}
+            //   refInput={refProducto}
+            //   value={buscar}
+            //   onChange={handleInputBuscar}
+            //   onKeyUp={(event) => keyUpSearch(event, () => handleSearchText(buscar))}
+            //   autoFocus={true}
+            // />
           }
 
         </div>
@@ -529,6 +551,7 @@ InvoiceView.propTypes = {
 
 ItemSearch.propTypes = {
   refProducto: PropTypes.object.isRequired,
+  refSearch: PropTypes.object.isRequired,
   buscar: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]).isRequired,
   tipo: PropTypes.number.isRequired,
   handleSelectTipo: PropTypes.func.isRequired,

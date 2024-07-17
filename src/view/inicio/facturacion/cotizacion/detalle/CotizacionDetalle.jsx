@@ -4,7 +4,7 @@ import { calculateTax, calculateTaxBruto, formatNumberWithZeros, formatTime, get
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
-import { detailCotizacion, obtenerCotizacionPdf } from '../../../../../network/rest/principal.network';
+import { detailCotizacion, obtenerCotizacionPdf, obtenerPedidoCotizacionPdf } from '../../../../../network/rest/principal.network';
 import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
 import { Table, TableResponsive } from '../../../../../components/Table';
@@ -13,7 +13,13 @@ import { SpinnerView } from '../../../../../components/Spinner';
 import printJS from 'print-js';
 import React from 'react';
 import { Link } from 'react-router-dom';
+import Button from '../../../../../components/Button';
+import PropTypes from 'prop-types';
 
+/**
+ * Componente que representa una funcionalidad específica.
+ * @extends React.Component
+ */
 class CotizacionDetalle extends CustomComponent {
 
   constructor(props) {
@@ -203,6 +209,16 @@ class CotizacionDetalle extends CustomComponent {
     });
   }
 
+  handleOpenImpresionPedido = () => {
+    printJS({
+      printable: obtenerPedidoCotizacionPdf(this.state.idCotizacion),
+      type: 'pdf',
+      showModal: true,
+      modalMessage: "Recuperando documento..."
+    });
+  }
+
+
   /*
   |--------------------------------------------------------------------------
   | Método de renderización
@@ -305,24 +321,27 @@ class CotizacionDetalle extends CustomComponent {
         />
 
         <Row>
-          <Column>
-            <div className="form-group">
-              <button
-                type="button"
-                className="btn btn-light"
-                onClick={this.handleOpenImpresionA4}
-              >
-                <i className="fa fa-print"></i> A4
-              </button>
-              {' '}
-              <button
-                type="button"
-                className="btn btn-light"
-                onClick={this.handleOpenImpresionTicket}
-              >
-                <i className="fa fa-print"></i> Ticket
-              </button>
-            </div>
+          <Column formGroup={true}>
+            <Button
+              className="btn-light"
+              onClick={this.handleOpenImpresionA4}
+            >
+              <i className="fa fa-print"></i> A4
+            </Button>
+            {' '}
+            <Button
+              className="btn-light"
+              onClick={this.handleOpenImpresionTicket}
+            >
+              <i className="fa fa-print"></i> Ticket
+            </Button>
+
+            <Button
+              className="btn-light"
+              onClick={this.handleOpenImpresionPedido}
+            >
+              <i className="fa fa-print"></i> Pedido
+            </Button>
           </Column>
         </Row>
 
@@ -555,5 +574,15 @@ class CotizacionDetalle extends CustomComponent {
     );
   }
 }
+
+CotizacionDetalle.propTypes = {
+  history: PropTypes.shape({
+    goBack: PropTypes.func.isRequired,
+  }).isRequired,
+  location: PropTypes.shape({
+    search: PropTypes.string
+  })
+};
+
 
 export default CotizacionDetalle;

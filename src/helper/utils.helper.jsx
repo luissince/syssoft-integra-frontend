@@ -57,7 +57,7 @@ export async function convertFileBase64(files) {
 /**
  * Formatea un número como una cantidad de dinero con opciones personalizables.
  *
- * @param {number} amount - La cantidad numérica que se va a formatear como dinero.
+ * @param {number|string} amount - La cantidad numérica que se va a formatear como dinero.
  * @param {number} [decimalCount=2] - El número de decimales a mostrar.
  * @param {string} [decimal="."] - El separador decimal.
  * @param {string} [thousands=","] - El separador de miles.
@@ -72,37 +72,25 @@ export function formatDecimal(
   const isNumber = /^-?\d*\.?\d+$/.test(amount);
   if (!isNumber) return '0.00';
 
-  decimalCount = Math.abs(decimalCount);
-  decimalCount = isNaN(decimalCount) ? 2 : decimalCount;
+  decimalCount = Number.isInteger(decimalCount) ? Math.abs(decimalCount) : 2;
 
-  const negativeSign = amount < 0 ? '-' : '';
+  const number = Number(amount)
 
-  let i = parseInt(
-    (amount = Math.abs(Number(amount) || 0).toFixed(decimalCount)),
-  ).toString();
+  const negativeSign = number < 0 ? '-' : '';
 
-  let j = i.length > 3 ? i.length % 3 : 0;
+  const roundedAmount = Math.abs(rounded(number, decimalCount)).toFixed(decimalCount);
+  const [integerPart, decimalPart] = roundedAmount.split('.');
 
-  const negative = negativeSign + (j ? i.substring(0, j) + thousands : '');
+  const integerFormatted = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, thousands);
+  const decimalFormatted = decimalCount ? decimal + (decimalPart || '0'.repeat(decimalCount)) : '';
 
-  const a = i.substring(j).replace(/(\d{3})(?=\d)/g, '$1' + thousands);
-
-  const d = decimalCount
-    ? decimal +
-    Math.abs(amount - i)
-      .toFixed(decimalCount)
-      .slice(2)
-    : '';
-
-  const total = negative + a + d;
-
-  return total;
+  return negativeSign + integerFormatted + decimalFormatted;
 }
 
 /**
  * Redondear un número como una cantidad.
  *
- * @param {number} amount - La cantidad numérica que se va a formatear como dinero.
+ * @param {number} amount - La cantidad numérica
  * @param {number} [decimalCount=2] - El número de decimales a mostrar.
  * @returns {string} La cantidad formateada como dinero.
  */
@@ -110,12 +98,13 @@ export function rounded(amount, decimalCount = 2) {
   const isNumber = /^-?\d*\.?\d+$/.test(amount);
   if (!isNumber) return '0';
 
-  decimalCount = Math.abs(decimalCount);
-  decimalCount = isNaN(decimalCount) ? 2 : decimalCount;
+  const number = Number(amount);
 
-  const negativeSign = amount < 0 ? '-' : '';
+  decimalCount = Number.isInteger(decimalCount) ? Math.abs(decimalCount) : 2;
 
-  const parsedAmount = Math.abs(Number(amount)) || 0;
+  const negativeSign = number < 0 ? '-' : '';
+
+  const parsedAmount = Math.abs(number);
   const fixedAmount = parsedAmount.toFixed(decimalCount);
 
   return negativeSign + fixedAmount;

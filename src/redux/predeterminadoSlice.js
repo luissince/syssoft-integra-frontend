@@ -7,13 +7,17 @@ const initialState = {
   moneda: null,
   empresa: null,
   productos: [],
-  listaVenta: {
+  ventaLista: {
     data: null,
     paginacion: null
   },
   cotizacionLista: {
     data: null,
     paginacion: null
+  },
+  cotizacionCrear: {
+    state: null,
+    local: null
   },
   guiaRemisionLista: {
     data: null,
@@ -38,6 +42,14 @@ const initialState = {
   trasladoLista: {
     data: null,
     paginacion: null
+  },
+  compraLista: {
+    data: null,
+    paginacion: null
+  },
+  compraCrear: {
+    state: null,
+    local: null
   },
   cpeSunatLista: {
     data: null,
@@ -74,13 +86,13 @@ const predeterminadoSlice = createSlice({
     },
 
     setListaVentaData: (state, action) => {
-      state.listaVenta.data = action.payload;
+      state.ventaLista.data = action.payload;
     },
     setListaVentaPaginacion: (state, action) => {
-      state.listaVenta.paginacion = action.payload;
+      state.ventaLista.paginacion = action.payload;
     },
     clearListaVenta: (state) => {
-      state.listaVenta = {
+      state.ventaLista = {
         data: null,
         paginacion: null
       };
@@ -96,6 +108,19 @@ const predeterminadoSlice = createSlice({
       state.cotizacionLista = {
         data: null,
         paginacion: null
+      };
+    },
+
+    setCrearCotizacionState: (state, action) => {
+      state.cotizacionCrear.state = action.payload;
+    },
+    setCrearCotizacionLocal: (state, action) => {
+      state.cotizacionCrear.local = action.payload;
+    },
+    clearCrearCotizacion: (state) => {
+      state.cotizacionCrear = {
+        state: null,
+        local: null
       };
     },
 
@@ -177,6 +202,33 @@ const predeterminadoSlice = createSlice({
       };
     },
 
+    setListaCompraData: (state, action) => {
+      state.compraLista.data = action.payload;
+    },
+    setListaCompraPaginacion: (state, action) => {
+      state.compraLista.paginacion = action.payload;
+    },
+    clearListaCompra: (state) => {
+      state.compraLista = {
+        data: null,
+        paginacion: null
+      };
+    },
+
+    setCrearCompraState: (state, action) => {
+      state.compraCrear.state = action.payload;
+    },
+    setCrearCompraLocal: (state, action) => {
+      state.compraCrear.local = action.payload;
+    },
+    clearCrearCompra: (state) => {
+      state.compraCrear = {
+        state: null,
+        local: null
+      };
+    },
+
+
     setListaCpeSunatData: (state, action) => {
       state.cpeSunatLista.data = action.payload;
     },
@@ -190,17 +242,18 @@ const predeterminadoSlice = createSlice({
       };
     },
 
-    clearPredeterminado: (state) => {
-      state.moneda = null;
-      state.empresa = null;
-      state.productos = [];
-      state.listaVenta = {
+    clearSucursal: (state) => {
+      state.ventaLista = {
         data: null,
         paginacion: null
       };
       state.cotizacionLista = {
         data: null,
         paginacion: null
+      };
+      state.cotizacionCrear = {
+        state: null,
+        local: null
       };
       state.guiaRemisionLista = {
         data: null,
@@ -226,11 +279,73 @@ const predeterminadoSlice = createSlice({
         data: null,
         paginacion: null
       };
+      state.compraLista = {
+        data: null,
+        paginacion: null
+      };
+      state.compraCrear = {
+        state: null,
+        local: null
+      };
       state.cpeSunatLista = {
         data: null,
         paginacion: null
       };
-    }
+    },
+
+    clearPredeterminado: (state) => {
+      state.moneda = null;
+      state.empresa = null;
+      state.productos = [];
+      state.ventaLista = {
+        data: null,
+        paginacion: null
+      };
+      state.cotizacionLista = {
+        data: null,
+        paginacion: null
+      };
+      state.cotizacionCrear = {
+        state: null,
+        local: null
+      };
+      state.guiaRemisionLista = {
+        data: null,
+        paginacion: null
+      };
+      state.productoLista = {
+        data: null,
+        paginacion: null
+      };
+      state.ajusteLista = {
+        data: null,
+        paginacion: null
+      };
+      state.inventarioLista = {
+        data: null,
+        paginacion: null
+      };
+      state.kardex = {
+        data: null,
+        paginacion: null
+      };
+      state.trasladoLista = {
+        data: null,
+        paginacion: null
+      };
+      state.compraLista = {
+        data: null,
+        paginacion: null
+      };
+      state.compraCrear = {
+        state: null,
+        local: null
+      };
+      state.cpeSunatLista = {
+        data: null,
+        paginacion: null
+      };
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -260,6 +375,10 @@ export const { setMonedaNacional,
   setListaCotizacionPaginacion,
   clearListaCotizacion,
 
+  setCrearCotizacionState,
+  setCrearCotizacionLocal,
+  clearCrearCotizacion,
+
   setListaGuiaRemisionData,
   setListaGuiaRemisionPaginacion,
   clearListaGuiaRemision,
@@ -284,10 +403,19 @@ export const { setMonedaNacional,
   setListaTrasladoPaginacion,
   clearListaTraslado,
 
+  setListaCompraData,
+  setListaCompraPaginacion,
+  clearListaCompra,
+
   setListaCpeSunatData,
   setListaCpeSunatPaginacion,
   clearListaCpeSunat,
 
+  setCrearCompraState,
+  setCrearCompraLocal,
+  clearCrearCompra,
+
+  clearSucursal,
   clearPredeterminado
 } = predeterminadoSlice.actions;
 export default predeterminadoSlice.reducer;

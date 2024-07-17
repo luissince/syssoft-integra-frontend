@@ -1905,6 +1905,10 @@ export async function obtenerPreCotizacionPdf(data, tipo, signal) {
   );
 }
 
+export function obtenerPedidoCotizacionPdf(idCotizacion) {
+  return `${import.meta.env.VITE_APP_BACK_END}/api/reporte/facturacion/cotizacion/pedido/pdf/a4/${idCotizacion}`
+}
+
 export function obtenerGuiaRemisionPdf(idGuiaRemision, tipo) {
   return `${import.meta.env.VITE_APP_BACK_END}/api/reporte/facturacion/guiaremision/pdf/${tipo}/${idGuiaRemision}`
 }

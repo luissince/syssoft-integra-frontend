@@ -87,7 +87,7 @@ class ModalPrecios extends Component {
       return;
     }
 
-    this.props.handleSave(this.state.producto, this.state.precio);
+    this.props.handleSave(this.state.producto, Number(this.state.precio));
     await this.refModal.current.handleOnClose()
   }
 

@@ -125,10 +125,10 @@ class ModalProducto extends Component {
 
     if (existeDetalle) {
       if (tipoProducto === "SERVICIO") {
-        existeDetalle.costo = parseFloat(costo);
+        existeDetalle.costo = Number(costo);
       } else {
-        existeDetalle.cantidad = parseFloat(cantidad);
-        existeDetalle.costo = parseFloat(costo);
+        existeDetalle.cantidad = Number(cantidad);
+        existeDetalle.costo = Number(costo);
       }
       existeDetalle.nombre = descripcion;
     } else {
@@ -137,8 +137,8 @@ class ModalProducto extends Component {
         idProducto: idProducto,
         codigo: codigo,
         nombre: descripcion,
-        cantidad: parseFloat(cantidad),
-        costo: parseFloat(costo),
+        cantidad: Number(cantidad),
+        costo: Number(costo),
         idImpuesto: impuesto.idImpuesto,
         nombreImpuesto: impuesto.nombre,
         porcentajeImpuesto: impuesto.porcentaje,
@@ -147,8 +147,7 @@ class ModalProducto extends Component {
       nuevoDetalles.push(data);
     }
 
-    this.props.handleSave(nuevoDetalles);
-    await this.refModal.current.handleOnClose()
+    this.props.handleSave(nuevoDetalles, await this.refModal.current.handleOnClose());
   }
 
   render() {

@@ -8,20 +8,16 @@ import {
   alertWarning,
   calculateTax,
   calculateTaxBruto,
-  focusOnFirstInvalidInput,
   isEmpty,
-  isNumeric,
   isText,
   numberFormat,
   rounded,
-  validateNumericInputs,
 } from '../../../../../helper/utils.helper';
 import Title from '../../../../../components/Title';
 import { connect } from 'react-redux';
 import { COMPRA } from '../../../../../model/types/tipo-comprobante';
 import {
   comboAlmacen,
-  comboBanco,
   comboComprobante,
   comboImpuesto,
   comboMoneda,
@@ -33,9 +29,7 @@ import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
 import SearchInput from '../../../../../components/SearchInput';
-import ModalSale from './component/ModalSale';
 import PropTypes from 'prop-types';
-import { CONTADO, CREDITO_FIJO, CREDITO_VARIABLE } from '../../../../../model/types/forma-cobro';
 import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
 import { SpinnerView } from '../../../../../components/Spinner';
@@ -44,7 +38,9 @@ import Select from '../../../../../components/Select';
 import TextArea from '../../../../../components/TextArea';
 import { Table } from '../../../../../components/Table';
 import ModalProducto from './component/ModalProducto';
-import ModalProveedor from './component/ModalProveedor';
+import ModalProveedor from '../../common/ModalProveedor';
+import ModalTransaccion from '../../../../../components/ModalTransaccion';
+import { clearCrearCompra, setCrearCompraLocal, setCrearCompraState } from '../../../../../redux/predeterminadoSlice';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -93,19 +89,11 @@ class CompraCrear extends CustomComponent {
       personas: [],
 
       // Atributos libres
-      codISO: '',
-      total: 0,
+      codiso: '',
+      importeTotal: 0,
 
       // Atributos del modal sale
-      isOpenSale: false,
-      loadingModalSale: false,
-      selectTipoCobro: CONTADO,
-      bancos: [],
-      bancosAgregados: [],
-
-      frecuenciaPagoFijo: new Date().getDate() > 15 ? '30' : '15',
-      frecuenciaPagoVariable: new Date().getDate() > 15 ? '30' : '15',
-      numeroCuotas: '',
+      isOpenTerminal: false,
 
       // Atributos del modal producto
       isOpenProducto: false,
@@ -137,14 +125,6 @@ class CompraCrear extends CustomComponent {
 
     // Referencia para el modal persona
     this.refModalCliente = React.createRef();
-
-    // Referencia para el modal sale
-    this.refModalSale = React.createRef();
-    this.refMetodoPagoContenedor = React.createRef();
-    this.refMetodoContado = React.createRef();
-    this.refNumeroCuotas = React.createRef();
-    this.refFrecuenciaPagoFijo = React.createRef();
-    this.refFrecuenciaPagoVariable = React.createRef();
 
     // Referencia para el custom modal producto
     this.refModalProducto = React.createRef();
@@ -194,32 +174,60 @@ class CompraCrear extends CustomComponent {
     */
 
   loadData = async () => {
-    const [comprobantes, monedas, bancos, almacenes, impuestos] =
-      await Promise.all([
-        this.fetchComprobante(COMPRA),
-        this.fetchMoneda(),
-        this.fetchComboBanco(),
-        this.fetchComboAlmacen({ idSucursal: this.state.idSucursal }),
-        this.fetchImpuesto(),
-      ]);
+    if (this.props.compraCrear && this.props.compraCrear.state && this.props.compraCrear.local) {
+      this.setState(this.props.compraCrear.state);
+      this.selectItemProducto = this.props.compraCrear.local.selectItemProducto;
+      this.selectItemPersona = this.props.compraCrear.local.selectItemPersona;
+    } else {
+      const [comprobantes, monedas, almacenes, impuestos] =
+        await Promise.all([
+          this.fetchComprobante(COMPRA),
+          this.fetchMoneda(),
+          this.fetchComboAlmacen({ idSucursal: this.state.idSucursal }),
+          this.fetchImpuesto(),
+        ]);
 
-    const comprobante = comprobantes.find((item) => item.preferida === 1);
-    const moneda = monedas.find((item) => item.nacional === 1);
-    const impuesto = impuestos.find((item) => item.preferido === 1);
+      const comprobante = comprobantes.find((item) => item.preferida === 1);
+      const moneda = monedas.find((item) => item.nacional === 1);
+      const impuesto = impuestos.find((item) => item.preferido === 1);
 
-    this.setState({
-      comprobantes,
-      monedas,
-      almacenes,
-      impuestos,
-      bancos,
-      idImpuesto: isEmpty(impuesto) ? '' : impuesto.idImpuesto,
-      idComprobante: isEmpty(comprobante) ? '' : comprobante.idComprobante,
-      idMoneda: isEmpty(moneda) ? '' : moneda.idMoneda,
-      codISO: isEmpty(moneda) ? '' : moneda.codiso,
-      loading: false,
-    });
+      this.setState({
+        comprobantes,
+        monedas,
+        almacenes,
+        impuestos,
+        idImpuesto: isEmpty(impuesto) ? '' : impuesto.idImpuesto,
+        idComprobante: isEmpty(comprobante) ? '' : comprobante.idComprobante,
+        idMoneda: isEmpty(moneda) ? '' : moneda.idMoneda,
+        codiso: isEmpty(moneda) ? '' : moneda.codiso,
+        loading: false,
+      }, () => {
+        this.updateReduxState();
+      });
+    }
   };
+
+  updateReduxState() {
+    this.props.setCrearCompraState(this.state)
+    this.props.setCrearCompraLocal({
+      selectItemProducto: this.selectItemProducto,
+      selectItemPersona: this.selectItemPersona,
+    })
+  }
+
+  clearView = () => {
+    this.setState(this.initial, async () => {
+      await this.props.clearCrearCompra();
+      await this.loadData();
+
+      this.selectItemProducto = false;
+      this.selectItemPersona = false;
+
+      this.refProducto.current.focus();
+
+      this.updateReduxState();
+    });
+  }
 
   //------------------------------------------------------------------------------------------
   // Peticiones HTTP
@@ -284,19 +292,6 @@ class CompraCrear extends CustomComponent {
       return [];
     }
   }
-  async fetchComboBanco() {
-    const response = await comboBanco(this.state.idSucursal, this.abortController.signal);
-
-    if (response instanceof SuccessReponse) {
-      return response.data;
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
-
-      return [];
-    }
-  }
 
   async fetchComboAlmacen(params) {
     const response = await comboAlmacen(params, this.abortController.signal);
@@ -343,33 +338,43 @@ class CompraCrear extends CustomComponent {
     */
 
   handleDocumentKeyDown = (event) => {
-    if (event.key === 'F1' && !this.state.isOpenProducto && !this.state.isOpenSale) {
+    if (event.key === 'F1' && !this.state.isOpenProducto && !this.state.isOpenTerminal) {
       this.handleGuardar();
     }
 
-    if (event.key === 'F2' && !this.state.isOpenProducto && !this.state.isOpenSale) {
+    if (event.key === 'F2' && !this.state.isOpenProducto && !this.state.isOpenTerminal) {
       this.handleLimpiar();
     }
   }
 
   handleSelectComprobante = (event) => {
-    this.setState({ idComprobante: event.target.value });
+    this.setState({ idComprobante: event.target.value }, () => {
+      this.updateReduxState();
+    });
   };
 
   handleSelectMoneda = (event) => {
-    this.setState({ idMoneda: event.target.value });
+    this.setState({ idMoneda: event.target.value }, () => {
+      this.updateReduxState();
+    });
   };
 
   handleInputObservacion = (event) => {
-    this.setState({ observacion: event.target.value });
+    this.setState({ observacion: event.target.value }, () => {
+      this.updateReduxState();
+    });
   };
 
   handleInputNota = (event) => {
-    this.setState({ nota: event.target.value });
+    this.setState({ nota: event.target.value }, () => {
+      this.updateReduxState();
+    });
   };
 
   handleSelectAlmacen = (event) => {
-    this.setState({ idAlmacen: event.target.value });
+    this.setState({ idAlmacen: event.target.value }, () => {
+      this.updateReduxState();
+    });
   };
 
   handleSelectImpuesto = (event) => {
@@ -380,392 +385,26 @@ class CompraCrear extends CustomComponent {
     this.setState({ idImpuesto: event.target.value });
 
     if (idImpuesto !== "") {
-      const newDetalle = [...this.state.detalles].map((item) => (
-        {
+      this.setState(prevState => ({
+        detalles: prevState.detalles.map(item => ({
           ...item,
           idImpuesto: impuesto.idImpuesto,
           nombreImpuesto: impuesto.nombre,
           porcentajeImpuesto: impuesto.porcentaje,
-        }
-      ));
-      this.setState({
-        detalles: newDetalle,
-      })
+        }))
+      }), () => {
+        this.updateReduxState();
+      });
     }
   };
 
   handleRemoverProducto = (idProducto) => {
     const detalles = this.state.detalles.filter((item) => item.idProducto !== idProducto);
 
-    const total = detalles.reduce((accumulate, item) => (accumulate += item.cantidad * item.costo), 0);
-    this.setState({ detalles, total });
-  };
-
-
-  //------------------------------------------------------------------------------------------
-  // Acciones del modal sale
-  //------------------------------------------------------------------------------------------
-  handleOpenModalSale = () => {
-    this.setState({ loadingModalSale: true, isOpenSale: true })
-  }
-
-  handleOnOpenModalSale = () => {
-    const metodo = this.state.bancos.find((item) => item.preferido === 1);
-
-    this.refMetodoContado.current.value = metodo ? metodo.idBanco : '';
-
-    if (metodo) {
-      const item = {
-        idBanco: metodo.idBanco,
-        nombre: metodo.nombre,
-        monto: '',
-        vuelto: metodo.vuelto,
-        descripcion: '',
-      };
-
-      this.setState((prevState) => ({
-        bancosAgregados: [...prevState.bancosAgregados, item],
-      }));
-    }
-
-    this.setState({ loadingModalSale: false });
-  }
-
-  handleOnHiddenModalSale = () => {
-    this.setState({
-      loadingModalSale: false,
-      selectTipoCobro: CONTADO,
-      bancosAgregados: [],
-      frecuenciaPagoFijo: new Date().getDate() > 15 ? '30' : '15',
-      frecuenciaPagoVariable: new Date().getDate() > 15 ? '30' : '15',
-      numeroCuotas: '',
+    const importeTotal = detalles.reduce((accumulate, item) => (accumulate += item.cantidad * item.costo), 0);
+    this.setState({ detalles, importeTotal }, () => {
+      this.updateReduxState();
     });
-  }
-
-  handleCloseModalSale = () => {
-    this.setState({ isOpenSale: false })
-  }
-
-  handleSelectTipoCobro = (tipo) => {
-    this.setState({ selectTipoCobro: tipo });
-  };
-
-  handleAddBancosAgregados = () => {
-    const listAdd = this.state.bancosAgregados.find((item) => item.idBanco === this.refMetodoContado.current.value);
-
-    if (listAdd) {
-      return;
-    }
-
-    const metodo = this.state.bancos.find((item) => item.idBanco === this.refMetodoContado.current.value);
-
-    const item = {
-      idBanco: metodo.idBanco,
-      nombre: metodo.nombre,
-      monto: '',
-      vuelto: metodo.vuelto,
-      descripcion: '',
-    };
-
-    this.setState((prevState) => ({
-      bancosAgregados: [...prevState.bancosAgregados, item],
-    }));
-  };
-
-  handleInputMontoBancosAgregados = (event, idBanco) => {
-    const { value } = event.target;
-
-    this.setState((prevState) => ({
-      bancosAgregados: prevState.bancosAgregados.map((item) => {
-        if (item.idBanco === idBanco) {
-          return { ...item, monto: value ? value : '' };
-        } else {
-          return item;
-        }
-      }),
-    }));
-  };
-
-  handleRemoveItemBancosAgregados = (idBanco) => {
-    const bancosAgregados = this.state.bancosAgregados.filter((item) => item.idBanco !== idBanco);
-    this.setState({ bancosAgregados });
-  };
-
-  handleSelectNumeroCuotas = (event) => {
-    this.setState({ numeroCuotas: event.target.value });
-  };
-
-  handleSelectFrecuenciaPagoFijo = (event) => {
-    this.setState({ frecuenciaPago: event.target.value });
-  };
-
-  handleSelectFrecuenciaPagoVariable = (event) => {
-    this.setState({ frecuenciaPago: event.target.value });
-  };
-
-  handleProcessContado = async () => {
-    const {
-      selectTipoCobro,
-
-      idComprobante,
-      persona,
-      idImpuesto,
-      idAlmacen,
-      idMoneda,
-      observacion,
-      nota,
-      detalles,
-      idUsuario,
-      idSucursal,
-
-      total,
-      bancosAgregados,
-    } = this.state;
-
-    let metodoCobrosLista = bancosAgregados.map(item => ({ ...item }));
-
-    if (isEmpty(metodoCobrosLista)) {
-      alertWarning('Compra', 'Tiene que agregar método de cobro para continuar.', () => {
-        this.refMetodoContado.current.focus();
-      });
-      return;
-    }
-
-    if (metodoCobrosLista.filter((item) => !isNumeric(item.monto)).length !== 0) {
-      alertWarning('Compra', 'Hay montos del metodo de cobro que no tiene valor.', () => {
-        validateNumericInputs(this.refMetodoPagoContenedor);
-      });
-      return;
-    }
-
-    const metodoCobroTotal = metodoCobrosLista.reduce((accumulator, item) => (accumulator += parseFloat(item.monto)), 0);
-
-    if (metodoCobrosLista.length > 1) {
-      if (metodoCobroTotal !== total) {
-        alertWarning('Compra', 'Al tener mas de 2 métodos de pago el monto debe ser igual al total.', () => {
-          focusOnFirstInvalidInput(this.refMetodoPagoContenedor);
-        });
-        return;
-      }
-    } else {
-      const metodo = metodoCobrosLista[0];
-      if (metodo.vuelto === 1) {
-        if (metodoCobroTotal < total) {
-          alertWarning('Compra', 'El monto a pago es menor que el total.', () => {
-            focusOnFirstInvalidInput(this.refMetodoPagoContenedor);
-          });
-          return;
-        }
-
-        metodoCobrosLista.forEach(item => {
-          item.descripcion = `Pago con ${rounded(parseFloat(item.monto))} y su vuelto es ${rounded(parseFloat(item.monto) - total)}`;
-          item.monto = total;
-        });
-      } else {
-        if (metodoCobroTotal !== total) {
-          alertWarning('Compra', 'El monto a pagar debe ser igual al total.', () => {
-            focusOnFirstInvalidInput(this.refMetodoPagoContenedor);
-          });
-          return;
-        }
-      }
-    }
-
-    alertDialog('Compra', '¿Está seguro de continuar?', async (accept) => {
-      if (accept) {
-        const data = {
-          idComprobante: idComprobante,
-          idProveedor: persona.idPersona,
-          idImpuesto: idImpuesto,
-          idAlmacen: idAlmacen,
-          idMoneda: idMoneda,
-          observacion: observacion,
-          nota: nota,
-          idUsuario: idUsuario,
-          idSucursal: idSucursal,
-          estado: 1,
-
-          idFormaCobro: selectTipoCobro,
-          metodoPago: metodoCobrosLista,
-
-          detalles: detalles,
-        };
-
-        this.handleCloseModalSale();
-        alertInfo('Compra', 'Procesando información...');
-
-        const response = await createCompra(data);
-
-        if (response instanceof SuccessReponse) {
-          alertSuccess('Compra', response.data, () => {
-            this.clearView();
-          });
-        }
-
-        if (response instanceof ErrorResponse) {
-          if (response.getType() === CANCELED) return;
-
-          alertWarning('Compra', response.getMessage());
-        }
-      }
-    });
-  };
-
-  handleProcessCreditoFijo = async () => {
-    const {
-      selectTipoCobro,
-
-      frecuenciaPagoFijo,
-      frecuenciaPagoVariable,
-      numeroCuotas,
-
-      idComprobante,
-      persona,
-      idImpuesto,
-      idAlmacen,
-      idMoneda,
-      observacion,
-      nota,
-      detalles,
-      idUsuario,
-      idSucursal,
-    } = this.state;
-
-    if (selectTipoCobro === CREDITO_FIJO && isEmpty(frecuenciaPagoFijo)) {
-      alertWarning('Compra', 'Seleccione la frecuenta de pago.', () => {
-        this.refFrecuenciaPagoFijo.current.focus();
-      });
-      return;
-    }
-
-    if (selectTipoCobro === CREDITO_FIJO && !isNumeric(numeroCuotas)) {
-      alertWarning('Compra', 'Ingrese el número de cuotas.', () => {
-        this.refNumeroCuotas.current.focus();
-      });
-      return;
-    }
-
-    alertDialog('Compra', '¿Está seguro de continuar?', async (accept) => {
-      if (accept) {
-        const data = {
-          idComprobante: idComprobante,
-          idProveedor: persona.idPersona,
-          idImpuesto: idImpuesto,
-          idAlmacen: idAlmacen,
-          idMoneda: idMoneda,
-          observacion: observacion,
-          nota: nota,
-          idUsuario: idUsuario,
-          idSucursal: idSucursal,
-          estado: 2,
-
-          idFormaCobro: selectTipoCobro,
-          frecuenciaPago: selectTipoCobro === CREDITO_FIJO ? frecuenciaPagoFijo : frecuenciaPagoVariable,
-          numeroCuotas: numeroCuotas,
-
-          detalles: detalles,
-        };
-
-        this.handleCloseModalSale();
-        alertInfo('Compra', 'Procesando información...');
-
-        const response = await createCompra(data);
-
-        if (response instanceof SuccessReponse) {
-          alertSuccess('Compra', response.data, () => {
-            this.clearView();
-          });
-        }
-
-        if (response instanceof ErrorResponse) {
-          if (response.getType() === CANCELED) return;
-
-          alertWarning('Compra', response.getMessage());
-        }
-      }
-    });
-  };
-
-  handleProcessCreditoVariable = async () => {
-    const {
-      selectTipoCobro,
-
-      frecuenciaPagoFijo,
-      frecuenciaPagoVariable,
-      numeroCuotas,
-
-      idComprobante,
-      persona,
-      idImpuesto,
-      idAlmacen,
-      idMoneda,
-      observacion,
-      nota,
-      detalles,
-      idUsuario,
-      idSucursal,
-    } = this.state;
-
-    if (selectTipoCobro === CREDITO_VARIABLE && isEmpty(frecuenciaPagoVariable)) {
-      alertWarning('Compra', 'Seleccione la frecuencia de pago.', () => {
-        this.refFrecuenciaPagoVariable.current.focus();
-      });
-      return;
-    }
-
-    alertDialog('Compra', '¿Está seguro de continuar?', async (accept) => {
-      if (accept) {
-        const data = {
-          idComprobante: idComprobante,
-          idProveedor: persona.idPersona,
-          idImpuesto: idImpuesto,
-          idAlmacen: idAlmacen,
-          idMoneda: idMoneda,
-          observacion: observacion,
-          nota: nota,
-          idUsuario: idUsuario,
-          idSucursal: idSucursal,
-          estado: 2,
-
-          idFormaCobro: selectTipoCobro,
-          frecuenciaPago: selectTipoCobro === CREDITO_FIJO ? frecuenciaPagoFijo : frecuenciaPagoVariable,
-          numeroCuotas: numeroCuotas,
-
-          detalles: detalles,
-        };
-
-        this.handleCloseModalSale();
-        alertInfo('Compra', 'Procesando información...');
-
-        const response = await createCompra(data);
-
-        if (response instanceof SuccessReponse) {
-          alertSuccess('Compra', response.data, () => {
-            this.clearView();
-          });
-        }
-
-        if (response instanceof ErrorResponse) {
-          if (response.getType() === CANCELED) return;
-
-          alertWarning('Compra', response.getMessage());
-        }
-      }
-    });
-  };
-
-  handleSaveSale = () => {
-    if (this.state.selectTipoCobro === CONTADO) {
-      this.handleProcessContado();
-    }
-
-    if (this.state.selectTipoCobro === CREDITO_FIJO) {
-      this.handleProcessCreditoFijo();
-    }
-
-    if (this.state.selectTipoCobro === CREDITO_VARIABLE) {
-      this.handleProcessCreditoVariable();
-    }
   };
 
   //------------------------------------------------------------------------------------------
@@ -792,9 +431,12 @@ class CompraCrear extends CustomComponent {
     this.setState({ isOpenProducto: false })
   }
 
-  handleSaveProducto = (detalles) => {
-    const total = detalles.reduce((accumulate, item) => (accumulate += item.cantidad * item.costo), 0);
-    this.setState({ detalles, total });
+  handleSaveProducto = async (detalles, callback = async function () { }) => {
+    const importeTotal = detalles.reduce((accumulate, item) => (accumulate += item.cantidad * item.costo), 0);
+    this.setState({ detalles, importeTotal }, () => {
+      this.updateReduxState();
+    });
+    await callback();
     this.refProducto.current.focus();
   }
 
@@ -820,6 +462,8 @@ class CompraCrear extends CustomComponent {
       producto: null,
     });
     this.selectItemProducto = false;
+
+    this.updateReduxState();
   };
 
   handleFilterProducto = async (event) => {
@@ -858,6 +502,7 @@ class CompraCrear extends CustomComponent {
       productos: [],
     });
     this.selectItemProducto = true;
+    this.updateReduxState();
 
     this.handleOpenModalProducto(value);
   };
@@ -872,6 +517,8 @@ class CompraCrear extends CustomComponent {
       persona: null,
     });
     this.selectItemPersona = false;
+
+    this.updateReduxState();
   };
 
   handleFilterPersona = async (event) => {
@@ -906,6 +553,8 @@ class CompraCrear extends CustomComponent {
       personas: [],
     });
     this.selectItemPersona = true;
+
+    this.updateReduxState();
   };
 
   //------------------------------------------------------------------------------------------
@@ -956,15 +605,8 @@ class CompraCrear extends CustomComponent {
       return;
     }
 
-    this.handleOpenModalSale();
+    this.handleOpenModalTerminal();
   };
-
-  clearView = () => {
-    this.setState(this.initial, async () => {
-      await this.loadData();
-      this.refProducto.current.focus();
-    });
-  }
 
   handleLimpiar = async () => {
     alertDialog("Compra", "¿Está seguro de limpiar la cotización?", (accept) => {
@@ -976,6 +618,124 @@ class CompraCrear extends CustomComponent {
 
   handleCerrar = () => {
     this.props.history.goBack();
+  };
+
+  //------------------------------------------------------------------------------------------
+  // Acciones del modal terminal
+  //------------------------------------------------------------------------------------------
+  handleOpenModalTerminal = () => {
+    this.setState({ isOpenTerminal: true })
+  }
+
+  handleCloseModalTerminal = () => {
+    this.setState({ isOpenTerminal: false })
+  }
+
+  handleProcessContado = async (idFormaPago, metodoPagosLista, callback = async function () { }) => {
+    const {
+      idComprobante,
+      persona,
+      idImpuesto,
+      idAlmacen,
+      idMoneda,
+      observacion,
+      nota,
+      detalles,
+      idUsuario,
+      idSucursal
+    } = this.state;
+
+
+    alertDialog('Compra', '¿Está seguro de continuar?', async (accept) => {
+      if (accept) {
+        const data = {
+          idFormaPago: idFormaPago,
+          idComprobante: idComprobante,
+          idProveedor: persona.idPersona,
+          idImpuesto: idImpuesto,
+          idAlmacen: idAlmacen,
+          idMoneda: idMoneda,
+          observacion: observacion,
+          nota: nota,
+          idUsuario: idUsuario,
+          idSucursal: idSucursal,
+          estado: 1,
+          metodoPago: metodoPagosLista,
+          detalles: detalles,
+        };
+
+        await callback();
+        alertInfo('Compra', 'Procesando información...');
+
+        const response = await createCompra(data);
+
+        if (response instanceof SuccessReponse) {
+          alertSuccess('Compra', response.data, () => {
+            this.clearView();
+          });
+        }
+
+        if (response instanceof ErrorResponse) {
+          if (response.getType() === CANCELED) return;
+
+          alertWarning('Compra', response.getMessage());
+        }
+      }
+    });
+  };
+
+  handleProcessCredito = async (idFormaPago, numeroCuotas, frecuenciaPagoCredito, importeTotal, callback = async function () { }) => {
+    const {
+      idComprobante,
+      persona,
+      idImpuesto,
+      idAlmacen,
+      idMoneda,
+      observacion,
+      nota,
+      detalles,
+      idUsuario,
+      idSucursal,
+    } = this.state;
+
+    alertDialog('Compra', '¿Está seguro de continuar?', async (accept) => {
+      if (accept) {
+        const data = {
+          idFormaPago: idFormaPago,
+          idComprobante: idComprobante,
+          idProveedor: persona.idPersona,
+          idImpuesto: idImpuesto,
+          idAlmacen: idAlmacen,
+          idMoneda: idMoneda,
+          observacion: observacion,
+          nota: nota,
+          idUsuario: idUsuario,
+          idSucursal: idSucursal,
+          estado: 2,
+          frecuenciaPago: frecuenciaPagoCredito,
+          numeroCuotas: numeroCuotas,
+          detalles: detalles,
+          importeTotal: importeTotal
+        };
+
+        await callback();
+        alertInfo('Compra', 'Procesando información...');
+
+        const response = await createCompra(data);
+
+        if (response instanceof SuccessReponse) {
+          alertSuccess('Compra', response.data, () => {
+            this.clearView();
+          });
+        }
+
+        if (response instanceof ErrorResponse) {
+          if (response.getType() === CANCELED) return;
+
+          alertWarning('Compra', response.getMessage());
+        }
+      }
+    });
   };
 
   /*
@@ -1014,8 +774,8 @@ class CompraCrear extends CustomComponent {
           {item.nombre}
         </td>
         <td>{rounded(item.cantidad)}</td>
-        <td>{numberFormat(item.costo, this.state.codISO)}</td>
-        <td>{numberFormat(item.cantidad * item.costo, this.state.codISO)}</td>
+        <td>{numberFormat(item.costo, this.state.codiso)}</td>
+        <td>{numberFormat(item.cantidad * item.costo, this.state.codiso)}</td>
         <td className="text-center">
           <Button
             className="btn-outline-danger btn-sm"
@@ -1074,7 +834,7 @@ class CompraCrear extends CustomComponent {
           <tr key={index}>
             <th className="text-right mb-2">{impuesto.nombre} :</th>
             <th className="text-right mb-2">
-              {numberFormat(impuesto.valor, this.state.codISO)}
+              {numberFormat(impuesto.valor, this.state.codiso)}
             </th>
           </tr>
         );
@@ -1086,7 +846,7 @@ class CompraCrear extends CustomComponent {
         <tr>
           <th className="text-right mb-2">SUB TOTAL :</th>
           <th className="text-right mb-2">
-            {numberFormat(subTotal, this.state.codISO)}
+            {numberFormat(subTotal, this.state.codiso)}
           </th>
         </tr>
         {impuestosGenerado()}
@@ -1094,7 +854,7 @@ class CompraCrear extends CustomComponent {
         <tr>
           <th className="text-right h5">TOTAL :</th>
           <th className="text-right h5">
-            {numberFormat(total, this.state.codISO)}
+            {numberFormat(total, this.state.codiso)}
           </th>
         </tr>
       </>
@@ -1104,42 +864,17 @@ class CompraCrear extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
-        <ModalSale
-          refModal={this.refModalSale}
-          isOpen={this.state.isOpenSale}
-          onOpen={this.handleOnOpenModalSale}
-          onHidden={this.handleOnHiddenModalSale}
-          onClose={this.handleCloseModalSale}
 
-          loading={this.state.loadingModalSale}
-          selectTipoCobro={this.state.selectTipoCobro}
-          handleSelectTipoCobro={this.handleSelectTipoCobro}
+        <ModalTransaccion
+          isOpen={this.state.isOpenTerminal}
 
-          refMetodoPagoContenedor={this.refMetodoPagoContenedor}
-          refMetodoContado={this.refMetodoContado}
+          idSucursal={this.state.idSucursal}
+          codiso={this.state.codiso}
+          importeTotal={this.state.importeTotal}
 
-          refNumeroCuotas={this.refNumeroCuotas}
-          numeroCuotas={this.state.numeroCuotas}
-          handleSelectNumeroCuotas={this.handleSelectNumeroCuotas}
-
-          refFrecuenciaPagoFijo={this.refFrecuenciaPagoFijo}
-          frecuenciaPagoFijo={this.state.frecuenciaPagoFijo}
-          handleSelectFrecuenciaPagoFijo={this.handleSelectFrecuenciaPagoFijo}
-
-          refFrecuenciaPagoVariable={this.refFrecuenciaPagoVariable}
-          frecuenciaPagoVariable={this.state.frecuenciaPagoVariable}
-          handleSelectFrecuenciaPagoVariable={this.handleSelectFrecuenciaPagoVariable}
-
-          codISO={this.state.codISO}
-          importeTotal={this.state.total}
-
-          bancos={this.state.bancos}
-          bancosAgregados={this.state.bancosAgregados}
-          handleAddBancosAgregados={this.handleAddBancosAgregados}
-          handleInputMontoBancosAgregados={this.handleInputMontoBancosAgregados}
-          handleRemoveItemBancosAgregados={this.handleRemoveItemBancosAgregados}
-
-          handleSaveSale={this.handleSaveSale}
+          onClose={this.handleCloseModalTerminal}
+          handleProcessContado={this.handleProcessContado}
+          handleProcessCredito={this.handleProcessCredito}
         />
 
         <ModalProducto
@@ -1416,6 +1151,13 @@ CompraCrear.propTypes = {
   history: PropTypes.shape({
     goBack: PropTypes.func.isRequired,
   }).isRequired,
+  compraCrear: PropTypes.shape({
+    state: PropTypes.object,
+    local: PropTypes.object,
+  }),
+  setCrearCompraState: PropTypes.func,
+  setCrearCompraLocal: PropTypes.func,
+  clearCrearCompra: PropTypes.func,
 };
 
 /**
@@ -1425,14 +1167,17 @@ CompraCrear.propTypes = {
 const mapStateToProps = (state) => {
   return {
     token: state.principal,
+    compraCrear: state.predeterminado.compraCrear
   };
 };
+
+const mapDispatchToProps = { setCrearCompraState, setCrearCompraLocal, clearCrearCompra }
 
 /**
  *
  * Método encargado de conectar con redux y exportar la clase
  */
 
-const ConnectedComprasCrear = connect(mapStateToProps, null)(CompraCrear);
+const ConnectedComprasCrear = connect(mapStateToProps, mapDispatchToProps)(CompraCrear);
 
 export default ConnectedComprasCrear;

@@ -17,6 +17,18 @@ class Search extends React.Component {
     this.debouncedSearch = this.debounce(this.props.onSearch, this.debounceTime);
   }
 
+  initialize = (data) => {
+    this.setState({
+      searchTerm: data
+    });
+  }
+
+  restart = () => {
+    this.setState({
+      searchTerm: ''
+    });
+  }
+
   debounce = (func, delay) => {
     let timeoutId;
     return (...args) => {
@@ -35,11 +47,14 @@ class Search extends React.Component {
     return (
       <Input
         autoFocus={true}
+        className={this.props.className}
         refInput={this.props.refInput}
-        iconLeft={<i className="bi bi-search"></i>}
+        iconLeft={this.props.iconLeft === null ? null : <i className="bi bi-search"></i>}
         placeholder={this.props.placeholder}
         value={this.state.searchTerm}
+        buttonRight={this.props.buttonRight}
         onChange={this.handleInputChange}
+        onKeyDown={this.props.onKeyDown}
       />
     );
   }
@@ -48,8 +63,12 @@ class Search extends React.Component {
 Search.propTypes = {
   refInput: PropTypes.object,
   onSearch: PropTypes.func.isRequired,
+  iconLeft: PropTypes.element,
   placeholder: PropTypes.string,
+  className: PropTypes.string,
+  buttonRight: PropTypes.element,
   debounceTime: PropTypes.number,
+  onKeyDown: PropTypes.func,
 }
 
 

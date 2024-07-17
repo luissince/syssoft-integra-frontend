@@ -1,7 +1,7 @@
-import Column from '../../../../../components/Column';
-import { CustomModalForm } from '../../../../../components/CustomModal';
-import Row from '../../../../../components/Row';
-import { SpinnerView } from '../../../../../components/Spinner';
+import Column from './Column';
+import { CustomModalForm } from './CustomModal';
+import Row from './Row';
+import { SpinnerView } from './Spinner';
 import {
   keyNumberInteger,
   numberFormat,
@@ -10,30 +10,24 @@ import {
   alertWarning,
   validateNumericInputs,
   rounded,
-  alertDialog,
-  alertInfo,
-  alertSuccess,
-  formatDecimal,
-  alertHTML,
-} from '../../../../../helper/utils.helper';
-import CustomComponent from '../../../../../model/class/custom-component';
-import { ADELANTADO, CONTADO, CREDITO_FIJO, CREDITO_VARIABLE } from '../../../../../model/types/forma-pago';
+} from '../helper/utils.helper';
+import CustomComponent from '../model/class/custom-component';
+import { ADELANTADO, CONTADO, CREDITO_FIJO, CREDITO_VARIABLE } from '../model/types/forma-pago';
 import PropTypes from 'prop-types';
-import { SERVICIO } from '../../../../../model/types/tipo-tratamiento-producto';
 import React from 'react';
-import { comboBanco, createVenta } from '../../../../../network/rest/principal.network';
-import SuccessReponse from '../../../../../model/class/response';
-import ErrorResponse from '../../../../../model/class/error-response';
-import { CANCELED } from '../../../../../model/types/types';
-import Button from '../../../../../components/Button';
-import Input from '../../../../../components/Input';
-import Select from '../../../../../components/Select';
+import { comboBanco } from '../network/rest/principal.network';
+import SuccessReponse from '../model/class/response';
+import ErrorResponse from '../model/class/error-response';
+import { CANCELED } from '../model/types/types';
+import Button from './Button';
+import Input from './Input';
+import Select from './Select';
 
 /**
  * Componente que representa una funcionalidad específica.
  * @extends React.Component
  */
-class ModalCobrar extends CustomComponent {
+class ModalTransaccion extends CustomComponent {
 
   constructor(props) {
     super(props);
@@ -47,6 +41,8 @@ class ModalCobrar extends CustomComponent {
       frecuenciaPago: new Date().getDate() > 15 ? '30' : '15',
       importeTotal: 0.0,
     }
+
+    this.refModal = React.createRef();
 
     this.refMetodoPagoContenedor = React.createRef();
     this.refNumeroCuotas = React.createRef();
@@ -85,19 +81,8 @@ class ModalCobrar extends CustomComponent {
   */
 
   onOpen = async () => {
-    this.setState({ loading: true })
+    this.setState({ loading: true });
     const bancos = await this.fetchComboBanco();
-
-    const { detalleVenta } = this.props;
-
-    const importeTotal = detalleVenta.reduce((accumulator, item) => {
-      const cantidad = item.idTipoTratamientoProducto === SERVICIO
-        ? item.cantidad
-        : item.inventarios.reduce((acc, current) => acc + current.cantidad, 0);
-
-      const totalProductPrice = item.precio * cantidad;
-      return accumulator + totalProductPrice;
-    }, 0)
 
     const metodo = bancos.find((item) => item.preferido === 1);
 
@@ -117,7 +102,11 @@ class ModalCobrar extends CustomComponent {
       }))
     }
 
-    this.setState({ importeTotal, bancos, loading: false });
+    this.setState({
+      importeTotal: Number(rounded(this.props.importeTotal)),
+      bancos,
+      loading: false
+    });
   }
 
   onHidden = () => {
@@ -233,19 +222,6 @@ class ModalCobrar extends CustomComponent {
       importeTotal,
     } = this.state;
 
-    const {
-      nuevoCliente,
-      comentario,
-      idUsuario,
-      idSucursal,
-      idCliente,
-      idImpuesto,
-      idMoneda,
-      idComprobante,
-      idCotizacion,
-      detalleVenta
-    } = this.props;
-
     let metodoPagosLista = bancosAgregados.map(item => ({ ...item }));
 
     if (isEmpty(metodoPagosLista)) {
@@ -260,7 +236,7 @@ class ModalCobrar extends CustomComponent {
       return;
     }
 
-    const metodoCobroTotal = metodoPagosLista.reduce((accumulator, item) => accumulator += parseFloat(item.monto), 0);
+    const metodoCobroTotal = metodoPagosLista.reduce((accumulator, item) => accumulator += Number(item.monto), 0);
 
     if (metodoPagosLista.length > 1) {
       if (metodoCobroTotal !== importeTotal) {
@@ -280,7 +256,7 @@ class ModalCobrar extends CustomComponent {
         }
 
         metodoPagosLista.forEach(item => {
-          item.descripcion = `Pago con ${rounded(parseFloat(item.monto))} y su vuelto es ${rounded(parseFloat(item.monto) - importeTotal)}`;
+          item.descripcion = `Pago con ${rounded(Number(item.monto))} y su vuelto es ${rounded(Number(item.monto) - importeTotal)}`;
           item.monto = importeTotal;
         });
       } else {
@@ -293,69 +269,8 @@ class ModalCobrar extends CustomComponent {
       }
     }
 
-    alertDialog('Venta', '¿Estás seguro de continuar?', async (accept) => {
-      if (accept) {
-        const data = {
-          idFormaPago: formaPago,
-          idComprobante: idComprobante,
-          idMoneda: idMoneda,
-          idImpuesto: idImpuesto,
-          idCliente: idCliente,
-          idSucursal: idSucursal,
-          comentario: comentario,
-          idUsuario: idUsuario,
-          estado: 1,
-          nuevoCliente: nuevoCliente,
-          idCotizacion: idCotizacion,
-          detalleVenta: detalleVenta,
-          bancosAgregados: metodoPagosLista,
-        };
-
-        await this.props.refModal.current.handleOnClose()
-        alertInfo('Venta', 'Procesando venta...');
-
-        const response = await createVenta(data);
-
-        if (response instanceof SuccessReponse) {
-          alertSuccess('Venta', response.data.message, () => {
-            this.props.handleOpenImpresion(response.data.idVenta);
-          });
-        }
-
-        if (response instanceof ErrorResponse) {
-          if (response.getBody() !== '') {
-            const body = response.getBody().map((item) =>
-              `<tr>
-                  <td>${item.nombre}</td>
-                  <td>${formatDecimal(item.cantidadActual)}</td>
-                  <td>${formatDecimal(item.cantidadReal)}</td>
-                  <td>${formatDecimal(item.cantidadActual - item.cantidadReal)}</td>
-                </tr>`,
-            );
-
-            alertHTML('Venta',
-              `<div class="d-flex flex-column align-items-center">
-                    <h5>Productos con cantidades faltantes</h5>
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Producto</th>
-                                <th>Cantidad a Vender</th>
-                                <th>Cantidad de Inventario</th>
-                                <th>Cantidad Faltante</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        ${body}
-                        </tbody>
-                    </table>
-                </div>`,
-            );
-          } else {
-            alertWarning('Venta', response.getMessage());
-          }
-        }
-      }
+    this.props.handleProcessContado(formaPago, metodoPagosLista, async () => {
+      await this.refModal.current.handleOnClose()
     });
   };
 
@@ -366,19 +281,6 @@ class ModalCobrar extends CustomComponent {
       frecuenciaPagoCredito,
       importeTotal
     } = this.state;
-
-
-    const {
-      nuevoCliente,
-      comentario,
-      idUsuario,
-      idSucursal,
-      idCliente,
-      idImpuesto,
-      idMoneda,
-      idComprobante,
-      detalleVenta
-    } = this.props;
 
     if (!isNumeric(numeroCuotas)) {
       alertWarning("Venta", "Ingrese el número de cuotas", () => {
@@ -401,70 +303,8 @@ class ModalCobrar extends CustomComponent {
       return;
     }
 
-    alertDialog('Venta', '¿Estás seguro de continuar?', async (accept) => {
-      if (accept) {
-        const data = {
-          idFormaPago: formaPago,
-          idComprobante: idComprobante,
-          idMoneda: idMoneda,
-          idImpuesto: idImpuesto,
-          idCliente: idCliente,
-          idSucursal: idSucursal,
-          comentario: comentario,
-          idUsuario: idUsuario,
-          estado: 2,
-          nuevoCliente: nuevoCliente,
-          detalleVenta: detalleVenta,
-          numCuotas: numeroCuotas,
-          frecuenciaPagoCredito: frecuenciaPagoCredito,
-          importeTotal: importeTotal
-        };
-
-        await this.props.refModal.current.handleOnClose()
-        alertInfo('Venta', 'Procesando venta...');
-
-        const response = await createVenta(data);
-
-        if (response instanceof SuccessReponse) {
-          alertSuccess('Venta', response.data.message, () => {
-            this.props.handleOpenImpresion(response.data.idVenta);
-          });
-        }
-
-        if (response instanceof ErrorResponse) {
-          if (response.getBody() !== '') {
-            const body = response.getBody().map((item) =>
-              `<tr>
-                  <td>${item.nombre}</td>
-                  <td>${formatDecimal(item.cantidadActual)}</td>
-                  <td>${formatDecimal(item.cantidadReal)}</td>
-                  <td>${formatDecimal(item.cantidadActual - item.cantidadReal)}</td>
-                </tr>`,
-            );
-
-            alertHTML('Venta',
-              `<div class="d-flex flex-column align-items-center">
-                    <h5>Productos con cantidades faltantes</h5>
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Producto</th>
-                                <th>Cantidad a Vender</th>
-                                <th>Cantidad de Inventario</th>
-                                <th>Cantidad Faltante</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        ${body}
-                        </tbody>
-                    </table>
-                </div>`,
-            );
-          } else {
-            alertWarning('Venta', response.getMessage());
-          }
-        }
-      }
+    this.props.handleProcessCredito(formaPago, numeroCuotas, frecuenciaPagoCredito, importeTotal, async () => {
+      await this.refModal.current.handleOnClose()
     });
   };
 
@@ -839,7 +679,6 @@ class ModalCobrar extends CustomComponent {
 
   render() {
     const {
-      refModal,
       isOpen,
       onClose,
       codiso,
@@ -858,7 +697,7 @@ class ModalCobrar extends CustomComponent {
 
     return (
       <CustomModalForm
-        contentRef={refModal}
+        contentRef={this.refModal}
         isOpen={isOpen}
         onOpen={this.onOpen}
         onHidden={this.onHidden}
@@ -1168,7 +1007,7 @@ class ModalCobrar extends CustomComponent {
 
             <Button
               className="btn-danger"
-              onClick={async () => await refModal.current.handleOnClose()}
+              onClick={async () => await this.refModal.current.handleOnClose()}
               text={"Cerrar"}
             />
           </>
@@ -1211,22 +1050,15 @@ const MetodoPago = ({
   );
 };
 
-ModalCobrar.propTypes = {
-  refModal: PropTypes.object.isRequired,
+ModalTransaccion.propTypes = {
   isOpen: PropTypes.bool.isRequired,
-  onClose: PropTypes.func.isRequired,
   idSucursal: PropTypes.string.isRequired,
-  nuevoCliente: PropTypes.object,
-  comentario: PropTypes.string.isRequired,
-  idUsuario: PropTypes.string.isRequired,
-  idCliente: PropTypes.string.isRequired,
-  idImpuesto: PropTypes.string.isRequired,
-  idMoneda: PropTypes.string.isRequired,
-  idComprobante: PropTypes.string.isRequired,
   codiso: PropTypes.string.isRequired,
-  idCotizacion: PropTypes.string,
-  detalleVenta: PropTypes.array.isRequired,
-  handleOpenImpresion: PropTypes.func.isRequired
+  importeTotal: PropTypes.number,
+
+  onClose: PropTypes.func.isRequired,
+  handleProcessContado: PropTypes.func,
+  handleProcessCredito: PropTypes.func
 }
 
 MetodoPago.propTypes = {
@@ -1237,4 +1069,4 @@ MetodoPago.propTypes = {
   handleRemoveItemBancosAgregados: PropTypes.func.isRequired,
 }
 
-export default ModalCobrar;
+export default ModalTransaccion;

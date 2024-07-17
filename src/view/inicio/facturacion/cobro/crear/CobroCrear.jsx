@@ -26,7 +26,6 @@ import ErrorResponse from '../../../../../model/class/error-response';
 import CustomComponent from '../../../../../model/class/custom-component';
 import SearchInput from '../../../../../components/SearchInput';
 import { CANCELED } from '../../../../../model/types/types';
-import ModalSale from './component/ModalSale';
 import { COMPROBANTE_DE_INGRESO } from '../../../../../model/types/tipo-comprobante';
 import PropTypes from 'prop-types';
 import { SpinnerView } from '../../../../../components/Spinner';
@@ -721,7 +720,7 @@ class CobroCrear extends CustomComponent {
           message={this.state.msgLoading}
         />
 
-        <ModalSale
+        {/* <ModalSale
           refModal={this.refCustomModalSale}
           isOpen={this.state.isOpenSale}
           onOpen={this.handleOnOpenModalSale}
@@ -740,7 +739,7 @@ class CobroCrear extends CustomComponent {
           handleRemoveItemBancosAgregados={this.handleRemoveItemBancosAgregados}
 
           handleSaveSale={this.handleSaveSale}
-        />
+        /> */}
 
         <Title
           title='Cobro'
