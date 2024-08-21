@@ -40,12 +40,10 @@ class ModalProveedor extends CustomComponent {
       email: '',
       direccion: '',
       idUbigeo: '',
-      ubigeo: '',
 
       tiposDocumentos: [],
 
-      filter: false,
-      filteredData: [],
+      ubigeos: [],
     }
 
     this.refModal = React.createRef();
@@ -59,8 +57,7 @@ class ModalProveedor extends CustomComponent {
 
     this.refDireccion = React.createRef();
     this.refUbigeo = React.createRef();
-
-    this.selectItem = false;
+    this.refValueUbigeo = React.createRef();
   }
 
   handleOnOpen = async () => {
@@ -111,15 +108,14 @@ class ModalProveedor extends CustomComponent {
       email: '',
       direccion: '',
       idUbigeo: '',
-      ubigeo: '',
 
       tiposDocumentos: [],
 
-      filter: false,
-      filteredData: [],
+      ubigeos: [],
     });
 
     this.peticion = false;
+    this.abortController = null;
   }
 
   handleTipoCliente = (event) => {
@@ -215,18 +211,14 @@ class ModalProveedor extends CustomComponent {
     }
   }
 
-  handleFilter = async (event) => {
-    const searchWord = this.selectItem ? '' : event.target.value;
-    await this.setStateAsync({ idUbigeo: '', ubigeo: searchWord });
-    this.selectItem = false;
-    if (searchWord.length === 0) {
-      await this.setStateAsync({ filteredData: [] });
+  handleFilter = async (value) => {
+    const searchWord = value;
+    this.setState({ idUbigeo: '' });
+
+    if (isEmpty(searchWord)) {
+      this.setState({ ubigeos: [] });
       return;
     }
-
-    if (this.state.filter) return;
-
-    await this.setStateAsync({ filter: true });
 
     const params = {
       filtrar: searchWord,
@@ -235,34 +227,24 @@ class ModalProveedor extends CustomComponent {
     const response = await getUbigeo(params);
 
     if (response instanceof SuccessReponse) {
-      await this.setStateAsync({ filter: false, filteredData: response.data });
+      this.setState({ ubigeos: response.data });
     }
 
     if (response instanceof ErrorResponse) {
-      await this.setStateAsync({ filter: false, filteredData: [] });
+      this.setState({ ubigeos: [] });
     }
   }
 
   handleSelectItem = async (value) => {
-    await this.setStateAsync({
-      ubigeo:
-        value.departamento +
-        '-' +
-        value.provincia +
-        '-' +
-        value.distrito +
-        ' (' +
-        value.ubigeo +
-        ')',
-      filteredData: [],
+    this.refUbigeo.current.initialize(value.departamento + ' - ' + value.provincia + ' - ' + value.distrito + ' (' + value.ubigeo + ')');
+    this.setState({
+      ubigeos: [],
       idUbigeo: value.idUbigeo,
     });
-    this.selectItem = true;
   }
 
-  handleClearInput = async () => {
-    await this.setStateAsync({ filteredData: [], idUbigeo: '', ubigeo: '' });
-    this.selectItem = false;
+  handleClearInput = () => {
+    this.setState({ ubigeos: [], idUbigeo: '', });
   }
 
   handleOnSubmit = async () => {
@@ -347,7 +329,6 @@ class ModalProveedor extends CustomComponent {
       celular,
       email,
       direccion,
-      ubigeo
     } = this.state;
 
     const {
@@ -384,6 +365,7 @@ class ModalProveedor extends CustomComponent {
               <Column formGroup={true}>
                 <RadioButton
                   className='form-check-inline'
+                  name='ckTipoCliente'
                   id={CLIENTE_NATURAL}
                   value={CLIENTE_NATURAL}
                   checked={idTipoCliente === CLIENTE_NATURAL}
@@ -394,6 +376,7 @@ class ModalProveedor extends CustomComponent {
 
                 <RadioButton
                   className='form-check-inline'
+                  name='ckTipoCliente'
                   id={CLIENTE_JURIDICO}
                   value={CLIENTE_JURIDICO}
                   checked={idTipoCliente === CLIENTE_JURIDICO}
@@ -406,9 +389,8 @@ class ModalProveedor extends CustomComponent {
 
             <Row>
               <Column className='col-md-6 col-12' formGroup={true}>
-                <label>Tipo Documento: <i className='fa fa-asterisk text-danger small'></i></label>
-
                 <Select
+                  label={<>Tipo Documento: <i className='fa fa-asterisk text-danger small'></i></>}
                   value={idTipoDocumento}
                   refSelect={this.refTipoDocumento}
                   onChange={this.handleSelectTipoDocumento}
@@ -436,19 +418,15 @@ class ModalProveedor extends CustomComponent {
               </Column>
 
               <Column className='col-md-6 col-12' formGroup={true}>
-                <label>
-                  N° de documento ({documento.length}): <i className="fa fa-asterisk text-danger small"></i>
-                </label>
-
-                <div className="input-group">
-                  <Input
-                    role={"integer"}
-                    refInput={this.refDocumento}
-                    value={documento}
-                    onChange={this.handleInputNumeroDocumento}
-                    placeholder="00000000"
-                  />
-                  <div className="input-group-append">
+                <Input
+                  group={true}
+                  label={<>  N° de documento ({documento.length}): <i className="fa fa-asterisk text-danger small"></i></>}
+                  role={"integer"}
+                  refInput={this.refDocumento}
+                  value={documento}
+                  onChange={this.handleInputNumeroDocumento}
+                  placeholder="00000000"
+                  buttonRight={<>
                     {
                       idTipoCliente === CLIENTE_NATURAL && (
                         <Button
@@ -471,20 +449,20 @@ class ModalProveedor extends CustomComponent {
                         </Button>
                       )
                     }
-                  </div>
-                </div>
+                  </>}
+                />
+
               </Column>
             </Row>
 
             <Row>
               <Column formGroup={true}>
-                <label>
-                  {idTipoCliente === CLIENTE_NATURAL && 'Apellidos y Nombres:'}
-                  {idTipoCliente === CLIENTE_JURIDICO && 'Razón Social:'}
-                  <i className="fa fa-asterisk text-danger small"></i>
-                </label>
-
                 <Input
+                  label={<>
+                    {idTipoCliente === CLIENTE_NATURAL && 'Apellidos y Nombres:'}
+                    {idTipoCliente === CLIENTE_JURIDICO && 'Razón Social:'}
+                    <i className="fa fa-asterisk text-danger small"></i>
+                  </>}
                   refInput={this.refInformacion}
                   value={informacion}
                   onChange={this.handleInputInformacion}
@@ -499,9 +477,8 @@ class ModalProveedor extends CustomComponent {
 
             <Row>
               <Column className='col-md-6 col-12' formGroup={true}>
-                <label>N° de Celular:</label>
-
                 <Input
+                  label={"N° de Celular:"}
                   role={"phone"}
                   value={celular}
                   refInput={this.refCelular}
@@ -511,9 +488,8 @@ class ModalProveedor extends CustomComponent {
               </Column>
 
               <Column formGroup={true}>
-                <label>E-Mail:</label>
-
                 <Input
+                  label={"E-Mail:"}
                   type="email"
                   value={email}
                   onChange={this.handleInputEmail}
@@ -524,9 +500,8 @@ class ModalProveedor extends CustomComponent {
 
             <Row>
               <Column formGroup={true}>
-                <label>Dirección:</label>
-
                 <Input
+                  label={"Dirección:"}
                   refInput={this.refDireccion}
                   value={direccion}
                   onChange={this.handleInputDireccion}
@@ -537,26 +512,17 @@ class ModalProveedor extends CustomComponent {
 
             <Row>
               <Column formGroup={true}>
-                <label>Ubigeo:</label>
                 <SearchInput
+                  ref={this.refUbigeo}
+                  label={"Ubigeo:"}
                   placeholder="Escribe para iniciar a filtrar..."
-                  refValue={this.refUbigeo}
-                  value={ubigeo}
-                  data={this.state.filteredData}
+                  refValue={this.refValueUbigeo}
+                  data={this.state.ubigeos}
                   handleClearInput={this.handleClearInput}
                   handleFilter={this.handleFilter}
                   handleSelectItem={this.handleSelectItem}
                   renderItem={(value) =>
-                    <>
-                      {value.departamento +
-                        '-' +
-                        value.provincia +
-                        '-' +
-                        value.distrito +
-                        ' (' +
-                        value.ubigeo +
-                        ')'}
-                    </>
+                    <>{value.departamento + ' - ' + value.provincia + ' - ' + value.distrito + ' (' + value.ubigeo + ')'}</>
                   }
                 />
               </Column>

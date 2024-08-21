@@ -739,23 +739,21 @@ class ModalTransaccion extends CustomComponent {
             {/* Tipos de venta */}
             <Row>
               {/* Al contado */}
-              <Column className="col-md-6 col-sm-12">
-                <div className="form-group">
-                  <Button
-                    className={`${formaPago === CONTADO ? 'btn-primary' : 'btn-light'} btn-block`}
-                    title="Pago al contado"
-                    onClick={() => this.handleSelectTipoPago(CONTADO)}
-                  >
-                    <div className="row">
-                      <div className="col-md-12">
-                        <i className="bi bi-cash-coin fa-2x"></i>
-                      </div>
-                    </div>
-                    <div className="text-center">
-                      <label>Contado</label>
-                    </div>
-                  </Button>
-                </div>
+              <Column className="col-md-6 col-sm-12" formGroup={true}>
+                <Button
+                  className={`${formaPago === CONTADO ? 'btn-primary' : 'btn-light'} btn-block`}
+                  title="Pago al contado"
+                  onClick={() => this.handleSelectTipoPago(CONTADO)}
+                >
+                  <Row>
+                    <Column className="col-md-12">
+                      <i className="bi bi-cash-coin fa-2x"></i>
+                    </Column>
+                  </Row>
+                  <div className="text-center">
+                    <label>Contado</label>
+                  </div>
+                </Button>
               </Column>
 
               {/* Crédito fijo*/}
@@ -835,34 +833,27 @@ class ModalTransaccion extends CustomComponent {
                   </div>
                 </Column>
 
-                <Column className="col-12">
-                  <div className="form-group">
-                    <label>Agregar método de cobro:</label>
-                    <div className="input-group">
-                      <div className="input-group-prepend">
-                        <div className="input-group-text">
-                          <i className="bi bi-tag-fill"></i>
-                        </div>
-                      </div>
-                      <Select
-                        title="Lista metodo de cobro"
-                        refSelect={this.refMetodoContado}>
-                        {bancos.map((item, index) => (
-                          <option key={index} value={item.idBanco}>
-                            {item.nombre}
-                          </option>
-                        ))}
-                      </Select>
-                      <div className="input-group-append">
-                        <Button
-                          className="btn-outline-success d-flex"
-                          title="Agregar Pago"
-                          onClick={this.handleAddBancosAgregados}
-                          icono={<i className="bi bi-plus-circle-fill"></i>}
-                        />
-                      </div>
-                    </div>
-                  </div>
+                <Column className="col-12" formGroup={true}>
+                  <Select
+                    group={true}
+                    label={"Agregar método de cobro:"}
+                    iconLeft={<i className="bi bi-tag-fill"></i>}
+                    title="Lista metodo de cobro"
+                    refSelect={this.refMetodoContado}
+                    buttonRight={
+                      <Button
+                        className="btn-outline-success d-flex"
+                        title="Agregar Pago"
+                        onClick={this.handleAddBancosAgregados}
+                        icono={<i className="bi bi-plus-circle-fill"></i>}
+                      />
+                    }>
+                    {bancos.map((item, index) => (
+                      <option key={index} value={item.idBanco}>
+                        {item.nombre}
+                      </option>
+                    ))}
+                  </Select>
                 </Column>
 
                 <Column className="col-12">
@@ -890,55 +881,40 @@ class ModalTransaccion extends CustomComponent {
                   </div>
 
                   <div className="form-group">
-                    <div className="input-group">
-                      <div className="input-group-prepend">
-                        <div className="input-group-text">
-                          <i className="bi bi-hourglass-split"></i>
-                        </div>
-                      </div>
-                      <Input
-                        title="Número de cuotas"
-                        placeholder="Número de cuotas"
-                        reduce={this.refNumeroCuotas}
-                        value={numeroCuotas}
-                        onChange={this.handleSelectNumeroCuotas}
-                        onKeyDown={keyNumberInteger}
-                      />
-                    </div>
+                    <Input
+                      group={true}
+                      iconLeft={<i className="bi bi-hourglass-split"></i>}
+                      title="Número de cuotas"
+                      placeholder="Número de cuotas"
+                      reduce={this.refNumeroCuotas}
+                      value={numeroCuotas}
+                      onChange={this.handleSelectNumeroCuotas}
+                      onKeyDown={keyNumberInteger}
+                    />
                   </div>
 
                   <div className="form-group">
-                    <div className="input-group">
-                      <div className="input-group-prepend">
-                        <div className="input-group-text">
-                          <i className="bi bi-credit-card-2-back"></i>
-                        </div>
-                      </div>
-                      <Select
-                        title="Lista frecuencia de pago"
-                        refSelect={this.refFrecuenciaPagoCredito}
-                        value={frecuenciaPagoCredito}
-                        onChange={this.handleSelectFrecuenciaPagoCredito}>
-                        <option value="">-- Frecuencia de pago --</option>
-                        <option value="15">Quinsenal</option>
-                        <option value="30">Mensual</option>
-                      </Select>
-                    </div>
+                    <Select
+                      group={true}
+                      iconLeft={<i className="bi bi-credit-card-2-back"></i>}
+                      title="Lista frecuencia de pago"
+                      refSelect={this.refFrecuenciaPagoCredito}
+                      value={frecuenciaPagoCredito}
+                      onChange={this.handleSelectFrecuenciaPagoCredito}>
+                      <option value="">-- Frecuencia de pago --</option>
+                      <option value="15">Quinsenal</option>
+                      <option value="30">Mensual</option>
+                    </Select>
                   </div>
 
                   <div className="form-group">
-                    <div className="input-group">
-                      <div className="input-group-prepend">
-                        <div className="input-group-text">
-                          <i className="bi bi-coin"></i>
-                        </div>
-                      </div>
-                      <Input
-                        placeholder="0.00"
-                        value={this.letraMensual()}
-                        disabled={true}
-                      />
-                    </div>
+                    <Input
+                      group={true}
+                      iconLeft={<i className="bi bi-coin"></i>}
+                      placeholder="0.00"
+                      value={this.letraMensual()}
+                      disabled={true}
+                    />
                   </div>
                 </Column>
               </Row>
@@ -958,23 +934,18 @@ class ModalTransaccion extends CustomComponent {
                   </div>
 
                   <div className="form-group">
-                    <div className="input-group">
-                      <div className="input-group-prepend">
-                        <div className="input-group-text">
-                          <i className="bi bi-credit-card-2-back"></i>
-                        </div>
-                      </div>
-                      <Select
-                        title="Lista frecuencia de pago"
-                        ref={this.refFrecuenciaPago}
-                        value={frecuenciaPago}
-                        onChange={this.handleSelectFrecuenciaPago}
-                      >
-                        <option value="">-- Frecuencia de pago --</option>
-                        <option value="15">Quinsenal</option>
-                        <option value="30">Mensual</option>
-                      </Select>
-                    </div>
+                    <Select
+                      group={true}
+                      iconLeft={<i className="bi bi-credit-card-2-back"></i>}
+                      title="Lista frecuencia de pago"
+                      refSelect={this.refFrecuenciaPago}
+                      value={frecuenciaPago}
+                      onChange={this.handleSelectFrecuenciaPago}
+                    >
+                      <option value="">-- Frecuencia de pago --</option>
+                      <option value="15">Quinsenal</option>
+                      <option value="30">Mensual</option>
+                    </Select>
                   </div>
                 </Column>
               </Row>

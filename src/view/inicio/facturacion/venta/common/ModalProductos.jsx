@@ -433,6 +433,8 @@ class ModalProductos extends CustomComponent {
                                             <label><i className="fa fa-search"></i> Buscar por código o nombres:</label>
 
                                             <Search
+                                                group={true}
+                                                iconLeft={<i className="bi bi-search"></i>}
                                                 placeholder={`Buscar por código, nombres...`}
                                                 refInput={this.refInputBuscar}
                                                 onSearch={this.handleSearchText}
@@ -452,18 +454,18 @@ class ModalProductos extends CustomComponent {
                                             <label>
                                                 Almacen: <i className="fa fa-asterisk text-danger small"></i>{' '}
                                             </label>
-                                                <Select
-                                                    title="Lista de Almacenes"
-                                                    refSelect={refAlmacen}
-                                                    value={idAlmacen}
-                                                    onChange={async (event) => handleSelectIdIdAlmacen(event, true, () => this.handleOnOpen())}>
-                                                    <option value="">-- Almacen --</option>
-                                                    {almacenes.map((item, index) => (
-                                                        <option key={index} value={item.idAlmacen}>
-                                                            {item.nombre}
-                                                        </option>
-                                                    ))}
-                                                </Select>
+                                            <Select
+                                                title="Lista de Almacenes"
+                                                refSelect={refAlmacen}
+                                                value={idAlmacen}
+                                                onChange={async (event) => handleSelectIdIdAlmacen(event, true, () => this.handleOnOpen())}>
+                                                <option value="">-- Almacen --</option>
+                                                {almacenes.map((item, index) => (
+                                                    <option key={index} value={item.idAlmacen}>
+                                                        {item.nombre}
+                                                    </option>
+                                                ))}
+                                            </Select>
                                         </Column>
                                     </Row>
                                 </div>

@@ -238,48 +238,41 @@ class ModalVenta extends CustomComponent {
                 body={
                     <div className='p-3'>
                         <Row>
-                            <Column className={"col-md-6 col-12"}>
-                                <div className="form-group">
-                                    <label><i className="fa fa-search"></i> Buscar por N° de Venta o Cliente:</label>
-                                    <div className="input-group">
-                                        <Input
-                                            placeholder="Buscar..."
-                                            value={buscar}
-                                            onChange={this.handleInputBuscar}
-                                            onKeyUp={(event) => keyUpSearch(event, () => this.handleSearchText(buscar))}
+                            <Column className={"col-md-6 col-12"} formGroup={true}>
+                                <Input
+                                    group={true}
+                                    label={<><i className="fa fa-search"></i> Buscar por N° de Venta o Cliente:</>}
+                                    placeholder="Buscar..."
+                                    value={buscar}
+                                    onChange={this.handleInputBuscar}
+                                    onKeyUp={(event) => keyUpSearch(event, () => this.handleSearchText(buscar))}
+                                    buttonRight={
+                                        <Button
+                                            className="btn-outline-secondary"
+                                            title="Recargar"
+                                            icono={<i className="bi bi-arrow-clockwise"></i>}
+                                            onClick={this.loadInit}
                                         />
-                                        <div className="input-group-append">
-                                            <Button
-                                                className="btn-outline-secondary"
-                                                title="Recargar"
-                                                icono={<i className="bi bi-arrow-clockwise"></i>}
-                                                onClick={this.loadInit}
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
+                                    }
+                                />
                             </Column>
 
-                            <Column>
-                                <div className="form-group">
-                                    <label><i className="fa fa-calendar"></i> Fecha Inicio:</label>
-                                    <Input
-                                        type='date'
-                                        value={fechaInicio}
-                                        onChange={this.handleFechaInicio}
-                                    />
-                                </div>
+                            <Column formGroup={true}>
+                                <Input
+                                    label={<><i className="fa fa-calendar"></i> Fecha Inicio:</>}
+                                    type='date'
+                                    value={fechaInicio}
+                                    onChange={this.handleFechaInicio}
+                                />
                             </Column>
 
-                            <Column>
-                                <div className="form-group">
-                                    <label><i className="fa fa-calendar"></i> Fecha  Final:</label>
-                                    <Input
-                                        type='date'
-                                        value={fechaFinal}
-                                        onChange={this.handleFechaFinal}
-                                    />
-                                </div>
+                            <Column formGroup={true}>
+                                <Input
+                                    label={<><i className="fa fa-calendar"></i> Fecha  Final:</>}
+                                    type='date'
+                                    value={fechaFinal}
+                                    onChange={this.handleFechaFinal}
+                                />
                             </Column>
                         </Row>
 

@@ -2,7 +2,7 @@ import SearchInput from '../../../../../../components/SearchInput';
 import PropTypes from 'prop-types';
 
 const InvoiceClient = (props) => {
-  const { placeholder, refCliente, cliente, clientes } = props;
+  const { placeholder,refCliente, refValueCliente, clientes } = props;
 
   const { handleClearInput, handleFilter, handleSelectItem } = props;
 
@@ -11,9 +11,9 @@ const InvoiceClient = (props) => {
   return (
     <div className="invoice-client px-3 pb-3">
       <SearchInput
+        ref={refCliente}
         placeholder={placeholder}
-        refValue={refCliente}
-        value={cliente}
+        refValue={refValueCliente}
         data={clientes}
         handleClearInput={handleClearInput}
         handleFilter={handleFilter}
@@ -38,8 +38,8 @@ const InvoiceClient = (props) => {
 
 InvoiceClient.propTypes = {
   placeholder: PropTypes.string.isRequired,
-  refCliente: PropTypes.object.isRequired,
-  cliente: PropTypes.string.isRequired,
+  refCliente: PropTypes.object,
+  refValueCliente: PropTypes.object.isRequired,
   clientes: PropTypes.array.isRequired,
 
   handleClearInput: PropTypes.func.isRequired,

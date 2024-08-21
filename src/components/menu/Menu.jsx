@@ -6,16 +6,13 @@ import Image from '../Image';
 
 const Menu = ({
   refSideBar,
-  path,
   url,
-  pathname,
   project,
   userToken,
   empresa
 }) => {
   const onEventOverlay = () => {
-    const sidebar = document.getElementById('sidebar');
-    sidebar.classList.remove('toggled');
+    refSideBar.current.classList.remove('toggled');
   };
 
   return (
@@ -23,12 +20,6 @@ const Menu = ({
       <div className="pro-sidebar-inner">
         <div className="pro-sidebar-layout">
           <div className="sidebar-header">
-            {/* <img
-              className="d-block mx-auto m-1"
-              src={images.icono}
-              alt="logo"
-              width="130"
-            /> */}
             <Image
               default={images.icono}
               src={`${empresa.rutaImage}`}
@@ -42,8 +33,65 @@ const Menu = ({
           <ul className="list-unstyled components">
             <p>{project.nombre}</p>
             <div className="line"></div>
-            {userToken.menus.map((menu, index) => {
+            {
+              userToken.menus.map((menu, index) => {
+                if (isEmpty(menu.subMenus) && menu.estado === 1) {
+                  return (
+                    <li key={index}>
+                      <NavLink
+                        to={`${url}/${menu.ruta}`}
+                        className="pro-inner-item"
+                        activeClassName="active-link"
+                        role="button"
+                        id={`${menu.ruta}`}
+                      >
+                        <span className="pro-icon-wrapper">
+                          <span className="pro-icon">
+                            <i className={menu.icon}></i>
+                          </span>
+                        </span>
+                        <span className="pro-item-content">{menu.nombre}</span>
+                      </NavLink>
+                    </li>
+                  );
+                }
 
+                if (menu.subMenus.filter((submenu) => submenu.estado === 1).length !== 0) {
+                  return (
+                    <li key={index}>
+                      <NavLink
+                        to={`${url}/${menu.ruta}`}
+                        className="pro-inner-item"
+                        activeClassName="active-link"
+                        role="button"
+                        id={`${menu.ruta}`}
+                      >
+                        <span className="pro-icon-wrapper">
+                          <span className="pro-icon">
+                            <i className={menu.icon}></i>
+                          </span>
+                        </span>
+                        <span className="pro-item-content">{menu.nombre}</span>
+                        <span className="suffix-wrapper">
+                          <span className="badge yellow">
+                            {
+                              menu.subMenus.filter(
+                                (submenu) => submenu.estado === 1,
+                              ).length
+                            }
+                          </span>
+                        </span>
+                        <span className="pro-arrow-wrapper">
+                          <span className="bi bi-arrow-right-circle-fill"></span>
+                        </span>
+                      </NavLink>
+                    </li>
+                  );
+                }
+              })
+            }
+
+            {/* {userToken.menus.map((menu, index) => {
               if (isEmpty(menu.subMenus) && menu.estado === 1) {
                 return (
                   <li key={index}>
@@ -163,7 +211,7 @@ const Menu = ({
               }
 
               return <></>;
-            })}
+            })} */}
           </ul>
 
           <ul className="list-unstyled sidebar-footer">

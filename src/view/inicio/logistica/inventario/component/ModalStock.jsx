@@ -1,3 +1,4 @@
+import Button from '../../../../../components/Button';
 import Column from '../../../../../components/Column';
 import { CustomModalForm } from '../../../../../components/CustomModal';
 import Input from '../../../../../components/Input';
@@ -26,7 +27,7 @@ const CustomModalStock = ({
 }) => {
   return (
     <CustomModalForm
-    contentRef={refModal}
+      contentRef={refModal}
       isOpen={isOpen}
       onOpen={onOpen}
       onHidden={onHidden}
@@ -50,58 +51,45 @@ const CustomModalStock = ({
           </Row>
 
           <Row>
-            <Column className={"col-sm-6 col-12"}>
-              <div className="form-group">
-                <label>
-                  Stock Máximo
-                  <i className="fa fa-asterisk text-danger small"></i>
-                </label>
-                <Input
-                  autoFocus={true}
-                  placeholder={"ingrese..."}
-                  role={"float"}
-                  refInput={refStockMaximo}
-                  value={stockMaximo}
-                  onChange={handleInputStockMaximo}
-
-                />
-              </div>
+            <Column className={"col-sm-6 col-12"} formGroup={true}>
+              <Input
+                autoFocus={true}
+                label={<> Stock Máximo <i className="fa fa-asterisk text-danger small"></i></>}
+                placeholder={"ingrese..."}
+                role={"float"}
+                refInput={refStockMaximo}
+                value={stockMaximo}
+                onChange={handleInputStockMaximo}
+              />
             </Column>
 
-            <Column className={"col-sm-6  col-12"}>
-              <div className="form-group">
-                <label>
-                  Stock Mínimo
-                  <i className="fa fa-asterisk text-danger small"></i>
-                </label>
-                <Input
-                  autoFocus={false}
-                  placeholder="ingrese..."
-                  role={"float"}
-                  refInput={refStockMinimo}
-                  value={stockMinimo}
-                  onChange={handleInputStockMinimo}
-                />
-              </div>
+            <Column className={"col-sm-6 col-12"} formGroup={true}>
+              <Input
+                label={<>Stock Mínimo <i className="fa fa-asterisk text-danger small"></i></>}
+                placeholder="ingrese..."
+                role={"float"}
+                refInput={refStockMinimo}
+                value={stockMinimo}
+                onChange={handleInputStockMinimo}
+              />
             </Column>
           </Row>
         </>
       }
       footer={
         <>
-          <button
+          <Button
             type="submit"
-            className="btn btn-primary"
+            className="btn-primary"
           >
             Aceptar
-          </button>
-          <button
-            type="button"
-            className="btn btn-danger"
+          </Button>
+          <Button
+            className="btn-danger"
             onClick={async () => await refModal.current.handleOnClose()}
           >
             Cerrar
-          </button>
+          </Button>
         </>
       }
     />

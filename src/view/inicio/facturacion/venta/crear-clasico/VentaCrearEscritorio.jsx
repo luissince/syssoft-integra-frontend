@@ -147,7 +147,6 @@ class VentaCrearEscritorio extends CustomComponent {
 
       // Filtrar cliente
       idCliente: '',
-      filterCliente: false,
       nuevoCliente: null,
 
       // Atributos del modal cliente
@@ -197,9 +196,6 @@ class VentaCrearEscritorio extends CustomComponent {
     // Referencia al modal agregar
     this.refModalDatos = React.createRef();
 
-    // Referencia al tipo de cliente
-    this.selectItemCliente = false;
-
     // Atributos para el modal configuración
     this.idModalConfiguration = 'idModalConfiguration';
     this.refImpuesto = React.createRef();
@@ -210,6 +206,7 @@ class VentaCrearEscritorio extends CustomComponent {
     // Atributos para el modal cliente
     this.idModalCliente = 'idModalCliente';
     this.refIdTipoDocumento = React.createRef();
+    this.refPersona = React.createRef();
     this.refNumeroDocumento = React.createRef();
     this.refInformacion = React.createRef();
     this.refNumeroCelular = React.createRef();
@@ -500,6 +497,7 @@ class VentaCrearEscritorio extends CustomComponent {
 
   reloadView() {
     this.setState(this.initial, async () => {
+      await this.refPersona.current.restart();
       await this.loadingData();
       this.index = -1;
       this.cells = [];
@@ -1588,8 +1586,8 @@ class VentaCrearEscritorio extends CustomComponent {
   // Filtrar cliente
   //------------------------------------------------------------------------------------------
 
-  handleClearInputCliente = async () => {
-    await this.setStateAsync({
+  handleClearInputCliente = () => {
+    this.setState({
       clientes: [],
       idCliente: '',
       idTipoCliente: CLIENTE_NATURAL,
@@ -1600,24 +1598,17 @@ class VentaCrearEscritorio extends CustomComponent {
       email: '',
       direccion: '',
       nuevoCliente: null,
-      filterCliente: false
     });
-    this.selectItemCliente = false;
   }
 
-  handleFilterCliente = async (event) => {
-    const searchWord = event.target.value;
-    await this.setStateAsync({ idCliente: '', numeroDocumento: searchWord });
+  handleFilterCliente = async (text) => {
+    const searchWord = text;
+    this.setState({ idCliente: '', numeroDocumento: searchWord });
 
-    this.selectItemCliente = false;
-    if (searchWord.length === 0) {
-      await this.setStateAsync({ clientes: [] });
+    if (isEmpty(searchWord)) {
+      this.setState({ clientes: [] });
       return;
     }
-
-    if (this.state.filterCliente) return;
-
-    await this.setStateAsync({ filterCliente: true });
 
     const params = {
       "opcion": 1,
@@ -1628,13 +1619,18 @@ class VentaCrearEscritorio extends CustomComponent {
     const clientes = await this.fetchFiltrarPersona(params)
 
     this.setState({
-      filterCliente: false,
       clientes: clientes,
     });
+  }
 
+  handleSetValueCliente = (value) =>{
+    this.setState({
+      numeroDocumento: value
+    });
   }
 
   handleSelectItemCliente = (value) => {
+    this.refPersona.current.initialize(value.documento);
     this.setState({
       clientes: [],
       idCliente: value.idPersona,
@@ -1645,7 +1641,7 @@ class VentaCrearEscritorio extends CustomComponent {
       numeroCelular: value.celular,
       email: value.email,
       direccion: value.direccion,
-    }, () => this.selectItemCliente = true);
+    });
   }
 
   //------------------------------------------------------------------------------------------
@@ -2234,6 +2230,7 @@ class VentaCrearEscritorio extends CustomComponent {
                 <div className='d-flex align-items-center justify-content-between'>
                   <RadioButton
                     className='form-check-inline'
+                    name='ckTipoCliente'
                     id={CLIENTE_NATURAL}
                     value={CLIENTE_NATURAL}
                     checked={this.state.idTipoCliente === CLIENTE_NATURAL}
@@ -2246,6 +2243,7 @@ class VentaCrearEscritorio extends CustomComponent {
 
                   <RadioButton
                     className='form-check-inline'
+                    name='ckTipoCliente'
                     id={CLIENTE_JURIDICO}
                     value={CLIENTE_JURIDICO}
                     checked={this.state.idTipoCliente === CLIENTE_JURIDICO}
@@ -2300,14 +2298,15 @@ class VentaCrearEscritorio extends CustomComponent {
                   </div>
                   <div className="invoice-client w-100">
                     <SearchInput
+                      ref={this.refPersona}
                       classNameContainer="position-relative"
                       placeholder={'N° de documento'}
                       refValue={this.refNumeroDocumento}
-                      value={this.state.numeroDocumento}
                       data={this.state.clientes}
                       handleClearInput={this.handleClearInputCliente}
                       handleFilter={this.handleFilterCliente}
                       handleSelectItem={this.handleSelectItemCliente}
+                      handleSetValue={this.handleSetValueCliente}
                       customButton={
                         <>
                           {

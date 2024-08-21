@@ -24,6 +24,11 @@ import Column from '../../../../../components/Column';
 import printJS from 'print-js';
 import ModalImpresion from './componente/ModalImpresion';
 import { TableResponsive } from '../../../../../components/Table';
+import Title from '../../../../../components/Title';
+import Button from '../../../../../components/Button';
+import Input from '../../../../../components/Input';
+import RadioButton from '../../../../../components/RadioButton';
+import Select from '../../../../../components/Select';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -66,37 +71,26 @@ class GuiaRemisionEditar extends CustomComponent {
       tipoPeso: [],
 
       // Filtrar producto
-      filtrarVenta: '',
       loadingVenta: false,
       venta: null,
       ventas: [],
 
       // Filtrar vehículo
-      filtrarVehiculo: '',
-      loadingVehiculo: false,
       vehiculo: null,
       vehiculos: [],
 
       // Filtrar conductor
-      filtrarConductor: '',
-      loadingConductor: false,
       conductor: null,
       conductores: [],
 
       // Filtrar conductor publico
-      filtrarConductorPublico: '',
-      loadingConductorPublico: false,
       conductorPublico: null,
       conductoresPublico: [],
 
       // Filtrar ubigeo partida
-      filterUbigeoPartida: '',
-      loadingUbigePartida: false,
       ubigeosPartida: [],
 
       // Filtrar ubigeo llegada
-      filterUbigeoLlegada: '',
-      loadingUbigeLlegada: false,
       ubigeosLlegada: [],
 
       idSucursal: this.props.token.project.idSucursal,
@@ -113,33 +107,32 @@ class GuiaRemisionEditar extends CustomComponent {
     this.refTipoPeso = React.createRef();
     this.refPeso = React.createRef();
 
-    this.refVenta = React.createRef();
     this.refDireccionPartida = React.createRef();
     this.refDireccionLlegada = React.createRef();
 
     // Filtrar venta
+    this.refVenta = React.createRef();
     this.refFiltrarVenta = React.createRef();
-    this.selectItemVenta = false;
 
     // Filtrar vehículo
+    this.refVehiculo = React.createRef();
     this.refFiltrarVehiculo = React.createRef();
-    this.selectItemVehiculo = false;
 
     // Filtrar conductor
+    this.refConductor = React.createRef();
     this.refFiltrarConductor = React.createRef();
-    this.selectItemConductor = false;
 
     // Filtrar conductor publico
+    this.refConductorPublico = React.createRef();
     this.refFiltrarConductorPublico = React.createRef();
-    this.selectItemConductorPublico = false;
 
     // Filtrar ubigeo partida
+    this.refUbigeoPartida = React.createRef();
     this.refFiltrarUbigeoPartida = React.createRef();
-    this.selectItemUbigeoPartida = false;
 
     // Filtrar ubigeo llegada
+    this.refUbigeoLlegada = React.createRef();
     this.refFiltrarUbigeoLlegada = React.createRef();
-    this.selectItemUbigeoLlegada = false;
 
     //Anular las peticiones
     this.abortController = new AbortController();
@@ -245,15 +238,15 @@ class GuiaRemisionEditar extends CustomComponent {
         disabledPrivado: false,
       })
 
-      this.handleSelectItemConductorPublico(conductor)
+      this.handleSelectItemConductorPublico(conductor);
     } else {
       this.setState({
         disabledPublica: false,
         disabledPrivado: true,
       });
 
-      this.handleSelectItemVehiculo(vehiculo);
-      this.handleSelectItemConductor(conductor)
+      this.handleSelectItemVehiculo(vehiculo);   
+      this.handleSelectItemConductor(conductor);
     }
 
     this.setState({
@@ -463,28 +456,22 @@ class GuiaRemisionEditar extends CustomComponent {
   // Filtrar venta
   //------------------------------------------------------------------------------------------
 
-  handleClearInputVenta = async () => {
-    await this.setStateAsync({
+  handleClearInputVenta = () => {
+    this.setState({
       ventas: [],
-      filtrarVenta: '',
       venta: null,
     });
-    this.selectItemVenta = false;
   };
 
-  handleFilterVenta = async (event) => {
-    const searchWord = this.selectItemVenta ? '' : event.target.value;
-    await this.setStateAsync({ venta: null, filtrarVenta: searchWord });
 
-    this.selectItemVenta = false;
-    if (searchWord.length === 0) {
-      await this.setStateAsync({ ventas: [] });
+  handleFilterVenta = async (text) => {
+    const searchWord = text;
+    this.setState({ venta: null });
+
+    if (isEmpty(searchWord)) {
+      this.setState({ ventas: [] });
       return;
     }
-
-    if (this.state.loadingVenta) return;
-
-    await this.setStateAsync({ loadingVenta: true });
 
     const params = {
       idSucursal: this.state.idSucursal,
@@ -495,55 +482,47 @@ class GuiaRemisionEditar extends CustomComponent {
 
     this.setState({
       ventas: ventas,
-      loadingVenta: false,
     });
   };
 
-  handleSelectItemVenta = async (value) => {
-    await this.setStateAsync({
+  handleSelectItemVenta = (value) => {
+    this.refVenta.current.initialize(`${value.nombreComprobante} ${value.serie}-${value.numeracion}`)
+    this.setState({
       venta: value,
-      filtrarVenta: `${value.nombreComprobante} ${value.serie}-${value.numeracion}`,
       ventas: [],
+    }, async () => {
+
+      this.setState({
+        loading: true
+      })
+      const ventaDetalle = await this.fetchObtenerVentaDetalle();
+
+      this.setState({
+        detalle: ventaDetalle,
+        loading: false
+      })
     });
-    this.selectItemVenta = true;
-
-    this.setState({
-      loading: true
-    })
-    const ventaDetalle = await this.fetchObtenerVentaDetalle();
-
-    this.setState({
-      detalle: ventaDetalle,
-      loading: false
-    })
   };
 
   //------------------------------------------------------------------------------------------
   // Filtrar vehículo
   //------------------------------------------------------------------------------------------
 
-  handleClearInputVehiculo = async () => {
-    await this.setStateAsync({
+  handleClearInputVehiculo = () => {
+    this.setState({
       vehiculos: [],
-      filtrarVehiculo: '',
       vehiculo: null,
     });
-    this.selectItemVehiculo = false;
   };
 
-  handleFilterVehiculo = async (event) => {
-    const searchWord = this.selectItemVehiculo ? '' : event.target.value;
-    await this.setStateAsync({ vehiculo: null, filtrarVehiculo: searchWord });
+  handleFilterVehiculo = async (text) => {
+    const searchWord = text;
+    this.setState({ vehiculo: null });
 
-    this.selectItemVehiculo = false;
-    if (searchWord.length === 0) {
-      await this.setStateAsync({ vehiculos: [] });
+    if (isEmpty(searchWord)) {
+      this.setState({ vehiculos: [] });
       return;
     }
-
-    if (this.state.loadingVehiculo) return;
-
-    await this.setStateAsync({ loadingVehiculo: true });
 
     const params = {
       filter: searchWord,
@@ -553,45 +532,40 @@ class GuiaRemisionEditar extends CustomComponent {
 
     this.setState({
       vehiculos: vehiculos,
-      loadingVehiculo: false,
     });
   };
 
-  handleSelectItemVehiculo = async (value) => {
-    await this.setStateAsync({
+  handleSelectItemVehiculo = (value) => {
+    this.refVehiculo.current.initialize(
+      `${value.marca}-${value.numeroPlaca}`,
+      true
+    );
+    this.setState({
       vehiculo: value,
-      filtrarVehiculo: `${value.marca}-${value.numeroPlaca}`,
       vehiculos: [],
     });
-    this.selectItemVehiculo = true;
   };
+
 
   //------------------------------------------------------------------------------------------
   // Filtrar conductor
   //------------------------------------------------------------------------------------------
 
-  handleClearInputConductor = async () => {
-    await this.setStateAsync({
+  handleClearInputConductor = () => {
+    this.setState({
       conductores: [],
-      filtrarConductor: '',
       conductor: null,
     });
-    this.selectItemConductor = false;
   };
 
-  handleFilterConductor = async (event) => {
-    const searchWord = this.selectItemConductor ? '' : event.target.value;
-    await this.setStateAsync({ conductor: null, filtrarConductor: searchWord });
+  handleFilterConductor = async (text) => {
+    const searchWord = text;
+    this.setState({ conductor: null });
 
-    this.selectItemConductor = false;
-    if (searchWord.length === 0) {
-      await this.setStateAsync({ conductores: [] });
+    if (isEmpty(searchWord)) {
+      this.setState({ conductores: [] });
       return;
     }
-
-    if (this.state.loadingConductor) return;
-
-    await this.setStateAsync({ loadingConductor: true });
 
     const params = {
       opcion: 1,
@@ -603,46 +577,40 @@ class GuiaRemisionEditar extends CustomComponent {
 
     this.setState({
       conductores: conductores,
-      loadingConductor: false,
     });
   };
 
-  handleSelectItemConductor = async (value) => {
-    await this.setStateAsync({
+  handleSelectItemConductor = (value) => {
+    this.refConductor.current.initialize(
+      `${value.documento}, ${value.informacion}`,
+      true
+    );
+    this.setState({
       conductor: value,
-      filtrarConductor: `${value.documento}, ${value.informacion}`,
       conductores: [],
     });
-    this.selectItemConductor = true;
   };
-
 
   //------------------------------------------------------------------------------------------
   // Filtrar conductor publico
   //------------------------------------------------------------------------------------------
 
-  handleClearInputConductorPublico = async () => {
-    await this.setStateAsync({
+  handleClearInputConductorPublico = () => {
+    this.setState({
       conductoresPublico: [],
-      filtrarConductorPublico: '',
       conductorPublico: null,
     });
-    this.selectItemConductorPublico = false;
   };
 
-  handleFilterConductorPublico = async (event) => {
-    const searchWord = this.selectItemConductorPublico ? '' : event.target.value;
-    await this.setStateAsync({ conductorPublico: null, filtrarConductorPublico: searchWord });
 
-    this.selectItemConductorPublico = false;
-    if (searchWord.length === 0) {
-      await this.setStateAsync({ conductores: [] });
+  handleFilterConductorPublico = async (text) => {
+    const searchWord = text;
+    this.setState({ conductorPublico: null });
+
+    if (isEmpty(searchWord)) {
+      this.setState({ conductores: [] });
       return;
     }
-
-    if (this.state.loadingConductorPublico) return;
-
-    await this.setStateAsync({ loadingConductorPublico: true });
 
     const params = {
       opcion: 1,
@@ -654,45 +622,39 @@ class GuiaRemisionEditar extends CustomComponent {
 
     this.setState({
       conductoresPublico: conductores,
-      loadingConductorPublico: false,
     });
   };
 
-  handleSelectItemConductorPublico = async (value) => {
-    await this.setStateAsync({
+  handleSelectItemConductorPublico = (value) => {
+    this.refConductorPublico.current.initialize(
+      `${value.documento}, ${value.informacion}`,
+      true
+    );
+    this.setState({
       conductorPublico: value,
-      filtrarConductorPublico: `${value.documento}, ${value.informacion}`,
       conductoresPublico: [],
     });
-    this.selectItemConductorPublico = true;
   };
 
   //------------------------------------------------------------------------------------------
   // Filtrar ubigeo partida
   //------------------------------------------------------------------------------------------
 
-  handleClearInputaUbigeoPartido = async () => {
-    await this.setStateAsync({
+  handleClearInputaUbigeoPartido = () => {
+    this.setState({
       ubigeosPartida: [],
-      filterUbigeoPartida: '',
       idUbigeoPartida: ''
     });
-    this.selectItemUbigeoPartida = false;
   };
 
-  handleFilterUbigeoPartido = async (event) => {
-    const searchWord = this.selectItemUbigeoPartida ? '' : event.target.value;
-    await this.setStateAsync({ idUbigeoPartida: '', filterUbigeoPartida: searchWord });
+  handleFilterUbigeoPartido = async (text) => {
+    const searchWord = text;
+    this.setState({ idUbigeoPartida: '' });
 
-    this.selectItemUbigeoPartida = false;
-    if (searchWord.length === 0) {
-      await this.setStateAsync({ ubigeosPartida: [] });
+    if (isEmpty(searchWord)) {
+      this.setState({ ubigeosPartida: [] });
       return;
     }
-
-    if (this.state.loadingUbigePartida) return;
-
-    await this.setStateAsync({ loadingUbigePartida: true });
 
     const params = {
       filtrar: searchWord,
@@ -702,53 +664,39 @@ class GuiaRemisionEditar extends CustomComponent {
 
     this.setState({
       ubigeosPartida: ubigeos,
-      loadingUbigePartida: false,
     });
   };
 
-  handleSelectItemUbigeoPartido = async (value) => {
-    await this.setStateAsync({
-      filterUbigeoPartida:
-        value.departamento +
-        ' - ' +
-        value.provincia +
-        ' - ' +
-        value.distrito +
-        ' (' +
-        value.ubigeo +
-        ')',
+  handleSelectItemUbigeoPartido = (value) => {
+    this.refUbigeoPartida.current.initialize(
+      `${value.departamento} - ${value.provincia} - ${value.distrito} (${value.ubigeo})`,
+      true
+    );
+    this.setState({
       ubigeosPartida: [],
       idUbigeoPartida: value.idUbigeo,
     });
-    this.selectItemUbigeoPartida = true;
   };
 
   //------------------------------------------------------------------------------------------
   // Filtrar ubigeo llegada
   //------------------------------------------------------------------------------------------
 
-  handleClearInputaUbigeoLlegada = async () => {
-    await this.setStateAsync({
+  handleClearInputaUbigeoLlegada = () => {
+    this.setState({
       ubigeosLlegada: [],
-      filterUbigeoLlegada: '',
       idUbigeoLlegada: ''
     });
-    this.selectItemUbigeoLlegada = false;
   };
 
-  handleFilterUbigeoLlegada = async (event) => {
-    const searchWord = this.selectItemUbigeoLlegada ? '' : event.target.value;
-    await this.setStateAsync({ idUbigeoLlegada: '', filterUbigeoLlegada: searchWord });
+  handleFilterUbigeoLlegada = async (text) => {
+    const searchWord = text;
+    this.setState({ idUbigeoLlegada: '' });
 
-    this.selectItemUbigeoLlegada = false;
-    if (searchWord.length === 0) {
-      await this.setStateAsync({ ubigeosLlegada: [] });
+    if (isEmpty(searchWord)) {
+      this.setState({ ubigeosLlegada: [] });
       return;
     }
-
-    if (this.state.loadingUbigeLlegada) return;
-
-    await this.setStateAsync({ loadingUbigeLlegada: true });
 
     const params = {
       filtrar: searchWord,
@@ -758,25 +706,18 @@ class GuiaRemisionEditar extends CustomComponent {
 
     this.setState({
       ubigeosLlegada: ubigeos,
-      loadingUbigeLlegada: false,
     });
   };
 
-  handleSelectItemUbigeoLlegada = async (value) => {
-    await this.setStateAsync({
-      filterUbigeoLlegada:
-        value.departamento +
-        ' - ' +
-        value.provincia +
-        ' - ' +
-        value.distrito +
-        ' (' +
-        value.ubigeo +
-        ')',
+  handleSelectItemUbigeoLlegada = (value) => {
+    this.refUbigeoLlegada.current.initialize(
+      `${value.departamento} - ${value.provincia} - ${value.distrito} (${value.ubigeo})`,
+      true
+    );
+    this.setState({
       ubigeosLlegada: [],
       idUbigeoLlegada: value.idUbigeo,
     });
-    this.selectItemUbigeoLlegada = true;
   };
 
   //------------------------------------------------------------------------------------------
@@ -800,11 +741,7 @@ class GuiaRemisionEditar extends CustomComponent {
   }
 
   handleBack() {
-    alertDialog("Guía de Remisión", "¿Está seguro de salir?", (accept) => {
-      if (accept) {
-        this.props.history.goBack()
-      }
-    });
+    this.props.history.goBack();
   }
 
   handleSave() {
@@ -962,40 +899,28 @@ class GuiaRemisionEditar extends CustomComponent {
           handlePrintTicket={this.handlePrintTicket}
         />
 
+        <Title
+          title='Guía Remisión'
+          subTitle='Crear'
+          icon={<i className='fa fa-edit'></i>}
+          handleGoBack={() => this.handleBack()}
+        />
 
         <Row>
-          <Column>
-            <div className="form-group">
-              <h5>
-                <span role="button" onClick={() => this.handleBack()}>
-                  <i className="bi bi-arrow-left-short"></i>
-                </span>{' '}
-                Guía Remisión
-                <small className="text-secondary"> Editar </small>
-              </h5>
-            </div>
-          </Column>
-        </Row>
-
-        <Row>
-          <Column className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
-            <button
-              type="button"
-              className="btn btn-warning"
+          <Column className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12" formGroup={true}>
+            <Button
+              className="btn-warning"
               onClick={() => this.handleSave()}>
               <i className='fa fa-save'></i>  Guardar
-            </button>
+            </Button>
             {" "}
-            <button
-              type="button"
-              className="btn btn-outline-danger"
+            <Button
+              className="btn-outline-danger"
               onClick={() => this.handleBack()}>
               <i className='fa fa-close'></i>  Cancelar
-            </button>
+            </Button>
           </Column>
         </Row>
-
-        <br />
 
         {/* Seleccione la venta */}
         <h6><span className='badge badge-primary'>1</span> Venta y Guía</h6>
@@ -1004,15 +929,12 @@ class GuiaRemisionEditar extends CustomComponent {
 
         <Row>
           <Column>
-            <label>
-              Filtrar Venta: <i className="fa fa-asterisk text-danger small"></i>
-            </label>
-
             <SearchInput
+              ref={this.refVenta}
               autoFocus={true}
+              label={<>Filtrar Venta: <i className="fa fa-asterisk text-danger small"></i></>}
               placeholder="Ejm: B001, 1, F001..."
               refValue={this.refFiltrarVenta}
-              value={this.state.filtrarVenta}
               data={this.state.ventas}
               handleClearInput={this.handleClearInputVenta}
               handleFilter={this.handleFilterVenta}
@@ -1034,17 +956,11 @@ class GuiaRemisionEditar extends CustomComponent {
         <div className="dropdown-divider"></div>
 
         <Row>
-          <Column>
-            <div className="form-group">
-              <label>
-                Selecciona un Cliente: <i className="fa fa-asterisk text-danger small"></i>
-              </label>
-              <input
-                type='text'
-                className='form-control'
-                value={this.state.venta ? `${this.state.venta.documento} - ${this.state.venta.informacion}` : ''}
-                disabled />
-            </div>
+          <Column formGroup={true}>
+            <Input
+              label={<>Selecciona un Cliente: <i className="fa fa-asterisk text-danger small"></i></>}
+              value={this.state.venta ? `${this.state.venta.documento} - ${this.state.venta.informacion}` : ''}
+              disabled />
           </Column>
         </Row>
 
@@ -1054,46 +970,28 @@ class GuiaRemisionEditar extends CustomComponent {
         <div className="dropdown-divider"></div>
 
         <Row>
-          <Column>
-            <div className="form-group">
-              <div>
-                <div className="form-check form-check-inline pr-5">
-                  <input
-                    className="form-check-input checked"
-                    type="radio"
-                    name="inlineRadioOptions"
-                    id="MT0001"
-                    value="MT0001"
-                    checked={this.state.idModalidadTraslado === 'MT0001'}
-                    onChange={this.handleInputModalidadTraslado}
-                  />
-                  <label className="form-check-label" htmlFor="MT0001">
-                    {' '}
-                    Público
-                  </label>
-                </div>
-              </div>
-            </div>
+          <Column formGroup={true}>
+            <RadioButton
+              id={"MT0001"}
+              value={"MT0001"}
+              name={"ckModalidadTraslado"}
+              checked={this.state.idModalidadTraslado === 'MT0001'}
+              onChange={this.handleInputModalidadTraslado}
+            >
+              Público
+            </RadioButton>
           </Column>
 
-          <Column>
-            <div className="form-group">
-              <div className="form-check form-check-inline">
-                <input
-                  className="form-check-input"
-                  type="radio"
-                  name="inlineRadioOptions"
-                  id="MT0002"
-                  value="MT0002"
-                  checked={this.state.idModalidadTraslado === 'MT0002'}
-                  onChange={this.handleInputModalidadTraslado}
-                />
-                <label className="form-check-label" htmlFor="MT0002">
-                  {' '}
-                  Privado
-                </label>
-              </div>
-            </div>
+          <Column formGroup={true}>
+            <RadioButton
+              id={"MT0002"}
+              value={"MT0002"}
+              name={"ckModalidadTraslado"}
+              checked={this.state.idModalidadTraslado === 'MT0002'}
+              onChange={this.handleInputModalidadTraslado}
+            >
+              Privado
+            </RadioButton>
           </Column>
         </Row>
 
@@ -1103,89 +1001,65 @@ class GuiaRemisionEditar extends CustomComponent {
         <div className="dropdown-divider"></div>
 
         <Row>
-          <Column className='col-md-6 col-12'>
-            <div className="form-group">
-              <label>
-                Motivo del traslado: <i className="fa fa-asterisk text-danger small"></i>
-              </label>
-
-              <div className="input-group">
-                <select className="form-control"
-                  ref={this.refMotivoTraslado}
-                  value={this.state.idMotivoTraslado}
-                  onChange={(event) => {
-                    this.setState({ idMotivoTraslado: event.target.value })
-                  }}>
-                  <option value="0">-- Seleccione comprobante --</option>
-                  {
-                    this.state.motivoTraslado.map((item, index) => (
-                      <option key={index} value={item.idMotivoTraslado}>{item.nombre}</option>
-                    ))
-                  }
-                </select>
-              </div>
-            </div>
+          <Column className='col-md-6 col-12' formGroup={true}>
+            <Select
+              label={<>Motivo del traslado: <i className="fa fa-asterisk text-danger small"></i></>}
+              refSelect={this.refMotivoTraslado}
+              value={this.state.idMotivoTraslado}
+              onChange={(event) => {
+                this.setState({ idMotivoTraslado: event.target.value })
+              }}>
+              <option value="0">-- Seleccione comprobante --</option>
+              {
+                this.state.motivoTraslado.map((item, index) => (
+                  <option key={index} value={item.idMotivoTraslado}>{item.nombre}</option>
+                ))
+              }
+            </Select>
           </Column>
 
-          <Column className='col-md-6 col-12'>
-            <div className="form-group">
-              <label>
-                Fecha traslado:{' '}<i className="fa fa-asterisk text-danger small"></i>
-              </label>
-              <input
-                className="form-control"
-                type="date"
-                value={this.state.fechaTraslado}
-                onChange={async (event) => {
-                  this.setState({ fechaTraslado: event.target.value });
-                }}
-              />
-            </div>
+
+          <Column className='col-md-6 col-12' formGroup={true}>
+            <Input
+              label={<>Fecha traslado:{' '}<i className="fa fa-asterisk text-danger small"></i></>}
+              type="date"
+              value={this.state.fechaTraslado}
+              onChange={async (event) => {
+                this.setState({ fechaTraslado: event.target.value });
+              }}
+            />
           </Column>
         </Row>
 
         <Row>
-          <Column className="col-md-6 col-12">
-            <div className="form-group">
-              <label>
-                Tipo Peso de Carga: <i className="fa fa-asterisk text-danger small" />
-              </label>
-
-              <div className="input-group">
-                <select className="form-control"
-                  ref={this.refTipoPeso}
-                  value={this.state.idTipoPeso}
-                  onChange={(event) => {
-                    this.setState({ idTipoPeso: event.target.value })
-                  }}>
-                  <option value="0">-- Seleccione --</option>
-                  {
-                    this.state.tipoPeso.map((item, index) => (
-                      <option key={index} value={item.idTipoPeso}>{item.nombre}</option>
-                    ))
-                  }
-                </select>
-              </div>
-            </div>
+          <Column className="col-md-6 col-12" formGroup={true}>
+            <Select
+              label={<>Tipo Peso de Carga: <i className="fa fa-asterisk text-danger small" /></>}
+              refSelect={this.refTipoPeso}
+              value={this.state.idTipoPeso}
+              onChange={(event) => {
+                this.setState({ idTipoPeso: event.target.value })
+              }}>
+              <option value="0">-- Seleccione --</option>
+              {
+                this.state.tipoPeso.map((item, index) => (
+                  <option key={index} value={item.idTipoPeso}>{item.nombre}</option>
+                ))
+              }
+            </Select>
           </Column>
 
-          <Column className="col-md-6 col-12">
-            <div className="form-group">
-              <label>Peso de la Carga:{' '}<i className="fa fa-asterisk text-danger small"></i></label>
-              <div className="input-group">
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Ejm: 0.00, 0"
-                  ref={this.refPeso}
-                  value={this.state.peso}
-                  onChange={(event) => {
-                    this.setState({ peso: event.target.value })
-                  }}
-                  onKeyDown={keyNumberFloat}
-                />
-              </div>
-            </div>
+          <Column className="col-md-6 col-12" formGroup={true}>
+            <Input
+              label={<>Peso de la Carga:{' '}<i className="fa fa-asterisk text-danger small"></i></>}
+              placeholder="Ejm: 0.00, 0"
+              refInput={this.refPeso}
+              value={this.state.peso}
+              onChange={(event) => {
+                this.setState({ peso: event.target.value })
+              }}
+              onKeyDown={keyNumberFloat}
+            />
           </Column>
         </Row>
 
@@ -1195,15 +1069,13 @@ class GuiaRemisionEditar extends CustomComponent {
         <div className="dropdown-divider"></div>
 
         <Row>
-          <Column className='col'>
-            <label>
-              Filtrar un vehículo: <i className="fa fa-asterisk text-danger small"></i>
-            </label>
+          <Column>
             <SearchInput
+              ref={this.refVehiculo}
+              label={<>Filtrar un vehículo: <i className="fa fa-asterisk text-danger small"></i></>}
               disabled={this.state.disabledPublica}
               placeholder="Filtrar por marca o número de placa..."
               refValue={this.refFiltrarVehiculo}
-              value={this.state.filtrarVehiculo}
               data={this.state.vehiculos}
               handleClearInput={this.handleClearInputVehiculo}
               handleFilter={this.handleFilterVehiculo}
@@ -1224,14 +1096,12 @@ class GuiaRemisionEditar extends CustomComponent {
 
         <Row>
           <Column>
-            <label>
-              Filtrar un Conductor (DNI): <i className="fa fa-asterisk text-danger small"></i>
-            </label>
             <SearchInput
+              ref={this.refConductor}
+              label={<>Filtrar un Conductor (DNI): <i className="fa fa-asterisk text-danger small"></i></>}
               disabled={this.state.disabledPublica}
               placeholder="Por número de documento o apellidos y nombres..."
               refValue={this.refFiltrarConductor}
-              value={this.state.filtrarConductor}
               data={this.state.conductores}
               handleClearInput={this.handleClearInputConductor}
               handleFilter={this.handleFilterConductor}
@@ -1251,16 +1121,13 @@ class GuiaRemisionEditar extends CustomComponent {
 
         <Row>
           <Column>
-            {/* <div className="form-group"> */}
-            <label>
-              Selecciona una Empresa (RUC): <i className="fa fa-asterisk text-danger small"></i>
-            </label>
 
             <SearchInput
+              ref={this.refConductorPublico}
+              label={<>Selecciona una Empresa (RUC): <i className="fa fa-asterisk text-danger small"></i></>}
               disabled={this.state.disabledPrivado}
               placeholder="Por número de documento o ruc..."
               refValue={this.refFiltrarConductorPublico}
-              value={this.state.filtrarConductorPublico}
               data={this.state.conductoresPublico}
               handleClearInput={this.handleClearInputConductorPublico}
               handleFilter={this.handleFilterConductorPublico}
@@ -1283,36 +1150,25 @@ class GuiaRemisionEditar extends CustomComponent {
             <div className="dropdown-divider"></div>
 
             <div className="form-group">
-              <label>
-                Dirección Partida: <i className="fa fa-asterisk text-danger small"></i>
-              </label>
-              <div className="input-group mb-2">
-                <div className="input-group-prepend">
-                  <div className="input-group-text">
-                    <i className="bi bi-search"></i>
-                  </div>
-                </div>
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Ingrese Dirección de partida..."
-                  ref={this.refDireccionPartida}
-                  value={this.state.direccionPartida}
-                  onChange={(event) => {
-                    this.setState({ direccionPartida: event.target.value })
-                  }}
-                />
-              </div>
+              <Input
+                group={true}
+                iconLeft={<i className="bi bi-search"></i>}
+                label={<>Dirección Partida: <i className="fa fa-asterisk text-danger small"></i></>}
+                placeholder="Ingrese Dirección de partida..."
+                refInput={this.refDireccionPartida}
+                value={this.state.direccionPartida}
+                onChange={(event) => {
+                  this.setState({ direccionPartida: event.target.value })
+                }}
+              />
             </div>
 
             <div className="form-group">
-              <label>
-                Ubigeo Partida: <i className="fa fa-asterisk text-danger small"></i>
-              </label>
               <SearchInput
+                ref={this.refUbigeoPartida}
+                label={<>Ubigeo Partida: <i className="fa fa-asterisk text-danger small"></i></>}
                 placeholder="Filtrar departamento, distrito o provincia..."
                 refValue={this.refFiltrarUbigeoPartida}
-                value={this.state.filterUbigeoPartida}
                 data={this.state.ubigeosPartida}
                 handleClearInput={this.handleClearInputaUbigeoPartido}
                 handleFilter={this.handleFilterUbigeoPartido}
@@ -1330,42 +1186,31 @@ class GuiaRemisionEditar extends CustomComponent {
             </div>
           </Column>
 
-          <Column className="col-md-6 col12">
+          <Column className="col-md-6 col-12">
             <h6><span className='badge badge-primary'>9</span> Punto de llegada</h6>
 
             <div className="dropdown-divider"></div>
 
             <div className="form-group">
-              <label>
-                Dirección Llegada: <i className="fa fa-asterisk text-danger small"></i>
-              </label>
-              <div className="input-group mb-2">
-                <div className="input-group-prepend">
-                  <div className="input-group-text">
-                    <i className="bi bi-search"></i>
-                  </div>
-                </div>
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Ingrese Dirección de llegada..."
-                  ref={this.refDireccionLlegada}
-                  value={this.state.direccionLlegada}
-                  onChange={(event) => {
-                    this.setState({ direccionLlegada: event.target.value })
-                  }}
-                />
-              </div>
+              <Input
+                group={true}
+                iconLeft={<i className="bi bi-search"></i>}
+                label={<>Dirección Llegada: <i className="fa fa-asterisk text-danger small"></i></>}
+                placeholder="Ingrese Dirección de llegada..."
+                refInput={this.refDireccionLlegada}
+                value={this.state.direccionLlegada}
+                onChange={(event) => {
+                  this.setState({ direccionLlegada: event.target.value })
+                }}
+              />
             </div>
 
             <div className="form-group">
-              <label>
-                Ubigeo Llegada: <i className="fa fa-asterisk text-danger small"></i>
-              </label>
               <SearchInput
+                ref={this.refUbigeoLlegada}
+                label={<>Ubigeo Llegada: <i className="fa fa-asterisk text-danger small"></i></>}
                 placeholder="Filtrar departamento, distrito o provincia..."
                 refValue={this.refFiltrarUbigeoLlegada}
-                value={this.state.filterUbigeoLlegada}
                 data={this.state.ubigeosLlegada}
                 handleClearInput={this.handleClearInputaUbigeoLlegada}
                 handleFilter={this.handleFilterUbigeoLlegada}

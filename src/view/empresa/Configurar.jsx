@@ -160,11 +160,11 @@ class Configurar extends CustomComponent {
 
     alertDialog('Mi Empresa', '¿Está seguro de continuar?', async (accept) => {
       if (accept) {
-        const logoSend = await imageBase64(this.refFileLogo.current.files);
+        const logoSend = await imageBase64(this.refFileLogo.current.files[0]);
         const baseLogo = logoSend ? logoSend.base64String : '';
         const extLogo = logoSend ? logoSend.extension : '';
 
-        const imageSend = await imageBase64(this.refFileImagen.current.files);
+        const imageSend = await imageBase64(this.refFileImagen.current.files[0]);
         const baseImage = imageSend ? imageSend.base64String : '';
         const extImage = imageSend ? imageSend.extension : '';
 

@@ -37,6 +37,7 @@ import Button from '../../../../components/Button';
 import Select from '../../../../components/Select';
 import Input from '../../../../components/Input';
 import RadioButton from '../../../../components/RadioButton';
+import CheckBox, { Switches } from '../../../../components/Checks';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -66,7 +67,6 @@ class PersonaEditar extends CustomComponent {
       genero: '',
       direccion: '',
       idUbigeo: '',
-      ubigeo: '',
 
       estadoCivil: '',
       predeterminado: false,
@@ -78,8 +78,7 @@ class PersonaEditar extends CustomComponent {
 
       tiposDocumentos: [],
 
-      filter: false,
-      filteredData: [],
+      ubigeos: [],
     };
 
     this.refTipoDocumento = React.createRef();
@@ -92,11 +91,10 @@ class PersonaEditar extends CustomComponent {
 
     this.refDireccion = React.createRef();
     this.refUbigeo = React.createRef();
+    this.refValueUbigeo = React.createRef();
     this.refFechaNacimiento = React.createRef();
 
     this.abortController = new AbortController();
-
-    this.selectItem = false;
   }
 
   async componentDidMount() {
@@ -128,15 +126,19 @@ class PersonaEditar extends CustomComponent {
       return;
     }
 
+    if (cliente && cliente.ubigeo) {
+      this.handleSelectItemUbigeo(cliente);
+    }
+
     this.setState({
       idTipoCliente: cliente.idTipoCliente,
       idPersona: cliente.idPersona,
       idTipoDocumento: cliente.idTipoDocumento,
       documento: text(cliente.documento),
       informacion: text(cliente.informacion),
-      cliente: cliente.cliente,
-      proveedor: cliente.proveedor,
-      conductor: cliente.conductor,
+      cliente: cliente.cliente === 1 ? true : false,
+      proveedor: cliente.proveedor === 1 ? true : false,
+      conductor: cliente.conductor === 1 ? true : false,
       licenciaConductir: text(cliente.licenciaConducir),
       telefono: text(cliente.telefono),
       celular: text(cliente.celular),
@@ -146,19 +148,16 @@ class PersonaEditar extends CustomComponent {
       direccion: text(cliente.direccion),
 
       idUbigeo: cliente.idUbigeo === 0 ? '' : cliente.idUbigeo.toString(),
-      ubigeo: cliente.ubigeo === '' ? '' : cliente.departamento + '-' + cliente.provincia + '-' + cliente.distrito + ' (' + cliente.ubigeo + ')',
 
       estadoCivil: text(cliente.estadoCivil),
-      predeterminado: cliente.predeterminado,
-      estado: cliente.estado,
+      predeterminado: cliente.predeterminado === 1 ? true : false,
+      estado: cliente.estado === 1 ? true : false,
       observacion: text(cliente.observacion),
 
       tiposDocumentos: documentos,
 
       loading: false,
     });
-
-    this.selectItem = cliente.idUbigeo === 0 ? false : true;
   }
 
   async fetchTipoDocumento() {
@@ -319,18 +318,14 @@ class PersonaEditar extends CustomComponent {
     }
   }
 
-  handleFilter = async (event) => {
-    const searchWord = this.selectItem ? '' : event.target.value;
-    await this.setStateAsync({ idUbigeo: '', ubigeo: searchWord });
-    this.selectItem = false;
-    if (searchWord.length === 0) {
-      await this.setStateAsync({ filteredData: [] });
+  handleFilterUbigeo = async (text) => {
+    const searchWord = text;
+    this.setState({ idUbigeo: '' });
+
+    if (isEmpty(searchWord)) {
+      this.setState({ ubigeos: [] });
       return;
     }
-
-    if (this.state.filter) return;
-
-    await this.setStateAsync({ filter: true });
 
     const params = {
       filtrar: searchWord,
@@ -339,34 +334,36 @@ class PersonaEditar extends CustomComponent {
     const response = await getUbigeo(params);
 
     if (response instanceof SuccessReponse) {
-      await this.setStateAsync({ filter: false, filteredData: response.data });
+      this.setState({ ubigeos: response.data });
     }
 
     if (response instanceof ErrorResponse) {
-      await this.setStateAsync({ filter: false, filteredData: [] });
+      if (response.getType() === CANCELED) return;
+
+      this.setState({ ubigeos: [] });
     }
   }
 
-  handleSelectItem = async (value) => {
-    await this.setStateAsync({
-      ubigeo:
-        value.departamento +
-        '-' +
-        value.provincia +
-        '-' +
-        value.distrito +
-        ' (' +
-        value.ubigeo +
-        ')',
-      filteredData: [],
+  handleSelectItemUbigeo = (value) => {
+    this.refUbigeo.current.initialize(
+      value.departamento +
+      '-' +
+      value.provincia +
+      '-' +
+      value.distrito +
+      ' (' +
+      value.ubigeo +
+      ')'
+    );
+    this.setState({
+      ubigeos: [],
       idUbigeo: value.idUbigeo,
     });
-    this.selectItem = true;
   }
 
-  handleClearInput = async () => {
-    await this.setStateAsync({ filteredData: [], idUbigeo: '', ubigeo: '' });
-    this.selectItem = false;
+
+  handleClearInputUbigeo = () => {
+    this.setState({ ubigeos: [], idUbigeo: '' });
   }
 
   handleSave = () => {
@@ -414,22 +411,22 @@ class PersonaEditar extends CustomComponent {
           idPersona: this.state.idPersona,
           idTipoDocumento: this.state.idTipoDocumento,
           documento: this.state.documento.toString().trim(),
-          informacion: this.state.informacion.trim(),
+          informacion: this.state.informacion.trim().toUpperCase(),
           cliente: this.state.cliente,
           proveedor: this.state.proveedor,
           conductor: this.state.conductor,
           licenciaConducir: this.state.licenciaConductir,
-          telefono: this.state.telefono.toString().trim(),
-          celular: this.state.celular.toString().trim(),
+          telefono: this.state.telefono.toString().trim().toUpperCase(),
+          celular: this.state.celular.toString().trim().toUpperCase(),
           fechaNacimiento: this.state.fechaNacimiento == '' ? null : this.state.fechaNacimient,
           email: this.state.email.trim(),
           genero: this.state.genero,
-          direccion: this.state.direccion.trim(),
+          direccion: this.state.direccion.trim().toUpperCase(),
           idUbigeo: this.state.idUbigeo,
           estadoCivil: this.state.estadoCivil,
           predeterminado: this.state.predeterminado,
           estado: this.state.estado,
-          observacion: this.state.observacion.trim(),
+          observacion: this.state.observacion.trim().toUpperCase(),
           idUsuario: this.state.idUsuario,
         };
 
@@ -463,7 +460,6 @@ class PersonaEditar extends CustomComponent {
       telefono,
       email,
       direccion,
-      ubigeo,
       estado,
       predeterminado,
     } = this.state;
@@ -494,6 +490,7 @@ class PersonaEditar extends CustomComponent {
           <Column formGroup={true}>
             <RadioButton
               className='form-check-inline'
+              name='rbTipoCliente'
               id={CLIENTE_NATURAL}
               value={CLIENTE_NATURAL}
               checked={idTipoCliente === CLIENTE_NATURAL}
@@ -504,6 +501,7 @@ class PersonaEditar extends CustomComponent {
 
             <RadioButton
               className='form-check-inline'
+              name='rbTipoCliente'
               id={CLIENTE_JURIDICO}
               value={CLIENTE_JURIDICO}
               checked={idTipoCliente === CLIENTE_JURIDICO}
@@ -516,11 +514,8 @@ class PersonaEditar extends CustomComponent {
 
         <Row>
           <Column className='col-md-6 col-12' formGroup={true}>
-            <label>
-              Tipo Documento: <i className="fa fa-asterisk text-danger small"></i>
-            </label>
-
             <Select
+              label={<>Tipo Documento: <i className="fa fa-asterisk text-danger small"></i></>}
               className={`${idTipoDocumento ? '' : 'is-invalid'}`}
               value={idTipoDocumento}
               refSelect={this.refTipoDocumento}
@@ -546,72 +541,52 @@ class PersonaEditar extends CustomComponent {
                 )
               }
             </Select>
-            {idTipoDocumento === '' && (
-              <div className="invalid-feedback">
-                Seleccione un valor.
-              </div>
-            )}
           </Column>
 
           <Column className='col-md-6 col-12' formGroup={true}>
-            <label>
-              N° de documento ({documento.length}):{' '}
-              <i className="fa fa-asterisk text-danger small"></i>
-            </label>
-
-            <div className="input-group is-invalid">
-              <Input
-                className={`${documento ? '' : 'is-invalid'}`}
-                refInput={this.refDocumento}
-                value={documento}
-                onChange={this.handleInputNumeroDocumento}
-                onKeyDown={keyNumberInteger}
-                placeholder="00000000"
-              />
-              <div className="input-group-append">
+            <Input
+              group={true}
+              label={<> N° de documento ({documento.length}): <i className="fa fa-asterisk text-danger small"></i></>}
+              className={`${documento ? '' : 'is-invalid'}`}
+              refInput={this.refDocumento}
+              value={documento}
+              onChange={this.handleInputNumeroDocumento}
+              onKeyDown={keyNumberInteger}
+              placeholder="00000000"
+              buttonRight={<>
                 {
                   idTipoCliente === CLIENTE_NATURAL && (
-                    <button
-                      className="btn btn-outline-secondary"
-                      type="button"
-                      title="Reniec"
+                    <Button
+                      className="btn-outline-secondary"
                       onClick={this.handleGetApiReniec}
                     >
                       <img src={images.reniec} alt="Reniec" width="12" />
-                    </button>
+                    </Button>
                   )
                 }
                 {
                   idTipoCliente === CLIENTE_JURIDICO && (
-                    <button
-                      className="btn btn-outline-secondary"
-                      type="button"
-                      title="Sunat"
+                    <Button
+                      className="btn-outline-secondary"
                       onClick={this.handleGetApiSunat}
                     >
                       <img src={images.sunat} alt="Sunat" width="12" />
-                    </button>
+                    </Button>
                   )
                 }
-              </div>
-            </div>
-            {documento === '' && (
-              <div className="invalid-feedback">
-                Ingrese un valor.
-              </div>
-            )}
+              </>}
+            />
           </Column>
         </Row>
 
         <Row>
           <Column formGroup={true}>
-            <label>
-              {idTipoCliente === CLIENTE_NATURAL && 'Apellidos y Nombres:'}
-              {idTipoCliente === CLIENTE_JURIDICO && 'Razón Social:'}
-              <i className="fa fa-asterisk text-danger small"></i>
-            </label>
-
             <Input
+              label={<>
+                {idTipoCliente === CLIENTE_NATURAL && 'Apellidos y Nombres:'}
+                {idTipoCliente === CLIENTE_JURIDICO && 'Razón Social:'}
+                {' '}<i className="fa fa-asterisk text-danger small"></i>
+              </>}
               className={`${informacion ? '' : 'is-invalid'}`}
               refInput={this.refInformacion}
               value={informacion}
@@ -622,9 +597,6 @@ class PersonaEditar extends CustomComponent {
                   : 'Ingrese su Razón Social'
               }
             />
-            {informacion === '' && (
-              <div className="invalid-feedback">Ingrese un valor.</div>
-            )}
           </Column>
         </Row>
 
@@ -634,42 +606,36 @@ class PersonaEditar extends CustomComponent {
               Tipo de Roles: <i className="fa fa-asterisk text-danger small"></i>
             </label>
 
-            <div className="form-check form-check">
-              <input className="form-check-input"
-                type="checkbox"
-                id="checkboxPnCliente"
-                checked={this.state.cliente}
-                onChange={(event) => {
-                  this.setState({ cliente: event.target.checked })
-                }} />
-              <label className="form-check-label" htmlFor="checkboxPnCliente"> Cliente</label>
-            </div>
+            <CheckBox
+              id="checkboxPnCliente"
+              checked={this.state.cliente}
+              onChange={(event) => {
+                this.setState({ cliente: event.target.checked })
+              }}>
+              Cliente
+            </CheckBox>
 
-            <div className="form-check form-check">
-              <input className="form-check-input"
-                type="checkbox"
-                id="checkboxPnProveedor"
-                checked={this.state.proveedor}
-                onChange={(event) => {
-                  this.setState({ proveedor: event.target.checked })
-                }} />
-              <label className="form-check-label" htmlFor="checkboxPnProveedor"> Proveedor</label>
-            </div>
+            <CheckBox
+              id="checkboxPnProveedor"
+              checked={this.state.proveedor}
+              onChange={(event) => {
+                this.setState({ proveedor: event.target.checked })
+              }}>
+              Proveedor
+            </CheckBox>
 
-            <div className="form-check form-check">
-              <input className="form-check-input"
-                type="checkbox"
-                id="checkboxPnConductor"
-                checked={this.state.conductor}
-                onChange={(event) => {
-                  this.setState({ conductor: event.target.checked })
-                }} />
-              <label className="form-check-label" htmlFor="checkboxPnConductor"> Conductor</label>
-            </div>
+            <CheckBox
+              id="checkboxPnConductor"
+              checked={this.state.conductor}
+              onChange={(event) => {
+                this.setState({ conductor: event.target.checked })
+              }}>
+              Conductor
+            </CheckBox>
             {
               this.state.conductor && (
-                <div className='row'>
-                  <div className='col'>
+                <Row>
+                  <Column>
                     <input
                       type='text'
                       className='form-control'
@@ -679,8 +645,8 @@ class PersonaEditar extends CustomComponent {
                       onChange={(event) => {
                         this.setState({ licenciaConductir: event.target.value })
                       }} />
-                  </div>
-                </div>
+                  </Column>
+                </Row>
               )
             }
           </Column>
@@ -689,24 +655,22 @@ class PersonaEditar extends CustomComponent {
         {idTipoCliente === 'TC0001' &&
           <Row>
             <Column className='col-md-4' formGroup={true}>
-              <label>Genero: </label>
-
-              <select
+              <Select
+                label={"Genero:"}
                 className="form-control"
-                ref={this.refGenero}
+                refSelect={this.refGenero}
                 value={genero}
                 onChange={this.handleSelectGenero}
               >
                 <option value="">-- Seleccione --</option>
                 <option value="1">Masculino</option>
                 <option value="2">Femenino</option>
-              </select>
+              </Select>
             </Column>
 
             <Column className='col-md-4' formGroup={true}>
-              <label>Estado Civil:</label>
-              <select
-                className="form-control"
+              <Select
+                label={"Estado Civil:"}
                 value={estadoCivil}
                 onChange={this.handleSelectEstadoCvil}
               >
@@ -715,15 +679,14 @@ class PersonaEditar extends CustomComponent {
                 <option value="2">Casado(a)</option>
                 <option value="3">Viudo(a)</option>
                 <option value="4">Divorciado(a)</option>
-              </select>
+              </Select>
             </Column>
 
             <Column className='col-md-4' formGroup={true}>
-              <label>Fecha de Nacimiento:</label>
-              <input
+              <Input
+                label={"Fecha de Nacimiento:"}
                 type="date"
-                className="form-control"
-                ref={this.refFechaNacimiento}
+                refInput={this.refFechaNacimiento}
                 value={fechaNacimiento}
                 onChange={this.handleInputFechaNacimiento}
               />
@@ -733,10 +696,8 @@ class PersonaEditar extends CustomComponent {
 
         <Row>
           <Column formGroup={true}>
-            <label>Observación:</label>
-            <input
-              type="text"
-              className="form-control"
+            <Input
+              label={"Observación:"}
               value={observacion}
               onChange={this.handleInputObservacion}
               placeholder="Ingrese alguna observación"
@@ -746,13 +707,10 @@ class PersonaEditar extends CustomComponent {
 
         <Row>
           <Column className='col-md-6 col-12' formGroup={true}>
-            <label>N° de Celular:</label>
-
-            <input
-              type="text"
-              className="form-control"
+            <Input
+              label={"N° de Celular:"}
               value={celular}
-              ref={this.refCelular}
+              refInput={this.refCelular}
               onChange={this.handleInputCelular}
               onKeyDown={keyNumberPhone}
               placeholder="Ingrese el número de celular."
@@ -760,13 +718,10 @@ class PersonaEditar extends CustomComponent {
           </Column>
 
           <Column className='col-md-6 col-12' formGroup={true}>
-            <label>N° de Telefono:</label>
-
-            <input
-              type="text"
-              className="form-control"
+            <Input
+              label={"N° de Telefono:"}
               value={telefono}
-              ref={this.refTelefono}
+              refInput={this.refTelefono}
               onChange={this.handleInputTelefono}
               onKeyDown={keyNumberPhone}
               placeholder="Ingrese el número de telefono."
@@ -776,11 +731,9 @@ class PersonaEditar extends CustomComponent {
 
         <Row>
           <Column formGroup={true}>
-            <label>E-Mail:</label>
-
-            <input
+            <Input
+              label={"E-Mail:"}
               type="email"
-              className="form-control"
               value={email}
               onChange={this.handleInputEmail}
               placeholder="Ingrese el email"
@@ -790,12 +743,9 @@ class PersonaEditar extends CustomComponent {
 
         <Row>
           <Column formGroup={true}>
-            <label>Dirección:</label>
-
-            <input
-              type="text"
-              className="form-control"
-              ref={this.refDireccion}
+            <Input
+              label={"Dirección:"}
+              refInput={this.refDireccion}
               value={direccion}
               onChange={this.handleInputDireccion}
               placeholder="Ingrese la dirección"
@@ -805,16 +755,15 @@ class PersonaEditar extends CustomComponent {
 
         <Row>
           <Column formGroup={true}>
-            <label>Ubigeo:</label>
-
             <SearchInput
+              ref={this.refUbigeo}
+              label={"Ubigeo:"}
               placeholder="Escribe para iniciar a filtrar..."
-              refValue={this.refUbigeo}
-              value={ubigeo}
-              data={this.state.filteredData}
-              handleClearInput={this.handleClearInput}
-              handleFilter={this.handleFilter}
-              handleSelectItem={this.handleSelectItem}
+              refValue={this.refValueUbigeo}
+              data={this.state.ubigeos}
+              handleClearInput={this.handleClearInputUbigeo}
+              handleFilter={this.handleFilterUbigeo}
+              handleSelectItem={this.handleSelectItemUbigeo}
               renderItem={(value) =>
                 <>
                   {value.departamento +
@@ -832,39 +781,26 @@ class PersonaEditar extends CustomComponent {
         </Row>
 
         <Row>
-          <Column className='col-md-6 col-12'>
-            <div className="form-group">
-              <label>Estado:</label>
-              <div className="custom-control custom-switch">
-                <input
-                  type="checkbox"
-                  className="custom-control-input"
-                  id="switch1"
-                  checked={estado}
-                  onChange={this.handleInputEstado}
-                />
-                <label className="custom-control-label" htmlFor="switch1">
-                  {estado ? 'Activo' : 'Inactivo'}
-                </label>
-              </div>
-            </div>
+          <Column className='col-md-6 col-12' formGroup={true}>
+            <Switches
+              label={"Estado:"}
+              id={"stEstado"}
+              checked={estado}
+              onChange={this.handleInputEstado}
+            >
+              {estado ? 'Activo' : 'Inactivo'}
+            </Switches>
           </Column>
 
           <Column className='col-md-6 col-12' formGroup={true}>
-            <label>Predeterminado:</label>
-
-            <div className="custom-control custom-switch">
-              <input
-                type="checkbox"
-                className="custom-control-input"
-                id="switch2"
-                checked={predeterminado}
-                onChange={this.handleInputPredeterminado}
-              />
-              <label className="custom-control-label" htmlFor="switch2">
-                {predeterminado ? 'Si' : 'No'}
-              </label>
-            </div>
+            <Switches
+              label={"Predeterminado:"}
+              id={"stPredeterminado"}
+              checked={predeterminado}
+              onChange={this.handleInputPredeterminado}
+            >
+              {predeterminado ? 'Si' : 'No'}
+            </Switches>
           </Column>
         </Row>
 
@@ -873,16 +809,16 @@ class PersonaEditar extends CustomComponent {
             <Button
               className='btn-warning mr-2'
               onClick={this.handleSave}
-              icono={<i className='fa fa-pencil'></i>}
-              text={"Editar"}
-            />
+            >
+              <i className='fa fa-pencil'></i>  Editar
+            </Button>
 
             <Button
               className='btn-danger'
               onClick={() => this.props.history.goBack()}
-              icono={<i className='fa fa-close'></i>}
-              text={"Cancelar"}
-            />
+            >
+              <i className='fa fa-close'></i> Cancelar
+            </Button>
           </Column>
         </Row>
       </ContainerWrapper>

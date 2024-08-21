@@ -2,8 +2,11 @@ import PropTypes from 'prop-types';
 
 const Input = ({
     autoFocus = false,
+    label,
+    group = false,
     iconLeft,
     type = "text",
+    autoComplete = "off",
     className = "",
     placeholder,
     disabled,
@@ -14,60 +17,97 @@ const Input = ({
     onChange,
     onKeyUp,
     onKeyDown,
-    onPaste
+    onPaste,
+    onFocus,
+    onMouseDown,
+    onBlur
 }) => {
-    if (iconLeft) {
+    if (type === 'color') {
         return (
-            <div className="input-group mb-2">
-                <div className="input-group-prepend">
-                    <div className="input-group-text">
-                        {iconLeft}
-                    </div>
-                </div>
-
-                <input
-                    autoFocus={autoFocus}
-                    type={type}
-                    className={`form-control ${className}`}
-                    placeholder={placeholder}
-                    disabled={disabled}
-                    role={role}
-                    ref={refInput}
-                    value={value}
-                    onChange={onChange}
-                    onKeyUp={onKeyUp}
-                    onKeyDown={onKeyDown}
-                    onPaste={onPaste}
-                />
-
-                <div className="input-group-append">
-                    {buttonRight}
+            <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                    {label}
+                </label>
+                <div className="d-flex align-items-center">
+                    <input
+                        type="color"
+                        value={value}
+                        onChange={onChange}
+                        className="h-10 w-10 border rounded"
+                    />
                 </div>
             </div>
         );
     }
+    if (group) {
+        return (
+            <>
+                {label && <label>{label} </label>}
+
+                <div className="input-group">
+                    {iconLeft && <div className="input-group-prepend">
+                        <div className="input-group-text">
+                            {iconLeft}
+                        </div>
+                    </div>}
+
+                    <input
+                        autoFocus={autoFocus}
+                        type={type}
+                        autoComplete={autoComplete}
+                        className={`form-control ${className}`}
+                        placeholder={placeholder}
+                        disabled={disabled}
+                        role={role}
+                        ref={refInput}
+                        value={value}
+                        onChange={onChange}
+                        onKeyUp={onKeyUp}
+                        onKeyDown={onKeyDown}
+                        onPaste={onPaste}
+                        onFocus={onFocus}
+                        onMouseDown={onMouseDown}
+                        onBlur={onBlur}
+                    />
+
+                    {buttonRight && <div className="input-group-append">
+                        {buttonRight}
+                    </div>}
+                </div>
+            </>
+        );
+    }
     return (
-        <input
-            autoFocus={autoFocus}
-            type={type}
-            className={`form-control ${className}`}
-            placeholder={placeholder}
-            disabled={disabled}
-            role={role}
-            ref={refInput}
-            value={value}
-            onChange={onChange}
-            onKeyUp={onKeyUp}
-            onKeyDown={onKeyDown}
-            onPaste={onPaste}
-        />
+        <>
+            {label && <label>{label} </label>}
+            <input
+                autoFocus={autoFocus}
+                type={type}
+                className={`form-control ${className}`}
+                placeholder={placeholder}
+                disabled={disabled}
+                role={role}
+                ref={refInput}
+                value={value}
+                onChange={onChange}
+                onKeyUp={onKeyUp}
+                onKeyDown={onKeyDown}
+                onPaste={onPaste}
+                onFocus={onFocus}
+                onMouseDown={onMouseDown}
+                onBlur={onBlur}
+            />
+        </>
     );
 }
 
 Input.propTypes = {
     autoFocus: PropTypes.bool,
+    label: PropTypes.oneOfType([PropTypes.string, PropTypes.element]),
+    group: PropTypes.bool,
     iconLeft: PropTypes.element,
-    type: PropTypes.oneOf(["text", "password", "search", "date", "email"]),
+    type: PropTypes.oneOf(["text", "password", "search", "date", "email", "color"]),
+    autoComplete: PropTypes.string,
     className: PropTypes.string,
     placeholder: PropTypes.string,
     disabled: PropTypes.bool,
@@ -78,7 +118,10 @@ Input.propTypes = {
     onChange: PropTypes.func,
     onKeyUp: PropTypes.func,
     onKeyDown: PropTypes.func,
-    onPaste: PropTypes.func
+    onPaste: PropTypes.func,
+    onFocus: PropTypes.func,
+    onMouseDown: PropTypes.func,
+    onBlur: PropTypes.func
 };
 
 export default Input;

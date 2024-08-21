@@ -103,19 +103,17 @@ class ModalAgregar extends Component {
             </Row>
 
             <Row>
-              <Column>
-                <div className="form-group">
-                  <label>{subTitulo}</label>
-                  <Input
-                    autoFocus={true}
-                    placeholder={"0.00"}
-                    role={"float"}
-                    refInput={this.refCantidad}
-                    value={cantidad}
-                    onChange={this.handleInputCantidad}
-                    onPaste={handlePasteFloat}
-                  />
-                </div>
+              <Column formGroup={true}>
+                <Input
+                  autoFocus={true}
+                  label={subTitulo}
+                  placeholder={"0.00"}
+                  role={"float"}
+                  refInput={this.refCantidad}
+                  value={cantidad}
+                  onChange={this.handleInputCantidad}
+                  onPaste={handlePasteFloat}
+                />
               </Column>
             </Row>
           </>

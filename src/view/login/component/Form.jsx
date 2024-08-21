@@ -50,7 +50,7 @@ const Form = (props) => {
               </div>
             )}
 
-            <div className="form-outline mb-4">
+            <div className="mb-4">
               <Input
                 refInput={usuarioInput}
                 onChange={handleChangeUsuario}
@@ -58,37 +58,17 @@ const Form = (props) => {
                 placeholder="Ingrese su usuario"
                 autoFocus={true}
               />
-              {/* <input
-                ref={usuarioInput}
-                onChange={handleChangeUsuario}
-                value={usuario}
-                type="text"
-                id="inputUsuario"
-                placeholder="Ingrese su usuario"
-                autoFocus
-                className="form-control"
-              /> */}
             </div>
 
-            <div className="form-outline mb-4">
-              <div className="input-group">
-                <Input
-                  refInput={passwordInput}
-                  onChange={handleChangePassword}
-                  value={password}
-                  type={lookPassword ? 'text' : 'password'}
-                  placeholder="Ingrese su contraseña"
-                />
-                {/* <input
-                  ref={passwordInput}
-                  onChange={handleChangePassword}
-                  value={password}
-                  id="inputPassword"
-                  type={lookPassword ? 'text' : 'password'}
-                  className="form-control"
-                  placeholder="Ingrese su contraseña"
-                /> */}
-                <div className="input-group-append">
+            <div className="mb-4">
+              <Input
+                group={true}
+                refInput={passwordInput}
+                onChange={handleChangePassword}
+                value={password}
+                type={lookPassword ? 'text' : 'password'}
+                placeholder="Ingrese su contraseña"
+                buttonRight={
                   <Button
                     className={"btn-outline-secondary"}
                     icono={
@@ -96,8 +76,8 @@ const Form = (props) => {
                     }
                     onClick={handleViewPassword}
                   />
-                </div>
-              </div>
+                }
+              />
             </div>
 
             <Button

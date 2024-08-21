@@ -808,6 +808,22 @@ export async function comboTipoAjuste(signal) {
 
 /*
 |--------------------------------------------------------------------------
+| ENDPOINTS DE TIPO ATRIBUTO
+|--------------------------------------------------------------------------
+*/
+export async function comboTipoAtributo(signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/tipoatributo/combo', {
+      signal: signal,
+    }),
+  );
+}
+// ------------------------------------------------------------------------
+// FIN PARA TIPO ATRIBUTO
+// ------------------------------------------------------------------------
+
+/*
+|--------------------------------------------------------------------------
 | ENDPOINTS DE COMPRA
 |--------------------------------------------------------------------------
 */
@@ -1335,7 +1351,7 @@ export async function deleteComprobante(params, signal) {
 | ENDPOINTS DE CATEGORIA
 |--------------------------------------------------------------------------
 */
-export async function listarCategoria(params, signal = null) {
+export async function listCategoria(params, signal = null) {
   return await Resolve.create(
     instancePrincipal.get('/api/categoria/list', {
       signal: signal,
@@ -1383,6 +1399,117 @@ export async function comboCategoria(signal) {
 
 // ------------------------------------------------------------------------
 // FIN PARA CATEGORIA
+// ------------------------------------------------------------------------
+
+/*
+|--------------------------------------------------------------------------
+| ENDPOINTS DE MARCA
+|--------------------------------------------------------------------------
+*/
+export async function listMarca(params, signal = null) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/marca/list', {
+      signal: signal,
+      params: params,
+    }),
+  );
+}
+
+export async function getIdMarca(params, signal = null) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/marca/id', {
+      signal: signal,
+      params: params,
+    }),
+  );
+}
+
+export async function addMarca(data) {
+  return await Resolve.create(
+    await instancePrincipal.post('/api/marca/', data),
+  );
+}
+
+export async function updateMarca(data) {
+  return await Resolve.create(
+    await instancePrincipal.put('/api/marca', data),
+  );
+}
+
+export async function removeMarca(params) {
+  return await Resolve.create(
+    instancePrincipal.delete('/api/marca', {
+      params: params,
+    }),
+  );
+}
+
+export async function comboMarca(signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/marca/combo', {
+      signal: signal,
+    }),
+  );
+}
+
+// ------------------------------------------------------------------------
+// FIN PARA MARCA
+// ------------------------------------------------------------------------
+
+/*
+|--------------------------------------------------------------------------
+| ENDPOINTS DE ATRIBUTO
+|--------------------------------------------------------------------------
+*/
+export async function listAtributo(params, signal = null) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/atributo/list', {
+      signal: signal,
+      params: params,
+    }),
+  );
+}
+
+export async function getIdAtributo(params, signal = null) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/atributo/id', {
+      signal: signal,
+      params: params,
+    }),
+  );
+}
+
+export async function addAtributo(data) {
+  return await Resolve.create(
+    await instancePrincipal.post('/api/atributo/', data),
+  );
+}
+
+export async function updateAtributo(data) {
+  return await Resolve.create(
+    await instancePrincipal.put('/api/atributo', data),
+  );
+}
+
+export async function removeAtributo(params) {
+  return await Resolve.create(
+    instancePrincipal.delete('/api/atributo', {
+      params: params,
+    }),
+  );
+}
+
+export async function comboAtributo(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/atributo/combo', {
+      signal: signal,
+      params: params,
+    }),
+  );
+}
+
+// ------------------------------------------------------------------------
+// FIN PARA ATRIBUTO
 // ------------------------------------------------------------------------
 
 /*
@@ -1796,7 +1923,7 @@ export async function saveAcceso(data, signal) {
 
 export async function updateAcceso(data, signal) {
   return await Resolve.create(
-    instancePrincipal.post('/api/acceso/updatedata', data, {
+    instancePrincipal.post('/api/acceso/update', data, {
       signal: signal,
     }),
   );

@@ -4,11 +4,10 @@ const RadioButton = ({
     autoFocus,
     id,
     className = "",
-    placeholder,
     disabled,
-    role,
     refInput,
     value,
+    name,
     checked,
     onChange,
     onKeyUp,
@@ -21,13 +20,12 @@ const RadioButton = ({
             <input
                 autoFocus={autoFocus}
                 id={id}
-                type={"radio"}
+                type="radio"
                 className="form-check-input"
-                placeholder={placeholder}
                 disabled={disabled}
-                role={role}
                 ref={refInput}
                 value={value}
+                name={name}
                 checked={checked}
                 onChange={onChange}
                 onKeyUp={onKeyUp}
@@ -46,15 +44,14 @@ const RadioButton = ({
 
 RadioButton.propTypes = {
     autoFocus: PropTypes.bool,
-    id: PropTypes.string,
+    id: PropTypes.string.isRequired,
     className: PropTypes.string,
-    placeholder: PropTypes.string,
     disabled: PropTypes.bool,
-    role: PropTypes.string,
     refInput: PropTypes.object,
-    value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    checked: PropTypes.bool,
-    onChange: PropTypes.func,
+    value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    name: PropTypes.string.isRequired,
+    checked: PropTypes.bool.isRequired,
+    onChange: PropTypes.func.isRequired,
     onKeyUp: PropTypes.func,
     onKeyDown: PropTypes.func,
     onPaste: PropTypes.func,

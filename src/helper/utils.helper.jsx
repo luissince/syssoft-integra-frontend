@@ -27,20 +27,21 @@ export function statePrivilegio(value) {
 
 /**
  * Lee un archivo de imagen y devuelve su representación en base64, su extensión y dimensiones.
- * @param {File[]} files - La lista de archivos de imagen seleccionados.
+ * @param {File} file - Archivo seleccionado
  * @returns {Promise<{ base64String: string, extension: string, width: number, height: number } | false>} Un objeto que contiene la representación en base64 del archivo, su extensión, ancho y altura; o false si no se selecciona ningún archivo.
  */
-export async function imageBase64(files) {
-  if (files.length !== 0) {
-    const name = files[0].name;
-    const read = await readDataURL(files);
-    const base64String = read.replace(/^data:.+;base64,/, '');
-    const extension = getExtension(name);
-    const { width, height } = await imageSizeData(read);
-    return { base64String, extension, width, height };
+export async function imageBase64(file) {
+  if (!file) {
+    return false;
   }
 
-  return false;
+  const name = file.name;
+  const read = await readDataURL(file);
+  const base64String = read.replace(/^data:.+;base64,/, '');
+  const extension = getExtension(name);
+  const { width, height } = await imageSizeData(read);
+  const size = Number(rounded(file.size / 1024));
+  return { base64String, extension, width, height, size };
 }
 
 export async function convertFileBase64(files) {
@@ -627,9 +628,8 @@ export function focusOnFirstInvalidInput(ref) {
   input.focus();
 }
 
-export function readDataURL(files) {
+export function readDataURL(file) {
   return new Promise((resolve, reject) => {
-    const file = files[0];
     const blob = file.slice();
     const reader = new FileReader();
     reader.onload = () => {
@@ -691,31 +691,31 @@ export function alertInfo(title, message) {
 
 export function getPathNavigation(opcion, idNavegacion) {
   if (opcion == "venta") {
-    return `/inicio/ventas/detalle?idVenta=${idNavegacion}`
+    return `/inicio/facturacion/ventas/detalle?idVenta=${idNavegacion}`
   }
 
   if (opcion == "cobro") {
-    return `/inicio/cobros/detalle?idCobro=${idNavegacion}`
+    return `/inicio/facturacion/cobros/detalle?idCobro=${idNavegacion}`
   }
 
   if (opcion == "compra") {
-    return `/inicio/compras/detalle?idCompra=${idNavegacion}`
+    return `/inicio/tesoreria/compras/detalle?idCompra=${idNavegacion}`
   }
 
   if (opcion == "gasto") {
-    return `/inicio/gastos/detalle?idGasto=${idNavegacion}`
+    return `/inicio/tesoreria/gastos/detalle?idGasto=${idNavegacion}`
   }
 
   if (opcion == "ajuste") {
-    return `/inicio/ajuste/detalle?idAjuste=${idNavegacion}`
+    return `/inicio/logistica/ajuste/detalle?idAjuste=${idNavegacion}`
   }
 
   if (opcion == "traslado") {
-    return `/inicio/traslado/detalle?idTraslado=${idNavegacion}`
+    return `/inicio/logistica/traslado/detalle?idTraslado=${idNavegacion}`
   }
 
   if (opcion == "cpe") {
-    return `/inicio/cpeelectronicos?comprobante=${idNavegacion}`
+    return `/inicio/cpe/cpeelectronicos?comprobante=${idNavegacion}`
   }
 }
 

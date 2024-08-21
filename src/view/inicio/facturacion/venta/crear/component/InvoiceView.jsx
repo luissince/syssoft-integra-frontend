@@ -259,11 +259,11 @@ class InvoiceView extends CustomComponent {
       <div className="h-100 d-flex flex-column items">
         <ItemSearch
           refProducto={this.refProducto}
-          refSearch={ this.refSearch}
+          refSearch={this.refSearch}
           buscar={buscar}
           tipo={tipo}
           handleSelectTipo={this.handleSelectTipo}
-          
+
           handleInputBuscar={this.handleInputBuscar}
           handleSearchCodBar={this.handleSearchCodBar}
           handleSearchText={this.handleSearchText}
@@ -328,7 +328,6 @@ const ItemSearch = (props) => {
                 ref={refSearch}
                 className="border border-success"
                 placeholder={`Buscar por código, nombres...`}
-                iconLeft={null}
                 refInput={refProducto}
                 onSearch={handleSearchText}
               />

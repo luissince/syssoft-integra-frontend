@@ -28,25 +28,17 @@ const Menu = (props) => {
       ></span>
 
       <ul className="app-nav">
+        {/* Navegar al menú de navegación */}
         <div className="dropdown">
-          {/* <a
-            className="app-nav__item"
-            href=""
-            onClick={handleCrearVenta}
-            aria-label="Abrir Perfil"
-            aria-expanded={false}
-          >
-            <i className="fast-sale fa fa-shopping-cart fa-lg"></i> Nueva venta
-          </a> */}
-
           <Link
             className="app-nav__item"
-            to={`${props.match.url}/ventas/crear`}>
+            to={`${props.match.url}/facturacion/ventas/crear`}>
             {' '}
             <i className="fast-sale fa fa-shopping-cart fa-lg"></i> Nueva venta
           </Link>
-
         </div>
+
+        {/* Lista de notificaciones */}
         <div className="dropdown">
           <a
             className="app-nav__item"
@@ -99,6 +91,8 @@ const Menu = (props) => {
             )}
           </ul>
         </div>
+
+        {/* Opcion de menus */}
         <div className="dropdown">
           <a
             className="app-nav__item"

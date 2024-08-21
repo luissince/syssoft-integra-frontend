@@ -221,7 +221,7 @@ class Traslado extends CustomComponent {
         loading: false,
         lista: response.data.result,
         totalPaginacion: totalPaginacion,
-      },()=>{
+      }, () => {
         this.updateReduxState();
       });
     }
@@ -439,8 +439,8 @@ class Traslado extends CustomComponent {
 
         <Row>
           <Column className="col-md-3" formGroup={true}>
-            <label>Tipo:</label>
             <Select
+              label={"Tipo:"}
               value={this.state.idTipoTraslado}
               onChange={this.handleSelectTipoTraslado}
             >
@@ -454,17 +454,17 @@ class Traslado extends CustomComponent {
           </Column>
 
           <Column className="col-md-3 col-sm-12" formGroup={true}>
-            <label>Fecha Inicio:</label>
             <Input
               type="date"
+              label={"Fecha Inicio:"}
               value={this.state.fechaInicio}
               onChange={this.handleInputFechaInicio}
             />
           </Column>
 
           <Column className="col-md-3 col-sm-12" formGroup={true}>
-            <label>Fecha Final:</label>
             <Input
+              label={"Fecha Final:"}
               type="date"
               value={this.state.fechaFinal}
               onChange={this.handleInputFechaFinal}
@@ -472,8 +472,8 @@ class Traslado extends CustomComponent {
           </Column>
 
           <Column className="col-md-3 col-sm-12" formGroup={true}>
-            <label>Sucursal:</label>
             <Select
+              label={"Sucursal:"}
               value={this.state.idSucursal}
               onChange={this.handleSelectSucursal}
             >
@@ -489,6 +489,8 @@ class Traslado extends CustomComponent {
         <Row>
           <Column className="col-md-6 col-sm-12" formGroup={true}>
             <Search
+              group={true}
+              iconLeft={<i className="bi bi-search"></i>}
               onSearch={this.searchText}
               placeholder="Buscar..."
             />

@@ -1,4 +1,6 @@
 import PropTypes from 'prop-types';
+import Row from './Row';
+import Column from './Column';
 
 /**
  * Componente de título.
@@ -11,9 +13,8 @@ import PropTypes from 'prop-types';
  */
 const Title = ({ title, subTitle, icon, handleGoBack }) => {
     return (
-        <div className="row">
-            <div className="col">
-                <div className="form-group">
+        <Row>
+            <Column formGroup={true}>
                     <h5>
                         {/* Renderiza un botón de retroceso si se proporciona la función handleGoBack */}
                         {handleGoBack !== undefined &&
@@ -25,9 +26,8 @@ const Title = ({ title, subTitle, icon, handleGoBack }) => {
                         {/* Renderiza el subtítulo y el icono si se proporciona */}
                         <small className="text-secondary"> {subTitle} {icon}</small>
                     </h5>
-                </div>
-            </div>
-        </div>
+            </Column>
+        </Row>
     );
 }
 

@@ -9,13 +9,14 @@ import ErrorResponse from '../../model/class/error-response';
 import { CANCELED } from '../../model/types/types';
 import Row from '../../components/Row';
 import ItemCard from './component/ItemCard';
-import Search from './component/Search';
 import Title from './component/Title';
 import { SpinnerView } from '../../components/Spinner';
 import { projectActive, signOut } from '../../redux/principalSlice';
 import PropTypes from 'prop-types';
 import { clearNoticacion } from '../../redux/noticacionSlice';
 import { clearPredeterminado } from '../../redux/predeterminadoSlice';
+import Column from '../../components/Column';
+import Input from '../../components/Input';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -137,11 +138,20 @@ class Principal extends CustomComponent {
           documento={"RUC: " + documento}
           handleSignOut={this.handleSignOut}
         />
-
-        <Search
-          refTxtSearch={this.refTxtSearch}
-          handleSearch={this.handleSearch}
-        />
+    
+        <Row>
+          <Column className="col-md-12 col-sm-12 col-12" formGroup={true}>
+            <Input
+              group={true}
+              iconLeft={<i className="bi bi-search"></i>}
+              className="bg-transparent"
+              type="search"
+              placeholder="Filtar por nombre de sucursal"
+              refInput={this.refTxtSearch}
+              onKeyUp={(event) => this.handleSearch(event.target.value)}
+            />
+          </Column>
+        </Row>
 
         <Row>
           {this.state.sucursales.map((item, index) => (

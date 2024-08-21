@@ -30,7 +30,6 @@ import CustomComponent from '../../../../../model/class/custom-component';
 import PropTypes from 'prop-types';
 import { SpinnerView } from '../../../../../components/Spinner';
 import Title from '../../../../../components/Title';
-import ModalTransaccion from '../../../../../components/ModalTransaccion';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -63,14 +62,10 @@ class GastoCrear extends CustomComponent {
       monedas: [],
 
       // Filtrar concepto
-      filtrarConcepto: '',
-      loadingConcepto: false,
       concepto: null,
       conceptos: [],
 
       // Filtrar cliente
-      filtrarCliente: '',
-      loadingCliente: false,
       cliente: null,
       clientes: [],
 
@@ -99,11 +94,11 @@ class GastoCrear extends CustomComponent {
 
     // Filtrar concepto
     this.refConcepto = React.createRef();
-    this.selectItemConcepto = false;
+    this.refValueConcepto = React.createRef();
 
     // Filtrar cliente
     this.refCliente = React.createRef();
-    this.selectItemCliente = false;
+    this.refValueCliente = React.createRef();
 
     // Referencia para el modal
     this.refMetodoPagoContenedor = React.createRef();
@@ -291,7 +286,7 @@ class GastoCrear extends CustomComponent {
 
     await this.handleClearInputConcepto();
 
-    this.refConcepto.current.focus();
+    this.refValueConcepto.current.focus();
   };
 
   removerGasto = (idConcepto) => {
@@ -529,28 +524,21 @@ class GastoCrear extends CustomComponent {
   // Filtrar concepto
   //------------------------------------------------------------------------------------------
 
-  handleClearInputConcepto = async () => {
-    await this.setStateAsync({
+  handleClearInputConcepto = () => {
+    this.setState({
       conceptos: [],
-      filtrarConcepto: '',
       concepto: null,
     });
-    this.selectItemConcepto = false;
   };
 
-  handleFilterConcepto = async (event) => {
-    const searchWord = this.selectItemConcepto ? '' : event.target.value;
-    await this.setStateAsync({ concepto: null, filtrarConcepto: searchWord });
+  handleFilterConcepto = async (value) => {
+    const searchWord = value;
+    this.setState({ concepto: null });
 
-    this.selectItemConcepto = false;
-    if (searchWord.length === 0) {
-      await this.setStateAsync({ conceptos: [] });
+    if (isEmpty(searchWord)) {
+      this.setState({ conceptos: [] });
       return;
     }
-
-    if (this.state.loadingConcepto) return;
-
-    await this.setStateAsync({ loadingConcepto: true });
 
     const params = {
       filtrar: searchWord,
@@ -558,46 +546,38 @@ class GastoCrear extends CustomComponent {
 
     const conceptos = await this.fetchFiltrarCobroConcepto(params);
 
-    await this.setStateAsync({ loadingConcepto: false, conceptos });
+    this.setState({ conceptos });
   };
 
-  handleSelectItemConcepto = async (value) => {
-    await this.setStateAsync({
+  handleSelectItemConcepto = (value) => {
+    this.refConcepto.current.initialize(value.nombre);
+    this.setState({
       concepto: value,
-      filtrarConcepto: value.nombre,
       conceptos: [],
+    }, () => {
+      this.refMonto.current.focus();
     });
-    this.selectItemConcepto = true;
-
-    this.refMonto.current.focus();
   };
 
   //------------------------------------------------------------------------------------------
   // Filtrar cliente
   //------------------------------------------------------------------------------------------
 
-  handleClearInputCliente = async () => {
-    await this.setStateAsync({
+  handleClearInputCliente = () => {
+    this.setState({
       clientes: [],
-      filtrarCliente: '',
       cliente: null,
     });
-    this.selectItemCliente = false;
   };
 
-  handleFilterCliente = async (event) => {
-    const searchWord = this.selectItemCliente ? '' : event.target.value;
-    await this.setStateAsync({ cliente: null, filtrarCliente: searchWord });
+  handleFilterCliente = async (value) => {
+    const searchWord = value;
+    this.setState({ cliente: null, });
 
-    this.selectItemCliente = false;
-    if (searchWord.length === 0) {
-      await this.setStateAsync({ clientes: [] });
+    if (isEmpty(searchWord)) {
+      this.setState({ clientes: [] });
       return;
     }
-
-    if (this.state.loadingCliente) return;
-
-    await this.setStateAsync({ loadingCliente: true });
 
     const params = {
       opcion: 1,
@@ -607,16 +587,15 @@ class GastoCrear extends CustomComponent {
 
     const clientes = await this.fetchFiltrarCliente(params);
 
-    await this.setStateAsync({ loadingCliente: false, clientes });
+    this.setState({ clientes });
   };
 
   handleSelectItemCliente = async (value) => {
-    await this.setStateAsync({
+    this.refCliente.current.initialize(value.documento + ' - ' + value.informacion);
+    this.setState({
       cliente: value,
-      filtrarCliente: value.documento + ' - ' + value.informacion,
       clientes: [],
     });
-    this.selectItemCliente = true;
   };
 
   //------------------------------------------------------------------------------------------
@@ -635,7 +614,7 @@ class GastoCrear extends CustomComponent {
 
     if (isEmpty(cliente)) {
       alertWarning('Gasto', 'Seleccione un cliente.', () =>
-        this.refCliente.current.focus(),
+        this.refValueCliente.current.focus(),
       );
       return;
     }
@@ -649,7 +628,7 @@ class GastoCrear extends CustomComponent {
 
     if (isEmpty(detalles)) {
       alertWarning('Gasto', 'Agregar algún concepto a la lista.', () =>
-        this.refConcepto.current.focus(),
+        this.refValueConcepto.current.focus(),
       );
       return;
     }
@@ -767,10 +746,10 @@ class GastoCrear extends CustomComponent {
               {/* Filtrar */}
               <div className="col-md-6">
                 <SearchInput
+                  ref={this.refConcepto}
                   autoFocus={true}
                   placeholder="Filtrar conceptos..."
-                  refValue={this.refConcepto}
-                  value={this.state.filtrarConcepto}
+                  refValue={this.refValueConcepto}
                   data={this.state.conceptos}
                   handleClearInput={this.handleClearInputConcepto}
                   handleFilter={this.handleFilterConcepto}
@@ -890,9 +869,9 @@ class GastoCrear extends CustomComponent {
 
             <div className="form-group">
               <SearchInput
+                ref={this.refCliente}
                 placeholder="Filtrar clientes..."
-                refValue={this.refCliente}
-                value={this.state.filtrarCliente}
+                refValue={this.refValueCliente}
                 data={this.state.clientes}
                 handleClearInput={this.handleClearInputCliente}
                 handleFilter={this.handleFilterCliente}

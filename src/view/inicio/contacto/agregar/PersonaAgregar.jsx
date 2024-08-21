@@ -34,6 +34,7 @@ import Button from '../../../../components/Button';
 import Select from '../../../../components/Select';
 import Input from '../../../../components/Input';
 import RadioButton from '../../../../components/RadioButton';
+import CheckBox, { Switches } from '../../../../components/Checks';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -62,7 +63,6 @@ class PersonaAgregar extends CustomComponent {
       genero: '',
       direccion: '',
       idUbigeo: '',
-      ubigeo: '',
 
       estadoCivil: '',
       predeterminado: false,
@@ -74,8 +74,7 @@ class PersonaAgregar extends CustomComponent {
 
       tiposDocumentos: [],
 
-      filter: false,
-      filteredData: [],
+      ubigeos: [],
     };
 
     this.refTipoDocumento = React.createRef();
@@ -88,11 +87,10 @@ class PersonaAgregar extends CustomComponent {
 
     this.refDireccion = React.createRef();
     this.refUbigeo = React.createRef();
+    this.refValueUbigeo = React.createRef();
     this.refFechaNacimiento = React.createRef();
 
     this.abortController = new AbortController();
-
-    this.selectItem = false;
   }
 
   async componentDidMount() {
@@ -255,18 +253,14 @@ class PersonaAgregar extends CustomComponent {
     }
   }
 
-  handleFilter = async (event) => {
-    const searchWord = this.selectItem ? '' : event.target.value;
-    await this.setStateAsync({ idUbigeo: '', ubigeo: searchWord });
-    this.selectItem = false;
-    if (searchWord.length === 0) {
-      await this.setStateAsync({ filteredData: [] });
+  handleFilterUbigeo = async (text) => {
+    const searchWord = text;
+    this.setState({ idUbigeo: '' });
+
+    if (isEmpty(searchWord)) {
+      this.setState({ ubigeos: [] });
       return;
     }
-
-    if (this.state.filter) return;
-
-    await this.setStateAsync({ filter: true });
 
     const params = {
       filtrar: searchWord,
@@ -275,34 +269,35 @@ class PersonaAgregar extends CustomComponent {
     const response = await getUbigeo(params);
 
     if (response instanceof SuccessReponse) {
-      await this.setStateAsync({ filter: false, filteredData: response.data });
+      this.setState({ ubigeos: response.data });
     }
 
     if (response instanceof ErrorResponse) {
-      await this.setStateAsync({ filter: false, filteredData: [] });
+      if (response.getType() === CANCELED) return;
+
+      this.setState({ ubigeos: [] });
     }
   }
 
-  handleSelectItem = async (value) => {
-    await this.setStateAsync({
-      ubigeo:
-        value.departamento +
-        '-' +
-        value.provincia +
-        '-' +
-        value.distrito +
-        ' (' +
-        value.ubigeo +
-        ')',
-      filteredData: [],
+  handleSelectItemUbigeo = (value) => {
+    this.refUbigeo.current.initialize(
+      value.departamento +
+      '-' +
+      value.provincia +
+      '-' +
+      value.distrito +
+      ' (' +
+      value.ubigeo +
+      ')'
+    );
+    this.setState({
+      ubigeos: [],
       idUbigeo: value.idUbigeo,
     });
-    this.selectItem = true;
   }
 
-  handleClearInput = async () => {
-    await this.setStateAsync({ filteredData: [], idUbigeo: '', ubigeo: '' });
-    this.selectItem = false;
+  handleClearInputUbigeo = () => {
+    this.setState({ ubigeos: [], idUbigeo: '' });
   }
 
   handleSave = () => {
@@ -348,7 +343,7 @@ class PersonaAgregar extends CustomComponent {
         const data = {
           idTipoCliente: this.state.idTipoCliente,
           idTipoDocumento: this.state.idTipoDocumento,
-          documento: this.state.documento.toString().trim().toUpperCase(),
+          documento: this.state.documento.toString().trim(),
           informacion: this.state.informacion.trim().toUpperCase(),
           cliente: this.state.cliente,
           proveedor: this.state.proveedor,
@@ -399,7 +394,6 @@ class PersonaAgregar extends CustomComponent {
       telefono,
       email,
       direccion,
-      ubigeo,
       estado,
       predeterminado,
     } = this.state;
@@ -430,6 +424,7 @@ class PersonaAgregar extends CustomComponent {
           <Column formGroup={true}>
             <RadioButton
               className='form-check-inline'
+              name='rbTipoCliente'
               id={CLIENTE_NATURAL}
               value={CLIENTE_NATURAL}
               checked={idTipoCliente === CLIENTE_NATURAL}
@@ -440,6 +435,7 @@ class PersonaAgregar extends CustomComponent {
 
             <RadioButton
               className='form-check-inline'
+              name='rbTipoCliente'
               id={CLIENTE_JURIDICO}
               value={CLIENTE_JURIDICO}
               checked={idTipoCliente === CLIENTE_JURIDICO}
@@ -452,10 +448,8 @@ class PersonaAgregar extends CustomComponent {
 
         <Row>
           <Column className='col-md-6 col-12' formGroup={true}>
-            <label>
-              Tipo Documento: <i className="fa fa-asterisk text-danger small"></i>
-            </label>
             <Select
+              label={<>Tipo Documento: <i className="fa fa-asterisk text-danger small"></i></>}
               className={`${idTipoDocumento ? '' : 'is-invalid'}`}
               value={idTipoDocumento}
               refSelect={this.refTipoDocumento}
@@ -481,29 +475,19 @@ class PersonaAgregar extends CustomComponent {
                 )
               }
             </Select>
-            {idTipoDocumento === '' && (
-              <div className="invalid-feedback">
-                Seleccione un valor.
-              </div>
-            )}
           </Column>
 
           <Column className='col-md-6 col-12' formGroup={true}>
-            <label>
-              N° de documento ({documento.length}):{' '}
-              <i className="fa fa-asterisk text-danger small"></i>
-            </label>
-
-            <div className="input-group is-invalid">
-              <Input
-                className={`${documento ? '' : 'is-invalid'}`}
-                refInput={this.refDocumento}
-                value={documento}
-                onChange={this.handleInputNumeroDocumento}
-                onKeyDown={keyNumberInteger}
-                placeholder="00000000"
-              />
-              <div className="input-group-append">
+            <Input
+              group={true}
+              label={<>   N° de documento ({documento.length}): <i className="fa fa-asterisk text-danger small"></i></>}
+              className={`${documento ? '' : 'is-invalid'}`}
+              refInput={this.refDocumento}
+              value={documento}
+              onChange={this.handleInputNumeroDocumento}
+              onKeyDown={keyNumberInteger}
+              placeholder="00000000"
+              buttonRight={<>
                 {
                   idTipoCliente === CLIENTE_NATURAL && (
                     <Button
@@ -526,25 +510,19 @@ class PersonaAgregar extends CustomComponent {
                     </Button>
                   )
                 }
-              </div>
-            </div>
-            {documento === '' && (
-              <div className="invalid-feedback">
-                Ingrese un valor.
-              </div>
-            )}
+              </>}
+            />
           </Column>
         </Row>
 
         <Row>
           <Column formGroup={true}>
-            <label>
-              {idTipoCliente === CLIENTE_NATURAL && 'Apellidos y Nombres:'}
-              {idTipoCliente === CLIENTE_JURIDICO && 'Razón Social:'}
-              <i className="fa fa-asterisk text-danger small"></i>
-            </label>
-
             <Input
+              label={<>
+                {idTipoCliente === CLIENTE_NATURAL && 'Apellidos y Nombres:'}
+                {idTipoCliente === CLIENTE_JURIDICO && 'Razón Social:'}
+                {' '}<i className="fa fa-asterisk text-danger small"></i>
+              </>}
               className={`${informacion ? '' : 'is-invalid'}`}
               refInput={this.refInformacion}
               value={informacion}
@@ -555,9 +533,6 @@ class PersonaAgregar extends CustomComponent {
                   : 'Ingrese su Razón Social'
               }
             />
-            {informacion === '' && (
-              <div className="invalid-feedback">Ingrese un valor.</div>
-            )}
           </Column>
         </Row>
 
@@ -566,38 +541,33 @@ class PersonaAgregar extends CustomComponent {
             <label>
               Tipo de Roles: <i className="fa fa-asterisk text-danger small"></i>
             </label>
-            <div className="form-check form-check">
-              <input className="form-check-input"
-                type="checkbox"
-                id="checkboxPnCliente"
-                checked={this.state.cliente}
-                onChange={(event) => {
-                  this.setState({ cliente: event.target.checked })
-                }} />
-              <label className="form-check-label" htmlFor="checkboxPnCliente"> Cliente</label>
-            </div>
 
-            <div className="form-check form-check">
-              <input className="form-check-input"
-                type="checkbox"
-                id="checkboxPnProveedor"
-                checked={this.state.proveedor}
-                onChange={(event) => {
-                  this.setState({ proveedor: event.target.checked })
-                }} />
-              <label className="form-check-label" htmlFor="checkboxPnProveedor"> Proveedor</label>
-            </div>
+            <CheckBox
+              id="checkboxPnCliente"
+              checked={this.state.cliente}
+              onChange={(event) => {
+                this.setState({ cliente: event.target.checked })
+              }}>
+              Cliente
+            </CheckBox>
 
-            <div className="form-check form-check">
-              <input className="form-check-input"
-                type="checkbox"
-                id="checkboxPnConductor"
-                checked={this.state.conductor}
-                onChange={(event) => {
-                  this.setState({ conductor: event.target.checked })
-                }} />
-              <label className="form-check-label" htmlFor="checkboxPnConductor"> Conductor</label>
-            </div>
+            <CheckBox
+              id="checkboxPnProveedor"
+              checked={this.state.proveedor}
+              onChange={(event) => {
+                this.setState({ proveedor: event.target.checked })
+              }}>
+              Proveedor
+            </CheckBox>
+
+            <CheckBox
+              id="checkboxPnConductor"
+              checked={this.state.conductor}
+              onChange={(event) => {
+                this.setState({ conductor: event.target.checked })
+              }}>
+              Conductor
+            </CheckBox>
             {
               this.state.conductor && (
                 <Row>
@@ -621,9 +591,8 @@ class PersonaAgregar extends CustomComponent {
         {idTipoCliente === 'TC0001' &&
           <Row>
             <Column className='col-md-4' formGroup={true}>
-              <label>Genero: </label>
-
               <Select
+                label={"Genero:"}
                 refSelect={this.refGenero}
                 value={genero}
                 onChange={this.handleSelectGenero}
@@ -635,8 +604,8 @@ class PersonaAgregar extends CustomComponent {
             </Column>
 
             <Column className='col-md-4' formGroup={true}>
-              <label>Estado Civil:</label>
               <Select
+                label={"Estado Civil:"}
                 value={estadoCivil}
                 onChange={this.handleSelectEstadoCvil}
               >
@@ -649,11 +618,10 @@ class PersonaAgregar extends CustomComponent {
             </Column>
 
             <Column className='col-md-4' formGroup={true}>
-              <label>Fecha de Nacimiento:</label>
-              <input
+              <Input
+                label={"Fecha de Nacimiento:"}
                 type="date"
-                className="form-control"
-                ref={this.refFechaNacimiento}
+                refInput={this.refFechaNacimiento}
                 value={fechaNacimiento}
                 onChange={this.handleInputFechaNacimiento}
               />
@@ -663,9 +631,8 @@ class PersonaAgregar extends CustomComponent {
 
         <Row>
           <Column formGroup={true}>
-            <label>Observación:</label>
-
             <Input
+              label={"Observación:"}
               value={observacion}
               onChange={this.handleInputObservacion}
               placeholder="Ingrese alguna observación"
@@ -675,9 +642,8 @@ class PersonaAgregar extends CustomComponent {
 
         <Row>
           <Column className='col-md-6 col-12' formGroup={true}>
-            <label>N° de Celular:</label>
-
             <Input
+              label={"N° de Celular:"}
               value={celular}
               refInput={this.refCelular}
               onChange={this.handleInputCelular}
@@ -687,9 +653,8 @@ class PersonaAgregar extends CustomComponent {
           </Column>
 
           <Column className='col-md-6 col-12' formGroup={true}>
-            <label>N° de Telefono:</label>
-
             <Input
+              label={"N° de Telefono:"}
               value={telefono}
               refInput={this.refTelefono}
               onChange={this.handleInputTelefono}
@@ -701,9 +666,8 @@ class PersonaAgregar extends CustomComponent {
 
         <Row>
           <Column formGroup={true}>
-            <label>E-Mail:</label>
-
             <Input
+              label={"E-Mail:"}
               type="email"
               value={email}
               onChange={this.handleInputEmail}
@@ -714,9 +678,8 @@ class PersonaAgregar extends CustomComponent {
 
         <Row>
           <Column formGroup={true}>
-            <label>Dirección:</label>
-
             <Input
+              label={"Dirección:"}
               refInput={this.refDireccion}
               value={direccion}
               onChange={this.handleInputDireccion}
@@ -727,15 +690,15 @@ class PersonaAgregar extends CustomComponent {
 
         <Row>
           <Column formGroup={true}>
-            <label>Ubigeo:</label>
             <SearchInput
+              ref={this.refUbigeo}
+              label={"Ubigeo:"}
               placeholder="Escribe para iniciar a filtrar..."
-              refValue={this.refUbigeo}
-              value={ubigeo}
-              data={this.state.filteredData}
-              handleClearInput={this.handleClearInput}
-              handleFilter={this.handleFilter}
-              handleSelectItem={this.handleSelectItem}
+              refValue={this.refValueUbigeo}
+              data={this.state.ubigeos}
+              handleClearInput={this.handleClearInputUbigeo}
+              handleFilter={this.handleFilterUbigeo}
+              handleSelectItem={this.handleSelectItemUbigeo}
               renderItem={(value) =>
                 <>
                   {value.departamento +
@@ -754,37 +717,25 @@ class PersonaAgregar extends CustomComponent {
 
         <Row>
           <Column className='col-md-6 col-12' formGroup={true}>
-            <label>Estado:</label>
-
-            <div className="custom-control custom-switch">
-              <input
-                type="checkbox"
-                className="custom-control-input"
-                id="switch1"
-                checked={estado}
-                onChange={this.handleInputEstado}
-              />
-              <label className="custom-control-label" htmlFor="switch1">
-                {estado ? 'Activo' : 'Inactivo'}
-              </label>
-            </div>
+            <Switches
+              label={"Estado:"}
+              id={"stEstado"}
+              checked={estado}
+              onChange={this.handleInputEstado}
+            >
+              {estado ? 'Activo' : 'Inactivo'}
+            </Switches>
           </Column>
 
           <Column className='col-md-6 col-12' formGroup={true}>
-            <label>Predeterminado:</label>
-
-            <div className="custom-control custom-switch">
-              <input
-                type="checkbox"
-                className="custom-control-input"
-                id="switch2"
-                checked={predeterminado}
-                onChange={this.handleInputPredeterminado}
-              />
-              <label className="custom-control-label" htmlFor="switch2">
-                {predeterminado ? 'Si' : 'No'}
-              </label>
-            </div>
+            <Switches
+              label={"Predeterminado:"}
+              id={"stPredeterminado"}
+              checked={predeterminado}
+              onChange={this.handleInputPredeterminado}
+            >
+              {predeterminado ? 'Si' : 'No'}
+            </Switches>
           </Column>
         </Row>
 
@@ -793,16 +744,16 @@ class PersonaAgregar extends CustomComponent {
             <Button
               className='btn-primary mr-2'
               onClick={this.handleSave}
-              icono={<i className='fa fa-plus'></i>}
-              text={"Guardar"}
-            />
+            >
+              <i className='fa fa-plus'></i> Guardar
+            </Button>
 
             <Button
               className='btn-danger'
               onClick={() => this.props.history.goBack()}
-              icono={<i className='fa fa-close'></i>}
-              text={"Cancelar"}
-            />
+            >
+              <i className='fa fa-close'></i> Cancelar
+            </Button>
           </Column>
         </Row>
       </ContainerWrapper>

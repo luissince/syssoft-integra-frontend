@@ -269,6 +269,8 @@ class Compras extends CustomComponent {
         <Row>
           <Column className="col-md-6 col-sm-12">
             <Search
+              group={true}
+              iconLeft={<i className="bi bi-search"></i>}
               onSearch={this.searchText}
               placeholder="Buscar..."
             />

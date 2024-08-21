@@ -26,6 +26,7 @@ import Column from '../../../../components/Column';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { setKardexData, setKardexPaginacion } from '../../../../redux/predeterminadoSlice';
+import Select from '../../../../components/Select';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -47,9 +48,8 @@ class Kardex extends CustomComponent {
       producto: null,
       cantidad: 0,
       costo: 0,
-      filtrar: '',
+
       productos: [],
-      loadingProducto: false,
 
       idAlmacen: '',
       nombreAlmacen: 'TODOS LOS ALMACENES',
@@ -72,9 +72,9 @@ class Kardex extends CustomComponent {
     };
 
     this.refProducto = React.createRef();
-    this.refIdAlmacen = React.createRef();
+    this.refValueProducto = React.createRef();
 
-    this.selectItemProducto = false;
+    this.refIdAlmacen = React.createRef();
 
     this.abortControllerTable = new AbortController();
   }
@@ -86,7 +86,6 @@ class Kardex extends CustomComponent {
   componentWillUnmount() {
     this.abortControllerTable.abort();
   }
-
 
   loadingData = async () => {
     if (this.props.kardex && this.props.kardex.data) {
@@ -103,7 +102,6 @@ class Kardex extends CustomComponent {
         this.updateReduxState();
       });
     }
-
   }
 
   updateReduxState() {
@@ -117,7 +115,6 @@ class Kardex extends CustomComponent {
     //   messagePaginacion: this.refPaginacion.current.messagePaginacion,
     // });
   }
-
 
   async fetchComboAlmacen(params) {
     const response = await comboAlmacen(params, this.abortControllerTable.signal);
@@ -206,23 +203,17 @@ class Kardex extends CustomComponent {
   //------------------------------------------------------------------------------------------
 
   handleClearInputProducto = async () => {
-    await this.setStateAsync({ productos: [], filtrar: '', producto: null });
-    this.selectItemProducto = false;
+    this.setState({ productos: [], producto: null });
   };
 
-  handleFilterProducto = async (event) => {
-    const searchWord = this.selectItemProducto ? '' : event.target.value;
-    await this.setStateAsync({ producto: null, filtrar: searchWord });
+  handleFilterProducto = async (value) => {
+    const searchWord = value;
+    this.setState({ producto: null });
 
-    this.selectItemProducto = false;
-    if (searchWord.length === 0) {
-      await this.setStateAsync({ productos: [] });
+    if (isEmpty(searchWord)) {
+      this.setState({ productos: [] });
       return;
     }
-
-    if (this.state.loadingProducto) return;
-
-    await this.setStateAsync({ loadingProducto: true });
 
     const params = {
       filtrar: searchWord,
@@ -230,18 +221,17 @@ class Kardex extends CustomComponent {
 
     const productos = await this.fetchFiltrarProducto(params);
 
-    await this.setStateAsync({ loadingProducto: false, productos });
+    this.setState({ productos });
   };
 
   handleSelectItemProducto = async (value) => {
-    await this.setStateAsync({
+    this.refProducto.current.initialize(value.nombre);
+    this.setState({
       producto: value,
-      filtrar: value.nombre,
       productos: [],
+    }, () => {
+      this.loadDataKardex(value.idProducto)
     });
-    this.selectItemProducto = true;
-
-    this.loadDataKardex(value.idProducto)
   };
 
   handleSelectAlmacen = (event) => {
@@ -365,11 +355,12 @@ class Kardex extends CustomComponent {
 
         <Row>
           <Column className="col-md-9 col-12">
-            <label>Filtrar los productos por código o nombre:</label>
             <SearchInput
+              ref={this.refProducto}
+              autoFocus={true}
+              label={"Filtrar los productos por código o nombre:"}
               placeholder="Filtrar productos..."
-              refValue={this.refProducto}
-              value={this.state.filtrar}
+              refValue={this.refValueProducto}
               data={this.state.productos}
               handleClearInput={this.handleClearInputProducto}
               handleFilter={this.handleFilterProducto}
@@ -384,29 +375,23 @@ class Kardex extends CustomComponent {
           </Column>
 
           <Column className="col-md-3 col-12" formGroup={true}>
-            <label>Almacen:</label>
-            <div className="input-group">
-              <div className="input-group-prepend">
-                <div className="input-group-text">
-                  <i className="fa fa-building"></i>
-                </div>
-              </div>
-              <select
-                className="form-control"
-                ref={this.refIdAlmacen}
-                value={this.state.idAlmacen}
-                onChange={this.handleSelectAlmacen}
-              >
-                <option value="">-- Almacen --</option>
-                {this.state.almacenes.map((item, index) => {
-                  return (
-                    <option key={index} value={item.idAlmacen}>
-                      {item.nombre}
-                    </option>
-                  );
-                })}
-              </select>
-            </div>
+            <Select
+              group={true}
+              iconLeft={<i className="fa fa-building"></i>}
+              label={"Almacen:"}
+              refSelect={this.refIdAlmacen}
+              value={this.state.idAlmacen}
+              onChange={this.handleSelectAlmacen}
+            >
+              <option value="">-- Almacen --</option>
+              {this.state.almacenes.map((item, index) => {
+                return (
+                  <option key={index} value={item.idAlmacen}>
+                    {item.nombre}
+                  </option>
+                );
+              })}
+            </Select>
           </Column>
         </Row>
 

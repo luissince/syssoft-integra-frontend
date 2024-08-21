@@ -6,9 +6,9 @@ import PropTypes from 'prop-types';
  * @param {ReactNode} props.children - Elementos hijos del componente.
  * @returns {JSX.Element} Componente de fila.
  */
-const Row = ({ children }) => {
+const Row = ({ className = "", children }) => {
     return (
-        <div className="row">
+        <div className={`row ${className}`}>
             {children}
         </div>
     );
@@ -16,6 +16,7 @@ const Row = ({ children }) => {
 
 // Definir propTypes para las propiedades del componente
 Row.propTypes = {
+    className: PropTypes.string,
     children: PropTypes.node.isRequired, // Los elementos hijos son requeridos y pueden ser cualquier nodo React
 };
 

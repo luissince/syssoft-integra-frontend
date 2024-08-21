@@ -1,6 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+/**
+ * Componente que representa una funcionalidad específica.
+ * @class
+ * @extends React.Component
+ */
 class Paginacion extends React.Component {
   constructor(props) {
     super(props);

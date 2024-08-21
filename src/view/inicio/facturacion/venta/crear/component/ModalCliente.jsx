@@ -58,165 +58,148 @@ const ModalCliente = (props) => {
 
             {/* Navegación por pestañas para Persona Natural y Persona Jurídica */}
             <Row>
-              <Column>
+              <Column className="col-md-12">
                 <label>
-                  Tipo de Cliente: <i className="fa fa-asterisk text-danger small"></i>
+                  Tipo de Persona: <i className="fa fa-asterisk text-danger small"></i>
                 </label>
+              </Column>
 
-                <div className="form-group">
-                  <RadioButton
-                    className='form-check-inline'
-                    id={CLIENTE_NATURAL}
-                    value={CLIENTE_NATURAL}
-                    checked={idTipoCliente === CLIENTE_NATURAL}
-                    onChange={handleClickIdTipoCliente}
-                  >
-                    <i className="bi bi-person"></i> Persona Natural
-                  </RadioButton>
+              <Column formGroup={true}>
+                <RadioButton
+                  className='form-check-inline'
+                  name="ckTipoPersona"
+                  id={CLIENTE_NATURAL}
+                  value={CLIENTE_NATURAL}
+                  checked={idTipoCliente === CLIENTE_NATURAL}
+                  onChange={handleClickIdTipoCliente}
+                >
+                  <i className="bi bi-person"></i> Persona Natural
+                </RadioButton>
 
-                  <RadioButton
-                    className='form-check-inline'
-                    id={CLIENTE_JURIDICO}
-                    value={CLIENTE_JURIDICO}
-                    checked={idTipoCliente === CLIENTE_JURIDICO}
-                    onChange={handleClickIdTipoCliente}
-                  >
-                    <i className="bi bi-building"></i> Persona Juridica
-                  </RadioButton>
-                </div>
+                <RadioButton
+                  className='form-check-inline'
+                  name="ckTipoPersona"
+                  id={CLIENTE_JURIDICO}
+                  value={CLIENTE_JURIDICO}
+                  checked={idTipoCliente === CLIENTE_JURIDICO}
+                  onChange={handleClickIdTipoCliente}
+                >
+                  <i className="bi bi-building"></i> Persona Juridica
+                </RadioButton>
               </Column>
             </Row>
 
             <Row>
-              <Column>
-                <div className="form-group">
-                  <label>
-                    Tipo Documento: <i className="fa fa-asterisk text-danger small"></i>{' '}
-                  </label>
-                  <Select
-                    refSelect={refIdTipoDocumento}
-                    value={idTipoDocumento}
-                    onChange={handleSelectIdTipoDocumento}>
-                    <option value={""}>- Seleccione -</option>
+              <Column formGroup={true}>
+                <Select
+                  label={<> Tipo Documento: <i className="fa fa-asterisk text-danger small"></i></>}
+                  refSelect={refIdTipoDocumento}
+                  value={idTipoDocumento}
+                  onChange={handleSelectIdTipoDocumento}>
+                  <option value={""}>- Seleccione -</option>
+                  {
+                    idTipoCliente === CLIENTE_NATURAL && (
+                      tiposDocumentos.filter((item) => item.idTipoDocumento !== 'TD0003').map((item, index) => (
+                        <option key={index} value={item.idTipoDocumento}>
+                          {item.nombre}
+                        </option>
+                      ))
+                    )
+                  }
+                  {
+                    idTipoCliente === CLIENTE_JURIDICO && (
+                      tiposDocumentos.filter((item) => item.idTipoDocumento === 'TD0003').map((item, index) => (
+                        <option key={index} value={item.idTipoDocumento}>
+                          {item.nombre}
+                        </option>
+                      ))
+                    )
+                  }
+                </Select>
+              </Column>
+            </Row>
+
+            <Row>
+              <Column formGroup={true}>
+                <Input
+                  autoFocus={true}
+                  group={true}
+                  label={<> N° de documento ({numeroDocumento.length}): <i className="fa fa-asterisk text-danger small"></i></>}
+                  placeholder="00000000"
+                  refInput={refNumeroDocumento}
+                  value={numeroDocumento}
+                  onChange={handleInputNumeroDocumento}
+                  onKeyDown={keyNumberInteger}
+                  onPaste={handlePasteInteger}
+                  buttonRight={<>
                     {
                       idTipoCliente === CLIENTE_NATURAL && (
-                        tiposDocumentos.filter((item) => item.idTipoDocumento !== 'TD0003').map((item, index) => (
-                          <option key={index} value={item.idTipoDocumento}>
-                            {item.nombre}
-                          </option>
-                        ))
+                        <Button
+                          className="btn-outline-secondary"
+                          title="Reniec"
+                          onClick={handleApiReniec}
+                        >
+                          <img src={images.reniec} alt="Reniec" width="12" />
+                        </Button>
                       )
                     }
                     {
                       idTipoCliente === CLIENTE_JURIDICO && (
-                        tiposDocumentos.filter((item) => item.idTipoDocumento === 'TD0003').map((item, index) => (
-                          <option key={index} value={item.idTipoDocumento}>
-                            {item.nombre}
-                          </option>
-                        ))
+                        <Button
+                          className="btn-outline-secondary"
+                          title="Sunat"
+                          onClick={handleApiSunat}
+                        >
+                          <img src={images.sunat} alt="Sunat" width="12" />
+                        </Button>
                       )
                     }
-                  </Select>
-                </div>
+                  </>}
+                />
               </Column>
             </Row>
 
             <Row>
-              <Column>
-                <div className="form-group">
-                  <label>
-                    N° de documento ({numeroDocumento.length}): <i className="fa fa-asterisk text-danger small"></i>
-                  </label>
-                  <div className="input-group is-invalid">
-                    <Input
-                      autoFocus={true}
-                      placeholder="00000000"
-                      refInput={refNumeroDocumento}
-                      value={numeroDocumento}
-                      onChange={handleInputNumeroDocumento}
-                      onKeyDown={keyNumberInteger}
-                      onPaste={handlePasteInteger}
-                    />
-                    <div className="input-group-append">
-                      {
-                        idTipoCliente === CLIENTE_NATURAL && (
-                          <Button
-                            className="btn-outline-secondary"
-                            title="Reniec"
-                            onClick={handleApiReniec}
-                          >
-                            <img src={images.reniec} alt="Reniec" width="12" />
-                          </Button>
-                        )
-                      }
-                      {
-                        idTipoCliente === CLIENTE_JURIDICO && (
-                          <Button
-                            className="btn-outline-secondary"
-                            title="Sunat"
-                            onClick={handleApiSunat}
-                          >
-                            <img src={images.sunat} alt="Sunat" width="12" />
-                          </Button>
-                        )
-                      }
-                    </div>
-                  </div>
-                </div>
-              </Column>
-            </Row>
-
-            <Row>
-              <Column>
-                <div className="form-group">
-                  <label>
+              <Column formGroup={true}>
+                <Input
+                  label={<>
                     {idTipoCliente === CLIENTE_NATURAL && 'Apellidos y Nombres:'}
                     {idTipoCliente === CLIENTE_JURIDICO && 'Razón Social:'}
-                    <i className="fa fa-asterisk text-danger small"></i>{' '}
-                  </label>
-                  <Input
-                    placeholder={
-                      idTipoCliente === CLIENTE_NATURAL ? 'Ingrese sus Apellidos y Nombres' : 'Ingrese su Razón Social'
-                    }
-                    refInput={refInformacion}
-                    value={informacion}
-                    onChange={handleInputInformacion}
-                  />
-                </div>
+                    <i className="fa fa-asterisk text-danger small"></i>
+                  </>}
+                  placeholder={
+                    idTipoCliente === CLIENTE_NATURAL ? 'Ingrese sus Apellidos y Nombres' : 'Ingrese su Razón Social'
+                  }
+                  refInput={refInformacion}
+                  value={informacion}
+                  onChange={handleInputInformacion}
+                />
               </Column>
             </Row>
 
 
             <Row>
-              <Column>
-                <div className="form-group">
-                  <label>
-                    N° de Celular:
-                  </label>
-                  <Input
-                    placeholder="Ingrese el número de celular."
-                    onKeyDown={keyNumberPhone}
-                    refInput={refNumeroCelular}
-                    value={numeroCelular}
-                    onChange={handleInputNumeroCelular}
-                  />
-                </div>
+              <Column formGroup={true}>
+                <Input
+                  label={"N° de Celular:"}
+                  placeholder="Ingrese el número de celular."
+                  onKeyDown={keyNumberPhone}
+                  refInput={refNumeroCelular}
+                  value={numeroCelular}
+                  onChange={handleInputNumeroCelular}
+                />
               </Column>
             </Row>
 
             <Row>
-              <Column>
-                <div className="form-group">
-                  <label>
-                    Dirección:
-                  </label>
-                  <Input
-                    placeholder="Ingrese la dirección"
-                    refInput={refDireccion}
-                    value={direccion}
-                    onChange={handleInputDireccion}
-                  />
-                </div>
+              <Column formGroup={true}>
+                <Input
+                  label={" Dirección:"}
+                  placeholder="Ingrese la dirección"
+                  refInput={refDireccion}
+                  value={direccion}
+                  onChange={handleInputDireccion}
+                />
               </Column>
             </Row>
           </div>

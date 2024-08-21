@@ -47,9 +47,10 @@ class Search extends React.Component {
     return (
       <Input
         autoFocus={true}
+        group={this.props.group}
         className={this.props.className}
         refInput={this.props.refInput}
-        iconLeft={this.props.iconLeft === null ? null : <i className="bi bi-search"></i>}
+        iconLeft={this.props.iconLeft}
         placeholder={this.props.placeholder}
         value={this.state.searchTerm}
         buttonRight={this.props.buttonRight}
@@ -62,6 +63,7 @@ class Search extends React.Component {
 
 Search.propTypes = {
   refInput: PropTypes.object,
+  group: PropTypes.bool,
   onSearch: PropTypes.func.isRequired,
   iconLeft: PropTypes.element,
   placeholder: PropTypes.string,

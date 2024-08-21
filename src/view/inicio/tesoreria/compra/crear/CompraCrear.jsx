@@ -41,6 +41,7 @@ import ModalProducto from './component/ModalProducto';
 import ModalProveedor from '../../common/ModalProveedor';
 import ModalTransaccion from '../../../../../components/ModalTransaccion';
 import { clearCrearCompra, setCrearCompraLocal, setCrearCompraState } from '../../../../../redux/predeterminadoSlice';
+import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -77,20 +78,16 @@ class CompraCrear extends CustomComponent {
       impuestos: [],
 
       // Filtrar producto
-      filtrarProducto: '',
-      loadingProducto: false,
       producto: null,
       productos: [],
 
       // Filtrar persona
-      filtrarPersona: '',
-      loadingPersona: false,
       persona: null,
       personas: [],
 
       // Atributos libres
       codiso: '',
-      importeTotal: 0,
+      total: 0,
 
       // Atributos del modal sale
       isOpenTerminal: false,
@@ -117,11 +114,11 @@ class CompraCrear extends CustomComponent {
 
     // Filtrar producto
     this.refProducto = React.createRef();
-    this.selectItemProducto = false;
+    this.refValueProducto = React.createRef();
 
     // Filtrar persona
-    this.refFilerPersona = React.createRef();
-    this.selectItemPersona = false;
+    this.refPersona = React.createRef();
+    this.refValuePersona = React.createRef();
 
     // Referencia para el modal persona
     this.refModalCliente = React.createRef();
@@ -131,6 +128,11 @@ class CompraCrear extends CustomComponent {
 
     //Anular las peticiones
     this.abortController = new AbortController();
+
+    this.refTable = React.createRef();
+    this.refTaleBody = React.createRef();
+    this.index = -1;
+    this.cells = [];
   }
 
   /*
@@ -176,8 +178,11 @@ class CompraCrear extends CustomComponent {
   loadData = async () => {
     if (this.props.compraCrear && this.props.compraCrear.state && this.props.compraCrear.local) {
       this.setState(this.props.compraCrear.state);
-      this.selectItemProducto = this.props.compraCrear.local.selectItemProducto;
-      this.selectItemPersona = this.props.compraCrear.local.selectItemPersona;
+      if (this.props.compraCrear.state.persona) {
+        this.handleSelectItemPersona(this.props.compraCrear.state.persona);
+      }
+      this.index = this.props.compraCrear.local.index;
+      this.cells = this.props.compraCrear.local.cells;
     } else {
       const [comprobantes, monedas, almacenes, impuestos] =
         await Promise.all([
@@ -210,20 +215,21 @@ class CompraCrear extends CustomComponent {
   updateReduxState() {
     this.props.setCrearCompraState(this.state)
     this.props.setCrearCompraLocal({
-      selectItemProducto: this.selectItemProducto,
-      selectItemPersona: this.selectItemPersona,
+      index: this.index,
+      cells: this.cells,
     })
   }
 
   clearView = () => {
     this.setState(this.initial, async () => {
+      await this.refProducto.current.restart();
+      await this.refPersona.current.restart();
       await this.props.clearCrearCompra();
       await this.loadData();
 
-      this.selectItemProducto = false;
-      this.selectItemPersona = false;
-
-      this.refProducto.current.focus();
+      this.refValueProducto.current.focus();
+      this.index = -1;
+      this.cells = [];
 
       this.updateReduxState();
     });
@@ -399,10 +405,17 @@ class CompraCrear extends CustomComponent {
   };
 
   handleRemoverProducto = (idProducto) => {
-    const detalles = this.state.detalles.filter((item) => item.idProducto !== idProducto);
+    const detalles = this.state.detalles.filter((item) => item.idProducto !== idProducto).map((item, index) => ({
+      ...item,
+      id: ++index
+    }));
 
-    const importeTotal = detalles.reduce((accumulate, item) => (accumulate += item.cantidad * item.costo), 0);
-    this.setState({ detalles, importeTotal }, () => {
+    if (isEmpty(this.state.detalles)) {
+      this.index = -1;
+    }
+
+    const total = detalles.reduce((accumulate, item) => (accumulate += item.cantidad * item.costo), 0);
+    this.setState({ detalles, total }, () => {
       this.updateReduxState();
     });
   };
@@ -432,12 +445,12 @@ class CompraCrear extends CustomComponent {
   }
 
   handleSaveProducto = async (detalles, callback = async function () { }) => {
-    const importeTotal = detalles.reduce((accumulate, item) => (accumulate += item.cantidad * item.costo), 0);
-    this.setState({ detalles, importeTotal }, () => {
+    const total = detalles.reduce((accumulate, item) => (accumulate += item.cantidad * item.costo), 0);
+    this.setState({ detalles, total }, () => {
       this.updateReduxState();
     });
     await callback();
-    this.refProducto.current.focus();
+    this.refValueProducto.current.focus();
   }
 
   //------------------------------------------------------------------------------------------
@@ -455,30 +468,23 @@ class CompraCrear extends CustomComponent {
   // Filtrar productos
   //------------------------------------------------------------------------------------------
 
-  handleClearInputProducto = async () => {
-    await this.setStateAsync({
+  handleClearInputProducto = () => {
+    this.setState({
       productos: [],
-      filtrarProducto: '',
       producto: null,
+    }, () => {
+      this.updateReduxState();
     });
-    this.selectItemProducto = false;
-
-    this.updateReduxState();
   };
 
-  handleFilterProducto = async (event) => {
-    const searchWord = this.selectItemProducto ? '' : event.target.value;
-    await this.setStateAsync({ producto: null, filtrarProducto: searchWord });
+  handleFilterProducto = async (text) => {
+    const searchWord = text;
+    this.setState({ producto: null });
 
-    this.selectItemProducto = false;
-    if (searchWord.length === 0) {
-      await this.setStateAsync({ productos: [] });
+    if (isEmpty(searchWord)) {
+      this.setState({ productos: [] });
       return;
     }
-
-    if (this.state.loadingProducto) return;
-
-    await this.setStateAsync({ loadingProducto: true });
 
     const params = {
       filtrar: searchWord,
@@ -491,49 +497,41 @@ class CompraCrear extends CustomComponent {
 
     this.setState({
       productos: filteredProductos,
-      loadingProducto: false,
     });
   };
 
-  handleSelectItemProducto = async (value) => {
-    await this.setStateAsync({
+  handleSelectItemProducto = (value) => {
+    this.refProducto.current.initialize(value.nombre);
+    this.setState({
       producto: value,
-      filtrarProducto: value.nombre,
       productos: [],
-    });
-    this.selectItemProducto = true;
-    this.updateReduxState();
+    }, () => {
+      this.updateReduxState();
 
-    this.handleOpenModalProducto(value);
+      this.handleOpenModalProducto(value);
+    });
   };
 
   //------------------------------------------------------------------------------------------
   // Filtrar persona
   //------------------------------------------------------------------------------------------
-  handleClearInputPersona = async () => {
-    await this.setStateAsync({
+  handleClearInputPersona = () => {
+    this.setState({
       personas: [],
-      filtrarPersona: '',
       persona: null,
+    }, () => {
+      this.updateReduxState();
     });
-    this.selectItemPersona = false;
-
-    this.updateReduxState();
   };
 
-  handleFilterPersona = async (event) => {
-    const searchWord = this.selectItemPersona ? '' : event.target.value;
-    await this.setStateAsync({ persona: null, filtrarPersona: searchWord });
+  handleFilterPersona = async (text) => {
+    const searchWord = text;
+    this.setState({ persona: null, });
 
-    this.selectItemPersona = false;
-    if (searchWord.length === 0) {
-      await this.setStateAsync({ personas: [] });
+    if (isEmpty(searchWord)) {
+      this.setState({ personas: [] });
       return;
     }
-
-    if (this.state.loadingPersona) return;
-
-    await this.setStateAsync({ loadingPersona: true });
 
     const params = {
       opcion: 1,
@@ -543,18 +541,17 @@ class CompraCrear extends CustomComponent {
 
     const personas = await this.fetchFiltrarCliente(params);
 
-    await this.setStateAsync({ loadingPersona: false, personas });
+    this.setState({ personas });
   };
 
   handleSelectItemPersona = async (value) => {
-    await this.setStateAsync({
+    this.refPersona.current.initialize(value.documento + ' - ' + value.informacion);
+    this.setState({
       persona: value,
-      filtrarPersona: value.documento + ' - ' + value.informacion,
       personas: [],
+    }, () => {
+      this.updateReduxState();
     });
-    this.selectItemPersona = true;
-
-    this.updateReduxState();
   };
 
   //------------------------------------------------------------------------------------------
@@ -573,7 +570,7 @@ class CompraCrear extends CustomComponent {
 
     if (isEmpty(persona)) {
       alertWarning('Compra', 'Seleccione un proveedor.', () =>
-        this.refFilerPersona.current.focus(),
+        this.refValuePersona.current.focus(),
       );
       return;
     }
@@ -600,7 +597,7 @@ class CompraCrear extends CustomComponent {
 
     if (isEmpty(detalles)) {
       alertWarning('Compra', 'Agregar algún producto a la lista.', () =>
-        this.refProducto.current.focus(),
+        this.refValueProducto.current.focus(),
       );
       return;
     }
@@ -684,7 +681,7 @@ class CompraCrear extends CustomComponent {
     });
   };
 
-  handleProcessCredito = async (idFormaPago, numeroCuotas, frecuenciaPagoCredito, importeTotal, callback = async function () { }) => {
+  handleProcessCredito = async (idFormaPago, numeroCuotas, frecuenciaPagoCredito, total, callback = async function () { }) => {
     const {
       idComprobante,
       persona,
@@ -715,7 +712,7 @@ class CompraCrear extends CustomComponent {
           frecuenciaPago: frecuenciaPagoCredito,
           numeroCuotas: numeroCuotas,
           detalles: detalles,
-          importeTotal: importeTotal
+          importeTotal: total
         };
 
         await callback();
@@ -754,7 +751,7 @@ class CompraCrear extends CustomComponent {
     |
     */
 
-  generarBody() {
+  generateBody() {
     const { detalles } = this.state;
 
     if (isEmpty(detalles)) {
@@ -765,27 +762,43 @@ class CompraCrear extends CustomComponent {
       );
     }
 
+    const widthCell1 = isEmpty(this.cells) ? "auto" : this.cells[0].offsetWidth + "px";
+    const widthCell2 = isEmpty(this.cells) ? "auto" : this.cells[1].offsetWidth + "px";
+    const widthCell3 = isEmpty(this.cells) ? "auto" : this.cells[2].offsetWidth + "px";
+    const widthCell4 = isEmpty(this.cells) ? "auto" : this.cells[3].offsetWidth + "px";
+    const widthCell5 = isEmpty(this.cells) ? "auto" : this.cells[4].offsetWidth + "px";
+    const widthCell6 = isEmpty(this.cells) ? "auto" : this.cells[5].offsetWidth + "px";
+
     return detalles.map((item, index) => (
-      <tr key={index}>
-        <td className="text-center">{item.id}</td>
-        <td>
-          {item.codigo}
-          <br />
-          {item.nombre}
-        </td>
-        <td>{rounded(item.cantidad)}</td>
-        <td>{numberFormat(item.costo, this.state.codiso)}</td>
-        <td>{numberFormat(item.cantidad * item.costo, this.state.codiso)}</td>
-        <td className="text-center">
-          <Button
-            className="btn-outline-danger btn-sm"
-            title="Eliminar"
-            onClick={() => this.handleRemoverProducto(item.idProducto)}
-          >
-            <i className="bi bi-trash"></i>
-          </Button>
-        </td>
-      </tr>
+      <Draggable key={item.idProducto} draggableId={item.idProducto} index={index}>
+        {(provided) => {
+          return (
+            <tr
+              {...provided.draggableProps}
+              ref={provided.innerRef}
+              {...provided.dragHandleProps}
+              className='bg-white'>
+              <td className="text-center" style={{ width: widthCell1 }}>{item.id}</td>
+              <td style={{ width: widthCell2 }}>
+                {item.codigo}
+                <br />
+                {item.nombre}
+              </td>
+              <td style={{ width: widthCell3 }}>{rounded(item.cantidad)}</td>
+              <td style={{ width: widthCell4 }}>{numberFormat(item.costo, this.state.codiso)}</td>
+              <td style={{ width: widthCell5 }}>{numberFormat(item.cantidad * item.costo, this.state.codiso)}</td>
+              <td className="text-center" style={{ width: widthCell6 }}>
+                <Button
+                  className="btn-outline-danger btn-sm"
+                  title="Eliminar"
+                  onClick={() => this.handleRemoverProducto(item.idProducto)}>
+                  <i className="bi bi-trash"></i>
+                </Button>
+              </td>
+            </tr>
+          );
+        }}
+      </Draggable>
     ));
   }
 
@@ -870,7 +883,7 @@ class CompraCrear extends CustomComponent {
 
           idSucursal={this.state.idSucursal}
           codiso={this.state.codiso}
-          importeTotal={this.state.importeTotal}
+          importeTotal={this.state.total}
 
           onClose={this.handleCloseModalTerminal}
           handleProcessContado={this.handleProcessContado}
@@ -902,7 +915,6 @@ class CompraCrear extends CustomComponent {
           message={this.state.msgLoading}
         />
 
-        {/* Titulo */}
         <Title
           title='Compra'
           subTitle='Crear'
@@ -914,10 +926,10 @@ class CompraCrear extends CustomComponent {
             <Row>
               <Column>
                 <SearchInput
+                  ref={this.refProducto}
                   autoFocus={true}
                   placeholder="Filtrar productos..."
-                  refValue={this.refProducto}
-                  value={this.state.filtrarProducto}
+                  refValue={this.refValueProducto}
                   data={this.state.productos}
                   handleClearInput={this.handleClearInputProducto}
                   handleFilter={this.handleFilterProducto}
@@ -930,8 +942,13 @@ class CompraCrear extends CustomComponent {
 
             <Row>
               <Column>
-                <div className="table-responsive">
-                  <table className="table table-striped table-bordered rounded">
+                <div className="table-responsive"
+                  onKeyDown={this.handleKeyDownTable}>
+                  <table
+                    ref={this.refTable}
+                    onClick={this.handleOnClickTable}
+                    onDoubleClick={this.handleOnDbClickTable}
+                    className={"table table-bordered table-hover table-sticky w-100"}>
                     <thead>
                       <tr>
                         <th width="5%" className="text-center">
@@ -946,7 +963,24 @@ class CompraCrear extends CustomComponent {
                         </th>
                       </tr>
                     </thead>
-                    <tbody>{this.generarBody()}</tbody>
+                    <DragDropContext
+                      onDragEnd={this.handleOnDragEndTable}
+                      onBeforeDragStart={this.handleOnBeforeDragStartTable}
+                    >
+                      <Droppable droppableId="table-body">
+                        {(provided) => (
+                          <tbody
+                            ref={(el) => {
+                              provided.innerRef(el)
+                              this.refTaleBody.current = el;
+                            }}
+                            {...provided.droppableProps}>
+                            {this.generateBody()}
+                            {provided.placeholder}
+                          </tbody>
+                        )}
+                      </Droppable>
+                    </DragDropContext>
                   </table>
                 </div>
               </Column>
@@ -978,34 +1012,28 @@ class CompraCrear extends CustomComponent {
 
           <Column className="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12">
             <div className="form-group">
-              <div className="input-group">
-                <div className="input-group-prepend">
-                  <div className="input-group-text">
-                    <i className="bi bi-receipt"></i>
-                  </div>
-                </div>
-
-                <Select
-                  title="Comprobantes de venta"
-                  refSelect={this.refComprobante}
-                  value={this.state.idComprobante}
-                  onChange={this.handleSelectComprobante}
-                >
-                  <option value="">-- Comprobantes --</option>
-                  {this.state.comprobantes.map((item, index) => (
-                    <option key={index} value={item.idComprobante}>
-                      {item.nombre + ' (' + item.serie + ')'}
-                    </option>
-                  ))}
-                </Select>
-              </div>
+              <Select
+                group={true}
+                iconLeft={<i className="bi bi-receipt"></i>}
+                title="Comprobantes de venta"
+                refSelect={this.refComprobante}
+                value={this.state.idComprobante}
+                onChange={this.handleSelectComprobante}
+              >
+                <option value="">-- Comprobantes --</option>
+                {this.state.comprobantes.map((item, index) => (
+                  <option key={index} value={item.idComprobante}>
+                    {item.nombre + ' (' + item.serie + ')'}
+                  </option>
+                ))}
+              </Select>
             </div>
 
             <div className="form-group">
               <SearchInput
+                ref={this.refPersona}
                 placeholder="Filtrar proveedores..."
-                refValue={this.refFilerPersona}
-                value={this.state.filtrarPersona}
+                refValue={this.refValuePersona}
                 data={this.state.personas}
                 handleClearInput={this.handleClearInputPersona}
                 handleFilter={this.handleFilterPersona}
@@ -1024,107 +1052,82 @@ class CompraCrear extends CustomComponent {
             </div>
 
             <div className="form-group">
-              <div className="input-group">
-                <div className="input-group-prepend">
-                  <div className="input-group-text">
-                    <i className="bi bi-percent"></i>
-                  </div>
-                </div>
-                <Select
-                  refSelect={this.refImpuesto}
-                  value={this.state.idImpuesto}
-                  onChange={this.handleSelectImpuesto}
-                >
-                  <option value={''}>-- Impuesto --</option>
-                  {this.state.impuestos.map((item, index) => {
-                    return (
-                      <option key={index} value={item.idImpuesto}>
-                        {item.nombre}
-                      </option>
-                    );
-                  })}
-                </Select>
-              </div>
-            </div>
-
-            <div className="form-group">
-              <div className="input-group">
-                <div className="input-group-prepend">
-                  <div className="input-group-text">
-                    <i className="fa fa-building"></i>
-                  </div>
-                </div>
-                <Select
-                  refSelect={this.refAlmacen}
-                  value={this.state.idAlmacen}
-                  onChange={this.handleSelectAlmacen}
-                >
-                  <option value={''}>-- Almacen --</option>
-                  {this.state.almacenes.map((item, index) => {
-                    return (
-                      <option key={index} value={item.idAlmacen}>
-                        {item.nombre}
-                      </option>
-                    );
-                  })}
-                </Select>
-              </div>
-            </div>
-
-            <div className="form-group">
-              <div className="input-group">
-                <div className="input-group-prepend">
-                  <div className="input-group-text">
-                    <i className="bi bi-cash"></i>
-                  </div>
-                </div>
-                <Select
-                  title="Lista metodo de pago"
-                  refSelect={this.refMoneda}
-                  value={this.state.idMoneda}
-                  onChange={this.handleSelectMoneda}
-                >
-                  <option value="">-- Moneda --</option>
-                  {this.state.monedas.map((item, index) => (
-                    <option key={index} value={item.idMoneda}>
+              <Select
+                group={true}
+                iconLeft={<i className="bi bi-percent"></i>}
+                refSelect={this.refImpuesto}
+                value={this.state.idImpuesto}
+                onChange={this.handleSelectImpuesto}
+              >
+                <option value={''}>-- Impuesto --</option>
+                {this.state.impuestos.map((item, index) => {
+                  return (
+                    <option key={index} value={item.idImpuesto}>
                       {item.nombre}
                     </option>
-                  ))}
-                </Select>
-              </div>
+                  );
+                })}
+              </Select>
             </div>
 
             <div className="form-group">
-              <div className="input-group">
-                <div className="input-group-prepend">
-                  <div className="input-group-text">
-                    <i className="bi bi-chat-dots-fill"></i>
-                  </div>
-                </div>
-                <TextArea
-                  title="Observaciones..."
-                  refInput={this.refObservacion}
-                  value={this.state.observacion}
-                  onChange={this.handleInputObservacion}
-                  placeholder="Ingrese alguna observación">
-                </TextArea>
-              </div>
+              <Select
+                group={true}
+                iconLeft={<i className="fa fa-building"></i>}
+                refSelect={this.refAlmacen}
+                value={this.state.idAlmacen}
+                onChange={this.handleSelectAlmacen}
+              >
+                <option value={''}>-- Almacen --</option>
+                {this.state.almacenes.map((item, index) => {
+                  return (
+                    <option key={index} value={item.idAlmacen}>
+                      {item.nombre}
+                    </option>
+                  );
+                })}
+              </Select>
             </div>
 
             <div className="form-group">
-              <div className="input-group">
-                <div className="input-group-prepend">
-                  <div className="input-group-text">
-                    <i className="bi bi-card-text"></i>
-                  </div>
-                </div>
-                <TextArea
-                  title="Observaciones..."
-                  value={this.state.nota}
-                  onChange={this.handleInputNota}
-                  placeholder="Ingrese alguna nota">
-                </TextArea>
-              </div>
+              <Select
+                group={true}
+                iconLeft={<i className="bi bi-cash"></i>}
+                title="Lista metodo de pago"
+                refSelect={this.refMoneda}
+                value={this.state.idMoneda}
+                onChange={this.handleSelectMoneda}
+              >
+                <option value="">-- Moneda --</option>
+                {this.state.monedas.map((item, index) => (
+                  <option key={index} value={item.idMoneda}>
+                    {item.nombre}
+                  </option>
+                ))}
+              </Select>
+            </div>
+
+            <div className="form-group">
+              <TextArea
+                group={true}
+                iconLeft={<i className="bi bi-chat-dots-fill"></i>}
+                title="Observaciones..."
+                refInput={this.refObservacion}
+                value={this.state.observacion}
+                onChange={this.handleInputObservacion}
+                placeholder="Ingrese alguna observación">
+              </TextArea>
+            </div>
+
+            <div className="form-group">
+              <TextArea
+                group={true}
+                iconLeft={<i className="bi bi-card-text"></i>}
+                title="Observaciones..."
+                value={this.state.nota}
+                onChange={this.handleInputNota}
+                placeholder="Ingrese alguna nota">
+              </TextArea>
             </div>
 
             <div className="form-group">

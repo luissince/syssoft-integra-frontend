@@ -29,6 +29,8 @@ import Button from '../../../../../components/Button';
 import Input from '../../../../../components/Input';
 import Select from '../../../../../components/Select';
 import { SpinnerView } from '../../../../../components/Spinner';
+import Title from '../../../../../components/Title';
+import RadioButton from '../../../../../components/RadioButton';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -51,9 +53,8 @@ class TrasladorCrear extends CustomComponent {
       producto: null,
       cantidad: 0,
       costo: 0,
-      filtrar: '',
+
       productos: [],
-      loadingProducto: false,
 
       idTipoTraslado: '',
 
@@ -104,10 +105,9 @@ class TrasladorCrear extends CustomComponent {
     this.refIdAlmacenDestinoExterno = React.createRef();
 
     this.refProducto = React.createRef();
+    this.refValueProducto = React.createRef();
 
     this.inputRefs = [];
-
-    this.selectItemProducto = false;
 
     this.abortController = new AbortController();
   }
@@ -263,30 +263,21 @@ class TrasladorCrear extends CustomComponent {
   // Filtrar producto
   //------------------------------------------------------------------------------------------
 
-  handleClearInputProducto = async () => {
-    await this.setStateAsync({
+  handleClearInputProducto = () => {
+    this.setState({
       productos: [],
-      filtrar: '',
       producto: null,
-      loadingProducto: false,
     });
-
-    this.selectItemProducto = false;
   };
 
-  handleFilterProducto = async (event) => {
-    const searchWord = this.selectItemProducto ? '' : event.target.value;
-    await this.setStateAsync({ producto: null, filtrar: searchWord });
+  handleFilterProducto = async (value) => {
+    const searchWord = value;
+    this.setState({ producto: null, });
 
-    this.selectItemProducto = false;
-    if (searchWord.length === 0) {
-      await this.setStateAsync({ productos: [] });
+    if (isEmpty(searchWord)) {
+      this.setState({ productos: [] });
       return;
     }
-
-    if (this.state.loadingProducto) return;
-
-    await this.setStateAsync({ loadingProducto: true });
 
     const params = {
       idAlmacen: this.state.idTipoTraslado === "TT0001" ? this.state.idAlmacenOrigenInterno : this.state.idAlmacenOrigenExterno,
@@ -298,21 +289,19 @@ class TrasladorCrear extends CustomComponent {
     // Filtrar productos por tipoProducto !== "SERVICIO"
     const filteredProductos = productos.filter((item) => item.tipoProducto !== 'SERVICIO');
 
-    await this.setStateAsync({
+    this.setState({
       productos: filteredProductos,
-      loadingProducto: false,
     });
   }
 
-  handleSelectItemProducto = async (value) => {
-    await this.setStateAsync({
+  handleSelectItemProducto = (value) => {
+    this.refProducto.current.initialize(value.nombre);
+    this.setState({
       producto: value,
-      filtrar: value.nombre,
       productos: [],
+    }, () => {
+      this.agregarProducto(value);
     });
-    this.selectItemProducto = true;
-
-    this.agregarProducto(value);
   }
 
   handleOptionTipoTraslado = (event) => {
@@ -484,7 +473,7 @@ class TrasladorCrear extends CustomComponent {
   handleSave = () => {
     if (isEmpty(this.state.detalle)) {
       alertWarning('Traslado', 'Agregue productos en la lista para continuar.', () => {
-        this.refProducto.current.focus();
+        this.refValueProducto.current.focus();
       });
       return;
     }
@@ -612,28 +601,18 @@ class TrasladorCrear extends CustomComponent {
 
   render() {
     return (
-      // Contenedor principal utilizando un componente llamado ContainerWrapper
-
       <ContainerWrapper>
 
-        {/* Mostrar un spinner de carga si initialLoad es verdadero */}
         <SpinnerView
           loading={this.state.initialLoad}
           message={this.state.initialMessage}
         />
 
-        {/* Encabezado de la página */}
-        <Row>
-          <Column formGroup={true}>
-            <h5>
-              <span role="button" onClick={() => this.props.history.goBack()}>
-                <i className="bi bi-arrow-left-short"></i>
-              </span>{' '}
-              Traslado
-              <small className="text-secondary"> CREAR</small>
-            </h5>
-          </Column>
-        </Row>
+        <Title
+          title="Traslado"
+          subTitle="CREAR"
+          handleGoBack={() => this.props.history.goBack()}
+        />
 
         {/* Condición para renderizar contenido específico según el estado 'paso' */}
         {this.state.paso === 1 && (
@@ -652,61 +631,49 @@ class TrasladorCrear extends CustomComponent {
             <Row>
               <Column formGroup={true}>
                 <label>Seleccione el tipo de traslado:</label>
-                <div className="form-check ">
-                  <input
-                    className="form-check-input"
-                    type="radio"
-                    ref={this.refIdTipoTraslado}
-                    name="tipoAjuste"
-                    id="TT0001"
-                    value="TT0001"
-                    checked={this.state.idTipoTraslado === 'TT0001'}
-                    onChange={this.handleOptionTipoTraslado}
-                  />
-                  <label className="form-check-label" htmlFor="TT0001">
-                    Entre almacenes
-                  </label>
-                </div>
 
-                <div className="form-check">
-                  <input
-                    className="form-check-input"
-                    type="radio"
-                    name="tipoAjuste"
-                    id="TT0002"
-                    value="TT0002"
-                    checked={this.state.idTipoTraslado === 'TT0002'}
-                    onChange={this.handleOptionTipoTraslado}
-                  />
-                  <label className="form-check-label" htmlFor="TT0002">
-                    Entre sucursales
-                  </label>
-                </div>
+                <RadioButton
+                  refInput={this.refIdTipoTraslado}
+                  id={"TT0001"}
+                  value={"TT0001"}
+                  name='ckTipoTraslado'
+                  checked={this.state.idTipoTraslado === 'TT0001'}
+                  onChange={this.handleOptionTipoTraslado}
+                >
+                  Entre almacenes
+                </RadioButton>
+
+                <RadioButton
+                  id={"TT0002"}
+                  value={"TT0002"}
+                  name='ckTipoTraslado'
+                  checked={this.state.idTipoTraslado === 'TT0002'}
+                  onChange={this.handleOptionTipoTraslado}
+                >
+                  Entre sucursales
+                </RadioButton>
               </Column>
             </Row>
 
 
             {/* Selección el motivo de traslado */}
             <Row>
-              <Column>
-                <div className="form-group">
-                  <label>Seleccione el motivo del traslado:</label>
-                  <select
-                    className="form-control"
-                    ref={this.refIdMotivoTraslado}
-                    value={this.state.idMotivoTraslado}
-                    onChange={this.handleSelectMotivojuste}
-                  >
-                    <option value="">-- Motivo traslado --</option>
-                    {
-                      this.state.motivoTraslado.map((item, index) => (
-                        <option key={index} value={item.idMotivoTraslado}>
-                          {item.nombre}
-                        </option>
-                      ))
-                    }
-                  </select>
-                </div>
+              <Column formGroup={true}>
+                <Select
+                  label={"Seleccione el motivo del traslado:"}
+                  refSelect={this.refIdMotivoTraslado}
+                  value={this.state.idMotivoTraslado}
+                  onChange={this.handleSelectMotivojuste}
+                >
+                  <option value="">-- Motivo traslado --</option>
+                  {
+                    this.state.motivoTraslado.map((item, index) => (
+                      <option key={index} value={item.idMotivoTraslado}>
+                        {item.nombre}
+                      </option>
+                    ))
+                  }
+                </Select>
               </Column>
             </Row>
 
@@ -717,50 +684,44 @@ class TrasladorCrear extends CustomComponent {
 
                   {/* Selección el almacen de origen */}
                   <Row>
-                    <Column>
-                      <div className="form-group">
-                        <label>Seleccione el almacen de origen:</label>
-                        <select
-                          className="form-control"
-                          ref={this.refIdAlmacenOriginInterno}
-                          value={this.state.idAlmacenOrigenInterno}
-                          onChange={this.handleSelectAlmacenOrigenInterno}
-                        >
-                          <option value="">-- Almacen --</option>
-                          {this.state.almacenesOrigenInterno.map((item, index) => {
-                            return (
-                              <option key={index} value={item.idAlmacen}>
-                                {item.nombre}
-                              </option>
-                            );
-                          })}
-                        </select>
-                      </div>
+                    <Column formGroup={true}>
+                      <Select
+                        label={"Seleccione el almacen de origen:"}
+                        refSelect={this.refIdAlmacenOriginInterno}
+                        value={this.state.idAlmacenOrigenInterno}
+                        onChange={this.handleSelectAlmacenOrigenInterno}
+                      >
+                        <option value="">-- Almacen --</option>
+                        {this.state.almacenesOrigenInterno.map((item, index) => {
+                          return (
+                            <option key={index} value={item.idAlmacen}>
+                              {item.nombre}
+                            </option>
+                          );
+                        })}
+                      </Select>
                     </Column>
                   </Row>
 
                   {/* Selección el almacen de destino */}
                   <Row>
-                    <Column>
-                      <div className="form-group">
-                        <label>Seleccione el almacen de destino:</label>
-                        <select
-                          className="form-control"
-                          ref={this.refIdAlmacenDesitnoInterno}
-                          value={this.state.idAlmacenDestinoInterno}
-                          onChange={this.handleSelectAlmacenDestinoInterno}
-                          disabled
-                        >
-                          <option value="">-- Almacen --</option>
-                          {this.state.almacenesDestinoInterno.map((item, index) => {
-                            return (
-                              <option key={index} value={item.idAlmacen}>
-                                {item.nombre}
-                              </option>
-                            );
-                          })}
-                        </select>
-                      </div>
+                    <Column formGroup={true}>
+                      <Select
+                        label={"Seleccione el almacen de destino:"}
+                        refSelect={this.refIdAlmacenDesitnoInterno}
+                        value={this.state.idAlmacenDestinoInterno}
+                        onChange={this.handleSelectAlmacenDestinoInterno}
+                        disabled
+                      >
+                        <option value="">-- Almacen --</option>
+                        {this.state.almacenesDestinoInterno.map((item, index) => {
+                          return (
+                            <option key={index} value={item.idAlmacen}>
+                              {item.nombre}
+                            </option>
+                          );
+                        })}
+                      </Select>
                     </Column>
                   </Row>
                 </>
@@ -772,74 +733,64 @@ class TrasladorCrear extends CustomComponent {
               this.state.idTipoTraslado === 'TT0002' && (
                 <>
                   <Row>
-                    <Column>
-                      <div className="form-group">
-                        <p>
-                          <i className="bi bi-arrow-bar-down"></i> Almacen de origin
-                        </p>
-                      </div>
+                    <Column formGroup={true}>
+                      <p>
+                        <i className="bi bi-arrow-bar-down"></i> Almacen de origin
+                      </p>
                     </Column>
                   </Row>
 
                   {/* Selección el almacen de origen */}
                   <Row>
-                    <Column>
-                      <div className="form-group">
-                        <label>Seleccione el almacen:</label>
-                        <select
-                          className="form-control"
-                          ref={this.refIdAlmacenOrigenExterno}
-                          value={this.state.idAlmacenOrigenExterno}
-                          onChange={this.handleSelectAlmacenOrigenExterno}
-                        >
-                          <option value="">-- Almacen --</option>
-                          {
-                            this.state.almacenes.map((item, index) => (
-                              <option key={index} value={item.idAlmacen}>
-                                {item.nombre}
-                              </option>
-                            ))
-                          }
-                        </select>
-                      </div>
+                    <Column formGroup={true}>
+                      <Select
+                        label={"Seleccione el almacen:"}
+                        refSelect={this.refIdAlmacenOrigenExterno}
+                        value={this.state.idAlmacenOrigenExterno}
+                        onChange={this.handleSelectAlmacenOrigenExterno}
+                      >
+                        <option value="">-- Almacen --</option>
+                        {
+                          this.state.almacenes.map((item, index) => (
+                            <option key={index} value={item.idAlmacen}>
+                              {item.nombre}
+                            </option>
+                          ))
+                        }
+                      </Select>
                     </Column>
                   </Row>
 
                   <Row>
-                    <Column>
-                      <div className="form-group">
-                        <p>
-                          <i className="bi bi-arrow-bar-right"></i> Sucural y almacen de destino
-                        </p>
-                      </div>
+                    <Column formGroup={true}>
+                      <p>
+                        <i className="bi bi-arrow-bar-right"></i> Sucural y almacen de destino
+                      </p>
                     </Column>
                   </Row>
 
                   {/* Selección la sucursal */}
                   <Row>
-                    <Column className="col-md-6 col-12">
-                      <div className="form-group">
-                        <label>Seleccione la sucursal:</label>
-                        <select
-                          className="form-control"
-                          ref={this.refIdSucursalExterno}
-                          value={this.state.idSucursalExterno}
-                          onChange={this.handleSelectSucursalExterno}>
-                          <option value="">-- Sucursal --</option>
-                          {
-                            this.state.sucursales.map((item, index) => (
-                              <option key={index} value={item.idSucursal}>
-                                {item.nombre}
-                              </option>
-                            ))
-                          }
-                        </select>
-                      </div>
+                    <Column className="col-md-6 col-12" formGroup={true}>
+                      <Select
+                        label={"Seleccione la sucursal:"}
+                        refSelect={this.refIdSucursalExterno}
+                        value={this.state.idSucursalExterno}
+                        onChange={this.handleSelectSucursalExterno}>
+                        <option value="">-- Sucursal --</option>
+                        {
+                          this.state.sucursales.map((item, index) => (
+                            <option key={index} value={item.idSucursal}>
+                              {item.nombre}
+                            </option>
+                          ))
+                        }
+                      </Select>
                     </Column>
 
                     <Column className="col-md-6 col-12" formGroup={true}>
-                      <label>Seleccione el almacen:</label>
                       <Select
+                        label={"Seleccione el almacen:"}
                         refSelect={this.refIdAlmacenDestinoExterno}
                         value={this.state.idAlmacenDestinoExterno}
                         onChange={this.handleSelectAlmacenDestinoExterno}
@@ -975,12 +926,12 @@ class TrasladorCrear extends CustomComponent {
 
               <Row>
                 <Column>
-                  <label>Filtrar por el código o nombre del producto::</label>
                   <SearchInput
+                    ref={this.refProducto}
                     autoFocus={true}
+                    label={"Filtrar por el código o nombre del producto:"}
                     placeholder="Filtrar productos..."
-                    refValue={this.refProducto}
-                    value={this.state.filtrar}
+                    refValue={this.refValueProducto}
                     data={this.state.productos}
                     handleClearInput={this.handleClearInputProducto}
                     handleFilter={this.handleFilterProducto}
@@ -996,10 +947,8 @@ class TrasladorCrear extends CustomComponent {
 
               <Row>
                 <Column formGroup={true}>
-                  <label>
-                    Ingrese alguna descripción para saber el motivo del ajuste:
-                  </label>
                   <Input
+                    label={"Ingrese alguna descripción para saber el motivo del ajuste:"}
                     placeholder="Ingrese una observación"
                     value={this.state.observacion}
                     onChange={this.handleInputObservacion}

@@ -727,8 +727,8 @@ class CpeElectronicos extends CustomComponent {
 
         <Row>
           <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
-            <label>Fecha de Inicio:</label>
             <Input
+              label={"Fecha de Inicio:"}
               type="date"
               value={this.state.fechaInicio}
               onChange={this.handleInputFechaInicio}
@@ -736,8 +736,8 @@ class CpeElectronicos extends CustomComponent {
           </Column>
 
           <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
-            <label>Fecha de Final:</label>
             <Input
+              label={"Fecha de Final:"}
               type="date"
               value={this.state.fechaFinal}
               onChange={this.handleInputFechaFinal}
@@ -745,8 +745,8 @@ class CpeElectronicos extends CustomComponent {
           </Column>
 
           <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
-            <label>Comprobantes:</label>
             <Select
+              label={"Comprobantes:"}
               value={this.state.idComprobante}
               onChange={this.handleSelectComprobante}
             >
@@ -760,8 +760,8 @@ class CpeElectronicos extends CustomComponent {
           </Column>
 
           <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
-            <label>Estados:</label>
             <Select
+              label={"Estados:"}
               value={this.state.estado}
               onChange={this.handleSelectEstado}
             >
@@ -774,16 +774,18 @@ class CpeElectronicos extends CustomComponent {
 
         <Row>
           <Column className="col-md-6 col-sm-12" formGroup={true}>
-            <label>Buscar:</label>
             <Search
+              group={true}
+              label={"Buscar:"}
+              iconLeft={<i className="bi bi-search"></i>}
               onSearch={this.searchText}
               placeholder="Ingrese los datos requeridos...."
             />
           </Column>
 
           <Column className="col-md-6 col-sm-12" formGroup={true}>
-            <label>Sucursal:</label>
             <Select
+              label={"Sucursal:"}
               value={this.state.idSucursal}
               onChange={this.handleSelectSucursal}
             >

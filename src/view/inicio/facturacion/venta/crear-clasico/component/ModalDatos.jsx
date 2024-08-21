@@ -81,17 +81,15 @@ class ModalDatos extends Component {
             </Row>
 
             <Row>
-              <Column>
-                <div className="form-group">
-                  <label>Ingrese su nueva descripción:</label>
-                  <Input
-                    autoFocus={true}
-                    placeholder={"descripción"}
-                    refInput={this.refInformacion}
-                    value={informacion}
-                    onChange={this.handleInputInformacion}
-                  />
-                </div>
+              <Column formGroup={true}>
+                <Input
+                  autoFocus={true}
+                  label={"Ingrese su nueva descripción:"}
+                  placeholder={"descripción"}
+                  refInput={this.refInformacion}
+                  value={informacion}
+                  onChange={this.handleInputInformacion}
+                />
               </Column>
             </Row>
           </>

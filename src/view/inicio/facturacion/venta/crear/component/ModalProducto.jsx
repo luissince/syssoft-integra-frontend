@@ -42,101 +42,86 @@ const ModalProducto = (props) => {
             />
 
             <Row>
-              <Column>
-                <div className="form-group">
-                  <h5>
-                    <i className="fa fa-pencil"></i>{' '}
-                    {producto && producto.nombreProducto}
-                  </h5>
-                </div>
+              <Column formGroup={true}>
+                <h5>
+                  <i className="fa fa-pencil"></i>{' '}
+                  {producto && producto.nombreProducto}
+                </h5>
               </Column>
             </Row>
 
             <Row>
-              <Column>
-                <div className="form-group">
-                  <label>
-                    Precio: <i className="fa fa-asterisk text-danger small"></i>{' '}
-                  </label>
-                  <Input
-                    autoFocus={true}
-                    placeholder="0.00"
-                    refInput={refPrecio}
-                    onKeyDown={keyNumberFloat}
-                    onPaste={handlePasteFloat}
-                  />
-                </div>
+              <Column formGroup={true}>
+                <Input
+                  autoFocus={true}
+                  label={<>Precio: <i className="fa fa-asterisk text-danger small"></i></>}
+                  placeholder="0.00"
+                  refInput={refPrecio}
+                  onKeyDown={keyNumberFloat}
+                  onPaste={handlePasteFloat}
+                />
               </Column>
             </Row>
 
             <Row>
-              <Column>
-                <div className="form-group">
-                  <label>Bonificación:</label>
-                  <Input
-                    placeholder="0"
-                    refInput={refBonificacion}
-                    onKeyDown={keyNumberFloat}
-                    onPaste={handlePasteFloat}
-                  />
-                </div>
+              <Column formGroup={true}>
+                <Input
+                  label={"Bonificación:"}
+                  placeholder="0"
+                  refInput={refBonificacion}
+                  onKeyDown={keyNumberFloat}
+                  onPaste={handlePasteFloat}
+                />
               </Column>
             </Row>
 
             <Row>
-              <Column>
-                <div className="form-group">
-                  <label>
-                    Descripción:{' '}
-                    <i className="fa fa-asterisk text-danger small"></i>
-                  </label>
-                  <TextArea
-                    placeholder="Ingrese los datos del producto"
-                    refInput={refDescripcion}
-                  ></TextArea>
-                </div>
+              <Column formGroup={true}>
+                <TextArea
+                  label={<>Descripción: <i className="fa fa-asterisk text-danger small"></i></>}
+                  placeholder="Ingrese los datos del producto"
+                  refInput={refDescripcion}
+                />
               </Column>
             </Row>
 
             <Row>
-              <Column>
-                <div className="form-group">
-                  <label>Lista de Precios:</label>
-                  <ul className="list-group">
-                    {listPrecio.map((item, index) => (
-                      <Button
-                        key={index}
-                        contentClassName="list-group-item list-group-item-action"
-                        onClick={() => handleSeleccionar(item)}
-                      >
-                        {item.nombre} - {item.valor}
-                      </Button>
-                    ))}
-                  </ul>
-                </div>
+              <Column formGroup={true}>
+                <label>Lista de Precios:</label>
+                <ul className="list-group">
+                  {listPrecio.map((item, index) => (
+                    <Button
+                      key={index}
+                      contentClassName="list-group-item list-group-item-action"
+                      onClick={() => handleSeleccionar(item)}
+                    >
+                      {item.nombre} - {item.valor}
+                    </Button>
+                  ))}
+                </ul>
+
               </Column>
             </Row>
             {
               producto && producto.idTipoTratamientoProducto === UNIDADES && (
                 <Row>
-                  <Column>
-                    <div className="form-group">
-                      <label>Cantidad por Almacen:</label>
-                      <ul className="list-group">
-                        {producto.inventarios.map((item, index) => (
-                          <li key={index} className="list-group-item">
-                            <div className='d-flex justify-content-between flex-row'>
-                              <div className=''>
-                                <span>{item.almacen}</span>
-                              </div>
-                              <div>
-                                <span>cantidad: {rounded(item.cantidad)}</span>
-                              </div>
+                  <Column formGroup={true}>
+                    <label>Cantidad por Almacen:</label>
+                    <ul className="list-group">
+                      {producto.inventarios.map((item, index) => (
+                        <li key={index} className="list-group-item">
+                          <div className='d-flex justify-content-between flex-row'>
+                            <div className=''>
+                              <span>{item.almacen}</span>
                             </div>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+                            <div>
+                              <span>cantidad: {rounded(item.cantidad)}</span>
+                            </div>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+
                   </Column>
                 </Row>
               )

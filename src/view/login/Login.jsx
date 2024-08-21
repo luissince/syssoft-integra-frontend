@@ -43,21 +43,24 @@ class Login extends CustomComponent {
   }
 
   onEventFocused = () => {
-    let userToken = window.localStorage.getItem('login');
-    if (userToken !== null) {
-      let projectToken = window.localStorage.getItem('project');
-      if (projectToken !== null) {
-        this.props.signIn({
-          token: JSON.parse(userToken),
-          project: JSON.parse(projectToken)
-        });
-      } else {
-        this.props.signIn({
-          token: JSON.parse(userToken),
-          project: null
-        });
-      }
+    const userToken = window.localStorage.getItem('login');
+    if (userToken === null) {
+      return
     }
+
+    const projectToken = window.localStorage.getItem('project');
+    if (projectToken !== null) {
+      this.props.signIn({
+        token: JSON.parse(userToken),
+        project: JSON.parse(projectToken)
+      });
+    } else {
+      this.props.signIn({
+        token: JSON.parse(userToken),
+        project: null
+      });
+    }
+
   };
 
   handleSendForm = async (event) => {
@@ -92,7 +95,7 @@ class Login extends CustomComponent {
 
     const response = await loginApi(data);
 
-    if (response instanceof SuccessReponse) {   
+    if (response instanceof SuccessReponse) {
       window.localStorage.setItem('login', JSON.stringify(response.data));
       this.props.signIn({
         token: response.data,

@@ -1,0 +1,237 @@
+import {
+  formatTime,
+  rounded,
+} from '../../../../../helper/utils.helper';
+import ContainerWrapper from '../../../../../components/Container';
+import CustomComponent from '../../../../../model/class/custom-component';
+import SuccessReponse from '../../../../../model/class/response';
+import ErrorResponse from '../../../../../model/class/error-response';
+import { detailAjuste } from '../../../../../network/rest/principal.network';
+import { CANCELED } from '../../../../../model/types/types';
+import { connect } from 'react-redux';
+import Title from '../../../../../components/Title';
+import Row from '../../../../../components/Row';
+import Column from '../../../../../components/Column';
+import { SpinnerView } from '../../../../../components/Spinner';
+import { TableResponsive } from '../../../../../components/Table';
+
+class LogisticaAjusteDetalle extends CustomComponent {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      loading: true,
+      msgLoading: 'Cargando datos...',
+
+      idAjuste: '',
+
+      tipo: '',
+      almacen: '',
+      estado: 0,
+      fecha: '',
+      hora: '',
+      motivo: '',
+      observacion: '',
+      detalle: [],
+
+      idSucursal: this.props.token.project.idSucursal,
+      idUsuario: this.props.token.userToken.idUsuario,
+    };
+
+    this.abortControllerView = new AbortController();
+  }
+
+  componentDidMount() {
+    const url = this.props.location.search;
+    const idAjuste = new URLSearchParams(url).get('idAjuste');
+    if (idAjuste !== null) {
+      this.loadDataId(idAjuste);
+    } else {
+      this.props.history.goBack();
+    }
+  }
+
+  componentWillUnmount() {
+    this.abortControllerView.abort();
+  }
+
+  async loadDataId(id) {
+    const [ajuste] = await Promise.all([
+      this.fetchDetalleAjuste(id)
+    ]);
+
+    this.setState({
+      tipo: ajuste.cabecera.tipo,
+      almacen: ajuste.cabecera.almacen,
+      estado: ajuste.cabecera.estado,
+      fecha: ajuste.cabecera.fecha,
+      hora: ajuste.cabecera.hora,
+      motivo: ajuste.cabecera.motivo,
+      observacion: ajuste.cabecera.observacion,
+
+      detalle: ajuste.detalle,
+      loading: false,
+    });
+  }
+
+  async fetchDetalleAjuste(id) {
+    const params = {
+      idAjuste: id,
+    };
+
+    const responde = await detailAjuste(
+      params,
+      this.abortControllerView.signal,
+    );
+
+    if (responde instanceof SuccessReponse) {
+      return responde.data;
+    }
+
+    if (responde instanceof ErrorResponse) {
+      if (responde.getType() === CANCELED) return;
+
+      return null;
+    }
+  }
+
+  render() {
+    const { tipo, motivo, almacen, estado, fecha, hora, observacion } =
+      this.state;
+
+    return (
+      <ContainerWrapper>
+        <SpinnerView
+          loading={this.state.loading}
+          message={this.state.msgLoading}
+        />
+
+        <Title
+          title={"Ajuste"}
+          subTitle={"DETALLE"}
+          handleGoBack={() => this.props.history.goBack()}
+        />
+
+        <Row>
+          <Column>
+            <div className="form-group">
+              <div className="table-responsive">
+                <table width="100%">
+                  <thead>
+                    <tr>
+                      <th className="table-secondary w-25 p-1 font-weight-normal ">
+                        Fecha y Hora
+                      </th>
+                      <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                        {fecha} - {formatTime(hora)}
+                      </th>
+                    </tr>
+                    <tr>
+                      <th className="table-secondary w-25 p-1 font-weight-normal ">
+                        Tipo de ajuste
+                      </th>
+                      <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                        {tipo}
+                      </th>
+                    </tr>
+                    <tr>
+                      <th className="table-secondary w-25 p-1 font-weight-normal ">
+                        Motivo
+                      </th>
+                      <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                        {motivo}
+                      </th>
+                    </tr>
+                    <tr>
+                      <th className="table-secondary w-25 p-1 font-weight-normal ">
+                        Almacen
+                      </th>
+                      <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                        {almacen}
+                      </th>
+                    </tr>
+                    <tr>
+                      <th className="table-secondary w-25 p-1 font-weight-normal ">
+                        Observación
+                      </th>
+                      <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                        {observacion}
+                      </th>
+                    </tr>
+                    <tr>
+                      <th className="table-secondary w-25 p-1 font-weight-normal ">
+                        Estado
+                      </th>
+                      <th
+                        className={`table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal ${estado === 1 ? 'text-success' : 'text-danger'
+                          }`}
+                      >
+                        {estado === 1 ? 'ACTIVO' : 'ANULADO'}
+                      </th>
+                    </tr>
+                  </thead>
+                </table>
+              </div>
+            </div>
+          </Column>
+        </Row>
+
+        <Row>
+          <Column>
+            <TableResponsive
+              className={"table table-light table-striped"}
+              title={"Detalle"}
+              tHead={
+                <tr>
+                  <th>#</th>
+                  <th>Producto</th>
+                  <th>Categoría</th>
+                  <th>Cantidad</th>
+                  <th>Unidad</th>
+                </tr>
+              }
+
+              tBody={
+                <>
+                  {this.state.detalle.map((item, index) => {
+                    return (
+                      <tr key={index}>
+                        <td className="text-center">{++index}</td>
+                        <td>
+                          {item.codigo}
+                          <br />
+                          {item.producto}
+                        </td>
+                        <td>{item.categoria}</td>
+                        <td>{rounded(item.cantidad)}</td>
+                        <td>{item.unidad}</td>
+                      </tr>
+                    );
+                  })}
+                </>
+              }
+            />
+          </Column>
+        </Row>
+      </ContainerWrapper>
+    );
+  }
+}
+
+/**
+ *
+ * Método encargado de traer la información de redux
+ */
+const mapStateToProps = (state) => {
+  return {
+    token: state.principal,
+  };
+};
+
+/**
+ *
+ * Método encargado de conectar con redux y exportar la clase
+ */
+const ConnectedAjusteDetalle = connect(mapStateToProps, null)(LogisticaAjusteDetalle);
+
+export default ConnectedAjusteDetalle;

@@ -9,6 +9,9 @@ import Row from '../../../../../../components/Row';
 import Column from '../../../../../../components/Column';
 import { SpinnerView } from '../../../../../../components/Spinner';
 import Input from '../../../../../../components/Input';
+import TextArea from '../../../../../../components/TextArea';
+import Select from '../../../../../../components/Select';
+import Button from '../../../../../../components/Button';
 
 const ModalSale = (props) => {
 
@@ -173,32 +176,25 @@ const ModalSale = (props) => {
           {!nextModalCobro && (
             <>
               <Row>
-                <Column>
-                  <div className='form-group'>
-                    <label>Monto a cobrar: <i className='fa fa-asterisk text-danger small'></i></label>
-                    <Input
-                      autoFocus={true}
-                      placeholder={"0.00"}
-                      refInput={refCobrar}
-                      value={cobrar}
-                      onChange={handleInputCobrar}
-                    />
-                  </div>
+                <Column formGroup={true}>
+                  <Input
+                    autoFocus={true}
+                    label={<>Monto a cobrar: <i className='fa fa-asterisk text-danger small'></i></>}
+                    placeholder={"0.00"}
+                    refInput={refCobrar}
+                    value={cobrar}
+                    onChange={handleInputCobrar}
+                  />
                 </Column>
               </Row>
 
               <Row>
-                <Column>
-                  <div className='form-group'>
-                    <label>Observación:</label>
-                    <textarea
-                      className='form-control'
-                      placeholder='Ingrese algúna observación...'
-                      value={observacion}
-                      onChange={handleInputObservacion}>
-
-                    </textarea>
-                  </div>
+                <Column formGroup={true}>
+                  <TextArea
+                    label={"Observación:"}
+                    placeholder='Ingrese algúna observación...'
+                    value={observacion}
+                    onChange={handleInputObservacion} />
                 </Column>
               </Row>
             </>
@@ -247,46 +243,36 @@ const ModalSale = (props) => {
               </Row>
 
               <Row>
-                <Column className='col-12'>
-                  <div className="form-group">
-                    <label>Metodo de cobro:</label>
-                    <div className="input-group">
-                      <div className="input-group-prepend">
-                        <div className="input-group-text">
-                          <i className="bi bi-tag-fill"></i>
-                        </div>
-                      </div>
-                      <select
-                        title="Lista metodo de cobro"
-                        className="form-control"
-                        ref={refMetodoContado}
+                <Column className='col-12' formGroup={true}>
+                  <Select
+                    group={true}
+                    label={"Metodo de cobro:"}
+                    iconLeft={<i className="bi bi-tag-fill"></i>}
+                    title="Lista metodo de cobro"
+                    className="form-control"
+                    refSelect={refMetodoContado}
+                    buttonRight={
+                      <Button
+                        className="btn-outline-success d-flex"
+                        title="Agregar Pago"
+                        onClick={handleAddBancosAgregados}
                       >
-                        {bancos.map((item, index) => (
-                          <option key={index} value={item.idBanco}>
-                            {item.nombre}
-                          </option>
-                        ))}
-                      </select>
-                      <div className="input-group-append">
-                        <button
-                          type="button"
-                          className="btn btn-outline-success d-flex"
-                          title="Agregar Pago"
-                          onClick={handleAddBancosAgregados}
-                        >
-                          <i className="bi bi-plus-circle-fill"></i>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+                        <i className="bi bi-plus-circle-fill"></i>
+                      </Button>
+                    }
+                  >
+                    {bancos.map((item, index) => (
+                      <option key={index} value={item.idBanco}>
+                        {item.nombre}
+                      </option>
+                    ))}
+                  </Select>
                 </Column>
               </Row>
 
               <Row>
-                <Column className="col-12">
-                  <div className="form-group">
-                    <div className="text-center">{generarVuelto()}</div>
-                  </div>
+                <Column className="col-12" formGroup={true}>
+                  <div className="text-center">{generarVuelto()}</div>
                 </Column>
               </Row>
 
@@ -310,12 +296,12 @@ const ModalSale = (props) => {
               <>
                 <p>Los campos con <i className='fa fa-asterisk text-danger small'></i> son obligatorios </p>
                 <div>
-                  <button
+                  <Button
                     type="submit"
-                    className="btn btn-outline-success"
+                    className="btn-outline-success"
                   >
                     <i className='fa fa-arrow-right'></i> Continuar
-                  </button>
+                  </Button>
                 </div>
               </>
             )
@@ -324,20 +310,19 @@ const ModalSale = (props) => {
           {
             nextModalCobro && (
               <>
-                <button
+                <Button
                   type="submit"
-                  className="btn btn-primary"
+                  className="btn-primary"
                 >
                   <i className='fa fa-save'></i> Completar
-                </button>
+                </Button>
 
-                <button
-                  type="button"
-                  className="btn btn-danger"
+                <Button
+                  className="btn-danger"
                   onClick={async () => await refModal.current.handleOnClose()}
                 >
                   <i className='fa fa-close'></i> Cerrar
-                </button>
+                </Button>
               </>
             )
           }

@@ -112,17 +112,15 @@ class ModalCantidad extends Component {
                 inventarios.map((inventario, index) => {
                   return (
                     <Row key={index}>
-                      <Column>
-                        <div className="form-group">
-                          <label>Ingrese su nueva cantidad del almacen ({inventario.almacen}):</label>
-                          <Input
-                            placeholder={"0.00"}
-                            role={"float"}
-                            value={inventario.cantidad}
-                            onChange={(event) => this.handleInputChange(event, inventario.idAlmacen)}
-                            onPaste={handlePasteFloat}
-                          />
-                        </div>
+                      <Column formGroup={true}>
+                        <Input
+                          label={<>Ingrese su nueva cantidad del almacen ({inventario.almacen}):</>}
+                          placeholder={"0.00"}
+                          role={"float"}
+                          value={inventario.cantidad}
+                          onChange={(event) => this.handleInputChange(event, inventario.idAlmacen)}
+                          onPaste={handlePasteFloat}
+                        />
                       </Column>
                     </Row>
                   );

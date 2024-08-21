@@ -32,6 +32,7 @@ import { SpinnerView } from '../../../../../components/Spinner';
 import Title from '../../../../../components/Title';
 import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
+import Button from '../../../../../components/Button';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -64,14 +65,10 @@ class CobroCrear extends CustomComponent {
       monedas: [],
 
       // Filtrar concepto
-      filtrarConcepto: '',
-      loadingConcepto: false,
       concepto: null,
       conceptos: [],
 
       // Filtrar cliente
-      filtrarCliente: '',
-      loadingCliente: false,
       cliente: null,
       clientes: [],
 
@@ -100,11 +97,11 @@ class CobroCrear extends CustomComponent {
 
     // Filtrar concepto
     this.refConcepto = React.createRef();
-    this.selectItemConcepto = false;
+    this.refValueConcepto = React.createRef();
 
     // Filtrar cliente
     this.refCliente = React.createRef();
-    this.selectItemCliente = false;
+    this.refValueCliente = React.createRef();
 
     // Referencia para el modal
     this.refCustomModalSale = React.createRef();
@@ -292,7 +289,7 @@ class CobroCrear extends CustomComponent {
 
     await this.handleClearInputConcepto();
 
-    this.refConcepto.current.focus();
+    this.refValueConcepto.current.focus();
   };
 
   removerCobro = (idConcepto) => {
@@ -519,27 +516,20 @@ class CobroCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
 
   handleClearInputConcepto = async () => {
-    await this.setStateAsync({
+    this.setState({
       conceptos: [],
-      filtrarConcepto: '',
       concepto: null,
     });
-    this.selectItemConcepto = false;
   };
 
-  handleFilterConcepto = async (event) => {
-    const searchWord = this.selectItemConcepto ? '' : event.target.value;
-    await this.setStateAsync({ concepto: null, filtrarConcepto: searchWord });
+  handleFilterConcepto = async (text) => {
+    const searchWord = text;
+    this.setState({ concepto: null });
 
-    this.selectItemConcepto = false;
-    if (searchWord.length === 0) {
-      await this.setStateAsync({ conceptos: [] });
+    if (isEmpty(searchWord)) {
+      this.setState({ conceptos: [] });
       return;
     }
-
-    if (this.state.loadingConcepto) return;
-
-    await this.setStateAsync({ loadingConcepto: true });
 
     const params = {
       filtrar: searchWord,
@@ -547,46 +537,37 @@ class CobroCrear extends CustomComponent {
 
     const conceptos = await this.fetchFiltrarCobroConcepto(params);
 
-    await this.setStateAsync({ loadingConcepto: false, conceptos });
+    this.setState({ conceptos });
   };
 
-  handleSelectItemConcepto = async (value) => {
-    await this.setStateAsync({
+  handleSelectItemConcepto = (value) => {
+    this.setState({
       concepto: value,
-      filtrarConcepto: value.nombre,
       conceptos: [],
+    }, () => {
+      this.refMonto.current.focus();
     });
-    this.selectItemConcepto = true;
-
-    this.refMonto.current.focus();
   };
 
   //------------------------------------------------------------------------------------------
   // Filtrar cliente
   //------------------------------------------------------------------------------------------
 
-  handleClearInputCliente = async () => {
-    await this.setStateAsync({
+  handleClearInputCliente = () => {
+    this.setState({
       clientes: [],
-      filtrarCliente: '',
       cliente: null,
     });
-    this.selectItemCliente = false;
   };
 
-  handleFilterCliente = async (event) => {
-    const searchWord = this.selectItemCliente ? '' : event.target.value;
-    await this.setStateAsync({ cliente: null, filtrarCliente: searchWord });
+  handleFilterCliente = async (text) => {
+    const searchWord = text;
+    this.setState({ cliente: null });
 
-    this.selectItemCliente = false;
-    if (searchWord.length === 0) {
-      await this.setStateAsync({ clientes: [] });
+    if (isEmpty(searchWord)) {
+      this.setState({ clientes: [] });
       return;
     }
-
-    if (this.state.loadingCliente) return;
-
-    await this.setStateAsync({ loadingCliente: true });
 
     const params = {
       opcion: 1,
@@ -596,16 +577,14 @@ class CobroCrear extends CustomComponent {
 
     const clientes = await this.fetchFiltrarCliente(params);
 
-    await this.setStateAsync({ loadingCliente: false, clientes });
+    this.setState({ clientes });
   };
 
-  handleSelectItemCliente = async (value) => {
-    await this.setStateAsync({
+  handleSelectItemCliente = (value) => {
+    this.setState({
       cliente: value,
-      filtrarCliente: value.documento + ' - ' + value.informacion,
       clientes: [],
     });
-    this.selectItemCliente = true;
   };
 
   //------------------------------------------------------------------------------------------
@@ -616,30 +595,22 @@ class CobroCrear extends CustomComponent {
     const { idComprobante, cliente, idMoneda, detalle } = this.state;
 
     if (!isText(idComprobante)) {
-      alertWarning('Cobro', 'Seleccione su comprobante.', () =>
-        this.refComprobante.current.focus(),
-      );
+      alertWarning('Cobro', 'Seleccione su comprobante.', () => this.refComprobante.current.focus());
       return;
     }
 
     if (isEmpty(cliente)) {
-      alertWarning('Cobro', 'Seleccione un cliente.', () =>
-        this.refCliente.current.focus(),
-      );
+      alertWarning('Cobro', 'Seleccione un cliente.', () => this.refValueCliente.current.focus());
       return;
     }
 
     if (!isText(idMoneda)) {
-      alertWarning('Cobro', 'Seleccione su moneda.', () =>
-        this.refMoneda.current.focus(),
-      );
+      alertWarning('Cobro', 'Seleccione su moneda.', () => this.refMoneda.current.focus());
       return;
     }
 
     if (isEmpty(detalle)) {
-      alertWarning('Cobro', 'Agregar algún concepto a la lista.', () =>
-        this.refConcepto.current.focus(),
-      );
+      alertWarning('Cobro', 'Agregar algún concepto a la lista.', () => this.refValueConcepto.current.focus());
       return;
     }
 
@@ -648,6 +619,8 @@ class CobroCrear extends CustomComponent {
 
   handleLimpiar = async () => {
     this.setState(this.initial, async () => {
+      await this.refConcepto.current.restart();
+      await this.refCliente.current.restart();
       await this.loadData();
     });
   };
@@ -754,10 +727,10 @@ class CobroCrear extends CustomComponent {
               {/* Filtrar */}
               <Column className="col-md-6">
                 <SearchInput
+                  ref={this.refConcepto}
                   autoFocus={true}
                   placeholder="Filtrar conceptos..."
-                  refValue={this.refConcepto}
-                  value={this.state.filtrarConcepto}
+                  refValue={this.refValueConcepto}
                   data={this.state.conceptos}
                   handleClearInput={this.handleClearInputConcepto}
                   handleFilter={this.handleFilterConcepto}
@@ -826,27 +799,24 @@ class CobroCrear extends CustomComponent {
 
             <Row>
               <div className="form-group">
-                <button
-                  type="button"
-                  className="btn btn-success"
+                <Button
+                  className="btn-success"
                   onClick={this.handleGuardar}
                 >
                   <i className="fa fa-save"></i> Guardar
-                </button>{' '}
-                <button
-                  type="button"
-                  className="btn btn-outline-info"
+                </Button>{' '}
+                <Button
+                  className="btn-outline-info"
                   onClick={this.handleLimpiar}
                 >
                   <i className="fa fa-trash"></i> Limpiar
-                </button>{' '}
-                <button
-                  type="button"
-                  className="btn btn-outline-danger"
+                </Button>{' '}
+                <Button
+                  className="btn-outline-danger"
                   onClick={this.handleCerrar}
                 >
                   <i className="fa fa-close"></i> Cerrar
-                </button>
+                </Button>
               </div>
             </Row>
           </Column>
@@ -879,9 +849,9 @@ class CobroCrear extends CustomComponent {
 
             <div className="form-group">
               <SearchInput
+                ref={this.refCliente}
                 placeholder="Filtrar clientes..."
-                refValue={this.refCliente}
-                value={this.state.filtrarCliente}
+                refValue={this.refValueCliente}
                 data={this.state.clientes}
                 handleClearInput={this.handleClearInputCliente}
                 handleFilter={this.handleFilterCliente}

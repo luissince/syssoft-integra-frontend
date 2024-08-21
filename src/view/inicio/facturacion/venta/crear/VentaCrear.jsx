@@ -78,8 +78,6 @@ class VentaCrear extends CustomComponent {
 
       // Filtrar cliente
       idCliente: '',
-      cliente: '',
-      filterCliente: false,
       nuevoCliente: null,
 
       // Lista de datos
@@ -161,7 +159,7 @@ class VentaCrear extends CustomComponent {
 
     // Referencia al tipo de cliente
     this.refCliente = React.createRef();
-    this.selectItemCliente = false;
+    this.refValueCliente = React.createRef();
 
     // Atributos para el modal configuración
     this.idModalConfiguration = 'idModalConfiguration';
@@ -456,6 +454,7 @@ class VentaCrear extends CustomComponent {
 
   reloadView() {
     this.setState(this.initial, async () => {
+      await this.refCliente.current.restart();
       await this.loadingData();
       this.refInvoiceView.current.componentClear();
     })
@@ -922,7 +921,7 @@ class VentaCrear extends CustomComponent {
 
     if (isEmpty(idCliente)) {
       alertWarning('Venta', 'Seleccione un cliente.', () =>
-        this.refCliente.current.focus()
+        this.refValueCliente.current.focus()
       );
       return;
     }
@@ -1407,30 +1406,22 @@ class VentaCrear extends CustomComponent {
   // Filtrar cliente
   //------------------------------------------------------------------------------------------
 
-  handleClearInputCliente = async () => {
-    await this.setStateAsync({
+  handleClearInputCliente = () => {
+    this.setState({
       clientes: [],
       idCliente: '',
-      cliente: '',
       nuevoCliente: null,
-      filterCliente: false
     });
-    this.selectItemCliente = false;
   }
 
-  handleFilterCliente = async (event) => {
-    const searchWord = this.selectItemCliente ? '' : event.target.value;
-    await this.setStateAsync({ idCliente: '', cliente: searchWord });
+  handleFilterCliente = async (text) => {
+    const searchWord = text;
+    this.setState({ idCliente: '' });
 
-    this.selectItemCliente = false;
-    if (searchWord.length === 0) {
-      await this.setStateAsync({ clientes: [] });
+    if (isEmpty(searchWord)) {
+      this.setState({ clientes: [] });
       return;
     }
-
-    if (this.state.filterCliente) return;
-
-    await this.setStateAsync({ filterCliente: true });
 
     const params = {
       "opcion": 1,
@@ -1441,18 +1432,16 @@ class VentaCrear extends CustomComponent {
     const clientes = await this.fetchFiltrarPersona(params)
 
     this.setState({
-      filterCliente: false,
       clientes: clientes,
     });
-
   }
 
   handleSelectItemCliente = (value) => {
+    this.refCliente.current.initialize(value.documento + ' - ' + value.informacion);
     this.setState({
-      cliente: value.documento + ' - ' + value.informacion,
       clientes: [],
       idCliente: value.idPersona,
-    }, () => this.selectItemCliente = true);
+    });
   }
 
   //------------------------------------------------------------------------------------------
@@ -1474,7 +1463,7 @@ class VentaCrear extends CustomComponent {
 
     if (isEmpty(this.state.idCliente) && this.state.nuevoCliente === null) {
       alertWarning('Venta', 'Selecciona un cliente.', () => {
-        this.refCliente.current.focus();
+        this.refValueCliente.current.focus();
       });
       return;
     }
@@ -1718,7 +1707,7 @@ class VentaCrear extends CustomComponent {
             handleOpenCliente={this.handleOpenCliente}
             placeholder="Filtrar clientes..."
             refCliente={this.refCliente}
-            cliente={this.state.cliente}
+            refValueCliente={this.refValueCliente}
             clientes={this.state.clientes}
             handleClearInput={this.handleClearInputCliente}
             handleFilter={this.handleFilterCliente}

@@ -363,8 +363,8 @@ class GuiaRemision extends CustomComponent {
 
         <Row>
           <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
-            <label>Fecha de Inicio:</label>
             <Input
+              label={"Fecha de Inicio:"}
               type="date"
               value={this.state.fechaInicio}
               onChange={this.handleInputFechaInico}
@@ -372,8 +372,8 @@ class GuiaRemision extends CustomComponent {
           </Column>
 
           <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
-            <label>Fecha de Final:</label>
             <Input
+              label={"Fecha de Final:"}
               type="date"
               value={this.state.fechaFinal}
               onChange={this.handleInputFechaFinal}
@@ -381,8 +381,8 @@ class GuiaRemision extends CustomComponent {
           </Column>
 
           <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
-            <label>Estados:</label>
             <Select
+              label={"Estados:"}
               value={this.state.estado}
               onChange={this.handleSelectEstado}
             >
@@ -396,6 +396,8 @@ class GuiaRemision extends CustomComponent {
         <Row>
           <Column className="col-md-6 col-sm-12" formGroup={true}>
             <Search
+              group={true}
+              iconLeft={<i className="bi bi-search"></i>}
               onSearch={this.searchText}
               placeholder="Buscar por comprobante o cliente..."
             />

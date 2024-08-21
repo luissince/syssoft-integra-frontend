@@ -434,6 +434,8 @@ class Inventario extends CustomComponent {
         <Row>
           <Column className="col-md-6 col-sm-12" formGroup={true}>
             <Search
+              group={true}
+              iconLeft={<i className="bi bi-search"></i>}
               onSearch={this.searchText}
               placeholder="Buscar..."
             />

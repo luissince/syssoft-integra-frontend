@@ -183,9 +183,9 @@ class ModalProducto extends Component {
 
             <Row>
               <Column formGroup={true}>
-                <label>Cantidad:</label>
                 <Input
                   autoFocus={true}
+                  label={"Cantidad:"}
                   placeholder={"0.00"}
                   role={"float"}
                   refInput={this.refCantidad}
@@ -196,8 +196,8 @@ class ModalProducto extends Component {
               </Column>
 
               <Column formGroup={true}>
-                <label>Costo:</label>
                 <Input
+                  label={"Costo:"}
                   placeholder={"0.00"}
                   role={"float"}
                   refInput={this.refCosto}
