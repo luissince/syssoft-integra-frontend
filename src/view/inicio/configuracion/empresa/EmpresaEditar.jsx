@@ -28,6 +28,8 @@ import { SpinnerView } from '../../../../components/Spinner';
 import Row from '../../../../components/Row';
 import Column from '../../../../components/Column';
 import Image from '../../../../components/Image';
+import Button from '../../../../components/Button';
+import Input from '../../../../components/Input';
 
 class EmpresaProceso extends CustomComponent {
   constructor(props) {
@@ -51,6 +53,8 @@ class EmpresaProceso extends CustomComponent {
       certificado: 'Hacer click para seleccionar su archivo.',
       claveCertificado: '',
 
+      fireBaseCertificado: 'Hacer click para seleccionar su archivo.',
+
       logo: images.noImage,
       image: images.noImage,
 
@@ -69,12 +73,13 @@ class EmpresaProceso extends CustomComponent {
     this.refDocumento = React.createRef();
     this.refRazonSocial = React.createRef();
 
-    this.refFileCertificado = React.createRef();
-
     this.refPasswordEmail = React.createRef();
     this.refPasswordSol = React.createRef();
     this.refPasswordClave = React.createRef();
     this.refPasswordClaveCertificado = React.createRef();
+
+    this.refFileCertificado = React.createRef();
+    this.refFileFireBase = React.createRef();
 
     this.refFileLogo = React.createRef();
     this.refFileImagen = React.createRef();
@@ -187,6 +192,16 @@ class EmpresaProceso extends CustomComponent {
     }
   };
 
+  handleFileFireBaseBase = (event) => {
+    if (!isEmpty(event.target.files)) {
+      this.setState({ fireBaseCertificado: event.target.files[0].name });
+    } else {
+      this.setState({ fireBaseCertificado: 'Hacer click para seleccionar su archivo.' }, () => {
+        this.refFileFireBase.current.value = '';
+      });
+    }
+  };
+
   async handleGetApiSunat() {
     if (isEmpty(this.state.documento)) {
       this.refDocumento.current.focus();
@@ -272,6 +287,8 @@ class EmpresaProceso extends CustomComponent {
 
       const certificadoSend = await convertFileBase64(this.refFileCertificado.current.files);
 
+      const fireBaseSend = await convertFileBase64(this.refFileFireBase.current.files);
+
       const data = {
         documento: this.state.documento.trim(),
         razonSocial: this.state.razonSocial.trim(),
@@ -289,6 +306,9 @@ class EmpresaProceso extends CustomComponent {
         certificado: certificadoSend.data ?? "",
         extCertificado: certificadoSend.extension ?? "",
         claveCertificado: this.state.claveCertificado,
+
+        fireBase: fireBaseSend.data ?? "",
+        extFireBase: fireBaseSend.extension ?? "",
 
         logo: logoSend.base64String ?? "",
         extlogo: logoSend.extension ?? "",
@@ -331,274 +351,265 @@ class EmpresaProceso extends CustomComponent {
         />
 
         <Row>
-          <Column className={"col-md-6"}>
-            <div className="form-group">
-              <label>
-                Ruc ({this.state.documento.length}): <i className="fa fa-asterisk text-danger small"></i>
-              </label>
-              <div className="input-group">
-                <input
-                  type="text"
-                  className="form-control"
-                  onKeyDown={keyNumberInteger}
-                  ref={this.refDocumento}
-                  value={this.state.documento}
-                  onChange={(event) =>
-                    this.setState({ documento: event.target.value })
-                  }
-                  placeholder="10909000223"
-                />
-                <div className="input-group-append">
-                  <button
-                    className="btn btn-outline-secondary"
-                    type="button"
-                    title="Sunat"
-                    onClick={() => this.handleGetApiSunat()}
-                  >
-                    <img src={images.sunat} alt="Sunat" width="12" />
-                  </button>
-                </div>
-              </div>
-            </div>
+          <Column className={"col-md-6"} formGroup={true}>
+            <Input
+              group={true}
+              label={<>Ruc ({this.state.documento.length}): <i className="fa fa-asterisk text-danger small"></i></>}
+              placeholder="10909000223"
+              refInput={this.refDocumento}
+              value={this.state.documento}
+              onChange={(event) =>
+                this.setState({ documento: event.target.value })
+              }
+              onKeyDown={keyNumberInteger}
+              buttonRight={
+                <Button
+                  className="btn-outline-secondary"
+                  title="Sunat"
+                  onClick={() => this.handleGetApiSunat()}
+                >
+                  <img src={images.sunat} alt="Sunat" width="12" />
+                </Button>
+              }
+            />
           </Column>
 
-          <Column className={"col-md-6"}>
-            <div className="form-group">
-              <label>
-                Razón Social: <i className="fa fa-asterisk text-danger small"></i>
-              </label>
-              <input
-                type="text"
-                className="form-control"
-                ref={this.refRazonSocial}
-                value={this.state.razonSocial}
-                onChange={(event) =>
-                  this.setState({ razonSocial: event.target.value })
-                }
-                placeholder="Ingrese la razón social"
-              />
-            </div>
+          <Column className={"col-md-6"} formGroup={true}>
+            <label>
+              Razón Social: <i className="fa fa-asterisk text-danger small"></i>
+            </label>
+            <input
+              type="text"
+              className="form-control"
+              ref={this.refRazonSocial}
+              value={this.state.razonSocial}
+              onChange={(event) =>
+                this.setState({ razonSocial: event.target.value })
+              }
+              placeholder="Ingrese la razón social"
+            />
           </Column>
         </Row>
 
         <Row>
-          <Column className={"col-md-6"}>
-            <div className="form-group">
-              <label>Nombre Comercial: </label>
-              <input
-                type="text"
-                className="form-control"
-                value={this.state.nombreEmpresa}
-                onChange={(event) =>
-                  this.setState({ nombreEmpresa: event.target.value })
-                }
-                placeholder="Ingrese el nombre comercial"
-              />
-            </div>
+          <Column className={"col-md-6"} formGroup={true}>
+            <label>Nombre Comercial: </label>
+            <input
+              type="text"
+              className="form-control"
+              value={this.state.nombreEmpresa}
+              onChange={(event) =>
+                this.setState({ nombreEmpresa: event.target.value })
+              }
+              placeholder="Ingrese el nombre comercial"
+            />
           </Column>
         </Row>
 
         <Row>
-          <Column className={"col-md-6"}>
-            <div className="form-group ">
-              <label>
-                Usuario Email (<small>Para el envío del correo</small>):{' '}
-              </label>
-              <input
-                type="text"
-                className="form-control"
-                value={this.state.usuarioEmail}
-                onChange={(event) =>
-                  this.setState({ usuarioEmail: event.target.value })
-                }
-                placeholder="Email de Envío"
-              />
-            </div>
+          <Column className={"col-md-6"} formGroup={true}>
+            <label>
+              Usuario Email (<small>Para el envío del correo</small>):{' '}
+            </label>
+            <input
+              type="text"
+              className="form-control"
+              value={this.state.usuarioEmail}
+              onChange={(event) =>
+                this.setState({ usuarioEmail: event.target.value })
+              }
+              placeholder="Email de Envío"
+            />
           </Column>
 
-          <Column className={"col-md-6"}>
-            <div className="form-group">
-              <label>
-                Contraseña Email (<small>Para el envío del correo</small>):{' '}
-              </label>
-              <div className="input-group">
-                <input
-                  ref={this.refPasswordEmail}
-                  type={this.state.lookPasswordEmail ? 'text' : 'password'}
-                  className="form-control"
-                  value={this.state.claveEmail}
-                  onChange={(event) =>
-                    this.setState({ claveEmail: event.target.value })
-                  }
-                  placeholder="********"
-                />
-                <div className="input-group-append">
-                  <button
-                    className="btn btn-outline-secondary"
-                    type="button"
-                    title="Email"
-                    onClick={this.handleLookPasswordEmail}
-                  >
-                    <i className={this.state.lookPasswordEmail ? 'fa fa-eye' : 'fa fa-eye-slash'}></i>
-                  </button>
-                </div>
+          <Column className={"col-md-6"} formGroup={true}>
+            <label>
+              Contraseña Email (<small>Para el envío del correo</small>):{' '}
+            </label>
+            <div className="input-group">
+              <input
+                ref={this.refPasswordEmail}
+                type={this.state.lookPasswordEmail ? 'text' : 'password'}
+                className="form-control"
+                value={this.state.claveEmail}
+                onChange={(event) =>
+                  this.setState({ claveEmail: event.target.value })
+                }
+                placeholder="********"
+              />
+              <div className="input-group-append">
+                <button
+                  className="btn btn-outline-secondary"
+                  type="button"
+                  title="Email"
+                  onClick={this.handleLookPasswordEmail}
+                >
+                  <i className={this.state.lookPasswordEmail ? 'fa fa-eye' : 'fa fa-eye-slash'}></i>
+                </button>
               </div>
             </div>
           </Column>
         </Row>
 
         <Row>
-          <Column className={"col-md-6"}>
-            <div className="form-group">
-              <label>
-                Usuario Sol(<small>Para el envío a Sunat</small>):{' '}
-              </label>
+          <Column className={"col-md-6"} formGroup={true}>
+            <label>
+              Usuario Sol(<small>Para el envío a Sunat</small>):{' '}
+            </label>
+            <input
+              type="text"
+              className="form-control"
+              value={this.state.usuarioSolSunat}
+              onChange={(event) =>
+                this.setState({ usuarioSolSunat: event.target.value })
+              }
+              placeholder="usuario"
+            />
+          </Column>
+
+          <Column className={"col-md-6"} formGroup={true}>
+            <label>
+              Clave Sol(<small>Para el envío a Sunat</small>):{' '}
+            </label>
+            <div className="input-group">
               <input
-                type="text"
+                ref={this.refPasswordSol}
+                type={this.state.refPasswordSol ? 'text' : 'password'}
                 className="form-control"
-                value={this.state.usuarioSolSunat}
+                value={this.state.claveSolSunat}
                 onChange={(event) =>
-                  this.setState({ usuarioSolSunat: event.target.value })
+                  this.setState({ claveSolSunat: event.target.value })
                 }
-                placeholder="usuario"
+                placeholder="********"
               />
-            </div>
-          </Column>
-
-          <Column className={"col-md-6"}>
-            <div className="form-group">
-              <label>
-                Clave Sol(<small>Para el envío a Sunat</small>):{' '}
-              </label>
-              <div className="input-group">
-                <input
-                  ref={this.refPasswordSol}
-                  type={this.state.refPasswordSol ? 'text' : 'password'}
-                  className="form-control"
-                  value={this.state.claveSolSunat}
-                  onChange={(event) =>
-                    this.setState({ claveSolSunat: event.target.value })
-                  }
-                  placeholder="********"
-                />
-                <div className="input-group-append">
-                  <button
-                    className="btn btn-outline-secondary"
-                    type="button"
-                    title="Sunat"
-                    onClick={this.handleLookPasswordSol}
-                  >
-                    <i className={this.state.refPasswordSol ? 'fa fa-eye' : 'fa fa-eye-slash'}></i>
-                  </button>
-                </div>
+              <div className="input-group-append">
+                <button
+                  className="btn btn-outline-secondary"
+                  type="button"
+                  title="Sunat"
+                  onClick={this.handleLookPasswordSol}
+                >
+                  <i className={this.state.refPasswordSol ? 'fa fa-eye' : 'fa fa-eye-slash'}></i>
+                </button>
               </div>
             </div>
           </Column>
         </Row>
 
         <Row>
-          <Column className={"col-md-6"}>
-            <div className="form-group">
-              <label>
-                Id Api Sunat(<small>Para el envío de guía de remisión</small>):{' '}
-              </label>
+          <Column className={"col-md-6"} formGroup={true}>
+            <label>
+              Id Api Sunat(<small>Para el envío de guía de remisión</small>):{' '}
+            </label>
+            <input
+              type="text"
+              className="form-control"
+              value={this.state.idApiSunat}
+              onChange={(event) =>
+                this.setState({ idApiSunat: event.target.value })
+              }
+              placeholder="usuario"
+            />
+          </Column>
+
+          <Column className={"col-md-6"} formGroup={true}>
+            <label>
+              Clave Api Sunat(<small>Para el envío de guía de remisión</small>):{' '}
+            </label>
+            <div className="input-group">
               <input
-                type="text"
+                ref={this.refPasswordClave}
+                type={this.state.lookPasswordClave ? 'text' : 'password'}
                 className="form-control"
-                value={this.state.idApiSunat}
+                value={this.state.claveApiSunat}
                 onChange={(event) =>
-                  this.setState({ idApiSunat: event.target.value })
+                  this.setState({ claveApiSunat: event.target.value })
                 }
-                placeholder="usuario"
+                placeholder="********"
               />
-            </div>
-          </Column>
-
-          <Column className={"col-md-6"}>
-            <div className="form-group">
-              <label>
-                Clave Api Sunat(<small>Para el envío de guía de remisión</small>):{' '}
-              </label>
-              <div className="input-group">
-                <input
-                  ref={this.refPasswordClave}
-                  type={this.state.lookPasswordClave ? 'text' : 'password'}
-                  className="form-control"
-                  value={this.state.claveApiSunat}
-                  onChange={(event) =>
-                    this.setState({ claveApiSunat: event.target.value })
-                  }
-                  placeholder="********"
-                />
-                <div className="input-group-append">
-                  <button
-                    className="btn btn-outline-secondary"
-                    type="button"
-                    title="Sunat"
-                    onClick={this.handleLookPasswordApiSunat}
-                  >
-                    <i className={this.state.lookPasswordClave ? 'fa fa-eye' : 'fa fa-eye-slash'}></i>
-                  </button>
-                </div>
+              <div className="input-group-append">
+                <button
+                  className="btn btn-outline-secondary"
+                  type="button"
+                  title="Sunat"
+                  onClick={this.handleLookPasswordApiSunat}
+                >
+                  <i className={this.state.lookPasswordClave ? 'fa fa-eye' : 'fa fa-eye-slash'}></i>
+                </button>
               </div>
             </div>
           </Column>
         </Row>
 
         <Row>
-          <Column>
-            <div className="form-group ">
-              <label>
-                Seleccionar Archivo (.p12, .pfx u otros):
-              </label>
+          <Column formGroup={true}>
+            <label>
+              Seleccionar Archivo (.p12, .pfx u otros):
+            </label>
+            <input
+              type="file"
+              id="fileCertificado"
+              accept=".p12,.pfx"
+              className="display-none"
+              ref={this.refFileCertificado}
+              onChange={this.handleFileCertificado}
+            />
+            <label htmlFor={"fileCertificado"} className='form-control cursor-pointer '>
+              {this.state.certificado}
+            </label>
+          </Column>
+
+          <Column className={"col-md-6"} formGroup={true}>
+            <label>
+              Contraseña de tu Certificado:
+            </label>
+            <div className="input-group">
               <input
-                type="file"
-                id="fileCertificado"
-                accept=".p12,.pfx"
-                className="display-none"
-                ref={this.refFileCertificado}
-                onChange={this.handleFileCertificado}
+                ref={this.refPasswordClaveCertificado}
+                type={this.state.lookPasswordClaveCertificado ? 'text' : 'password'}
+                className="form-control"
+                value={this.state.claveCertificado}
+                onChange={(event) =>
+                  this.setState({ claveCertificado: event.target.value })
+                }
+                placeholder="********"
               />
-              <label htmlFor={"fileCertificado"} className='form-control cursor-pointer '>
-                {this.state.certificado}
-              </label>
-            </div>
-          </Column>
-
-          <Column className={"col-md-6"}>
-            <div className="form-group">
-              <label>
-                Contraseña de tu Certificado:
-              </label>
-              <div className="input-group">
-                <input
-                  ref={this.refPasswordClaveCertificado}
-                  type={this.state.lookPasswordClaveCertificado ? 'text' : 'password'}
-                  className="form-control"
-                  value={this.state.claveCertificado}
-                  onChange={(event) =>
-                    this.setState({ claveCertificado: event.target.value })
-                  }
-                  placeholder="********"
-                />
-                <div className="input-group-append">
-                  <button
-                    className="btn btn-outline-secondary"
-                    type="button"
-                    title="Email"
-                    onClick={this.handleLookPasswordCertificado}
-                  >
-                    <i className={this.state.lookPasswordClaveCertificado ? 'fa fa-eye' : 'fa fa-eye-slash'}></i>
-                  </button>
-                </div>
+              <div className="input-group-append">
+                <button
+                  className="btn btn-outline-secondary"
+                  type="button"
+                  title="Email"
+                  onClick={this.handleLookPasswordCertificado}
+                >
+                  <i className={this.state.lookPasswordClaveCertificado ? 'fa fa-eye' : 'fa fa-eye-slash'}></i>
+                </button>
               </div>
             </div>
           </Column>
         </Row>
+        <Row>
+          <Column formGroup={true}>
+            <label>
+              Seleccionar Archivo de Configuración de FireBase (.json):
+            </label>
+            <input
+              type="file"
+              id="fileFireBase"
+              accept=".json"
+              className="display-none"
+              ref={this.refFileFireBase}
+              onChange={this.handleFileFireBaseBase}
+            />
+            <label htmlFor={"fileFireBase"} className='form-control cursor-pointer'>
+              {this.state.fireBaseCertificado}
+            </label>
+          </Column>
+        </Row>
+
 
         <Row>
-          <Column className={"col-md-6"}>
-            <div className="form-group text-center">
+          <Column className={"col-md-6"} formGroup={true}>
+            <div className="text-center">
               <label>Logo</label>
               <br />
               <small>Usuado para los reportes</small>
@@ -634,8 +645,8 @@ class EmpresaProceso extends CustomComponent {
             </div>
           </Column>
 
-          <Column className={"col-md-6"}>
-            <div className="form-group text-center">
+          <Column className={"col-md-6"} formGroup={true}>
+            <div className="text-center">
               <label>Imagen</label>
               <br />
               <small>Usuado para mostrar el logo en sistema</small>
@@ -665,34 +676,30 @@ class EmpresaProceso extends CustomComponent {
                   <span></span>
                 </div>
               </label>{' '}
-              <button
-                className="btn btn-outline-secondary"
+              <Button
+                className="btn-outline-secondary"
                 onClick={() => this.clearImage()}
               >
                 <i className="bi bi-trash"></i>
-              </button>
+              </Button>
             </div>
           </Column>
         </Row>
 
         <Row>
-          <Column>
-            <div className="form-group">
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={() => this.handleGuardar()}
-              >
-                Guardar
-              </button>{' '}
-              <button
-                type="button"
-                className="btn btn-danger"
-                onClick={() => this.props.history.goBack()}
-              >
-                Cerrar
-              </button>
-            </div>
+          <Column formGroup={true}>
+            <Button
+              className="btn-primary"
+              onClick={() => this.handleGuardar()}
+            >
+              Guardar
+            </Button>{' '}
+            <Button
+              className="btn-danger"
+              onClick={() => this.props.history.goBack()}
+            >
+              Cerrar
+            </Button>
           </Column>
         </Row>
       </ContainerWrapper>
