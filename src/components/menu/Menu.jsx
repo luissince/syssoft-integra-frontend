@@ -44,6 +44,11 @@ const Menu = ({
                         activeClassName="active-link"
                         role="button"
                         id={`${menu.ruta}`}
+                        onClick={() => {
+                          if (refSideBar.current) {
+                            refSideBar.current.classList.remove('toggled');
+                          }
+                        }}
                       >
                         <span className="pro-icon-wrapper">
                           <span className="pro-icon">
@@ -65,6 +70,11 @@ const Menu = ({
                         activeClassName="active-link"
                         role="button"
                         id={`${menu.ruta}`}
+                        onClick={() => {
+                          if (refSideBar.current) {
+                            refSideBar.current.classList.remove('toggled');
+                          }
+                        }}
                       >
                         <span className="pro-icon-wrapper">
                           <span className="pro-icon">
