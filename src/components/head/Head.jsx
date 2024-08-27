@@ -1,8 +1,13 @@
 import { Link } from 'react-router-dom';
 import { images } from '../../helper';
 import PropTypes from 'prop-types';
+import { getStatePrivilegio } from '../../helper/utils.helper';
+import { FACTURACION, REALIZAR_VENTA, VENTAS } from '../../model/types/menu';
 
 const Menu = (props) => {
+
+  const add = getStatePrivilegio(props.token.userToken.menus, FACTURACION, VENTAS, REALIZAR_VENTA);
+
   const handleSignIn = () => {
     window.localStorage.removeItem('login');
     window.localStorage.removeItem('project');
@@ -29,14 +34,14 @@ const Menu = (props) => {
 
       <ul className="app-nav">
         {/* Navegar al menú de navegación */}
-        <div className="dropdown">
+        {add && <div className="dropdown">
           <Link
             className="app-nav__item"
             to={`${props.match.url}/facturacion/ventas/crear`}>
             {' '}
             <i className="fast-sale fa fa-shopping-cart fa-lg"></i> Nueva venta
           </Link>
-        </div>
+        </div>}
 
         {/* Lista de notificaciones */}
         <div className="dropdown">
@@ -164,6 +169,7 @@ Menu.propTypes = {
       nombres: PropTypes.string,
       apellidos: PropTypes.string,
       rol: PropTypes.string,
+      menus: PropTypes.array,
     })
   })
 }

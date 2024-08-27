@@ -20,9 +20,40 @@ export function makeid(length) {
   return result;
 }
 
-export function statePrivilegio(value) {
-  if (value === undefined) return false;
-  return value === 1 ? true : false;
+/**
+ * Obtiene el estado de un privilegio específico dentro de un menú, submenú y privilegio dados.
+ * 
+ * @param {Array} menus - Lista de menús, cada uno con sus submenús y privilegios.
+ * @param {string} idMenu - Id del menú en el que se encuentra el privilegio.
+ * @param {string} idSubMenu - Id del submenú dentro del menú especificado.
+ * @param {string} idPrivilegio - Id del privilegio dentro del submenú especificado.
+ * @returns {boolean} - Estado del privilegio (true o false), o false si el array de menús está vacío o si ocurre un error.
+ */
+export function getStatePrivilegio(list, idMenu, idSubMenu, idPrivilegio) {
+  // Verifica si el array de menús está vacío o es nulo.
+  if (isEmpty(list)) {
+    return false;
+  }
+
+  try {
+    // Encuentra el menú con el id especificado.
+    const menu = list.find(item => item.idMenu === idMenu);
+    if (!menu) return false;
+
+    // Encuentra el submenú con el id especificado dentro del menú.
+    const subMenu = menu.subMenus.find(item => item.idSubMenu === idSubMenu);
+    if (!subMenu) return false;
+
+    // Encuentra el privilegio con el id especificado dentro del submenú.
+    const privilegio = subMenu.privilegios.find(item => item.idPrivilegio === idPrivilegio);
+    if (!privilegio) return false;
+
+    // Retorna el estado del privilegio.
+    return privilegio.estado === 1 ? true : false;
+  } catch (error) {
+    // Retorna 0 si ocurre un error al acceder al privilegio (ej: índices fuera de rango).
+    return false;
+  }
 }
 
 /**

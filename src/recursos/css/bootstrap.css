@@ -428,6 +428,8 @@ footer {
 
 header.app-header {
   width: 100%;
+  min-height: 60px;
+  height: auto;
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;

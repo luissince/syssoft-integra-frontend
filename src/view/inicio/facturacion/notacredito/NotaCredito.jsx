@@ -9,7 +9,6 @@ import {
   alertSuccess,
   alertWarning,
   alertError,
-  statePrivilegio,
   keyUpSearch,
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
