@@ -8,7 +8,6 @@ import {
   alertSuccess,
   alertWarning,
   isEmpty,
-  spinnerLoading,
 } from '../../../../helper/utils.helper.jsx';
 import ContainerWrapper from '../../../../components/Container.jsx';
 import {
@@ -21,6 +20,13 @@ import SuccessReponse from '../../../../model/class/response.js';
 import ErrorResponse from '../../../../model/class/error-response.js';
 import { CANCELED } from '../../../../model/types/types.js';
 import CustomComponent from '../../../../model/class/custom-component.js';
+import { SpinnerView } from '../../../../components/Spinner.jsx';
+import Row from '../../../../components/Row.jsx';
+import Column from '../../../../components/Column.jsx';
+import Button from '../../../../components/Button.jsx';
+import Select from '../../../../components/Select.jsx';
+import Title from '../../../../components/Title.jsx';
+import CheckBox from '../../../../components/Checks.jsx';
 
 
 /**
@@ -32,14 +38,14 @@ class Accesos extends CustomComponent {
   constructor(props) {
     super(props);
     this.state = {
-      idEmpresa: '',
-      idPerfil: '',
-      perfiles: [],
-      menu: [],
-      catalogo: [],
       loading: true,
       msgLoading: 'Cargando datos...',
 
+      idEmpresa: '',
+      idPerfil: '',
+      perfiles: [],
+      menus: [],
+      sucursales: [],
       // save: statePrivilegio(
       //   this.props.token.userToken.menus[1].submenu[2].privilegio[0].estado,
       // ),
@@ -49,6 +55,7 @@ class Accesos extends CustomComponent {
 
       messageWarning: '',
     };
+
     this.refIdPerfil = React.createRef();
 
     this.abortControllerView = new AbortController();
@@ -89,7 +96,8 @@ class Accesos extends CustomComponent {
 
   loadDataAcceso = async (id) => {
     await this.setStateAsync({
-      menu: [],
+      menus: [],
+      sucursales: [],
       loading: true,
       msgLoading: 'Cargando accesos...',
     });
@@ -102,8 +110,8 @@ class Accesos extends CustomComponent {
 
     if (response instanceof SuccessReponse) {
       const menus = response.data.menu.map((item) => {
-        let submenu = [];
-        for (const value of response.data.submenu) {
+        let subMenu = [];
+        for (const value of response.data.subMenu) {
           let privilegio = [];
 
           if (item.idMenu === value.idMenu) {
@@ -123,7 +131,7 @@ class Accesos extends CustomComponent {
               }
             }
 
-            submenu.push({
+            subMenu.push({
               estado: value.estado,
               idMenu: value.idMenu,
               idSubMenu: value.idSubMenu,
@@ -135,12 +143,13 @@ class Accesos extends CustomComponent {
 
         return {
           ...item,
-          children: submenu,
+          children: subMenu,
         };
       });
 
       await this.setStateAsync({
-        menu: menus,
+        menus: menus,
+        sucursales: response.data.perfilSucursales,
         loading: false,
       });
 
@@ -154,39 +163,41 @@ class Accesos extends CustomComponent {
     }
   };
 
-  async onChangePerfil(event) {
-    if (event.target.value.length > 0) {
+  onChangePerfil = async (event) => {
+    const { value } = event.target;
+    if (value.length > 0) {
       await this.setStateAsync({
-        idPerfil: event.target.value,
+        idPerfil: value,
         messageWarning: '',
       });
-      this.loadDataAcceso(event.target.value);
+      this.loadDataAcceso(value);
     } else {
       await this.setStateAsync({
-        idPerfil: event.target.value,
-        menu: [],
+        idPerfil: value,
+        menus: [],
         messageWarning: 'Seleccione el perfil.',
       });
     }
   }
 
-  handleCheck = async (event) => {
-    let updatedList = [...this.state.menu];
+  handleCheckMenu = async (event) => {
+    const { value } = event.target;
+    let updatedList = [...this.state.menus];
     for (let menu of updatedList) {
-      if (menu.idMenu === event.target.value) {
+      if (menu.idMenu === value) {
         menu.estado = event.target.checked ? 1 : 0;
         break;
       } else {
         if (menu.children.length !== 0) {
-          for (let submenu of menu.children) {
-            if (menu.idMenu + submenu.idSubMenu === event.target.value) {
-              submenu.estado = event.target.checked ? 1 : 0;
+          for (let subMenu of menu.children) {
+            if (menu.idMenu + subMenu.idSubMenu === value) {
+              subMenu.estado = event.target.checked ? 1 : 0;
               break;
             } else {
-              for (let privilegio of submenu.children) {
+              for (let privilegio of subMenu.children) {
                 if (
-                  menu.idMenu + submenu.idSubMenu + privilegio.idPrivilegio ===
-                  event.target.value
+                  menu.idMenu + subMenu.idSubMenu + privilegio.idPrivilegio ===
+                  value
                 ) {
                   privilegio.estado = event.target.checked ? 1 : 0;
                   break;
@@ -197,7 +208,22 @@ class Accesos extends CustomComponent {
         }
       }
     }
-    await this.setStateAsync({ menu: updatedList });
+    await this.setStateAsync({ menus: updatedList });
+  };
+
+  handleCheckSucursal = async (event) => {
+    const { value } = event.target;
+    this.setState(prevState => ({
+      sucursales: prevState.sucursales.map((item)=>{
+        if(item.idSucursal === value){
+          return {
+            ...item,
+            estado: item.estado === 1 ? 0 : 1
+          }
+        }
+        return item;
+      })
+    }));
   };
 
   async onEventGuardar() {
@@ -212,7 +238,8 @@ class Accesos extends CustomComponent {
       if (accept) {
         const data = {
           idPerfil: this.state.idPerfil,
-          menu: this.state.menu,
+          menus: this.state.menus,
+          sucursales: this.state.sucursales
         };
 
         alertInfo('Acceso', 'Procesando información...');
@@ -223,7 +250,8 @@ class Accesos extends CustomComponent {
           alertSuccess('Acceso', response.data, async () => {
             await this.setStateAsync({
               idPerfil: '',
-              menu: [],
+              menus: [],
+              sucursales: [],
             });
           });
         }
@@ -247,7 +275,7 @@ class Accesos extends CustomComponent {
       if (accept) {
         const data = {
           idPerfil: this.state.idPerfil,
-          menu: this.state.menu,
+          menus: this.state.menus,
         };
 
         alertInfo('Acceso', 'Procesando información...');
@@ -258,7 +286,8 @@ class Accesos extends CustomComponent {
           alertSuccess('Acceso', response.data, async () => {
             await this.setStateAsync({
               idPerfil: '',
-              menu: [],
+              menus: [],
+              sucursales: [],
             });
           });
         }
@@ -273,17 +302,15 @@ class Accesos extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
-        {this.state.loading && spinnerLoading(this.state.msgLoading)}
+        <SpinnerView
+          loading={this.state.loading}
+          message={this.state.msgLoading}
+        />
 
-        <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <div className="form-group">
-              <h5>
-                Accesos <small className="text-secondary">LISTA</small>
-              </h5>
-            </div>
-          </div>
-        </div>
+        <Title
+          title='Accesos'
+          subTitle='LISTA'
+        />
 
         {this.state.messageWarning !== '' ? (
           <div className="alert alert-warning" role="alert">
@@ -292,61 +319,85 @@ class Accesos extends CustomComponent {
           </div>
         ) : null}
 
-        <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <label>Perfil: </label>
-            <div className="form-group">
-              <select
-                className="form-control"
-                ref={this.refIdPerfil}
-                value={this.state.idPerfil}
-                onChange={(event) => this.onChangePerfil(event)}
-              >
-                <option value="">- Seleccione -</option>
-                {this.state.perfiles.map((item, index) => (
+        <Row>
+          <Column className="col-lg-12 col-md-12 col-sm-12 col-xs-12" formGroup={true}>
+            <Select
+              group={true}
+              label={"Perfil:"}
+              refSelect={this.refIdPerfil}
+              value={this.state.idPerfil}
+              onChange={this.onChangePerfil}
+            >
+              <option value="">- Seleccione -</option>
+              {
+                this.state.perfiles.map((item, index) => (
                   <option key={index} value={item.idPerfil}>
                     {item.descripcion}
                   </option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </div>
+                ))
+              }
+            </Select>
+          </Column>
+        </Row>
 
-        <div className="row">
-          <div className="col-md-12">
+        <Row>
+          <Column className="col-md-6" formGroup={true}>
+            <h6>Menus</h6>
             {
               <OptionsList
-                options={this.state.menu}
-                handleCheck={this.handleCheck}
+                options={this.state.menus}
+                handleCheck={this.handleCheckMenu}
               />
             }
-          </div>
-        </div>
+          </Column>
+          <Column className="col-md-6" formGroup={true}>
+            <h6>Principal - Sucursal</h6>
+            <ul className='list-unstyled'>
+              {
+                this.state.sucursales.map((item, index) => {
+                  return (
+                    <li key={index}>
+                      <CheckBox
+                        className='form-check-inline m-1'
+                        id={`id${item.idSucursal}`}
+                        value={item.idSucursal}
+                        checked={item.estado === 1 ? true : false}
+                        onChange={this.handleCheckSucursal}
+                      >
+                        {item.nombre}
+                      </CheckBox>
+                    </li>
+                  );
+                })
+              }
+            </ul>
+          </Column>
+        </Row>
 
-        <div className="row">
-          <div className="col-xl-12 col-lg-12 col-md-12 col-sm-4 col-12">
-            <button
-              type="button"
-              className="btn btn-primary"
+        <Row>
+          <Column className="col-xl-12 col-lg-12 col-md-12 col-sm-4 col-12">
+            <Button
+              className="btn-primary"
               onClick={() => this.onEventGuardar()}
-              // disabled={!this.state.save}
+            // disabled={!this.state.save}
             >
               <i className="fa fa-save"></i> Guardar
-            </button>{' '}
-            <button
-              type="button"
-              className="btn btn-info"
+            </Button>
+            {' '}
+            <Button
+              className="btn-info"
               onClick={() => this.onEventUpdateData()}
-              // disabled={!this.state.update}
+            // disabled={!this.state.update}
             >
               <i className="fa fa-refresh"></i> Actualizar
-            </button>{' '}
-            <button type="button" className="btn btn-outline-danger">
+            </Button>
+            {' '}
+            <Button
+              className="btn-outline-danger">
               <i className="fa fa-close"></i> Cancelar
-            </button>
-          </div>
-        </div>
+            </Button>
+          </Column>
+        </Row>
       </ContainerWrapper>
     );
   }
@@ -363,22 +414,15 @@ const OptionsList = ({ options, handleCheck }) => {
             (option.idPrivilegio === undefined ? '' : option.idPrivilegio);
           return (
             <li key={index}>
-              <div className="form-check form-check-inline m-1">
-                <input
-                  className="form-check-input"
-                  type="checkbox"
-                  id={`id${option.nombre}`}
-                  value={value}
-                  checked={option.estado === 1 ? true : false}
-                  onChange={handleCheck}
-                />
-                <label
-                  className="form-check-label"
-                  htmlFor={`id${option.nombre}`}
-                >
-                  {option.nombre}
-                </label>
-              </div>
+              <CheckBox
+                className='form-check-inline m-1'
+                id={`id${option.nombre}`}
+                value={value}
+                checked={option.estado === 1 ? true : false}
+                onChange={handleCheck}
+              >
+                {option.nombre}
+              </CheckBox>
             </li>
           );
         } else {
@@ -389,22 +433,16 @@ const OptionsList = ({ options, handleCheck }) => {
           return (
             <li key={index}>
               <i className="cursor-pointer mr-3 mt-1 mb-1 fa fa-plus-square text-lg align-middle"></i>
-              <div className="form-check form-check-inline m-1 pl-1">
-                <input
-                  type="checkbox"
-                  className="form-check-input"
-                  id={`id${option.nombre}`}
-                  value={value}
-                  checked={option.estado === 1 ? true : false}
-                  onChange={handleCheck}
-                />
-                <label
-                  className="form-check-label"
-                  htmlFor={`id${option.nombre}`}
-                >
-                  {option.nombre}
-                </label>
-              </div>
+              <CheckBox
+                className='form-check-inline m-1 pl-1'
+                id={`id${option.nombre}`}
+                value={value}
+                checked={option.estado === 1 ? true : false}
+                onChange={handleCheck}
+              >
+                {option.nombre}
+              </CheckBox>
+
               {option.children.length && (
                 <OptionsList
                   options={option.children}

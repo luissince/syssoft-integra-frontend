@@ -53,7 +53,11 @@ class Principal extends CustomComponent {
   }
 
   async loadingData() {
-    const response = await initSucursales(this.abortController.signal);
+    const params = {
+      idPerfil: this.props.token.userToken.idPerfil
+    }
+
+    const response = await initSucursales(params, this.abortController.signal);
 
     if (response instanceof SuccessReponse) {
       this.setState({
@@ -138,7 +142,7 @@ class Principal extends CustomComponent {
           documento={"RUC: " + documento}
           handleSignOut={this.handleSignOut}
         />
-    
+
         <Row>
           <Column className="col-md-12 col-sm-12 col-12" formGroup={true}>
             <Input

@@ -47,9 +47,10 @@ export async function listSucursales(params, signal) {
   );
 }
 
-export async function initSucursales(signal) {
+export async function initSucursales(params,signal) {
   return await Resolve.create(
     instancePrincipal.get('/api/sucursal/inicio', {
+      params: params,
       signal: signal,
     }),
   );
