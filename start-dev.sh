@@ -18,4 +18,4 @@ if [ "$current_branch" != "development" ] && [ "$stay_in_current_branch" == fals
     git checkout development
 fi
 
-npx nodemon index.js
+vite
