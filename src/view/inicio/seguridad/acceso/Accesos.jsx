@@ -28,7 +28,6 @@ import Select from '../../../../components/Select.jsx';
 import Title from '../../../../components/Title.jsx';
 import CheckBox from '../../../../components/Checks.jsx';
 
-
 /**
  * Componente que representa una funcionalidad específica.
  * @extends React.Component
@@ -214,8 +213,8 @@ class Accesos extends CustomComponent {
   handleCheckSucursal = async (event) => {
     const { value } = event.target;
     this.setState(prevState => ({
-      sucursales: prevState.sucursales.map((item)=>{
-        if(item.idSucursal === value){
+      sucursales: prevState.sucursales.map((item) => {
+        if (item.idSucursal === value) {
           return {
             ...item,
             estado: item.estado === 1 ? 0 : 1
@@ -308,9 +307,11 @@ class Accesos extends CustomComponent {
         />
 
         <Title
-          title='Accesos'
+          title='Perfiles'
           subTitle='LISTA'
+          handleGoBack={() => this.props.history.goBack()}
         />
+
 
         {this.state.messageWarning !== '' ? (
           <div className="alert alert-warning" role="alert">
@@ -460,6 +461,12 @@ const OptionsList = ({ options, handleCheck }) => {
 OptionsList.propTypes = {
   options: PropTypes.array,
   handleCheck: PropTypes.func
+}
+
+Accesos.propTypes = {
+  history: PropTypes.shape({
+    goBack: PropTypes.func,
+  }),
 }
 
 const mapStateToProps = (state) => {

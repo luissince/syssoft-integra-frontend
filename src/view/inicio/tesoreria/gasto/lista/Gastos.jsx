@@ -1,12 +1,10 @@
 import React from 'react';
 import {
-  spinnerLoading,
   formatTime,
   alertDialog,
   alertInfo,
   alertSuccess,
   alertWarning,
-  keyUpSearch,
   isEmpty,
   formatNumberWithZeros,
   numberFormat,
@@ -22,8 +20,25 @@ import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
 import CustomComponent from '../../../../../model/class/custom-component';
+import PropTypes from 'prop-types';
+import { SpinnerTable } from '../../../../../components/Spinner';
+import Title from '../../../../../components/Title';
+import Row from '../../../../../components/Row';
+import Column from '../../../../../components/Column';
+import Button from '../../../../../components/Button';
+import { TableResponsive } from '../../../../../components/Table';
+import Search from '../../../../../components/Search';
 
+/**
+ * Componente que representa una funcionalidad específica.
+ * @extends React.Component
+ */
 class Gastos extends CustomComponent {
+
+  /**
+   *
+   * Constructor
+   */
   constructor(props) {
     super(props);
     this.state = {
@@ -34,6 +49,8 @@ class Gastos extends CustomComponent {
       loading: false,
       lista: [],
       restart: false,
+
+      buscar: '',
 
       opcion: 0,
       paginacion: 0,
@@ -49,6 +66,20 @@ class Gastos extends CustomComponent {
     this.abortControllerTable = new AbortController();
   }
 
+  /*
+  |--------------------------------------------------------------------------
+  | Método de cliclo de vida
+  |--------------------------------------------------------------------------
+  |
+  | El ciclo de vida de un componente en React consta de varios métodos que se ejecutan en diferentes momentos durante la vida útil
+  | del componente. Estos métodos proporcionan puntos de entrada para realizar acciones específicas en cada etapa del ciclo de vida,
+  | como inicializar el estado, montar el componente, actualizar el estado y desmontar el componente. Estos métodos permiten a los
+  | desarrolladores controlar y realizar acciones específicas en respuesta a eventos de ciclo de vida, como la creación, actualización
+  | o eliminación del componente. Entender y utilizar el ciclo de vida de React es fundamental para implementar correctamente la lógica
+  | de la aplicación y optimizar el rendimiento del componente.
+  |
+  */
+
   componentDidMount() {
     this.loadInit();
   }
@@ -57,20 +88,34 @@ class Gastos extends CustomComponent {
     this.abortControllerTable.abort();
   }
 
+  /*
+  |--------------------------------------------------------------------------
+  | Métodos de acción
+  |--------------------------------------------------------------------------
+  |
+  | Carga los datos iniciales necesarios para inicializar el componente. Este método se utiliza típicamente
+  | para obtener datos desde un servicio externo, como una API o una base de datos, y actualizar el estado del
+  | componente en consecuencia. El método loadingData puede ser responsable de realizar peticiones asíncronas
+  | para obtener los datos iniciales y luego actualizar el estado del componente una vez que los datos han sido
+  | recuperados. La función loadingData puede ser invocada en el montaje inicial del componente para asegurarse
+  | de que los datos requeridos estén disponibles antes de renderizar el componente en la interfaz de usuario.
+  |
+  */
+
   loadInit = async () => {
     if (this.state.loading) return;
 
     await this.setStateAsync({ paginacion: 1, restart: true });
-    this.fillTable(0, '');
+    this.fillTable(0);
     await this.setStateAsync({ opcion: 0 });
   };
 
-  async searchText(text) {
+  searchText = async (text) => {
     if (this.state.loading) return;
 
     if (text.trim().length === 0) return;
 
-    await this.setStateAsync({ paginacion: 1, restart: false });
+    await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
     this.fillTable(1, text.trim());
     await this.setStateAsync({ opcion: 1 });
   }
@@ -83,17 +128,17 @@ class Gastos extends CustomComponent {
   onEventPaginacion = () => {
     switch (this.state.opcion) {
       case 0:
-        this.fillTable(0, '');
+        this.fillTable(0);
         break;
       case 1:
-        this.fillTable(1, this.refTxtSearch.current.value);
+        this.fillTable(1, this.state.buscar);
         break;
       default:
-        this.fillTable(0, '');
+        this.fillTable(0);
     }
   };
 
-  fillTable = async (opcion, buscar) => {
+  fillTable = async (opcion, buscar = '') => {
     this.setState({
       loading: true,
       lista: [],
@@ -133,6 +178,22 @@ class Gastos extends CustomComponent {
       });
     }
   };
+
+  /*
+  |--------------------------------------------------------------------------
+  | Método de eventos
+  |--------------------------------------------------------------------------
+  |
+  | El método handle es una convención utilizada para denominar funciones que manejan eventos específicos
+  | en los componentes de React. Estas funciones se utilizan comúnmente para realizar tareas o actualizaciones
+  | en el estado del componente cuando ocurre un evento determinado, como hacer clic en un botón, cambiar el valor
+  | de un campo de entrada, o cualquier otra interacción del usuario. Los métodos handle suelen recibir el evento
+  | como parámetro y se encargan de realizar las operaciones necesarias en función de la lógica de la aplicación.
+  | Por ejemplo, un método handle para un evento de clic puede actualizar el estado del componente o llamar a
+  | otra función específica de la lógica de negocio. La convención de nombres handle suele combinarse con un prefijo
+  | que describe el tipo de evento que maneja, como handleInputChange, handleClick, handleSubmission, entre otros. 
+  |
+  */
 
   handleCrear = () => {
     this.props.history.push({
@@ -175,14 +236,29 @@ class Gastos extends CustomComponent {
     );
   };
 
-  generarBody() {
+  /*
+|--------------------------------------------------------------------------
+| Método de renderización
+|--------------------------------------------------------------------------
+|
+| El método render() es esencial en los componentes de React y se encarga de determinar
+| qué debe mostrarse en la interfaz de usuario basado en el estado y las propiedades actuales
+| del componente. Este método devuelve un elemento React que describe lo que debe renderizarse
+| en la interfaz de usuario. La salida del método render() puede incluir otros componentes
+| de React, elementos HTML o una combinación de ambos. Es importante que el método render()
+| sea una función pura, es decir, no debe modificar el estado del componente ni interactuar
+| directamente con el DOM. En su lugar, debe basarse únicamente en los props y el estado
+| actuales del componente para determinar lo que se mostrará.
+|
+*/
+
+  generateBody() {
     if (this.state.loading) {
       return (
-        <tr>
-          <td className="text-center" colSpan="8">
-            {spinnerLoading('Cargando información de la tabla...', true)}
-          </td>
-        </tr>
+        <SpinnerTable
+          colSpan='8'
+          message='Cargando información de la tabla...'
+        />
       );
     }
 
@@ -216,7 +292,7 @@ class Gastos extends CustomComponent {
           <td className="text-center">
             {
               item.estado === 1
-                ? <span className="text-success">COBRADO</span>
+                ? <span className="text-success">ACTIVO</span>
                 : <span className="text-danger">ANULADO</span>
             }
           </td>
@@ -227,7 +303,7 @@ class Gastos extends CustomComponent {
             <button
               className="btn btn-outline-info btn-sm"
               title="Detalle"
-              onClick={() => this.handleDetalle(item.idGasto)}              
+              onClick={() => this.handleDetalle(item.idGasto)}
             >
               <i className="fa fa-eye"></i>
             </button>
@@ -236,7 +312,7 @@ class Gastos extends CustomComponent {
             <button
               className="btn btn-outline-danger btn-sm"
               title="Eliminar"
-              onClick={() => this.handleAnular(item.idGasto)}          
+              onClick={() => this.handleAnular(item.idGasto)}
             >
               <i className="fa fa-remove"></i>
             </button>
@@ -249,84 +325,69 @@ class Gastos extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
-        <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <div className="form-group">
-              <h5>
-                Gastos <small className="text-secondary">LISTA</small>
-              </h5>
-            </div>
-          </div>
-        </div>
+        <Title
+          title='Gastos'
+          subTitle='LISTA'
+          handleGoBack={() => this.props.history.goBack()}
+        />
 
-        <div className="row">
-          <div className="col-md-6 col-sm-12">
-            <div className="form-group">
-              <div className="input-group mb-2">
-                <div className="input-group-prepend">
-                  <div className="input-group-text">
-                    <i className="bi bi-search"></i>
-                  </div>
-                </div>
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Buscar..."
-                  ref={this.refTxtSearch}
-                  onKeyUp={(event) =>
-                    keyUpSearch(event, () =>
-                      this.searchText(event.target.value),
-                    )
-                  }
-                />
-              </div>
-            </div>
-          </div>
-          <div className="col-md-6 col-sm-12">
-            <div className="form-group">
-              <button
-                className="btn btn-outline-info"
-                onClick={this.handleCrear}               
-              >
-                <i className="bi bi-file-plus"></i> Nuevo Registro
-              </button>{' '}
-              <button
-                className="btn btn-outline-secondary"
-                onClick={this.loadInit}
-              >
-                <i className="bi bi-arrow-clockwise"></i>
-              </button>
-            </div>
-          </div>
-        </div>
+        <Row>
+          <Column formGroup={true}>
+            <Button
+              className='btn-outline-info'
+              onClick={this.handleCrear}
+            >
+              <i className="bi bi-file-plus"></i> Nuevo Registro
+            </Button>
+            {' '}
+            <Button
+              className='btn-outline-secondary'
+              onClick={this.loadInit}
+            >
+              <i className="bi bi-arrow-clockwise"></i> Recargar Vista
+            </Button>
+          </Column>
+        </Row>
 
-        <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <div className="table-responsive">
-              <table className="table table-striped table-bordered rounded">
-                <thead>
-                  <tr>
-                    <th width="5%" className="text-center">
-                      #
-                    </th>
-                    <th width="10%">Fecha</th>
-                    <th width="10%">Comprobante</th>
-                    <th width="20%">Cliente</th>
-                    <th width="10%">Estado</th>
-                    <th width="10%">Monto</th>
-                    <th width="5%" className="text-center">
-                      Detalle
-                    </th>
-                    <th width="5%" className="text-center">
-                      Anular
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>{this.generarBody()}</tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+
+        <Row>
+          <Column className="col-md-6 col-sm-12" formGroup={true}>
+            <Search
+              group={true}
+              iconLeft={<i className="bi bi-search"></i>}
+              ref={this.refSearch}
+              onSearch={this.searchText}
+              placeholder="Buscar por comprobante o proveedor..."
+            />
+          </Column>
+        </Row>
+
+
+        <Row>
+          <Column>
+            <TableResponsive
+              tHead={
+                <tr>
+                  <th width="5%" className="text-center">
+                    #
+                  </th>
+                  <th width="10%">Fecha</th>
+                  <th width="15%">Proveedor</th>
+                  <th width="15%">Comprobante</th>
+                  <th width="10%">Estado</th>
+                  <th width="10%" className="text-center">Monto</th>
+                  <th width="5%" className="text-center">
+                    Detalle
+                  </th>
+                  <th width="5%" className="text-center">
+                    Anular
+                  </th>
+                </tr>
+              }
+              tBody={this.generateBody()}
+            />
+          </Column>
+        </Row>
 
         <Paginacion
           loading={this.state.loading}
@@ -341,12 +402,27 @@ class Gastos extends CustomComponent {
   }
 }
 
+Gastos.propTypes = {
+  token: PropTypes.shape({
+    userToken: PropTypes.shape({
+      idUsuario: PropTypes.string.isRequired,
+    }).isRequired,
+    project: PropTypes.shape({
+      idSucursal: PropTypes.string.isRequired,
+    }).isRequired,
+  }).isRequired,
+  location: PropTypes.shape({
+    pathname: PropTypes.string,
+  }),
+  history: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
+};
+
 const mapStateToProps = (state) => {
   return {
     token: state.principal,
   };
 };
 
-const ConnectedGastos =connect(mapStateToProps, null)(Gastos);
+const ConnectedGastos = connect(mapStateToProps, null)(Gastos);
 
 export default ConnectedGastos;

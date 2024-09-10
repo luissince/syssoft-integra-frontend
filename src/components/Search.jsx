@@ -48,6 +48,7 @@ class Search extends React.Component {
       <Input
         autoFocus={true}
         group={this.props.group}
+        label={this.props.label}
         className={this.props.className}
         refInput={this.props.refInput}
         iconLeft={this.props.iconLeft}
@@ -64,6 +65,7 @@ class Search extends React.Component {
 Search.propTypes = {
   refInput: PropTypes.object,
   group: PropTypes.bool,
+  label: PropTypes.string,
   onSearch: PropTypes.func.isRequired,
   iconLeft: PropTypes.element,
   placeholder: PropTypes.string,

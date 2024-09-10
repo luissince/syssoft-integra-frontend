@@ -8,31 +8,37 @@ import {
   calculateTax,
   calculateTaxBruto,
   formatTime,
-  isEmpty,
-  isNumeric,
   isText,
   numberFormat,
-  rounded,
-  validateNumericInputs
+  rounded
 } from "../../../../../helper/utils.helper";
-import { colletAccountsReceivableVenta, comboBanco, detailAccountsReceivableVenta, obtenerVentaPdf } from "../../../../../network/rest/principal.network";
+import PropTypes from 'prop-types';
+import { cancelAccountsReceivableVenta, createAccountsReceivableVenta, detailAccountsReceivableVenta, obtenerVentaPdf } from "../../../../../network/rest/principal.network";
 import SuccessReponse from "../../../../../model/class/response";
 import ErrorResponse from "../../../../../model/class/error-response";
 import { CANCELED } from "../../../../../model/types/types";
 import { CONTADO, CREDITO_FIJO, CREDITO_VARIABLE } from '../../../../../model/types/forma-pago';
 import React from "react";
-import ModalSale from "./component/ModalSale";
+import ModalProceso from "./component/ModalProceso";
 import printJS from "print-js";
 import { SpinnerView } from "../../../../../components/Spinner";
 import Row from "../../../../../components/Row";
 import Column from "../../../../../components/Column";
 import { TableResponsive } from "../../../../../components/Table";
 import { connect } from "react-redux";
+import Title from "../../../../../components/Title";
+import Button from "../../../../../components/Button";
+import ModalTransaccion from "../../../../../components/ModalTransaccion";
 
-class CuentasPorPagarAmbonar extends CustomComponent {
+/**
+ * Componente que representa una funcionalidad específica.
+ * @extends React.Component
+ */
+class CuentasPorCobrarAbonar extends CustomComponent {
 
   constructor(props) {
     super(props);
+
     this.state = {
       // Atributos de carga
       loading: true,
@@ -56,29 +62,23 @@ class CuentasPorPagarAmbonar extends CustomComponent {
       cobrado: 0,
 
       detalles: [],
-      plazos: [],
+      cuotas: [],
 
       // Atributos del mdaol de cobro
-      isOpenModalCobro: false,
-      loadingModalCobro: false,
-      nextModalCobro: false,
-      idPlazo: 0,
-      cobrar: '',
+      isOpenProceso: false,
+      cuota: null,
       monto: 0,
-      bancos: [],
-      bancosAgregados: [],
-      observacion: '',
+
+      // Atributos del modal cobrar
+      isOpenTerminal: false,
 
       // Id principales
       idSucursal: this.props.token.project.idSucursal,
       idUsuario: this.props.token.userToken.idUsuario,
     };
 
-    // Referencia y variable del modal cobro
-    this.refCobrar = React.createRef();
-    this.refMetodoPagoContenedor = React.createRef();
-    this.refModalCobro = React.createRef();
-    this.refMetodoContado = React.createRef();
+    // Referencia del modal proceso
+    this.refModalProceso = React.createRef();
 
     //Anular las peticiones
     this.abortControllerView = new AbortController();
@@ -113,9 +113,8 @@ class CuentasPorPagarAmbonar extends CustomComponent {
   }
 
   async loadingData(id) {
-    const [factura, bancos] = await Promise.all([
+    const [factura] = await Promise.all([
       this.fetchIdFactura(id),
-      this.fetchComboBanco(),
     ]);
 
     const {
@@ -157,9 +156,7 @@ class CuentasPorPagarAmbonar extends CustomComponent {
       cobrado: factura.resumen[0].cobrado,
 
       detalles: factura.detalles,
-      plazos: factura.plazos,
-
-      bancos,
+      cuotas: factura.cuotas,
 
       loading: false,
     });
@@ -180,20 +177,6 @@ class CuentasPorPagarAmbonar extends CustomComponent {
       if (response.getType() === CANCELED) return;
 
       return false;
-    }
-  }
-
-  async fetchComboBanco() {
-    const response = await comboBanco(this.state.idSucursal, this.abortControllerView.signal);
-
-    if (response instanceof SuccessReponse) {
-      return response.data;
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
-
-      return [];
     }
   }
 
@@ -241,216 +224,102 @@ class CuentasPorPagarAmbonar extends CustomComponent {
   // Eventos del modal cobro
   //------------------------------------------------------------------------------------------
 
-  handleOpenModalCobro = (plazo) => {
-    this.setState({ isOpenModalCobro: true, idPlazo: plazo.idPlazo, monto: plazo.monto })
+  handleOpenModalProceso = (cuota) => {
+    this.setState({ isOpenProceso: true, cuota: cuota })
   }
 
-  handleOnOpenModalCobro = () => {
-    let cobrado = 0;
-    const plazo = this.state.plazos.find(item => item.idPlazo === this.state.idPlazo)
-    if (plazo) {
-      cobrado = plazo.ingresos.reduce((acc, item) => acc + item.monto, 0)
-    }
-
-    this.setState({ cobrar: this.state.monto - cobrado, loadingModalCobro: false });
+  handleCloseModalProceso = () => {
+    this.setState({ isOpenProceso: false, cuota: null })
   }
 
-  handleOnHidden = () => {
+  handleActionProceso = async (cuota, monto) => {
     this.setState({
-      nextModalCobro: false,
-      cobrar: '',
-      bancosAgregados: [],
-      idPlazo: 0,
-      observacion: '',
-    });
-  }
-
-  handleCloseModalCobro = () => {
-    this.setState({ isOpenModalCobro: false })
-  }
-
-  handleAddBancosAgregados = () => {
-    const listAdd = this.state.bancosAgregados.find((item) => item.idBanco === this.refMetodoContado.current.value);
-
-    if (listAdd) {
-      return;
-    }
-
-    const metodo = this.state.bancos.find((item) => item.idBanco === this.refMetodoContado.current.value,);
-
-    const item = {
-      idBanco: metodo.idBanco,
-      nombre: metodo.nombre,
-      monto: '',
-      vuelto: metodo.vuelto,
-      descripcion: '',
-    };
-
-    this.setState((prevState) => ({
-      bancosAgregados: [...prevState.bancosAgregados, item],
-    }));
-  };
-
-  handleInputMontoBancosAgregados = (event, idBanco) => {
-    const { value } = event.target;
-
-    this.setState((prevState) => ({
-      bancosAgregados: prevState.bancosAgregados.map((item) => {
-        if (item.idBanco === idBanco) {
-          return { ...item, monto: value ? value : '' };
-        } else {
-          return item;
-        }
-      }),
-    }));
-  };
-
-  handleRemoveItemBancosAgregados = (idBanco) => {
-    const bancosAgregados = this.state.bancosAgregados.filter((item) => item.idBanco !== idBanco);
-    this.setState({ bancosAgregados });
-  };
-
-  handleNextModalCobro = () => {
-    this.setState({ nextModalCobro: true }, () => {
-      const metodo = this.state.bancos.find((item) => item.preferido === 1);
-
-      this.refMetodoContado.current.value = metodo ? metodo.idBanco : '';
-
-      if (metodo) {
-        const item = {
-          idBanco: metodo.idBanco,
-          nombre: metodo.nombre,
-          monto: '',
-          vuelto: metodo.vuelto,
-          descripcion: '',
-        };
-
-        this.setState((prevState) => ({
-          bancosAgregados: [...prevState.bancosAgregados, item],
-        }));
-      }
+      cuota,
+      monto: Number(monto),
+    }, () => {
+      this.handleOpenModalTerminal();
     })
   }
 
-  handleInputCobrar = (event) => {
-    this.setState({ cobrar: event.target.value })
+  //------------------------------------------------------------------------------------------
+  // Acciones del modal terminal
+  //------------------------------------------------------------------------------------------
+
+  handleOpenModalTerminal = () => {
+    this.setState({ isOpenTerminal: true })
   }
 
-  handleInputObservacion = (event) => {
-    this.setState({ observacion: event.target.value })
+  handleProcessContado = (idFormaPago, metodoPagosLista, notaTransacion, callback = async function () { }) => {
+    const {
+      idVenta,
+      cuota,
+      idUsuario,
+      monto,
+    } = this.state;
+
+    alertDialog('Cuenta por Cobrar', '¿Estás seguro de continuar?', async (accept) => {
+      if (accept) {
+        const data = {
+
+          idVenta,
+          idCuota: cuota.idCuota,
+          idUsuario,
+          monto,
+          notaTransacion,
+          bancosAgregados: metodoPagosLista,
+        };
+
+        await callback();
+        alertInfo('Cuenta por Cobrar', 'Procesando información...');
+
+        const response = await createAccountsReceivableVenta(data);
+
+        if (response instanceof SuccessReponse) {
+          alertSuccess('Cuenta por Cobrar', response.data, () => {
+            this.props.history.goBack()
+          });
+        }
+
+        if (response instanceof ErrorResponse) {
+          if (response.getType() === CANCELED) return;
+
+          alertWarning('Cuenta por Cobrar', response.getMessage());
+        }
+      }
+    });
   }
 
-  handleSaveSale = async () => {
-    if (!this.state.nextModalCobro) {
-      if (!isNumeric(this.state.cobrar)) {
-        alertWarning("Cobro", "Ingrese el monto a cobrar", () => {
-          this.refCobrar.current.focus();
-        })
-        return;
-      }
-      this.handleNextModalCobro();
-    } else {
-      const {
-        idVenta,
-        idUsuario,
-        idPlazo,
-        cobrar,
-        bancosAgregados,
-        observacion
-      } = this.state;
+  handleCloseModalTerminal = async () => {
+    this.setState({ isOpenTerminal: false })
+  }
 
+  handleCancelSale = async (idCuota, idTransaccion) => {
+    alertDialog('Cuenta por Cobrar', '¿Estás seguro de anular?', async (accept) => {
+      if (accept) {
+        const params = {
+          idCuota: idCuota,
+          idTransaccion: idTransaccion,
+          idVenta: this.state.idVenta
+        }
 
-      // if (isEmpty(metodoPagoLista)) {
-      //     alertWarning('Cobro', 'Tiene que agregar método de cobro para continuar.');
-      //     return;
-      // }
+        alertInfo('Cuenta por Cobrar', 'Procesando información...');
 
-      // if (metodoPagoLista.filter((item) => !isNumeric(item.monto)).length !== 0) {
-      //     alertWarning('Cobro', 'Hay montos del metodo de cobro que no tiene valor.', () => {
-      //         validateNumericInputs(this.refMetodoPagoContenedor);
-      //     });
-      //     return;
-      // }
+        const response = await cancelAccountsReceivableVenta(params);
 
-      let metodoPagoLista = bancosAgregados.map(item => ({ ...item }));
-
-      if (isEmpty(metodoPagoLista)) {
-        alertWarning('Cobro', 'Tiene que agregar método de cobro para continuar.');
-        return;
-      }
-
-      if (metodoPagoLista.filter((item) => !isNumeric(item.monto)).length !== 0) {
-        alertWarning('Cobro', 'Hay montos del metodo de cobro que no tiene valor.', () => {
-          validateNumericInputs(this.refMetodoPagoContenedor);
-        });
-        return;
-      }
-
-      const metodoCobroTotal = metodoPagoLista.reduce((accumulator, item) => (accumulator += parseFloat(item.monto)), 0);
-
-      if (metodoPagoLista.length > 1) {
-        if (metodoCobroTotal !== cobrar) {
-          alertWarning('Cobro', 'Al tener mas de 2 métodos de cobro el monto debe ser igual al total.', () => {
-            validateNumericInputs(this.refMetodoPagoContenedor);
+        if (response instanceof SuccessReponse) {
+          alertSuccess('Cuenta por Cobrar', response.data, () => {
+            this.props.history.goBack()
           });
-          return;
         }
-      } else {
-        const metodo = metodoPagoLista[0];
-        if (metodo.vuelto === 1) {
-          if (metodoCobroTotal < cobrar) {
-            alertWarning('Cobro', 'El monto a cobrar es menor que el total.', () => {
-              validateNumericInputs(this.refMetodoPagoContenedor);
-            });
-            return;
-          }
 
-          metodoPagoLista.forEach(item => {
-            item.descripcion = `Pago con ${rounded(parseFloat(item.monto))} y su vuelto es ${rounded(parseFloat(item.monto) - cobrar)}`;
-            item.monto = cobrar;
-          });
-        } else {
-          if (metodoCobroTotal !== cobrar) {
-            alertWarning('Cobro', 'El monto a cobrar debe ser igual al total.', () => {
-              validateNumericInputs(this.refMetodoPagoContenedor);
-            });
-            return;
-          }
+        if (response instanceof ErrorResponse) {
+          if (response.getType() === CANCELED) return;
+
+          alertWarning('Cuenta por Cobrar', response.getMessage());
         }
       }
-
-      alertDialog('Cobro', '¿Está seguro de continuar?', async (accept) => {
-        if (accept) {
-          const data = {
-            idVenta: idVenta,
-            idUsuario: idUsuario,
-            idPlazo: idPlazo,
-            // idSucursal: idSucursal,
-            estado: 1,
-            observacion: observacion,
-            bancosAgregados: metodoPagoLista,
-          };
-
-          this.handleCloseModalCobro();
-          alertInfo('Cobro', 'Procesando información...');
-
-          const response = await colletAccountsReceivableVenta(data);
-
-          if (response instanceof SuccessReponse) {
-            alertSuccess('Cobro', response.data, () => {
-              // this.handleLimpiar();
-            });
-          }
-
-          if (response instanceof ErrorResponse) {
-            if (response.getType() === CANCELED) return;
-
-            alertWarning('Cobro', response.getMessage());
-          }
-        }
-      });
-    }
-  };
+    });
+  }
 
   /*
   |--------------------------------------------------------------------------
@@ -467,6 +336,30 @@ class CuentasPorPagarAmbonar extends CustomComponent {
   | actuales del componente para determinar lo que se mostrará.
   |
    */
+
+  renderDetalle() {
+    return (
+      this.state.detalles.map((item, index) => (
+        <tr key={index}>
+          <td>{++index}</td>
+          <td>{item.producto}</td>
+          <td>{item.medida}</td>
+          <td>{item.categoria}</td>
+          <td className="text-right">{rounded(item.cantidad)}</td>
+          <td className="text-right">{item.impuesto}</td>
+          <td className="text-right">
+            {numberFormat(item.precio, this.state.codiso)}
+          </td>
+          <td className="text-right">
+            {numberFormat(
+              item.cantidad * item.precio,
+              this.state.codiso,
+            )}
+          </td>
+        </tr>
+      ))
+    );
+  }
 
   renderTotal() {
     let subTotal = 0;
@@ -540,6 +433,103 @@ class CuentasPorPagarAmbonar extends CustomComponent {
     );
   }
 
+  renderCuotas() {
+    return (
+      this.state.cuotas.map((cuota, index) => {
+        let montoActual = cuota.monto;
+
+        return <React.Fragment key={index}>
+          <tr className="table-success">
+            <td className="text-center">{index + 1}</td>
+            <td>{cuota.fecha}</td>
+            <td>{"CUOTA " + cuota.cuota}</td>
+            <td className={`${cuota.estado === 0 ? "text-danger" : "text-success"}`}>{cuota.estado === 0 ? "Por Cobrar" : "Cobrado"}</td>
+            <td>{numberFormat(cuota.monto, this.state.codiso)}</td>
+            <td className="text-center">
+              <Button
+                className="btn-warning btn-sm"
+                onClick={() => this.handleOpenModalProceso(cuota)}
+                disabled={cuota.estado === 1 ? true : false}
+              >
+                <i className="fa fa-money"></i>
+              </Button>
+            </td>
+            <td className="text-center">
+              <Button
+                className="btn-light btn-sm"
+              >
+                <i className="fa fa-print"></i>
+              </Button>
+            </td>
+          </tr>
+
+          <tr><td colSpan="7" className="pb-0">Cobros Asociados</td></tr>
+          <tr>
+            <th>#</th>
+            <th>Fecha y Hora</th>
+            <th>Concepto</th>
+            <th colSpan={2}>Nota</th>
+            <th>Usuario</th>
+            <th className="text-center">Anular</th>
+          </tr>
+          {
+            cuota.transacciones.map((item, index) => {
+              return (
+                <React.Fragment key={index}>
+                  <tr className="table-secondary">
+                    <td>{index + 1}</td>
+                    <td>
+                      <span>{item.fecha}</span>
+                      <br />
+                      <span>{formatTime(item.hora)}</span>
+                    </td>
+                    <td>{item.concepto}</td>
+                    <td colSpan={2}>{item.nota}</td>
+                    <td>{item.usuario}</td>
+                    <td className="text-center">
+                      <Button
+                        className="btn-danger btn-sm"
+                        onClick={() => this.handleCancelSale(cuota.idCuota, item.idTransaccion)}
+                      >
+                        <i className="fa fa-close"></i>
+                      </Button>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td className=" text-center">#</td>
+                    <td className="">Banco</td>
+                    <td className="">Cobrado</td>
+                    <td className="">Restante</td>
+                    <td className="">Observación</td>
+                  </tr>
+                  {
+                    item.detalles.map((detalle, index) => {
+                      montoActual = montoActual - detalle.monto;
+                      return (
+                        <tr key={index}>
+                          <td className="text-center">{index + 1}</td>
+                          <td>{detalle.nombre}</td>
+                          <td>{numberFormat(detalle.monto, this.state.codiso)}</td>
+                          <td>{numberFormat(montoActual, this.state.codiso)}</td>
+                          <td>{detalle.observacion}</td>
+                        </tr>
+                      );
+                    })
+                  }
+                </React.Fragment>
+              );
+            })
+          }
+          <tr>
+            <td colSpan="7">
+              <hr />
+            </td>
+          </tr>
+        </React.Fragment>
+      })
+    );
+  }
 
   render() {
     return (
@@ -549,193 +539,172 @@ class CuentasPorPagarAmbonar extends CustomComponent {
           message={this.state.msgLoading}
         />
 
-        <ModalSale
-          refModal={this.refModalCobro}
-          isOpen={this.state.isOpenModalCobro}
-          onOpen={this.handleOnOpenModalCobro}
-          onHidden={this.handleOnHidden}
-          onClose={this.handleCloseModalCobro}
+        <ModalProceso
+          refModal={this.refModalProceso}
+          isOpen={this.state.isOpenProceso}
+          onClose={this.handleCloseModalProceso}
 
-          loading={this.state.loadingModalCobro}
-
-          refCobrar={this.refCobrar}
-          cobrar={this.state.cobrar}
-          handleInputCobrar={this.handleInputCobrar}
-
-          nextModalCobro={this.state.nextModalCobro}
-
-          refMetodoPagoContenedor={this.refMetodoPagoContenedor}
-          refMetodoContado={this.refMetodoContado}
-          monto={this.state.monto}
-
-          observacion={this.state.observacion}
-          handleInputObservacion={this.handleInputObservacion}
-
-          idPlazo={this.state.idPlazo}
-          plazos={this.state.plazos}
-
-          bancos={this.state.bancos}
           codISO={this.state.codiso}
-          bancosAgregados={this.state.bancosAgregados}
-          handleAddBancosAgregados={this.handleAddBancosAgregados}
-          handleInputMontoBancosAgregados={this.handleInputMontoBancosAgregados}
-          handleRemoveItemBancosAgregados={this.handleRemoveItemBancosAgregados}
+          cuota={this.state.cuota}
+          cuotas={this.state.cuotas}
 
-          handleSaveSale={this.handleSaveSale}
+          handleAction={this.handleActionProceso}
+        />
+
+        <ModalTransaccion
+          tipo={"Cobro"}
+          title={"Completar Cobro"}
+          isOpen={this.state.isOpenTerminal}
+
+          idSucursal={this.state.idSucursal}
+          disabledCreditoFijo={true}
+          codiso={this.state.codiso}
+          importeTotal={this.state.monto}
+
+          onClose={this.handleCloseModalTerminal}
+          handleProcessContado={this.handleProcessContado}
+          handleProcessCredito={() => { }}
+        />
+
+        <Title
+          title='Cuentas por Cobrar'
+          subTitle='DETALLE'
+          handleGoBack={() => this.props.history.goBack()}
         />
 
         <Row>
-          <Column>
-            <div className="form-group">
-              <h5>
-                <span role="button" onClick={() => this.props.history.goBack()}>
-                  <i className="bi bi-arrow-left-short"></i>
-                </span>{' '}
-                Cuentas por Cobrar
-                <small className="text-secondary"> detalles</small>
-              </h5>
-            </div>
-          </Column>
-        </Row>
-
-        <Row>
-          <Column>
-            <div className="form-group">
-              <button
-                type="button"
-                className="btn btn-light"
-                onClick={this.handlePrintA4}
-              >
-                <i className="fa fa-print"></i> A4
-              </button> {' '}
-              <button
-                type="button"
-                className="btn btn-light"
-                onClick={this.handlePrintTicket}
-              >
-                <i className="fa fa-print"></i> Ticket
-              </button>
-            </div>
+          <Column formGroup={true}>
+            <Button
+              className="btn-light"
+              onClick={this.handlePrintA4}
+            >
+              <i className="fa fa-print"></i> A4
+            </Button>
+            {' '}
+            <Button
+              className="btn-light"
+              onClick={this.handlePrintTicket}
+            >
+              <i className="fa fa-print"></i> Ticket
+            </Button>
           </Column>
         </Row>
 
         <Row>
           <Column className="col-lg-6 col-md-12">
-            <div className="form-group">
-              <div className="table-responsive">
-                <table width="100%">
-                  <thead>
-                    <tr>
-                      <th className="table-secondary w-25 p-1 font-weight-normal ">
-                        Comprobante
-                      </th>
-                      <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {this.state.comprobante}
-                      </th>
-                    </tr>
-                    <tr>
-                      <th className="table-secondary w-25 p-1 font-weight-normal ">
-                        Cliente
-                      </th>
-                      <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {this.state.cliente}
-                      </th>
-                    </tr>
-                    <tr>
-                      <th className="table-secondary w-25 p-1 font-weight-normal ">
-                        Fecha
-                      </th>
-                      <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {this.state.fecha}
-                      </th>
-                    </tr>
-                    <tr>
-                      <th className="table-secondary w-25 p-1 font-weight-normal ">
-                        Notas
-                      </th>
-                      <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {this.state.notas}
-                      </th>
-                    </tr>
-                    <tr>
-                      <th className="table-secondary w-25 p-1 font-weight-normal ">
-                        Forma de venta
-                      </th>
-                      <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {this.state.formaPago}
-                      </th>
-                    </tr>
-                    <tr>
-                      <th className="table-secondary w-25 p-1 font-weight-normal ">
-                        Estado
-                      </th>
-                      <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {this.state.estado}
-                      </th>
-                    </tr>
-                    <tr>
-                      <th className="table-secondary w-25 p-1 font-weight-normal ">
-                        Usuario
-                      </th>
-                      <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {this.state.usuario}
-                      </th>
-                    </tr>
-                  </thead>
-                </table>
-              </div>
-            </div>
+            <TableResponsive
+              className={"table table-light table-striped"}
+              tHead={
+                <>
+                  <tr>
+                    <th className="table-secondary w-25 p-1 font-weight-normal ">
+                      Comprobante
+                    </th>
+                    <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                      {this.state.comprobante}
+                    </th>
+                  </tr>
+                  <tr>
+                    <th className="table-secondary w-25 p-1 font-weight-normal ">
+                      Cliente
+                    </th>
+                    <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                      {this.state.cliente}
+                    </th>
+                  </tr>
+                  <tr>
+                    <th className="table-secondary w-25 p-1 font-weight-normal ">
+                      Fecha
+                    </th>
+                    <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                      {this.state.fecha}
+                    </th>
+                  </tr>
+                  <tr>
+                    <th className="table-secondary w-25 p-1 font-weight-normal ">
+                      Notas
+                    </th>
+                    <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                      {this.state.notas}
+                    </th>
+                  </tr>
+                  <tr>
+                    <th className="table-secondary w-25 p-1 font-weight-normal ">
+                      Forma de venta
+                    </th>
+                    <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                      {this.state.formaPago}
+                    </th>
+                  </tr>
+                  <tr>
+                    <th className="table-secondary w-25 p-1 font-weight-normal ">
+                      Estado
+                    </th>
+                    <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                      {this.state.estado}
+                    </th>
+                  </tr>
+                  <tr>
+                    <th className="table-secondary w-25 p-1 font-weight-normal ">
+                      Usuario
+                    </th>
+                    <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                      {this.state.usuario}
+                    </th>
+                  </tr>
+                </>
+              }
+            />
           </Column>
 
-          <Column className="col-lg-6 col-md-12">
-            <div className="form-group">
-              <div className="table-responsive">
-                <table width="100%">
-                  <thead>
-                    <tr>
-                      <th className="table-secondary w-25 p-1 font-weight-normal ">
-                        Numero de Cuotas
-                      </th>
-                      <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {this.state.numeroCuota}
-                      </th>
-                    </tr>
-                    <tr>
-                      <th className="table-secondary w-25 p-1 font-weight-normal ">
-                        Frecuencia
-                      </th>
-                      <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {this.state.frecuenciaPago} DÍAS
-                      </th>
-                    </tr>
-                    <tr>
-                      <th className="table-secondary w-25 p-1 font-weight-normal ">
-                        Total
-                      </th>
-                      <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {numberFormat(this.state.total, this.state.codiso)}
-                      </th>
-                    </tr>
-                    <tr>
-                      <th className="table-secondary w-25 p-1 font-weight-normal">
-                        Cobrado
-                      </th>
-                      <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal text-success">
-                        {numberFormat(this.state.cobrado, this.state.codiso)}
-                      </th>
-                    </tr>
-                    <tr>
-                      <th className="table-secondary w-25 p-1 font-weight-normal">
-                        Por Cobrar
-                      </th>
-                      <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal text-danger">
-                        {numberFormat(this.state.total - this.state.cobrado, this.state.codiso)}
-                      </th>
-                    </tr>
-                  </thead>
-                </table>
-              </div>
-            </div>
+          <Column className="col-lg-6 col-md-12" formGroup={true}>
+            <TableResponsive
+              className={"table table-light table-striped"}
+              tHead={
+                <>
+                  <tr>
+                    <th className="table-secondary w-25 p-1 font-weight-normal ">
+                      Numero de Cuotas
+                    </th>
+                    <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                      {this.state.numeroCuota}
+                    </th>
+                  </tr>
+                  <tr>
+                    <th className="table-secondary w-25 p-1 font-weight-normal ">
+                      Frecuencia
+                    </th>
+                    <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                      {this.state.frecuenciaPago} DÍAS
+                    </th>
+                  </tr>
+                  <tr>
+                    <th className="table-secondary w-25 p-1 font-weight-normal ">
+                      Total
+                    </th>
+                    <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                      {numberFormat(this.state.total, this.state.codiso)}
+                    </th>
+                  </tr>
+                  <tr>
+                    <th className="table-secondary w-25 p-1 font-weight-normal">
+                      Cobrado
+                    </th>
+                    <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal text-success">
+                      {numberFormat(this.state.cobrado, this.state.codiso)}
+                    </th>
+                  </tr>
+                  <tr>
+                    <th className="table-secondary w-25 p-1 font-weight-normal">
+                      Por Cobrar
+                    </th>
+                    <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal text-danger">
+                      {numberFormat(this.state.total - this.state.cobrado, this.state.codiso)}
+                    </th>
+                  </tr>
+                </>
+              }
+            />
           </Column>
         </Row>
 
@@ -756,25 +725,7 @@ class CuentasPorPagarAmbonar extends CustomComponent {
                   <th>Monto</th>
                 </tr>
               }
-              tBody={this.state.detalles.map((item, index) => (
-                <tr key={index}>
-                  <td>{++index}</td>
-                  <td>{item.producto}</td>
-                  <td>{item.medida}</td>
-                  <td>{item.categoria}</td>
-                  <td className="text-right">{rounded(item.cantidad)}</td>
-                  <td className="text-right">{item.impuesto}</td>
-                  <td className="text-right">
-                    {numberFormat(item.precio, this.state.codiso)}
-                  </td>
-                  <td className="text-right">
-                    {numberFormat(
-                      item.cantidad * item.precio,
-                      this.state.codiso,
-                    )}
-                  </td>
-                </tr>
-              ))}
+              tBody={this.renderDetalle()}
             />
           </Column>
         </Row>
@@ -794,83 +745,17 @@ class CuentasPorPagarAmbonar extends CustomComponent {
               title={"Cuotas"}
               className={"table table-light"}
               tHead={
-                <tr>
-                  <th>#</th>
-                  <th>Fecha de Cobro</th>
-                  <th>Cuota</th>
-                  <th>Estado</th>
-                  <th>Monto</th>
-                  <th>Cobrar</th>
-                  <th>Imprimir</th>
+                <tr className="table-primary">
+                  <th width={"5%"}>#</th>
+                  <th width={"10%"}>Fecha de Cobro</th>
+                  <th width={"10%"}>Cuota</th>
+                  <th width={"10%"}>Estado</th>
+                  <th width={"15%"}>Monto</th>
+                  <th width={"5%"} className="text-center">Cobrar</th>
+                  <th width={"5%"} className="text-center">Imprimir</th>
                 </tr>
               }
-              tBody={
-                this.state.plazos.map((plazo, index) => {
-                  let montoActual = plazo.monto;
-
-                  return <React.Fragment key={index}>
-                    <tr className="table-success">
-                      <td className="text-center">{index + 1}</td>
-                      <td>{plazo.fecha}</td>
-                      <td>{"CUOTA " + plazo.cuota}</td>
-                      <td className={`${plazo.estado === 0 ? "text-danger" : "text-success"}`}>{plazo.estado === 0 ? "Por Cobrar" : "Cobrado"}</td>
-                      <td>{numberFormat(plazo.monto, this.state.codiso)}</td>
-                      <td className="text-center">
-                        <button
-                          type="button"
-                          className="btn btn-warning btn-sm"
-                          onClick={() => this.handleOpenModalCobro(plazo)}
-                          disabled={plazo.estado === 1 ? true : false}
-                        >
-                          <i className="fa fa-money"></i>
-                        </button>
-                      </td>
-                      <td className="text-center">
-                        <button
-                          type="button"
-                          className="btn btn-light btn-sm"
-                        >
-                          <i className="fa fa-print"></i>
-                        </button>
-                      </td>
-                    </tr>
-
-                    <tr><td colSpan="7" className="pb-0">Cobros Asociados</td></tr>
-                    <tr>
-                      <td className="pb-0 text-center">#</td>
-                      <td className="pb-0">Banco</td>
-                      <td className="pb-0">Fecha</td>
-                      <td className="pb-0">Cobrado</td>
-                      <td className="pb-0">Restante</td>
-                      <td className="pb-0">Observación</td>
-                    </tr>
-                    {
-                      plazo.ingresos.map((ingreso, index) => {
-                        montoActual = montoActual - ingreso.monto;
-                        return (
-                          <tr key={index}>
-                            <td className="text-center">{index + 1}</td>
-                            <td>{ingreso.nombre}</td>
-                            <td>
-                              {ingreso.fecha}
-                              <br />
-                              {formatTime(ingreso.hora)}
-                            </td>
-                            <td>{numberFormat(ingreso.monto, this.state.codiso)}</td>
-                            <td>{numberFormat(montoActual, this.state.codiso)}</td>
-                            <td>{ingreso.descripcion}</td>
-                          </tr>
-                        );
-                      })
-                    }
-                    <tr>
-                      <td colSpan="9">
-                        <hr />
-                      </td>
-                    </tr>
-                  </React.Fragment>
-                })
-              }
+              tBody={this.renderCuotas()}
             />
           </Column>
         </Row>
@@ -879,12 +764,29 @@ class CuentasPorPagarAmbonar extends CustomComponent {
   }
 }
 
+CuentasPorCobrarAbonar.propTypes = {
+  token: PropTypes.shape({
+    userToken: PropTypes.shape({
+      idUsuario: PropTypes.string.isRequired,
+    }).isRequired,
+    project: PropTypes.shape({
+      idSucursal: PropTypes.string.isRequired,
+    }).isRequired,
+  }).isRequired,
+  history: PropTypes.shape({
+    goBack: PropTypes.func.isRequired,
+  }).isRequired,
+  location: PropTypes.shape({
+    search: PropTypes.string
+  })
+};
+
 const mapStateToProps = (state) => {
   return {
     token: state.principal,
   };
 };
 
-const ConnectedCuentasPorPagarAmbonar = connect(mapStateToProps, null)(CuentasPorPagarAmbonar);
+const ConnectedCuentasPorCobrarAbonar = connect(mapStateToProps, null)(CuentasPorCobrarAbonar);
 
-export default ConnectedCuentasPorPagarAmbonar;
+export default ConnectedCuentasPorCobrarAbonar;

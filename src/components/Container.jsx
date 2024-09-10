@@ -139,7 +139,7 @@ export class ContainerMenu extends React.Component {
                   key={index}
                   title={item.nombre}
                   icon={item.icon}
-                  category={"Configurar"}
+                  category={"Módulo"}
                   path={`${this.props.url}/${item.ruta}`}
                 />
               ))

@@ -1,6 +1,6 @@
 import ContainerWrapper from '../../../../../components/Container';
 import CustomComponent from '../../../../../model/class/custom-component';
-import { calculateTax, calculateTaxBruto, formatNumberWithZeros, formatTime, isText, numberFormat, rounded } from '../../../../../helper/utils.helper';
+import { calculateTax, calculateTaxBruto, formatNumberWithZeros, formatTime, isEmpty, isText, numberFormat, rounded } from '../../../../../helper/utils.helper';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
@@ -11,6 +11,8 @@ import { Table, TableResponsive } from '../../../../../components/Table';
 import Title from '../../../../../components/Title';
 import { SpinnerView } from '../../../../../components/Spinner';
 import PropTypes from 'prop-types';
+import Button from '../../../../../components/Button';
+import React from 'react';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -52,8 +54,8 @@ class CompraDetalle extends CustomComponent {
       codiso: '',
       total: 0,
 
-      detalle: [],
-      salidas: []
+      detalles: [],
+      transaccion: []
     };
 
     this.abortControllerView = new AbortController();
@@ -109,8 +111,7 @@ class CompraDetalle extends CustomComponent {
 
     } = compra.cabecera;
 
-    const monto = compra.detalle.reduce((accumlate, item) => accumlate + (item.costo * item.cantidad), 0,);
-
+    const monto = compra.detalles.reduce((accumlate, item) => accumlate + (item.costo * item.cantidad), 0,);
 
     this.setState({
       idCompra: id,
@@ -134,8 +135,8 @@ class CompraDetalle extends CustomComponent {
       codiso: codiso,
       total: monto,
 
-      detalle: compra.detalle,
-      salidas: compra.salidas,
+      detalles: compra.detalles,
+      transaccion: compra.transaccion,
 
       loading: false,
     });
@@ -159,11 +160,36 @@ class CompraDetalle extends CustomComponent {
     }
   }
 
+  renderDetalles() {
+    return (
+      this.state.detalles.map((item, index) => (
+        <tr key={index}>
+          <td>{++index}</td>
+          <td>{item.producto}</td>
+          <td className="text-right">
+            {numberFormat(item.costo, this.state.codiso)}
+          </td>
+
+          <td>{item.categoria}</td>
+          <td className="text-right">{item.impuesto}</td>
+          <td className="text-right">{rounded(item.cantidad)}</td>
+          <td>{item.medida}</td>
+          <td className="text-right">
+            {numberFormat(
+              item.cantidad * item.costo,
+              this.state.codiso,
+            )}
+          </td>
+        </tr>
+      ))
+    );
+  }
+
   renderTotal() {
     let subTotal = 0;
     let total = 0;
 
-    for (const item of this.state.detalle) {
+    for (const item of this.state.detalles) {
       const cantidad = item.cantidad;
       const valor = item.costo;
 
@@ -179,7 +205,7 @@ class CompraDetalle extends CustomComponent {
     }
 
     const impuestosGenerado = () => {
-      const resultado = this.state.detalle.reduce((acc, item) => {
+      const resultado = this.state.detalles.reduce((acc, item) => {
         const total = item.cantidad * item.costo;
         const subTotal = calculateTaxBruto(item.porcentaje, total);
         const impuestoTotal = calculateTax(item.porcentaje, subTotal);
@@ -230,6 +256,62 @@ class CompraDetalle extends CustomComponent {
     );
   }
 
+  renderTransaciones() {
+    if (isEmpty(this.state.transaccion)) {
+      return (
+        <tr>
+          <td colSpan="6" className="text-center">
+            No hay transacciones para mostrar.
+          </td>
+        </tr>
+      );
+    }
+
+    return (
+      this.state.transaccion.map((item, index) => {
+        return (
+          <React.Fragment key={index}>
+            <tr className="table-success">
+              <td>{index + 1}</td>
+              <td>
+                <span>{item.fecha}</span>
+                <br />
+                <span>{formatTime(item.hora)}</span>
+              </td>
+              <td>{item.concepto}</td>
+              <td>{item.nota}</td>
+              <td>{item.usuario}</td>
+            </tr>
+
+            <tr>
+              <td className="text-center">#</td>
+              <td>Banco</td>
+              <td>Monto</td>
+              <td colSpan={2}>Observación</td>
+            </tr>
+            {
+              item.detalles.map((detalle, index) => {
+                return (
+                  <tr key={index}>
+                    <td className="text-center">{index + 1}</td>
+                    <td>{detalle.nombre}</td>
+                    <td>{numberFormat(detalle.monto, this.state.codiso)}</td>
+                    <td colSpan={2}>{detalle.observacion}</td>
+                  </tr>
+                );
+              })
+            }
+            <tr>
+              <td colSpan="6">
+                <hr />
+              </td>
+            </tr>
+          </React.Fragment>
+        );
+      })
+    );
+  }
+
   render() {
     return (
       <ContainerWrapper>
@@ -240,26 +322,23 @@ class CompraDetalle extends CustomComponent {
 
         <Title
           title='Compra'
-          subTitle='Detalle'
+          subTitle='DETALLE'
           handleGoBack={() => this.props.history.goBack()}
         />
 
         <Row>
-          <Column>
-            <div className="form-group">
-              <button
-                type="button"
-                className="btn btn-light"
-              >
-                <i className="fa fa-print"></i> A4
-              </button>{' '}
-              <button
-                type="button"
-                className="btn btn-light"
-              >
-                <i className="fa fa-print"></i> Ticket
-              </button>
-            </div>
+          <Column formGroup={true}>
+            <Button
+              className="btn-light"
+            >
+              <i className="fa fa-print"></i> A4
+            </Button>
+            {' '}
+            <Button
+              className="btn-light"
+            >
+              <i className="fa fa-print"></i> Ticket
+            </Button>
           </Column>
         </Row>
 
@@ -416,30 +495,7 @@ class CompraDetalle extends CustomComponent {
                   <th>Importe</th>
                 </tr>
               }
-              tBody={
-                <>
-                  {this.state.detalle.map((item, index) => (
-                    <tr key={index}>
-                      <td>{++index}</td>
-                      <td>{item.producto}</td>
-                      <td className="text-right">
-                        {numberFormat(item.costo, this.state.codiso)}
-                      </td>
-
-                      <td>{item.categoria}</td>
-                      <td className="text-right">{item.impuesto}</td>
-                      <td className="text-right">{rounded(item.cantidad)}</td>
-                      <td>{item.medida}</td>
-                      <td className="text-right">
-                        {numberFormat(
-                          item.cantidad * item.costo,
-                          this.state.codiso,
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </>
-              }
+              tBody={this.renderDetalles()}
             />
           </Column>
         </Row>
@@ -457,42 +513,18 @@ class CompraDetalle extends CustomComponent {
         <Row>
           <Column>
             <TableResponsive
-              className="table table-light table-striped"
-              title={"Salidas asociados"}
+              className={"table table-light"}
+              title={"Transacciones"}
               tHead={
                 <tr>
                   <th>#</th>
                   <th>Fecha y Hora</th>
-                  <th>Metodo</th>
-                  <th>Descripción</th>
-                  <th>Monto</th>
+                  <th>Concepto</th>
+                  <th>Nota</th>
+                  <th>Usuario</th>
                 </tr>
               }
-              tBody={
-                <>
-                  {this.state.salidas.length === 0 ? (
-                    <tr>
-                      <td colSpan="5" className="text-center">
-                        No hay ingresos para mostrar.
-                      </td>
-                    </tr>
-                  ) : (
-                    this.state.salidas.map((item, index) => (
-                      <tr key={index}>
-                        <td>{++index}</td>
-                        <td>
-                          <span>{item.fecha}</span>
-                          <br />
-                          <span>{formatTime(item.hora)}</span>
-                        </td>
-                        <td>{item.nombre}</td>
-                        <td>{item.descripcion}</td>
-                        <td>{numberFormat(item.monto, this.state.codiso)}</td>
-                      </tr>
-                    ))
-                  )}
-                </>
-              }
+              tBody={this.renderTransaciones()}
             />
           </Column>
         </Row>

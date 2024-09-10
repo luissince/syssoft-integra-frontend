@@ -357,40 +357,30 @@ class Traslado extends CustomComponent {
           <span className="badge badge-danger">Anulado</span>
         );
 
-
       return (
         <tr key={index}>
           <td className="text-center">{item.id}</td>
-          <td>
-            {item.fecha} <br />
-            {formatTime(item.hora)}
-          </td>
-          <td>
-            {item.tipo}
-            <br />
-            {item.motivo}
-          </td>
+          <td>{item.fecha} <br />{formatTime(item.hora)}</td>
+          <td>{item.tipo}<br />{item.motivo}</td>
           <td>{item.almacenOrigen}</td>
           <td>{item.almacenDestino}</td>
           <td>{item.observacion}</td>
           <td>{estado}</td>
           <td className='text-center'>
-            <button
-              className="btn btn-outline-info btn-sm"
-              title="Editar"
+            <Button
+              className="btn-outline-info btn-sm"
               onClick={() => this.handleDetalle(item.idTraslado)}
             >
               <i className="bi bi-eye"></i>
-            </button>
+            </Button>
           </td>
           <td className='text-center'>
-            <button
-              className="btn btn-outline-danger btn-sm"
-              title="Anular"
+            <Button
+              className="btn-outline-danger btn-sm"
               onClick={() => this.handleCancelar(item.idTraslado)}
             >
               <i className="bi bi-trash"></i>
-            </button>
+            </Button>
           </td>
         </tr>
       );
@@ -418,6 +408,7 @@ class Traslado extends CustomComponent {
         <Title
           title='Traslado'
           subTitle='LISTA'
+          handleGoBack={() => this.props.history.goBack()}
         />
 
         <Row>

@@ -1,12 +1,10 @@
-import React from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import {
   alertDialog,
   alertInfo,
   alertSuccess,
   alertWarning,
-  spinnerLoading,
-  keyUpSearch,
   isEmpty,
 } from '../../../../helper/utils.helper';
 import Paginacion from '../../../../components/Paginacion';
@@ -19,8 +17,20 @@ import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
 import { CANCELED } from '../../../../model/types/types';
 import CustomComponent from '../../../../model/class/custom-component';
+import Button from '../../../../components/Button';
+import Title from '../../../../components/Title';
+import Row from '../../../../components/Row';
+import Column from '../../../../components/Column';
+import { TableResponsive } from '../../../../components/Table';
+import Search from '../../../../components/Search';
+import { SpinnerTable } from '../../../../components/Spinner';
 
+/**
+ * Componente que representa una funcionalidad específica.
+ * @extends React.Component
+ */
 class Usuarios extends CustomComponent {
+
   constructor(props) {
     super(props);
     this.state = {
@@ -41,14 +51,14 @@ class Usuarios extends CustomComponent {
       lista: [],
       restart: false,
 
+      buscar: '',
+
       opcion: 0,
       paginacion: 0,
       totalPaginacion: 0,
       filasPorPagina: 10,
       messageTable: 'Cargando información...',
     };
-
-    this.refTxtSearch = React.createRef();
 
     this.abortControllerTable = new AbortController();
   }
@@ -69,12 +79,12 @@ class Usuarios extends CustomComponent {
     await this.setStateAsync({ opcion: 0 });
   };
 
-  async searchText(text) {
+  searchText = async (text) => {
     if (this.state.loading) return;
 
     if (text.trim().length === 0) return;
 
-    await this.setStateAsync({ paginacion: 1, restart: false });
+    await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
     this.fillTable(1, text.trim());
     await this.setStateAsync({ opcion: 1 });
   }
@@ -87,18 +97,18 @@ class Usuarios extends CustomComponent {
   onEventPaginacion = () => {
     switch (this.state.opcion) {
       case 0:
-        this.fillTable(0, '');
+        this.fillTable(0);
         break;
       case 1:
-        this.fillTable(1, this.refTxtSearch.current.value);
+        this.fillTable(1, this.state.buscar);
         break;
       default:
-        this.fillTable(0, '');
+        this.fillTable(0);
     }
   };
 
-  fillTable = async (opcion, buscar) => {
-    await this.setStateAsync({
+  fillTable = async (opcion, buscar = '') => {
+    this.setState({
       loading: true,
       lista: [],
       messageTable: 'Cargando información...',
@@ -106,7 +116,7 @@ class Usuarios extends CustomComponent {
 
     const params = {
       opcion: opcion,
-      buscar: buscar,
+      buscar: buscar.trim(),
       posicionPagina: (this.state.paginacion - 1) * this.state.filasPorPagina,
       filasPorPagina: this.state.filasPorPagina,
     };
@@ -121,7 +131,7 @@ class Usuarios extends CustomComponent {
         Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
       );
 
-      await this.setStateAsync({
+      this.setState({
         loading: false,
         lista: response.data.result,
         totalPaginacion: totalPaginacion,
@@ -131,7 +141,7 @@ class Usuarios extends CustomComponent {
     if (response instanceof ErrorResponse) {
       if (response.getType() === CANCELED) return;
 
-      await this.setStateAsync({
+      this.setState({
         loading: false,
         lista: [],
         totalPaginacion: 0,
@@ -192,11 +202,10 @@ class Usuarios extends CustomComponent {
   generarBody() {
     if (this.state.loading) {
       return (
-        <tr>
-          <td className="text-center" colSpan="10">
-            {spinnerLoading('Cargando información de la tabla...', true)}
-          </td>
-        </tr>
+        <SpinnerTable
+          colSpan='10'
+          message='Cargando información de la tabla...'
+        />
       );
     }
 
@@ -231,34 +240,31 @@ class Usuarios extends CustomComponent {
             <span className={styleEstado}>{estado}</span>
           </td>
           <td>
-            <button
-              className="btn btn-outline-warning btn-sm"
-              title="Editar"
+            <Button
+              className="btn-outline-warning btn-sm"
               onClick={() => this.handleEditar(item.idUsuario)}
-              // disabled={!this.state.edit}
+            // disabled={!this.state.edit}
             >
               <i className="bi bi-pencil"></i>
-            </button>
+            </Button>
           </td>
           <td className="text-center">
-            <button
-              className="btn btn-outline-danger btn-sm"
-              title="Editar"
+            <Button
+              className="btn-outline-danger btn-sm"
               onClick={() => this.handleBorrar(item.idUsuario)}
-              // disabled={!this.state.remove}
+            // disabled={!this.state.remove}
             >
               <i className="bi bi-trash"></i>
-            </button>
+            </Button>
           </td>
           <td>
-            <button
-              className="btn btn-outline-info btn-sm"
-              title="Resetear"
+            <Button
+              className="btn-outline-info btn-sm"
               onClick={() => this.handleResetear(item.idUsuario)}
-              // disabled={!this.state.reset}
+            // disabled={!this.state.reset}
             >
               <i className="bi bi-key"></i>
-            </button>
+            </Button>
           </td>
         </tr>
       );
@@ -268,83 +274,65 @@ class Usuarios extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
-        <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <div className="form-group">
-              <h5>
-                Usuarios <small className="text-secondary">LISTA</small>
-              </h5>
-            </div>
-          </div>
-        </div>
+        <Title
+          title='Usuarios'
+          subTitle='LISTA'
+          handleGoBack={() => this.props.history.goBack()}
+        />
 
-        <div className="row">
-          <div className="col-md-6 col-sm-12">
-            <div className="form-group">
-              <div className="input-group mb-2">
-                <div className="input-group-prepend">
-                  <div className="input-group-text">
-                    <i className="bi bi-search"></i>
-                  </div>
-                </div>
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Buscar..."
-                  ref={this.refTxtSearch}
-                  onKeyUp={(event) =>
-                    keyUpSearch(event, () =>
-                      this.searchText(event.target.value),
-                    )
-                  }
-                />
-              </div>
-            </div>
-          </div>
-          <div className="col-md-6 col-sm-12">
-            <div className="form-group">
-              <button
-                className="btn btn-outline-info"
-                onClick={this.handleAgregar}
-                // disabled={!this.state.add}
-              >
-                <i className="bi bi-file-plus"></i> Nuevo Registro
-              </button>{' '}
-              <button
-                className="btn btn-outline-secondary"
-                onClick={() => this.loadInit()}
-              >
-                <i className="bi bi-arrow-clockwise"></i>
-              </button>
-            </div>
-          </div>
-        </div>
+        <Row>
+          <Column formGroup={true}>
+            <Button
+              className='btn-outline-info'
+              onClick={this.handleAgregar}
+            >
+              <i className="bi bi-file-plus"></i> Nuevo Registro
+            </Button>
+            {' '}
+            <Button
+              className='btn-outline-secondary'
+              onClick={this.loadInit}
+            >
+              <i className="bi bi-arrow-clockwise"></i> Recargar Vista
+            </Button>
+          </Column>
+        </Row>
 
-        <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <div className="table-responsive">
-              <table className="table table-striped table-bordered rounded">
-                <thead>
-                  <tr>
-                    <th width="5%" className="text-center">
-                      #
-                    </th>
-                    <th width="20%">Nombre y Apellidos</th>
-                    <th width="10%">Telefono</th>
-                    <th width="10%">Email</th>
-                    <th width="10%">Perfil</th>
-                    <th width="10%">Representante</th>
-                    <th width="5%">Estado</th>
-                    <th width="5%">Editar</th>
-                    <th width="5%">Eliminar</th>
-                    <th width="5%">Resetear</th>
-                  </tr>
-                </thead>
-                <tbody>{this.generarBody()}</tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+        <Row>
+          <Column className="col-md-6 col-sm-12" formGroup={true}>
+            <Search
+              group={true}
+              iconLeft={<i className="bi bi-search"></i>}
+              ref={this.refSearch}
+              onSearch={this.searchText}
+              placeholder="Buscar por comprobante o cliente..."
+            />
+          </Column>
+        </Row>
+
+        <Row>
+          <Column>
+            <TableResponsive
+              tHead={
+                <tr>
+                  <th width="5%" className="text-center">
+                    #
+                  </th>
+                  <th width="20%">Nombre y Apellidos</th>
+                  <th width="10%">Telefono</th>
+                  <th width="10%">Email</th>
+                  <th width="10%">Perfil</th>
+                  <th width="10%">Representante</th>
+                  <th width="5%">Estado</th>
+                  <th width="5%">Editar</th>
+                  <th width="5%">Eliminar</th>
+                  <th width="5%">Resetear</th>
+                </tr>
+              }
+              tBody={this.generarBody()}
+            />
+          </Column>
+        </Row>
 
         <Paginacion
           loading={this.state.loading}
@@ -357,6 +345,13 @@ class Usuarios extends CustomComponent {
       </ContainerWrapper>
     );
   }
+}
+
+Usuarios.propTypes = {
+  history: PropTypes.oneOfType([PropTypes.array, PropTypes.object]),
+  location: PropTypes.shape({
+    pathname: PropTypes.string
+  })
 }
 
 const mapStateToProps = (state) => {

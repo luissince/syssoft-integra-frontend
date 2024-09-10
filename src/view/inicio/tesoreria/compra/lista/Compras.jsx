@@ -263,7 +263,8 @@ class Compras extends CustomComponent {
       <ContainerWrapper>
         <Title
           title='Compras'
-          subTitle='Lista'
+          subTitle='LISTA'
+          handleGoBack={() => this.props.history.goBack()}
         />
 
         <Row>

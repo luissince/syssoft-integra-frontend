@@ -33,6 +33,7 @@ import CustomModalStock from './component/ModalStock';
 import Select from '../../../../components/Select';
 import Search from '../../../../components/Search';
 import { setListaInventarioData, setListaInventarioPaginacion } from '../../../../redux/predeterminadoSlice';
+import Button from '../../../../components/Button';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -368,30 +369,19 @@ class Inventario extends CustomComponent {
       return (
         <tr key={index}>
           <td className="text-center">{item.id}</td>
-          <td>
-            {item.codigo}
-            <br />
-            <b>{item.producto}</b>
-          </td>
+          <td>{item.codigo}<br /><b>{item.producto}</b></td>
           <td>{item.almacen}</td>
-          <td>
-            {item.cantidadMaxima} {item.medida}
-          </td>
-          <td>
-            {item.cantidadMinima} {item.medida}
-          </td>
-          <td className={`${background} ${color}`}>
-            {rounded(item.cantidad)} {item.medida}
-          </td>
+          <td>{item.cantidadMaxima} {item.medida}</td>
+          <td>{item.cantidadMinima} {item.medida}</td>
+          <td className={`${background} ${color}`}>{rounded(item.cantidad)} {item.medida}</td>
           <td>{numberFormat(item.costo, this.state.codISO)}</td>
           <td className="text-center">
-            <button
-              className="btn btn-outline-warning btn-sm"
-              title="Editar"
+            <Button
+              className="btn-outline-warning btn-sm"
               onClick={() => this.handleOpenModal(item)}
             >
               <i className="bi bi-pencil"></i>
-            </button>
+            </Button>
           </td>
         </tr>
       );
@@ -404,6 +394,12 @@ class Inventario extends CustomComponent {
         <SpinnerView
           loading={this.state.initialLoad}
           message={this.state.initialMessage}
+        />
+
+        <Title
+          title='Inventario'
+          subTitle='INICIAL'
+          handleGoBack={() => this.props.history.goBack()}
         />
 
         <CustomModalStock
@@ -424,11 +420,6 @@ class Inventario extends CustomComponent {
           handleInputStockMaximo={this.handleInputStockMaximo}
 
           handleSave={this.handleSave}
-        />
-
-        <Title
-          title='Inventario'
-          subTitle='INICIAL'
         />
 
         <Row>

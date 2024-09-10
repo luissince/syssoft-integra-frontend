@@ -291,44 +291,21 @@ class Kardex extends CustomComponent {
       return (
         <tr key={index}>
           <td>{++index}</td>
-          <td>
-            {item.fecha}
-            <br />
-            {formatTime(item.hora)}
-          </td>
+          <td>{item.fecha}<br />{formatTime(item.hora)}</td>
           <td>
             <Link className="btn-link" to={getPathNavigation(item.opcion, item.idNavegacion)}>
               {item.detalle} <i className='bi bi-hand-index-fill'></i>
             </Link>
           </td>
-
-          <td className="bg-success text-white">
-            {item.tipo === 'INGRESO' ? '+' + rounded(item.cantidad) : ''}
-          </td>
-          <td className="bg-danger text-white">
-            {item.tipo === 'SALIDA' ? '-' + rounded(item.cantidad) : ''}
-          </td>
+          <td className="bg-success text-white">{item.tipo === 'INGRESO' ? '+' + rounded(item.cantidad) : ''}</td>
+          <td className="bg-danger text-white">{item.tipo === 'SALIDA' ? '-' + rounded(item.cantidad) : ''}</td>
           <td className="font-weight-bold">{rounded(cantidad)}</td>
           <td>{numberFormat(item.costo, this.state.codISO)}</td>
-
-          <td>
-            {item.tipo === 'INGRESO'
-              ? '+' + rounded(item.costo * item.cantidad)
-              : ''}
-          </td>
-          <td>
-            {item.tipo === 'SALIDA'
-              ? '-' + rounded(item.costo * item.cantidad)
-              : ''}
-          </td>
+          <td>{item.tipo === 'INGRESO' ? '+' + rounded(item.costo * item.cantidad) : ''}</td>
+          <td>{item.tipo === 'SALIDA' ? '-' + rounded(item.costo * item.cantidad) : ''}</td>
           <td>{numberFormat(costo, this.state.codISO)}</td>
-
           <td>{item.almacen}</td>
-          <td>
-            {item.apellidos}
-            {<br />}
-            {item.nombres}
-          </td>
+          <td>{item.apellidos}{<br />}{item.nombres}</td>
         </tr>
       );
     });
@@ -351,6 +328,7 @@ class Kardex extends CustomComponent {
         <Title
           title='Kardex'
           subTitle='LISTA'
+          handleGoBack={() => this.props.history.goBack()}
         />
 
         <Row>

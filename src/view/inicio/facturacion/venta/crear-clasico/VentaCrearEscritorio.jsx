@@ -891,7 +891,7 @@ class VentaCrearEscritorio extends CustomComponent {
 
   handleOpenSale = async () => {
     const tipoDocumento = this.state.tiposDocumentos.find(item => item.idTipoDocumento === this.state.idTipoDocumento);
-
+    
     if (isEmpty(this.state.detalleVenta)) {
       alertWarning('Venta', 'La lista de productos esta vacía.', () => {
         this.redCodigoBarras.current.focus();
@@ -973,7 +973,7 @@ class VentaCrearEscritorio extends CustomComponent {
     this.setState({ isOpenTerminal: true })
   }
 
-  handleProcessContado = (idFormaPago, metodoPagosLista, callback = async function () { }) => {
+  handleProcessContado = (idFormaPago, metodoPagosLista, notaTransacion, callback = async function () { }) => {
     const {
       nuevoCliente,
       comentario,
@@ -1002,6 +1002,7 @@ class VentaCrearEscritorio extends CustomComponent {
           nuevoCliente: nuevoCliente,
           idCotizacion: idCotizacion,
           detalleVenta: detalleVenta,
+          notaTransacion,
           bancosAgregados: metodoPagosLista,
         };
 
@@ -1053,7 +1054,7 @@ class VentaCrearEscritorio extends CustomComponent {
     });
   }
 
-  handleProcessCredito = (idFormaPago, numeroCuotas, frecuenciaPagoCredito, importeTotal, callback = async function () { }) => {
+  handleProcessCredito = (idFormaPago, numeroCuotas, frecuenciaPago, importeTotal, notaTransacion, callback = async function () { }) => {
     const {
       nuevoCliente,
       comentario,
@@ -1065,7 +1066,6 @@ class VentaCrearEscritorio extends CustomComponent {
       idComprobante,
       detalleVenta
     } = this.state;
-
 
     alertDialog('Venta', '¿Estás seguro de continuar?', async (accept) => {
       if (accept) {
@@ -1081,8 +1081,9 @@ class VentaCrearEscritorio extends CustomComponent {
           estado: 2,
           nuevoCliente: nuevoCliente,
           detalleVenta: detalleVenta,
-          numCuotas: numeroCuotas,
-          frecuenciaPagoCredito: frecuenciaPagoCredito,
+          numeroCuotas: numeroCuotas,
+          frecuenciaPago: frecuenciaPago,
+          notaTransacion,
           importeTotal: importeTotal
         };
 
@@ -1623,7 +1624,7 @@ class VentaCrearEscritorio extends CustomComponent {
     });
   }
 
-  handleSetValueCliente = (value) =>{
+  handleSetValueCliente = (value) => {
     this.setState({
       numeroDocumento: value
     });
@@ -1950,6 +1951,8 @@ class VentaCrearEscritorio extends CustomComponent {
         />
 
         <ModalTransaccion
+          tipo={"Venta"}
+          title={"Completar Venta"}
           isOpen={this.state.isOpenTerminal}
 
           idSucursal={this.state.idSucursal}

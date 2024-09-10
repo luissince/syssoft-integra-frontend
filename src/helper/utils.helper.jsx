@@ -331,6 +331,14 @@ export function isText(value) {
   return typeof value === 'string' && value.trim().length > 0;
 }
 
+export function getNumber(value) {
+  if (!isNumeric(value)) {
+    return 0
+  }
+
+  return Number(value);
+}
+
 export function keyNumberInteger(event, enterCallback) {
   const key = event.key;
   const isDigit = /\d/.test(key);

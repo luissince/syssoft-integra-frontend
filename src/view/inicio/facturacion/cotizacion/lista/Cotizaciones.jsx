@@ -327,7 +327,8 @@ class Cotizaciones extends CustomComponent {
       <ContainerWrapper>
         <Title
           title='Cotización'
-          subTitle='Lista'
+          subTitle='LISTA'
+          handleGoBack={() => this.props.history.goBack()}
         />
 
         <Row>

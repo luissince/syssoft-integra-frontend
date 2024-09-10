@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  spinnerLoading,
   alertDialog,
   alertInfo,
   alertSuccess,
@@ -25,10 +24,11 @@ import { connect } from 'react-redux';
 import Title from '../../../../../components/Title';
 import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
-import { SpinnerView } from '../../../../../components/Spinner';
+import { SpinnerTable, SpinnerView } from '../../../../../components/Spinner';
 import { TableResponsive } from '../../../../../components/Table';
 import Search from '../../../../../components/Search';
 import { setListaAjusteData, setListaAjustePaginacion } from '../../../../../redux/predeterminadoSlice';
+import Button from '../../../../../components/Button';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -277,11 +277,10 @@ class LogisticaAjuste extends CustomComponent {
   generarBody = () => {
     if (this.state.loading) {
       return (
-        <tr>
-          <td className="text-center" colSpan="8">
-            {spinnerLoading('Cargando información de la tabla...', true)}
-          </td>
-        </tr>
+        <SpinnerTable
+          colSpan='8'
+          message='Cargando información de la tabla...'
+        />
       );
     }
 
@@ -313,35 +312,26 @@ class LogisticaAjuste extends CustomComponent {
       return (
         <tr key={index}>
           <td className="text-center">{item.id}</td>
-          <td>
-            {item.fecha} <br />
-            {formatTime(item.hora)}
-          </td>
-          <td>
-            {iconTipoAjuste} {item.ajuste}
-            <br />
-            {item.motivo}
-          </td>
+          <td>{item.fecha} <br />{formatTime(item.hora)}</td>
+          <td>{iconTipoAjuste} {item.ajuste}<br />{item.motivo}</td>
           <td>{item.observacion}</td>
           <td>{item.almacen}</td>
           <td>{estado}</td>
           <td className="text-center">
-            <button
-              className="btn btn-outline-info btn-sm"
-              title="Editar"
+            <Button
+              className="btn-outline-info btn-sm"
               onClick={() => this.handleDetalle(item.idAjuste)}
             >
               <i className="bi bi-eye"></i>
-            </button>
+            </Button>
           </td>
           <td className="text-center">
-            <button
-              className="btn btn-outline-danger btn-sm"
-              title="Anular"
+            <Button
+              className="btn-outline-danger btn-sm"
               onClick={() => this.handleCancelar(item.idAjuste)}
             >
               <i className="bi bi-trash"></i>
-            </button>
+            </Button>
           </td>
         </tr>
       );

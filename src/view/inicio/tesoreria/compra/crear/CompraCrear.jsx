@@ -628,7 +628,7 @@ class CompraCrear extends CustomComponent {
     this.setState({ isOpenTerminal: false })
   }
 
-  handleProcessContado = async (idFormaPago, metodoPagosLista, callback = async function () { }) => {
+  handleProcessContado = async (idFormaPago, metodoPagosLista, notaTransacion, callback = async function () { }) => {
     const {
       idComprobante,
       persona,
@@ -657,8 +657,9 @@ class CompraCrear extends CustomComponent {
           idUsuario: idUsuario,
           idSucursal: idSucursal,
           estado: 1,
-          metodoPago: metodoPagosLista,
           detalles: detalles,
+          notaTransacion,
+          bancosAgregados: metodoPagosLista,
         };
 
         await callback();
@@ -681,7 +682,7 @@ class CompraCrear extends CustomComponent {
     });
   };
 
-  handleProcessCredito = async (idFormaPago, numeroCuotas, frecuenciaPagoCredito, total, callback = async function () { }) => {
+  handleProcessCredito = async (idFormaPago, numeroCuotas, frecuenciaPago, total, notaTransacion, callback = async function () { }) => {
     const {
       idComprobante,
       persona,
@@ -709,9 +710,10 @@ class CompraCrear extends CustomComponent {
           idUsuario: idUsuario,
           idSucursal: idSucursal,
           estado: 2,
-          frecuenciaPago: frecuenciaPagoCredito,
           numeroCuotas: numeroCuotas,
+          frecuenciaPago: frecuenciaPago,
           detalles: detalles,
+          notaTransacion,
           importeTotal: total
         };
 
@@ -879,6 +881,8 @@ class CompraCrear extends CustomComponent {
       <ContainerWrapper>
 
         <ModalTransaccion
+          tipo={"Compra"}
+          title={"Completar Compra"}
           isOpen={this.state.isOpenTerminal}
 
           idSucursal={this.state.idSucursal}
@@ -989,10 +993,10 @@ class CompraCrear extends CustomComponent {
             <Row>
               <Column formGroup={true}>
                 <Button
-                  className="btn-success"
+                  className="btn-primary"
                   onClick={this.handleGuardar}
                 >
-                  <i className="fa fa-save"></i> Guardar (F1)
+                  <i className="fa fa-arrow-right"></i> Registrar (F1)
                 </Button>{' '}
                 <Button
                   className="btn-outline-info"

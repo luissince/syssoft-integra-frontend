@@ -4,9 +4,8 @@ import {
   alertDialog,
   alertSuccess,
   alertWarning,
-  spinnerLoading,
-  keyUpSearch,
   alertInfo,
+  isEmpty,
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import Paginacion from '../../../../components/Paginacion';
@@ -19,6 +18,13 @@ import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
 import { CANCELED } from '../../../../model/types/types';
 import CustomComponent from '../../../../model/class/custom-component';
+import Title from '../../../../components/Title';
+import Row from '../../../../components/Row';
+import Column from '../../../../components/Column';
+import Button from '../../../../components/Button';
+import Search from '../../../../components/Search';
+import { SpinnerTable } from '../../../../components/Spinner';
+import { TableResponsive } from '../../../../components/Table';
 
 class Conceptos extends CustomComponent {
   constructor(props) {
@@ -38,16 +44,18 @@ class Conceptos extends CustomComponent {
       lista: [],
       restart: false,
 
+      buscar: '',
+
       opcion: 0,
       paginacion: 0,
       totalPaginacion: 0,
-      filasPorPagina: 5,
+      filasPorPagina: 10,
       messageTable: 'Cargando información...',
 
       idUsuario: this.props.token.userToken.idUsuario,
     };
 
-    this.refTxtSearch = React.createRef();
+    this.refSearch = React.createRef();
 
     this.abortControllerTable = new AbortController();
   }
@@ -68,12 +76,12 @@ class Conceptos extends CustomComponent {
     await this.setStateAsync({ opcion: 0 });
   };
 
-  async searchText(text) {
+  searchText = async (text) => {
     if (this.state.loading) return;
 
     if (text.trim().length === 0) return;
 
-    await this.setStateAsync({ paginacion: 1, restart: false });
+    await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
     this.fillTable(1, text.trim());
     await this.setStateAsync({ opcion: 1 });
   }
@@ -86,17 +94,17 @@ class Conceptos extends CustomComponent {
   onEventPaginacion = () => {
     switch (this.state.opcion) {
       case 0:
-        this.fillTable(0, '');
+        this.fillTable(0);
         break;
       case 1:
-        this.fillTable(1, this.refTxtSearch.current.value);
+        this.fillTable(1, this.state.buscar);
         break;
       default:
-        this.fillTable(0, '');
+        this.fillTable(0);
     }
   };
 
-  fillTable = async (opcion, buscar) => {
+  fillTable = async (opcion, buscar = '') => {
     await this.setStateAsync({
       loading: true,
       lista: [],
@@ -105,22 +113,19 @@ class Conceptos extends CustomComponent {
 
     const params = {
       opcion: opcion,
-      buscar: buscar,
+      buscar: buscar.trim(),
       posicionPagina: (this.state.paginacion - 1) * this.state.filasPorPagina,
       filasPorPagina: this.state.filasPorPagina,
     };
 
-    const response = await listConceptos(
-      params,
-      this.abortControllerTable.signal,
-    );
+    const response = await listConceptos(params, this.abortControllerTable.signal);
 
     if (response instanceof SuccessReponse) {
       const totalPaginacion = parseInt(
         Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
       );
 
-      await this.setStateAsync({
+      this.setState({
         loading: false,
         lista: response.data.result,
         totalPaginacion: totalPaginacion,
@@ -130,7 +135,7 @@ class Conceptos extends CustomComponent {
     if (response instanceof ErrorResponse) {
       if (response.getType() === CANCELED) return;
 
-      await this.setStateAsync({
+      this.setState({
         loading: false,
         lista: [],
         totalPaginacion: 0,
@@ -183,142 +188,129 @@ class Conceptos extends CustomComponent {
     );
   }
 
+  generateBody() {
+    if (this.state.loading) {
+      return (
+        <SpinnerTable
+          colSpan='7'
+          message='Cargando información de la tabla...'
+        />
+      );
+    }
+
+    if (isEmpty(this.state.lista)) {
+      return (
+        <tr>
+          <td className="text-center" colSpan="7">¡No hay datos registrados!</td>
+        </tr>
+      );
+    }
+
+    return this.state.lista.map((item, index) => {
+      return (
+        <tr key={index}>
+          <td className="text-center">{item.id}</td>
+          <td>{item.nombre}</td>
+          <td>
+            {item.tipo === 1
+              ? 'TIPO INGRESO'
+              : 'TIPO EGRESO'}
+          </td>
+          <td>{item.sistema === 1 ? 'SISTEMA' : 'LIBRE'}</td>
+          <td>
+            {item.fecha}
+            {<br />}
+            {formatTime(item.hora)}
+          </td>
+          <td className="text-center">
+            <button
+              className="btn btn-outline-warning btn-sm"
+              title="Editar"
+              onClick={() => this.handleEditar(item.idConcepto)}
+            // disabled={!this.state.edit}
+            >
+              <i className="bi bi-pencil"></i>
+            </button>
+          </td>
+          <td className="text-center">
+            <button
+              className="btn btn-outline-danger btn-sm"
+              title="Anular"
+              onClick={() => this.handleBorrar(item.idConcepto)}
+            // disabled={!this.state.remove}
+            >
+              <i className="bi bi-trash"></i>
+            </button>
+          </td>
+        </tr>
+      );
+    });
+  }
+
+
   render() {
     return (
       <ContainerWrapper>
-        <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <div className="form-group">
-              <h5>
-                Conceptos <small className="text-secondary">LISTA</small>
-              </h5>
-            </div>
-          </div>
-        </div>
+        <Title
+          title='Conceptos'
+          subTitle='LISTA'
+          handleGoBack={() => this.props.history.goBack()}
+        />
 
-        <div className="row">
-          <div className="col-md-6 col-sm-12">
-            <div className="form-group">
-              <div className="input-group mb-2">
-                <div className="input-group-prepend">
-                  <div className="input-group-text">
-                    <i className="bi bi-search"></i>
-                  </div>
-                </div>
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Buscar..."
-                  ref={this.refTxtSearch}
-                  onKeyUp={(event) =>
-                    keyUpSearch(event, () =>
-                      this.searchText(event.target.value),
-                    )
-                  }
-                />
-              </div>
-            </div>
-          </div>
-          <div className="col-md-6 col-sm-12">
-            <div className="form-group">
-              <button
-                className="btn btn-outline-info"
-                onClick={this.handleAgregar}
-                // disabled={!this.state.add}
-              >
-                <i className="bi bi-file-plus"></i> Nuevo Registro
-              </button>{' '}
-              <button
-                className="btn btn-outline-secondary"
-                onClick={() => this.loadInit()}
-              >
-                <i className="bi bi-arrow-clockwise"></i>
-              </button>
-            </div>
-          </div>
-        </div>
+        <Row>
+          <Column formGroup={true}>
+            <Button
+              className='btn-outline-info'
+              onClick={this.handleAgregar}
+            >
+              <i className="bi bi-file-plus"></i> Nuevo Registro
+            </Button>
+            {' '}
+            <Button
+              className='btn-outline-secondary'
+              onClick={this.loadInit}
+            >
+              <i className="bi bi-arrow-clockwise"></i> Recargar Vista
+            </Button>
+          </Column>
+        </Row>
 
-        <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <div className="table-responsive">
-              <table className="table table-striped table-bordered rounded">
-                <thead>
-                  <tr>
-                    <th width="5%" className="text-center">
-                      #
-                    </th>
-                    <th width="25%">Concepto</th>
-                    <th width="20%">Tipo Concepto</th>
-                    <th width="10%">Sistema</th>
-                    <th width="10%">Creacion</th>
-                    <th width="5%" className="text-center">
-                      Editar
-                    </th>
-                    <th width="5%" className="text-center">
-                      Eliminar
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {this.state.loading ? (
-                    <tr>
-                      <td className="text-center" colSpan="7">
-                        {spinnerLoading(
-                          'Cargando información de la tabla...',
-                          true,
-                        )}
-                      </td>
-                    </tr>
-                  ) : this.state.lista.length === 0 ? (
-                    <tr className="text-center">
-                      <td colSpan="7">¡No hay datos registrados!</td>
-                    </tr>
-                  ) : (
-                    this.state.lista.map((item, index) => {
-                      return (
-                        <tr key={index}>
-                          <td className="text-center">{item.id}</td>
-                          <td>{item.nombre}</td>
-                          <td>
-                            {item.tipo === 1
-                              ? 'CONCEPTO DE GASTO'
-                              : 'CONCEPTO DE COBRO'}
-                          </td>
-                          <td>{item.sistema === 1 ? 'SISTEMA' : 'LIBRE'}</td>
-                          <td>
-                            {item.fecha}
-                            {<br />}
-                            {formatTime(item.hora)}
-                          </td>
-                          <td className="text-center">
-                            <button
-                              className="btn btn-outline-warning btn-sm"
-                              title="Editar"
-                              onClick={() => this.handleEditar(item.idConcepto)}
-                              // disabled={!this.state.edit}
-                            >
-                              <i className="bi bi-pencil"></i>
-                            </button>
-                          </td>
-                          <td className="text-center">
-                            <button
-                              className="btn btn-outline-danger btn-sm"
-                              title="Anular"
-                              onClick={() => this.handleBorrar(item.idConcepto)}
-                              // disabled={!this.state.remove}
-                            >
-                              <i className="bi bi-trash"></i>
-                            </button>
-                          </td>
-                        </tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+        <Row>
+          <Column className="col-md-6 col-sm-12" formGroup={true}>
+            <Search
+              group={true}
+              iconLeft={<i className="bi bi-search"></i>}
+              ref={this.refSearch}
+              onSearch={this.searchText}
+              placeholder="Buscar por comprobante o cliente..."
+            />
+          </Column>
+        </Row>
+
+        <Row>
+          <Column>
+            <TableResponsive
+              tHead={
+                <tr>
+                  <th width="5%" className="text-center">
+                    #
+                  </th>
+                  <th width="25%">Concepto</th>
+                  <th width="20%">Tipo Concepto</th>
+                  <th width="10%">Sistema</th>
+                  <th width="10%">Creacion</th>
+                  <th width="5%" className="text-center">
+                    Editar
+                  </th>
+                  <th width="5%" className="text-center">
+                    Eliminar
+                  </th>
+                </tr>
+              }
+              tBody={this.generateBody()}
+            />
+          </Column>
+        </Row>
 
         <Paginacion
           loading={this.state.loading}
@@ -338,6 +330,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-const ConnectedConceptos =connect(mapStateToProps, null)(Conceptos);
+const ConnectedConceptos = connect(mapStateToProps, null)(Conceptos);
 
 export default ConnectedConceptos;

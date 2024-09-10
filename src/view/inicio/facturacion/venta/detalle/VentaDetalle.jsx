@@ -6,6 +6,7 @@ import {
   calculateTax,
   formatTime,
   isText,
+  isEmpty,
 } from '../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../../../components/Container';
@@ -20,9 +21,20 @@ import { SpinnerView } from '../../../../../components/Spinner';
 import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
 import { Table, TableResponsive } from '../../../../../components/Table';
+import Button from '../../../../../components/Button';
+import PropTypes from 'prop-types';
+import React from 'react';
 
+/**
+ * Componente que representa una funcionalidad específica.
+ * @extends React.Component
+ */
 class VentaDetalle extends CustomComponent {
 
+  /**
+   *
+   * Constructor
+   */
   constructor(props) {
     super(props);
     this.state = {
@@ -41,8 +53,8 @@ class VentaDetalle extends CustomComponent {
       usuario: '',
       comentario: '',
 
-      detalle: [],
-      ingresos: [],
+      detalles: [],
+      transaccion: []
     };
 
     this.abortControllerView = new AbortController();
@@ -76,6 +88,20 @@ class VentaDetalle extends CustomComponent {
     this.abortControllerView.abort();
   }
 
+  /*
+  |--------------------------------------------------------------------------
+  | Métodos de acción
+  |--------------------------------------------------------------------------
+  |
+  | Carga los datos iniciales necesarios para inicializar el componente. Este método se utiliza típicamente
+  | para obtener datos desde un servicio externo, como una API o una base de datos, y actualizar el estado del
+  | componente en consecuencia. El método loadingData puede ser responsable de realizar peticiones asíncronas
+  | para obtener los datos iniciales y luego actualizar el estado del componente una vez que los datos han sido
+  | recuperados. La función loadingData puede ser invocada en el montaje inicial del componente para asegurarse
+  | de que los datos requeridos estén disponibles antes de renderizar el componente en la interfaz de usuario.
+  |
+   */
+
   async loadingData(id) {
     const [factura] = await Promise.all([
       this.fetchIdFactura(id)
@@ -97,7 +123,7 @@ class VentaDetalle extends CustomComponent {
       comentario,
     } = factura.cabecera;
 
-    const monto = factura.ingresos.reduce((accumlate, item) => accumlate + item.monto, 0,);
+    const monto = factura.detalles.reduce((accumlate, item) => accumlate + (item.precio * item.cantidad), 0,);
 
     const nuevoEstado = estado === 1 ? <span className="text-success">COBRADO</span> : estado === 2 ? <span className="text-warning">POR COBRAR</span> : estado === 3 ? <span className="text-danger">ANULADO</span> : <span className="text-primary">POR LLEVAR</span>;
 
@@ -115,9 +141,9 @@ class VentaDetalle extends CustomComponent {
       usuario: usuario,
       comentario: comentario,
       total: rounded(monto),
-      detalle: factura.detalle,
 
-      ingresos: factura.ingresos,
+      detalles: factura.detalles,
+      transaccion: factura.transaccion,
 
       loading: false,
     });
@@ -143,18 +169,19 @@ class VentaDetalle extends CustomComponent {
 
   /*
   |--------------------------------------------------------------------------
-  | Métodos de acción
+  | Método de eventos
   |--------------------------------------------------------------------------
   |
-  | Carga los datos iniciales necesarios para inicializar el componente. Este método se utiliza típicamente
-  | para obtener datos desde un servicio externo, como una API o una base de datos, y actualizar el estado del
-  | componente en consecuencia. El método loadingData puede ser responsable de realizar peticiones asíncronas
-  | para obtener los datos iniciales y luego actualizar el estado del componente una vez que los datos han sido
-  | recuperados. La función loadingData puede ser invocada en el montaje inicial del componente para asegurarse
-  | de que los datos requeridos estén disponibles antes de renderizar el componente en la interfaz de usuario.
+  | El método handle es una convención utilizada para denominar funciones que manejan eventos específicos
+  | en los componentes de React. Estas funciones se utilizan comúnmente para realizar tareas o actualizaciones
+  | en el estado del componente cuando ocurre un evento determinado, como hacer clic en un botón, cambiar el valor
+  | de un campo de entrada, o cualquier otra interacción del usuario. Los métodos handle suelen recibir el evento
+  | como parámetro y se encargan de realizar las operaciones necesarias en función de la lógica de la aplicación.
+  | Por ejemplo, un método handle para un evento de clic puede actualizar el estado del componente o llamar a
+  | otra función específica de la lógica de negocio. La convención de nombres handle suele combinarse con un prefijo
+  | que describe el tipo de evento que maneja, como handleInputChange, handleClick, handleSubmission, entre otros. 
   |
-   */
-
+  */
 
   handlePrintA4 = () => {
     printJS({
@@ -196,12 +223,39 @@ class VentaDetalle extends CustomComponent {
   |
    */
 
+  renderDetalles(){
+      return (
+        this.state.detalles.map((item, index) => (
+          <tr key={index}>
+            <td>{++index}</td>
+            <td>
+              {item.codigo}
+              <br />
+              {item.producto}
+            </td>
+            <td>{item.medida}</td>
+            <td>{item.categoria}</td>
+            <td className="text-right">{rounded(item.cantidad)}</td>
+            <td className="text-right">{item.impuesto}</td>
+            <td className="text-right">
+              {numberFormat(item.precio, this.state.codiso)}
+            </td>
+            <td className="text-right">
+              {numberFormat(
+                item.cantidad * item.precio,
+                this.state.codiso,
+              )}
+            </td>
+          </tr>
+        ))
+      );
+  }
 
   renderTotal() {
     let subTotal = 0;
     let total = 0;
 
-    for (const item of this.state.detalle) {
+    for (const item of this.state.detalles) {
       const cantidad = item.cantidad;
       const valor = item.precio;
 
@@ -217,7 +271,7 @@ class VentaDetalle extends CustomComponent {
     }
 
     const impuestosGenerado = () => {
-      const resultado = this.state.detalle.reduce((acc, item) => {
+      const resultado = this.state.detalles.reduce((acc, item) => {
         const total = item.cantidad * item.precio;
         const subTotal = calculateTaxBruto(item.porcentaje, total);
         const impuestoTotal = calculateTax(item.porcentaje, subTotal);
@@ -269,6 +323,62 @@ class VentaDetalle extends CustomComponent {
     );
   }
 
+  renderTransaciones() {
+    if (isEmpty(this.state.transaccion)) {
+      return (
+        <tr>
+          <td colSpan="5" className="text-center">
+            No hay transacciones para mostrar.
+          </td>
+        </tr>
+      );
+    }
+
+    return (
+      this.state.transaccion.map((item, index) => {
+        return (
+          <React.Fragment key={index}>
+            <tr className="table-success">
+              <td>{index + 1}</td>
+              <td>
+                <span>{item.fecha}</span>
+                <br />
+                <span>{formatTime(item.hora)}</span>
+              </td>
+              <td>{item.concepto}</td>
+              <td>{item.nota}</td>
+              <td>{item.usuario}</td>
+            </tr>
+
+            <tr>
+              <td className="text-center">#</td>
+              <td>Banco</td>
+              <td>Monto</td>
+              <td colSpan={2}>Observación</td>
+            </tr>
+            {
+              item.detalles.map((detalle, index) => {
+                return (
+                  <tr key={index}>
+                    <td className="text-center">{index + 1}</td>
+                    <td>{detalle.nombre}</td>
+                    <td>{numberFormat(detalle.monto, this.state.codiso)}</td>
+                    <td colSpan={2}>{detalle.observacion}</td>
+                  </tr>
+                );
+              })
+            }
+            <tr>
+              <td colSpan="5">
+                <hr />
+              </td>
+            </tr>
+          </React.Fragment>
+        );
+      })
+    );
+  }
+
   render() {
     return (
       <ContainerWrapper>
@@ -279,29 +389,25 @@ class VentaDetalle extends CustomComponent {
 
         <Title
           title='Venta'
-          subTitle='detalle'
+          subTitle='DETALLE'
           handleGoBack={() => this.props.history.goBack()}
         />
 
         <Row>
-          <Column>
-            <div className="form-group">
-              <button
-                type="button"
-                className="btn btn-light"
-                onClick={this.handlePrintA4}
-              >
-                <i className="fa fa-print"></i> A4
-              </button>
-              {' '}
-              <button
-                type="button"
-                className="btn btn-light"
-                onClick={this.handlePrintTicket}
-              >
-                <i className="fa fa-print"></i> Ticket
-              </button>
-            </div>
+          <Column formGroup={true}>
+            <Button
+              className="btn-light"
+              onClick={this.handlePrintA4}
+            >
+              <i className="fa fa-print"></i> A4
+            </Button>
+            {' '}
+            <Button
+              className="btn-light"
+              onClick={this.handlePrintTicket}
+            >
+              <i className="fa fa-print"></i> Ticket
+            </Button>
           </Column>
         </Row>
 
@@ -400,33 +506,7 @@ class VentaDetalle extends CustomComponent {
                   <th>Monto</th>
                 </tr>
               }
-              tBody={
-                <>
-                  {this.state.detalle.map((item, index) => (
-                    <tr key={index}>
-                      <td>{++index}</td>
-                      <td>
-                        {item.codigo}
-                        <br />
-                        {item.producto}
-                      </td>
-                      <td>{item.medida}</td>
-                      <td>{item.categoria}</td>
-                      <td className="text-right">{rounded(item.cantidad)}</td>
-                      <td className="text-right">{item.impuesto}</td>
-                      <td className="text-right">
-                        {numberFormat(item.precio, this.state.codiso)}
-                      </td>
-                      <td className="text-right">
-                        {numberFormat(
-                          item.cantidad * item.precio,
-                          this.state.codiso,
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </>
-              }
+              tBody={this.renderDetalles()}
             />
           </Column>
         </Row>
@@ -445,42 +525,18 @@ class VentaDetalle extends CustomComponent {
           <Column>
             <TableResponsive
               className={"table table-light table-striped"}
-              title={"Ingresos asociado"}
+              title={"Transacciones"}
               tHead={
                 <tr>
                   <th>#</th>
                   <th>Fecha y Hora</th>
-                  <th>Metodo</th>
-                  <th>Descripción</th>
-                  <th>Monto</th>
+                  <th>Concepto</th>
+                  <th>Nota</th>
+                  <th>Usuario</th>
                 </tr>
               }
 
-              tBody={
-                <>
-                  {this.state.ingresos.length === 0 ? (
-                    <tr>
-                      <td colSpan="5" className="text-center">
-                        No hay ingresos para mostrar.
-                      </td>
-                    </tr>
-                  ) : (
-                    this.state.ingresos.map((item, index) => (
-                      <tr key={index}>
-                        <td>{++index}</td>
-                        <td>
-                          <span>{item.fecha}</span>
-                          <br />
-                          <span>{formatTime(item.hora)}</span>
-                        </td>
-                        <td>{item.nombre}</td>
-                        <td>{item.descripcion}</td>
-                        <td>{numberFormat(item.monto, this.state.codiso)}</td>
-                      </tr>
-                    ))
-                  )}
-                </>
-              }
+              tBody={this.renderTransaciones()}
             />
           </Column>
         </Row>
@@ -488,6 +544,15 @@ class VentaDetalle extends CustomComponent {
     );
   }
 }
+
+VentaDetalle.propTypes = {
+  history: PropTypes.shape({
+    goBack: PropTypes.func.isRequired,
+  }).isRequired,
+  location: PropTypes.shape({
+    search: PropTypes.string
+  })
+};
 
 const mapStateToProps = (state) => {
   return {

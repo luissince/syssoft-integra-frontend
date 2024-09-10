@@ -8,12 +8,17 @@ import {
   alertSuccess,
   alertWarning,
   isText,
-  spinnerLoading,
 } from '../../../../helper/utils.helper';
 import { addConcepto } from '../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
 import { CANCELED } from '../../../../model/types/types';
+import Row from '../../../../components/Row';
+import Column from '../../../../components/Column';
+import Select from '../../../../components/Select';
+import Title from '../../../../components/Title';
+import Input from '../../../../components/Input';
+import Button from '../../../../components/Button';
 
 class ConceptoAgregar extends CustomComponent {
   constructor(props) {
@@ -76,105 +81,74 @@ class ConceptoAgregar extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
-        {this.state.loading && spinnerLoading(this.state.msgLoading)}
+        <Title
+          title='Concepo'
+          subTitle='Agregar'
+          icon={<i className="bi bi-plus"></i>}
+          handleGoBack={() => this.props.history.goBack()}
+        />
 
-        <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <section className="content-header">
-              <h5>
-                <span role="button" onClick={() => this.props.history.goBack()}>
-                  <i className="bi bi-arrow-left-short"></i>
-                </span>{' '}
-                Agregar concepto
-              </h5>
-            </section>
-          </div>
-        </div>
+        <Row>
+          <Column className="col-md-12" formGroup={true}>
+            <Input
+              group={true}
+              label={<>Nombre: <i className="fa fa-asterisk text-danger small"></i></>}
+              value={this.state.nombre}
+              refInput={this.refNombre}
+              onChange={(event) =>
+                this.setState({ nombre: event.target.value })
+              }
+              placeholder="Ingrese el nombre del concepto" />
+          </Column>
+        </Row>
 
-        <div className="row">
-          <div className="col-md-12">
-            <div className="form-group">
-              <label>
-                Nombre <i className="fa fa-asterisk text-danger small"></i>
-              </label>
-              <input
-                type="text"
-                className="form-control"
-                value={this.state.nombre}
-                ref={this.refNombre}
-                onChange={(event) =>
-                  this.setState({ nombre: event.target.value })
-                }
-                placeholder="Ingrese el nombre del concepto"
-              />
-            </div>
-          </div>
-        </div>
+        <Row>
+          <Column className="col-md-12" formGroup={true}>
+            <Select
+              group={true}
+              label={<>Tipo de Concepto: <i className="fa fa-asterisk text-danger small"></i></>}
+              value={this.state.tipo}
+              refSelect={this.refTipo}
+              onChange={(event) =>
+                this.setState({ tipo: event.target.value })
+              }>
+              <option value={0}>-- Seleccione --</option>
+              <option value={1}>INGRESO</option>
+              <option value={2}>EGRESO</option>
+            </Select>
+          </Column>
+        </Row>
 
-        <div className="row">
-          <div className="col-md-12">
-            <div className="form-group">
-              <label>
-                Tipo de Concepto{' '}
-                <i className="fa fa-asterisk text-danger small"></i>
-              </label>
-              <div className="input-group">
-                <select
-                  className="form-control"
-                  value={this.state.tipo}
-                  ref={this.refTipo}
-                  onChange={(event) =>
-                    this.setState({ tipo: event.target.value })
-                  }
-                >
-                  <option value={0}>-- Seleccione --</option>
-                  <option value={1}>CONCEPTO DE GASTO</option>
-                  <option value={2}>CONCEPTO DE COBRO</option>
-                </select>
-              </div>
-            </div>
-          </div>
-        </div>
+        <Row>
+          <Column className="col-md-12" formGroup={true}>
+            <Input
+              group={true}
+              label={"Código"}
+              value={this.state.codigo}
+              onChange={(event) =>
+                this.setState({ codigo: event.target.value })
+              }
+              placeholder="Código" />
+          </Column>
+        </Row>
 
-        <div className="row">
-          <div className="col-md-12">
-            <div className="form-group">
-              <label>Código</label>
-              <div className="input-group">
-                <input
-                  type="text"
-                  className="form-control"
-                  value={this.state.codigo}
-                  onChange={(event) =>
-                    this.setState({ codigo: event.target.value })
-                  }
-                  placeholder="Código"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="row">
-          <div className="col-md-12">
-            <div className="form-group">
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={this.handleGuardar}
-              >
-                Guardar
-              </button>{' '}
-              <button
-                type="button"
-                className="btn btn-danger"
-                onClick={() => this.props.history.goBack()}
-              >
-                Cerrar
-              </button>
-            </div>
-          </div>
-        </div>
+        <Row>
+          <Column className="col-md-12" formGroup={true}>
+            <Button
+              className="btn-primary"
+              onClick={this.handleGuardar}
+            >
+              <i className='fa fa-save'></i> Guardar
+            </Button>
+            {' '}
+            <Button
+              className="btn-danger"
+              onClick={() => this.props.history.goBack()}
+            >
+              <i className='fa fa-close'></i> Cerrar
+            </Button>
+          </Column>
+        </Row>
       </ContainerWrapper>
     );
   }
@@ -186,6 +160,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-const ConnectedConceptoAgregar =connect(mapStateToProps, null)(ConceptoAgregar);
+const ConnectedConceptoAgregar = connect(mapStateToProps, null)(ConceptoAgregar);
 
 export default ConnectedConceptoAgregar;

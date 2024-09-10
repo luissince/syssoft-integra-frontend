@@ -310,15 +310,8 @@ class Productos extends CustomComponent {
         <tr key={index}>
           <td className="text-center">{item.id}</td>
           <td>{tipo()}</td>
-          <td>
-            {item.codigo}
-            <br />
-            <b>{item.nombre}</b>{' '}
-            {item.preferido === 1 && (<i className="fa fa-star text-warning"></i>)}
-          </td>
-          <td className="text-right">
-            {numberFormat(item.precio, this.state.codISO)}
-          </td>
+          <td>{item.codigo}<br /><b>{item.nombre}</b>{' '}{item.preferido === 1 && (<i className="fa fa-star text-warning"></i>)}</td>
+          <td className="text-right">{numberFormat(item.precio, this.state.codISO)}</td>
           <td>{item.medida}</td>
           <td>{item.categoria}</td>
           <td className="text-center">{estado}</td>
@@ -358,7 +351,8 @@ class Productos extends CustomComponent {
       <ContainerWrapper>
         <Title
           title='Productos'
-          subTitle='Lista'
+          subTitle='LISTA'
+          handleGoBack={() => this.props.history.goBack()}
         />
 
         <Row>

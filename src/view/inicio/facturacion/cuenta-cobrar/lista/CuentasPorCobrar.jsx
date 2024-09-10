@@ -1,8 +1,6 @@
-import React from 'react';
 import {
   formatNumberWithZeros,
   isEmpty,
-  keyUpSearch,
   numberFormat,
 } from '../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
@@ -20,8 +18,21 @@ import Title from '../../../../../components/Title';
 import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
 import { TableResponsive } from '../../../../../components/Table';
+import Button from '../../../../../components/Button';
+import PropTypes from 'prop-types';
+import Search from '../../../../../components/Search';
+import Select from '../../../../../components/Select';
 
+/**
+ * Componente que representa una funcionalidad específica.
+ * @extends React.Component
+ */
 class CuentasPorCobrar extends CustomComponent {
+
+  /**
+   *
+   * Constructor
+   */
   constructor(props) {
     super(props);
     this.state = {
@@ -30,6 +41,7 @@ class CuentasPorCobrar extends CustomComponent {
       restart: false,
 
       tipo: 'only',
+      buscar: '',
 
       opcion: 0,
       paginacion: 0,
@@ -40,33 +52,60 @@ class CuentasPorCobrar extends CustomComponent {
       idSucursal: this.props.token.project.idSucursal,
       idUsuario: this.props.token.userToken.idUsuario,
     };
-    this.refTxtSearch = React.createRef();
 
     this.abortControllerTable = new AbortController();
   }
 
+  /*
+  |--------------------------------------------------------------------------
+  | Método de cliclo de vida
+  |--------------------------------------------------------------------------
+  |
+  | El ciclo de vida de un componente en React consta de varios métodos que se ejecutan en diferentes momentos durante la vida útil
+  | del componente. Estos métodos proporcionan puntos de entrada para realizar acciones específicas en cada etapa del ciclo de vida,
+  | como inicializar el estado, montar el componente, actualizar el estado y desmontar el componente. Estos métodos permiten a los
+  | desarrolladores controlar y realizar acciones específicas en respuesta a eventos de ciclo de vida, como la creación, actualización
+  | o eliminación del componente. Entender y utilizar el ciclo de vida de React es fundamental para implementar correctamente la lógica
+  | de la aplicación y optimizar el rendimiento del componente.
+  |
+  */
+
   async componentDidMount() {
-    await this.loadInit();
+    await this.loadingInit();
   }
 
   componentWillUnmount() {
     this.abortControllerTable.abort();
   }
 
-  loadInit = async () => {
+  /*
+  |--------------------------------------------------------------------------
+  | Métodos de acción
+  |--------------------------------------------------------------------------
+  |
+  | Carga los datos iniciales necesarios para inicializar el componente. Este método se utiliza típicamente
+  | para obtener datos desde un servicio externo, como una API o una base de datos, y actualizar el estado del
+  | componente en consecuencia. El método loadingData puede ser responsable de realizar peticiones asíncronas
+  | para obtener los datos iniciales y luego actualizar el estado del componente una vez que los datos han sido
+  | recuperados. La función loadingData puede ser invocada en el montaje inicial del componente para asegurarse
+  | de que los datos requeridos estén disponibles antes de renderizar el componente en la interfaz de usuario.
+  |
+  */
+
+  loadingInit = async () => {
     if (this.state.loading) return;
 
     await this.setStateAsync({ paginacion: 1, restart: true });
-    this.fillTable(0, '');
+    this.fillTable(0);
     await this.setStateAsync({ opcion: 0 });
   };
 
-  async searchText(text) {
+  searchText = async (text) => {
     if (this.state.loading) return;
 
     if (text.trim().length === 0) return;
 
-    await this.setStateAsync({ paginacion: 1, restart: false });
+    await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
     this.fillTable(1, text.trim());
     await this.setStateAsync({ opcion: 1 });
   }
@@ -79,23 +118,22 @@ class CuentasPorCobrar extends CustomComponent {
   onEventPaginacion = () => {
     switch (this.state.opcion) {
       case 0:
-        this.fillTable(0, '');
+        this.fillTable(0);
         break;
       case 1:
-        this.fillTable(1, this.refTxtSearch.current.value);
+        this.fillTable(1, this.state.buscar);
         break;
       default:
-        this.fillTable(0, '');
+        this.fillTable(0);
     }
   };
 
-  fillTable = async (opcion, buscar) => {
-    this.setStateAsync({
+  fillTable = async (opcion, buscar = '') => {
+    this.setState({
       loading: true,
       lista: [],
       messageTable: 'Cargando información...',
     });
-
 
     const params = {
       opcion: opcion,
@@ -132,6 +170,21 @@ class CuentasPorCobrar extends CustomComponent {
     }
   };
 
+  /*
+  |--------------------------------------------------------------------------
+  | Método de eventos
+  |--------------------------------------------------------------------------
+  |
+  | El método handle es una convención utilizada para denominar funciones que manejan eventos específicos
+  | en los componentes de React. Estas funciones se utilizan comúnmente para realizar tareas o actualizaciones
+  | en el estado del componente cuando ocurre un evento determinado, como hacer clic en un botón, cambiar el valor
+  | de un campo de entrada, o cualquier otra interacción del usuario. Los métodos handle suelen recibir el evento
+  | como parámetro y se encargan de realizar las operaciones necesarias en función de la lógica de la aplicación.
+  | Por ejemplo, un método handle para un evento de clic puede actualizar el estado del componente o llamar a
+  | otra función específica de la lógica de negocio. La convención de nombres handle suele combinarse con un prefijo
+  | que describe el tipo de evento que maneja, como handleInputChange, handleClick, handleSubmission, entre otros. 
+  |
+  */
 
   handleCobrar = (idVenta) => {
     this.props.history.push({
@@ -142,11 +195,27 @@ class CuentasPorCobrar extends CustomComponent {
 
   handleSelecTipo = (event) => {
     this.setState({ tipo: event.target.value }, () => {
-      this.loadInit()
+      this.loadingInit()
     })
   }
 
-  generarBody() {
+  /*
+  |--------------------------------------------------------------------------
+  | Método de renderización
+  |--------------------------------------------------------------------------
+  |
+  | El método render() es esencial en los componentes de React y se encarga de determinar
+  | qué debe mostrarse en la interfaz de usuario basado en el estado y las propiedades actuales
+  | del componente. Este método devuelve un elemento React que describe lo que debe renderizarse
+  | en la interfaz de usuario. La salida del método render() puede incluir otros componentes
+  | de React, elementos HTML o una combinación de ambos. Es importante que el método render()
+  | sea una función pura, es decir, no debe modificar el estado del componente ni interactuar
+  | directamente con el DOM. En su lugar, debe basarse únicamente en los props y el estado
+  | actuales del componente para determinar lo que se mostrará.
+  |
+  */
+
+  generateBody() {
     if (this.state.loading) {
       return (
         <SpinnerTable
@@ -195,58 +264,44 @@ class CuentasPorCobrar extends CustomComponent {
     return (
       <ContainerWrapper>
         <Title
-          title=' Cuentas por Cobrar '
+          title='Cuentas por Cobrar'
           subTitle='LISTA'
+          handleGoBack={() => this.props.history.goBack()}
         />
 
         <Row>
-          <Column className="col-lg-6 col-md-6 col-sm-12">
-            <div className="form-group">
-              <label>Buscar:</label>
-              <div className="input-group mb-2">
-                <div className="input-group-prepend">
-                  <div className="input-group-text">
-                    <i className="bi bi-search"></i>
-                  </div>
-                </div>
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Ingrese datos del comprobante de referencia..."
-                  ref={this.refTxtSearch}
-                  onKeyUp={(event) =>
-                    keyUpSearch(event, () =>
-                      this.searchText(event.target.value),
-                    )
-                  }
-                />
-              </div>
-            </div>
+          <Column formGroup={true}>
+            <Button
+              className='btn-outline-secondary'
+              onClick={this.loadingInit}
+            >
+              <i className="bi bi-arrow-clockwise"></i> Recargar Vista
+            </Button>
+          </Column>
+        </Row>
+
+        <Row>
+          <Column className="col-lg-6 col-md-6 col-sm-12" formGroup={true}>
+            <Search
+              group={true}
+              label={"Buscar:"}
+              iconLeft={<i className="bi bi-search"></i>}
+              ref={this.refSearch}
+              onSearch={this.searchText}
+              placeholder="Buscar por comprobante o cliente..."
+            />
           </Column>
 
-          <Column className="col-lg-3 col-md-6 col-sm-12">
-            <div className="form-group">
-              <label>Tipo:</label>
-              <select
-                className="form-control"
-                value={this.state.tipo}
-                onChange={this.handleSelecTipo}>
-                <option value="only">Mostrar ventas por cobrar</option>
-                <option value="all">Mostrar todas las ventas al crédito</option>
-              </select>
-            </div>
-          </Column>
-
-          <Column className="col-lg-3 col-md-6 col-sm-12">
-            <label>Opciones:</label>
-            <div className="form-group">
-              <button
-                className="btn btn-outline-secondary"
-                onClick={this.loadInit}
-              >
-                <i className="bi bi-arrow-clockwise"></i> Recargar
-              </button>
-            </div>
+          <Column className="col-lg-3 col-md-6 col-sm-12" formGroup={true}>
+            <Select
+              group
+              label={"Tipo"}
+              value={this.state.tipo}
+              onChange={this.handleSelecTipo}
+            >
+              <option value="only">Mostrar ventas al crédito</option>
+              <option value="all">Mostrar todas las ventas al crédito</option>
+            </Select>
           </Column>
         </Row>
 
@@ -265,7 +320,7 @@ class CuentasPorCobrar extends CustomComponent {
                   <th width="5%" className="text-center">Cobrar</th>
                 </tr>
               }
-              tBody={this.generarBody()}
+              tBody={this.generateBody()}
             />
           </Column>
         </Row>
@@ -282,6 +337,19 @@ class CuentasPorCobrar extends CustomComponent {
     );
   }
 }
+
+CuentasPorCobrar.propTypes = {
+  token: PropTypes.shape({
+    userToken: PropTypes.shape({
+      idUsuario: PropTypes.string.isRequired,
+    }).isRequired,
+    project: PropTypes.shape({
+      idSucursal: PropTypes.string.isRequired,
+    }).isRequired,
+  }).isRequired,
+  history: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
+  location: PropTypes.object
+};
 
 const mapStateToProps = (state) => {
   return {

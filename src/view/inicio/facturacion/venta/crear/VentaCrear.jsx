@@ -1486,7 +1486,7 @@ class VentaCrear extends CustomComponent {
     this.setState({ isOpenTerminal: true })
   }
 
-  handleProcessContado = (idFormaPago, metodoPagosLista, callback = async function () { }) => {
+  handleProcessContado = (idFormaPago, metodoPagosLista, notaTransacion, callback = async function () { }) => {
     const {
       nuevoCliente,
       comentario,
@@ -1515,6 +1515,7 @@ class VentaCrear extends CustomComponent {
           nuevoCliente: nuevoCliente,
           idCotizacion: idCotizacion,
           detalleVenta: detalleVenta,
+          notaTransacion,
           bancosAgregados: metodoPagosLista,
         };
 
@@ -1566,7 +1567,7 @@ class VentaCrear extends CustomComponent {
     });
   }
 
-  handleProcessCredito = (idFormaPago, numeroCuotas, frecuenciaPagoCredito, importeTotal, callback = async function () { }) => {
+  handleProcessCredito = (idFormaPago, numeroCuotas, frecuenciaPago, importeTotal, notaTransacion, callback = async function () { }) => {
     const {
       nuevoCliente,
       comentario,
@@ -1594,8 +1595,9 @@ class VentaCrear extends CustomComponent {
           estado: 2,
           nuevoCliente: nuevoCliente,
           detalleVenta: detalleVenta,
-          numCuotas: numeroCuotas,
-          frecuenciaPagoCredito: frecuenciaPagoCredito,
+          numeroCuotas: numeroCuotas,
+          frecuenciaPago: frecuenciaPago,
+          notaTransacion,
           importeTotal: importeTotal
         };
 
@@ -1733,6 +1735,8 @@ class VentaCrear extends CustomComponent {
         </section>
 
         <ModalTransaccion
+          tipo={"Venta"}
+          title={"Completar Venta"}
           isOpen={this.state.isOpenTerminal}
 
           idSucursal={this.state.idSucursal}

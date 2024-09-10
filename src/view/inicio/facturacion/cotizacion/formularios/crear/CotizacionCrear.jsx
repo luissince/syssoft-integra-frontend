@@ -320,6 +320,7 @@ class CotizaciónCrear extends CustomComponent {
       return [];
     }
   }
+  
   /*
   |--------------------------------------------------------------------------
   | Método de eventos

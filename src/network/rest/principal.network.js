@@ -480,19 +480,28 @@ export async function listAccountsReceivableVenta(params, signal) {
   );
 }
 
-export async function colletAccountsReceivableVenta(data, signal) {
-  return await Resolve.create(
-    instancePrincipal.post('/api/factura/collet/accounts/receivable', data, {
-      signal: signal,
-    }),
-  );
-}
-
 export async function detailAccountsReceivableVenta(params, signal) {
   return await Resolve.create(
     instancePrincipal.get('/api/factura/detail/accounts/receivable', {
       signal: signal,
       params: params,
+    }),
+  );
+}
+
+export async function createAccountsReceivableVenta(data, signal) {
+  return await Resolve.create(
+    instancePrincipal.post('/api/factura/create/accounts/receivable', data, {
+      signal: signal,
+    }),
+  );
+}
+
+export async function cancelAccountsReceivableVenta(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.delete('/api/factura/cancel/accounts/receivable', {
+      params: params,
+      signal: signal,
     }),
   );
 }
@@ -707,59 +716,6 @@ export async function cancelTraslado(params, signal) {
 
 /*
 |--------------------------------------------------------------------------
-| ENDPOINTS DE INGRESO
-|--------------------------------------------------------------------------
-*/
-export async function listIngreso(params, signal) {
-  return await Resolve.create(
-    instancePrincipal.get('/api/ingreso/list', {
-      params: params,
-      signal: signal,
-    }),
-  );
-}
-
-export async function cancelIngreso(params, signal) {
-  return await Resolve.create(
-    instancePrincipal.delete('/api/ingreso/cancel', {
-      params: params,
-      signal: signal,
-    }),
-  );
-}
-// ------------------------------------------------------------------------
-// FIN PARA INGRESO
-// ------------------------------------------------------------------------
-
-/*
-|--------------------------------------------------------------------------
-| ENDPOINTS DE SALIDA
-|--------------------------------------------------------------------------
-*/
-export async function listSalida(params, signal) {
-  return await Resolve.create(
-    instancePrincipal.get('/api/salida/list', {
-      params: params,
-      signal: signal,
-    }),
-  );
-}
-
-export async function cancelSalida(params, signal) {
-  return await Resolve.create(
-    instancePrincipal.delete('/api/salida/cancel', {
-      params: params,
-      signal: signal,
-    }),
-  );
-}
-// ------------------------------------------------------------------------
-// FIN PARA SALIDA
-// ------------------------------------------------------------------------
-
-
-/*
-|--------------------------------------------------------------------------
 | ENDPOINTS DE TIPO TRASLADO
 |--------------------------------------------------------------------------
 */
@@ -863,9 +819,35 @@ export async function cancelCompra(params, signal) {
   );
 }
 
-export async function accountsPayableCompra(params, signal) {
+export async function listAccountsPayableCompra(params, signal) {
   return await Resolve.create(
-    instancePrincipal.delete('/api/compra/accounts/payable', {
+    instancePrincipal.get('/api/compra/list/accounts/payable', {
+      params: params,
+      signal: signal,
+    }),
+  );
+}
+
+export async function detailAccountsPayableCompra(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/compra/detail/accounts/payable', {
+      signal: signal,
+      params: params,
+    }),
+  );
+}
+
+export async function createAccountsPayableCompra(data, signal) {
+  return await Resolve.create(
+    instancePrincipal.post('/api/compra/create/accounts/payable', data, {
+      signal: signal,
+    }),
+  );
+}
+
+export async function cancelAccountsPayableCompra(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.delete('/api/compra/cancel/accounts/payable', {
       params: params,
       signal: signal,
     }),

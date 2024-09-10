@@ -44,8 +44,6 @@ import NotaCredito from './facturacion/notacredito/NotaCredito';
 import NotaCreditoProceso from './facturacion/notacredito/NotaCreditoProceso';
 import NotaCreditoDetalle from './facturacion/notacredito/NotaCreditoDetalle';
 
-import Ingresos from './facturacion/ingreso/lista/Ingresos.jsx';
-
 import CuentasPorCobrar from './facturacion/cuenta-cobrar/lista/CuentasPorCobrar.jsx';
 import CuentasPorCobrarAbonar from './facturacion/cuenta-cobrar/crear/CuentasPorCobrarAbonar.jsx';
 
@@ -78,8 +76,6 @@ import Compras from './tesoreria/compra/lista/Compras.jsx';
 import CompraCrear from './tesoreria/compra/crear/CompraCrear.jsx';
 import CompraDetalle from './tesoreria/compra/detalle/CompraDetalle.jsx';
 
-import Salidas from './tesoreria/salida/lista/Salidas.jsx';
-
 import CuentasPorPagar from './tesoreria/cuenta-pagar/lista/CuentasPorPagar.jsx';
 import CuentasPorPagarAmortizar from './tesoreria/cuenta-pagar/crear/CuentasPorPagarAmortizar.jsx';
 
@@ -95,19 +91,6 @@ import UsuarioEditar from './seguridad/usuario/UsuarioEditar.jsx';
 import UsuarioResetear from './seguridad/usuario/UsuarioResetear.jsx';
 
 import Accesos from './seguridad/acceso/Accesos.jsx';
-
-import Reporte from './reporte/index.jsx';
-
-import RepVentas from './reporte/RepVentas.jsx';
-import RepFinanciero from './reporte/RepFinanciero.jsx';
-import RepProductos from './reporte/RepProductos.jsx';
-import RepClientes from './reporte/RepClientes.jsx';
-import RepCpeSunat from './reporte/RepCpeSunat.jsx';
-
-import CpeSunat from './cpesunat/index.jsx';
-
-import CpeElectronicos from './cpesunat/lista/CpeElectronicos.jsx';
-import CpeConsultar from './cpesunat/consulta/CpeConsultar.jsx';
 
 import Contacto from './contacto/index.jsx';
 
@@ -172,6 +155,20 @@ import MarcaEditar from './configuracion/marca/MarcaEditar.jsx';
 import Atributos from './configuracion/atributo/Atributos.jsx';
 import AtributosAgregar from './configuracion/atributo/AtributosAgregar.jsx';
 import AtributosEditar from './configuracion/atributo/AtributosEditar.jsx';
+
+import Reporte from './reporte/index.jsx';
+
+import RepVentas from './reporte/RepVentas.jsx';
+import RepCompras from './reporte/RepCompras.jsx';
+import RepFinanciero from './reporte/RepFinanciero.jsx';
+import RepProductos from './reporte/RepProductos.jsx';
+import RepClientes from './reporte/RepClientes.jsx';
+import RepCpeSunat from './reporte/RepCpeSunat.jsx';
+
+import CpeSunat from './cpesunat/index.jsx';
+
+import CpeElectronicos from './cpesunat/lista/CpeElectronicos.jsx';
+import CpeConsultar from './cpesunat/consulta/CpeConsultar.jsx';
 
 import { listNotificacion } from '../../network/rest/principal.network.js';
 import SuccessReponse from '../../model/class/response.js';
@@ -369,7 +366,6 @@ class Inicio extends React.Component {
           | SEGURIDAD
           --------------------------------------------------------
           */}
-
           <Route
             path={`${path}/seguridad`}
             exact={true}
@@ -526,12 +522,6 @@ class Inicio extends React.Component {
           />
 
           <Route
-            path={`${path}/facturacion/ingresos`}
-            exact={true}
-            render={(props) => <Ingresos {...props} />}
-          />
-
-          <Route
             path={`${path}/facturacion/cuentacobrar`}
             exact={true}
             render={(props) => <CuentasPorCobrar {...props} />}
@@ -552,8 +542,6 @@ class Inicio extends React.Component {
             exact={true}
             render={(props) => <Logistica {...props} />}
           />
-
-
 
           <Route
             path={`${path}/logistica/productos`}
@@ -603,7 +591,6 @@ class Inicio extends React.Component {
             exact={true}
             render={(props) => <Kardex {...props} />}
           />
-
 
           <Route
             path={`${path}/logistica/traslado`}
@@ -665,12 +652,6 @@ class Inicio extends React.Component {
           />
 
           <Route
-            path={`${path}/tesoreria/salidas`}
-            exact={true}
-            render={(props) => <Salidas {...props} />}
-          />
-
-          <Route
             path={`${path}/tesoreria/cuentapagar`}
             exact={true}
             render={(props) => <CuentasPorPagar {...props} />}
@@ -727,14 +708,11 @@ class Inicio extends React.Component {
             render={(props) => <Conductores {...props} />}
           />
 
-
-
           {/* 
           --------------------------------------------------------
           | CONFIGURACIÓN
           --------------------------------------------------------
           */}
-
           <Route
             path={`${path}/configuracion`}
             exact={true}
@@ -947,6 +925,7 @@ class Inicio extends React.Component {
             exact={true}
             render={(props) => <AtributosEditar {...props} />}
           />
+
           {/* 
           --------------------------------------------------------
           | REPORTE
@@ -962,18 +941,27 @@ class Inicio extends React.Component {
             path={`${path}/reportes/repventas`}
             render={(props) => <RepVentas {...props} />}
           />
+
+          <Route
+            path={`${path}/reportes/repcompras`}
+            render={(props) => <RepCompras {...props} />}
+          />
+
           <Route
             path={`${path}/reportes/repfinanciero`}
             render={(props) => <RepFinanciero {...props} />}
           />
+
           <Route
             path={`${path}/reportes/repproductos`}
             render={(props) => <RepProductos {...props} />}
           />
+
           <Route
             path={`${path}/reportes/repclientes`}
             render={(props) => <RepClientes {...props} />}
           />
+
           <Route
             path={`${path}/reportes/repcepsunat`}
             render={(props) => <RepCpeSunat {...props} />}

@@ -304,31 +304,28 @@ class GuiaRemision extends CustomComponent {
             {estado}
           </td>
           <td className='text-center'>
-            <button
-              className="btn btn-outline-primary btn-sm"
-              title="Detalle"
+            <Button
+              className="btn-outline-primary btn-sm"
               onClick={() => this.handleDetalle(item.idGuiaRemision)}
             >
               <i className="fa fa-eye"></i>
-            </button>
+            </Button>
           </td>
           <td className='text-center'>
-            <button
-              className="btn btn-outline-warning btn-sm"
-              title="Detalle"
+            <Button
+              className="btn-outline-warning btn-sm"
               onClick={() => this.handleEditar(item.idGuiaRemision)}
             >
               <i className="fa fa-pencil"></i>
-            </button>
+            </Button>
           </td>
           <td className='text-center'>
-            <button
-              className="btn btn-outline-danger btn-sm"
-              title="Detalle"
+            <Button
+              className="btn-outline-danger btn-sm"
               onClick={() => this.handleAnular(item.idGuiaRemision)}
             >
               <i className="fa fa-remove"></i>
-            </button>
+            </Button>
           </td>
         </tr>
       )
@@ -341,6 +338,7 @@ class GuiaRemision extends CustomComponent {
         <Title
           title='Guía de Remisión'
           subTitle='LISTA'
+          handleGoBack={() => this.props.history.goBack()}
         />
 
         <Row>

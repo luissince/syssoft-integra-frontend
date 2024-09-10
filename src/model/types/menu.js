@@ -19,7 +19,6 @@ export const COBROS = 'SM0003';              // MN0003 Cobros
 export const NOTA_CREDITO = 'SM0004';        // MN0003 Nota de Crédito
 export const COTIZACION = 'SM0005';          // MN0003 Cotización
 export const GUIA_REMISION = 'SM0006';       // MN0003 Guia de Remisión
-export const INGRESOS = 'SM0007';            // MN0003 Ingresos
 export const CUENTAS_POR_COBRAR = 'SM0008';  // MN0003 Cuentas por Cobrar
 
 export const PRODUCTOS = 'SM0002';   // MN0004 Productos
@@ -30,7 +29,6 @@ export const TRASLADO = 'SM0008';    // MN0004 Traslado
 
 export const COMPRAS = 'SM0001';           // MN0005 Compras
 export const GASTOS = 'SM0002';            // MN0005 Gastos
-export const SALIDAS = 'SM0003';           // MN0005 Salidas
 export const CUENTAS_POR_PAGAR = 'SM0004'; // MN0005 Cuentas por Pagar
 
 export const TODOS = 'SM0001';        // MN0006 Todos
